@@ -157,6 +157,17 @@
 		return list;
 	});
 	const showVerdicts = $derived(showResult && outcomeColumns.length > 0);
+	const chartColumns = $derived(Math.min(Math.max(chartCount, 1), 2));
+	// Two rows fill the header's height; a single row keeps its own and is centred.
+	const chartRows = $derived(chartCount > 2 ? 'minmax(14rem, 1fr)' : 'minmax(18rem, auto)');
+	const chartCount = $derived(
+		[
+			showScore && data.global_score && data.global_score.maturity_score >= 0,
+			showResult,
+			showExtendedResult && compliance_assessment_donut_values.extended_result?.values?.length > 0,
+			showStatus
+		].filter(Boolean).length
+	);
 	const verdictCount = $derived(shownRules.filter((rule) => rule.kind !== 'number').length);
 	const verdictsMet = $derived(
 		shownRules.filter((rule) => rule.kind !== 'number' && outcomeMet(rule)).length
@@ -900,78 +911,83 @@
 					{/key}
 				{/if}
 			</div>
-			<div
-				class="flex-1 min-w-0 grid gap-2 content-start"
-				style="grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));"
-			>
-				{#key compliance_assessment_donut_values}
-					{#if showScore && data.global_score && data.global_score.maturity_score >= 0}
-						<div class="min-w-0 h-72">
-							<RingProgress
-								name="global_maturity"
-								value={data.global_score.maturity_score}
-								max={data.global_score.total_max_score}
-								min={scoreFloor}
-								color={getScoreHexColor(
-									data.global_score.maturity_score,
-									data.global_score.total_max_score,
-									false,
-									scoreFloor
-								)}
-								strokeWidth={35}
-								fontSize={36}
-								title={m.maturity()}
-							/>
-						</div>
-					{/if}
-					{#if showResult}
-						<div class="min-w-0 h-72">
-							<DonutChart
-								s_label="Result"
-								name="compliance_result"
-								title={m.compliance()}
-								orientation="horizontal"
-								values={compliance_assessment_donut_values.result.values}
-								colors={compliance_assessment_donut_values.result.values.map(
-									(object) => object.itemStyle.color
-								)}
-								showPercentage={true}
-							/>
-						</div>
-					{/if}
-					{#if showExtendedResult && compliance_assessment_donut_values.extended_result?.values?.length > 0}
-						<div class="min-w-0 h-72">
-							<DonutChart
-								s_label="Extended Result"
-								name="compliance_extended_result"
-								title={m.extendedResult()}
-								orientation="horizontal"
-								values={compliance_assessment_donut_values.extended_result.values}
-								colors={compliance_assessment_donut_values.extended_result.values.map(
-									(object) => object.itemStyle.color
-								)}
-								showPercentage={true}
-							/>
-						</div>
-					{/if}
-					{#if showStatus}
-						<div class="min-w-0 h-72">
-							<DonutChart
-								s_label="Status"
-								name="compliance_status"
-								title={m.progress()}
-								orientation="horizontal"
-								values={compliance_assessment_donut_values.status.values}
-								colors={compliance_assessment_donut_values.status.values.map(
-									(object) => object.itemStyle.color
-								)}
-								showPercentage={true}
-							/>
-						</div>
-					{/if}
-				{/key}
+			<div class="flex-1 min-w-0 flex flex-col gap-2">
+				<div
+					class="flex-1 grid gap-2"
+					style="grid-template-columns: repeat({chartColumns}, minmax(0, 1fr)); grid-auto-rows: {chartRows}; align-content: {chartCount >
+					2
+						? 'stretch'
+						: 'center'};"
+				>
+					{#key compliance_assessment_donut_values}
+						{#if showScore && data.global_score && data.global_score.maturity_score >= 0}
+							<div class="min-w-0 min-h-56">
+								<RingProgress
+									name="global_maturity"
+									value={data.global_score.maturity_score}
+									max={data.global_score.total_max_score}
+									min={scoreFloor}
+									color={getScoreHexColor(
+										data.global_score.maturity_score,
+										data.global_score.total_max_score,
+										false,
+										scoreFloor
+									)}
+									strokeWidth={35}
+									fontSize={36}
+									title={m.maturity()}
+								/>
+							</div>
+						{/if}
+						{#if showResult}
+							<div class="min-w-0 min-h-56">
+								<DonutChart
+									s_label="Result"
+									name="compliance_result"
+									title={m.compliance()}
+									orientation="horizontal"
+									values={compliance_assessment_donut_values.result.values}
+									colors={compliance_assessment_donut_values.result.values.map(
+										(object) => object.itemStyle.color
+									)}
+									showPercentage={true}
+								/>
+							</div>
+						{/if}
+						{#if showExtendedResult && compliance_assessment_donut_values.extended_result?.values?.length > 0}
+							<div class="min-w-0 min-h-56">
+								<DonutChart
+									s_label="Extended Result"
+									name="compliance_extended_result"
+									title={m.extendedResult()}
+									orientation="horizontal"
+									values={compliance_assessment_donut_values.extended_result.values}
+									colors={compliance_assessment_donut_values.extended_result.values.map(
+										(object) => object.itemStyle.color
+									)}
+									showPercentage={true}
+								/>
+							</div>
+						{/if}
+						{#if showStatus}
+							<div class="min-w-0 min-h-56">
+								<DonutChart
+									s_label="Status"
+									name="compliance_status"
+									title={m.progress()}
+									orientation="horizontal"
+									values={compliance_assessment_donut_values.status.values}
+									colors={compliance_assessment_donut_values.status.values.map(
+										(object) => object.itemStyle.color
+									)}
+									showPercentage={true}
+								/>
+							</div>
+						{/if}
+					{/key}
+				</div>
 				{#if showAnswers && data.compliance_assessment.answers_progress != null}
-					<div class="col-span-full flex items-center gap-2 text-sm text-surface-600-400">
+					<div class="flex items-center gap-2 text-sm text-surface-600-400">
 						<i class="fa-solid fa-clipboard-question text-primary-500"></i>
 						<span>{m.questions()}: {data.compliance_assessment.answers_progress}%</span>
 						<div class="flex-1 bg-surface-200-800 rounded-full h-1.5 max-w-32">
@@ -983,7 +999,7 @@
 					</div>
 				{/if}
 			</div>
-			<div class="flex flex-col space-y-2 ml-4">
+			<div class="flex flex-col space-y-2 ml-4 w-80 xl:w-96 shrink-0">
 				<div class="flex flex-row space-x-2">
 					<button
 						type="button"
@@ -1050,29 +1066,29 @@
 								<Anchor
 									breadcrumbAction="push"
 									href={`${page.url.pathname}/flash-mode`}
-									class="flex items-center gap-3 px-3.5 py-3 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-700 hover:bg-indigo-100 hover:border-indigo-200 dark:bg-surface-800 dark:border-surface-700 dark:text-indigo-300 dark:hover:bg-surface-700 dark:hover:border-surface-600 transition-colors cursor-pointer"
+									class="flex items-center gap-2 px-2.5 py-3 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-700 hover:bg-indigo-100 hover:border-indigo-200 dark:bg-surface-800 dark:border-surface-700 dark:text-indigo-300 dark:hover:bg-surface-700 dark:hover:border-surface-600 transition-colors cursor-pointer"
 									data-testid="flash-mode-button"
 								>
 									<div
-										class="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-500 dark:bg-indigo-600 text-white shrink-0"
+										class="flex items-center justify-center w-7 h-7 rounded-lg bg-indigo-500 dark:bg-indigo-600 text-white shrink-0"
 									>
 										<i class="fa-solid fa-bolt text-sm"></i>
 									</div>
-									<span class="text-sm font-semibold">{m.flashMode()}</span>
+									<span class="text-sm font-semibold leading-tight">{m.flashMode()}</span>
 								</Anchor>
 							{/if}
 							<Anchor
 								breadcrumbAction="push"
 								href={`${page.url.pathname}/table-mode`}
-								class="flex items-center gap-3 px-3.5 py-3 rounded-xl bg-surface-50-950 border border-surface-100-900 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-200-800 transition-colors cursor-pointer"
+								class="flex items-center gap-2 px-2.5 py-3 rounded-xl bg-surface-50-950 border border-surface-100-900 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-200-800 transition-colors cursor-pointer"
 								data-testid="table-mode-button"
 							>
 								<div
-									class="flex items-center justify-center w-8 h-8 rounded-lg bg-slate-500 text-white shrink-0"
+									class="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-500 text-white shrink-0"
 								>
 									<i class="fa-solid fa-table-list text-sm"></i>
 								</div>
-								<span class="text-sm font-semibold">{m.tableMode()}</span>
+								<span class="text-sm font-semibold leading-tight">{m.tableMode()}</span>
 							</Anchor>
 						</div>
 					</div>
@@ -1086,42 +1102,42 @@
 							>
 							<div class="grid grid-cols-2 gap-2">
 								<button
-									class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors shadow-sm cursor-pointer text-left"
+									class="flex items-center gap-2 px-2.5 py-2.5 rounded-xl border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors shadow-sm cursor-pointer text-left"
 									onclick={() => modalApplyMapping()}
 									data-testid="apply-mapping-button"
 								>
 									<i class="fa-solid fa-diagram-project text-emerald-500 text-base"></i>
-									<span class="text-sm font-medium">{m.applyMapping()}</span>
+									<span class="text-sm font-medium leading-tight">{m.applyMapping()}</span>
 								</button>
 								<button
-									class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors shadow-sm cursor-pointer text-left"
+									class="flex items-center gap-2 px-2.5 py-2.5 rounded-xl border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors shadow-sm cursor-pointer text-left"
 									onclick={() => modalCreateCloneForm()}
 									data-testid="clone-audit-button"
 								>
 									<i class="fa-solid fa-copy text-fuchsia-500 text-base"></i>
-									<span class="text-sm font-medium">{m.cloneAudit()}</span>
+									<span class="text-sm font-medium leading-tight">{m.cloneAudit()}</span>
 								</button>
 								<button
-									class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors shadow-sm cursor-pointer text-left"
+									class="flex items-center gap-2 px-2.5 py-2.5 rounded-xl border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors shadow-sm cursor-pointer text-left"
 									onclick={() => modalCompareAudit()}
 									data-testid="compare-audit-button"
 								>
 									<i class="fa-solid fa-code-compare text-rose-500 text-base"></i>
-									<span class="text-sm font-medium">{m.compareToAudit()}</span>
+									<span class="text-sm font-medium leading-tight">{m.compareToAudit()}</span>
 								</button>
 								{#if page.data?.featureflags?.validation_flows}
 									<button
-										class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors shadow-sm cursor-pointer text-left"
+										class="flex items-center gap-2 px-2.5 py-2.5 rounded-xl border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors shadow-sm cursor-pointer text-left"
 										onclick={() => modalRequestValidation()}
 										data-testid="request-validation-button"
 									>
 										<i class="fa-solid fa-check-circle text-amber-500 text-base"></i>
-										<span class="text-sm font-medium">{m.requestValidation()}</span>
+										<span class="text-sm font-medium leading-tight">{m.requestValidation()}</span>
 									</button>
 								{/if}
 								{#if !data.compliance_assessment.is_locked}
 									<button
-										class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors shadow-sm cursor-pointer text-left"
+										class="flex items-center gap-2 px-2.5 py-2.5 rounded-xl border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors shadow-sm cursor-pointer text-left"
 										data-testid="sync-to-actions-button"
 										onclick={async () => {
 											await modalConfirmSyncToActions(
@@ -1141,11 +1157,13 @@
 										{:else}
 											<i class="fa-solid fa-arrows-rotate text-cyan-500 text-base"></i>
 										{/if}
-										<span class="text-sm font-medium">{m.syncToAppliedControls()}</span>
+										<span class="text-sm font-medium leading-tight"
+											>{m.syncToAppliedControls()}</span
+										>
 									</button>
 									{#if canPerformActionOnObject( { user: page.data.user, action: 'add', model: 'appliedcontrol', object: data.compliance_assessment } ) && data.compliance_assessment.framework.reference_controls.length > 0}
 										<button
-											class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors shadow-sm cursor-pointer text-left"
+											class="flex items-center gap-2 px-2.5 py-2.5 rounded-xl border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors shadow-sm cursor-pointer text-left"
 											onclick={() => {
 												modalConfirmCreateSuggestedControls(
 													data.compliance_assessment.id,
@@ -1164,7 +1182,7 @@
 											{:else}
 												<i class="fa-solid fa-wand-magic-sparkles text-violet-500 text-base"></i>
 											{/if}
-											<span class="text-sm font-medium">{m.suggestControls()}</span>
+											<span class="text-sm font-medium leading-tight">{m.suggestControls()}</span>
 										</button>
 									{/if}
 								{/if}
@@ -1172,11 +1190,11 @@
 									<Anchor
 										breadcrumbAction="push"
 										href={`${page.url.pathname}/assignments`}
-										class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors shadow-sm cursor-pointer text-left"
+										class="flex items-center gap-2 px-2.5 py-2.5 rounded-xl border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors shadow-sm cursor-pointer text-left"
 										data-testid="assignments-button"
 									>
 										<i class="fa-solid fa-user-tag text-green-500 text-base"></i>
-										<span class="text-sm font-medium">{m.assignments()}</span>
+										<span class="text-sm font-medium leading-tight">{m.assignments()}</span>
 									</Anchor>
 								{/if}
 								{#if page.data?.featureflags?.auditee_mode && activeAssignments.length > 0}
@@ -1186,11 +1204,11 @@
 									<Anchor
 										breadcrumbAction="push"
 										href={reviewResponsesHref}
-										class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors shadow-sm cursor-pointer text-left"
+										class="flex items-center gap-2 px-2.5 py-2.5 rounded-xl border border-surface-200-800 bg-surface-50-950 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700 transition-colors shadow-sm cursor-pointer text-left"
 										data-testid="review-responses-button"
 									>
 										<i class="fa-solid fa-clipboard-check text-blue-500 text-base"></i>
-										<span class="text-sm font-medium">{m.reviewResponses()}</span>
+										<span class="text-sm font-medium leading-tight">{m.reviewResponses()}</span>
 									</Anchor>
 								{/if}
 							</div>
@@ -1209,14 +1227,14 @@
 									{@const allMet = verdictCount > 0 && verdictsMet === verdictCount}
 									<button
 										type="button"
-										class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border transition-colors cursor-pointer text-left {allMet
+										class="flex items-center gap-2 px-2.5 py-2.5 rounded-xl border transition-colors cursor-pointer text-left {allMet
 											? 'bg-success-50-950 border-success-200-800 text-success-800-200 hover:bg-success-100-900'
 											: 'bg-surface-50-950 border-surface-200-800 text-surface-700-300 hover:bg-surface-100-900'}"
 										onclick={openVerdictsDialog}
 										data-testid="verdicts-tile"
 									>
 										<div
-											class="flex items-center justify-center w-8 h-8 rounded-lg text-white shrink-0 {allMet
+											class="flex items-center justify-center w-7 h-7 rounded-lg text-white shrink-0 {allMet
 												? 'bg-success-500 dark:bg-success-600'
 												: 'bg-violet-500 dark:bg-violet-600'}"
 										>
@@ -1234,17 +1252,18 @@
 												>
 											</div>
 										{:else}
-											<span class="text-sm font-semibold">{m.computedOutcomes()}</span>
+											<span class="text-sm font-semibold leading-tight">{m.computedOutcomes()}</span
+											>
 										{/if}
 									</button>
 								{/if}
 								{#if has_threats && !page.data.user.is_third_party}
 									<button
-										class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 hover:bg-amber-100 transition-colors cursor-pointer text-left"
+										class="flex items-center gap-2 px-2.5 py-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 hover:bg-amber-100 transition-colors cursor-pointer text-left"
 										onclick={openThreatsDialog}
 									>
 										<div
-											class="flex items-center justify-center w-8 h-8 rounded-lg bg-amber-500 dark:bg-amber-600 text-white shrink-0"
+											class="flex items-center justify-center w-7 h-7 rounded-lg bg-amber-500 dark:bg-amber-600 text-white shrink-0"
 										>
 											<i class="fa-solid fa-triangle-exclamation text-sm"></i>
 										</div>
@@ -1260,15 +1279,15 @@
 									<Anchor
 										breadcrumbAction="push"
 										href={`${page.url.pathname}/advanced-analytics`}
-										class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-surface-50-950 border border-surface-200-800 text-surface-700-300 hover:bg-surface-100-900 transition-colors cursor-pointer"
+										class="flex items-center gap-2 px-2.5 py-2.5 rounded-xl bg-surface-50-950 border border-surface-200-800 text-surface-700-300 hover:bg-surface-100-900 transition-colors cursor-pointer"
 										data-testid="advanced-analytics-button"
 									>
 										<div
-											class="flex items-center justify-center w-8 h-8 rounded-lg bg-orange-500 dark:bg-orange-600 text-white shrink-0"
+											class="flex items-center justify-center w-7 h-7 rounded-lg bg-orange-500 dark:bg-orange-600 text-white shrink-0"
 										>
 											<i class="fa-solid fa-chart-line text-sm"></i>
 										</div>
-										<span class="text-sm font-semibold">{m.advancedAnalytics()}</span>
+										<span class="text-sm font-semibold leading-tight">{m.advancedAnalytics()}</span>
 									</Anchor>
 								{/if}
 							</div>
