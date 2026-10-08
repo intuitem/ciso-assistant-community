@@ -142,6 +142,7 @@
 	const exportFilterSearch = $derived.by(() => {
 		const params = new URLSearchParams(currentFilterSearch);
 		if (currentSearch) params.set('search', currentSearch);
+		else params.delete('search');
 		const search = params.toString();
 		return search ? `?${search}` : '';
 	});

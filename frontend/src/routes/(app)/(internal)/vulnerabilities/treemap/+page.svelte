@@ -106,7 +106,8 @@
 		medium: 'bg-yellow-500 text-white border-yellow-600 hover:bg-yellow-600',
 		low: 'bg-blue-500 dark:bg-blue-600 text-white border-blue-600 hover:bg-blue-600',
 		info: 'bg-surface-400-600 text-white border-surface-600-400 hover:bg-surface-600-400',
-		undefined: 'bg-surface-50-950 text-white border-surface-600-400 hover:bg-surface-600-400'
+		undefined:
+			'bg-surface-950-50 text-surface-50-950 border-surface-600-400 hover:bg-surface-600-400'
 	};
 
 	// Inactive severity colors
@@ -129,7 +130,7 @@
 		not_exploitable: 'bg-teal-500 dark:bg-teal-600 text-white border-teal-600 hover:bg-teal-600',
 		unaffected:
 			'bg-emerald-500 dark:bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-600',
-		'--': 'bg-surface-50-950 text-white border-surface-600-400 hover:bg-surface-600-400'
+		'--': 'bg-surface-950-50 text-surface-50-950 border-surface-600-400 hover:bg-surface-600-400'
 	};
 
 	// Inactive status colors

@@ -489,7 +489,11 @@ class RiskAcceptanceWriteSerializer(BaseModelSerializer):
             raise serializers.ValidationError(
                 {"approver": "An approver is required to submit for approval."}
             )
-        approver = data.get("approver")
+        approver = (
+            data["approver"]
+            if "approver" in data
+            else getattr(self.instance, "approver", None)
+        )
         folder = data.get("folder") or getattr(self.instance, "folder", None)
         scenarios = data.get("risk_scenarios")
         if scenarios is None and self.instance:

@@ -3842,7 +3842,7 @@ class RiskMatrixViewSet(BaseModelViewSet):
                 if name not in labels:
                     labels.append(name)
 
-        res = [{"value": k, "label": " / ".join(v)} for k, v in options.items()]
+        res = [{"value": k, "label": " | ".join(v)} for k, v in options.items()]
         return Response(res)
 
     @action(detail=False, name="Get impact choices")
