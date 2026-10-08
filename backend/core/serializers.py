@@ -3673,6 +3673,7 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
         source="get_selected_implementation_groups"
     )
     framework_exports = serializers.ReadOnlyField()
+    outcome_rules = serializers.ReadOnlyField()
     progress = serializers.SerializerMethodField()
     answers_progress = serializers.SerializerMethodField()
     assets = FieldsRelatedField(many=True)
@@ -3777,6 +3778,7 @@ class ComplianceAssessmentListSerializer(BaseModelSerializer):
             "version",
             "framework",
             "computed_outcome",
+            "computed_values",
             "folder",
             "perimeter",
             "progress",
@@ -4230,6 +4232,7 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
     class Meta:
         model = ComplianceAssessment
         fields = "__all__"
+        read_only_fields = ["computed_outcome", "computed_values"]
 
 
 class ComplianceAssessmentImportExportSerializer(BaseModelSerializer):
@@ -4260,6 +4263,7 @@ class ComplianceAssessmentImportExportSerializer(BaseModelSerializer):
             "framework",
             "selected_implementation_groups",
             "computed_outcome",
+            "computed_values",
             "min_score",
             "max_score",
             "scores_definition",

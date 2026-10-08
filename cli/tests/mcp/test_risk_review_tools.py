@@ -910,11 +910,11 @@ class TestUpdateTools:
 
 class TestRegistration:
     def _tool_names(self, read_only):
-        from mcp.server.fastmcp import FastMCP
+        from mcp.server.mcpserver import MCPServer
 
         import ca_mcp.server as server
 
-        fresh = FastMCP("test")
+        fresh = MCPServer("test")
         with (
             patch.object(server, "mcp", fresh),
             patch.object(server, "_registered", False),
