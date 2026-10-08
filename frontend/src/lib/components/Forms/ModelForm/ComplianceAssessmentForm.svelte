@@ -230,19 +230,24 @@
 		untrack(() => writeScale(proposed?.value ?? null, false));
 	});
 
+	// Edit: the scale is resent as stored until the user picks another one. Left
+	// out, the form library would fill it with nulls, which the backend reads as
+	// "use the framework's scale".
 	$effect(() => {
 		if (!object?.id || scaleDirty) return;
-		untrack(() => {
-			if (SCALE_FIELDS.every((f) => $formData[f] === undefined)) return;
+		untrack(() =>
 			form.form.update(
-				(d) => {
-					const next = { ...d };
-					for (const f of SCALE_FIELDS) delete next[f];
-					return next;
-				},
+				(d) => ({
+					...d,
+					score_scale_preset: object.score_scale_preset ?? null,
+					min_score: object.min_score ?? null,
+					max_score: object.max_score ?? null,
+					scores_definition:
+						object.scores_definition == null ? null : scaleLevels(object.scores_definition)
+				}),
 				{ taint: false }
-			);
-		});
+			)
+		);
 	});
 
 	let scoringEnabled = $derived(

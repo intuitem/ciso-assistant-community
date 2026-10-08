@@ -1,7 +1,17 @@
 <script lang="ts">
-	import { getTranslation, withTranslation, type OutcomeRule } from './builder-state';
-	import { createDragHandlers } from './builder-utils.svelte';
+	import {
+		getTranslation,
+		ruleIdFromLabel,
+		ruleIdProblem,
+		withTranslation,
+		type OutcomeRule
+	} from './builder-state';
+	import { safeTranslate } from '$lib/utils/i18n';
+	import { createHandleGatedDragHandlers } from './builder-utils.svelte';
 	import ConfirmAction from './ConfirmAction.svelte';
+	import CelInput from './CelInput.svelte';
+	import { SECTION_ICON, SECTION_TITLE } from './section-style';
+	import { readableValues, type CelCatalog } from './cel-complete';
 	import { m } from '$paraglide/messages';
 
 	interface Props {
@@ -11,9 +21,28 @@
 		/** Which evaluator the rules will run against — the two expose different
 		 * context roots, and a rule written for the wrong one silently never fires. */
 		mode?: 'framework' | 'quick_form';
+		/** Quick forms: pages a number rule can read the score of. */
+		pages?: { id: string; label: string }[];
+		/** What the expression field suggests. */
+		catalog?: CelCatalog;
 	}
 
-	let { outcomes, onupdate, activeLanguage = null, mode = 'framework' }: Props = $props();
+	let {
+		outcomes,
+		onupdate,
+		activeLanguage = null,
+		mode = 'framework',
+		pages = [],
+		catalog = { mode: 'framework', nodes: [], questions: [] }
+	}: Props = $props();
+
+	// The picker writes, and only ever replaces, a bare page score: a hand-written
+	// expression is never overwritten by it.
+	const PAGE_SCORE = /^\s*pages\["([^"]+)"\]\.score\s*$/;
+	const pageScoreOf = (expression: string | undefined) =>
+		expression ? (PAGE_SCORE.exec(expression)?.[1] ?? null) : null;
+	const pagePickable = (expression: string | undefined) =>
+		!expression?.trim() || pageScoreOf(expression) !== null;
 
 	let rules: OutcomeRule[] = $state(outcomes.map((r) => ({ ...r })));
 	let expandedIndex: number | null = $state(null);
@@ -28,8 +57,25 @@
 		onupdate(rules.map((r) => ({ ...r })));
 	}
 
+	const otherIds = (index: number) => rules.filter((_, i) => i !== index).map((r) => r.ref_id);
+
+	// The ID follows the label until the author types one of their own.
+	function setLabel(index: number, label: string) {
+		const rule = rules[index];
+		const others = otherIds(index);
+		if (rule.ref_id === ruleIdFromLabel(rule.annotation ?? '', others)) {
+			rule.ref_id = ruleIdFromLabel(label, others);
+		}
+		rule.annotation = label;
+		persist();
+	}
+
 	function addRule() {
-		rules = [...rules, { ref_id: '', annotation: '', color: null, expression: '' }];
+		const ref_id = ruleIdFromLabel(
+			'',
+			rules.map((r) => r.ref_id)
+		);
+		rules = [...rules, { ref_id, annotation: '', color: null, expression: '' }];
 		expandedIndex = rules.length - 1;
 		persist();
 	}
@@ -40,7 +86,7 @@
 		persist();
 	}
 
-	const drag = createDragHandlers((from, to) => {
+	const drag = createHandleGatedDragHandlers((from, to) => {
 		const copy = [...rules];
 		const [moved] = copy.splice(from, 1);
 		copy.splice(to, 0, moved);
@@ -54,6 +100,7 @@
 					{
 						title: m.builderCelGroupResponse(),
 						rows: [
+							['response.score', m.builderCelResponseScore()],
 							['response.score_sum', m.builderCelScoreSum()],
 							['response.score_max', m.builderCelScoreMax()],
 							['response.answered_count', m.builderCelAnsweredQuestions()],
@@ -65,6 +112,8 @@
 						title: m.builderCelGroupPages(),
 						rows: [
 							['pages["PAGE_ID"].visible', m.builderCelPageVisible()],
+							['pages["PAGE_ID"].score', m.builderCelPageScore()],
+							['pages["PAGE_ID"].score_max', m.builderCelPageScoreMax()],
 							['pages["PAGE_ID"].answered_count', m.builderCelAnsweredQuestions()],
 							['pages["PAGE_ID"].total_count', m.builderCelTotalQuestions()]
 						],
@@ -84,6 +133,7 @@
 					{
 						title: m.builderCelGroupOther(),
 						rows: [
+							['values.REF_ID', m.builderCelValues()],
 							['computed_outcomes', m.builderCelComputedOutcomes()],
 							['hidden_pages', m.builderCelHiddenPages()]
 						]
@@ -137,8 +187,9 @@
 
 <div class="space-y-1.5">
 	<div class="flex items-center justify-between">
-		<span class="text-xs font-medium text-surface-600-400 uppercase tracking-wider"
-			>{m.builderOutcomeRules()}</span
+		<span class={SECTION_TITLE}
+			><i class="{SECTION_ICON} fa-code-branch" aria-hidden="true"
+			></i>{m.builderOutcomeRules()}</span
 		>
 		<button
 			type="button"
@@ -156,7 +207,8 @@
 				? 'opacity-50'
 				: ''}"
 			draggable="true"
-			ondragstart={() => drag.handleDragStart(index)}
+			onmousedown={drag.recordMousedown}
+			ondragstart={(e) => drag.handleDragStart(e, index)}
 			ondragover={drag.handleDragOver}
 			ondrop={(e) => drag.handleDrop(e, index)}
 			ondragend={drag.handleDragEnd}
@@ -164,11 +216,16 @@
 		>
 			<!-- Collapsed row -->
 			<div class="flex items-center gap-2 px-3 py-2">
-				<span class="cursor-grab text-gray-300 hover:text-surface-600-400">
+				<span class="cursor-grab text-gray-300 hover:text-surface-600-400" data-drag-handle>
 					<i class="fa-solid fa-grip-vertical text-xs"></i>
 				</span>
 
-				{#if rule.color}
+				{#if rule.kind === 'number'}
+					<span
+						class="text-[10px] font-mono font-semibold px-1 rounded bg-surface-200-800 text-surface-600-400"
+						title={m.builderRuleKindNumber()}>#</span
+					>
+				{:else if rule.color}
 					<span
 						class="w-3 h-3 rounded-full shrink-0 border border-surface-200-800"
 						style="background-color: {rule.color}"
@@ -200,6 +257,7 @@
 
 			<!-- Expanded details -->
 			{#if expandedIndex === index}
+				{@const idProblem = ruleIdProblem(rule.ref_id ?? '', otherIds(index))}
 				<div class="px-3 pb-3 pt-1 border-t border-surface-200-800 space-y-2">
 					<div class="grid grid-cols-2 gap-2">
 						<label class="block">
@@ -207,12 +265,19 @@
 							<input
 								type="text"
 								value={rule.ref_id}
+								aria-invalid={!!idProblem}
+								data-testid="outcome-rule-id"
 								class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 								onblur={(e) => {
-									rules[index].ref_id = e.currentTarget.value;
+									rules[index].ref_id = e.currentTarget.value.trim();
 									persist();
 								}}
 							/>
+							{#if idProblem}
+								<span class="text-xs text-error-600 dark:text-error-400"
+									>{safeTranslate(idProblem)}</span
+								>
+							{/if}
 						</label>
 						<label class="block">
 							<span class="text-xs text-surface-600-400">{m.builderLabel()}</span>
@@ -221,56 +286,104 @@
 								value={rule.annotation}
 								placeholder={m.builderLabelHint()}
 								class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-								onblur={(e) => {
-									rules[index].annotation = e.currentTarget.value;
-									persist();
-								}}
+								onblur={(e) => setLabel(index, e.currentTarget.value)}
 							/>
 						</label>
 					</div>
 
-					<label class="block">
+					{#if mode === 'quick_form'}
+						<label class="block">
+							<span class="text-xs text-surface-600-400">{m.builderRuleKind()}</span>
+							<select
+								class="w-full text-sm border border-surface-200-800 rounded px-2 py-1 bg-surface-50-950"
+								value={rule.kind === 'number' ? 'number' : 'boolean'}
+								onchange={(e) => {
+									if (e.currentTarget.value === 'number') {
+										rules[index].kind = 'number';
+										rules[index].color = null;
+									} else {
+										delete rules[index].kind;
+									}
+									persist();
+								}}
+								data-testid="outcome-rule-kind"
+							>
+								<option value="boolean">{m.builderRuleKindBoolean()}</option>
+								<option value="number">{m.builderRuleKindNumber()}</option>
+							</select>
+							<span class="text-xs text-surface-500">{m.builderRuleKindHint()}</span>
+						</label>
+					{/if}
+
+					<div class="block">
 						<span class="text-xs text-surface-600-400">{m.builderCelExpression()}</span>
-						<textarea
+						<CelInput
+							multiline
 							value={rule.expression}
 							placeholder={mode === 'quick_form'
 								? m.builderCelExpressionPlaceholderQuickForm()
 								: m.builderCelExpressionPlaceholder()}
-							rows="2"
 							class="input w-full text-sm font-mono border border-surface-200-800 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 resize-y"
-							onblur={(e) => {
-								rules[index].expression = e.currentTarget.value;
+							{catalog}
+							place={{ where: 'outcome', values: readableValues(rules, index) }}
+							oncommit={(value) => {
+								rules[index].expression = value;
 								persist();
 							}}
-						></textarea>
-					</label>
+							testid="outcome-rule-expression"
+						/>
+					</div>
 
-					<label class="block">
-						<span class="text-xs text-surface-600-400">{m.builderColor()}</span>
-						<div class="flex items-center gap-2">
-							<input
-								type="color"
-								value={rule.color ?? '#6b7280'}
-								class="w-8 h-8 rounded border border-surface-200-800 cursor-pointer"
+					{#if mode === 'quick_form' && rule.kind === 'number' && pages.length && pagePickable(rule.expression)}
+						<label class="block">
+							<span class="text-xs text-surface-600-400">{m.builderUsePageScore()}</span>
+							<select
+								class="w-full text-sm border border-surface-200-800 rounded px-2 py-1 bg-surface-50-950"
+								value={pageScoreOf(rule.expression) ?? ''}
 								onchange={(e) => {
-									rules[index].color = e.currentTarget.value;
+									const id = e.currentTarget.value;
+									rules[index].expression = id ? `pages["${id}"].score` : '';
 									persist();
 								}}
-							/>
-							{#if rule.color}
-								<button
-									type="button"
-									class="text-xs text-surface-500 hover:text-surface-600-400"
-									onclick={() => {
-										rules[index].color = null;
+								data-testid="outcome-rule-page-score"
+							>
+								<option value="">--</option>
+								{#each pages as page (page.id)}
+									<option value={page.id}>{page.label || page.id}</option>
+								{/each}
+							</select>
+							<span class="text-xs text-surface-500">{m.builderUsePageScoreHint()}</span>
+						</label>
+					{/if}
+
+					{#if rule.kind !== 'number'}
+						<label class="block">
+							<span class="text-xs text-surface-600-400">{m.builderColor()}</span>
+							<div class="flex items-center gap-2">
+								<input
+									type="color"
+									value={rule.color ?? '#6b7280'}
+									class="w-8 h-8 rounded border border-surface-200-800 cursor-pointer"
+									onchange={(e) => {
+										rules[index].color = e.currentTarget.value;
 										persist();
 									}}
-								>
-									{m.builderClearAction()}
-								</button>
-							{/if}
-						</div>
-					</label>
+								/>
+								{#if rule.color}
+									<button
+										type="button"
+										class="text-xs text-surface-500 hover:text-surface-600-400"
+										onclick={() => {
+											rules[index].color = null;
+											persist();
+										}}
+									>
+										{m.builderClearAction()}
+									</button>
+								{/if}
+							</div>
+						</label>
+					{/if}
 
 					{#if activeLanguage}
 						{@const lang = activeLanguage}

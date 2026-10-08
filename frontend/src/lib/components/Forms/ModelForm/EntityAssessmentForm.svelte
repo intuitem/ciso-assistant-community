@@ -5,7 +5,6 @@
 	import Select from '../Select.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
-	import Score from '../Score.svelte';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 
@@ -233,15 +232,6 @@
 	bind:cachedValue={formDataCache['due_date']}
 />
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
-	<Score
-		{form}
-		label={m.criticality()}
-		field="criticality"
-		inversedColors
-		fullDonut
-		min_score={1}
-		max_score={4}
-	/>
 	<Select
 		{form}
 		options={model.selectOptions['conclusion']}

@@ -62,12 +62,18 @@ def quick_form_to_editor_doc(quick_form: dict, *, locale: str = "en") -> dict:
     doc = framework_to_editor_doc(pseudo, locale=locale)
     doc["kind"] = "quick_form"
     doc["framework_meta"]["kind"] = "quick_form"
+    doc["framework_meta"]["subject_question_urn"] = (
+        quick_form.get("subject_question_urn") or None
+    )
+    doc["framework_meta"]["on_accept"] = quick_form.get("on_accept") or []
     for key in FRAMEWORK_ONLY_META_KEYS:
         doc["framework_meta"].pop(key, None)
     return doc
 
 
-def editor_doc_to_quick_form_object(editor_doc: dict, *, existing: dict) -> dict:
+def editor_doc_to_quick_form_object(
+    editor_doc: dict, *, existing: dict, urn_map_out: dict | None = None
+) -> dict:
     """Convert an editor doc back into the library-YAML quick form object.
 
     `existing` is the quick form object currently in the draft document; it
@@ -81,9 +87,15 @@ def editor_doc_to_quick_form_object(editor_doc: dict, *, existing: dict) -> dict
     for node in editor_doc.get("nodes") or []:
         if node.get("parent_urn"):
             raise BuilderError("Quick form pages cannot be nested")
+    urn_map: dict = {}
     result = editor_doc_to_framework_object(
-        editor_doc, existing=pseudo_existing, node_base=page_base_urn(form_urn)
+        editor_doc,
+        existing=pseudo_existing,
+        node_base=page_base_urn(form_urn),
+        urn_map_out=urn_map,
     )
+    if urn_map_out is not None:
+        urn_map_out.update(urn_map)
     pages = []
     for node in result.pop("requirement_nodes", []):
         pages.append(
@@ -95,5 +107,23 @@ def editor_doc_to_quick_form_object(editor_doc: dict, *, existing: dict) -> dict
         )
     for key in FRAMEWORK_ONLY_META_KEYS:
         result.pop(key, None)
+    meta = editor_doc.get("framework_meta") or {}
+    # Absent from the payload means the editor does not model it: keep the
+    # document's value (already carried over with the other unknown keys).
+    if "subject_question_urn" in meta:
+        subject = str(meta.get("subject_question_urn") or "").lower()
+        # A question added in this session carries the editor's URN until saved.
+        subject = urn_map.get(subject, subject)
+        if subject:
+            result["subject_question_urn"] = subject
+        else:
+            result.pop("subject_question_urn", None)
+    if "on_accept" in meta:
+        if meta.get("on_accept"):
+            result["on_accept"] = meta["on_accept"]
+        else:
+            result.pop("on_accept", None)
+    # Rules and conditions were rebased onto the saved ids by the framework
+    # conversion (pages are its requirement nodes).
     result["pages"] = pages
     return result
