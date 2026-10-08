@@ -59,41 +59,55 @@
 		$choicesDefinitionValue = entries;
 	}
 
-	// Derived metric: datasets (JSON, name -> read configuration) and one CEL
-	// expression. The textarea holds the JSON text; the form field holds the
-	// parsed object, or the raw text when it does not parse so the backend
-	// says so.
+	// Derived metric: datasets edited structurally, one CEL expression, and a
+	// preview that evaluates the formula against a domain without writing.
+	import DatasetEditor from '$lib/components/Metrology/DatasetEditor.svelte';
+	import type { ReadableModel } from '$lib/components/Metrology/DatasetEditor.svelte';
+	import { datasetReferences } from '$lib/utils/derived-metrics';
+	import { onMount } from 'svelte';
+
 	const { value: datasetsValue } = formFieldProxy(form, 'datasets');
 	const { value: expressionValue } = formFieldProxy(form, 'expression');
 	const { value: folderValue } = formFieldProxy(form, 'folder');
-	let datasetsText = $state('');
-	let datasetsInvalid = $state(false);
 	let formulaOpen = $state(false);
-	$effect(() => {
-		const current = $datasetsValue;
-		if (current && typeof current === 'object') {
-			const text = JSON.stringify(current, null, 2);
-			if (text !== datasetsText) datasetsText = text;
-			formulaOpen = true;
-		} else if (typeof current === 'string' && current && !datasetsText) {
-			datasetsText = current;
-		}
-		if ($expressionValue) formulaOpen = true;
-	});
-	function onDatasetsInput(text: string) {
-		datasetsText = text;
-		if (!text.trim()) {
-			$datasetsValue = null;
-			datasetsInvalid = false;
-			return;
+	let models = $state<ReadableModel[]>([]);
+	let domains = $state<{ id: string; str: string }[]>([]);
+	let previewFolder = $state('');
+	onMount(async () => {
+		try {
+			const res = await fetch('/fe-api/metrology/readable-models');
+			if (res.ok) models = await res.json();
+		} catch {
+			models = [];
 		}
 		try {
-			$datasetsValue = JSON.parse(text);
-			datasetsInvalid = false;
+			const res = await fetch('/folders?content_type=DO&content_type=GL');
+			if (res.ok) {
+				const body = await res.json();
+				const rows = Array.isArray(body) ? body : (body.results ?? []);
+				domains = rows.map((row: any) => ({ id: row.id, str: row.str ?? row.name }));
+			}
 		} catch {
-			$datasetsValue = text;
-			datasetsInvalid = true;
+			domains = [];
 		}
+	});
+	$effect(() => {
+		if ($datasetsValue && typeof $datasetsValue === 'object' && Object.keys($datasetsValue).length)
+			formulaOpen = true;
+		if ($expressionValue) formulaOpen = true;
+	});
+	$effect(() => {
+		if (!previewFolder && $folderValue) previewFolder = $folderValue as string;
+	});
+	function clearFormula() {
+		$datasetsValue = null;
+		$expressionValue = '';
+		preview = null;
+	}
+	const references = $derived(datasetReferences($datasetsValue as Record<string, any>));
+	function insertReference(ref: string) {
+		const current = ($expressionValue as string) ?? '';
+		$expressionValue = current && !current.endsWith(' ') ? `${current} ${ref}` : `${current}${ref}`;
 	}
 
 	let previewBusy = $state(false);
@@ -111,7 +125,7 @@
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
-					folder: $folderValue,
+					folder: previewFolder || $folderValue,
 					datasets: $datasetsValue,
 					expression: $expressionValue
 				})
@@ -187,28 +201,40 @@
 
 <div class="form-group rounded-base border border-surface-200-800 p-3 flex flex-col gap-2">
 	<label class="flex items-center gap-2 text-sm font-semibold cursor-pointer">
-		<input type="checkbox" class="checkbox" bind:checked={formulaOpen} />
+		<input
+			type="checkbox"
+			class="checkbox"
+			checked={formulaOpen}
+			onchange={(e) => {
+				formulaOpen = e.currentTarget.checked;
+				if (!formulaOpen) clearFormula();
+			}}
+			data-testid="derived-metric-toggle"
+		/>
 		{m.derivedMetric()}
 	</label>
 	<p class="text-xs text-surface-500">{m.derivedMetricHelpText()}</p>
 	{#if formulaOpen}
-		<label class="flex flex-col gap-1">
+		<div class="flex flex-col gap-1">
 			<span class="text-sm font-semibold">{m.datasets()}</span>
-			<textarea
-				class="textarea text-xs font-mono w-full"
-				rows="8"
-				data-testid="form-input-datasets"
-				value={datasetsText}
-				oninput={(e) => onDatasetsInput(e.currentTarget.value)}
-				placeholder={'{"controls": {"model": "applied_control", "aggregates": [{"fn": "count"}]}}'}
-			></textarea>
-			{#if datasetsInvalid}
-				<span class="text-xs text-error-500">{m.datasetsInvalidJson()}</span>
-			{/if}
 			<span class="text-xs text-surface-500">{m.datasetsHelpText()}</span>
-		</label>
+			<DatasetEditor bind:value={$datasetsValue} {models} />
+		</div>
 		<label class="flex flex-col gap-1">
 			<span class="text-sm font-semibold">{m.expression()}</span>
+			{#if references.length}
+				<div class="flex flex-wrap gap-1">
+					{#each references as ref (ref)}
+						<button
+							type="button"
+							class="chip preset-tonal text-[10px] font-mono"
+							onclick={() => insertReference(ref)}
+						>
+							{ref}
+						</button>
+					{/each}
+				</div>
+			{/if}
 			<textarea
 				class="textarea text-sm font-mono w-full"
 				rows="2"
@@ -218,18 +244,23 @@
 			></textarea>
 			<span class="text-xs text-surface-500">{m.expressionHelpText()}</span>
 		</label>
-		<div class="flex items-center gap-2">
+		<div class="flex items-center gap-2 flex-wrap">
+			<select class="select text-xs w-56" bind:value={previewFolder} title={m.previewDomain()}>
+				{#if !domains.length}
+					<option value={$folderValue}>{m.previewDomain()}</option>
+				{/if}
+				{#each domains as domain (domain.id)}
+					<option value={domain.id}>{domain.str}</option>
+				{/each}
+			</select>
 			<button
 				type="button"
 				class="btn preset-tonal text-xs"
-				disabled={previewBusy || !$folderValue || !$expressionValue}
+				disabled={previewBusy || !(previewFolder || $folderValue) || !$expressionValue}
 				onclick={runPreview}
 			>
 				<i class="fa-solid fa-play mr-1"></i>{m.previewFormula()}
 			</button>
-			{#if !$folderValue}
-				<span class="text-xs text-surface-500">{m.previewNeedsFolder()}</span>
-			{/if}
 		</div>
 		{#if preview}
 			{#if preview.ok}

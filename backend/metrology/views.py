@@ -69,6 +69,16 @@ class MetricDefinitionViewSet(BaseModelViewSet):
         )
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get readable models", url_path="readable-models")
+    def readable_models(self, request):
+        """The models a dataset may read, with their fields and the aggregate
+        functions: the same registry the workflow builder uses, served here
+        so the metric form does not depend on the workflows feature flag."""
+        from core.reads.registry import registry_payload
+
+        return Response(registry_payload())
+
     @action(detail=False, methods=["post"], url_path="preview-formula")
     def preview_formula(self, request):
         """Evaluate a derived metric's formula against a folder, writing

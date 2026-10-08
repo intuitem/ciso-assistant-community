@@ -25,7 +25,7 @@
 		groupsToTree,
 		FILTER_OPS,
 		type Condition
-	} from './filter-dnf';
+	} from '$lib/utils/filter-dnf';
 	import { VARIABLE_TYPES } from './builder-constants';
 
 	interface Option {

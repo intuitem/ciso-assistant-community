@@ -64,6 +64,7 @@ from .query import (
     subtree_folder_ids,
     validate_read_config,
 )
+from .registry import registry_payload
 
 __all__ = [
     "AGGREGATES",
@@ -107,6 +108,7 @@ __all__ = [
     "read_max_limit",
     "read_mode",
     "referenced_fields",
+    "registry_payload",
     "related_count",
     "run_aggregate_read",
     "run_aggregates",

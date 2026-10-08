@@ -197,35 +197,9 @@ class WorkflowViewSet(WorkflowsFeatureGate, BaseModelViewSet):
     def readable_models(self, request):
         """The read_objects registry: field lists double as the
         filter/order whitelist the builder offers."""
-        from core.reads import READABLE_MODELS, field_kind, function_catalog
+        from core.reads.registry import registry_payload
 
-        # The function catalog is the same for every model; it travels on
-        # each entry so the builder reads one list, as it always has.
-        functions = function_catalog()
-        return Response(
-            [
-                {
-                    "key": key,
-                    "fields": entry.readable_fields(),
-                    # What each field holds: decides the operators a filter
-                    # and the functions an aggregate may use.
-                    "kinds": {
-                        name: field_kind(entry, name)
-                        for name in entry.readable_fields()
-                    },
-                    # Database-side values among the fields.
-                    "annotations": sorted(entry.annotations),
-                    # Output-only values; not filterable/orderable, but a
-                    # worker-side aggregate can run over them.
-                    "computed": sorted(entry.computed.keys()),
-                    # Same, but only resolved when a node names them in
-                    # `include` — they cost too much to return by default.
-                    "includable": sorted(entry.optional_computed.keys()),
-                    "aggregates": functions,
-                }
-                for key, entry in READABLE_MODELS.items()
-            ]
-        )
+        return Response(registry_payload())
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get updatable models", url_path="updatable-models")

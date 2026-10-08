@@ -547,6 +547,21 @@ class TestEndpoints:
         )
         assert response.status_code == 403
 
+    def test_the_registry_is_served_to_the_metric_form(self):
+        view = MetricDefinitionViewSet.as_view({"get": "readable_models"})
+        request = APIRequestFactory().get(
+            "/metrology/metric-definitions/readable-models/"
+        )
+        force_authenticate(request, user=self.admin())
+        response = view(request)
+        assert response.status_code == 200
+        entries = {entry["key"]: entry for entry in response.data}
+        assert entries["applied_control"]["kinds"]["status"] == "text"
+        assert {fn["name"] for fn in entries["applied_control"]["aggregates"]} >= {
+            "count",
+            "avg",
+        }
+
     def test_refresh_refuses_a_manual_metric(self):
         domain = make_domain("Domain")
         instance = make_instance(domain, make_definition("", {}))
