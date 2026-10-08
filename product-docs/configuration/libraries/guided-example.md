@@ -498,4 +498,6 @@ Add a `name[fr]` column to the Review Themes. Keep each `ref_id` unchanged so th
 
 If you already imported the English library, use [Update a library](update-library.md) to publish these translations as a new version. Then check the French display in a test audit as you did for the English version.
 
-[TO BE CONTINUED]
+## Solution: Final Excel file
+
+If you got stuck or want to check your work, [download the completed OHSS Excel workbook](../../.gitbook/assets/octopus-habitat-security-standard.xlsx). It contains every sheet we built in this guide, including the French translations from the extra section. Compare it with your workbook one sheet at a time, starting with `library_meta`, `fwk_meta`, and `fwk_content`, then check the Answers, Scores, and Implementation Groups sheets.
