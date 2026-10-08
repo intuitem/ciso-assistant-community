@@ -342,4 +342,52 @@ Well done! You have now transferred the standard's requirements, questions, answ
 For a framework with hundreds of requirements, focus the review on the overall structure and spot-check representative rows. Excel's column filters can help you inspect `depth`, `assessable`, and other fields in groups, making inconsistent values or unexpected gaps easier to find.
 {% endhint %}
 
+## Optional: Convert the workbook to YAML
+
+This step is only for obtaining the YAML version of your workbook. If you do not want one, skip this section and continue with the next step. When you import the Excel file through the Library catalog, CISO Assistant converts it to YAML during the import and loads the library for you. You do not need to run the script or upload a YAML version. The [conversion step in Create a Library](create-library.md#5-optional-convert-the-workbook-to-yaml) also explains this option.
+
+{% hint style="info" %}
+If the `python` command is not recognized, use `python3` instead in the commands below.
+{% endhint %}
+
+1. Install [Python](https://www.python.org/) 3.14 or later if you do not already have it. Check the version available in your terminal:
+
+   ```shell
+   python --version
+   ```
+
+2. Click [here](https://raw.githubusercontent.com/intuitem/ciso-assistant-community/refs/heads/main/backend/scripts/convert_library_v2.py) to download the [`convert_library_v2.py`](https://raw.githubusercontent.com/intuitem/ciso-assistant-community/refs/heads/main/backend/scripts/convert_library_v2.py) script. If your browser displays the code instead, right-click save the page as `convert_library_v2.py`. Place it in the same folder as your completed Excel workbook. You do not need to download the whole repository.
+
+3. Open a terminal in that folder and create a virtual environment:
+
+   ```shell
+   python -m venv .venv
+   ```
+
+4. Activate the virtual environment. On Windows, use PowerShell:
+
+   ```powershell
+   .\.venv\Scripts\Activate.ps1
+   ```
+
+   On macOS or Linux, use:
+
+   ```shell
+   source .venv/bin/activate
+   ```
+
+5. Install the two packages used by the conversion script in the active virtual environment:
+
+   ```shell
+   python -m pip install openpyxl PyYAML
+   ```
+
+6. Run the downloaded script with your workbook. Replace the example name if your Excel file is named differently:
+
+   ```shell
+   python convert_library_v2.py "octopus-habitat-security-standard.xlsx"
+   ```
+
+The script creates a `.yaml` file in the current directory with the same base name as the Excel workbook you chose. For example, `octopus-habitat-security-standard.xlsx` becomes `octopus-habitat-security-standard.yaml`. You can open it in a text editor to inspect the result. If the script reports an error, correct the Excel workbook and run the command again.
+
 [TO BE CONTINUED]
