@@ -552,6 +552,83 @@ class TestDocumentationScoreNoneLegacySemantic:
         global_doc = ca.get_global_score()["documentation_score"]
         assert section_node["aggregated_documentation_score"] == global_doc == 2.0
 
+    def test_doc_none_counts_as_the_minimum_with_sum_too(self):
+        """SUM counts a missing documentation score as the scale minimum, like
+        the averages, in the global score, the tree and what rules read."""
+        from core.cel_service import _add_scores, build_cel_context
+        from core.helpers import (
+            annotate_tree_with_aggregated_scores,
+            get_sorted_requirement_nodes,
+        )
+        from core.models import RequirementAssessment as RA
+
+        root = Folder.get_root_folder()
+        folder = Folder.objects.create(parent_folder=root, name="doc-none-sum folder")
+        perimeter = Perimeter.objects.create(
+            name="doc-none-sum perimeter", folder=folder
+        )
+        framework = Framework.objects.create(
+            name="Offset framework (1..4, sum)",
+            urn="urn:test:fw-doc-none-sum",
+            min_score=1,
+            max_score=4,
+            folder=root,
+        )
+        section = RequirementNode.objects.create(
+            urn="urn:test:risk:req_node:doc-none-sum:sec",
+            framework=framework,
+            assessable=False,
+            folder=root,
+        )
+        ca = ComplianceAssessment.objects.create(
+            name="Doc-None sum CA",
+            framework=framework,
+            folder=folder,
+            perimeter=perimeter,
+            score_calculation_method=ComplianceAssessment.CalculationMethod.SUM,
+            show_documentation_score=True,
+        )
+        for ref, doc in (("s1", 3), ("s2", None)):
+            node = RequirementNode.objects.create(
+                urn=f"urn:test:risk:req_node:doc-none-sum:{ref}",
+                framework=framework,
+                parent_urn=section.urn,
+                assessable=True,
+                weight=1,
+                folder=root,
+            )
+            RA.objects.create(
+                compliance_assessment=ca,
+                requirement=node,
+                folder=folder,
+                is_scored=True,
+                score=3,
+                documentation_score=doc,
+            )
+
+        # 3 + 1 (the missing one at the scale minimum), not 3 + 0.
+        assert ca.get_global_score()["documentation_score"] == 4.0
+        nodes = list(RequirementNode.objects.filter(framework=framework))
+        ras = list(RA.objects.filter(compliance_assessment=ca))
+        tree = get_sorted_requirement_nodes(
+            nodes, ras, framework.max_score, framework.min_score
+        )
+        annotate_tree_with_aggregated_scores(tree, ca)
+
+        def _find(t, urn):
+            for n in t.values():
+                if n.get("urn") == urn:
+                    return n
+                if (f := _find(n.get("children") or {}, urn)) is not None:
+                    return f
+            return None
+
+        assert _find(tree, section.urn)["aggregated_documentation_score"] == 4.0
+        context, _ = build_cel_context(ca)
+        _add_scores(context, ca, framework, [{"expression": "true"}])
+        assert context["requirements"]["s2"]["documentation_score"] == 1.0
+        assert context["assessment"]["documentation_score"] == 4.0
+
 
 @pytest.mark.django_db
 class TestRadarDataNormalizesMixedScales:
