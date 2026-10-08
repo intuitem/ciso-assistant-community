@@ -1142,11 +1142,12 @@ class TestFolderConsumer:
         assert error is None
         assert "create_iam_groups" not in record_data
 
-    def test_invalid_create_iam_groups_fails_the_row(self, base_context):
+    @pytest.mark.parametrize("cell", ["maybe", 2])
+    def test_invalid_create_iam_groups_fails_the_row(self, base_context, cell):
         _, error = FolderRecordConsumer(base_context).prepare_create(
-            {"name": "Grouped", "create_iam_groups": "maybe"}, None
+            {"name": "Grouped", "create_iam_groups": cell}, None
         )
-        assert "Invalid create_iam_groups 'maybe'" in error.error
+        assert f"Invalid create_iam_groups '{cell}'" in error.error
 
     def test_skipped_row_creates_no_label(
         self, skip_context, domain_folder, all_accessible

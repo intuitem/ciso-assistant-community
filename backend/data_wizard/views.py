@@ -2954,7 +2954,7 @@ class FolderRecordConsumer(RecordConsumer):
 
         raw_iam_groups = record.get("create_iam_groups")
         if not is_blank_cell(raw_iam_groups):
-            create_iam_groups = _parse_bool_cell(raw_iam_groups)
+            create_iam_groups = _parse_bool_cell(raw_iam_groups, binary_only=True)
             if create_iam_groups is None:
                 return {}, Error(
                     record=record,
