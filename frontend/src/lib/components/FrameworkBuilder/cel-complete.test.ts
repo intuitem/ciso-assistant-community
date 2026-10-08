@@ -171,7 +171,7 @@ describe('framework scores', () => {
 	test('section and group ids, then their fields', () => {
 		expect(at('sections["')).toEqual(['gv']);
 		expect(at('groups["')).toEqual(['B']);
-		expect(at('groups["B"].mat')).toEqual(['maturity_score']);
+		expect(at('groups["B"].mat')).toEqual(['maturity_score', 'min_maturity_score']);
 		expect(at('sections["gv"].de')).toEqual(['depth']);
 	});
 

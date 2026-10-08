@@ -247,6 +247,48 @@ class TestScoresInTheContext:
         b = ca.get_scores_for([_ra(levels, "r2"), _ra(levels, "r3")])
         assert context["groups"]["B"]["maturity_score"] == b["maturity_score"]
 
+    def test_groups_count_exclusions_and_their_lowest_maturity(self, levels):
+        _score(levels, "r1", 4, 2)
+        _score(levels, "r2", 2, 2)
+        _score(levels, "r3", 5, 5)
+        _, context = self._context(levels, "groups.size()")
+        assert context["groups"]["A"]["not_applicable_count"] == 0
+        assert context["groups"]["A"]["min_maturity_score"] == 2.0
+        _score(levels, "r2", 2, 2, result="not_applicable")
+        _, context = self._context(levels, "groups.size()")
+        assert context["groups"]["A"]["not_applicable_count"] == 1
+        # An N/A requirement that does not count makes the lowest maturity -1,
+        # so a rule on it fails, as one on its own maturity_score does.
+        assert context["groups"]["A"]["min_maturity_score"] == -1.0
+        ComplianceAssessment.objects.filter(pk=levels["ca"].pk).update(
+            anchor_na_to_target=True, target_score=3
+        )
+        _, context = self._context(levels, "groups.size()")
+        assert context["groups"]["A"]["min_maturity_score"] == 3.0
+
+    def test_the_lowest_maturity_is_the_lowest_requirement_maturity(self, levels):
+        _score(levels, "r1", 4, 2)
+        _score(levels, "r2", 5)
+        _score(levels, "r3", 3, 4)
+        _, context = self._context(levels, "sections.size() + groups.size()")
+        requirements = context["requirements"]
+        for scope, subset, keys in (
+            ("groups", "A", ("r1", "r2")),
+            ("groups", "B", ("r2", "r3")),
+            ("sections", "one", ("r1", "r2")),
+        ):
+            assert context[scope][subset]["min_maturity_score"] == min(
+                requirements[key]["maturity_score"] for key in keys
+            )
+
+    def test_an_empty_subset_counts_nothing(self, levels):
+        ComplianceAssessment.objects.filter(pk=levels["ca"].pk).update(
+            selected_implementation_groups=["A"]
+        )
+        _, context = self._context(levels, "sections.size()")
+        assert context["sections"]["two"]["not_applicable_count"] == 0
+        assert context["sections"]["two"]["min_maturity_score"] == -1.0
+
     def test_sections_and_groups_only_when_a_rule_reads_them(self, levels):
         _, context = self._context(levels, 'requirements["r1"].score > 0')
         assert "sections" not in context and "groups" not in context
@@ -648,6 +690,24 @@ class TestCyfunConformityCriteria:
         assert "basic_exclusions" not in fired
         assert "basic_criteria_met" not in fired
         assert "basic_maturity" in fired
+
+    def test_a_weak_key_measure_fails_the_level(self, cyfun):
+        # A BASIC key measure counts at IMPORTANT too.
+        ca = cyfun(["I"])
+        weak = next(
+            pk
+            for pk, groups in RequirementAssessment.objects.filter(
+                compliance_assessment=ca, requirement__assessable=True
+            ).values_list("id", "requirement__implementation_groups")
+            if "BK" in (groups or [])
+        )
+        RequirementAssessment.objects.filter(id=weak).update(
+            score=2, documentation_score=3
+        )
+        fired = _outcomes(ca)
+        assert "important_key_measures" not in fired
+        assert "important_criteria_met" not in fired
+        assert "important_maturity" in fired
 
     def test_exclusions_are_counted_per_level(self, cyfun):
         ca = cyfun(["I"])

@@ -187,6 +187,8 @@
 							['sections["NODE_ID"].documentation_score', m.builderCelSubsetDocumentationScore()],
 							['sections["NODE_ID"].scored_count', m.builderCelSubsetScoredCount()],
 							['sections["NODE_ID"].total_count', m.builderCelSubsetTotalCount()],
+							['sections["NODE_ID"].not_applicable_count', m.builderCelSubsetNotApplicableCount()],
+							['sections["NODE_ID"].min_maturity_score', m.builderCelSubsetMinMaturityScore()],
 							['sections["NODE_ID"].depth', m.builderCelSectionDepth()],
 							['sections["NODE_ID"].ref_id', m.builderCelSectionRefId()]
 						]
@@ -198,7 +200,9 @@
 							['groups["GROUP_ID"].implementation_score', m.builderCelSubsetImplementationScore()],
 							['groups["GROUP_ID"].documentation_score', m.builderCelSubsetDocumentationScore()],
 							['groups["GROUP_ID"].scored_count', m.builderCelSubsetScoredCount()],
-							['groups["GROUP_ID"].total_count', m.builderCelSubsetTotalCount()]
+							['groups["GROUP_ID"].total_count', m.builderCelSubsetTotalCount()],
+							['groups["GROUP_ID"].not_applicable_count', m.builderCelSubsetNotApplicableCount()],
+							['groups["GROUP_ID"].min_maturity_score', m.builderCelSubsetMinMaturityScore()]
 						]
 					},
 					{

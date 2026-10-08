@@ -5644,6 +5644,8 @@
 	"builderCelSubsetMaturityScore": "maturity score of its requirements (-1 when none is scored)",
 	"builderCelSubsetScoredCount": "requirements scored",
 	"builderCelSubsetTotalCount": "requirements in the audit's scope",
+	"builderCelSubsetNotApplicableCount": "requirements marked not applicable",
+	"builderCelSubsetMinMaturityScore": "lowest maturity score of its requirements (-1 when one is not counted, or when it has none)",
 	"builderCelSectionDepth": "level in the framework tree (1 at the top)",
 	"builderCelSectionRefId": "reference of the section",
 	"builderCelScoresHint": "Scores follow the audit's calculation method, as on its page, over the requirements in its scope. Every section and group is listed: one with no requirement in scope scores -1.",

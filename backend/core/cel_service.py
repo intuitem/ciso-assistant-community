@@ -337,12 +337,35 @@ def _layers(scores: dict) -> dict:
     }
 
 
+def _requirement_maturity(ca, ra) -> float:
+    """requirements[k].maturity_score of a requirement assessment."""
+    requirement = ra.requirement
+    return _requirement_layers(
+        ca,
+        {"min_score": requirement.min_score, "max_score": requirement.max_score},
+        {
+            "result": ra.result,
+            "is_scored": ra.is_scored,
+            "score": ra.score,
+            "documentation_score": ra.documentation_score,
+        },
+    )["maturity_score"]
+
+
 def _subset_scores(ca, ras) -> dict:
+    """A subset's scores, and what level criteria check on its requirements:
+    its N/A count and its lowest requirement maturity (-1 when one does not
+    count, or when it has none). Rules read them instead of looping over
+    `requirements`, which is slow in CEL."""
     scores = ca.get_scores_for(ras)
     return {
         **_layers(scores),
         "scored_count": scores["scored_count"],
         "total_count": len(ras),
+        "not_applicable_count": sum(ra.result == "not_applicable" for ra in ras),
+        "min_maturity_score": min(
+            (_requirement_maturity(ca, ra) for ra in ras), default=-1.0
+        ),
     }
 
 
@@ -932,6 +955,8 @@ _SUBSET_PROBE = {
     "maturity_score": 0.0,
     "scored_count": 0,
     "total_count": 0,
+    "not_applicable_count": 0,
+    "min_maturity_score": 0.0,
 }
 
 # Computed only when outcome rules run, never for visibility.

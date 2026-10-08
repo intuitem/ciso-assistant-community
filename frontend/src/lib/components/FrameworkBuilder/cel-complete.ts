@@ -119,7 +119,9 @@ function fieldDetails(mode: CelMode): Record<string, Record<string, string>> {
 		documentation_score: m.builderCelSubsetDocumentationScore(),
 		maturity_score: m.builderCelSubsetMaturityScore(),
 		scored_count: m.builderCelSubsetScoredCount(),
-		total_count: m.builderCelSubsetTotalCount()
+		total_count: m.builderCelSubsetTotalCount(),
+		not_applicable_count: m.builderCelSubsetNotApplicableCount(),
+		min_maturity_score: m.builderCelSubsetMinMaturityScore()
 	};
 	if (mode === 'quick_form') {
 		return {

@@ -54,6 +54,8 @@
 			"maturity_score",
 			"scored_count",
 			"total_count",
+			"not_applicable_count",
+			"min_maturity_score",
 			"depth",
 			"ref_id"
 		],
@@ -62,7 +64,9 @@
 			"documentation_score",
 			"maturity_score",
 			"scored_count",
-			"total_count"
+			"total_count",
+			"not_applicable_count",
+			"min_maturity_score"
 		],
 		"answers": ["value", "score", "selected_choices", "weight", "type"]
 	}

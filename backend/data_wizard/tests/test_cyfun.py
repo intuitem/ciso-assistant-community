@@ -329,3 +329,69 @@ class TestCyfunEndpoint:
         results = resp.json()["results"]
         assert results["failed"] == 1
         assert results["errors"][0]["error"] == "UnrecognizedCyfunWorkbook"
+
+
+THREE_ROWS = {
+    "GOVERN": [
+        {5: "Essential", 6: "GV.OC-01.1: Mission.", 7: 3, 8: 2},
+        {5: "Essential", 6: "GV.OC-02.1: Stakeholders.", 7: 4, 8: 4},
+        {5: "Essential", 6: "GV.OC-03.1: Requirements.", 7: 2, 8: 3},
+    ]
+}
+
+
+@pytest.mark.django_db(transaction=True)
+class TestCyfunImportTransaction:
+    """With real commits: the import runs in one transaction, so the outcome
+    rules are evaluated once, and a failing row rolls back alone."""
+
+    _post = TestCyfunEndpoint._post
+
+    def test_outcomes_are_evaluated_once(
+        self, knox_admin_client, domain_folder, cyfun_stored_library, monkeypatch
+    ):
+        from core import cel_service
+
+        evaluated = []
+        evaluate = cel_service.evaluate_outcomes
+        monkeypatch.setattr(
+            cel_service,
+            "evaluate_outcomes",
+            lambda ca: evaluated.append(ca.pk) or evaluate(ca),
+        )
+        resp = self._post(
+            knox_admin_client, build_workbook(THREE_ROWS), domain_folder.id
+        )
+        assert resp.json()["results"]["successful"] == 3
+        assert len(evaluated) == 1
+
+    def test_a_failing_row_does_not_undo_the_others(
+        self, knox_admin_client, domain_folder, cyfun_stored_library, monkeypatch
+    ):
+        from core.serializers import RequirementAssessmentWriteSerializer
+
+        save = RequirementAssessmentWriteSerializer.save
+
+        def failing_save(serializer, **kwargs):
+            if serializer.instance.requirement.ref_id == "GV.OC-02.1":
+                # A real database error (NOT NULL), which aborts a PostgreSQL
+                # transaction unless the row has its own savepoint.
+                RequirementAssessment.objects.filter(pk=serializer.instance.pk).update(
+                    result=None
+                )
+            return save(serializer, **kwargs)
+
+        monkeypatch.setattr(RequirementAssessmentWriteSerializer, "save", failing_save)
+        resp = self._post(
+            knox_admin_client, build_workbook(THREE_ROWS), domain_folder.id, name="Rows"
+        )
+        results = resp.json()["results"]
+        assert (results["successful"], results["failed"]) == (2, 1)
+        ca = ComplianceAssessment.objects.get(name="Rows")
+        scores = dict(
+            RequirementAssessment.objects.filter(
+                compliance_assessment=ca,
+                requirement__ref_id__in=["GV.OC-01.1", "GV.OC-02.1", "GV.OC-03.1"],
+            ).values_list("requirement__ref_id", "score")
+        )
+        assert scores == {"GV.OC-01.1": 2, "GV.OC-02.1": 1, "GV.OC-03.1": 3}

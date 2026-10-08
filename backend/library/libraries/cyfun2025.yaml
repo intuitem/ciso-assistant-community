@@ -21101,8 +21101,7 @@ objects:
     - ref_id: basic_key_measures
       implementation_groups:
       - B
-      expression: requirements.all(k, !("BK" in requirements[k].implementation_groups) || requirements[k].maturity_score
-        >= 2.5)
+      expression: groups["BK"].min_maturity_score >= 2.5
       annotation: 'BASIC: every key measure at 2.5 or more'
       translations:
         fr:
@@ -21112,9 +21111,8 @@ objects:
     - ref_id: basic_exclusions
       implementation_groups:
       - B
-      expression: requirements.filter(k, "B" in requirements[k].implementation_groups && requirements[k].result
-        == "not_applicable").size() <= 1 && !requirements.exists(k, requirements[k].result ==
-        "not_applicable" && "BK" in requirements[k].implementation_groups)
+      expression: groups["B"].not_applicable_count <= 1 && groups["BK"].not_applicable_count
+        == 0
       annotation: 'BASIC: at most 1 exclusion, none on a key measure'
       translations:
         fr:
@@ -21145,8 +21143,7 @@ objects:
     - ref_id: important_key_measures
       implementation_groups:
       - I
-      expression: requirements.all(k, !("IK" in requirements[k].implementation_groups) || requirements[k].maturity_score
-        >= 3.0)
+      expression: groups["IK"].min_maturity_score >= 3.0
       annotation: 'IMPORTANT: every key measure at 3 or more'
       translations:
         fr:
@@ -21156,9 +21153,8 @@ objects:
     - ref_id: important_exclusions
       implementation_groups:
       - I
-      expression: requirements.filter(k, "I" in requirements[k].implementation_groups && requirements[k].result
-        == "not_applicable").size() <= 3 && !requirements.exists(k, requirements[k].result ==
-        "not_applicable" && "IK" in requirements[k].implementation_groups)
+      expression: groups["I"].not_applicable_count <= 3 && groups["IK"].not_applicable_count
+        == 0
       annotation: 'IMPORTANT: at most 3 exclusions, none on a key measure'
       translations:
         fr:
@@ -21189,8 +21185,7 @@ objects:
     - ref_id: essential_key_measures
       implementation_groups:
       - E
-      expression: requirements.all(k, !("EK" in requirements[k].implementation_groups) || requirements[k].maturity_score
-        >= 3.0)
+      expression: groups["EK"].min_maturity_score >= 3.0
       annotation: 'ESSENTIAL: every key measure at 3 or more'
       translations:
         fr:
@@ -21210,9 +21205,8 @@ objects:
     - ref_id: essential_exclusions
       implementation_groups:
       - E
-      expression: requirements.filter(k, "E" in requirements[k].implementation_groups && requirements[k].result
-        == "not_applicable").size() <= 5 && !requirements.exists(k, requirements[k].result ==
-        "not_applicable" && ("EK" in requirements[k].implementation_groups || "EG" in requirements[k].implementation_groups))
+      expression: groups["E"].not_applicable_count <= 5 && groups["EK"].not_applicable_count
+        == 0 && groups["EG"].not_applicable_count == 0
       annotation: 'ESSENTIAL: at most 5 exclusions, none on a key measure or management aspect'
       translations:
         fr:

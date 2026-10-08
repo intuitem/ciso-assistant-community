@@ -5656,6 +5656,8 @@
 	"builderCelSubsetMaturityScore": "score de maturité de ses exigences (-1 si aucune n'est notée)",
 	"builderCelSubsetScoredCount": "exigences notées",
 	"builderCelSubsetTotalCount": "exigences dans le périmètre de l'audit",
+	"builderCelSubsetNotApplicableCount": "exigences non applicables",
+	"builderCelSubsetMinMaturityScore": "score de maturité le plus bas de ses exigences (-1 si l'une n'est pas comptée, ou s'il n'en a aucune)",
 	"builderCelSectionDepth": "niveau dans l'arborescence du référentiel (1 au sommet)",
 	"builderCelSectionRefId": "référence de la section",
 	"builderCelScoresHint": "Les scores suivent la méthode de calcul de l'audit, comme sur sa page, sur les exigences de son périmètre. Toutes les sections et tous les groupes sont listés : sans exigence dans le périmètre, leur score vaut -1.",
