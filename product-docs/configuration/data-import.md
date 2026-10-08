@@ -326,10 +326,18 @@ Controls are created on picked based on the perimeter's domain. Line breaks are 
 * **assets**\
   Newline-, semicolon- or comma-separated asset names or ref\_ids. Missing assets are auto-created in the domain folder with the default type Support, provided you may add assets there — otherwise the name is reported as a warning on the row.
 * **threats**\
-  Newline-, semicolon- or comma-separated threat ref\_ids (or names) of existing threats you can view, such as the ones loaded from a library. Threats are only linked, never created: an unknown one is reported as a warning on the row.
+  Pipe-, newline-, semicolon- or comma-separated threat ref\_ids or names (ref\_id first, then name), matched among the threats you can view in the risk assessment's domain and its parent domains, up to the global domain where library threats live. Threats are only linked, never created: an unknown threat is reported as a warning on the row. `threat` is accepted as an alias.
 * **justification**: String
 
 1: The string must represent a value present in the chosen risk matrix
+
+### Special considerations
+
+* When the same threat ref\_id or name exists at several levels, the threat of the nearest domain wins. Several matches within the same domain are ambiguous: none of them is linked and the row is reported as a warning.
+* Threats from other domains, sibling or sub-domains, are not matched.
+* On update, a filled `threats` cell replaces the threats linked to the scenario with the ones it resolves; a blank cell, or one where no threat resolves, leaves them untouched.
+* The risk assessment's CSV and XLSX exports write threats as ref\_ids (the name when a threat has none), so the `threats` column can be re-imported as is. Give a ref\_id to any threat whose name contains a pipe, a semicolon or a comma: its name would be split on re-import.
+* The template's threats (`ICT-001` to `ICT-003`) come from the INTUITEM Common Catalog library, which must be loaded for them to be linked.
 
 
 
