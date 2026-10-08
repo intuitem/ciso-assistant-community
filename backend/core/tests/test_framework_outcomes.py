@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 import pytest
+from django.db import transaction
 
 from core.cel_service import (
     _add_scores,
@@ -31,7 +32,7 @@ NS = "urn:test:risk:req_node:levels"
 
 
 @pytest.fixture
-def levels(db):
+def levels(db, django_capture_on_commit_callbacks):
     folder = Folder.get_root_folder()
     framework = Framework.objects.create(
         name="Levels",
@@ -60,16 +61,19 @@ def levels(db):
         "r2": node("r2", "one", ["A", "B"]),
         "r3": node("r3", "two", ["B"]),
     }
-    ca = ComplianceAssessment.objects.create(
-        name="Levels audit",
-        framework=framework,
-        folder=folder,
-        min_score=1,
-        max_score=5,
-    )
-    ca.show_documentation_score = True
-    ca.save()
-    ca.create_requirement_assessments()
+    # Run the evaluations creation schedules: the test transaction never
+    # commits, and a pending one would absorb the next.
+    with django_capture_on_commit_callbacks(execute=True):
+        ca = ComplianceAssessment.objects.create(
+            name="Levels audit",
+            framework=framework,
+            folder=folder,
+            min_score=1,
+            max_score=5,
+        )
+        ca.show_documentation_score = True
+        ca.save()
+        ca.create_requirement_assessments()
     return {"framework": framework, "ca": ca, "nodes": nodes}
 
 
@@ -301,14 +305,58 @@ class TestReEvaluation:
         ca.refresh_from_db()
         assert "documented" not in ca.computed_outcome
 
+    def test_a_new_audit(self, levels, django_capture_on_commit_callbacks):
+        _rules(levels, self.RULES)
+        with django_capture_on_commit_callbacks(execute=True):
+            ca = ComplianceAssessment.objects.create(
+                name="New", framework=levels["framework"], folder=levels["ca"].folder
+            )
+        ca.refresh_from_db()
+        assert ca.computed_outcome == {"on_b": {}}
+
+    def test_the_audit_is_read_when_the_evaluation_runs(
+        self, levels, django_capture_on_commit_callbacks
+    ):
+        _rules(levels, self.RULES)
+        assert "on_b" in _evaluate(levels).computed_outcome
+        ca = ComplianceAssessment.objects.get(pk=levels["ca"].pk)
+        with django_capture_on_commit_callbacks(execute=True):
+            ca.selected_implementation_groups = ["B"]
+            ca.save()
+            # Changed again later in the same transaction, like a library update does.
+            ComplianceAssessment.objects.filter(pk=ca.pk).update(
+                selected_implementation_groups=["A"]
+            )
+        ca.refresh_from_db()
+        assert "on_b" not in ca.computed_outcome
+
+    def test_a_rolled_back_change_does_not_block_the_next(
+        self, levels, django_capture_on_commit_callbacks
+    ):
+        _rules(levels, self.RULES)
+        assert "on_b" in _evaluate(levels).computed_outcome
+        ca = ComplianceAssessment.objects.get(pk=levels["ca"].pk)
+        with pytest.raises(RuntimeError), transaction.atomic():
+            ca.selected_implementation_groups = ["B"]
+            ca.save()
+            raise RuntimeError
+        ca = ComplianceAssessment.objects.get(pk=levels["ca"].pk)
+        with django_capture_on_commit_callbacks(execute=True):
+            ca.selected_implementation_groups = ["A"]
+            ca.save()
+        ca.refresh_from_db()
+        assert "on_b" not in ca.computed_outcome
+
     def test_a_library_update(self, django_capture_on_commit_callbacks):
         StoredLibrary.store_library_content(_library(1, "before").encode())[0].load()
-        ca = ComplianceAssessment.objects.create(
-            name="Updated",
-            framework=Framework.objects.get(urn="urn:test:risk:framework:updated"),
-            folder=Folder.get_root_folder(),
-        )
-        assert _outcomes(ca) == {"before"}
+        with django_capture_on_commit_callbacks(execute=True):
+            ca = ComplianceAssessment.objects.create(
+                name="Updated",
+                framework=Framework.objects.get(urn="urn:test:risk:framework:updated"),
+                folder=Folder.get_root_folder(),
+            )
+        ca.refresh_from_db()
+        assert set(ca.computed_outcome) == {"before"}
         StoredLibrary.store_library_content(_library(2, "after").encode())
         with django_capture_on_commit_callbacks(execute=True):
             assert (

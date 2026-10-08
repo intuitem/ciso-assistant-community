@@ -117,25 +117,44 @@ def round_score(value: float) -> float:
 
 
 def _defer_once(conn_attr: str, key, callback):
-    """Schedule *callback* via on_commit, deduplicating by *key* per transaction.
+    """Schedule *callback* via on_commit, once per *key* among the callbacks
+    still pending on the connection.
 
-    Attaches a pending-set to the DB connection under *conn_attr* so that only
-    the first call per *key* in a given transaction actually registers the
-    on_commit hook.
+    Pending callbacks are looked up in Django's own on_commit queue, which a
+    rollback clears, so a rolled-back schedule never blocks a later one.
     """
     conn = transaction.get_connection()
-    pending = getattr(conn, conn_attr, None)
-    if pending is None:
-        pending = set()
-        setattr(conn, conn_attr, pending)
-    if key not in pending:
-        pending.add(key)
+    tag = (conn_attr, key)
+    if any(
+        getattr(entry[1], "_defer_tag", None) == tag
+        and not getattr(entry[1], "_done", False)
+        for entry in conn.run_on_commit
+    ):
+        return
 
-        def _on_commit(k=key, p=pending, cb=callback):
-            p.discard(k)
-            cb()
+    def _on_commit(cb=callback):
+        # Marked so a callback run early (tests capturing on_commit) no
+        # longer counts as pending.
+        _on_commit._done = True
+        cb()
 
-        transaction.on_commit(_on_commit)
+    _on_commit._defer_tag = tag
+    transaction.on_commit(_on_commit)
+
+
+def defer_outcome_evaluation(compliance_assessment_pk) -> None:
+    """Evaluate an audit's outcome rules once the transaction commits, on the
+    audit as committed: callers often hold an instance that later updates in
+    the same transaction leave stale."""
+
+    def _evaluate():
+        from core.cel_service import evaluate_outcomes
+
+        ca = ComplianceAssessment.objects.filter(pk=compliance_assessment_pk).first()
+        if ca is not None:
+            evaluate_outcomes(ca)
+
+    _defer_once("_pending_cel_evaluations", compliance_assessment_pk, _evaluate)
 
 
 URN_REGEX = r"^urn:([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+)(?::([a-zA-Z0-9_-]+))?:([0-9A-Za-z\[\]\(\)\-\._:]+)$"
@@ -1831,13 +1850,7 @@ class LibraryUpdater:
 
                 if had_outcomes or new_framework.outcomes_definition:
                     for ca in compliance_assessments:
-
-                        def _evaluate(ca=ca):
-                            from core.cel_service import evaluate_outcomes
-
-                            evaluate_outcomes(ca)
-
-                        _defer_once("_pending_cel_evaluations", ca.pk, _evaluate)
+                        defer_outcome_evaluation(ca.pk)
 
                 existing_requirement_node_objects = {
                     rn.urn.lower(): rn
@@ -2287,13 +2300,7 @@ class LibraryUpdater:
                     # bulk_update skips RequirementAssessment.save(), which
                     # re-evaluates outcomes when a score changes.
                     for ca in ca_with_scale_change:
-
-                        def _evaluate(ca=ca):
-                            from core.cel_service import evaluate_outcomes
-
-                            evaluate_outcomes(ca)
-
-                        _defer_once("_pending_cel_evaluations", ca.pk, _evaluate)
+                        defer_outcome_evaluation(ca.pk)
 
                 # Keep selected_implementation_groups consistent for dynamic frameworks
                 # This must run even if no RA scalar fields changed, because answer
@@ -9117,12 +9124,7 @@ class ComplianceAssessment(Assessment):
 
         # bulk_update skips RequirementAssessment.save(), which normally
         # re-evaluates outcomes when a score changes.
-        def _evaluate():
-            from core.cel_service import evaluate_outcomes
-
-            evaluate_outcomes(self)
-
-        _defer_once("_pending_cel_evaluations", self.pk, _evaluate)
+        defer_outcome_evaluation(self.pk)
 
     # What outcome rules read besides the requirements: scope and scoring.
     _CEL_RELEVANT_FIELDS = frozenset(
@@ -9159,8 +9161,9 @@ class ComplianceAssessment(Assessment):
             self.max_score = self.framework.max_score
             self.scores_definition = self.framework.scores_definition
             self.score_scale_preset = None
+        creating = self._state.adding
         loaded = getattr(self, "_loaded_cel_values", {})
-        cel_changed = any(
+        cel_changed = creating or any(
             getattr(self, f) != value
             for f, value in loaded.items()
             if f in (kwargs.get("update_fields") or self._CEL_RELEVANT_FIELDS)
@@ -9168,14 +9171,10 @@ class ComplianceAssessment(Assessment):
         super().save(*args, **kwargs)
         self.upsert_daily_metrics()
         if cel_changed:
-            self._loaded_cel_values = self._cel_snapshot(loaded)
-
-            def _evaluate(ca=self):
-                from core.cel_service import evaluate_outcomes
-
-                evaluate_outcomes(ca)
-
-            _defer_once("_pending_cel_evaluations", self.pk, _evaluate)
+            self._loaded_cel_values = self._cel_snapshot(
+                self._CEL_RELEVANT_FIELDS if creating else loaded
+            )
+            defer_outcome_evaluation(self.pk)
 
     def create_requirement_assessments(
         self, baseline: Self | None = None
@@ -11294,14 +11293,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         return {f for f in self._CEL_RELEVANT_FIELDS if getattr(self, f) != old.get(f)}
 
     def _defer_cel_evaluation(self):
-        ca = self.compliance_assessment
-
-        def _run():
-            from core.cel_service import evaluate_outcomes
-
-            evaluate_outcomes(ca)
-
-        _defer_once("_pending_cel_evaluations", ca.pk, _run)
+        defer_outcome_evaluation(self.compliance_assessment_id)
 
     def save(self, *args, **kwargs) -> None:
         update_fields = kwargs.get("update_fields")
@@ -12199,14 +12191,7 @@ class Answer(AbstractBaseModel, FolderMixin):
         return []
 
     def _defer_cel_evaluation(self):
-        ca = self.requirement_assessment.compliance_assessment
-
-        def _run():
-            from core.cel_service import evaluate_outcomes
-
-            evaluate_outcomes(ca)
-
-        _defer_once("_pending_cel_evaluations", ca.pk, _run)
+        defer_outcome_evaluation(self.requirement_assessment.compliance_assessment_id)
 
     def _defer_response_recompute(self):
         response = self.response

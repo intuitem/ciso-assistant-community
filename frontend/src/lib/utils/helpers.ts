@@ -93,12 +93,15 @@ export function getScoreHexColor(
 /**
  * A score as displayed: two decimals, half up, like the CCB CyFun tools' 0.00
  * format and the backend's `round_score`. Scores are computed unrounded; only
- * their display rounds. The epsilon absorbs float noise (68.335 * 100 is
- * 6833.4999…, which must still show 68.34).
+ * their display rounds. As the backend, float noise is cleared at nine
+ * decimals first (68.335 * 100 is 6833.4999…, which must show 68.34, while
+ * 1.234999999 stays below the tie); the rounding then runs on integers.
  */
 export function roundScore(value: number, decimals = 2): number {
-	const factor = 10 ** decimals;
-	return (Math.sign(value) * Math.round(Math.abs(value) * factor + 1e-7)) / factor;
+	const nanos = Math.round(Math.abs(value) * 1e9);
+	const step = 10 ** (9 - decimals);
+	const rounded = Math.floor((nanos + step / 2) / step) / 10 ** decimals;
+	return value < 0 ? -rounded : rounded;
 }
 
 export function formatScoreValue(

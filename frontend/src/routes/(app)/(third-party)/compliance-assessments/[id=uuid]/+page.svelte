@@ -121,12 +121,14 @@
 	const outcomeRules = $derived(
 		(compliance_assessment.outcome_rules ?? []) as Record<string, any>[]
 	);
+	// Verdicts follow the result's visibility, computed numbers the score's.
 	const shownRules = $derived(
-		outcomeRules.filter(
-			(rule) =>
-				rule.kind !== 'number' ||
-				((rule.annotation || rule.label) &&
-					compliance_assessment.computed_values?.[rule.ref_id] != null)
+		outcomeRules.filter((rule) =>
+			rule.kind === 'number'
+				? showScore &&
+					(rule.annotation || rule.label) &&
+					compliance_assessment.computed_values?.[rule.ref_id] != null
+				: showResult
 		)
 	);
 	const outcomeMet = (rule: Record<string, any>) =>
@@ -156,18 +158,7 @@
 		if (general && list.length > 1) general.title = m.general();
 		return list;
 	});
-	const showVerdicts = $derived(showResult && outcomeColumns.length > 0);
-	const chartColumns = $derived(Math.min(Math.max(chartCount, 1), 2));
-	// Two rows fill the header's height; a single row keeps its own and is centred.
-	const chartRows = $derived(chartCount > 2 ? 'minmax(14rem, 1fr)' : 'minmax(18rem, auto)');
-	const chartCount = $derived(
-		[
-			showScore && data.global_score && data.global_score.maturity_score >= 0,
-			showResult,
-			showExtendedResult && compliance_assessment_donut_values.extended_result?.values?.length > 0,
-			showStatus
-		].filter(Boolean).length
-	);
+	const showVerdicts = $derived(outcomeColumns.length > 0);
 	const verdictCount = $derived(shownRules.filter((rule) => rule.kind !== 'number').length);
 	const verdictsMet = $derived(
 		shownRules.filter((rule) => rule.kind !== 'number' && outcomeMet(rule)).length
@@ -750,6 +741,17 @@
 
 	let tree = $derived(data.tree);
 	let compliance_assessment_donut_values = $derived(data.compliance_assessment_donut_values);
+	const chartCount = $derived(
+		[
+			showScore && data.global_score && data.global_score.maturity_score >= 0,
+			showResult,
+			showExtendedResult && compliance_assessment_donut_values.extended_result?.values?.length > 0,
+			showStatus
+		].filter(Boolean).length
+	);
+	const chartColumns = $derived(Math.min(Math.max(chartCount, 1), 2));
+	// Two rows fill the header's height; a single row keeps its own and is centred.
+	const chartRows = $derived(chartCount > 2 ? 'minmax(14rem, 1fr)' : 'minmax(18rem, auto)');
 
 	let filterPopupOpen = $state(false);
 

@@ -38,6 +38,8 @@ describe('roundScore', () => {
 		expect(roundScore(2.9971)).toBe(3);
 		expect(roundScore(41.125)).toBe(41.13);
 		expect(roundScore(13 / 3)).toBe(4.33);
+		expect(roundScore(1.234999999)).toBe(1.23);
+		expect(roundScore(2.695)).toBe(2.7);
 	});
 
 	test('percentages keep one decimal, the nothing-scored sentinel stays', () => {
