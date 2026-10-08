@@ -806,6 +806,10 @@ Compliance assessments have a score scale (min_score, max_score, score definitio
 
 Note: for now, the score scale is not selectable, it is defined by the framework.
 
+A framework whose standard defines the scale sets `score_scale_locked`: its audits keep the framework scale (the framework is scale-bound, like a framework that computes scores from its questions). A framework can also set `score_calculation_method` (`average` by default, `sum` or `average_of_averages`), the method proposed for its new audits, and `anchor_na_to_target` and `target_score` (also proposed for its new audits). Each entry of `implementation_groups_definition` can set its own `target_score`: an audit gets the highest target of its selected groups, a group without one counting as the framework's.
+
+Exports specific to a framework, such as a publisher's official self-assessment template, are registered in `core.framework_exports` by their own module (e.g. `core.cyfun`). An audit lists those it supports in `framework_exports`, served at `compliance-assessments/{id}/framework-exports/{ref_id}/`.
+
 ### Question and answer format
 
 The format for questions and answers json fields will evolve over time. The initial format is the following:

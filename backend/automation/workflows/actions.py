@@ -84,6 +84,7 @@ from resilience.models import AssetAssessment, BusinessImpactAnalysis
 from tprm.models import Entity, EntityAssessment, EntityScore
 
 from .context import RESERVED_VARIABLE_KEYS, VARIABLE_KEY_RE, temporal_seeds
+from .expressions import ExpressionError, compile_expression, evaluate
 from .models import WorkflowToken
 from .tasks import ai_call_task, send_email_task
 
@@ -294,6 +295,62 @@ class DateOffsetAction(BaseAction):
             # In-memory like set_variables; _persist_node_output flushes it.
             instance.variables[output] = result.isoformat()
         return {"result": result.isoformat(), "base": base_date.isoformat()}
+
+
+def compute_rows(config):
+    """The (key, expression) rows of a compute config, in authored order.
+    Rows that are not a dict are skipped; a missing key or expression becomes
+    an empty string so validation can name the row."""
+    rows = (config or {}).get("expressions") or []
+    if not isinstance(rows, list):
+        return []
+    return [
+        (str(row.get("key") or ""), row.get("expression") or "")
+        for row in rows
+        if isinstance(row, dict)
+    ]
+
+
+@register
+class ComputeAction(BaseAction):
+    """set_variables with operators: each row is a variable key and a CEL
+    expression over the render context (variables, {{nodes.*}} outputs, loop
+    item/index, payload). Rows run in order and each sees the ones before
+    it, so an intermediate value need not be its own step.
+
+    Rows are a list, not a dict: the order is semantic, and PostgreSQL's jsonb
+    reorders object keys (by length, then bytewise), which would evaluate
+    `label = score > 12 ? ...` before `score` on one database and after it on
+    the other.
+
+    Pure and deterministic, so every failure is fatal: a retry would evaluate
+    the same expression over the same data."""
+
+    action_type = "compute"
+
+    def execute(self, config, instance):
+        rows = compute_rows(config)
+        if not rows:
+            raise FatalActionError("compute: this step has no expressions")
+        reserved = RESERVED_VARIABLE_KEYS & {key for key, _ in rows}
+        if reserved:
+            raise FatalActionError(
+                f"compute: {', '.join(sorted(reserved))} is set by the engine"
+            )
+        context = _render_context(instance)
+        results = {}
+        for key, expression in rows:
+            if not VARIABLE_KEY_RE.match(key):
+                raise FatalActionError(
+                    f"compute: '{key}' is not a writable variable name"
+                )
+            try:
+                results[key] = evaluate(expression, {**context, **results})
+            except ExpressionError as e:
+                raise FatalActionError(f"compute: '{key}': {e}")
+        # In-memory like set_variables; _persist_node_output flushes it.
+        instance.variables.update(results)
+        return results
 
 
 # Explicit registry of models workflows may create: each entry
@@ -1545,6 +1602,7 @@ READABLE_MODELS: dict[str, ReadEntry] = {
         ],
         computed={
             "computed_outcome": lambda r: r.computed_outcome,
+            "computed_values": lambda r: r.computed_values,
             "score": lambda r: r.score,
             "answers": _quick_form_answers,
         },
@@ -4120,6 +4178,71 @@ def validate_date_offset_config(node):
     return errors
 
 
+def validate_compute_config(node):
+    """Publish-time checks for compute nodes: every expression must parse and
+    every key must be a variable the engine lets a step write. Evaluation
+    errors (types, missing fields, division by zero) depend on run data and
+    surface at runtime as fatal node failures."""
+    config = node.action_config or {}
+    if config.get("type") != "compute":
+        return []
+    raw = config.get("expressions")
+    # compute_rows skips what is not a row; publish must not, or the run would
+    # quietly do less than the document says.
+    if isinstance(raw, list) and any(not isinstance(row, dict) for row in raw):
+        return [
+            (
+                "action_compute_malformed",
+                "Expressions must be a list of rows, each with a key and an expression",
+            )
+        ]
+    rows = compute_rows(config)
+    if not rows:
+        return [
+            (
+                "action_compute_empty",
+                "This step computes nothing — add an expression under Expressions",
+            )
+        ]
+    errors = []
+    seen = set()
+    for key, expression in rows:
+        if key in RESERVED_VARIABLE_KEYS:
+            errors.append(
+                (
+                    "action_compute_reserved",
+                    f"'{key}' is set by the engine on every run",
+                )
+            )
+        elif not VARIABLE_KEY_RE.match(key):
+            errors.append(
+                ("action_compute_bad_key", f"'{key}' is not a writable variable name")
+            )
+        elif key in seen:
+            errors.append(
+                (
+                    "action_compute_duplicate_key",
+                    f"'{key}' is computed twice — keep one row per variable",
+                )
+            )
+        seen.add(key)
+        try:
+            compile_expression(expression)
+        except ExpressionError as e:
+            errors.append(("action_compute_bad_expression", f"'{key}': {e}"))
+    keys = {key for key, _ in rows}
+    for key, path in sorted((node.output_mapping or {}).items()):
+        if str(path) not in keys:
+            errors.append(
+                (
+                    "action_compute_unmapped_output",
+                    f"'{key}' is mapped from '{path}', which this step never "
+                    "computes — add it under Expressions instead",
+                )
+            )
+    return errors
+
+
 def validate_update_config(node):
     """Publish-time checks for update_object nodes: what the whitelists would
     refuse mid-run is refused here."""
@@ -4297,6 +4420,7 @@ ACTION_CONFIG_VALIDATORS = {
     "manage_group_membership": validate_group_membership_config,
     "set_variables": validate_set_variables_config,
     "date_offset": validate_date_offset_config,
+    "compute": validate_compute_config,
     "ai_extract": validate_ai_config,
     "ai_generate": validate_ai_config,
 }

@@ -42,3 +42,10 @@ jobs:
       - name: Run pagination client tests
         working-directory: ${{env.working-directory}}
         run: uv run pytest tests/test_pagination_client.py -q
+      # test_mcp.py is excluded: it was written for the single-file ca_mcp.py
+      # and patches ca_mcp.requests / ca_mcp.rprint, which no longer exist since
+      # the tools were split into modules (#2788). Its expectations (tools
+      # returning None) are obsolete too, so it fails and needs a rewrite.
+      - name: Run MCP tools tests
+        working-directory: ${{env.working-directory}}
+        run: uv run pytest tests/mcp -q --ignore=tests/mcp/test_mcp.py

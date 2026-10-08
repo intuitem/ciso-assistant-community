@@ -9,13 +9,13 @@
 	import { page } from '$app/stores';
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import Score from '../Score.svelte';
 	interface Props {
 		form: SuperValidated<any>;
 		model: ModelInfo;
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
 		initialData?: Record<string, any>;
+		object?: Record<string, any>;
 	}
 
 	let {
@@ -23,7 +23,8 @@
 		model,
 		cacheLocks = {},
 		formDataCache = $bindable({}),
-		initialData = {}
+		initialData = {},
+		object = {}
 	}: Props = $props();
 
 	let doraEnabled = $derived(!!$page.data?.featureflags?.dora);
@@ -58,14 +59,15 @@
 	bind:cachedValue={formDataCache['provider_entity']}
 	label={m.providerEntity()}
 />
-<Score
+<AutocompleteSelect
 	{form}
-	label={m.criticality()}
-	field="criticality"
-	inversedColors
-	fullDonut
-	min_score={1}
-	max_score={4}
+	optionsEndpoint={`tiers?selectable=${object.tier?.id ?? object.tier ?? ''}`}
+	field="tier"
+	cacheLock={cacheLocks['tier']}
+	bind:cachedValue={formDataCache['tier']}
+	label={m.tier()}
+	helpText={m.solutionTierHelpText()}
+	nullable
 />
 <AutocompleteSelect
 	{form}

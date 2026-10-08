@@ -707,6 +707,7 @@ export const GeneralSettingsSchema = z.object({
 		.optional(),
 	default_landing: z.enum(['analytics', 'respondent', 'portal']).default('analytics').optional(),
 	disable_partially_compliant_result: z.boolean().default(false).optional(),
+	documentation_score_first: z.boolean().default(false).optional(),
 	use_risk_category_label: z.boolean().default(false).optional(),
 	personal_folders_parent: z.string().uuid().optional().nullable(),
 	currency: z.enum(CURRENCY_SYMBOLS).default('€'),
@@ -951,7 +952,15 @@ export const EntitiesSchema = z.object({
 	default_penetration: z.number().optional(),
 	default_maturity: z.number().optional(),
 	default_trust: z.number().optional(),
-	filtering_labels: z.array(z.string()).optional()
+	filtering_labels: z.array(z.string()).optional(),
+	tier: z.string().optional().nullable(),
+	tier_note: z.string().optional()
+});
+
+export const tierSchema = z.object({
+	...NameDescriptionMixin,
+	hexcolor: z.string().optional(),
+	is_visible: z.boolean().optional().default(true)
 });
 
 export const EntityAssessmentSchema = z.object({
@@ -983,7 +992,6 @@ export const EntityAssessmentSchema = z.object({
 	solutions: z.array(z.string().optional()).optional(),
 	compliance_assessment: z.string().optional(),
 	evidence: z.string().optional(),
-	criticality: z.number().optional().nullable(),
 	conclusion: z.string().optional().nullable(),
 	expiry_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	penetration: z.number().optional(),
@@ -1003,7 +1011,7 @@ export const solutionSchema = z.object({
 	...NameDescriptionMixin,
 	provider_entity: z.string(),
 	ref_id: z.string().optional(),
-	criticality: z.number().optional(),
+	tier: z.string().uuid().optional().nullable(),
 	owner: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
 	filtering_labels: z.string().optional().array().optional(),
@@ -1401,7 +1409,13 @@ export const ebiosRMSchema = z.object({
 	assets: z.string().uuid().optional().array().optional(),
 	folder: z.string(),
 	compliance_assessments: z.string().uuid().optional().array().optional(),
-	reference_entity: z.string().optional()
+	reference_entity: z.string().optional(),
+	classification: z.string().uuid().optional().nullable(),
+	objectives: z.string().optional(),
+	constraints_hypotheses: z.string().optional(),
+	responsibility_matrix: z.string().optional().nullable(),
+	eta: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
+	due_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish()
 });
 
 export const fearedEventsSchema = z.object({
@@ -1422,6 +1436,7 @@ export const roToSchema = z.object({
 	feared_events: z.string().uuid().optional().array().optional(),
 	risk_origin: z.string(),
 	target_objective: z.string(),
+	target_objective_category: z.string().uuid().optional().nullable(),
 	motivation: z.number().default(0).optional(),
 	resources: z.number().default(0).optional(),
 	activity: z.number().min(0).max(4).optional().default(0),
@@ -1454,6 +1469,7 @@ export const StrategicScenarioSchema = z.object({
 	ebios_rm_study: z.string(),
 	ro_to_couple: z.string().uuid(),
 	focused_feared_event: z.string().uuid().nullable().optional(),
+	gravity_forced: z.number().int().nullable().optional(),
 	ref_id: z.string().optional(),
 	folder: z.string()
 });
@@ -1476,6 +1492,7 @@ export const operationalScenarioSchema = z.object({
 	techniques: z.string().uuid().optional().array().optional(),
 	operating_modes_description: z.string().optional(),
 	likelihood: z.number().optional().default(-1),
+	likelihood_forced: z.number().int().nullable().optional(),
 	is_selected: z.boolean().default(true),
 	justification: z.string().optional(),
 	folder: z.string(),
@@ -1511,7 +1528,9 @@ export const QuickFormPublicationSchema = z.object({
 	default_reviewers: z.array(z.string().optional()).optional(),
 	allow_multiple_drafts: z.boolean().default(false).optional(),
 	icon: z.string().optional(),
-	order: z.number().default(0).optional()
+	order: z.number().default(0).optional(),
+	show_projection: z.boolean().default(false).optional(),
+	always_review: z.boolean().default(false).optional()
 });
 
 export const QuickFormResponseSchema = z.object({
@@ -1809,6 +1828,7 @@ export const ElementaryActionSchema = z.object({
 	folder: z.string(),
 	ref_id: z.string().optional(),
 	threat: z.string().uuid().optional().nullable(),
+	technique: z.string().uuid().optional().nullable(),
 	icon: z.string().optional().nullable(),
 	attack_stage: z.number().default(0),
 	operating_modes: z.string().uuid().optional().array().optional()
@@ -1828,6 +1848,7 @@ export const KillChainSchema = z.object({
 	// is_highlighted: z.boolean().default(false),
 	antecedents: z.string().uuid().optional().array().optional(),
 	logic_operator: z.string().optional().nullable(),
+	assets: z.string().uuid().optional().array().optional(),
 	folder: z.string()
 });
 
@@ -2214,6 +2235,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'entity-assessments': EntityAssessmentSchema,
 	representatives: representativeSchema,
 	'entity-scores': entityScoreSchema,
+	tiers: tierSchema,
 	solutions: solutionSchema,
 	contracts: contractSchema,
 	vulnerabilities: vulnerabilitySchema,

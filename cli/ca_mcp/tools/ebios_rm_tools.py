@@ -22,6 +22,8 @@ from ..resolvers import (
     resolve_risk_matrix_id,
     resolve_asset_id,
     resolve_entity_id,
+    _normalize_for_matching,
+    _find_terminology_match,
 )
 from ..utils.response_formatter import (
     success_response,
@@ -34,52 +36,6 @@ from ..utils.response_formatter import (
 # ============================================================================
 # HELPER FUNCTIONS
 # ============================================================================
-
-
-def _normalize_for_matching(text: str) -> str:
-    """Normalize text for fuzzy matching: lowercase, strip, remove trailing 's' for plurals"""
-    normalized = text.lower().strip()
-    # Handle common plural forms
-    if normalized.endswith("s") and len(normalized) > 2:
-        normalized = normalized[:-1]
-    # Handle underscores vs spaces
-    normalized = normalized.replace("_", " ").replace("-", " ")
-    return normalized
-
-
-def _find_terminology_match(terminologies: list, user_input: str) -> dict | None:
-    """Find a terminology that matches the user input.
-
-    Matches against:
-    - Base name field (snake_case like "organized_crime")
-    - All translations in the translations dict
-
-    Uses case-insensitive, plural-insensitive matching.
-    """
-    normalized_input = _normalize_for_matching(user_input)
-
-    for term in terminologies:
-        # Match against the base name
-        if _normalize_for_matching(term.get("name", "")) == normalized_input:
-            return term
-
-        # Match against translations
-        translations = term.get("translations", {})
-        if isinstance(translations, dict):
-            for locale, locale_data in translations.items():
-                if isinstance(locale_data, dict):
-                    translated_name = locale_data.get("name", "")
-                    if (
-                        translated_name
-                        and _normalize_for_matching(translated_name) == normalized_input
-                    ):
-                        return term
-                elif isinstance(locale_data, str):
-                    # Some translations might be stored as direct strings
-                    if _normalize_for_matching(locale_data) == normalized_input:
-                        return term
-
-    return None
 
 
 def _resolve_or_create_risk_origin(risk_origin_input: str) -> tuple[str, bool]:
@@ -184,6 +140,44 @@ def _resolve_or_create_stakeholder_category(category_input: str) -> tuple[str, b
         )
 
 
+def _resolve_target_objective_category(category_input: str) -> str:
+    terminologies, error = fetch_all_results(
+        "/terminologies/",
+        params={"field_path": "ro_to.target_objective_category", "is_visible": "true"},
+    )
+    if error:
+        raise ValueError(f"Failed to fetch target objective categories: {error}")
+    match = _find_terminology_match(terminologies, category_input)
+    if not match:
+        raise ValueError(f"Target objective category '{category_input}' not found")
+    return match["id"]
+
+
+def _resolve_technique_id(technique: str) -> str:
+    if "-" in technique and len(technique) == 36:
+        return technique
+    results, error = fetch_all_results("/techniques/", params={"search": technique})
+    if error:
+        raise ValueError(f"Failed to fetch techniques: {error}")
+    wanted = technique.strip().lower()
+    matches = [
+        t
+        for t in results
+        if wanted in ((t.get("ref_id") or "").lower(), (t.get("name") or "").lower())
+    ]
+    if not matches:
+        raise ValueError(f"Technique '{technique}' not found")
+    if len(matches) > 1:
+        raise ValueError(
+            f"Ambiguous technique '{technique}', found {len(matches)}: use its ID"
+        )
+    return matches[0]["id"]
+
+
+def _forced_level(level: int) -> int | None:
+    return None if level < 0 else level
+
+
 # ============================================================================
 # READ TOOLS
 # ============================================================================
@@ -224,8 +218,8 @@ async def get_ebios_rm_studies(
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
-        result += "|ID|Ref|Name|Status|Version|Security Baseline|Risk Matrix|Folder|\n"
-        result += "|---|---|---|---|---|---|---|---|\n"
+        result += "|ID|Ref|Name|Status|Version|Quotation Method|Security Baseline|Risk Matrix|Folder|\n"
+        result += "|---|---|---|---|---|---|---|---|---|\n"
 
         for study in studies:
             study_id = study.get("id", "N/A")
@@ -233,6 +227,7 @@ async def get_ebios_rm_studies(
             name = study.get("name", "N/A")
             status_val = study.get("status", "N/A")
             version = study.get("version") or "N/A"
+            quotation_method = study.get("quotation_method") or "N/A"
             risk_matrix = (study.get("risk_matrix") or {}).get("str", "N/A")
             folder_name = (study.get("folder") or {}).get("str", "N/A")
 
@@ -243,7 +238,7 @@ async def get_ebios_rm_studies(
             else:
                 baseline = "Not set"
 
-            result += f"|{study_id}|{ref_id}|{name}|{status_val}|{version}|{baseline}|{risk_matrix}|{folder_name}|\n"
+            result += f"|{study_id}|{ref_id}|{name}|{status_val}|{version}|{quotation_method}|{baseline}|{risk_matrix}|{folder_name}|\n"
 
         return success_response(
             result,
@@ -494,8 +489,8 @@ async def get_strategic_scenarios(
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
-        result += "|ID|Ref|Name|RoTo Couple|Gravity|Study|\n"
-        result += "|---|---|---|---|---|---|\n"
+        result += "|ID|Ref|Name|RoTo Couple|Gravity|Forced|Study|\n"
+        result += "|---|---|---|---|---|---|---|\n"
 
         for scenario in scenarios:
             scenario_id = scenario.get("id", "N/A")
@@ -506,11 +501,10 @@ async def get_strategic_scenarios(
             gravity_name = (
                 gravity.get("name", "--") if isinstance(gravity, dict) else str(gravity)
             )
+            forced = "Yes" if scenario.get("gravity_forced") is not None else "No"
             study_name = (scenario.get("ebios_rm_study") or {}).get("str", "N/A")
 
-            result += (
-                f"|{scenario_id}|{ref_id}|{name}|{ro_to}|{gravity_name}|{study_name}|\n"
-            )
+            result += f"|{scenario_id}|{ref_id}|{name}|{ro_to}|{gravity_name}|{forced}|{study_name}|\n"
 
         return success_response(
             result,
@@ -627,8 +621,8 @@ async def get_operational_scenarios(
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
-        result += "|ID|Ref|Name|Likelihood|Gravity|Risk Level|Selected|Study|\n"
-        result += "|---|---|---|---|---|---|---|---|\n"
+        result += "|ID|Ref|Name|Likelihood|Forced|Gravity|Risk Level|Selected|Study|\n"
+        result += "|---|---|---|---|---|---|---|---|---|\n"
 
         for scenario in scenarios:
             scenario_id = scenario.get("id", "N/A")
@@ -656,10 +650,11 @@ async def get_operational_scenarios(
                 else str(risk_level)
             )
 
+            forced = "Yes" if scenario.get("likelihood_forced") is not None else "No"
             selected = "Yes" if scenario.get("is_selected") else "No"
             study_name = (scenario.get("ebios_rm_study") or {}).get("str", "N/A")
 
-            result += f"|{scenario_id}|{ref_id}|{name}|{likelihood_name}|{gravity_name}|{risk_level_name}|{selected}|{study_name}|\n"
+            result += f"|{scenario_id}|{ref_id}|{name}|{likelihood_name}|{forced}|{gravity_name}|{risk_level_name}|{selected}|{study_name}|\n"
 
         return success_response(
             result,
@@ -760,8 +755,8 @@ async def get_operating_modes(
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
-        result += "|ID|Ref|Name|Likelihood|Operational Scenario|Elementary Actions|\n"
-        result += "|---|---|---|---|---|---|\n"
+        result += "|ID|Ref|Name|Likelihood|Computed Likelihood|Quotation Method|Operational Scenario|Elementary Actions|\n"
+        result += "|---|---|---|---|---|---|---|---|\n"
 
         for mode in modes:
             mode_id = mode.get("id", "N/A")
@@ -775,16 +770,18 @@ async def get_operating_modes(
                 else str(likelihood)
             )
 
+            computed = mode.get("computed_likelihood", "N/A")
+            quotation_method = mode.get("quotation_method") or "N/A"
             op_scenario = (mode.get("operational_scenario") or {}).get("str", "N/A")
             elem_actions = mode.get("elementary_actions", [])
             actions_count = str(len(elem_actions)) if elem_actions else "0"
 
-            result += f"|{mode_id}|{ref_id}|{name}|{likelihood_name}|{op_scenario}|{actions_count}|\n"
+            result += f"|{mode_id}|{ref_id}|{name}|{likelihood_name}|{computed}|{quotation_method}|{op_scenario}|{actions_count}|\n"
 
         return success_response(
             result,
             "get_operating_modes",
-            "Workshop 4: Use operating mode IDs to manage kill chains and elementary actions",
+            "Workshop 4: Use operating mode IDs to manage kill chains and elementary actions. Under the standard or advanced method, get_operating_mode_quotation explains the computed likelihood",
         )
     except Exception as e:
         return error_response(
@@ -837,8 +834,8 @@ async def get_kill_chains(
 
         result = found_line(kill_chains, "kill chain steps for operating mode") + "\n\n"
         result += "**Attack Stages:** 0=Know/Reconnaissance, 1=Enter/Initial Access, 2=Discover/Discovery, 3=Exploit/Exploitation\n\n"
-        result += "|ID|Elementary Action|Stage|Highlighted|Logic Op|Antecedents|\n"
-        result += "|---|---|---|---|---|---|\n"
+        result += "|ID|Elementary Action|Stage|Highlighted|Logic Op|Antecedents|Success Probability|Success %|Technical Difficulty|Assets|\n"
+        result += "|---|---|---|---|---|---|---|---|---|---|\n"
 
         for kc in kill_chains:
             kc_id = kc.get("id", "N/A")
@@ -854,19 +851,95 @@ async def get_kill_chains(
 
             antecedents = kc.get("antecedents", [])
             if antecedents:
-                antecedent_names = [a.get("str", "?") for a in antecedents[:2]]
-                antecedents_str = ", ".join(antecedent_names)
-                if len(antecedents) > 2:
-                    antecedents_str += f" (+{len(antecedents) - 2})"
+                antecedents_str = ", ".join(a.get("id", "?") for a in antecedents)
             else:
                 antecedents_str = "-"
 
-            result += f"|{kc_id}|{action_name}|{attack_stage}|{highlighted}|{logic_op}|{antecedents_str}|\n"
+            success_probability = kc.get("success_probability", -1)
+            success_pct = kc.get("success_probability_pct")
+            success_pct_str = "-" if success_pct is None else success_pct
+            technical_difficulty = kc.get("technical_difficulty", -1)
+            assets = kc.get("assets", [])
+            assets_str = ", ".join(a.get("str", "?") for a in assets) if assets else "-"
+
+            result += f"|{kc_id}|{action_name}|{attack_stage}|{highlighted}|{logic_op}|{antecedents_str}|{success_probability}|{success_pct_str}|{technical_difficulty}|{assets_str}|\n"
 
         return success_response(
             result,
             "get_kill_chains",
             "Workshop 4: Add more steps with create_kill_chain_step. Stage 0 actions cannot have antecedents.",
+        )
+    except Exception as e:
+        return error_response(
+            "Internal Error",
+            str(e),
+            "Report this error to the user",
+            retry_allowed=False,
+        )
+
+
+async def get_operating_mode_quotation(
+    operating_mode: str,
+):
+    """Explain the computed likelihood of an operating mode (Workshop 4)
+
+    Under the study's standard or advanced quotation method, the likelihood is rolled up
+    from the kill chain step ratings:
+    - Standard: cumulative success probability = Min(step, Max(antecedents)) for OR,
+      Min over all antecedents for AND
+    - Advanced: same probability roll-up, plus cumulative technical difficulty
+      = Max(step, Min(antecedents)), crossed through the likelihood grid at the final steps
+
+    A step that is not rated, or follows one that is not, stays unrated (-1).
+    Under the manual or express method there is no step roll-up.
+
+    Args:
+        operating_mode: Operating mode ID/name (required)
+    """
+    try:
+        operating_mode_id = resolve_operating_mode_id(operating_mode)
+
+        res = make_get_request(
+            f"/ebios-rm/operating-modes/{operating_mode_id}/quotation/"
+        )
+        if res.status_code != 200:
+            return http_error_response(res.status_code, res.text)
+
+        data = res.json()
+        method = data.get("method", "N/A")
+        steps = data.get("steps")
+        if steps is None:
+            return success_response(
+                f"Quotation method: {method}. The likelihood is not computed from kill chain steps under this method.",
+                "get_operating_mode_quotation",
+                "Set quotation_method to standard or advanced with update_ebios_rm_study to rate each step",
+            )
+
+        kill_chains, error = fetch_all_results(
+            "/ebios-rm/kill-chains/", params={"operating_mode": operating_mode_id}
+        )
+        if error:
+            return error
+        names = {
+            kc.get("id"): (kc.get("elementary_action") or {}).get("str", "?")
+            for kc in kill_chains
+        }
+
+        result = f"Quotation method: {method}\n"
+        result += f"Operating mode likelihood: {data.get('likelihood')}\n\n"
+        result += "|Step ID|Elementary Action|Cumulative Probability|Cumulative Difficulty|Step Likelihood|Critical Path|\n"
+        result += "|---|---|---|---|---|---|\n"
+
+        for step_id, values in steps.items():
+            difficulty = values.get("difficulty")
+            difficulty_str = "-" if difficulty is None else difficulty
+            critical = "Yes" if values.get("critical") else "No"
+            result += f"|{step_id}|{names.get(step_id, '?')}|{values.get('probability')}|{difficulty_str}|{values.get('likelihood')}|{critical}|\n"
+
+        return success_response(
+            result,
+            "get_operating_mode_quotation",
+            "Levels are indexes on the study's risk matrix likelihood scale, -1 when unrated. Rate steps with update_kill_chain_step",
         )
     except Exception as e:
         return error_response(
@@ -893,6 +966,9 @@ async def create_ebios_rm_study(
     reference_entity_id: str = None,
     assets: list = None,
     compliance_assessments: list = None,
+    quotation_method: str = None,
+    objectives: str = None,
+    constraints_hypotheses: str = None,
 ) -> str:
     """Create an EBIOS RM study (Workshop 1)
 
@@ -912,6 +988,13 @@ async def create_ebios_rm_study(
         reference_entity_id: Reference entity ID/name (the organization being studied)
         assets: List of asset IDs/names to include in the study
         compliance_assessments: List of compliance assessment (audit) IDs/names for security baseline
+        quotation_method: Likelihood method for Workshop 4:
+            manual = direct estimate on each operational scenario,
+            express = operational scenario takes its most likely operating mode,
+            standard = each kill chain step rated by success probability, rolled up per operating mode,
+            advanced = standard plus each step's technical difficulty, crossed through the likelihood grid
+        objectives: Study objectives
+        constraints_hypotheses: Constraints and hypotheses of the study
     """
     try:
         from ..resolvers import resolve_compliance_assessment_id
@@ -933,6 +1016,12 @@ async def create_ebios_rm_study(
 
         if reference_entity_id:
             payload["reference_entity"] = resolve_entity_id(reference_entity_id)
+        if quotation_method:
+            payload["quotation_method"] = quotation_method
+        if objectives:
+            payload["objectives"] = objectives
+        if constraints_hypotheses:
+            payload["constraints_hypotheses"] = constraints_hypotheses
 
         if assets:
             resolved_assets = []
@@ -1046,6 +1135,7 @@ async def create_ro_to_couple(
     is_selected: bool = False,
     justification: str = "",
     feared_events: list = None,
+    target_objective_category: str = None,
 ) -> str:
     """Create a Risk Origin / Target Objective (RoTo) couple
 
@@ -1061,6 +1151,7 @@ async def create_ro_to_couple(
         is_selected: Whether the RoTo couple is selected for analysis
         justification: Justification for selection/deselection
         feared_events: List of feared event IDs/names to link
+        target_objective_category: Target objective category name (must match an existing category terminology)
     """
     try:
         ebios_rm_study_id = resolve_ebios_rm_study_id(ebios_rm_study_id)
@@ -1079,6 +1170,11 @@ async def create_ro_to_couple(
             "is_selected": is_selected,
             "justification": justification,
         }
+
+        if target_objective_category:
+            payload["target_objective_category"] = _resolve_target_objective_category(
+                target_objective_category
+            )
 
         if feared_events:
             resolved_feared_events = []
@@ -1319,6 +1415,8 @@ async def create_operational_scenario(
     is_selected: bool = False,
     justification: str = "",
     threats: list = None,
+    likelihood_forced: int = None,
+    techniques: list = None,
 ) -> str:
     """Create an operational scenario from an attack path (Workshop 4)
 
@@ -1329,10 +1427,14 @@ async def create_operational_scenario(
         ebios_rm_study_id: EBIOS RM study ID/name (required)
         attack_path_id: Attack path ID/name (required)
         operating_modes_description: Description of operating modes
-        likelihood: Likelihood level (-1 for not rated, 0+ based on risk matrix)
+        likelihood: Likelihood level (-1 for not rated, 0+ based on risk matrix).
+                    Initial value; once operating modes exist under a computed quotation method,
+                    it is replaced on save. Use likelihood_forced to override.
+        likelihood_forced: Analyst override of the computed likelihood (0+ based on risk matrix)
         is_selected: Whether the scenario is selected for treatment
         justification: Justification for selection/deselection
         threats: List of threat IDs/names to link
+        techniques: List of adversary techniques (IDs, ref_ids such as "T1566", or names)
     """
     try:
         from ..resolvers import resolve_id_or_name
@@ -1354,6 +1456,12 @@ async def create_operational_scenario(
             for threat in threats:
                 resolved_threats.append(resolve_id_or_name(threat, "/threats/"))
             payload["threats"] = resolved_threats
+
+        if likelihood_forced is not None:
+            payload["likelihood_forced"] = _forced_level(likelihood_forced)
+
+        if techniques:
+            payload["techniques"] = [_resolve_technique_id(t) for t in techniques]
 
         res = make_post_request("/ebios-rm/operational-scenarios/", payload)
 
@@ -1383,6 +1491,7 @@ async def create_elementary_action(
     attack_stage: int = 0,
     icon: str = None,
     threat_id: str = None,
+    technique: str = None,
 ) -> str:
     """Create an elementary action for use in operating modes (Workshop 4)
 
@@ -1397,6 +1506,7 @@ async def create_elementary_action(
         attack_stage: Attack stage (0=Know/Reconnaissance, 1=Enter/Initial Access, 2=Discover/Discovery, 3=Exploit/Exploitation)
         icon: Icon name (server, computer, cloud, file, diamond, phone, cube, blocks, shapes, network, database, key, search, carrot, money, skull, globe, usb)
         threat_id: Threat ID/name to link
+        technique: Catalogue technique this action derives from (ID, ref_id such as "T1566", or name)
     """
     try:
         from ..resolvers import resolve_id_or_name
@@ -1418,6 +1528,9 @@ async def create_elementary_action(
 
         if threat_id:
             payload["threat"] = resolve_id_or_name(threat_id, "/threats/")
+
+        if technique:
+            payload["technique"] = _resolve_technique_id(technique)
 
         res = make_post_request("/ebios-rm/elementary-actions/", payload)
 
@@ -1457,7 +1570,9 @@ async def create_operating_mode(
         operational_scenario_id: Operational scenario ID (required)
         description: Description
         ref_id: Reference ID (auto-generated if not provided)
-        likelihood: Likelihood level (-1 for not rated, 0+ based on risk matrix)
+        likelihood: Likelihood level (-1 for not rated, 0+ based on risk matrix).
+                    Used under the manual and express quotation methods; under standard or
+                    advanced it is computed from the kill chain step ratings.
         elementary_actions: List of elementary action IDs/names to include
     """
     try:
@@ -1507,6 +1622,10 @@ async def create_kill_chain_step(
     is_highlighted: bool = False,
     logic_operator: str = None,
     antecedents: list = None,
+    success_probability: int = None,
+    success_probability_pct: float = None,
+    technical_difficulty: int = None,
+    assets: list = None,
 ) -> str:
     """Create a kill chain step linking an elementary action to an operating mode (Workshop 4)
 
@@ -1523,15 +1642,22 @@ async def create_kill_chain_step(
     - Stage 2 (Discover/Discovery): Can have antecedents from Stage 0, 1, or 2
     - Stage 3 (Exploit/Exploitation): Can have antecedents from any stage
 
-    **Important:** Antecedents must already exist as kill chain steps in this operating mode.
+    **Important:** Antecedents are kill chain step IDs of this operating mode (see get_kill_chains).
+    The same elementary action may appear in several steps of one operating mode.
 
     Args:
         operating_mode_id: Operating mode ID (required)
         elementary_action_id: Elementary action ID/name to add as a step (required)
         is_highlighted: Whether to highlight this step in visualizations
         logic_operator: "AND" or "OR" - how to combine multiple antecedents
-        antecedents: List of elementary action IDs that must precede this action
-                     (Must already be kill chain steps, stage must be <= this action's stage)
+        antecedents: List of kill chain step IDs (from get_kill_chains) that precede this step
+                     (Steps of the same operating mode, stage must be <= this action's stage)
+        success_probability: Success probability level on the study's likelihood scale (-1 for not rated).
+                             Rated under the standard and advanced quotation methods.
+        success_probability_pct: Optional success probability as a percentage (0-100)
+        technical_difficulty: Technical difficulty level on the study's likelihood scale (-1 for not rated).
+                              Rated under the advanced quotation method.
+        assets: List of supporting asset IDs/names this step applies to
     """
     try:
         operating_mode_id = resolve_operating_mode_id(operating_mode_id)
@@ -1571,8 +1697,17 @@ async def create_kill_chain_step(
         if antecedents:
             resolved_antecedents = []
             for ant in antecedents:
-                resolved_antecedents.append(resolve_elementary_action_id(ant))
+                resolved_antecedents.append(resolve_kill_chain_id(ant))
             payload["antecedents"] = resolved_antecedents
+
+        if success_probability is not None:
+            payload["success_probability"] = success_probability
+        if success_probability_pct is not None:
+            payload["success_probability_pct"] = success_probability_pct
+        if technical_difficulty is not None:
+            payload["technical_difficulty"] = technical_difficulty
+        if assets:
+            payload["assets"] = [resolve_asset_id(a) for a in assets]
 
         res = make_post_request("/ebios-rm/kill-chains/", payload)
 
@@ -1613,6 +1748,10 @@ async def update_ebios_rm_study(
     assets: list = None,
     compliance_assessments: list = None,
     folder: str = None,
+    quotation_method: str = None,
+    objectives: str = None,
+    constraints_hypotheses: str = None,
+    confirm_method_change: bool = False,
 ) -> str:
     """Update an EBIOS RM study (Workshop 1)
 
@@ -1632,6 +1771,16 @@ async def update_ebios_rm_study(
         assets: List of asset IDs/names (replaces existing)
         compliance_assessments: List of compliance assessment (audit) IDs/names for security baseline (replaces existing)
         folder: Folder (domain) ID/name to move the study to; all study-scoped objects (feared events, RO/TO couples, stakeholders, strategic scenarios, attack paths, operational scenarios, operating modes, kill chains) follow the study
+        quotation_method: Likelihood method for Workshop 4:
+            manual = direct estimate on each operational scenario,
+            express = operational scenario takes its most likely operating mode,
+            standard = each kill chain step rated by success probability, rolled up per operating mode,
+            advanced = standard plus each step's technical difficulty, crossed through the likelihood grid
+        objectives: Study objectives
+        constraints_hypotheses: Constraints and hypotheses of the study
+        confirm_method_change: Required to leave the manual method. The likelihoods entered on
+            operational scenarios are then replaced by the computed ones and are not restored
+            by switching back to manual; forced likelihoods are kept. Ask the user first.
     """
     try:
         from ..resolvers import resolve_compliance_assessment_id
@@ -1654,6 +1803,23 @@ async def update_ebios_rm_study(
             payload["observation"] = observation
         if folder is not None:
             payload["folder"] = resolve_folder_id(folder)
+        if quotation_method is not None:
+            if quotation_method != "manual" and not confirm_method_change:
+                current = make_get_request(f"/ebios-rm/studies/{resolved_study_id}/")
+                if current.status_code != 200:
+                    return http_error_response(current.status_code, current.text)
+                if current.json().get("quotation_method") == "manual":
+                    return error_response(
+                        "Confirmation Required",
+                        "Leaving the manual method replaces the likelihoods entered on operational scenarios with the values computed from their operating modes. Switching back to manual will not restore them. Forced likelihoods are kept.",
+                        "Ask the user to confirm, then retry with confirm_method_change=True",
+                        retry_allowed=True,
+                    )
+            payload["quotation_method"] = quotation_method
+        if objectives is not None:
+            payload["objectives"] = objectives
+        if constraints_hypotheses is not None:
+            payload["constraints_hypotheses"] = constraints_hypotheses
 
         if assets is not None:
             resolved_assets = []
@@ -1775,6 +1941,7 @@ async def update_ro_to_couple(
     is_selected: bool = None,
     justification: str = None,
     feared_events: list = None,
+    target_objective_category: str = None,
 ) -> str:
     """Update a RoTo couple
 
@@ -1787,6 +1954,7 @@ async def update_ro_to_couple(
         is_selected: Whether the RoTo couple is selected
         justification: Justification text
         feared_events: List of feared event IDs/names (replaces existing)
+        target_objective_category: Target objective category name (must match an existing category terminology, "" to clear)
     """
     try:
         resolved_roto_id = resolve_ro_to_id(ro_to_id)
@@ -1805,6 +1973,12 @@ async def update_ro_to_couple(
             payload["is_selected"] = is_selected
         if justification is not None:
             payload["justification"] = justification
+        if target_objective_category is not None:
+            payload["target_objective_category"] = (
+                _resolve_target_objective_category(target_objective_category)
+                if target_objective_category
+                else None
+            )
 
         if feared_events is not None:
             resolved_feared_events = []
@@ -1928,6 +2102,7 @@ async def update_strategic_scenario(
     description: str = None,
     ref_id: str = None,
     focused_feared_event_id: str = None,
+    gravity_forced: int = None,
 ) -> str:
     """Update a strategic scenario
 
@@ -1937,6 +2112,7 @@ async def update_strategic_scenario(
         description: New description
         ref_id: New reference ID
         focused_feared_event_id: Feared event ID to focus gravity calculation on
+        gravity_forced: Analyst override of the computed gravity (0+ based on risk matrix, -1 to clear)
     """
     try:
         resolved_scenario_id = resolve_strategic_scenario_id(scenario_id)
@@ -1953,6 +2129,8 @@ async def update_strategic_scenario(
             payload["focused_feared_event"] = resolve_feared_event_id(
                 focused_feared_event_id
             )
+        if gravity_forced is not None:
+            payload["gravity_forced"] = _forced_level(gravity_forced)
 
         if not payload:
             return "Error: No fields provided to update"
@@ -2051,16 +2229,22 @@ async def update_operational_scenario(
     is_selected: bool = None,
     justification: str = None,
     threats: list = None,
+    likelihood_forced: int = None,
+    techniques: list = None,
 ) -> str:
     """Update an operational scenario
 
     Args:
         scenario_id: Operational scenario ID (required)
         operating_modes_description: New operating modes description
-        likelihood: Likelihood level (-1 for not rated, 0+ based on risk matrix)
+        likelihood: Likelihood level (-1 for not rated, 0+ based on risk matrix).
+                    Only kept under the manual quotation method; otherwise it is computed
+                    from the operating modes and replaced on save. Use likelihood_forced instead.
+        likelihood_forced: Analyst override of the computed likelihood (0+ based on risk matrix, -1 to clear)
         is_selected: Whether the scenario is selected
         justification: Justification text
         threats: List of threat IDs/names (replaces existing)
+        techniques: List of adversary techniques (IDs, ref_ids such as "T1566", or names; replaces existing)
     """
     try:
         from ..resolvers import resolve_id_or_name
@@ -2083,6 +2267,12 @@ async def update_operational_scenario(
             for threat in threats:
                 resolved_threats.append(resolve_id_or_name(threat, "/threats/"))
             payload["threats"] = resolved_threats
+
+        if likelihood_forced is not None:
+            payload["likelihood_forced"] = _forced_level(likelihood_forced)
+
+        if techniques is not None:
+            payload["techniques"] = [_resolve_technique_id(t) for t in techniques]
 
         if not payload:
             return "Error: No fields provided to update"
@@ -2128,7 +2318,9 @@ async def update_operating_mode(
         name: New name
         description: New description
         ref_id: New reference ID
-        likelihood: Likelihood level (-1 for not rated, 0+ based on risk matrix)
+        likelihood: Likelihood level (-1 for not rated, 0+ based on risk matrix).
+                    Used under the manual and express quotation methods; under standard or
+                    advanced it is computed from the kill chain step ratings.
         elementary_actions: List of elementary action IDs/names to associate (replaces existing).
                             This is the first step before creating kill chain steps.
     """
@@ -2182,10 +2374,15 @@ async def update_kill_chain_step(
     is_highlighted: bool = None,
     logic_operator: str = None,
     antecedents: list = None,
+    success_probability: int = None,
+    success_probability_pct: float = None,
+    technical_difficulty: int = None,
+    assets: list = None,
 ) -> str:
     """Update a kill chain step (Workshop 4)
 
-    Updates an existing kill chain step's properties (antecedents, highlighting, logic operator).
+    Updates an existing kill chain step's properties (antecedents, highlighting, logic operator,
+    ratings, supporting assets).
 
     **Attack Stage Rules for antecedents:**
     - Stage 0 (Know/Reconnaissance): Cannot have antecedents - these are starting points
@@ -2193,14 +2390,20 @@ async def update_kill_chain_step(
     - Stage 2 (Discover/Discovery): Can have antecedents from Stage 0, 1, or 2
     - Stage 3 (Exploit/Exploitation): Can have antecedents from any stage
 
-    **Important:** Antecedents must already exist as kill chain steps in the same operating mode.
+    **Important:** Antecedents are kill chain step IDs of the same operating mode (see get_kill_chains).
 
     Args:
         kill_chain_id: Kill chain step UUID (required)
         is_highlighted: Whether to highlight this step in visualizations
         logic_operator: "AND" or "OR" - how to combine multiple antecedents
-        antecedents: List of elementary action IDs that must precede this action
-                     (Must already be kill chain steps, stage must be <= this action's stage)
+        antecedents: List of kill chain step IDs (from get_kill_chains) that precede this step
+                     (Steps of the same operating mode, stage must be <= this action's stage)
+        success_probability: Success probability level on the study's likelihood scale (-1 for not rated).
+                             Rated under the standard and advanced quotation methods.
+        success_probability_pct: Optional success probability as a percentage (0-100)
+        technical_difficulty: Technical difficulty level on the study's likelihood scale (-1 for not rated).
+                              Rated under the advanced quotation method.
+        assets: List of supporting asset IDs/names this step applies to (replaces existing)
     """
     try:
         resolved_kc_id = resolve_kill_chain_id(kill_chain_id)
@@ -2236,8 +2439,17 @@ async def update_kill_chain_step(
         if antecedents is not None:
             resolved_antecedents = []
             for ant in antecedents:
-                resolved_antecedents.append(resolve_elementary_action_id(ant))
+                resolved_antecedents.append(resolve_kill_chain_id(ant))
             payload["antecedents"] = resolved_antecedents
+
+        if success_probability is not None:
+            payload["success_probability"] = success_probability
+        if success_probability_pct is not None:
+            payload["success_probability_pct"] = success_probability_pct
+        if technical_difficulty is not None:
+            payload["technical_difficulty"] = technical_difficulty
+        if assets is not None:
+            payload["assets"] = [resolve_asset_id(a) for a in assets]
 
         if not payload:
             return "Error: No fields provided to update"

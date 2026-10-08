@@ -22,6 +22,7 @@
   * [Risk matrices](concepts/risk-matrices.md)
   * [Threats](concepts/threats.md)
   * [Threat intelligence](concepts/threat-intel.md)
+  * [TTP catalogs and threat models](concepts/ttps-and-threat-models.md)
   * [Metrics](concepts/metrics.md)
   * [Journeys](concepts/journeys.md)
 * Assets and resilience
@@ -40,6 +41,7 @@
   * [Documents](concepts/documents.md)
   * [Findings binders](concepts/findings-assessments.md)
   * [Validation flows](concepts/validation-flows.md)
+  * [Security exceptions](concepts/security-exceptions.md)
 * Risk
   * [Risk assessments](concepts/risk-assessments.md)
   * [EBIOS RM](concepts/ebios-rm.md)
@@ -191,6 +193,7 @@
 * [Audit log](features/audit-log.md)
 * [Domain export/import](features/domain-export-import.md)
 * [Focus mode](features/focus-mode.md)
+* [Personal module visibility](features/personal-module-visibility.md)
 * [Sync to actions](features/sync-to-actions.md)
 * [Dashboards](features/dashboards.md)
 * [Audit advanced analytics](features/audit-analytics.md)
@@ -198,6 +201,7 @@
 * [Insights](features/insights.md)
 * [Control Plan](features/control-plan.md)
 * [Action plans](features/action-plans.md)
+* [Risk trajectory](features/risk-trajectory.md)
 * [Working with tables](features/working-with-tables.md)
 * [Custom fields](features/custom-fields.md)
 * [Workflow builder](features/workflows/README.md)

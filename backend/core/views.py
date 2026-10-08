@@ -194,6 +194,8 @@ from core.pagination import CustomLimitOffsetPagination
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import (
     build_answers_dict,
+    escape_excel_formula,
+    sanitize_xlsx_value,
     bulk_update_with_log,
     compare_schema_versions,
     get_respondent_scoped_folder_ids,
@@ -220,7 +222,11 @@ from .models import *
 from .serializers import *
 
 from .models import Severity
-from . import dora
+from . import dora, framework_exports
+from core.asset_graph import walk_asset_graph
+
+DEPENDENCY_GRAPH_LIMIT = 300
+DEPENDENCY_GRAPH_MAX_LIMIT = 2000
 from core.mappings.merge import compute_map_from_merge
 
 from serdes.utils import (
@@ -245,6 +251,9 @@ from global_settings.utils import (
 from core import commitment
 
 import structlog
+
+from core.quick_form_apply import project, targets_of
+from core.quick_form_targets import get_target
 
 logger = structlog.get_logger(__name__)
 
@@ -483,40 +492,12 @@ def get_mapping_max_depth():
         return MAPPING_MAX_DEPTH
 
 
-def escape_excel_formula(value):
-    """
-    Escape Excel formula injection by prefixing dangerous characters.
-    Prevents CSV/Formula injection (OWASP) when values start with =+-@
-    """
-    if value is None:
-        return ""
-    s = str(value)
-    if not s:
-        return ""
-    stripped = s.lstrip()
-    if stripped and stripped[0] in ("=", "+", "-", "@"):
-        return "'" + s
-    return s
-
-
 def escape_csv_row(row):
     """Apply formula-injection escaping to every string cell of a CSV row."""
     return [
         escape_excel_formula(value) if isinstance(value, str) else value
         for value in row
     ]
-
-
-ILLEGAL_XLSX_CHARS_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
-XLSX_MAX_CELL_CHARS = 32_767
-
-
-def sanitize_xlsx_value(value):
-    """Strip ASCII control characters openpyxl refuses to write (tab/LF/CR are allowed)
-    and cap strings at Excel's per-cell limit."""
-    if isinstance(value, str):
-        return ILLEGAL_XLSX_CHARS_RE.sub("", value)[:XLSX_MAX_CELL_CHARS]
-    return value
 
 
 def create_xlsx_response(entries, filename, wrap_columns=None):
@@ -2793,6 +2774,7 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
     ] + [CustomFieldFilterBackend]
     search_fields = ["name", "description", "ref_id", "folder__name"]
     ordering = ["folder__name", "name"]
+    autocomplete_fields = ["type"]
 
     def get_queryset(self) -> models.query.QuerySet:
         qs = super().get_queryset().select_related("asset_class", "folder")
@@ -3148,6 +3130,110 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
                 "tree": annotate(AssetClass.build_tree()),
                 "unclassified_count": direct_counts.get(None, 0),
                 "total_count": sum(direct_counts.values()),
+            }
+        )
+
+    @action(detail=True, methods=["get"], url_path="dependency-graph")
+    def dependency_graph(self, request, pk=None):
+        focus = self.get_object()
+        mode = request.query_params.get("mode", "chain")
+        if mode not in ("chain", "connected"):
+            return Response(
+                {"error": "mode must be chain or connected"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            max_hops = (
+                int(request.query_params["max_hops"])
+                if request.query_params.get("max_hops")
+                else None
+            )
+            limit = min(
+                int(request.query_params.get("limit", DEPENDENCY_GRAPH_LIMIT)),
+                DEPENDENCY_GRAPH_MAX_LIMIT,
+            )
+            expand = [uuid.UUID(v) for v in request.query_params.getlist("expand")]
+            reveal = [uuid.UUID(v) for v in request.query_params.getlist("reveal")]
+        except ValueError:
+            return Response(
+                {"error": "invalid max_hops, limit, expand or reveal"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if (max_hops is not None and max_hops < 1) or limit < 1:
+            return Response(
+                {"error": "max_hops and limit must be positive"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        walk = walk_asset_graph(
+            focus.id,
+            Asset.parent_assets.through.objects.values_list(
+                "from_asset_id", "to_asset_id"
+            ),
+            mode=mode,
+            max_hops=max_hops,
+            limit=limit,
+            expand=expand,
+            reveal=reveal,
+        )
+
+        viewable = set(
+            RoleAssignment.get_viewable_object_ids(request.user, Asset).filter(
+                id__in=walk.order
+            )
+        )
+        assets = {
+            a.id: a
+            for a in Asset.objects.filter(id__in=viewable).select_related("folder")
+        }
+        placeholder = {}
+        for asset_id in walk.order:
+            if asset_id not in assets:
+                placeholder[asset_id] = f"hidden-{len(placeholder) + 1}"
+
+        def key(asset_id):
+            return placeholder.get(asset_id, str(asset_id))
+
+        folder_paths = {}
+        nodes = []
+        for asset_id in walk.order:
+            node = {
+                "id": key(asset_id),
+                "hops": walk.hops[asset_id],
+                "side": walk.side[asset_id],
+                "omitted": walk.omitted.get(asset_id, 0),
+                "elsewhere": walk.elsewhere.get(asset_id, 0),
+            }
+            asset = assets.get(asset_id)
+            if asset is None:
+                node["hidden"] = True
+            else:
+                folder = asset.folder
+                if folder.id not in folder_paths:
+                    folder_paths[folder.id] = folder.get_folder_full_path_string()
+                node.update(
+                    hidden=False,
+                    name=asset.name,
+                    ref_id=asset.ref_id,
+                    type=asset.type,
+                    folder={
+                        "id": str(folder.id),
+                        "str": folder.name,
+                        "path": folder_paths[folder.id],
+                    },
+                )
+            nodes.append(node)
+
+        return Response(
+            {
+                "focus": str(focus.id),
+                "mode": mode,
+                "truncated": walk.truncated,
+                "nodes": nodes,
+                "edges": [
+                    {"source": key(parent), "target": key(child)}
+                    for parent, child in walk.edges
+                ],
             }
         )
 
@@ -3883,6 +3969,10 @@ class RiskMatrixViewSet(BaseModelViewSet):
             for j, val in enumerate(row):
                 if not isinstance(val, int) or val < 0 or val >= len(risk):
                     errors.append(f"Grid cell [{i}][{j}] has invalid risk index {val}.")
+
+        from ebios_rm.rating_kit import validate as validate_ebios_rm
+
+        errors.extend(validate_ebios_rm(json_def.get("ebios_rm"), len(probability)))
 
         for category_name, levels in [
             ("probability", probability),
@@ -7400,8 +7490,52 @@ class ComplianceAssessmentEvidenceList(generics.ListAPIView):
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
-        context.update({"pk": self.kwargs["pk"]})
+        context.update(
+            {
+                "pk": self.kwargs["pk"],
+                "indirect_evidence_links": self._get_indirect_evidence_links(),
+            }
+        )
         return context
+
+    def _get_indirect_evidence_links(self):
+        """Map (requirement_assessment_id, evidence_id) -> [names] of the applied
+        controls and task templates linking that evidence to that requirement assessment.
+        Computed once per request to avoid per-evidence queries.
+        TaskNode.evidences is deprecated (evidences live on the task template)."""
+        pk = self.kwargs["pk"]
+        links = defaultdict(list)
+
+        # Only expose applied controls and task templates the caller is allowed to view
+        applied_controls = AppliedControl.objects.filter(
+            requirement_assessments__compliance_assessment_id=pk,
+            id__in=RoleAssignment.get_viewable_object_ids(
+                self.request.user, AppliedControl
+            ),
+        ).distinct()
+        task_templates = TaskTemplate.objects.filter(
+            requirement_assessments__compliance_assessment_id=pk,
+            id__in=RoleAssignment.get_viewable_object_ids(
+                self.request.user, TaskTemplate
+            ),
+        ).distinct()
+
+        for queryset in (applied_controls, task_templates):
+            queryset = queryset.prefetch_related(
+                "evidences",
+                Prefetch(
+                    "requirement_assessments",
+                    queryset=RequirementAssessment.objects.filter(
+                        compliance_assessment_id=pk
+                    ),
+                ),
+            )
+            for via in queryset:
+                evidence_ids = {e.id for e in via.evidences.all()}
+                for req_assessment in via.requirement_assessments.all():
+                    for evidence_id in evidence_ids:
+                        links[(req_assessment.id, evidence_id)].append(via.name)
+        return links
 
     def get_queryset(self):
         """RBAC not automatic as we don't inherit from BaseModelViewSet -> enforce it explicitly"""
@@ -7416,18 +7550,30 @@ class ComplianceAssessmentEvidenceList(generics.ListAPIView):
 
         compliance_assessment = ComplianceAssessment.objects.get(id=compliance_id)
 
-        # Get all requirement assessments for this compliance assessment
-        requirement_assessments = RequirementAssessment.objects.filter(
-            compliance_assessment=compliance_assessment
-        ).prefetch_related("evidences", "applied_controls__evidences")
-
         # Get visible evidences to filter result
         viewable_evidences = RoleAssignment.get_viewable_object_ids(
             self.request.user, Evidence
         )
 
-        # Collect evidence IDs from both direct and indirect relationships
+        # Get all requirement assessments for this compliance assessment,
+        # only walking through applied controls the caller is allowed to view
+        viewable_applied_controls = AppliedControl.objects.filter(
+            id__in=RoleAssignment.get_viewable_object_ids(
+                self.request.user, AppliedControl
+            )
+        ).prefetch_related("evidences")
+        requirement_assessments = RequirementAssessment.objects.filter(
+            compliance_assessment=compliance_assessment
+        ).prefetch_related(
+            "evidences",
+            Prefetch("applied_controls", queryset=viewable_applied_controls),
+        )
+
+        # Collect evidence IDs from global, direct and indirect relationships
         evidence_ids = set()
+        for evidence in compliance_assessment.evidences.all():
+            if evidence.id in viewable_evidences:
+                evidence_ids.add(evidence.id)
         for req_assessment in requirement_assessments:
             for evidence in req_assessment.evidences.all():
                 if evidence.id in viewable_evidences:
@@ -7436,6 +7582,22 @@ class ComplianceAssessmentEvidenceList(generics.ListAPIView):
                 for evidence in applied_control.evidences.all():
                     if evidence.id in viewable_evidences:
                         evidence_ids.add(evidence.id)
+
+        # Evidences linked through viewable task templates attached to the
+        # compliance assessment or its requirement assessments
+        task_templates = TaskTemplate.objects.filter(
+            Q(compliance_assessments=compliance_assessment)
+            | Q(requirement_assessments__compliance_assessment=compliance_assessment),
+            id__in=RoleAssignment.get_viewable_object_ids(
+                self.request.user, TaskTemplate
+            ),
+        ).distinct()
+        task_evidence_ids = set(
+            Evidence.objects.filter(task_templates__in=task_templates).values_list(
+                "id", flat=True
+            )
+        )
+        evidence_ids.update(task_evidence_ids & set(viewable_evidences))
 
         return Evidence.objects.filter(id__in=evidence_ids).distinct()
 
@@ -8479,6 +8641,7 @@ class ActorViewSet(BaseModelViewSet):
 
 class TeamViewSet(BaseModelViewSet):
     model = Team
+    filterset_fields = ["name", "folder"]
 
     def get_queryset(self):
         return (
@@ -9300,7 +9463,11 @@ class FolderViewSet(BaseModelViewSet):
             "include_enclaves", "False"
         ).lower() in ["true", "1", "yes"]
 
-        viewable_objects = RoleAssignment.get_viewable_object_ids(request.user, Folder)
+        # A set: the tree builders test membership once per folder, and `in` on a
+        # QuerySet scans its cached list, which is quadratic in the folder count.
+        viewable_objects = set(
+            RoleAssignment.get_viewable_object_ids(request.user, Folder)
+        )
 
         children_by_parent, parent_of, perimeters_by_folder = build_folder_indexes(
             include_perimeters=include_perimeters
@@ -10406,7 +10573,22 @@ class FrameworkViewSet(BaseModelViewSet):
         # Domain-tree inheritance overlay. Computed per live CA (column) against
         # its ancestor audits when the org-wide strategy is enabled; gated so the
         # default (none) adds no query cost.
-        from core.audit_inheritance import build_overlay_map, get_strategy
+        from core.audit_inheritance import (
+            build_overlay_map,
+            get_strategy,
+            make_overlay_redactor,
+            redact_overlay,
+        )
+
+        # The overlay carries values from other audits; they follow the same
+        # per-CA field visibility as the row's own fields. Hidden verdicts are
+        # kept out of the chain before the winner is picked, and the remaining
+        # hidden values are redacted from the result. Ancestors are viewable
+        # live audits on this framework, so they are in all_visible_cas unless
+        # a campaign filter narrowed it; the redactor fetches those lazily.
+        hidden_for_ca = make_overlay_redactor(
+            all_visible_cas, respondent_folders, viewable_ca_ids=viewable_ca_ids
+        )
 
         aggregation_strategy = get_strategy()
         overlays_by_ca: Dict[Any, Dict[str, Any]] = {}
@@ -10416,6 +10598,7 @@ class FrameworkViewSet(BaseModelViewSet):
                     ca,
                     viewable_ca_ids=viewable_ca_ids,
                     strategy=aggregation_strategy,
+                    hidden_for_ca=hidden_for_ca,
                 )["overlay"]
 
         ras = (
@@ -10509,7 +10692,11 @@ class FrameworkViewSet(BaseModelViewSet):
                     ),
                     # Inheritance overlay for this (audit, requirement); None when
                     # no ancestor audit covers it or the feature is off.
-                    "inheritance": overlays_by_ca.get(ca.id, {}).get(str(req.id)),
+                    "inheritance": redact_overlay(
+                        overlays_by_ca.get(ca.id, {}).get(str(req.id)),
+                        str(ca.id),
+                        hidden_for_ca,
+                    ),
                 }
             )
 
@@ -12434,6 +12621,20 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         replacing the Count(distinct=True) annotations dropped from the
         list queryset. Bounded by `len(queryset)` (≤ page size), so the
         cost is independent of the total RA table size.
+        """
+        optimized_data = super()._get_optimized_object_data(queryset)
+        audit_ids = [a.id for a in queryset]
+        if not audit_ids:
+            return optimized_data
+
+        total_map, assessed_map = self.get_requirement_counts(audit_ids)
+        optimized_data["total_requirements"] = total_map
+        optimized_data["assessed_requirements"] = assessed_map
+        return optimized_data
+
+    @staticmethod
+    def get_requirement_counts(audit_ids) -> tuple[dict, dict]:
+        """(total, assessed) assessable requirement counts per audit id.
 
         Audits without implementation groups go through per-mode GROUP BY
         buckets; audits with implementation groups share one scalar
@@ -12441,11 +12642,6 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         two JSON lists, which SQL can't do).
         """
         from core.models import Question
-
-        optimized_data = super()._get_optimized_object_data(queryset)
-        audit_ids = [a.id for a in queryset]
-        if not audit_ids:
-            return optimized_data
 
         # The progress mode (status visible = status-driven) and the content
         # branches are audit-level facts known before querying, so audits are
@@ -12602,9 +12798,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 ):
                     assessed_map[ca_id] += 1
 
-        optimized_data["total_requirements"] = total_map
-        optimized_data["assessed_requirements"] = assessed_map
-        return optimized_data
+        return total_map, assessed_map
 
     def get_queryset(self):
         """Optimize queries for table view and serializer, with conditional annotations for sorting"""
@@ -12927,8 +13121,14 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
 
         return response
 
-    @action(detail=True, methods=["get"], name="CyFun Excel Export")
-    def cyfun_xlsx(self, request, pk):
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path=r"framework-exports/(?P<export_id>[\w-]+)",
+        name="Framework export",
+    )
+    def framework_export(self, request, pk, export_id):
+        """An export specific to the audit's framework (core.framework_exports)."""
         if not RoleAssignment.is_object_accessible(
             request.user, "view", ComplianceAssessment, UUID(pk)
         ):
@@ -12936,89 +13136,32 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
             )
 
-        audit = ComplianceAssessment.objects.get(id=pk)
-        CYFUN_FRAMEWORK_URN = "urn:intuitem:risk:framework:ccb-cyfun2025"
-        if audit.framework.urn != CYFUN_FRAMEWORK_URN:
+        export = framework_exports.get(export_id)
+        if export is None:
             return Response(
-                {"error": "This export is only available for CyFun 2025 assessments"},
+                {"error": "Unknown export"}, status=status.HTTP_404_NOT_FOUND
+            )
+        audit = ComplianceAssessment.objects.get(id=pk)
+        # An export holds the whole audit: only users with the full view of it,
+        # not respondents scoped to their part.
+        if not RoleAssignment.is_access_allowed(
+            request.user,
+            Permission.objects.get(codename="view_compliance_assessment_full"),
+            audit.folder,
+        ):
+            return Response(
+                {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
+            )
+        if not export.supports(audit):
+            return Response(
+                {"error": "This export is not available for this audit"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-
-        template_path = (
-            Path(__file__).resolve().parent
-            / "templates"
-            / "core"
-            / "CyFun2025_Self-Assessment_tool_ESSENTIAL_v3.1.xlsx"
-        )
-        wb = load_workbook(template_path)
-
-        SHEET_MAP = {
-            "GV": "GOVERN",
-            "ID": "IDENTIFY",
-            "PR": "PROTECT",
-            "DE": "DETECT",
-            "RS": "RESPOND",
-            "RC": "RECOVER",
-        }
-
-        # Build ref_id → row lookup for each function sheet
-        sheet_row_maps = {}
-        for sheet_name in SHEET_MAP.values():
-            ws = wb[sheet_name]
-            row_map = {}
-            for row in range(1, ws.max_row + 1):
-                cell_value = ws.cell(row=row, column=6).value  # Column F
-                if cell_value and isinstance(cell_value, str):
-                    ref_id = cell_value.split(":")[0].strip().rstrip(".")
-                    if ref_id:
-                        row_map[ref_id] = row
-            sheet_row_maps[sheet_name] = row_map
-
-        # Fetch all requirement assessments
-        requirement_assessments = (
-            RequirementAssessment.objects.filter(compliance_assessment=audit)
-            .select_related("requirement")
-            .filter(requirement__assessable=True)
-        )
-
-        for ra in requirement_assessments:
-            ref_id = ra.requirement.ref_id
-            if not ref_id:
-                continue
-
-            prefix = ref_id.split(".")[0]
-            sheet_name = SHEET_MAP.get(prefix)
-            if not sheet_name:
-                continue
-
-            row = sheet_row_maps.get(sheet_name, {}).get(ref_id)
-            if row is None:
-                continue
-
-            ws = wb[sheet_name]
-            if ra.result == RequirementAssessment.Result.NOT_APPLICABLE:
-                ws.cell(row=row, column=7, value="N/A")  # Column G: doc score
-                ws.cell(row=row, column=8, value="N/A")  # Column H: impl score
-            else:
-                if ra.documentation_score is not None:
-                    ws.cell(row=row, column=7, value=ra.documentation_score)
-                if ra.score is not None:
-                    ws.cell(row=row, column=8, value=ra.score)
-            if ra.observation:
-                ws.cell(
-                    row=row, column=13, value=escape_excel_formula(ra.observation)
-                )  # Column M: comments
-
-        buffer = io.BytesIO()
-        wb.save(buffer)
-        buffer.seek(0)
-
-        response = HttpResponse(
-            buffer.getvalue(),
-            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        )
-        response["Content-Disposition"] = (
-            f'attachment; filename="{audit.name}_CyFun_Self-Assessment.xlsx"'
+        file = export.build(audit)
+        response = HttpResponse(file.content, content_type=file.content_type)
+        # The filename carries the audit's name, which may hold control characters.
+        response["Content-Disposition"] = safe_filename_header(
+            "attachment", file.filename
         )
         return response
 
@@ -13976,7 +14119,11 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         when it is ``none`` the overlay map is empty and this behaves like
         ``tree``.
         """
-        from core.audit_inheritance import build_overlay_map
+        from core.audit_inheritance import (
+            build_overlay_map,
+            make_overlay_redactor,
+            redact_overlay,
+        )
 
         compliance_assessment = self.get_object()
         _framework = compliance_assessment.framework
@@ -14030,16 +14177,29 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         viewable_ca_ids = RoleAssignment.get_viewable_object_ids(
             request.user, ComplianceAssessment
         )
+        # Same per-CA field visibility as the report: hidden verdicts never
+        # take part in the selection, hidden values are redacted from the
+        # result, each for the viewer's role on the audit it came from.
+        hidden_for_ca = make_overlay_redactor(
+            [compliance_assessment],
+            get_respondent_scoped_folder_ids(request.user),
+            viewable_ca_ids=viewable_ca_ids,
+        )
         result = build_overlay_map(
-            compliance_assessment, viewable_ca_ids=viewable_ca_ids
+            compliance_assessment,
+            viewable_ca_ids=viewable_ca_ids,
+            hidden_for_ca=hidden_for_ca,
         )
         overlay = result["overlay"]
+        target_ca_id = str(compliance_assessment.id)
 
         def attach(nodes: dict):
             for req_id, node in nodes.items():
                 ov = overlay.get(str(req_id))
                 if ov is not None:
-                    node["inheritance"] = ov
+                    node["inheritance"] = redact_overlay(
+                        ov, target_ca_id, hidden_for_ca
+                    )
                 children = node.get("children")
                 if children:
                     attach(children)
@@ -14700,9 +14860,14 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 audit.requirement_assessments.select_related("requirement").all()
             )
 
-            # Build mapping of requirement_id to assessment
+            # Build mapping of requirement_id to assessment, limited to the
+            # audit's selected implementation groups like its global score.
+            selected_groups = set(audit.selected_implementation_groups or [])
             req_assessment_map = {
-                str(ra.requirement_id): ra for ra in requirement_assessments
+                str(ra.requirement_id): ra
+                for ra in requirement_assessments
+                if not selected_groups
+                or selected_groups & set(ra.requirement.implementation_groups or [])
             }
 
             # Build children dictionary for quick lookup
@@ -14776,41 +14941,17 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 else:
                     compliance_percentage = 0
 
-                # Maturity score for the radar slice. Reuse the audit's
-                # configured aggregation so per-RA scale overrides are
-                # normalised the same way as the global score (e.g. a binary
-                # 0..1 requirement contributes 100% at 1, not 1 raw).
-                # Mirror get_global_score's filtering: when anchor_na_to_target
-                # is on, N/A RAs stay in so they anchor to the target; off,
-                # they are excluded along with unscored RAs.
-                # `_compute_score_for_field` returns -1 when nothing is scored.
-                if audit.anchor_na_to_target:
-                    scored_list = [
-                        ra
-                        for ra in assessable_list
-                        if ra.result == "not_applicable" or ra.is_scored
-                    ]
-                else:
-                    scored_list = [
-                        ra
-                        for ra in assessable_list
-                        if ra.is_scored and ra.result != "not_applicable"
-                    ]
-                if scored_list:
-                    computed = audit._compute_score_for_field(
-                        scored_list,
-                        None,
-                        "score",
-                        audit.anchor_na_to_target,
-                    )
-                    maturity_score = 0 if computed == -1 else computed
-                else:
-                    maturity_score = 0
+                # Maturity score for the radar slice: the section's
+                # implementation score, filtered and aggregated like the global
+                # score (per-RA scales normalised, N/A anchored when enabled).
+                maturity_score = audit.get_scores_for(assessable_list)[
+                    "implementation_score"
+                ]
 
                 radar_data["compliance_percentages"].append(
                     round(compliance_percentage, 1)
                 )
-                radar_data["maturity_scores"].append(round(maturity_score, 1))
+                radar_data["maturity_scores"].append(maturity_score or 0)
 
             return radar_data
 
@@ -15381,7 +15522,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         ras = RequirementAssessment.objects.filter(
             compliance_assessment=compliance_assessment,
             requirement__assessable=True,
-        ).select_related("requirement")
+        ).select_related("requirement", "compliance_assessment")
 
         # Auditee filtering
         respondent_folders = get_respondent_scoped_folder_ids(request.user)
@@ -15425,44 +15566,9 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 continue
 
             results = defaultdict(int)
-            weighted_score = 0
-            total_weight = 0
-            doc_weighted_score = 0
-            doc_total_weight = 0
-            scored_count = 0
-            is_sum = (
-                compliance_assessment.score_calculation_method
-                == compliance_assessment.CalculationMethod.SUM
-            )
             for ra in assessable_list:
                 results[ra.result] += 1
-                if ra.is_scored and ra.result != "not_applicable":
-                    weight = ra.requirement.weight if ra.requirement.weight else 1
-                    weighted_score += (ra.score or 0) * weight
-                    total_weight += weight
-                    scored_count += 1
-                    if compliance_assessment.show_documentation_score:
-                        doc_weighted_score += (ra.documentation_score or 0) * weight
-                        doc_total_weight += weight
-
-            if is_sum:
-                section_score = (
-                    int(weighted_score * 10) / 10 if total_weight > 0 else None
-                )
-                section_doc_score = (
-                    int(doc_weighted_score * 10) / 10 if doc_total_weight > 0 else None
-                )
-            else:
-                section_score = (
-                    int((weighted_score / total_weight) * 10) / 10
-                    if total_weight > 0
-                    else None
-                )
-                section_doc_score = (
-                    int((doc_weighted_score / doc_total_weight) * 10) / 10
-                    if doc_total_weight > 0
-                    else None
-                )
+            scores = compliance_assessment.get_scores_for(assessable_list)
 
             node_name = (
                 get_referential_translation(node, "name")
@@ -15470,27 +15576,13 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 or node.ref_id
                 or str(node.id)
             )
-            # Compute maturity as average of enabled layers
-            enabled_scores = [
-                s for s in [section_score, section_doc_score] if s is not None
-            ]
-            section_maturity = (
-                int(sum(enabled_scores) / len(enabled_scores) * 10) / 10
-                if enabled_scores
-                else None
-            )
-
             sections.append(
                 {
                     "ref_id": node.ref_id,
                     "name": node_name,
                     "total_assessable": len(assessable_list),
                     "results": dict(results),
-                    "implementation_score": section_score,
-                    "documentation_score": section_doc_score,
-                    "maturity_score": section_maturity,
-                    "scored_count": scored_count,
-                    "total_weight": total_weight,
+                    **scores,
                 }
             )
 
@@ -15828,7 +15920,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         ras = RequirementAssessment.objects.filter(
             compliance_assessment=compliance_assessment,
             requirement__assessable=True,
-        ).select_related("requirement")
+        ).select_related("requirement", "compliance_assessment")
 
         # Auditee filtering
         respondent_folders = get_respondent_scoped_folder_ids(request.user)
@@ -15878,57 +15970,12 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
 
             results = defaultdict(int)
             assessed = 0
-            weighted_score = 0
-            total_weight = 0
-            doc_weighted_score = 0
-            doc_total_weight = 0
-            scored_count = 0
-            is_sum = (
-                compliance_assessment.score_calculation_method
-                == compliance_assessment.CalculationMethod.SUM
-            )
-
             for ra in matching_ras:
                 results[ra.result] += 1
                 if ra.result != "not_assessed":
                     assessed += 1
-                if ra.is_scored and ra.result != "not_applicable":
-                    weight = ra.requirement.weight if ra.requirement.weight else 1
-                    weighted_score += (ra.score or 0) * weight
-                    total_weight += weight
-                    scored_count += 1
-                    if compliance_assessment.show_documentation_score:
-                        doc_weighted_score += (ra.documentation_score or 0) * weight
-                        doc_total_weight += weight
-
             total = len(matching_ras)
-            if is_sum:
-                group_score = (
-                    int(weighted_score * 10) / 10 if total_weight > 0 else None
-                )
-                group_doc_score = (
-                    int(doc_weighted_score * 10) / 10 if doc_total_weight > 0 else None
-                )
-            else:
-                group_score = (
-                    int((weighted_score / total_weight) * 10) / 10
-                    if total_weight > 0
-                    else None
-                )
-                group_doc_score = (
-                    int((doc_weighted_score / doc_total_weight) * 10) / 10
-                    if doc_total_weight > 0
-                    else None
-                )
-
-            enabled_scores = [
-                s for s in [group_score, group_doc_score] if s is not None
-            ]
-            group_maturity = (
-                int(sum(enabled_scores) / len(enabled_scores) * 10) / 10
-                if enabled_scores
-                else None
-            )
+            scores = compliance_assessment.get_scores_for(matching_ras)
 
             groups.append(
                 {
@@ -15939,10 +15986,10 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                     "progress_percent": round(assessed / total * 100)
                     if total > 0
                     else 0,
-                    "implementation_score": group_score,
-                    "documentation_score": group_doc_score,
-                    "maturity_score": group_maturity,
-                    "scored_count": scored_count,
+                    "implementation_score": scores["implementation_score"],
+                    "documentation_score": scores["documentation_score"],
+                    "maturity_score": scores["maturity_score"],
+                    "scored_count": scores["scored_count"],
                 }
             )
 
@@ -20362,6 +20409,117 @@ class QuickFormViewSet(BaseModelViewSet):
     def create(self, request, *args, **kwargs):
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
+    @staticmethod
+    def _assessable(request, target_key, subject_id):
+        """(target, subject, may_start): the object a form would assess, and
+        whether the caller may file a response in its domain. None when the
+        target is unknown or the subject is out of the caller's sight."""
+        from core.quick_form_targets import get_target
+
+        target = get_target(str(target_key or ""))
+        if target is None or not subject_id:
+            return None
+        model = apps.get_model(target.subject_model)
+        try:
+            subject = model.objects.filter(pk=subject_id).first()
+        except ValueError, ValidationError:
+            return None
+        if subject is None or not RoleAssignment.is_object_readable(
+            request.user, model, subject.pk
+        ):
+            return None
+        permission = Permission.objects.get(codename="add_quickformresponse")
+        may_start = RoleAssignment.is_access_allowed(
+            user=request.user, perm=permission, folder=Folder.get_folder(subject)
+        )
+        return target, subject, may_start
+
+    @action(detail=False, url_path="assess-options", name="Forms that assess an object")
+    def assess_options(self, request):
+        """What the caller can start to assess an object through `target`:
+        forms they may fill straight from the object, else the publications
+        they may file against. `?target=entity.tier&subject=<id>`."""
+        found = self._assessable(
+            request,
+            request.query_params.get("target"),
+            request.query_params.get("subject"),
+        )
+        if found is None:
+            return Response([])
+        target, _, may_start = found
+        options, seen = [], set()
+        if may_start:
+            for quick_form in self.get_queryset().order_by("name"):
+                if target.key in targets_of(quick_form):
+                    seen.add(quick_form.id)
+                    options.append(
+                        {
+                            "kind": "form",
+                            "id": str(quick_form.id),
+                            "name": quick_form.get_name_translated,
+                        }
+                    )
+        for publication in entitled_quick_form_publications(request.user):
+            if publication.quick_form_id not in seen and target.key in targets_of(
+                publication.quick_form
+            ):
+                options.append(
+                    {
+                        "kind": "publication",
+                        "id": str(publication.id),
+                        "name": publication.name,
+                    }
+                )
+        return Response(options)
+
+    @action(detail=True, methods=["post"], name="Assess an object with this form")
+    def start(self, request, pk):
+        """Start (or resume) the caller's response about `subject`, filed in the
+        subject's domain under the caller's own rights there. No publication:
+        this is the in-house path, for those who may create responses."""
+        from core.object_references import ReferenceError_
+
+        # Not `get_object()`: as a POST it would demand `add_quickform` on the
+        # form's folder (library content, in Global), which analysts — the
+        # people assessing — do not hold. Reading the form is enough; the right
+        # that matters is filing a response in the subject's domain (may_start).
+        quick_form = self.get_queryset().filter(pk=pk).first()
+        if quick_form is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        subject_id = request.data.get("subject")
+        found = next(
+            (
+                f
+                for key in targets_of(quick_form)
+                if (f := self._assessable(request, key, subject_id)) is not None
+            ),
+            None,
+        )
+        if found is None:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        _, subject, may_start = found
+        if not may_start:
+            return Response(
+                {"error": "permissionDenied"}, status=status.HTTP_403_FORBIDDEN
+            )
+        try:
+            response_object, resumed = start_quick_form_response(
+                request.user,
+                subject_id=subject.pk,
+                quick_form=quick_form,
+                folder=Folder.get_folder(subject),
+            )
+        except ReferenceError_ as e:
+            logger.info("Rejected assessment subject", error=e.detail or e.code)
+            return Response({"error": e.code}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {
+                "redirect": f"/quick-form-responses/{response_object.id}",
+                "resumed": resumed,
+                "ref_id": response_object.ref_id,
+            }
+        )
+
     @action(detail=True, methods=["post"], name="Preview a published form")
     def preview(self, request, pk):
         """Answer a published form without creating a response.
@@ -20386,6 +20544,7 @@ class QuickFormViewSet(BaseModelViewSet):
                     "name": page.get_name_translated,
                     "description": page.get_description_translated,
                     "visibility_expression": page.visibility_expression,
+                    "aggregation": page.aggregation,
                     "questions": page.get_questions_translated() or {},
                 }
             )
@@ -20411,6 +20570,18 @@ class QuickFormViewSet(BaseModelViewSet):
                 "progress": evaluation["progress"],
                 "score": evaluation["score"],
                 "computed_outcome": evaluation["computed_outcome"],
+                "computed_values": evaluation["computed_values"],
+                "scored_complete": evaluation["context"]["response"]["scored_complete"],
+                # Authors want to see where answers lead.
+                "projection": project(
+                    quick_form.on_accept,
+                    evaluation["computed_values"],
+                    evaluation["computed_outcome"],
+                    ready=evaluation["context"]["response"]["scored_complete"],
+                    score=evaluation["score"],
+                )
+                if quick_form.on_accept
+                else [],
             }
         )
 
@@ -20484,6 +20655,7 @@ def emit_quick_form_event(response, action):
         "status": response.status,
         "resolution": response.resolution,
         "outcome_refs": response.outcome_refs,
+        "computed_values": response.computed_values,
         "score": response.score,
         "submitted_by": str(response.submitted_by_id)
         if response.submitted_by_id
@@ -20518,6 +20690,89 @@ def _reference_labels(response, user=None):
     return out
 
 
+class _NotAllApplied(Exception):
+    pass
+
+
+def _applies_on_submit(response, user, scored_complete) -> bool:
+    """`can_apply_on_submit`, failing to review: a target that cannot even be
+    planned (its current value unreadable…) must not turn a submit into a 500."""
+    from core.quick_form_apply import can_apply_on_submit
+
+    try:
+        with transaction.atomic():
+            return can_apply_on_submit(response, user, scored_complete=scored_complete)
+    except Exception as e:
+        logger.error(
+            "on_submit_plan_failed", response=str(response.pk), error=e, exc_info=True
+        )
+        return False
+
+
+def _close_on_submit(response, user, evaluation=None) -> list[dict] | None:
+    """Apply a just-submitted response at once when its submitter could make
+    every change by hand (see `can_apply_on_submit`); None when it goes to
+    review. Accepted with the submitter as decider, so workflows and reports
+    treat it as any acceptance; decider == submitter marks a self-assessment.
+    All or nothing: if a target fails to write, nothing is kept and the
+    response goes to review."""
+    from core.cel_service import evaluate_quick_form
+    from core.quick_form_apply import apply_on_accept
+
+    publication = response.publication
+    if not response.quick_form.on_accept or (
+        publication is not None and publication.always_review
+    ):
+        return None
+    if evaluation is None:
+        evaluation = evaluate_quick_form(response, persist=True)
+    scored_complete = evaluation["context"]["response"]["scored_complete"]
+    if not _applies_on_submit(response, user, scored_complete):
+        return None
+    try:
+        with transaction.atomic():
+            response.status = QuickFormResponse.Status.CLOSED
+            response.resolution = QuickFormResponse.Resolution.ACCEPTED
+            response.decided_by = user
+            response.save(
+                update_fields=["status", "resolution", "decided_by", "updated_at"]
+            )
+            applied = apply_on_accept(response, user)
+            if not all(row["applied"] for row in applied):
+                raise _NotAllApplied
+    except _NotAllApplied:
+        response.refresh_from_db()
+        return None
+    except Exception as e:
+        logger.error(
+            "on_submit_apply_failed", response=str(response.pk), error=e, exc_info=True
+        )
+        response.refresh_from_db()
+        return None
+    emit_quick_form_event(response, "closed")
+    return applied
+
+
+def _on_submit_outcome(response, user, evaluation) -> str | None:
+    """For a draft with on-accept targets: "apply" when submitting will write
+    them at once, "review" when it goes to a reviewer. Read from the answers as
+    they stand, not the last persisted evaluation."""
+    # Whoever submits decides the path, so only they get an answer.
+    if (
+        user is None
+        or response.status != QuickFormResponse.Status.DRAFT
+        or not response.quick_form.on_accept
+        or not response.is_requester(user)
+        # Planning costs queries: worth it only once Submit can be clicked.
+        or not evaluation["progress"]["complete"]
+    ):
+        return None
+    response.computed_values = evaluation["computed_values"]
+    response.computed_outcome = evaluation["computed_outcome"]
+    scored_complete = evaluation["context"]["response"]["scored_complete"]
+    return "apply" if _applies_on_submit(response, user, scored_complete) else "review"
+
+
 def _self_validation_allowed(response) -> bool:
     """The escape hatch for small organisations. Never in a personal folder: its owner
     holds analyst there, so they would raise and approve unseen."""
@@ -20549,6 +20804,8 @@ def quick_form_response_content(response, user=None):
     from core.utils import build_answers_dict
 
     evaluation = evaluate_quick_form(response, persist=False)
+    subject = response.subject_summary(user)
+    subject_readable = bool(subject and subject["str"] is not None)
     hidden = set(evaluation["hidden_pages"])
     pages = []
     for page in (
@@ -20584,6 +20841,7 @@ def quick_form_response_content(response, user=None):
                 "description": response.quick_form.get_description_translated,
                 "outcomes_definition": response.quick_form.outcomes_definition,
                 "scores_definition": response.quick_form.scores_definition,
+                "subject_question_urn": response.quick_form.subject_question_urn,
             },
             "pages": pages,
             "answers": answers,
@@ -20595,8 +20853,40 @@ def quick_form_response_content(response, user=None):
             "progress": evaluation["progress"],
             "score": evaluation["score"],
             "computed_outcome": evaluation["computed_outcome"],
+            "computed_values": evaluation["computed_values"],
+            # Until then an unanswered page scores 0: values read as results.
+            "scored_complete": evaluation["context"]["response"]["scored_complete"],
+            # Off on a publication by default (it may reach the vendor itself);
+            # always on for an assessment started from the object, filled in-house.
+            "projection": project(
+                response.quick_form.on_accept,
+                evaluation["computed_values"],
+                evaluation["computed_outcome"],
+                ready=evaluation["context"]["response"]["scored_complete"],
+                score=evaluation["score"],
+            )
+            if response.quick_form.on_accept
+            and (response.publication is None or response.publication.show_projection)
+            else [],
+            "subject": subject,
+            "applications": [
+                {
+                    "target": a.target,
+                    "label": getattr(get_target(a.target), "label", a.target),
+                    # Values and note only for a caller who may view the subject.
+                    "previous": a.previous_display if subject_readable else None,
+                    "new": a.new_display if subject_readable else None,
+                    "overridden": a.overridden,
+                    "note": a.note if subject_readable else None,
+                    # No `applied_by`: this payload also reaches requesters, and
+                    # who decided is the reviewers' business (the log keeps it).
+                    "applied_at": a.created_at,
+                }
+                for a in response.applications.all()
+            ],
             "can_edit_answers": response.status == QuickFormResponse.Status.DRAFT
             and (user is None or response.is_requester(user)),
+            "on_submit": _on_submit_outcome(response, user, evaluation),
             # Whether this viewer may decide. Computed here so the action bar shows
             # what the server will actually accept instead of 403ing on click.
             "can_review": _can_review(user, response) if user is not None else False,
@@ -20620,6 +20910,7 @@ def my_request_row(r):
         "cloned_from": r.cloned_from.ref_id if r.cloned_from_id else None,
         "score": r.score,
         "computed_outcome": r.computed_outcome,
+        "computed_values": r.computed_values,
         "progress": {
             "answered_count": r.answers.exclude(Answer.empty_value_q()).count(),
             "total_count": Question.objects.filter(
@@ -20652,9 +20943,20 @@ def entitled_quick_form_publications(user):
     )
 
 
-def start_quick_form_response(user, publication):
+def start_quick_form_response(
+    user, publication=None, subject_id=None, *, quick_form=None, folder=None
+):
     """Create `user`'s response for `publication`, or hand back the draft they
     already have. Returns (response, resumed).
+
+    Without a publication, `quick_form` and `folder` say what is filled and where
+    it lands: an assessment started from the object itself, under the caller's
+    own rights on that folder (checked by the caller).
+
+    With `subject_id`, the form's subject question is pre-answered with it, checked
+    like any answer the requester could give, and only a draft about that same
+    subject is resumed. Raises ReferenceError_ when the form has no subject
+    question or the requester could not have picked that object.
 
     Built through the ORM rather than the write serializer: that serializer checks
     `add_quickformresponse` on the target folder, the permission a requester is
@@ -20662,32 +20964,51 @@ def start_quick_form_response(user, publication):
     reviewers all come from the publication, and entitlement is the caller's job to
     check before calling.
     """
+    from core.object_references import ReferenceError_, validate_ids
+
+    if publication is not None:
+        quick_form, folder = publication.quick_form, publication.target_folder
     requester = Actor.objects.filter(user=user, entity__isnull=True).first()
+    subject_question = None
+    if subject_id is not None:
+        probe = QuickFormResponse(quick_form=quick_form, folder=folder)
+        subject_question = probe.subject_question()
+        if subject_question is None:
+            raise ReferenceError_("formHasNoSubjectQuestion")
+        validate_ids(
+            subject_question,
+            folder,
+            [str(subject_id)],
+            user=user,
+        )
 
     with transaction.atomic():
-        if requester is not None and not publication.allow_multiple_drafts:
+        multiple = publication is not None and publication.allow_multiple_drafts
+        if requester is not None and not multiple:
             # Inside the transaction, and serialised on the requester's own Actor row.
             # A double click, or a tile clicked in two tabs, otherwise has both requests
             # find no draft and create one each — and `respondents` is an M2M, so no
             # unique constraint can catch it afterwards.
             Actor.objects.select_for_update().filter(pk=requester.pk).first()
-            draft = (
-                QuickFormResponse.objects.filter(
-                    publication=publication,
-                    status=QuickFormResponse.Status.DRAFT,
-                    respondents=requester,
-                )
-                .order_by("-created_at")
-                .first()
+            drafts = QuickFormResponse.objects.filter(
+                publication=publication,
+                quick_form=quick_form,
+                status=QuickFormResponse.Status.DRAFT,
+                respondents=requester,
             )
+            if subject_id is not None:
+                # A draft about another vendor is not the one being asked for.
+                drafts = drafts.filter(subject_object_id=subject_id)
+            draft = drafts.order_by("-created_at").first()
             if draft is not None:
                 return draft, True
 
         response = QuickFormResponse.objects.create(
-            name=publication.name,
-            quick_form=publication.quick_form,
-            folder=publication.target_folder,
+            name=publication.name if publication else quick_form.name,
+            quick_form=quick_form,
+            folder=folder,
             publication=publication,
+            subject_locked=subject_question is not None,
             # Self-service has no "not started yet": the requester is filling it now,
             # and there are no respondents to notify — they are the respondent.
             started_at=timezone.now(),
@@ -20695,9 +21016,14 @@ def start_quick_form_response(user, publication):
         response.seed_answers()
         if requester is not None:
             response.respondents.set([requester])
-        reviewers = list(publication.default_reviewers.all())
+        reviewers = list(publication.default_reviewers.all()) if publication else []
         if reviewers:
             response.reviewers.set(reviewers)
+        if subject_question is not None:
+            Answer.objects.filter(response=response, question=subject_question).update(
+                value=[str(subject_id)]
+            )
+            response.recompute()
     return response, False
 
 
@@ -20769,6 +21095,10 @@ class MyRequestViewSet(viewsets.ViewSet):
                 {"answers": f"unknown question urn(s): {sorted(unknown)[:3]}"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        if response.changes_locked_subject(answers):
+            return Response(
+                {"error": "subjectLocked"}, status=status.HTTP_400_BAD_REQUEST
+            )
         with transaction.atomic():
             apply_answers_dict(
                 "response", response, questions_by_urn, answers, user=request.user
@@ -20819,10 +21149,16 @@ class MyRequestViewSet(viewsets.ViewSet):
             update_fields.append("due_date")
         response.save(update_fields=update_fields)
         emit_quick_form_submitted(response)
-        transaction.on_commit(
-            lambda pk=response.pk: send_quick_form_submitted_notification(pk)
-        )
-        return Response(QuickFormResponseReadSerializer(response).data)
+        applied = _close_on_submit(response, request.user, evaluation)
+        if applied is None:
+            # Nobody to notify when nothing is left to review.
+            transaction.on_commit(
+                lambda pk=response.pk: send_quick_form_submitted_notification(pk)
+            )
+        data = QuickFormResponseReadSerializer(response).data
+        if applied is not None:
+            data = {**data, "on_accept": applied}
+        return Response(data)
 
     @action(
         detail=True,
@@ -20990,6 +21326,8 @@ class MyRequestViewSet(viewsets.ViewSet):
                 folder=source.folder,
                 publication=source.publication,
                 cloned_from=source,
+                # A copy is about the same object.
+                subject_locked=source.subject_locked,
             )
             clone.seed_answers()
             clone.respondents.set(source.respondents.all())
@@ -21090,6 +21428,12 @@ class QuickFormPublicationViewSet(BaseModelViewSet):
     def _entitled_queryset(self, request):
         return entitled_quick_form_publications(request.user)
 
+    @action(detail=False, url_path="on-accept-targets", name="Apply-on-accept targets")
+    def on_accept_targets(self, request):
+        from core.quick_form_apply import target_choices
+
+        return Response(target_choices())
+
     @action(detail=False, name="Publications the caller may file against")
     def mine(self, request):
         return Response(
@@ -21104,6 +21448,9 @@ class QuickFormPublicationViewSet(BaseModelViewSet):
                         "name": publication.quick_form.name,
                     },
                     "domain": str(publication.target_folder),
+                    # Lets an object page offer "assess" for the publications
+                    # that write to it.
+                    "targets": targets_of(publication.quick_form),
                 }
                 for publication in self._entitled_queryset(request)
             ]
@@ -21124,7 +21471,15 @@ class QuickFormPublicationViewSet(BaseModelViewSet):
         if publication is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        response_object, resumed = start_quick_form_response(request.user, publication)
+        from core.object_references import ReferenceError_
+
+        try:
+            response_object, resumed = start_quick_form_response(
+                request.user, publication, subject_id=request.data.get("subject")
+            )
+        except ReferenceError_ as e:
+            logger.info("Rejected request subject", error=e.detail or e.code)
+            return Response({"error": e.code}, status=status.HTTP_400_BAD_REQUEST)
         return Response(
             {
                 "redirect": f"/quick-form-responses/{response_object.id}",
@@ -21150,11 +21505,14 @@ class QuickFormResponseViewSet(BaseModelViewSet):
         # Outcome rows are the queryable projection of `computed_outcome`, which is
         # a JSON blob django-filter cannot reach.
         "outcomes__ref_id",
+        "subject_content_type",
+        "subject_object_id",
     ]
     search_fields = ["name", "description"]
     permission_overrides = {
         "awaiting_conversion": "view_quickformresponse",
         "content": "view_quickformresponse",
+        "accept_preview": "view_quickformresponse",
         "set_status": "view_quickformresponse",
         "start": "change_quickformresponse",
         "status": "view_quickformresponse",
@@ -21349,6 +21707,8 @@ class QuickFormResponseViewSet(BaseModelViewSet):
             )
             .annotate(has_produced=Exists(produced))
             .filter(has_produced=False)
+            # Applying on accept (a vendor's tier…) is the conversion.
+            .exclude(applications__isnull=False)
             .select_related("quick_form", "folder")
             .order_by("-updated_at")
         )
@@ -21560,6 +21920,7 @@ class QuickFormResponseViewSet(BaseModelViewSet):
             return Response(
                 {"error": "onlyRequesterCanSubmit"}, status=status.HTTP_403_FORBIDDEN
             )
+        evaluation = None
         if config.get("check_completion"):
             evaluation = evaluate_quick_form(response, persist=True)
             if not evaluation["progress"]["complete"]:
@@ -21578,6 +21939,8 @@ class QuickFormResponseViewSet(BaseModelViewSet):
             response.observation = observation
 
         resolution = request.data.get("resolution") or ""
+        overrides = request.data.get("overrides") or {}
+        planned = None
         if new_status == QuickFormResponse.Status.CLOSED:
             if resolution not in self.REVIEWER_RESOLUTIONS:
                 return Response(
@@ -21587,6 +21950,26 @@ class QuickFormResponseViewSet(BaseModelViewSet):
                     },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
+            if resolution == QuickFormResponse.Resolution.ACCEPTED and overrides:
+                from core.quick_form_apply import plan
+
+                if not isinstance(overrides, dict):
+                    return Response(
+                        {"error": "invalidOverride"},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                planned = plan(response, request.user, overrides)
+                for item in planned:
+                    proposal = item["proposal"]
+                    if item["target"] in overrides and not proposal.ok:
+                        return Response(
+                            {
+                                "error": "invalidOverride",
+                                "target": item["target"],
+                                "reason": proposal.reason,
+                            },
+                            status=status.HTTP_400_BAD_REQUEST,
+                        )
             response.resolution = resolution
         elif response.resolution:
             # Reopening clears the verdict: the request is live again.
@@ -21642,11 +22025,22 @@ class QuickFormResponseViewSet(BaseModelViewSet):
                 update_fields.append("due_date")
         response.save(update_fields=update_fields)
 
+        on_accept = None
+        if (
+            new_status == QuickFormResponse.Status.CLOSED
+            and response.resolution == QuickFormResponse.Resolution.ACCEPTED
+        ):
+            from core.quick_form_apply import apply_on_accept
+
+            on_accept = apply_on_accept(response, request.user, overrides, planned)
+
         if is_real_submission:
             emit_quick_form_submitted(response)
-            transaction.on_commit(
-                lambda pk=response.pk: send_quick_form_submitted_notification(pk)
-            )
+            on_accept = _close_on_submit(response, request.user, evaluation)
+            if on_accept is None:
+                transaction.on_commit(
+                    lambda pk=response.pk: send_quick_form_submitted_notification(pk)
+                )
         elif new_status == QuickFormResponse.Status.CLOSED:
             # The decision is the interesting moment: `resolution` is on the payload, so
             # a workflow waits for "accepted" rather than for "no longer open".
@@ -21658,4 +22052,18 @@ class QuickFormResponseViewSet(BaseModelViewSet):
             transaction.on_commit(
                 lambda pk=response.pk: send_quick_form_reopened_notification(pk)
             )
-        return Response(QuickFormResponseReadSerializer(response).data)
+        data = QuickFormResponseReadSerializer(
+            response, context={"request": request}
+        ).data
+        if on_accept is not None:
+            data = {**data, "on_accept": on_accept}
+        return Response(data)
+
+    @action(detail=True, methods=["get"], url_path="accept-preview")
+    def accept_preview(self, request, pk):
+        """What accepting would write through the publication's targets, for
+        this reviewer: proposed values, or why a target would write nothing."""
+        from core.quick_form_apply import plan, serialize_plan
+
+        response = self.get_object()
+        return Response(serialize_plan(plan(response, request.user)))

@@ -31,6 +31,7 @@ from rest_framework.views import APIView
 
 from core.base_models import AbstractBaseModel
 from core.constants import COUNTRY_CHOICES
+from core.cyfun import CYFUN_2025_URN
 from core.models import (
     Actor,
     AppliedControl,
@@ -82,14 +83,12 @@ from core.serializers import (
     VulnerabilityWriteSerializer,
 )
 from core.utils import (
-    AUDITOR_ONLY,
     build_questions_dict,
     get_global_currency,
     parse_answers_cell,
 )
 from data_wizard.arm_helpers import process_arm_file
 from data_wizard.cyfun_helpers import (
-    CYFUN_FRAMEWORK_URN,
     CYFUN_LIBRARY_URN,
     LEVEL_TO_GROUP,
     process_cyfun_file,
@@ -641,34 +640,46 @@ def _resolve_owners(value: Any) -> list[UUID]:
 
 
 def build_matrix_mappings(risk_matrix: RiskMatrix) -> dict:
-    """Label-to-value mappings for probability and impact, translations included."""
+    """Label-to-value mappings for probability and impact, translations included.
+
+    A level's value is its position in the matrix definition, which is how
+    risk scenarios index levels everywhere else. Levels carry no reliable
+    "id": built-in libraries and builder-published matrices omit it.
+    """
     mappings: dict[str, dict[str, int]] = {"probability": {}, "impact": {}}
 
     try:
         matrix_definition = risk_matrix.json_definition
         for dimension in ("probability", "impact"):
-            for entry in matrix_definition.get(dimension, []):
-                entry_id = entry.get("id")
-                if entry_id is None:
-                    continue
+            for index, entry in enumerate(matrix_definition.get(dimension, [])):
                 name = entry.get("name", "")
                 if name:
-                    mappings[dimension][name.lower()] = entry_id
-                for translation in entry.get("translations", {}).values():
+                    mappings[dimension][name.strip().lower()] = index
+                for translation in (entry.get("translations") or {}).values():
                     translated = translation.get("name", "")
                     if translated:
-                        mappings[dimension][translated.lower()] = entry_id
+                        mappings[dimension][translated.strip().lower()] = index
     except Exception:
         logger.warning("matrix_mappings_build_failed", exc_info=True)
 
     return mappings
 
 
+# Label the exports write for an unrated level (see RiskScenario._get_risk_data).
+NOT_RATED_LABEL = "--"
+
+
+def is_blank_cell(value: Any) -> bool:
+    return value is None or (isinstance(value, str) and not value.strip())
+
+
 def map_risk_value(value: Any, mapping_dict: dict) -> int:
     """Map a probability/impact label to its matrix value, -1 when undefined."""
-    if value is None or value == "":
+    if is_blank_cell(value):
         return -1
     clean_value = str(value).strip().lower()
+    if clean_value == NOT_RATED_LABEL:
+        return -1
     if clean_value in mapping_dict:
         return mapping_dict[clean_value]
     logger.warning(
@@ -2036,6 +2047,14 @@ class RiskAssessmentRecordConsumer(RecordConsumer[RiskAssessmentContext]):
             "filtering_labels": ["filtering_labels", "labels", "label"],
         }
     )
+    RISK_LEVEL_FIELDS: ClassVar[tuple[str, ...]] = (
+        "inherent_impact",
+        "inherent_proba",
+        "current_impact",
+        "current_proba",
+        "residual_impact",
+        "residual_proba",
+    )
 
     def create_context(self) -> tuple[Optional[RiskAssessmentContext], Optional[Error]]:
         try:
@@ -2170,21 +2189,6 @@ class RiskAssessmentRecordConsumer(RecordConsumer[RiskAssessmentContext]):
             "ref_id": record.get("ref_id", ""),
             "description": record.get("description", ""),
             "risk_assessment": context.risk_assessment.id,
-            "inherent_impact": map_risk_value(record.get("inherent_impact"), impact),
-            "inherent_proba": map_risk_value(
-                record.get("inherent_proba") or record.get("inherent_probability"),
-                probability,
-            ),
-            "current_impact": map_risk_value(record.get("current_impact"), impact),
-            "current_proba": map_risk_value(
-                record.get("current_proba") or record.get("current_probability"),
-                probability,
-            ),
-            "residual_impact": map_risk_value(record.get("residual_impact"), impact),
-            "residual_proba": map_risk_value(
-                record.get("residual_proba") or record.get("residual_probability"),
-                probability,
-            ),
             "treatment": next(
                 (opt for opt, _ in RiskScenario.TREATMENT_OPTIONS if treatment == opt),
                 "open",
@@ -2198,8 +2202,33 @@ class RiskAssessmentRecordConsumer(RecordConsumer[RiskAssessmentContext]):
             ),
         }
 
+        # A level is only written when its cell holds a matrix label or the
+        # explicit "--" (unrated). Blank cells and unknown labels leave the
+        # field out: a new scenario gets the -1 default, an update keeps the
+        # existing rating. Unknown labels are reported on the row.
+        unmapped = []
+        for field_name in self.RISK_LEVEL_FIELDS:
+            raw = next(
+                (
+                    record[key]
+                    for key in self.SOURCE_KEY_MAP.get(field_name, [field_name])
+                    if not is_blank_cell(record.get(key))
+                ),
+                None,
+            )
+            if raw is None:
+                continue
+            mapping = impact if field_name.endswith("_impact") else probability
+            value = map_risk_value(raw, mapping)
+            if value == -1 and str(raw).strip() != NOT_RATED_LABEL:
+                unmapped.append(f"{field_name} '{str(raw).strip()}'")
+                continue
+            scenario_data[field_name] = value
+
         unresolved = existing_controls.failed + additional_controls.failed
         messages = []
+        if unmapped:
+            messages.append(f"Not in the risk matrix: {', '.join(unmapped)}")
         if unresolved:
             messages.append(f"Could not resolve controls: {', '.join(unresolved)}")
         if assets.failed:
@@ -4513,7 +4542,16 @@ class LoadFileView(APIView):
         except ValueError as e:
             return fail(e.args[0] if e.args else "UnrecognizedCyfunWorkbook")
 
-        if not LoadedLibrary.objects.filter(urn=CYFUN_LIBRARY_URN).exists():
+        loaded_library = LoadedLibrary.objects.filter(urn=CYFUN_LIBRARY_URN).first()
+        if loaded_library is not None and (
+            StoredLibrary.objects.filter(
+                urn=CYFUN_LIBRARY_URN, version__gt=loaded_library.version
+            ).exists()
+        ):
+            # The import relies on the scoring settings of the current library
+            # (calculation method, visibility...): update the library first.
+            return fail("CyfunLibraryOutdated")
+        if loaded_library is None:
             stored_library = StoredLibrary.objects.filter(urn=CYFUN_LIBRARY_URN).first()
             if stored_library is None:
                 return fail("CyfunLibraryNotFound")
@@ -4522,7 +4560,7 @@ class LoadFileView(APIView):
                 logger.error("CyFun library import failed", error=error)
                 return fail("CyfunLibraryImportFailed")
         try:
-            framework = Framework.objects.get(urn=CYFUN_FRAMEWORK_URN)
+            framework = Framework.objects.get(urn=CYFUN_2025_URN)
         except Framework.DoesNotExist:
             return fail("CyfunFrameworkNotFound")
 
@@ -4546,12 +4584,6 @@ class LoadFileView(APIView):
             "perimeter": perimeter_id,
             "framework": framework.id,
             "folder": folder_id,
-            "score_calculation_method": ComplianceAssessment.CalculationMethod.AVG_OF_AVG,
-            "field_visibility": {
-                "score": dict(AUDITOR_ONLY),
-                "is_scored": dict(AUDITOR_ONLY),
-                "documentation_score": dict(AUDITOR_ONLY),
-            },
         }
         level = parsed["assurance_level"]
         if level:
@@ -5824,6 +5856,11 @@ class LoadFileView(APIView):
                         solution_data["criticality"] = int(record.get("criticality"))
                     except ValueError, TypeError:
                         pass
+                    # Kept for existing files: the 1-4 value also sets the tier.
+                    from tprm.tiers import tier_for_criticality
+
+                    if tier := tier_for_criticality(record.get("criticality")):
+                        solution_data["tier"] = tier.id
 
                 # Check for existing solution by ref_id or name
                 existing_solution = Solution.objects.filter(ref_id=ref_id).first()
