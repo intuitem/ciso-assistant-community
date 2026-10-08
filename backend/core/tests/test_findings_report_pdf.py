@@ -310,3 +310,21 @@ def test_xlsx_export_escapes_formula_hidden_behind_control_character(
     assert first[header.index("name")] == "'=1+1"
     assert first[header.index("recommendation")] == '\'=HYPERLINK("http://x")'
     assert first[header.index("priority")] == "P1"
+
+
+@pytest.mark.django_db
+def test_xlsx_export_keeps_undefined_status_importable(
+    admin_client,  # noqa: F811
+    assessment,
+):
+    (finding,) = _findings(assessment, [3], rich=True)
+    finding.status = Finding.Status.UNDEFINED
+    finding.save()
+    url = reverse("findings-assessments-xlsx", kwargs={"pk": str(assessment.pk)})
+    response = admin_client.get(url)
+    assert response.status_code == http.HTTP_200_OK
+
+    sheet = openpyxl.load_workbook(io.BytesIO(response.content))["Findings"]
+    rows = list(sheet.iter_rows(values_only=True))
+    header, first = rows[0], rows[1]
+    assert first[header.index("status")] == "--"

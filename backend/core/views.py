@@ -17385,7 +17385,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             entries.append(
                 {
                     k: escape_excel_formula(sanitize_xlsx_value(v))
-                    if isinstance(v, str)
+                    if isinstance(v, str) and k != "status"
                     else v
                     for k, v in entry.items()
                 }
