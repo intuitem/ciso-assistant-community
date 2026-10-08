@@ -4895,6 +4895,12 @@ class AnswerWriteSerializer(BaseModelSerializer):
                 raise serializers.ValidationError(
                     "Answers can only be modified while the response is in progress."
                 )
+            if (
+                question
+                and "value" in attrs
+                and response.changes_locked_subject({question.urn: attrs["value"]})
+            ):
+                raise serializers.ValidationError({"value": "subjectLocked"})
             # Same rule as the `answers` dict on the response itself: folder-level rights
             # on Answer are not rights over someone else's request.
             request = self.context.get("request")
@@ -5322,6 +5328,7 @@ class QuickFormResponseImportExportSerializer(BaseModelSerializer):
             "eta",
             "due_date",
             "computed_outcome",
+            "computed_values",
             "score",
             "started_at",
             "submitted_at",
@@ -7362,6 +7369,7 @@ class QuickFormReadSerializer(BaseModelSerializer):
     pages_count = serializers.SerializerMethodField()
     responses_count = serializers.SerializerMethodField()
     is_deletable = serializers.SerializerMethodField()
+    on_accept_health = serializers.SerializerMethodField()
 
     def get_pages_count(self, obj):
         return obj.pages.count()
@@ -7372,6 +7380,13 @@ class QuickFormReadSerializer(BaseModelSerializer):
     def get_is_deletable(self, obj):
         return obj.is_deletable()
 
+    def get_on_accept_health(self, obj) -> list[dict]:
+        from core.quick_form_apply import on_accept_health
+
+        # One tier scale per request, not per listed form.
+        cache = self.context.setdefault("on_accept_health_cache", {})
+        return on_accept_health(obj, cache) if obj.on_accept else []
+
     class Meta:
         model = QuickForm
         fields = "__all__"
@@ -7381,6 +7396,8 @@ class QuickFormWriteSerializer(BaseModelSerializer):
     class Meta:
         model = QuickForm
         exclude = ["created_at", "updated_at"]
+        # Comes with the library, edited in the library builder.
+        read_only_fields = ["on_accept"]
 
 
 class QuickFormPageReadSerializer(BaseModelSerializer):
@@ -7449,6 +7466,19 @@ class QuickFormResponseReadSerializer(BaseModelSerializer):
     progress = serializers.SerializerMethodField()
     is_deletable = serializers.SerializerMethodField()
     awaiting_conversion = serializers.BooleanField(read_only=True)
+    subject = serializers.SerializerMethodField()
+
+    def get_subject(self, obj):
+        user = getattr(self.context.get("request"), "user", None)
+        # Listed: every subject on the page is labelled at once.
+        page = getattr(self.parent, "instance", None)
+        if page is None or isinstance(page, QuickFormResponse):
+            return obj.subject_summary(user)
+        if "_subject_labels" not in self.context:
+            self.context["_subject_labels"] = QuickFormResponse.subject_labels(
+                page, user
+            )
+        return obj.subject_summary(user, self.context["_subject_labels"])
 
     def get_is_deletable(self, obj) -> bool:
         # Answered per caller: a closed request is administrator-only.
@@ -7484,6 +7514,9 @@ class QuickFormResponseWriteSerializer(BaseModelSerializer):
         read_only_fields = [
             "status",
             "computed_outcome",
+            "computed_values",
+            "subject_content_type",
+            "subject_object_id",
             "score",
             "started_at",
             "submitted_at",
@@ -7520,6 +7553,8 @@ class QuickFormResponseWriteSerializer(BaseModelSerializer):
                 raise serializers.ValidationError(
                     {"answers": "Only the requester can change the answers."}
                 )
+            if self.instance.changes_locked_subject(attrs["answers"]):
+                raise serializers.ValidationError({"answers": "subjectLocked"})
         if self.instance and "quick_form" in attrs:
             if attrs["quick_form"] != self.instance.quick_form:
                 raise serializers.ValidationError(

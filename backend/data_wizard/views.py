@@ -5957,6 +5957,11 @@ class LoadFileView(APIView):
                         solution_data["criticality"] = int(record.get("criticality"))
                     except ValueError, TypeError:
                         pass
+                    # Kept for existing files: the 1-4 value also sets the tier.
+                    from tprm.tiers import tier_for_criticality
+
+                    if tier := tier_for_criticality(record.get("criticality")):
+                        solution_data["tier"] = tier.id
 
                 # Check for existing solution by ref_id or name
                 existing_solution = Solution.objects.filter(ref_id=ref_id).first()

@@ -491,6 +491,12 @@ export const navData = {
 					href: '/entities'
 				},
 				{
+					name: 'criticality',
+					fa_icon: 'fa-solid fa-layer-group',
+					href: '/entities/tiers',
+					permissions: ['view_tier']
+				},
+				{
 					name: 'representatives',
 					fa_icon: 'fa-solid fa-user-tie',
 					href: '/representatives'
