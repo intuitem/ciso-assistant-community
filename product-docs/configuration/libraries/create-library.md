@@ -18,13 +18,52 @@ Decide which objects you need before creating the workbook. For a first Framewor
 
 You can create the Excel workbook from scratch or use `prepare_framework_v2.py` to generate a starting point for a Framework. The script is specific to Frameworks. For other types of library, follow their [object pages](library-objects/README.md) or a dedicated workflow such as [Create a Mapping](create-mapping.md).
 
-### Generate a Framework workbook
+### Set up Python for the scripts
 
-1. Make a copy of [`prepare_framework_v2_config.xlsx`](https://github.com/intuitem/ciso-assistant-community/raw/refs/heads/main/tools/prepare_framework_v2_config.xlsx). Read the `info` sheet, then replace the example values in the `base` sheet with your own. For a first Framework, `base` is enough: leave the optional rows and sheets starting with `#` disabled.
-2. From the CISO Assistant repository root, run [`prepare_framework_v2.py`](https://github.com/intuitem/ciso-assistant-community/blob/main/tools/prepare_framework_v2.py) with your configuration file:
+This setup is not required if you do not plan to use the preparation script for now. You can return to it later if you decide to generate, check, or convert a workbook with Python.
+
+{% hint style="info" %}
+If the `python` command is not recognized, use `python3` instead in the commands below. If a `.py` download opens as text in your browser, right-click and save it with the filename shown in its link.
+{% endhint %}
+
+1. Install [Python](https://www.python.org/) 3.14 or later if needed, then check its version in a terminal:
 
    ```shell
-   python tools/prepare_framework_v2.py --input path/to/your-config.xlsx --output path/to/your-library.xlsx
+   python --version
+   ```
+
+2. Open a terminal in the folder where you will keep your workbook and create a virtual environment:
+
+   ```shell
+   python -m venv .venv
+   ```
+
+3. Activate it. On Windows, use PowerShell:
+
+   ```powershell
+   .\.venv\Scripts\Activate.ps1
+   ```
+
+   On macOS or Linux, use:
+
+   ```shell
+   source .venv/bin/activate
+   ```
+
+4. Install the packages needed to generate and convert the workbook:
+
+   ```shell
+   python -m pip install openpyxl PyYAML
+   ```
+
+### Generate a Framework workbook
+
+1. Download [`prepare_framework_v2_config.xlsx`](https://github.com/intuitem/ciso-assistant-community/raw/refs/heads/main/tools/prepare_framework_v2_config.xlsx), then download the [`prepare_framework_v2.py`](https://raw.githubusercontent.com/intuitem/ciso-assistant-community/refs/heads/main/tools/prepare_framework_v2.py) script. Save both in your working folder. You do not need to download the whole repository.
+2. Read the `info` sheet of the configuration workbook, then replace the example values in `base` with your own. For a first Framework, `base` is enough: leave the optional rows and sheets starting with `#` disabled.
+3. With the virtual environment active, run the script from that folder:
+
+   ```shell
+   python prepare_framework_v2.py --input prepare_framework_v2_config.xlsx --output your-library.xlsx
    ```
 
 With the default sheet name in `base`, the script creates `library_meta`, `framework_meta`, and `framework_content`. It fills in the metadata and the content sheet's column names. You will add the Framework's sections and requirements in the next step.
@@ -49,23 +88,31 @@ For another kind of library, such as a standalone Threats catalogue, use the [Li
 This check is not mandatory. It can help detect common errors and inconsistencies, but it cannot tell whether you have chosen and organized the library's objects appropriately for your framework. You can continue to the next step without doing this step.
 {% endhint %}
 
-If you choose to check the workbook, run [`check_library_v2.py`](https://github.com/intuitem/ciso-assistant-community/blob/main/tools/check_library_v2.py) from the repository root:
+If you choose to check the workbook, follow [the Python setup above](#set-up-python-for-the-scripts) if you have not already done so. Click [here](https://raw.githubusercontent.com/intuitem/ciso-assistant-community/refs/heads/main/tools/check_library_v2.py) to download the [`check_library_v2.py`](https://raw.githubusercontent.com/intuitem/ciso-assistant-community/refs/heads/main/tools/check_library_v2.py) script into the same folder as your workbook. This optional script also needs `pandas`, so install it in the active virtual environment:
 
 ```shell
-python tools/check_library_v2.py path/to/your-library.xlsx
+python -m pip install pandas
+```
+
+Then run the checker from that folder, replacing the example filename with your own:
+
+```shell
+python check_library_v2.py your-library.xlsx
 ```
 
 If the check reports an error, correct the workbook and run it again.
 
 ## 5. Optional: convert the workbook to YAML
 
-You do not need to convert the Excel file before importing it into CISO Assistant. If you want to inspect the resulting YAML, run [`convert_library_v2.py`](https://github.com/intuitem/ciso-assistant-community/blob/main/backend/scripts/convert_library_v2.py) from the repository root:
+This step is only for obtaining a separate YAML version of your workbook. If you do not need one, skip to the next step. When you import the Excel file, CISO Assistant converts it to YAML automatically and loads the library for you. If you want to generate and inspect the YAML yourself, follow [the Python setup above](#set-up-python-for-the-scripts) if needed, then click [here](https://raw.githubusercontent.com/intuitem/ciso-assistant-community/refs/heads/main/backend/scripts/convert_library_v2.py) to download the [`convert_library_v2.py`](https://raw.githubusercontent.com/intuitem/ciso-assistant-community/refs/heads/main/backend/scripts/convert_library_v2.py) script into the same folder as your workbook.
+
+With the virtual environment active, run:
 
 ```shell
-python backend/scripts/convert_library_v2.py path/to/your-library.xlsx
+python convert_library_v2.py your-library.xlsx
 ```
 
-By default, the script creates a `.yaml` file in the current directory with the same base name as the Excel file. For example, `example_framework.xlsx` becomes `example_framework.yaml`.
+The script creates a `.yaml` file in the current directory with the same base name as the Excel workbook you chose. For example, `example_framework.xlsx` becomes `example_framework.yaml`. You can open it in a text editor to inspect the result. If the script reports an error, correct the workbook and run the command again.
 
 ## 6. Import the library
 
