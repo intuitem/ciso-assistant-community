@@ -4978,6 +4978,8 @@ class LoadFileView(APIView):
                 )
                 continue
 
+            # Controls this row created; dropped if the row rolls back.
+            row_controls: list[str] = []
             try:
                 # A savepoint per row: a failing row rolls back alone instead of
                 # aborting the caller's transaction for the rows after it.
@@ -5020,7 +5022,7 @@ class LoadFileView(APIView):
                             controls = _resolve_applied_controls(
                                 controls_cell, compliance_assessment.folder, request
                             )
-                            controls_created.extend(controls.created)
+                            row_controls.extend(controls.created)
                             requirement_data["applied_controls"] = controls.ids
                             if controls.failed:
                                 results["warnings"].append(
@@ -5123,9 +5125,13 @@ class LoadFileView(APIView):
                             }
                         )
             except Exception as e:
+                row_controls = []
                 logger.warning(f"Error updating requirement assessment: {str(e)}")
                 results["failed"] += 1
                 results["errors"].append({"record": record, "error": str(e)})
+            finally:
+                # Also after a row's early `continue`, which keeps its savepoint.
+                controls_created.extend(row_controls)
 
         if controls_created:
             results.setdefault("details", {})["applied_controls_created"] = len(

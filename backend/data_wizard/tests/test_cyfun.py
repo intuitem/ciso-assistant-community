@@ -395,3 +395,52 @@ class TestCyfunImportTransaction:
             ).values_list("requirement__ref_id", "score")
         )
         assert scores == {"GV.OC-01.1": 2, "GV.OC-02.1": None, "GV.OC-03.1": 3}
+
+
+@pytest.mark.django_db
+def test_controls_of_a_rolled_back_row_are_not_counted(
+    app_ready, domain_folder, cyfun_stored_library, monkeypatch
+):
+    """A row that fails rolls back the applied controls it created: they must
+    not be reported as created."""
+    from rest_framework.test import APIRequestFactory
+
+    from core.models import AppliedControl, Framework
+    from core.serializers import RequirementAssessmentWriteSerializer
+    from data_wizard.views import LoadFileView
+    from iam.models import User, UserGroup
+
+    admin = User.objects.create_superuser("rows@datawizard.test")
+    UserGroup.objects.get(name="BI-UG-ADM").user_set.add(admin)
+    assert StoredLibrary.objects.get(urn=CYFUN_LIBRARY_URN).load() is None
+    framework = Framework.objects.get(urn=CYFUN_2025_URN)
+    audit = ComplianceAssessment.objects.create(
+        name="Controls", framework=framework, folder=domain_folder
+    )
+    audit.create_requirement_assessments()
+
+    save = RequirementAssessmentWriteSerializer.save
+
+    def failing_save(serializer, **kwargs):
+        if serializer.instance.requirement.ref_id == "GV.OC-02.1":
+            raise RuntimeError("row failure")
+        return save(serializer, **kwargs)
+
+    monkeypatch.setattr(RequirementAssessmentWriteSerializer, "save", failing_save)
+    request = APIRequestFactory().post("/")
+    request.user = admin
+    results = {"successful": 0, "failed": 0, "errors": []}
+    LoadFileView()._reconcile_compliance_requirements(
+        request,
+        [
+            {"ref_id": "GV.OC-01.1", "assessable": True, "applied_controls": "Kept"},
+            {"ref_id": "GV.OC-02.1", "assessable": True, "applied_controls": "Dropped"},
+        ],
+        audit,
+        framework.id,
+        results,
+    )
+    assert (results["successful"], results["failed"]) == (1, 1)
+    assert results["details"]["applied_controls_created"] == 1
+    assert AppliedControl.objects.filter(name="Kept").exists()
+    assert not AppliedControl.objects.filter(name="Dropped").exists()
