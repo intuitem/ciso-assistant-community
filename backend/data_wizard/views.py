@@ -2878,8 +2878,10 @@ class FolderRecordConsumer(RecordConsumer):
             if parent and parent.name.lower() == domain_name.lower():
                 return parent.id, None
 
+        # The root counts too: files may name it instead of leaving `domain` blank.
         matching_folders = Folder.objects.filter(
-            name__iexact=domain_name, content_type=Folder.ContentType.DOMAIN
+            name__iexact=domain_name,
+            content_type__in=[Folder.ContentType.DOMAIN, Folder.ContentType.ROOT],
         )
         count = matching_folders.count()
         if count == 0:

@@ -865,7 +865,7 @@ Folders (domains) are the top-level organisational units in CISO Assistant. Impo
 
 * Conflict detection is performed by `internal_id` when present, otherwise by `name` + parent folder.
 * When `domain` is left blank the folder is attached to the root of the tenant.
-* `domain` is looked up among domains only. An error is returned if it matches more than one domain, unless the row's `internal_id` points to a domain whose current parent has that name.
+* `domain` is looked up among domains and the root folder (enclaves and personal folders are ignored). An error is returned if it matches more than one, unless the row's `internal_id` points to a domain whose current parent has that name.
 * Label names may only contain letters, digits, `_` or `-` (36 characters at most); a row with an invalid label is rejected. Creating a label that does not exist yet requires the permission to add labels.
 * Setting `create_iam_groups` to true creates the domain's IAM groups. Setting it to false on an existing domain removes them, which is refused while users are assigned to them.
 * The domains list can be exported to Excel or CSV with the same columns, so an export can be edited and re-imported with the **Update** strategy. In update mode, a blank cell leaves the field untouched.

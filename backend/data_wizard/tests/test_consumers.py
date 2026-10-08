@@ -1190,6 +1190,13 @@ class TestFolderConsumer:
         _, error = consumer.prepare_create({"name": "Servers", "domain": "Ops"}, None)
         assert "Multiple" in error.error
 
+    def test_root_can_be_named_as_parent(self, base_context, root_folder):
+        record_data, error = FolderRecordConsumer(base_context).prepare_create(
+            {"name": "TopLevel", "domain": root_folder.name}, None
+        )
+        assert error is None
+        assert record_data["parent_folder"] == root_folder.id
+
     def test_parent_lookup_ignores_non_domain_folders(self, base_context, root_folder):
         domain = Folder.objects.create(
             name="Ops",
