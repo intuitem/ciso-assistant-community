@@ -55,10 +55,12 @@ async function handleRiskAcceptanceTransition(
 
 	const res = await fetch(endpoint, requestInitOptions);
 	if (!res.ok) {
-		const response = await res.json();
-		if (response.non_field_errors) {
-			setError(form, 'non_field_errors', response.non_field_errors);
-		}
+		const response = await res.json().catch(() => ({}));
+		setError(
+			form,
+			'non_field_errors',
+			response.non_field_errors ?? response.error ?? response.detail ?? m.anErrorOccurred()
+		);
 		return fail(400, { form });
 	}
 

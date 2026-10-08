@@ -3828,8 +3828,7 @@ class RiskMatrixViewSet(BaseModelViewSet):
         if risk_assessment_id:
             matrices = matrices.filter(riskassessment__id=risk_assessment_id)
 
-        undefined = {-1: "--"}
-        options = undefined
+        options = {-1: ["--"]}
         for matrix in matrices:
             for i, risk in enumerate(matrix.json_definition.get("risk", [])):
                 translations = risk.get("translations")
@@ -3839,9 +3838,11 @@ class RiskMatrixViewSet(BaseModelViewSet):
 
                 # Use the translated name if available, otherwise fall back to the default name
                 name = translated.get("name") or risk.get("name", "")
-                options[i] = name
+                labels = options.setdefault(i, [])
+                if name not in labels:
+                    labels.append(name)
 
-        res = [{"value": k, "label": v} for k, v in options.items()]
+        res = [{"value": k, "label": " / ".join(v)} for k, v in options.items()]
         return Response(res)
 
     @action(detail=False, name="Get impact choices")
@@ -5418,15 +5419,12 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         from collections import defaultdict
 
         risk_assessment = self.get_object()
-        scoped_folder = risk_assessment.folder
 
         # Get IAM-visible IDs for related objects
         visible_threat_ids = RoleAssignment.get_viewable_object_ids(
-            request.user, Threat, scoped_folder
+            request.user, Threat
         )
-        visible_asset_ids = RoleAssignment.get_viewable_object_ids(
-            request.user, Asset, scoped_folder
-        )
+        visible_asset_ids = RoleAssignment.get_viewable_object_ids(request.user, Asset)
 
         scenarios = RiskScenario.objects.filter(
             risk_assessment=risk_assessment
@@ -7692,11 +7690,15 @@ class RiskScenarioFilter(GenericFilterSet):
         field_name="residual_level", widget=QueryArrayWidget
     )
     # Aliased filters for user-friendly query params
-    folder = df.UUIDFilter(
-        field_name="risk_assessment__perimeter__folder", label="Folder ID"
+    folder = df.ModelMultipleChoiceFilter(
+        queryset=Folder.objects.all(),
+        field_name="risk_assessment__perimeter__folder",
+        label="Folder ID",
     )
-    perimeter = df.UUIDFilter(
-        field_name="risk_assessment__perimeter", label="Perimeter ID"
+    perimeter = df.ModelMultipleChoiceFilter(
+        queryset=Perimeter.objects.all(),
+        field_name="risk_assessment__perimeter",
+        label="Perimeter ID",
     )
     within_tolerance = df.ChoiceFilter(
         choices=[("YES", "YES"), ("NO", "NO"), ("--", "--")],
@@ -8250,22 +8252,6 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
             approver=request.user, state="submitted"
         ).count()
         return Response({"count": acceptance_count})
-
-    def perform_update(self, serializer):
-        risk_acceptance = serializer.validated_data
-
-        if risk_acceptance.get("approver"):
-            for scenario in risk_acceptance.get("risk_scenarios"):
-                if not RoleAssignment.is_access_allowed(
-                    risk_acceptance.get("approver"),
-                    Permission.objects.get(codename="approve_riskacceptance"),
-                    scenario.risk_assessment.folder,
-                ):
-                    raise ValidationError(
-                        "The approver is not allowed to approve this risk acceptance"
-                    )
-        risk_acceptance = serializer.save()
-        dispatch_webhook_event(risk_acceptance, "updated", serializer)
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get state choices")
