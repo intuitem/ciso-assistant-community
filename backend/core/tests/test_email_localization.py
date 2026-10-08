@@ -1,12 +1,20 @@
+from datetime import date
 from string import Template
+from types import SimpleNamespace
 
 import pytest
 
 from core.email_utils import (
+    format_control_list,
+    format_email_date,
+    format_task_node_list,
+    get_email_preferences,
     load_email_template,
     localize_assignment_decision,
     localize_day_unit,
 )
+from global_settings.models import GlobalSettings
+from iam.models import User
 
 
 @pytest.mark.parametrize(
@@ -93,3 +101,234 @@ def test_german_assignment_reviewed_subject_localizes_decision():
         "CISO Assistant: Ihre Aufgabe für 'ISO 27001' wurde zur Überarbeitung "
         "zurückgegeben"
     )
+
+
+@pytest.mark.parametrize(
+    ("locale", "expected_due", "expected_status"),
+    [
+        ("de", "Fällig: 30.09.2026", "Status: Ausstehend"),
+        ("en", "Due: 09/30/2026", "Status: Pending"),
+        ("fr", "Échéance: 30/09/2026", "Statut: En attente"),
+    ],
+)
+def test_task_list_localizes_dynamic_details(locale, expected_due, expected_status):
+    task_template = SimpleNamespace(
+        id="template-id",
+        name="Review access",
+        is_recurrent=False,
+    )
+    task_node = SimpleNamespace(
+        id="node-id",
+        task_template=task_template,
+        due_date=date(2026, 9, 30),
+        status="pending",
+    )
+
+    task_list = format_task_node_list([task_node], locale=locale)
+
+    assert expected_due in task_list
+    assert expected_status in task_list
+
+
+@pytest.mark.parametrize(
+    ("preference", "expected"),
+    [
+        ("iso", "2026-09-30"),
+        ("ddmmyyyy", "30/09/2026"),
+        ("mmddyyyy", "09/30/2026"),
+        ("long_dmy", "30 September 2026"),
+        ("long_mdy", "September 30, 2026"),
+    ],
+)
+def test_email_date_honors_recipient_preference(preference, expected):
+    assert format_email_date(date(2026, 9, 30), "de", preference) == expected
+
+
+def test_task_list_keeps_recipient_locale_when_labels_fall_back():
+    task_template = SimpleNamespace(
+        id="template-id",
+        name="Review access",
+        is_recurrent=False,
+    )
+    task_node = SimpleNamespace(
+        id="node-id",
+        task_template=task_template,
+        due_date=date(2026, 9, 30),
+        status="pending",
+    )
+
+    task_list = format_task_node_list([task_node], locale="es", date_format="long_dmy")
+
+    assert "Due: 30 septiembre 2026" in task_list
+    assert "Status: Pending" in task_list
+
+
+def test_email_date_falls_back_to_english_for_unknown_locale():
+    assert (
+        format_email_date(date(2026, 9, 30), "unknown", "long_dmy")
+        == "30 September 2026"
+    )
+
+
+def test_control_list_uses_german_short_date_for_auto_format():
+    control = SimpleNamespace(name="Zugangssteuerung", eta=date(2026, 9, 30))
+
+    control_list = format_control_list([control], locale="de")
+
+    assert control_list == "- Zugangssteuerung (ETA: 30.09.2026)"
+
+
+@pytest.mark.django_db
+def test_email_preferences_use_user_values_before_instance_defaults():
+    GlobalSettings.objects.update_or_create(
+        name="general",
+        defaults={"value": {"default_language": "en", "default_date_format": "iso"}},
+    )
+    user = User.objects.create_user(email="localized-email@tests.com")
+    user.preferences = {"lang": "de", "date_format": "long_dmy"}
+    user.save(update_fields=["preferences"])
+
+    assert get_email_preferences(user.email) == ("de", "long_dmy")
+
+
+@pytest.mark.django_db
+def test_email_preferences_use_instance_defaults_for_missing_user():
+    GlobalSettings.objects.update_or_create(
+        name="general",
+        defaults={
+            "value": {"default_language": "fr", "default_date_format": "mmddyyyy"}
+        },
+    )
+
+    assert get_email_preferences("external@tests.com") == ("fr", "mmddyyyy")
+
+
+def test_email_preferences_fall_back_when_settings_are_unavailable(monkeypatch):
+    no_result = SimpleNamespace(first=lambda: None)
+    monkeypatch.setattr(User.objects, "filter", lambda **_: no_result)
+    monkeypatch.setattr(GlobalSettings.objects, "filter", lambda **_: no_result)
+
+    assert get_email_preferences("external@tests.com") == ("en", "auto")
+
+
+@pytest.mark.django_db
+def test_email_preferences_fall_back_for_invalid_instance_defaults():
+    GlobalSettings.objects.update_or_create(
+        name="general",
+        defaults={
+            "value": {
+                "default_language": "invalid",
+                "default_date_format": ["invalid"],
+            }
+        },
+    )
+
+    assert get_email_preferences("external@tests.com") == ("en", "auto")
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    ("sender_name", "sender_kwargs", "expected_subject"),
+    [
+        (
+            "send_task_node_due_soon_notification",
+            {"days": 7},
+            "Tâche à échéance",
+        ),
+        ("send_task_node_overdue_notification", {}, "tâche(s) en retard"),
+    ],
+)
+def test_task_email_senders_forward_recipient_preferences(
+    monkeypatch, sender_name, sender_kwargs, expected_subject
+):
+    from core import tasks as core_tasks
+
+    GlobalSettings.objects.update_or_create(
+        name="general",
+        defaults={"value": {"default_language": "en", "default_date_format": "iso"}},
+    )
+    user = User.objects.create_user(email=f"{sender_name}@tests.com")
+    user.preferences = {"lang": "fr", "date_format": "long_dmy"}
+    user.save(update_fields=["preferences"])
+
+    task_template = SimpleNamespace(
+        id="template-id",
+        name="Review access",
+        description="",
+        is_recurrent=False,
+    )
+    task_node = SimpleNamespace(
+        id="node-id",
+        task_template=task_template,
+        due_date=date(2026, 9, 30),
+        status="pending",
+    )
+    sent_messages = []
+
+    monkeypatch.setattr(core_tasks, "check_email_configuration", lambda *_: True)
+    monkeypatch.setattr(
+        core_tasks,
+        "send_notification_email",
+        lambda subject, body, recipient, html_body=None: sent_messages.append(
+            (subject, body, recipient, html_body)
+        ),
+    )
+
+    sender = getattr(core_tasks, sender_name)
+    sender.call_local(user.email, [task_node], **sender_kwargs)
+
+    assert len(sent_messages) == 1
+    subject, body, recipient, html_body = sent_messages[0]
+    assert expected_subject in subject
+    assert recipient == user.email
+    assert "Échéance: 30 septembre 2026" in body
+    assert "Statut: En attente" in body
+    assert "Échéance: 30 septembre 2026" in html_body
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    ("sender_name", "sender_kwargs", "expected_subject"),
+    [
+        ("send_notification_email_expired_eta", {}, "Überfällige Maßnahmen"),
+        (
+            "send_applied_control_expiring_soon_notification",
+            {"days": 7},
+            "Maßnahmen in 7 Tagen fällig",
+        ),
+    ],
+)
+def test_control_email_senders_forward_recipient_preferences(
+    monkeypatch, sender_name, sender_kwargs, expected_subject
+):
+    from core import tasks as core_tasks
+
+    GlobalSettings.objects.update_or_create(
+        name="general",
+        defaults={"value": {"default_language": "en", "default_date_format": "iso"}},
+    )
+    user = User.objects.create_user(email=f"{sender_name}@tests.com")
+    user.preferences = {"lang": "de", "date_format": "long_dmy"}
+    user.save(update_fields=["preferences"])
+
+    control = SimpleNamespace(name="Zugangssteuerung", eta=date(2026, 10, 5))
+    sent_messages = []
+
+    monkeypatch.setattr(core_tasks, "check_email_configuration", lambda *_: True)
+    monkeypatch.setattr(
+        core_tasks,
+        "send_notification_email",
+        lambda subject, body, recipient, html_body=None: sent_messages.append(
+            (subject, body, recipient, html_body)
+        ),
+    )
+
+    sender = getattr(core_tasks, sender_name)
+    sender.call_local(user.email, [control], **sender_kwargs)
+
+    assert len(sent_messages) == 1
+    subject, body, recipient, html_body = sent_messages[0]
+    assert expected_subject in subject
+    assert recipient == user.email
+    assert "Zugangssteuerung (ETA: 5 Oktober 2026)" in body
+    assert "Zugangssteuerung (ETA: 5 Oktober 2026)" in html_body
