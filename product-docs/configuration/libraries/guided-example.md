@@ -161,6 +161,73 @@ The final section, **Monitoring and response**, follows the simpler pattern we u
 | `x` | `2` | `OH.3.2` |  | Record security and safety incidents, including the time, affected area, actions taken and outcome. |
 | `x` | `2` | `OH.3.3` |  | Review every incident within seven days and track corrective actions to closure. |
 
-The question attached to `OH 3.2` can be added later, alongside the other questions. For now, keep the requirements and their hierarchy in place.
+The question attached to `OH 3.2` will be added next, alongside the questions under `OH 2.2`.
+
+## Add the assessment questions
+
+The structure is now in place. The PDF includes two questions under `OH 2.2` and one under `OH 3.2`. We will write those questions in the Framework first, then define how users can answer them.
+
+### Write the questions in `fwk_content`
+
+Add a `questions` column to `fwk_content`. In the rows for `OH.2.2` and `OH.3.2`, copy the questions from the PDF.
+
+The table below shows only these two rows:
+
+| assessable | depth | ref_id | name | description | questions |
+| --- | --- | --- | --- | --- | --- |
+| `x` | `2` | `OH.2.2` |  | Equip the habitat with alerts for strong currents and unauthorized entry, and test both alerts at least monthly. | Are both alerts enabled?<br>Which alerts were tested in the past month? |
+| `x` | `2` | `OH.3.2` |  | Record security and safety incidents, including the time, affected area, actions taken and outcome. | Where is the latest incident record stored, and how can it be retrieved? |
+
+For `OH.2.2`, the two questions go on separate lines **in the same cell**. If you placed a temporary `x` there earlier, replace it with these questions. Leave `questions` empty for rows without questions.
+
+### Create the Answers sheets
+
+The `questions` column contains only the question text. CISO Assistant also needs to know the expected answer type (single choice, multiple choices, or free text) and, where applicable, the possible answers users can select. An [Answers](library-objects/answers.md) object defines both.
+
+Create two sheets named `answ_meta` and `answ_content`. We chose `answ` as their shared prefix, just as we chose `fwk` for the Framework sheets. These prefixes are names you choose, not fixed names required by CISO Assistant. 
+
+Fill `answ_meta` with one property per row:
+
+| Property | Value |
+| --- | --- |
+| `type` | `answers` |
+| `name` | `answ` |
+
+### Link Answers in `fwk_meta`
+
+Add this property to the existing `fwk_meta` sheet, beneath its other metadata:
+
+| Property | Value |
+| --- | --- |
+| `answers_definition` | `answ` |
+
+The value must match `name` in `answ_meta`. This tells the Framework where its answer sets are defined.
+
+### Fill `answ_content`
+
+Create one row for each kind of answer needed by the PDF. Add the `id`, `question_type`, and `question_choices` columns:
+
+| id | question_type | question_choices |
+| --- | --- | --- |
+| `alerts_enabled` | `unique_choice` | Yes<br>No |
+| `alerts_tested` | `multiple_choice` | Strong current<br>Intrusion |
+| `incident_record` | `text` |  |
+
+For the first two rows, enter each choice on a separate line **in the same cell**. Leave `question_choices` empty for the free-text answer. The `id` values are identifiers we choose so the Framework can refer to these answer sets. See [Answers](library-objects/answers.md) for other answer types and optional fields.
+
+### Assign answer IDs in `fwk_content`
+
+Add an `answer` column to `fwk_content`. In each row that has questions, enter the matching IDs from `answ_content`.
+
+Here are the same rows with the new column:
+
+| assessable | depth | ref_id | name | description | questions | answer |
+| --- | --- | --- | --- | --- | --- | --- |
+| `x` | `2` | `OH.2.2` |  | Equip the habitat with alerts for strong currents and unauthorized entry, and test both alerts at least monthly. | Are both alerts enabled?<br>Which alerts were tested in the past month? | `alerts_enabled`<br>`alerts_tested` |
+| `x` | `2` | `OH.3.2` |  | Record security and safety incidents, including the time, affected area, actions taken and outcome. | Where is the latest incident record stored, and how can it be retrieved? | `incident_record` |
+
+The two IDs for `OH.2.2` must be on separate lines **in the same cell**, in the same order as its questions. The first ID belongs to the first question, and the second to the second question.
+
+In our case, when an auditor will assess `OH.2.2` on CISO Assistant, they will see **"Are both alerts enabled?"** with a single choice between **"Yes"** and **"No"**, followed by **"Which alerts were tested in the past month?"** where they can select **"Strong current"**, **"Intrusion"**, or both. These questions complement the requirement.
 
 [TO BE CONTINUED]
