@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { ruleLabel } from '$lib/components/QuickForms/rule-label';
 	import { invalidateAll } from '$app/navigation';
 	import { deserialize } from '$app/forms';
 	import { page } from '$app/state';
@@ -74,7 +75,7 @@
 			score: r.score,
 			outcomes: Object.entries(r.computed_outcome ?? {}).map(([ref_id, v]: [string, any]) => ({
 				ref_id,
-				label: v?.label ?? ref_id,
+				label: ruleLabel(v, ref_id),
 				color: v?.color,
 				description: v?.description
 			})),

@@ -627,6 +627,7 @@
 	"libraryLoadingError": "آپ کی لائبریری لوڈ کرتے وقت ایک خرابی پیش آئی",
 	"processingError": "پروسیسنگ کی خرابی",
 	"libraryAlreadyLoadedError": "یہ لائبریری پہلے ہی لوڈ ہو چکی ہے",
+	"libraryOutdatedError": "اس لائبریری کا نیا ورژن پہلے سے محفوظ ہے۔ درآمد کرنے کے لیے اپنی فائل میں زیادہ \"version\" مقرر کریں۔",
 	"invalidLibraryFileError": "غلط لائبریری فائل۔ براہ کرم یقینی بنائیں کہ فارمیٹ درست ہے۔",
 	"taintedFormMessage": "کیا آپ اس صفحے کو چھوڑنا چاہتے ہیں؟ آپ کی گئی تبدیلیاں محفوظ نہیں ہو سکتی ہیں۔",
 	"riskScenariosStatus": "خطرے کے منظرناموں کی حیثیت",
@@ -637,7 +638,6 @@
 	"attemptToDeleteOnlyAdminAccountError": "آپ اپنے ایپلیکیشن کے واحد ایڈمن اکاؤنٹ کو حذف نہیں کر سکتے۔",
 	"attemptToRemoveOnlyAdminUserGroup": "آپ اپنے ایپلیکیشن کے واحد ایڈمن صارف کو ایڈمن صارف گروپ سے نہیں ہٹا سکتے۔",
 	"attemptToRemoveSelfFromDomainAdminGroup": "آپ خود کو ڈومین ایڈمنسٹریٹر گروپ سے نہیں ہٹا سکتے۔ کسی دوسرے ایڈمنسٹریٹر سے ایسا کرنے کو کہیں۔",
-	"scoringHelpText": "اسکورنگ کو فعال کرنے کے لیے چیک کریں",
 	"overrideScore": "اسکور کو اووررائیڈ کریں",
 	"overrideScoreHelpText": "اسکور کو دستی طور پر مقرر کریں اور جوابات سے اس کا دوبارہ حساب روک دیں",
 	"automaticScore": "خودکار اسکور",
@@ -1607,5 +1607,7 @@
 	"attributeMappingGroups": "گروپس ایٹریبیوٹ میپنگ",
 	"attributeMappingGroupsHelpText": "کلیم کا نام جو صارف کی IdP گروپ رکنیت لے جاتا ہے۔ یہاں پائے جانے والے گروپس ہر لاگ ان پر IdP گروپس کے ساتھ ہم آہنگ کیے جاتے ہیں، اور ایڈمن کے ذریعے میپ کیے گئے کسی بھی CISO Assistant صارف گروپ تک رسائی دیتے ہیں۔",
 	"jitProvisioning": "SSO خودکار پرووژننگ (JIT)",
-	"jitProvisioningDescription": "پہلی SSO لاگ ان پر اکاؤنٹس کی خودکار تخلیق، اور ان کی IdP گروپ رکنیت کی مطابقت پذیری کو فعال کریں، بغیر SCIM کی ضرورت کے۔"
+	"jitProvisioningDescription": "پہلی SSO لاگ ان پر اکاؤنٹس کی خودکار تخلیق، اور ان کی IdP گروپ رکنیت کی مطابقت پذیری کو فعال کریں، بغیر SCIM کی ضرورت کے۔",
+	"includeNotApplicableRequirements": "غیر قابلِ اطلاق ضروریات شامل کریں",
+	"excludeNotApplicableRequirements": "غیر قابلِ اطلاق ضروریات خارج کریں"
 }
