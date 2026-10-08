@@ -1910,8 +1910,10 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
         record_severity = record.get("severity")
         severity = self.SEVERITY_MAP.get(record_severity, -1)
 
-        # Parse priority (1-4)
+        # Parse priority: 1-4, or the "P1".."P4" labels the export writes
         priority = record.get("priority")
+        if isinstance(priority, str):
+            priority = priority.strip().upper().removeprefix("P")
         if isinstance(priority, (int, float)):
             priority = int(priority)
         elif isinstance(priority, str) and priority.isdigit():
@@ -1972,6 +1974,7 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
             "eta": _parse_date(record.get("eta")),
             "due_date": _parse_date(record.get("due_date")),
             "observation": record.get("observation", ""),
+            "recommendation": record.get("recommendation", ""),
             "vulnerabilities": vulnerabilities,
             "applied_controls": applied_controls.ids,
         }
