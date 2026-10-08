@@ -118,6 +118,19 @@
 	const showStatus = $derived(fieldVis.showStatus);
 	const showScore = $derived(fieldVis.showScore);
 
+	const outcomeRules = $derived(
+		(compliance_assessment.outcome_rules ?? []) as Record<string, any>[]
+	);
+	const verdictRules = $derived(outcomeRules.filter((rule) => rule.kind !== 'number'));
+	const shownValues = $derived(
+		outcomeRules.filter(
+			(rule) =>
+				rule.kind === 'number' &&
+				(rule.annotation || rule.label) &&
+				compliance_assessment.computed_values?.[rule.ref_id] != null
+		)
+	);
+
 	const has_threats = data.threats.total_unique_threats > 0;
 
 	const objectsNotVisibleLabel = (count: number): string => {
@@ -841,11 +854,11 @@
 					<div class="font-medium">{m.createdAt()}</div>
 					{formatDateOrDateTime(data.compliance_assessment.created_at, getLocale())}
 				</div>
-				{#if showResult && compliance_assessment.framework.outcomes_definition?.length}
+				{#if showResult && (verdictRules.length || shownValues.length)}
 					<div>
 						<div class="text-sm font-medium text-surface-800-200">{safeTranslate('outcomes')}</div>
 						<div class="flex flex-wrap gap-1.5 mt-1">
-							{#each compliance_assessment.framework.outcomes_definition as rule}
+							{#each verdictRules as rule (rule.ref_id)}
 								{@const isActive =
 									compliance_assessment.computed_outcome &&
 									rule.ref_id in compliance_assessment.computed_outcome}
@@ -868,6 +881,19 @@
 										class:opacity-40={!isActive}
 									></span>
 									{ruleLabel(rule, rule.ref_id)}
+								</span>
+							{/each}
+							{#each shownValues as rule (rule.ref_id)}
+								<span
+									class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs border border-surface-300-700 bg-surface-50-950 text-surface-800-200"
+								>
+									{ruleLabel(rule, rule.ref_id)}
+									<span class="font-semibold tabular-nums"
+										>{Number(compliance_assessment.computed_values[rule.ref_id]).toLocaleString(
+											getLocale(),
+											{ maximumFractionDigits: 2 }
+										)}</span
+									>
 								</span>
 							{/each}
 						</div>

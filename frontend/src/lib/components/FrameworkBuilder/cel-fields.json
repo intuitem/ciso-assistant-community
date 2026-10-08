@@ -15,10 +15,55 @@
 		"answers": ["value", "score", "selected_choices", "weight", "type", "answered"]
 	},
 	"framework": {
-		"roots": ["assessment", "requirements", "answers", "computed_outcomes", "hidden_requirements"],
+		"roots": [
+			"assessment",
+			"requirements",
+			"sections",
+			"groups",
+			"answers",
+			"values",
+			"computed_outcomes",
+			"hidden_requirements"
+		],
 		"visibility_roots": ["assessment", "requirements", "answers", "computed_outcomes"],
-		"assessment": ["score_sum", "score_max", "answered_count", "total_count"],
-		"requirements": ["score", "max_score", "result", "status"],
+		"assessment": [
+			"score_sum",
+			"score_max",
+			"answered_count",
+			"total_count",
+			"selected_implementation_groups"
+		],
+		"assessment_scores": [
+			"implementation_score",
+			"documentation_score",
+			"maturity_score",
+			"target_score"
+		],
+		"requirements": [
+			"score",
+			"max_score",
+			"result",
+			"status",
+			"documentation_score",
+			"maturity_score",
+			"implementation_groups"
+		],
+		"sections": [
+			"implementation_score",
+			"documentation_score",
+			"maturity_score",
+			"scored_count",
+			"total_count",
+			"depth",
+			"ref_id"
+		],
+		"groups": [
+			"implementation_score",
+			"documentation_score",
+			"maturity_score",
+			"scored_count",
+			"total_count"
+		],
 		"answers": ["value", "score", "selected_choices", "weight", "type"]
 	}
 }

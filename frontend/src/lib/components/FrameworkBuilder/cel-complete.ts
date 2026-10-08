@@ -23,6 +23,10 @@ export interface CelCatalog {
 	/** Pages (quick forms) or assessable requirements (frameworks). */
 	nodes: { id: string; label: string }[];
 	questions: CelQuestion[];
+	/** Frameworks: nodes with children, scored as `sections[id]`. */
+	sections?: { id: string; label: string }[];
+	/** Frameworks: implementation groups, scored as `groups[id]`. */
+	groups?: { id: string; label: string }[];
 }
 
 /** Where an expression runs: rules see `values`, visibility does not. */
@@ -48,14 +52,31 @@ export interface CelCompletion {
 
 const CHOICE_TYPES = new Set(['unique_choice', 'multiple_choice']);
 
-export function buildCelCatalog(nodes: BuilderNode[], mode: CelMode): CelCatalog {
-	const catalog: CelCatalog = { mode, nodes: [], questions: [] };
+export function buildCelCatalog(
+	nodes: BuilderNode[],
+	mode: CelMode,
+	groups: { id: string; label: string }[] = []
+): CelCatalog {
+	const catalog: CelCatalog = {
+		mode,
+		nodes: [],
+		questions: [],
+		sections: [],
+		groups: mode === 'framework' ? groups : []
+	};
 	const walk = (list: BuilderNode[], top: boolean) => {
 		for (const bn of list) {
 			const nodeId = extractNodeId(bn.node.urn);
 			const label = bn.node.name || bn.node.ref_id || nodeId || '';
 			const listed = mode === 'quick_form' ? top : bn.node.assessable;
 			if (nodeId && listed) catalog.nodes.push({ id: nodeId, label });
+			if (nodeId && mode === 'framework' && bn.children.length) {
+				const ref = bn.node.ref_id;
+				catalog.sections?.push({
+					id: nodeId,
+					label: ref && ref !== label ? `${ref} ${label}` : label
+				});
+			}
 			for (const { question } of bn.questions) {
 				const id = extractNodeId(question.urn);
 				if (!id) continue;
@@ -93,6 +114,13 @@ function fieldDetails(mode: CelMode): Record<string, Record<string, string>> {
 		type: m.builderCelAnswerType(),
 		answered: m.builderCelAnswerAnswered()
 	};
+	const subset = {
+		implementation_score: m.builderCelSubsetImplementationScore(),
+		documentation_score: m.builderCelSubsetDocumentationScore(),
+		maturity_score: m.builderCelSubsetMaturityScore(),
+		scored_count: m.builderCelSubsetScoredCount(),
+		total_count: m.builderCelSubsetTotalCount()
+	};
 	if (mode === 'quick_form') {
 		return {
 			roots: {
@@ -126,7 +154,10 @@ function fieldDetails(mode: CelMode): Record<string, Record<string, string>> {
 		roots: {
 			assessment: m.builderCelGroupAssessment(),
 			requirements: m.builderCelGroupRequirements(),
+			sections: m.builderCelGroupSections(),
+			groups: m.builderCelGroupImplementationGroups(),
 			answers: m.builderCelGroupAnswers(),
+			values: m.builderCelValues(),
 			computed_outcomes: m.builderCelComputedOutcomes(),
 			hidden_requirements: m.builderCelHiddenRequirements()
 		},
@@ -134,14 +165,24 @@ function fieldDetails(mode: CelMode): Record<string, Record<string, string>> {
 			score_sum: m.builderCelScoreSum(),
 			score_max: m.builderCelScoreMax(),
 			answered_count: m.builderCelAnsweredCount(),
-			total_count: m.builderCelTotalCount()
+			total_count: m.builderCelTotalCount(),
+			selected_implementation_groups: m.builderCelSelectedGroups(),
+			implementation_score: m.builderCelAssessmentImplementationScore(),
+			documentation_score: m.builderCelAssessmentDocumentationScore(),
+			maturity_score: m.builderCelAssessmentMaturityScore(),
+			target_score: m.builderCelAssessmentTargetScore()
 		},
 		requirements: {
 			score: m.builderCelReqScore(),
 			max_score: m.builderCelReqMaxScore(),
 			result: m.builderCelReqResult(),
-			status: m.builderCelReqStatus()
+			status: m.builderCelReqStatus(),
+			documentation_score: m.builderCelReqDocumentationScore(),
+			maturity_score: m.builderCelReqMaturityScore(),
+			implementation_groups: m.builderCelReqGroups()
 		},
+		sections: { ...subset, depth: m.builderCelSectionDepth(), ref_id: m.builderCelSectionRefId() },
+		groups: subset,
 		answers
 	};
 }
@@ -184,11 +225,19 @@ export function celSuggestions(
 	const spec = FIELDS[catalog.mode] as Record<string, string[]>;
 	const details = fieldDetails(catalog.mode);
 	const nodeScope = catalog.mode === 'quick_form' ? 'pages' : 'requirements';
+	const outcome = place.where === 'outcome';
+	const ids: Record<string, { id: string; label: string }[]> = {
+		[nodeScope]: catalog.nodes,
+		...(catalog.mode === 'framework' && outcome
+			? { sections: catalog.sections ?? [], groups: catalog.groups ?? [] }
+			: {})
+	};
+	const scopes = [...Object.keys(ids), 'answers'].join('|');
 	const result = (from: number, to: number, items: CelSuggestion[]) =>
 		items.length ? { from, to, items } : null;
 
-	// pages["…  /  answers["…  /  requirements["…
-	let match = new RegExp(`\\b(${nodeScope}|answers)\\[\\s*(["']?)([^"'\\]]*)$`).exec(before);
+	// pages["…  /  answers["…  /  requirements["…  /  sections["…
+	let match = new RegExp(`\\b(${scopes})\\[\\s*(["']?)([^"'\\]]*)$`).exec(before);
 	if (match) {
 		const [, scope, quote, typed] = match;
 		const from = cursor - quote.length - typed.length;
@@ -201,7 +250,7 @@ export function celSuggestions(
 						detail: `${q.label} · ${q.group}`,
 						again: true
 					}))
-				: catalog.nodes.map((n) => ({
+				: ids[scope].map((n) => ({
 						label: n.id,
 						insert: `"${n.id}"].`,
 						detail: n.label,
@@ -224,9 +273,7 @@ export function celSuggestions(
 	}
 
 	// pages["p"].…  /  answers["q"].…
-	match = new RegExp(`\\b(${nodeScope}|answers)\\[\\s*["']([^"']*)["']\\s*\\]\\.(\\w*)$`).exec(
-		before
-	);
+	match = new RegExp(`\\b(${scopes})\\[\\s*["']([^"']*)["']\\s*\\]\\.(\\w*)$`).exec(before);
 	if (match) {
 		const [, scope, id, typed] = match;
 		let names = spec[scope] ?? [];
@@ -254,11 +301,13 @@ export function celSuggestions(
 							detail: m.builderCelValues()
 						}))
 					: []
-				: (spec[root] ?? []).map((name) => ({
-						label: name,
-						insert: name,
-						detail: details[root]?.[name]
-					}));
+				: [...(spec[root] ?? []), ...(outcome ? (spec[`${root}_scores`] ?? []) : [])].map(
+						(name) => ({
+							label: name,
+							insert: name,
+							detail: details[root]?.[name]
+						})
+					);
 		return result(cursor - typed.length, cursor, matching(items, typed));
 	}
 
@@ -287,7 +336,7 @@ export function celSuggestions(
 	const roots = spec[place.where === 'visibility' ? 'visibility_roots' : 'roots'] ?? [];
 	const items: CelSuggestion[] = [
 		...roots.map((name) => {
-			const indexed = name === nodeScope || name === 'answers';
+			const indexed = name in ids || name === 'answers';
 			const dotted = name === 'response' || name === 'assessment' || name === 'values';
 			return {
 				label: name,

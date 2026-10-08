@@ -80,7 +80,14 @@ def _build_answer_data(ca, in_scope_node_ids) -> dict[str, dict]:
 
 
 def _build_context_dict(
-    in_scope, ra_rows, answer_data, max_score, computed_outcomes=None
+    in_scope,
+    ra_rows,
+    answer_data,
+    max_score,
+    computed_outcomes=None,
+    min_score=0,
+    with_documentation=False,
+    selected_groups=None,
 ) -> dict:
     """Build the raw context dict from in-scope nodes, RA rows, and answer data."""
     from core.utils import extract_node_id
@@ -100,11 +107,18 @@ def _build_context_dict(
         if ra and ra["is_scored"] and ra["result"] != "not_applicable":
             score_sum += ra["score"] or 0
             answered_count += 1
+            score = ra["score"] or 0
+            documentation = ra.get("documentation_score")
+            documentation = min_score if documentation is None else documentation
             entry = {
-                "score": ra["score"] or 0,
+                "score": score,
                 "max_score": max_score,
                 "result": ra["result"],
                 "status": ra["status"],
+                "documentation_score": documentation,
+                "maturity_score": float(
+                    (score + documentation) / 2 if with_documentation else score
+                ),
             }
         else:
             entry = {
@@ -112,7 +126,10 @@ def _build_context_dict(
                 "max_score": max_score,
                 "result": ra["result"] if ra else "not_assessed",
                 "status": ra["status"] if ra else "to_do",
+                "documentation_score": 0,
+                "maturity_score": 0.0,
             }
+        entry["implementation_groups"] = list(node.get("implementation_groups") or [])
 
         if node_id:
             requirements[node_id] = entry
@@ -123,6 +140,7 @@ def _build_context_dict(
             "score_max": score_max,
             "answered_count": answered_count,
             "total_count": total_count,
+            "selected_implementation_groups": list(selected_groups or []),
         },
         "requirements": requirements,
         "answers": answer_data,
@@ -192,7 +210,14 @@ def build_cel_context(compliance_assessment) -> tuple[dict, set[str]]:
         for row in RequirementAssessment.objects.filter(
             compliance_assessment=ca,
             requirement_id__in=in_scope_node_ids,
-        ).values("requirement__urn", "score", "result", "status", "is_scored")
+        ).values(
+            "requirement__urn",
+            "score",
+            "documentation_score",
+            "result",
+            "status",
+            "is_scored",
+        )
     }
 
     # Query 3: answer-level data for in-scope requirements
@@ -200,10 +225,15 @@ def build_cel_context(compliance_assessment) -> tuple[dict, set[str]]:
 
     max_score = ca.max_score or 100
     computed_outcomes = ca.computed_outcome if ca.computed_outcome else {}
+    scale = {
+        "min_score": ca.min_score or 0,
+        "with_documentation": bool(ca.show_documentation_score),
+        "selected_groups": ca.selected_implementation_groups,
+    }
 
     # Phase 1: build initial context with assessable in-scope nodes
     initial_context = _build_context_dict(
-        in_scope, ra_rows, answer_data, max_score, computed_outcomes
+        in_scope, ra_rows, answer_data, max_score, computed_outcomes, **scale
     )
 
     # Phase 2: evaluate visibility expressions (single-pass)
@@ -255,6 +285,7 @@ def build_cel_context(compliance_assessment) -> tuple[dict, set[str]]:
             visible_answer_data,
             max_score,
             visible_outcomes,
+            **scale,
         )
         final_context["hidden_requirements"] = [
             extract_node_id(u) for u in hidden_urns if extract_node_id(u)
@@ -268,52 +299,161 @@ def build_cel_context(compliance_assessment) -> tuple[dict, set[str]]:
     return final_context, hidden_urns
 
 
+_SCORE_LAYERS = ("implementation_score", "documentation_score", "maturity_score")
+
+
+def _layers(scores: dict) -> dict:
+    """Score layers for CEL: -1 when nothing is scored, as the global score."""
+    return {
+        layer: -1.0
+        if scores.get(layer) is None or scores.get(layer) == -1
+        else float(scores[layer])
+        for layer in _SCORE_LAYERS
+    }
+
+
+def _subset_scores(ca, ras) -> dict:
+    scores = ca.get_scores_for(ras)
+    return {
+        **_layers(scores),
+        "scored_count": scores["scored_count"],
+        "total_count": len(ras),
+    }
+
+
+def _group_scores(ca, framework, ras) -> dict:
+    groups = {}
+    for group in framework.implementation_groups_definition or []:
+        ref_id = (group or {}).get("ref_id")
+        members = [
+            ra for ra in ras if ref_id in (ra.requirement.implementation_groups or [])
+        ]
+        if ref_id and members:
+            groups[ref_id] = _subset_scores(ca, members)
+    return groups
+
+
+def _node_depths(parents: dict) -> dict:
+    """Depth of each node from its parent links, the top level being 1."""
+    depths: dict = {}
+
+    def depth(urn, seen=()):
+        if urn not in depths:
+            parent = parents.get(urn)
+            depths[urn] = (
+                depth(parent, (*seen, urn))
+                if parent in parents and parent not in seen
+                else 0
+            ) + 1
+        return depths[urn]
+
+    for urn in parents:
+        depth(urn)
+    return depths
+
+
+def _section_scores(ca, framework, ras) -> dict:
+    from core.models import RequirementNode
+    from core.utils import extract_node_id
+
+    nodes = {
+        row["urn"]: row
+        for row in RequirementNode.objects.filter(framework=framework).values(
+            "urn", "parent_urn", "ref_id"
+        )
+    }
+    depths = _node_depths({urn: row["parent_urn"] for urn, row in nodes.items()})
+    members: dict[str, list] = {}
+    for ra in ras:
+        parent, seen = ra.requirement.parent_urn, set()
+        while parent in nodes and parent not in seen:
+            seen.add(parent)
+            members.setdefault(parent, []).append(ra)
+            parent = nodes[parent]["parent_urn"]
+    sections = {}
+    for urn, section_ras in members.items():
+        node_id = extract_node_id(urn)
+        if node_id:
+            sections[node_id] = {
+                **_subset_scores(ca, section_ras),
+                "depth": depths[urn],
+                "ref_id": nodes[urn]["ref_id"] or "",
+            }
+    return sections
+
+
+def _add_scores(context: dict, ca, framework, rules) -> None:
+    """The audit's scores as its page shows them; section and group scores
+    only when a rule reads them, over the requirements in `context`."""
+    from core.models import RequirementAssessment
+    from core.utils import extract_node_id
+
+    ras = list(
+        RequirementAssessment.objects.filter(
+            compliance_assessment=ca, requirement__assessable=True
+        ).select_related("requirement", "compliance_assessment")
+    )
+    context["assessment"].update(
+        {
+            **_layers(ca.get_global_score(prefetched_requirements=ras)),
+            "target_score": float(
+                ca.target_score if ca.target_score is not None else ca.max_score or 0
+            ),
+        }
+    )
+    expressions = " ".join(str(rule.get("expression") or "") for rule in rules)
+    visible = [
+        ra
+        for ra in ras
+        if extract_node_id(ra.requirement.urn) in context["requirements"]
+    ]
+    if re.search(r"\bgroups\b", expressions):
+        context["groups"] = _group_scores(ca, framework, visible)
+    if re.search(r"\bsections\b", expressions):
+        context["sections"] = _section_scores(ca, framework, visible)
+
+
+def rule_applies(rule: dict, selected_groups) -> bool:
+    """A rule limited to implementation groups applies when the audit's scope
+    includes one of them, or covers the whole framework, as for requirements."""
+    groups = (rule or {}).get("implementation_groups") or []
+    return not groups or not selected_groups or bool(set(groups) & set(selected_groups))
+
+
 def evaluate_outcomes(compliance_assessment) -> None:
-    """Evaluate CEL outcome rules and store all matching results on the assessment."""
-    from core.models import Framework
+    """Evaluate the framework's outcome rules that apply to the audit's scope and
+    store the yes/no rules that fired and the numbers computed."""
+    from core.models import ComplianceAssessment, Framework
 
     ca = compliance_assessment
     # Refresh framework from DB to pick up any changes to outcomes_definition
     # (the FK cache may be stale when called from deferred on_commit hooks)
     framework = Framework.objects.get(pk=ca.framework_id)
-    outcomes_def = framework.outcomes_definition
+    rules = [
+        rule
+        for rule in framework.outcomes_definition or []
+        if rule_applies(rule, ca.selected_implementation_groups)
+    ]
 
-    if not outcomes_def:
-        if ca.computed_outcome is not None:
-            ca.computed_outcome = None
-            ca.save(update_fields=["computed_outcome"])
-        return
+    computed = values = None
+    if rules:
+        context, _hidden = build_cel_context(ca)
+        _add_scores(context, ca, framework, rules)
+        computed, values = _evaluate_rules(
+            celpy.Environment(),
+            rules,
+            context,
+            compliance_assessment_id=str(ca.pk),
+        )
+        if not any(is_numeric_rule(rule) for rule in rules):
+            values = None
 
-    context, _hidden = build_cel_context(ca)
-    cel_context = {k: _python_to_cel(v) for k, v in context.items()}
-
-    computed = {}
-    env = celpy.Environment()
-    for rule in outcomes_def:
-        expression = rule.get("expression", "")
-        ref_id = rule.get("ref_id", "")
-        if not expression or not ref_id:
-            continue
-        try:
-            ast = env.compile(expression)
-            prog = env.program(ast)
-            result = prog.evaluate(cel_context)
-            if result:
-                computed[ref_id] = {
-                    k: v for k, v in rule.items() if k not in ("expression", "ref_id")
-                }
-        except Exception:
-            logger.warning(
-                "cel_evaluation_error",
-                expression=expression,
-                compliance_assessment_id=str(ca.pk),
-                exc_info=True,
-            )
-            continue
-
-    if ca.computed_outcome != computed:
+    if ca.computed_outcome != computed or ca.computed_values != values:
         ca.computed_outcome = computed
-        ca.save(update_fields=["computed_outcome"])
+        ca.computed_values = values
+        ComplianceAssessment.objects.filter(pk=ca.pk).update(
+            computed_outcome=computed, computed_values=values
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -575,11 +715,15 @@ def _as_number(result) -> float | None:
     return None
 
 
-def _evaluate_quick_form_rules(env, rules, context: dict, **log_fields):
-    """Run a quick form's outcome rules against `context`.
+_NOT_PASSED_ON = ("expression", "ref_id", "implementation_groups")
 
-    Numeric rules (`kind: number`) run first, in order, each seeing the values
-    computed before it as `values.<ref_id>`; the yes/no rules then see them all.
+
+def _evaluate_rules(env, rules, context: dict, **log_fields):
+    """Run outcome rules against `context`, in their order.
+
+    Number rules (`kind: number`) run first, each seeing the values computed
+    before it as `values.<ref_id>`; the yes/no rules then see them all, and
+    each sees the yes/no rules above it that fired as `computed_outcomes`.
     Returns (fired, values): the classifications that fired, keyed by ref_id
     with their pass-through attributes, and {ref_id: float}. Fail-open per rule:
     an expression error or a non-number result is logged and skipped.
@@ -587,13 +731,24 @@ def _evaluate_quick_form_rules(env, rules, context: dict, **log_fields):
     values: dict[str, float] = {}
     fired: dict[str, dict] = {}
     rules = [r for r in rules or [] if r.get("expression") and r.get("ref_id")]
+    base = {
+        k: _python_to_cel(v)
+        for k, v in context.items()
+        if k not in ("values", "computed_outcomes")
+    }
+
+    def run(rule):
+        return env.program(env.compile(rule["expression"])).evaluate(
+            {
+                **base,
+                "values": _python_to_cel(values),
+                "computed_outcomes": _python_to_cel(fired),
+            }
+        )
 
     for rule in [r for r in rules if is_numeric_rule(r)]:
-        cel_context = {
-            k: _python_to_cel(v) for k, v in {**context, "values": values}.items()
-        }
         try:
-            result = env.program(env.compile(rule["expression"])).evaluate(cel_context)
+            result = run(rule)
         except Exception:
             logger.warning(
                 "cel_value_error",
@@ -614,14 +769,11 @@ def _evaluate_quick_form_rules(env, rules, context: dict, **log_fields):
             continue
         values[rule["ref_id"]] = number
 
-    cel_context = {
-        k: _python_to_cel(v) for k, v in {**context, "values": values}.items()
-    }
     for rule in [r for r in rules if not is_numeric_rule(r)]:
         try:
-            if env.program(env.compile(rule["expression"])).evaluate(cel_context):
+            if run(rule):
                 fired[rule["ref_id"]] = {
-                    k: v for k, v in rule.items() if k not in ("expression", "ref_id")
+                    k: v for k, v in rule.items() if k not in _NOT_PASSED_ON
                 }
         except Exception:
             logger.warning(
@@ -696,7 +848,13 @@ def _quick_form_probe(quick_form: dict) -> dict:
 
 _STRINGS = re.compile(r"""\"(?:[^\"\\]|\\.)*\"|'(?:[^'\\]|\\.)*'""")
 _ROOT = re.compile(r"(?<![\w.])([A-Za-z_]\w*)\s*[.\[]")
-_SINGULAR = {"pages": "page", "answers": "answer", "requirements": "requirement"}
+_SINGULAR = {
+    "pages": "page",
+    "answers": "answer",
+    "requirements": "requirement",
+    "sections": "section",
+    "groups": "implementation group",
+}
 
 
 def _explain(expression, error, context, scopes, container) -> str:
@@ -728,21 +886,48 @@ def _explain(expression, error, context, scopes, container) -> str:
     return f"This expression cannot be evaluated against this {container}'s data"
 
 
+_SUBSET_PROBE = {
+    "implementation_score": 0.0,
+    "documentation_score": 0.0,
+    "maturity_score": 0.0,
+    "scored_count": 0,
+    "total_count": 0,
+}
+
+# Computed only when outcome rules run, never for visibility.
+RULE_ONLY_ASSESSMENT_FIELDS = (*_SCORE_LAYERS, "target_score")
+
+
 def _framework_probe(framework: dict) -> dict:
     """A context with the real shape of a framework's audits but empty values:
-    every assessable requirement and every question, so an id that exists is
-    never flagged and one that does not always is."""
+    every assessable requirement, section, group and question, so an id that
+    exists is never flagged and one that does not always is."""
     from core.utils import extract_node_id
 
-    requirements, answers = {}, {}
-    for node in framework.get("requirement_nodes") or []:
-        node_id = extract_node_id(str(node.get("urn") or ""))
+    nodes = framework.get("requirement_nodes") or []
+    parents = {str(node.get("parent_urn") or "") for node in nodes}
+    depths = _node_depths(
+        {str(node.get("urn") or ""): node.get("parent_urn") for node in nodes}
+    )
+    requirements, sections, answers = {}, {}, {}
+    for node in nodes:
+        urn = str(node.get("urn") or "")
+        node_id = extract_node_id(urn)
         if node_id and node.get("assessable"):
             requirements[node_id] = {
                 "score": 0,
                 "max_score": 100,
                 "result": "not_assessed",
                 "status": "to_do",
+                "documentation_score": 0,
+                "maturity_score": 0.0,
+                "implementation_groups": [],
+            }
+        if node_id and urn in parents:
+            sections[node_id] = {
+                **_SUBSET_PROBE,
+                "depth": depths[urn],
+                "ref_id": str(node.get("ref_id") or ""),
             }
         for q_urn, question in (node.get("questions") or {}).items():
             q_node_id = extract_node_id(str(q_urn))
@@ -756,22 +941,103 @@ def _framework_probe(framework: dict) -> dict:
                 "weight": int((question or {}).get("weight") or 1),
                 "type": q_type,
             }
+    rules = framework.get("outcomes_definition") or []
     return {
         "assessment": {
             "score_sum": 0,
             "score_max": 0,
             "answered_count": 0,
             "total_count": 0,
+            "selected_implementation_groups": [],
+            **{field: 0.0 for field in RULE_ONLY_ASSESSMENT_FIELDS},
         },
         "requirements": requirements,
+        "sections": sections,
+        "groups": {
+            str(group.get("ref_id")): dict(_SUBSET_PROBE)
+            for group in framework.get("implementation_groups_definition") or []
+            if (group or {}).get("ref_id")
+        },
         "answers": answers,
+        "values": {
+            str(rule.get("ref_id")): 0.0
+            for rule in rules
+            if rule.get("ref_id") and is_numeric_rule(rule)
+        },
         "computed_outcomes": {
             str(rule.get("ref_id")): {}
-            for rule in framework.get("outcomes_definition") or []
-            if rule.get("ref_id")
+            for rule in rules
+            if rule.get("ref_id") and not is_numeric_rule(rule)
         },
         "hidden_requirements": [],
     }
+
+
+def _framework_visibility_probe(probe: dict) -> dict:
+    """Visibility runs before the rules and the hidden requirements are known,
+    and without the scores, as at runtime."""
+    context = {
+        k: v
+        for k, v in probe.items()
+        if k not in ("hidden_requirements", "values", "sections", "groups")
+    }
+    context["assessment"] = {
+        k: v
+        for k, v in probe["assessment"].items()
+        if k not in RULE_ONLY_ASSESSMENT_FIELDS
+    }
+    return context
+
+
+_OUTCOME_REF = re.compile(
+    r"""["'](\w+)["']\s+in\s+computed_outcomes\b"""
+    r"""|\bcomputed_outcomes\s*(?:\.\s*(\w+)\b(?!\s*\()|\[\s*["'](\w+)["']\s*\])"""
+)
+
+
+def _check_rules(rules, probe: dict, check, error) -> None:
+    """Check outcome rules in the order they run: a number rule reads the
+    number rules above it, a yes/no rule every number rule and the yes/no
+    rules above it."""
+    for rule in rules:
+        kind = rule.get("kind")
+        if kind not in (None, "", "boolean", "number"):
+            error(
+                str(rule.get("ref_id") or ""),
+                str(rule.get("expression") or ""),
+                f"Unknown rule kind '{kind}': use 'number' or leave it empty",
+            )
+    values: dict[str, float] = {}
+    for rule in [r for r in rules if is_numeric_rule(r)]:
+        ref_id = str(rule.get("ref_id") or "")
+        expression = str(rule.get("expression") or "")
+        result = check(
+            ref_id, expression, {**probe, "values": values, "computed_outcomes": {}}
+        )
+        if expression and result is not None and _as_number(result) is None:
+            error(ref_id, expression, "A numeric rule must return a number")
+        values = {**values, ref_id: 0.0}
+    above: dict[str, dict] = {}
+    for rule in [r for r in rules if not is_numeric_rule(r)]:
+        ref_id = str(rule.get("ref_id") or "")
+        expression = str(rule.get("expression") or "")
+        named = {
+            name for match in _OUTCOME_REF.findall(expression) for name in match if name
+        }
+        if missing := sorted(named - set(above)):
+            error(
+                ref_id,
+                expression,
+                f"No yes/no rule '{missing[0]}' above this one: a rule reads "
+                "only the yes/no rules listed before it",
+            )
+        else:
+            check(
+                ref_id,
+                expression,
+                {**probe, "values": values, "computed_outcomes": above},
+            )
+        above = {**above, ref_id: {}}
 
 
 def validate_framework_expressions(framework: dict) -> list[dict]:
@@ -780,30 +1046,43 @@ def validate_framework_expressions(framework: dict) -> list[dict]:
     expression against the wrong context, or naming an id that does not exist,
     compiles but raises when an audit is evaluated, where it is only logged."""
     probe = _framework_probe(framework)
-    # Visibility runs before the hidden requirements are known, as at runtime.
-    visibility_probe = {k: v for k, v in probe.items() if k != "hidden_requirements"}
     env = celpy.Environment()
-    errors = _rule_id_problems(framework.get("outcomes_definition") or [])
+    rules = framework.get("outcomes_definition") or []
+    errors = _rule_id_problems(rules)
+
+    def _error(where, ref_id, expression, message):
+        errors.append(
+            {
+                "where": where,
+                "ref_id": ref_id,
+                "expression": expression,
+                "error": message,
+            }
+        )
 
     def _check(where, ref_id, expression, context):
         if not expression:
-            return
+            return None
         try:
-            env.program(env.compile(expression)).evaluate(
+            return env.program(env.compile(expression)).evaluate(
                 {k: _python_to_cel(v) for k, v in context.items()}
             )
         except Exception as e:
-            errors.append(
-                {
-                    "where": where,
-                    "ref_id": ref_id,
-                    "expression": expression,
-                    "error": _explain(
-                        expression, e, context, ("requirements", "answers"), "framework"
-                    ),
-                }
+            _error(
+                where,
+                ref_id,
+                expression,
+                _explain(
+                    expression,
+                    e,
+                    context,
+                    ("requirements", "sections", "groups", "answers"),
+                    "framework",
+                ),
             )
+            return None
 
+    visibility_probe = _framework_visibility_probe(probe)
     for node in framework.get("requirement_nodes") or []:
         _check(
             "requirement_visibility",
@@ -811,13 +1090,35 @@ def validate_framework_expressions(framework: dict) -> list[dict]:
             str(node.get("visibility_expression") or ""),
             visibility_probe,
         )
-    for rule in framework.get("outcomes_definition") or []:
-        _check(
+
+    known_groups = set(probe["groups"])
+    for rule in rules:
+        groups = rule.get("implementation_groups")
+        if groups is None:
+            continue
+        if not isinstance(groups, list) or not all(isinstance(g, str) for g in groups):
+            unknown = "implementation_groups must be a list of group ids"
+        elif unknown_ids := [g for g in groups if g not in known_groups]:
+            unknown = f"Unknown implementation group '{unknown_ids[0]}'"
+        else:
+            continue
+        _error(
             "outcome",
             str(rule.get("ref_id") or ""),
             str(rule.get("expression") or ""),
-            probe,
+            unknown,
         )
+
+    _check_rules(
+        rules,
+        probe,
+        lambda ref_id, expression, context: _check(
+            "outcome", ref_id, expression, context
+        ),
+        lambda ref_id, expression, message: _error(
+            "outcome", ref_id, expression, message
+        ),
+    )
     return errors
 
 
@@ -879,33 +1180,16 @@ def validate_quick_form_expressions(quick_form: dict) -> list[dict]:
             str(page.get("visibility_expression") or ""),
             visibility_probe,
         )
-    rules = quick_form.get("outcomes_definition") or []
-    for rule in rules:
-        kind = rule.get("kind")
-        if kind not in (None, "", "boolean", "number"):
-            _error(
-                "outcome",
-                str(rule.get("ref_id") or ""),
-                str(rule.get("expression") or ""),
-                f"Unknown rule kind '{kind}': use 'number' or leave it empty",
-            )
-    # A numeric rule sees only the values computed before it, as at runtime.
-    earlier: dict[str, float] = {}
-    for rule in [r for r in rules if is_numeric_rule(r)]:
-        ref_id = str(rule.get("ref_id") or "")
-        expression = str(rule.get("expression") or "")
-        result = _check("outcome", ref_id, expression, {**raw_probe, "values": earlier})
-        if expression and result is not None and _as_number(result) is None:
-            _error("outcome", ref_id, expression, "A numeric rule must return a number")
-        earlier = {**earlier, ref_id: 0.0}
-    for rule in rules:
-        if is_numeric_rule(rule):
-            continue
-        _check(
-            "outcome",
-            str(rule.get("ref_id") or ""),
-            str(rule.get("expression") or ""),
-        )
+    _check_rules(
+        quick_form.get("outcomes_definition") or [],
+        raw_probe,
+        lambda ref_id, expression, context: _check(
+            "outcome", ref_id, expression, context
+        ),
+        lambda ref_id, expression, message: _error(
+            "outcome", ref_id, expression, message
+        ),
+    )
     return errors
 
 
@@ -1125,7 +1409,7 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
             logger.warning("preview_visibility_error", expression=expression)
 
     context = build_context(hidden, {}) if hidden else initial
-    computed, values = _evaluate_quick_form_rules(
+    computed, values = _evaluate_rules(
         env, quick_form.get("outcomes_definition"), context, preview=True
     )
     context["values"] = values
@@ -1208,7 +1492,7 @@ def evaluate_quick_form(response, persist: bool = True) -> dict:
     )
     context["hidden_pages"] = sorted(hidden_page_urns)
 
-    computed, values = _evaluate_quick_form_rules(
+    computed, values = _evaluate_rules(
         env,
         form.outcomes_definition,
         context,

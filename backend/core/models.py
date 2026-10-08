@@ -1,3 +1,4 @@
+import copy
 import math
 from decimal import ROUND_HALF_UP, Decimal
 from fractions import Fraction
@@ -1767,6 +1768,7 @@ class LibraryUpdater:
                 prev_min = getattr(prev_fw, "min_score", None)
                 prev_max = getattr(prev_fw, "max_score", None)
                 prev_def = getattr(prev_fw, "scores_definition", None)
+                had_outcomes = bool(getattr(prev_fw, "outcomes_definition", None))
 
                 new_framework, _ = Framework.objects.update_or_create(
                     urn=framework_dict["urn"],
@@ -1821,6 +1823,16 @@ class LibraryUpdater:
                 self.prune_stale_implementation_groups(
                     new_framework, compliance_assessments
                 )
+
+                if had_outcomes or new_framework.outcomes_definition:
+                    for ca in compliance_assessments:
+
+                        def _evaluate(ca=ca):
+                            from core.cel_service import evaluate_outcomes
+
+                            evaluate_outcomes(ca)
+
+                        _defer_once("_pending_cel_evaluations", ca.pk, _evaluate)
 
                 existing_requirement_node_objects = {
                     rn.urn.lower(): rn
@@ -8860,6 +8872,9 @@ class ComplianceAssessment(Assessment):
         verbose_name=_("Score scale preset"),
     )
     computed_outcome = models.JSONField(null=True, blank=True)
+    computed_values = models.JSONField(
+        blank=True, null=True, verbose_name=_("Computed values")
+    )
 
     assets = models.ManyToManyField(
         Asset,
@@ -9104,6 +9119,33 @@ class ComplianceAssessment(Assessment):
 
         _defer_once("_pending_cel_evaluations", self.pk, _evaluate)
 
+    # What outcome rules read besides the requirements: scope and scoring.
+    _CEL_RELEVANT_FIELDS = frozenset(
+        {
+            "selected_implementation_groups",
+            "field_visibility",
+            "score_calculation_method",
+            "anchor_na_to_target",
+            "target_score",
+            "min_score",
+            "max_score",
+        }
+    )
+
+    def _cel_snapshot(self, fields) -> dict:
+        # JSON fields are mutated in place by their setters (field_visibility).
+        return {
+            f: copy.deepcopy(getattr(self, f))
+            for f in self._CEL_RELEVANT_FIELDS
+            if f in fields
+        }
+
+    @classmethod
+    def from_db(cls, db, field_names, values, *, fetch_mode=None):
+        instance = super().from_db(db, field_names, values, fetch_mode=fetch_mode)
+        instance._loaded_cel_values = instance._cel_snapshot(field_names)
+        return instance
+
     def save(self, *args, **kwargs) -> None:
         # No scale chosen: the framework's (the organisation scale is only
         # ever proposed by the form, so API/import behaviour never changes).
@@ -9112,8 +9154,23 @@ class ComplianceAssessment(Assessment):
             self.max_score = self.framework.max_score
             self.scores_definition = self.framework.scores_definition
             self.score_scale_preset = None
+        loaded = getattr(self, "_loaded_cel_values", {})
+        cel_changed = any(
+            getattr(self, f) != value
+            for f, value in loaded.items()
+            if f in (kwargs.get("update_fields") or self._CEL_RELEVANT_FIELDS)
+        )
         super().save(*args, **kwargs)
         self.upsert_daily_metrics()
+        if cel_changed:
+            self._loaded_cel_values = self._cel_snapshot(loaded)
+
+            def _evaluate(ca=self):
+                from core.cel_service import evaluate_outcomes
+
+                evaluate_outcomes(ca)
+
+            _defer_once("_pending_cel_evaluations", self.pk, _evaluate)
 
     def create_requirement_assessments(
         self, baseline: Self | None = None
@@ -9790,6 +9847,17 @@ class ComplianceAssessment(Assessment):
                 "format": export.format,
             }
             for export in available_framework_exports(self)
+        ]
+
+    @property
+    def outcome_rules(self) -> list[dict]:
+        """The framework's outcome rules that apply to the audit's scope."""
+        from core.cel_service import rule_applies
+
+        return [
+            rule
+            for rule in self.framework.outcomes_definition or []
+            if rule_applies(rule, self.selected_implementation_groups)
         ]
 
     def get_selected_implementation_groups(self):
@@ -11202,7 +11270,9 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         # Atomic update and save
         self.save(update_fields=["score", "result", "is_scored"])
 
-    _CEL_RELEVANT_FIELDS = frozenset({"score", "result", "status"})
+    _CEL_RELEVANT_FIELDS = frozenset(
+        {"score", "documentation_score", "is_scored", "result", "status"}
+    )
 
     @classmethod
     def from_db(cls, db, field_names, values, *, fetch_mode=None):
