@@ -1910,8 +1910,10 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
         record_severity = record.get("severity")
         severity = self.SEVERITY_MAP.get(record_severity, -1)
 
-        # Parse priority (1-4)
+        # Parse priority: 1-4, or the "P1".."P4" labels the export writes
         priority = record.get("priority")
+        if isinstance(priority, str):
+            priority = priority.strip().upper().removeprefix("P")
         if isinstance(priority, (int, float)):
             priority = int(priority)
         elif isinstance(priority, str) and priority.isdigit():
@@ -1972,6 +1974,7 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
             "eta": _parse_date(record.get("eta")),
             "due_date": _parse_date(record.get("due_date")),
             "observation": record.get("observation", ""),
+            "recommendation": record.get("recommendation", ""),
             "vulnerabilities": vulnerabilities,
             "applied_controls": applied_controls.ids,
         }
@@ -5856,6 +5859,11 @@ class LoadFileView(APIView):
                         solution_data["criticality"] = int(record.get("criticality"))
                     except ValueError, TypeError:
                         pass
+                    # Kept for existing files: the 1-4 value also sets the tier.
+                    from tprm.tiers import tier_for_criticality
+
+                    if tier := tier_for_criticality(record.get("criticality")):
+                        solution_data["tier"] = tier.id
 
                 # Check for existing solution by ref_id or name
                 existing_solution = Solution.objects.filter(ref_id=ref_id).first()

@@ -12,11 +12,7 @@ import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import type { PageServerLoad } from './$types';
 
-export const load = (async ({ fetch }) => {
-	const storedLibrariesEndpoint = `${BASE_API_URL}/stored-libraries/`;
-	const storedLibrariesResponse = await fetch(storedLibrariesEndpoint);
-	const storedLibraries = await storedLibrariesResponse.json();
-
+export const load = (async () => {
 	const makeHeadData = (URLModel) => {
 		return listViewFields[URLModel].body.reduce((obj, key, index) => {
 			obj[key] = listViewFields[URLModel].head[index];
@@ -26,7 +22,8 @@ export const load = (async ({ fetch }) => {
 
 	const storedLibrariesTable = {
 		head: makeHeadData('stored-libraries'),
-		meta: { urlmodel: 'stored-libraries', ...storedLibraries },
+		// The table pages through the API itself: nothing to fetch up front.
+		meta: { urlmodel: 'stored-libraries' },
 		body: []
 	};
 

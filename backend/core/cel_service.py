@@ -2,9 +2,19 @@
 
 from __future__ import annotations
 
+import re
+
 import celpy
 import celpy.celtypes as celtypes
 import structlog
+
+from core.quick_form_scoring import (
+    aggregate_form,
+    aggregate_page,
+    clamp,
+    normalize_form_aggregation,
+    score_bounds,
+)
 
 logger = structlog.get_logger(__name__)
 
@@ -338,7 +348,7 @@ def _quick_form_snapshot(response) -> dict:
     pages = list(
         QuickFormPage.objects.filter(quick_form_id=response.quick_form_id)
         .order_by("order")
-        .values("id", "urn", "visibility_expression")
+        .values("id", "urn", "visibility_expression", "aggregation")
     )
     questions = list(
         Question.objects.filter(page__quick_form_id=response.quick_form_id)
@@ -381,7 +391,13 @@ def _quick_form_snapshot(response) -> dict:
             "scorable": question.type in ("unique_choice", "multiple_choice")
             and any(c.add_score is not None for c in question.choices.all()),
         }
-    return {"pages": pages, "per_question": per_question}
+    form = response.quick_form
+    return {
+        "pages": pages,
+        "per_question": per_question,
+        "aggregation": form.score_aggregation,
+        "bounds": form.score_bounds,
+    }
 
 
 def _quick_form_context(snapshot, hidden_page_ids, computed_outcomes) -> dict:
@@ -400,12 +416,22 @@ def _quick_form_context(snapshot, hidden_page_ids, computed_outcomes) -> dict:
     answered_count = 0
     total_count = 0
     required_missing = 0
+    scorable_by_page: dict = {p["id"]: [] for p in snapshot["pages"]}
 
     for entry in snapshot["per_question"].values():
         if entry["page_id"] in hidden_page_ids or not entry["visible"]:
             continue
         question = entry["question"]
         stats = page_stats[entry["page_id"]]
+        if entry["scorable"]:
+            scorable_by_page[entry["page_id"]].append(
+                {
+                    "score": entry["score"],
+                    "max_score": entry["max_score"],
+                    "weight": question.weight,
+                    "answered": entry["answered"],
+                }
+            )
         stats["total_count"] += 1
         total_count += 1
         if entry["answered"]:
@@ -434,7 +460,11 @@ def _quick_form_context(snapshot, hidden_page_ids, computed_outcomes) -> dict:
                 "answered": entry["answered"],
             }
 
+    page_results = []
     for page in snapshot["pages"]:
+        result = aggregate_page(scorable_by_page[page["id"]], page.get("aggregation"))
+        if result is not None:
+            page_results.append(result)
         node_id = extract_node_id(page["urn"])
         if not node_id:
             continue
@@ -443,15 +473,25 @@ def _quick_form_context(snapshot, hidden_page_ids, computed_outcomes) -> dict:
             "visible": page["id"] not in hidden_page_ids,
             "answered_count": stats["answered_count"],
             "total_count": stats["total_count"],
+            "score": result["score"] if result else 0.0,
+            "score_max": result["score_max"] if result else 0.0,
         }
+
+    items = [item for page_items in scorable_by_page.values() for item in page_items]
+    score = clamp(
+        aggregate_form(items, page_results, snapshot["aggregation"]),
+        snapshot["bounds"],
+    )
 
     return {
         "response": {
+            "score": score,
             "score_sum": score_sum,
             "score_max": score_max,
             "answered_count": answered_count,
             "total_count": total_count,
             "complete": required_missing == 0,
+            "scored_complete": all(item["answered"] for item in items),
         },
         "pages": pages,
         "answers": answers,
@@ -459,28 +499,13 @@ def _quick_form_context(snapshot, hidden_page_ids, computed_outcomes) -> dict:
     }
 
 
-def _quick_form_score(response, context, snapshot, hidden_page_ids) -> int | None:
-    """Aggregate score of the visible, answered, scorable questions, clamped
-    to the form's bounds. None until the response is complete."""
-    if not context["response"]["complete"]:
+def _quick_form_score(context) -> float | None:
+    """The stored score: the context's aggregated score to two decimals, so an
+    average reads 2.4 rather than 2. None until the response is complete."""
+    score = context["response"]["score"]
+    if not context["response"]["complete"] or score is None:
         return None
-    form = response.quick_form
-    scorable = [
-        e
-        for e in snapshot["per_question"].values()
-        if e["scorable"]
-        and e["visible"]
-        and e["page_id"] not in hidden_page_ids
-        and e["answered"]
-    ]
-    if not scorable:
-        return None
-    total = sum(e["score"] for e in scorable)
-    if form.score_aggregation == "mean":
-        total_weight = sum(e["question"].weight for e in scorable) or 1
-        total = total / total_weight
-    lo, hi = form.score_bounds
-    return int(max(lo, min(hi, round(total))))
+    return round(score, 2)
 
 
 _PROBE_VALUE_BY_TYPE = {
@@ -491,6 +516,122 @@ _PROBE_VALUE_BY_TYPE = {
     "unique_choice": "",
     "multiple_choice": "",
 }
+
+
+RULE_ID = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+
+RULE_ID_MESSAGES = {
+    "outcomeRuleIdRequired": "needs an ID",
+    "outcomeRuleIdInvalid": "ID must use letters, digits and _, not starting with a digit",
+    "outcomeRuleIdDuplicate": "ID is already used by another rule",
+}
+
+
+def outcome_rule_id_errors(rules) -> list[dict]:
+    """{index, ref_id, error} per outcome rule whose ref_id is missing, not a
+    CEL name, or taken by an earlier rule. Results are keyed by ref_id and a
+    number rule is read as `values.<ref_id>`: a rule without one never runs,
+    a duplicate hides the other, and a hyphen reads as a minus."""
+    errors, seen = [], set()
+    for index, rule in enumerate(rules or []):
+        ref_id = str((rule or {}).get("ref_id") or "").strip()
+        if not ref_id:
+            code = "outcomeRuleIdRequired"
+        elif not RULE_ID.match(ref_id):
+            code = "outcomeRuleIdInvalid"
+        elif ref_id in seen:
+            code = "outcomeRuleIdDuplicate"
+        else:
+            code = None
+        if code:
+            errors.append({"index": index, "ref_id": ref_id, "error": code})
+        seen.add(ref_id)
+    return errors
+
+
+def _rule_id_problems(rules) -> list[dict]:
+    return [
+        {
+            "where": "outcome",
+            "ref_id": e["ref_id"] or f"#{e['index'] + 1}",
+            "expression": str((rules[e["index"]] or {}).get("expression") or ""),
+            "error": e["error"],
+        }
+        for e in outcome_rule_id_errors(rules)
+    ]
+
+
+def is_numeric_rule(rule: dict) -> bool:
+    return (rule or {}).get("kind") == "number"
+
+
+def _as_number(result) -> float | None:
+    """A CEL result as a float, or None when it is not a number. Booleans are
+    ints in Python, so they are ruled out first."""
+    if isinstance(result, (bool, celtypes.BoolType)):
+        return None
+    if isinstance(result, (int, float)):
+        return float(result)
+    return None
+
+
+def _evaluate_quick_form_rules(env, rules, context: dict, **log_fields):
+    """Run a quick form's outcome rules against `context`.
+
+    Numeric rules (`kind: number`) run first, in order, each seeing the values
+    computed before it as `values.<ref_id>`; the yes/no rules then see them all.
+    Returns (fired, values): the classifications that fired, keyed by ref_id
+    with their pass-through attributes, and {ref_id: float}. Fail-open per rule:
+    an expression error or a non-number result is logged and skipped.
+    """
+    values: dict[str, float] = {}
+    fired: dict[str, dict] = {}
+    rules = [r for r in rules or [] if r.get("expression") and r.get("ref_id")]
+
+    for rule in [r for r in rules if is_numeric_rule(r)]:
+        cel_context = {
+            k: _python_to_cel(v) for k, v in {**context, "values": values}.items()
+        }
+        try:
+            result = env.program(env.compile(rule["expression"])).evaluate(cel_context)
+        except Exception:
+            logger.warning(
+                "cel_value_error",
+                expression=rule["expression"],
+                rule=rule["ref_id"],
+                exc_info=True,
+                **log_fields,
+            )
+            continue
+        number = _as_number(result)
+        if number is None:
+            logger.warning(
+                "cel_value_not_a_number",
+                expression=rule["expression"],
+                rule=rule["ref_id"],
+                **log_fields,
+            )
+            continue
+        values[rule["ref_id"]] = number
+
+    cel_context = {
+        k: _python_to_cel(v) for k, v in {**context, "values": values}.items()
+    }
+    for rule in [r for r in rules if not is_numeric_rule(r)]:
+        try:
+            if env.program(env.compile(rule["expression"])).evaluate(cel_context):
+                fired[rule["ref_id"]] = {
+                    k: v for k, v in rule.items() if k not in ("expression", "ref_id")
+                }
+        except Exception:
+            logger.warning(
+                "cel_evaluation_error",
+                expression=rule["expression"],
+                rule=rule["ref_id"],
+                exc_info=True,
+                **log_fields,
+            )
+    return fired, values
 
 
 def _quick_form_probe(quick_form: dict) -> dict:
@@ -507,7 +648,13 @@ def _quick_form_probe(quick_form: dict) -> dict:
     for page in quick_form.get("pages") or []:
         node_id = extract_node_id(str(page.get("urn") or ""))
         if node_id:
-            pages[node_id] = {"visible": True, "answered_count": 0, "total_count": 0}
+            pages[node_id] = {
+                "visible": True,
+                "answered_count": 0,
+                "total_count": 0,
+                "score": 0.0,
+                "score_max": 0.0,
+            }
         for q_urn, question in (page.get("questions") or {}).items():
             q_node_id = extract_node_id(str(q_urn))
             if not q_node_id:
@@ -523,21 +670,155 @@ def _quick_form_probe(quick_form: dict) -> dict:
             }
     return {
         "response": {
+            "score": 0.0,
             "score_sum": 0,
             "score_max": 0,
             "answered_count": 0,
             "total_count": 0,
             "complete": False,
+            "scored_complete": False,
         },
         "pages": pages,
         "answers": answers,
         "computed_outcomes": {
             str(rule.get("ref_id")): {}
             for rule in quick_form.get("outcomes_definition") or []
-            if rule.get("ref_id")
+            if rule.get("ref_id") and not is_numeric_rule(rule)
+        },
+        "values": {
+            str(rule.get("ref_id")): 0.0
+            for rule in quick_form.get("outcomes_definition") or []
+            if rule.get("ref_id") and is_numeric_rule(rule)
         },
         "hidden_pages": [],
     }
+
+
+_STRINGS = re.compile(r"""\"(?:[^\"\\]|\\.)*\"|'(?:[^'\\]|\\.)*'""")
+_ROOT = re.compile(r"(?<![\w.])([A-Za-z_]\w*)\s*[.\[]")
+_SINGULAR = {"pages": "page", "answers": "answer", "requirements": "requirement"}
+
+
+def _explain(expression, error, context, scopes, container) -> str:
+    """Why `expression` failed against `context`, for its author.
+
+    Built from the expression and the names the context offers, never from the
+    exception's text: that reaches API responses, and must not carry internals.
+    """
+    if isinstance(error, celpy.CELParseError):
+        return "Syntax error in this expression"
+    for scope in scopes:
+        for ref in re.findall(rf"""\b{scope}\[\s*["']([^"']*)["']\s*\]""", expression):
+            if ref not in (context.get(scope) or {}):
+                known = ", ".join(sorted(context.get(scope) or {})) or "none"
+                return (
+                    f"No {_SINGULAR[scope]} '{ref}' in this {container}. Known: {known}"
+                )[:300]
+    if "values" in context:
+        for name in re.findall(r"\bvalues\.(\w+)", expression):
+            if name not in context["values"]:
+                return (
+                    f"No number rule '{name}' above this one: a rule reads only "
+                    "the number rules listed before it"
+                )
+    for root in _ROOT.findall(_STRINGS.sub('""', expression)):
+        if root not in context:
+            available = ", ".join(sorted(context))
+            return f"Unknown name '{root}'. Available: {available}"[:300]
+    return f"This expression cannot be evaluated against this {container}'s data"
+
+
+def _framework_probe(framework: dict) -> dict:
+    """A context with the real shape of a framework's audits but empty values:
+    every assessable requirement and every question, so an id that exists is
+    never flagged and one that does not always is."""
+    from core.utils import extract_node_id
+
+    requirements, answers = {}, {}
+    for node in framework.get("requirement_nodes") or []:
+        node_id = extract_node_id(str(node.get("urn") or ""))
+        if node_id and node.get("assessable"):
+            requirements[node_id] = {
+                "score": 0,
+                "max_score": 100,
+                "result": "not_assessed",
+                "status": "to_do",
+            }
+        for q_urn, question in (node.get("questions") or {}).items():
+            q_node_id = extract_node_id(str(q_urn))
+            if not q_node_id:
+                continue
+            q_type = str((question or {}).get("type") or "text")
+            answers[q_node_id] = {
+                "value": _PROBE_VALUE_BY_TYPE.get(q_type, ""),
+                "score": 0,
+                "selected_choices": [],
+                "weight": int((question or {}).get("weight") or 1),
+                "type": q_type,
+            }
+    return {
+        "assessment": {
+            "score_sum": 0,
+            "score_max": 0,
+            "answered_count": 0,
+            "total_count": 0,
+        },
+        "requirements": requirements,
+        "answers": answers,
+        "computed_outcomes": {
+            str(rule.get("ref_id")): {}
+            for rule in framework.get("outcomes_definition") or []
+            if rule.get("ref_id")
+        },
+        "hidden_requirements": [],
+    }
+
+
+def validate_framework_expressions(framework: dict) -> list[dict]:
+    """Check every requirement visibility expression and outcome rule of a
+    framework, as `validate_quick_form_expressions` does for forms: an
+    expression against the wrong context, or naming an id that does not exist,
+    compiles but raises when an audit is evaluated, where it is only logged."""
+    probe = _framework_probe(framework)
+    # Visibility runs before the hidden requirements are known, as at runtime.
+    visibility_probe = {k: v for k, v in probe.items() if k != "hidden_requirements"}
+    env = celpy.Environment()
+    errors = _rule_id_problems(framework.get("outcomes_definition") or [])
+
+    def _check(where, ref_id, expression, context):
+        if not expression:
+            return
+        try:
+            env.program(env.compile(expression)).evaluate(
+                {k: _python_to_cel(v) for k, v in context.items()}
+            )
+        except Exception as e:
+            errors.append(
+                {
+                    "where": where,
+                    "ref_id": ref_id,
+                    "expression": expression,
+                    "error": _explain(
+                        expression, e, context, ("requirements", "answers"), "framework"
+                    ),
+                }
+            )
+
+    for node in framework.get("requirement_nodes") or []:
+        _check(
+            "requirement_visibility",
+            str(node.get("ref_id") or node.get("urn") or ""),
+            str(node.get("visibility_expression") or ""),
+            visibility_probe,
+        )
+    for rule in framework.get("outcomes_definition") or []:
+        _check(
+            "outcome",
+            str(rule.get("ref_id") or ""),
+            str(rule.get("expression") or ""),
+            probe,
+        )
+    return errors
 
 
 def validate_quick_form_expressions(quick_form: dict) -> list[dict]:
@@ -548,32 +829,78 @@ def validate_quick_form_expressions(quick_form: dict) -> list[dict]:
     mistake is a valid expression against the wrong context (`assessment.*`
     instead of `response.*`), which raises at evaluation and is swallowed there.
     """
-    probe = {k: _python_to_cel(v) for k, v in _quick_form_probe(quick_form).items()}
+    raw_probe = _quick_form_probe(quick_form)
     env = celpy.Environment()
-    errors = []
+    errors = _rule_id_problems(quick_form.get("outcomes_definition") or [])
 
-    def _check(where, ref_id, expression):
+    def _error(where, ref_id, expression, message):
+        errors.append(
+            {
+                "where": where,
+                "ref_id": ref_id,
+                "expression": expression,
+                "error": message,
+            }
+        )
+
+    def _check(where, ref_id, expression, context=None):
         if not expression:
-            return
+            return None
+        context = raw_probe if context is None else context
         try:
-            env.program(env.compile(expression)).evaluate(probe)
-        except Exception as e:
-            errors.append(
-                {
-                    "where": where,
-                    "ref_id": ref_id,
-                    "expression": expression,
-                    "error": str(e).split("\n")[0][:300],
-                }
+            return env.program(env.compile(expression)).evaluate(
+                {k: _python_to_cel(v) for k, v in context.items()}
             )
+        except Exception as e:
+            _error(
+                where,
+                ref_id,
+                expression,
+                _explain(expression, e, context, ("pages", "answers"), "form"),
+            )
+            return None
 
+    from core.object_references import subject_question_error
+
+    if (subject_error := subject_question_error(quick_form)) is not None:
+        _error(
+            "subject_question",
+            str(quick_form.get("subject_question_urn") or ""),
+            "",
+            subject_error,
+        )
+
+    # Visibility is resolved before any rule runs, so it cannot read `values`.
+    visibility_probe = {k: v for k, v in raw_probe.items() if k != "values"}
     for page in quick_form.get("pages") or []:
         _check(
             "page_visibility",
             str(page.get("ref_id") or page.get("urn") or ""),
             str(page.get("visibility_expression") or ""),
+            visibility_probe,
         )
-    for rule in quick_form.get("outcomes_definition") or []:
+    rules = quick_form.get("outcomes_definition") or []
+    for rule in rules:
+        kind = rule.get("kind")
+        if kind not in (None, "", "boolean", "number"):
+            _error(
+                "outcome",
+                str(rule.get("ref_id") or ""),
+                str(rule.get("expression") or ""),
+                f"Unknown rule kind '{kind}': use 'number' or leave it empty",
+            )
+    # A numeric rule sees only the values computed before it, as at runtime.
+    earlier: dict[str, float] = {}
+    for rule in [r for r in rules if is_numeric_rule(r)]:
+        ref_id = str(rule.get("ref_id") or "")
+        expression = str(rule.get("expression") or "")
+        result = _check("outcome", ref_id, expression, {**raw_probe, "values": earlier})
+        if expression and result is not None and _as_number(result) is None:
+            _error("outcome", ref_id, expression, "A numeric rule must return a number")
+        earlier = {**earlier, ref_id: 0.0}
+    for rule in rules:
+        if is_numeric_rule(rule):
+            continue
         _check(
             "outcome",
             str(rule.get("ref_id") or ""),
@@ -696,9 +1023,12 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
             "missing": 0,
             "weight": 0,
         }
+        page_results = []
+        items = []
         for page in pages:
             node_id = extract_node_id(str(page.get("urn") or "")) or page.get("ref_id")
             stats = {"answered_count": 0, "total_count": 0}
+            page_items = []
             for entry in page["_questions"]:
                 if page.get("urn") in hidden_page_urns:
                     continue
@@ -717,6 +1047,18 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
                     if answered:
                         totals["sum"] += score_of(entry)
                         totals["weight"] += int(entry.get("weight") or 1)
+                    if any(
+                        c.get("add_score") is not None
+                        for c in entry.get("choices") or []
+                    ):
+                        page_items.append(
+                            {
+                                "score": score_of(entry),
+                                "max_score": max_score_of(entry),
+                                "weight": int(entry.get("weight") or 1),
+                                "answered": answered,
+                            }
+                        )
                 q_node_id = extract_node_id(entry["urn"])
                 if q_node_id:
                     answer_ctx[q_node_id] = {
@@ -731,19 +1073,36 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
                         "type": entry.get("type") or "text",
                         "answered": answered,
                     }
+            result = aggregate_page(page_items, page.get("aggregation"))
+            if result is not None:
+                page_results.append(result)
+            items.extend(page_items)
             if node_id:
                 page_ctx[node_id] = {
                     "visible": page.get("urn") not in hidden_page_urns,
                     **stats,
+                    "score": result["score"] if result else 0.0,
+                    "score_max": result["score_max"] if result else 0.0,
                 }
+        definition = quick_form.get("scores_definition") or {}
+        score = clamp(
+            aggregate_form(
+                items,
+                page_results,
+                normalize_form_aggregation(definition.get("aggregation")),
+            ),
+            score_bounds(definition),
+        )
         return {
             "response": {
+                "score": score,
                 "score_sum": totals["sum"],
                 "score_max": totals["max"],
                 "score_weight": totals["weight"],
                 "answered_count": totals["answered"],
                 "total_count": totals["total"],
                 "complete": totals["missing"] == 0,
+                "scored_complete": all(item["answered"] for item in items),
             },
             "pages": page_ctx,
             "answers": answer_ctx,
@@ -766,19 +1125,10 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
             logger.warning("preview_visibility_error", expression=expression)
 
     context = build_context(hidden, {}) if hidden else initial
-    computed = {}
-    for rule in quick_form.get("outcomes_definition") or []:
-        expression, ref_id = rule.get("expression", ""), rule.get("ref_id", "")
-        if not expression or not ref_id:
-            continue
-        try:
-            program = env.program(env.compile(expression))
-            if program.evaluate({k: _python_to_cel(v) for k, v in context.items()}):
-                computed[ref_id] = {
-                    k: v for k, v in rule.items() if k not in ("expression", "ref_id")
-                }
-        except Exception:
-            logger.warning("preview_outcome_error", expression=expression, rule=ref_id)
+    computed, values = _evaluate_quick_form_rules(
+        env, quick_form.get("outcomes_definition"), context, preview=True
+    )
+    context["values"] = values
 
     missing_required = [
         entry["urn"]
@@ -790,24 +1140,8 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
         and not is_answered(entry)
     ]
 
-    definition = quick_form.get("scores_definition") or {}
-    try:
-        lo, hi = int(definition.get("min", 0)), int(definition.get("max", 100))
-    except TypeError, ValueError:
-        lo, hi = 0, 100
-    raw = context["response"]["score_sum"]
-    aggregation = definition.get("aggregation", "sum")
-    if aggregation == "mean":
-        # The same divisor `_quick_form_score` uses: the summed weight of the scorable
-        # answered questions, not the count of every visible one. Dividing by the count
-        # made the preview disagree with the live response on any form that mixes
-        # scorable and non-scorable questions, or uses a weight other than 1.
-        raw = raw / (context["response"]["score_weight"] or 1)
-    score = (
-        int(max(lo, min(hi, round(raw))))
-        if context["response"]["complete"] and context["response"]["score_max"]
-        else None
-    )
+    # Same rule as the live evaluator, so a preview cannot disagree with a response.
+    score = _quick_form_score(context)
 
     return {
         "hidden_pages": sorted(u for u in hidden if u),
@@ -819,6 +1153,7 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
         },
         "score": score,
         "computed_outcome": computed,
+        "computed_values": values,
         "context": context,
     }
 
@@ -873,47 +1208,38 @@ def evaluate_quick_form(response, persist: bool = True) -> dict:
     )
     context["hidden_pages"] = sorted(hidden_page_urns)
 
-    computed = {}
-    if form.outcomes_definition:
-        cel_context = {k: _python_to_cel(v) for k, v in context.items()}
-        for rule in form.outcomes_definition:
-            expression = rule.get("expression", "")
-            ref_id = rule.get("ref_id", "")
-            if not expression or not ref_id:
-                continue
-            try:
-                prog = env.program(env.compile(expression))
-                if prog.evaluate(cel_context):
-                    computed[ref_id] = {
-                        k: v
-                        for k, v in rule.items()
-                        if k not in ("expression", "ref_id")
-                    }
-            except Exception:
-                logger.warning(
-                    "cel_evaluation_error",
-                    expression=expression,
-                    quick_form_response_id=str(response.pk),
-                    exc_info=True,
-                )
-    computed_outcome = computed if form.outcomes_definition else None
+    computed, values = _evaluate_quick_form_rules(
+        env,
+        form.outcomes_definition,
+        context,
+        quick_form_response_id=str(response.pk),
+    )
+    context["values"] = values
+    has_rules = bool(form.outcomes_definition)
+    has_numeric = any(is_numeric_rule(r) for r in form.outcomes_definition or [])
+    computed_outcome = computed if has_rules else None
+    computed_values = values if has_numeric else None
 
-    score = _quick_form_score(response, context, snapshot, hidden_page_ids)
+    score = _quick_form_score(context)
     outcome_refs = ",".join(sorted(computed)) if computed else ""
 
     if persist and (
         response.computed_outcome != computed_outcome
+        or response.computed_values != computed_values
         or response.score != score
         or response.outcome_refs != outcome_refs
     ):
         QuickFormResponse.objects.filter(pk=response.pk).update(
             computed_outcome=computed_outcome,
+            computed_values=computed_values,
             score=score,
             outcome_refs=outcome_refs,
         )
     if persist:
         _sync_outcome_rows(response, computed)
+        response.refresh_subject_from_answers()
     response.computed_outcome = computed_outcome
+    response.computed_values = computed_values
     response.score = score
     response.outcome_refs = outcome_refs
 
@@ -940,4 +1266,5 @@ def evaluate_quick_form(response, persist: bool = True) -> dict:
         },
         "score": score,
         "computed_outcome": computed_outcome,
+        "computed_values": computed_values,
     }
