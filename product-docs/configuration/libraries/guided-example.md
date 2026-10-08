@@ -49,6 +49,10 @@ Leave the optional entries beginning with `#` disabled for now. We will add othe
 </details>
 {% endhint %}
 
+## Fill in the metadata
+
+We start with the metadata because it is usually quick to fill in. It also establishes the library's identity and the Framework's identifiers before we add content, helping us keep those values consistent later.
+
 Both metadata sheets use one property per row, with its name in column A and its value in column B. The table headers below are only here to make the examples easier to read.
 
 ### Fill `library_meta`
@@ -95,18 +99,68 @@ For a library built around one Framework, `ref_id`, `name`, and `description` ar
 
 We will add links to other objects here when we introduce them. For the full list of fields, see [Framework](library-objects/framework.md).
 
-### Sketch `framework_content`
+## Plan the Framework structure
 
-Begin with the standard's sections and requirements, in the same order as the PDF. A section is a heading at `depth` `1`, so leave `assessable` empty. Each requirement beneath it goes at `depth` `2` and gets an `x` in `assessable`. Apart from these two columns, fill only `ref_id`, `name`, and `description` for now.
+Before filling `framework_content`, make a simple outline of the standard. The sheet will have one row per section or requirement, in the same order as the source document.
+The `depth` column expresses the hierarchy. Often, `1` marks a main section, `2` its requirements, and `3` their subrequirements, but the meaning of each level depends on the source Framework. In `assessable`, leave headings empty and enter `x` for requirements users will assess. Use `name` for a short title and `description` for the full requirement text. See [Framework](library-objects/framework.md) for the fields in this sheet.
 
-Here is how to start the `framework_content` sheet with the first section:
+For OHSS, identify the three main sections, then list the numbered requirements beneath each one. Decide which rows are headings and which are assessable before copying the text into Excel. Keep the source identifiers at hand: they will help us choose stable `ref_id` values.
+
+This planning step matters. If the hierarchy turns out to be wrong after you have added questions, themes, and scores, you may need to reorganize much of the workbook. It is harder to change once the Framework is used in audits.
+
+{% hint style="info" %}
+Some Frameworks can have sections or requirements without an identifier. In that case, leave `ref_id` empty for those rows and fill in `name`, `description`, or both.
+{% endhint %}
+
+## Add the first section to `framework_content`
+
+Start with **Access and identity**. Add its heading at `depth` `1` with an empty `assessable` cell, then add its requirements at `depth` `2` with `x` in `assessable`. For now, fill only `ref_id`, `name`, and `description` alongside these two columns.
+
+Here is the first section in `framework_content`:
 
 | assessable | depth | ref_id | name | description |
 | --- | --- | --- | --- | --- |
 |  | `1` | `OH.1` | Access and identity |  |
 | `x` | `2` | `OH.1.1` |  | Maintain an inventory of permanent residents and authorized visitors, including the areas each may enter. |
 | `x` | `2` | `OH.1.2` |  | Use a controlled entry procedure for visitors. Record the host, entry and exit times, and review the log at least monthly. |
+| `x` | `2` | `OH.1.3` |  | Revoke access within one tide cycle when a resident or contractor no longer needs it. |
 
-The PDF uses identifiers such as `OH 1.1`. Because `ref_id` cannot contain spaces, we use `OH.1.1` in the workbook and follow the same pattern for the other rows. We also assign `OH.1` to the first section. Continue with `OH.1.3`, then add sections 2 and 3 with their requirements. Leave the questions, review themes, and score scale for later: the goal here is to establish the Framework's hierarchy before adding more objects.
+The PDF uses identifiers such as `OH 1.1`. As a best practice, we avoid spaces in `ref_id`, so we write `OH.1.1` in the workbook and follow the same pattern for the other rows. We also assign `OH.1` to the first section so it is easy to identify in CISO Assistant and its requirements are easier to locate.
+
+If you are still unsure about the outline, you can enter just the three main section headings in Excel first and check whether the structure makes sense. Then add their requirements. Leave the questions, review themes, and score scale for later. The goal here is to establish the Framework's hierarchy before adding more objects.
+
+## Add the second section to `framework_content`
+
+Continue in the same sheet with **Habitat and equipment**. Its heading is at `depth` `1`, just like the first section.
+
+This time, `OH 2.1` has two subrequirements: put the parent at `depth` `2` and its children at `depth` `3`. Here, `OH 2.1` serves as a section heading. Its source wording goes in `name`, `description` stays empty, and it is not assessable. Its two specific children receive `x`, so we assess them without assessing the parent again. The following requirements, `OH 2.2` and `OH 2.3`, return to `depth` `2` because they are not children of `OH 2.1`.
+
+| assessable | depth | ref_id | name | description |
+| --- | --- | --- | --- | --- |
+|  | `1` | `OH.2` | Habitat and equipment |  |
+|  | `2` | `OH.2.1` | Inspect and maintain habitat structures and access points. |  |
+| `x` | `3` | `OH.2.1.1` |  | Inspect structural supports, anchoring points and entry hatches at least quarterly. |
+| `x` | `3` | `OH.2.1.2` |  | Record and repair defects that could destabilize the habitat or permit unauthorized entry. |
+| `x` | `2` | `OH.2.2` |  | Equip the habitat with alerts for strong currents and unauthorized entry, and test both alerts at least monthly. |
+| `x` | `2` | `OH.2.3` |  | Keep a tested backup power source for critical lighting, alerts and communication equipment. |
+
+The source also includes assessment questions under `OH 2.2`. We keep only the requirement text for now and will return to its questions and answers after the hierarchy is in place.
+
+{% hint style="info" %}
+If you want a reminder, you can add the `questions` column now and put a temporary `x` in the `OH.2.2` row.
+{% endhint %}
+
+## Add the third section to `framework_content`
+
+The final section, **Monitoring and response**, follows the simpler pattern we used for the first one: one heading at `depth` `1`, followed by three assessable requirements at `depth` `2`.
+
+| assessable | depth | ref_id | name | description |
+| --- | --- | --- | --- | --- |
+|  | `1` | `OH.3` | Monitoring and response |  |
+| `x` | `2` | `OH.3.1` |  | Maintain an emergency contact route and a safe evacuation path from each occupied chamber. |
+| `x` | `2` | `OH.3.2` |  | Record security and safety incidents, including the time, affected area, actions taken and outcome. |
+| `x` | `2` | `OH.3.3` |  | Review every incident within seven days and track corrective actions to closure. |
+
+The question attached to `OH 3.2` can be added later, alongside the other questions. For now, keep the requirements and their hierarchy in place.
 
 [TO BE CONTINUED]
