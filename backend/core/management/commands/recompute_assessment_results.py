@@ -9,10 +9,16 @@ The command is idempotent: re-running on already-aligned data is a no-op.
 Scope
 -----
 Only requirement assessments whose requirement has at least one question
-choice with a *resolvable* `compute_result` (via `resolve_compute_result`)
-are considered. Score-only or questionnaire-only audits without any
-compute_result-bearing choice are left alone, so a stored manual result is
-not silently reset to `not_assessed`.
+choice with a *resolvable* `compute_result` (via `resolve_compute_result`),
+or at least one question weighted other than 1, are considered. Weighted
+questions are in scope because a weighted SUM score is now projected onto the
+unweighted scale instead of saturating, so scores stored before that are
+stale. Other score-only or questionnaire-only audits are left alone, and
+`recompute_assessment` never touches `result` on a requirement without a
+compute_result-bearing choice, so a stored manual result is not silently reset
+to `not_assessed`. `score` is another matter: a weighted requirement whose
+questionnaire is not complete gets its score cleared (score=None,
+is_scored=False) unless is_score_overridden pins it, so run with --dry-run first.
 
 Post-processing
 ---------------
@@ -32,7 +38,12 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils import timezone
 
-from core.models import ComplianceAssessment, QuestionChoice, RequirementAssessment
+from core.models import (
+    ComplianceAssessment,
+    Question,
+    QuestionChoice,
+    RequirementAssessment,
+)
 from core.utils import resolve_compute_result
 
 logger = logging.getLogger(__name__)
@@ -44,7 +55,7 @@ RESULT_UPDATE_FIELDS = ["score", "result", "is_scored", "updated_at"]
 class Command(BaseCommand):
     help = (
         "Recompute RequirementAssessment.result/score for existing audits using the "
-        "current semantic compute_result aggregation."
+        "current semantic compute_result aggregation and weighted SUM scoring."
     )
 
     def add_arguments(self, parser):
@@ -113,6 +124,33 @@ class Command(BaseCommand):
             if req_id is not None and resolve_compute_result(cr) is not None
         }
 
+    def _weighted_requirement_ids(
+        self, scoped_ca: "ComplianceAssessment | None"
+    ) -> set:
+        """Return requirement node IDs carrying a question weighted other than 1,
+        whose stored score predates the weighted SUM projection.
+
+        Only a choice question with a scored choice can move a weighted score, so
+        the others stay out of scope and keep their stored values.
+        """
+        questions_qs = Question.objects.filter(
+            requirement_node__isnull=False,
+            type__in=(
+                Question.Type.UNIQUE_CHOICE,
+                Question.Type.MULTIPLE_CHOICE,
+            ),
+            choices__add_score__isnull=False,
+        ).exclude(weight=1)
+        if scoped_ca is not None:
+            questions_qs = questions_qs.filter(
+                requirement_node_id__in=RequirementAssessment.objects.filter(
+                    compliance_assessment=scoped_ca,
+                ).values_list("requirement_id", flat=True),
+            )
+        return set(
+            questions_qs.values_list("requirement_node_id", flat=True).distinct()
+        )
+
     def _flush_batch(self, batch, fields, dry_run):
         if not batch or dry_run:
             batch.clear()
@@ -169,18 +207,21 @@ class Command(BaseCommand):
                 ) from exc
             self.stdout.write(f"Scoped to compliance assessment {ca_uuid}")
 
-        resolvable_req_ids = self._resolvable_requirement_ids(scoped_ca)
-        if not resolvable_req_ids:
+        req_ids = self._resolvable_requirement_ids(
+            scoped_ca
+        ) | self._weighted_requirement_ids(scoped_ca)
+        if not req_ids:
             self.stdout.write(
                 self.style.WARNING(
-                    "No requirement node carries a resolvable compute_result; nothing to do."
+                    "No requirement node carries a resolvable compute_result or a "
+                    "weighted question; nothing to do."
                 )
             )
             return
 
         queryset = RequirementAssessment.objects.select_related(
             "compliance_assessment", "requirement"
-        ).filter(requirement_id__in=resolvable_req_ids)
+        ).filter(requirement_id__in=req_ids)
 
         if scoped_ca is not None:
             queryset = queryset.filter(compliance_assessment=scoped_ca)
@@ -189,7 +230,8 @@ class Command(BaseCommand):
         if total == 0:
             self.stdout.write(
                 self.style.WARNING(
-                    "No requirement assessments in scope (no compute_result-driven requirement found)."
+                    "No requirement assessments in scope (no compute_result-driven "
+                    "or weighted requirement found)."
                 )
             )
             return

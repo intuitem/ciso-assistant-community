@@ -3,11 +3,14 @@
 Pure functions shared by the live evaluator (`evaluate_quick_form`) and the
 builder preview (`evaluate_quick_form_document`), so the two cannot drift.
 
-Each scorable question is an item `{score, max_score, weight, answered}`;
-`score` and `max_score` already carry the question weight. Results are floats:
+Each scorable question is an item `{score, max_score, weight, answered, lo, hi}`;
+`score` and `max_score` already carry the question weight, `lo` and `hi` are its
+unweighted reachable range. Results are floats:
 CEL compares a double against an int literal (`score > 17`) but not an int
 against a double literal (`3 > 2.5`), so averages and sums share one type.
 """
+
+from core.utils import project_weighted_sum
 
 PAGE_AGGREGATIONS = ("sum", "max", "mean")
 FORM_AGGREGATIONS = ("sum", "mean", "pages_sum", "pages_mean")
@@ -66,6 +69,16 @@ def aggregate_form(
     total = sum(i["score"] for i in answered)
     if aggregation == "mean":
         total /= sum(i["weight"] for i in answered) or 1
+    else:
+        # A question weight means the same thing here as in an audit: the range
+        # spans every scorable question, a skipped optional one counting as 0.
+        total = project_weighted_sum(
+            total,
+            sum(i["lo"] * i["weight"] for i in items),
+            sum(i["hi"] * i["weight"] for i in items),
+            sum(i["lo"] for i in items),
+            sum(i["hi"] for i in items),
+        )
     return float(total)
 
 
