@@ -1,6 +1,9 @@
 """`entity.tier`: an accepted response sets its vendor's tier through bands on
 the form score or on number rules, and yes/no rules, highest tier winning."""
 
+from datetime import datetime, timezone
+from types import SimpleNamespace
+
 import pytest
 from knox.models import AuthToken
 from rest_framework.test import APIClient
@@ -1079,3 +1082,38 @@ def test_a_library_with_an_invalid_on_accept_does_not_load():
     stored, error = StoredLibrary.store_library_content(content.encode("utf-8"))
     assert error is None, error
     assert "mappingOutcomeUnknown" in str(stored.load())
+
+
+class TestTierFromAnotherForm:
+    def _subject(self, form_id, tier=object()):
+        source = SimpleNamespace(
+            quick_form_id=form_id,
+            quick_form=SimpleNamespace(get_name_translated="Vendor tiering"),
+        )
+        return SimpleNamespace(
+            tier=tier,
+            tier_response=source,
+            tier_set_at=datetime(2026, 10, 5, tzinfo=timezone.utc),
+        )
+
+    def test_names_the_form_whose_tier_accepting_replaces(self):
+        origin = EntityTierTarget().origin(
+            self._subject("a"), SimpleNamespace(quick_form_id="b")
+        )
+        assert origin == {
+            "form": "Vendor tiering",
+            "set_at": "2026-10-05T00:00:00+00:00",
+        }
+
+    def test_nothing_when_the_same_form_or_no_assessed_tier(self):
+        target = EntityTierTarget()
+        assert (
+            target.origin(self._subject("a"), SimpleNamespace(quick_form_id="a"))
+            is None
+        )
+        assert (
+            target.origin(
+                self._subject("a", tier=None), SimpleNamespace(quick_form_id="b")
+            )
+            is None
+        )
