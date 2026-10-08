@@ -50,10 +50,9 @@ There is **no notification model** in the database. Notifications are fire-and-f
 | `EMAIL_HOST_PASSWORD_RESCUE` | No | Fallback SMTP password |
 | `EMAIL_USE_TLS_RESCUE` | No | Fallback TLS setting |
 | `EMAIL_TRANSPORT` | No | `smtp` (password, default) or `smtp-oauth2` (bearer token). Also `_RESCUE` |
-| `EMAIL_OAUTH2_PROVIDER` | With `smtp-oauth2` | `microsoft`, `google` or `generic`; presets fill host, token endpoint, scope and grant |
-| `EMAIL_OAUTH2_TENANT_ID`, `EMAIL_OAUTH2_CLIENT_ID`, `EMAIL_OAUTH2_CLIENT_SECRET` | Microsoft | Entra app registration with the `SMTP.SendAsApp` application permission |
-| `EMAIL_OAUTH2_SERVICE_ACCOUNT_FILE` | Google | Path to the service account JSON with domain-wide delegation |
-| `EMAIL_OAUTH2_TOKEN_URL`, `EMAIL_OAUTH2_GRANT_TYPE`, `EMAIL_OAUTH2_SCOPE`, `EMAIL_OAUTH2_REFRESH_TOKEN`, `EMAIL_OAUTH2_ISSUER`, `EMAIL_OAUTH2_PRIVATE_KEY`, `EMAIL_OAUTH2_AUDIENCE` | Generic | Any provider following RFC 6749 (`client_credentials`, `refresh_token`) or RFC 7523 (`jwt_bearer`). The token URL must be https |
+| `EMAIL_OAUTH2_GRANT_TYPE`, `EMAIL_OAUTH2_TOKEN_URL`, `EMAIL_OAUTH2_SCOPE` | With `smtp-oauth2` | `client_credentials`, `refresh_token` (RFC 6749) or `jwt_bearer` (RFC 7523); the token URL must be https. Values per provider in the installation docs |
+| `EMAIL_OAUTH2_CLIENT_ID`, `EMAIL_OAUTH2_CLIENT_SECRET`, `EMAIL_OAUTH2_REFRESH_TOKEN` | Per grant | Client credentials and refresh token grants |
+| `EMAIL_OAUTH2_SERVICE_ACCOUNT_FILE`, or `EMAIL_OAUTH2_ISSUER` + `EMAIL_OAUTH2_PRIVATE_KEY`, `EMAIL_OAUTH2_AUDIENCE` | jwt_bearer | Signing identity for the JWT bearer grant (Google service accounts) |
 
 The variables are turned into Django's `MAILERS` setting by `backend/ciso_assistant/mailers.py`. Every send goes through `backend/core/mailer.py`.
 

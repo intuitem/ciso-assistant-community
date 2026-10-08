@@ -1,4 +1,4 @@
-"""OAuth 2.0 over SMTP: environment presets, token grants, and the XOAUTH2
+"""OAuth 2.0 over SMTP: environment variables, token grants, and the XOAUTH2
 step on the SMTP connection, including the retry and the failover path."""
 
 import json
@@ -21,11 +21,15 @@ HERE = "core.tests.test_mail_oauth2"
 
 MICROSOFT_ENV = {
     "EMAIL_TRANSPORT": "smtp-oauth2",
-    "EMAIL_OAUTH2_PROVIDER": "microsoft",
-    "EMAIL_OAUTH2_TENANT_ID": "tenant-1",
+    "EMAIL_HOST": "smtp.office365.com",
+    "EMAIL_PORT": "587",
+    "EMAIL_USE_TLS": "True",
+    "EMAIL_HOST_USER": "noreply@example.com",
+    "EMAIL_OAUTH2_GRANT_TYPE": "client_credentials",
+    "EMAIL_OAUTH2_TOKEN_URL": "https://login.microsoftonline.com/tenant-1/oauth2/v2.0/token",
+    "EMAIL_OAUTH2_SCOPE": "https://outlook.office365.com/.default",
     "EMAIL_OAUTH2_CLIENT_ID": "client-1",
     "EMAIL_OAUTH2_CLIENT_SECRET": "s3cret",
-    "EMAIL_HOST_USER": "noreply@example.com",
 }
 
 
@@ -36,10 +40,10 @@ def fresh_token_cache():
     mail_oauth2.clear_cache()
 
 
-# --- environment presets ------------------------------------------------------
+# --- environment ---------------------------------------------------------------
 
 
-def test_microsoft_preset_fills_host_scope_and_token_url():
+def test_microsoft_values_build_a_client_credentials_mailer():
     options = build_mailers(MICROSOFT_ENV)["default"]["OPTIONS"]
     assert (options["host"], options["port"]) == ("smtp.office365.com", 587)
     assert (options["use_tls"], options["use_ssl"]) == (True, False)
@@ -54,54 +58,37 @@ def test_microsoft_preset_fills_host_scope_and_token_url():
     assert oauth2["user"] == "noreply@example.com"
 
 
-def test_google_preset_uses_service_account_file(tmp_path):
+def test_google_values_build_a_jwt_bearer_mailer(tmp_path):
     account = tmp_path / "sa.json"
     account.write_text("{}")
     options = build_mailers(
         {
             "EMAIL_TRANSPORT": "smtp-oauth2",
-            "EMAIL_OAUTH2_PROVIDER": "google",
-            "EMAIL_OAUTH2_SERVICE_ACCOUNT_FILE": str(account),
+            "EMAIL_HOST": "smtp.gmail.com",
+            "EMAIL_PORT": "587",
+            "EMAIL_USE_TLS": "true",
             "EMAIL_HOST_USER": "noreply@example.com",
+            "EMAIL_OAUTH2_GRANT_TYPE": "jwt_bearer",
+            "EMAIL_OAUTH2_TOKEN_URL": "https://oauth2.googleapis.com/token",
+            "EMAIL_OAUTH2_SCOPE": "https://mail.google.com/",
+            "EMAIL_OAUTH2_SERVICE_ACCOUNT_FILE": str(account),
         }
     )["default"]["OPTIONS"]
-    assert (options["host"], options["port"], options["use_tls"]) == (
-        "smtp.gmail.com",
-        587,
-        True,
-    )
     oauth2 = options["oauth2"]
     assert oauth2["grant_type"] == "jwt_bearer"
-    assert oauth2["token_url"] == "https://oauth2.googleapis.com/token"
-    assert oauth2["scope"] == "https://mail.google.com/"
     assert oauth2["service_account_file"] == str(account)
+    assert "provider" not in oauth2
 
 
-def test_explicit_host_and_port_override_the_preset():
-    options = build_mailers(
-        {**MICROSOFT_ENV, "EMAIL_HOST": "smtp.example", "EMAIL_PORT": "2525"}
-    )["default"]["OPTIONS"]
-    assert (options["host"], options["port"]) == ("smtp.example", 2525)
-
-
-def test_generic_provider_spells_everything_out():
+def test_refresh_token_grant_is_configurable():
     options = build_mailers(
         {
-            "EMAIL_TRANSPORT": "smtp-oauth2",
-            "EMAIL_HOST": "smtp.example",
-            "EMAIL_HOST_USER": "noreply@example.com",
-            "EMAIL_OAUTH2_TOKEN_URL": "https://idp.example/token",
+            **MICROSOFT_ENV,
             "EMAIL_OAUTH2_GRANT_TYPE": "refresh_token",
-            "EMAIL_OAUTH2_CLIENT_ID": "c",
-            "EMAIL_OAUTH2_CLIENT_SECRET": "s",
             "EMAIL_OAUTH2_REFRESH_TOKEN": "r",
-            "EMAIL_OAUTH2_SCOPE": "mail",
         }
     )["default"]["OPTIONS"]
-    assert options["oauth2"]["provider"] == "generic"
     assert options["oauth2"]["refresh_token"] == "r"
-    # No preset: STARTTLS is not assumed.
-    assert options["use_tls"] is False
 
 
 def test_password_transport_is_unchanged_by_default():
@@ -118,42 +105,29 @@ def test_oauth2_rescue_behind_a_password_primary():
     assert mailers["rescue"]["OPTIONS"]["oauth2"]["grant_type"] == "client_credentials"
 
 
+def without(env, *keys):
+    return {key: value for key, value in env.items() if key not in keys}
+
+
 @pytest.mark.parametrize(
     "env, message",
     [
         ({"EMAIL_TRANSPORT": "carrier-pigeon", "EMAIL_HOST": "x"}, "EMAIL_TRANSPORT"),
-        ({**MICROSOFT_ENV, "EMAIL_OAUTH2_PROVIDER": "yahoo"}, "EMAIL_OAUTH2_PROVIDER"),
+        (without(MICROSOFT_ENV, "EMAIL_HOST"), "EMAIL_HOST is required"),
+        (without(MICROSOFT_ENV, "EMAIL_HOST_USER"), "EMAIL_HOST_USER"),
+        (without(MICROSOFT_ENV, "EMAIL_OAUTH2_GRANT_TYPE"), "EMAIL_OAUTH2_GRANT_TYPE"),
+        (without(MICROSOFT_ENV, "EMAIL_OAUTH2_TOKEN_URL"), "EMAIL_OAUTH2_TOKEN_URL"),
         (
-            {k: v for k, v in MICROSOFT_ENV.items() if k != "EMAIL_OAUTH2_TENANT_ID"},
-            "EMAIL_OAUTH2_TENANT_ID",
-        ),
-        (
-            {k: v for k, v in MICROSOFT_ENV.items() if k != "EMAIL_HOST_USER"},
-            "EMAIL_HOST_USER",
-        ),
-        (
-            {
-                k: v
-                for k, v in MICROSOFT_ENV.items()
-                if k != "EMAIL_OAUTH2_CLIENT_SECRET"
-            },
+            without(MICROSOFT_ENV, "EMAIL_OAUTH2_CLIENT_SECRET"),
             "EMAIL_OAUTH2_CLIENT_SECRET",
         ),
         (
-            {
-                "EMAIL_TRANSPORT": "smtp-oauth2",
-                "EMAIL_HOST": "smtp.example",
-                "EMAIL_HOST_USER": "u",
-                "EMAIL_OAUTH2_TOKEN_URL": "http://idp.example/token",
-                "EMAIL_OAUTH2_GRANT_TYPE": "client_credentials",
-                "EMAIL_OAUTH2_CLIENT_ID": "c",
-                "EMAIL_OAUTH2_CLIENT_SECRET": "s",
-            },
+            {**MICROSOFT_ENV, "EMAIL_OAUTH2_TOKEN_URL": "http://idp.example/token"},
             "https",
         ),
         (
-            {"EMAIL_TRANSPORT": "smtp-oauth2", "EMAIL_HOST_USER": "u"},
-            "EMAIL_HOST",
+            {**MICROSOFT_ENV, "EMAIL_OAUTH2_GRANT_TYPE": "jwt_bearer"},
+            "EMAIL_OAUTH2_SERVICE_ACCOUNT_FILE",
         ),
     ],
 )
@@ -166,7 +140,6 @@ def test_describe_redacts_oauth_secrets():
     lines = describe(build_mailers(MICROSOFT_ENV))
     assert "s3cret" not in lines[0]
     assert "client-1" in lines[0]
-    assert "tenant-1" in lines[0]
 
 
 # --- token grants -------------------------------------------------------------

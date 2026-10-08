@@ -137,25 +137,31 @@ services:
 
 When upgrading to 3.16+, remove the `command:` override and switch to the CA bundle method above.
 
-### OAuth 2.0 over SMTP (Microsoft 365, Google Workspace)
+### OAuth 2.0 over SMTP (Microsoft 365, Google Workspace, others)
 
-Microsoft 365 and Google Workspace no longer accept a mailbox password for SMTP. CISO Assistant can authenticate with an OAuth 2.0 token instead. The session is still SMTP: same host, same port, same firewall rules. Set `EMAIL_TRANSPORT=smtp-oauth2` and pick a provider. The same variables exist with a `_RESCUE` suffix for the second mailer.
+Microsoft 365 and Google Workspace no longer accept a mailbox password for SMTP. CISO Assistant can authenticate with an OAuth 2.0 token instead. The session is still SMTP: same host, same port, same firewall rules. Set `EMAIL_TRANSPORT=smtp-oauth2`, then give the token endpoint, the grant and the credentials. The same variables exist with a `_RESCUE` suffix for the second mailer.
 
 `EMAIL_HOST_USER` is the mailbox mail is sent as. `EMAIL_HOST_PASSWORD` is not used.
+
+There are no provider presets in the application. The blocks below are the values for the two common providers; any provider that follows the OAuth 2.0 standards works the same way.
 
 #### Microsoft 365
 
 ```bash
 EMAIL_TRANSPORT=smtp-oauth2
-EMAIL_OAUTH2_PROVIDER=microsoft
-EMAIL_OAUTH2_TENANT_ID=<tenant id>
-EMAIL_OAUTH2_CLIENT_ID=<application (client) id>
-EMAIL_OAUTH2_CLIENT_SECRET=<client secret>
+EMAIL_HOST=smtp.office365.com
+EMAIL_PORT=587
+EMAIL_USE_TLS=True
 EMAIL_HOST_USER=noreply@example.com
 DEFAULT_FROM_EMAIL=noreply@example.com
+EMAIL_OAUTH2_GRANT_TYPE=client_credentials
+EMAIL_OAUTH2_TOKEN_URL=https://login.microsoftonline.com/<tenant id>/oauth2/v2.0/token
+EMAIL_OAUTH2_SCOPE=https://outlook.office365.com/.default
+EMAIL_OAUTH2_CLIENT_ID=<application (client) id>
+EMAIL_OAUTH2_CLIENT_SECRET=<client secret>
 ```
 
-Host, port and STARTTLS default to `smtp.office365.com:587`. On the tenant side:
+On the tenant side:
 
 1. Register an application in Entra ID and create a client secret.
 2. Do not grant `SMTP.SendAsApp` tenant-wide in Entra. Grant it through Exchange RBAC for Applications with a management scope limited to the sending mailbox, so a leaked secret cannot send as anyone else. Grants from Entra and Exchange add up, so an Entra grant would undo the scope.
@@ -165,13 +171,18 @@ Host, port and STARTTLS default to `smtp.office365.com:587`. On the tenant side:
 
 ```bash
 EMAIL_TRANSPORT=smtp-oauth2
-EMAIL_OAUTH2_PROVIDER=google
-EMAIL_OAUTH2_SERVICE_ACCOUNT_FILE=/run/secrets/mailer-service-account.json
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USE_TLS=True
 EMAIL_HOST_USER=noreply@example.com
 DEFAULT_FROM_EMAIL=noreply@example.com
+EMAIL_OAUTH2_GRANT_TYPE=jwt_bearer
+EMAIL_OAUTH2_TOKEN_URL=https://oauth2.googleapis.com/token
+EMAIL_OAUTH2_SCOPE=https://mail.google.com/
+EMAIL_OAUTH2_SERVICE_ACCOUNT_FILE=/run/secrets/mailer-service-account.json
 ```
 
-Host, port and STARTTLS default to `smtp.gmail.com:587`. On the Workspace side, create a service account, download its JSON key, and grant it domain-wide delegation for the scope `https://mail.google.com/`.
+On the Workspace side, create a service account, download its JSON key, and grant it domain-wide delegation for the scope `https://mail.google.com/`.
 
 {% hint style="warning" %}
 SMTP with OAuth on Google requires the full mail scope, and domain-wide delegation cannot be limited to one mailbox. A leaked key can read and send as any user in the domain. If that is not acceptable, use the IP-allowlisted SMTP relay (`smtp-relay.gmail.com`) with `EMAIL_TRANSPORT=smtp` and no credentials instead.
@@ -179,21 +190,6 @@ SMTP with OAuth on Google requires the full mail scope, and domain-wide delegati
 
 #### Any other provider
 
-```bash
-EMAIL_TRANSPORT=smtp-oauth2
-EMAIL_OAUTH2_PROVIDER=generic
-EMAIL_HOST=smtp.example.com
-EMAIL_PORT=587
-EMAIL_USE_TLS=True
-EMAIL_HOST_USER=noreply@example.com
-EMAIL_OAUTH2_TOKEN_URL=https://idp.example.com/oauth2/token
-EMAIL_OAUTH2_GRANT_TYPE=client_credentials   # or refresh_token, jwt_bearer
-EMAIL_OAUTH2_CLIENT_ID=<client id>
-EMAIL_OAUTH2_CLIENT_SECRET=<client secret>
-EMAIL_OAUTH2_SCOPE=<scope the provider expects>
-```
-
-`refresh_token` additionally needs `EMAIL_OAUTH2_REFRESH_TOKEN`. `jwt_bearer` needs either `EMAIL_OAUTH2_SERVICE_ACCOUNT_FILE` or `EMAIL_OAUTH2_ISSUER` plus `EMAIL_OAUTH2_PRIVATE_KEY`, and optionally `EMAIL_OAUTH2_AUDIENCE` when it differs from the token URL. The token URL must use https. It may point at a private identity provider.
+Use the same variables with the values from the provider's documentation. `refresh_token` additionally needs `EMAIL_OAUTH2_REFRESH_TOKEN`. `jwt_bearer` needs either `EMAIL_OAUTH2_SERVICE_ACCOUNT_FILE` or `EMAIL_OAUTH2_ISSUER` plus `EMAIL_OAUTH2_PRIVATE_KEY`, and optionally `EMAIL_OAUTH2_AUDIENCE` when it differs from the token URL. The token URL must use https. It may point at a private identity provider.
 
 Tokens are cached until shortly before they expire. A token the server rejects is refreshed and retried once; a second rejection counts as an unreachable mailer and the next configured mailer, if any, is tried.
-

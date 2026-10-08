@@ -8,9 +8,9 @@ when ``MAIL_DEBUG`` is on.
 
 ``EMAIL_TRANSPORT`` (and ``EMAIL_TRANSPORT_RESCUE``) selects how a mailer
 authenticates: ``smtp`` with a password, the default, or ``smtp-oauth2`` with
-a bearer token. ``EMAIL_OAUTH2_PROVIDER`` picks a preset, ``microsoft`` or
-``google``, that fills in the token endpoint, scope, grant and SMTP host, or
-``generic`` to spell them all out.
+a bearer token obtained through one of the standard OAuth 2.0 grants. There
+are no provider presets: the operator supplies host, token endpoint, grant
+and scope, and the documentation gives the values for the common providers.
 """
 
 from collections.abc import Mapping
@@ -25,33 +25,11 @@ ALIASES = ("default", "rescue")
 TRANSPORTS = ("smtp", "smtp-oauth2")
 GRANTS = ("client_credentials", "refresh_token", "jwt_bearer")
 
-PROVIDERS = {
-    "microsoft": {
-        "host": "smtp.office365.com",
-        "port": 587,
-        "use_tls": True,
-        "grant_type": "client_credentials",
-        "scope": "https://outlook.office365.com/.default",
-    },
-    "google": {
-        "host": "smtp.gmail.com",
-        "port": 587,
-        "use_tls": True,
-        "grant_type": "jwt_bearer",
-        "token_url": "https://oauth2.googleapis.com/token",
-        "scope": "https://mail.google.com/",
-    },
-    "generic": {},
-}
-
 OAUTH2_SECRET_KEYS = ("client_secret", "refresh_token", "private_key")
 
 
-def _flag(env: Mapping[str, str], name: str, default: bool = False) -> bool:
-    value = env.get(name)
-    if value is None:
-        return default
-    return value.lower() in ("true", "1", "yes")
+def _flag(env: Mapping[str, str], name: str) -> bool:
+    return env.get(name, "False").lower() in ("true", "1", "yes")
 
 
 def validate_oauth2(config: dict) -> None:
@@ -85,20 +63,18 @@ def validate_oauth2(config: dict) -> None:
         )
 
 
-def oauth2_config(env: Mapping[str, str], suffix: str, preset: dict) -> dict:
+def oauth2_config(env: Mapping[str, str], suffix: str) -> dict:
     """The ``oauth2`` option for an ``smtp-oauth2`` mailer, validated so a
     broken configuration stops startup instead of failing at send time."""
 
     def var(name: str) -> str | None:
         return env.get(f"EMAIL_OAUTH2_{name}{suffix}") or None
 
-    provider = (var("PROVIDER") or "generic").lower()
     config = {
-        "provider": provider,
         "user": env.get(f"EMAIL_HOST_USER{suffix}") or None,
-        "grant_type": var("GRANT_TYPE") or preset.get("grant_type"),
-        "token_url": var("TOKEN_URL") or preset.get("token_url"),
-        "scope": var("SCOPE") or preset.get("scope"),
+        "grant_type": var("GRANT_TYPE"),
+        "token_url": var("TOKEN_URL"),
+        "scope": var("SCOPE"),
         "client_id": var("CLIENT_ID"),
         "client_secret": var("CLIENT_SECRET"),
         "refresh_token": var("REFRESH_TOKEN"),
@@ -107,15 +83,6 @@ def oauth2_config(env: Mapping[str, str], suffix: str, preset: dict) -> dict:
         "private_key": var("PRIVATE_KEY"),
         "audience": var("AUDIENCE"),
     }
-    if provider == "microsoft" and not config["token_url"]:
-        tenant = var("TENANT_ID")
-        if not tenant:
-            raise ValueError(
-                f"EMAIL_OAUTH2_TENANT_ID{suffix} is required for Microsoft 365"
-            )
-        config["token_url"] = (
-            f"https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token"
-        )
     try:
         validate_oauth2(config)
     except ValueError as error:
@@ -134,22 +101,15 @@ def smtp_mailer(env: Mapping[str, str], suffix: str = "") -> dict | None:
         raise ValueError(
             f"EMAIL_TRANSPORT{suffix} must be one of {', '.join(TRANSPORTS)}"
         )
-    preset = {}
-    if transport == "smtp-oauth2":
-        provider = (env.get(f"EMAIL_OAUTH2_PROVIDER{suffix}") or "generic").lower()
-        if provider not in PROVIDERS:
-            raise ValueError(
-                f"EMAIL_OAUTH2_PROVIDER{suffix} must be one of {', '.join(PROVIDERS)}"
-            )
-        preset = PROVIDERS[provider]
-
-    host = env.get(f"EMAIL_HOST{suffix}") or preset.get("host")
+    host = env.get(f"EMAIL_HOST{suffix}")
     if not host:
         if transport == "smtp-oauth2":
-            raise ValueError(f"EMAIL_HOST{suffix} is required for this OAuth provider")
+            raise ValueError(
+                f"EMAIL_HOST{suffix} is required with EMAIL_TRANSPORT{suffix}=smtp-oauth2"
+            )
         return None
 
-    use_tls = _flag(env, f"EMAIL_USE_TLS{suffix}", default=preset.get("use_tls", False))
+    use_tls = _flag(env, f"EMAIL_USE_TLS{suffix}")
     use_ssl = _flag(env, f"EMAIL_USE_SSL{suffix}")
     if use_tls and use_ssl:
         raise ValueError(
@@ -160,8 +120,6 @@ def smtp_mailer(env: Mapping[str, str], suffix: str = "") -> dict | None:
         if not port.isdigit():
             raise ValueError(f"EMAIL_PORT{suffix} must be a number, got {port!r}")
         port = int(port)
-    elif preset.get("port"):
-        port = preset["port"]
 
     options = {
         "host": host,
@@ -174,7 +132,7 @@ def smtp_mailer(env: Mapping[str, str], suffix: str = "") -> dict | None:
     }
     if transport == "smtp-oauth2":
         options["password"] = None
-        options["oauth2"] = oauth2_config(env, suffix, preset)
+        options["oauth2"] = oauth2_config(env, suffix)
     return {"BACKEND": SMTP_BACKEND, "OPTIONS": options}
 
 
