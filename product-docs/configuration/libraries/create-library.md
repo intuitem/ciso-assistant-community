@@ -117,3 +117,11 @@ The script creates a `.yaml` file in the current directory with the same base na
 ## 6. Import the library
 
 Follow [Import a library](import-library.md) to upload the Excel workbook, or the YAML file if you converted it.
+
+## 7. Check the imported library
+
+After the import, open the library in the Catalog and check that its objects and content appear as expected. An import can succeed even if the result is not what you intended.
+
+If the library contains a Framework, create a test audit before using it for a real one. Check the hierarchy and assessable requirements, then try any questions, answer choices, scores, Implementation Groups, and translations you added. See [Creating your first Audit](../../guides/first-audit.md) if you need help setting one up.
+
+If something is missing or misplaced, correct the source workbook. You can then [update the library](update-library.md), or [unload and delete it](unload-or-delete-library.md) before importing the corrected file if no audit depends on it.
