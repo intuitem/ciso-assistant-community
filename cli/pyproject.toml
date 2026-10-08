@@ -9,7 +9,7 @@ dependencies = [
     "icecream>=2.1.0",
     # floor: 1.6.0 predates streamable_http_app/TransportSecuritySettings.
     # ceiling: v2 drops mcp.server.fastmcp and request_ctx, both imported here.
-    "mcp[cli]>=1.28.1,<2",
+    "mcp[cli]>=1.28.1,<3",
     "python-dotenv>=1.0.0",
     "requests>=2.32.3",
     "rich>=13.0.0",
