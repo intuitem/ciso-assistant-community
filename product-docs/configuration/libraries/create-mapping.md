@@ -12,13 +12,50 @@ Choose which Framework is the **source** and which is the **target**. The prepar
 
 ## 2. Generate the Mapping workbook
 
-From the CISO Assistant repository root, run:
+You can download and run `prepare_mapping_v2.py` without downloading the whole repository. If you already set up Python while creating your Framework libraries, you can reuse that virtual environment.
 
-```shell
-python tools/prepare_mapping_v2.py path/to/source.yaml path/to/target.yaml
-```
+1. Install [Python](https://www.python.org/) 3.14 or later if needed, then check its version:
 
-The first file is the source Framework, and the second is the target. The script creates a `mapping-<source>-and-<target>.xlsx` file in the current directory. It fills the library and Mapping metadata, lists the source requirements in `mappings_content`, and adds `source` and `target` sheets for reference.
+   ```shell
+   python --version
+   ```
+
+2. Click [here](https://raw.githubusercontent.com/intuitem/ciso-assistant-community/refs/heads/main/tools/prepare_mapping_v2.py) to download the [`prepare_mapping_v2.py`](https://raw.githubusercontent.com/intuitem/ciso-assistant-community/refs/heads/main/tools/prepare_mapping_v2.py) script. Place it in a working folder with both Framework YAML files.
+3. Open a terminal in that folder and create a virtual environment if you do not already have one:
+
+   ```shell
+   python -m venv .venv
+   ```
+
+4. Activate the virtual environment. On Windows, use PowerShell:
+
+   ```powershell
+   .\.venv\Scripts\Activate.ps1
+   ```
+
+   On macOS or Linux, use:
+
+   ```shell
+   source .venv/bin/activate
+   ```
+
+5. Install the packages used by the script in the active virtual environment:
+
+   ```shell
+   python -m pip install openpyxl PyYAML
+   ```
+
+6. Run the downloaded script with the source YAML first and the target YAML second. Replace the example filenames with your own:
+
+   ```shell
+   python prepare_mapping_v2.py source.yaml target.yaml
+   ```
+
+{% hint style="info" %}
+If the `python` command is not recognized, use `python3` instead in the commands above. If the `.py` link opens as text in your browser, right-click and save the page as `prepare_mapping_v2.py`.
+{% endhint %}
+
+The script creates a `mapping-<source>-and-<target>.xlsx` file in the current directory. It fills the library and Mapping metadata, lists the source requirements in `mappings_content`, and adds `source` and `target` sheets for reference.
 
 ## 3. Link the requirements
 
