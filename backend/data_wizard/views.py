@@ -1140,6 +1140,9 @@ class RecordConsumer[Context = None](ABC):
         """
         return data
 
+    def after_write(self, instance, created: bool) -> None:
+        """Follow-up writes for a saved row, inside the transaction of that write."""
+
     def _write_record(self, data: dict, instance=None) -> Optional[str]:
         """Create, or update *instance*, from *data*; return an error or None."""
         with transaction.atomic():
@@ -1153,7 +1156,8 @@ class RecordConsumer[Context = None](ABC):
                 transaction.set_rollback(True)
                 return str(serializer.errors)
             try:
-                serializer.save()
+                saved = serializer.save()
+                self.after_write(saved, created=instance is None)
             except Exception as e:
                 transaction.set_rollback(True)
                 return str(e)
@@ -2948,7 +2952,24 @@ class FolderRecordConsumer(RecordConsumer):
         if label_names:
             data["filtering_labels"] = raw_labels
 
+        raw_iam_groups = record.get("create_iam_groups")
+        if not is_blank_cell(raw_iam_groups):
+            create_iam_groups = _parse_bool_cell(raw_iam_groups)
+            if create_iam_groups is None:
+                return {}, Error(
+                    record=record,
+                    error=f"Invalid create_iam_groups '{raw_iam_groups}': "
+                    "use true or false",
+                )
+            data["create_iam_groups"] = create_iam_groups
+
         return data, None
+
+    def after_write(self, instance: Folder, created: bool) -> None:
+        # The API provisions IAM groups in FolderViewSet.perform_create, which the
+        # import bypasses; on update, the serializer handles the flag change.
+        if created:
+            Folder.create_default_ug_and_ra(instance)
 
     def resolve_deferred(self, data: dict) -> dict:
         if "filtering_labels" not in data:

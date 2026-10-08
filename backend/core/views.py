@@ -9212,6 +9212,10 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
                 "label": "labels",
                 "format": lambda qs: ",".join(o.label for o in qs.all()),
             },
+            "create_iam_groups": {
+                "source": "create_iam_groups",
+                "label": "create_iam_groups",
+            },
         },
         "filename": "domains_export",
         "select_related": ["parent_folder"],

@@ -1125,6 +1125,29 @@ class TestFolderConsumer:
         assert "not allowed to create labels: Secret" in error.error
         assert not FilteringLabel.objects.filter(label="Secret").exists()
 
+    @pytest.mark.parametrize(
+        ("cell", "expected"), [("yes", True), ("false", False), (True, True)]
+    )
+    def test_create_iam_groups_is_parsed(self, base_context, cell, expected):
+        record_data, error = FolderRecordConsumer(base_context).prepare_create(
+            {"name": "Grouped", "create_iam_groups": cell}, None
+        )
+        assert error is None
+        assert record_data["create_iam_groups"] is expected
+
+    def test_blank_create_iam_groups_is_left_out(self, base_context):
+        record_data, error = FolderRecordConsumer(base_context).prepare_create(
+            {"name": "Plain", "create_iam_groups": ""}, None
+        )
+        assert error is None
+        assert "create_iam_groups" not in record_data
+
+    def test_invalid_create_iam_groups_fails_the_row(self, base_context):
+        _, error = FolderRecordConsumer(base_context).prepare_create(
+            {"name": "Grouped", "create_iam_groups": "maybe"}, None
+        )
+        assert "Invalid create_iam_groups 'maybe'" in error.error
+
     def test_skipped_row_creates_no_label(
         self, skip_context, domain_folder, all_accessible
     ):

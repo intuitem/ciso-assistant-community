@@ -3,10 +3,10 @@
 import io
 
 import pytest
-from openpyxl import load_workbook
+from openpyxl import Workbook, load_workbook
 
 from core.models import FilteringLabel
-from iam.models import Folder
+from iam.models import Folder, UserGroup
 
 URL = "/api/data-wizard/load-file/"
 
@@ -52,7 +52,14 @@ class TestFolderRoundTrip:
     def test_export_columns_match_import(self, api_client, domains, all_accessible):
         ws = load_workbook(io.BytesIO(_export(api_client))).worksheets[0]
         rows = list(ws.iter_rows(values_only=True))
-        assert rows[0] == ("internal_id", "name", "description", "domain", "labels")
+        assert rows[0] == (
+            "internal_id",
+            "name",
+            "description",
+            "domain",
+            "labels",
+            "create_iam_groups",
+        )
         exported = {row[1]: row for row in rows[1:]}
         # The root folder is implicit in the import, so it is not exported.
         assert set(exported) == {"Alpha", "Beta", "Gamma"}
@@ -160,3 +167,43 @@ class TestFolderRoundTrip:
         assert "Invalid internal_id" in str(results["errors"])
         assert results["created"] == 1
         assert Folder.objects.filter(name="Delta").exists()
+
+
+def _iam_groups(folder) -> int:
+    return UserGroup.objects.filter(folder=folder, builtin=True).count()
+
+
+@pytest.mark.django_db
+def test_iam_groups_round_trip(knox_admin_client):
+    wb = Workbook()
+    ws = wb.active
+    ws.append(["name", "create_iam_groups"])
+    ws.append(["Grouped", "yes"])
+    ws.append(["Plain", None])
+    content = io.BytesIO()
+    wb.save(content)
+
+    resp = _import(knox_admin_client, content.getvalue(), "stop")
+    assert resp.status_code == 200, resp.json()
+    assert resp.json()["results"]["created"] == 2, resp.json()
+    grouped = Folder.objects.get(name="Grouped")
+    plain = Folder.objects.get(name="Plain")
+    # Created by the import, the domain gets its groups as through the API.
+    assert grouped.create_iam_groups and _iam_groups(grouped) > 0
+    assert not plain.create_iam_groups and _iam_groups(plain) == 0
+
+    wb = load_workbook(io.BytesIO(_export(knox_admin_client)))
+    ws = wb.worksheets[0]
+    header = [c.value for c in ws[1]]
+    for row in ws.iter_rows(min_row=2):
+        if row[header.index("name")].value == "Grouped":
+            row[header.index("create_iam_groups")].value = False
+    edited = io.BytesIO()
+    wb.save(edited)
+
+    resp = _import(knox_admin_client, edited.getvalue(), "update")
+    assert resp.status_code == 200, resp.json()
+    assert resp.json()["results"]["failed"] == 0, resp.json()
+    grouped.refresh_from_db()
+    assert not grouped.create_iam_groups
+    assert _iam_groups(grouped) == 0
