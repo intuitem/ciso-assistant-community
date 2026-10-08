@@ -38,7 +38,7 @@
 	}
 
 	interface Props {
-		value: Record<string, any> | null | undefined;
+		value: Record<string, unknown> | null | undefined;
 		models: ReadableModel[];
 		onchange?: () => void;
 	}
@@ -56,10 +56,17 @@
 	let datasets = $state<Dataset[]>([]);
 	let lastEmitted = '';
 
-	function fromValue(raw: Record<string, any> | null | undefined): Dataset[] {
+	type StoredConfig = {
+		model?: unknown;
+		filters?: Record<string, unknown> | null;
+		aggregates?: unknown;
+	};
+
+	function fromValue(raw: Record<string, unknown> | null | undefined): Dataset[] {
 		if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return [];
 		return Object.entries(raw).map(([name, config]) => {
-			const cfg = config && typeof config === 'object' ? config : {};
+			const cfg: StoredConfig =
+				config && typeof config === 'object' ? (config as StoredConfig) : {};
 			const groups = treeToGroups(cfg.filters);
 			return {
 				name,
@@ -68,14 +75,14 @@
 				// A tree the builder cannot edit (a "not" group) is kept as is.
 				rawFilters: groups === null ? (cfg.filters ?? null) : null,
 				aggregates: Array.isArray(cfg.aggregates)
-					? cfg.aggregates.map((a: any) => ({ ...a }))
+					? (cfg.aggregates as AggregateRow[]).map((a) => ({ ...a }))
 					: [{ fn: 'count' }]
 			};
 		});
 	}
 
-	function toValue(list: Dataset[]): Record<string, any> {
-		const out: Record<string, any> = {};
+	function toValue(list: Dataset[]): Record<string, unknown> {
+		const out: Record<string, unknown> = {};
 		for (const d of list) {
 			const config: Record<string, unknown> = { model: d.model };
 			const filters = d.rawFilters ?? groupsToTree(d.groups);

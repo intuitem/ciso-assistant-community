@@ -85,7 +85,10 @@
 			if (res.ok) {
 				const body = await res.json();
 				const rows = Array.isArray(body) ? body : (body.results ?? []);
-				domains = rows.map((row: any) => ({ id: row.id, str: row.str ?? row.name }));
+				domains = rows.map((row: { id: string; str?: string; name?: string }) => ({
+					id: row.id,
+					str: row.str ?? row.name ?? ''
+				}));
 			}
 		} catch {
 			domains = [];
@@ -104,7 +107,7 @@
 		$expressionValue = '';
 		preview = null;
 	}
-	const references = $derived(datasetReferences($datasetsValue as Record<string, any>));
+	const references = $derived(datasetReferences($datasetsValue as Record<string, unknown>));
 	function insertReference(ref: string) {
 		const current = ($expressionValue as string) ?? '';
 		$expressionValue = current && !current.endsWith(' ') ? `${current} ${ref}` : `${current}${ref}`;

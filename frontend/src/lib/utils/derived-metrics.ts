@@ -17,11 +17,12 @@ export function aliasOf(row: AggregateRow): string {
 }
 
 // Every `dataset.alias` an expression may read, in dataset order.
-export function datasetReferences(datasets: Record<string, any> | null | undefined): string[] {
+export function datasetReferences(datasets: Record<string, unknown> | null | undefined): string[] {
 	if (!datasets || typeof datasets !== 'object') return [];
 	const refs: string[] = [];
 	for (const [name, config] of Object.entries(datasets)) {
-		const rows: AggregateRow[] = Array.isArray(config?.aggregates) ? config.aggregates : [];
+		const aggregates = (config as { aggregates?: unknown } | null)?.aggregates;
+		const rows: AggregateRow[] = Array.isArray(aggregates) ? (aggregates as AggregateRow[]) : [];
 		for (const row of rows) refs.push(`${name}.${aliasOf(row)}`);
 	}
 	return refs;
