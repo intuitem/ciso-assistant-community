@@ -2231,6 +2231,7 @@ class RecordMeasurementAction(BaseAction):
             value=value,
             observation=str(render(config.get("observation", ""), context) or ""),
             evidence_revision=self._revision(config, context, instance),
+            source=CustomMetricSample.Source.WORKFLOW,
         )
         return {
             "object_id": str(sample.id),

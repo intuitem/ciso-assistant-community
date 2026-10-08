@@ -101,8 +101,29 @@ class MetricDefinition(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
             "Default target value for metric instances. Can be overridden at instance level."
         ),
     )
+    # A derived metric: datasets read in aggregate mode through core.reads,
+    # one CEL expression over their results. Empty for a manual metric.
+    datasets = models.JSONField(
+        blank=True,
+        null=True,
+        verbose_name=_("Datasets"),
+        help_text=_(
+            "For derived metrics: named read configurations, each answering "
+            "aggregates the expression can use"
+        ),
+    )
+    expression = models.TextField(
+        blank=True,
+        default="",
+        verbose_name=_("Expression"),
+        help_text=_("For derived metrics: the CEL expression computing the value"),
+    )
 
     fields_to_check = ["ref_id", "name"]
+
+    @property
+    def is_derived(self) -> bool:
+        return bool((self.expression or "").strip())
 
     class Meta:
         verbose_name = _("Metric definition")
@@ -175,8 +196,22 @@ class MetricInstance(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         blank=True,
         null=True,
     )
+    # Derived metrics: when the sampler last ran for this instance, and what
+    # went wrong if no sample came out of it.
+    last_computed_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("Last computed at")
+    )
+    last_computation_error = models.TextField(
+        blank=True, default="", verbose_name=_("Last computation error")
+    )
 
     fields_to_check = ["ref_id", "name"]
+
+    @property
+    def is_derived(self) -> bool:
+        return (
+            self.metric_definition_id is not None and self.metric_definition.is_derived
+        )
 
     class Meta:
         verbose_name = _("Metric instance")
@@ -279,6 +314,21 @@ class CustomMetricSample(AbstractBaseModel, FolderMixin):
         related_name="samples",
         blank=True,
         null=True,
+    )
+
+    class Source(models.TextChoices):
+        MANUAL = "manual", _("Manual")
+        WORKFLOW = "workflow", _("Workflow")
+        DERIVED = "derived", _("Derived")
+
+    source = models.CharField(
+        max_length=20,
+        choices=Source.choices,
+        default=Source.MANUAL,
+        verbose_name=_("Source"),
+        help_text=_(
+            "What wrote the sample: a person, a workflow, or the metric's own formula"
+        ),
     )
 
     class Meta:

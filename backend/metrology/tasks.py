@@ -1,6 +1,6 @@
 from datetime import date, timedelta
 from huey import crontab
-from huey.contrib.djhuey import db_periodic_task
+from huey.contrib.djhuey import db_periodic_task, db_task
 
 import logging.config
 from django.conf import settings
@@ -98,3 +98,59 @@ def cleanup_old_builtin_metric_samples():
         logger.warning(
             "Metrology tables do not exist yet — skipping builtin metric sample cleanup"
         )
+
+
+# ---------- derived metrics ----------
+
+
+@db_task()
+def compute_derived_metric_task(instance_id):
+    """One instance, by id: the manual refresh and the sweep both land here."""
+    from metrology.derived import DerivedMetricError, compute_sample
+
+    instance = (
+        MetricInstance.objects.select_related("metric_definition", "folder")
+        .filter(id=instance_id)
+        .first()
+    )
+    if instance is None:
+        return
+    try:
+        compute_sample(instance)
+    except DerivedMetricError as e:
+        # Recorded on the instance by compute_sample; the log is for operators.
+        logger.warning(
+            "derived metric computation failed",
+            metric_instance_id=str(instance.id),
+            error=str(e),
+        )
+
+
+@db_periodic_task(crontab(minute="*/15"))
+def compute_due_derived_metrics():
+    """The sweep: every derived instance past its collection interval."""
+    from metrology.derived import due_instances
+
+    try:
+        due = due_instances()
+    except DatabaseError:
+        logger.warning("Metrology tables do not exist yet — skipping derived metrics")
+        return
+    for instance in due:
+        compute_derived_metric_task(str(instance.id))
+    if due:
+        logger.info("derived metrics sweep", queued=len(due))
+
+
+@db_periodic_task(crontab(hour="3", minute="30"))
+def downsample_derived_metric_samples():
+    """Older than a week, one derived sample per instance per day."""
+    from metrology.derived import downsample_derived_samples
+
+    try:
+        deleted = downsample_derived_samples()
+    except DatabaseError:
+        logger.warning("Metrology tables do not exist yet — skipping downsampling")
+        return
+    if deleted:
+        logger.info("derived metric samples downsampled", deleted=deleted)

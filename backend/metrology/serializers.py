@@ -84,6 +84,27 @@ class MetricDefinitionWriteSerializer(BaseModelSerializer):
 
         return value
 
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        from metrology.derived import validate_formula
+
+        datasets = attrs.get(
+            "datasets",
+            getattr(self.instance, "datasets", None) if self.instance else None,
+        )
+        expression = attrs.get(
+            "expression",
+            getattr(self.instance, "expression", "") if self.instance else "",
+        )
+        errors = validate_formula(datasets, expression)
+        if errors:
+            # One list under `expression`: the form shows the formula as one
+            # block, and the codes travel in the messages for the editor.
+            raise serializers.ValidationError(
+                {"expression": [message for _code, message in errors]}
+            )
+        return attrs
+
     class Meta:
         model = MetricDefinition
         exclude = ["translations"]
@@ -95,6 +116,7 @@ class MetricDefinitionReadSerializer(ReferentialSerializer):
     library = FieldsRelatedField(["name", "id"])
     unit = FieldsRelatedField(["name", "id"])
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
+    is_derived = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = MetricDefinition
@@ -125,6 +147,7 @@ class MetricInstanceWriteSerializer(BaseModelSerializer):
 
 class MetricInstanceReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
+    is_derived = serializers.BooleanField(read_only=True)
     folder = FieldsRelatedField()
     metric_definition = FieldsRelatedField(
         [

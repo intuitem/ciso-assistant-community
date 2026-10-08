@@ -162,6 +162,14 @@ class TestEvaluate:
 
     def test_null_is_a_value(self):
         assert evaluate("missing == null", {"missing": None}) is True
+        # Equality against null answers, whatever the other side holds.
+        for value in (1, 2.5, "s", True, [1], {"a": 1}):
+            assert evaluate("x == null", {"x": value}) is False, value
+            assert evaluate("x != null", {"x": value}) is True, value
+            assert evaluate("null == x", {"x": value}) is False, value
+        assert evaluate("null == null", {}) is True
+        assert evaluate("(x == null ? 0 : x) + 1", {"x": 2.0}) == 3.0
+        assert evaluate("(x == null ? 0 : x) + 1", {"x": None}) == 1
         assert evaluate("has(m.x) ? m.x : 0", {"m": {}}) == 0
         assert evaluate("x", {"x": None}) is None
         with pytest.raises(ExpressionError, match="null value has no fields"):

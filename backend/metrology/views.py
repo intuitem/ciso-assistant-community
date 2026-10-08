@@ -9,7 +9,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from core.views import BaseModelViewSet, LONG_CACHE_TTL
-from iam.models import RoleAssignment
+from iam.models import Folder, RoleAssignment
+from django.contrib.auth.models import Permission
 from metrology.models import (
     MetricDefinition,
     MetricInstance,
@@ -20,6 +21,13 @@ from metrology.models import (
 )
 from metrology.builtin_metrics import BUILTIN_METRICS, METRIC_TYPE_CHART_TYPES
 from metrology.serializers import BuiltinMetricSampleReadSerializer
+
+
+def _as_uuid(value):
+    try:
+        return uuid.UUID(str(value))
+    except ValueError, TypeError:
+        return None
 
 
 def _user_can_read_target(user, content_type, object_id):
@@ -61,6 +69,52 @@ class MetricDefinitionViewSet(BaseModelViewSet):
         )
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, methods=["post"], url_path="preview-formula")
+    def preview_formula(self, request):
+        """Evaluate a derived metric's formula against a folder, writing
+        nothing. The datasets' aggregates and the result come back so an author
+        sees what the expression reads; an evaluation failure is a 200 with
+        ok: false. Needs the right to add metric instances in that folder, the
+        same right that would make the number visible."""
+        from metrology.derived import (
+            DerivedMetricError,
+            evaluate_formula,
+            validate_formula,
+        )
+
+        data = request.data if isinstance(request.data, dict) else {}
+        folder = Folder.objects.filter(id=_as_uuid(data.get("folder"))).first()
+        if folder is None:
+            return Response(
+                {"error": "folderNotFound"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        permission = Permission.objects.filter(codename="add_metricinstance").first()
+        if permission is None or not RoleAssignment.is_access_allowed(
+            user=request.user, perm=permission, folder=folder
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        datasets = data.get("datasets")
+        expression = data.get("expression") or ""
+        errors = validate_formula(datasets, expression)
+        if errors:
+            return Response(
+                {"ok": False, "errors": [{"code": c, "message": m} for c, m in errors]}
+            )
+        try:
+            evaluation = evaluate_formula(datasets, expression, folder)
+        except DerivedMetricError as e:
+            return Response(
+                {
+                    "ok": False,
+                    "errors": [
+                        {"code": "derived_evaluation_failed", "message": str(e)}
+                    ],
+                }
+            )
+        return Response(
+            {"ok": True, "value": evaluation.value, "datasets": evaluation.datasets}
+        )
+
     @action(detail=False, name="Get category choices")
     def category(self, request):
         return Response(dict(MetricDefinition.Category.choices))
@@ -105,6 +159,26 @@ class MetricInstanceViewSet(BaseModelViewSet):
                 "owner", "organisation_objectives", "filtering_labels", "samples"
             )
         )
+
+    @action(detail=True, methods=["post"], url_path="refresh")
+    def refresh(self, request, pk=None):
+        """Recompute a derived metric now. The task is enqueued, never run
+        inline, so a refresh and a scheduled run share one code path and a
+        slow worker-side aggregate never sits on a request."""
+        from metrology.tasks import compute_derived_metric_task
+
+        instance = self.get_object()
+        if not instance.is_derived:
+            return Response(
+                {"error": "metricNotDerived"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        permission = Permission.objects.filter(codename="change_metricinstance").first()
+        if permission is None or not RoleAssignment.is_access_allowed(
+            user=request.user, perm=permission, folder=instance.folder
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        compute_derived_metric_task(str(instance.id))
+        return Response({"queued": True}, status=status.HTTP_202_ACCEPTED)
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")

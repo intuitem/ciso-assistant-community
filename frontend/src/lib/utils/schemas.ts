@@ -2058,6 +2058,8 @@ export const MetricDefinitionSchema = z.object({
 	provider: z.string().optional().nullable(),
 	higher_is_better: z.boolean().default(true),
 	default_target: z.number().optional().nullable(),
+	datasets: jsonSchema.optional().nullable(),
+	expression: z.string().optional(),
 	filtering_labels: z.string().optional().array().optional()
 });
 

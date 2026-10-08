@@ -1,0 +1,391 @@
+"""Derived metrics: a sample computed from the instance's own data.
+
+A derived metric definition carries ``datasets`` (name -> read configuration,
+evaluated in aggregate mode through core.reads) and one CEL ``expression``
+over the dataset results. The instance binds the formula to a folder: every
+dataset reads that folder's subtree, with no identity, so the value is a fact
+about the folder and the same for everyone who may view the instance (see
+documentation/architecture/decisions/derived-metrics-from-workflow-reads.md).
+
+The expression may also read ``previous`` (the instance's latest sample
+value, or null), ``metrics.<ref_id>.value`` (the latest value of other
+instances in the same subtree) and ``now`` / ``today``. Dataset filter values
+may carry ``{{today}}``, ``{{now}}`` and ``{{today-30d}}``-style offsets.
+"""
+
+from __future__ import annotations
+
+import datetime
+import math
+import re
+from dataclasses import dataclass
+from dataclasses import field as dataclass_field
+
+from django.core.cache import cache
+from django.db import transaction
+from django.utils import timezone
+
+from core.expressions import (
+    ExpressionError,
+    compile_expression,
+    evaluate,
+    referenced_paths,
+)
+from core.reads import (
+    MODE_AGGREGATE,
+    ReadError,
+    ReadScope,
+    run_aggregate_read,
+    subtree_folder_ids,
+    validate_read_config,
+)
+
+DATASET_NAME_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+MAX_DATASETS = 10
+MAX_EXPRESSION_LENGTH = 2000
+# Names the expression may read besides the datasets.
+CONTEXT_ROOTS = frozenset({"previous", "metrics", "now", "today"})
+# A lock outlives any sane computation; a crashed worker frees it by expiry.
+LOCK_TTL_SECONDS = 600
+
+_TIME_TOKEN_RE = re.compile(r"\{\{\s*(today|now)\s*(?:([+-])\s*(\d+)\s*d)?\s*\}\}")
+
+
+class DerivedMetricError(Exception):
+    """The formula cannot be evaluated for this instance. Author-facing."""
+
+
+# ---------- the formula ----------
+
+
+def is_derived(definition) -> bool:
+    return bool((definition.expression or "").strip())
+
+
+def validate_formula(datasets, expression) -> list[tuple[str, str]]:
+    """Save-time checks of a definition's formula, as (code, message) tuples.
+    An empty expression with no datasets is a plain (manual) definition."""
+    errors = []
+    expression = expression or ""
+    if not expression.strip() and not datasets:
+        return errors
+    if not isinstance(datasets, dict) or not datasets:
+        errors.append(
+            ("derived_datasets_missing", "A derived metric needs at least one dataset")
+        )
+        datasets = {}
+    if len(datasets) > MAX_DATASETS:
+        errors.append(
+            ("derived_datasets_too_many", f"At most {MAX_DATASETS} datasets per metric")
+        )
+    names = set()
+    for name, config in datasets.items():
+        if (
+            not isinstance(name, str)
+            or not DATASET_NAME_RE.match(name)
+            or name in CONTEXT_ROOTS
+        ):
+            errors.append(
+                (
+                    "derived_dataset_name_invalid",
+                    (
+                        f"'{name}' is not a valid dataset name (letters, digits, _; "
+                        f"not one of {', '.join(sorted(CONTEXT_ROOTS))})"
+                    ),
+                )
+            )
+            continue
+        names.add(name)
+        if not isinstance(config, dict):
+            errors.append(
+                ("derived_dataset_invalid", f"dataset '{name}' must be a mapping")
+            )
+            continue
+        for code, message in validate_read_config(_aggregate_config(config)):
+            errors.append(("derived_dataset_invalid", f"dataset '{name}': {message}"))
+    if not isinstance(expression, str) or not expression.strip():
+        errors.append(
+            ("derived_expression_missing", "A derived metric needs an expression")
+        )
+        return errors
+    if len(expression) > MAX_EXPRESSION_LENGTH:
+        errors.append(("derived_expression_too_long", "The expression is too long"))
+        return errors
+    try:
+        compile_expression(expression)
+    except ExpressionError as e:
+        errors.append(("derived_expression_invalid", str(e)))
+        return errors
+    roots = {path.split(".")[0] for path in referenced_paths(expression)}
+    for root in sorted(roots - names - CONTEXT_ROOTS):
+        errors.append(
+            (
+                "derived_expression_unknown_name",
+                f"'{root}' is not a dataset of this metric",
+            )
+        )
+    return errors
+
+
+def _aggregate_config(config):
+    """A dataset is a read configuration in aggregate mode, whatever the
+    stored config says: the metric form never offers the mode."""
+    return {**config, "mode": MODE_AGGREGATE}
+
+
+# ---------- evaluation ----------
+
+
+def resolve_time_tokens(value, now=None):
+    """``{{today}}``, ``{{now}}`` and ``{{today-30d}}`` in a filter value."""
+    if not isinstance(value, str) or "{{" not in value:
+        return value
+    now = now or timezone.now()
+
+    def substitute(match):
+        base, sign, days = match.group(1), match.group(2), match.group(3)
+        moment = now
+        if days:
+            delta = datetime.timedelta(days=int(days))
+            moment = moment + delta if sign == "+" else moment - delta
+        return moment.date().isoformat() if base == "today" else moment.isoformat()
+
+    return _TIME_TOKEN_RE.sub(substitute, value)
+
+
+@dataclass
+class Evaluation:
+    """What one evaluation produced, for a sample or for the preview."""
+
+    value: object = None
+    datasets: dict = dataclass_field(default_factory=dict)
+    context: dict = dataclass_field(default_factory=dict)
+
+
+def other_metric_values(folder, exclude_id=None):
+    """``metrics.<ref_id>.value`` for the instances of the subtree that carry a
+    ref_id: the latest sample's raw value, whatever wrote it."""
+    from .models import MetricInstance
+
+    values = {}
+    instances = (
+        MetricInstance.objects.filter(folder_id__in=subtree_folder_ids(folder))
+        .exclude(ref_id__isnull=True)
+        .exclude(ref_id="")
+        .prefetch_related("samples")
+        .select_related("metric_definition")
+    )
+    if exclude_id is not None:
+        instances = instances.exclude(id=exclude_id)
+    for instance in instances:
+        values[instance.ref_id] = {"value": instance.raw_value()}
+    return values
+
+
+def evaluate_formula(datasets, expression, folder, *, previous=None, exclude_id=None):
+    """Datasets then expression, against ``folder``'s subtree. Raises
+    DerivedMetricError with the message an author needs."""
+    now = timezone.now()
+    scope = ReadScope(folder_ids=subtree_folder_ids(folder))
+    evaluation = Evaluation()
+    for name, config in (datasets or {}).items():
+        try:
+            evaluation.datasets[name] = run_aggregate_read(
+                _aggregate_config(config),
+                scope,
+                resolve=lambda value, now=now: resolve_time_tokens(value, now),
+            )
+        except ReadError as e:
+            raise DerivedMetricError(f"dataset '{name}': {e}")
+        except (ValueError, TypeError) as e:
+            raise DerivedMetricError(f"dataset '{name}': invalid filter value ({e})")
+    evaluation.context = {
+        **evaluation.datasets,
+        "previous": previous,
+        "metrics": other_metric_values(folder, exclude_id),
+        "now": now.isoformat(),
+        "today": now.date().isoformat(),
+    }
+    try:
+        evaluation.value = evaluate(expression, evaluation.context)
+    except ExpressionError as e:
+        raise DerivedMetricError(f"expression: {e}")
+    return evaluation
+
+
+def shape_value(value, definition):
+    """The sample envelope the API validates, from the expression's result:
+    a finite number for a quantitative metric, a level (its name, ref_id or
+    1-based index) for a qualitative one."""
+    from .models import MetricDefinition
+
+    if definition.category == MetricDefinition.Category.QUALITATIVE:
+        choices = definition.choices_definition or []
+        if isinstance(value, bool) or value is None:
+            raise DerivedMetricError(f"'{value}' is not a level of this metric")
+        if isinstance(value, (int, float)) and not isinstance(value, bool):
+            index = int(value)
+            if index != value or index < 1 or index > len(choices):
+                raise DerivedMetricError(
+                    f"level {value} is outside the metric's {len(choices)} options"
+                )
+            return {"choice_index": index}
+        text = str(value).strip().lower()
+        for index, choice in enumerate(choices, start=1):
+            names = {
+                str(choice.get("name", "")).strip().lower(),
+                str(choice.get("ref_id", "")).strip().lower(),
+            }
+            if text in names - {""}:
+                return {"choice_index": index}
+        raise DerivedMetricError(f"'{value}' is not a level of this metric")
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise DerivedMetricError(f"the expression must return a number, not {value!r}")
+    if not math.isfinite(float(value)):
+        raise DerivedMetricError("the expression returned a non-finite number")
+    return {"result": float(value)}
+
+
+# ---------- sampling ----------
+
+FREQUENCY_INTERVALS = {
+    "realtime": datetime.timedelta(minutes=15),
+    "hourly": datetime.timedelta(hours=1),
+    "daily": datetime.timedelta(days=1),
+    "weekly": datetime.timedelta(days=7),
+    "monthly": datetime.timedelta(days=30),
+    "quarterly": datetime.timedelta(days=91),
+    "yearly": datetime.timedelta(days=365),
+}
+DEFAULT_INTERVAL = datetime.timedelta(days=1)
+
+
+def interval_for(instance):
+    return FREQUENCY_INTERVALS.get(instance.collection_frequency, DEFAULT_INTERVAL)
+
+
+def is_due(instance, now=None):
+    now = now or timezone.now()
+    if instance.last_computed_at is None:
+        return True
+    return now - instance.last_computed_at >= interval_for(instance)
+
+
+def due_instances(now=None):
+    """Derived instances the sweep should compute now: active or stale (the
+    staleness sweep flips those back), with a formula, past their interval."""
+    from .models import MetricInstance
+
+    now = now or timezone.now()
+    candidates = (
+        MetricInstance.objects.filter(
+            status__in=[MetricInstance.Status.ACTIVE, MetricInstance.Status.STALE]
+        )
+        .exclude(metric_definition__expression="")
+        .select_related("metric_definition", "folder")
+    )
+    return [instance for instance in candidates if is_due(instance, now)]
+
+
+def _lock_key(instance_id):
+    return f"metrology:derived-metric-lock:{instance_id}"
+
+
+def compute_sample(instance, *, write=True):
+    """Evaluate the instance's formula and, by default, write the sample.
+    Records the failure on the instance instead of a sample when the
+    evaluation fails; the error is author-facing and retrying is pointless
+    until the formula or the data changes. Returns the Evaluation, or None
+    when another worker holds the instance's lock."""
+    from .models import CustomMetricSample
+
+    definition = instance.metric_definition
+    if not is_derived(definition):
+        raise DerivedMetricError("this metric has no formula")
+    key = _lock_key(instance.id)
+    if not cache.add(key, "1", LOCK_TTL_SECONDS):
+        return None
+    try:
+        now = timezone.now()
+        try:
+            evaluation = evaluate_formula(
+                definition.datasets,
+                definition.expression,
+                instance.folder,
+                previous=instance.raw_value(),
+                exclude_id=instance.id,
+            )
+            envelope = shape_value(evaluation.value, definition)
+        except DerivedMetricError as e:
+            if write:
+                instance.last_computed_at = now
+                instance.last_computation_error = str(e)
+                instance.save(
+                    update_fields=[
+                        "last_computed_at",
+                        "last_computation_error",
+                        "updated_at",
+                    ]
+                )
+            raise
+        if write:
+            with transaction.atomic():
+                CustomMetricSample.objects.create(
+                    metric_instance=instance,
+                    folder=instance.folder,
+                    timestamp=now,
+                    value=envelope,
+                    source=CustomMetricSample.Source.DERIVED,
+                )
+                instance.last_computed_at = now
+                instance.last_computation_error = ""
+                instance.save(
+                    update_fields=[
+                        "last_computed_at",
+                        "last_computation_error",
+                        "updated_at",
+                    ]
+                )
+            # The memoised latest sample is stale now.
+            instance.__dict__.pop("_latest_sample", None)
+        return evaluation
+    finally:
+        cache.delete(key)
+
+
+# ---------- retention ----------
+
+KEEP_EVERY_SAMPLE_DAYS = 7
+
+
+def downsample_derived_samples(now=None):
+    """Older than KEEP_EVERY_SAMPLE_DAYS, keep one derived sample per instance
+    per day (the last one). Hourly ticks across many instances add up, and a
+    trend older than a week does not need the intraday points. Returns the
+    number of samples deleted."""
+    from .models import CustomMetricSample
+
+    now = now or timezone.now()
+    cutoff = now - datetime.timedelta(days=KEEP_EVERY_SAMPLE_DAYS)
+    old = (
+        CustomMetricSample.objects.filter(
+            source=CustomMetricSample.Source.DERIVED, timestamp__lt=cutoff
+        )
+        .order_by("metric_instance_id", "timestamp")
+        .values_list("id", "metric_instance_id", "timestamp")
+    )
+    doomed = []
+    last_key = None
+    last_id = None
+    for sample_id, instance_id, stamp in old.iterator(chunk_size=2000):
+        key = (instance_id, timezone.localtime(stamp).date())
+        if key == last_key:
+            # The previous one of the same day is superseded by this one.
+            doomed.append(last_id)
+        last_key, last_id = key, sample_id
+    deleted = 0
+    for start in range(0, len(doomed), 500):
+        deleted += CustomMetricSample.objects.filter(
+            id__in=doomed[start : start + 500]
+        ).delete()[0]
+    return deleted

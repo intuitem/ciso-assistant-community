@@ -119,6 +119,21 @@ This is the actual data of the metric instance on a given timestamp.&#x20;
 
 Keep in mind that you can add the data manually or through all the supported integrations (API, n8n, etc.). Note that data cannot be in the future.
 
+## Derived metrics
+
+A derived metric computes its own samples from the data already in the instance: the share of applied controls that are active, the average progress of the audits in a domain, the number of controls past their ETA. Nobody types the number in; the application reads it on a schedule.
+
+A derived definition carries two things in addition to the usual fields:
+
+* **Datasets**: named read configurations, each aggregating objects of one kind. A dataset names a model, optional filters on its fields, and a list of aggregates (count, distinct count, sum, average, minimum, maximum, median, percentile, standard deviation, optionally grouped by a field). The vocabulary is the one the workflow **Read objects** step uses in its "Numbers about the matches" mode; see the [action reference](../features/workflows/actions.md#numbers-about-the-matches).
+* **Expression**: a [CEL](https://cel.dev) expression over the dataset results, for example `active.count * 100.0 / controls.count`. It can also read `previous` (the instance's latest sample), `metrics.<ref_id>.value` (the latest value of another instance in the same scope, by its reference id), and `now` / `today`. Dataset filter values accept `{{today}}`, `{{now}}` and offsets such as `{{today-30d}}`. A quantitative metric returns a number; a qualitative one returns the name of a level.
+
+The definition is the formula; the **instance** binds it to a domain. Every dataset reads that domain and its sub-domains, nothing above or beside it, and with no user identity: the value is a fact about the domain, the same for everyone allowed to see the instance. To cover several domains at once, create the instance in their common ancestor. Creating a derived instance requires the right to add metric instances in that domain.
+
+Samples are computed on the instance's **collection frequency** (real-time means every quarter of an hour), and on demand with **Refresh now** on the instance page. A computation that fails, for instance because a worker-side aggregate exceeds the row ceiling the instance sets, writes no sample and shows its error on the instance page instead. The definition form offers a **Preview** that evaluates the formula against a domain without writing anything, and shows what each dataset answered.
+
+Older than a week, the application keeps one derived sample per instance and per day, so a long series does not grow by the hour.
+
 <figure><img src="../.gitbook/assets/image (55).png" alt=""><figcaption></figcaption></figure>
 
 ## Dashboards
