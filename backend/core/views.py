@@ -10437,6 +10437,17 @@ class FrameworkFilter(GenericFilterSet):
         label="Baseline",
     )
 
+    in_domain_tree = df.BooleanFilter(
+        method="filter_in_domain_tree",
+        label="Has audits the domain tree can show",
+    )
+
+    def filter_in_domain_tree(self, queryset, name, value):
+        from core.domain_tree import tree_audits
+
+        used = tree_audits(self.request.user).values("framework_id")
+        return queryset.filter(id__in=used) if value else queryset.exclude(id__in=used)
+
     def filter_framework(self, queryset, name, value):
         if not value:
             return queryset
@@ -10556,6 +10567,26 @@ class FrameworkViewSet(BaseModelViewSet):
                 _framework.min_score,
             )
         )
+
+    @action(detail=True, methods=["get"], url_path="domain_tree")
+    def domain_tree(self, request, pk):
+        """This framework's audits summed up per domain, for the domain tree view.
+
+        Query params:
+          - campaign (uuid): narrow to one campaign's audits.
+        """
+        from core.domain_tree import build_domain_tree
+
+        framework = self.get_object()  # checks read permission
+        campaign_id = request.query_params.get("campaign") or None
+        if campaign_id:
+            try:
+                UUID(campaign_id)
+            except ValueError:
+                return Response(
+                    {"error": "invalid campaign"}, status=status.HTTP_400_BAD_REQUEST
+                )
+        return Response(build_domain_tree(request.user, framework, campaign_id))
 
     @action(detail=True, methods=["get"])
     def report(self, request, pk):
