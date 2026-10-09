@@ -2,9 +2,11 @@
 
 Two things on top of Django's backend:
 
-- ``EMAIL_FORCE_TLS_1_2``. Django 6 removed the ``ssl_context`` kwarg and
-  turned it into a ``cached_property`` built from the ``ssl_certfile`` /
-  ``ssl_keyfile`` options, so the TLS 1.2 pin has to be applied here.
+- The TLS context. Django 6 removed the ``ssl_context`` kwarg and builds the
+  context itself; with a client certificate it builds a bare one that trusts
+  no CA, so no server certificate verifies. We build it from the default
+  context instead, add the client certificate, and apply
+  ``EMAIL_FORCE_TLS_1_2``.
 - OAuth 2.0 over SMTP (SASL XOAUTH2). When the mailer carries an ``oauth2``
   option, the connection authenticates with a bearer token obtained by
   ``core.mail_oauth2`` instead of a password. The username stays the mailbox
@@ -39,9 +41,11 @@ class EmailBackend(SMTPEmailBackend):
 
     @cached_property
     def ssl_context(self):
-        # Pin Django's own context in place so a client certificate passed in
-        # OPTIONS keeps applying alongside the TLS 1.2 restriction.
-        context = super().ssl_context
+        # Not super().ssl_context: with a client certificate Django returns
+        # SSLContext(PROTOCOL_TLS_CLIENT) without the system trust store.
+        context = ssl.create_default_context()
+        if self.ssl_certfile or self.ssl_keyfile:
+            context.load_cert_chain(self.ssl_certfile, self.ssl_keyfile)
         if getattr(settings, "EMAIL_FORCE_TLS_1_2", False):
             pin_tls12(context)
         return context
@@ -59,16 +63,31 @@ class EmailBackend(SMTPEmailBackend):
         return opened
 
     def _authenticate_oauth2(self):
-        connection = self.connection
-        connection.ehlo_or_helo_if_needed()
-        token = mail_oauth2.get_token(self.oauth2)
         try:
-            _auth_xoauth2(connection, self.username, token)
+            self._authenticate_with(mail_oauth2.get_token(self.oauth2))
+            return
         except smtplib.SMTPAuthenticationError:
-            # The cached token may have been revoked or expired early; one
-            # retry with a freshly issued token, then give up.
-            token = mail_oauth2.get_token(self.oauth2, force_refresh=True)
-            _auth_xoauth2(connection, self.username, token)
+            # The cached token may have been revoked or expired early. The
+            # session is still usable for a second attempt.
+            pass
+        except smtplib.SMTPServerDisconnected:
+            # Servers commonly delay the answer to a failed login, and the
+            # delay can outlast the timeout. The session is gone: start a new
+            # one for the retry.
+            self._drop_connection()
+            super().open()
+        # One retry with a freshly issued token, then give up.
+        self._authenticate_with(mail_oauth2.get_token(self.oauth2, force_refresh=True))
+
+    def _authenticate_with(self, token: str):
+        try:
+            self.connection.ehlo_or_helo_if_needed()
+            _auth_xoauth2(self.connection, self.username, token)
+        except Exception:
+            # A token that did not get us in is never offered again, whatever
+            # the failure: otherwise it would be reused until it expires.
+            mail_oauth2.discard(self.oauth2, token)
+            raise
 
     def _drop_connection(self):
         connection, self.connection = self.connection, None

@@ -9,12 +9,15 @@ side is one of three standard grants:
 - ``refresh_token`` (RFC 6749): a long-lived refresh token obtained once by a
   person. Providers that offer no machine flow.
 
-Tokens are cached per configuration until shortly before they expire. The
-token endpoint is an operator-supplied URL at the same trust level as
+Tokens are cached per configuration until shortly before they expire, and a
+token the mail server refused is dropped from the cache. The refresh token is
+read from the configuration only: providers that revoke a refresh token once
+it has been used are not supported. The token endpoint is an operator-supplied URL at the same trust level as
 ``EMAIL_HOST``, so it may point at a private identity provider; it must use
 HTTPS because the response carries a bearer secret.
 """
 
+import hashlib
 import json
 import threading
 import time
@@ -48,12 +51,19 @@ def xoauth2_string(user: str, token: str) -> str:
 
 
 def _cache_key(config: dict) -> tuple:
+    # The credentials are part of the key, hashed so the cache never holds
+    # them: a changed secret must not keep serving a token the old one minted.
+    credentials = "\x00".join(
+        config.get(name) or ""
+        for name in ("client_secret", "refresh_token", "private_key")
+    )
     return (
         config["token_url"],
         config.get("client_id"),
         config.get("issuer") or config.get("service_account_file"),
         config.get("user"),
         config.get("scope"),
+        hashlib.sha256(credentials.encode()).hexdigest(),
     )
 
 
@@ -72,6 +82,16 @@ def get_token(config: dict, *, force_refresh: bool = False) -> str:
     return token
 
 
+def discard(config: dict, token: str) -> None:
+    """Drop ``token`` from the cache so it is never offered again. A newer
+    token cached meanwhile by another thread stays."""
+    key = _cache_key(config)
+    with _lock:
+        cached = _cache.get(key)
+        if cached is not None and cached[0] == token:
+            del _cache[key]
+
+
 def clear_cache() -> None:
     with _lock:
         _cache.clear()
@@ -88,9 +108,19 @@ def fetch_token(config: dict) -> tuple[str, int]:
     except httpx.HTTPError as error:
         raise TokenError(f"token endpoint unreachable: {error}") from error
     if response.status_code != 200:
-        raise TokenError(
-            f"token endpoint answered {response.status_code}: {_error_text(response)}"
-        )
+        detail = _error_text(response)
+        if config["grant_type"] == "refresh_token" and detail.startswith(
+            "invalid_grant"
+        ):
+            # Most providers hand out a new refresh token on every refresh and
+            # keep the old one valid; only rotation with revocation breaks us,
+            # and it shows up here.
+            detail += (
+                " (the refresh token was refused: it expired or was revoked, or"
+                " the provider revokes refresh tokens once used, which is not"
+                " supported; issue a new one and disable that setting)"
+            )
+        raise TokenError(f"token endpoint answered {response.status_code}: {detail}")
     try:
         body = response.json()
     except ValueError as error:
@@ -100,7 +130,7 @@ def fetch_token(config: dict) -> tuple[str, int]:
         raise TokenError("token endpoint returned no access_token")
     try:
         expires_in = int(body.get("expires_in", ASSERTION_LIFETIME_SECONDS))
-    except (TypeError, ValueError):
+    except TypeError, ValueError:
         expires_in = ASSERTION_LIFETIME_SECONDS
     logger.info(
         "oauth2 token obtained",
@@ -137,12 +167,15 @@ def _grant_payload(config: dict) -> dict:
             payload["scope"] = config["scope"]
         return payload
     if grant == "refresh_token":
-        return {
+        payload = {
             "grant_type": grant,
             "client_id": config["client_id"],
-            "client_secret": config["client_secret"],
             "refresh_token": config["refresh_token"],
         }
+        # Public clients have no secret (RFC 6749 section 6).
+        if config.get("client_secret"):
+            payload["client_secret"] = config["client_secret"]
+        return payload
     return {"grant_type": JWT_BEARER_GRANT, "assertion": _signed_assertion(config)}
 
 

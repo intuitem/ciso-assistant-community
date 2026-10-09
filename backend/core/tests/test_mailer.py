@@ -1,13 +1,17 @@
 """core.mailer: ordered failover on connection failure only, and the
 environment-to-MAILERS builder behind it."""
 
+import smtplib
+
 import pytest
 from django.core import mail
+from django.core.mail import mailers
 from django.core.mail.backends.base import BaseEmailBackend
 from django.core.mail.backends.locmem import EmailBackend as LocmemBackend
 
 from ciso_assistant.mailers import CONSOLE_BACKEND, SMTP_BACKEND, build_mailers
 from core import mailer
+from core.email_backend import EmailBackend
 
 LOCMEM = "django.core.mail.backends.locmem.EmailBackend"
 HERE = "core.tests.test_mailer"
@@ -45,9 +49,33 @@ class UncleanCloseBackend(LocmemBackend):
         raise RuntimeError("421 closing transmission channel")
 
 
+class LoginRefusedSMTP:
+    """Accepts the TCP connection, then rejects the password."""
+
+    instances: list = []
+
+    def __init__(self, host, port, local_hostname=None, timeout=None):
+        self.closed = False
+        LoginRefusedSMTP.instances.append(self)
+
+    def login(self, user, password):
+        raise smtplib.SMTPAuthenticationError(535, b"5.7.8 bad credentials")
+
+    def quit(self):
+        self.closed = True
+
+    def close(self):
+        self.closed = True
+
+
+class LoginRefusedBackend(EmailBackend):
+    connection_class = LoginRefusedSMTP
+
+
 @pytest.fixture(autouse=True)
 def reset_counters():
     RefusingBackend.opened = 0
+    LoginRefusedSMTP.instances = []
 
 
 # --- configuration ---------------------------------------------------------
@@ -144,6 +172,47 @@ def test_build_mailers_rejects_non_numeric_port():
         )
 
 
+@pytest.mark.parametrize(
+    "flags, built, connected",
+    [
+        # Before MAILERS an unset port reached smtplib as 0, i.e. 25, even
+        # with STARTTLS; Django's mailers would otherwise pick 587.
+        ({"EMAIL_USE_TLS": "True"}, 25, 25),
+        ({}, 25, 25),
+        ({"EMAIL_USE_SSL": "True"}, None, 465),
+    ],
+)
+def test_unset_port_keeps_the_pre_mailers_default(settings, flags, built, connected):
+    settings.MAILERS = build_mailers({"EMAIL_HOST": "smtp.example", **flags})
+    assert settings.MAILERS["default"]["OPTIONS"]["port"] == built
+    assert mailers["default"].port == connected
+
+
+def test_build_mailers_reads_the_client_certificate(settings):
+    settings.MAILERS = build_mailers(
+        {
+            "EMAIL_HOST": "smtp.example",
+            "EMAIL_SSL_CERTFILE": "/certs/client.pem",
+            "EMAIL_SSL_KEYFILE": "/certs/client.key",
+            "EMAIL_HOST_RESCUE": "smtp2.example",
+            "EMAIL_SSL_CERTFILE_RESCUE": "/certs/rescue.pem",
+        }
+    )
+    primary = mailers["default"]
+    rescue = mailers["rescue"]
+    assert (primary.ssl_certfile, primary.ssl_keyfile) == (
+        "/certs/client.pem",
+        "/certs/client.key",
+    )
+    assert (rescue.ssl_certfile, rescue.ssl_keyfile) == ("/certs/rescue.pem", None)
+
+
+def test_build_mailers_without_client_certificate_emits_no_cert_options():
+    options = build_mailers({"EMAIL_HOST": "smtp.example"})["default"]["OPTIONS"]
+    assert "ssl_certfile" not in options
+    assert "ssl_keyfile" not in options
+
+
 def test_build_mailers_mail_debug_uses_console_only():
     mailers = build_mailers({"EMAIL_HOST": "smtp.example"}, mail_debug=True)
     assert mailers == {"default": {"BACKEND": CONSOLE_BACKEND}}
@@ -182,6 +251,27 @@ def test_unreachable_first_mailer_fails_over_to_the_next(settings):
     mailer.send("S", "body", "a@tests.local")
     assert RefusingBackend.opened == 1
     assert [m.to for m in mail.outbox] == [["a@tests.local"]]
+
+
+def test_rejected_login_releases_the_socket_before_failing_over(settings):
+    # Django keeps a half-open connection on the backend when login fails;
+    # failover must close it rather than leave it to the garbage collector.
+    settings.MAILERS = {
+        "default": {
+            "BACKEND": f"{HERE}.LoginRefusedBackend",
+            "OPTIONS": {
+                "host": "smtp.example",
+                "port": 25,
+                "username": "apikey",
+                "password": "wrong",
+            },
+        },
+        "rescue": {"BACKEND": LOCMEM},
+    }
+    settings.DEFAULT_FROM_EMAIL = "ciso@tests.local"
+    mailer.send("S", "body", "a@tests.local")
+    assert [m.to for m in mail.outbox] == [["a@tests.local"]]
+    assert [smtp.closed for smtp in LoginRefusedSMTP.instances] == [True]
 
 
 def test_failure_after_handover_does_not_fail_over(settings):

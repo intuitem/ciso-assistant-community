@@ -91,6 +91,31 @@ def test_refresh_token_grant_is_configurable():
     assert options["oauth2"]["refresh_token"] == "r"
 
 
+def test_oauth2_over_implicit_tls_is_accepted():
+    env = {**without(MICROSOFT_ENV, "EMAIL_USE_TLS"), "EMAIL_USE_SSL": "True"}
+    options = build_mailers(env)["default"]["OPTIONS"]
+    assert (options["use_tls"], options["use_ssl"]) == (False, True)
+
+
+def test_refresh_token_grant_accepts_a_public_client():
+    # RFC 6749 section 6: a public client refreshes with its id only.
+    options = build_mailers(
+        {
+            **without(MICROSOFT_ENV, "EMAIL_OAUTH2_CLIENT_SECRET"),
+            "EMAIL_OAUTH2_GRANT_TYPE": "refresh_token",
+            "EMAIL_OAUTH2_REFRESH_TOKEN": "r",
+        }
+    )["default"]["OPTIONS"]
+    assert options["oauth2"]["client_secret"] is None
+
+
+def test_email_timeout_bounds_the_token_request():
+    options = build_mailers({**MICROSOFT_ENV, "EMAIL_TIMEOUT": "7"})["default"][
+        "OPTIONS"
+    ]
+    assert options["oauth2"]["timeout"] == 7
+
+
 def test_password_transport_is_unchanged_by_default():
     options = build_mailers({"EMAIL_HOST": "smtp.example"})["default"]["OPTIONS"]
     assert "oauth2" not in options
@@ -128,6 +153,15 @@ def without(env, *keys):
         (
             {**MICROSOFT_ENV, "EMAIL_OAUTH2_GRANT_TYPE": "jwt_bearer"},
             "EMAIL_OAUTH2_SERVICE_ACCOUNT_FILE",
+        ),
+        (
+            # The bearer token must never travel over a plaintext session.
+            without(MICROSOFT_ENV, "EMAIL_USE_TLS"),
+            "EMAIL_USE_TLS or EMAIL_USE_SSL",
+        ),
+        (
+            {**MICROSOFT_ENV, "EMAIL_USE_TLS": "False"},
+            "must not be sent in clear",
         ),
     ],
 )
@@ -205,6 +239,77 @@ def test_refresh_token_grant(monkeypatch):
     }
 
 
+def test_refresh_token_grant_without_secret_sends_none(monkeypatch):
+    calls = make_endpoint(monkeypatch, issue())
+    config = {
+        **CLIENT_CREDENTIALS,
+        "grant_type": "refresh_token",
+        "client_secret": None,
+        "refresh_token": "r",
+    }
+    mail_oauth2.get_token(config)
+    assert form(calls[0]) == {
+        "grant_type": "refresh_token",
+        "client_id": "c",
+        "refresh_token": "r",
+    }
+
+
+REFRESH = {**CLIENT_CREDENTIALS, "grant_type": "refresh_token", "refresh_token": "r"}
+
+
+def test_new_refresh_token_in_the_response_is_not_an_error(monkeypatch):
+    # Keycloak and Microsoft return a new refresh token on every refresh and
+    # keep the configured one valid; that must stay silent.
+    make_endpoint(
+        monkeypatch,
+        lambda request: httpx.Response(
+            200,
+            json={"access_token": "tok", "expires_in": 3600, "refresh_token": "r2"},
+        ),
+    )
+    warnings = []
+    monkeypatch.setattr(
+        mail_oauth2.logger, "warning", lambda event, **fields: warnings.append(event)
+    )
+    assert mail_oauth2.get_token(REFRESH) == "tok"
+    assert warnings == []
+
+
+def test_refused_refresh_token_explains_why(monkeypatch):
+    make_endpoint(
+        monkeypatch,
+        lambda request: httpx.Response(
+            400,
+            json={
+                "error": "invalid_grant",
+                "error_description": "Maximum allowed refresh token reuse exceeded",
+            },
+        ),
+    )
+    with pytest.raises(mail_oauth2.TokenError) as raised:
+        mail_oauth2.get_token(REFRESH)
+    message = str(raised.value)
+    assert "invalid_grant Maximum allowed refresh token reuse exceeded" in message
+    assert "revokes refresh tokens once used" in message
+
+
+def test_invalid_grant_on_other_grants_has_no_refresh_hint(monkeypatch):
+    make_endpoint(
+        monkeypatch,
+        lambda request: httpx.Response(400, json={"error": "invalid_grant"}),
+    )
+    with pytest.raises(mail_oauth2.TokenError) as raised:
+        mail_oauth2.get_token(CLIENT_CREDENTIALS)
+    assert "refresh token" not in str(raised.value)
+
+
+def test_token_request_uses_the_configured_timeout(monkeypatch):
+    calls = make_endpoint(monkeypatch, issue())
+    mail_oauth2.get_token({**CLIENT_CREDENTIALS, "timeout": 7})
+    assert calls[0].extensions["timeout"]["connect"] == 7
+
+
 def test_jwt_bearer_grant_signs_an_assertion_for_the_mailbox(monkeypatch, tmp_path):
     key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
     private_pem = key.private_bytes(
@@ -249,6 +354,14 @@ def test_tokens_are_cached_until_shortly_before_expiry(monkeypatch):
     assert len(calls) == 1
     mail_oauth2.get_token(CLIENT_CREDENTIALS, force_refresh=True)
     assert len(calls) == 2
+
+
+def test_changed_secret_does_not_reuse_the_cached_token(monkeypatch):
+    calls = make_endpoint(monkeypatch, issue("tok", 3600))
+    mail_oauth2.get_token(CLIENT_CREDENTIALS)
+    mail_oauth2.get_token({**CLIENT_CREDENTIALS, "client_secret": "rotated"})
+    assert len(calls) == 2
+    assert form(calls[1])["client_secret"] == "rotated"
 
 
 def test_short_lived_tokens_are_not_cached(monkeypatch):
@@ -305,6 +418,9 @@ class FakeSMTP:
 
     instances: list = []
     reject: set = set()
+    # Answer a rejected token by dropping the session, as a client sees a
+    # server whose delay on failed logins outlasts the read timeout.
+    drop_on_reject = False
 
     def __init__(self, host, port, local_hostname=None, timeout=None):
         self.host, self.port = host, port
@@ -322,6 +438,11 @@ class FakeSMTP:
         initial = authobject(None)
         self.auth_calls.append((mechanism, initial))
         if any(f"Bearer {token}\x01" in initial for token in FakeSMTP.reject):
+            if FakeSMTP.drop_on_reject:
+                self.closed = True
+                raise smtplib.SMTPServerDisconnected(
+                    "Connection unexpectedly closed: The read operation timed out"
+                )
             # The server answers the bad token with a challenge, the client
             # sends an empty line, the server closes with 535.
             assert authobject(b'{"status":"401"}') == ""
@@ -345,6 +466,7 @@ class FakeSMTPBackend(EmailBackend):
 def reset_fake_smtp():
     FakeSMTP.instances = []
     FakeSMTP.reject = set()
+    FakeSMTP.drop_on_reject = False
 
 
 @pytest.fixture
@@ -402,6 +524,45 @@ def test_two_rejections_fail_the_open_and_release_the_socket(tokens):
         backend.open()
     assert backend.connection is None
     assert FakeSMTP.instances[0].closed is True
+
+
+def test_rejection_lost_to_a_server_delay_retries_on_a_new_session(tokens):
+    FakeSMTP.reject = {"tok-1"}
+    FakeSMTP.drop_on_reject = True
+    backend = oauth_backend()
+    assert backend.open() is True
+    first, second = FakeSMTP.instances
+    assert first.closed is True
+    assert [call[1] for call in second.auth_calls] == [
+        "user=noreply@example.com\x01auth=Bearer tok-2\x01\x01"
+    ]
+    assert tokens == [False, True]
+    assert backend.connection is second
+
+
+def sequential_tokens(monkeypatch):
+    issued = iter(["tok-a", "tok-b", "tok-c"])
+    return make_endpoint(
+        monkeypatch,
+        lambda request: httpx.Response(
+            200, json={"access_token": next(issued), "expires_in": 3600}
+        ),
+    )
+
+
+@pytest.mark.parametrize("drop_on_reject", [False, True])
+def test_refused_tokens_are_not_reused_from_the_cache(monkeypatch, drop_on_reject):
+    sequential_tokens(monkeypatch)
+    FakeSMTP.reject = {"tok-a", "tok-b"}
+    FakeSMTP.drop_on_reject = drop_on_reject
+    with pytest.raises(smtplib.SMTPException):
+        oauth_backend().open()
+    # The server accepts tokens again (say, a permission was granted): the
+    # next session must fetch a new token, not replay a refused one.
+    FakeSMTP.reject = set()
+    backend = oauth_backend()
+    assert backend.open() is True
+    assert backend.connection.auth_calls[-1][1].endswith("Bearer tok-c\x01\x01")
 
 
 def test_token_endpoint_failure_fails_the_open(monkeypatch):

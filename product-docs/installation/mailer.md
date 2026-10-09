@@ -25,6 +25,10 @@ EMAIL_USE_SSL=False
 EMAIL_USE_TLS=True    # STARTTLS (typically port 587)
 ```
 
+When `EMAIL_PORT` is unset, the port is 465 with `EMAIL_USE_SSL` and 25 otherwise, STARTTLS included. Set `EMAIL_PORT=587` explicitly for submission over STARTTLS.
+
+For a relay that requires a client certificate, set `EMAIL_SSL_CERTFILE` (and `EMAIL_SSL_KEYFILE` when the key is in a separate file) to paths inside the container. `EMAIL_FORCE_TLS_1_2` applies on top of it.
+
 For local development you can run [Mailpit](https://github.com/axllent/mailpit) and point `EMAIL_HOST` at it with both flags set to `False`.
 
 ### Checking the configuration
@@ -151,7 +155,7 @@ When upgrading to 3.16+, remove the `command:` override and switch to the CA bun
 
 Microsoft 365 and Google Workspace no longer accept a mailbox password for SMTP. CISO Assistant can authenticate with an OAuth 2.0 token instead. The session is still SMTP: same host, same port, same firewall rules. Set `EMAIL_TRANSPORT=smtp-oauth2`, then give the token endpoint, the grant and the credentials. The same variables exist with a `_RESCUE` suffix for the second mailer.
 
-`EMAIL_HOST_USER` is the mailbox mail is sent as. `EMAIL_HOST_PASSWORD` is not used.
+`EMAIL_HOST_USER` is the mailbox mail is sent as. `EMAIL_HOST_PASSWORD` is not used. `EMAIL_USE_TLS` or `EMAIL_USE_SSL` is required: the token is a bearer credential and is never sent over a plaintext session. `EMAIL_TIMEOUT` also bounds the token request.
 
 There are no provider presets in the application. The blocks below are the values for the two common providers; any provider that follows the OAuth 2.0 standards works the same way.
 
@@ -200,6 +204,6 @@ SMTP with OAuth on Google requires the full mail scope, and domain-wide delegati
 
 #### Any other provider
 
-Use the same variables with the values from the provider's documentation. `refresh_token` additionally needs `EMAIL_OAUTH2_REFRESH_TOKEN`. `jwt_bearer` needs either `EMAIL_OAUTH2_SERVICE_ACCOUNT_FILE` or `EMAIL_OAUTH2_ISSUER` plus `EMAIL_OAUTH2_PRIVATE_KEY`, and optionally `EMAIL_OAUTH2_AUDIENCE` when it differs from the token URL. The token URL must use https. It may point at a private identity provider.
+Use the same variables with the values from the provider's documentation. `refresh_token` additionally needs `EMAIL_OAUTH2_REFRESH_TOKEN`; `EMAIL_OAUTH2_CLIENT_SECRET` is optional for it, so public clients work. The application keeps using the refresh token from the environment. That works with providers that hand out a new refresh token on each refresh while the old one stays valid (Microsoft, Keycloak by default), but not when the provider revokes a refresh token once it has been used (Keycloak "Revoke Refresh Token", rotation with reuse detection in Okta or Auth0): turn that off for this client. When the token is refused, the error says so. `jwt_bearer` needs either `EMAIL_OAUTH2_SERVICE_ACCOUNT_FILE` or `EMAIL_OAUTH2_ISSUER` plus `EMAIL_OAUTH2_PRIVATE_KEY`, and optionally `EMAIL_OAUTH2_AUDIENCE` when it differs from the token URL. The token URL must use https. It may point at a private identity provider.
 
-Tokens are cached until shortly before they expire. A token the server rejects is refreshed and retried once; a second rejection counts as an unreachable mailer and the next configured mailer, if any, is tried.
+Tokens are cached until shortly before they expire. A token the server rejects is dropped from the cache and the login is retried once with a new token, on a new connection when the server took longer than `EMAIL_TIMEOUT` to answer the failed login. A second rejection counts as an unreachable mailer and the next configured mailer, if any, is tried.

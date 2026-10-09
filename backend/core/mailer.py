@@ -75,6 +75,9 @@ def open_connection(attempts: list | None = None):
             if attempts is not None:
                 attempts.append((alias, str(error)))
             last_error = error
+            # A failed login or STARTTLS leaves the socket half open on the
+            # backend; release it before moving on.
+            _close(backend, alias)
             continue
         try:
             yield backend

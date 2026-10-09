@@ -46,7 +46,8 @@ def validate_oauth2(config: dict) -> None:
         raise ValueError("EMAIL_HOST_USER (the mailbox to send as) is required")
     required = {
         "client_credentials": ("client_id", "client_secret"),
-        "refresh_token": ("client_id", "client_secret", "refresh_token"),
+        # RFC 6749 section 6: a public client refreshes without a secret.
+        "refresh_token": ("client_id", "refresh_token"),
         "jwt_bearer": (),
     }[grant]
     missing = [name for name in required if not config.get(name)]
@@ -63,9 +64,10 @@ def validate_oauth2(config: dict) -> None:
         )
 
 
-def oauth2_config(env: Mapping[str, str], suffix: str) -> dict:
+def oauth2_config(env: Mapping[str, str], suffix: str, timeout: int) -> dict:
     """The ``oauth2`` option for an ``smtp-oauth2`` mailer, validated so a
-    broken configuration stops startup instead of failing at send time."""
+    broken configuration stops startup instead of failing at send time.
+    ``timeout`` bounds the token request like the SMTP connection."""
 
     def var(name: str) -> str | None:
         return env.get(f"EMAIL_OAUTH2_{name}{suffix}") or None
@@ -82,6 +84,7 @@ def oauth2_config(env: Mapping[str, str], suffix: str) -> dict:
         "issuer": var("ISSUER"),
         "private_key": var("PRIVATE_KEY"),
         "audience": var("AUDIENCE"),
+        "timeout": timeout,
     }
     try:
         validate_oauth2(config)
@@ -94,8 +97,8 @@ def smtp_mailer(env: Mapping[str, str], suffix: str = "") -> dict | None:
     """One SMTP mailer from ``EMAIL_*{suffix}`` variables, or None when
     nothing is configured. Raises ValueError on contradictory TLS settings, as
     the settings module always did, on a non-numeric port, and on an unusable
-    OAuth configuration. An unset port is left to the backend: 465 with SSL,
-    587 with STARTTLS, 25 otherwise."""
+    OAuth configuration. An unset port is 465 with SSL and 25 otherwise,
+    STARTTLS included, as before ``MAILERS``."""
     transport = (env.get(f"EMAIL_TRANSPORT{suffix}") or "smtp").lower()
     if transport not in TRANSPORTS:
         raise ValueError(
@@ -115,11 +118,21 @@ def smtp_mailer(env: Mapping[str, str], suffix: str = "") -> dict | None:
         raise ValueError(
             f"EMAIL_USE_TLS{suffix} and EMAIL_USE_SSL{suffix} are mutually exclusive"
         )
+    if transport == "smtp-oauth2" and not (use_tls or use_ssl):
+        raise ValueError(
+            f"EMAIL_TRANSPORT{suffix}=smtp-oauth2 requires EMAIL_USE_TLS{suffix} or "
+            f"EMAIL_USE_SSL{suffix}: the bearer token must not be sent in clear"
+        )
     port = env.get(f"EMAIL_PORT{suffix}") or None
     if port is not None:
         if not port.isdigit():
             raise ValueError(f"EMAIL_PORT{suffix} must be a number, got {port!r}")
         port = int(port)
+    elif not use_ssl:
+        # Before MAILERS an unset port reached smtplib as 0, which is 25 even
+        # with STARTTLS. Django's mailers would pick 587; keep 25 so existing
+        # deployments connect where they always did.
+        port = 25
 
     options = {
         "host": host,
@@ -130,9 +143,15 @@ def smtp_mailer(env: Mapping[str, str], suffix: str = "") -> dict | None:
         "use_ssl": use_ssl,
         "timeout": int(env.get("EMAIL_TIMEOUT", "5")),
     }
+    # Client certificate for relays that require one; the TLS 1.2 pin in
+    # core.email_backend applies on top of it.
+    for option in ("ssl_certfile", "ssl_keyfile"):
+        value = env.get(f"EMAIL_{option.upper()}{suffix}")
+        if value:
+            options[option] = value
     if transport == "smtp-oauth2":
         options["password"] = None
-        options["oauth2"] = oauth2_config(env, suffix)
+        options["oauth2"] = oauth2_config(env, suffix, options["timeout"])
     return {"BACKEND": SMTP_BACKEND, "OPTIONS": options}
 
 

@@ -68,41 +68,41 @@ def send_email_task(
         return
 
     sent, failed = [], []
+    pending = list(recipients)
     try:
-        # One connection for the whole batch (not one handshake per
-        # recipient); individual messages so recipients don't see each other.
-        with mailer.open_connection() as connection:
-            for email in recipients:
-                try:
-                    send_email_now(subject, body, email, connection=connection)
-                    sent.append(email)
-                except Exception as e:
-                    # Raw exception text stays out of the run log (it can
-                    # carry SMTP server internals); detail goes to the
-                    # server log.
-                    logger.error(
-                        "send_email action delivery failure",
-                        recipient=email,
-                        instance_id=str(token.instance_id),
-                        error=e,
-                    )
-                    failed.append(email)
-                    # A transport-level failure leaves the shared handle
-                    # dead, and Django's open() short-circuits on a non-None
-                    # connection — every later recipient would fail on the
-                    # same socket. Recycle it so one bad send cannot starve
-                    # the rest.
-                    connection.close()
-                    connection.open()
+        # One session for the batch (not one handshake per recipient);
+        # individual messages so recipients don't see each other.
+        while pending:
+            # A failed send can leave the socket dead, so the rest of the
+            # batch gets a new session. It goes through open_connection, so
+            # a primary that died mid-batch hands them to the next mailer.
+            with mailer.open_connection() as connection:
+                while pending:
+                    email = pending.pop(0)
+                    try:
+                        send_email_now(subject, body, email, connection=connection)
+                        sent.append(email)
+                    except Exception as e:
+                        # Raw exception text stays out of the run log (it can
+                        # carry SMTP server internals); detail goes to the
+                        # server log.
+                        logger.error(
+                            "send_email action delivery failure",
+                            recipient=email,
+                            instance_id=str(token.instance_id),
+                            error=e,
+                        )
+                        failed.append(email)
+                        break
     except Exception as e:
-        # The connection itself failed to open, recycle or close; recipients
-        # not already attempted never got their mail.
+        # No mailer could be opened; recipients not already attempted never
+        # got their mail.
         logger.error(
             "send_email action connection failure",
             instance_id=str(token.instance_id),
             error=e,
         )
-        failed += [r for r in recipients if r not in sent and r not in failed]
+        failed += pending
 
     try:
         if failed:

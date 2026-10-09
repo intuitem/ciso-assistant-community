@@ -16,8 +16,9 @@ import uuid
 from datetime import timedelta
 
 import pytest
-from contextlib import nullcontext
+from contextlib import contextmanager
 from django.core import mail
+from django.core.mail.backends.locmem import EmailBackend as LocmemBackend
 from django.utils import timezone
 
 from global_settings.models import GlobalSettings
@@ -34,6 +35,35 @@ from automation.workflows.models import (
     WorkflowVersion,
 )
 from automation.workflows.tests.helpers import publisher_user
+
+
+HERE = "automation.workflows.tests.test_send_email_action"
+
+
+class DyingPrimaryBackend(LocmemBackend):
+    """Delivers until it sees gone@tests.local, then the server is down for
+    good: the dropped socket and every later open fail."""
+
+    alive = True
+
+    def open(self):
+        if not DyingPrimaryBackend.alive:
+            raise ConnectionRefusedError("primary is down")
+        return super().open()
+
+    def send_messages(self, messages):
+        if any("gone@tests.local" in message.to for message in messages):
+            DyingPrimaryBackend.alive = False
+            raise smtplib.SMTPServerDisconnected("connection dropped")
+        return super().send_messages(messages)
+
+
+class RescueBackend(LocmemBackend):
+    delivered: list = []
+
+    def send_messages(self, messages):
+        RescueBackend.delivered += [message.to[0] for message in messages]
+        return super().send_messages(messages)
 
 
 def node(type_, **kwargs):
@@ -393,7 +423,7 @@ class TestSendEmail:
     ):
         # Django's open() short-circuits on a non-None connection, so a
         # dropped socket stays dead for every later recipient unless the
-        # task recycles it. This stands in for that backend behaviour.
+        # task opens a new session. This stands in for that backend.
         configure_smtp(settings)
 
         class DroppingConnection:
@@ -427,9 +457,17 @@ class TestSendEmail:
                 return len(messages)
 
         connection = DroppingConnection()
+
+        @contextmanager
+        def session():
+            connection.open()
+            try:
+                yield connection
+            finally:
+                connection.close()
+
         monkeypatch.setattr(
-            "automation.workflows.tasks.mailer.open_connection",
-            lambda: nullcontext(connection),
+            "automation.workflows.tasks.mailer.open_connection", session
         )
         version = email_flow(
             {
@@ -441,8 +479,43 @@ class TestSendEmail:
             instance = start_instance(version)
         dispatch.run()
         instance.refresh_from_db()
-        assert connection.reopened == 1
+        # One session up to the drop, a second one for the rest.
+        assert connection.reopened == 2
         assert connection.delivered == ["a@tests.local", "c@tests.local"]
+        assert instance.status == WorkflowInstance.Status.FAILED
+        assert any(
+            "gone@tests.local" in m and "(2 of 3 sent)" in m
+            for m in error_messages(instance)
+        )
+
+    def test_primary_dying_mid_batch_fails_over_for_the_rest(
+        self, settings, dispatch, monkeypatch, django_capture_on_commit_callbacks
+    ):
+        # Recipients after the drop were never handed to any server, so the
+        # new session must go through failover instead of reopening the
+        # dead primary.
+        settings.MAILERS = {
+            "default": {"BACKEND": f"{HERE}.DyingPrimaryBackend"},
+            "rescue": {"BACKEND": f"{HERE}.RescueBackend"},
+        }
+        settings.DEFAULT_FROM_EMAIL = "ciso@tests.local"
+        monkeypatch.setattr(DyingPrimaryBackend, "alive", True)
+        monkeypatch.setattr(RescueBackend, "delivered", [])
+        version = email_flow(
+            {
+                "recipients": "a@tests.local, gone@tests.local, c@tests.local",
+                "subject": "S",
+            }
+        )
+        with django_capture_on_commit_callbacks(execute=True):
+            instance = start_instance(version)
+        dispatch.run()
+        instance.refresh_from_db()
+        assert sorted(message.to[0] for message in mail.outbox) == [
+            "a@tests.local",
+            "c@tests.local",
+        ]
+        assert RescueBackend.delivered == ["c@tests.local"]
         assert instance.status == WorkflowInstance.Status.FAILED
         assert any(
             "gone@tests.local" in m and "(2 of 3 sent)" in m
