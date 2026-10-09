@@ -206,6 +206,7 @@ def live_framework_to_object(framework) -> dict:
                 "visibility_expression": node.visibility_expression,
                 "min_score": node.min_score,
                 "max_score": node.max_score,
+                "scores_definition_ref": node.scores_definition_ref,
                 "target_score": node.target_score,
                 "translations": node.translations or None,
             }

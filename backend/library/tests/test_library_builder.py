@@ -822,8 +822,10 @@ def test_node_fields_survive_publish_and_export(admin_client):
         "importance": "mandatory",
         "min_score": 0,
         "max_score": 5,
+        "scores_definition_ref": "six-step",
         "target_score": 3.5,
     }
+    six_step = [{"score": score, "name": f"Step {score}"} for score in range(6)]
     draft = _create_draft(
         admin_client,
         content={
@@ -832,6 +834,7 @@ def test_node_fields_survive_publish_and_export(admin_client):
                     "urn": "urn:me:risk:framework:mylib",
                     "ref_id": "MYFW",
                     "name": "My framework",
+                    "scores_definition": {"alternatives": {"six-step": six_step}},
                     "requirement_nodes": [
                         {
                             "urn": "urn:me:risk:req_node:mylib:r1",
@@ -871,7 +874,13 @@ def test_node_fields_survive_publish_and_export(admin_client):
     serialized = live.live_framework_to_object(node.framework)
     nodes = {n["urn"]: n for n in serialized["requirement_nodes"]}
     assert {name: nodes[node.urn].get(name) for name in fields} == fields
-    defaults_omitted = {"importance", "min_score", "max_score", "target_score"}
+    defaults_omitted = {
+        "importance",
+        "min_score",
+        "max_score",
+        "scores_definition_ref",
+        "target_score",
+    }
     assert not defaults_omitted & nodes[plain.urn].keys()
 
 
