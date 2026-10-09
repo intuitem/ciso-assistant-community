@@ -494,7 +494,9 @@ class RiskAcceptanceWriteSerializer(BaseModelSerializer):
             if "approver" in data
             else getattr(self.instance, "approver", None)
         )
-        folder = data.get("folder") or getattr(self.instance, "folder", None)
+        folder = data.get("folder") or (
+            self.instance.folder if self.instance else Folder.get_root_folder()
+        )
         scenarios = data.get("risk_scenarios")
         if scenarios is None and self.instance:
             scenarios = self.instance.risk_scenarios.select_related(
