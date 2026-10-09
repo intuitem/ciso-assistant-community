@@ -38,8 +38,8 @@ The content sheet contains one row per implementation group.
 | `ref_id`<mark style="color:$danger;">*</mark> | Unique identifier used to assign the group to framework requirements | Letters, numbers, `.`, `_`, or `-` only; no spaces. Keep it consistent with the references in the framework. |
 | `name`<mark style="color:$danger;">*</mark> <mark style="color:$info;">T</mark> | Name shown to users when selecting Implementation Groups | Text |
 | `description` <mark style="color:$info;">T</mark> | Optional explanation of what the group includes | Text |
-| `default_selected` | Groups preselected when an audit is created. Users can change the selection. | Enter `x` for a group that should be selected when the audit is created. Otherwise, leave the cell empty. |
-| `target_score` | Target score proposed for new audits that select this group, instead of the framework's. When several groups are selected, the highest applies. | Number within the framework's score scale. Requires a `target_score` in the framework's metadata sheet. |
+| `default_selected` | Rarely used. Groups preselected when an audit is created. Users can change the selection. For questionnaires with dynamic questions, it defines which groups are selected before answers add other groups. | Enter `x` for a group that should be selected when the audit is created. Otherwise, leave the cell empty. |
+| `target_score` | Rarely used. Target score proposed for new audits that select this group, instead of the framework's. When several groups are selected, the highest applies. | Number within the framework's score scale. Requires a `target_score` in the framework's metadata sheet. |
 
 See [Translate library content](../translations.md) for how to add translations.
 
