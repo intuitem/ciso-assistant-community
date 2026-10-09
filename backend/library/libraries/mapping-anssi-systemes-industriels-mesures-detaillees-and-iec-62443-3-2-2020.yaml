@@ -1,0 +1,77 @@
+urn: urn:intuitem:risk:library:mapping-anssi-systemes-industriels-mesures-detaillees-and-iec-62443-3-2-2020
+locale: en
+ref_id: mapping-anssi-systemes-industriels-mesures-detaillees-and-iec-62443-3-2-2020
+name: ANSSI Systèmes industriels - Mesures détaillées <-> IEC 62443-3-2
+description: Correspondences between the ANSSI guide 'La cybersécurité des systèmes industriels – Mesures
+  détaillées' (v2) and IEC 62443-3-2, as published by ANSSI in the guide (Annex A and per-recommendation
+  badges).
+copyright: Licence Ouverte v2.0 - Etalab (ANSSI)
+version: 1
+publication_date: 2026-09-30
+provider: ANSSI
+packager: intuitem
+dependencies:
+- urn:intuitem:risk:library:anssi-systemes-industriels-mesures-detaillees
+- urn:intuitem:risk:library:iec-62443-3-2-2020
+objects:
+  requirement_mapping_sets:
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-anssi-systemes-industriels-mesures-detaillees-and-iec-62443-3-2-2020
+    ref_id: mapping-anssi-systemes-industriels-mesures-detaillees-and-iec-62443-3-2-2020
+    name: ANSSI Systèmes industriels - Mesures détaillées <-> IEC 62443-3-2
+    description: Correspondences between the ANSSI guide 'La cybersécurité des systèmes industriels –
+      Mesures détaillées' (v2) and IEC 62443-3-2, as published by ANSSI in the guide (Annex A and per-recommendation
+      badges).
+    source_framework_urn: urn:intuitem:risk:framework:anssi-systemes-industriels-mesures-detaillees
+    target_framework_urn: urn:intuitem:risk:framework:iec-62443-3-2-2020
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r12
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-5.13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r49
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-7.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r101
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r104
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r105
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3.6
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r108
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r108-moins
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r110
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3.6
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r123
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r125
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r127
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r175
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r184
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r189
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r190
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r191
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r211
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-3-2-2020:zcr-3.2
+      relationship: intersect
