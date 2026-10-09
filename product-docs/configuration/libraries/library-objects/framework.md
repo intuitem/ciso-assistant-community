@@ -31,14 +31,14 @@ The metadata sheet is a key-value table with one property per row.
 | `implementation_groups_definition` | Links an [Implementation Groups](implementation-groups.md) object | The `name` value in the Implementation Groups object's metadata sheet |
 | `answers_definition` | Links an [Answers](answers.md) object | The `name` value in the Answers object's metadata sheet |
 | `scores_definition` | Links a [Scores](scores.md) object | The `name` value in the Scores object's metadata sheet |
-| `min_score` | Lowest score available when assessing requirements | Integer, `0` or more, lower than `max_score`. Set both or neither; without them the scale is `0` to `100`. |
+| `min_score` | Lowest score available when assessing requirements | Integer, `0` or more, lower than `max_score`. Set both or neither. |
 | `max_score` | Highest score available when assessing requirements | Integer, higher than `min_score` |
 | `annotation` | Additional information about the framework | Text |
-| `score_calculation_method` | Calculation method proposed for new audits | `average` (default), `sum`, or `average_of_averages` |
-| `target_score` | Target score proposed for new audits | Number between `min_score` and `max_score` |
-| `anchor_na_to_target` | Counts not applicable requirements as the target score in new audits | Enter `x` to enable. Requires `target_score`. |
-| `score_scale_locked` | Keeps the framework's score scale in its audits, when the standard defines it | Enter `x` to enable |
-| `field_visibility` | Initial field visibility for auditors and respondents in new audits | JSON object, e.g. `{"score": {"auditor": "edit", "respondent": "edit"}}` |
+| `score_calculation_method` | 	Rarely used. Calculation method proposed for new audits | `average` (default), `sum`, or `average_of_averages` |
+| `target_score` | Rarely used. Target score proposed for new audits | Number between `min_score` and `max_score` |
+| `anchor_na_to_target` | Rarely used. Counts not applicable requirements as the target score in new audits | Enter `x` to enable. Requires `target_score`. |
+| `score_scale_locked` | Rarely used. Keeps the framework's score scale in its audits, when the standard defines it | Enter `x` to enable |
+| `field_visibility` | Rarely used. Initial field visibility for auditors and respondents in new audits | JSON object, e.g. `{"score": {"auditor": "edit", "respondent": "edit"}}` |
 
 For example, if `implementation_groups_definition` is `imp_grp`, the framework uses the sheets `imp_grp_meta` and `imp_grp_content`.
 
@@ -68,10 +68,14 @@ The content sheet contains one row per section or requirement. Rows follow the o
 | `answer` | Answer set used for each question | One [Answers](answers.md) `id` for all questions, or one `id` per question on separate lines |
 | `depends_on` | Choice that makes a question appear | `question_number:choice_number`, with multiple choice numbers separated by commas; `/` for none |
 | `condition` | How the choices in `depends_on` are evaluated | `any` or `all`; `/` when there is no dependency |
-| `threats` | Threats associated with a requirement | `prefix_id:ref_id` references using [URN Prefixes](urn-prefixes.md), or full URNs. Separate several with commas or line breaks. |
-| `reference_controls` | Reference Controls associated with a requirement | `prefix_id:ref_id` references using [URN Prefixes](urn-prefixes.md), or full URNs. Separate several with commas or line breaks. |
+| `threats` | Threats associated with a requirement | `prefix_id:ref_id` references using [URN Prefixes](urn-prefixes.md). Separate several with commas or line breaks. |
+| `reference_controls` | Reference Controls associated with a requirement | `prefix_id:ref_id` references using [URN Prefixes](urn-prefixes.md). Separate several with commas or line breaks. |
 
-Use at least one of `ref_id`, `name`, or `description` for each row. The converter builds each row's URN from `base_urn` and its `ref_id`, lowercased, with spaces turned into `-`. A row without `ref_id` gets a URN based on its position under its parent, so inserting, removing, or moving such rows changes their URNs. Keep `ref_id` values stable across versions.
+Use at least one of `ref_id`, `name`, or `description` for each row.
+
+{% hint style="warning" %}
+The converter builds a row's URN from `base_urn` and its `ref_id`, lowercased with spaces replaced by `-`. Without a `ref_id`, the URN depends on the row's position under its parent. When updating a library, keep existing `ref_id` values whenever possible and avoid rearranging rows without checking the impact on the hierarchy. Changing a `ref_id`, or inserting, removing, or moving rows without one, can change URNs and cause inconsistencies in existing audits.
+{% endhint %}
 
 See [Translate library content](../translations.md) for how to add translations.
 
@@ -95,7 +99,7 @@ A Framework can use [Implementation Groups](implementation-groups.md), [Answers]
 ### When updating a library
 
 - Keep the framework `urn`, `base_urn`, and existing requirement `ref_id` values when possible.
-- To change a `ref_id` without changing the requirement's URN, set `node_id` to the previous URN suffix (for example `access.1`).
+- If changing a `ref_id` is unavoidable, set `node_id` to the previous URN suffix (for example `access.1`) to preserve the requirement's URN. Use this only as a last resort: accumulating such overrides makes the library harder to maintain.
 
 ## Example
 
