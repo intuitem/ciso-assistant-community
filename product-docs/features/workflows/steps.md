@@ -20,6 +20,7 @@ An action does one thing: reads objects, creates one, sends an email, calls an e
 | Action | Does |
 |---|---|
 | Create object | Creates an object of a chosen kind, optionally updating an existing one with the same name |
+| Create or update in bulk | Creates or updates one object per entry of a list |
 | Update object | Changes fields and links on one existing object |
 | Attach a file to an evidence | Adds a file, typed or downloaded, to an evidence |
 | Record a measurement | Files a number against a metric instance |

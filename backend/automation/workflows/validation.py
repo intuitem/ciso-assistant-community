@@ -638,7 +638,7 @@ def _validate_ai_value_fencing(node, ai_refs, ai_variables):
             if entry is not None
             else (None, None)
         )
-    elif action_type == "create_object":
+    elif action_type in ("create_object", "upsert_objects"):
         entry = CREATABLE_MODELS.get(config.get("model"))
         fields, fenced = (
             (entry["fields"], lambda key: _creatable_values(entry, key))
@@ -649,11 +649,19 @@ def _validate_ai_value_fencing(node, ai_refs, ai_variables):
         return []
     if entry is None or not (ai_refs or ai_variables):
         return []
+    items_from_ai = action_type == "upsert_objects" and _ai_sources_in(
+        config.get("items"), ai_refs, ai_variables
+    )
     errors = []
     for key, value in sorted((config.get("fields") or {}).items()):
         if key not in fields or fenced(key) is None:
             continue
-        for source in sorted(_ai_sources_in(value, ai_refs, ai_variables)):
+        sources = _ai_sources_in(value, ai_refs, ai_variables)
+        if items_from_ai:
+            sources |= {
+                path for path in _template_paths(value) if path.split(".")[0] == "item"
+            }
+        for source in sorted(sources):
             errors.append(
                 (
                     "action_update_ai_value_on_fenced_field",

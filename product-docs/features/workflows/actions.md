@@ -240,6 +240,23 @@ Four of these are where a run files what an external system reported, and each i
 * **Validation flow** (`validation_flow`) asks for sign-off. Name an `approver` and what is being validated — audits, evidences, policies, findings assessments or security exceptions. The requester is the run's own identity.
 * **Right Request** (`right_request`) opens a request in **New**. Closing it stays with whoever handles it.
 
+### Create or update in bulk
+
+Creates or updates one object per entry of a list, in a single step. Use it after an HTTP request that follows pages: a loop around Create object costs two steps per entry, so a few thousand devices run out of steps, while this step takes them all at once.
+
+| Setting | |
+|---|---|
+| Object to create | One of the creatable objects that can be matched |
+| Items | A list from an earlier step, such as `{{nodes.list_devices.items}}` |
+| Fields | Same as Create object. Each value reads the current entry as `{{item.<path>}}` |
+| On item failure | Continue and count the failure, or stop the run |
+
+Every entry is matched and updated the way **Update when it already exists** does on Create object. A failing entry is rolled back on its own and the rest still land.
+
+Output: `model`, `received`, `created`, `updated`, `failed`, `errors` (the first 20, each with its `index` and `reason`), `truncated` (true when the list held more entries than `WORKFLOW_UPSERT_MAX_ITEMS`, which defaults to `WORKFLOW_NODE_OUTPUT_MAX_ITEMS`, 10 000 by default; the rest are skipped).
+
+Permission: `add_<model>` and `change_<model>`.
+
 ### Update object
 
 Changes fields and relations on one existing object.
@@ -394,7 +411,7 @@ Delivery happens in the background worker. The step waits for the result. Each r
 | Continue when the answer is an error | Off by default |
 | Continue when the tool cannot be reached | Off by default |
 
-Output: `status`, `body` (parsed JSON, or the first 5000 characters of text), `unreachable`, `host`, `reason`. Every key is reported on both outcomes, so a condition cannot resolve to nothing on one branch. No permission required.
+Output: `status`, `body` (parsed JSON, or the first 5000 characters of text), `unreachable`, `host`, `reason`, `items`, `count`, `pages`, `truncated`. Every key is reported on both outcomes, so a condition cannot resolve to nothing on one branch. No permission required.
 
 By default a `4xx` or `5xx` answer fails the step, and a tool that never answered at all fails it too. That is the safe reading: a collection that could not run must not look like one that ran and found nothing.
 
@@ -402,7 +419,29 @@ The two checkboxes turn each of those into an outcome the graph can route on ins
 
 Use them when the step is followed by a branch that does something about the failure — log it, email the owner, open a task. Without that branch, opting in only hides the problem.
 
-Redirects are not followed. Private addresses are refused. A secret or an `Authorization` header requires `https`. Errors are reported by host only, never with the full URL, so a secret in a query string cannot leak into the log.
+#### Paging and OAuth
+
+**Follow pages** gathers every page of a list API into `items`:
+
+| Setting | |
+|---|---|
+| Path to the items | Where the list sits in each answer, such as `value` or `data` |
+| Path to the next page | What leads to the next page, such as `@odata.nextLink` or `pagination.nextCursor` |
+| Cursor parameter | Optional. When set, the value at the next-page path is a cursor sent as this query parameter. When empty, it is the full URL of the next page, which must stay on the same host |
+| Offset parameter | Optional, for APIs that page with an offset such as `$skip` instead of a link. Each page adds the number of items received to it, and paging stops at the first empty page. Replaces the next-page path |
+| Count only, keep no items | Count the items without keeping them, for APIs that offer no count of their own. Nothing from the answer is stored |
+| Fields to keep | Optional, comma-separated. Each item keeps only these fields. Use it when the API returns large records and the step needs a few fields: it keeps big lists within what one step can store |
+| Page limit | 1 to 50, default 10 |
+
+Paging stops when there is no next page, at the page limit, or when the items reach what one step's output can hold: `WORKFLOW_NODE_OUTPUT_MAX_ITEMS` items (10 000 by default), or about 90% of `WORKFLOW_NODE_OUTPUT_BUDGET` characters (5 000 000 by default). Both are environment variables of the backend. `pages` says how many were read, `count` how many items were gathered, and `truncated` is true when a limit cut the list short. When paging, `body` is left empty: the items are in `items`, and keeping every raw page as well would double what the run stores.
+
+**Sign in with OAuth client credentials** fetches a token before the request and sends it as a bearer token. It takes a **Token URL** (must be `https`), a **Client ID**, a **Client secret** and an optional **Scope**, all *expr*. The client secret must be a workflow secret, such as `{{secrets.client_secret}}`: publishing refuses one typed in as text. The token never appears in the output or the run log.
+
+A run keeps every item it gathered, but the builder shows a preview: lists in step outputs and variables are cut to their first 50 entries, followed by a note saying how many more there are. Expressions and the steps themselves always read the full list.
+
+Output mappings accept keys that contain dots, so `body.@odata.count` reads a Microsoft Graph count.
+
+Redirects are not followed. Private addresses are refused. A secret, an `Authorization` header or `oauth` requires `https`. Errors are reported by host only, never with the full URL, so a secret in a query string cannot leak into the log.
 
 ## Identity steps
 
