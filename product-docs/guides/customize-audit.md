@@ -29,9 +29,9 @@ In the order they appear on the panel (mirroring the respondent view):
 | **Answers** | Auditor + Respondent | Questionnaire answers when the framework defines auto-questions. |
 | **Respondent alignment** | Hidden | Whether the respondent's answer matches the auditor's expectation. The "Auditor only" pill is greyed out — only the respondent can populate this. |
 | **Status** | Auditor only | The lifecycle status of the requirement assessment. |
-| **Result** | Auditor + Respondent | Compliant / partial / non-compliant / N/A. |
+| **Result** | Auditor + Respondent | Compliant / partial / non-compliant / N/A. Also shows the framework's yes/no outcome rules on the audit page (e.g. the [CCB conformity criteria](../features/framework-specific/cyfun.md#checking-the-ccb-conformity-criteria) for CyFun 2025). |
 | **Extended result** | Auditor only | Free-form qualifier alongside the result. Cannot be more permissive than **Result**. |
-| **Score** | Hidden | Numeric score. |
+| **Score** | Hidden | Numeric score. Also shows the values the framework's number rules compute. |
 | **Documentation score** | Hidden | Companion score for documentation maturity. Cannot be more permissive than **Score**. |
 | **Applied controls** | Auditor + Respondent | The controls linked to this requirement. |
 | **Evidences** | Auditor + Respondent | Files / links proving the requirement. |

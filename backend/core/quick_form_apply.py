@@ -91,6 +91,7 @@ def plan(response, user, overrides: dict | None = None) -> list[dict]:
             "label": target.label,
             "subject": None,
             "current": None,
+            "origin": None,
             "proposal": None,
             # Whether the caller may see the subject's name and current value;
             # the subject itself is kept for the write either way.
@@ -103,6 +104,7 @@ def plan(response, user, overrides: dict | None = None) -> list[dict]:
             continue
         item["subject"] = subject
         item["current"] = target.current(subject)
+        item["origin"] = target.origin(subject, response)
         item["readable"] = _readable(user, subject)
         if not _allowed(user, target, subject):
             item["proposal"] = Proposal.refuse("subjectPermissionRequired")
@@ -144,6 +146,11 @@ def serialize_plan(items: list[dict]) -> list[dict]:
                 "proposed": proposal.display if proposal.ok else None,
                 "overridden": proposal.overridden,
                 **({"extra": proposal.extra} if proposal.extra else {}),
+                **(
+                    {"replaces": item["origin"]}
+                    if readable and item.get("origin")
+                    else {}
+                ),
             }
         )
     return rows

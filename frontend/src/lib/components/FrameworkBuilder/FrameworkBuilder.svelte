@@ -251,8 +251,15 @@
 		return walk($rootNodesStore);
 	});
 
+	const ruleGroups = $derived(
+		($frameworkStore.implementation_groups_definition ?? [])
+			.map((g) => g as Record<string, unknown>)
+			.filter((g) => g.ref_id)
+			.map((g) => ({ id: String(g.ref_id), label: String(g.name ?? g.ref_id) }))
+	);
+
 	// What the expression fields suggest: every page, requirement, question and choice.
-	const celCatalog = $derived(buildCelCatalog($rootNodesStore, mode));
+	const celCatalog = $derived(buildCelCatalog($rootNodesStore, mode, ruleGroups));
 	setCelCatalogContext(() => celCatalog);
 
 	// Pages as rules address them (`pages["<node id>"]`), named for the author.
@@ -1037,6 +1044,7 @@
 									{mode}
 									pages={rulePages}
 									catalog={celCatalog}
+									groups={ruleGroups}
 								/>
 							</div>
 
