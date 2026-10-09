@@ -295,10 +295,12 @@ def build_cel_context(compliance_assessment) -> tuple[dict, set[str]]:
     if hidden_assessable:
         visible_scope = [n for n in in_scope if n["urn"] not in hidden_assessable]
         visible_urns = {n["urn"] for n in visible_scope}
+        visible_node_ids = {extract_node_id(u) for u in visible_urns if extract_node_id(u)}
+        # answer_data is keyed by question node_id ("<requirement>:question:<id>")
         visible_answer_data = {
             k: v
             for k, v in answer_data.items()
-            if k in {extract_node_id(u) for u in visible_urns if extract_node_id(u)}
+            if k.split(":question:", 1)[0] in visible_node_ids
         }
         visible_ra_rows = {k: v for k, v in ra_rows.items() if k in visible_urns}
         visible_outcomes = (
