@@ -12631,15 +12631,15 @@ class RiskAcceptance(NameDescriptionMixin, FolderMixin):
         with transaction.atomic():
             self.state = state
             if state == "accepted":
-                self.accepted_at = datetime.now()
+                self.accepted_at = timezone.now()
                 # iterate over the risk scenarios to set their treatment to accepted
                 for scenario in self.risk_scenarios.all():
                     scenario.treatment = "accept"
                     scenario.save()
             if state == "rejected":
-                self.rejected_at = datetime.now()
+                self.rejected_at = timezone.now()
             elif state == "revoked":
-                self.revoked_at = datetime.now()
+                self.revoked_at = timezone.now()
                 # revert the treatment set on acceptance, leaving scenarios that have
                 # since moved to another treatment, or are still covered by another
                 # accepted acceptance, untouched
