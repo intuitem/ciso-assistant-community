@@ -14,7 +14,7 @@ Unloading a library makes its content unavailable for use, but keeps the library
 ![Libraries page with the Unload library button highlighted for a custom library](../../.gitbook/assets/unload_library.png)
 
 {% hint style="warning" %}
-Only administrators see the unload button, and it is hidden while the library is in use. For example, an audit uses its Framework, a risk assessment or business impact analysis uses its risk matrix, or an assessment uses its threats or controls based on its reference controls. Delete or change those objects first.
+Only administrators can see the unload button. It is hidden while an audit uses the library's Framework, a risk assessment or business impact analysis uses its risk matrix, or an assessment uses its threats or controls based on its reference controls. Delete or change those objects first.
 
 If a loaded Mapping library depends on this library, the button still appears, but unloading fails because the library is in use. Unload the Mapping library first.
 
