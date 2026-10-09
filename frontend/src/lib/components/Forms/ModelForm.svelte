@@ -469,7 +469,12 @@
 					hidden={HIDDEN_FOLDER_MODELS.has(URLModel)}
 					disabled={(URLModel === 'entities' && object?.builtin) ||
 						(URLModel === 'perimeters' && !!initialData?.folder)}
-					contentTypes={['compliance-assessments', 'evidences'].includes(URLModel)
+					contentTypes={[
+						'compliance-assessments',
+						'evidences',
+						'applied-controls',
+						'task-templates'
+					].includes(URLModel)
 						? ['DO', 'GL', 'EN']
 						: undefined}
 					helpText={URLModel === 'campaigns'
