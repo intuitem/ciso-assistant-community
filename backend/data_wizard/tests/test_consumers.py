@@ -1320,6 +1320,30 @@ class TestFindingsAssessmentConsumer:
         assert result.created == 1
         assert FindingsAssessment.objects.filter(folder=domain_folder).exists()
 
+    @pytest.mark.parametrize("priority", ["P2", "p2", 2, "2"])
+    def test_reads_exported_priority_label_and_recommendation(
+        self, domain_folder, admin_user, priority
+    ):
+        """The xlsx export writes "P1".."P4" and a recommendation column."""
+        ctx = self._findings_context(domain_folder, admin_user)
+        result = _run(
+            FindingsAssessmentRecordConsumer,
+            ctx,
+            [
+                {
+                    "name": "Weak key",
+                    "ref_id": "F-001",
+                    "status": "--",
+                    "priority": priority,
+                    "recommendation": "Rotate the key.",
+                }
+            ],
+        )
+        assert result.created == 1
+        finding = Finding.objects.get(ref_id="F-001")
+        assert finding.priority == 2
+        assert finding.recommendation == "Rotate the key."
+
     def test_target_reuse_updates_existing_and_adds_new(
         self, domain_folder, admin_user
     ):

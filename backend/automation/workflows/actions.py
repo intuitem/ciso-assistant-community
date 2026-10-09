@@ -181,6 +181,12 @@ def render(value, variables):
                 import json
 
                 return json.dumps(resolved, default=str)
+            if isinstance(resolved, float):
+                # Text for people: scores are computed unrounded and shown
+                # with two decimals, as in the app.
+                from core.models import round_score
+
+                return str(round_score(resolved))
             return str(resolved)
 
         return TEMPLATE_RE.sub(substitute, value)

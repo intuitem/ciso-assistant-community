@@ -1941,8 +1941,10 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
         record_severity = record.get("severity")
         severity = self.SEVERITY_MAP.get(record_severity, -1)
 
-        # Parse priority (1-4)
+        # Parse priority: 1-4, or the "P1".."P4" labels the export writes
         priority = record.get("priority")
+        if isinstance(priority, str):
+            priority = priority.strip().upper().removeprefix("P")
         if isinstance(priority, (int, float)):
             priority = int(priority)
         elif isinstance(priority, str) and priority.isdigit():
@@ -2003,6 +2005,7 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
             "eta": _parse_date(record.get("eta")),
             "due_date": _parse_date(record.get("due_date")),
             "observation": record.get("observation", ""),
+            "recommendation": record.get("recommendation", ""),
             "vulnerabilities": vulnerabilities,
             "applied_controls": applied_controls.ids,
         }
@@ -4716,21 +4719,25 @@ class LoadFileView(APIView):
         serializer = ComplianceAssessmentWriteSerializer(
             data=assessment_data, context={"request": request}
         )
-        try:
-            serializer.is_valid(raise_exception=True)
-            compliance_assessment = serializer.save()
-            compliance_assessment.create_requirement_assessments()
-        except Exception as e:
-            logger.error("Failed to create CyFun compliance assessment", error=e)
-            return fail("CyfunAssessmentCreationFailed")
-        logger.info(
-            "Created CyFun compliance assessment",
-            id=compliance_assessment.id,
-            assurance_level=level,
-        )
-        return self._reconcile_compliance_requirements(
-            request, parsed["records"], compliance_assessment, framework.id, results
-        )
+        # One transaction: the outcome rules are evaluated once, at commit,
+        # instead of after every imported row.
+        with transaction.atomic():
+            try:
+                serializer.is_valid(raise_exception=True)
+                compliance_assessment = serializer.save()
+                compliance_assessment.create_requirement_assessments()
+            except Exception as e:
+                logger.error("Failed to create CyFun compliance assessment", error=e)
+                transaction.set_rollback(True)
+                return fail("CyfunAssessmentCreationFailed")
+            logger.info(
+                "Created CyFun compliance assessment",
+                id=compliance_assessment.id,
+                assurance_level=level,
+            )
+            return self._reconcile_compliance_requirements(
+                request, parsed["records"], compliance_assessment, framework.id, results
+            )
 
     @staticmethod
     def _resolve_summary_row_template(
@@ -5095,149 +5102,160 @@ class LoadFileView(APIView):
                 )
                 continue
 
+            # Controls this row created; dropped if the row rolls back.
+            row_controls: list[str] = []
             try:
-                # ref_id wins, but a stale ref_id must still fall back to urn.
-                ReqNode = None
-                if ref_id:
-                    ReqNode = RequirementNode.objects.filter(
-                        framework__id=framework_id, ref_id=ref_id
-                    ).first()
-                if ReqNode is None and urn:
-                    ReqNode = RequirementNode.objects.filter(
-                        framework__id=framework_id, urn=urn
-                    ).first()
+                # A savepoint per row: a failing row rolls back alone instead of
+                # aborting the caller's transaction for the rows after it.
+                with transaction.atomic():
+                    # ref_id wins, but a stale ref_id must still fall back to urn.
+                    ReqNode = None
+                    if ref_id:
+                        ReqNode = RequirementNode.objects.filter(
+                            framework__id=framework_id, ref_id=ref_id
+                        ).first()
+                    if ReqNode is None and urn:
+                        ReqNode = RequirementNode.objects.filter(
+                            framework__id=framework_id, urn=urn
+                        ).first()
 
-                requirement_assessment = None
-                if ReqNode:
-                    requirement_assessment = RequirementAssessment.objects.filter(
-                        compliance_assessment=compliance_assessment,
-                        requirement=ReqNode,
-                    ).first()
-                else:
-                    logger.warning("Import attempt: unknown ref_id/urn")
+                    requirement_assessment = None
+                    if ReqNode:
+                        requirement_assessment = RequirementAssessment.objects.filter(
+                            compliance_assessment=compliance_assessment,
+                            requirement=ReqNode,
+                        ).first()
+                    else:
+                        logger.warning("Import attempt: unknown ref_id/urn")
 
-                if requirement_assessment:
-                    compliance_result = record.get("compliance_result")
-                    requirement_progress = record.get("requirement_progress")
-                    observations = record.get("observations")
-                    requirement_data = {}
-                    if compliance_result not in (None, ""):
-                        requirement_data["result"] = compliance_result
-                    if requirement_progress not in (None, ""):
-                        requirement_data["status"] = requirement_progress
-                    if observations not in (None, ""):
-                        requirement_data["observation"] = observations
-                    controls_cell = record.get("applied_controls") or record.get(
-                        "controls"
-                    )
-                    if controls_cell not in (None, ""):
-                        controls = _resolve_applied_controls(
-                            controls_cell, compliance_assessment.folder, request
+                    if requirement_assessment:
+                        compliance_result = record.get("compliance_result")
+                        requirement_progress = record.get("requirement_progress")
+                        observations = record.get("observations")
+                        requirement_data = {}
+                        if compliance_result not in (None, ""):
+                            requirement_data["result"] = compliance_result
+                        if requirement_progress not in (None, ""):
+                            requirement_data["status"] = requirement_progress
+                        if observations not in (None, ""):
+                            requirement_data["observation"] = observations
+                        controls_cell = record.get("applied_controls") or record.get(
+                            "controls"
                         )
-                        controls_created.extend(controls.created)
-                        requirement_data["applied_controls"] = controls.ids
-                        if controls.failed:
-                            results["warnings"].append(
+                        if controls_cell not in (None, ""):
+                            controls = _resolve_applied_controls(
+                                controls_cell, compliance_assessment.folder, request
+                            )
+                            row_controls.extend(controls.created)
+                            requirement_data["applied_controls"] = controls.ids
+                            if controls.failed:
+                                results["warnings"].append(
+                                    {
+                                        "requirement": ReqNode.ref_id or ReqNode.urn,
+                                        "warning": f"Could not resolve controls: {', '.join(controls.failed)}",
+                                    }
+                                )
+                        impl_score = record.get("implementation_score")
+                        doc_score = record.get("documentation_score")
+                        score = record.get("score")
+                        enable_doc_score = False
+                        if impl_score not in (None, "") and doc_score not in (None, ""):
+                            requirement_data.update(
                                 {
-                                    "requirement": ReqNode.ref_id or ReqNode.urn,
-                                    "warning": f"Could not resolve controls: {', '.join(controls.failed)}",
+                                    "score": impl_score,
+                                    "documentation_score": doc_score,
+                                    "is_scored": True,
                                 }
                             )
-                    impl_score = record.get("implementation_score")
-                    doc_score = record.get("documentation_score")
-                    score = record.get("score")
-                    enable_doc_score = False
-                    if impl_score not in (None, "") and doc_score not in (None, ""):
-                        requirement_data.update(
-                            {
-                                "score": impl_score,
-                                "documentation_score": doc_score,
-                                "is_scored": True,
-                            }
-                        )
-                        enable_doc_score = True
-                    elif score not in (None, ""):
-                        requirement_data.update({"score": score, "is_scored": True})
+                            enable_doc_score = True
+                        elif score not in (None, ""):
+                            requirement_data.update({"score": score, "is_scored": True})
 
-                    # Build answers from the "answers" cell
-                    answers_cell = record.get("answers")
-                    questions_dict = build_questions_dict(ReqNode) if ReqNode else None
-                    if answers_cell not in (None, "") and questions_dict:
-                        answers, answer_warnings = parse_answers_cell(
-                            answers_cell, questions_dict
+                        # Build answers from the "answers" cell
+                        answers_cell = record.get("answers")
+                        questions_dict = (
+                            build_questions_dict(ReqNode) if ReqNode else None
                         )
-                        for warning in answer_warnings:
-                            results["warnings"].append(
-                                {
-                                    "requirement": ReqNode.ref_id or ReqNode.urn,
-                                    "warning": warning,
-                                }
+                        if answers_cell not in (None, "") and questions_dict:
+                            answers, answer_warnings = parse_answers_cell(
+                                answers_cell, questions_dict
                             )
-                        # An empty dict means every line was a hint or was
-                        # skipped; sending it would be a no-op write.
-                        if answers:
-                            requirement_data["answers"] = answers
+                            for warning in answer_warnings:
+                                results["warnings"].append(
+                                    {
+                                        "requirement": ReqNode.ref_id or ReqNode.urn,
+                                        "warning": warning,
+                                    }
+                                )
+                            # An empty dict means every line was a hint or was
+                            # skipped; sending it would be a no-op write.
+                            if answers:
+                                requirement_data["answers"] = answers
 
-                    override_cell = record.get("is_score_overridden")
-                    if override_cell not in (None, ""):
-                        override_value = _parse_bool_cell(
-                            override_cell, binary_only=True
+                        override_cell = record.get("is_score_overridden")
+                        if override_cell not in (None, ""):
+                            override_value = _parse_bool_cell(
+                                override_cell, binary_only=True
+                            )
+                            if override_value is None:
+                                results["failed"] += 1
+                                results["errors"].append(
+                                    {
+                                        "record": record,
+                                        "error": f"Invalid is_score_overridden value '{override_cell}': expected a boolean",
+                                    }
+                                )
+                                continue
+                            requirement_data["is_score_overridden"] = override_value
+                        elif (
+                            requirement_data.get("score") not in (None, "")
+                            and requirement_assessment.requirement.questions.exists()
+                        ):
+                            # Imported score on question-driven requirement = override
+                            requirement_data["is_score_overridden"] = True
+
+                        req_serializer = RequirementAssessmentWriteSerializer(
+                            instance=requirement_assessment,
+                            data=requirement_data,
+                            partial=True,
+                            context={"request": request},
                         )
-                        if override_value is None:
+                        if req_serializer.is_valid():
+                            req_serializer.save()
+                            if (
+                                enable_doc_score
+                                and not compliance_assessment.show_documentation_score
+                            ):
+                                # show_documentation_score is a @property backed by
+                                # `field_visibility`; the setter mutates that JSON
+                                # column, so update_fields must point at the concrete
+                                # field.
+                                compliance_assessment.show_documentation_score = True
+                                compliance_assessment.save(
+                                    update_fields=["field_visibility"]
+                                )
+                            results["successful"] += 1
+                        else:
                             results["failed"] += 1
                             results["errors"].append(
-                                {
-                                    "record": record,
-                                    "error": f"Invalid is_score_overridden value '{override_cell}': expected a boolean",
-                                }
+                                {"record": record, "errors": req_serializer.errors}
                             )
-                            continue
-                        requirement_data["is_score_overridden"] = override_value
-                    elif (
-                        requirement_data.get("score") not in (None, "")
-                        and requirement_assessment.requirement.questions.exists()
-                    ):
-                        # Imported score on question-driven requirement = override
-                        requirement_data["is_score_overridden"] = True
-
-                    req_serializer = RequirementAssessmentWriteSerializer(
-                        instance=requirement_assessment,
-                        data=requirement_data,
-                        partial=True,
-                        context={"request": request},
-                    )
-                    if req_serializer.is_valid():
-                        req_serializer.save()
-                        if (
-                            enable_doc_score
-                            and not compliance_assessment.show_documentation_score
-                        ):
-                            # show_documentation_score is a @property backed by
-                            # `field_visibility`; the setter mutates that JSON
-                            # column, so update_fields must point at the concrete
-                            # field.
-                            compliance_assessment.show_documentation_score = True
-                            compliance_assessment.save(
-                                update_fields=["field_visibility"]
-                            )
-                        results["successful"] += 1
                     else:
                         results["failed"] += 1
                         results["errors"].append(
-                            {"record": record, "errors": req_serializer.errors}
+                            {
+                                "record": record,
+                                "error": f"No matching requirement found with ref_id '{ref_id}' or urn '{urn}'",
+                            }
                         )
-                else:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {
-                            "record": record,
-                            "error": f"No matching requirement found with ref_id '{ref_id}' or urn '{urn}'",
-                        }
-                    )
             except Exception as e:
+                row_controls = []
                 logger.warning(f"Error updating requirement assessment: {str(e)}")
                 results["failed"] += 1
                 results["errors"].append({"record": record, "error": str(e)})
+            finally:
+                # Also after a row's early `continue`, which keeps its savepoint.
+                controls_created.extend(row_controls)
 
         if controls_created:
             results.setdefault("details", {})["applied_controls_created"] = len(
