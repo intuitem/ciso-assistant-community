@@ -33,10 +33,10 @@ export interface TreeNode {
 	descendants: number;
 }
 
-/** `section` is a section ref_id; null means no filter. */
+/** `section` is an index into feed.sections; null means no filter. */
 export interface Filters {
 	ig: string | null;
-	section: string | null;
+	section: number | null;
 }
 
 export const AGGREGATIONS: { key: Aggregation; label: string; caption: string }[] = [
@@ -120,7 +120,7 @@ export function progressValue(s: Stats | null): number | null {
 }
 
 function tupleFilter(feed: DomainTreeFeed, f: Filters) {
-	const section = f.section ? feed.sections.findIndex((s) => s.ref_id === f.section) : -1;
+	const section = f.section ?? -1;
 	const sigOk = feed.signatures.map((sig) => !f.ig || sig.includes(f.ig));
 	return (sectionIdx: number, sigIdx: number) =>
 		sigOk[sigIdx] && (section < 0 || sectionIdx === section);
@@ -130,7 +130,7 @@ function tupleFilter(feed: DomainTreeFeed, f: Filters) {
 export function ownStats(feed: DomainTreeFeed, f: Filters): Map<string, Stats> {
 	const match = tupleFilter(feed, f);
 	const out = new Map<string, Stats>();
-	const unfiltered = !f.ig && !f.section;
+	const unfiltered = !f.ig && f.section === null;
 	for (const a of feed.audits) {
 		if (a.results_hidden) continue;
 		const s = emptyStats();

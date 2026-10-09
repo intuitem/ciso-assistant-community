@@ -113,7 +113,7 @@ def framework_structure(framework) -> dict[str, Any]:
 def select_audits(cas: list[ComplianceAssessment]) -> list[ComplianceAssessment]:
     """At most one audit per domain.
 
-    Deprecated audits are skipped. Real data rarely moves audits to done (most
+    Real data rarely moves audits to done (most
     carry no status at all), so any other status qualifies; a started audit wins
     over a planned one, then the most recently updated wins.
     """
@@ -123,8 +123,6 @@ def select_audits(cas: list[ComplianceAssessment]) -> list[ComplianceAssessment]
         return (ca.status != ComplianceAssessment.Status.PLANNED, ca.updated_at)
 
     for ca in cas:
-        if ca.status == ComplianceAssessment.Status.DEPRECATED:
-            continue
         current = chosen.get(ca.folder_id)
         if current is None or rank(ca) > rank(current):
             chosen[ca.folder_id] = ca
@@ -159,7 +157,7 @@ def _na_target_ratio(ca: ComplianceAssessment) -> float:
     return (max(lo, min(ca.target_score, hi)) - lo) / (hi - lo)
 
 
-def tree_audits(user):
+def tree_audits(user, respondent_folders=None):
     """Audits the domain tree may show this user, before the one-per-domain pick.
 
     Respondents only see the audits they are assigned to, as on the audit list.
@@ -168,7 +166,8 @@ def tree_audits(user):
         id__in=RoleAssignment.get_viewable_object_ids(user, ComplianceAssessment),
         folder__content_type__in=TREE_CONTENT_TYPES,
     ).exclude(status=ComplianceAssessment.Status.DEPRECATED)
-    respondent_folders = get_respondent_scoped_folder_ids(user)
+    if respondent_folders is None:
+        respondent_folders = get_respondent_scoped_folder_ids(user)
     if respondent_folders:
         qs = qs.filter(
             ~Q(folder_id__in=respondent_folders)
@@ -186,7 +185,8 @@ def build_domain_tree(user, framework, campaign_id=None) -> dict[str, Any]:
     }
     viewable_folder_ids = set(RoleAssignment.get_viewable_object_ids(user, Folder))
 
-    ca_qs = tree_audits(user).filter(framework=framework)
+    respondent_folders = get_respondent_scoped_folder_ids(user)
+    ca_qs = tree_audits(user, respondent_folders).filter(framework=framework)
     if campaign_id:
         ca_qs = ca_qs.filter(campaign_id=campaign_id)
     audits = sorted(select_audits(list(ca_qs)), key=lambda ca: ca.name)
@@ -199,15 +199,17 @@ def build_domain_tree(user, framework, campaign_id=None) -> dict[str, Any]:
     for fid in folders:
         if fid not in viewable_folder_ids:
             continue
+        path = []
         current = fid
-        while current is not None and current not in kept:
-            kept.add(current)
+        while current in folders and current not in kept:
+            path.append(current)
             current = folders[current]["parent_folder_id"]
+        if current is None or current in kept:
+            kept.update(path)
 
     structure = framework_structure(framework)
     placement = structure["placement"]
 
-    respondent_folders = get_respondent_scoped_folder_ids(user)
     roles = {
         ca.id: "respondent"
         if respondent_folders and ca.folder_id in respondent_folders

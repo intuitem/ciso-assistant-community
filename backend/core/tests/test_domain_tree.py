@@ -272,6 +272,21 @@ class TestDomainTreeFeed:
         root = [f for f in feed["folders"] if f["parent_id"] is None]
         assert len(root) == 1
 
+    def test_domain_outside_the_tree_is_dropped(self, framework):
+        enclave = Folder.objects.create(
+            name="Enclave",
+            content_type=Folder.ContentType.ENCLAVE,
+            parent_folder=Folder.get_root_folder(),
+        )
+        orphan = Folder.objects.create(
+            name="Orphan", content_type=Folder.ContentType.DOMAIN, parent_folder=enclave
+        )
+        audit(framework, domain("D"), "kept", {})
+        feed = build_domain_tree(admin(), framework)
+        ids = {f["id"] for f in feed["folders"]}
+        assert str(orphan.id) not in ids
+        assert sum(1 for f in feed["folders"] if f["parent_id"] is None) == 1
+
     def test_hidden_ancestor_is_sent_without_a_name(self, framework):
         parent = domain("Secret parent")
         child = domain("Child", parent)

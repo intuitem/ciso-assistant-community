@@ -14,6 +14,7 @@
 	import { visibleList } from '$lib/components/DataViz/RingTree/layout';
 	import type { RingNode } from '$lib/components/DataViz/RingTree/types';
 	import { generateFeed, type FeedSize } from './data';
+	import { COUNT } from './feed';
 	import {
 		aggregate,
 		AGGREGATIONS,
@@ -42,7 +43,7 @@
 	let seed = $state(42);
 	let size = $state<FeedSize>('small');
 	let ig = $state<string>('');
-	let section = $state<string>('');
+	let section = $state<number | null>(null);
 	let metric = $state<Metric>('compliance');
 	let agg = $state<Aggregation>('audits');
 	let collapsed = $state<Set<string>>(new Set());
@@ -68,11 +69,6 @@
 	}
 
 	function openFramework(id: string | null) {
-		selectedId = null;
-		collapsed = new Set();
-		focusN = 0;
-		ig = '';
-		section = '';
 		const params = new URLSearchParams();
 		if (id) params.set('framework', id);
 		if (id && data.campaignId) params.set('campaign', data.campaignId);
@@ -80,13 +76,22 @@
 	}
 
 	const isDummy = $derived(!data.frameworkId);
+
+	$effect(() => {
+		void data.frameworkId;
+		selectedId = null;
+		collapsed = new Set();
+		focusN = 0;
+		ig = '';
+		section = null;
+	});
 	const feed = $derived(data.feed ?? generateFeed(seed, size));
 	const hasScores = $derived(
-		feed.audits.some((a) => a.score !== null) || feed.counts.some((t) => t[9] > 0)
+		feed.audits.some((a) => a.score !== null) || feed.counts.some((t) => t[COUNT.scored] > 0)
 	);
 	const shownMetric = $derived<Metric>(hasScores ? metric : 'compliance');
 	const feedKb = $derived(new Blob([JSON.stringify(feed)]).size / 1024);
-	const filters = $derived({ ig: ig || null, section: section || null });
+	const filters = $derived({ ig: ig || null, section });
 	const root = $derived(buildTree(feed, filters));
 	const nodes = $derived(root ? allNodes(root) : []);
 	const nodeById = $derived(new Map(nodes.map((n) => [n.id, n])));
@@ -182,9 +187,7 @@
 			feed.framework.name,
 			shownMetric === 'compliance' ? 'Compliance' : 'Score',
 			filters.ig ?? "each audit's own IGs",
-			filters.section
-				? `section ${filters.section}. ${feed.sections.find((s) => s.ref_id === filters.section)?.name}`
-				: 'all sections'
+			filters.section !== null ? `section ${sectionLabel(filters.section)}` : 'all sections'
 		].join(' · ')
 	);
 	const aggCaption = $derived(AGGREGATIONS.find((a) => a.key === agg)?.caption);
@@ -192,7 +195,7 @@
 		[
 			`Branch = ${aggCaption}`,
 			shownMetric === 'score'
-				? filters.ig || filters.section
+				? filters.ig || filters.section !== null
 					? 'score = average of the implementation scores in this filter'
 					: "score = each audit's score as on its audit page"
 				: '',
@@ -263,6 +266,12 @@
 		return 'no audit data';
 	}
 
+	function sectionLabel(index: number) {
+		const s = feed.sections[index];
+		if (!s) return '';
+		return s.ref_id ? `${s.ref_id}. ${s.name}` : s.name;
+	}
+
 	function statusLabel(status: string | null) {
 		return status ? status.replace('_', ' ') : 'no status';
 	}
@@ -290,10 +299,11 @@
 		if (!selected) return [];
 		const branchRoot = selected;
 		return feed.sections
-			.map((sec) => {
-				const own = ownStats(feed, { ig: filters.ig, section: sec.ref_id });
+			.map((sec, index) => {
+				const own = ownStats(feed, { ig: filters.ig, section: index });
 				return {
 					...sec,
+					index,
 					value: aggregate(
 						branchRoot,
 						(m) => (m.audit ? (own.get(m.id) ?? emptyStats()) : null),
@@ -436,9 +446,9 @@
 		<label>
 			{@render fieldLabel('Section')}
 			<select class="select h-9 w-56 py-0 text-sm" bind:value={section}>
-				<option value="">All sections</option>
-				{#each feed.sections as s (s.ref_id)}
-					<option value={s.ref_id}>{s.ref_id}. {s.name}</option>
+				<option value={null}>All sections</option>
+				{#each feed.sections as s, i (s.id)}
+					<option value={i}>{sectionLabel(i)}</option>
 				{/each}
 			</select>
 		</label>
@@ -715,18 +725,18 @@
 						</div>
 					{/if}
 
-					{#if sectionBreakdown.length && !filters.section}
+					{#if sectionBreakdown.length && filters.section === null}
 						<div>
 							<div class="mb-1 text-xs font-semibold uppercase tracking-wide text-surface-600-400">
 								Branch by section, weakest first
 							</div>
 							<ul class="space-y-1">
-								{#each sectionBreakdown as s (s.ref_id)}
+								{#each sectionBreakdown as s (s.id)}
 									<li>
 										<button
 											class="flex w-full items-center gap-2 rounded px-1 py-0.5 text-left text-xs hover:bg-surface-100-900"
 											title="Filter the tree on this section"
-											onclick={() => (section = s.ref_id)}
+											onclick={() => (section = s.index)}
 										>
 											<span class="w-5 text-right text-surface-500">{s.ref_id}</span>
 											<span class="flex-1 truncate">{s.name}</span>
