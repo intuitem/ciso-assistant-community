@@ -1132,11 +1132,12 @@ class RecordConsumer[Context = None](ABC):
         )
         return results
 
-    def resolve_deferred(self, data: dict) -> dict:
+    def resolve_deferred(self, data: dict, instance=None) -> dict:
         """Resolve values whose resolution writes to the database.
 
         Runs only once a row is known to be written, inside the transaction of
         that write, so a skipped or rejected row leaves nothing behind.
+        *instance* is the record being updated, None on creation.
         """
         return data
 
@@ -1148,7 +1149,7 @@ class RecordConsumer[Context = None](ABC):
         with transaction.atomic():
             serializer = self.get_serializer_class()(
                 instance=instance,
-                data=self.resolve_deferred(data),
+                data=self.resolve_deferred(data, instance),
                 partial=instance is not None,
                 context={"request": self.request},
             )
@@ -2973,13 +2974,23 @@ class FolderRecordConsumer(RecordConsumer):
         if created:
             Folder.create_default_ug_and_ra(instance)
 
-    def resolve_deferred(self, data: dict) -> dict:
+    @cached_property
+    def viewable_label_ids(self) -> set:
+        return set(
+            RoleAssignment.get_viewable_object_ids(self.request.user, FilteringLabel)
+        )
+
+    def resolve_deferred(self, data: dict, instance=None) -> dict:
         if "filtering_labels" not in data:
             return data
-        return {
-            **data,
-            "filtering_labels": _resolve_filtering_labels(data["filtering_labels"]),
-        }
+        label_ids = _resolve_filtering_labels(data["filtering_labels"])
+        if instance is not None:
+            # The export only lists the labels the user may view: the cell cannot
+            # mention the others, so it must not unlink them.
+            label_ids += instance.filtering_labels.exclude(
+                id__in=self.viewable_label_ids
+            ).values_list("id", flat=True)
+        return {**data, "filtering_labels": label_ids}
 
 
 class VulnerabilityRecordConsumer(RecordConsumer[None]):

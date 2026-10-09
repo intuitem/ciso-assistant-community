@@ -1149,6 +1149,24 @@ class TestFolderConsumer:
         )
         assert f"Invalid create_iam_groups '{cell}'" in error.error
 
+    def test_update_keeps_labels_hidden_from_the_user(self, base_context, root_folder):
+        from core.models import FilteringLabel
+
+        public = FilteringLabel.objects.create(label="Public")
+        hidden = FilteringLabel.objects.create(label="Hidden")
+        dropped = FilteringLabel.objects.create(label="Dropped")
+        folder = Folder.objects.create(name="Labelled", parent_folder=root_folder)
+        folder.filtering_labels.set([public, hidden, dropped])
+        consumer = FolderRecordConsumer(base_context)
+        consumer.__dict__["viewable_label_ids"] = {public.id, dropped.id}
+
+        resolved = consumer.resolve_deferred(
+            {"filtering_labels": "Public"}, instance=folder
+        )
+
+        # Visible labels follow the cell; the hidden one stays linked.
+        assert set(resolved["filtering_labels"]) == {public.id, hidden.id}
+
     def test_skipped_row_creates_no_label(
         self, skip_context, domain_folder, all_accessible
     ):
