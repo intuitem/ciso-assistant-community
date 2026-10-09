@@ -207,6 +207,14 @@ class MetricInstanceReadSerializer(BaseModelSerializer):
 
 
 # CustomMetricSample serializers
+# Shared by the write serializer and the viewset's destroy: the samples of a
+# derived metric are the formula's, in every direction.
+DERIVED_SAMPLE_READ_ONLY = (
+    "This metric is computed from its formula; its samples cannot be written "
+    "or deleted by hand"
+)
+
+
 class CustomMetricSampleWriteSerializer(BaseModelSerializer):
     def create(self, validated_data):
         # Set folder from metric_instance before the permission check in parent class
@@ -237,12 +245,7 @@ class CustomMetricSampleWriteSerializer(BaseModelSerializer):
             # A derived series is its formula's: a typed-in point would
             # become the next computation's `previous`.
             raise serializers.ValidationError(
-                {
-                    "metric_instance": (
-                        "This metric is computed from its formula; its samples "
-                        "cannot be written by hand"
-                    )
-                }
+                {"metric_instance": DERIVED_SAMPLE_READ_ONLY}
             )
 
         if "value" in attrs:

@@ -1,15 +1,23 @@
 """Marking metric formulas for recomputation when what they read changes.
 
 A sample written, edited or deleted marks the formulas reading its metric,
-from that sample's period on. An instance appearing, disappearing or moving
-changes what an input resolves to, so it marks them whole, as does editing a
-formula. Marks are applied after commit and only recorded: the sweep
-recomputes, never the request. The series engine writes in bulk, which sends
-no signal, and marks its own dependents.
+from that sample's period on. An instance appearing, disappearing, moving or
+changing its collection frequency (the staleness threshold a reader aligns
+on) changes what an input resolves to, so it marks them whole, as does
+editing a formula. Marks are applied after commit and only recorded: the
+sweep recomputes, never the request.
+
+The sampler's own bulk writes and deletes send no signal (series._store,
+derived.downsample_derived_samples) and mark what they change themselves.
+An instance deleted with its samples sends one signal per sample while the
+instance row still exists, Django deleting the dependents first: those are
+skipped, since the instance's own signal marks the readers whole.
 """
 
+import threading
+
 from django.db import transaction
-from django.db.models.signals import post_delete, post_save, pre_save
+from django.db.models.signals import post_delete, post_save, pre_delete, pre_save
 from django.dispatch import receiver
 
 from .models import CustomMetricSample, MetricDefinition, MetricInstance
@@ -23,6 +31,16 @@ _BOOKKEEPING = {
     "updated_at",
     "status",
 }
+
+# Instances whose cascade delete is under way on this thread: their samples'
+# delete signals carry nothing the instance's own signal does not.
+_local = threading.local()
+
+
+def _deleting():
+    if not hasattr(_local, "deleting"):
+        _local.deleting = set()
+    return _local.deleting
 
 
 def _after_commit(definition_id, folder_id, moment):
@@ -61,6 +79,8 @@ def remember_sample_timestamp(sender, instance, **kwargs):
 @receiver(post_save, sender=CustomMetricSample)
 @receiver(post_delete, sender=CustomMetricSample)
 def sample_changed(sender, instance, **kwargs):
+    if instance.metric_instance_id in _deleting():
+        return
     if not _has_readers():
         return
     moments = [instance.timestamp]
@@ -71,8 +91,6 @@ def sample_changed(sender, instance, **kwargs):
     )
     row = metric.first()
     if row is None:
-        # The instance is being deleted with its samples: its own signal
-        # marks the readers whole.
         return
     _after_commit(row[0], row[1], min(moments))
 
@@ -86,7 +104,7 @@ def remember_instance_scope(sender, instance, **kwargs):
     if not instance._state.adding:
         instance._previous_scope = (
             MetricInstance.objects.filter(pk=instance.pk)
-            .values_list("metric_definition_id", "folder_id")
+            .values_list("metric_definition_id", "folder_id", "collection_frequency")
             .first()
         )
 
@@ -97,21 +115,33 @@ def instance_saved(sender, instance, created, update_fields=None, **kwargs):
 
     if update_fields is not None and set(update_fields) <= _BOOKKEEPING:
         return
-    scope = (instance.metric_definition_id, instance.folder_id)
+    scope = (
+        instance.metric_definition_id,
+        instance.folder_id,
+        instance.collection_frequency,
+    )
     previous = getattr(instance, "_previous_scope", None)
     if not created and previous == scope:
         return
     if not _has_readers():
         return
-    _after_commit(*scope, FULL)
-    if previous is not None and previous != scope:
-        _after_commit(*previous, FULL)
+    # A new frequency changes how old a value may be when a reader aligns
+    # on it: every period of every reader may differ.
+    _after_commit(scope[0], scope[1], FULL)
+    if previous is not None and previous[:2] != scope[:2]:
+        _after_commit(previous[0], previous[1], FULL)
+
+
+@receiver(pre_delete, sender=MetricInstance)
+def instance_deleting(sender, instance, **kwargs):
+    _deleting().add(instance.id)
 
 
 @receiver(post_delete, sender=MetricInstance)
 def instance_deleted(sender, instance, **kwargs):
     from .series import FULL
 
+    _deleting().discard(instance.id)
     if _has_readers():
         _after_commit(instance.metric_definition_id, instance.folder_id, FULL)
 

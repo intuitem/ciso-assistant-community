@@ -352,6 +352,23 @@ class TestSweep:
         assert {hourly.id, never.id, stale.id} <= due
         assert fresh.id not in due and manual.id not in due and deprecated.id not in due
 
+    def test_due_within_half_a_sweep_of_the_interval(self):
+        """The stamp lands a few seconds after the tick that queued the run,
+        so the next aligned tick must still count; a duplicate queued right
+        after a run must not."""
+        domain = make_domain("Domain")
+        now = timezone.now()
+        hourly = make_instance(domain, collection_frequency="hourly")
+        hourly.last_computed_at = now - datetime.timedelta(minutes=59, seconds=57)
+        assert is_due(hourly, now)
+        hourly.last_computed_at = now - datetime.timedelta(minutes=50)
+        assert not is_due(hourly, now)
+        realtime = make_instance(domain, collection_frequency="realtime")
+        realtime.last_computed_at = now - datetime.timedelta(minutes=14, seconds=57)
+        assert is_due(realtime, now)
+        realtime.last_computed_at = now - datetime.timedelta(seconds=2)
+        assert not is_due(realtime, now)
+
     def test_no_frequency_means_daily(self):
         domain = make_domain("Domain")
         instance = make_instance(domain, collection_frequency=None)
@@ -395,6 +412,43 @@ class TestDownsampling:
             recent_a.id,
             recent_b.id,
         } <= remaining
+
+    def test_downsampling_marks_no_reader(self, django_capture_on_commit_callbacks):
+        """The sample kept for a day is the one a reader's day-end cutoff
+        finds, so nothing a formula reads changes: no mark, no signal."""
+        domain = make_domain("Domain")
+        instance = make_instance(domain)
+        reader = make_instance(
+            domain,
+            make_definition(
+                "x",
+                None,
+                inputs=[
+                    {
+                        "key": "x",
+                        "definition": str(instance.metric_definition_id),
+                        "combine": "one",
+                    }
+                ],
+            ),
+        )
+        now = timezone.now()
+        for hour in (8, 18):
+            CustomMetricSample.objects.create(
+                metric_instance=instance,
+                folder=domain,
+                timestamp=(now - datetime.timedelta(days=20)).replace(
+                    hour=hour, minute=0
+                ),
+                value={"result": float(hour)},
+                source=CustomMetricSample.Source.DERIVED,
+            )
+        MetricInstance.objects.filter(id=reader.id).update(recompute_from=None)
+        with django_capture_on_commit_callbacks(execute=True) as callbacks:
+            assert downsample_derived_samples(now) == 1
+        assert callbacks == []
+        reader.refresh_from_db()
+        assert reader.recompute_from is None
 
 
 @pytest.mark.django_db
@@ -524,6 +578,31 @@ class TestEndpoints:
             self.reader(domain),
         )
         assert response.status_code == 403
+
+    def test_a_derived_sample_cannot_be_deleted_by_hand(self):
+        from metrology.views import CustomMetricSampleViewSet
+
+        domain = make_domain("Domain")
+        derived = make_instance(domain)
+        manual = make_instance(domain, make_definition("", {}))
+        view = CustomMetricSampleViewSet.as_view({"delete": "destroy"})
+        admin = self.admin()
+        for instance, expected in ((derived, 400), (manual, 204)):
+            sample = CustomMetricSample.objects.create(
+                metric_instance=instance,
+                folder=domain,
+                timestamp=timezone.now(),
+                value={"result": 1.0},
+            )
+            request = APIRequestFactory().delete(
+                f"/metrology/custom-metric-samples/{sample.id}/"
+            )
+            force_authenticate(request, user=admin)
+            response = view(request, pk=str(sample.id))
+            assert response.status_code == expected, response.data
+            assert CustomMetricSample.objects.filter(id=sample.id).exists() == (
+                expected == 400
+            )
 
     def test_refresh_queues_a_recomputation_for_those_who_may_change_it(self):
         domain = make_domain("Domain")

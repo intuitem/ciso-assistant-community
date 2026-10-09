@@ -314,6 +314,30 @@ STALENESS_THRESHOLDS = {
 }
 
 
+def parse_sample_value(value):
+    """A stored sample value as Python: a JSON string is parsed, anything
+    else is returned as is. None when the string is not JSON."""
+    if isinstance(value, str):
+        try:
+            return json.loads(value)
+        except json.JSONDecodeError, TypeError:
+            return None
+    return value
+
+
+def quantitative_result(value):
+    """The number a quantitative envelope carries, or None. The one decoder
+    for ``{"result": ...}``, whether the value comes from a model instance
+    or straight out of ``values_list``."""
+    envelope = parse_sample_value(value)
+    if not isinstance(envelope, dict):
+        return None
+    result = envelope.get("result")
+    if isinstance(result, bool) or not isinstance(result, (int, float)):
+        return None
+    return result
+
+
 class CustomMetricSample(AbstractBaseModel, FolderMixin):
     metric_instance = models.ForeignKey(
         MetricInstance,
@@ -381,13 +405,9 @@ class CustomMetricSample(AbstractBaseModel, FolderMixin):
         if not self.value:
             return None
 
-        if isinstance(self.value, str):
-            try:
-                value_dict = json.loads(self.value)
-            except json.JSONDecodeError, TypeError:
-                return None
-        else:
-            value_dict = self.value
+        value_dict = parse_sample_value(self.value)
+        if value_dict is None:
+            return None
 
         if not isinstance(value_dict, dict):
             logger.warning(
@@ -412,10 +432,7 @@ class CustomMetricSample(AbstractBaseModel, FolderMixin):
             return choice_index
 
         elif metric_definition.category == MetricDefinition.Category.QUANTITATIVE:
-            result = value_dict.get("result")
-            if isinstance(result, bool) or not isinstance(result, (int, float)):
-                return None
-            return result
+            return quantitative_result(value_dict)
 
         return None
 

@@ -4,7 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models import Count
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
-from rest_framework import status
+from rest_framework import status, serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -20,7 +20,10 @@ from metrology.models import (
     DashboardWidget,
 )
 from metrology.builtin_metrics import BUILTIN_METRICS, METRIC_TYPE_CHART_TYPES
-from metrology.serializers import BuiltinMetricSampleReadSerializer
+from metrology.serializers import (
+    DERIVED_SAMPLE_READ_ONLY,
+    BuiltinMetricSampleReadSerializer,
+)
 
 
 def _as_uuid(value):
@@ -277,6 +280,16 @@ class CustomMetricSampleViewSet(BaseModelViewSet):
     filterset_fields = ["folder", "metric_instance", "evidence_revision"]
     search_fields = ["observation"]
     ordering = ["-timestamp"]  # Most recent first
+
+    def perform_destroy(self, instance):
+        # Same refusal as the write serializer: a derived series is its
+        # formula's. A period deleted by hand would never be recomputed, and a
+        # deleted latest sample would change the next computation's `previous`.
+        if instance.metric_instance.is_derived:
+            raise serializers.ValidationError(
+                {"metric_instance": DERIVED_SAMPLE_READ_ONLY}
+            )
+        super().perform_destroy(instance)
 
     def get_queryset(self):
         # raw_value()/display_value() walk metric_instance -> metric_definition to

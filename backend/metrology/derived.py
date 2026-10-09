@@ -70,10 +70,6 @@ class DerivedMetricError(Exception):
 # ---------- the formula ----------
 
 
-def is_derived(definition) -> bool:
-    return bool((definition.expression or "").strip())
-
-
 def validate_formula(
     datasets, expression, inputs=None, definition=None
 ) -> list[tuple[str, str]]:
@@ -127,7 +123,7 @@ def validate_formula(
             errors.append(("derived_dataset_invalid", f"dataset '{name}': {message}"))
         for message in _grouping_errors(config):
             errors.append(("derived_dataset_invalid", f"dataset '{name}': {message}"))
-    if not isinstance(expression, str) or not expression.strip():
+    if not expression.strip():
         errors.append(
             ("derived_expression_missing", "A derived metric needs an expression")
         )
@@ -396,6 +392,14 @@ FREQUENCY_INTERVALS = {
     "yearly": datetime.timedelta(days=365),
 }
 DEFAULT_INTERVAL = datetime.timedelta(days=1)
+# How often the sweep runs (tasks.compute_due_derived_metrics). The stamp an
+# instance carries is written when its task runs, a little after the tick
+# that queued it, so a strict comparison would miss the next aligned tick
+# and slip every interval by one sweep. Half a sweep of slack: the tick
+# nearest the interval picks the instance up, and a duplicate queued seconds
+# after a run does not.
+SWEEP_INTERVAL = datetime.timedelta(minutes=15)
+DUE_TOLERANCE = SWEEP_INTERVAL / 2
 
 
 def interval_for(instance):
@@ -406,7 +410,7 @@ def is_due(instance, now=None):
     now = now or timezone.now()
     if instance.last_computed_at is None:
         return True
-    return now - instance.last_computed_at >= interval_for(instance)
+    return now - instance.last_computed_at >= interval_for(instance) - DUE_TOLERANCE
 
 
 def due_instances(now=None):
@@ -446,7 +450,7 @@ def compute_sample(instance, *, write=True, only_if_due=False, full=False):
     from .models import CustomMetricSample
 
     definition = instance.metric_definition
-    if not is_derived(definition):
+    if not definition.is_derived:
         raise DerivedMetricError("this metric has no formula")
     if definition.reads_metrics:
         from .series import compute_series
@@ -516,11 +520,24 @@ def compute_sample(instance, *, write=True, only_if_due=False, full=False):
 KEEP_EVERY_SAMPLE_DAYS = 7
 
 
+def delete_samples_silently(queryset):
+    """Delete sample rows without instantiating them or sending signals: the
+    sampler's own housekeeping, which either marks what it changes itself
+    (series._store) or changes nothing a reader sees (downsampling). The
+    signal path would load every row and queue a mark per row."""
+    return queryset._raw_delete(queryset.db)
+
+
 def downsample_derived_samples(now=None):
     """Older than KEEP_EVERY_SAMPLE_DAYS, keep one derived sample per instance
-    per day (the last one). Hourly ticks across many instances add up, and a
-    trend older than a week does not need the intraday points. Returns the
-    number of samples deleted."""
+    per UTC day (the last one). Hourly ticks across many instances add up, and
+    a trend older than a week does not need the intraday points. Returns the
+    number of samples deleted.
+
+    Days are UTC like the series periods, so the sample kept for a day is the
+    one a reader's day-end cutoff finds: a formula reading this instance sees
+    the same value before and after, and nothing is marked for recompute.
+    Sub-daily readers never reach back this far (series.evaluate_series)."""
     from .models import CustomMetricSample
 
     now = now or timezone.now()
@@ -536,14 +553,14 @@ def downsample_derived_samples(now=None):
     last_key = None
     last_id = None
     for sample_id, instance_id, stamp in old.iterator(chunk_size=2000):
-        key = (instance_id, timezone.localtime(stamp).date())
+        key = (instance_id, stamp.astimezone(datetime.timezone.utc).date())
         if key == last_key:
             # The previous one of the same day is superseded by this one.
             doomed.append(last_id)
         last_key, last_id = key, sample_id
     deleted = 0
     for start in range(0, len(doomed), 500):
-        deleted += CustomMetricSample.objects.filter(
-            id__in=doomed[start : start + 500]
-        ).delete()[0]
+        deleted += delete_samples_silently(
+            CustomMetricSample.objects.filter(id__in=doomed[start : start + 500])
+        )
     return deleted

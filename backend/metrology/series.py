@@ -33,6 +33,7 @@ from .derived import (
     LOCK_TTL_SECONDS,
     DerivedMetricError,
     _lock_key,
+    delete_samples_silently,
     is_due,
     shape_value,
 )
@@ -275,20 +276,11 @@ def resolve_inputs(inputs, folder):
 
 
 def _number(value):
-    """A quantitative sample's value, or None."""
-    if isinstance(value, str):
-        import json
+    """A quantitative sample's value, or None: the model's own decoder, on
+    the raw column value ``values_list`` hands out."""
+    from .models import quantitative_result
 
-        try:
-            value = json.loads(value)
-        except ValueError:
-            return None
-    if not isinstance(value, dict):
-        return None
-    result = value.get("result")
-    if isinstance(result, bool) or not isinstance(result, (int, float)):
-        return None
-    return result
+    return quantitative_result(value)
 
 
 class _AsOf:
@@ -364,25 +356,13 @@ def evaluate_series(
     keeps. ``shape`` carries the output's category and levels. ``previous``
     is the value of the period before the first one computed. Writes
     nothing. Raises DerivedMetricError naming the input or the period."""
-    from .models import STALENESS_THRESHOLDS, CustomMetricSample
+    from .models import STALENESS_THRESHOLDS
 
     now = timezone.now()
     evaluation = SeriesEvaluation(resolved=resolve_inputs(inputs, folder))
     instance_ids = [
         instance.id for item in evaluation.resolved for instance in item.instances
     ]
-    points = defaultdict(list)
-    for instance_id, stamp, value in (
-        CustomMetricSample.objects.filter(
-            metric_instance_id__in=instance_ids, timestamp__lte=now
-        )
-        .order_by("timestamp")
-        .values_list("metric_instance_id", "timestamp", "value")
-        .iterator(chunk_size=2000)
-    ):
-        number = _number(value)
-        if number is not None:
-            points[instance_id].append((stamp, number))
 
     last = period_start(now, frequency)
     floor = shift_period(last, frequency, -(MAX_PERIODS - 1))
@@ -392,11 +372,18 @@ def evaluate_series(
     if since is not None and since != FULL:
         floor = max(floor, period_start(since, frequency))
     evaluation.start = floor
+
+    points = defaultdict(list)
+    for instance_id, stamp, value in _input_points(instance_ids, floor, now):
+        number = _number(value)
+        if number is not None:
+            points[instance_id].append((stamp, number))
     stamps = [series[0][0] for series in points.values() if series]
     if not stamps:
         return evaluation
     # Computing starts at the first input sample; ``evaluation.start`` stays
-    # at the floor so periods before it lose any stale sample.
+    # at the floor so periods before it lose any stale sample. A sample
+    # before the floor, when one exists, pulls the start down to the floor.
     start = max(floor, period_start(min(stamps), frequency))
 
     readers = {
@@ -448,6 +435,39 @@ def evaluate_series(
         evaluation.periods.append(period)
         current = end
     return evaluation
+
+
+def _input_points(instance_ids, floor, now):
+    """The samples the periods from ``floor`` to ``now`` can read, in time
+    order: every sample inside that window, plus each instance's last one
+    before it, which is what the first periods see. A recompute of the last
+    period or two must not stream years of history to find that one row."""
+    from django.db.models import OuterRef, Q, Subquery
+
+    from .models import CustomMetricSample, MetricInstance
+
+    last_before = (
+        CustomMetricSample.objects.filter(
+            metric_instance=OuterRef("pk"), timestamp__lt=floor
+        )
+        .order_by("-timestamp")
+        .values("id")[:1]
+    )
+    carried = list(
+        MetricInstance.objects.filter(id__in=instance_ids)
+        .annotate(last_before=Subquery(last_before))
+        .exclude(last_before__isnull=True)
+        .values_list("last_before", flat=True)
+    )
+    return (
+        CustomMetricSample.objects.filter(
+            metric_instance_id__in=instance_ids, timestamp__lte=now
+        )
+        .filter(Q(timestamp__gte=floor) | Q(id__in=carried))
+        .order_by("timestamp")
+        .values_list("metric_instance_id", "timestamp", "value")
+        .iterator(chunk_size=2000)
+    )
 
 
 # ---------- the sampler ----------
@@ -580,9 +600,13 @@ def _store(instance, evaluation):
     changed.extend(existing)
     with transaction.atomic():
         if existing:
-            CustomMetricSample.objects.filter(
-                id__in=[sample.id for sample in existing.values()]
-            ).delete()
+            # Signal-free like the bulk writes below: the caller marks the
+            # readers once, from the earliest changed period.
+            delete_samples_silently(
+                CustomMetricSample.objects.filter(
+                    id__in=[sample.id for sample in existing.values()]
+                )
+            )
         CustomMetricSample.objects.bulk_create(to_create, batch_size=500)
         CustomMetricSample.objects.bulk_update(
             to_update, ["value", "timestamp", "updated_at"], batch_size=500
@@ -638,6 +662,22 @@ def mark_dependents(definition, folder, moment):
     )
     if instance_ids:
         mark(instance_ids, moment)
+
+
+def input_closure(definitions):
+    """The ids of every definition the given formulas read, at any depth."""
+    seen = set()
+    stack = list(definitions)
+    while stack:
+        definition = stack.pop()
+        for spec in definition.inputs or []:
+            if not isinstance(spec, dict):
+                continue
+            target = resolve_definition(spec.get("definition"))
+            if target is not None and target.id not in seen:
+                seen.add(target.id)
+                stack.append(target)
+    return seen
 
 
 def depth(definition, seen=None):

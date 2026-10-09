@@ -402,6 +402,31 @@ class TestMarks:
         out.refresh_from_db()
         assert out.recompute_from is None
 
+    def test_a_new_input_frequency_marks_the_whole_series(
+        self, frozen, django_capture_on_commit_callbacks
+    ):
+        """The frequency sets how old a value may be when a reader aligns on
+        it, so every period may differ."""
+        _domain, _base, source, out = self.setup_series()
+        with django_capture_on_commit_callbacks(execute=True):
+            source.collection_frequency = "weekly"
+            source.save()
+        out.refresh_from_db()
+        assert out.recompute_from == FULL
+
+    def test_a_deleted_input_instance_marks_once(
+        self, frozen, django_capture_on_commit_callbacks
+    ):
+        """Its samples go first and would each queue a mark of their own;
+        the instance's single FULL mark is the one that counts."""
+        _domain, _base, source, out = self.setup_series()
+        sample(source, 3, at(2026, 4, 2))
+        with django_capture_on_commit_callbacks(execute=True) as callbacks:
+            source.delete()
+        assert len(callbacks) == 1
+        out.refresh_from_db()
+        assert out.recompute_from == FULL
+
     def test_editing_the_formula_marks_every_instance(
         self, frozen, django_capture_on_commit_callbacks
     ):
@@ -446,6 +471,44 @@ class TestComposition:
         compute_due_derived_metrics.call_local()
         assert stored(middle) == {"2026-05-01": 8}
         assert stored(top) == {"2026-05-01": 9}
+
+    def test_the_sweep_computes_a_dataset_input_before_its_reader(
+        self, frozen, monkeypatch
+    ):
+        """A dataset formula is queued on its own, unless a due metric formula
+        reads it: then it runs first, in the sweep, so the reader does not
+        see the previous tick's value."""
+        from core.models import AppliedControl
+        from metrology import tasks
+
+        queued = []
+        monkeypatch.setattr(
+            tasks, "compute_derived_metric_task", lambda *a, **k: queued.append(a)
+        )
+        domain = make_domain("Domain")
+        AppliedControl.objects.create(name="AC", folder=domain, status="active")
+        counting = make_definition(
+            "Controls",
+            datasets={
+                "c": {"model": "applied_control", "aggregates": [{"fn": "count"}]}
+            },
+            expression="c.count",
+        )
+        unrelated = make_definition(
+            "Other",
+            datasets={
+                "c": {"model": "applied_control", "aggregates": [{"fn": "count"}]}
+            },
+            expression="c.count * 10",
+        )
+        count = make_instance(domain, counting)
+        other = make_instance(domain, unrelated)
+        reader = make_instance(domain, formula("x + 1", ("x", counting, "one")))
+        tasks.compute_due_derived_metrics.call_local()
+        assert count.raw_value() == 1
+        assert stored(reader) == {"2026-05-01": 2}
+        # The one nobody reads went to the queue as before.
+        assert queued == [(str(other.id),)]
 
     def test_a_reader_is_marked_when_its_input_formula_changes(self, frozen):
         domain = make_domain("Domain")
