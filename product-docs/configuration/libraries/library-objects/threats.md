@@ -65,7 +65,7 @@ The tables below show an example of a Threats object.
 | Property | Value |
 | --- | --- |
 | `type` | `threats` |
-| `base_urn` | `urn:intuitem:risk:threat:sample-framework.1` |
+| `base_urn` | `urn:intuitem:risk:threat:sample-framework` |
 
 ### `thrt_content`
 
@@ -86,11 +86,11 @@ This section is mainly for advanced users and debugging. The excerpt below shows
 ```yaml
 objects:
   threats:
-  - urn: urn:intuitem:risk:threat:sample-framework.1:t1
+  - urn: urn:intuitem:risk:threat:sample-framework:t1
     ref_id: T1
     name: Unauthorized access
     description: Someone gains access to a protected account
-  - urn: urn:intuitem:risk:threat:sample-framework.1:t2
+  - urn: urn:intuitem:risk:threat:sample-framework:t2
     ref_id: T2
     name: Data loss
     description: Important data becomes unavailable

@@ -24,7 +24,7 @@ An asterisk (<mark style="color:$danger;">*</mark>) marks a required property. (
 | `copyright`<mark style="color:$danger;">*</mark> | The library copyright notice | Text |
 | `provider`<mark style="color:$danger;">*</mark> | The organization that provides the library's content | Text |
 | `packager`<mark style="color:$danger;">*</mark> | The person or organization that packaged the library | Text |
-| `labels` | Search labels for the library. The converter and CISO rewrites them in uppercase. | Separate labels with commas or line breaks. Do not include spaces within a label. |
+| `labels` | Search labels for the library. The Excel converter rewrites them in uppercase. | Separate labels with commas or line breaks. Use letters, numbers, `_`, or `-` only, up to 36 characters per label. |
 | `dependencies` | URNs of other libraries this library depends on. Most library authors can leave this out. | Library URNs separated by commas or line breaks. Use only for specific cases. |
 
 See [Translate library content](../translations.md) for how to add translations.
@@ -50,16 +50,16 @@ The table below shows an example of a `library_meta` sheet for a security operat
 | Property | Value |
 | --- | --- |
 | `type` | `library` |
-| `urn` | `urn:intuitem:risk:library:security-operations.1` |
+| `urn` | `urn:intuitem:risk:library:security-operations` |
 | `version` | `1` |
 | `locale` | `en` |
-| `ref_id` | `security-operations.1` |
+| `ref_id` | `security-operations` |
 | `name` | Security Operations Library |
 | `description` | A framework and supporting content for assessing access management and incident response. |
 | `copyright` | © 2026 intuitem |
 | `provider` | intuitem |
 | `packager` | intuitem |
-| `labels` | `security-operations, access_management, incident.response, 24x7-monitoring` |
+| `labels` | `security-operations, access_management, incident-response, 24x7-monitoring` |
 | `name[fr]` | Bibliothèque des opérations de sécurité |
 | `description[fr]` | Un référentiel et des contenus complémentaires pour évaluer la gestion des accès et la réponse aux incidents. |
 
@@ -71,9 +71,9 @@ This section is mainly for advanced users and debugging. The excerpt below shows
 <summary>Show YAML</summary>
 
 ```yaml
-urn: urn:intuitem:risk:library:security-operations.1
+urn: urn:intuitem:risk:library:security-operations
 locale: en
-ref_id: security-operations.1
+ref_id: security-operations
 name: Security Operations Library
 description: A framework and supporting content for assessing access management and incident response.
 copyright: © 2026 intuitem
@@ -83,7 +83,7 @@ packager: intuitem
 labels:
   - SECURITY-OPERATIONS
   - ACCESS_MANAGEMENT
-  - INCIDENT.RESPONSE
+  - INCIDENT-RESPONSE
   - 24X7-MONITORING
 translations:
   fr:

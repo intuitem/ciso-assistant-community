@@ -35,7 +35,7 @@ The content sheet contains one row per probability, impact, or risk level. Add o
 | Field | Meaning | Format / allowed values |
 | --- | --- | --- |
 | `type`<mark style="color:$danger;">*</mark> | Kind of level defined by the row | `probability`, `impact`, or `risk` |
-| `id`<mark style="color:$danger;">*</mark> | Numeric identifier of the level within its type | Non-negative integer |
+| `id`<mark style="color:$danger;">*</mark> | Position of the level within its type, from lowest to highest | Consecutive integers starting at `0` (`0`, `1`, `2`, …), with no gaps |
 | `color`<mark style="color:$danger;">*</mark> | Color shown for this level | Set the Excel cell's fill color if needed. The cell text can stay empty |
 | `abbreviation`<mark style="color:$danger;">*</mark> <mark style="color:$info;">T</mark> | Short label for the level | Text |
 | `name`<mark style="color:$danger;">*</mark> <mark style="color:$info;">T</mark> | Name of the level | Text |
@@ -43,6 +43,10 @@ The content sheet contains one row per probability, impact, or risk level. Add o
 | `grid`<mark style="color:$danger;">*</mark> | Risk level for one probability and impact combination | On probability rows, a `risk` level `id`. Repeat the `grid` column once per impact level |
 
 The first `grid` column corresponds to the lowest impact ID, the next to the next impact ID, and so on. The converter orders probabilities and impacts by their IDs.
+
+{% hint style="warning" %}
+Number the levels of each type from `0`, with no gaps. CISO Assistant reads a `grid` value as a position in the list of risk levels: `0` is the first level, `1` the second, and so on. A matrix numbered from `1` imports without errors but displays the wrong risk levels.
+{% endhint %}
 
 See [Translate library content](../translations.md) for how to add translations.
 
@@ -54,7 +58,7 @@ A Risk Matrix is an independent library object.
 
 ### When creating a library
 
-- List the probability and impact IDs before filling the grid, so every intersection points to a defined risk ID.
+- List the probability, impact, and risk IDs before filling the grid, so every intersection points to a defined risk ID.
 - Set colors through the Excel cell fills, not by typing a color code into the `color` column.
 
 ### When updating a library
@@ -70,7 +74,7 @@ The tables below show an example of a 3x3 Risk Matrix. In Excel, each `grid` hea
 | Property | Value |
 | --- | --- |
 | `type` | `risk_matrix` |
-| `urn` | `urn:intuitem:risk:matrix:sample-matrix.1` |
+| `urn` | `urn:intuitem:risk:matrix:sample-matrix` |
 | `ref_id` | `SAMPLE-MATRIX.1` |
 | `name` | Sample risk matrix |
 | `description` | Probability and impact combined into a risk level |
@@ -101,7 +105,7 @@ This section is mainly for advanced users and debugging. The excerpt below shows
 ```yaml
 objects:
   risk_matrix:
-  - urn: urn:intuitem:risk:matrix:sample-matrix.1
+  - urn: urn:intuitem:risk:matrix:sample-matrix
     ref_id: SAMPLE-MATRIX.1
     name: Sample risk matrix
     description: Probability and impact combined into a risk level

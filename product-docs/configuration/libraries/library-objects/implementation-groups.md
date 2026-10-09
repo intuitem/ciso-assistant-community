@@ -4,7 +4,7 @@ description: Define groups for organizing a framework's requirements
 
 # Implementation Groups
 
-Implementation Groups let you divide a framework's elements into as many groups as needed. A group can represent a topic, a level, a category, or another useful way to organize the framework. These logical groups help users filter and display requirements by theme or another criterion, so they can focus on a relevant subset instead of seeing every requirement at once. An element can belong to one or more groups.
+Implementation Groups let you divide a framework's elements into as many groups as needed. A group can represent a topic, a level, a category, or another useful way to organize the framework. When creating or editing an audit, users can select one or more groups to limit the audit to a relevant subset of requirements. Requirements outside the selected groups are left out of the audit's progress and score. An element can belong to one or more groups.
 
 Implementation Groups are optional and are only useful when linked to a framework.
 
@@ -38,12 +38,13 @@ The content sheet contains one row per implementation group.
 | `ref_id`<mark style="color:$danger;">*</mark> | Unique identifier used to assign the group to framework requirements | Letters, numbers, `.`, `_`, or `-` only; no spaces. Keep it consistent with the references in the framework. |
 | `name`<mark style="color:$danger;">*</mark> <mark style="color:$info;">T</mark> | Name shown to users when selecting Implementation Groups | Text |
 | `description` <mark style="color:$info;">T</mark> | Optional explanation of what the group includes | Text |
-| `default_selected` | Rarely used. Sets the initial group selection for a questionnaire with dynamic questions. | Enter `x` for a group that should be selected when the audit is created. Otherwise, leave the cell empty. |
+| `default_selected` | Groups preselected when an audit is created. Users can change the selection. | Enter `x` for a group that should be selected when the audit is created. Otherwise, leave the cell empty. |
+| `target_score` | Target score proposed for new audits that select this group, instead of the framework's. When several groups are selected, the highest applies. | Number within the framework's score scale. Requires a `target_score` in the framework's metadata sheet. |
 
 See [Translate library content](../translations.md) for how to add translations.
 
 {% hint style="info" %}
-Use `default_selected` only when a questionnaire has dynamic questions. It lets you preselect an initial group of requirements. Answers can select additional groups through `select_implementation_groups`. For frameworks without dynamic questions, leave this column empty.
+Groups marked with `default_selected` are selected when an audit is created, so the audit starts limited to their requirements. Use it when a framework has a usual starting scope, such as a baseline level, or in a questionnaire with dynamic questions, where answers can then select more groups through `select_implementation_groups`. Otherwise, leave the column empty so new audits include every requirement.
 {% endhint %}
 
 ## Relationships with other objects
@@ -96,7 +97,7 @@ This section is mainly for advanced users and debugging. The excerpt below shows
 ```yaml
 objects:
   framework:
-    urn: urn:intuitem:risk:framework:example-framework.1
+    urn: urn:intuitem:risk:framework:example-framework
     # ...
     implementation_groups_definition:
     - ref_id: access
@@ -107,14 +108,14 @@ objects:
       description: Requirements about reporting and handling incidents
     # ...
     requirement_nodes:
-    - urn: urn:intuitem:risk:req_node:example-framework.1:req-1
+    - urn: urn:intuitem:risk:req_node:example-framework:req-1
       assessable: true
       depth: 1
       ref_id: REQ-1
       # ...
       implementation_groups:
       - access
-    - urn: urn:intuitem:risk:req_node:example-framework.1:req-2
+    - urn: urn:intuitem:risk:req_node:example-framework:req-2
       assessable: true
       depth: 1
       ref_id: REQ-2

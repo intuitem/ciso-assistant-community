@@ -68,7 +68,7 @@ The tables below show an example of a Reference Controls object.
 | Property | Value |
 | --- | --- |
 | `type` | `reference_controls` |
-| `base_urn` | `urn:intuitem:risk:function:sample-framework.1` |
+| `base_urn` | `urn:intuitem:risk:function:sample-framework` |
 
 ### `ref_ctrl_content`
 
@@ -89,13 +89,13 @@ This section is mainly for advanced users and debugging. The excerpt below shows
 ```yaml
 objects:
   reference_controls:
-  - urn: urn:intuitem:risk:function:sample-framework.1:rc1
+  - urn: urn:intuitem:risk:function:sample-framework:rc1
     ref_id: RC1
     name: Review access rights
     category: process
     csf_function: protect
     description: Review user access on a regular basis
-  - urn: urn:intuitem:risk:function:sample-framework.1:rc2
+  - urn: urn:intuitem:risk:function:sample-framework:rc2
     ref_id: RC2
     name: Test backups
     category: procedure

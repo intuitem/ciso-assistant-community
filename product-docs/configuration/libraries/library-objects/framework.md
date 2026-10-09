@@ -31,12 +31,18 @@ The metadata sheet is a key-value table with one property per row.
 | `implementation_groups_definition` | Links an [Implementation Groups](implementation-groups.md) object | The `name` value in the Implementation Groups object's metadata sheet |
 | `answers_definition` | Links an [Answers](answers.md) object | The `name` value in the Answers object's metadata sheet |
 | `scores_definition` | Links a [Scores](scores.md) object | The `name` value in the Scores object's metadata sheet |
-| `min_score` | Lowest score available when assessing requirements | Integer |
-| `max_score` | Highest score available when assessing requirements | Integer |
+| `min_score` | Lowest score available when assessing requirements | Integer, `0` or more, lower than `max_score`. Set both or neither; without them the scale is `0` to `100`. |
+| `max_score` | Highest score available when assessing requirements | Integer, higher than `min_score` |
+| `annotation` | Additional information about the framework | Text |
+| `score_calculation_method` | Calculation method proposed for new audits | `average` (default), `sum`, or `average_of_averages` |
+| `target_score` | Target score proposed for new audits | Number between `min_score` and `max_score` |
+| `anchor_na_to_target` | Counts not applicable requirements as the target score in new audits | Enter `x` to enable. Requires `target_score`. |
+| `score_scale_locked` | Keeps the framework's score scale in its audits, when the standard defines it | Enter `x` to enable |
+| `field_visibility` | Initial field visibility for auditors and respondents in new audits | JSON object, e.g. `{"score": {"auditor": "edit", "respondent": "edit"}}` |
 
 For example, if `implementation_groups_definition` is `imp_grp`, the framework uses the sheets `imp_grp_meta` and `imp_grp_content`.
 
-The Framework's `urn` identifies the Framework itself. By default, a section or requirement with a `ref_id` gets its own URN by appending the lowercased `ref_id` to `base_urn`. For example, `ACCESS.1` with `base_urn` `urn:intuitem:risk:req_node:sample-framework.1` becomes `urn:intuitem:risk:req_node:sample-framework.1:access.1`.
+The Framework's `urn` identifies the Framework itself. By default, a section or requirement with a `ref_id` gets its own URN by appending the lowercased `ref_id` to `base_urn`. For example, `ACCESS.1` with `base_urn` `urn:intuitem:risk:req_node:sample-framework` becomes `urn:intuitem:risk:req_node:sample-framework:access.1`.
 
 ### `<object>_content`
 
@@ -47,24 +53,25 @@ The content sheet contains one row per section or requirement. Rows follow the o
 | `assessable`<mark style="color:$danger;">*</mark> | Whether users assess this element | Enter `x` for an assessable requirement, leave empty for a heading |
 | `depth`<mark style="color:$danger;">*</mark> | Level in the hierarchy | Positive integer. Start with `1` and do not skip any levels (except when returning to a lower level). |
 | `ref_id` | Identifier used to recognize the element| Letters, numbers, `.`, `_`, or `-` only; no spaces. Keep it stable across versions. |
+| `node_id` | Rarely used. Replaces the end of the element's URN | Lowercase letters, numbers, `.`, `_`, or `-`. Use it to keep an existing URN when you change a `ref_id`. |
 | `name` <mark style="color:$info;">T</mark> | Short title | Text |
 | `description` <mark style="color:$info;">T</mark> | Requirement text or explanation | Text |
 | `annotation` <mark style="color:$info;">T</mark> | Additional guidance | Text |
 | `typical_evidence` <mark style="color:$info;">T</mark> | Examples of evidence to look for | Text |
 | `importance` | Priority of the requirement | `mandatory`, `recommended`, or `nice_to_have` |
 | `weight` | Relative weight of the requirement | Positive integer |
-| `min_score` | Lowest score for a specific requirement, overriding the framework value | Integer |
-| `max_score` | Highest score for a specific requirement, overriding the framework value | Integer |
+| `min_score` | Lowest score for a specific requirement, overriding the framework value | Integer, `0` or more, lower than the row's `max_score`. Fill both columns or neither. |
+| `max_score` | Highest score for a specific requirement, overriding the framework value | Integer, higher than the row's `min_score` |
 | `scores_definition` | Alternative score scale for this requirement | Prefix of a [Scores](scores.md) sheet pair |
-| `implementation_groups` | Implementation Groups used to filter the requirement | One or more [Implementation Groups](implementation-groups.md) `ref_id` values, separated by commas |
+| `implementation_groups` | Implementation Groups the requirement belongs to | One or more [Implementation Groups](implementation-groups.md) `ref_id` values, separated by commas |
 | `questions` <mark style="color:$info;">T</mark> | Questions asked when assessing a requirement | One question per line in a cell |
 | `answer` | Answer set used for each question | One [Answers](answers.md) `id` for all questions, or one `id` per question on separate lines |
 | `depends_on` | Choice that makes a question appear | `question_number:choice_number`, with multiple choice numbers separated by commas; `/` for none |
 | `condition` | How the choices in `depends_on` are evaluated | `any` or `all`; `/` when there is no dependency |
-| `threats` | Threats associated with a requirement |  Shortened Threat URN references using [URN Prefixes](urn-prefixes.md) |
-| `reference_controls` | Reference Controls associated with a requirement | Shortened Reference Controls URN references using [URN Prefixes](urn-prefixes.md) |
+| `threats` | Threats associated with a requirement | `prefix_id:ref_id` references using [URN Prefixes](urn-prefixes.md), or full URNs. Separate several with commas or line breaks. |
+| `reference_controls` | Reference Controls associated with a requirement | `prefix_id:ref_id` references using [URN Prefixes](urn-prefixes.md), or full URNs. Separate several with commas or line breaks. |
 
-Use at least one of `ref_id`, `name`, or `description` for each row. If you use `ref_id`, it is recommended that you choose one that remains stable, because the converter uses it to generate the element's URN.
+Use at least one of `ref_id`, `name`, or `description` for each row. The converter builds each row's URN from `base_urn` and its `ref_id`, lowercased, with spaces turned into `-`. A row without `ref_id` gets a URN based on its position under its parent, so inserting, removing, or moving such rows changes their URNs. Keep `ref_id` values stable across versions.
 
 See [Translate library content](../translations.md) for how to add translations.
 
@@ -88,6 +95,7 @@ A Framework can use [Implementation Groups](implementation-groups.md), [Answers]
 ### When updating a library
 
 - Keep the framework `urn`, `base_urn`, and existing requirement `ref_id` values when possible.
+- To change a `ref_id` without changing the requirement's URN, set `node_id` to the previous URN suffix (for example `access.1`).
 
 ## Example
 
@@ -98,8 +106,8 @@ The tables below show an example of a Framework with one section and one assessa
 | Property | Value |
 | --- | --- |
 | `type` | `framework` |
-| `urn` | `urn:intuitem:risk:framework:sample-framework.1` |
-| `base_urn` | `urn:intuitem:risk:req_node:sample-framework.1` |
+| `urn` | `urn:intuitem:risk:framework:sample-framework` |
+| `base_urn` | `urn:intuitem:risk:req_node:sample-framework` |
 | `ref_id` | `SAMPLE.1` |
 | `name` | Sample framework |
 | `description` | A short set of access management requirements |
@@ -123,20 +131,20 @@ This section is mainly for advanced users and debugging. The excerpt below shows
 ```yaml
 objects:
   framework:
-    urn: urn:intuitem:risk:framework:sample-framework.1
+    urn: urn:intuitem:risk:framework:sample-framework
     ref_id: SAMPLE.1
     name: Sample framework
     description: A short set of access management requirements
     requirement_nodes:
-    - urn: urn:intuitem:risk:req_node:sample-framework.1:access
+    - urn: urn:intuitem:risk:req_node:sample-framework:access
       assessable: false
       depth: 1
       ref_id: ACCESS
       name: Access management
-    - urn: urn:intuitem:risk:req_node:sample-framework.1:access.1
+    - urn: urn:intuitem:risk:req_node:sample-framework:access.1
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:sample-framework.1:access
+      parent_urn: urn:intuitem:risk:req_node:sample-framework:access
       ref_id: ACCESS.1
       name: Review access rights
       description: Review user access regularly

@@ -45,7 +45,8 @@ See [Translate library content](../translations.md) for how to add translations.
 A Scores object can be linked to a [Framework](framework.md) in two places:
 
 1. In the framework's metadata sheet, set `scores_definition` to the Scores object prefix (e.g., `scr`) to define the default scale.
-2. Less commonly, in the framework's content sheet, use `scores_definition` to assign a separate Scores object to a requirement that needs its own scoring scale.
+2. Less commonly, in the framework's content sheet, use `scores_definition` to assign a separate Scores object to a requirement that needs its own scoring scale. The requirement's `min_score` and `max_score` must match that scale's range, and the scale must define a score for every value in it.
+
 A library can therefore contain multiple Scores objects.
 
 Answer choices in [Answers](answers.md) can contribute points through `add_score`.
@@ -93,7 +94,7 @@ This section is mainly for advanced users and debugging. The excerpt below shows
 ```yaml
 objects:
   framework:
-    urn: urn:intuitem:risk:framework:sample-framework.1
+    urn: urn:intuitem:risk:framework:sample-framework
     # ...
     min_score: 0
     max_score: 2

@@ -75,13 +75,13 @@ The tables below show an illustrative Mapping from a sample Framework to ISO/IEC
 | Property | Value |
 | --- | --- |
 | `type` | `requirement_mapping_set` |
-| `urn` | `urn:intuitem:risk:req_mapping_set:sample-framework.1-to-iso27001-2022` |
-| `ref_id` | `sample-framework.1-to-iso27001-2022` |
+| `urn` | `urn:intuitem:risk:req_mapping_set:sample-framework-to-iso27001-2022` |
+| `ref_id` | `sample-framework-to-iso27001-2022` |
 | `name` | Sample framework to ISO/IEC 27001:2022 |
 | `description` | Links selected access management requirements to ISO/IEC 27001:2022 |
-| `source_framework_urn` | `urn:intuitem:risk:framework:sample-framework.1` |
+| `source_framework_urn` | `urn:intuitem:risk:framework:sample-framework` |
 | `target_framework_urn` | `urn:intuitem:risk:framework:iso27001-2022` |
-| `source_node_base_urn` | `urn:intuitem:risk:req_node:sample-framework.1` |
+| `source_node_base_urn` | `urn:intuitem:risk:req_node:sample-framework` |
 | `target_node_base_urn` | `urn:intuitem:risk:req_node:iso27001-2022` |
 
 ### `mappings_content`
@@ -104,40 +104,40 @@ This section is mainly for advanced users and debugging. The excerpt below shows
 ```yaml
 objects:
   requirement_mapping_sets:
-  - urn: urn:intuitem:risk:req_mapping_set:sample-framework.1-to-iso27001-2022
-    ref_id: sample-framework.1-to-iso27001-2022
+  - urn: urn:intuitem:risk:req_mapping_set:sample-framework-to-iso27001-2022
+    ref_id: sample-framework-to-iso27001-2022
     name: Sample framework to ISO/IEC 27001:2022
     description: Links selected access management requirements to ISO/IEC 27001:2022
-    source_framework_urn: urn:intuitem:risk:framework:sample-framework.1
+    source_framework_urn: urn:intuitem:risk:framework:sample-framework
     target_framework_urn: urn:intuitem:risk:framework:iso27001-2022
     requirement_mappings:
-    - source_requirement_urn: urn:intuitem:risk:req_node:sample-framework.1:access.1
+    - source_requirement_urn: urn:intuitem:risk:req_node:sample-framework:access.1
       target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
       relationship: subset
       rationale: semantic
-    - source_requirement_urn: urn:intuitem:risk:req_node:sample-framework.1:identity.1
+    - source_requirement_urn: urn:intuitem:risk:req_node:sample-framework:identity.1
       target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.16
       relationship: intersect
-    - source_requirement_urn: urn:intuitem:risk:req_node:sample-framework.1:auth.1
+    - source_requirement_urn: urn:intuitem:risk:req_node:sample-framework:auth.1
       target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
       relationship: subset
       rationale: semantic
-  - urn: urn:intuitem:risk:req_mapping_set:sample-framework.1-to-iso27001-2022-revert
-    ref_id: sample-framework.1-to-iso27001-2022-revert
+  - urn: urn:intuitem:risk:req_mapping_set:sample-framework-to-iso27001-2022-revert
+    ref_id: sample-framework-to-iso27001-2022-revert
     name: Sample framework to ISO/IEC 27001:2022
     description: Links selected access management requirements to ISO/IEC 27001:2022
     source_framework_urn: urn:intuitem:risk:framework:iso27001-2022
-    target_framework_urn: urn:intuitem:risk:framework:sample-framework.1
+    target_framework_urn: urn:intuitem:risk:framework:sample-framework
     requirement_mappings:
     - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.18
-      target_requirement_urn: urn:intuitem:risk:req_node:sample-framework.1:access.1
+      target_requirement_urn: urn:intuitem:risk:req_node:sample-framework:access.1
       relationship: superset
       rationale: semantic
     - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.16
-      target_requirement_urn: urn:intuitem:risk:req_node:sample-framework.1:identity.1
+      target_requirement_urn: urn:intuitem:risk:req_node:sample-framework:identity.1
       relationship: intersect
     - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.5.17
-      target_requirement_urn: urn:intuitem:risk:req_node:sample-framework.1:auth.1
+      target_requirement_urn: urn:intuitem:risk:req_node:sample-framework:auth.1
       relationship: superset
       rationale: semantic
 ```

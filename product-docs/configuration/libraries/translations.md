@@ -12,6 +12,8 @@ Keep the original field for the library's primary language, which is defined in 
 
 In a `_meta` sheet, add a new key and its translated value on a separate row. In a `_content` sheet, add a new column and fill it for the rows you want to translate.
 
+For cells with one value per line, such as `questions` in a Framework or `question_choices` and `description` in Answers, the translated cell must have the same number of lines, in the same order.
+
 {% hint style="warning" %}
 Only fields marked (<mark style="color:$info;">T</mark>) support translations. If you translate a key or column that does not support translations, CISO Assistant will not display the translated value, even if you add it manually to the final YAML.
 {% endhint %}

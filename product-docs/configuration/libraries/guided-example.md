@@ -79,6 +79,10 @@ Here is how we chose the values:
 - `urn` follows `urn:<packager>:risk:library:<identifier>`. Here, `intuitem` is the packager, `library` identifies the object type, and the final part is a lowercase identifier based on the title. It has no version suffix, so the same URN can identify later updates to this library.
 
 {% hint style="warning" %}
+We use `intuitem` because intuitem publishes this example. For your own libraries, use your organization's name in every URN (for example `urn:acme:risk:library:…`). Reusing the `intuitem` namespace can collide with a built-in library: CISO Assistant would then reject your upload as outdated, or offer it as an update that replaces the built-in content in existing audits.
+{% endhint %}
+
+{% hint style="warning" %}
 The `v1` in `ref_id` marks this edition of the standard, while `library_meta.version` tracks updates to the library. For a correction or minor addition, keep the library and Framework URNs and the identifiers of existing requirements, then increase `library_meta.version` from `1` to `2`. If a new edition substantially changes the Framework's structure or requirements, create a separate library with a distinct URN and new Framework and requirement URNs. Replacing the existing structure under the same identifiers can break existing audits.
 {% endhint %}
 
@@ -275,7 +279,7 @@ In our case, when an auditor will assess a requirement such as `OH.2.2`, they ca
 
 ## 7. Add Review Themes as Implementation Groups
 
-The PDF uses **Review Themes** to help inspectors focus on a topic. They are optional filters, not requirements or levels of compliance. A requirement can have several themes or none. This is why we can represent them as [Implementation Groups](library-objects/implementation-groups.md). CISO Assistant can use these groups to show the requirements relevant to a selected topic without changing the framework's structure.
+The PDF uses **Review Themes** to help inspectors focus on a topic. They are optional filters, not requirements or levels of compliance. A requirement can have several themes or none. This is why we can represent them as [Implementation Groups](library-objects/implementation-groups.md). When you create or edit an audit, you can select one or more groups to limit the audit to the requirements of those topics.
 
 ### 7.1 Create the Implementation Groups sheets
 
@@ -332,7 +336,11 @@ The table below lists all assessable requirements that have a Review Theme. It k
 
 The PDF assigns **"Habitat"** to `OH.2.1` and both of its subrequirements. Since `OH.2.1` is not assessable, we assign `habitat` only to its two children. `OH.2.3` remains assessable even though it has no theme.
 
-In our example, an inspector can filter by **"Monitoring"** in CISO Assistant to focus on `OH.2.2` and `OH.3.2` instead of viewing every requirement at once. A requirement with several groups can appear under each relevant filter, but it remains a single requirement to assess.
+In our example, an audit with **"Monitoring"** selected covers only `OH.2.2` and `OH.3.2`. A requirement with several groups is in scope when any of them is selected, but it remains a single requirement to assess.
+
+{% hint style="warning" %}
+Selecting groups changes the audit's scope: requirements outside them, including `OH.2.3` which has no theme, are left out of its progress and score. For a certification audit, leave the groups unselected so every requirement is assessed. To compare themes without narrowing the audit, use the implementation group breakdown in the audit's advanced analytics.
+{% endhint %}
 
 ## 8. Review the workbook against the source
 
@@ -344,7 +352,7 @@ For a framework with hundreds of requirements, focus the review on the overall s
 
 ## 9. Optional: Convert the workbook to YAML
 
-This step is only for obtaining the YAML version of your workbook. If you do not want one, skip this section and continue with the next step. When you import the Excel file through the Library catalog, CISO Assistant converts it to YAML during the import and loads the library for you. You do not need to run the script or upload a YAML version. The [conversion step in Create a Library](create-library.md#5-optional-convert-the-workbook-to-yaml) also explains this option.
+This step is only for obtaining the YAML version of your workbook. If you do not want one, skip this section and continue with the next step. When you import the Excel file through the Library catalog, CISO Assistant converts it to YAML during the import and loads the library for you. You do not need to run the script or upload a YAML version. The [conversion step in Create a Library](create-library.md#id-5.-optional-convert-the-workbook-to-yaml) also explains this option.
 
 {% hint style="info" %}
 If the `python` command is not recognized, use `python3` instead in the commands below.
@@ -411,7 +419,7 @@ Open the test audit and check that:
 - The three main sections appear in order. Under **"Habitat and equipment"**, `OH.2.1` is a heading with two assessable subrequirements, not a requirement to score itself.
 - `OH.2.2` shows both questions with the expected single-choice and multiple-choice answers, while `OH.3.2` accepts free text.
 - Assessable requirements use the `0` to `2` score scale and display the labels and meanings from the standard.
-- The Review Themes are available as Implementation Groups. For example, selecting **"Monitoring"** should let you focus on `OH.2.2` and `OH.3.2`. Also check that `OH.2.3`, which has no theme, is still present when viewing the full Framework.
+- The Review Themes are available as Implementation Groups. In a second test audit with **"Monitoring"** selected, check that only `OH.2.2` and `OH.3.2` are in scope. In an audit with no group selected, check that `OH.2.3`, which has no theme, is present.
 
 If something is missing or misplaced, correct the workbook before using the library for real audits. If no audit uses this Framework yet, or you have removed the test audit, you can [unload and delete the library](unload-or-delete-library.md) and import the corrected workbook as a replacement. If you need to keep an existing audit, [update the library](update-library.md) instead.
 
@@ -496,10 +504,12 @@ Add a `name[fr]` column to the Review Themes. Keep each `ref_id` unchanged so th
 | `monitoring` | Surveillance |
 | `response` | Réponse |
 
-If you already imported the English library, use [Update a library](update-library.md) to publish these translations as a new version. Then check the French display in a test audit as you did for the English version.
+If you already imported the English library, increase `version` in `library_meta` from `1` to `2`, then follow [Update a library](update-library.md) to publish these translations. Then check the French display in a test audit as you did for the English version.
 
 ## Solution: Final Excel & YAML files
 
 If you got stuck or want to check your work, [download the completed OHSS Excel workbook](../../.gitbook/assets/octopus-habitat-security-standard.xlsx). It contains every sheet we built in this guide, including the French translations from the extra section. Compare it with your workbook one sheet at a time, starting with `library_meta`, `fwk_meta`, and `fwk_content`, then check the Answers, Scores, and Implementation Groups sheets.
+
+The solution workbook uses `version` `1`. If you already imported your own version 1 of OHSS, set `version` to `2` before uploading it.
 
 You can also [view the YAML version](../../.gitbook/assets/octopus-habitat-security-standard.yaml) if you want to inspect the converted library.

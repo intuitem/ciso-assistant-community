@@ -13,9 +13,13 @@ Before updating a library, it is strongly recommended to keep a backup copy of t
 ## Publish a new version
 
 1. Edit the library's Excel (`.xlsx`) file.
-2. Increase `version` in the `library_meta` sheet. Keep the library's `urn` and every other type of identifiers (e.g. `ref_id`) of existing content stable so CISO Assistant can recognize the library and preserve references to its existing requirements.
-3. Upload the updated Excel (`.xlsx`) file as described in [Import a library](import-library.md). If you prefer, [convert it to YAML first](create-library.md#5-optional-convert-the-workbook-to-yaml), then upload the generated `.yaml` file.
+2. Increase `version` in the `library_meta` sheet. Keep the library's `urn` and the identifiers of existing content stable. CISO Assistant matches content by URN, and a requirement's URN is built from its `ref_id` (or from its position when it has none).
+3. Upload the updated Excel (`.xlsx`) file as described in [Import a library](import-library.md). If you prefer, [convert it to YAML first](create-library.md#id-5.-optional-convert-the-workbook-to-yaml), then upload the generated `.yaml` file.
 4. After the upload, follow [Update a library from the catalog](#update-a-library-from-the-catalog) below to load the new version in your instance.
+
+{% hint style="info" %}
+The upload is rejected if `version` is not higher than the stored version: "This library has already been loaded" for the same version, or "A newer version of this library is already stored" for a lower one. Increase `version` and upload again.
+{% endhint %}
 
 ## Update a library from the Catalog
 
@@ -28,5 +32,13 @@ Use this action to load a newer library version into your instance. This applies
 ![Libraries page showing the Update available filter and the update action for a library](../../.gitbook/assets/update_library.png)
 
 {% hint style="warning" %}
-Updating a library from the catalog also updates the content of all objects in your instance that are linked to that library. Always click the library in the catalog and inspect its updated content before starting the update.
+Updating a library from the catalog changes every object linked to it, including existing audits:
+
+- New requirements are added to every audit that uses the Framework.
+- Requirements missing from the new version are deleted, together with their assessments in existing audits (result, score, answers, and observation). Linked evidence and applied controls are kept, but are no longer attached to them.
+- A requirement whose `ref_id` changed gets a new URN. It is treated as deleted and re-added, so its assessments are lost.
+
+Always click the library in the catalog and inspect its updated content before starting the update.
 {% endhint %}
+
+If the new version changes the score range (`min_score` or `max_score`), CISO Assistant asks how to adjust the scores of existing audits: **Clamp** keeps them within the new bounds, **Rule of Three** rescales them to the new range, and **Reset** clears them.

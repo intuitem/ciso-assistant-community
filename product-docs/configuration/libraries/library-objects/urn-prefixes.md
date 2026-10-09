@@ -66,10 +66,10 @@ The tables below show an example of a URN Prefixes object for two catalogues.
 
 | prefix_id | prefix_value |
 | --- | --- |
-| `1` | `urn:intuitem:risk:threat:sample-framework.1` |
-| `2` | `urn:intuitem:risk:function:sample-framework.1` |
+| `1` | `urn:intuitem:risk:threat:sample-framework` |
+| `2` | `urn:intuitem:risk:function:sample-framework` |
 
-With these prefixes, `1:t1` in a framework becomes `urn:intuitem:risk:threat:sample-framework.1:t1` after conversion. To see an example of URN Prefixes in a complete Excel file, download [`example_framework.xlsx`](https://github.com/intuitem/ciso-assistant-community/raw/refs/heads/main/tools/example_framework.xlsx) and open its `urn_pref_meta`, `urn_pref_content`, and `fwk_content` sheets.
+With these prefixes, `1:t1` in a framework becomes `urn:intuitem:risk:threat:sample-framework:t1` after conversion. To see an example of URN Prefixes in a complete Excel file, download [`example_framework.xlsx`](https://github.com/intuitem/ciso-assistant-community/raw/refs/heads/main/tools/example_framework.xlsx) and open its `urn_pref_meta`, `urn_pref_content`, and `fwk_content` sheets.
 
 ## Advanced: YAML representation of this object
 
@@ -81,18 +81,18 @@ This section is mainly for advanced users and debugging. The excerpt below shows
 ```yaml
 objects:
   framework:
-    urn: urn:intuitem:risk:framework:sample-framework.1
+    urn: urn:intuitem:risk:framework:sample-framework
     # ...
     requirement_nodes:
-    - urn: urn:intuitem:risk:req_node:sample-framework.1:access.1
+    - urn: urn:intuitem:risk:req_node:sample-framework:access.1
       assessable: true
       depth: 1
       ref_id: ACCESS.1
       # ...
       threats:
-      - urn:intuitem:risk:threat:sample-framework.1:t1
+      - urn:intuitem:risk:threat:sample-framework:t1
       reference_controls:
-      - urn:intuitem:risk:function:sample-framework.1:rc1
+      - urn:intuitem:risk:function:sample-framework:rc1
 ```
 
 The prefixes themselves do not become a separate YAML object.

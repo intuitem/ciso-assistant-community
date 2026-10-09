@@ -29,7 +29,7 @@ For example, if `name` is `answ`, the object is defined by `answ_meta` and `answ
 
 ### `<object>_content`
 
-The content sheet contains one row per answer set. For choice questions, put one choice per line in the `question_choices` cell. Use the same line order in columns that describe each choice. Use `/` for a choice that has no value in an optional column.
+The content sheet contains one row per answer set. For choice questions, put one choice per line in the `question_choices` cell. Use the same line order in columns that describe each choice. Use `/` for a choice that has no value in an optional column, except in `add_score`, where you enter `0`.
 
 | Field | Meaning | Format / allowed values |
 | --- | --- | --- |
@@ -38,7 +38,7 @@ The content sheet contains one row per answer set. For choice questions, put one
 | `question_choices` <mark style="color:$info;">T</mark> | Choices offered for a choice question | Text. One choice per line. Required for `unique_choice` and `multiple_choice`. Start a continuation line with a vertical bar `\|` to keep a line break inside one choice. |
 | `description` <mark style="color:$info;">T</mark> | Explanation for each choice | Text. One value per choice, on separate lines; `/` for none |
 | `select_implementation_groups` | Groups selected when a choice is chosen | Implementation Group `ref_id` values separated by commas within a choice; one line per choice, `/` for none |
-| `add_score` | Points contributed by each choice | Non-negative integer per choice; one line per choice |
+| `add_score` | Points contributed by each choice | Integer per choice; one line per choice. A negative value subtracts points. Enter `0` for a choice that adds no points (`/` is not accepted). |
 | `compute_result` | Compliance result contributed by each choice | `compliant`, `partially_compliant`, `non_compliant`, or `not_applicable`; one line per choice, `/` for none |
 | `color` | Color shown for each choice | Hex color `#RRGGBB` per choice, one line per choice, `/` for none |
 
@@ -99,22 +99,22 @@ This section is mainly for advanced users and debugging. The excerpt below shows
 ```yaml
 objects:
   framework:
-    urn: urn:intuitem:risk:framework:sample-framework.1
+    urn: urn:intuitem:risk:framework:sample-framework
     # ...
     requirement_nodes:
-    - urn: urn:intuitem:risk:req_node:sample-framework.1:access.1
+    - urn: urn:intuitem:risk:req_node:sample-framework:access.1
       assessable: true
       depth: 1
       ref_id: ACCESS.1
       # ...
       questions:
-        urn:intuitem:risk:req_node:sample-framework.1:access.1:question:1:
+        urn:intuitem:risk:req_node:sample-framework:access.1:question:1:
           type: unique_choice
           text: Are administrator accounts reviewed?
           choices:
-          - urn: urn:intuitem:risk:req_node:sample-framework.1:access.1:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:sample-framework:access.1:question:1:choice:1
             value: 'Yes'
-          - urn: urn:intuitem:risk:req_node:sample-framework.1:access.1:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:sample-framework:access.1:question:1:choice:2
             value: 'No'
 ```
 

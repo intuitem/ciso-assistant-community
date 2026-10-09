@@ -18,7 +18,7 @@ Here are the object types you will find in this example:
 
 | Sheets | What they contain |
 | --- | --- |
-| `library_meta` | The library's identity and shared metadata. |
+| `library_meta` | The library's identity and shared metadata, including labels and a dependency on another library. |
 | `fwk_meta`, `fwk_content` | Framework metadata and its hierarchy of sections and requirements. The content also illustrates questions, requirement-level scoring, implementation groups, and references to threats and controls. |
 | `imp_grp_meta`, `imp_grp_content` | Implementation group definitions. |
 | `answ_meta`, `answ_content` | Answer types and reusable answer choices for framework questions. |
@@ -27,6 +27,8 @@ Here are the object types you will find in this example:
 | `thrt_meta`, `thrt_content` | A sample threat catalogue. |
 | `ref_ctrl_meta`, `ref_ctrl_content` | A sample reference control catalogue. |
 | `urn_pref_meta`, `urn_pref_content` | URN prefixes the framework can use to reference internal or external threats and reference controls. |
+
+Most sheets also include French translations in `[fr]` columns. See [Translate library content](translations.md).
 
 ## Example questionnaire
 
@@ -40,7 +42,7 @@ Here are the object types you will find in this example:
 | --- | --- |
 | `library_meta` | The library's identity and shared metadata. |
 | `fwk_meta`, `fwk_content` | Framework metadata and requirements. Questions are written directly in the framework content; the example also includes conditional-question fields. |
-| `imp_grp_meta`, `imp_grp_content` | Implementation groups used to scope questionnaire requirements and choices. |
+| `imp_grp_meta`, `imp_grp_content` | Implementation groups that scope the questionnaire's requirements. Answer choices select them through `select_implementation_groups`, and `default_selected` sets the starting group. |
 | `answ_meta`, `answ_content` | Reusable answer types and choices, with examples of scoring, compliance results, colors, and translations. |
 
 ## Which one should I check first?
