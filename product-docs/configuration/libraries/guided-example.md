@@ -76,11 +76,7 @@ Here is how we chose the values:
 
 - `name` is the title on the PDF. We copied the opening two sentences into `description`, though a shorter summary would also work. `locale` is `en` because the source is in English.
 - `ref_id` combines the standard's acronym, `OHSS`, with `v1` to identify this edition.
-- `urn` follows `urn:<packager>:risk:library:<identifier>`. Here, `intuitem` is the packager, `library` identifies the object type, and the final part is a lowercase identifier based on the title. It has no version suffix, so the same URN can identify later updates to this library.
-
-{% hint style="warning" %}
-We use `intuitem` because intuitem publishes this example. For your own libraries, use your organization's name in every URN (for example `urn:acme:risk:library:…`). Reusing the `intuitem` namespace can collide with a built-in library: CISO Assistant would then reject your upload as outdated, or offer it as an update that replaces the built-in content in existing audits.
-{% endhint %}
+- `urn` follows `urn:<packager>:risk:library:<identifier>`. Here, `intuitem` is the packager, but you can use your organization's name for your own library. If you do, use it consistently in `packager` and the URNs. `library` identifies the object type, and the final part is a lowercase identifier based on the title. It has no version suffix, so the same URN can identify later updates to this library.
 
 {% hint style="warning" %}
 The `v1` in `ref_id` marks this edition of the standard, while `library_meta.version` tracks updates to the library. For a correction or minor addition, keep the library and Framework URNs and the identifiers of existing requirements, then increase `library_meta.version` from `1` to `2`. If a new edition substantially changes the Framework's structure or requirements, create a separate library with a distinct URN and new Framework and requirement URNs. Replacing the existing structure under the same identifiers can break existing audits.
