@@ -86,6 +86,36 @@ objects:
       implementation_groups: [IG2, IG1]
 """.lstrip()
 
+FLAT_YAML = """
+urn: urn:intuitem:test:library:domain-tree-flat
+locale: en
+ref_id: DTF
+name: domain tree flat
+description: x
+copyright: x
+version: 1
+publication_date: 2025-01-01
+provider: t
+packager: t
+objects:
+  framework:
+    urn: urn:intuitem:test:framework:domain-tree-flat
+    ref_id: DTF
+    name: flat checklist
+    description: x
+    requirement_nodes:
+    - urn: urn:intuitem:test:req_node:dtf:a
+      assessable: true
+      depth: 1
+      ref_id: A
+      name: a
+    - urn: urn:intuitem:test:req_node:dtf:b
+      assessable: true
+      depth: 1
+      ref_id: B
+      name: b
+""".lstrip()
+
 SHOW_SCORE = {"score": EVERYONE_EDIT, "is_scored": EVERYONE_EDIT}
 
 
@@ -159,6 +189,15 @@ class TestFrameworkStructure:
         assert s["signatures"] == [["IG1", "IG2"], ["IG2"]]
         # S2.A sits two levels down and still lands in section S2
         assert sorted(map(tuple, s["scope"])) == [(0, 0, 1), (0, 1, 1), (1, 0, 1)]
+
+    def test_flat_framework_is_one_section(self, framework):
+        stored, err = StoredLibrary.store_library_content(FLAT_YAML.encode())
+        assert err is None, err
+        assert stored.load() is None
+        flat = Framework.objects.get(urn="urn:intuitem:test:framework:domain-tree-flat")
+        s = framework_structure(flat)
+        assert [sec["name"] for sec in s["sections"]] == ["flat checklist"]
+        assert s["scope"] == [[0, 0, 2]]
 
 
 @pytest.mark.django_db

@@ -43,7 +43,8 @@ def framework_structure(framework) -> dict[str, Any]:
     """Sections, IG signatures and per-requirement placement for a framework.
 
     Sections are the top-level requirement nodes; a framework wrapped in a single
-    top-level node uses that node's children instead.
+    non-assessable top-level node uses that node's children instead, and a flat
+    framework is a single section.
     """
     nodes = list(
         RequirementNode.objects.filter(framework=framework).values(
@@ -64,11 +65,14 @@ def framework_structure(framework) -> dict[str, Any]:
         children[parent].append(n)
 
     top = sorted(children[None], key=_order_key)
-    if len(top) == 1 and children[top[0]["urn"]]:
+    if len(top) == 1 and children[top[0]["urn"]] and not top[0]["assessable"]:
         top = sorted(children[top[0]["urn"]], key=_order_key)
+    flat = not any(children[n["urn"]] for n in top)
     section_index = {n["urn"]: i for i, n in enumerate(top)}
 
     def section_of(node: dict) -> int | None:
+        if flat:
+            return 0
         current = node
         while current is not None:
             if current["urn"] in section_index:
@@ -100,7 +104,9 @@ def framework_structure(framework) -> dict[str, Any]:
         scope[(section, signature_index[sig])] += 1
 
     return {
-        "sections": [
+        "sections": [{"id": str(framework.id), "ref_id": "", "name": framework.name}]
+        if flat
+        else [
             {"id": str(n["id"]), "ref_id": n["ref_id"] or "", "name": n["name"] or ""}
             for n in top
         ],

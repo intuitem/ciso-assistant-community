@@ -96,7 +96,6 @@
 	const nodes = $derived(root ? allNodes(root) : []);
 	const nodeById = $derived(new Map(nodes.map((n) => [n.id, n])));
 	const selected = $derived(selectedId ? (nodeById.get(selectedId) ?? null) : null);
-	const scopeSize = $derived(computeScopeSize(feed, filters));
 
 	function val(s: Stats | null) {
 		return metricValue(s, shownMetric);
@@ -171,7 +170,7 @@
 			showBranch: branchAddsInfo(n),
 			empty: !n.auditsInBranch,
 			badge: rank.has(n.id) ? `#${rank.get(n.id)}` : undefined,
-			hiddenCount: n.descendants,
+			hiddenCount: shownDescendants(n),
 			children: n.children.map(toRing)
 		};
 	}
@@ -245,6 +244,14 @@
 		return answers < MIN_ANSWERS
 			? `Based on ${answers} ${answers === 1 ? 'answer' : 'answers'} only (under ${MIN_ANSWERS}): shown faded`
 			: `The audit page shows ${n.audit?.progress ?? 0}% progress (under ${MIN_PROGRESS}%): shown faded`;
+	}
+
+	function shownDescendants(n: TreeNode): number {
+		if (!only) return n.descendants;
+		return n.children.reduce(
+			(total, c) => (only.has(c.id) ? total + 1 + shownDescendants(c) : total),
+			0
+		);
 	}
 
 	function label(n: TreeNode) {
@@ -582,7 +589,11 @@
 						</div>
 					</div>
 				</div>
-				{#if ringRoot}
+				{#if !isDummy && !feed.audits.length}
+					<p class="p-6 text-sm text-surface-600-400">
+						No audits on this framework that you can see.
+					</p>
+				{:else if ringRoot}
 					{#if outline}
 						<RingOutline
 							bind:this={outlineRef}
@@ -677,7 +688,9 @@
 						{@render statBlock(
 							'Own audit',
 							selected.own,
-							selected.own ? selected.own.rows / scopeSize : undefined
+							selected.own
+								? selected.own.rows / computeScopeSize(feed, filters, selected.audit)
+								: undefined
 						)}
 						{#if selected.audit.progress !== null}
 							<p class="text-xs text-surface-600-400">

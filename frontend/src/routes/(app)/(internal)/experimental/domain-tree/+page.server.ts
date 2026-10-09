@@ -1,15 +1,14 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { match as isUuid } from '../../../../../params/uuid';
 import type { PageServerLoad } from './$types';
 import type { DomainTreeFeed } from './feed';
-
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export const load: PageServerLoad = async ({ fetch, url }) => {
 	const frameworkId = url.searchParams.get('framework');
 	const campaignId = url.searchParams.get('campaign');
 
 	if (!frameworkId) return { frameworkId: null, campaignId, feed: null, error: null };
-	if (!UUID.test(frameworkId) || (campaignId && !UUID.test(campaignId)))
+	if (!isUuid(frameworkId) || (campaignId && !isUuid(campaignId)))
 		return { frameworkId, campaignId, feed: null, error: 'Invalid framework or campaign.' };
 
 	const query = campaignId ? `?campaign=${campaignId}` : '';

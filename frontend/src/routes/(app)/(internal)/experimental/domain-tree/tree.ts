@@ -144,10 +144,13 @@ export function ownStats(feed: DomainTreeFeed, f: Filters): Map<string, Stats> {
 	return out;
 }
 
-/** Number of framework requirements in the filtered scope. */
-export function scopeSize(feed: DomainTreeFeed, f: Filters): number {
+/** Number of framework requirements in the filtered scope, within the audit's own IGs when no IG filter applies. */
+export function scopeSize(feed: DomainTreeFeed, f: Filters, audit?: Audit | null): number {
 	const match = tupleFilter(feed, f);
-	return feed.scope.reduce((n, [s, g, c]) => (match(s, g) ? n + c : n), 0);
+	const groups = f.ig ? [] : (audit?.selected_implementation_groups ?? []);
+	const inGroups = (g: number) =>
+		!groups.length || feed.signatures[g].some((ig) => groups.includes(ig));
+	return feed.scope.reduce((n, [s, g, c]) => (match(s, g) && inGroups(g) ? n + c : n), 0);
 }
 
 export function buildTree(feed: DomainTreeFeed, f: Filters): TreeNode | null {
