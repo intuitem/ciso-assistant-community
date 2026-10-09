@@ -9,13 +9,27 @@ description: >-
 
 Compatible with: SaaS or on-premises, CE or Pro
 
-Tested MCP clients: Claude Desktop, Claude Code, LM Studio, OpenWebUI
+Tested MCP clients: Claude Desktop, Claude Code, LM Studio, OpenWebUI, ChatGPT desktop app
+
+{% hint style="info" %}
+**The server now runs on version 2 of the MCP Python SDK.** Nothing changes for
+clients: the endpoint, the token headers and the negotiated protocol versions
+(`2024-11-05` to `2025-11-25`) are the same, so existing Claude, ChatGPT and
+Copilot Studio connections keep working as configured.
+
+- **Running from source (stdio):** `git pull`. The `uv run` command in your
+  client configuration installs the new dependencies on its next start.
+- **Docker Compose:** pull the new images and recreate the `mcp` service.
+- **Custom tools:** code of your own that imports `mcp.server.fastmcp` must
+  switch to `from mcp.server.mcpserver import MCPServer`. See the
+  [SDK migration guide](https://py.sdk.modelcontextprotocol.io/v2/migration/).
+{% endhint %}
 
 ### What is MCP?
 
 MCP (Model Context Protocol) allows AI assistants like Claude to interact with external tools and services. Think of it as giving your AI a set of capabilities to read and write data in CISO Assistant.
 
-The CISO Assistant MCP server provides **111 tools** covering:
+The CISO Assistant MCP server provides **113 tools** covering:
 
 - Risk management (assessments, scenarios, matrices)
 - Compliance audits (frameworks, requirements)
@@ -47,13 +61,13 @@ machine.
 3. **Simpler security model** - no credential travels between the client and the MCP server, and there is no CORS or network authentication to configure.
 4. **Works offline** - the server itself runs locally; only the CISO Assistant API calls need the network.
 
-Use stdio with Claude Desktop, Claude Code, LM Studio, Cursor and any other client
-that can launch a local process.
+Use stdio with Claude Desktop, Claude Code, LM Studio, Cursor, the ChatGPT desktop
+app and any other client that can launch a local process.
 
 **Streamable HTTP** — the server listens on a port and several users share it.
 Choose this only when the client cannot start a local process, which is the case
-for **ChatGPT** and **Microsoft Copilot Studio**, since those run in the vendor's
-cloud rather than on your machine.
+for **ChatGPT on the web** and **Microsoft Copilot Studio**, since those run in the
+vendor's cloud rather than on your machine.
 
 The trade-off is real: HTTP means a listening service, and for a cloud client it
 means that service must be reachable from the internet. See
@@ -417,10 +431,40 @@ Save the `mcp.json` file and restart LM Studio for the changes to take effect
 
 ---
 
+### Setup for the ChatGPT desktop app
+
+The desktop app launches local MCP servers itself, so it can use stdio like
+Claude Desktop — no tunnel, no listening port.
+
+In the app, open the **MCPs** tab and connect a custom MCP. On the **Connect to a
+custom MCP** form:
+
+1. **Name**: `ciso-assistant`
+2. **Type**: `STDIO`
+3. **Command to launch**: `uv` — or its full path if the app cannot find it (`which uv`)
+4. **Arguments** — one per field, using **Add argument** for each:
+   - `--directory`
+   - `/path/to/ciso-assistant-community/cli`
+   - `run`
+   - `ca_mcp.py`
+5. **Environment variables**, using **Add environment variable** for each. Names
+   are case-sensitive — `TOKEN`, not `Token`:
+   - `TOKEN` = your Personal Access Token
+   - `API_URL` = your CISO Assistant API URL, for example `http://localhost:8000/api`
+   - `VERIFY_CERTIFICATE` = `false` for a self-signed certificate
+6. **Save**
+
+To connect to a shared server instead, choose **Streamable HTTP** as the type —
+see [Connecting the ChatGPT desktop app over HTTP](#connecting-the-chatgpt-desktop-app-over-http).
+The type cannot be changed afterwards: the app asks you to uninstall the server
+and add it again.
+
+---
+
 ### Streamable HTTP transport
 
-Only needed for clients that cannot start a local process — ChatGPT and Microsoft
-Copilot Studio. If your client can launch a subprocess, use stdio instead.
+Only needed for clients that cannot start a local process — ChatGPT on the web and
+Microsoft Copilot Studio. If your client can launch a subprocess, use stdio instead.
 
 #### Option A: Docker Compose (recommended)
 
@@ -507,21 +551,35 @@ Authorization: Token <PAT>
 X-CISO-Token: <PAT>
 ```
 
-Use `X-CISO-Token` if the client reserves or rewrites `Authorization`.
+The `Authorization` value is accepted as `Token <PAT>`, `Bearer <PAT>` or the bare
+PAT, so it works whichever form the client sends. Use `X-CISO-Token` if the client
+reserves or rewrites `Authorization`.
 
 #### Read-only by default
 
-The HTTP endpoint exposes **only read tools (49)**. Set
+The HTTP endpoint exposes **only read tools (51)**. Set
 `CA_MCP_READ_ONLY=false` to expose the write tools as well — a deliberate choice,
 since an agent driven by a third-party orchestrator would then be able to modify
 your GRC data.
 
-#### Connecting ChatGPT
+#### Connecting ChatGPT on the web
 
 Requires developer mode. Create a new plugin, set the connection to your server
 URL ending in `/mcp`, choose **Access token / API key** with a **Custom Header**
 named `Authorization`, then enter the PAT itself when prompted for the key. Enter
 the token on its own, with no `Token` or `Bearer` prefix in the value field.
+
+#### Connecting the ChatGPT desktop app over HTTP
+
+On the **Connect to a custom MCP** form, set **Type** to `Streamable HTTP`, then:
+
+1. **URL**: your server URL ending in `/mcp`
+2. **Headers**: name `Authorization`, value `Token <PAT>`
+3. **Save**
+
+The desktop app runs on your machine, so a server on the same machine is reachable
+at `http://127.0.0.1:8001/mcp` with no tunnel. For a single user, the
+[stdio setup](#setup-for-the-chatgpt-desktop-app) is simpler still.
 
 #### Connecting Microsoft Copilot Studio
 
@@ -688,9 +746,15 @@ risk assessment.
 ### FAQ
 
 - What about ChatGPT compatibility?
-  - Supported, via the [Streamable HTTP transport](#streamable-http-transport). It needs developer mode enabled in ChatGPT, and because ChatGPT calls from OpenAI's cloud the server must be reachable from there — either published behind an HTTPS reverse proxy, or connected through OpenAI's Secure MCP Tunnel, which reaches a private server without a public listener. The endpoint is read-only by default and every request carries its own token. For a single user on their own machine, stdio remains simpler and exposes nothing.
+  - It depends on where you use ChatGPT. The **desktop app** runs MCP servers on your machine, so it works with stdio like Claude Desktop — see [Setup for the ChatGPT desktop app](#setup-for-the-chatgpt-desktop-app). **ChatGPT on the web** calls from OpenAI's cloud, so it needs the [Streamable HTTP transport](#streamable-http-transport) with developer mode enabled, and the server must be reachable from there — either published behind an HTTPS reverse proxy, or connected through OpenAI's Secure MCP Tunnel, which reaches a private server without a public listener. Over HTTP the endpoint is read-only by default and every request carries its own token.
 - What about Microsoft Copilot Studio?
   - The same HTTP transport applies. Beyond reachability, the Power Platform environment needs Copilot Credits allocated to it, and tenant data policies covering connectors also cover MCP access.
+- Do I need to change my client configuration after the MCP SDK v2 upgrade?
+  - No. The server negotiates the same protocol versions as before, on the same `/mcp` endpoint, with the same `Authorization` and `X-CISO-Token` headers. Only the server's own dependencies changed, and `uv run` or a new image picks them up.
+- After updating, the server fails with `No module named 'mcp.server.fastmcp'`.
+  - Something is still loading code written for SDK v1 against the new SDK. Usually that is a partial update — run `git pull` from the repository root, then start the server again so `uv run` re-syncs. If the import comes from tools you added yourself, replace `FastMCP` with `MCPServer` from `mcp.server.mcpserver`.
+- The server worked on SDK v1 with `CA_MCP_HOST=0.0.0.0` — is it still protected?
+  - Yes. Without `CA_MCP_ALLOWED_HOSTS` the server still accepts only loopback `Host` headers, whatever address it binds to, and answers anything else with **421 Misdirected Request**. Set `CA_MCP_ALLOWED_HOSTS` to the hostname your client uses, as described in [Making it reachable](#making-it-reachable).
 
 ### Need Help?
 

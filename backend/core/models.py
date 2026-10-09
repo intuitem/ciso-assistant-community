@@ -97,39 +97,71 @@ from dataclasses import dataclass
 logger = get_logger(__name__)
 
 
-def round_score(value: float) -> float:
-    """Round an aggregated score to two decimals, half up.
+def clean_score(value: float) -> float:
+    """An aggregated score without the float noise of ratio-based aggregation
+    (2.69499999999 is 2.695), as spreadsheets keep 15 significant digits.
+    Scores are computed and compared unrounded, like in the CCB CyFun tools;
+    rounding is for display (round_score)."""
+    return round(value, 9)
 
-    Matches the precision of reference tools such as the CCB CyFun
-    self-assessment workbook. Rounding to 9 decimals first absorbs
-    float-precision noise from ratio-based aggregation (e.g. 2.69499999999
-    must round to 2.70, not 2.69).
-    """
+
+def round_score(value: float) -> float:
+    """A score as displayed: two decimals, half up, like the CCB CyFun tools'
+    0.00 format (2.695 shows as 2.70)."""
     return float(
-        Decimal(repr(round(value, 9))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        Decimal(repr(clean_score(value))).quantize(
+            Decimal("0.01"), rounding=ROUND_HALF_UP
+        )
     )
 
 
 def _defer_once(conn_attr: str, key, callback):
-    """Schedule *callback* via on_commit, deduplicating by *key* per transaction.
+    """Schedule *callback* via on_commit, once per *key* while the first one is
+    still pending.
 
-    Attaches a pending-set to the DB connection under *conn_attr* so that only
-    the first call per *key* in a given transaction actually registers the
-    on_commit hook.
+    Django replaces its on_commit list on every commit, rollback and savepoint
+    rollback, so a schedule is pending only while the list it went into is still
+    the connection's: a rolled-back schedule never blocks a later one.
     """
     conn = transaction.get_connection()
     pending = getattr(conn, conn_attr, None)
     if pending is None:
-        pending = set()
+        pending = {}
         setattr(conn, conn_attr, pending)
-    if key not in pending:
-        pending.add(key)
+    scheduled = pending.get(key)
+    if (
+        scheduled is not None
+        and scheduled[0] is conn.run_on_commit
+        and not scheduled[1]._done
+    ):
+        return
 
-        def _on_commit(k=key, p=pending, cb=callback):
-            p.discard(k)
-            cb()
+    def _on_commit(cb=callback):
+        # Marked so a callback run early (tests capturing on_commit) no
+        # longer counts as pending.
+        _on_commit._done = True
+        pending.pop(key, None)
+        cb()
 
-        transaction.on_commit(_on_commit)
+    _on_commit._done = False
+    transaction.on_commit(_on_commit)
+    if conn.in_atomic_block:
+        pending[key] = (conn.run_on_commit, _on_commit)
+
+
+def defer_outcome_evaluation(compliance_assessment_pk) -> None:
+    """Evaluate an audit's outcome rules once the transaction commits, on the
+    audit as committed: callers often hold an instance that later updates in
+    the same transaction leave stale."""
+
+    def _evaluate():
+        from core.cel_service import evaluate_outcomes
+
+        ca = ComplianceAssessment.objects.filter(pk=compliance_assessment_pk).first()
+        if ca is not None:
+            evaluate_outcomes(ca)
+
+    _defer_once("_pending_cel_evaluations", compliance_assessment_pk, _evaluate)
 
 
 URN_REGEX = r"^urn:([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+)(?::([a-zA-Z0-9_-]+))?:([0-9A-Za-z\[\]\(\)\-\._:]+)$"
@@ -1767,6 +1799,7 @@ class LibraryUpdater:
                 prev_min = getattr(prev_fw, "min_score", None)
                 prev_max = getattr(prev_fw, "max_score", None)
                 prev_def = getattr(prev_fw, "scores_definition", None)
+                had_outcomes = bool(getattr(prev_fw, "outcomes_definition", None))
 
                 new_framework, _ = Framework.objects.update_or_create(
                     urn=framework_dict["urn"],
@@ -1821,6 +1854,10 @@ class LibraryUpdater:
                 self.prune_stale_implementation_groups(
                     new_framework, compliance_assessments
                 )
+
+                if had_outcomes or new_framework.outcomes_definition:
+                    for ca in compliance_assessments:
+                        defer_outcome_evaluation(ca.pk)
 
                 existing_requirement_node_objects = {
                     rn.urn.lower(): rn
@@ -2270,13 +2307,7 @@ class LibraryUpdater:
                     # bulk_update skips RequirementAssessment.save(), which
                     # re-evaluates outcomes when a score changes.
                     for ca in ca_with_scale_change:
-
-                        def _evaluate(ca=ca):
-                            from core.cel_service import evaluate_outcomes
-
-                            evaluate_outcomes(ca)
-
-                        _defer_once("_pending_cel_evaluations", ca.pk, _evaluate)
+                        defer_outcome_evaluation(ca.pk)
 
                 # Keep selected_implementation_groups consistent for dynamic frameworks
                 # This must run even if no RA scalar fields changed, because answer
@@ -2578,8 +2609,27 @@ class LibraryUpdater:
                     **requirement_mapping_dict,
                 )
 
+    def framework_rules_error(self) -> str | None:
+        """The checks library import runs on outcome rules and visibility
+        expressions, so an update cannot bring in what a load refuses."""
+        from core.cel_service import validate_framework_expressions
+        from library.utils import outcome_rule_id_error
+
+        for framework in self.new_frameworks or []:
+            if error := outcome_rule_id_error(framework):
+                return error
+            if errors := validate_framework_expressions(framework):
+                first = errors[0]
+                return (
+                    f"[FRAMEWORK_ERROR] {first['where']} {first['ref_id']}: "
+                    f"{first['error']}"
+                )
+        return None
+
     # We should create a LibraryVerifier class in the future that check if the library is valid and use it for a better error handling.
     def update_library(self) -> Union[str, None]:
+        if (error_msg := self.framework_rules_error()) is not None:
+            return error_msg
         if (error_msg := self.update_dependencies()) is not None:
             return error_msg
 
@@ -8860,6 +8910,9 @@ class ComplianceAssessment(Assessment):
         verbose_name=_("Score scale preset"),
     )
     computed_outcome = models.JSONField(null=True, blank=True)
+    computed_values = models.JSONField(
+        blank=True, null=True, verbose_name=_("Computed values")
+    )
 
     assets = models.ManyToManyField(
         Asset,
@@ -9097,12 +9150,30 @@ class ComplianceAssessment(Assessment):
 
         # bulk_update skips RequirementAssessment.save(), which normally
         # re-evaluates outcomes when a score changes.
-        def _evaluate():
-            from core.cel_service import evaluate_outcomes
+        defer_outcome_evaluation(self.pk)
 
-            evaluate_outcomes(self)
+    # What outcome rules read besides the requirements: scope and scoring.
+    _CEL_RELEVANT_FIELDS = frozenset(
+        {
+            "selected_implementation_groups",
+            "field_visibility",
+            "score_calculation_method",
+            "anchor_na_to_target",
+            "target_score",
+            "min_score",
+            "max_score",
+        }
+    )
 
-        _defer_once("_pending_cel_evaluations", self.pk, _evaluate)
+    def _cel_snapshot(self, fields) -> dict:
+        # References, not copies: field_visibility's setters assign a new dict.
+        return {f: getattr(self, f) for f in self._CEL_RELEVANT_FIELDS if f in fields}
+
+    @classmethod
+    def from_db(cls, db, field_names, values, *, fetch_mode=None):
+        instance = super().from_db(db, field_names, values, fetch_mode=fetch_mode)
+        instance._loaded_cel_values = instance._cel_snapshot(field_names)
+        return instance
 
     def save(self, *args, **kwargs) -> None:
         # No scale chosen: the framework's (the organisation scale is only
@@ -9112,8 +9183,20 @@ class ComplianceAssessment(Assessment):
             self.max_score = self.framework.max_score
             self.scores_definition = self.framework.scores_definition
             self.score_scale_preset = None
+        creating = self._state.adding
+        loaded = getattr(self, "_loaded_cel_values", {})
+        update_fields = kwargs.get("update_fields")
+        saved = self._CEL_RELEVANT_FIELDS & set(
+            update_fields if update_fields is not None else self._CEL_RELEVANT_FIELDS
+        )
+        cel_changed = not creating and any(
+            f not in loaded or getattr(self, f) != loaded[f] for f in saved
+        )
         super().save(*args, **kwargs)
         self.upsert_daily_metrics()
+        self._loaded_cel_values = {**loaded, **self._cel_snapshot(saved)}
+        if cel_changed or (creating and self.framework.outcomes_definition):
+            defer_outcome_evaluation(self.pk)
 
     def create_requirement_assessments(
         self, baseline: Self | None = None
@@ -9363,6 +9446,9 @@ class ComplianceAssessment(Assessment):
             # Ensure metrics are refreshed once after the bulk update.
             self.refresh_from_db(fields=["updated_at"])
             self.upsert_daily_metrics()
+            # bulk_update skips RequirementAssessment.save(), which normally
+            # re-evaluates outcomes when a result changes.
+            defer_outcome_evaluation(self.pk)
 
         return changes
 
@@ -9402,7 +9488,8 @@ class ComplianceAssessment(Assessment):
         contribution; no scale normalization.
 
         When anchor_na_to_target is True, N/A RAs contribute their resolved
-        target (or resolved max if no target is set).
+        target (or resolved max if no target is set). With every method, a
+        missing documentation score counts as the RA's resolved minimum.
 
         Returns the unrounded score, or -1 if no scored requirements exist.
         """
@@ -9436,7 +9523,9 @@ class ComplianceAssessment(Assessment):
                     if raw is None:
                         if score_field == "score":
                             continue
-                        raw = 0
+                        # A missing documentation score is the bottom of the
+                        # scale, as for the averages.
+                        raw = ras.get_resolved_scoring()["min_score"] or 0
                     score = raw
                 total += score * weight
                 total_weight += weight
@@ -9665,20 +9754,19 @@ class ComplianceAssessment(Assessment):
                 self.anchor_na_to_target,
             )
 
-        # Maturity is the average of the enabled layers (ignore -1 / None),
-        # computed on unrounded layers so rounding only happens once.
+        # Maturity is the average of the enabled layers (ignore -1 / None).
         enabled = [s for s in [impl_score, doc_score] if s is not None and s != -1]
         if enabled:
-            maturity_score = round_score(sum(enabled) / len(enabled))
+            maturity_score = clean_score(sum(enabled) / len(enabled))
         else:
             maturity_score = impl_score  # -1 if nothing scored
 
-        def _display(score):
-            return score if score is None or score == -1 else round_score(score)
+        def _clean(score):
+            return score if score is None or score == -1 else clean_score(score)
 
         return {
-            "implementation_score": _display(impl_score),
-            "documentation_score": _display(doc_score),
+            "implementation_score": _clean(impl_score),
+            "documentation_score": _clean(doc_score),
             "maturity_score": maturity_score,
         }
 
@@ -9705,16 +9793,15 @@ class ComplianceAssessment(Assessment):
                 )
         impl_score = None if impl_score == -1 else impl_score
         doc_score = None if doc_score == -1 else doc_score
-        # Maturity uses the unrounded layers so rounding only happens once.
         enabled = [s for s in [impl_score, doc_score] if s is not None]
         return {
-            "implementation_score": round_score(impl_score)
+            "implementation_score": clean_score(impl_score)
             if impl_score is not None
             else None,
-            "documentation_score": round_score(doc_score)
+            "documentation_score": clean_score(doc_score)
             if doc_score is not None
             else None,
-            "maturity_score": round_score(sum(enabled) / len(enabled))
+            "maturity_score": clean_score(sum(enabled) / len(enabled))
             if enabled
             else None,
             "scored_count": len(scored),
@@ -9791,6 +9878,13 @@ class ComplianceAssessment(Assessment):
             }
             for export in available_framework_exports(self)
         ]
+
+    @property
+    def outcome_rules(self) -> list[dict]:
+        """The framework's outcome rules that apply to the audit's scope."""
+        from core.cel_service import applicable_rules
+
+        return applicable_rules(self.framework, self.selected_implementation_groups)
 
     def get_selected_implementation_groups(self):
         framework = self.framework
@@ -11202,7 +11296,9 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         # Atomic update and save
         self.save(update_fields=["score", "result", "is_scored"])
 
-    _CEL_RELEVANT_FIELDS = frozenset({"score", "result", "status"})
+    _CEL_RELEVANT_FIELDS = frozenset(
+        {"score", "documentation_score", "is_scored", "result", "status"}
+    )
 
     @classmethod
     def from_db(cls, db, field_names, values, *, fetch_mode=None):
@@ -11221,14 +11317,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         return {f for f in self._CEL_RELEVANT_FIELDS if getattr(self, f) != old.get(f)}
 
     def _defer_cel_evaluation(self):
-        ca = self.compliance_assessment
-
-        def _run():
-            from core.cel_service import evaluate_outcomes
-
-            evaluate_outcomes(ca)
-
-        _defer_once("_pending_cel_evaluations", ca.pk, _run)
+        defer_outcome_evaluation(self.compliance_assessment_id)
 
     def save(self, *args, **kwargs) -> None:
         update_fields = kwargs.get("update_fields")
@@ -12126,14 +12215,7 @@ class Answer(AbstractBaseModel, FolderMixin):
         return []
 
     def _defer_cel_evaluation(self):
-        ca = self.requirement_assessment.compliance_assessment
-
-        def _run():
-            from core.cel_service import evaluate_outcomes
-
-            evaluate_outcomes(ca)
-
-        _defer_once("_pending_cel_evaluations", ca.pk, _run)
+        defer_outcome_evaluation(self.requirement_assessment.compliance_assessment_id)
 
     def _defer_response_recompute(self):
         response = self.response

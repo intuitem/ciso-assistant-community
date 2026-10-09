@@ -17409,7 +17409,9 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
                 "description": finding.description,
                 "status": finding.status,
                 "severity": finding.get_severity_display(),
-                "priority": finding.priority if finding.priority is not None else "",
+                "priority": str(finding.get_priority_display())
+                if finding.priority
+                else "",
                 "folder": finding.folder.name if finding.folder else "",
                 "filtering_labels": "|".join(
                     [
@@ -17431,6 +17433,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
                     ]
                 ),
                 "observation": escape_excel_formula(finding.observation),
+                "recommendation": escape_excel_formula(finding.recommendation),
                 "created_at": finding.created_at.strftime("%Y-%m-%d %H:%M:%S")
                 if finding.created_at
                 else "",
@@ -17439,7 +17442,14 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
                 if finding.due_date
                 else "",
             }
-            entries.append(entry)
+            entries.append(
+                {
+                    k: escape_excel_formula(sanitize_xlsx_value(v))
+                    if isinstance(v, str) and k != "status"
+                    else v
+                    for k, v in entry.items()
+                }
+            )
 
         df = pd.DataFrame(entries)
         buffer = io.BytesIO()
@@ -17458,6 +17468,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
                 "applied_controls",
                 "evidences",
                 "observation",
+                "recommendation",
             ]
             wrap_indices = [
                 df.columns.get_loc(col) + 1 for col in wrap_columns if col in df.columns
@@ -17586,8 +17597,10 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             md_content += f"### {finding.ref_id or 'N/A'} - {finding.name}\n\n"
             md_content += f"- **Status**: {finding.get_status_display()}\n"
             md_content += f"- **Severity**: {finding.get_severity_display()}\n"
+            md_content += f"- **Priority**: {finding.get_priority_display() if finding.priority else 'N/A'}\n"
             md_content += f"- **Description**: {finding.description or 'N/A'}\n"
             md_content += f"- **Observation**: {finding.observation or 'N/A'}\n"
+            md_content += f"- **Recommendation**: {finding.recommendation or 'N/A'}\n"
             if finding.applied_controls.exists():
                 md_content += "- **Applied Controls**:\n"
                 for ac in finding.applied_controls.all():
