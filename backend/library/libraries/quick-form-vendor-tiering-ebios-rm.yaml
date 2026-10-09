@@ -1,0 +1,316 @@
+urn: urn:intuitem:risk:library:vendor-tiering-ebios-rm
+locale: en
+ref_id: vendor-tiering-ebios-rm
+name: Vendor tiering (EBIOS RM)
+description: 'A starter form to tier a vendor with the four EBIOS Risk Manager stakeholder criteria. Start
+  it from a vendor with "Assess tier"; an accepted response writes the tier onto the vendor. It is an
+  alternative to the "Vendor tiering" form: use one tiering method per organisation.'
+copyright: © intuitem. Criteria and rating scales after the EBIOS Risk Manager method, ANSSI.
+version: 1
+publication_date: '2026-10-08'
+provider: intuitem
+packager: intuitem
+objects:
+  quick_forms:
+  - urn: urn:intuitem:risk:quick_form:vendor-tiering-ebios-rm
+    ref_id: vendor-tiering-ebios-rm
+    name: Vendor tiering (EBIOS RM)
+    description: 'Tiers a vendor with the stakeholder criteria of the EBIOS Risk Manager method (ANSSI,
+      workshop 3): exposure (dependency, penetration) and cyber reliability (cyber maturity, trust), each
+      rated from 1 to 4.
+
+
+      The threat level is dependency × penetration ÷ (maturity × trust), from 0.06 to 16, the value the
+      EBIOS RM ecosystem map places stakeholders by.'
+    annotation: 'An accepted response sets the vendor''s tier on the default scale from the threat level,
+      with the default zones of the EBIOS RM ecosystem map: Critical from 2.5 (danger zone), Important
+      from 0.9 (control zone), Standard from 0.2 (watch zone), Low impact below. EBIOS RM leaves these
+      thresholds to each organisation: adjust them in the form''s settings to match your own. The tiers
+      are named by key, so a renamed or reordered scale keeps working.'
+    ref_id_prefix: VTE
+    subject_question_urn: urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:context:question:vendor
+    on_accept:
+    - target: entity.tier
+      config:
+        mapping:
+        - outcome: threat_level
+          thresholds:
+          - tier: critical
+            min: 2.5
+          - tier: important
+            min: 0.9
+          - tier: standard
+            min: 0.2
+          - tier: low-impact
+    outcomes_definition:
+    - ref_id: dependency
+      label: Dependency
+      kind: number
+      expression: '"exposure:question:dependency:choice:l4" in answers["exposure:question:dependency"].selected_choices
+        ? 4.0 : ("exposure:question:dependency:choice:l3" in answers["exposure:question:dependency"].selected_choices
+        ? 3.0 : ("exposure:question:dependency:choice:l2" in answers["exposure:question:dependency"].selected_choices
+        ? 2.0 : 1.0))'
+      translations:
+        fr:
+          label: Dépendance
+    - ref_id: penetration
+      label: Penetration
+      kind: number
+      expression: '"exposure:question:penetration:choice:l4" in answers["exposure:question:penetration"].selected_choices
+        ? 4.0 : ("exposure:question:penetration:choice:l3" in answers["exposure:question:penetration"].selected_choices
+        ? 3.0 : ("exposure:question:penetration:choice:l2" in answers["exposure:question:penetration"].selected_choices
+        ? 2.0 : 1.0))'
+      translations:
+        fr:
+          label: Pénétration
+    - ref_id: maturity
+      label: Cyber maturity
+      kind: number
+      expression: '"reliability:question:maturity:choice:l4" in answers["reliability:question:maturity"].selected_choices
+        ? 4.0 : ("reliability:question:maturity:choice:l3" in answers["reliability:question:maturity"].selected_choices
+        ? 3.0 : ("reliability:question:maturity:choice:l2" in answers["reliability:question:maturity"].selected_choices
+        ? 2.0 : 1.0))'
+      translations:
+        fr:
+          label: Maturité cyber
+    - ref_id: trust
+      label: Trust
+      kind: number
+      expression: '"reliability:question:trust:choice:l4" in answers["reliability:question:trust"].selected_choices
+        ? 4.0 : ("reliability:question:trust:choice:l3" in answers["reliability:question:trust"].selected_choices
+        ? 3.0 : ("reliability:question:trust:choice:l2" in answers["reliability:question:trust"].selected_choices
+        ? 2.0 : 1.0))'
+      translations:
+        fr:
+          label: Confiance
+    - ref_id: threat_level
+      label: Threat level
+      kind: number
+      expression: values.dependency * values.penetration / (values.maturity * values.trust)
+      translations:
+        fr:
+          label: Niveau de menace
+    pages:
+    - urn: urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:context
+      ref_id: context
+      name: Context
+      questions:
+        urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:context:question:vendor:
+          type: object_reference
+          text: Vendor
+          config:
+            model: entity
+          translations:
+            fr:
+              text: Fournisseur
+        urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:context:question:service:
+          type: text
+          text: What service does the vendor provide?
+          translations:
+            fr:
+              text: Quel service le fournisseur assure-t-il ?
+      translations:
+        fr:
+          name: Contexte
+    - urn: urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:exposure
+      ref_id: exposure
+      name: Exposure
+      description: How much the vendor matters to you and how far it reaches into your systems.
+      questions:
+        urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:exposure:question:dependency:
+          type: unique_choice
+          text: How vital is the relationship with this vendor to your activity?
+          choices:
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:exposure:question:dependency:choice:l1
+            value: 1 – Not needed
+            description: Your mission can be carried out without any link to this vendor's systems.
+            translations:
+              fr:
+                value: 1 – Pas nécessaire
+                description: Votre mission peut être menée sans aucun lien avec le SI de ce fournisseur.
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:exposure:question:dependency:choice:l2
+            value: 2 – Useful
+            description: The link helps carry out your mission, which could do without it.
+            translations:
+              fr:
+                value: 2 – Utile
+                description: Le lien facilite votre mission, qui pourrait s'en passer.
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:exposure:question:dependency:choice:l3
+            value: 3 – Essential, replaceable
+            description: The link is essential, but another provider could take over.
+            translations:
+              fr:
+                value: 3 – Indispensable, remplaçable
+                description: Le lien est indispensable, mais un autre prestataire pourrait prendre le
+                  relais.
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:exposure:question:dependency:choice:l4
+            value: 4 – Essential, irreplaceable
+            description: The link is essential and no other provider could take over.
+            translations:
+              fr:
+                value: 4 – Indispensable, irremplaçable
+                description: Le lien est indispensable et aucun autre prestataire ne pourrait prendre
+                  le relais.
+          translations:
+            fr:
+              text: La relation avec ce fournisseur est-elle vitale pour votre activité ?
+        urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:exposure:question:penetration:
+          type: unique_choice
+          text: How far does this vendor reach into your internal resources?
+          choices:
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:exposure:question:penetration:choice:l1
+            value: 1 – No access or user access
+            description: No access, or standard user rights on end-user devices such as workstations or
+              phones.
+            translations:
+              fr:
+                value: 1 – Aucun accès ou accès utilisateur
+                description: Aucun accès, ou des droits d'utilisateur standard sur des terminaux comme
+                  les postes de travail ou les téléphones.
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:exposure:question:penetration:choice:l2
+            value: 2 – Administrator of end-user devices
+            description: Administrator rights on end-user devices or fleets, or physical access to your
+              offices.
+            translations:
+              fr:
+                value: 2 – Administrateur des terminaux
+                description: Des droits d'administrateur sur des terminaux ou des flottes, ou un accès
+                  physique à vos bureaux.
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:exposure:question:penetration:choice:l3
+            value: 3 – Administrator of business servers
+            description: 'Administrator rights on business servers: files, databases, web or application
+              servers.'
+            translations:
+              fr:
+                value: 3 – Administrateur des serveurs métier
+                description: 'Des droits d''administrateur sur des serveurs métier : fichiers, bases de
+                  données, serveurs web ou d''application.'
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:exposure:question:penetration:choice:l4
+            value: 4 – Administrator of the infrastructure
+            description: Administrator rights on core infrastructure (directory, DNS, network, firewalls,
+              hypervisors, storage) or physical access to server rooms.
+            translations:
+              fr:
+                value: 4 – Administrateur de l'infrastructure
+                description: Des droits d'administrateur sur l'infrastructure (annuaire, DNS, réseau,
+                  pare-feu, hyperviseurs, stockage) ou un accès physique aux salles serveurs.
+          translations:
+            fr:
+              text: Jusqu'où ce fournisseur accède-t-il à vos ressources internes ?
+      translations:
+        fr:
+          name: Exposition
+          description: Le poids du fournisseur pour vous et jusqu'où il accède à vos systèmes.
+    - urn: urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:reliability
+      ref_id: reliability
+      name: Cyber reliability
+      description: How well the vendor protects itself, and whether its interests match yours. Higher
+        levels lower the threat.
+      questions:
+        urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:reliability:question:maturity:
+          type: unique_choice
+          text: What are this vendor's security capabilities?
+          choices:
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:reliability:question:maturity:choice:l1
+            value: 1 – Ad hoc
+            description: Basic hygiene is applied now and then, nothing is formalised, and incident response
+              is uncertain.
+            translations:
+              fr:
+                value: 1 – Ponctuelle
+                description: L'hygiène de base est appliquée ponctuellement, rien n'est formalisé et la
+                  réaction aux incidents est incertaine.
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:reliability:question:maturity:choice:l2
+            value: 2 – Reactive
+            description: Hygiene rules and regulations are followed but not part of an overall policy;
+              security is handled as issues arise.
+            translations:
+              fr:
+                value: 2 – Réactive
+                description: Les règles d'hygiène et la réglementation sont suivies sans politique d'ensemble
+                  ; la sécurité est traitée au fil des problèmes.
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:reliability:question:maturity:choice:l3
+            value: 3 – Policy-driven
+            description: An overall security policy is applied, still mostly reactive, with some risks
+              centralised and anticipated.
+            translations:
+              fr:
+                value: 3 – Encadrée
+                description: Une politique de sécurité d'ensemble est appliquée, encore surtout réactive,
+                  avec certains risques centralisés et anticipés.
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:reliability:question:maturity:choice:l4
+            value: 4 – Managed and proactive
+            description: The vendor manages its risks through an integrated, proactive security policy.
+            translations:
+              fr:
+                value: 4 – Pilotée et proactive
+                description: Le fournisseur pilote ses risques par une politique de sécurité intégrée
+                  et proactive.
+          translations:
+            fr:
+              text: Quelles sont les capacités de ce fournisseur en matière de sécurité ?
+        urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:reliability:question:trust:
+          type: unique_choice
+          text: Could this vendor's intentions or interests run against yours?
+          choices:
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:reliability:question:trust:choice:l1
+            value: 1 – Unknown
+            description: You don't know the vendor's intentions.
+            translations:
+              fr:
+                value: 1 – Inconnues
+                description: Vous ne connaissez pas les intentions du fournisseur.
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:reliability:question:trust:choice:l2
+            value: 2 – Neutral
+            description: The vendor's intentions are considered neutral.
+            translations:
+              fr:
+                value: 2 – Neutres
+                description: Les intentions du fournisseur sont considérées comme neutres.
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:reliability:question:trust:choice:l3
+            value: 3 – Probably favourable
+            description: The vendor's intentions are known and likely favourable to you.
+            translations:
+              fr:
+                value: 3 – Probablement favorables
+                description: Les intentions du fournisseur sont connues et probablement favorables.
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering-ebios-rm:reliability:question:trust:choice:l4
+            value: 4 – Fully aligned
+            description: The vendor's intentions are well known and fully compatible with yours.
+            translations:
+              fr:
+                value: 4 – Pleinement alignées
+                description: Les intentions du fournisseur sont bien connues et pleinement compatibles
+                  avec les vôtres.
+          translations:
+            fr:
+              text: Les intentions ou les intérêts de ce fournisseur peuvent-ils être contraires aux vôtres
+                ?
+      translations:
+        fr:
+          name: Fiabilité cyber
+          description: La capacité du fournisseur à se protéger, et la convergence de ses intérêts avec
+            les vôtres. Des niveaux élevés réduisent la menace.
+    translations:
+      fr:
+        name: Criticité des fournisseurs (EBIOS RM)
+        description: 'Classe un fournisseur selon les critères d''évaluation des parties prenantes de
+          la méthode EBIOS Risk Manager (ANSSI, atelier 3) : l''exposition (dépendance, pénétration) et
+          la fiabilité cyber (maturité cyber, confiance), chacun noté de 1 à 4.
+
+
+          Le niveau de menace vaut dépendance × pénétration ÷ (maturité × confiance), de 0,06 à 16 : c''est
+          la valeur selon laquelle la cartographie de l''écosystème d''EBIOS RM place les parties prenantes.'
+        annotation: 'Une réponse acceptée attribue le niveau du fournisseur sur l''échelle par défaut
+          à partir du niveau de menace, selon les zones par défaut de la cartographie de l''écosystème
+          d''EBIOS RM : Critique à partir de 2,5 (zone de danger), Important à partir de 0,9 (zone de
+          contrôle), Standard à partir de 0,2 (zone de veille), Faible impact en dessous. EBIOS RM laisse
+          ces seuils à chaque organisation : ajustez-les dans les paramètres du formulaire. Les niveaux
+          sont désignés par leur clé : une échelle renommée ou réordonnée continue de fonctionner.'
+translations:
+  fr:
+    name: Criticité des fournisseurs (EBIOS RM)
+    description: 'Un formulaire de départ pour classer un fournisseur selon les quatre critères d''évaluation
+      des parties prenantes d''EBIOS Risk Manager. Lancez-le depuis un fournisseur avec « Évaluer le niveau
+      » ; une réponse acceptée attribue le niveau au fournisseur. C''est une alternative au formulaire
+      « Criticité des fournisseurs » : retenez une seule méthode de classement par organisation.'

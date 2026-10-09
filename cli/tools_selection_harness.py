@@ -180,13 +180,13 @@ CLI_DIR = os.environ.get("CA_CLI_DIR", os.path.dirname(os.path.abspath(__file__)
 
 
 def load_tools(read_only: bool):
-    """Build a fresh FastMCP per surface — server.register_tools is idempotent."""
+    """Build a fresh MCPServer per surface — server.register_tools is idempotent."""
     if CLI_DIR not in sys.path:
         sys.path.insert(0, CLI_DIR)
-    from mcp.server.fastmcp import FastMCP
+    from mcp.server.mcpserver import MCPServer
     from ca_mcp.server import READ_TOOLS, WRITE_TOOLS
 
-    probe = FastMCP("probe")
+    probe = MCPServer("probe")
     for fn in READ_TOOLS:
         probe.tool()(fn)
     if not read_only:
@@ -201,7 +201,8 @@ def load_tools(read_only: bool):
                 "function": {
                     "name": t.name,
                     "description": (t.description or "")[:1024],
-                    "parameters": t.inputSchema or {"type": "object", "properties": {}},
+                    "parameters": t.input_schema
+                    or {"type": "object", "properties": {}},
                 },
             }
         )
