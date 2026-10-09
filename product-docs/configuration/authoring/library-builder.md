@@ -109,11 +109,32 @@ The order in the editor is the order respondents see. Keep conditional (`depends
 
 ### Add outcome rules
 
-To label a result based on the final score (_Bronze_ at 60+, _Silver_ at 80+, _Gold_ at 95+):
+Outcome rules judge each audit of the framework and show on the audit page. To label a result based on the maturity score (_Bronze_ at 60+, _Silver_ at 80+, _Gold_ at 95+ on a 0–100 scale):
 
 1. Open **Framework Settings** → **Outcome rules** → **Add rule**.
-2. Per tier, set a **ref_id** (`bronze`), a **CEL Expression** (a boolean, e.g. `score >= 60`), a **Label** (what reaching this tier means), and a **color**.
-3. All matching rules apply, so order doesn't matter; use the literal `true` as a catch-all default tier. The **CEL context reference** toggle lists the context variables available in expressions (`assessment.*`, `requirements[...]`, `answers[...]`).
+2. Per tier, set a **ref_id** (`bronze`), a **CEL Expression** (a boolean, e.g. `assessment.maturity_score >= 60`), a **Label** (what reaching this tier means), and a **color**.
+3. Every matching yes/no rule applies; use the literal `true` as a catch-all default tier. The **CEL context reference** toggle lists the variables expressions can read.
+
+Rules can do more than label a score:
+
+- **Number rules.** Set **Result** to **Number** to compute a value instead of a yes/no verdict (an average, a count). Number rules below it and every yes/no rule read it as `values.<ref_id>`; with a label, the value shows on the audit to those who see its **Score**.
+- **Rule order.** Number rules run first, in order, each seeing the ones above it. Yes/no rules then run in order and see the yes/no rules above them that fired, as `computed_outcomes` — so a summary rule such as `"maturity" in computed_outcomes && "exclusions" in computed_outcomes` goes below the rules it reads.
+- **Applies to.** When the framework has implementation groups, limit a rule to some of them: it then applies only to audits whose scope includes one of these groups (or covers the whole framework, with no group selected). Use it for criteria that differ by level, as the CyFun 2025 [conformity criteria](../../features/framework-specific/cyfun.md#checking-the-ccb-conformity-criteria) do.
+
+What an expression can read:
+
+| Variable                                               | Fields                                                                                                                                                                                                                                                                        |
+| ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `assessment`                                           | `implementation_score`, `documentation_score`, `maturity_score`, `target_score`, `selected_implementation_groups`, and the answer counts (`score_sum`, `score_max`, `answered_count`, `total_count`)                                                                          |
+| `requirements["NODE_ID"]`                              | `score`, `documentation_score`, `maturity_score`, `max_score`, `result`, `status`, `implementation_groups`                                                                                                                                                                    |
+| `groups["GROUP_ID"]`, `sections["NODE_ID"]`            | the scores of their requirements (`implementation_score`, `documentation_score`, `maturity_score`), `scored_count`, `total_count`, `not_applicable_count` and `min_maturity_score` (the lowest requirement maturity); sections also `depth` (1 at the top level) and `ref_id` |
+| `answers["…"]`, `values.<ref_id>`, `computed_outcomes` | question answers, number rules, yes/no rules above                                                                                                                                                                                                                            |
+
+Scores are the ones the audit page shows — same calculation method, over the requirements in the audit's scope — but unrounded: a maturity of 2.497 shows as 2.50 and does not reach 2.5. A score is `-1` when nothing counts (nothing scored, or a group or section with no requirement in scope): a minimum such as `>= 3.0` then fails, but an upper bound such as `< 2.0` holds, so a rule that flags low scores should also check the score is not `-1` (or, for groups and sections, that `scored_count > 0`). A requirement's `maturity_score` is the average of its implementation and documentation scores, or `-1` when it isn't counted (not scored, or not applicable without [N/A anchoring](../../guides/customize-audit.md#anchor-na-to-target-score)).
+
+Rules are evaluated again after every score, result or scope change, so prefer the group and section fields to loops over requirements: `groups["K"].min_maturity_score >= 3.0` checks every key measure at once, where `requirements.all(k, …)` is much slower. Requirement visibility expressions run before the scores are computed and cannot read them, nor `groups`, `sections` or `values`.
+
+Saving the framework, and loading or updating its library, refuses a rule that names a requirement, group or section that doesn't exist, reads a yes/no rule listed below it, or has an unknown kind: at runtime such a rule would only fail silently.
 
 ### Reference reference controls and threats from a requirement
 
@@ -287,7 +308,7 @@ The builder will let you do almost anything; the choices that age well are narro
 ## Builder vs Excel
 
 - **Builder** — for content that lives primarily on this instance (internal policies, forked variants, in-progress drafts), for iterative editing, and anywhere a translation pass matters (the side-by-side editing and coverage counter are hard to replicate in a spreadsheet).
-- **Excel** — for content you ship as a library file across instances or to the community catalogue, for constructs the builder UI doesn't expose (e.g. per-requirement score overrides), and for the initial conversion of a published standard from its source spreadsheet. See [Excel-driven authoring](excel.md) and [Designing your own libraries](../libraries/custom-libraries.md).
+- **Excel** — for content you ship as a library file across instances or to the community catalogue, for constructs the builder UI doesn't expose (e.g. per-requirement score overrides), and for the initial conversion of a published standard from its source spreadsheet. See [Excel-driven authoring](excel.md) and [Create a Library](../libraries/create-library.md).
 
 The two paths compose: an Excel-built library can be imported into a draft and tuned in place, and a builder draft can be exported to YAML for redistribution.
 
@@ -311,8 +332,8 @@ Individual users' most recently typed packager is also remembered locally and ta
 
 - [Libraries](../libraries/README.md) — how to load, upgrade, and clean up authored content.
 - [Excel-driven authoring](excel.md) — the alternative Excel-to-YAML workflow for cross-instance publishing.
-- [Designing your own libraries](../libraries/custom-libraries.md) — the library YAML format the builder produces.
-- [Getting your custom framework](../libraries/custom-frameworks.md) — quick-start for a single-framework library.
-- [Library upgrade](../libraries/library-upgrade.md) — what changes are safe to ship in a later version.
+- [Library objects](../libraries/library-objects/README.md) — the available objects, with links to their Excel fields and YAML examples.
+- [Guided example: create your first framework](../libraries/guided-example.md) — a step-by-step framework workbook.
+- [Update a library](../libraries/update-library.md) — how to publish a new version and apply it to existing audits.
 - Concepts: [Frameworks](../../concepts/frameworks.md) · [Risk matrices](../../concepts/risk-matrices.md) · [Journeys](../../concepts/journeys.md) · [Mappings](../../concepts/mappings.md).
 - [Contributing → Frameworks and libraries](../../contributing/framework.md) — how to upstream authored content to the community catalogue.

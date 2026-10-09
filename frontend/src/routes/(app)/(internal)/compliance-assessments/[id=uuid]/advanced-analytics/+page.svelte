@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { roundScore } from '$lib/utils/helpers';
 	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
 	import StackedBarsNormalized from '$lib/components/Chart/StackedBarsNormalized.svelte';
@@ -149,7 +150,7 @@
 						lineStyle: { width: 2.5 },
 						emphasis: { focus: 'series' },
 						yAxisIndex: 1,
-						data: timeline.map((t: any) => (t.score >= 0 ? t.score : null)),
+						data: timeline.map((t: any) => (t.score >= 0 ? roundScore(t.score) : null)),
 						itemStyle: { color: '#6366f1' },
 						symbol: 'circle',
 						symbolSize: 5
@@ -203,6 +204,8 @@
 			}
 		};
 	}
+
+	const shown = (value: number | null) => (value == null ? value : roundScore(value));
 </script>
 
 <div class="flex flex-col gap-5 pb-8">
@@ -461,7 +464,7 @@
 													name: (s.ref_id ? s.ref_id + ' ' : '') + s.name,
 													max: isSum ? baseMax * (s.total_weight || 1) : baseMax
 												}))}
-												values={scoredSections.map((s: any) => s.implementation_score)}
+												values={scoredSections.map((s: any) => roundScore(s.implementation_score))}
 												height="h-full"
 											/>
 										</div>
@@ -479,7 +482,9 @@
 														name: (s.ref_id ? s.ref_id + ' ' : '') + s.name,
 														max: isSum ? baseMax * (s.total_weight || 1) : baseMax
 													}))}
-													values={docScoredSections.map((s: any) => s.documentation_score)}
+													values={docScoredSections.map((s: any) =>
+														roundScore(s.documentation_score)
+													)}
 													height="h-full"
 												/>
 											</div>
@@ -529,7 +534,7 @@
 													{#if section.maturity_score !== null}
 														<span
 															class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full bg-violet-50 text-violet-700 text-xs font-medium px-2 py-0.5"
-															>{section.maturity_score}</span
+															>{shown(section.maturity_score)}</span
 														>
 													{:else}
 														<span class="text-surface-400">&mdash;</span>
@@ -542,7 +547,7 @@
 														{#if section.implementation_score !== null}
 															<span
 																class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full bg-indigo-50 text-indigo-700 text-xs font-medium px-2 py-0.5"
-																>{section.implementation_score}</span
+																>{shown(section.implementation_score)}</span
 															>
 														{:else}
 															<span class="text-surface-400">&mdash;</span>
@@ -555,7 +560,7 @@
 															{#if section.documentation_score !== null}
 																<span
 																	class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium px-2 py-0.5"
-																	>{section.documentation_score}</span
+																	>{shown(section.documentation_score)}</span
 																>
 															{:else}
 																<span class="text-surface-400">&mdash;</span>
@@ -950,7 +955,7 @@
 												{#if group.maturity_score !== null}
 													<span
 														class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full bg-violet-50 text-violet-700 text-xs font-medium px-2 py-0.5"
-														>{group.maturity_score}</span
+														>{shown(group.maturity_score)}</span
 													>
 												{:else}
 													<span class="text-surface-400">&mdash;</span>
@@ -963,7 +968,7 @@
 													{#if group.implementation_score !== null}
 														<span
 															class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full bg-indigo-50 text-indigo-700 text-xs font-medium px-2 py-0.5"
-															>{group.implementation_score}</span
+															>{shown(group.implementation_score)}</span
 														>
 													{:else}
 														<span class="text-surface-400">&mdash;</span>
@@ -976,7 +981,7 @@
 														{#if group.documentation_score !== null}
 															<span
 																class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium px-2 py-0.5"
-																>{group.documentation_score}</span
+																>{shown(group.documentation_score)}</span
 															>
 														{:else}
 															<span class="text-surface-400">&mdash;</span>

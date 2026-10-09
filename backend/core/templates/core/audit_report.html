@@ -141,7 +141,7 @@
         <h1 class='text-3xl'>{{ compliance_assessment.name }}: {{ compliance_assessment.framework }}</h1>
         {% with scores=compliance_assessment.get_global_score %}
         {% if scores.maturity_score > -1 %}
-            <p class='font-semibold'>{% trans "Score:" %}</p> <span class="font-semibold">{{ scores.maturity_score|floatformat }}</span>
+            <p class='font-semibold'>{% trans "Score:" %}</p> <span class="font-semibold">{{ scores.maturity_score|floatformat:"-2" }}</span>
         {% endif %}
         {% endwith %}
         {% bar_graph assessments ancestors %}

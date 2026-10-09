@@ -26,5 +26,5 @@ For frameworks, matrices, and presets, the **recommended path is the in-app visu
 ## Related
 
 - [Libraries](../libraries/README.md) — how to load, upgrade, and clean up authored content.
-- [Designing your own libraries](../libraries/custom-libraries.md) — the full Excel-to-YAML workflow that backs framework and matrix authoring.
+- [Create a Library](../libraries/create-library.md) — the Excel workflow for authoring a library.
 - [Contributing → Frameworks and libraries](../../contributing/framework.md) — how to upstream authored content to the community library.

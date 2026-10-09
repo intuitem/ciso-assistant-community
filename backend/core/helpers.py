@@ -414,11 +414,11 @@ def annotate_tree_with_aggregated_scores(
     anchor_na = compliance_assessment.anchor_na_to_target
 
     def _clean(value):
-        """Round a parent's display value like the global score (round_score).
-        Upstream rollups use the raw _aggregated_ratio, so no precision is lost."""
+        """A parent's value like the global score (clean_score): unrounded,
+        rendering rounds it."""
         if value is None:
             return None
-        return round_score(value)
+        return clean_score(value)
 
     def walk(node: dict) -> None:
         children = node.get("children") or {}
@@ -463,14 +463,10 @@ def annotate_tree_with_aggregated_scores(
                 node["_leaf_weight"] = weight
                 if show_doc:
                     # documentation_score=None counts as the bottom of the
-                    # scale, like _compute_raw_score_for_field (SUM keeps its
-                    # raw 0). (score=None is excluded above; doc is not.)
+                    # scale, like _compute_raw_score_for_field, with every
+                    # method. (score=None is excluded above; doc is not.)
                     if doc_val is None:
-                        doc_val = (
-                            0
-                            if method == ComplianceAssessment.CalculationMethod.SUM
-                            else ra_min
-                        )
+                        doc_val = ra_min
                     doc_ratio = (doc_val - ra_min) / ra_range
                     node["aggregated_documentation_score"] = doc_val
                     node["_aggregated_doc_ratio"] = doc_ratio
