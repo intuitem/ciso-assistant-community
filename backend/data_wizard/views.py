@@ -86,6 +86,7 @@ from core.utils import (
     build_questions_dict,
     get_global_currency,
     parse_answers_cell,
+    unescape_excel_formula,
 )
 from data_wizard.arm_helpers import process_arm_file
 from data_wizard.cyfun_helpers import (
@@ -426,21 +427,31 @@ def _resolve_asset_class(value: Any, path_index: dict) -> Optional[AssetClass]:
     return candidates[0] if len(candidates) == 1 else None
 
 
+def _split_label_names(value: Any) -> set[str]:
+    """Split a pipe-, comma- or newline-separated cell into label names."""
+    if not isinstance(value, str):
+        return set()
+    return {name.strip() for name in re.split(r"[|,\n]", value) if name.strip()}
+
+
+def _invalid_label_names(names: set[str]) -> list[str]:
+    """Names FilteringLabel would reject, so a row can fail with a clear message."""
+    field = FilteringLabel._meta.get_field("label")
+    invalid = []
+    for name in names:
+        try:
+            field.run_validators(name)
+        except ValidationError:
+            invalid.append(name)
+    return sorted(invalid)
+
+
 def _resolve_filtering_labels(value: Any) -> list[UUID]:
     """Parse pipe- or comma-separated label names and return list of FilteringLabel IDs.
 
     Labels that do not yet exist are created on the fly.
     """
-    if not isinstance(value, str):
-        return []
-
-    value = value.strip()
-    if not value:
-        return []
-
-    label_names = set(
-        name.strip() for name in re.split(r"[|,\n]", value) if name.strip()
-    )
+    label_names = _split_label_names(value)
     label_ids: list[UUID] = []
     for label_name in label_names:
         label = FilteringLabel.objects.filter(label=label_name).first()
@@ -1056,9 +1067,21 @@ class RecordConsumer[Context = None](ABC):
             existing = None
             internal_id = record.get("internal_id")
             if internal_id:
-                existing = model_class.objects.filter(
-                    pk=internal_id, id__in=viewable_ids
-                ).first()
+                try:
+                    existing = model_class.objects.filter(
+                        pk=internal_id, id__in=viewable_ids
+                    ).first()
+                except ValidationError, ValueError:
+                    # A hand-edited id would otherwise abort the whole file.
+                    results.add_error(
+                        Error(
+                            record=record, error=f"Invalid internal_id '{internal_id}'"
+                        )
+                    )
+                    if self.on_conflict == ConflictMode.STOP:
+                        results.stopped = True
+                        break
+                    continue
             if existing is None:
                 try:
                     existing = self.find_existing(record_data)
@@ -1082,44 +1105,21 @@ class RecordConsumer[Context = None](ABC):
                         break
                     case ConflictMode.UPDATE:
                         update_data = self._build_update_data(record, record_data)
-                        serializer = self.get_serializer_class()(
-                            instance=existing,
-                            data=update_data,
-                            partial=True,
-                            context={"request": self.request},
-                        )
-                        if serializer.is_valid():
-                            try:
-                                serializer.save()
-                                results.add_updated()
-                            except Exception as e:
-                                results.add_error(Error(record=record, error=str(e)))
+                        error = self._write_record(update_data, instance=existing)
+                        if error:
+                            results.add_error(Error(record=record, error=error))
                         else:
-                            results.add_error(
-                                Error(
-                                    record=record,
-                                    error=str(serializer.errors),
-                                )
-                            )
+                            results.add_updated()
                         continue
 
-            serializer = self.get_serializer_class()(
-                data=record_data, context={"request": self.request}
-            )
-            if serializer.is_valid():
-                try:
-                    serializer.save()
-                    results.add_created()
-                except Exception as e:
-                    results.add_error(Error(record=record, error=str(e)))
-                    if self.on_conflict == ConflictMode.STOP:
-                        results.stopped = True
-                        break
-            else:
-                results.add_error(Error(record=record, error=str(serializer.errors)))
+            error = self._write_record(record_data)
+            if error:
+                results.add_error(Error(record=record, error=error))
                 if self.on_conflict == ConflictMode.STOP:
                     results.stopped = True
                     break
+            else:
+                results.add_created()
 
         for key, names in self.side_effects.items():
             if names:
@@ -1131,6 +1131,40 @@ class RecordConsumer[Context = None](ABC):
             f"Skipped: {results.skipped}, Failed: {results.failed}"
         )
         return results
+
+    def resolve_deferred(self, data: dict, instance=None) -> dict:
+        """Resolve values whose resolution writes to the database.
+
+        Runs only once a row is known to be written, inside the transaction of
+        that write, so a skipped or rejected row leaves nothing behind.
+        *instance* is the record being updated, None on creation.
+        """
+        return data
+
+    def after_write(self, instance, created: bool) -> None:
+        """Follow-up writes for a saved row, inside the transaction of that write."""
+
+    def _write_record(self, data: dict, instance=None) -> Optional[str]:
+        """Create, or update *instance*, from *data*; return an error or None."""
+        with transaction.atomic():
+            # Validation can raise too (e.g. PermissionDenied when linking an
+            # object the user cannot view): that must fail the row, not the file.
+            try:
+                serializer = self.get_serializer_class()(
+                    instance=instance,
+                    data=self.resolve_deferred(data, instance),
+                    partial=instance is not None,
+                    context={"request": self.request},
+                )
+                if not serializer.is_valid():
+                    transaction.set_rollback(True)
+                    return str(serializer.errors)
+                saved = serializer.save()
+                self.after_write(saved, created=instance is None)
+            except Exception as e:
+                transaction.set_rollback(True)
+                return str(e)
+        return None
 
     def _record_side_effects(self, key: str, resolved: SideObjects) -> None:
         self.side_effects.setdefault(key, []).extend(resolved.created)
@@ -2812,11 +2846,60 @@ class FolderRecordConsumer(RecordConsumer):
     SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType(
         {
             "parent_folder": ["domain"],
+            "filtering_labels": ["filtering_labels", "labels", "étiquette", "label"],
         }
     )
 
     def create_context(self):
         return None, None
+
+    @cached_property
+    def may_add_labels(self) -> bool:
+        # New labels are created in the root folder (FolderMixin's default).
+        return RoleAssignment.is_access_allowed(
+            user=self.request.user,
+            perm=Permission.objects.get(codename="add_filteringlabel"),
+            folder=Folder.get_root_folder(),
+        )
+
+    def _resolve_parent(self, record: dict) -> tuple[Optional[UUID], Optional[Error]]:
+        """Resolve the `domain` column, a parent domain given by name."""
+        domain_name = str(record.get("domain", "")).strip()
+        if not domain_name:
+            return Folder.get_root_folder().id, None
+
+        # Names are not unique: a row exported with its internal_id keeps its
+        # current parent while that parent's name is unchanged.
+        internal_id = record.get("internal_id")
+        if internal_id:
+            try:
+                current = (
+                    Folder.objects.filter(id=internal_id)
+                    .select_related("parent_folder")
+                    .first()
+                )
+            except ValidationError, ValueError:
+                current = None  # reported when the row is matched
+            parent = current.parent_folder if current else None
+            if parent and parent.name.lower() == domain_name.lower():
+                return parent.id, None
+
+        # The root counts too: files may name it instead of leaving `domain` blank.
+        matching_folders = Folder.objects.filter(
+            name__iexact=domain_name,
+            content_type__in=[Folder.ContentType.DOMAIN, Folder.ContentType.ROOT],
+        )
+        count = matching_folders.count()
+        if count == 0:
+            return None, Error(
+                record=record, error=f"Parent folder '{domain_name}' not found"
+            )
+        if count > 1:
+            return None, Error(
+                record=record,
+                error=f"Multiple folders named '{domain_name}' found; please use a unique name",
+            )
+        return matching_folders.first().id, None
 
     def find_existing(self, record_data: dict) -> Optional[Folder]:
         name = record_data.get("name")
@@ -2831,33 +2914,88 @@ class FolderRecordConsumer(RecordConsumer):
     def prepare_create(
         self, record: dict, context: None
     ) -> tuple[dict, Optional[Error]]:
+        # A domains export escapes formula-like cells; undo it so they round-trip.
+        record = {key: unescape_excel_formula(value) for key, value in record.items()}
         name = record.get("name")
         if not name:
             return {}, Error(record=record, error="Name field is mandatory")
 
-        domain_name = str(record.get("domain", "")).strip()
-        if domain_name:
-            matching_folders = Folder.objects.filter(name__iexact=domain_name)
-            count = matching_folders.count()
-            if count == 0:
-                return {}, Error(
-                    record=record,
-                    error=f"Parent folder '{domain_name}' not found",
-                )
-            if count > 1:
-                return {}, Error(
-                    record=record,
-                    error=f"Multiple folders named '{domain_name}' found; please use a unique name",
-                )
-            parent_folder_id = matching_folders.first().id
-        else:
-            parent_folder_id = Folder.get_root_folder().id
+        parent_folder_id, error = self._resolve_parent(record)
+        if error is not None:
+            return {}, error
 
-        return {
+        data = {
             "name": name,
             "description": record.get("description", ""),
             "parent_folder": parent_folder_id,
-        }, None
+        }
+
+        raw_labels = (
+            record.get("filtering_labels")
+            or record.get("labels")
+            or record.get("étiquette")
+            or record.get("label")
+        )
+        label_names = _split_label_names(raw_labels)
+        invalid_labels = _invalid_label_names(label_names)
+        if invalid_labels:
+            return {}, Error(
+                record=record,
+                error=f"Invalid labels {', '.join(invalid_labels)}: use only "
+                "letters, digits, '_' or '-', 36 characters at most",
+            )
+        if label_names and not self.may_add_labels:
+            existing = set(
+                FilteringLabel.objects.filter(label__in=label_names).values_list(
+                    "label", flat=True
+                )
+            )
+            missing = sorted(label_names - existing)
+            if missing:
+                return {}, Error(
+                    record=record,
+                    error=f"You are not allowed to create labels: {', '.join(missing)}",
+                )
+        # Kept as names: missing labels are created only when the row is written.
+        if label_names:
+            data["filtering_labels"] = raw_labels
+
+        raw_iam_groups = record.get("create_iam_groups")
+        if not is_blank_cell(raw_iam_groups):
+            create_iam_groups = _parse_bool_cell(raw_iam_groups, binary_only=True)
+            if create_iam_groups is None:
+                return {}, Error(
+                    record=record,
+                    error=f"Invalid create_iam_groups '{raw_iam_groups}': "
+                    "use true or false",
+                )
+            data["create_iam_groups"] = create_iam_groups
+
+        return data, None
+
+    def after_write(self, instance: Folder, created: bool) -> None:
+        # The API provisions IAM groups in FolderViewSet.perform_create, which the
+        # import bypasses; on update, the serializer handles the flag change.
+        if created:
+            Folder.create_default_ug_and_ra(instance)
+
+    @cached_property
+    def viewable_label_ids(self) -> set:
+        return set(
+            RoleAssignment.get_viewable_object_ids(self.request.user, FilteringLabel)
+        )
+
+    def resolve_deferred(self, data: dict, instance=None) -> dict:
+        if "filtering_labels" not in data:
+            return data
+        label_ids = _resolve_filtering_labels(data["filtering_labels"])
+        if instance is not None:
+            # The export only lists the labels the user may view: the cell cannot
+            # mention the others, so it must not unlink them.
+            label_ids += instance.filtering_labels.exclude(
+                id__in=self.viewable_label_ids
+            ).values_list("id", flat=True)
+        return {**data, "filtering_labels": label_ids}
 
 
 class VulnerabilityRecordConsumer(RecordConsumer[None]):
@@ -4262,9 +4400,8 @@ class LoadFileView(APIView):
                         ).fillna("")
                     else:
                         file_type = RecordFileType.CSV
-                        # utf-8-sig transparently strips a leading BOM (added to our
-                        # CSV exports for Excel) so the first column header is not corrupted.
-                        df = pd.read_csv(record_file, encoding="utf-8-sig").fillna("")
+                        # Detects the delimiter: our table exports use ';'.
+                        df = read_csv_file(record_file)
 
                     try:
                         df = normalize_df_columns(df)
