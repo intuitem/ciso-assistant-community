@@ -3359,6 +3359,8 @@ class HttpRequestAction(BaseAction):
         return token
 
     def _paginate(self, config, paginate, method, url, kwargs, host):
+        import json
+
         import requests
         from core.net_safety import (
             BlockedRequestError,
@@ -3369,12 +3371,19 @@ class HttpRequestAction(BaseAction):
         items_path = paginate.get("items") or ""
         next_path = paginate.get("next") or ""
         cursor_param = paginate.get("cursor_param") or ""
+        offset_param = paginate.get("offset_param") or ""
+        page_size = int(paginate.get("page_size") or 0)
+        count_only = _as_bool(paginate.get("count_only"))
         max_pages = min(
             max(int(paginate.get("max_pages") or HTTP_DEFAULT_PAGES), 1),
             http_max_pages(),
         )
-        max_items = http_max_items()
-        items, pages, truncated = [], 0, False
+        from .engine import MAX_COLLECTION_ITEMS, node_output_budget
+
+        max_items = min(http_max_items(), MAX_COLLECTION_ITEMS)
+        max_chars = node_output_budget() * 9 // 10
+        offset = int(_query_value(url, offset_param) or 0) if offset_param else 0
+        items, count, pages, truncated, chars = [], 0, 0, False, 0
         while True:
             response = requests.request(method, url, **kwargs)
             pages += 1
@@ -3387,36 +3396,51 @@ class HttpRequestAction(BaseAction):
                     f"http_request: '{items_path}' is not a list in the answer "
                     f"from '{host}'"
                 )
-            items.extend(page_items)
-            following = dig(output["body"], next_path) if next_path else None
-            if len(items) > max_items:
-                items, truncated = items[:max_items], True
-                break
-            if not following:
-                break
+            if not count_only:
+                for item in page_items:
+                    size = len(json.dumps(item, default=str))
+                    if len(items) >= max_items or chars + size > max_chars:
+                        truncated = True
+                        break
+                    items.append(item)
+                    chars += size
+                count = len(items)
+                if truncated:
+                    break
+            else:
+                count += len(page_items)
+            if offset_param:
+                if not page_items or len(page_items) < page_size:
+                    break
+                offset += len(page_items)
+                following = str(offset)
+            else:
+                following = dig(output["body"], next_path) if next_path else None
+                if not following:
+                    break
             if pages >= max_pages:
                 truncated = True
                 break
-            url = self._next_url(url, str(following), cursor_param, host)
+            url = self._next_url(
+                url, str(following), offset_param or cursor_param, host
+            )
             try:
                 assert_public_url_unless_dev(url, allowed_schemes=("https", "http"))
             except (BlockedRequestError, DnsLookupError) as e:
                 raise ActionError(f"http_request: {type(e).__name__} for host '{host}'")
-        return {**output, "items": items, "pages": pages, "truncated": truncated}
+        return {
+            **output,
+            "body": None,
+            "items": None if count_only else items,
+            "count": count,
+            "pages": pages,
+            "truncated": truncated,
+        }
 
     @staticmethod
-    def _next_url(url, following, cursor_param, host):
-        from urllib.parse import parse_qsl, urlencode, urlunsplit
-
-        if cursor_param:
-            parts = urlsplit(url)
-            query = [
-                (key, value)
-                for key, value in parse_qsl(parts.query, keep_blank_values=True)
-                if key != cursor_param
-            ]
-            query.append((cursor_param, following))
-            return urlunsplit(parts._replace(query=urlencode(query)))
+    def _next_url(url, following, param, host):
+        if param:
+            return _with_query_param(url, param, following)
         if (
             urlsplit(following).hostname != host
             or urlsplit(following).scheme != urlsplit(url).scheme
@@ -3456,9 +3480,31 @@ class HttpRequestAction(BaseAction):
             "host": host,
             "reason": reason,
             "items": None,
+            "count": None,
             "pages": 0,
             "truncated": False,
         }
+
+
+def _query_value(url, key):
+    from urllib.parse import parse_qsl
+
+    return dict(parse_qsl(urlsplit(url).query, keep_blank_values=True)).get(key)
+
+
+def _with_query_param(url, key, value):
+    from urllib.parse import parse_qsl, quote, urlencode, urlunsplit
+
+    parts = urlsplit(url)
+    query = [
+        (name, current)
+        for name, current in parse_qsl(parts.query, keep_blank_values=True)
+        if name != key
+    ]
+    query.append((key, value))
+    return urlunsplit(
+        parts._replace(query=urlencode(query, quote_via=quote, safe="$'(),"))
+    )
 
 
 def json_loads_or_none(value):
@@ -4264,10 +4310,23 @@ def _validate_http_paginate(paginate):
         errors.append(
             ("action_http_paginate_missing", "Paging needs the path to the items")
         )
-    if not str(paginate.get("next") or "").strip():
+    offset_param = str(paginate.get("offset_param") or "").strip()
+    if not offset_param and not str(paginate.get("next") or "").strip():
         errors.append(
             ("action_http_paginate_missing", "Paging needs the path to the next page")
         )
+    if offset_param:
+        page_size = paginate.get("page_size")
+        try:
+            if int(page_size) < 1:
+                raise ValueError
+        except ValueError, TypeError:
+            errors.append(
+                (
+                    "action_http_bad_page_size",
+                    "Paging by offset needs the page size the request asks for",
+                )
+            )
     max_pages = paginate.get("max_pages")
     if max_pages not in ("", None) and not _is_templated(max_pages):
         try:

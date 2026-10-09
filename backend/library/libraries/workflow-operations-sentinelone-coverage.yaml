@@ -3,7 +3,7 @@ locale: en
 ref_id: workflow-operations-sentinelone-coverage
 name: SentinelOne — endpoint coverage metrics
 description: 'Reads three numbers from SentinelOne every morning and records each one as a sample of a
-  metric: agents deployed, agents running an out-of-date version, and threats not yet resolved. After
+  metric: agents deployed, agents running an out-of-date version, and threats not yet resolved (unresolved or in progress). After
   importing: create three metric instances (numeric) and set their ids in metric_agents,
   metric_outdated_agents and metric_open_threats; set console_url to your management console (for
   example https://your-tenant.sentinelone.net); add an API token of a read-only service user as the
@@ -56,6 +56,10 @@ objects:
           url: '{{console_url}}/web/api/v2.1/agents?limit=1'
           headers:
             Authorization: ApiToken {{secrets.s1_api_token}}
+        retry:
+          max_attempts: 3
+          delay_seconds: 120
+          backoff: exponential
       - ref: record_agents
         type: action
         label: Record agents
@@ -73,6 +77,10 @@ objects:
           url: '{{console_url}}/web/api/v2.1/agents?isUpToDate=false&limit=1'
           headers:
             Authorization: ApiToken {{secrets.s1_api_token}}
+        retry:
+          max_attempts: 3
+          delay_seconds: 120
+          backoff: exponential
       - ref: record_outdated_agents
         type: action
         label: Record out-of-date agents
@@ -87,9 +95,13 @@ objects:
         action_config:
           type: http_request
           method: GET
-          url: '{{console_url}}/web/api/v2.1/threats?resolved=false&limit=1'
+          url: '{{console_url}}/web/api/v2.1/threats?incidentStatuses=unresolved,in_progress&limit=1'
           headers:
             Authorization: ApiToken {{secrets.s1_api_token}}
+        retry:
+          max_attempts: 3
+          delay_seconds: 120
+          backoff: exponential
       - ref: record_open_threats
         type: action
         label: Record unresolved threats

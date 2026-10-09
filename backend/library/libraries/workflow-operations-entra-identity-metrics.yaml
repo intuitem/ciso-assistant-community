@@ -4,12 +4,14 @@ ref_id: workflow-operations-entra-identity-metrics
 name: Microsoft Entra ID — identity hygiene metrics
 description: 'Reads three numbers from Microsoft Entra ID every Monday and records each one as a
   sample of a metric, so identity hygiene shows a trend instead of a screenshot: users not registered
-  for MFA, members of the Global Administrator role, and guest accounts. After importing: create three
+  for MFA, Global Administrator role assignments, and guest accounts. After importing: create three
   metric instances (numeric) and set their ids in metric_no_mfa, metric_global_admins and
   metric_guests; set tenant_id and client_id from an Entra app registration; add its client secret as
   the entra_client_secret secret. The app needs the Microsoft Graph application permissions
   AuditLog.Read.All, User.Read.All and RoleManagement.Read.Directory, with admin consent. The MFA
-  registration report requires an Entra ID P1 or P2 licence.'
+  registration report requires an Entra ID P1 or P2 licence and leaves out disabled users. Role
+  assignments are counted as Entra lists them: a role given through a group counts once, and roles
+  that are only eligible through Privileged Identity Management are not included.'
 copyright: © intuitem
 version: 1
 publication_date: 2026-10-07
@@ -21,7 +23,7 @@ objects:
     schema_version: 1
     ref_id: entra-identity-metrics
     name: Microsoft Entra ID — identity hygiene metrics
-    description: 'Every Monday: count users without MFA registered, Global Administrators and guest
+    description: 'Every Monday: count users without MFA registered, Global Administrator assignments and guest
       accounts in Microsoft Entra ID, and record each count against its metric. A refused token or an
       unanswered request fails the run, so a stalled collection shows in the run history.'
     requires:
@@ -47,9 +49,6 @@ objects:
       - key: metric_guests
         type: string
         default_value: ''
-      - key: no_mfa
-        type: number
-        default_value: 0
       nodes:
       - ref: every_monday
         type: trigger
@@ -65,23 +64,28 @@ objects:
           type: http_request
           method: GET
           url: https://graph.microsoft.com/v1.0/reports/authenticationMethods/userRegistrationDetails?$filter=isMfaRegistered
-            eq false&$count=true&$top=1
-          headers:
-            ConsistencyLevel: eventual
+            eq false
           oauth:
             token_url: https://login.microsoftonline.com/{{tenant_id}}/oauth2/v2.0/token
             client_id: '{{client_id}}'
             client_secret: '{{secrets.entra_client_secret}}'
             scope: https://graph.microsoft.com/.default
-        output_mapping:
-          no_mfa: body.@odata.count
+          paginate:
+            items: value
+            next: '@odata.nextLink'
+            count_only: true
+            max_pages: 50
+        retry:
+          max_attempts: 3
+          delay_seconds: 120
+          backoff: exponential
       - ref: record_no_mfa
         type: action
         label: Record users without MFA
         action_config:
           type: record_measurement
           metric_instance: '{{metric_no_mfa}}'
-          value: '{{no_mfa}}'
+          value: '{{nodes.count_no_mfa.count}}'
           observation: Collected from Microsoft Entra ID on {{today}}
       - ref: count_global_admins
         type: action
@@ -89,21 +93,28 @@ objects:
         action_config:
           type: http_request
           method: GET
-          url: https://graph.microsoft.com/v1.0/directoryRoles(roleTemplateId='{{global_admin_role}}')/members/$count
-          headers:
-            ConsistencyLevel: eventual
+          url: https://graph.microsoft.com/v1.0/roleManagement/directory/roleAssignments?$filter=roleDefinitionId
+            eq '{{global_admin_role}}'
           oauth:
             token_url: https://login.microsoftonline.com/{{tenant_id}}/oauth2/v2.0/token
             client_id: '{{client_id}}'
             client_secret: '{{secrets.entra_client_secret}}'
             scope: https://graph.microsoft.com/.default
+          paginate:
+            items: value
+            next: '@odata.nextLink'
+            count_only: true
+        retry:
+          max_attempts: 3
+          delay_seconds: 120
+          backoff: exponential
       - ref: record_global_admins
         type: action
         label: Record Global Administrators
         action_config:
           type: record_measurement
           metric_instance: '{{metric_global_admins}}'
-          value: '{{nodes.count_global_admins.body}}'
+          value: '{{nodes.count_global_admins.count}}'
           observation: Collected from Microsoft Entra ID on {{today}}
       - ref: count_guests
         type: action
@@ -119,6 +130,10 @@ objects:
             client_id: '{{client_id}}'
             client_secret: '{{secrets.entra_client_secret}}'
             scope: https://graph.microsoft.com/.default
+        retry:
+          max_attempts: 3
+          delay_seconds: 120
+          backoff: exponential
       - ref: record_guests
         type: action
         label: Record guest accounts

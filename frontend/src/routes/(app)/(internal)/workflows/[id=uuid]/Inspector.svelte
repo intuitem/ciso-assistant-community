@@ -331,7 +331,15 @@
 	const upsertableModels = $derived(creatableModels.filter((entry) => entry.upsert !== false));
 
 	function togglePaginate(on: boolean) {
-		if (on) actionConfig.paginate = { items: '', next: '', cursor_param: '', max_pages: 10 };
+		if (on)
+			actionConfig.paginate = {
+				items: '',
+				next: '',
+				cursor_param: '',
+				offset_param: '',
+				count_only: false,
+				max_pages: 10
+			};
 		else delete actionConfig.paginate;
 		onChange();
 	}
@@ -2514,6 +2522,37 @@
 								bind:value={actionConfig.paginate.cursor_param}
 								oninput={onChange}
 							/>
+						</label>
+						<label>
+							{@render fieldLabel(m.httpPaginateOffsetParam())}
+							<input
+								type="text"
+								class="input w-full text-sm font-mono"
+								placeholder="$skip"
+								bind:value={actionConfig.paginate.offset_param}
+								oninput={onChange}
+							/>
+						</label>
+						{#if actionConfig.paginate.offset_param}
+							<label>
+								{@render fieldLabel(m.httpPaginatePageSize())}
+								<input
+									type="number"
+									class="input w-full text-sm"
+									min="1"
+									bind:value={actionConfig.paginate.page_size}
+									oninput={onChange}
+								/>
+							</label>
+						{/if}
+						<label class="flex items-center gap-1.5 text-xs text-surface-700-300 cursor-pointer">
+							<input
+								type="checkbox"
+								class="checkbox scale-75"
+								bind:checked={actionConfig.paginate.count_only}
+								onchange={onChange}
+							/>
+							{m.httpPaginateCountOnly()}
 						</label>
 						<label>
 							{@render fieldLabel(m.httpPaginateMaxPages())}

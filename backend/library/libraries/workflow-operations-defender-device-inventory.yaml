@@ -7,8 +7,8 @@ description: 'Pulls the active devices Microsoft Defender for Endpoint knows abo
   Each asset carries the Defender device id as its reference and the platform, exposure level and risk
   score in its description. After importing: set tenant_id and client_id from an Entra app registration
   that has the WindowsDefenderATP application permission Machine.Read.All with admin consent, and add its
-  client secret as the defender_client_secret secret. A run records up to 2000 devices; the log says
-  when the inventory was larger than that.'
+  client secret as the defender_client_secret secret. A run records up to 2000 devices, read 1000 at a
+  time; the log says when the inventory was larger than that.'
 copyright: © intuitem
 version: 1
 publication_date: 2026-10-07
@@ -47,7 +47,7 @@ objects:
         action_config:
           type: http_request
           method: GET
-          url: https://api.securitycenter.microsoft.com/api/machines?$filter=healthStatus eq 'Active'
+          url: https://api.security.microsoft.com/api/machines?$filter=healthStatus eq 'Active'&$top=1000
           timeout: 30
           oauth:
             token_url: https://login.microsoftonline.com/{{tenant_id}}/oauth2/v2.0/token
@@ -56,8 +56,13 @@ objects:
             scope: https://api.securitycenter.microsoft.com/.default
           paginate:
             items: value
-            next: '@odata.nextLink'
-            max_pages: 50
+            offset_param: $skip
+            page_size: 1000
+            max_pages: 10
+        retry:
+          max_attempts: 3
+          delay_seconds: 120
+          backoff: exponential
       - ref: keep_assets
         type: action
         label: Keep one asset per device

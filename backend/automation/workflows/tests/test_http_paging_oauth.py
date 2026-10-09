@@ -79,6 +79,7 @@ class TestPaging:
         assert [item["id"] for item in result["items"]] == [1, 2, 3]
         assert result["pages"] == 2
         assert result["truncated"] is False
+        assert result["body"] is None
 
     def test_cursor_goes_into_the_query_string(self, tool):
         tool["pages"]["handler"] = cursor_pages
@@ -124,6 +125,21 @@ class TestPaging:
         assert result["truncated"] is True
         assert len(tool["requests"]) == 1
 
+    def test_output_budget_stops_paging(self, tool, settings):
+        settings.WORKFLOW_NODE_OUTPUT_BUDGET = 1200
+        tool["pages"]["handler"] = lambda url: FakeResponse(
+            {"value": [{"blob": "x" * 400} for _ in range(3)]}
+        )
+        instance = start_instance(
+            fetch_flow(
+                make_domain("Budget"),
+                paginate={"items": "value", "next": "@odata.nextLink"},
+            )
+        )
+        result = output(instance)
+        assert result["count"] == len(result["items"]) == 2
+        assert result["truncated"] is True
+
     def test_a_next_link_to_another_host_fails(self, tool):
         tool["pages"]["handler"] = lambda url: FakeResponse(
             {"value": [], "@odata.nextLink": "https://elsewhere.invalid/steal"}
@@ -161,6 +177,73 @@ OAUTH = {
     "client_secret": "s3cret",
     "scope": "https://graph.invalid/.default",
 }
+
+
+def offset_pages(url):
+    skip = int(parse_qs(urlsplit(url).query).get("$skip", ["0"])[0])
+    rows = [{"id": i} for i in range(5)]
+    return FakeResponse({"value": rows[skip : skip + 2]})
+
+
+@pytest.mark.django_db
+class TestOffsetPaging:
+    def test_skips_by_page_size_until_a_short_page(self, tool):
+        tool["pages"]["handler"] = offset_pages
+        result = output(
+            start_instance(
+                fetch_flow(
+                    make_domain("Offset"),
+                    url="https://tool.invalid/machines?$top=2",
+                    paginate={
+                        "items": "value",
+                        "offset_param": "$skip",
+                        "page_size": 2,
+                    },
+                )
+            )
+        )
+        assert [item["id"] for item in result["items"]] == [0, 1, 2, 3, 4]
+        assert result["count"] == 5
+        skips = [
+            parse_qs(urlsplit(call["url"]).query).get("$skip")
+            for call in tool["requests"]
+        ]
+        assert skips == [None, ["2"], ["4"]]
+
+    def test_page_limit_truncates(self, tool):
+        tool["pages"]["handler"] = offset_pages
+        result = output(
+            start_instance(
+                fetch_flow(
+                    make_domain("OffsetCap"),
+                    paginate={
+                        "items": "value",
+                        "offset_param": "$skip",
+                        "page_size": 2,
+                        "max_pages": 2,
+                    },
+                )
+            )
+        )
+        assert result["count"] == 4
+        assert result["truncated"] is True
+
+    def test_count_only_keeps_no_items(self, tool):
+        tool["pages"]["handler"] = graph_pages
+        result = output(
+            start_instance(
+                fetch_flow(
+                    make_domain("CountOnly"),
+                    paginate={
+                        "items": "value",
+                        "next": "@odata.nextLink",
+                        "count_only": True,
+                    },
+                )
+            )
+        )
+        assert result["count"] == 3
+        assert result["items"] is None
 
 
 @pytest.mark.django_db
@@ -256,6 +339,19 @@ class TestPublishChecks:
 
     def test_incomplete_paging(self):
         assert "action_http_paginate_missing" in self.codes(paginate={"items": "value"})
+
+    def test_offset_paging_needs_a_page_size(self):
+        assert "action_http_bad_page_size" in self.codes(
+            paginate={"items": "value", "offset_param": "$skip"}
+        )
+
+    def test_offset_paging_needs_no_next_path(self):
+        assert (
+            self.codes(
+                paginate={"items": "value", "offset_param": "$skip", "page_size": 100}
+            )
+            == set()
+        )
 
     def test_page_limit_out_of_range(self):
         assert "action_http_bad_max_pages" in self.codes(
