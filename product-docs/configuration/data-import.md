@@ -329,7 +329,7 @@ Controls are created on picked based on the perimeter's domain. Line breaks are 
   Pipe-, newline-, semicolon- or comma-separated threat ref\_ids or names (ref\_id first, then name), matched among the threats you can view in the risk assessment's domain and its parent domains, up to the global domain where library threats live. Threats are only linked, never created: an unknown threat is reported as a warning on the row. `threat` is accepted as an alias.
 * **justification**: String
 
-1: The string must represent a value present in the chosen risk matrix
+1: The string must be the name of a level of the chosen risk matrix, or one of its translations. Matching ignores case and surrounding spaces. Use `--` to mark a level as not rated. An empty cell leaves the level untouched. A value that matches no level is reported as a warning on the row and leaves the level untouched. Untouched levels are unrated on a new scenario and keep their current rating when updating an existing one.
 
 ### Special considerations
 
@@ -860,9 +860,12 @@ Folders (domains) are the top-level organisational units in CISO Assistant. Impo
 
 #### Supported fields
 
+* `internal_id` - id of an existing folder, filled in by the domains export; used to match the row in update mode, even if the folder was renamed
 * `name`\*
 * `description`
 * `domain` - name of the parent folder, must match exactly one existing folder name (case-insensitive)
+* `labels` - pipe- or comma-separated label names (created if missing); also accepted as `label` or `filtering_labels`
+* `create_iam_groups` - whether the domain gets its IAM groups (true/false, yes/no or 1/0)
 
 ### Template
 
@@ -870,9 +873,12 @@ Folders (domains) are the top-level organisational units in CISO Assistant. Impo
 
 #### Special considerations
 
-* Conflict detection is performed by `name` + parent folder.
+* Conflict detection is performed by `internal_id` when present, otherwise by `name` + parent folder.
 * When `domain` is left blank the folder is attached to the root of the tenant.
-* An error is returned if `domain` matches more than one folder name.
+* `domain` is looked up among domains and the root folder (enclaves and personal folders are ignored). An error is returned if it matches more than one, unless the row's `internal_id` points to a domain whose current parent has that name.
+* Label names may only contain letters, digits, `_` or `-` (36 characters at most); a row with an invalid label is rejected. Creating a label that does not exist yet requires the permission to add labels.
+* Setting `create_iam_groups` to true creates the domain's IAM groups. Setting it to false on an existing domain removes them, which is refused while users are assigned to them.
+* The domains list can be exported to Excel or CSV with the same columns, so an export can be edited and re-imported with the **Update** strategy. In update mode, a blank cell leaves the field untouched.
 
 ***
 

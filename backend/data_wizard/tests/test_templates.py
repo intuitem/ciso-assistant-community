@@ -294,7 +294,8 @@ class TestSimpleTemplates:
         assert results["failed"] == 1
         assert results["stopped"] is True
         assert "subDomainsRequirePro" in str(results["errors"])
-        Folder.objects.get(name="ACME Corp", parent_folder=root_folder)
+        acme = Folder.objects.get(name="ACME Corp", parent_folder=root_folder)
+        assert list(acme.filtering_labels.values_list("label", flat=True)) == ["Group"]
         assert not Folder.objects.filter(name="IT Department").exists()
 
     def test_security_exceptions_template(

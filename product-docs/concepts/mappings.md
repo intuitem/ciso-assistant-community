@@ -84,7 +84,7 @@ This is what makes a modest set of crosswalks go a long way: a hub framework suc
 
 ## Loading vs authoring
 
-Many cross-walks ship as built-in or community libraries (ISO 27001 ↔ NIST CSF, SOC 2 ↔ ISO 27002, and so on). When none of them fits, you can author your own — see [Designing your own libraries](../configuration/libraries/custom-libraries.md) and the `prepare_mapping_v2.py` tool that scaffolds a mapping skeleton between two loaded frameworks.
+Many cross-walks ship as built-in or community libraries (ISO 27001 ↔ NIST CSF, SOC 2 ↔ ISO 27002, and so on). When none of them fits, see [Create a Mapping](../configuration/libraries/create-mapping.md) for the Excel workflow using `prepare_mapping_v2.py`.
 
 ## Related
 

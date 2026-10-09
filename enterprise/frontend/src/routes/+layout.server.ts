@@ -54,8 +54,8 @@ function sanitizeClientSettings(
 	};
 }
 
-export const load: LayoutServerLoad = async ({ fetch, locals, url }) => {
-	const isSSOAuthenticate = url.pathname.startsWith('/sso/authenticate');
+export const load: LayoutServerLoad = async ({ fetch, locals, url, untrack }) => {
+	const isSSOAuthenticate = untrack(() => url.pathname.startsWith('/sso/authenticate'));
 	const clientSettings = isSSOAuthenticate
 		? {
 				name: 'clientSettings',

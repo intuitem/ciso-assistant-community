@@ -109,6 +109,22 @@ export const POST: RequestHandler = async ({ fetch, request, url, params }) => {
 			);
 		}
 
+		case 'preview-expression': {
+			const versionId = requireUuid(body.version, 'version');
+			const payload: Record<string, unknown> = {
+				rows: Array.isArray(body.rows) ? body.rows : []
+			};
+			if (typeof body.reference_run === 'string' && UUID_RE.test(body.reference_run)) {
+				payload.reference_run = body.reference_run;
+			}
+			return proxy(
+				fetch,
+				`${BASE_API_URL}/workflows/workflow-versions/${versionId}/preview-expression/`,
+				'POST',
+				payload
+			);
+		}
+
 		case 'list-instances': {
 			const workflowId = requireUuid(body.workflow, 'workflow');
 			return proxy(
@@ -181,6 +197,11 @@ export const POST: RequestHandler = async ({ fetch, request, url, params }) => {
 
 		case 'event-keys': {
 			return proxy(fetch, `${BASE_API_URL}/workflows/workflow-triggers/event-keys/`, 'GET');
+		}
+
+		case 'get-instance': {
+			const instanceId = requireUuid(body.instance, 'instance');
+			return proxy(fetch, `${BASE_API_URL}/workflows/workflow-instances/${instanceId}/`, 'GET');
 		}
 
 		case 'instance-logs': {

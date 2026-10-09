@@ -4,6 +4,7 @@ from fractions import Fraction
 import json
 import os
 import re
+import uuid
 import hashlib
 import operator
 from datetime import date, datetime
@@ -56,6 +57,11 @@ from library.helpers import (
 )
 
 from core.utils import format_currency as _fmt_currency
+from core.quick_form_scoring import (
+    normalize_form_aggregation,
+    normalize_page_aggregation,
+    score_bounds,
+)
 from global_settings.models import GlobalSettings
 from integrations.sync_mixin import IntegrationSyncableMixin
 
@@ -84,41 +90,78 @@ from .validators import (
     JSONSchemaInstanceValidator,
 )
 from . import dora
+from .framework_exports import available_for as available_framework_exports
 from collections import defaultdict, deque
 from dataclasses import dataclass
 
 logger = get_logger(__name__)
 
 
-def _truncate_one_decimal(value: float) -> float:
-    """Truncate *value* to one decimal, matching the JS frontend display.
+def clean_score(value: float) -> float:
+    """An aggregated score without the float noise of ratio-based aggregation
+    (2.69499999999 is 2.695), as spreadsheets keep 15 significant digits.
+    Scores are computed and compared unrounded, like in the CCB CyFun tools;
+    rounding is for display (round_score)."""
+    return round(value, 9)
 
-    A tiny epsilon absorbs float-precision noise introduced by ratio-based
-    aggregation (e.g. 77.49999999999 should still truncate to 77.5).
-    """
-    return int(value * 10 + 1e-9) / 10
+
+def round_score(value: float) -> float:
+    """A score as displayed: two decimals, half up, like the CCB CyFun tools'
+    0.00 format (2.695 shows as 2.70)."""
+    return float(
+        Decimal(repr(clean_score(value))).quantize(
+            Decimal("0.01"), rounding=ROUND_HALF_UP
+        )
+    )
 
 
 def _defer_once(conn_attr: str, key, callback):
-    """Schedule *callback* via on_commit, deduplicating by *key* per transaction.
+    """Schedule *callback* via on_commit, once per *key* while the first one is
+    still pending.
 
-    Attaches a pending-set to the DB connection under *conn_attr* so that only
-    the first call per *key* in a given transaction actually registers the
-    on_commit hook.
+    Django replaces its on_commit list on every commit, rollback and savepoint
+    rollback, so a schedule is pending only while the list it went into is still
+    the connection's: a rolled-back schedule never blocks a later one.
     """
     conn = transaction.get_connection()
     pending = getattr(conn, conn_attr, None)
     if pending is None:
-        pending = set()
+        pending = {}
         setattr(conn, conn_attr, pending)
-    if key not in pending:
-        pending.add(key)
+    scheduled = pending.get(key)
+    if (
+        scheduled is not None
+        and scheduled[0] is conn.run_on_commit
+        and not scheduled[1]._done
+    ):
+        return
 
-        def _on_commit(k=key, p=pending, cb=callback):
-            p.discard(k)
-            cb()
+    def _on_commit(cb=callback):
+        # Marked so a callback run early (tests capturing on_commit) no
+        # longer counts as pending.
+        _on_commit._done = True
+        pending.pop(key, None)
+        cb()
 
-        transaction.on_commit(_on_commit)
+    _on_commit._done = False
+    transaction.on_commit(_on_commit)
+    if conn.in_atomic_block:
+        pending[key] = (conn.run_on_commit, _on_commit)
+
+
+def defer_outcome_evaluation(compliance_assessment_pk) -> None:
+    """Evaluate an audit's outcome rules once the transaction commits, on the
+    audit as committed: callers often hold an instance that later updates in
+    the same transaction leave stale."""
+
+    def _evaluate():
+        from core.cel_service import evaluate_outcomes
+
+        ca = ComplianceAssessment.objects.filter(pk=compliance_assessment_pk).first()
+        if ca is not None:
+            evaluate_outcomes(ca)
+
+    _defer_once("_pending_cel_evaluations", compliance_assessment_pk, _evaluate)
 
 
 URN_REGEX = r"^urn:([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+)(?::([a-zA-Z0-9_-]+))?:([0-9A-Za-z\[\]\(\)\-\._:]+)$"
@@ -1154,12 +1197,14 @@ class StoredLibrary(LibraryMixin):
                 builtin=builtin,
                 hash_checksum=hash_checksum,
                 content=library_objects,
+                # autoload libraries with requirement mapping sets, or that ask for it
                 autoload=bool(
-                    library_objects.get(
+                    library_data.get("autoload")
+                    or library_objects.get(
                         "requirement_mapping_set",
                         library_objects.get("requirement_mapping_sets"),
                     )
-                ),  # autoload is true if the library contains requirement mapping sets
+                ),
             )
             new_library.filtering_labels.set(filtering_labels)
             return new_library, None
@@ -1176,7 +1221,10 @@ class StoredLibrary(LibraryMixin):
     def get_loaded_library(self) -> Optional["LoadedLibrary"]:
         if not self.is_loaded:
             return
-        return LoadedLibrary.objects.filter(urn=self.urn).first()
+        # Read up to three times per row when listing (id, is_update, reference count).
+        if "_loaded_library" not in self.__dict__:
+            self._loaded_library = LoadedLibrary.objects.filter(urn=self.urn).first()
+        return self._loaded_library
 
     @property
     def is_update(self) -> bool:
@@ -1730,10 +1778,28 @@ class LibraryUpdater:
                     framework_dict["outcomes_definition"] = []
                 # An omitted IG definition means that the framework no longer defines implementation groups.
                 framework_dict.setdefault("implementation_groups_definition", None)
+                # Same for the scoring properties: omitted means back to the defaults.
+                framework_dict.setdefault("score_scale_locked", False)
+                framework_dict.setdefault("score_calculation_method", "average")
+                framework_dict.setdefault("anchor_na_to_target", False)
+                framework_dict.setdefault("target_score", None)
+                Framework.validate_score_calculation_method(
+                    framework_dict["score_calculation_method"]
+                )
+                Framework.validate_scoring_defaults(
+                    min_score=framework_dict.get("min_score", 0),
+                    max_score=framework_dict.get("max_score", 100),
+                    anchor_na_to_target=framework_dict["anchor_na_to_target"],
+                    target_score=framework_dict["target_score"],
+                    implementation_groups_definition=framework_dict[
+                        "implementation_groups_definition"
+                    ],
+                )
                 prev_fw = Framework.objects.filter(urn=framework_dict["urn"]).first()
                 prev_min = getattr(prev_fw, "min_score", None)
                 prev_max = getattr(prev_fw, "max_score", None)
                 prev_def = getattr(prev_fw, "scores_definition", None)
+                had_outcomes = bool(getattr(prev_fw, "outcomes_definition", None))
 
                 new_framework, _ = Framework.objects.update_or_create(
                     urn=framework_dict["urn"],
@@ -1789,6 +1855,10 @@ class LibraryUpdater:
                     new_framework, compliance_assessments
                 )
 
+                if had_outcomes or new_framework.outcomes_definition:
+                    for ca in compliance_assessments:
+                        defer_outcome_evaluation(ca.pk)
+
                 existing_requirement_node_objects = {
                     rn.urn.lower(): rn
                     for rn in RequirementNode.objects.filter(framework=new_framework)
@@ -1810,6 +1880,7 @@ class LibraryUpdater:
                 order_id = 0
                 all_fields_to_update = set()
                 # Omitting one of these nullable fields in a new version must clear its previous value.
+                # min_score/max_score are kept: existing scores were recorded on that scale.
                 clearable_requirement_node_fields = (
                     "ref_id",
                     "name",
@@ -1818,7 +1889,14 @@ class LibraryUpdater:
                     "typical_evidence",
                     "visibility_expression",
                     "implementation_groups",
+                    "scores_definition_ref",
+                    "target_score",
                 )
+                requirement_node_defaults = {
+                    "weight": 1,
+                    "importance": RequirementNode.Importance.UNDEFINED,
+                    "display_mode": RequirementNode.DisplayMode.DEFAULT,
+                }
 
                 # Check if score boundaries changed (triggers warning + strategy prompt)
                 score_boundaries_changed = (
@@ -1957,6 +2035,10 @@ class LibraryUpdater:
                         ].lower()
                     requirement_node_dict["order_id"] = order_id
                     order_id += 1
+                    # Omitted or explicit null falls back to the default.
+                    for field, default in requirement_node_defaults.items():
+                        if requirement_node_dict.get(field) is None:
+                            requirement_node_dict[field] = default
 
                     if urn in existing_requirement_node_objects:
                         requirement_node_object = existing_requirement_node_objects[urn]
@@ -2237,13 +2319,7 @@ class LibraryUpdater:
                     # bulk_update skips RequirementAssessment.save(), which
                     # re-evaluates outcomes when a score changes.
                     for ca in ca_with_scale_change:
-
-                        def _evaluate(ca=ca):
-                            from core.cel_service import evaluate_outcomes
-
-                            evaluate_outcomes(ca)
-
-                        _defer_once("_pending_cel_evaluations", ca.pk, _evaluate)
+                        defer_outcome_evaluation(ca.pk)
 
                 # Keep selected_implementation_groups consistent for dynamic frameworks
                 # This must run even if no RA scalar fields changed, because answer
@@ -2308,6 +2384,10 @@ class LibraryUpdater:
                     "title_question_urn": (
                         new_quick_form.get("title_question_urn") or ""
                     ).lower(),
+                    "subject_question_urn": (
+                        new_quick_form.get("subject_question_urn") or ""
+                    ).lower(),
+                    "on_accept": new_quick_form.get("on_accept") or [],
                     "urn_namespace": urn.split(":")[1]
                     if urn.startswith("urn:")
                     else "custom",
@@ -2357,6 +2437,9 @@ class LibraryUpdater:
                         "translations": page.get("translations", {}),
                         "order": order,
                         "visibility_expression": page.get("visibility_expression"),
+                        "aggregation": normalize_page_aggregation(
+                            page.get("aggregation")
+                        ),
                     }
                     page_object, _ = QuickFormPage.objects.update_or_create(
                         quick_form=quick_form,
@@ -2439,6 +2522,8 @@ class LibraryUpdater:
                 "probability",
                 "impact",
                 "risk",
+                "strength_of_knowledge",
+                "ebios_rm",
             }  # Store this as a constant somewhere (as a static attribute of the class)
             other_keys = set(matrix.keys()) - json_definition_keys
             matrix_dict = {key: matrix[key] for key in other_keys}
@@ -2447,7 +2532,7 @@ class LibraryUpdater:
                 if key in matrix:  # If all keys are mandatory this condition is useless
                     matrix_dict["json_definition"][key] = matrix[key]
 
-            RiskMatrix.objects.update_or_create(
+            risk_matrix, _ = RiskMatrix.objects.update_or_create(
                 urn=matrix["urn"].lower(),
                 defaults=matrix_dict,
                 create_defaults={
@@ -2457,6 +2542,8 @@ class LibraryUpdater:
                     "library": self.old_library,
                 },
             )
+            for study in risk_matrix.ebios_rm_studies.all():
+                study.refresh_ratings()
 
     def update_requirement_mapping_sets(self):
         for requirement_mapping_set in self.new_requirement_mapping_sets:
@@ -2534,8 +2621,27 @@ class LibraryUpdater:
                     **requirement_mapping_dict,
                 )
 
+    def framework_rules_error(self) -> str | None:
+        """The checks library import runs on outcome rules and visibility
+        expressions, so an update cannot bring in what a load refuses."""
+        from core.cel_service import validate_framework_expressions
+        from library.utils import outcome_rule_id_error
+
+        for framework in self.new_frameworks or []:
+            if error := outcome_rule_id_error(framework):
+                return error
+            if errors := validate_framework_expressions(framework):
+                first = errors[0]
+                return (
+                    f"[FRAMEWORK_ERROR] {first['where']} {first['ref_id']}: "
+                    f"{first['error']}"
+                )
+        return None
+
     # We should create a LibraryVerifier class in the future that check if the library is valid and use it for a better error handling.
     def update_library(self) -> Union[str, None]:
+        if (error_msg := self.framework_rules_error()) is not None:
+            return error_msg
         if (error_msg := self.update_dependencies()) is not None:
             return error_msg
 
@@ -2650,6 +2756,8 @@ class LoadedLibrary(LibraryMixin):
             res["risk_matrix"]["impact"] = update_translations(matrix.impact)
             res["risk_matrix"]["risk"] = update_translations(matrix.risk)
             res["risk_matrix"]["grid"] = matrix.grid
+            if "ebios_rm" in matrix.json_definition:
+                res["risk_matrix"]["ebios_rm"] = matrix.json_definition["ebios_rm"]
             res["strength_of_knowledge"] = matrix.strength_of_knowledge
             res["risk_matrix"] = [res["risk_matrix"]]
         return res
@@ -2871,6 +2979,10 @@ class Terminology(NameDescriptionMixin, FolderMixin):
 
     class FieldPath(models.TextChoices):
         ROTO_RISK_ORIGIN = "ro_to.risk_origin", "ro_to/risk_origin"
+        ROTO_TARGET_OBJECTIVE_CATEGORY = (
+            "ro_to.target_objective_category",
+            "ro_to/target_objective_category",
+        )
         QUALIFICATIONS = "qualifications", "qualifications"
         ACCREDITATION_STATUS = "accreditation.status", "accreditationStatus"
         ACCREDITATION_CATEGORY = "accreditation.category", "accreditationCategory"
@@ -2935,6 +3047,46 @@ class Terminology(NameDescriptionMixin, FolderMixin):
             "name": "other",
             "builtin": True,
             "field_path": FieldPath.ROTO_RISK_ORIGIN,
+            "is_visible": True,
+        },
+    ]
+
+    # Categories of target objectives from EBIOS RM fiche méthode 4.
+    DEFAULT_ROTO_TARGET_OBJECTIVE_CATEGORIES = [
+        {
+            "name": "espionage",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_TARGET_OBJECTIVE_CATEGORY,
+            "is_visible": True,
+        },
+        {
+            "name": "strategic_prepositioning",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_TARGET_OBJECTIVE_CATEGORY,
+            "is_visible": True,
+        },
+        {
+            "name": "influence",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_TARGET_OBJECTIVE_CATEGORY,
+            "is_visible": True,
+        },
+        {
+            "name": "operational_disruption",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_TARGET_OBJECTIVE_CATEGORY,
+            "is_visible": True,
+        },
+        {
+            "name": "lucrative",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_TARGET_OBJECTIVE_CATEGORY,
+            "is_visible": True,
+        },
+        {
+            "name": "challenge_and_amusement",
+            "builtin": True,
+            "field_path": FieldPath.ROTO_TARGET_OBJECTIVE_CATEGORY,
             "is_visible": True,
         },
     ]
@@ -3372,6 +3524,10 @@ class Terminology(NameDescriptionMixin, FolderMixin):
         cls._seed_defaults(cls.DEFAULT_ROTO_RISK_ORIGINS)
 
     @classmethod
+    def create_default_roto_target_objective_categories(cls):
+        cls._seed_defaults(cls.DEFAULT_ROTO_TARGET_OBJECTIVE_CATEGORIES)
+
+    @classmethod
     def create_default_qualifications(cls):
         cls._seed_defaults(cls.DEFAULT_QUALIFICATIONS)
 
@@ -3644,6 +3800,33 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
             "{field_name: {role: 'edit' | 'read' | 'hidden'}}."
         ),
     )
+    score_scale_locked = models.BooleanField(
+        default=False,
+        verbose_name=_("Score scale locked"),
+        help_text=_("The standard defines the score scale: audits cannot change it."),
+    )
+    score_calculation_method = models.CharField(
+        max_length=30,
+        default="average",
+        verbose_name=_("Score calculation method"),
+        help_text=_("Calculation method proposed for new audits."),
+    )
+    anchor_na_to_target = models.BooleanField(
+        default=False,
+        verbose_name=_("Anchor N/A to target score"),
+        help_text=_(
+            "New audits count not applicable requirements as the target score."
+        ),
+    )
+    target_score = models.FloatField(
+        null=True,
+        blank=True,
+        verbose_name=_("Target score"),
+        help_text=_(
+            "Target score proposed for new audits, on the framework scale. "
+            "Implementation groups can override it."
+        ),
+    )
     urn_namespace = models.CharField(
         max_length=50,
         default="custom",
@@ -3756,13 +3939,98 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
 
     @classmethod
     def scale_bound_q(cls, framework):
-        """Boolean expression for annotating querysets (framework may be an OuterRef)."""
+        """Boolean expression for annotating framework querysets (framework may
+        be an OuterRef)."""
         choices, nodes = cls.scale_bound_querysets(framework)
-        return Exists(choices) | Exists(nodes)
+        return Q(score_scale_locked=True) | Exists(choices) | Exists(nodes)
 
     @property
     def is_scale_bound(self) -> bool:
-        return any(qs.exists() for qs in self.scale_bound_querysets(self))
+        return self.score_scale_locked or any(
+            qs.exists() for qs in self.scale_bound_querysets(self)
+        )
+
+    @staticmethod
+    def validate_score_calculation_method(method):
+        """A library may only declare a calculation method audits support."""
+        if method not in ComplianceAssessment.CalculationMethod.values:
+            raise ValueError(
+                f"invalid score_calculation_method {method!r}: expected one of "
+                f"{', '.join(ComplianceAssessment.CalculationMethod.values)}"
+            )
+
+    @staticmethod
+    def scoring_defaults_problem(
+        *,
+        min_score,
+        max_score,
+        anchor_na_to_target,
+        target_score,
+        implementation_groups_definition,
+    ) -> tuple[str, str] | None:
+        """(error key, detail) when audits would refuse what the framework
+        proposes: N/A anchoring needs a target, implementation group targets fall
+        back on the framework's, and every target lies on the framework scale."""
+        group_targets = [
+            (f"implementation group {group.get('ref_id')!r} target_score", target)
+            for group in implementation_groups_definition or []
+            if isinstance(group, dict)
+            and (target := group.get("target_score")) is not None
+        ]
+        if target_score is None and (anchor_na_to_target or group_targets):
+            return (
+                "targetScoreRequired",
+                "target_score is required with anchor_na_to_target or "
+                "implementation group target scores",
+            )
+        for label, target in [("target_score", target_score), *group_targets]:
+            if target is not None and not min_score <= target <= max_score:
+                return (
+                    "targetScoreOutOfRange",
+                    f"{label} {target} is outside the framework scale "
+                    f"{min_score}-{max_score}",
+                )
+        return None
+
+    @staticmethod
+    def validate_scoring_defaults(**scoring) -> None:
+        """Library loading: fail loudly, with details for the library author."""
+        if problem := Framework.scoring_defaults_problem(**scoring):
+            raise ValueError(problem[1])
+
+    @property
+    def default_scoring(self) -> dict:
+        """Scoring settings proposed when creating an audit on this framework.
+
+        `target_score` is expressed on the framework's scale. Implementation
+        groups can set their own `target_score`: with groups selected, the
+        highest of their targets applies (a group without one counts as the
+        framework's).
+        """
+        scoring = {"score_calculation_method": self.score_calculation_method}
+        if self.anchor_na_to_target:
+            scoring["anchor_na_to_target"] = True
+        if self.target_score is not None:
+            scoring["target_score"] = self.target_score
+            by_group = {
+                group["ref_id"]: group["target_score"]
+                for group in self.implementation_groups_definition or []
+                if group.get("target_score") is not None
+            }
+            if by_group:
+                scoring["target_score_by_group"] = by_group
+        return scoring
+
+    def default_scoring_for(self, selected_implementation_groups) -> dict:
+        """default_scoring resolved for an audit's implementation groups."""
+        scoring = self.default_scoring
+        by_group = scoring.pop("target_score_by_group", {})
+        if selected_implementation_groups and "target_score" in scoring:
+            scoring["target_score"] = max(
+                by_group.get(group, scoring["target_score"])
+                for group in selected_implementation_groups
+            )
+        return scoring
 
     def __str__(self) -> str:
         return f"{self.provider} - {self.get_name_translated}"
@@ -4070,6 +4338,23 @@ class QuickForm(ReferentialObjectMixin, I18nObjectMixin):
             "every response from the same entry point carries the same name."
         ),
     )
+    subject_question_urn = models.CharField(
+        max_length=255,
+        blank=True,
+        default="",
+        verbose_name=_("Subject question"),
+        help_text=_(
+            "URN of a single-object reference question naming what each response "
+            "is about, e.g. the vendor being assessed."
+        ),
+    )
+    # What an accepted response writes, and where: [{"target": key, "config": {}}],
+    # keys from core.quick_form_targets. Part of the form's method, so it travels
+    # with the library; configs name objects by stable keys (e.g. tier keys),
+    # never by instance ids.
+    on_accept = models.JSONField(
+        default=list, blank=True, verbose_name=_("Apply on accept")
+    )
     ref_id_prefix = models.CharField(
         max_length=8,
         blank=True,
@@ -4101,19 +4386,13 @@ class QuickForm(ReferentialObjectMixin, I18nObjectMixin):
 
     @property
     def score_bounds(self) -> tuple[int, int]:
-        definition = self.scores_definition or {}
-        min_score = definition.get("min", 0)
-        max_score = definition.get("max", 100)
-        try:
-            min_score, max_score = int(min_score), int(max_score)
-        except TypeError, ValueError:
-            return 0, 100
-        return (min_score, max_score) if min_score < max_score else (0, 100)
+        return score_bounds(self.scores_definition)
 
     @property
     def score_aggregation(self) -> str:
-        aggregation = (self.scores_definition or {}).get("aggregation", "sum")
-        return aggregation if aggregation in ("sum", "mean") else "sum"
+        return normalize_form_aggregation(
+            (self.scores_definition or {}).get("aggregation")
+        )
 
     def __str__(self) -> str:
         return f"{self.provider} - {self.get_name_translated}"
@@ -4136,6 +4415,19 @@ class QuickFormPage(ReferentialObjectMixin, I18nObjectMixin):
         null=True,
         verbose_name=_("Visibility expression"),
         help_text=_("CEL expression; the page is hidden when it evaluates to false"),
+    )
+
+    class Aggregation(models.TextChoices):
+        SUM = "sum", _("Sum")
+        MAX = "max", _("Maximum")
+        MEAN = "mean", _("Mean")
+
+    aggregation = models.CharField(
+        max_length=10,
+        choices=Aggregation.choices,
+        default=Aggregation.SUM,
+        verbose_name=_("Aggregation"),
+        help_text=_("How the page's question scores combine into the page score"),
     )
 
     fields_to_check = ["urn"]
@@ -4207,6 +4499,26 @@ class QuickFormPublication(NameDescriptionMixin, FolderMixin):
         max_length=64, blank=True, default="", verbose_name=_("Icon")
     )
     order = models.IntegerField(default=0, verbose_name=_("Order"))
+    # Off by default: a form sent to the vendor itself must not show the vendor
+    # how it is about to be rated.
+    show_projection = models.BooleanField(
+        default=False,
+        verbose_name=_("Show the projected result to respondents"),
+        help_text=_(
+            "While filling the form, respondents see what accepting it would "
+            "write, e.g. the vendor's tier."
+        ),
+    )
+    # Off: a submitter who could make every on-accept change by hand gets it
+    # applied on submit instead of waiting for a second person.
+    always_review = models.BooleanField(
+        default=False,
+        verbose_name=_("Always require review"),
+        help_text=_(
+            "Even when the person submitting could make the change themselves, "
+            "an accepted review is needed before anything is written."
+        ),
+    )
 
     fields_to_check = ["name"]
 
@@ -8610,6 +8922,9 @@ class ComplianceAssessment(Assessment):
         verbose_name=_("Score scale preset"),
     )
     computed_outcome = models.JSONField(null=True, blank=True)
+    computed_values = models.JSONField(
+        blank=True, null=True, verbose_name=_("Computed values")
+    )
 
     assets = models.ManyToManyField(
         Asset,
@@ -8847,12 +9162,30 @@ class ComplianceAssessment(Assessment):
 
         # bulk_update skips RequirementAssessment.save(), which normally
         # re-evaluates outcomes when a score changes.
-        def _evaluate():
-            from core.cel_service import evaluate_outcomes
+        defer_outcome_evaluation(self.pk)
 
-            evaluate_outcomes(self)
+    # What outcome rules read besides the requirements: scope and scoring.
+    _CEL_RELEVANT_FIELDS = frozenset(
+        {
+            "selected_implementation_groups",
+            "field_visibility",
+            "score_calculation_method",
+            "anchor_na_to_target",
+            "target_score",
+            "min_score",
+            "max_score",
+        }
+    )
 
-        _defer_once("_pending_cel_evaluations", self.pk, _evaluate)
+    def _cel_snapshot(self, fields) -> dict:
+        # References, not copies: field_visibility's setters assign a new dict.
+        return {f: getattr(self, f) for f in self._CEL_RELEVANT_FIELDS if f in fields}
+
+    @classmethod
+    def from_db(cls, db, field_names, values, *, fetch_mode=None):
+        instance = super().from_db(db, field_names, values, fetch_mode=fetch_mode)
+        instance._loaded_cel_values = instance._cel_snapshot(field_names)
+        return instance
 
     def save(self, *args, **kwargs) -> None:
         # No scale chosen: the framework's (the organisation scale is only
@@ -8862,8 +9195,20 @@ class ComplianceAssessment(Assessment):
             self.max_score = self.framework.max_score
             self.scores_definition = self.framework.scores_definition
             self.score_scale_preset = None
+        creating = self._state.adding
+        loaded = getattr(self, "_loaded_cel_values", {})
+        update_fields = kwargs.get("update_fields")
+        saved = self._CEL_RELEVANT_FIELDS & set(
+            update_fields if update_fields is not None else self._CEL_RELEVANT_FIELDS
+        )
+        cel_changed = not creating and any(
+            f not in loaded or getattr(self, f) != loaded[f] for f in saved
+        )
         super().save(*args, **kwargs)
         self.upsert_daily_metrics()
+        self._loaded_cel_values = {**loaded, **self._cel_snapshot(saved)}
+        if cel_changed or (creating and self.framework.outcomes_definition):
+            defer_outcome_evaluation(self.pk)
 
     def create_requirement_assessments(
         self, baseline: Self | None = None
@@ -9113,10 +9458,32 @@ class ComplianceAssessment(Assessment):
             # Ensure metrics are refreshed once after the bulk update.
             self.refresh_from_db(fields=["updated_at"])
             self.upsert_daily_metrics()
+            # bulk_update skips RequirementAssessment.save(), which normally
+            # re-evaluates outcomes when a result changes.
+            defer_outcome_evaluation(self.pk)
 
         return changes
 
-    def _compute_score_for_field(
+    def na_anchor_score(self, ra_min, ra_max):
+        """Score an N/A requirement counts for when anchor_na_to_target is on.
+
+        The CA-wide target is projected onto the requirement's own scale, so
+        mixed scales stay coherent; without a target it counts as its max.
+        """
+        ca_min, ca_max = self.min_score, self.max_score
+        if (
+            self.target_score is not None
+            and ca_min is not None
+            and ca_max is not None
+            and ca_max > ca_min
+            and ra_max > ra_min
+        ):
+            ca_target_clamped = max(ca_min, min(self.target_score, ca_max))
+            ca_ratio = (ca_target_clamped - ca_min) / (ca_max - ca_min)
+            return ra_min + ca_ratio * (ra_max - ra_min)
+        return ra_max
+
+    def _compute_raw_score_for_field(
         self, requirement_assessments, ig, score_field, anchor_na_to_target=False
     ):
         """
@@ -9133,9 +9500,10 @@ class ComplianceAssessment(Assessment):
         contribution; no scale normalization.
 
         When anchor_na_to_target is True, N/A RAs contribute their resolved
-        target (or resolved max if no target is set).
+        target (or resolved max if no target is set). With every method, a
+        missing documentation score counts as the RA's resolved minimum.
 
-        Returns the computed score, or -1 if no scored requirements exist.
+        Returns the unrounded score, or -1 if no scored requirements exist.
         """
         ca_min = self.min_score
         ca_max = self.max_score
@@ -9158,34 +9526,24 @@ class ComplianceAssessment(Assessment):
                     resolved = ras.get_resolved_scoring()
                     ra_min = resolved["min_score"]
                     ra_max = resolved["max_score"]
-                    if (
-                        self.target_score is not None
-                        and ra_min is not None
-                        and ra_max is not None
-                        and ra_max > ra_min
-                    ):
-                        # Project the CA-wide target score onto the RA scale as a
-                        # ratio so summing across mixed scales stays coherent
-                        # (raw injection would add 80/100 onto a 0-5 RA).
-                        ca_target_clamped = max(ca_min, min(self.target_score, ca_max))
-                        ca_ratio = (ca_target_clamped - ca_min) / ca_range
-                        score = ra_min + ca_ratio * (ra_max - ra_min)
-                    elif ra_max is not None:
-                        score = ra_max
+                    if ra_min is None or ra_max is None:
+                        score = ra_max or 0
                     else:
-                        score = 0
+                        score = self.na_anchor_score(ra_min, ra_max)
                 else:
                     raw = getattr(ras, score_field)
                     if raw is None:
                         if score_field == "score":
                             continue
-                        raw = 0
+                        # A missing documentation score is the bottom of the
+                        # scale, as for the averages.
+                        raw = ras.get_resolved_scoring()["min_score"] or 0
                     score = raw
                 total += score * weight
                 total_weight += weight
             if total_weight == 0:
                 return -1
-            return _truncate_one_decimal(total)
+            return total
 
         def _ra_ratio_weight(ras):
             if ig and not (ig & set(ras.requirement.implementation_groups or [])):
@@ -9200,21 +9558,15 @@ class ComplianceAssessment(Assessment):
 
             is_na = ras.result == RequirementAssessment.Result.NOT_APPLICABLE
             if is_na and anchor_na_to_target:
-                # Project the CA-wide target onto the RA scale as a ratio so
-                # mixed scales stay coherent (CA target 80/100 contributes
-                # 80% of the RA range, not 80 raw).
-                if self.target_score is not None:
-                    ca_target_clamped = max(ca_min, min(self.target_score, ca_max))
-                    ca_ratio = (ca_target_clamped - ca_min) / ca_range
-                    raw = ra_min + ca_ratio * ra_range
-                else:
-                    raw = ra_max
+                raw = self.na_anchor_score(ra_min, ra_max)
             else:
                 raw = getattr(ras, score_field)
                 if raw is None:
                     if score_field == "score":
                         return None
-                    raw = 0
+                    # A missing documentation score is the bottom of the scale
+                    # (0 on 0-based scales), never below it.
+                    raw = ra_min
 
             ratio = (raw - ra_min) / ra_range
             return ratio, (ras.requirement.weight or 1)
@@ -9231,25 +9583,7 @@ class ComplianceAssessment(Assessment):
             if not leaf_ratios:
                 return -1
 
-            all_nodes = RequirementNode.objects.filter(
-                framework=self.framework
-            ).values_list("urn", "parent_urn", "weight")
-
-            children_map = defaultdict(list)
-            node_weights = {}
-            roots = []
-            all_urns = set()
-            parent_links = {}
-            for urn, parent_urn, weight in all_nodes:
-                node_weights[urn] = weight or 1
-                all_urns.add(urn)
-                parent_links[urn] = parent_urn
-            for urn, parent_urn in parent_links.items():
-                if parent_urn and parent_urn in all_urns:
-                    children_map[parent_urn].append(urn)
-                else:
-                    # Orphan or root: keep reachable as a tree root.
-                    roots.append(urn)
+            children_map, node_weights, roots = self.framework_node_tree
 
             computed_ratios = {}
             visiting = set()
@@ -9311,7 +9645,7 @@ class ComplianceAssessment(Assessment):
                 return -1
 
             global_ratio = sum(category_ratios) / len(category_ratios)
-            return _truncate_one_decimal(ca_min + global_ratio * ca_range)
+            return ca_min + global_ratio * ca_range
 
         total_ratio_weighted = 0
         total_weight = 0
@@ -9328,7 +9662,29 @@ class ComplianceAssessment(Assessment):
 
         # AVG: average of weighted ratios, denormalized onto the CA scale.
         avg_ratio = total_ratio_weighted / total_weight
-        return _truncate_one_decimal(ca_min + avg_ratio * ca_range)
+        return ca_min + avg_ratio * ca_range
+
+    @cached_property
+    def framework_node_tree(self):
+        """(children, weights, roots) of the framework's nodes by URN, built
+        once per instance: the radar scores each section separately."""
+        all_nodes = RequirementNode.objects.filter(
+            framework=self.framework
+        ).values_list("urn", "parent_urn", "weight")
+        children_map = defaultdict(list)
+        node_weights = {}
+        roots = []
+        parent_links = {}
+        for urn, parent_urn, weight in all_nodes:
+            node_weights[urn] = weight or 1
+            parent_links[urn] = parent_urn
+        for urn, parent_urn in parent_links.items():
+            if parent_urn and parent_urn in parent_links:
+                children_map[parent_urn].append(urn)
+            else:
+                # Orphan or root: keep reachable as a tree root.
+                roots.append(urn)
+        return children_map, node_weights, roots
 
     def get_global_score(
         self, prefetched_requirements: Optional[list[RequirementAssessment]] = None
@@ -9397,30 +9753,71 @@ class ComplianceAssessment(Assessment):
             else None
         )
 
-        impl_score = self._compute_score_for_field(
+        impl_score = self._compute_raw_score_for_field(
             requirement_assessments_scored, ig, "score", self.anchor_na_to_target
         )
 
         doc_score = None
         if self.show_documentation_score:
-            doc_score = self._compute_score_for_field(
+            doc_score = self._compute_raw_score_for_field(
                 requirement_assessments_scored,
                 ig,
                 "documentation_score",
                 self.anchor_na_to_target,
             )
 
-        # Maturity is the average of the enabled layers (ignore -1 / None)
+        # Maturity is the average of the enabled layers (ignore -1 / None).
         enabled = [s for s in [impl_score, doc_score] if s is not None and s != -1]
         if enabled:
-            maturity_score = _truncate_one_decimal(sum(enabled) / len(enabled))
+            maturity_score = clean_score(sum(enabled) / len(enabled))
         else:
             maturity_score = impl_score  # -1 if nothing scored
 
+        def _clean(score):
+            return score if score is None or score == -1 else clean_score(score)
+
         return {
-            "implementation_score": impl_score,
-            "documentation_score": doc_score,
+            "implementation_score": _clean(impl_score),
+            "documentation_score": _clean(doc_score),
             "maturity_score": maturity_score,
+        }
+
+    def get_scores_for(self, requirement_assessments) -> dict:
+        """Scores of a subset of RAs (a section, an implementation group),
+        filtered and aggregated like get_global_score so they stay consistent
+        with the tree and the global score. Layers with nothing scored are None.
+        """
+        na = RequirementAssessment.Result.NOT_APPLICABLE
+        scored = [
+            ra
+            for ra in requirement_assessments
+            if (self.anchor_na_to_target and ra.result == na)
+            or (ra.is_scored and ra.score is not None and ra.result != na)
+        ]
+        impl_score = doc_score = None
+        if scored:
+            impl_score = self._compute_raw_score_for_field(
+                scored, None, "score", self.anchor_na_to_target
+            )
+            if self.show_documentation_score:
+                doc_score = self._compute_raw_score_for_field(
+                    scored, None, "documentation_score", self.anchor_na_to_target
+                )
+        impl_score = None if impl_score == -1 else impl_score
+        doc_score = None if doc_score == -1 else doc_score
+        enabled = [s for s in [impl_score, doc_score] if s is not None]
+        return {
+            "implementation_score": clean_score(impl_score)
+            if impl_score is not None
+            else None,
+            "documentation_score": clean_score(doc_score)
+            if doc_score is not None
+            else None,
+            "maturity_score": clean_score(sum(enabled) / len(enabled))
+            if enabled
+            else None,
+            "scored_count": len(scored),
+            "total_weight": sum(ra.requirement.weight or 1 for ra in scored),
         }
 
     def get_total_max_score(self):
@@ -9479,6 +9876,27 @@ class ComplianceAssessment(Assessment):
         else:
             # For AVG and AVG_OF_AVG, the score is bounded by max_score
             return self.max_score
+
+    @property
+    def framework_exports(self) -> list[dict]:
+        """Exports specific to the audit's framework (core.framework_exports),
+        such as a publisher's official self-assessment template."""
+        return [
+            {
+                "ref_id": export.ref_id,
+                "title": export.title,
+                "description": export.description,
+                "format": export.format,
+            }
+            for export in available_framework_exports(self)
+        ]
+
+    @property
+    def outcome_rules(self) -> list[dict]:
+        """The framework's outcome rules that apply to the audit's scope."""
+        from core.cel_service import applicable_rules
+
+        return applicable_rules(self.framework, self.selected_implementation_groups)
 
     def get_selected_implementation_groups(self):
         framework = self.framework
@@ -10890,7 +11308,9 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         # Atomic update and save
         self.save(update_fields=["score", "result", "is_scored"])
 
-    _CEL_RELEVANT_FIELDS = frozenset({"score", "result", "status"})
+    _CEL_RELEVANT_FIELDS = frozenset(
+        {"score", "documentation_score", "is_scored", "result", "status"}
+    )
 
     @classmethod
     def from_db(cls, db, field_names, values, *, fetch_mode=None):
@@ -10909,14 +11329,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         return {f for f in self._CEL_RELEVANT_FIELDS if getattr(self, f) != old.get(f)}
 
     def _defer_cel_evaluation(self):
-        ca = self.compliance_assessment
-
-        def _run():
-            from core.cel_service import evaluate_outcomes
-
-            evaluate_outcomes(ca)
-
-        _defer_once("_pending_cel_evaluations", ca.pk, _run)
+        defer_outcome_evaluation(self.compliance_assessment_id)
 
     def save(self, *args, **kwargs) -> None:
         update_fields = kwargs.get("update_fields")
@@ -11137,6 +11550,15 @@ class ProducedObjectLink(AbstractBaseModel):
         }
 
 
+def _uuid_or_text(value) -> str:
+    """A UUID in its canonical (lowercase) form, anything else as text: the same
+    id sent in another case is the same id."""
+    try:
+        return str(uuid.UUID(str(value)))
+    except ValueError:
+        return str(value)
+
+
 class QuickFormResponse(
     NameDescriptionMixin, ETADueDateMixin, FolderMixin, AbstractBaseModel
 ):
@@ -11235,13 +11657,37 @@ class QuickFormResponse(
     computed_outcome = models.JSONField(
         blank=True, null=True, verbose_name=_("Computed outcome")
     )
+    # Results of the `kind: number` rules, {ref_id: number}. Kept apart from
+    # `computed_outcome`, whose every key reads as a classification that fired.
+    computed_values = models.JSONField(
+        blank=True, null=True, verbose_name=_("Computed values")
+    )
+    # What the response is about, read from the form's subject question. Generic
+    # because entity is the first subject type, not the only one.
+    subject_content_type = models.ForeignKey(
+        ContentType,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name=_("Subject type"),
+    )
+    subject_object_id = models.UUIDField(
+        null=True, blank=True, verbose_name=_("Subject")
+    )
+    subject = GenericForeignKey("subject_content_type", "subject_object_id")
+    # Started from the object itself ("Assess tier"): the subject answer is
+    # fixed, so the assessment cannot drift to another object mid-way.
+    subject_locked = models.BooleanField(
+        default=False, verbose_name=_("Subject locked")
+    )
     # Denormalized mirror of the fired outcome ref_ids, comma-joined and sorted.
     # `computed_outcome` is a JSON blob: the API cannot filter it and the workflow
     # engine only filters concrete columns, so routing and reporting need this.
     outcome_refs = models.TextField(
         blank=True, default="", verbose_name=_("Outcome refs")
     )
-    score = models.IntegerField(blank=True, null=True, verbose_name=_("Score"))
+    score = models.FloatField(blank=True, null=True, verbose_name=_("Score"))
     started_at = models.DateTimeField(
         blank=True, null=True, verbose_name=_("Started at")
     )
@@ -11299,6 +11745,12 @@ class QuickFormResponse(
     class Meta:
         verbose_name = _("Quick form response")
         verbose_name_plural = _("Quick form responses")
+        indexes = [
+            models.Index(
+                fields=["subject_content_type", "subject_object_id"],
+                name="qf_response_subject_idx",
+            )
+        ]
         permissions = [
             (
                 "approve_quickformresponse",
@@ -11401,6 +11853,135 @@ class QuickFormResponse(
             QuickFormResponse.objects.filter(pk=self.pk).update(name=title[:limit])
             self.name = title[:limit]
 
+    def subject_question(self):
+        """The form's subject question when it is a single-object reference to a
+        referenceable model, else None."""
+        from core.object_references import REFERENCEABLE
+
+        urn = self.quick_form.subject_question_urn
+        if not urn:
+            return None
+        question = Question.objects.filter(
+            page__quick_form_id=self.quick_form_id, urn__iexact=urn
+        ).first()
+        if question is None or question.type != Question.Type.OBJECT_REFERENCE:
+            return None
+        config = question.config if isinstance(question.config, dict) else {}
+        if config.get("multiple") or config.get("model") not in REFERENCEABLE:
+            return None
+        return question
+
+    def subject_summary(self, user=None, labels: dict | None = None) -> dict | None:
+        """What the response is about, as {id, model, str}. The label is filled in
+        only for a caller who may view that object, like answer labels. A list
+        passes `labels` from `subject_labels`, so a row costs no query."""
+        from django.contrib.contenttypes.models import ContentType
+
+        from core.object_references import REFERENCEABLE
+
+        if not self.subject_content_type_id or not self.subject_object_id:
+            return None
+        model_class = ContentType.objects.get_for_id(
+            self.subject_content_type_id
+        ).model_class()
+        label = model_class._meta.label if model_class else ""
+        if labels is None:
+            labels = QuickFormResponse.subject_labels([self], user)
+        return {
+            "id": str(self.subject_object_id),
+            "model": next(
+                (k for k, v in REFERENCEABLE.items() if v["model"] == label), None
+            ),
+            "str": labels.get((self.subject_content_type_id, self.subject_object_id)),
+        }
+
+    @staticmethod
+    def subject_labels(responses, user) -> dict:
+        """{(content type id, object id): label} for the subjects of `responses`
+        that `user` may view: one permission lookup and one query per model."""
+        from collections import defaultdict
+
+        from django.contrib.contenttypes.models import ContentType
+
+        from iam.models import RoleAssignment
+
+        if user is None or not user.is_authenticated:
+            return {}
+        ids_by_type = defaultdict(set)
+        for response in responses:
+            if response.subject_content_type_id and response.subject_object_id:
+                ids_by_type[response.subject_content_type_id].add(
+                    response.subject_object_id
+                )
+        labels = {}
+        for type_id, ids in ids_by_type.items():
+            model_class = ContentType.objects.get_for_id(type_id).model_class()
+            if model_class is None:
+                continue
+            viewable = RoleAssignment.get_viewable_object_ids(user, model_class)
+            for target in model_class.objects.filter(pk__in=ids).filter(
+                pk__in=viewable
+            ):
+                labels[(type_id, target.pk)] = str(target)
+        return labels
+
+    def changes_locked_subject(self, answers: dict) -> bool:
+        """Whether `answers` would point a locked response at another object.
+        Re-sending the current subject is not a change."""
+        if not self.subject_locked or not isinstance(answers, dict):
+            return False
+        urn = (self.quick_form.subject_question_urn or "").lower()
+        for key, value in answers.items():
+            if str(key).lower() != urn:
+                continue
+            ids = value if isinstance(value, list) else [value]
+            if {_uuid_or_text(v) for v in ids if v} != {str(self.subject_object_id)}:
+                return True
+        return False
+
+    def refresh_subject_from_answers(self) -> None:
+        """Point the response at the object its subject question names.
+
+        Locked once closed, or when started about an object: a response keeps
+        the subject it was decided, or started, about. The id was checked as
+        reachable when the answer was written.
+        """
+        from core.object_references import REFERENCEABLE
+
+        if self.status == self.Status.CLOSED or (
+            self.subject_locked and self.subject_object_id
+        ):
+            return
+        question = self.subject_question()
+        if question is None:
+            return
+        value = (
+            Answer.objects.filter(response=self, question=question)
+            .values_list("value", flat=True)
+            .first()
+        )
+        ids = value if isinstance(value, list) else []
+        subject_id = str(ids[0]) if len(ids) == 1 else None
+        content_type = (
+            ContentType.objects.get_for_model(
+                apps.get_model(REFERENCEABLE[question.config["model"]]["model"])
+            )
+            if subject_id
+            else None
+        )
+        current = (
+            self.subject_content_type_id,
+            str(self.subject_object_id) if self.subject_object_id else None,
+        )
+        wanted = (content_type.id if content_type else None, subject_id)
+        if current == wanted:
+            return
+        QuickFormResponse.objects.filter(pk=self.pk).update(
+            subject_content_type=content_type, subject_object_id=subject_id
+        )
+        self.subject_content_type = content_type
+        self.subject_object_id = subject_id
+
     def seed_answers(self) -> None:
         """One empty Answer per question of the form, like audits do at
         creation, so progress counting and the renderer see every question."""
@@ -11474,6 +12055,58 @@ class AnswerAttachment(AbstractBaseModel, FolderMixin):
 
     def __str__(self) -> str:
         return self.filename
+
+
+class QuickFormApplication(AbstractBaseModel, FolderMixin):
+    """One write an accepted response made through an `on_accept` target: what
+    it changed, where, from what to what, and who accepted it."""
+
+    response = models.ForeignKey(
+        "QuickFormResponse",
+        on_delete=models.CASCADE,
+        related_name="applications",
+        verbose_name=_("Quick form response"),
+    )
+    target = models.CharField(max_length=100, verbose_name=_("Target"))
+    subject_content_type = models.ForeignKey(
+        ContentType,
+        on_delete=models.CASCADE,
+        related_name="+",
+        verbose_name=_("Subject type"),
+    )
+    subject_object_id = models.UUIDField(verbose_name=_("Subject"))
+    subject = GenericForeignKey("subject_content_type", "subject_object_id")
+    previous_value = models.JSONField(
+        null=True, blank=True, verbose_name=_("Previous value")
+    )
+    previous_display = models.CharField(
+        max_length=255, blank=True, default="", verbose_name=_("Previous")
+    )
+    new_value = models.JSONField(null=True, blank=True, verbose_name=_("New value"))
+    new_display = models.CharField(
+        max_length=255, blank=True, default="", verbose_name=_("New")
+    )
+    overridden = models.BooleanField(default=False, verbose_name=_("Overridden"))
+    note = models.TextField(blank=True, default="", verbose_name=_("Note"))
+    applied_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="quick_form_applications",
+        verbose_name=_("Applied by"),
+    )
+
+    class Meta:
+        verbose_name = _("Quick form application")
+        verbose_name_plural = _("Quick form applications")
+        ordering = ["-created_at"]
+
+    def save(self, *args, **kwargs):
+        # As visible as the response that made it.
+        if self.response_id:
+            self.folder_id = self.response.folder_id
+        super().save(*args, **kwargs)
 
 
 class QuickFormOutcome(AbstractBaseModel, FolderMixin):
@@ -11594,14 +12227,7 @@ class Answer(AbstractBaseModel, FolderMixin):
         return []
 
     def _defer_cel_evaluation(self):
-        ca = self.requirement_assessment.compliance_assessment
-
-        def _run():
-            from core.cel_service import evaluate_outcomes
-
-            evaluate_outcomes(ca)
-
-        _defer_once("_pending_cel_evaluations", ca.pk, _run)
+        defer_outcome_evaluation(self.requirement_assessment.compliance_assessment_id)
 
     def _defer_response_recompute(self):
         response = self.response
@@ -12005,15 +12631,15 @@ class RiskAcceptance(NameDescriptionMixin, FolderMixin):
         with transaction.atomic():
             self.state = state
             if state == "accepted":
-                self.accepted_at = datetime.now()
+                self.accepted_at = timezone.now()
                 # iterate over the risk scenarios to set their treatment to accepted
                 for scenario in self.risk_scenarios.all():
                     scenario.treatment = "accept"
                     scenario.save()
             if state == "rejected":
-                self.rejected_at = datetime.now()
+                self.rejected_at = timezone.now()
             elif state == "revoked":
-                self.revoked_at = datetime.now()
+                self.revoked_at = timezone.now()
                 # revert the treatment set on acceptance, leaving scenarios that have
                 # since moved to another treatment, or are still covered by another
                 # accepted acceptance, untouched

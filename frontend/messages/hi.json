@@ -631,6 +631,7 @@
 	"libraryLoadingError": "आपकी लाइब्रेरी लोड करते समय एक त्रुटि उत्पन्न हुई",
 	"processingError": "प्रसंस्करण त्रुटि",
 	"libraryAlreadyLoadedError": "यह लाइब्रेरी पहले ही लोड की जा चुकी है",
+	"libraryOutdatedError": "इस लाइब्रेरी का नया संस्करण पहले से संग्रहीत है। इसे आयात करने के लिए अपनी फ़ाइल में अधिक \"version\" सेट करें।",
 	"invalidLibraryFileError": "अवैध लाइब्रेरी फ़ाइल। कृपया सुनिश्चित करें कि प्रारूप सही है।",
 	"taintedFormMessage": "क्या आप इस पृष्ठ को छोड़ना चाहते हैं? किए गए परिवर्तन सहेजे नहीं जा सकते।",
 	"riskScenariosStatus": "जोखिम परिदृश्यों की स्थिति",
@@ -641,7 +642,6 @@
 	"attemptToDeleteOnlyAdminAccountError": "आप अपने एप्लिकेशन के केवल व्यवस्थापक खाते को हटा नहीं सकते।",
 	"attemptToRemoveOnlyAdminUserGroup": "आप एप्लिकेशन के केवल व्यवस्थापक उपयोगकर्ता को व्यवस्थापक उपयोगकर्ता समूह से हटा नहीं सकते।",
 	"attemptToRemoveSelfFromDomainAdminGroup": "आप स्वयं को डोमेन व्यवस्थापक समूह से नहीं हटा सकते। किसी अन्य व्यवस्थापक से ऐसा करने के लिए कहें।",
-	"scoringHelpText": "स्कोरिंग को सक्षम करने के लिए जाँचें",
 	"overrideScore": "स्कोर अधिलेखित करें",
 	"overrideScoreHelpText": "स्कोर को मैन्युअल रूप से नियत करें और उत्तरों से इसकी पुनर्गणना रोकें",
 	"automaticScore": "स्वचालित स्कोर",
@@ -1588,5 +1588,7 @@
 	"attributeMappingGroups": "समूह विशेषता मैपिंग",
 	"attributeMappingGroupsHelpText": "वह क्लेम नाम जो उपयोगकर्ता की IdP समूह सदस्यता ले जाता है। यहाँ पाए गए समूह हर लॉगिन पर IdP समूहों के साथ समन्वयित किए जाते हैं, और व्यवस्थापक द्वारा मैप किए गए किसी भी CISO Assistant उपयोगकर्ता समूह की अनुमति देते हैं।",
 	"jitProvisioning": "SSO स्वतः-प्रावधान (JIT)",
-	"jitProvisioningDescription": "पहली SSO लॉगिन पर खातों का स्वतः निर्माण और उनकी IdP समूह सदस्यता का समन्वयन सक्षम करें, बिना SCIM की आवश्यकता के।"
+	"jitProvisioningDescription": "पहली SSO लॉगिन पर खातों का स्वतः निर्माण और उनकी IdP समूह सदस्यता का समन्वयन सक्षम करें, बिना SCIM की आवश्यकता के।",
+	"includeNotApplicableRequirements": "लागू नहीं होने वाली आवश्यकताएँ शामिल करें",
+	"excludeNotApplicableRequirements": "लागू नहीं होने वाली आवश्यकताएँ बाहर रखें"
 }

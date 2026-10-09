@@ -35,7 +35,17 @@ export const load = (async ({ fetch, params }) => {
 	// Supervised actions are a reviewer's affordance; a requester's call 403s and the
 	// list is simply empty for them.
 	const actionsRes = await fetch(`${reviewer}suggested-actions/`);
+	// What accepting would write; only meaningful while a decision is pending.
+	const deciding = response.status === 'submitted' || response.status === 'in_review';
+	const previewRes = deciding ? await fetch(`${reviewer}accept-preview/`) : null;
+	const acceptPreview =
+		previewRes && previewRes.ok
+			? await previewRes.json()
+			: previewRes
+				? await discardBody(previewRes).then(() => [])
+				: [];
 	return {
+		acceptPreview,
 		suggestedActions: actionsRes.ok
 			? await actionsRes.json()
 			: await discardBody(actionsRes).then(() => []),
@@ -71,7 +81,7 @@ export const actions: Actions = {
 		return { status: res.status, body: await res.json() };
 	},
 	setStatus: async (event) => {
-		const { id, status, observation, resolution } = await event.request.json();
+		const { id, status, observation, resolution, overrides } = await event.request.json();
 		// The requester's only transition is submit; every other one is the reviewer's.
 		const fallback =
 			status === 'submitted'
@@ -81,7 +91,7 @@ export const actions: Actions = {
 			event.fetch,
 			`${BASE_API_URL}/quick-form-responses/${id}/set-status/`,
 			fallback,
-			json({ status, observation, resolution })
+			json({ status, observation, resolution, overrides })
 		);
 		return { status: res.status, body: await res.json() };
 	},

@@ -29,9 +29,9 @@ In the order they appear on the panel (mirroring the respondent view):
 | **Answers** | Auditor + Respondent | Questionnaire answers when the framework defines auto-questions. |
 | **Respondent alignment** | Hidden | Whether the respondent's answer matches the auditor's expectation. The "Auditor only" pill is greyed out — only the respondent can populate this. |
 | **Status** | Auditor only | The lifecycle status of the requirement assessment. |
-| **Result** | Auditor + Respondent | Compliant / partial / non-compliant / N/A. |
+| **Result** | Auditor + Respondent | Compliant / partial / non-compliant / N/A. Also shows the framework's yes/no outcome rules on the audit page (e.g. the [CCB conformity criteria](../features/framework-specific/cyfun.md#checking-the-ccb-conformity-criteria) for CyFun 2025). |
 | **Extended result** | Auditor only | Free-form qualifier alongside the result. Cannot be more permissive than **Result**. |
-| **Score** | Hidden | Numeric score. |
+| **Score** | Hidden | Numeric score. Also shows the values the framework's number rules compute. |
 | **Documentation score** | Hidden | Companion score for documentation maturity. Cannot be more permissive than **Score**. |
 | **Applied controls** | Auditor + Respondent | The controls linked to this requirement. |
 | **Evidences** | Auditor + Respondent | Files / links proving the requirement. |
@@ -63,7 +63,51 @@ The audit's stored `field_visibility` is the runtime source of truth. The framew
 
 ## Scoring
 
-Three settings shape how the platform turns per-requirement scores into a global score:
+These settings shape the scale requirements are scored on and how the platform turns per-requirement scores into a global score.
+
+### Choosing the score scale
+
+The **Score scale** picker sets the scale every requirement of the audit is scored on. It sits under **More**, just after the **Field visibility** panel, on both the create and the edit form.
+
+{% hint style="info" %}
+The picker only offers scales once scoring is visible to auditors. **Score** defaults to _Hidden_, so first switch it to _Auditor only_ or _Auditor + Respondent_ in **Field visibility**; until then the picker shows a reminder instead of the options.
+{% endhint %}
+
+Pick one of the options:
+
+| Option | Scale | Offered when |
+|---|---|---|
+| **Framework** | The framework's own range and level labels. | The framework declares a scale of its own (level labels, or a range other than 0–100). |
+| **Baseline audit** | The scale of the audit you are copying. | Creating a copy of an audit on the same framework. |
+| **Organisation** | The organisation default, set in [general settings](../configuration/settings/general.md#audits) (0–5 unless changed). | Always. |
+| **0–100** · _Percentage (%)_ | No level labels. | Always. |
+| **0–5** · _e.g. ISO 33020_ | Incomplete, Performed, Managed, Established, Predictable, Innovating. | Always. |
+| **1–5** · _e.g. CMMI_ | Initial, Managed, Defined, Quantitatively managed, Optimized. | Always. |
+| **1–4** · _e.g. NIST_ | Partial, Risk-informed, Repeatable, Adaptive. | Always. |
+| **0–3** · _e.g. C2M2_ | Incomplete, Initial, Managed, Defined. | Always. |
+| **Current scale** | The scale the audit already has. | Editing an audit whose scale matches none of the other options. |
+
+The preset matching the organisation default is not repeated: the **Organisation** option stands for it. Preset level labels follow the interface language. Below the options, the **Levels** line previews the labels of the selected scale, or reads _No level labels: scores are shown as numbers._
+
+On a new audit the picker pre-selects, in this order: the **Baseline audit** for a copy, otherwise the **Framework** scale when the framework has one, otherwise the **Organisation** default. Audits created through the API without any scale get the framework's scale; the organisation default is only proposed by the form.
+
+#### Frameworks with a fixed scale
+
+When the framework's questionnaire computes scores from its answers, or some of its requirements carry their own scale, the scale cannot be changed. Only **Framework** is offered, with the note _This framework computes scores from its questions, so its scale cannot be changed._
+
+#### Changing the scale of an existing audit
+
+Picking a scale with a different range announces the conversion under the picker: _Existing scores, documentation scores and target will be converted proportionally from 0–100 to 0–5._ (with the actual ranges). When there is something to convert, **Save** opens a confirmation panel titled _Saving will convert existing values from … to …_ that counts the scored requirements, unticked scores and documentation scores affected, and the target change. Confirm with **Convert and save**, or **Cancel** to keep editing.
+
+- Values are converted proportionally and rounded to whole numbers, halves rounded up — 40 on 0–100 becomes 2 on 0–5.
+- The **Target score** is converted too (to two decimals), unless you change it in the same save; a target you set yourself must fall within the new range.
+- Requirements with their own scale keep their scores.
+- The score history before today stays on the previous scale.
+- Rounding means converting back will not restore the original values exactly.
+
+Switching to an option with the same range only changes the level labels; scores are left as they are. The scale of a [locked](#lock) audit cannot change unless the same save unlocks it.
+
+When copying an audit, picking a scale other than the baseline's converts the carried-over scores the same way.
 
 ### Score calculation method
 
@@ -91,7 +135,7 @@ The **Anchor N/A to target score** checkbox controls how _Not Applicable_ requir
 
 ### Per-requirement scale override
 
-By default every requirement in an audit is scored on the same scale (e.g. 0..5). When a framework needs a few requirements scored on a different scale — for example a binary "Yes / No" check inside an otherwise maturity-style framework — those requirements can ship their own scale:
+By default every requirement in an audit is scored on the audit's [score scale](#choosing-the-score-scale) (e.g. 0..5). When a framework needs a few requirements scored on a different scale — for example a binary "Yes / No" check inside an otherwise maturity-style framework — those requirements can ship their own scale:
 
 - `min_score` / `max_score` override the bounds of the audit-level scale for that requirement only.
 - `scores_definition_ref` overrides the labels. The framework declares an **alternatives registry** keyed by name, and each requirement references an entry by name. Two requirements pointing at the same name share the same definition without duplication.

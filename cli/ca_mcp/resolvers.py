@@ -1,6 +1,20 @@
 """Helper functions to resolve names to UUIDs"""
 
-from .client import fetch_all_results
+import json
+import re
+import uuid
+
+from .client import fetch_all_results, make_get_request
+
+
+def _is_uuid(value) -> bool:
+    if not isinstance(value, str):
+        return False
+    try:
+        uuid.UUID(value)
+    except ValueError:
+        return False
+    return True
 
 
 def resolve_folder_id(folder_name_or_id: str) -> str:
@@ -135,7 +149,9 @@ def resolve_risk_assessment_id(assessment_name_or_id: str) -> str:
     )
 
     if error:
-        raise ValueError(f"Risk assessment '{assessment_name_or_id}' API error: {error}")
+        raise ValueError(
+            f"Risk assessment '{assessment_name_or_id}' API error: {error}"
+        )
 
     if not assessments:
         raise ValueError(f"Risk assessment '{assessment_name_or_id}' not found")
@@ -442,6 +458,30 @@ def resolve_vulnerability_id(vulnerability_name_or_id: str) -> str:
     return str(vulnerabilities[0]["id"])
 
 
+def resolve_team_id(team_name_or_id: str) -> str:
+    """Helper function to resolve team name to UUID
+    If already a UUID, returns it. If a name, looks it up via API.
+    """
+    if "-" in team_name_or_id and len(team_name_or_id) == 36:
+        return team_name_or_id
+
+    teams, error = fetch_all_results("/teams/", params={"name": team_name_or_id})
+
+    if error:
+        raise ValueError(f"Team '{team_name_or_id}' API error: {error}")
+
+    if not teams:
+        raise ValueError(f"Team '{team_name_or_id}' not found")
+
+    if len(teams) > 1:
+        team_names = [t["name"] for t in teams[:3]]
+        raise ValueError(
+            f"Ambiguous team name '{team_name_or_id}', found {len(teams)}: {team_names}"
+        )
+
+    return str(teams[0]["id"])
+
+
 def resolve_task_template_id(task_name_or_id: str) -> str:
     """Helper function to resolve task template name to UUID
     If already a UUID, returns it. If a name, looks it up via API.
@@ -481,7 +521,9 @@ def resolve_entity_id(entity_name_or_id: str) -> str:
     if "-" in entity_name_or_id and len(entity_name_or_id) == 36:
         return entity_name_or_id
 
-    entities, error = fetch_all_results("/entities/", params={"name": entity_name_or_id})
+    entities, error = fetch_all_results(
+        "/entities/", params={"name": entity_name_or_id}
+    )
 
     if error:
         raise ValueError(f"Entity '{entity_name_or_id}' API error: {error}")
@@ -644,9 +686,7 @@ def resolve_feared_event_id(feared_event_name_or_id: str) -> str:
     )
 
     if error:
-        raise ValueError(
-            f"Feared event '{feared_event_name_or_id}' API error: {error}"
-        )
+        raise ValueError(f"Feared event '{feared_event_name_or_id}' API error: {error}")
 
     if not feared_events:
         raise ValueError(f"Feared event '{feared_event_name_or_id}' not found")
@@ -718,9 +758,7 @@ def resolve_attack_path_id(attack_path_name_or_id: str) -> str:
     )
 
     if error:
-        raise ValueError(
-            f"Attack path '{attack_path_name_or_id}' API error: {error}"
-        )
+        raise ValueError(f"Attack path '{attack_path_name_or_id}' API error: {error}")
 
     if not attack_paths:
         raise ValueError(f"Attack path '{attack_path_name_or_id}' not found")
@@ -755,9 +793,7 @@ def resolve_elementary_action_id(action_name_or_id: str) -> str:
     )
 
     if error:
-        raise ValueError(
-            f"Elementary action '{action_name_or_id}' API error: {error}"
-        )
+        raise ValueError(f"Elementary action '{action_name_or_id}' API error: {error}")
 
     if not actions:
         raise ValueError(f"Elementary action '{action_name_or_id}' not found")
@@ -803,3 +839,452 @@ def resolve_kill_chain_id(kill_chain_id: str) -> str:
         return kill_chain_id
 
     raise ValueError(f"Kill chain step '{kill_chain_id}' is not a valid UUID")
+
+
+# ============================================================================
+# Terminology matching helpers (shared by EBIOS RM and risk scenario tools)
+# ============================================================================
+
+
+def _normalize_for_matching(text: str) -> str:
+    """Normalize text for fuzzy matching: lowercase, strip, remove trailing 's' for plurals"""
+    normalized = text.lower().strip()
+    # Handle common plural forms
+    if normalized.endswith("s") and len(normalized) > 2:
+        normalized = normalized[:-1]
+    # Handle underscores vs spaces
+    normalized = normalized.replace("_", " ").replace("-", " ")
+    return normalized
+
+
+def _find_terminology_match(terminologies: list, user_input: str) -> dict | None:
+    """Find a terminology that matches the user input.
+
+    Matches against:
+    - Base name field (snake_case like "organized_crime")
+    - All translations in the translations dict
+
+    Uses case-insensitive, plural-insensitive matching.
+    """
+    normalized_input = _normalize_for_matching(user_input)
+
+    for term in terminologies:
+        # Match against the base name
+        if _normalize_for_matching(term.get("name", "")) == normalized_input:
+            return term
+
+        # Match against translations
+        translations = term.get("translations", {})
+        if isinstance(translations, dict):
+            for locale, locale_data in translations.items():
+                if isinstance(locale_data, dict):
+                    translated_name = locale_data.get("name", "")
+                    if (
+                        translated_name
+                        and _normalize_for_matching(translated_name) == normalized_input
+                    ):
+                        return term
+                elif isinstance(locale_data, str):
+                    # Some translations might be stored as direct strings
+                    if _normalize_for_matching(locale_data) == normalized_input:
+                        return term
+
+    return None
+
+
+# ============================================================================
+# Risk review resolvers: actors, reference controls, qualifications, risk levels
+# ============================================================================
+
+
+def _actor_label(actor: dict) -> str:
+    return str(
+        actor.get("str") or (actor.get("specific") or {}).get("str") or actor.get("id")
+    )
+
+
+def resolve_actor_id(actor_ref: str) -> str:
+    """Resolve an Actor (user, team or entity) from a UUID, email or name.
+
+    Owner / assignee fields reference Actor ids, not User ids.
+    Matching order: exact email, exact display string (case-insensitive),
+    then a single search hit. Raises ValueError naming the candidates.
+    """
+    if _is_uuid(actor_ref):
+        return actor_ref
+
+    ref = str(actor_ref).strip()
+    if not ref:
+        raise ValueError("Actor reference is empty")
+    ref_lower = ref.lower()
+
+    actors, error = fetch_all_results("/actors/", params={"search": ref})
+    if error:
+        raise ValueError(f"Actor '{ref}' API error: {error}")
+    actors = actors or []
+
+    # 1. exact email
+    if "@" in ref:
+        by_email = [
+            a
+            for a in actors
+            if str((a.get("specific") or {}).get("email") or "").lower() == ref_lower
+        ]
+        if not by_email:
+            # /actors/ does not return the email of the wrapped user: map it
+            # through /users/ and match the actor on the user id.
+            users, user_error = fetch_all_results(
+                "/users/", params={"email__icontains": ref}
+            )
+            if not user_error and users:
+                user_ids = {
+                    str(u.get("id"))
+                    for u in users
+                    if str(u.get("email") or "").lower() == ref_lower
+                }
+                by_email = [
+                    a
+                    for a in actors
+                    if str((a.get("specific") or {}).get("id")) in user_ids
+                ]
+        if len(by_email) == 1:
+            return str(by_email[0]["id"])
+
+    # 2. exact display string
+    exact = [a for a in actors if _actor_label(a).strip().lower() == ref_lower]
+    if len(exact) == 1:
+        return str(exact[0]["id"])
+    if len(exact) > 1:
+        labels = [_actor_label(a) for a in exact[:5]]
+        raise ValueError(
+            f"Ambiguous actor '{ref}', found {len(exact)} exact matches: {labels}. "
+            "Use the actor UUID"
+        )
+    if "@" in ref:
+        raise ValueError(f"Actor with email '{ref}' not found")
+
+    # 3. single search hit
+    if len(actors) == 1:
+        return str(actors[0]["id"])
+
+    if not actors:
+        raise ValueError(
+            f"Actor '{ref}' not found. Use list_objects('actors') to list actors"
+        )
+
+    labels = [_actor_label(a) for a in actors[:5]]
+    raise ValueError(
+        f"Ambiguous actor '{ref}', found {len(actors)}: {labels}. "
+        "Use an exact email, the exact name, or the actor UUID"
+    )
+
+
+def resolve_actor_ids(actor_refs) -> list:
+    """Resolve a list of actor references (see resolve_actor_id)."""
+    if isinstance(actor_refs, str):
+        actor_refs = [actor_refs]
+    return [resolve_actor_id(a) for a in actor_refs]
+
+
+def resolve_user_id(user_ref: str) -> str:
+    """Resolve a User (not an Actor) from a UUID, email or name.
+
+    Team.leader/deputies/members are plain User references, unlike
+    owner/assignee fields which reference Actor ids (see resolve_actor_id).
+    """
+    if _is_uuid(user_ref):
+        return user_ref
+
+    ref = str(user_ref).strip()
+    if not ref:
+        raise ValueError("User reference is empty")
+
+    params = {"email": ref} if "@" in ref else {"search": ref}
+    users, error = fetch_all_results("/users/", params=params)
+    if error:
+        raise ValueError(f"User '{ref}' API error: {error}")
+
+    if not users:
+        raise ValueError(f"User '{ref}' not found")
+
+    if len(users) > 1:
+        needle = ref.lower()
+        exact = [
+            u
+            for u in users
+            if needle
+            in {
+                (u.get("first_name") or "").lower(),
+                (u.get("last_name") or "").lower(),
+                f"{u.get('first_name') or ''} {u.get('last_name') or ''}".strip().lower(),
+            }
+        ]
+        if len(exact) == 1:
+            return str(exact[0]["id"])
+        labels = [u.get("email") for u in users[:5]]
+        raise ValueError(f"Ambiguous user '{ref}', found {len(users)}: {labels}")
+
+    return str(users[0]["id"])
+
+
+def resolve_user_ids(user_refs) -> list:
+    """Resolve a list of user references (see resolve_user_id)."""
+    if isinstance(user_refs, str):
+        user_refs = [user_refs]
+    return [resolve_user_id(u) for u in user_refs]
+
+
+def resolve_reference_control_id(ref: str) -> str:
+    """Resolve a reference control from a UUID, URN, ref_id or name.
+
+    URN -> ?urn= lookup. Otherwise ?search= then an exact case-insensitive
+    match on ref_id, then on name.
+    """
+    if _is_uuid(ref):
+        return ref
+
+    value = str(ref).strip()
+    if value.lower().startswith("urn:"):
+        controls, error = fetch_all_results(
+            "/reference-controls/", params={"urn": value}
+        )
+        if error:
+            raise ValueError(f"Reference control '{value}' API error: {error}")
+        if not controls:
+            raise ValueError(f"Reference control '{value}' not found")
+        if len(controls) > 1:
+            raise ValueError(
+                f"Ambiguous reference control URN '{value}', found {len(controls)}"
+            )
+        return str(controls[0]["id"])
+
+    controls, error = fetch_all_results(
+        "/reference-controls/", params={"search": value}
+    )
+    if error:
+        raise ValueError(f"Reference control '{value}' API error: {error}")
+    controls = controls or []
+
+    def _label(c):
+        ref_id = c.get("ref_id") or ""
+        return f"{ref_id} {c.get('name') or ''} ({c.get('urn') or c.get('id')})".strip()
+
+    for field in ("ref_id", "name"):
+        matches = [
+            c
+            for c in controls
+            if str(c.get(field) or "").strip().lower() == value.lower()
+        ]
+        if len(matches) == 1:
+            return str(matches[0]["id"])
+        if len(matches) > 1:
+            raise ValueError(
+                f"Ambiguous reference control '{value}', {len(matches)} match on "
+                f"{field}: {[_label(c) for c in matches[:5]]}. Use the URN or UUID"
+            )
+
+    if controls:
+        raise ValueError(
+            f"Reference control '{value}' not found as an exact ref_id or name. "
+            f"Candidates: {[_label(c) for c in controls[:5]]}"
+        )
+    raise ValueError(f"Reference control '{value}' not found")
+
+
+# Fixed letter aliases for the builtin qualifications
+QUALIFICATION_LETTERS = {
+    "C": "confidentiality",
+    "I": "integrity",
+    "A": "availability",
+    "D": "availability",
+    "T": "proof",
+    "P": "proof",
+}
+
+# French labels of the builtin qualifications. Builtin terminologies carry no
+# translations in the database (their labels live in the frontend).
+_QUALIFICATION_ALIASES = {
+    "confidentialité": "confidentiality",
+    "confidentialite": "confidentiality",
+    "intégrité": "integrity",
+    "integrite": "integrity",
+    "disponibilité": "availability",
+    "disponibilite": "availability",
+    "preuve": "proof",
+    "traçabilité": "proof",
+    "tracabilite": "proof",
+}
+
+
+def resolve_qualification_ids(qualifications) -> list:
+    """Resolve qualification letters/names/UUIDs to Terminology ids.
+
+    Letters: C=confidentiality, I=integrity, A/D=availability, T/P=proof.
+    Names match the terminology name or any translation, case-insensitively.
+    Never creates a terminology.
+    """
+    if isinstance(qualifications, str):
+        qualifications = [qualifications]
+
+    lookups = []
+    for item in qualifications:
+        value = str(item).strip()
+        lookup = QUALIFICATION_LETTERS.get(value.upper()) if len(value) == 1 else None
+        lookups.append(lookup or _QUALIFICATION_ALIASES.get(value.lower()) or item)
+    return resolve_terminology_ids(lookups, "qualifications")
+
+
+def _matrix_risk_levels(risk_matrix_id: str) -> list:
+    res = make_get_request(f"/risk-matrices/{risk_matrix_id}/")
+    if res.status_code != 200:
+        raise ValueError(
+            f"Risk matrix '{risk_matrix_id}' API error: {res.status_code} - {res.text}"
+        )
+    json_def = res.json().get("json_definition") or {}
+    if isinstance(json_def, str):
+        json_def = json.loads(json_def)
+    return json_def.get("risk") or []
+
+
+def resolve_risk_level_index(value, risk_matrix_id: str = None) -> int:
+    """Resolve a risk level (e.g. a risk tolerance) to its matrix index.
+
+    An int is returned as is (-1 = unset). A string is matched to the name or
+    abbreviation of a risk level of the given matrix.
+    """
+    if isinstance(value, bool):
+        raise ValueError(f"Invalid risk level '{value}'")
+    if isinstance(value, int):
+        return value
+    text = str(value).strip()
+    if not text:
+        raise ValueError("Risk level is empty")
+    try:
+        return int(text)
+    except ValueError:
+        pass
+
+    if not risk_matrix_id:
+        raise ValueError(
+            f"Cannot resolve risk level '{text}' without a risk matrix; pass an index"
+        )
+
+    levels = _matrix_risk_levels(risk_matrix_id)
+    for idx, level in enumerate(levels):
+        # json_definition is localized: name/abbreviation are in the request
+        # locale, the other locales stay in `translations`
+        entries = [level]
+        translations = level.get("translations")
+        if isinstance(translations, dict):
+            entries += [t for t in translations.values() if isinstance(t, dict)]
+        candidates = {
+            str(entry.get(key) or "").strip().lower()
+            for entry in entries
+            for key in ("name", "abbreviation")
+        }
+        candidates.discard("")
+        if text.lower() in candidates:
+            return idx
+
+    labels = [
+        f"{idx}={level.get('name')} ({level.get('abbreviation')})"
+        for idx, level in enumerate(levels)
+    ]
+    raise ValueError(f"Risk level '{text}' not found. Valid levels: {labels}")
+
+
+def resolve_terminology_ids(values, field_path: str) -> list:
+    """Resolve terminology names/UUIDs of one field_path to Terminology ids.
+
+    Matches every visible terminology of that field_path, builtin or custom,
+    on its name, translated name or any translation (case- and
+    plural-insensitive). UUIDs are passed through. Never creates a terminology.
+    """
+    if isinstance(values, str):
+        values = [values]
+
+    terminologies = None
+    resolved = []
+    for item in values:
+        if _is_uuid(item):
+            term_id = item
+        else:
+            value = str(item).strip()
+            if not value:
+                raise ValueError(f"Empty {field_path} value")
+            if terminologies is None:
+                terminologies, error = fetch_all_results(
+                    "/terminologies/",
+                    params={"field_path": field_path, "is_visible": "true"},
+                    max_items=None,
+                )
+                if error:
+                    raise ValueError(
+                        f"Failed to fetch {field_path} terminologies: {error}"
+                    )
+                terminologies = terminologies or []
+
+            match = next(
+                (
+                    t
+                    for t in terminologies
+                    if str(t.get("name") or "").lower() == value.lower()
+                    or str(t.get("translated_name") or "").lower() == value.lower()
+                ),
+                None,
+            ) or _find_terminology_match(terminologies, value)
+
+            if not match:
+                names = sorted(
+                    {
+                        str(t.get("translated_name") or t.get("name"))
+                        for t in terminologies
+                    }
+                )
+                raise ValueError(
+                    f"'{value}' not found among visible {field_path} terminologies: "
+                    f"{names}"
+                )
+            term_id = str(match["id"])
+        if term_id not in resolved:
+            resolved.append(term_id)
+    return resolved
+
+
+_DURATION_RE = re.compile(
+    r"^(?:(?P<d>\d+)d)?(?:(?P<h>\d+)h)?(?:(?P<m>\d+)m)?(?:(?P<s>\d+)s)?$"
+)
+DURATION_FORMATS = (
+    "an integer number of seconds, or a written duration made of "
+    "<n>d, <n>h, <n>m, <n>s in that order (e.g. '90s', '30m', '2h', '1d', '1h30m')"
+)
+
+
+def parse_duration(value) -> int:
+    """Parse a duration into seconds.
+
+    Accepts a non-negative int (seconds, unchanged), a digit-only string, or a
+    written duration such as "90s", "30m", "2h", "1d", "1h30m". Anything else
+    raises ValueError naming the accepted formats.
+    """
+    if isinstance(value, bool):
+        raise ValueError(f"Invalid duration {value!r}: expected {DURATION_FORMATS}")
+    if isinstance(value, int):
+        if value < 0:
+            raise ValueError(f"Invalid duration {value!r}: expected {DURATION_FORMATS}")
+        return value
+    if isinstance(value, str):
+        # "1h 30m" == "1h30m"; "2 hours" still fails the pattern
+        text = re.sub(r"\s+", "", value).lower()
+        if text.isdigit():
+            return int(text)
+        match = _DURATION_RE.match(text)
+        if text and match:
+            parts = match.groupdict()
+            return (
+                int(parts["d"] or 0) * 86400
+                + int(parts["h"] or 0) * 3600
+                + int(parts["m"] or 0) * 60
+                + int(parts["s"] or 0)
+            )
+    raise ValueError(f"Invalid duration {value!r}: expected {DURATION_FORMATS}")

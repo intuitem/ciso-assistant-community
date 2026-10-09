@@ -77,7 +77,9 @@ from tprm.models import (
     Entity,
     EntityAssessment,
     Solution,
+    Tier,
 )
+from tprm.tiers import set_entity_tier
 
 from .serializers import ExportSerializer
 from .utils import (
@@ -373,6 +375,16 @@ def import_terminologies(
     if single_value:
         return result_qs.first()
     return result_qs
+
+
+def _imported_tier(ref: str, **context) -> Tier | None:
+    """The tier an export names: by key, or by name for exports made before
+    tiers had keys. A missing one is not created: a tier without a rank would
+    break the ordering of the scale."""
+    tier = Tier.objects.filter(key=ref).first() or Tier.objects.filter(name=ref).first()
+    if tier is None:
+        logger.warning("Import: tier not found on this instance", tier=ref, **context)
+    return tier
 
 
 def import_asset_class(
@@ -1046,6 +1058,10 @@ def process_model_relationships(
             # Create with no parent and wire it up in the post-pass
             # resolve_self_referencing_fks once every entity exists.
             _fields["parent_entity"] = None
+            if tier_ref := _fields.pop("tier", None):
+                many_to_many_map_ids["tier"] = _imported_tier(
+                    tier_ref, entity=_fields.get("name")
+                )
             many_to_many_map_ids["relationship_ids"] = import_terminologies(
                 _fields.pop("relationship", []),
                 Terminology.FieldPath.ENTITY_RELATIONSHIP,
@@ -1061,6 +1077,12 @@ def process_model_relationships(
             )
             many_to_many_map_ids["asset_ids"] = get_mapped_ids(
                 _fields.pop("assets", []), link_dump_database_ids
+            )
+            tier_ref = _fields.pop("tier", None)
+            _fields["tier"] = (
+                _imported_tier(tier_ref, solution=_fields.get("name"))
+                if tier_ref
+                else None
             )
 
         case "solutionsubcontractor":
@@ -1175,6 +1197,10 @@ def process_model_relationships(
             _fields["risk_origin"] = import_terminologies(
                 _fields["risk_origin"],
                 Terminology.FieldPath.ROTO_RISK_ORIGIN,
+            )
+            _fields["target_objective_category"] = import_terminologies(
+                _fields.get("target_objective_category"),
+                Terminology.FieldPath.ROTO_TARGET_OBJECTIVE_CATEGORY,
             )
 
         case "stakeholder":
@@ -1528,6 +1554,8 @@ def set_many_to_many_relations(
         case "entity":
             if relationship_ids := many_to_many_map_ids.get("relationship_ids"):
                 obj.relationship.set(relationship_ids)
+            if tier := many_to_many_map_ids.get("tier"):
+                set_entity_tier(obj, tier)
 
         case "solution":
             if asset_ids := many_to_many_map_ids.get("asset_ids"):
