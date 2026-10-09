@@ -122,6 +122,14 @@ class TestObjectRendering:
         rendered = render("payload: {{nodes.fetch.body}}", context)
         assert rendered == 'payload: {"a": 1, "items": [1, 2]}'
 
+    def test_numbers_in_text_show_two_decimals_objects_stay_exact(self):
+        from automation.workflows.actions import render
+
+        context = {"scores": {"maturity_score": 8 / 3, "count": 3}}
+        assert render("{{scores.maturity_score}}", context) == "2.67"
+        assert render("{{scores.count}}", context) == "3"
+        assert '"maturity_score": 2.666' in render("{{scores}}", context)
+
 
 @pytest.mark.django_db
 class TestNodeOutputReferences:
