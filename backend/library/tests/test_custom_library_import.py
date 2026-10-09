@@ -742,13 +742,58 @@ objects:
         assert node.typical_evidence is None
         assert node.visibility_expression is None
         assert node.target_score is None
-        assert node.min_score is None
-        assert node.max_score is None
+        # The scale is kept: existing scores were recorded on it.
+        assert node.min_score == 0
+        assert node.max_score == 1
         assert node.scores_definition_ref is None
         assert node.weight == 1
         assert node.importance == RequirementNode.Importance.UNDEFINED
         assert node.implementation_groups is None
         assert node.order_id == 2
+
+    def test_null_importance_and_weight_fall_back_to_defaults(
+        self, admin_client, upload_url
+    ):
+        """Explicit nulls load as the defaults, on import and on update."""
+        nulls = (
+            "description: A sample assessable requirement\n"
+            "      importance: null\n"
+            "      weight: null"
+        )
+        v1_yaml = SAMPLE_FRAMEWORK_YAML.replace(
+            "description: A sample assessable requirement", nulls
+        )
+        response1 = _upload_yaml(
+            admin_client, upload_url, "null_defaults_v1.yaml", v1_yaml.encode("utf-8")
+        )
+        assert response1.status_code == status.HTTP_201_CREATED, response1.content
+
+        node_urn = "urn:intuitem:test:req_node:sample-fw-reg:cat-1.1"
+        node = RequirementNode.objects.get(urn=node_urn)
+        assert node.importance == RequirementNode.Importance.UNDEFINED
+        assert node.weight == 1
+
+        node.importance = RequirementNode.Importance.MANDATORY
+        node.weight = 3
+        node.save(update_fields=["importance", "weight"])
+
+        v2_yaml = v1_yaml.replace("version: 1", "version: 2").replace(
+            "Another sample assessable requirement",
+            "Another sample assessable requirement\n      importance: null",
+        )
+        response2 = _upload_yaml(
+            admin_client, upload_url, "null_defaults_v2.yaml", v2_yaml.encode("utf-8")
+        )
+        assert response2.status_code == status.HTTP_201_CREATED, response2.content
+
+        loaded = LoadedLibrary.objects.get(
+            urn="urn:intuitem:test:library:sample-framework-regression"
+        )
+        assert loaded.update() is None
+
+        node.refresh_from_db()
+        assert node.importance == RequirementNode.Importance.UNDEFINED
+        assert node.weight == 1
 
 
 # Excel Import Tests

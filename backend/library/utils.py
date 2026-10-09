@@ -169,10 +169,13 @@ class RequirementNodeImporter:
                 visibility_expression=self.requirement_data.get(
                     "visibility_expression"
                 ),
-                weight=self.requirement_data.get("weight", 1),
-                importance=self.requirement_data.get(
-                    "importance", RequirementNode.Importance.UNDEFINED
+                weight=(
+                    1
+                    if self.requirement_data.get("weight") is None
+                    else self.requirement_data["weight"]
                 ),
+                importance=self.requirement_data.get("importance")
+                or RequirementNode.Importance.UNDEFINED,
                 min_score=self.requirement_data.get("min_score"),
                 max_score=self.requirement_data.get("max_score"),
                 scores_definition_ref=self.requirement_data.get(

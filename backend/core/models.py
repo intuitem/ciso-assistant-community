@@ -1880,6 +1880,7 @@ class LibraryUpdater:
                 order_id = 0
                 all_fields_to_update = set()
                 # Omitting one of these nullable fields in a new version must clear its previous value.
+                # min_score/max_score are kept: existing scores were recorded on that scale.
                 clearable_requirement_node_fields = (
                     "ref_id",
                     "name",
@@ -1888,8 +1889,6 @@ class LibraryUpdater:
                     "typical_evidence",
                     "visibility_expression",
                     "implementation_groups",
-                    "min_score",
-                    "max_score",
                     "scores_definition_ref",
                     "target_score",
                 )
@@ -2036,14 +2035,16 @@ class LibraryUpdater:
                         ].lower()
                     requirement_node_dict["order_id"] = order_id
                     order_id += 1
+                    # Omitted or explicit null falls back to the default.
+                    for field, default in requirement_node_defaults.items():
+                        if requirement_node_dict.get(field) is None:
+                            requirement_node_dict[field] = default
 
                     if urn in existing_requirement_node_objects:
                         requirement_node_object = existing_requirement_node_objects[urn]
                         # Consider omissions before applying imported values.
                         for field in clearable_requirement_node_fields:
                             requirement_node_dict.setdefault(field, None)
-                        for field, default in requirement_node_defaults.items():
-                            requirement_node_dict.setdefault(field, default)
                         for key, value in requirement_node_dict.items():
                             setattr(requirement_node_object, key, value)
                         requirement_node_object.clean()
