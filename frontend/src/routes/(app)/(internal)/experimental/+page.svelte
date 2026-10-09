@@ -54,7 +54,7 @@
 		title="Domain compliance tree"
 		desc="One framework tracked across the domain tree: each domain shows its own audit and its branch average, filterable by implementation group and section. Pick a framework, or explore with generated data."
 		link="/experimental/domain-tree"
-		tags={['audit', 'domains', 'analytics', 'prototype']}
+		tags={['PRO', 'audit', 'domains', 'analytics', 'prototype']}
 	/>
 	{#each experimentalExtras as extra (extra.link)}
 		<Article title={extra.title} desc={extra.desc} link={extra.link} tags={extra.tags} />
