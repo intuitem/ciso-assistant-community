@@ -1167,6 +1167,28 @@ class TestFolderConsumer:
         # Visible labels follow the cell; the hidden one stays linked.
         assert set(resolved["filtering_labels"]) == {public.id, hidden.id}
 
+    def test_permission_error_fails_only_its_row(
+        self, skip_context, all_accessible, monkeypatch
+    ):
+        """Linking an object the user cannot view raises in validation."""
+        from rest_framework.exceptions import PermissionDenied
+
+        from core.serializers import FolderWriteSerializer
+
+        def deny_labels(self, data):
+            if data.get("filtering_labels"):
+                raise PermissionDenied({"filtering_labels": "denied"})
+
+        monkeypatch.setattr(FolderWriteSerializer, "_check_m2m_visibility", deny_labels)
+
+        result = FolderRecordConsumer(skip_context).process_records(
+            [{"name": "Hidden label", "labels": "Secret"}, {"name": "Next row"}]
+        )
+        assert result.failed == 1
+        assert "denied" in str(result.errors)
+        assert result.created == 1
+        assert Folder.objects.filter(name="Next row").exists()
+
     def test_skipped_row_creates_no_label(
         self, skip_context, domain_folder, all_accessible
     ):

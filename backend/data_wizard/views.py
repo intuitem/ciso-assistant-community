@@ -1147,16 +1147,18 @@ class RecordConsumer[Context = None](ABC):
     def _write_record(self, data: dict, instance=None) -> Optional[str]:
         """Create, or update *instance*, from *data*; return an error or None."""
         with transaction.atomic():
-            serializer = self.get_serializer_class()(
-                instance=instance,
-                data=self.resolve_deferred(data, instance),
-                partial=instance is not None,
-                context={"request": self.request},
-            )
-            if not serializer.is_valid():
-                transaction.set_rollback(True)
-                return str(serializer.errors)
+            # Validation can raise too (e.g. PermissionDenied when linking an
+            # object the user cannot view): that must fail the row, not the file.
             try:
+                serializer = self.get_serializer_class()(
+                    instance=instance,
+                    data=self.resolve_deferred(data, instance),
+                    partial=instance is not None,
+                    context={"request": self.request},
+                )
+                if not serializer.is_valid():
+                    transaction.set_rollback(True)
+                    return str(serializer.errors)
                 saved = serializer.save()
                 self.after_write(saved, created=instance is None)
             except Exception as e:
