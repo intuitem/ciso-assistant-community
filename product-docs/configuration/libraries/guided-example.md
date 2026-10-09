@@ -332,10 +332,10 @@ The table below lists all assessable requirements that have a Review Theme. It k
 
 The PDF assigns **"Habitat"** to `OH.2.1` and both of its subrequirements. Since `OH.2.1` is not assessable, we assign `habitat` only to its two children. `OH.2.3` remains assessable even though it has no theme.
 
-In our example, an audit with **"Monitoring"** selected covers only `OH.2.2` and `OH.3.2`. A requirement with several groups is in scope when any of them is selected, but it remains a single requirement to assess.
+In our example, an inspector can filter by **"Monitoring"** in CISO Assistant to focus on `OH.2.2` and `OH.3.2` instead of viewing every requirement at once. A requirement with several groups can appear under each relevant filter, but it remains a single requirement to assess.
 
 {% hint style="warning" %}
-Selecting groups changes the audit's scope: requirements outside them, including `OH.2.3` which has no theme, are left out of its progress and score. For a certification audit, leave the groups unselected so every requirement is assessed. To compare themes without narrowing the audit, use the implementation group breakdown in the audit's advanced analytics.
+Selecting groups changes the audit's scope: requirements outside them, including `OH.2.3` which has no theme, are left out of its progress and score. For a full certification audit, leave the implementation groups unselected so every requirement is assessed and taken into account. To compare themes without narrowing the audit, you can use the implementation group breakdown in the audit's advanced analytics.
 {% endhint %}
 
 ## 8. Review the workbook against the source
