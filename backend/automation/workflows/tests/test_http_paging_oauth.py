@@ -3,7 +3,11 @@ from urllib.parse import parse_qs, urlsplit
 
 import pytest
 
-from automation.workflows.actions import dig, validate_http_request_config
+from automation.workflows.actions import (
+    ActionError,
+    dig,
+    validate_http_request_config,
+)
 from automation.workflows.engine import start_instance
 from automation.workflows.models import WorkflowInstance
 from automation.workflows.tests.test_unreachable_tool import fetch_flow, make_domain
@@ -153,6 +157,102 @@ class TestPaging:
         assert instance.status == WorkflowInstance.Status.FAILED
         assert len(tool["requests"]) == 1
 
+    def test_a_relative_next_link_is_followed(self, tool):
+        def pages(url):
+            if "skiptoken" not in url:
+                return FakeResponse(
+                    {
+                        "value": [{"id": 1}],
+                        "@odata.nextLink": "/coverage.json?skiptoken=2",
+                    }
+                )
+            return FakeResponse({"value": [{"id": 2}]})
+
+        tool["pages"]["handler"] = pages
+        result = output(
+            start_instance(
+                fetch_flow(
+                    make_domain("Relative"),
+                    paginate={"items": "value", "next": "@odata.nextLink"},
+                )
+            )
+        )
+        assert [item["id"] for item in result["items"]] == [1, 2]
+        assert tool["requests"][1]["url"] == (
+            "https://tool.invalid/coverage.json?skiptoken=2"
+        )
+
+    def test_a_next_link_on_another_port_fails(self, tool):
+        tool["pages"]["handler"] = lambda url: FakeResponse(
+            {"value": [], "@odata.nextLink": "https://tool.invalid:8443/steal"}
+        )
+        instance = start_instance(
+            fetch_flow(
+                make_domain("Port"),
+                paginate={"items": "value", "next": "@odata.nextLink"},
+            )
+        )
+        assert instance.status == WorkflowInstance.Status.FAILED
+        assert len(tool["requests"]) == 1
+
+    def test_an_error_on_a_later_page_keeps_what_was_read(self, tool):
+        def pages(url):
+            if "skiptoken" not in url:
+                return FakeResponse(
+                    {
+                        "value": [{"id": 1}, {"id": 2}],
+                        "@odata.nextLink": "https://tool.invalid/coverage.json?skiptoken=2",
+                    }
+                )
+            return FakeResponse({"error": "boom"}, 503)
+
+        tool["pages"]["handler"] = pages
+        result = output(
+            start_instance(
+                fetch_flow(
+                    make_domain("LaterError"),
+                    allow_error_status=True,
+                    paginate={"items": "value", "next": "@odata.nextLink"},
+                )
+            )
+        )
+        assert result["status"] == 503
+        assert [item["id"] for item in result["items"]] == [1, 2]
+        assert (result["count"], result["pages"], result["truncated"]) == (2, 2, True)
+
+    def test_a_templated_page_limit_is_read_at_run_time(self, tool):
+        tool["pages"]["handler"] = graph_pages
+        result = output(
+            start_instance(
+                fetch_flow(
+                    make_domain("Templated"),
+                    paginate={
+                        "items": "value",
+                        "next": "@odata.nextLink",
+                        "max_pages": "{{payload.limit}}",
+                    },
+                ),
+                payload={"limit": 1},
+            )
+        )
+        assert (result["pages"], result["truncated"]) == (1, True)
+
+    def test_a_page_limit_that_is_not_a_number_fails_for_good(self, tool):
+        tool["pages"]["handler"] = graph_pages
+        instance = start_instance(
+            fetch_flow(
+                make_domain("NotANumber"),
+                paginate={
+                    "items": "value",
+                    "next": "@odata.nextLink",
+                    "max_pages": "{{payload.limit}}",
+                },
+            ),
+            payload={"limit": "lots"},
+        )
+        assert instance.status == WorkflowInstance.Status.FAILED
+        assert tool["requests"] == []
+
     def test_a_next_link_that_repeats_fails(self, tool):
         tool["pages"]["handler"] = lambda url: FakeResponse(
             {
@@ -220,7 +320,7 @@ def offset_pages(url):
 
 @pytest.mark.django_db
 class TestOffsetPaging:
-    def test_skips_by_page_size_until_a_short_page(self, tool):
+    def test_skips_until_an_empty_page(self, tool):
         tool["pages"]["handler"] = offset_pages
         result = output(
             start_instance(
@@ -241,7 +341,7 @@ class TestOffsetPaging:
             parse_qs(urlsplit(call["url"]).query).get("$skip")
             for call in tool["requests"]
         ]
-        assert skips == [None, ["2"], ["4"]]
+        assert skips == [None, ["2"], ["4"], ["5"]]
 
     def test_page_limit_truncates(self, tool):
         tool["pages"]["handler"] = offset_pages
@@ -252,7 +352,6 @@ class TestOffsetPaging:
                     paginate={
                         "items": "value",
                         "offset_param": "$skip",
-                        "page_size": 2,
                         "max_pages": 2,
                     },
                 )
@@ -261,11 +360,26 @@ class TestOffsetPaging:
         assert result["count"] == 4
         assert result["truncated"] is True
 
-    def test_offset_paging_without_a_page_size_fails(self, tool):
+    def test_a_smaller_server_page_keeps_paging(self, tool):
+        tool["pages"]["handler"] = offset_pages
+        result = output(
+            start_instance(
+                fetch_flow(
+                    make_domain("SmallPages"),
+                    url="https://tool.invalid/machines?$top=1000",
+                    paginate={"items": "value", "offset_param": "$skip"},
+                )
+            )
+        )
+        assert result["count"] == 5
+        assert result["truncated"] is False
+
+    def test_a_non_numeric_offset_in_the_url_fails_for_good(self, tool):
         tool["pages"]["handler"] = offset_pages
         instance = start_instance(
             fetch_flow(
-                make_domain("NoSize"),
+                make_domain("BadSkip"),
+                url="https://tool.invalid/machines?$skip=abc",
                 paginate={"items": "value", "offset_param": "$skip"},
             )
         )
@@ -317,6 +431,29 @@ class TestOAuth:
         instance = start_instance(fetch_flow(make_domain("Refused"), oauth=OAUTH))
         assert instance.status == WorkflowInstance.Status.FAILED
         assert tool["requests"] == []
+
+    def test_refused_credentials_are_not_retried(self):
+        from automation.workflows.actions import FatalActionError, HttpRequestAction
+
+        with pytest.MonkeyPatch.context() as patch:
+            patch.setattr(
+                "core.net_safety.assert_public_url_unless_dev", lambda *a, **k: None
+            )
+            for status, payload, error in [
+                (401, {"error": "invalid_client"}, FatalActionError),
+                (400, {"error": "invalid_client"}, FatalActionError),
+                (503, {"error": "busy"}, ActionError),
+                (429, {"error": "slow down"}, ActionError),
+                (200, ["not", "an", "object"], ActionError),
+            ]:
+                patch.setattr(
+                    "requests.post",
+                    lambda *a, _p=payload, _s=status, **k: FakeResponse(_p, _s),
+                )
+                with pytest.raises(error) as caught:
+                    HttpRequestAction._fetch_token(OAUTH, 5)
+                if error is ActionError:
+                    assert not isinstance(caught.value, FatalActionError)
 
     def test_a_cleartext_token_url_fails(self, tool):
         tool["pages"]["handler"] = lambda url: FakeResponse({"value": 1})
@@ -384,18 +521,8 @@ class TestPublishChecks:
     def test_incomplete_paging(self):
         assert "action_http_paginate_missing" in self.codes(paginate={"items": "value"})
 
-    def test_offset_paging_needs_a_page_size(self):
-        assert "action_http_bad_page_size" in self.codes(
-            paginate={"items": "value", "offset_param": "$skip"}
-        )
-
     def test_offset_paging_needs_no_next_path(self):
-        assert (
-            self.codes(
-                paginate={"items": "value", "offset_param": "$skip", "page_size": 100}
-            )
-            == set()
-        )
+        assert self.codes(paginate={"items": "value", "offset_param": "$skip"}) == set()
 
     def test_page_limit_out_of_range(self):
         assert "action_http_bad_max_pages" in self.codes(

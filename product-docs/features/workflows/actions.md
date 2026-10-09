@@ -428,8 +428,7 @@ Use them when the step is followed by a branch that does something about the fai
 | Path to the items | Where the list sits in each answer, such as `value` or `data` |
 | Path to the next page | What leads to the next page, such as `@odata.nextLink` or `pagination.nextCursor` |
 | Cursor parameter | Optional. When set, the value at the next-page path is a cursor sent as this query parameter. When empty, it is the full URL of the next page, which must stay on the same host |
-| Offset parameter | Optional, for APIs that page with an offset such as `$skip` instead of a link. Each page adds the number of items received to it. Replaces the next-page path |
-| Page size | With an offset parameter: the page size the URL asks for, such as the `$top` value. A shorter page ends paging |
+| Offset parameter | Optional, for APIs that page with an offset such as `$skip` instead of a link. Each page adds the number of items received to it, and paging stops at the first empty page. Replaces the next-page path |
 | Count only, keep no items | Count the items without keeping them, for APIs that offer no count of their own. Nothing from the answer is stored |
 | Page limit | 1 to 50, default 10 |
 

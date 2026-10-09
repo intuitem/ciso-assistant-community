@@ -545,12 +545,19 @@
 
 	function pickReference(runs: any[]) {
 		return (
-			runs.find(
-				(run: any) => run.status === 'completed' && Object.keys(run.node_outputs ?? {}).length
-			) ??
-			runs.find((run: any) => Object.keys(run.node_outputs ?? {}).length) ??
+			runs.find((run: any) => run.status === 'completed' && run.has_outputs) ??
+			runs.find((run: any) => run.has_outputs) ??
 			null
 		);
+	}
+
+	async function loadRun(run: any) {
+		const res = await fetch(opsUrl('get-instance'), {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ instance: run.id })
+		});
+		return res.ok ? await res.json() : null;
 	}
 
 	async function ensureReferenceRun() {
@@ -564,7 +571,8 @@
 			});
 			if (!res.ok) return;
 			const data = await res.json();
-			referenceRun = pickReference(data.results ?? data);
+			const candidate = pickReference(data.results ?? data);
+			if (candidate) referenceRun = await loadRun(candidate);
 		} finally {
 			// Deliberately no "already attempted" latch: while no run has data
 			// yet, every node selection retries, and the runs-panel poll below
@@ -573,18 +581,26 @@
 		}
 	}
 
-	function pinReference(run: any) {
+	async function pinReference(run: any) {
 		referencePinned = true;
-		referenceRun = run;
+		referenceRun = (await loadRun(run)) ?? referenceRun;
 	}
 
 	// Runs-panel polling feeds this: without an explicit pin, the reference
 	// follows the latest run with data, so the browser populates live.
-	function handleRunsRefreshed(runs: any[]) {
-		if (referencePinned) return;
+	async function handleRunsRefreshed(runs: any[]) {
+		if (referencePinned || referenceFetchInFlight) return;
 		const candidate = pickReference(runs);
-		if (candidate && candidate.id !== referenceRun?.id) {
-			referenceRun = candidate;
+		if (
+			candidate &&
+			(candidate.id !== referenceRun?.id || candidate.status !== referenceRun?.status)
+		) {
+			referenceFetchInFlight = true;
+			try {
+				referenceRun = (await loadRun(candidate)) ?? referenceRun;
+			} finally {
+				referenceFetchInFlight = false;
+			}
 		}
 	}
 

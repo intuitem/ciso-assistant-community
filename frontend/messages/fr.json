@@ -6859,7 +6859,6 @@
 	"httpPaginateNext": "Chemin vers la page suivante",
 	"httpPaginateCursorParam": "Paramètre de curseur",
 	"httpPaginateOffsetParam": "Paramètre de décalage",
-	"httpPaginatePageSize": "Taille de page",
 	"httpPaginateCountOnly": "Compter seulement, sans conserver les éléments",
 	"httpPaginateMaxPages": "Nombre maximal de pages",
 	"httpPaginateHint": "Rassemble toutes les pages dans items. Laissez le paramètre de curseur vide quand la réponse donne la page suivante sous forme d'URL complète.",

@@ -1122,8 +1122,6 @@ MAX_LEAF_CHARS = 1000
 MAX_STRUCTURE_DEPTH = 10
 DISPLAY_MAX_ITEMS = 50
 DISPLAY_BUDGET = 200_000
-LIST_DISPLAY_MAX_ITEMS = 3
-LIST_DISPLAY_BUDGET = 20_000
 
 
 def node_output_max_items():
@@ -1136,15 +1134,18 @@ def node_output_budget():
     return int(getattr(settings, "WORKFLOW_NODE_OUTPUT_BUDGET", 5_000_000))
 
 
-def display_preview(value, listing=False):
-    if listing:
-        return _cap_structure(
-            value, [LIST_DISPLAY_BUDGET], max_items=LIST_DISPLAY_MAX_ITEMS
-        )
-    return _cap_structure(value, [DISPLAY_BUDGET], max_items=DISPLAY_MAX_ITEMS)
+def display_preview(value):
+    return _cap_structure(
+        value,
+        [DISPLAY_BUDGET],
+        max_items=DISPLAY_MAX_ITEMS,
+        max_keys=node_output_max_items(),
+    )
 
 
-def _cap_structure(value, budget=None, depth=0, lost=None, max_items=None):
+def _cap_structure(
+    value, budget=None, depth=0, lost=None, max_items=None, max_keys=None
+):
     """Bound node_outputs without flattening: dicts and lists keep their shape so
     paths into them keep working. `lost` collects what the caller no longer
     has."""
@@ -1152,6 +1153,8 @@ def _cap_structure(value, budget=None, depth=0, lost=None, max_items=None):
         budget = [node_output_budget()]
     if max_items is None:
         max_items = node_output_max_items()
+    if max_keys is None:
+        max_keys = max_items
 
     def drop(what, remedy=None):
         if lost is not None:
@@ -1175,17 +1178,19 @@ def _cap_structure(value, budget=None, depth=0, lost=None, max_items=None):
     if isinstance(value, dict):
         capped = {}
         for index, (key, item) in enumerate(value.items()):
-            if index >= max_items or budget[0] <= 0:
+            if index >= max_keys or budget[0] <= 0:
                 drop(
                     f"{len(value) - index} of {len(value)} keys were dropped",
                     "WORKFLOW_NODE_OUTPUT_MAX_ITEMS"
-                    if index >= max_items
+                    if index >= max_keys
                     else "WORKFLOW_NODE_OUTPUT_BUDGET",
                 )
                 capped["<omitted>"] = f"{len(value) - index} more keys"
                 break
             budget[0] -= len(str(key))
-            capped[key] = _cap_structure(item, budget, depth + 1, lost, max_items)
+            capped[key] = _cap_structure(
+                item, budget, depth + 1, lost, max_items, max_keys
+            )
         return capped
 
     if isinstance(value, list):
@@ -1201,7 +1206,7 @@ def _cap_structure(value, budget=None, depth=0, lost=None, max_items=None):
                 capped_items.append(f"<{len(value) - index} more items>")
                 break
             capped_items.append(
-                _cap_structure(item, budget, depth + 1, lost, max_items)
+                _cap_structure(item, budget, depth + 1, lost, max_items, max_keys)
             )
         return capped_items
 

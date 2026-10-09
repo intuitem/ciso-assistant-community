@@ -275,8 +275,13 @@ class TestDefenderRecipe:
         assert instance.status == WorkflowInstance.Status.COMPLETED
         assert vendor.rejected == []
         pages = [parse_qs(urlsplit(url).query) for method, url in vendor.calls[1:]]
-        assert [page["$top"] for page in pages] == [["1000"]] * 3
-        assert [page.get("$skip") for page in pages] == [None, ["1000"], ["2000"]]
+        assert [page["$top"] for page in pages] == [["1000"]] * 4
+        assert [page.get("$skip") for page in pages] == [
+            None,
+            ["1000"],
+            ["2000"],
+            ["2500"],
+        ]
         assert instance.node_outputs["keep_assets"]["created"] == 2500
         assert instance.node_outputs["list_devices"]["truncated"] is False
         assert Asset.objects.filter(folder=domain).count() == 2500
@@ -390,17 +395,42 @@ class TestCanvasGetsAPreview:
         assert shown["keep_assets"]["created"] == 1200
 
 
-class TestListResponsesAreLighter:
-    def test_list_and_detail_previews(self):
-        from types import SimpleNamespace
+@pytest.mark.django_db
+class TestRunsApi:
+    def test_list_skips_outputs_and_detail_keeps_every_node(self, vendors):
+        from rest_framework.test import APIRequestFactory, force_authenticate
 
-        run = SimpleNamespace(
-            node_outputs={"pull": {"items": list(range(100))}}, variables={}
+        from automation.workflows.views import WorkflowInstanceViewSet
+
+        vendors(devices=120)
+        domain = make_domain("Api")
+        instance = start_instance(
+            install_recipe(
+                "workflow-operations-defender-device-inventory",
+                domain,
+                {"tenant_id": "contoso", "client_id": "app"},
+                {"defender_client_secret": "ms"},
+            )
         )
-        serializer = WorkflowInstanceReadSerializer()
-        serializer._context = {"view": SimpleNamespace(action="list")}
-        listed = serializer.get_node_outputs(run)["pull"]["items"]
-        serializer._context = {"view": SimpleNamespace(action="retrieve")}
-        detailed = serializer.get_node_outputs(run)["pull"]["items"]
-        assert listed == [0, 1, 2, "<97 more items>"]
-        assert len(detailed) == DISPLAY_MAX_ITEMS + 1
+        factory = APIRequestFactory()
+        user = publisher_user()
+
+        request = factory.get(
+            "/api/workflows/workflow-instances/",
+            {"workflow": str(instance.workflow_id)},
+        )
+        force_authenticate(request, user=user)
+        listed = WorkflowInstanceViewSet.as_view({"get": "list"})(request)
+        row = (listed.data.get("results") or listed.data)[0]
+        assert row["has_outputs"] is True
+        assert row["node_outputs"] is None and row["variables"] is None
+
+        request = factory.get(f"/api/workflows/workflow-instances/{instance.id}/")
+        force_authenticate(request, user=user)
+        detail = WorkflowInstanceViewSet.as_view({"get": "retrieve"})(
+            request, pk=str(instance.id)
+        )
+        outputs = detail.data["node_outputs"]
+        assert set(outputs) >= {"list_devices", "keep_assets", "report"}
+        assert {"items", "count", "pages", "truncated"} <= set(outputs["list_devices"])
+        assert len(outputs["list_devices"]["items"]) == DISPLAY_MAX_ITEMS + 1

@@ -128,9 +128,8 @@ class TestUpsertAuthorization:
                 else real_can(user, codename, folder)
             ),
         )
-        output = run(upsert_flow(home), devices("a", "b")).node_outputs["keep"]
-        assert (output["created"], output["updated"], output["failed"]) == (1, 0, 1)
-        assert "may not update" in output["errors"][0]["reason"]
+        instance = run(upsert_flow(home), devices("a", "b"))
+        assert instance.status == WorkflowInstance.Status.FAILED
         assert Asset.objects.get(folder=elsewhere, name="a").ref_id == "old"
 
 
@@ -193,3 +192,44 @@ class TestPublishAndPermissions:
             "add_asset",
             "change_asset",
         ]
+
+
+@pytest.mark.django_db
+class TestItemErrors:
+    def test_a_value_the_model_rejects_fails_only_its_item(self, monkeypatch):
+        from automation.workflows import actions
+
+        real = actions.CreateObjectAction.execute
+
+        def execute(self, config, instance, fields=None):
+            if fields and fields.get("name") == "bad":
+                raise ValueError("Field 'x' expected a number but got 'n/a'")
+            return real(self, config, instance, fields)
+
+        monkeypatch.setattr(actions.CreateObjectAction, "execute", execute)
+        domain = make_domain("ValueError")
+        output = run(upsert_flow(domain), devices("bad", "good")).node_outputs["keep"]
+        assert (output["created"], output["failed"]) == (1, 1)
+        assert output["errors"][0] == {"index": 0, "reason": "ValueError"}
+
+
+@pytest.mark.django_db
+class TestLookupsOncePerStep:
+    def test_permission_checks_do_not_grow_with_items(self, monkeypatch):
+        from automation.workflows import authz
+
+        calls = []
+        real_can = authz.can
+
+        def can(user, codename, folder):
+            calls.append(codename)
+            return real_can(user, codename, folder)
+
+        monkeypatch.setattr(authz, "can", can)
+        domain = make_domain("Memo")
+        version = upsert_flow(domain)
+        run(version, devices(*[f"h{i}" for i in range(5)]))
+        five = len(calls)
+        calls.clear()
+        run(version, devices(*[f"x{i}" for i in range(40)]))
+        assert len(calls) == five

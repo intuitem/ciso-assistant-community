@@ -96,6 +96,10 @@ class ActionError(Exception):
     """Deliberate action failure, routed through the node's retry policy."""
 
 
+class PermissionDeniedError(ActionError):
+    """The run identity lacks a permission an action needs."""
+
+
 class FatalActionError(ActionError):
     """Permanent action failure (static config, validation) that no retry can
     change: the engine fails the node immediately instead of burning the
@@ -889,12 +893,18 @@ def _authorize_creation_folder(model, folder, instance, verb="add"):
     from .engine import run_identity
 
     codename = f"{verb}_{model._meta.model_name}"
+    memo = getattr(instance, "_authz_memo", None)
+    key = (codename, getattr(folder, "id", folder))
+    if memo is not None and key in memo:
+        return
     if not authz.can(run_identity(instance), codename, folder):
-        raise ActionError(
+        raise PermissionDeniedError(
             f"create_object: this workflow may not "
             f"{'create' if verb == 'add' else 'update'} a "
             f"{model._meta.model_name} in '{folder}'"
         )
+    if memo is not None:
+        memo.add(key)
 
 
 _TASK_TARGETS = {
@@ -1296,10 +1306,6 @@ class UpsertObjectsAction(BaseAction):
     action_type = "upsert_objects"
 
     def execute(self, config, instance):
-        from decimal import InvalidOperation
-
-        from django.db import DatabaseError, transaction
-
         model = config.get("model")
         if model not in CREATABLE_MODELS:
             raise FatalActionError(f"upsert_objects: unknown model '{model}'")
@@ -1307,11 +1313,26 @@ class UpsertObjectsAction(BaseAction):
         items = _resolve_list(config.get("items"), context, "upsert_objects: 'items'")
         limit = upsert_max_items()
         truncated = len(items) > limit
+        instance._authz_memo = set()
+        instance._creation_folder_memo = _creation_folder(instance)
+        try:
+            return self._upsert_all(
+                config, instance, model, context, items[:limit], truncated, len(items)
+            )
+        finally:
+            del instance._authz_memo
+            del instance._creation_folder_memo
+
+    def _upsert_all(self, config, instance, model, context, items, truncated, received):
+        from decimal import InvalidOperation
+
+        from django.db import DatabaseError, transaction
+
         stop_on_error = config.get("on_item_error") == "stop"
         single = {"type": "create_object", "model": model, "upsert": True}
         created = updated = failed = 0
         errors = []
-        for index, item in enumerate(items[:limit]):
+        for index, item in enumerate(items):
             try:
                 fields = render(
                     config.get("fields") or {},
@@ -1319,7 +1340,16 @@ class UpsertObjectsAction(BaseAction):
                 )
                 with transaction.atomic():
                     result = CreateObjectAction().execute(single, instance, fields)
-            except (ActionError, ValidationError, DatabaseError, InvalidOperation) as e:
+            except PermissionDeniedError:
+                raise
+            except (
+                ActionError,
+                ValidationError,
+                DatabaseError,
+                InvalidOperation,
+                ValueError,
+                TypeError,
+            ) as e:
                 if stop_on_error:
                     raise
                 failed += 1
@@ -1337,7 +1367,7 @@ class UpsertObjectsAction(BaseAction):
                 updated += 1
         return {
             "model": model,
-            "received": len(items),
+            "received": received,
             "created": created,
             "updated": updated,
             "failed": failed,
@@ -1363,6 +1393,9 @@ def _upsert_match(entry, kwargs, folder):
 def _creation_folder(instance):
     """The triggering object's folder when there is one: an object created because of X
     belongs where X lives, not where the workflow does."""
+    cached = getattr(instance, "_creation_folder_memo", None)
+    if cached is not None:
+        return cached
     trigger_obj = _triggering_object(instance)
     folder = getattr(trigger_obj, "folder", None)
     return folder or instance.folder
@@ -3322,7 +3355,7 @@ class HttpRequestAction(BaseAction):
                 headers["Authorization"] = "Bearer " + self._fetch_token(
                     render(config.get("oauth"), context), timeout
                 )
-            paginate = config.get("paginate")
+            paginate = render(config.get("paginate"), context)
             if not paginate:
                 response = requests.request(method, url, **kwargs)
                 return self._finish(config, response, host)
@@ -3369,13 +3402,18 @@ class HttpRequestAction(BaseAction):
         response = requests.post(
             token_url, data=data, timeout=timeout, allow_redirects=False
         )
-        token = (json_loads_or_none(response.text) or {}).get("access_token")
-        if response.status_code >= 400 or not token:
-            raise ActionError(
-                f"http_request: no token from '{token_host}' "
-                f"(HTTP {response.status_code})"
-            )
-        return token
+        answer = json_loads_or_none(response.text)
+        token = answer.get("access_token") if isinstance(answer, dict) else None
+        if token:
+            return token
+        error = (
+            FatalActionError
+            if 400 <= response.status_code < 500 and response.status_code != 429
+            else ActionError
+        )
+        raise error(
+            f"http_request: no token from '{token_host}' (HTTP {response.status_code})"
+        )
 
     def _paginate(self, config, paginate, method, url, kwargs, host):
         import json
@@ -3391,24 +3429,23 @@ class HttpRequestAction(BaseAction):
         next_path = paginate.get("next") or ""
         cursor_param = paginate.get("cursor_param") or ""
         offset_param = paginate.get("offset_param") or ""
-        try:
-            page_size = int(paginate.get("page_size") or 0)
-        except ValueError, TypeError:
-            page_size = 0
-        if offset_param and page_size < 1:
-            raise FatalActionError(
-                "http_request: paging by offset needs a positive page size"
-            )
         count_only = _as_bool(paginate.get("count_only"))
         max_pages = min(
-            max(int(paginate.get("max_pages") or HTTP_DEFAULT_PAGES), 1),
+            max(
+                _paging_int(paginate.get("max_pages"), "max_pages", HTTP_DEFAULT_PAGES),
+                1,
+            ),
             http_max_pages(),
         )
         from .engine import node_output_budget, node_output_max_items
 
         max_items = min(http_max_items(), node_output_max_items())
         max_chars = node_output_budget() * 9 // 10
-        offset = int(_query_value(url, offset_param) or 0) if offset_param else 0
+        offset = (
+            _paging_int(_query_value(url, offset_param), offset_param, 0)
+            if offset_param
+            else 0
+        )
         items, count, pages, truncated, chars = [], 0, 0, False, 0
         requested = {url}
         while True:
@@ -3416,7 +3453,8 @@ class HttpRequestAction(BaseAction):
             pages += 1
             output = self._finish(config, response, host)
             if output["status"] >= 400:
-                return output
+                truncated = pages > 1
+                break
             page_items = dig(output["body"], items_path) if items_path else None
             if not isinstance(page_items, list):
                 raise ActionError(
@@ -3437,7 +3475,7 @@ class HttpRequestAction(BaseAction):
             else:
                 count += len(page_items)
             if offset_param:
-                if not page_items or len(page_items) < page_size:
+                if not page_items:
                     break
                 offset += len(page_items)
                 following = str(offset)
@@ -3462,7 +3500,7 @@ class HttpRequestAction(BaseAction):
                 raise ActionError(f"http_request: {type(e).__name__} for host '{host}'")
         return {
             **output,
-            "body": None,
+            "body": output["body"] if output["status"] >= 400 else None,
             "items": None if count_only else items,
             "count": count,
             "pages": pages,
@@ -3471,12 +3509,13 @@ class HttpRequestAction(BaseAction):
 
     @staticmethod
     def _next_url(url, following, param, host):
+        from urllib.parse import urljoin
+
         if param:
             return _with_query_param(url, param, following)
-        if (
-            urlsplit(following).hostname != host
-            or urlsplit(following).scheme != urlsplit(url).scheme
-        ):
+        following = urljoin(url, following)
+        current, target = urlsplit(url), urlsplit(following)
+        if (target.scheme, target.netloc) != (current.scheme, current.netloc):
             raise FatalActionError(
                 f"http_request: the next page points away from '{host}'"
             )
@@ -3516,6 +3555,15 @@ class HttpRequestAction(BaseAction):
             "pages": 0,
             "truncated": False,
         }
+
+
+def _paging_int(value, name, default):
+    if value in (None, ""):
+        return default
+    try:
+        return int(value)
+    except ValueError, TypeError:
+        raise FatalActionError(f"http_request: paging '{name}' is not a number")
 
 
 def _query_value(url, key):
@@ -4347,18 +4395,6 @@ def _validate_http_paginate(paginate):
         errors.append(
             ("action_http_paginate_missing", "Paging needs the path to the next page")
         )
-    if offset_param:
-        page_size = paginate.get("page_size")
-        try:
-            if int(page_size) < 1:
-                raise ValueError
-        except ValueError, TypeError:
-            errors.append(
-                (
-                    "action_http_bad_page_size",
-                    "Paging by offset needs the page size the request asks for",
-                )
-            )
     max_pages = paginate.get("max_pages")
     if max_pages not in ("", None) and not _is_templated(max_pages):
         try:

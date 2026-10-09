@@ -2533,18 +2533,6 @@
 								oninput={onChange}
 							/>
 						</label>
-						{#if actionConfig.paginate.offset_param}
-							<label>
-								{@render fieldLabel(m.httpPaginatePageSize())}
-								<input
-									type="number"
-									class="input w-full text-sm"
-									min="1"
-									bind:value={actionConfig.paginate.page_size}
-									oninput={onChange}
-								/>
-							</label>
-						{/if}
 						<label class="flex items-center gap-1.5 text-xs text-surface-700-300 cursor-pointer">
 							<input
 								type="checkbox"
