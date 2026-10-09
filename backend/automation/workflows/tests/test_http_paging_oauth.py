@@ -386,6 +386,40 @@ class TestOffsetPaging:
         assert instance.status == WorkflowInstance.Status.FAILED
         assert tool["requests"] == []
 
+    def test_a_short_last_page_at_the_limit_is_complete(self, tool):
+        tool["pages"]["handler"] = offset_pages
+        result = output(
+            start_instance(
+                fetch_flow(
+                    make_domain("ExactLimit"),
+                    paginate={
+                        "items": "value",
+                        "offset_param": "$skip",
+                        "max_pages": 3,
+                    },
+                )
+            )
+        )
+        assert (result["count"], result["pages"], result["truncated"]) == (5, 3, False)
+
+    def test_keep_stores_only_the_listed_fields(self, tool):
+        tool["pages"]["handler"] = lambda url: FakeResponse(
+            {"value": [{"id": 1, "name": "a", "blob": "x" * 500}]}
+        )
+        result = output(
+            start_instance(
+                fetch_flow(
+                    make_domain("Keep"),
+                    paginate={
+                        "items": "value",
+                        "next": "@odata.nextLink",
+                        "keep": ["id", "name"],
+                    },
+                )
+            )
+        )
+        assert result["items"] == [{"id": 1, "name": "a"}]
+
     def test_count_only_keeps_no_items(self, tool):
         tool["pages"]["handler"] = graph_pages
         result = output(
@@ -497,10 +531,20 @@ class TestPublishChecks:
     def test_valid_settings_pass(self):
         assert (
             self.codes(
-                oauth=OAUTH,
+                oauth={**OAUTH, "client_secret": "{{secrets.client_secret}}"},
                 paginate={"items": "value", "next": "@odata.nextLink", "max_pages": 5},
             )
             == set()
+        )
+
+    def test_a_literal_client_secret_is_refused(self):
+        assert "action_http_oauth_secret_literal" in self.codes(
+            oauth={**OAUTH, "client_secret": "s3cret"}
+        )
+
+    def test_keep_must_be_a_list_of_names(self):
+        assert "action_http_bad_keep" in self.codes(
+            paginate={"items": "value", "next": "n", "keep": "id"}
         )
 
     def test_incomplete_oauth(self):

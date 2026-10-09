@@ -2533,6 +2533,25 @@
 								oninput={onChange}
 							/>
 						</label>
+						<label>
+							{@render fieldLabel(m.httpPaginateKeep())}
+							<input
+								type="text"
+								class="input w-full text-sm font-mono"
+								placeholder="id, name"
+								value={(actionConfig.paginate.keep ?? []).join(', ')}
+								oninput={(e) => {
+									const keys = e.currentTarget.value
+										.split(',')
+										.map((key) => key.trim())
+										.filter(Boolean);
+									if (keys.length) actionConfig.paginate.keep = keys;
+									else delete actionConfig.paginate.keep;
+									onChange();
+								}}
+							/>
+							<span class="text-[10px] text-surface-500">{m.httpPaginateKeepHint()}</span>
+						</label>
 						<label class="flex items-center gap-1.5 text-xs text-surface-700-300 cursor-pointer">
 							<input
 								type="checkbox"

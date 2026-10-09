@@ -6860,6 +6860,8 @@
 	"httpPaginateCursorParam": "Paramètre de curseur",
 	"httpPaginateOffsetParam": "Paramètre de décalage",
 	"httpPaginateCountOnly": "Compter seulement, sans conserver les éléments",
+	"httpPaginateKeep": "Champs à conserver",
+	"httpPaginateKeepHint": "Séparés par des virgules. Chaque élément ne garde que ces champs, ce qui permet aux réponses volumineuses de tenir dans ce qu'une étape peut stocker. Laisser vide pour tout conserver.",
 	"httpPaginateMaxPages": "Nombre maximal de pages",
 	"httpPaginateHint": "Rassemble toutes les pages dans items. Laissez le paramètre de curseur vide quand la réponse donne la page suivante sous forme d'URL complète.",
 	"httpOauth": "S'authentifier avec des identifiants client OAuth",

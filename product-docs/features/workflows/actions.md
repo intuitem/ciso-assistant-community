@@ -430,11 +430,12 @@ Use them when the step is followed by a branch that does something about the fai
 | Cursor parameter | Optional. When set, the value at the next-page path is a cursor sent as this query parameter. When empty, it is the full URL of the next page, which must stay on the same host |
 | Offset parameter | Optional, for APIs that page with an offset such as `$skip` instead of a link. Each page adds the number of items received to it, and paging stops at the first empty page. Replaces the next-page path |
 | Count only, keep no items | Count the items without keeping them, for APIs that offer no count of their own. Nothing from the answer is stored |
+| Fields to keep | Optional, comma-separated. Each item keeps only these fields. Use it when the API returns large records and the step needs a few fields: it keeps big lists within what one step can store |
 | Page limit | 1 to 50, default 10 |
 
 Paging stops when there is no next page, at the page limit, or when the items reach what one step's output can hold: `WORKFLOW_NODE_OUTPUT_MAX_ITEMS` items (10 000 by default), or about 90% of `WORKFLOW_NODE_OUTPUT_BUDGET` characters (5 000 000 by default). Both are environment variables of the backend. `pages` says how many were read, `count` how many items were gathered, and `truncated` is true when a limit cut the list short. When paging, `body` is left empty: the items are in `items`, and keeping every raw page as well would double what the run stores.
 
-**Sign in with OAuth client credentials** fetches a token before the request and sends it as a bearer token. It takes a **Token URL** (must be `https`), a **Client ID**, a **Client secret** and an optional **Scope**, all *expr*, so the client secret can come from a secret. The token never appears in the output or the run log.
+**Sign in with OAuth client credentials** fetches a token before the request and sends it as a bearer token. It takes a **Token URL** (must be `https`), a **Client ID**, a **Client secret** and an optional **Scope**, all *expr*. The client secret must be a workflow secret, such as `{{secrets.client_secret}}`: publishing refuses one typed in as text. The token never appears in the output or the run log.
 
 A run keeps every item it gathered, but the builder shows a preview: lists in step outputs and variables are cut to their first 50 entries, followed by a note saying how many more there are. Expressions and the steps themselves always read the full list.
 

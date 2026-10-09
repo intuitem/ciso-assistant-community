@@ -6310,6 +6310,8 @@
 	"httpPaginateCursorParam": "Cursor parameter",
 	"httpPaginateOffsetParam": "Offset parameter",
 	"httpPaginateCountOnly": "Count only, keep no items",
+	"httpPaginateKeep": "Fields to keep",
+	"httpPaginateKeepHint": "Comma-separated. Each item keeps only these fields, which keeps large answers within what one step can store. Leave empty to keep everything.",
 	"httpPaginateMaxPages": "Page limit",
 	"httpPaginateHint": "Gathers every page into items. Leave the cursor parameter empty when the answer gives the next page as a full URL.",
 	"httpOauth": "Sign in with OAuth client credentials",

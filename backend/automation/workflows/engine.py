@@ -1107,8 +1107,6 @@ def _store_node_output(node, output, instance):
     lost = []
     instance.node_outputs[key] = _cap_structure(output, lost=lost)
     if lost and not _foreign_output(node):
-        # Only the character budget is a setting; naming it for the item and
-        # depth caps, which are constants, would misdirect.
         raisable = {remedy for _what, remedy in lost if remedy}
         hint = f" Or raise {', '.join(sorted(raisable))}." if raisable else ""
         raise FatalActionError(
@@ -1134,10 +1132,11 @@ def node_output_budget():
     return int(getattr(settings, "WORKFLOW_NODE_OUTPUT_BUDGET", 5_000_000))
 
 
-def display_preview(value):
+def display_preview(value, lost=None):
     return _cap_structure(
         value,
         [DISPLAY_BUDGET],
+        lost=lost,
         max_items=DISPLAY_MAX_ITEMS,
         max_keys=node_output_max_items(),
     )

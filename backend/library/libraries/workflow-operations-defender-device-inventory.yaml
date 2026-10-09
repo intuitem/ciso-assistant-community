@@ -57,6 +57,14 @@ objects:
           paginate:
             items: value
             offset_param: $skip
+            keep:
+            - id
+            - computerDnsName
+            - osPlatform
+            - version
+            - exposureLevel
+            - riskScore
+            - lastSeen
             max_pages: 10
         retry:
           max_attempts: 3

@@ -79,6 +79,8 @@ A draft can be saved in any state. Publishing requires a sound graph, so the bui
 | Credentials may only travel over `https` | The URL is `http` and the step carries a secret, an `Authorization` header or OAuth. Use `https` |
 | The token URL must be https | Use the `https` address of the token endpoint |
 | OAuth needs a token url / client id / client secret | Fill the missing OAuth setting |
+| The client secret must come from a workflow secret, such as `{{secrets.client_secret}}` | Add the secret to the workflow and reference it, instead of typing the value in |
+| Fields to keep must be a list of names | List the fields as names |
 | Paging needs the path to the items / to the next page | Fill both paths, or turn **Follow pages** off |
 | The page limit must be between 1 and 50 | Use a value in range |
 | A list of items is required | Point **Items** at a list, for example `{{nodes.fetch.items}}` |

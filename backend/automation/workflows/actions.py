@@ -8,7 +8,6 @@ output_mapping into instance variables. String config values support
 
 import datetime
 import re
-from types import SimpleNamespace
 import uuid
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -96,14 +95,14 @@ class ActionError(Exception):
     """Deliberate action failure, routed through the node's retry policy."""
 
 
-class PermissionDeniedError(ActionError):
-    """The run identity lacks a permission an action needs."""
-
-
 class FatalActionError(ActionError):
     """Permanent action failure (static config, validation) that no retry can
     change: the engine fails the node immediately instead of burning the
     retry schedule."""
+
+
+class PermissionDeniedError(FatalActionError):
+    """The run identity lacks a permission an action needs."""
 
 
 class DeferredTask:
@@ -1296,9 +1295,13 @@ class CreateObjectAction(BaseAction):
 
 
 def upsert_max_items():
+    return _item_cap("WORKFLOW_UPSERT_MAX_ITEMS")
+
+
+def _item_cap(setting):
     from .engine import node_output_max_items
 
-    return int(getattr(settings, "WORKFLOW_UPSERT_MAX_ITEMS", node_output_max_items()))
+    return int(getattr(settings, setting, node_output_max_items()))
 
 
 @register
@@ -3286,9 +3289,7 @@ def http_max_pages():
 
 
 def http_max_items():
-    from .engine import node_output_max_items
-
-    return int(getattr(settings, "WORKFLOW_HTTP_MAX_ITEMS", node_output_max_items()))
+    return _item_cap("WORKFLOW_HTTP_MAX_ITEMS")
 
 
 @register
@@ -3430,6 +3431,7 @@ class HttpRequestAction(BaseAction):
         cursor_param = paginate.get("cursor_param") or ""
         offset_param = paginate.get("offset_param") or ""
         count_only = _as_bool(paginate.get("count_only"))
+        keep = [str(key) for key in paginate.get("keep") or []]
         max_pages = min(
             max(
                 _paging_int(paginate.get("max_pages"), "max_pages", HTTP_DEFAULT_PAGES),
@@ -3446,7 +3448,7 @@ class HttpRequestAction(BaseAction):
             if offset_param
             else 0
         )
-        items, count, pages, truncated, chars = [], 0, 0, False, 0
+        items, count, pages, truncated, chars, largest = [], 0, 0, False, 0, 0
         requested = {url}
         while True:
             response = requests.request(method, url, **kwargs)
@@ -3461,6 +3463,14 @@ class HttpRequestAction(BaseAction):
                     f"http_request: '{items_path}' is not a list in the answer "
                     f"from '{host}'"
                 )
+            largest = max(largest, len(page_items))
+            if keep:
+                page_items = [
+                    {key: item[key] for key in keep if key in item}
+                    if isinstance(item, dict)
+                    else item
+                    for item in page_items
+                ]
             if not count_only:
                 for item in page_items:
                     size = len(json.dumps(item, default=str))
@@ -3484,7 +3494,7 @@ class HttpRequestAction(BaseAction):
                 if not following:
                     break
             if pages >= max_pages:
-                truncated = True
+                truncated = not (offset_param and len(page_items) < largest)
                 break
             url = self._next_url(
                 url, str(following), offset_param or cursor_param, host
@@ -4122,10 +4132,9 @@ def validate_upsert_objects_config(node):
     errors = []
     if not config.get("items"):
         errors.append(("action_upsert_missing_items", "A list of items is required"))
-    shim = SimpleNamespace(
-        action_config={**config, "type": "create_object", "upsert": True}
+    return errors + _validate_create(
+        {**config, "type": "create_object", "upsert": True}
     )
-    return errors + validate_create_config(shim)
 
 
 def validate_create_config(node):
@@ -4134,6 +4143,10 @@ def validate_create_config(node):
     config = node.action_config or {}
     if config.get("type") != "create_object":
         return []
+    return _validate_create(config)
+
+
+def _validate_create(config):
     entry = CREATABLE_MODELS.get(config.get("model"))
     if entry is None:
         return [
@@ -4366,6 +4379,17 @@ def _validate_http_oauth(oauth):
             errors.append(
                 ("action_http_oauth_missing", f"OAuth needs a {key.replace('_', ' ')}")
             )
+    client_secret = str(oauth.get("client_secret") or "").strip()
+    if client_secret and not SECRETS_REFERENCE_RE.search(client_secret):
+        errors.append(
+            (
+                "action_http_oauth_secret_literal",
+                (
+                    "The client secret must come from a workflow secret, such as "
+                    "{{secrets.client_secret}}"
+                ),
+            )
+        )
     token_url = str(oauth.get("token_url") or "")
     if (
         token_url
@@ -4394,6 +4418,13 @@ def _validate_http_paginate(paginate):
     if not offset_param and not str(paginate.get("next") or "").strip():
         errors.append(
             ("action_http_paginate_missing", "Paging needs the path to the next page")
+        )
+    keep = paginate.get("keep")
+    if keep not in (None, "", []) and (
+        not isinstance(keep, list) or not all(isinstance(k, str) for k in keep)
+    ):
+        errors.append(
+            ("action_http_bad_keep", "Fields to keep must be a list of names")
         )
     max_pages = paginate.get("max_pages")
     if max_pages not in ("", None) and not _is_templated(max_pages):

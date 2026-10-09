@@ -141,6 +141,7 @@ class WorkflowInstanceReadSerializer(BaseModelSerializer):
     variables = serializers.SerializerMethodField()
 
     has_outputs = serializers.SerializerMethodField()
+    outputs_trimmed = serializers.SerializerMethodField()
 
     def _listing(self):
         view = self.context.get("view")
@@ -155,6 +156,14 @@ class WorkflowInstanceReadSerializer(BaseModelSerializer):
         if self._listing():
             return None
         return display_preview(obj.variables or {})
+
+    def get_outputs_trimmed(self, obj):
+        if self._listing():
+            return None
+        lost = []
+        display_preview(obj.node_outputs or {}, lost)
+        display_preview(obj.variables or {}, lost)
+        return bool(lost)
 
     def get_has_outputs(self, obj):
         if hasattr(obj, "has_outputs"):

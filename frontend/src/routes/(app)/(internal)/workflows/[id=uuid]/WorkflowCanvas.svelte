@@ -560,7 +560,9 @@
 			body: JSON.stringify({ instance: run.id })
 		});
 		const loaded = res.ok ? await res.json() : null;
-		if (loaded && request === referenceRequest) referenceRun = loaded;
+		if (!loaded || request !== referenceRequest) return false;
+		referenceRun = loaded;
+		return true;
 	}
 
 	async function ensureReferenceRun() {
@@ -585,8 +587,7 @@
 	}
 
 	async function pinReference(run: any) {
-		referencePinned = true;
-		await loadRun(run);
+		if (await loadRun(run)) referencePinned = true;
 	}
 
 	// Runs-panel polling feeds this: without an explicit pin, the reference

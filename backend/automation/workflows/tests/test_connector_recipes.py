@@ -424,6 +424,7 @@ class TestRunsApi:
         row = (listed.data.get("results") or listed.data)[0]
         assert row["has_outputs"] is True
         assert row["node_outputs"] is None and row["variables"] is None
+        assert row["outputs_trimmed"] is None
 
         request = factory.get(f"/api/workflows/workflow-instances/{instance.id}/")
         force_authenticate(request, user=user)
@@ -434,3 +435,4 @@ class TestRunsApi:
         assert set(outputs) >= {"list_devices", "keep_assets", "report"}
         assert {"items", "count", "pages", "truncated"} <= set(outputs["list_devices"])
         assert len(outputs["list_devices"]["items"]) == DISPLAY_MAX_ITEMS + 1
+        assert detail.data["outputs_trimmed"] is True
