@@ -415,7 +415,7 @@ Open the test audit and check that:
 - The three main sections appear in order. Under **"Habitat and equipment"**, `OH.2.1` is a heading with two assessable subrequirements, not a requirement to score itself.
 - `OH.2.2` shows both questions with the expected single-choice and multiple-choice answers, while `OH.3.2` accepts free text.
 - Assessable requirements use the `0` to `2` score scale and display the labels and meanings from the standard.
-- The Review Themes are available as Implementation Groups. In a second test audit with **"Monitoring"** selected, check that only `OH.2.2` and `OH.3.2` are in scope. In an audit with no group selected, check that `OH.2.3`, which has no theme, is present.
+- Check that the Review Themes are available as Implementation Groups. For example, select the group **"Monitoring"** in the test audit settings and check that only `OH.2.2` and `OH.3.2` are visible. Then clear the selection to view the full Framework and check that `OH.2.3`, which has no theme, is also present.
 
 If something is missing or misplaced, correct the workbook before using the library for real audits. If no audit uses this Framework yet, or you have removed the test audit, you can [unload and delete the library](unload-or-delete-library.md) and import the corrected workbook as a replacement. If you need to keep an existing audit, [update the library](update-library.md) instead.
 
