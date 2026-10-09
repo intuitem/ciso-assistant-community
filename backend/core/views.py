@@ -5420,24 +5420,28 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
 
         risk_assessment = self.get_object()
 
-        # Get IAM-visible IDs for related objects
-        visible_threat_ids = set(
-            RoleAssignment.get_viewable_object_ids(request.user, Threat)
-        )
-        visible_asset_ids = set(
-            RoleAssignment.get_viewable_object_ids(request.user, Asset)
-        )
-
         scenarios = RiskScenario.objects.filter(
             risk_assessment=risk_assessment
-        ).prefetch_related("threats", "assets", "applied_controls")
+        ).prefetch_related(
+            Prefetch(
+                "threats",
+                queryset=Threat.objects.filter(
+                    id__in=RoleAssignment.get_viewable_object_ids(request.user, Threat)
+                ),
+            ),
+            Prefetch(
+                "assets",
+                queryset=Asset.objects.filter(
+                    id__in=RoleAssignment.get_viewable_object_ids(request.user, Asset)
+                ),
+            ),
+            "applied_controls",
+        )
 
         # 1. Threats breakdown: count scenarios per visible threat
         threat_counts: dict[str, int] = defaultdict(int)
         for scenario in scenarios:
             for threat in scenario.threats.all():
-                if threat.id not in visible_threat_ids:
-                    continue
                 threat_counts[threat.name] += 1
 
         sorted_threats = sorted(threat_counts.items(), key=lambda x: x[1], reverse=True)
@@ -5476,8 +5480,6 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         asset_counts: dict[str, int] = defaultdict(int)
         for scenario in scenarios:
             for asset in scenario.assets.all():
-                if asset.id not in visible_asset_ids:
-                    continue
                 asset_counts[asset.name] += 1
         sorted_assets = sorted(asset_counts.items(), key=lambda x: x[1], reverse=True)
         assets_data = {
