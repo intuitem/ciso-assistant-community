@@ -9197,16 +9197,8 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
             },
             # Only the start of a cell can trigger a formula, and the default
             # escaping covers it; escaping each label would corrupt the list.
-            "domain": {
-                "source": "parent_folder",
-                "label": "domain",
-                # The import places a blank parent at the root.
-                "format": lambda parent: (
-                    parent.name
-                    if parent and parent.content_type != Folder.ContentType.ROOT
-                    else ""
-                ),
-            },
+            # Annotated in _get_export_queryset.
+            "domain": {"source": "export_parent_name", "label": "domain"},
             "labels": {
                 "source": "filtering_labels",
                 "label": "labels",
@@ -9218,7 +9210,6 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
             },
         },
         "filename": "domains_export",
-        "select_related": ["parent_folder"],
         # Replaced by a visibility-scoped Prefetch in _get_export_queryset; kept so
         # the CSV export iterates the prefetched queryset rather than .iterator().
         "prefetch_related": ["filtering_labels"],
@@ -9227,8 +9218,12 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
     def _get_export_queryset(self):
         # Only domains round-trip through the import: the root folder is implicit,
         # and enclaves or personal folders are not created there.
-        # Labels are prefetched here, limited to the ones the user may view: the
-        # list view masks the others, and the export must not reveal them either.
+        # The list view masks the parents and labels the user may not view, and
+        # the export must not reveal them either. A blank parent is placed at the
+        # root on creation and left untouched on update.
+        viewable_folders = RoleAssignment.get_viewable_object_ids(
+            self.request.user, Folder
+        )
         viewable_labels = RoleAssignment.get_viewable_object_ids(
             self.request.user, FilteringLabel
         )
@@ -9236,6 +9231,17 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
             super()
             ._get_export_queryset()
             .filter(content_type=Folder.ContentType.DOMAIN)
+            .annotate(
+                export_parent_name=Case(
+                    When(
+                        parent_folder__content_type=Folder.ContentType.DOMAIN,
+                        parent_folder_id__in=viewable_folders,
+                        then=F("parent_folder__name"),
+                    ),
+                    default=Value(""),
+                    output_field=CharField(),
+                )
+            )
             .prefetch_related(None)
             .prefetch_related(
                 Prefetch(

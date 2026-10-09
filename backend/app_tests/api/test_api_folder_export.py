@@ -14,24 +14,28 @@ from core.utils import RoleCodename
 from iam.models import Folder, Permission, Role, RoleAssignment, User
 
 
-def _client_with_role(role: Role) -> APIClient:
+def _client_with_role(role: Role, perimeter: Folder | None = None) -> APIClient:
     user = User.objects.create_user(f"export-{uuid.uuid4().hex[:6]}@test.test")
     root = Folder.get_root_folder()
     assignment = RoleAssignment.objects.create(
         user=user, role=role, folder=root, is_recursive=True
     )
-    assignment.perimeter_folders.add(root)
+    assignment.perimeter_folders.add(perimeter or root)
     client = APIClient()
     _, token = AuthToken.objects.create(user=user)
     client.credentials(HTTP_AUTHORIZATION=f"Token {token}")
     return client
 
 
-def _exported_labels(client) -> dict[str, str]:
+def _exported_rows(client) -> dict[str, dict]:
     resp = client.get("/api/folders/export_csv/")
     assert resp.status_code == status.HTTP_200_OK, resp.content
     rows = csv.DictReader(io.StringIO(resp.content.decode("utf-8-sig")), delimiter=";")
-    return {row["name"]: row["labels"] for row in rows}
+    return {row["name"]: row for row in rows}
+
+
+def _exported_labels(client) -> dict[str, str]:
+    return {name: row["labels"] for name, row in _exported_rows(client).items()}
 
 
 @pytest.fixture
@@ -61,3 +65,37 @@ class TestFolderExportLabelVisibility:
         exported = _exported_labels(_client_with_role(reader))
 
         assert exported[labelled_domain.name] == "Confidential"
+
+
+@pytest.mark.django_db
+class TestFolderExportParentVisibility:
+    @pytest.fixture
+    def nested(self):
+        parent = Folder.objects.create(
+            name=f"parent-{uuid.uuid4().hex[:6]}",
+            parent_folder=Folder.get_root_folder(),
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        child = Folder.objects.create(
+            name=f"child-{uuid.uuid4().hex[:6]}",
+            parent_folder=parent,
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        return parent, child
+
+    def test_hidden_parent_is_not_exported(self, nested):
+        _, child = nested
+        reader = Role.objects.get(name=RoleCodename.READER.value)
+
+        rows = _exported_rows(_client_with_role(reader, perimeter=child))
+
+        assert rows[child.name]["domain"] == ""
+
+    def test_visible_parent_is_exported(self, nested):
+        parent, child = nested
+        reader = Role.objects.get(name=RoleCodename.READER.value)
+
+        rows = _exported_rows(_client_with_role(reader))
+
+        assert rows[child.name]["domain"] == parent.name
+        assert rows[parent.name]["domain"] == ""
