@@ -28,7 +28,7 @@ Here are the object types you will find in this example:
 | `ref_ctrl_meta`, `ref_ctrl_content` | A sample reference control catalogue. |
 | `urn_pref_meta`, `urn_pref_content` | URN prefixes the framework can use to reference internal or external threats and reference controls. |
 
-Most sheets also include French translations in `[fr]` columns. See [Translate library content](translations.md).
+Every translatable field in these sheets also has a French translation, with `[fr]` appended to its column or key name.
 
 ## Example questionnaire
 
