@@ -411,7 +411,7 @@ Delivery happens in the background worker. The step waits for the result. Each r
 | Continue when the answer is an error | Off by default |
 | Continue when the tool cannot be reached | Off by default |
 
-Output: `status`, `body` (parsed JSON, or the first 5000 characters of text), `unreachable`, `host`, `reason`, `items`, `pages`, `truncated`. Every key is reported on both outcomes, so a condition cannot resolve to nothing on one branch. No permission required.
+Output: `status`, `body` (parsed JSON, or the first 5000 characters of text), `unreachable`, `host`, `reason`, `items`, `count`, `pages`, `truncated`. Every key is reported on both outcomes, so a condition cannot resolve to nothing on one branch. No permission required.
 
 By default a `4xx` or `5xx` answer fails the step, and a tool that never answered at all fails it too. That is the safe reading: a collection that could not run must not look like one that ran and found nothing.
 
@@ -428,9 +428,12 @@ Use them when the step is followed by a branch that does something about the fai
 | Path to the items | Where the list sits in each answer, such as `value` or `data` |
 | Path to the next page | What leads to the next page, such as `@odata.nextLink` or `pagination.nextCursor` |
 | Cursor parameter | Optional. When set, the value at the next-page path is a cursor sent as this query parameter. When empty, it is the full URL of the next page, which must stay on the same host |
+| Offset parameter | Optional, for APIs that page with an offset such as `$skip` instead of a link. Each page adds the number of items received to it. Replaces the next-page path |
+| Page size | With an offset parameter: the page size the URL asks for, such as the `$top` value. A shorter page ends paging |
+| Count only, keep no items | Count the items without keeping them, for APIs that offer no count of their own. Nothing from the answer is stored |
 | Page limit | 1 to 50, default 10 |
 
-Paging stops when `next` is empty, at `max_pages`, or at 2000 items. `pages` says how many were read, and `truncated` is true when a limit cut the list short.
+Paging stops when there is no next page, at the page limit, or when the items reach what one step's output can hold: 2000 items, or about 90% of the output budget (`WORKFLOW_NODE_OUTPUT_BUDGET`, 500 000 characters by default). `pages` says how many were read, `count` how many items were gathered, and `truncated` is true when a limit cut the list short. When paging, `body` is left empty: the items are in `items`, and keeping every raw page as well would double what the run stores.
 
 **Sign in with OAuth client credentials** fetches a token before the request and sends it as a bearer token. It takes a **Token URL** (must be `https`), a **Client ID**, a **Client secret** and an optional **Scope**, all *expr*, so the client secret can come from a secret. The token never appears in the output or the run log.
 
