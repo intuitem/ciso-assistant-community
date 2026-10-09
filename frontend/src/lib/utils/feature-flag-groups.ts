@@ -321,6 +321,11 @@ export function getFeatureFlagGroups(availableKeys: string[]): FeatureFlagGroup[
 					field: 'data_breaches',
 					label: m.dataBreaches(),
 					description: m.dataBreachesDescription()
+				},
+				{
+					field: 'dpias',
+					label: m.dpias(),
+					description: m.dpiasDescription()
 				}
 			].filter(({ field }) => availableKeys.includes(field))
 		},

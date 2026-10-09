@@ -116,6 +116,7 @@ export const URL_MODEL = [
 	'processings',
 	'right-requests',
 	'data-breaches',
+	'dpias',
 	'purposes',
 	'personal-data',
 	'data-subjects',

@@ -20478,7 +20478,10 @@ def emit_quick_form_event(response, action):
 
 
 def emit_quick_form_submitted(response):
+    from privacy.screening import apply_screening_verdict
+
     emit_quick_form_event(response, "submitted")
+    apply_screening_verdict(response)
 
 
 def _reference_labels(response, user=None):

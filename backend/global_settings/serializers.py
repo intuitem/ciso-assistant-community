@@ -65,6 +65,32 @@ def validate_default_dashboard_value(value):
     return str(value)
 
 
+def validate_dpia_screening_form_value(value):
+    from core.models import QuickForm
+    from privacy.screening import is_screening_compatible
+
+    if value in (None, ""):
+        return None
+    try:
+        uuid.UUID(str(value))
+    except ValueError, TypeError:
+        raise serializers.ValidationError(
+            {"dpia_screening_form": "Must be a valid UUID."}
+        )
+    quick_form = QuickForm.objects.filter(id=value).first()
+    if quick_form is None:
+        raise serializers.ValidationError(
+            {"dpia_screening_form": "Quick form does not exist."}
+        )
+    if not is_screening_compatible(quick_form):
+        raise serializers.ValidationError(
+            {
+                "dpia_screening_form": "This quick form has no dpia_required outcome, so it cannot drive the DPIA screening."
+            }
+        )
+    return str(value)
+
+
 GENERAL_SETTINGS_KEYS = [
     "security_objective_scale",
     "ebios_radar_max",
@@ -107,6 +133,7 @@ GENERAL_SETTINGS_KEYS = [
     "disable_partially_compliant_result",
     "use_risk_category_label",
     "disabled_email_templates",
+    "dpia_screening_form",
 ]
 
 LLM_URL_DEFAULTS = {
@@ -232,6 +259,8 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                 validated_data["value"][key] = temp
             if key == "default_custom_analytics_dashboard":
                 validated_data["value"][key] = validate_default_dashboard_value(value)
+            if key == "dpia_screening_form":
+                validated_data["value"][key] = validate_dpia_screening_form_value(value)
         # Get new currency value
         new_currency = validated_data["value"].get("currency")
 
@@ -447,6 +476,7 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     data_breaches = serializers.BooleanField(
         source="value.data_breaches", required=False, default=True
     )
+    dpias = serializers.BooleanField(source="value.dpias", required=False, default=True)
     chat_mode = serializers.BooleanField(
         source="value.chat_mode", required=False, default=False
     )
@@ -515,6 +545,7 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
             "control_plan",
             "custom_portals",
             "data_breaches",
+            "dpias",
             "document_management",
             "ebiosrm",
             "exceptions",

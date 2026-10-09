@@ -489,6 +489,12 @@ export const navData = {
 					fa_icon: 'fa-solid fa-triangle-exclamation',
 					href: '/data-breaches',
 					permissions: ['view_databreach']
+				},
+				{
+					name: 'dpias',
+					fa_icon: 'fa-solid fa-scale-balanced',
+					href: '/dpias',
+					permissions: ['view_dpia']
 				}
 			]
 		},

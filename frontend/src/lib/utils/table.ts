@@ -2751,6 +2751,41 @@ export const listViewFields = {
 			due_date: dateFilter('due_date')
 		}
 	},
+	dpias: {
+		head: ['refId', 'name', 'processing', 'status', 'decision', 'reviewDue', 'folder'],
+		body: ['ref_id', 'name', 'processing', 'status', 'decision', 'review_due', 'folder'],
+		filters: {
+			folder: DOMAIN_FILTER,
+			processing: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'processings',
+					label: 'processing',
+					multiple: true
+				}
+			},
+			status: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'dpias/status',
+					optionsLabelField: 'label',
+					optionsValueField: 'value',
+					label: 'status',
+					multiple: true
+				}
+			},
+			decision: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'dpias/decision',
+					optionsLabelField: 'label',
+					optionsValueField: 'value',
+					label: 'decision',
+					multiple: true
+				}
+			}
+		}
+	},
 	'data-breaches': {
 		head: [
 			'refId',

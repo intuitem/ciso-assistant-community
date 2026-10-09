@@ -11,6 +11,7 @@ from core.views import (
     BaseModelViewSet as AbstractBaseModelViewSet,
     ExportMixin,
     actor_prefetch,
+    check_folder_add_permission,
     escape_excel_formula,
 )
 from django_filters.rest_framework import DjangoFilterBackend
@@ -35,6 +36,7 @@ from .models import (
     Processing,
     RightRequest,
     DataBreach,
+    Dpia,
     ART6_LAWFUL_BASIS_CHOICES,
     ART9_SPECIAL_CATEGORY_CONDITION_CHOICES,
     TRANSFER_MECHANISM_CHOICES,
@@ -585,6 +587,29 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
     def status(self, request):
         return Response(dict(Processing.STATUS_CHOICES))
 
+    @action(detail=True, methods=["post"], url_path="dpia-screening")
+    def dpia_screening(self, request, pk=None):
+        from django.contrib.auth.models import Permission
+        from .screening import start_screening
+
+        processing = self.get_object()
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="change_processing"),
+            folder=processing.folder,
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        response, resumed = start_screening(processing, request)
+        return Response(
+            {
+                "id": response.id,
+                "ref_id": response.ref_id,
+                "resumed": resumed,
+                "redirect": f"/quick-form-responses/{response.id}",
+            },
+            status=status.HTTP_200_OK if resumed else status.HTTP_201_CREATED,
+        )
+
     @action(detail=False, name="Get all processing assigned_to actors")
     def assigned_to(self, request):
         return Response(
@@ -880,3 +905,80 @@ class DataBreachViewSet(BaseModelViewSet):
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(DataBreach.STATUS_CHOICES))
+
+
+class DpiaViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows DPIAs to be viewed or edited.
+    """
+
+    model = Dpia
+    filterset_fields = [
+        "name",
+        "folder",
+        "perimeter",
+        "processing",
+        "status",
+        "decision",
+        "authors",
+        "reviewers",
+        "validated_by",
+        "review_due",
+    ]
+    search_fields = ["name", "ref_id", "description"]
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                "folder",
+                "perimeter",
+                "processing",
+                "validated_by",
+                "design_risk_assessment",
+                "incident_risk_assessment",
+            )
+            .prefetch_related("authors", "reviewers")
+        )
+
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(Dpia.Status.choices))
+
+    @action(detail=False, name="Get decision choices")
+    def decision(self, request):
+        return Response(dict(Dpia.Decision.choices))
+
+    @action(detail=False, name="Get reason choices")
+    def reasons(self, request):
+        return Response(dict(Dpia.Reason.choices))
+
+    @action(detail=True, name="DPIA report")
+    def report(self, request, pk=None):
+        from .dpia import build_report
+
+        return Response(build_report(self.get_object()))
+
+    @action(detail=True, methods=["post"], url_path="risk-registers")
+    def risk_registers(self, request, pk=None):
+        from core.models import RiskAssessment, RiskMatrix, RiskScenario
+        from .dpia import create_risk_registers
+
+        dpia = self.get_object()
+        check_folder_add_permission(
+            request.user, dpia.folder, RiskAssessment, RiskScenario
+        )
+        matrix = RiskMatrix.objects.filter(pk=request.data.get("risk_matrix")).first()
+        if matrix is None:
+            return Response(
+                {"risk_matrix": "This field is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        create_risk_registers(dpia, matrix)
+        return Response(
+            {
+                "design_risk_assessment": dpia.design_risk_assessment_id,
+                "incident_risk_assessment": dpia.incident_risk_assessment_id,
+            }
+        )

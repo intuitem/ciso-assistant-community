@@ -1,7 +1,16 @@
 from django.db import models
 from iam.models import FolderMixin
 from tprm.models import Entity
-from core.models import Actor, AppliedControl, Asset, Evidence, Incident, Perimeter
+from core.models import (
+    Actor,
+    AppliedControl,
+    Assessment,
+    Asset,
+    Evidence,
+    Incident,
+    Perimeter,
+    RiskAssessment,
+)
 from core.models import FilteringLabelMixin, Terminology
 from core.base_models import NameDescriptionMixin, AbstractBaseModel
 from core.constants import COUNTRY_CHOICES
@@ -99,6 +108,14 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
     usage_channel = models.CharField(max_length=255, blank=True)
     dpia_required = models.BooleanField(default=False, blank=True)
     dpia_reference = models.CharField(max_length=255, blank=True)
+    dpia_screening = models.ForeignKey(
+        "core.QuickFormResponse",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="screened_processings",
+        verbose_name=_("DPIA screening"),
+    )
     has_sensitive_personal_data = models.BooleanField(default=False)
     associated_controls = models.ManyToManyField(
         AppliedControl, blank=True, related_name="processings"
@@ -579,6 +596,111 @@ class DataBreach(NameDescriptionFolderMixin):
         verbose_name_plural = "Data Breaches"
 
 
+class Dpia(Assessment):
+    class Reason(models.TextChoices):
+        EVALUATION_SCORING = "evaluation_scoring", _("Evaluation or scoring")
+        AUTOMATED_DECISION = (
+            "automated_decision",
+            _("Automated decision-making with legal or similar effect"),
+        )
+        SYSTEMATIC_MONITORING = "systematic_monitoring", _("Systematic monitoring")
+        SENSITIVE_DATA = "sensitive_data", _("Sensitive or highly personal data")
+        LARGE_SCALE = "large_scale", _("Large-scale processing")
+        MATCHING_DATASETS = "matching_datasets", _("Matching or combining datasets")
+        VULNERABLE_SUBJECTS = "vulnerable_subjects", _("Vulnerable data subjects")
+        INNOVATIVE_TECHNOLOGY = "innovative_technology", _("Innovative technology")
+        PREVENTS_RIGHTS = (
+            "prevents_rights",
+            _("Prevents exercising a right or using a service"),
+        )
+        NATIONAL_LIST = "national_list", _("Supervisory authority mandatory list")
+        VOLUNTARY = "voluntary", _("Voluntary assessment")
+
+    class Decision(models.TextChoices):
+        PROCEED = "proceed", _("Proceed")
+        PROCEED_CONDITIONALLY = "proceed_conditionally", _("Proceed with conditions")
+        CONSULT_SA = "consult_sa", _("Consult the supervisory authority")
+        ABANDON = "abandon", _("Abandon")
+
+    ref_id = models.CharField(
+        max_length=100, blank=True, verbose_name=_("Reference ID")
+    )
+    processing = models.ForeignKey(
+        Processing,
+        on_delete=models.CASCADE,
+        related_name="dpias",
+        verbose_name=_("Processing"),
+    )
+    screening = models.ForeignKey(
+        "core.QuickFormResponse",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="dpias",
+        verbose_name=_("Screening"),
+    )
+    reasons = models.JSONField(default=list, blank=True, verbose_name=_("Reasons"))
+    scope_boundaries = models.TextField(blank=True, verbose_name=_("Scope boundaries"))
+    necessity = models.TextField(blank=True, verbose_name=_("Necessity"))
+    proportionality = models.TextField(blank=True, verbose_name=_("Proportionality"))
+    method_statement = models.TextField(blank=True, verbose_name=_("Method statement"))
+    design_risk_assessment = models.ForeignKey(
+        RiskAssessment,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="dpias_as_design_risk",
+        verbose_name=_("Design risk assessment"),
+    )
+    incident_risk_assessment = models.ForeignKey(
+        RiskAssessment,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="dpias_as_incident_risk",
+        verbose_name=_("Incident risk assessment"),
+    )
+    dpo_opinion = models.TextField(blank=True, verbose_name=_("DPO opinion"))
+    dpo_advice_applied = models.TextField(
+        blank=True, verbose_name=_("How the DPO advice was applied")
+    )
+    data_subject_views = models.TextField(
+        blank=True, verbose_name=_("Data subjects' views")
+    )
+    views_not_sought_reason = models.TextField(
+        blank=True, verbose_name=_("Why data subjects' views were not sought")
+    )
+    decision = models.CharField(
+        max_length=30,
+        choices=Decision.choices,
+        blank=True,
+        verbose_name=_("Decision"),
+    )
+    conditions = models.TextField(blank=True, verbose_name=_("Conditions"))
+    validated_by = models.ForeignKey(
+        Actor,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="validated_dpias",
+        verbose_name=_("Validated by"),
+    )
+    validated_at = models.DateField(
+        null=True, blank=True, verbose_name=_("Validated at")
+    )
+    review_due = models.DateField(null=True, blank=True, verbose_name=_("Review due"))
+
+    fields_to_check = ["name", "version"]
+
+    class Meta:
+        verbose_name = _("DPIA")
+        verbose_name_plural = _("DPIAs")
+
+    def save(self, *args, **kwargs):
+        self.folder = self.processing.folder
+        super().save(*args, **kwargs)
+
+
 common_exclude = ["created_at", "updated_at"]
 auditlog.register(
     Processing,
@@ -614,5 +736,9 @@ auditlog.register(
 )
 auditlog.register(
     DataBreach,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    Dpia,
     exclude_fields=common_exclude,
 )

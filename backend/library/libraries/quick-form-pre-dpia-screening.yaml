@@ -1,0 +1,156 @@
+urn: urn:intuitem:risk:library:pre-dpia-screening
+locale: en
+ref_id: pre-dpia-screening
+name: Pre-DPIA screening
+description: >
+  Decide whether a processing activity needs a full DPIA, using the nine
+  WP29/EDPB criteria as CNIL applies them. Two or more criteria met means a
+  DPIA is required.
+copyright: © intuitem
+version: 1
+publication_date: 2026-09-28
+provider: intuitem
+packager: intuitem
+objects:
+  quick_forms:
+    - urn: urn:intuitem:risk:quick_form:pre-dpia-screening
+      ref_id: pre-dpia-screening
+      name: Pre-DPIA screening
+      description: Is a data protection impact assessment required for this processing?
+      title_question_urn: urn:intuitem:risk:qf_page:pre-dpia-screening:identification:question:name
+      ref_id_prefix: DPIA
+      scores_definition:
+        min: 0
+        max: 9
+        aggregation: sum
+      outcomes_definition:
+        - ref_id: dpia_required
+          label: DPIA required
+          color: red
+          description: Two or more criteria are met — a full DPIA must be carried out before the processing starts.
+          expression: 'response.score_sum >= 2'
+        - ref_id: dpia_recommended
+          label: DPIA recommended
+          color: orange
+          description: One criterion is met. A DPIA is not mandatory but the DPO should confirm.
+          expression: 'response.score_sum == 1'
+        - ref_id: dpia_not_required
+          label: No DPIA required
+          color: green
+          description: No criterion is met. Record this screening as the justification.
+          expression: 'response.complete && response.score_sum == 0'
+        - ref_id: exemption_claimed
+          label: Exemption claimed — DPO review needed
+          color: purple
+          expression: '"exemption:question:exemption" in answers && answers["exemption:question:exemption"].answered && !("exemption:question:exemption:choice:none" in answers["exemption:question:exemption"].selected_choices)'
+      pages:
+        - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:identification
+          ref_id: identification
+          name: Processing identification
+          description: |
+            # Pre-DPIA screening
+
+            This short form records **why** a DPIA is or is not required for a
+            processing activity. Keep the completed response as evidence of the
+            decision — Article 35(1) GDPR requires you to be able to justify it.
+          questions:
+            urn:intuitem:risk:qf_page:pre-dpia-screening:identification:question:name:
+              type: text
+              text: Name of the processing activity
+            urn:intuitem:risk:qf_page:pre-dpia-screening:identification:question:purpose:
+              type: text
+              text: Purpose of the processing
+            urn:intuitem:risk:qf_page:pre-dpia-screening:identification:question:role:
+              type: unique_choice
+              text: Our role
+              choices:
+                - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:identification:question:role:choice:controller
+                  value: Controller
+                - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:identification:question:role:choice:joint
+                  value: Joint controller
+                - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:identification:question:role:choice:processor
+                  value: Processor
+            urn:intuitem:risk:qf_page:pre-dpia-screening:identification:question:stage:
+              type: unique_choice
+              text: Stage
+              choices:
+                - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:identification:question:stage:choice:new
+                  value: New processing
+                - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:identification:question:stage:choice:changed
+                  value: Existing processing being changed
+                - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:identification:question:stage:choice:review
+                  value: Periodic review
+            urn:intuitem:risk:qf_page:pre-dpia-screening:identification:question:start_date:
+              type: date
+              text: Planned start date
+              required: false
+        - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:criteria
+          ref_id: criteria
+          name: WP29 criteria
+          description: |
+            Tick every criterion the processing meets. **Two or more means a DPIA
+            is required.** These are the nine criteria of the WP29 guidelines
+            (WP248 rev.01), endorsed by the EDPB and applied by the CNIL.
+          questions:
+            urn:intuitem:risk:qf_page:pre-dpia-screening:criteria:question:criteria:
+              type: multiple_choice
+              text: Which of these apply to the processing?
+              choices:
+                - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:criteria:question:criteria:choice:evaluation_scoring
+                  value: Evaluation or scoring, including profiling and prediction
+                  add_score: 1
+                - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:criteria:question:criteria:choice:automated_decision
+                  value: Automated decision-making with legal or similarly significant effect
+                  add_score: 1
+                - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:criteria:question:criteria:choice:systematic_monitoring
+                  value: Systematic monitoring, including of a publicly accessible area
+                  add_score: 1
+                - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:criteria:question:criteria:choice:sensitive_data
+                  value: Sensitive data or data of a highly personal nature
+                  add_score: 1
+                - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:criteria:question:criteria:choice:large_scale
+                  value: Data processed on a large scale
+                  add_score: 1
+                - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:criteria:question:criteria:choice:matching_datasets
+                  value: Matching or combining datasets from different sources
+                  add_score: 1
+                - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:criteria:question:criteria:choice:vulnerable_subjects
+                  value: Data concerning vulnerable data subjects (children, employees, patients...)
+                  add_score: 1
+                - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:criteria:question:criteria:choice:innovative_technology
+                  value: Innovative use or new technological or organisational solutions
+                  add_score: 1
+                - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:criteria:question:criteria:choice:prevents_rights
+                  value: Processing that prevents data subjects from exercising a right or using a service
+                  add_score: 1
+                - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:criteria:question:criteria:choice:none
+                  value: None of these criteria applies
+                  add_score: 0
+            urn:intuitem:risk:qf_page:pre-dpia-screening:criteria:question:evidence:
+              type: text
+              text: Briefly justify the criteria you ticked
+              required: false
+        - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:exemption
+          ref_id: exemption
+          name: Exemptions
+          visibility_expression: 'response.score_sum >= 2'
+          description: |
+            A DPIA looks required. Before proceeding, check whether the processing
+            appears on the CNIL list of processing operations **exempt** from a DPIA.
+          questions:
+            urn:intuitem:risk:qf_page:pre-dpia-screening:exemption:question:exemption:
+              type: unique_choice
+              text: Does an exemption apply?
+              choices:
+                - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:exemption:question:exemption:choice:none
+                  value: No exemption applies
+                - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:exemption:question:exemption:choice:legal
+                  value: Processing has a legal basis with a DPIA already carried out by the legislator
+                - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:exemption:question:exemption:choice:list
+                  value: Processing appears on the supervisory authority's exemption list
+                - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:exemption:question:exemption:choice:prior
+                  value: An equivalent DPIA already covers this processing
+            urn:intuitem:risk:qf_page:pre-dpia-screening:exemption:question:reference:
+              type: text
+              text: Reference of the exemption or of the existing DPIA
+              required: false
