@@ -62,6 +62,9 @@
 		defaults({ framework: untrack(() => data.frameworkId) ?? null }, zod(pickerSchema)),
 		{ dataType: 'json', SPA: true, validators: zod(pickerSchema) }
 	);
+	// AutocompleteSelect ignores an outside reset back to its mount value, so
+	// clearing it means remounting it.
+	let pickerKey = $state(0);
 
 	function pickFramework(id: string | null | undefined) {
 		if (!id || id === data.frameworkId) return;
@@ -419,15 +422,17 @@
 			{@render fieldLabel('Framework')}
 			<div class="flex gap-1">
 				<div class="min-w-0 flex-1">
-					<AutocompleteSelect
-						form={pickerForm}
-						field="framework"
-						optionsEndpoint="frameworks"
-						optionsDetailedUrlParameters={[['in_domain_tree', 'true']]}
-						optionsInfoFields={{ fields: [{ field: 'provider' }], position: 'prefix' }}
-						placeholder="Pick a framework"
-						onChange={pickFramework}
-					/>
+					{#key pickerKey}
+						<AutocompleteSelect
+							form={pickerForm}
+							field="framework"
+							optionsEndpoint="frameworks"
+							optionsDetailedUrlParameters={[['in_domain_tree', 'true']]}
+							optionsInfoFields={{ fields: [{ field: 'provider' }], position: 'prefix' }}
+							placeholder="Pick a framework"
+							onChange={pickFramework}
+						/>
+					{/key}
 				</div>
 				{#if !isDummy}
 					<button
@@ -435,6 +440,7 @@
 						class="btn h-9 shrink-0 preset-tonal text-sm"
 						onclick={() => {
 							pickerForm.form.update((f) => ({ ...f, framework: null }));
+							pickerKey++;
 							openFramework(null);
 						}}>Use dummy data</button
 					>
@@ -515,6 +521,19 @@
 	{:else}
 		<div class="flex flex-col gap-4 lg:flex-row">
 			<div class="min-w-0 flex-1 rounded-lg border border-surface-200-800 bg-surface-50-950">
+				{#if isDummy}
+					<!-- inside the tree card, so a screenshot of the tree keeps it -->
+					<div
+						class="flex items-center gap-2 rounded-t-lg preset-tonal-warning px-4 py-2 text-sm"
+						role="note"
+					>
+						<i class="fa-solid fa-triangle-exclamation"></i>
+						<span
+							><strong>Sample data</strong> — a generated organisation, not your audits. Pick a framework
+							above to see your own.</span
+						>
+					</div>
+				{/if}
 				<div class="space-y-2 border-b border-surface-200-800 px-4 py-3">
 					<div>
 						<div class="text-sm font-semibold">{caption}</div>
