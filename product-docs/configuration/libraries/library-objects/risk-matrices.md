@@ -35,7 +35,7 @@ The content sheet contains one row per probability, impact, or risk level. Add o
 | Field | Meaning | Format / allowed values |
 | --- | --- | --- |
 | `type`<mark style="color:$danger;">*</mark> | Kind of level defined by the row | `probability`, `impact`, or `risk` |
-| `id`<mark style="color:$danger;">*</mark> | Position of the level within its type, from lowest to highest | Consecutive integers starting at `0` (`0`, `1`, `2`, …), with no gaps |
+| `id`<mark style="color:$danger;">*</mark> | Position of the level within its type, from lowest to highest | Consecutive integers starting at `0` (`0`, `1`, `2`, ...), with no gaps |
 | `color`<mark style="color:$danger;">*</mark> | Color shown for this level | Set the Excel cell's fill color if needed. The cell text can stay empty |
 | `abbreviation`<mark style="color:$danger;">*</mark> <mark style="color:$info;">T</mark> | Short label for the level | Text |
 | `name`<mark style="color:$danger;">*</mark> <mark style="color:$info;">T</mark> | Name of the level | Text |
