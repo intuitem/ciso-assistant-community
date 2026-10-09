@@ -1,0 +1,148 @@
+urn: urn:intuitem:risk:library:mapping-anssi-systemes-industriels-mesures-detaillees-and-iec-62443-4-1-2018
+locale: en
+ref_id: mapping-anssi-systemes-industriels-mesures-detaillees-and-iec-62443-4-1-2018
+name: ANSSI Systèmes industriels - Mesures détaillées <-> IEC 62443-4-1
+description: Correspondences between the ANSSI guide 'La cybersécurité des systèmes industriels – Mesures
+  détaillées' (v2) and IEC 62443-4-1, as published by ANSSI in the guide (Annex A and per-recommendation
+  badges).
+copyright: Licence Ouverte v2.0 - Etalab (ANSSI)
+version: 1
+publication_date: 2026-09-30
+provider: ANSSI
+packager: intuitem
+dependencies:
+- urn:intuitem:risk:library:anssi-systemes-industriels-mesures-detaillees
+- urn:intuitem:risk:library:iec-62443-4-1-2018
+objects:
+  requirement_mapping_sets:
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-anssi-systemes-industriels-mesures-detaillees-and-iec-62443-4-1-2018
+    ref_id: mapping-anssi-systemes-industriels-mesures-detaillees-and-iec-62443-4-1-2018
+    name: ANSSI Systèmes industriels - Mesures détaillées <-> IEC 62443-4-1
+    description: Correspondences between the ANSSI guide 'La cybersécurité des systèmes industriels –
+      Mesures détaillées' (v2) and IEC 62443-4-1, as published by ANSSI in the guide (Annex A and per-recommendation
+      badges).
+    source_framework_urn: urn:intuitem:risk:framework:anssi-systemes-industriels-mesures-detaillees
+    target_framework_urn: urn:intuitem:risk:framework:iec-62443-4-1-2018
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r2
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r14
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sg-7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r14
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sr-5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r15
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r24
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r30
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sr-3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r31
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:svv-1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r31
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:svv-3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r33
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sd-1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r35
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r36
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sum-1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r39
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:dm-5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r45
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:svv-4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r55
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:dm-1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r57
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:dm-5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r86
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r156
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sd-4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r158
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sd-4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r161
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sd-4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r161
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sg-3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r165
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-6
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r165
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sum-1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r166
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:si-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r168
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:svv-3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r170
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:dm-4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r173
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sum-1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r178
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sd-4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r194
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:si-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r194
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:svv-3
+      relationship: intersect
+      annotation: 'IEC 62443-4-1: SVV-3.5, SVV-3.6'
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r195
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:sm-7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r196
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:si-1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r196
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:si-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r197
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:si-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r198
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:si-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r198
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:svv-1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r199
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:svv-5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r200
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:si-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r201
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:si-2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r201
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:svv-1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-systemes-industriels-mesures-detaillees:r201
+      target_requirement_urn: urn:intuitem:risk:req_node:iec-62443-4-1-2018:svv-3
+      relationship: intersect
+      annotation: 'IEC 62443-4-1: SVV-3.5, SVV-3.6'

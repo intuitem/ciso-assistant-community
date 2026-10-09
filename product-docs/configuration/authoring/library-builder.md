@@ -308,7 +308,7 @@ The builder will let you do almost anything; the choices that age well are narro
 ## Builder vs Excel
 
 - **Builder** — for content that lives primarily on this instance (internal policies, forked variants, in-progress drafts), for iterative editing, and anywhere a translation pass matters (the side-by-side editing and coverage counter are hard to replicate in a spreadsheet).
-- **Excel** — for content you ship as a library file across instances or to the community catalogue, for constructs the builder UI doesn't expose (e.g. per-requirement score overrides), and for the initial conversion of a published standard from its source spreadsheet. See [Excel-driven authoring](excel.md) and [Designing your own libraries](../libraries/custom-libraries.md).
+- **Excel** — for content you ship as a library file across instances or to the community catalogue, for constructs the builder UI doesn't expose (e.g. per-requirement score overrides), and for the initial conversion of a published standard from its source spreadsheet. See [Excel-driven authoring](excel.md) and [Create a Library](../libraries/create-library.md).
 
 The two paths compose: an Excel-built library can be imported into a draft and tuned in place, and a builder draft can be exported to YAML for redistribution.
 
@@ -332,8 +332,8 @@ Individual users' most recently typed packager is also remembered locally and ta
 
 - [Libraries](../libraries/README.md) — how to load, upgrade, and clean up authored content.
 - [Excel-driven authoring](excel.md) — the alternative Excel-to-YAML workflow for cross-instance publishing.
-- [Designing your own libraries](../libraries/custom-libraries.md) — the library YAML format the builder produces.
-- [Getting your custom framework](../libraries/custom-frameworks.md) — quick-start for a single-framework library.
-- [Library upgrade](../libraries/library-upgrade.md) — what changes are safe to ship in a later version.
+- [Library objects](../libraries/library-objects/README.md) — the available objects, with links to their Excel fields and YAML examples.
+- [Guided example: create your first framework](../libraries/guided-example.md) — a step-by-step framework workbook.
+- [Update a library](../libraries/update-library.md) — how to publish a new version and apply it to existing audits.
 - Concepts: [Frameworks](../../concepts/frameworks.md) · [Risk matrices](../../concepts/risk-matrices.md) · [Journeys](../../concepts/journeys.md) · [Mappings](../../concepts/mappings.md).
 - [Contributing → Frameworks and libraries](../../contributing/framework.md) — how to upstream authored content to the community catalogue.
