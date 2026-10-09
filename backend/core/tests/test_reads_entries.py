@@ -103,6 +103,16 @@ class TestEveryEntry:
     def test_base_filter_is_a_q_or_absent(self, key, entry):
         assert entry.base_filter is None or isinstance(entry.base_filter, Q)
 
+    def test_categorical_fields_never_hold_free_text(self, key, entry):
+        """A derived metric groups only by these, and its value is visible
+        without read rights on the rows: a key must name a category, never
+        row content."""
+        categorical = entry.categorical_fields()
+        assert set(categorical) <= set(entry.readable_fields()), key
+        for name in ("id", "name", "description", "ref_id", "link"):
+            assert name not in categorical, f"{key}.{name}"
+        assert not set(categorical) & set(entry.annotations), key
+
 
 @pytest.mark.django_db
 class TestEveryEntryWithDatabase:
@@ -127,6 +137,16 @@ class TestReadEntry:
             readable = READABLE_MODELS[key].readable_fields()
             assert "name" not in readable, key
             assert {"id", "created_at", "updated_at"} <= set(readable), key
+
+    def test_categorical_fields_are_choices_booleans_and_relations(self):
+        assert READABLE_MODELS["applied_control"].categorical_fields() == [
+            "status",
+            "priority",
+        ]
+        assert {"framework", "perimeter", "status"} <= set(
+            READABLE_MODELS["compliance_assessment"].categorical_fields()
+        )
+        assert "is_active" in READABLE_MODELS["entity"].categorical_fields()
 
     def test_a_fresh_entry_defaults_to_nothing_extra(self):
         from core.models import AppliedControl

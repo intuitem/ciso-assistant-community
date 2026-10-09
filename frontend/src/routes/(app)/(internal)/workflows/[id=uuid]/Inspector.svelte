@@ -27,6 +27,13 @@
 		type Condition
 	} from '$lib/utils/filter-dnf';
 	import { VARIABLE_TYPES } from './builder-constants';
+	import {
+		READ_ROW_DEFAULTS,
+		aggregateRowsOf,
+		applyActionDefaults,
+		ensureAggregateRows,
+		type AggregateRow
+	} from './read-config';
 
 	interface Option {
 		id: string;
@@ -346,13 +353,7 @@
 	}
 
 	function initActionConfig() {
-		const type = actionConfig.type;
-		const defaults: any = ACTION_CONFIG_DEFAULTS[type] ?? {};
-		for (const [key, value] of Object.entries(defaults)) {
-			// Clone: the nested literals are shared, and bindings mutate them in
-			// place, so two nodes of the same type would edit one object.
-			if (actionConfig[key] === undefined) actionConfig[key] = structuredClone(value);
-		}
+		applyActionDefaults(actionConfig, ACTION_CONFIG_DEFAULTS[actionConfig.type] ?? {});
 		onChange();
 	}
 
@@ -361,12 +362,7 @@
 	// the template reads it.
 	$effect(() => {
 		if (nodeDomain?.type === 'action' && actionConfig?.type) {
-			const defaults: any = ACTION_CONFIG_DEFAULTS[actionConfig.type] ?? {};
-			for (const [key, value] of Object.entries(defaults)) {
-				// Clone: the nested literals are shared, so two nodes of one
-				// type would otherwise edit the same object.
-				if (actionConfig[key] === undefined) actionConfig[key] = structuredClone(value);
-			}
+			applyActionDefaults(actionConfig, ACTION_CONFIG_DEFAULTS[actionConfig.type] ?? {});
 		}
 		if (nodeDomain?.type === 'trigger') {
 			nodeDomain.trigger_config ??= { type: 'manual' };
@@ -631,9 +627,6 @@
 		onChange();
 	}
 
-	// Aggregate mode answers numbers, not rows: the row-only keys are errors
-	// at publish time, so switching modes adds or removes them wholesale.
-	const READ_ROW_DEFAULTS = { order_by: '-created_at', limit: 25, offset: '', include: [] };
 	function setReadMode(mode: string) {
 		actionConfig.mode = mode;
 		if (mode === 'aggregate') {
@@ -648,7 +641,6 @@
 		onChange();
 	}
 
-	type AggregateRow = { fn: string; field?: string; group_by?: string; as?: string; p?: number };
 	const aggregateFunctions = $derived(readableEntry?.aggregates ?? []);
 	function aggregateFn(name: string) {
 		return aggregateFunctions.find((fn) => fn.name === name);
@@ -688,8 +680,7 @@
 		return !!row.field && !readableEntry?.fields.includes(row.field);
 	}
 	function aggregateRows(): AggregateRow[] {
-		if (!Array.isArray(actionConfig.aggregates)) actionConfig.aggregates = [];
-		return actionConfig.aggregates as AggregateRow[];
+		return aggregateRowsOf(actionConfig);
 	}
 	function setAggregateFn(row: AggregateRow, name: string) {
 		row.fn = name;
@@ -2287,7 +2278,7 @@
 								type="button"
 								class="btn preset-tonal text-[10px] self-start"
 								onclick={() => {
-									aggregateRows().push({ fn: 'count' });
+									ensureAggregateRows(actionConfig).push({ fn: 'count' });
 									onChange();
 								}}
 							>

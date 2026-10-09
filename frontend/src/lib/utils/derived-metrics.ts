@@ -27,3 +27,24 @@ export function datasetReferences(datasets: Record<string, unknown> | null | und
 	}
 	return refs;
 }
+
+// Names the expression reads besides the datasets (mirrors
+// metrology.derived.CONTEXT_ROOTS).
+const CONTEXT_ROOTS = new Set(['previous', 'metrics', 'now', 'today']);
+
+// What a typed dataset name becomes: identifier characters only.
+export function sanitizeDatasetName(raw: string): string {
+	return raw.replace(/[^A-Za-z0-9_]/g, '_');
+}
+
+// Why a dataset cannot take `name`, or null when it can. Datasets are keyed
+// by name, so a duplicate would silently replace another one on save.
+export function datasetNameProblem(
+	name: string,
+	otherNames: string[]
+): 'required' | 'invalid' | 'taken' | null {
+	if (!name) return 'required';
+	if (!/^[A-Za-z_]/.test(name) || CONTEXT_ROOTS.has(name)) return 'invalid';
+	if (otherNames.includes(name)) return 'taken';
+	return null;
+}

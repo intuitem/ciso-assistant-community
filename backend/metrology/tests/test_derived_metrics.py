@@ -557,6 +557,8 @@ class TestEndpoints:
         assert response.status_code == 200
         entries = {entry["key"]: entry for entry in response.data}
         assert entries["applied_control"]["kinds"]["status"] == "text"
+        # The editor offers these, and only these, as group-by fields.
+        assert entries["applied_control"]["categorical"] == ["status", "priority"]
         assert {fn["name"] for fn in entries["applied_control"]["aggregates"]} >= {
             "count",
             "avg",
@@ -574,3 +576,322 @@ class TestEndpoints:
             pk=str(instance.id),
         )
         assert response.status_code == 400
+
+
+# ---------- regressions from the PR review ----------
+
+
+def by(field):
+    return {
+        "model": "applied_control",
+        "aggregates": [{"fn": "count", "group_by": field}],
+    }
+
+
+def make_sample(instance, value, minutes_ago=0):
+    return CustomMetricSample.objects.create(
+        metric_instance=instance,
+        folder=instance.folder,
+        timestamp=timezone.now() - datetime.timedelta(minutes=minutes_ago),
+        value={"result": value},
+    )
+
+
+@pytest.mark.django_db
+class TestGroupingNamesCategoriesOnly:
+    """A derived value is visible without read rights on the rows: a
+    breakdown by name or description would hand out row content."""
+
+    @pytest.mark.parametrize("field", ["name", "description", "ref_id", "id"])
+    def test_free_text_cannot_group_a_dataset(self, field):
+        errors = validate_formula({"c": by(field)}, "1")
+        assert [code for code, _m in errors] == ["derived_dataset_invalid"]
+        assert f"'{field}' cannot group a derived metric" in errors[0][1]
+
+    def test_a_category_still_groups(self):
+        assert validate_formula({"c": by("status")}, "1") == []
+
+    def test_evaluation_refuses_a_definition_saved_around_the_rule(self):
+        domain = make_domain("Domain")
+        AppliedControl.objects.create(name="secret plan", folder=domain)
+        with pytest.raises(DerivedMetricError, match="cannot group"):
+            evaluate_formula({"c": by("name")}, "1", domain)
+
+    def test_the_preview_never_answers_row_content(self):
+        domain = make_domain("Domain")
+        AppliedControl.objects.create(
+            name="secret plan", description="top secret", folder=domain
+        )
+        view = MetricDefinitionViewSet.as_view({"post": "preview_formula"})
+        request = APIRequestFactory().post(
+            "/metrology/metric-definitions/preview-formula/",
+            {
+                "folder": str(domain.id),
+                "datasets": {"c": by("description")},
+                "expression": "1",
+            },
+            format="json",
+        )
+        force_authenticate(
+            request,
+            user=User.objects.create_superuser(
+                email=f"admin-{uuid.uuid4().hex[:6]}@tests.local"
+            ),
+        )
+        response = view(request)
+        assert response.status_code == 200
+        assert response.data["ok"] is False
+        assert "datasets" not in response.data
+        assert "top secret" not in str(response.data)
+
+
+@pytest.mark.django_db
+class TestFilterValueFailures:
+    def setup_method(self):
+        cache.clear()
+
+    def late(self, token):
+        return {
+            "late": {
+                "model": "applied_control",
+                "filters": {
+                    "conditions": [{"field": "eta", "op": "lt", "value": token}]
+                },
+                "aggregates": [{"fn": "count"}],
+            }
+        }
+
+    def test_a_value_the_column_refuses_is_recorded_not_raised_raw(self):
+        """{{now}} on a date column made Django raise ValidationError, which
+        escaped compute_sample: nothing was recorded and the sweep requeued
+        the instance forever."""
+        domain = make_domain("Domain")
+        AppliedControl.objects.create(name="a", folder=domain)
+        instance = make_instance(
+            domain, make_definition("late.count", self.late("{{now}}"))
+        )
+        with pytest.raises(DerivedMetricError, match="does not fit its field"):
+            compute_sample(instance)
+        instance.refresh_from_db()
+        assert instance.last_computed_at is not None
+        assert instance.last_computation_error == (
+            "dataset 'late': a filter value does not fit its field"
+        )
+        # Django's own wording stays in the log.
+        assert "YYYY-MM-DD" not in instance.last_computation_error
+
+    def test_the_preview_answers_the_same_failure_without_a_500(self):
+        domain = make_domain("Domain")
+        view = MetricDefinitionViewSet.as_view({"post": "preview_formula"})
+        request = APIRequestFactory().post(
+            "/metrology/metric-definitions/preview-formula/",
+            {
+                "folder": str(domain.id),
+                "datasets": self.late("not a date"),
+                "expression": "late.count",
+            },
+            format="json",
+        )
+        force_authenticate(
+            request,
+            user=User.objects.create_superuser(
+                email=f"admin-{uuid.uuid4().hex[:6]}@tests.local"
+            ),
+        )
+        response = view(request)
+        assert response.status_code == 200
+        assert response.data["errors"] == [
+            {
+                "code": "derived_evaluation_failed",
+                "message": "dataset 'late': a filter value does not fit its field",
+            }
+        ]
+
+    def test_a_stale_matrix_level_is_named(self, monkeypatch):
+        import metrology.derived as derived
+
+        def stale(*_args, **_kwargs):
+            raise IndexError("list index out of range")
+
+        monkeypatch.setattr(derived, "run_aggregate_read", stale)
+        with pytest.raises(DerivedMetricError, match="no longer exists"):
+            evaluate_formula({"c": CONTROLS}, "c.count", make_domain("Domain"))
+
+
+@pytest.mark.django_db
+class TestNonStringExpression:
+    def test_validation_reports_it(self):
+        assert validate_formula({"c": CONTROLS}, 5) == [
+            ("derived_expression_invalid", "The expression must be text")
+        ]
+
+    def test_the_preview_answers_instead_of_a_500(self):
+        domain = make_domain("Domain")
+        view = MetricDefinitionViewSet.as_view({"post": "preview_formula"})
+        request = APIRequestFactory().post(
+            "/metrology/metric-definitions/preview-formula/",
+            {"folder": str(domain.id), "datasets": {"c": CONTROLS}, "expression": 5},
+            format="json",
+        )
+        force_authenticate(
+            request,
+            user=User.objects.create_superuser(
+                email=f"admin-{uuid.uuid4().hex[:6]}@tests.local"
+            ),
+        )
+        response = view(request)
+        assert response.status_code == 200
+        assert response.data["errors"][0]["code"] == "derived_expression_invalid"
+
+
+@pytest.mark.django_db
+class TestQueuedTwice:
+    def setup_method(self):
+        cache.clear()
+
+    def test_a_duplicate_sweep_run_writes_nothing(self):
+        """A lagging queue holds the same instance twice; the second run
+        finds the first one's stamp and stops."""
+        from metrology.tasks import compute_derived_metric_task
+
+        domain = make_domain("Domain")
+        make_controls(domain, ["active"])
+        instance = make_instance(domain, collection_frequency="daily")
+        compute_derived_metric_task.call_local(str(instance.id), only_if_due=True)
+        compute_derived_metric_task.call_local(str(instance.id), only_if_due=True)
+        assert instance.samples.count() == 1
+
+    def test_the_stamp_is_read_under_the_lock_not_from_the_caller(self):
+        domain = make_domain("Domain")
+        make_controls(domain, ["active"])
+        instance = make_instance(domain, collection_frequency="daily")
+        stale_copy = MetricInstance.objects.get(id=instance.id)
+        assert compute_sample(instance, only_if_due=True) is not None
+        # Loaded before the first run finished: its stamp is still None.
+        assert stale_copy.last_computed_at is None
+        assert compute_sample(stale_copy, only_if_due=True) is None
+        assert instance.samples.count() == 1
+
+    def test_a_manual_refresh_always_computes(self):
+        domain = make_domain("Domain")
+        make_controls(domain, ["active"])
+        instance = make_instance(domain, collection_frequency="daily")
+        compute_sample(instance)
+        compute_sample(instance)
+        assert instance.samples.count() == 2
+
+
+@pytest.mark.django_db
+class TestServerOwnedFields:
+    def test_a_client_cannot_label_a_sample(self):
+        from metrology.serializers import CustomMetricSampleWriteSerializer
+
+        domain = make_domain("Domain")
+        instance = make_instance(domain, make_definition("", {}))
+        serializer = CustomMetricSampleWriteSerializer(
+            data={
+                "metric_instance": str(instance.id),
+                "timestamp": timezone.now().isoformat(),
+                "value": {"result": 1},
+                "source": "derived",
+            }
+        )
+        assert serializer.is_valid(), serializer.errors
+        assert "source" not in serializer.validated_data
+
+    def test_a_derived_series_refuses_a_typed_in_sample(self):
+        from metrology.serializers import CustomMetricSampleWriteSerializer
+
+        domain = make_domain("Domain")
+        instance = make_instance(domain)
+        serializer = CustomMetricSampleWriteSerializer(
+            data={
+                "metric_instance": str(instance.id),
+                "timestamp": timezone.now().isoformat(),
+                "value": {"result": 1},
+            }
+        )
+        assert not serializer.is_valid()
+        assert "computed from its formula" in str(serializer.errors["metric_instance"])
+
+    def test_the_sampler_bookkeeping_is_read_only(self):
+        from metrology.serializers import MetricInstanceWriteSerializer
+
+        domain = make_domain("Domain")
+        instance = make_instance(domain)
+        serializer = MetricInstanceWriteSerializer(
+            instance,
+            data={
+                "last_computed_at": "2099-01-01T00:00:00Z",
+                "last_computation_error": "forged",
+            },
+            partial=True,
+        )
+        assert serializer.is_valid(), serializer.errors
+        assert "last_computed_at" not in serializer.validated_data
+        assert "last_computation_error" not in serializer.validated_data
+
+
+@pytest.mark.django_db
+class TestOtherMetrics:
+    def test_not_queried_when_the_expression_does_not_read_them(self):
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        domain = make_domain("Domain")
+        make_instance(domain, ref_id="other")
+        with CaptureQueriesContext(connection) as queries:
+            evaluate_formula({"c": CONTROLS}, "c.count", domain)
+        assert not any("metrology_metricinstance" in query["sql"] for query in queries)
+
+    def test_the_latest_sample_in_two_queries_whatever_the_history(self):
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        from metrology.derived import other_metric_values
+
+        domain = make_domain("Domain")
+        first = make_instance(domain, ref_id="first")
+        second = make_instance(domain, ref_id="second")
+        for minutes_ago, value in ((30, 1.0), (20, 2.0), (10, 3.0)):
+            make_sample(first, value, minutes_ago)
+        make_sample(second, 7.0)
+        make_instance(domain, ref_id="empty")
+        with CaptureQueriesContext(connection) as queries:
+            values = other_metric_values(domain, referenced={"first"})
+        assert values == {
+            "first": {"value": 3.0},
+            "second": {"value": 7.0},
+            "empty": {"value": None},
+        }
+        # The subtree lookup, the instances with their latest sample id, the
+        # samples themselves.
+        assert len(queries) <= 3
+
+    def test_a_shared_ref_id_is_never_picked_arbitrarily(self):
+        parent = make_domain("Parent")
+        left = make_domain("Left", parent)
+        right = make_domain("Right", parent)
+        make_sample(make_instance(left, ref_id="M1"), 1.0)
+        make_sample(make_instance(right, ref_id="M1"), 2.0)
+        with pytest.raises(DerivedMetricError, match="2 instances in this domain"):
+            evaluate_formula({"c": CONTROLS}, "metrics.M1.value", parent)
+        # Not reading it is fine, and it is not offered to read.
+        evaluation = evaluate_formula({"c": CONTROLS}, "size(metrics)", parent)
+        assert evaluation.value == 0
+
+
+@pytest.mark.django_db
+class TestChoiceEndpointsCache:
+    def test_category_is_cached_again(self):
+        view = MetricDefinitionViewSet.as_view({"get": "category"})
+        request = APIRequestFactory().get("/metrology/metric-definitions/category/")
+        force_authenticate(
+            request,
+            user=User.objects.create_superuser(
+                email=f"admin-{uuid.uuid4().hex[:6]}@tests.local"
+            ),
+        )
+        response = view(request)
+        response.render()
+        assert "max-age" in response.get("Cache-Control", "")

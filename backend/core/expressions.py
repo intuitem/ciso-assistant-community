@@ -36,6 +36,12 @@ class ExpressionError(Exception):
     """A CEL expression that cannot be compiled or evaluated. The message is
     author-facing and already mentions the expression key when known."""
 
+    def __init__(self, message):
+        super().__init__(message)
+        # What an API response may carry: the curated text, never the
+        # exception object itself.
+        self.message = message
+
 
 # celpy reports a missing overload with the grammar rule name; translate the
 # ones an author will actually hit into the operator they wrote.

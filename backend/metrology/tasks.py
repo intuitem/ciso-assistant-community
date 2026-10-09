@@ -104,8 +104,10 @@ def cleanup_old_builtin_metric_samples():
 
 
 @db_task()
-def compute_derived_metric_task(instance_id):
-    """One instance, by id: the manual refresh and the sweep both land here."""
+def compute_derived_metric_task(instance_id, only_if_due=False):
+    """One instance, by id: the manual refresh and the sweep both land here.
+    The sweep passes ``only_if_due`` so a duplicate it queued while the
+    queue lagged finds the instance already computed and writes nothing."""
     from metrology.derived import DerivedMetricError, compute_sample
 
     instance = (
@@ -116,13 +118,13 @@ def compute_derived_metric_task(instance_id):
     if instance is None:
         return
     try:
-        compute_sample(instance)
+        compute_sample(instance, only_if_due=only_if_due)
     except DerivedMetricError as e:
         # Recorded on the instance by compute_sample; the log is for operators.
         logger.warning(
             "derived metric computation failed",
             metric_instance_id=str(instance.id),
-            error=str(e),
+            error=e.message,
         )
 
 
@@ -137,7 +139,7 @@ def compute_due_derived_metrics():
         logger.warning("Metrology tables do not exist yet — skipping derived metrics")
         return
     for instance in due:
-        compute_derived_metric_task(str(instance.id))
+        compute_derived_metric_task(str(instance.id), only_if_due=True)
     if due:
         logger.info("derived metrics sweep", queued=len(due))
 

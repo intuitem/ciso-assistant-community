@@ -4,35 +4,58 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('metrology', '0006_small_multiples_chart_type'),
+        ("metrology", "0006_small_multiples_chart_type"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='custommetricsample',
-            name='source',
-            field=models.CharField(choices=[('manual', 'Manual'), ('workflow', 'Workflow'), ('derived', 'Derived')], default='manual', help_text="What wrote the sample: a person, a workflow, or the metric's own formula", max_length=20, verbose_name='Source'),
+            model_name="custommetricsample",
+            name="source",
+            field=models.CharField(
+                choices=[
+                    ("manual", "Manual"),
+                    ("workflow", "Workflow"),
+                    ("derived", "Derived"),
+                ],
+                default="manual",
+                help_text="What wrote the sample: a person, a workflow, or the metric's own formula",
+                max_length=20,
+                verbose_name="Source",
+            ),
         ),
         migrations.AddField(
-            model_name='metricdefinition',
-            name='datasets',
-            field=models.JSONField(blank=True, help_text='For derived metrics: named read configurations, each answering aggregates the expression can use', null=True, verbose_name='Datasets'),
+            model_name="metricdefinition",
+            name="datasets",
+            field=models.JSONField(
+                blank=True,
+                help_text="For derived metrics: named read configurations, each answering aggregates the expression can use",
+                null=True,
+                verbose_name="Datasets",
+            ),
         ),
         migrations.AddField(
-            model_name='metricdefinition',
-            name='expression',
-            field=models.TextField(blank=True, default='', help_text='For derived metrics: the CEL expression computing the value', verbose_name='Expression'),
+            model_name="metricdefinition",
+            name="expression",
+            field=models.TextField(
+                blank=True,
+                default="",
+                help_text="For derived metrics: the CEL expression computing the value",
+                verbose_name="Expression",
+            ),
         ),
         migrations.AddField(
-            model_name='metricinstance',
-            name='last_computation_error',
-            field=models.TextField(blank=True, default='', verbose_name='Last computation error'),
+            model_name="metricinstance",
+            name="last_computation_error",
+            field=models.TextField(
+                blank=True, default="", verbose_name="Last computation error"
+            ),
         ),
         migrations.AddField(
-            model_name='metricinstance',
-            name='last_computed_at',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='Last computed at'),
+            model_name="metricinstance",
+            name="last_computed_at",
+            field=models.DateTimeField(
+                blank=True, null=True, verbose_name="Last computed at"
+            ),
         ),
     ]

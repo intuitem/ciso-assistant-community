@@ -5,7 +5,12 @@
 	// is the backend's own read configuration, keyed by dataset name.
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import { aliasOf, type AggregateRow } from '$lib/utils/derived-metrics';
+	import {
+		aliasOf,
+		datasetNameProblem,
+		sanitizeDatasetName,
+		type AggregateRow
+	} from '$lib/utils/derived-metrics';
 	import {
 		newCondition,
 		treeToGroups,
@@ -26,11 +31,17 @@
 		fields: string[];
 		kinds?: Record<string, string>;
 		annotations?: string[];
+		// Fields with a fixed set of values: the only ones a derived metric
+		// may group by.
+		categorical?: string[];
 		computed?: string[];
 		aggregates?: AggregateFn[];
 	}
 	interface Dataset {
 		name: string;
+		// What the author typed while it cannot be applied (empty, taken).
+		nameDraft?: string;
+		nameProblem?: 'required' | 'invalid' | 'taken' | null;
 		model: string;
 		groups: Condition[][];
 		aggregates: AggregateRow[];
@@ -156,10 +167,25 @@
 		emit();
 	}
 
-	function setName(d: Dataset, name: string) {
-		d.name = name.replace(/[^A-Za-z0-9_]/g, '_');
+	function setName(d: Dataset, raw: string) {
+		const name = sanitizeDatasetName(raw);
+		const problem = datasetNameProblem(
+			name,
+			datasets.filter((other) => other !== d).map((other) => other.name)
+		);
+		d.nameDraft = name;
+		d.nameProblem = problem;
+		// The stored value keeps the last valid name until this one is.
+		if (problem) return;
+		d.name = name;
 		emit();
 	}
+
+	const NAME_PROBLEM_MESSAGES = {
+		required: () => m.datasetNameRequired(),
+		invalid: () => m.datasetNameInvalid(),
+		taken: () => m.datasetNameTaken()
+	};
 
 	// ----- aggregates (same rules as the workflow builder) -----
 
@@ -192,6 +218,9 @@
 	function groupChoices(d: Dataset): string[] {
 		const entry = entryFor(d);
 		if (!entry) return [];
+		// A derived value is visible without the viewer's read rights on the
+		// rows: group by categories, never by free text.
+		if (entry.categorical) return entry.categorical;
 		const annotations = new Set(entry.annotations ?? []);
 		return entry.fields.filter((field) => !annotations.has(field));
 	}
@@ -232,10 +261,16 @@
 					<input
 						type="text"
 						class="input text-sm font-mono"
-						value={d.name}
+						value={d.nameDraft ?? d.name}
 						oninput={(e) => setName(d, e.currentTarget.value)}
+						aria-invalid={d.nameProblem ? 'true' : undefined}
 						data-testid="dataset-name"
 					/>
+					{#if d.nameProblem}
+						<span class="text-xs text-error-500" data-testid="dataset-name-error">
+							{NAME_PROBLEM_MESSAGES[d.nameProblem]()}
+						</span>
+					{/if}
 				</label>
 				<label class="flex flex-col gap-1 flex-1 min-w-0">
 					<span class="text-xs font-semibold">{m.objectToRead()}</span>

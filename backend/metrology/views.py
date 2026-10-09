@@ -69,7 +69,6 @@ class MetricDefinitionViewSet(BaseModelViewSet):
         )
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
-    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get readable models", url_path="readable-models")
     def readable_models(self, request):
         """The models a dataset may read, with their fields and the aggregate
@@ -117,7 +116,7 @@ class MetricDefinitionViewSet(BaseModelViewSet):
                 {
                     "ok": False,
                     "errors": [
-                        {"code": "derived_evaluation_failed", "message": str(e)}
+                        {"code": "derived_evaluation_failed", "message": e.message}
                     ],
                 }
             )
@@ -125,6 +124,7 @@ class MetricDefinitionViewSet(BaseModelViewSet):
             {"ok": True, "value": evaluation.value, "datasets": evaluation.datasets}
         )
 
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get category choices")
     def category(self, request):
         return Response(dict(MetricDefinition.Category.choices))

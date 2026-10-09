@@ -411,10 +411,20 @@ def _run_python(entry, queryset, specs, computed):
         | {spec.group_by for spec in specs if spec.group_by}
     )
 
+    # The stored value, as values_list and the database path read it: a
+    # relation column is its id (`framework_id`), not the related object.
+    attnames = {
+        name: getattr(get_model_field(entry.model, name), "attname", name)
+        for name in columns
+    }
+
     def rows():
         if needs_objects:
             for obj in queryset.order_by().iterator(chunk_size=500):
-                yield obj, {name: getattr(obj, name, None) for name in columns}
+                yield (
+                    obj,
+                    {name: getattr(obj, attnames[name], None) for name in columns},
+                )
         else:
             for row in (
                 queryset.order_by().values_list(*columns).iterator(chunk_size=2000)

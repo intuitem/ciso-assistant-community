@@ -414,7 +414,7 @@ def _validate_aggregate_mode(config, entry):
         try:
             normalized = _aggregates.normalize_aggregate(spec, entry, config, taken)
         except ReadError as e:
-            errors.append(("action_read_invalid_aggregate", str(e)))
+            errors.append(("action_read_invalid_aggregate", e.message))
             continue
         taken.append(normalized.alias)
     return errors

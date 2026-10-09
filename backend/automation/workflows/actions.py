@@ -2228,6 +2228,13 @@ class RecordMeasurementAction(BaseAction):
             instance,
             "record_measurement",
         )
+        # Same refusal as CustomMetricSampleWriteSerializer: a derived series
+        # is its formula's.
+        if metric.is_derived:
+            raise FatalActionError(
+                "record_measurement: this metric is computed from its formula; "
+                "a workflow cannot record its samples"
+            )
         value = self._shape(render(config.get("value", ""), context), metric)
         timestamp = self._timestamp(config, context)
         sample = CustomMetricSample.objects.create(

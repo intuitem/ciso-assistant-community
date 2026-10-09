@@ -508,6 +508,33 @@ class TestWorkerEngine:
         assert result["requirements"] == 6
         assert result["avg_progress_by_status"] == {"planned": 75.0}
 
+    def test_a_relation_groups_by_its_id_whichever_way_the_rows_load(self):
+        """A computed spec makes the worker load objects; a relation column
+        must still key by the stored id, as the values path and the database
+        engine do, never by the related object's name."""
+        domain = make_domain("Domain")
+        first = make_audit(domain, ["done", "to_do"])
+        second = make_audit(make_domain("Sub", domain), ["done"])
+        # Two perimeters named alike must not collapse into one bucket.
+        second.perimeter.name = first.perimeter.name
+        second.perimeter.save()
+        by_perimeter = {"fn": "median", "field": "progress", "group_by": "perimeter"}
+        with_objects = aggregate(
+            "compliance_assessment", [by_perimeter], scope_of(domain)
+        )
+        db_keys = aggregate(
+            "compliance_assessment",
+            [{"fn": "count", "group_by": "perimeter"}],
+            scope_of(domain),
+        )
+        expected = {str(first.perimeter_id), str(second.perimeter_id)}
+        assert set(with_objects["median_progress_by_perimeter"]) == expected
+        assert set(db_keys["by_perimeter"]) == expected
+        assert with_objects["median_progress_by_perimeter"] == {
+            str(first.perimeter_id): 50.0,
+            str(second.perimeter_id): 100.0,
+        }
+
     def test_a_non_numeric_computed_value_is_refused(self):
         domain = make_domain("Domain")
         make_audit(domain, ["done"])

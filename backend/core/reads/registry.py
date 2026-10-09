@@ -22,6 +22,9 @@ def registry_payload():
             "kinds": {
                 name: field_kind(entry, name) for name in entry.readable_fields()
             },
+            # Fields with a fixed set of values: what a derived metric may
+            # group by.
+            "categorical": entry.categorical_fields(),
             # Database-side values among the fields.
             "annotations": sorted(entry.annotations),
             # Output-only values; not filterable/orderable, but a worker-side

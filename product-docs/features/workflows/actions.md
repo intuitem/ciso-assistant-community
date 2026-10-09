@@ -369,7 +369,7 @@ Files a number against a metric instance, as a dated sample.
 
 Output: `object_id`, `metric_instance_id`, `value`, `timestamp`. Permission: `add_custommetricsample`.
 
-The metric definition decides the shape of the value, so you write a plain number either way: a quantitative metric stores it as the result, a qualitative one as the index of one of its options, counted from 1. An index past the last option is refused, as is a value that is not a number and a timestamp in the future.
+The metric definition decides the shape of the value, so you write a plain number either way: a quantitative metric stores it as the result, a qualitative one as the index of one of its options, counted from 1. An index past the last option is refused, as is a value that is not a number and a timestamp in the future. A derived metric, whose samples come from its own formula, is refused too.
 
 The metric instance must be inside the workflow's domain or a sub-domain. The sample is a reading, not a verdict: nothing on the metric instance itself changes.
 

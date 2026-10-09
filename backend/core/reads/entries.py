@@ -13,7 +13,15 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from dataclasses import field as dataclass_field
 
-from django.db.models import Count, Model, OuterRef, Q, Subquery
+from django.db.models import (
+    BooleanField,
+    Count,
+    ForeignKey,
+    Model,
+    OuterRef,
+    Q,
+    Subquery,
+)
 from django.db.models.functions import Coalesce
 
 from core.models import (
@@ -37,6 +45,8 @@ from core.models import (
 )
 from doc_management.models import DocumentContainer, DocumentRevision, ManagedDocument
 from tprm.models import Entity, EntityAssessment
+
+from .filters import get_model_field
 
 # Columns every readable model exposes, when it has them.
 BASE_READ_FIELDS = ["id", "name", "created_at", "updated_at"]
@@ -107,6 +117,19 @@ class ReadEntry:
             + self.fields
             + list(self.annotations)
         )
+
+    def categorical_fields(self) -> list[str]:
+        """Readable columns holding one of a fixed set of values: a choice, a
+        boolean, a related object. Grouping by one names categories (a status,
+        a framework id), never row content such as a name or a description."""
+        categorical = []
+        for name in self.readable_fields():
+            column = get_model_field(self.model, name)
+            if column is None or name in self.annotations:
+                continue
+            if column.choices or isinstance(column, (BooleanField, ForeignKey)):
+                categorical.append(name)
+        return categorical
 
 
 def related_count(model, relation):

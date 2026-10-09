@@ -34,6 +34,12 @@ class ReadError(ValueError):
     """A read configuration that cannot be compiled or served. The message is
     author-facing and never names the caller (a workflow node prefixes it)."""
 
+    def __init__(self, message):
+        super().__init__(message)
+        # What an API response may carry: the curated text, never the
+        # exception object itself.
+        self.message = message
+
 
 MAX_FILTER_DEPTH = 5
 

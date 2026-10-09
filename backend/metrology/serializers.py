@@ -143,6 +143,9 @@ class MetricInstanceWriteSerializer(BaseModelSerializer):
     class Meta:
         model = MetricInstance
         fields = "__all__"
+        # The sampler's own bookkeeping: a client stamping last_computed_at
+        # in the future would stop the instance from ever being computed.
+        read_only_fields = ["last_computed_at", "last_computation_error"]
 
 
 class MetricInstanceReadSerializer(BaseModelSerializer):
@@ -219,6 +222,21 @@ class CustomMetricSampleWriteSerializer(BaseModelSerializer):
     def validate(self, attrs):
         attrs = super().validate(attrs)
 
+        target = attrs.get("metric_instance") or getattr(
+            self.instance, "metric_instance", None
+        )
+        if target is not None and target.is_derived:
+            # A derived series is its formula's: a typed-in point would
+            # become the next computation's `previous`.
+            raise serializers.ValidationError(
+                {
+                    "metric_instance": (
+                        "This metric is computed from its formula; its samples "
+                        "cannot be written by hand"
+                    )
+                }
+            )
+
         if "value" in attrs:
             value = attrs["value"]
         elif self.instance is not None:
@@ -256,6 +274,9 @@ class CustomMetricSampleWriteSerializer(BaseModelSerializer):
     class Meta:
         model = CustomMetricSample
         exclude = ["folder"]
+        # What wrote the sample is a fact the server records: through this
+        # serializer, always a person.
+        read_only_fields = ["source"]
 
 
 class CustomMetricSampleReadSerializer(BaseModelSerializer):

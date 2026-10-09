@@ -21,8 +21,11 @@ import re
 from dataclasses import dataclass
 from dataclasses import field as dataclass_field
 
+import structlog
 from django.core.cache import cache
+from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.db.models import OuterRef, Subquery
 from django.utils import timezone
 
 from core.expressions import (
@@ -33,6 +36,7 @@ from core.expressions import (
 )
 from core.reads import (
     MODE_AGGREGATE,
+    READABLE_MODELS,
     ReadError,
     ReadScope,
     run_aggregate_read,
@@ -48,11 +52,19 @@ CONTEXT_ROOTS = frozenset({"previous", "metrics", "now", "today"})
 # A lock outlives any sane computation; a crashed worker frees it by expiry.
 LOCK_TTL_SECONDS = 600
 
+logger = structlog.get_logger(__name__)
+
 _TIME_TOKEN_RE = re.compile(r"\{\{\s*(today|now)\s*(?:([+-])\s*(\d+)\s*d)?\s*\}\}")
 
 
 class DerivedMetricError(Exception):
     """The formula cannot be evaluated for this instance. Author-facing."""
+
+    def __init__(self, message):
+        super().__init__(message)
+        # What an API response or the instance page may carry: the curated
+        # text, never the exception object itself.
+        self.message = message
 
 
 # ---------- the formula ----------
@@ -67,6 +79,8 @@ def validate_formula(datasets, expression) -> list[tuple[str, str]]:
     An empty expression with no datasets is a plain (manual) definition."""
     errors = []
     expression = expression or ""
+    if not isinstance(expression, str):
+        return [("derived_expression_invalid", "The expression must be text")]
     if not expression.strip() and not datasets:
         return errors
     if not isinstance(datasets, dict) or not datasets:
@@ -103,6 +117,8 @@ def validate_formula(datasets, expression) -> list[tuple[str, str]]:
             continue
         for code, message in validate_read_config(_aggregate_config(config)):
             errors.append(("derived_dataset_invalid", f"dataset '{name}': {message}"))
+        for message in _grouping_errors(config):
+            errors.append(("derived_dataset_invalid", f"dataset '{name}': {message}"))
     if not isinstance(expression, str) or not expression.strip():
         errors.append(
             ("derived_expression_missing", "A derived metric needs an expression")
@@ -114,7 +130,7 @@ def validate_formula(datasets, expression) -> list[tuple[str, str]]:
     try:
         compile_expression(expression)
     except ExpressionError as e:
-        errors.append(("derived_expression_invalid", str(e)))
+        errors.append(("derived_expression_invalid", e.message))
         return errors
     roots = {path.split(".")[0] for path in referenced_paths(expression)}
     for root in sorted(roots - names - CONTEXT_ROOTS):
@@ -125,6 +141,27 @@ def validate_formula(datasets, expression) -> list[tuple[str, str]]:
             )
         )
     return errors
+
+
+def _grouping_errors(config):
+    """A derived value is visible to whoever may view the instance, without
+    their read rights on the rows: a breakdown may name categories (a status,
+    a related object's id) but never row content (a name, a description)."""
+    entry = READABLE_MODELS.get(config.get("model"))
+    aggregates = config.get("aggregates")
+    if entry is None or not isinstance(aggregates, list):
+        return []
+    categorical = set(entry.categorical_fields())
+    return [
+        (
+            f"'{spec['group_by']}' cannot group a derived metric: only a field "
+            "with a fixed set of values (a choice, yes/no, a related object) can"
+        )
+        for spec in aggregates
+        if isinstance(spec, dict)
+        and spec.get("group_by")
+        and spec["group_by"] not in categorical
+    ]
 
 
 def _aggregate_config(config):
@@ -162,24 +199,62 @@ class Evaluation:
     context: dict = dataclass_field(default_factory=dict)
 
 
-def other_metric_values(folder, exclude_id=None):
+def other_metric_values(folder, exclude_id=None, referenced=()):
     """``metrics.<ref_id>.value`` for the instances of the subtree that carry a
-    ref_id: the latest sample's raw value, whatever wrote it."""
-    from .models import MetricInstance
+    ref_id: the latest sample's raw value, whatever wrote it. One query for
+    the instances and one for their latest samples, whatever the history.
 
-    values = {}
+    A ref_id is not unique across a subtree. One that several instances share
+    is left out rather than picked arbitrarily, and naming it in
+    ``referenced`` (the ref_ids the expression reads) is an error."""
+    from .models import CustomMetricSample, MetricInstance
+
+    latest = (
+        CustomMetricSample.objects.filter(metric_instance=OuterRef("pk"))
+        .order_by("-timestamp")
+        .values("id")[:1]
+    )
     instances = (
         MetricInstance.objects.filter(folder_id__in=subtree_folder_ids(folder))
         .exclude(ref_id__isnull=True)
         .exclude(ref_id="")
-        .prefetch_related("samples")
-        .select_related("metric_definition")
+        .annotate(latest_sample_id=Subquery(latest))
     )
     if exclude_id is not None:
         instances = instances.exclude(id=exclude_id)
-    for instance in instances:
-        values[instance.ref_id] = {"value": instance.raw_value()}
+    rows = list(instances.values_list("ref_id", "latest_sample_id"))
+    # raw_value() reads the definition's category: fetched with the samples.
+    samples = {
+        sample.id: sample
+        for sample in CustomMetricSample.objects.filter(
+            id__in=[sample_id for _ref, sample_id in rows if sample_id is not None]
+        ).select_related("metric_instance__metric_definition")
+    }
+    counts = {}
+    for ref_id, _sample_id in rows:
+        counts[ref_id] = counts.get(ref_id, 0) + 1
+    for ref_id in sorted(referenced):
+        if counts.get(ref_id, 0) > 1:
+            raise DerivedMetricError(
+                f"metrics.{ref_id}: {counts[ref_id]} instances in this domain "
+                "share this reference id"
+            )
+    values = {}
+    for ref_id, sample_id in rows:
+        if counts[ref_id] > 1:
+            continue
+        sample = samples.get(sample_id)
+        values[ref_id] = {"value": sample.raw_value() if sample else None}
     return values
+
+
+def _referenced_metrics(expression):
+    """``None`` when the expression never reads ``metrics``, else the ref_ids
+    it names (``*`` for an index that is not a string literal)."""
+    paths = [path.split(".") for path in referenced_paths(expression)]
+    if not any(parts[0] == "metrics" for parts in paths):
+        return None
+    return {parts[1] for parts in paths if parts[0] == "metrics" and len(parts) > 1}
 
 
 def evaluate_formula(datasets, expression, folder, *, previous=None, exclude_id=None):
@@ -189,6 +264,11 @@ def evaluate_formula(datasets, expression, folder, *, previous=None, exclude_id=
     scope = ReadScope(folder_ids=subtree_folder_ids(folder))
     evaluation = Evaluation()
     for name, config in (datasets or {}).items():
+        # A definition saved before the rule, or written around the
+        # serializer, is held to it here too.
+        grouping = _grouping_errors(config) if isinstance(config, dict) else []
+        if grouping:
+            raise DerivedMetricError(f"dataset '{name}': {grouping[0]}")
         try:
             evaluation.datasets[name] = run_aggregate_read(
                 _aggregate_config(config),
@@ -196,20 +276,42 @@ def evaluate_formula(datasets, expression, folder, *, previous=None, exclude_id=
                 resolve=lambda value, now=now: resolve_time_tokens(value, now),
             )
         except ReadError as e:
-            raise DerivedMetricError(f"dataset '{name}': {e}")
-        except (ValueError, TypeError) as e:
-            raise DerivedMetricError(f"dataset '{name}': invalid filter value ({e})")
+            raise DerivedMetricError(f"dataset '{name}': {e.message}")
+        except ValidationError, ValueError, TypeError:
+            # A value the column cannot hold, refused by Django or the
+            # database while the filter is applied or the query runs. Their
+            # wording is theirs, not ours: it goes to the log, not to the
+            # author.
+            logger.warning(
+                "derived metric dataset rejected a filter value",
+                dataset=name,
+                exc_info=True,
+            )
+            raise DerivedMetricError(
+                f"dataset '{name}': a filter value does not fit its field"
+            )
+        except IndexError:
+            # A library update can shrink a matrix while scenarios keep their
+            # old level indices; a computed cell lookup then runs past it.
+            raise DerivedMetricError(
+                f"dataset '{name}': a stored level no longer exists in the risk matrix"
+            )
+    referenced = _referenced_metrics(expression)
     evaluation.context = {
         **evaluation.datasets,
         "previous": previous,
-        "metrics": other_metric_values(folder, exclude_id),
+        "metrics": (
+            {}
+            if referenced is None
+            else other_metric_values(folder, exclude_id, referenced)
+        ),
         "now": now.isoformat(),
         "today": now.date().isoformat(),
     }
     try:
         evaluation.value = evaluate(expression, evaluation.context)
     except ExpressionError as e:
-        raise DerivedMetricError(f"expression: {e}")
+        raise DerivedMetricError(f"expression: {e.message}")
     return evaluation
 
 
@@ -291,12 +393,13 @@ def _lock_key(instance_id):
     return f"metrology:derived-metric-lock:{instance_id}"
 
 
-def compute_sample(instance, *, write=True):
+def compute_sample(instance, *, write=True, only_if_due=False):
     """Evaluate the instance's formula and, by default, write the sample.
     Records the failure on the instance instead of a sample when the
     evaluation fails; the error is author-facing and retrying is pointless
     until the formula or the data changes. Returns the Evaluation, or None
-    when another worker holds the instance's lock."""
+    when another worker holds the instance's lock or, with ``only_if_due``,
+    when a run queued earlier already computed it."""
     from .models import CustomMetricSample
 
     definition = instance.metric_definition
@@ -306,6 +409,14 @@ def compute_sample(instance, *, write=True):
     if not cache.add(key, "1", LOCK_TTL_SECONDS):
         return None
     try:
+        if only_if_due:
+            # A sweep queues every due instance; when the queue lags behind
+            # a sweep interval, the same instance is queued twice. Checked
+            # under the lock, against the stored stamp, so the second one
+            # finds the first one's sample and stops.
+            instance.refresh_from_db(fields=["last_computed_at"])
+            if not is_due(instance):
+                return None
         now = timezone.now()
         try:
             evaluation = evaluate_formula(
@@ -319,7 +430,7 @@ def compute_sample(instance, *, write=True):
         except DerivedMetricError as e:
             if write:
                 instance.last_computed_at = now
-                instance.last_computation_error = str(e)
+                instance.last_computation_error = e.message
                 instance.save(
                     update_fields=[
                         "last_computed_at",
