@@ -16,7 +16,7 @@ get_owner_linux() {
 
 wait_for_backend() {
   for i in $(seq 1 "$BACKEND_CHECK_ATTEMPTS"); do
-    if docker compose -f "${DOCKER_COMPOSE_FILE}" exec -T backend curl --fail --silent http://localhost:8000/api/health/ >/dev/null 2>&1; then
+    if docker compose -f "${DOCKER_COMPOSE_FILE}" exec -T backend python3 -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health/', timeout=5)" >/dev/null 2>&1; then
       echo "Backend is ready."
       return
     fi
