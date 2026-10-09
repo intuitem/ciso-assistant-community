@@ -105,7 +105,8 @@ DESCRIPTION = (
 
 
 def fetch(dest: Path) -> Path:
-    with urllib.request.urlopen(SOURCE_URL, timeout=60) as response:
+    # SOURCE_URL is a fixed https URL, never user input
+    with urllib.request.urlopen(SOURCE_URL, timeout=60) as response:  # nosec B310
         payload = response.read()
     with tarfile.open(fileobj=io.BytesIO(payload), mode="r:gz") as archive:
         archive.extractall(dest, filter="data")
