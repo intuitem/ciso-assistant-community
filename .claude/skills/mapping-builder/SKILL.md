@@ -241,7 +241,8 @@ objects:
           target_requirement_urn: ...
           relationship: equal | intersect | subset | superset
           strength_of_relationship: 0-10        # optional
-          rationale: ...                          # optional, useful for review
+          rationale: semantic                     # enum: syntactic | semantic | functional (CharField max 20)
+          annotation: ...                         # the verdict's free-text "rationale" lands here
     - # reverse mapping set, auto-derived
       ...
 ```

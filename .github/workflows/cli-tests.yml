@@ -42,6 +42,9 @@ jobs:
       - name: Run pagination client tests
         working-directory: ${{env.working-directory}}
         run: uv run pytest tests/test_pagination_client.py -q
-      - name: Run MCP risk review tools tests
+      - name: Run CLI tests
         working-directory: ${{env.working-directory}}
-        run: uv run pytest tests/test_mcp_risk_review_tools.py -q
+        run: uv run pytest tests/test_cli.py -q
+      - name: Run MCP tools tests
+        working-directory: ${{env.working-directory}}
+        run: uv run pytest tests/mcp -q

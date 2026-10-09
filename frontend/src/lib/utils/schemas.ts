@@ -707,6 +707,7 @@ export const GeneralSettingsSchema = z.object({
 		.optional(),
 	default_landing: z.enum(['analytics', 'respondent', 'portal']).default('analytics').optional(),
 	disable_partially_compliant_result: z.boolean().default(false).optional(),
+	documentation_score_first: z.boolean().default(false).optional(),
 	use_risk_category_label: z.boolean().default(false).optional(),
 	personal_folders_parent: z.string().uuid().optional().nullable(),
 	currency: z.enum(CURRENCY_SYMBOLS).default('€'),
@@ -952,7 +953,15 @@ export const EntitiesSchema = z.object({
 	default_penetration: z.number().optional(),
 	default_maturity: z.number().optional(),
 	default_trust: z.number().optional(),
-	filtering_labels: z.array(z.string()).optional()
+	filtering_labels: z.array(z.string()).optional(),
+	tier: z.string().optional().nullable(),
+	tier_note: z.string().optional()
+});
+
+export const tierSchema = z.object({
+	...NameDescriptionMixin,
+	hexcolor: z.string().optional(),
+	is_visible: z.boolean().optional().default(true)
 });
 
 export const EntityAssessmentSchema = z.object({
@@ -984,7 +993,6 @@ export const EntityAssessmentSchema = z.object({
 	solutions: z.array(z.string().optional()).optional(),
 	compliance_assessment: z.string().optional(),
 	evidence: z.string().optional(),
-	criticality: z.number().optional().nullable(),
 	conclusion: z.string().optional().nullable(),
 	expiry_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	penetration: z.number().optional(),
@@ -1004,7 +1012,7 @@ export const solutionSchema = z.object({
 	...NameDescriptionMixin,
 	provider_entity: z.string(),
 	ref_id: z.string().optional(),
-	criticality: z.number().optional(),
+	tier: z.string().uuid().optional().nullable(),
 	owner: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
 	filtering_labels: z.string().optional().array().optional(),
@@ -1521,7 +1529,9 @@ export const QuickFormPublicationSchema = z.object({
 	default_reviewers: z.array(z.string().optional()).optional(),
 	allow_multiple_drafts: z.boolean().default(false).optional(),
 	icon: z.string().optional(),
-	order: z.number().default(0).optional()
+	order: z.number().default(0).optional(),
+	show_projection: z.boolean().default(false).optional(),
+	always_review: z.boolean().default(false).optional()
 });
 
 export const QuickFormResponseSchema = z.object({
@@ -2226,6 +2236,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'entity-assessments': EntityAssessmentSchema,
 	representatives: representativeSchema,
 	'entity-scores': entityScoreSchema,
+	tiers: tierSchema,
 	solutions: solutionSchema,
 	contracts: contractSchema,
 	vulnerabilities: vulnerabilitySchema,
