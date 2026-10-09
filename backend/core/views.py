@@ -3822,14 +3822,13 @@ class RiskMatrixViewSet(BaseModelViewSet):
         viewable_matrices = RoleAssignment.get_viewable_object_ids(
             request.user, RiskMatrix
         )
-        matrices = RiskMatrix.objects.filter(id__in=viewable_matrices)
+        matrices = RiskMatrix.objects.filter(id__in=viewable_matrices).order_by("name")
 
         risk_assessment_id = request.query_params.get("risk_assessment")
         if risk_assessment_id:
             matrices = matrices.filter(riskassessment__id=risk_assessment_id)
 
-        undefined = {-1: "--"}
-        options = undefined
+        options = {-1: ["--"]}
         for matrix in matrices:
             for i, risk in enumerate(matrix.json_definition.get("risk", [])):
                 translations = risk.get("translations")
@@ -3839,9 +3838,11 @@ class RiskMatrixViewSet(BaseModelViewSet):
 
                 # Use the translated name if available, otherwise fall back to the default name
                 name = translated.get("name") or risk.get("name", "")
-                options[i] = name
+                labels = options.setdefault(i, [])
+                if name and name not in labels:
+                    labels.append(name)
 
-        res = [{"value": k, "label": v} for k, v in options.items()]
+        res = [{"value": k, "label": " | ".join(v)} for k, v in options.items() if v]
         return Response(res)
 
     @action(detail=False, name="Get impact choices")
@@ -5418,24 +5419,29 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         from collections import defaultdict
 
         risk_assessment = self.get_object()
-        scoped_folder = risk_assessment.folder
-
-        # Get IAM-visible IDs for related objects
-        visible_threat_ids = RoleAssignment.get_viewable_object_ids(
-            request.user, Threat, scoped_folder
-        )
-        visible_asset_ids = RoleAssignment.get_viewable_object_ids(
-            request.user, Asset, scoped_folder
-        )
 
         scenarios = RiskScenario.objects.filter(
             risk_assessment=risk_assessment
-        ).prefetch_related("threats", "assets", "applied_controls")
+        ).prefetch_related(
+            Prefetch(
+                "threats",
+                queryset=Threat.objects.filter(
+                    id__in=RoleAssignment.get_viewable_object_ids(request.user, Threat)
+                ),
+            ),
+            Prefetch(
+                "assets",
+                queryset=Asset.objects.filter(
+                    id__in=RoleAssignment.get_viewable_object_ids(request.user, Asset)
+                ),
+            ),
+            "applied_controls",
+        )
 
         # 1. Threats breakdown: count scenarios per visible threat
         threat_counts: dict[str, int] = defaultdict(int)
         for scenario in scenarios:
-            for threat in scenario.threats.filter(id__in=visible_threat_ids):
+            for threat in scenario.threats.all():
                 threat_counts[threat.name] += 1
 
         sorted_threats = sorted(threat_counts.items(), key=lambda x: x[1], reverse=True)
@@ -5473,7 +5479,7 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         # 4. Assets at risk: count scenarios per visible asset, sorted
         asset_counts: dict[str, int] = defaultdict(int)
         for scenario in scenarios:
-            for asset in scenario.assets.filter(id__in=visible_asset_ids):
+            for asset in scenario.assets.all():
                 asset_counts[asset.name] += 1
         sorted_assets = sorted(asset_counts.items(), key=lambda x: x[1], reverse=True)
         assets_data = {
@@ -7692,11 +7698,17 @@ class RiskScenarioFilter(GenericFilterSet):
         field_name="residual_level", widget=QueryArrayWidget
     )
     # Aliased filters for user-friendly query params
-    folder = df.UUIDFilter(
-        field_name="risk_assessment__perimeter__folder", label="Folder ID"
+    folder = GenericFilterSet.UUIDInFilter(
+        field_name="risk_assessment__folder",
+        lookup_expr="in",
+        widget=QueryArrayWidget,
+        label="Folder ID",
     )
-    perimeter = df.UUIDFilter(
-        field_name="risk_assessment__perimeter", label="Perimeter ID"
+    perimeter = GenericFilterSet.UUIDInFilter(
+        field_name="risk_assessment__perimeter",
+        lookup_expr="in",
+        widget=QueryArrayWidget,
+        label="Perimeter ID",
     )
     within_tolerance = df.ChoiceFilter(
         choices=[("YES", "YES"), ("NO", "NO"), ("--", "--")],
@@ -8250,22 +8262,6 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
             approver=request.user, state="submitted"
         ).count()
         return Response({"count": acceptance_count})
-
-    def perform_update(self, serializer):
-        risk_acceptance = serializer.validated_data
-
-        if risk_acceptance.get("approver"):
-            for scenario in risk_acceptance.get("risk_scenarios"):
-                if not RoleAssignment.is_access_allowed(
-                    risk_acceptance.get("approver"),
-                    Permission.objects.get(codename="approve_riskacceptance"),
-                    scenario.risk_assessment.folder,
-                ):
-                    raise ValidationError(
-                        "The approver is not allowed to approve this risk acceptance"
-                    )
-        risk_acceptance = serializer.save()
-        dispatch_webhook_event(risk_acceptance, "updated", serializer)
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get state choices")
@@ -9176,7 +9172,7 @@ class FolderFilter(GenericFilterSet):
         ]
 
 
-class FolderViewSet(BaseModelViewSet):
+class FolderViewSet(ExportMixin, BaseModelViewSet):
     """
     API endpoint that allows folders to be viewed or edited.
     """
@@ -9184,6 +9180,72 @@ class FolderViewSet(BaseModelViewSet):
     model = Folder
     filterset_class = FolderFilter
     search_fields = ["name"]
+
+    # Columns mirror the domains import template, so an export can be re-imported.
+    export_config = {
+        "fields": {
+            "internal_id": {"source": "id", "label": "internal_id"},
+            "name": {"source": "name", "label": "name", "escape": True},
+            "description": {
+                "source": "description",
+                "label": "description",
+                "escape": True,
+            },
+            # Only the start of a cell can trigger a formula, and the default
+            # escaping covers it; escaping each label would corrupt the list.
+            # Annotated in _get_export_queryset.
+            "domain": {"source": "export_parent_name", "label": "domain"},
+            "labels": {
+                "source": "filtering_labels",
+                "label": "labels",
+                "format": lambda qs: ",".join(o.label for o in qs.all()),
+            },
+            "create_iam_groups": {
+                "source": "create_iam_groups",
+                "label": "create_iam_groups",
+            },
+        },
+        "filename": "domains_export",
+        # Replaced by a visibility-scoped Prefetch in _get_export_queryset; kept so
+        # the CSV export iterates the prefetched queryset rather than .iterator().
+        "prefetch_related": ["filtering_labels"],
+    }
+
+    def _get_export_queryset(self):
+        # Only domains round-trip through the import: the root folder is implicit,
+        # and enclaves or personal folders are not created there.
+        # The list view masks the parents and labels the user may not view, and
+        # the export must not reveal them either. A blank parent is placed at the
+        # root on creation and left untouched on update.
+        viewable_folders = RoleAssignment.get_viewable_object_ids(
+            self.request.user, Folder
+        )
+        viewable_labels = RoleAssignment.get_viewable_object_ids(
+            self.request.user, FilteringLabel
+        )
+        return (
+            super()
+            ._get_export_queryset()
+            .filter(content_type=Folder.ContentType.DOMAIN)
+            .annotate(
+                export_parent_name=Case(
+                    When(
+                        parent_folder__content_type=Folder.ContentType.DOMAIN,
+                        parent_folder_id__in=viewable_folders,
+                        then=F("parent_folder__name"),
+                    ),
+                    default=Value(""),
+                    output_field=CharField(),
+                )
+            )
+            .prefetch_related(None)
+            .prefetch_related(
+                Prefetch(
+                    "filtering_labels",
+                    queryset=FilteringLabel.objects.filter(id__in=viewable_labels),
+                )
+            )
+        )
 
     def perform_create(self, serializer):
         """
@@ -17349,7 +17411,9 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
                 "description": finding.description,
                 "status": finding.status,
                 "severity": finding.get_severity_display(),
-                "priority": finding.priority if finding.priority is not None else "",
+                "priority": str(finding.get_priority_display())
+                if finding.priority
+                else "",
                 "folder": finding.folder.name if finding.folder else "",
                 "filtering_labels": "|".join(
                     [
@@ -17371,6 +17435,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
                     ]
                 ),
                 "observation": escape_excel_formula(finding.observation),
+                "recommendation": escape_excel_formula(finding.recommendation),
                 "created_at": finding.created_at.strftime("%Y-%m-%d %H:%M:%S")
                 if finding.created_at
                 else "",
@@ -17379,7 +17444,14 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
                 if finding.due_date
                 else "",
             }
-            entries.append(entry)
+            entries.append(
+                {
+                    k: escape_excel_formula(sanitize_xlsx_value(v))
+                    if isinstance(v, str) and k != "status"
+                    else v
+                    for k, v in entry.items()
+                }
+            )
 
         df = pd.DataFrame(entries)
         buffer = io.BytesIO()
@@ -17398,6 +17470,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
                 "applied_controls",
                 "evidences",
                 "observation",
+                "recommendation",
             ]
             wrap_indices = [
                 df.columns.get_loc(col) + 1 for col in wrap_columns if col in df.columns
@@ -17526,8 +17599,10 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             md_content += f"### {finding.ref_id or 'N/A'} - {finding.name}\n\n"
             md_content += f"- **Status**: {finding.get_status_display()}\n"
             md_content += f"- **Severity**: {finding.get_severity_display()}\n"
+            md_content += f"- **Priority**: {finding.get_priority_display() if finding.priority else 'N/A'}\n"
             md_content += f"- **Description**: {finding.description or 'N/A'}\n"
             md_content += f"- **Observation**: {finding.observation or 'N/A'}\n"
+            md_content += f"- **Recommendation**: {finding.recommendation or 'N/A'}\n"
             if finding.applied_controls.exists():
                 md_content += "- **Applied Controls**:\n"
                 for ac in finding.applied_controls.all():
