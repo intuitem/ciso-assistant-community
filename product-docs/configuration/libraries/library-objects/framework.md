@@ -34,7 +34,7 @@ The metadata sheet is a key-value table with one property per row.
 | `min_score` | Lowest score available when assessing requirements | Integer, `0` or more, lower than `max_score`. Set both or neither. |
 | `max_score` | Highest score available when assessing requirements | Integer, higher than `min_score` |
 | `annotation` | Additional information about the framework | Text |
-| `score_calculation_method` | 	Rarely used. Calculation method proposed for new audits | `average` (default), `sum`, or `average_of_averages` |
+| `score_calculation_method` | Rarely used. Calculation method proposed for new audits | `average` (default), `sum`, or `average_of_averages` |
 | `target_score` | Rarely used. Target score proposed for new audits | Number between `min_score` and `max_score` |
 | `anchor_na_to_target` | Rarely used. Counts not applicable requirements as the target score in new audits | Enter `x` to enable. Requires `target_score`. |
 | `score_scale_locked` | Rarely used. Keeps the framework's score scale in its audits, when the standard defines it | Enter `x` to enable |

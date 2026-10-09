@@ -45,7 +45,7 @@ The content sheet contains one row per probability, impact, or risk level. Add o
 The first `grid` column corresponds to the lowest impact ID, the next to the next impact ID, and so on. The converter orders probabilities and impacts by their IDs.
 
 {% hint style="warning" %}
-Number the levels of each type from `0`, with no gaps. CISO Assistant reads a `grid` value as a position in the list of risk levels: `0` is the first level, `1` the second, and so on. A matrix numbered from `1` imports without errors but displays the wrong risk levels.
+Number the levels of each type from `0`, with no gaps. CISO Assistant reads a `grid` value as a position in the list of risk levels: `0` is the first level, `1` the second, and so on. A matrix numbered from `1` imports without errors but displays the wrong risk levels, and a grid cell that points to the highest level causes an error when the matrix or its risk scenarios are displayed.
 {% endhint %}
 
 See [Translate library content](../translations.md) for how to add translations.

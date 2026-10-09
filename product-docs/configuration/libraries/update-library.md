@@ -41,4 +41,4 @@ Updating a library from the catalog changes every object linked to it, including
 Always click the library in the catalog and inspect its updated content before starting the update.
 {% endhint %}
 
-If the new version changes the score range (`min_score` or `max_score`), CISO Assistant asks how to adjust the scores of existing audits: **Clamp** keeps them within the new bounds, **Rule of Three** rescales them to the new range, and **Reset** clears them.
+If the new version changes the score range (`min_score` or `max_score`), CISO Assistant asks how to adjust the scores of existing audits: **Clamp** keeps them within the new bounds, **Rule of Three** rescales them to the new range, and **Reset** clears them. Requirements with their own `min_score` and `max_score` keep their scores.

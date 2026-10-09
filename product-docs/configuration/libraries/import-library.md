@@ -19,7 +19,7 @@ If the file is valid, CISO Assistant confirms the import. The loaded frameworks 
 If the import reports an error, correct the source file and try again. See [Create a Library](create-library.md) for help preparing the Excel file.
 
 {% hint style="info" %}
-If an earlier version of the same library is already loaded, CISO Assistant only stores the new version and shows the message _"A new version of the library has been stored. Please trigger the update to apply it."_. To apply an update, follow [Update a library](update-library.md#update-a-library-from-the-catalog).
+If an earlier version of the same library is already loaded, CISO Assistant only stores the new version and shows the message _"A new version of the library has been stored. Please trigger the update to apply it."_ To apply an update, follow [Update a library](update-library.md#update-a-library-from-the-catalog).
 {% endhint %}
 
 ### Optional: convert Excel to YAML first
