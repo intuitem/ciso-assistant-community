@@ -9172,7 +9172,7 @@ class FolderFilter(GenericFilterSet):
         ]
 
 
-class FolderViewSet(BaseModelViewSet):
+class FolderViewSet(ExportMixin, BaseModelViewSet):
     """
     API endpoint that allows folders to be viewed or edited.
     """
@@ -9180,6 +9180,72 @@ class FolderViewSet(BaseModelViewSet):
     model = Folder
     filterset_class = FolderFilter
     search_fields = ["name"]
+
+    # Columns mirror the domains import template, so an export can be re-imported.
+    export_config = {
+        "fields": {
+            "internal_id": {"source": "id", "label": "internal_id"},
+            "name": {"source": "name", "label": "name", "escape": True},
+            "description": {
+                "source": "description",
+                "label": "description",
+                "escape": True,
+            },
+            # Only the start of a cell can trigger a formula, and the default
+            # escaping covers it; escaping each label would corrupt the list.
+            # Annotated in _get_export_queryset.
+            "domain": {"source": "export_parent_name", "label": "domain"},
+            "labels": {
+                "source": "filtering_labels",
+                "label": "labels",
+                "format": lambda qs: ",".join(o.label for o in qs.all()),
+            },
+            "create_iam_groups": {
+                "source": "create_iam_groups",
+                "label": "create_iam_groups",
+            },
+        },
+        "filename": "domains_export",
+        # Replaced by a visibility-scoped Prefetch in _get_export_queryset; kept so
+        # the CSV export iterates the prefetched queryset rather than .iterator().
+        "prefetch_related": ["filtering_labels"],
+    }
+
+    def _get_export_queryset(self):
+        # Only domains round-trip through the import: the root folder is implicit,
+        # and enclaves or personal folders are not created there.
+        # The list view masks the parents and labels the user may not view, and
+        # the export must not reveal them either. A blank parent is placed at the
+        # root on creation and left untouched on update.
+        viewable_folders = RoleAssignment.get_viewable_object_ids(
+            self.request.user, Folder
+        )
+        viewable_labels = RoleAssignment.get_viewable_object_ids(
+            self.request.user, FilteringLabel
+        )
+        return (
+            super()
+            ._get_export_queryset()
+            .filter(content_type=Folder.ContentType.DOMAIN)
+            .annotate(
+                export_parent_name=Case(
+                    When(
+                        parent_folder__content_type=Folder.ContentType.DOMAIN,
+                        parent_folder_id__in=viewable_folders,
+                        then=F("parent_folder__name"),
+                    ),
+                    default=Value(""),
+                    output_field=CharField(),
+                )
+            )
+            .prefetch_related(None)
+            .prefetch_related(
+                Prefetch(
+                    "filtering_labels",
+                    queryset=FilteringLabel.objects.filter(id__in=viewable_labels),
+                )
+            )
+        )
 
     def perform_create(self, serializer):
         """
