@@ -44,34 +44,34 @@
 		})
 	);
 
-	type PillValue = 'everyone' | 'auditor' | 'hidden';
+	type Role = keyof Pair;
+	const ROLES: { role: Role; label: () => string }[] = [
+		{ role: 'auditor', label: m.visibilityRoleAuditor },
+		{ role: 'respondent', label: m.visibilityRoleRespondent }
+	];
 
-	// The 3 pills the editor exposes today, each backed by a per-role pair.
-	// Future PRs may add more pills (e.g. auditor_only_edit, respondent_only_edit)
-	// without changing storage shape.
-	const OPTIONS: { v: PillValue; label: () => string; pair: Pair; activeClass: string }[] = [
+	// Each role picks its own access level, so read and write can be granted separately.
+	const OPTIONS: { v: RoleAccess; label: () => string; activeClass: string }[] = [
 		{
-			v: 'everyone',
-			label: m.visibilityAuditorRespondent,
-			pair: { auditor: 'edit', respondent: 'edit' },
+			v: 'edit',
+			label: m.visibilityEdit,
 			activeClass: 'bg-green-100 text-green-800 border-green-300'
 		},
 		{
-			v: 'auditor',
-			label: m.visibilityAuditorOnly,
-			pair: { auditor: 'edit', respondent: 'hidden' },
-			activeClass: 'bg-amber-100 text-amber-800 border-amber-300'
+			v: 'read',
+			label: m.visibilityRead,
+			activeClass: 'bg-sky-100 text-sky-800 border-sky-300'
 		},
 		{
 			v: 'hidden',
 			label: m.visibilityHidden,
-			pair: { auditor: 'hidden', respondent: 'hidden' },
 			activeClass: 'bg-rose-100 text-rose-800 border-rose-300'
 		}
 	];
 
-	function readPair(field: string): Pair {
-		const raw = (value ?? {})[field] as any;
+	// Reads from `map` so a pending update can see the fields it already changed.
+	function readPair(field: string, map: VisibilityMap | null | undefined = value): Pair {
+		const raw = (map ?? {})[field] as any;
 		if (raw && typeof raw === 'object') {
 			return {
 				auditor: (raw.auditor as RoleAccess) ?? 'edit',
@@ -91,64 +91,105 @@
 		return { auditor: 'edit', respondent: 'edit' };
 	}
 
-	function pairToPill(pair: Pair): PillValue | null {
-		const match = OPTIONS.find(
-			(o) => o.pair.auditor === pair.auditor && o.pair.respondent === pair.respondent
-		);
-		return match ? match.v : null;
-	}
+	const ACCESS_RANK: Record<RoleAccess, number> = { hidden: 0, read: 1, edit: 2 };
 
-	const VISIBILITY_RANK: Record<PillValue, number> = { hidden: 0, auditor: 1, everyone: 2 };
-
-	function pillFor(field: string): PillValue | null {
-		return pairToPill(readPair(field));
-	}
-
-	// Per-field constraint: a child field's visibility cannot exceed its parent's.
+	// Per-field constraint: for each role, a child field's access cannot exceed its parent's.
 	// Extends naturally if more parent/child relationships are added.
 	const PARENT_OF: Record<string, string> = {
 		documentation_score: 'score',
 		extended_result: 'result'
 	};
 
-	// Per-field pill exclusions: pills that don't make semantic sense for a given
-	// field. respondent_alignment with AUDITOR_ONLY is incoherent — the field is
-	// only ever populated by the respondent answering the auto-question, so
-	// auditor-only would prevent it from being filled in at all.
-	const DISALLOWED_PILLS: Record<string, PillValue[]> = {
-		respondent_alignment: ['auditor']
-	};
-
-	function isOptionAllowed(field: string, optionValue: PillValue): boolean {
-		if (DISALLOWED_PILLS[field]?.includes(optionValue)) return false;
-		const parent = PARENT_OF[field];
-		if (!parent) return true;
-		const parentPill = pillFor(parent);
-		if (parentPill === null) return true; // unknown future shape — don't constrain
-		return VISIBILITY_RANK[optionValue] <= VISIBILITY_RANK[parentPill];
-	}
-
-	// Children that should be clamped down whenever their parent's permissiveness drops.
+	// Children that should be clamped down whenever their parent's access drops.
 	const CHILDREN_OF: Record<string, string[]> = {
 		score: ['documentation_score'],
 		result: ['extended_result']
 	};
 
-	function setVisibility(field: string, pill: PillValue) {
-		const target = OPTIONS.find((o) => o.v === pill);
-		if (!target) return;
+	// Fields whose value can be computed from the answers: nobody needs to write them,
+	// so read-only combinations make sense there.
+	const COMPUTABLE_FIELDS = new Set(['score', 'result']);
+
+	// respondent_alignment is only ever populated by the respondent answering the
+	// auto-question: showing it to the auditor while hiding it from the respondent
+	// would leave it empty forever.
+	function isAlignmentIncoherent(field: string, pair: Pair): boolean {
+		return (
+			field === 'respondent_alignment' && pair.respondent === 'hidden' && pair.auditor !== 'hidden'
+		);
+	}
+
+	function isValidPair(field: string, pair: Pair): boolean {
+		// The auditor sees at least what the respondent sees.
+		if (pair.auditor === 'hidden' && pair.respondent !== 'hidden') return false;
+		if (isAlignmentIncoherent(field, pair)) return false;
+		if (pair.auditor === 'hidden' && pair.respondent === 'hidden') return true;
+		// A visible field needs a writer, unless its value is computed.
+		return pair.auditor === 'edit' || pair.respondent === 'edit' || COMPUTABLE_FIELDS.has(field);
+	}
+
+	// A role may never exceed the parent field's access for that role.
+	function withinParent(
+		field: string,
+		role: Role,
+		access: RoleAccess,
+		map: VisibilityMap | null | undefined = value
+	): boolean {
+		const parent = PARENT_OF[field];
+		return !parent || ACCESS_RANK[access] <= ACCESS_RANK[readPair(parent, map)[role]];
+	}
+
+	// The auditor's choice drives the field: the respondent is offered only what fits it.
+	function respondentOptions(
+		field: string,
+		auditor: RoleAccess,
+		map: VisibilityMap | null | undefined = value
+	): RoleAccess[] {
+		return (['hidden', 'read', 'edit'] as RoleAccess[]).filter(
+			(respondent) =>
+				isValidPair(field, { auditor, respondent }) &&
+				withinParent(field, 'respondent', respondent, map)
+		);
+	}
+
+	// Keep the respondent's access when it still fits, else take the most restrictive one that does.
+	function fitPair(
+		field: string,
+		auditor: RoleAccess,
+		respondent: RoleAccess,
+		map: VisibilityMap
+	): Pair {
+		const options = respondentOptions(field, auditor, map);
+		if (options.includes(respondent)) return { auditor, respondent };
+		if (options.length) return { auditor, respondent: options[0] };
+		return { auditor: 'hidden', respondent: 'hidden' };
+	}
+
+	function isOptionAllowed(field: string, role: Role, access: RoleAccess): boolean {
+		if (role === 'auditor') return withinParent(field, 'auditor', access);
+		return respondentOptions(field, readPair(field).auditor).includes(access);
+	}
+
+	function setAccess(field: string, role: Role, access: RoleAccess) {
 		const next: VisibilityMap = { ...value };
-		next[field] = { ...target.pair };
+		const current = readPair(field);
+		const pair =
+			role === 'auditor'
+				? fitPair(field, access, current.respondent, next)
+				: { ...current, respondent: access };
+		next[field] = pair;
 		// is_scored has no independent meaning — it always tracks score
 		if (field === 'score') {
-			next['is_scored'] = { ...target.pair };
+			next['is_scored'] = { ...pair };
 		}
-		// Clamp any child fields that would now exceed the parent's permissiveness.
+		// Clamp child fields down to the parent's new access, then refit their respondent.
 		for (const child of CHILDREN_OF[field] ?? []) {
-			const childPill = pairToPill(readPair(child));
-			if (childPill !== null && VISIBILITY_RANK[childPill] > VISIBILITY_RANK[pill]) {
-				next[child] = { ...target.pair };
-			}
+			const childPair = readPair(child, next);
+			const auditor =
+				ACCESS_RANK[childPair.auditor] > ACCESS_RANK[pair.auditor]
+					? pair.auditor
+					: childPair.auditor;
+			next[child] = fitPair(child, auditor, childPair.respondent, next);
 		}
 		onChange(next);
 	}
@@ -157,28 +198,33 @@
 <div class="space-y-1">
 	<h3 class="font-semibold text-sm">{m.fieldVisibility()}</h3>
 	<p class="text-xs text-surface-600-400 mb-2">{m.fieldVisibilityHelpText()}</p>
-	<div class="max-w-xl">
+	<div class="grid grid-cols-[1fr_auto_auto] items-center gap-x-3 gap-y-1 max-w-2xl">
+		<span></span>
+		{#each ROLES as { label }}
+			<span class="text-xs font-semibold text-surface-600-400 text-center">{label()}</span>
+		{/each}
 		{#each visibleFields as field}
-			{@const pill = pillFor(field)}
+			{@const pair = readPair(field)}
 			{@const label = FIELD_LABELS[field]?.() ?? field}
-			<div class="flex items-center justify-between gap-3 py-1">
-				<span class="text-sm text-surface-700-300">{label}</span>
+			<span class="text-sm text-surface-700-300">{label}</span>
+			{#each ROLES as { role, label: roleLabel }}
 				<div
 					class="inline-flex shrink-0 rounded-md border border-surface-200-800 bg-surface-50-950 p-0.5"
 					role="radiogroup"
-					aria-label={label}
+					aria-label={`${label} — ${roleLabel()}`}
 				>
 					{#each OPTIONS as option}
-						{@const optionDisabled = disabled || !isOptionAllowed(field, option.v)}
+						{@const optionDisabled = disabled || !isOptionAllowed(field, role, option.v)}
 						<button
 							type="button"
 							role="radio"
-							aria-checked={pill === option.v}
+							aria-checked={pair[role] === option.v}
 							disabled={optionDisabled}
-							data-testid={`visibility-${field}-${option.v}`}
-							onclick={() => setVisibility(field, option.v)}
-							class="px-2.5 py-0.5 text-xs font-medium rounded border transition-colors disabled:opacity-50 disabled:cursor-not-allowed {pill ===
-							option.v
+							data-testid={`visibility-${field}-${role}-${option.v}`}
+							onclick={() => setAccess(field, role, option.v)}
+							class="px-2.5 py-0.5 text-xs font-medium rounded border transition-colors disabled:opacity-50 disabled:cursor-not-allowed {pair[
+								role
+							] === option.v
 								? `${option.activeClass} shadow-sm`
 								: 'text-surface-600-400 hover:text-surface-900-100 border-transparent'}"
 						>
@@ -186,7 +232,7 @@
 						</button>
 					{/each}
 				</div>
-			</div>
+			{/each}
 		{/each}
 	</div>
 </div>

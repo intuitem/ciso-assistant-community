@@ -29,6 +29,7 @@
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import {
 		getFieldVisibility,
+		isFieldEditable,
 		hasComputedResult,
 		hasComputedScore,
 		shouldShowAutoQuestion,
@@ -130,6 +131,14 @@
 	const showAppliedControls = $derived(fieldVis.showAppliedControls);
 	const showEvidences = $derived(fieldVis.showEvidences);
 	const showRespondentAlignment = $derived(fieldVis.showRespondentAlignment);
+	// A field can be visible but read-only for the viewer's role.
+	const canEditAppliedControls = $derived(
+		isFieldEditable(complianceAssessment, 'applied_controls', viewerRole)
+	);
+	const canEditEvidences = $derived(isFieldEditable(complianceAssessment, 'evidences', viewerRole));
+	const canEditObservation = $derived(
+		isFieldEditable(complianceAssessment, 'observation', viewerRole)
+	);
 
 	const hasQuestions = $derived(
 		requirementAssessments.some(
@@ -649,24 +658,28 @@
 <!-- Related-object panel (controls / evidences): create/select + item list -->
 {#snippet detailPanel(cfg: Record<string, any>)}
 	<div class="card border border-surface-200-800 rounded-lg p-3 space-y-2">
-		{#if !shallow && !isReadOnly}
+		{#if !shallow && !isReadOnly && (cfg.canCreate !== false || cfg.canSelect !== false)}
 			<div class="flex flex-row gap-2 items-center">
-				<button
-					class="btn btn-sm preset-filled-primary-500"
-					onclick={cfg.onCreate}
-					type="button"
-					data-testid={cfg.createTestId}
-				>
-					<i class="fa-solid fa-plus mr-2"></i>{cfg.createLabel}
-				</button>
-				<button
-					class="btn btn-sm preset-filled-secondary-500"
-					onclick={cfg.onSelect}
-					type="button"
-					data-testid={cfg.selectTestId}
-				>
-					<i class="fa-solid fa-hand-pointer mr-2"></i>{cfg.selectLabel}
-				</button>
+				{#if cfg.canCreate !== false}
+					<button
+						class="btn btn-sm preset-filled-primary-500"
+						onclick={cfg.onCreate}
+						type="button"
+						data-testid={cfg.createTestId}
+					>
+						<i class="fa-solid fa-plus mr-2"></i>{cfg.createLabel}
+					</button>
+				{/if}
+				{#if cfg.canSelect !== false}
+					<button
+						class="btn btn-sm preset-filled-secondary-500"
+						onclick={cfg.onSelect}
+						type="button"
+						data-testid={cfg.selectTestId}
+					>
+						<i class="fa-solid fa-hand-pointer mr-2"></i>{cfg.selectLabel}
+					</button>
+				{/if}
 			</div>
 		{/if}
 		{#if cfg.items?.length}
@@ -1582,6 +1595,8 @@
 																emptyLabel: m.noAppliedControlYet(),
 																createLabel: m.addAppliedControl(),
 																selectLabel: m.selectAppliedControls(),
+																canCreate: canEditAppliedControls,
+																canSelect: canEditAppliedControls,
 																onCreate: () => modalMeasureCreateForm(requirementAssessment),
 																onSelect: () =>
 																	modalUpdateForm(requirementAssessment, 'selectAppliedControls')
@@ -1598,6 +1613,8 @@
 																createTestId: 'create-evidence-button',
 																selectTestId: 'select-evidence-button',
 																linkTestId: 'evidence-link',
+																canCreate: canEditEvidences,
+																canSelect: canEditEvidences,
 																onCreate: () => modalEvidenceCreateForm(requirementAssessment),
 																onSelect: () =>
 																	modalUpdateForm(requirementAssessment, 'selectEvidences')
@@ -1612,7 +1629,7 @@
 																<div class="card border border-surface-200-800 rounded-lg p-3">
 																	<TableMarkdownField
 																		value={requirementAssessment.observation}
-																		disabled={isReadOnly}
+																		disabled={isReadOnly || !canEditObservation}
 																		onSave={async (newValue) => {
 																			requirementAssessment.observation = newValue;
 																			await update(requirementAssessment, 'observation');
