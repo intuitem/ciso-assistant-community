@@ -65,13 +65,17 @@
 			aria-selected={selectedId === n.id}
 			aria-expanded={expandable(n) ? open : undefined}
 			tabindex="0"
-			class="flex cursor-pointer items-center gap-2 py-1 pr-3 outline-none hover:bg-surface-100-900 {selectedId ===
+			class="flex cursor-pointer items-center gap-2 py-1 pr-3 outline-hidden hover:bg-surface-100-900 focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-inset {selectedId ===
 			n.id
 				? 'bg-primary-50-950 shadow-[inset_3px_0_0_var(--color-primary-500)]'
 				: ''}"
 			style="padding-left: {depth * 20 + 8}px"
 			onclick={() => onselect?.(n.id)}
-			onkeydown={(e) => e.key === 'Enter' && onselect?.(n.id)}
+			onkeydown={(e) => {
+				if (e.target !== e.currentTarget || (e.key !== 'Enter' && e.key !== ' ')) return;
+				e.preventDefault();
+				onselect?.(n.id);
+			}}
 		>
 			{#if expandable(n)}
 				<button

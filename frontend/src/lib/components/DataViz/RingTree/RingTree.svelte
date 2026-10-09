@@ -119,6 +119,13 @@
 	}
 
 	const fmt = formatPercent;
+
+	function activate(e: KeyboardEvent, run: () => void) {
+		if (e.key !== 'Enter' && e.key !== ' ') return;
+		e.preventDefault();
+		e.stopPropagation();
+		run();
+	}
 </script>
 
 <div class="relative">
@@ -158,13 +165,21 @@
 				<g
 					transform="translate({p.x},{p.y})"
 					data-node-id={n.id}
-					class="cursor-pointer outline-none"
+					class="group cursor-pointer outline-hidden"
 					role="treeitem"
 					aria-selected={selectedId === n.id}
 					tabindex="0"
 					onclick={() => onselect?.(n.id)}
-					onkeydown={(e) => e.key === 'Enter' && onselect?.(n.id)}
+					onkeydown={(e) => activate(e, () => onselect?.(n.id))}
 				>
+					<circle
+						r={R_OUT + 13}
+						fill="none"
+						stroke="var(--color-primary-500)"
+						stroke-width="2"
+						stroke-dasharray="4 3"
+						class="hidden group-focus-visible:inline"
+					/>
 					<title
 						>{n.label}: {n.own !== undefined ? `own ${fmt(n.own)}` : ''}{n.showBranch !== false
 							? `${n.own !== undefined ? ' · ' : ''}branch ${fmt(n.branch)}`
@@ -263,11 +278,7 @@
 								e.stopPropagation();
 								ontoggle?.(n.id);
 							}}
-							onkeydown={(e) => {
-								if (e.key !== 'Enter') return;
-								e.stopPropagation();
-								ontoggle?.(n.id);
-							}}
+							onkeydown={(e) => activate(e, () => ontoggle?.(n.id))}
 						>
 							<circle
 								r="8"

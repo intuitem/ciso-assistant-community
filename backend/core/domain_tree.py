@@ -9,7 +9,14 @@ the payload grows with the number of audits, not with the framework's size.
 from collections import defaultdict
 from typing import Any
 
-from core.models import ComplianceAssessment, RequirementAssessment, RequirementNode
+from django.db.models import Q
+
+from core.models import (
+    Actor,
+    ComplianceAssessment,
+    RequirementAssessment,
+    RequirementNode,
+)
 from core.utils import get_respondent_scoped_folder_ids, is_field_visible_to
 from iam.models import Folder, RoleAssignment
 
@@ -153,11 +160,21 @@ def _na_target_ratio(ca: ComplianceAssessment) -> float:
 
 
 def tree_audits(user):
-    """Audits the domain tree may show this user, before the one-per-domain pick."""
-    return ComplianceAssessment.objects.filter(
+    """Audits the domain tree may show this user, before the one-per-domain pick.
+
+    Respondents only see the audits they are assigned to, as on the audit list.
+    """
+    qs = ComplianceAssessment.objects.filter(
         id__in=RoleAssignment.get_viewable_object_ids(user, ComplianceAssessment),
         folder__content_type__in=TREE_CONTENT_TYPES,
     ).exclude(status=ComplianceAssessment.Status.DEPRECATED)
+    respondent_folders = get_respondent_scoped_folder_ids(user)
+    if respondent_folders:
+        qs = qs.filter(
+            ~Q(folder_id__in=respondent_folders)
+            | Q(requirement_assignments__actor__in=Actor.get_all_for_user(user))
+        ).distinct()
+    return qs
 
 
 def build_domain_tree(user, framework, campaign_id=None) -> dict[str, Any]:
@@ -200,8 +217,9 @@ def build_domain_tree(user, framework, campaign_id=None) -> dict[str, Any]:
     scored_audits = {
         ca.id: ca
         for ca in audits
-        if is_field_visible_to(ca, "result", roles[ca.id])
-        and is_field_visible_to(ca, "score", roles[ca.id])
+        if roles[ca.id] == "auditor"
+        and is_field_visible_to(ca, "result", "auditor")
+        and is_field_visible_to(ca, "score", "auditor")
     }
     requirements_by_audit: dict[Any, list[RequirementAssessment]] = defaultdict(list)
     for ra in RequirementAssessment.objects.filter(
@@ -215,7 +233,9 @@ def build_domain_tree(user, framework, campaign_id=None) -> dict[str, Any]:
     visible: dict[Any, dict[str, Any]] = {}
     for i, ca in enumerate(audits):
         role = roles[ca.id]
-        results_hidden = not is_field_visible_to(ca, "result", role)
+        results_hidden = role == "respondent" or not is_field_visible_to(
+            ca, "result", role
+        )
         score_visible = is_field_visible_to(ca, "score", role)
         if not results_hidden:
             visible[ca.id] = {

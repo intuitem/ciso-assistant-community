@@ -10,14 +10,16 @@ from rest_framework.test import APIClient
 from core.apps import startup
 from core.domain_tree import build_domain_tree, framework_structure
 from core.models import (
+    Actor,
     Campaign,
     ComplianceAssessment,
     Framework,
     Perimeter,
     RequirementAssessment,
+    RequirementAssignment,
     StoredLibrary,
 )
-from core.utils import AUDITOR_ONLY, EVERYONE_EDIT
+from core.utils import EVERYONE_EDIT
 from iam.models import Folder, User, UserGroup
 
 YAML = """
@@ -292,27 +294,51 @@ class TestDomainTreeFeed:
         assert "Sibling" not in {f["name"] for f in feed["folders"]}
         assert [a["name"] for a in feed["audits"]] == ["child audit"]
 
-    def test_respondent_gets_hidden_results_and_no_counts(self, framework):
+    def test_respondent_only_sees_assigned_audits_without_results(self, framework):
         d = domain("D")
-        audit(
-            framework,
-            d,
-            "hidden",
-            {"S1.A": ("compliant", None)},
-            field_visibility={"result": AUDITOR_ONLY},
-        )
+        assigned = audit(framework, d, "assigned", {"S1.A": ("compliant", None)})
+        other = domain("Other")
+        audit(framework, other, "not assigned", {"S1.A": ("compliant", None)})
         respondent = member("auditee@domain-tree-tests.com", d, "BI-UG-ADE")
+        UserGroup.objects.get(name="BI-UG-ADE", folder=other).user_set.add(respondent)
+        assignment = RequirementAssignment.objects.create(
+            compliance_assessment=assigned, folder=d, status="in_progress"
+        )
+        assignment.actor.add(Actor.objects.get_or_create(user=respondent)[0])
 
         feed = build_domain_tree(respondent, framework)
 
-        assert [(a["name"], a["results_hidden"]) for a in feed["audits"]] == [
-            ("hidden", True)
-        ]
+        assert [
+            (a["name"], a["results_hidden"], a["score"], a["progress"])
+            for a in feed["audits"]
+        ] == [("assigned", True, None, None)]
         assert feed["counts"] == []
-        # the auditor side still sees them
         auditor_feed = build_domain_tree(admin(), framework)
-        assert auditor_feed["audits"][0]["results_hidden"] is False
+        assert {a["name"] for a in auditor_feed["audits"]} == {
+            "assigned",
+            "not assigned",
+        }
+        assert all(not a["results_hidden"] for a in auditor_feed["audits"])
         assert auditor_feed["counts"]
+
+    def test_unassigned_respondent_sees_no_audit(self, framework):
+        d = domain("D")
+        audit(framework, d, "not assigned", {"S1.A": ("compliant", None)})
+        respondent = member("auditee@domain-tree-tests.com", d, "BI-UG-ADE")
+
+        assert build_domain_tree(respondent, framework)["audits"] == []
+
+    def test_hidden_result_field_hides_results_for_auditors(self, framework):
+        audit(
+            framework,
+            domain("D"),
+            "hidden",
+            {"S1.A": ("compliant", None)},
+            field_visibility={"result": {"auditor": "hidden", "respondent": "hidden"}},
+        )
+        feed = build_domain_tree(admin(), framework)
+        assert feed["audits"][0]["results_hidden"] is True
+        assert feed["counts"] == []
 
     def test_campaign_filter(self, framework):
         d1, d2 = domain("D1"), domain("D2")
