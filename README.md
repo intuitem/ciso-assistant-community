@@ -375,6 +375,7 @@ Read more here: [AI engine](backend/chat/README.md)
 127. OWASP Top 10 for Agentic Applications 2026 🐝🤖
 128. Personal Information Protection Law (PIPL) 🇨🇳
 129. Personal Information Protection Compliance Audit Measures and Guideline (CAC) 🇨🇳
+130. OWASP Software Assurance Maturity Model (SAMM) v2.2 🐝🖥️
 
 ### Community contributions
 
@@ -429,7 +430,6 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 ### Coming soon
 
 - Indonesia PDP 🇮🇩
-- OWASP SAMM
 - COBAC R-2024/01
 - ICO Data protection self-assessment 🇬🇧
 - ASD ISM 🇦🇺

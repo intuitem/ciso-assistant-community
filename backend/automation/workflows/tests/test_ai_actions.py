@@ -540,6 +540,83 @@ class TestAiValueFencing:
 
 
 @pytest.mark.django_db
+class TestAiFencingThroughItems:
+    def published(self, items, fields):
+        workflow = Workflow.objects.create(
+            name="Fencing items", folder=Folder.get_root_folder()
+        )
+        version = WorkflowVersion.objects.create(
+            workflow=workflow, run_as=publisher_user()
+        )
+        start = node("trigger", trigger_config={"type": "manual"})
+        triage = node(
+            "action",
+            ref="triage",
+            action_config={
+                "type": "ai_extract",
+                "prompt": "Triage",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "findings": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {"status": {"type": "string"}},
+                            },
+                        }
+                    },
+                    "required": ["findings"],
+                },
+            },
+        )
+        write = node(
+            "action",
+            ref="write",
+            action_config={
+                "type": "upsert_objects",
+                "model": "vulnerability",
+                "items": items,
+                "fields": fields,
+            },
+        )
+        end = node("end")
+        save_graph(
+            version,
+            {
+                "nodes": [start, triage, write, end],
+                "edges": [edge(start, triage), edge(triage, write), edge(write, end)],
+                "variables": [],
+            },
+        )
+        return version
+
+    def codes(self, version):
+        return {error["code"] for error in validate_graph(version)}
+
+    def test_an_ai_list_cannot_fill_a_fenced_field(self):
+        version = self.published(
+            "{{nodes.triage.findings}}",
+            {"name": "{{item.name}}", "status": "{{item.status}}"},
+        )
+        assert "action_update_ai_value_on_fenced_field" in self.codes(version)
+
+    def test_an_ai_list_may_fill_free_text(self):
+        version = self.published(
+            "{{nodes.triage.findings}}",
+            {"name": "{{item.name}}", "description": "{{item.status}}"},
+        )
+        assert "action_update_ai_value_on_fenced_field" not in self.codes(version)
+
+    def test_a_list_from_elsewhere_may_fill_a_fenced_field(self):
+        version = self.published(
+            "{{payload.findings}}",
+            {"name": "{{item.name}}", "status": "{{item.status}}"},
+        )
+        assert "action_update_ai_value_on_fenced_field" not in self.codes(version)
+
+
+@pytest.mark.django_db
 class TestAiConfigValidation:
     def graph_codes(self, config, output_mapping=None):
         version = ai_flow(config, output_mapping=output_mapping)
