@@ -8,6 +8,8 @@ If the workbook structure feels unfamiliar, start by exploring one of these comp
 
 Both workbooks include an `info` sheet that explains the example. It is for reference only and is not required library content.
 
+Colors help you understand the structure of the sheets and cells. Some cells also contain notes with additional guidance. Look for a small triangle in the upper-right corner of a cell (red in Excel, orange in ONLYOFFICE, brown in LibreOffice), then hover over it to read the note.
+
 ## Example framework
 
 [Download `example_framework.xlsx`](https://github.com/intuitem/ciso-assistant-community/raw/refs/heads/main/tools/example_framework.xlsx)
