@@ -542,6 +542,7 @@
 	let referenceRun = $state<any | null>(null);
 	let referencePinned = $state(false);
 	let referenceFetchInFlight = false;
+	let referenceRequest = 0;
 
 	function pickReference(runs: any[]) {
 		return (
@@ -552,12 +553,14 @@
 	}
 
 	async function loadRun(run: any) {
+		const request = ++referenceRequest;
 		const res = await fetch(opsUrl('get-instance'), {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ instance: run.id })
 		});
-		return res.ok ? await res.json() : null;
+		const loaded = res.ok ? await res.json() : null;
+		if (loaded && request === referenceRequest) referenceRun = loaded;
 	}
 
 	async function ensureReferenceRun() {
@@ -572,7 +575,7 @@
 			if (!res.ok) return;
 			const data = await res.json();
 			const candidate = pickReference(data.results ?? data);
-			if (candidate) referenceRun = await loadRun(candidate);
+			if (candidate && !referencePinned) await loadRun(candidate);
 		} finally {
 			// Deliberately no "already attempted" latch: while no run has data
 			// yet, every node selection retries, and the runs-panel poll below
@@ -583,7 +586,7 @@
 
 	async function pinReference(run: any) {
 		referencePinned = true;
-		referenceRun = (await loadRun(run)) ?? referenceRun;
+		await loadRun(run);
 	}
 
 	// Runs-panel polling feeds this: without an explicit pin, the reference
@@ -597,7 +600,7 @@
 		) {
 			referenceFetchInFlight = true;
 			try {
-				referenceRun = (await loadRun(candidate)) ?? referenceRun;
+				await loadRun(candidate);
 			} finally {
 				referenceFetchInFlight = false;
 			}
