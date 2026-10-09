@@ -430,7 +430,13 @@ class ServiceNowClient(BaseIntegrationClient):
         try:
             while True:
                 params = {
-                    "sysparm_query": "sys_update_nameISNOTEMPTY^ORDERBYname",
+                    "sysparm_query": "^".join(
+                        [
+                            "sys_update_nameISNOTEMPTY",
+                            *(f"nameNOT LIKE{s}" for s in EXCLUDED_TABLE_SUBSTRINGS),
+                            "ORDERBYname",
+                        ]
+                    ),
                     "sysparm_fields": "name,label",
                     "sysparm_limit": TABLES_PAGE_SIZE,
                     "sysparm_offset": offset,

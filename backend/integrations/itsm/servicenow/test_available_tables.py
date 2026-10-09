@@ -83,7 +83,10 @@ def test_get_available_tables_filters_and_sorts(mock_get, client):
         "incident",
     ]
     query = mock_get.call_args[1]["params"]["sysparm_query"]
-    assert "LIKE" not in query
+    assert [c for c in query.split("^") if "LIKE" in c] == [
+        "nameNOT LIKEm2m",
+        "nameNOT LIKEimp_",
+    ]
 
 
 @patch("integrations.itsm.servicenow.client.requests.get")
