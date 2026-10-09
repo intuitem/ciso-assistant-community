@@ -329,3 +329,118 @@ class TestCyfunEndpoint:
         results = resp.json()["results"]
         assert results["failed"] == 1
         assert results["errors"][0]["error"] == "UnrecognizedCyfunWorkbook"
+
+
+THREE_ROWS = {
+    "GOVERN": [
+        {5: "Essential", 6: "GV.OC-01.1: Mission.", 7: 3, 8: 2},
+        {5: "Essential", 6: "GV.OC-02.1: Stakeholders.", 7: 4, 8: 4},
+        {5: "Essential", 6: "GV.OC-03.1: Requirements.", 7: 2, 8: 3},
+    ]
+}
+
+
+@pytest.mark.django_db(transaction=True)
+class TestCyfunImportTransaction:
+    """With real commits: the import runs in one transaction, so the outcome
+    rules are evaluated once, and a failing row rolls back alone."""
+
+    _post = TestCyfunEndpoint._post
+
+    def test_outcomes_are_evaluated_once(
+        self, knox_admin_client, domain_folder, cyfun_stored_library, monkeypatch
+    ):
+        from core import cel_service
+
+        evaluated = []
+        evaluate = cel_service.evaluate_outcomes
+        monkeypatch.setattr(
+            cel_service,
+            "evaluate_outcomes",
+            lambda ca: evaluated.append(ca.pk) or evaluate(ca),
+        )
+        resp = self._post(
+            knox_admin_client, build_workbook(THREE_ROWS), domain_folder.id
+        )
+        assert resp.json()["results"]["successful"] == 3
+        assert len(evaluated) == 1
+
+    def test_a_failing_row_does_not_undo_the_others(
+        self, knox_admin_client, domain_folder, cyfun_stored_library, monkeypatch
+    ):
+        from core.serializers import RequirementAssessmentWriteSerializer
+
+        save = RequirementAssessmentWriteSerializer.save
+
+        def failing_save(serializer, **kwargs):
+            if serializer.instance.requirement.ref_id == "GV.OC-02.1":
+                # A real database error (NOT NULL), which aborts a PostgreSQL
+                # transaction unless the row has its own savepoint.
+                RequirementAssessment.objects.filter(pk=serializer.instance.pk).update(
+                    result=None
+                )
+            return save(serializer, **kwargs)
+
+        monkeypatch.setattr(RequirementAssessmentWriteSerializer, "save", failing_save)
+        resp = self._post(
+            knox_admin_client, build_workbook(THREE_ROWS), domain_folder.id, name="Rows"
+        )
+        results = resp.json()["results"]
+        assert (results["successful"], results["failed"]) == (2, 1)
+        ca = ComplianceAssessment.objects.get(name="Rows")
+        scores = dict(
+            RequirementAssessment.objects.filter(
+                compliance_assessment=ca,
+                requirement__ref_id__in=["GV.OC-01.1", "GV.OC-02.1", "GV.OC-03.1"],
+            ).values_list("requirement__ref_id", "score")
+        )
+        assert scores == {"GV.OC-01.1": 2, "GV.OC-02.1": None, "GV.OC-03.1": 3}
+
+
+@pytest.mark.django_db
+def test_controls_of_a_rolled_back_row_are_not_counted(
+    app_ready, domain_folder, cyfun_stored_library, monkeypatch
+):
+    """A row that fails rolls back the applied controls it created: they must
+    not be reported as created."""
+    from rest_framework.test import APIRequestFactory
+
+    from core.models import AppliedControl, Framework
+    from core.serializers import RequirementAssessmentWriteSerializer
+    from data_wizard.views import LoadFileView
+    from iam.models import User, UserGroup
+
+    admin = User.objects.create_superuser("rows@datawizard.test")
+    UserGroup.objects.get(name="BI-UG-ADM").user_set.add(admin)
+    assert StoredLibrary.objects.get(urn=CYFUN_LIBRARY_URN).load() is None
+    framework = Framework.objects.get(urn=CYFUN_2025_URN)
+    audit = ComplianceAssessment.objects.create(
+        name="Controls", framework=framework, folder=domain_folder
+    )
+    audit.create_requirement_assessments()
+
+    save = RequirementAssessmentWriteSerializer.save
+
+    def failing_save(serializer, **kwargs):
+        if serializer.instance.requirement.ref_id == "GV.OC-02.1":
+            raise RuntimeError("row failure")
+        return save(serializer, **kwargs)
+
+    monkeypatch.setattr(RequirementAssessmentWriteSerializer, "save", failing_save)
+    request = APIRequestFactory().post("/")
+    request.user = admin
+    results = {"successful": 0, "failed": 0, "errors": []}
+    LoadFileView()._reconcile_compliance_requirements(
+        request,
+        [
+            {"ref_id": "GV.OC-01.1", "assessable": True, "applied_controls": "Kept"},
+            {"ref_id": "GV.OC-02.1", "assessable": True, "applied_controls": "Dropped"},
+        ],
+        audit,
+        framework.id,
+        results,
+    )
+    assert (results["successful"], results["failed"]) == (1, 1)
+    assert results["details"]["applied_controls_created"] == 1
+    assert AppliedControl.objects.filter(name="Kept").exists()
+    assert not AppliedControl.objects.filter(name="Dropped").exists()

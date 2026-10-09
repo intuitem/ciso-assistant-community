@@ -394,6 +394,14 @@ class FrameworkImporter:
 
         if error := outcome_rule_id_error(self.framework_data):
             return error
+        from core.cel_service import validate_framework_expressions
+
+        if errors := validate_framework_expressions(self.framework_data):
+            first = errors[0]
+            return (
+                f"[FRAMEWORK_ERROR] {first['where']} {first['ref_id']}: "
+                f"{first['error']}"
+            )
 
         if "requirement_nodes" in self.framework_data:
             requirement_node_data = self.framework_data["requirement_nodes"]
