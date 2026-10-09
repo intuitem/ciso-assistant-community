@@ -3,6 +3,8 @@
 	// definition and says how its instances in the domain and its sub-domains
 	// combine, period by period. The value is the backend's own list.
 	import { m } from '$paraglide/messages';
+	import type { ComponentProps } from 'svelte';
+	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import {
 		COMBINES,
 		datasetNameProblem,
@@ -20,23 +22,34 @@
 	interface Props {
 		// The form field as stored: a list of inputs, or nothing yet.
 		value: unknown;
+		// The definitions offered, for naming an input after the one picked.
 		definitions: DefinitionOption[];
+		// The definition form: each row's picker writes its `inputs[i].definition`.
+		form: ComponentProps<typeof AutocompleteSelect>['form'];
+		// The definition being edited, never offered as its own input.
+		self?: Record<string, unknown>;
 		onchange?: () => void;
 	}
-	let { value = $bindable(), definitions, onchange }: Props = $props();
+	let { value = $bindable(), definitions, form, self, onchange }: Props = $props();
 
 	interface Row extends MetricInput {
+		// Stable per row while it lives here: a picker must not keep the state
+		// of the row that sat at its index before a removal.
+		uid: number;
 		keyDraft?: string;
 		keyProblem?: 'required' | 'invalid' | 'taken' | null;
 	}
 
 	let rows = $state<Row[]>([]);
 	let lastEmitted = '';
+	let nextUid = 0;
 
 	$effect(() => {
 		const serialized = JSON.stringify(value ?? null);
 		if (serialized !== lastEmitted) {
-			rows = Array.isArray(value) ? (value as MetricInput[]).map((input) => ({ ...input })) : [];
+			rows = Array.isArray(value)
+				? (value as MetricInput[]).map((input) => ({ ...input, uid: nextUid++ }))
+				: [];
 			lastEmitted = serialized;
 		}
 	});
@@ -61,7 +74,7 @@
 	}
 
 	function addInput() {
-		rows.push({ key: uniqueKey('input'), definition: '', combine: 'one' });
+		rows.push({ key: uniqueKey('input'), definition: '', combine: 'one', uid: nextUid++ });
 		emit();
 	}
 
@@ -84,12 +97,13 @@
 		emit();
 	}
 
-	function setDefinition(row: Row, definition: string) {
+	function setDefinition(row: Row, picked: unknown) {
+		const definition = typeof picked === 'string' ? picked : '';
 		row.definition = definition;
 		// A fresh input reads as the metric's own name, when still the default.
-		const picked = definitions.find((option) => option.id === definition);
-		if (picked && /^input(_\d+)?$/.test(row.key)) {
-			const base = sanitizeDatasetName(picked.name.toLowerCase()).replace(/^(\d)/, '_$1');
+		const option = definitions.find((candidate) => candidate.id === definition);
+		if (option && /^input(_\d+)?$/.test(row.key)) {
+			const base = sanitizeDatasetName(option.name.toLowerCase()).replace(/^(\d)/, '_$1');
 			const key = uniqueKey(base || 'input');
 			if (!datasetNameProblem(key, [])) row.key = key;
 		}
@@ -117,7 +131,7 @@
 </script>
 
 <div class="flex flex-col gap-2">
-	{#each rows as row, index (index)}
+	{#each rows as row, index (row.uid)}
 		<div
 			class="rounded-base border border-surface-200-800 bg-surface-50-950 p-3 flex flex-wrap items-start gap-2"
 			data-testid="metric-input"
@@ -136,24 +150,18 @@
 					<span class="text-xs text-error-500">{KEY_PROBLEM_MESSAGES[row.keyProblem]()}</span>
 				{/if}
 			</label>
-			<label class="flex flex-col gap-1 flex-1 min-w-48">
-				<span class="text-xs font-semibold">{m.inputMetric()}</span>
-				<select
-					class="select text-sm w-full"
-					value={row.definition}
-					onchange={(e) => setDefinition(row, e.currentTarget.value)}
-					data-testid="metric-input-definition"
-				>
-					<option value="" disabled>{m.selectAMetric()}</option>
-					{#each definitions as option (option.id)}
-						<option value={option.id}>{option.name}</option>
-					{/each}
-					{#if row.definition && !definitions.some((option) => option.id === row.definition)}
-						<!-- A library URN, or a definition not offered here: kept as is. -->
-						<option value={row.definition}>{row.definition}</option>
-					{/if}
-				</select>
-			</label>
+			<div class="flex-1 min-w-48" data-testid="metric-input-definition">
+				<AutocompleteSelect
+					{form}
+					field={`inputs_${index}_definition`}
+					valuePath={`inputs[${index}].definition`}
+					label={m.inputMetric()}
+					placeholder={m.selectAMetric()}
+					optionsEndpoint="metric-definitions?category=quantitative"
+					optionsSelf={self}
+					onChange={(picked) => setDefinition(row, picked)}
+				/>
+			</div>
 			<label class="flex flex-col gap-1 w-44 shrink-0">
 				<span class="text-xs font-semibold">{m.inputCombine()}</span>
 				<select

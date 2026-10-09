@@ -6176,6 +6176,7 @@
 	"nodeRef": "Reference name",
 	"insertHint": "Click a value to insert it into the focused field.",
 	"insertReference": "Insert reference",
+	"clickToInsert": "Click a name to insert it:",
 	"copyValue": "Copy value",
 	"replayRun": "Replay",
 	"exitRunView": "Exit run view",

@@ -6726,6 +6726,7 @@
 	"nodeRef": "Nom de référence",
 	"insertHint": "Cliquez sur une valeur pour l'insérer dans le champ actif.",
 	"insertReference": "Insérer une référence",
+	"clickToInsert": "Cliquez sur un nom pour l'insérer :",
 	"copyValue": "Copier la valeur",
 	"replayRun": "Rejouer",
 	"exitRunView": "Quitter la vue d'exécution",

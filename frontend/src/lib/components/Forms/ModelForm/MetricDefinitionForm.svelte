@@ -67,10 +67,12 @@
 	import DatasetEditor from '$lib/components/Metrology/DatasetEditor.svelte';
 	import type { ReadableModel } from '$lib/components/Metrology/DatasetEditor.svelte';
 	import MetricInputsEditor from '$lib/components/Metrology/MetricInputsEditor.svelte';
+	import CelInput from '$lib/components/Cel/CelInput.svelte';
 	import type { DefinitionOption } from '$lib/components/Metrology/MetricInputsEditor.svelte';
 	import {
 		datasetReferences,
 		formulaKind,
+		formulaScope,
 		inputReferences,
 		type MetricInput
 	} from '$lib/utils/derived-metrics';
@@ -178,10 +180,20 @@
 		ok: boolean;
 		value?: unknown;
 		datasets?: Record<string, unknown>;
-		periods?: { start: string; value: unknown; skipped: boolean }[];
+		periods?: {
+			start: string;
+			value: unknown;
+			skipped: boolean;
+			inputs?: Record<string, unknown>;
+		}[];
 		inputs?: Record<string, { id: string; name: string; folder: string }[]>;
 		errors?: { code: string; message: string }[];
 	}>(null);
+	// What the expression editor completes: the inputs or the datasets, with
+	// what the last preview answered for each.
+	const celScope = $derived(
+		formulaScope(kind, $datasetsValue as Record<string, unknown> | null, $inputsValue, preview)
+	);
 	// The most recent periods first, as a reader scans a series.
 	const previewPeriods = $derived([...(preview?.periods ?? [])].reverse().slice(0, 12));
 	async function runPreview() {
@@ -325,7 +337,7 @@
 			<div class="flex flex-col gap-1">
 				<span class="text-sm font-semibold">{m.metricInputs()}</span>
 				<span class="text-xs text-surface-500">{m.metricInputsHelpText()}</span>
-				<MetricInputsEditor bind:value={$inputsValue} {definitions} />
+				<MetricInputsEditor bind:value={$inputsValue} {definitions} {form} self={object} />
 			</div>
 		{:else}
 			<div class="flex flex-col gap-1">
@@ -334,34 +346,42 @@
 				<DatasetEditor bind:value={$datasetsValue} {models} />
 			</div>
 		{/if}
-		<label class="flex flex-col gap-1">
-			<span class="text-sm font-semibold">{m.expression()}</span>
+		<!-- Not a <label>: a label forwards any click inside it to its first
+		     labelable descendant, here the first reference chip, which then
+		     inserts that name. -->
+		<div class="flex flex-col gap-1" role="group" aria-labelledby="derived-expression-label">
+			<span id="derived-expression-label" class="text-sm font-semibold">{m.expression()}</span>
 			{#if references.length}
-				<div class="flex flex-wrap gap-1">
+				<div class="flex flex-wrap items-center gap-1.5">
+					<span class="text-xs text-surface-500">{m.clickToInsert()}</span>
 					{#each references as ref (ref)}
 						<button
 							type="button"
-							class="chip preset-tonal text-[10px] font-mono"
+							class="chip preset-outlined-primary-500 text-primary-700-300 hover:preset-filled-primary-500 cursor-pointer gap-1 px-2 py-0.5 text-xs font-mono transition-colors"
+							title={m.insertReference()}
+							aria-label={`${m.insertReference()}: ${ref}`}
 							onclick={() => insertReference(ref)}
+							data-testid="expression-reference"
 						>
-							{ref}
+							<i class="fa-solid fa-plus text-[10px]" aria-hidden="true"></i>{ref}
 						</button>
 					{/each}
 				</div>
 			{/if}
-			<textarea
-				class="textarea text-sm font-mono w-full"
-				rows="2"
-				data-testid="form-input-expression"
-				bind:value={$expressionValue}
+			<CelInput
+				bind:value={
+					() => ($expressionValue as string | undefined) ?? '', (next) => ($expressionValue = next)
+				}
+				scope={celScope}
+				testid="form-input-expression"
 				placeholder={kind === 'metrics'
 					? 'clicks * 100.0 / trained'
 					: 'active.count * 100.0 / controls.count'}
-			></textarea>
+			/>
 			<span class="text-xs text-surface-500"
 				>{kind === 'metrics' ? m.metricExpressionHelpText() : m.expressionHelpText()}</span
 			>
-		</label>
+		</div>
 		<div class="flex items-center gap-2 flex-wrap">
 			<select class="select text-xs w-56" bind:value={previewFolder} title={m.previewDomain()}>
 				{#if !domains.length}

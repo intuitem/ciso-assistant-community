@@ -3,7 +3,9 @@ import {
 	aliasOf,
 	datasetNameProblem,
 	formulaKind,
+	formulaScope,
 	inputReferences,
+	sampleMoment,
 	sanitizeDatasetName
 } from './derived-metrics';
 
@@ -65,5 +67,75 @@ describe('metric formulas', () => {
 	it('name inputs with the dataset rules', () => {
 		expect(datasetNameProblem('now', [])).toBe('invalid');
 		expect(datasetNameProblem('clicks', ['clicks'])).toBe('taken');
+	});
+});
+
+describe('sampleMoment', () => {
+	it('plots a period sample at its period start, not at its UTC end', () => {
+		// November, stamped at its last instant: shown as December 1st in Paris.
+		expect(
+			sampleMoment({
+				timestamp: '2025-11-30T23:59:59.999999Z',
+				period_start: '2025-11-01T00:00:00Z'
+			})
+		).toBe('2025-11-01T00:00:00Z');
+	});
+
+	it('plots any other sample at its timestamp', () => {
+		expect(sampleMoment({ timestamp: '2026-10-05T09:00:00Z', period_start: null })).toBe(
+			'2026-10-05T09:00:00Z'
+		);
+		expect(sampleMoment({ timestamp: '2026-10-05T09:00:00Z' })).toBe('2026-10-05T09:00:00Z');
+	});
+});
+
+describe('formulaScope', () => {
+	it('offers datasets with their aliases after a dot, previous and metrics', () => {
+		const scope = formulaScope(
+			'objects',
+			{
+				controls: { model: 'applied_control', aggregates: [{ fn: 'count' }] },
+				active: { model: 'applied_control', aggregates: [{ fn: 'count', group_by: 'status' }] }
+			},
+			null
+		);
+		expect(scope.variables.map((v) => v.key)).toEqual([
+			'controls',
+			'active',
+			'metrics',
+			'previous'
+		]);
+		expect(Object.keys(scope.referenceVariables)).toEqual(['controls', 'active']);
+		expect(Object.keys(scope.referenceVariables.controls as object)).toEqual(['count']);
+		expect(Object.keys(scope.referenceVariables.active as object)).toEqual(['by_status']);
+	});
+
+	it('shows what the last preview answered', () => {
+		const scope = formulaScope(
+			'objects',
+			{ controls: { model: 'applied_control', aggregates: [{ fn: 'count' }] } },
+			null,
+			{ datasets: { controls: { count: 34 } } }
+		);
+		expect(scope.referenceVariables).toEqual({ controls: { count: 34 } });
+	});
+
+	it('offers the inputs of a metric formula with their latest period values', () => {
+		const scope = formulaScope(
+			'metrics',
+			null,
+			[
+				{ key: 'clicks', definition: 'a', combine: 'sum' },
+				{ key: 'headcount', definition: 'b', combine: 'sum' }
+			],
+			{
+				periods: [
+					{ inputs: { clicks: 50, headcount: 900 } },
+					{ inputs: { clicks: 30, headcount: 950 } }
+				]
+			}
+		);
+		expect(scope.variables.map((v) => v.key)).toEqual(['clicks', 'headcount', 'previous']);
+		expect(scope.referenceVariables).toEqual({ clicks: 30, headcount: 950 });
 	});
 });

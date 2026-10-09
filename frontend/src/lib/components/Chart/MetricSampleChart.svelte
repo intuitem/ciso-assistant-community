@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { sampleMoment } from '$lib/utils/derived-metrics';
 	import { onMount } from 'svelte';
 
 	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
@@ -43,13 +44,13 @@
 								typeof sample.value === 'string' ? JSON.parse(sample.value) : sample.value;
 							if (isQualitative) {
 								// For qualitative: extract choice_index
-								return [sample.timestamp, value?.choice_index ?? null];
+								return [sampleMoment(sample), value?.choice_index ?? null];
 							} else {
 								// For quantitative: extract result
-								return [sample.timestamp, value?.result ?? null];
+								return [sampleMoment(sample), value?.result ?? null];
 							}
 						} catch {
-							return [sample.timestamp, null];
+							return [sampleMoment(sample), null];
 						}
 					})
 					.filter((item) => item[1] !== null)

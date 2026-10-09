@@ -48,7 +48,8 @@
 	});
 </script>
 
-<DetailView {data} {form}>
+<!-- A derived series is its formula's: no sample is typed in by hand. -->
+<DetailView {data} {form} disableCreate={Boolean(metricInstance?.is_derived)}>
 	{#snippet actions()}
 		{#if metricInstance?.is_derived}
 			<button

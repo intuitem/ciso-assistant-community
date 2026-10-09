@@ -1,3 +1,5 @@
+import type { Scope } from '$lib/components/Cel/compute-assist';
+
 // Helpers shared by the dataset editor and the metric definition form.
 
 export interface AggregateRow {
@@ -75,4 +77,55 @@ export function inputReferences(inputs: unknown): string[] {
 // A formula reads objects (datasets) or other metrics (inputs), never both.
 export function formulaKind(inputs: unknown): 'objects' | 'metrics' {
 	return Array.isArray(inputs) && inputs.length ? 'metrics' : 'objects';
+}
+
+// Where a sample sits on a time axis. A metric formula's sample answers for a
+// calendar period and is stamped at the period's last instant (UTC), which a
+// browser east of UTC shows as the next day: plot it at the period's start
+// instead, as a period is labelled. Any other sample sits at its timestamp.
+export function sampleMoment(sample: { timestamp: string; period_start?: string | null }): string {
+	return sample.period_start || sample.timestamp;
+}
+
+// ---------- the expression editor ----------
+
+// What the CEL editor offers in a derived metric's expression: the datasets
+// (with their aliases after a dot) or the inputs, then `previous`, and
+// `metrics` for a formula over objects. Values come from the last preview
+// when there is one, so a suggestion shows what the name currently holds.
+export function formulaScope(
+	kind: 'objects' | 'metrics',
+	datasets: Record<string, unknown> | null | undefined,
+	inputs: unknown,
+	preview?: {
+		datasets?: Record<string, unknown>;
+		periods?: { inputs?: Record<string, unknown> }[];
+	} | null
+): Scope {
+	const scope: Scope = {
+		variables: [],
+		referenceVariables: {},
+		referenceNodes: [],
+		upstreamNodes: []
+	};
+	if (kind === 'metrics') {
+		const keys = inputReferences(inputs).filter((key) => key !== 'previous');
+		const lastPeriod = preview?.periods?.length
+			? preview.periods[preview.periods.length - 1]
+			: undefined;
+		scope.variables = keys.map((key) => ({ key, type: 'input' }));
+		scope.referenceVariables = { ...(lastPeriod?.inputs ?? {}) };
+	} else {
+		const shapes: Record<string, Record<string, unknown>> = {};
+		for (const ref of datasetReferences(datasets)) {
+			const [name, alias] = ref.split('.');
+			// No value until a preview answers: the suggestion shows none.
+			shapes[name] = { ...(shapes[name] ?? {}), [alias]: undefined };
+		}
+		scope.variables = Object.keys(shapes).map((key) => ({ key, type: 'dataset' }));
+		scope.referenceVariables = { ...shapes, ...(preview?.datasets ?? {}) };
+		scope.variables.push({ key: 'metrics', type: 'other metrics' });
+	}
+	scope.variables.push({ key: 'previous', type: 'last value' });
+	return scope;
 }

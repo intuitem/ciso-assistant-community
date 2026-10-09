@@ -15,9 +15,9 @@
 	import { fetchHookSecret, publicHookUrl } from './hook-url';
 	import { postOps } from './ops';
 	import DataBrowser from './DataBrowser.svelte';
-	import CelInput from './CelInput.svelte';
-	import type { Scope as CelScope } from './compute-assist';
-	import { dig, renderTemplate } from './expressions';
+	import CelInput from '$lib/components/Cel/CelInput.svelte';
+	import type { Scope as CelScope } from '$lib/components/Cel/compute-assist';
+	import { dig, renderTemplate } from '$lib/components/Cel/expressions';
 	import { TRIGGER_ICONS } from './nodes/TriggerNode.svelte';
 	import {
 		newCondition,
