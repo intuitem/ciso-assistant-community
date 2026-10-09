@@ -1122,6 +1122,8 @@ MAX_LEAF_CHARS = 1000
 MAX_STRUCTURE_DEPTH = 10
 DISPLAY_MAX_ITEMS = 50
 DISPLAY_BUDGET = 200_000
+LIST_DISPLAY_MAX_ITEMS = 3
+LIST_DISPLAY_BUDGET = 20_000
 
 
 def node_output_max_items():
@@ -1134,7 +1136,11 @@ def node_output_budget():
     return int(getattr(settings, "WORKFLOW_NODE_OUTPUT_BUDGET", 5_000_000))
 
 
-def display_preview(value):
+def display_preview(value, listing=False):
+    if listing:
+        return _cap_structure(
+            value, [LIST_DISPLAY_BUDGET], max_items=LIST_DISPLAY_MAX_ITEMS
+        )
     return _cap_structure(value, [DISPLAY_BUDGET], max_items=DISPLAY_MAX_ITEMS)
 
 

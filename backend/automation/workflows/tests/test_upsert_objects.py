@@ -107,6 +107,51 @@ class TestUpsertObjects:
         assert instance.status == WorkflowInstance.Status.FAILED
 
 
+@pytest.mark.django_db
+class TestUpsertAuthorization:
+    def test_updating_a_row_needs_change_where_it_lives(self, monkeypatch):
+        from automation.workflows import authz
+
+        home = make_domain("Home")
+        elsewhere = make_domain("Elsewhere")
+        Asset.objects.create(name="a", ref_id="old", folder=elsewhere)
+        monkeypatch.setattr(
+            "automation.workflows.actions._creation_folder", lambda instance: elsewhere
+        )
+        real_can = authz.can
+        monkeypatch.setattr(
+            authz,
+            "can",
+            lambda user, codename, folder: (
+                False
+                if codename == "change_asset" and folder == elsewhere
+                else real_can(user, codename, folder)
+            ),
+        )
+        output = run(upsert_flow(home), devices("a", "b")).node_outputs["keep"]
+        assert (output["created"], output["updated"], output["failed"]) == (1, 0, 1)
+        assert "may not update" in output["errors"][0]["reason"]
+        assert Asset.objects.get(folder=elsewhere, name="a").ref_id == "old"
+
+
+@pytest.mark.django_db
+class TestBadValues:
+    def test_a_value_that_cannot_be_rendered_fails_only_its_item(self):
+        domain = make_domain("HugeFloat")
+        version = upsert_flow(
+            domain, fields={**FIELDS, "description": "score {{item.score}}"}
+        )
+        output = run(
+            version,
+            [
+                {"host": "bad", "id": "1", "score": 1e300},
+                {"host": "good", "id": "2", "score": 1.5},
+            ],
+        ).node_outputs["keep"]
+        assert (output["created"], output["failed"]) == (1, 1)
+        assert output["errors"][0] == {"index": 0, "reason": "InvalidOperation"}
+
+
 def config_node(**config):
     return type(
         "Node",

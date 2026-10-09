@@ -25,7 +25,8 @@ objects:
     name: Microsoft Entra ID — identity hygiene metrics
     description: 'Every Monday: count users without MFA registered, Global Administrator assignments and guest
       accounts in Microsoft Entra ID, and record each count against its metric. A refused token or an
-      unanswered request fails the run, so a stalled collection shows in the run history.'
+      unanswered request fails the run, so a stalled collection shows in the run history. A count
+      cut short by the page limit is not recorded, since it would read lower than the truth.'
     requires:
       secrets:
       - entra_client_secret
@@ -49,6 +50,12 @@ objects:
       - key: metric_guests
         type: string
         default_value: ''
+      - key: no_mfa_cut_short
+        type: boolean
+        default_value: false
+      - key: global_admins_cut_short
+        type: boolean
+        default_value: false
       nodes:
       - ref: every_monday
         type: trigger
@@ -79,6 +86,28 @@ objects:
           max_attempts: 3
           delay_seconds: 120
           backoff: exponential
+        output_mapping:
+          no_mfa_cut_short: truncated
+      - ref: count_no_mfa_complete
+        type: condition
+        label: Is the MFA count complete?
+        branches:
+        - name: Complete
+          condition_groups:
+          - operator: and
+            conditions:
+            - variable: no_mfa_cut_short
+              op: eq
+              value: false
+        - name: Cut short
+          is_default: true
+      - ref: log_count_no_mfa_cut_short
+        type: action
+        label: Say the users without MFA count is incomplete
+        action_config:
+          type: log
+          message: 'Nothing recorded for users without MFA on {{today}}: Entra had more pages than one run reads, so
+            the count would be too low.'
       - ref: record_no_mfa
         type: action
         label: Record users without MFA
@@ -108,6 +137,28 @@ objects:
           max_attempts: 3
           delay_seconds: 120
           backoff: exponential
+        output_mapping:
+          global_admins_cut_short: truncated
+      - ref: count_global_admins_complete
+        type: condition
+        label: Is the admin count complete?
+        branches:
+        - name: Complete
+          condition_groups:
+          - operator: and
+            conditions:
+            - variable: global_admins_cut_short
+              op: eq
+              value: false
+        - name: Cut short
+          is_default: true
+      - ref: log_count_global_admins_cut_short
+        type: action
+        label: Say the Global Administrator count is incomplete
+        action_config:
+          type: log
+          message: 'Nothing recorded for Global Administrator on {{today}}: Entra had more pages than one run reads, so
+            the count would be too low.'
       - ref: record_global_admins
         type: action
         label: Record Global Administrators
@@ -148,12 +199,28 @@ objects:
       - source: every_monday
         target: count_no_mfa
       - source: count_no_mfa
+        target: count_no_mfa_complete
+      - source: count_no_mfa_complete
         target: record_no_mfa
+        source_branch: Complete
+      - source: count_no_mfa_complete
+        target: log_count_no_mfa_cut_short
+        source_branch: Cut short
       - source: record_no_mfa
         target: count_global_admins
+      - source: log_count_no_mfa_cut_short
+        target: count_global_admins
       - source: count_global_admins
+        target: count_global_admins_complete
+      - source: count_global_admins_complete
         target: record_global_admins
+        source_branch: Complete
+      - source: count_global_admins_complete
+        target: log_count_global_admins_cut_short
+        source_branch: Cut short
       - source: record_global_admins
+        target: count_guests
+      - source: log_count_global_admins_cut_short
         target: count_guests
       - source: count_guests
         target: record_guests

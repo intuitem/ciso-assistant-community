@@ -253,7 +253,7 @@ Creates or updates one object per entry of a list, in a single step. Use it afte
 
 Every entry is matched and updated the way **Update when it already exists** does on Create object. A failing entry is rolled back on its own and the rest still land.
 
-Output: `model`, `received`, `created`, `updated`, `failed`, `errors` (the first 20, each with its `index` and `reason`), `truncated` (true when the list held more than `WORKFLOW_NODE_OUTPUT_MAX_ITEMS` entries, 10 000 by default; the rest are skipped).
+Output: `model`, `received`, `created`, `updated`, `failed`, `errors` (the first 20, each with its `index` and `reason`), `truncated` (true when the list held more entries than `WORKFLOW_UPSERT_MAX_ITEMS`, which defaults to `WORKFLOW_NODE_OUTPUT_MAX_ITEMS`, 10 000 by default; the rest are skipped).
 
 Permission: `add_<model>` and `change_<model>`.
 

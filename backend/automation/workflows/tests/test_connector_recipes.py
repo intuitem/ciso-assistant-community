@@ -233,6 +233,29 @@ class TestEntraRecipe:
         assert "person0@contoso.com" not in json.dumps(instance.node_outputs)
         assert sum(1 for method, _ in vendor.calls if method == "POST") == 3
 
+    def test_a_count_cut_short_is_not_recorded(self, vendors):
+        vendor = vendors(users_without_mfa=60, graph_page=1)
+        domain = make_domain("EntraLarge")
+        no_mfa, admins, guests = (make_metric(domain) for _ in range(3))
+        version = install_recipe(
+            "workflow-operations-entra-identity-metrics",
+            domain,
+            {
+                "tenant_id": "contoso",
+                "client_id": "app",
+                "metric_no_mfa": str(no_mfa.id),
+                "metric_global_admins": str(admins.id),
+                "metric_guests": str(guests.id),
+            },
+            {"entra_client_secret": "ms"},
+        )
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        assert vendor.rejected == []
+        assert instance.node_outputs["count_no_mfa"]["truncated"] is True
+        assert not CustomMetricSample.objects.filter(metric_instance=no_mfa).exists()
+        assert readings(admins, guests) == [3, 12]
+
 
 @pytest.mark.django_db
 class TestDefenderRecipe:
@@ -365,3 +388,19 @@ class TestCanvasGetsAPreview:
         assert len(items) == DISPLAY_MAX_ITEMS + 1
         assert items[-1] == f"<{1200 - DISPLAY_MAX_ITEMS} more items>"
         assert shown["keep_assets"]["created"] == 1200
+
+
+class TestListResponsesAreLighter:
+    def test_list_and_detail_previews(self):
+        from types import SimpleNamespace
+
+        run = SimpleNamespace(
+            node_outputs={"pull": {"items": list(range(100))}}, variables={}
+        )
+        serializer = WorkflowInstanceReadSerializer()
+        serializer._context = {"view": SimpleNamespace(action="list")}
+        listed = serializer.get_node_outputs(run)["pull"]["items"]
+        serializer._context = {"view": SimpleNamespace(action="retrieve")}
+        detailed = serializer.get_node_outputs(run)["pull"]["items"]
+        assert listed == [0, 1, 2, "<97 more items>"]
+        assert len(detailed) == DISPLAY_MAX_ITEMS + 1

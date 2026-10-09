@@ -140,11 +140,15 @@ class WorkflowInstanceReadSerializer(BaseModelSerializer):
     node_outputs = serializers.SerializerMethodField()
     variables = serializers.SerializerMethodField()
 
+    def _listing(self):
+        view = self.context.get("view")
+        return getattr(view, "action", None) == "list"
+
     def get_node_outputs(self, obj):
-        return display_preview(obj.node_outputs or {})
+        return display_preview(obj.node_outputs or {}, self._listing())
 
     def get_variables(self, obj):
-        return display_preview(obj.variables or {})
+        return display_preview(obj.variables or {}, self._listing())
 
     def get_run_as(self, obj):
         # The identity the run acts as: version.run_as, or the

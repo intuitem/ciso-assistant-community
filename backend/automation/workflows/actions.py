@@ -883,15 +883,16 @@ def _link_targets(obj, params, instance, relations):
             getattr(obj, name).set(rows)
 
 
-def _authorize_creation_folder(model, folder, instance):
+def _authorize_creation_folder(model, folder, instance, verb="add"):
     """The create permission, checked where the row will actually land."""
     from . import authz
     from .engine import run_identity
 
-    codename = f"add_{model._meta.model_name}"
+    codename = f"{verb}_{model._meta.model_name}"
     if not authz.can(run_identity(instance), codename, folder):
         raise ActionError(
-            f"create_object: this workflow may not create a "
+            f"create_object: this workflow may not "
+            f"{'create' if verb == 'add' else 'update'} a "
             f"{model._meta.model_name} in '{folder}'"
         )
 
@@ -1235,6 +1236,10 @@ class CreateObjectAction(BaseAction):
         created = True
         if config.get("upsert"):
             obj = _upsert_match(entry, kwargs, folder)
+            if obj is not None:
+                _authorize_creation_folder(
+                    entry["model"], obj.folder, instance, verb="change"
+                )
 
         if constructor:
             params = _construction_params(entry, fields, instance)
@@ -1291,6 +1296,8 @@ class UpsertObjectsAction(BaseAction):
     action_type = "upsert_objects"
 
     def execute(self, config, instance):
+        from decimal import InvalidOperation
+
         from django.db import DatabaseError, transaction
 
         model = config.get("model")
@@ -1305,13 +1312,14 @@ class UpsertObjectsAction(BaseAction):
         created = updated = failed = 0
         errors = []
         for index, item in enumerate(items[:limit]):
-            fields = render(
-                config.get("fields") or {}, {**context, "item": item, "index": index}
-            )
             try:
+                fields = render(
+                    config.get("fields") or {},
+                    {**context, "item": item, "index": index},
+                )
                 with transaction.atomic():
                     result = CreateObjectAction().execute(single, instance, fields)
-            except (ActionError, ValidationError, DatabaseError) as e:
+            except (ActionError, ValidationError, DatabaseError, InvalidOperation) as e:
                 if stop_on_error:
                     raise
                 failed += 1
@@ -3383,7 +3391,14 @@ class HttpRequestAction(BaseAction):
         next_path = paginate.get("next") or ""
         cursor_param = paginate.get("cursor_param") or ""
         offset_param = paginate.get("offset_param") or ""
-        page_size = int(paginate.get("page_size") or 0)
+        try:
+            page_size = int(paginate.get("page_size") or 0)
+        except ValueError, TypeError:
+            page_size = 0
+        if offset_param and page_size < 1:
+            raise FatalActionError(
+                "http_request: paging by offset needs a positive page size"
+            )
         count_only = _as_bool(paginate.get("count_only"))
         max_pages = min(
             max(int(paginate.get("max_pages") or HTTP_DEFAULT_PAGES), 1),
@@ -3395,6 +3410,7 @@ class HttpRequestAction(BaseAction):
         max_chars = node_output_budget() * 9 // 10
         offset = int(_query_value(url, offset_param) or 0) if offset_param else 0
         items, count, pages, truncated, chars = [], 0, 0, False, 0
+        requested = {url}
         while True:
             response = requests.request(method, url, **kwargs)
             pages += 1
@@ -3435,6 +3451,11 @@ class HttpRequestAction(BaseAction):
             url = self._next_url(
                 url, str(following), offset_param or cursor_param, host
             )
+            if url in requested:
+                raise ActionError(
+                    f"http_request: '{host}' pointed back to a page already read"
+                )
+            requested.add(url)
             try:
                 assert_public_url_unless_dev(url, allowed_schemes=("https", "http"))
             except (BlockedRequestError, DnsLookupError) as e:

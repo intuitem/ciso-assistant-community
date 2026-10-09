@@ -153,6 +153,39 @@ class TestPaging:
         assert instance.status == WorkflowInstance.Status.FAILED
         assert len(tool["requests"]) == 1
 
+    def test_a_next_link_that_repeats_fails(self, tool):
+        tool["pages"]["handler"] = lambda url: FakeResponse(
+            {
+                "value": [{"id": 1}],
+                "@odata.nextLink": "https://tool.invalid/coverage.json?skiptoken=1",
+            }
+        )
+        instance = start_instance(
+            fetch_flow(
+                make_domain("Loop"),
+                paginate={"items": "value", "next": "@odata.nextLink"},
+            )
+        )
+        assert instance.status == WorkflowInstance.Status.FAILED
+        assert len(tool["requests"]) == 2
+
+    def test_a_cursor_that_repeats_fails(self, tool):
+        tool["pages"]["handler"] = lambda url: FakeResponse(
+            {"data": [{"id": "a"}], "pagination": {"nextCursor": "same"}}
+        )
+        instance = start_instance(
+            fetch_flow(
+                make_domain("CursorLoop"),
+                paginate={
+                    "items": "data",
+                    "next": "pagination.nextCursor",
+                    "cursor_param": "cursor",
+                },
+            )
+        )
+        assert instance.status == WorkflowInstance.Status.FAILED
+        assert len(tool["requests"]) == 2
+
     def test_a_missing_items_list_fails(self, tool):
         tool["pages"]["handler"] = lambda url: FakeResponse({"other": []})
         instance = start_instance(
@@ -227,6 +260,17 @@ class TestOffsetPaging:
         )
         assert result["count"] == 4
         assert result["truncated"] is True
+
+    def test_offset_paging_without_a_page_size_fails(self, tool):
+        tool["pages"]["handler"] = offset_pages
+        instance = start_instance(
+            fetch_flow(
+                make_domain("NoSize"),
+                paginate={"items": "value", "offset_param": "$skip"},
+            )
+        )
+        assert instance.status == WorkflowInstance.Status.FAILED
+        assert tool["requests"] == []
 
     def test_count_only_keeps_no_items(self, tool):
         tool["pages"]["handler"] = graph_pages
