@@ -1888,6 +1888,7 @@ class LibraryUpdater:
                     "typical_evidence",
                     "visibility_expression",
                     "implementation_groups",
+                    "target_score",
                 )
 
                 # Check if score boundaries changed (triggers warning + strategy prompt)

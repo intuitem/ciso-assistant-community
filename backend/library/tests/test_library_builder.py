@@ -811,6 +811,68 @@ def test_publish_refuses_a_draft_with_unresolved_references(admin_client):
 
 
 @pytest.mark.django_db
+def test_node_fields_survive_publish_and_export(admin_client):
+    """A first load keeps the node's visibility expression, importance and
+    target score; both the draft export and the live serialization carry
+    them."""
+    from library import live
+
+    fields = {
+        "visibility_expression": 'requirements["r1"].score > 1',
+        "importance": "mandatory",
+        "target_score": 3.5,
+    }
+    draft = _create_draft(
+        admin_client,
+        content={
+            "frameworks": [
+                {
+                    "urn": "urn:me:risk:framework:mylib",
+                    "ref_id": "MYFW",
+                    "name": "My framework",
+                    "requirement_nodes": [
+                        {
+                            "urn": "urn:me:risk:req_node:mylib:r1",
+                            "ref_id": "R1",
+                            "assessable": True,
+                            "depth": 1,
+                        },
+                        {
+                            "urn": "urn:me:risk:req_node:mylib:r2",
+                            "ref_id": "R2",
+                            "assessable": True,
+                            "depth": 1,
+                            **fields,
+                        },
+                    ],
+                }
+            ],
+        },
+    )
+    response = admin_client.post(
+        reverse("library-drafts-publish", args=[draft["id"]]), {}, format="json"
+    )
+    assert response.status_code == status.HTTP_200_OK, response.content
+
+    node = RequirementNode.objects.get(urn="urn:me:risk:req_node:mylib:r2")
+    assert {name: getattr(node, name) for name in fields} == fields
+    plain = RequirementNode.objects.get(urn="urn:me:risk:req_node:mylib:r1")
+    assert plain.importance == RequirementNode.Importance.UNDEFINED
+    assert plain.target_score is None
+
+    exported = yaml.safe_load(
+        admin_client.get(reverse("library-drafts-export", args=[draft["id"]])).content
+    )
+    nodes = exported["objects"]["frameworks"][0]["requirement_nodes"]
+    assert {name: nodes[1].get(name) for name in fields} == fields
+
+    serialized = live.live_framework_to_object(node.framework)
+    nodes = {n["urn"]: n for n in serialized["requirement_nodes"]}
+    assert {name: nodes[node.urn].get(name) for name in fields} == fields
+    assert not {"importance", "target_score"} & nodes[plain.urn].keys()
+
+
+@pytest.mark.django_db
 def test_adopt_preserves_identity_and_freezes_it(admin_client):
     stored, error = StoredLibrary.store_library_content(
         yaml.safe_dump(SOURCE_LIBRARY).encode()
