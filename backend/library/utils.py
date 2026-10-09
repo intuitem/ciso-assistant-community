@@ -4,6 +4,9 @@ import time
 from .helpers import get_referential_translation
 from typing import List, Union
 
+from core.object_references import subject_question_error
+from core.quick_form_scoring import PAGE_AGGREGATIONS, normalize_page_aggregation
+
 # interesting thread: https://stackoverflow.com/questions/27743711/can-i-speedup-yaml
 from core.models import (
     Framework,
@@ -100,6 +103,20 @@ def preview_library(framework: dict) -> dict[str, list]:
             )
     preview["requirement_nodes"] = requirement_nodes_list
     return preview
+
+
+def outcome_rule_id_error(data: dict) -> str | None:
+    """The first outcome rule whose ref_id cannot be used, as a load error."""
+    from core.cel_service import RULE_ID_MESSAGES, outcome_rule_id_errors
+
+    rules = data.get("outcomes_definition") or []
+    if errors := outcome_rule_id_errors(rules):
+        first = errors[0]
+        return (
+            f"Outcome rule {first['index'] + 1} ({first['ref_id'] or 'no ID'}): "
+            f"{RULE_ID_MESSAGES[first['error']]}"
+        )
+    return None
 
 
 class RequirementNodeImporter:
@@ -375,6 +392,17 @@ class FrameworkImporter:
                 ", ".join(detected_object_fields)
             )
 
+        if error := outcome_rule_id_error(self.framework_data):
+            return error
+        from core.cel_service import validate_framework_expressions
+
+        if errors := validate_framework_expressions(self.framework_data):
+            first = errors[0]
+            return (
+                f"[FRAMEWORK_ERROR] {first['where']} {first['ref_id']}: "
+                f"{first['error']}"
+            )
+
         if "requirement_nodes" in self.framework_data:
             requirement_node_data = self.framework_data["requirement_nodes"]
             if (
@@ -402,6 +430,22 @@ class FrameworkImporter:
         scores_definition = self.framework_data.get("scores_definition")
         if isinstance(scores_definition, list):
             scores_definition = {"scale": scores_definition}
+
+        score_calculation_method = self.framework_data.get(
+            "score_calculation_method", "average"
+        )
+        Framework.validate_score_calculation_method(score_calculation_method)
+        Framework.validate_scoring_defaults(
+            min_score=min_score,
+            max_score=max_score,
+            anchor_na_to_target=bool(
+                self.framework_data.get("anchor_na_to_target", False)
+            ),
+            target_score=self.framework_data.get("target_score"),
+            implementation_groups_definition=self.framework_data.get(
+                "implementation_groups_definition"
+            ),
+        )
 
         # update_or_create: identical to create() for normal loads (no row
         # exists yet) and adopts a pre-existing library-less framework in
@@ -438,6 +482,14 @@ class FrameworkImporter:
                 ),
                 outcomes_definition=self.framework_data.get("outcomes_definition", []),
                 field_visibility=self.framework_data.get("field_visibility") or {},
+                score_scale_locked=bool(
+                    self.framework_data.get("score_scale_locked", False)
+                ),
+                score_calculation_method=score_calculation_method,
+                anchor_na_to_target=bool(
+                    self.framework_data.get("anchor_na_to_target", False)
+                ),
+                target_score=self.framework_data.get("target_score"),
                 provider=library_object.provider,
                 locale=library_object.locale,
                 default_locale=library_object.default_locale,
@@ -469,6 +521,9 @@ class QuickFormPageImporter:
         questions = self.page_data.get("questions")
         if questions is not None and not isinstance(questions, dict):
             return "questions must be an object keyed by URN"
+        aggregation = self.page_data.get("aggregation")
+        if aggregation is not None and aggregation not in PAGE_AGGREGATIONS:
+            return "aggregation must be one of {}".format(", ".join(PAGE_AGGREGATIONS))
         return None
 
     def import_page(self, quick_form: QuickForm):
@@ -486,6 +541,9 @@ class QuickFormPageImporter:
                 provider=quick_form.provider,
                 order=self.index,
                 visibility_expression=self.page_data.get("visibility_expression"),
+                aggregation=normalize_page_aggregation(
+                    self.page_data.get("aggregation")
+                ),
                 locale=quick_form.locale,
                 default_locale=quick_form.default_locale,
                 translations=self.page_data.get("translations", {}),
@@ -526,6 +584,15 @@ class QuickFormImporter:
                 f"{'s' if len(errors) > 1 else ''} detected, page {index + 1} "
                 f"has the following error : {error}"
             )
+        if (error := subject_question_error(self.quick_form_data)) is not None:
+            return f"[QUICK_FORM_ERROR] {error}"
+        if error := outcome_rule_id_error(self.quick_form_data):
+            return f"[QUICK_FORM_ERROR] {error}"
+        from core.quick_form_apply import validate_on_accept_document
+
+        if errors := validate_on_accept_document(self.quick_form_data):
+            first = errors[0]
+            return f"[QUICK_FORM_ERROR] on_accept {first['ref_id']}: {first['error']}"
         return None
 
     def import_quick_form(self, library_object: LoadedLibrary):
@@ -554,6 +621,10 @@ class QuickFormImporter:
                 title_question_urn=str(
                     self.quick_form_data.get("title_question_urn") or ""
                 ).lower(),
+                subject_question_urn=str(
+                    self.quick_form_data.get("subject_question_urn") or ""
+                ).lower(),
+                on_accept=self.quick_form_data.get("on_accept") or [],
                 outcomes_definition=self.quick_form_data.get("outcomes_definition")
                 or [],
                 scores_definition=self.quick_form_data.get("scores_definition"),

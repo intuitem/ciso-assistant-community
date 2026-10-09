@@ -601,6 +601,7 @@
 	"libraryLoadingError": "Si è verificato un errore durante il caricamento della libreria",
 	"processingError": "Errore di elaborazione",
 	"libraryAlreadyLoadedError": "Questa libreria è già stata caricata",
+	"libraryOutdatedError": "Una versione più recente di questa libreria è già memorizzata. Imposta una \"version\" più alta nel file per importarlo.",
 	"invalidLibraryFileError": "File della libreria non valido. Assicurati che il formato sia corretto.",
 	"taintedFormMessage": "Vuoi lasciare questa pagina? Le modifiche apportate potrebbero non essere salvate.",
 	"riskScenariosStatus": "Stato degli scenari di rischio",
@@ -611,7 +612,6 @@
 	"attemptToDeleteOnlyAdminAccountError": "Non puoi eliminare l'unico account amministratore dell'applicazione.",
 	"attemptToRemoveOnlyAdminUserGroup": "Non puoi rimuovere l'unico utente amministratore dal gruppo amministratori.",
 	"attemptToRemoveSelfFromDomainAdminGroup": "Non puoi rimuovere te stesso da un gruppo di amministratori di dominio. Chiedi a un altro amministratore di farlo.",
-	"scoringHelpText": "Spunta per abilitare lo scoring",
 	"overrideScore": "Sovrascrivi il punteggio",
 	"overrideScoreHelpText": "Fissa manualmente il punteggio e interrompi il ricalcolo dalle risposte",
 	"automaticScore": "Punteggio automatico",
@@ -4083,5 +4083,7 @@
 	"attributeMappingGroups": "Mappatura dell'attributo gruppi",
 	"attributeMappingGroupsHelpText": "Nome/i della claim che trasporta le appartenenze ai gruppi IdP dell'utente. I gruppi trovati qui vengono sincronizzati con i gruppi IdP a ogni accesso e concedono i gruppi utente di CISO Assistant a cui un amministratore li ha mappati.",
 	"jitProvisioning": "Provisioning automatico SSO (JIT)",
-	"jitProvisioningDescription": "Abilita la creazione automatica degli account al primo accesso SSO e la sincronizzazione delle loro appartenenze ai gruppi IdP, senza richiedere SCIM."
+	"jitProvisioningDescription": "Abilita la creazione automatica degli account al primo accesso SSO e la sincronizzazione delle loro appartenenze ai gruppi IdP, senza richiedere SCIM.",
+	"includeNotApplicableRequirements": "Includi requisiti non applicabili",
+	"excludeNotApplicableRequirements": "Escludi requisiti non applicabili"
 }

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { roundScore } from '$lib/utils/helpers';
 	import { page } from '$app/state';
 	import Question from '$lib/components/Forms/Question.svelte';
 	import SegmentedControl from '$lib/components/Forms/SegmentedControl.svelte';
@@ -7,6 +8,11 @@
 	import SplashCard from '$lib/components/FrameworkBuilder/SplashCard.svelte';
 	import TableMarkdownField from '$lib/components/Forms/TableMarkdownField.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import {
+		setContextRecursiveTreeView,
+		DEFAULT_CONTEXT_RECURSIVE_TREE_VIEW
+	} from '$lib/components/TreeView/RecursiveTreeView.svelte';
+	import ExcludeNotApplicableRequirements from '$lib/components/TreeView/ExcludeNotApplicableRequirements.svelte';
 	import {
 		getModalStore,
 		type ModalComponent,
@@ -35,6 +41,7 @@
 	} from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
+	import ScorePair from '$lib/components/ComplianceAssessment/ScorePair.svelte';
 	import { Switch } from '@skeletonlabs/skeleton-svelte';
 	import type { Actions, PageData } from './$types';
 	import { onMount, tick } from 'svelte';
@@ -493,6 +500,19 @@
 			count: tocSections.filter((s) => s.result === opt.value).length
 		}))
 	);
+
+	const contextTreeView = $state(structuredClone(DEFAULT_CONTEXT_RECURSIVE_TREE_VIEW));
+	setContextRecursiveTreeView(contextTreeView);
+
+	const filteredResultCounts = $derived(
+		resultCounts.filter(({ value }) => {
+			if (contextTreeView.excludeNotApplicableRequirements && value === 'not_applicable') {
+				return false;
+			}
+			return true;
+		})
+	);
+
 	const filteredTocSections = $derived(
 		tocFilterResult
 			? tocSections.filter(
@@ -503,17 +523,35 @@
 
 	// Compact score formatting for the header analytics.
 	function fmtScore(v: number | null | undefined) {
-		return v == null ? '--' : Math.round(Number(v) * 10) / 10;
+		return v == null ? '--' : roundScore(Number(v));
 	}
 
-	// Audit progress analytics (assessable requirements only).
-	const assessableTotal = $derived(
-		tocSections.filter((s) => s.result !== '__section__' && s.result !== '__splash__').length
-	);
-	const assessedCount = $derived(
+	const assessableTOCSections = $derived(
 		tocSections.filter(
-			(s) => s.result !== '__section__' && s.result !== '__splash__' && s.result !== 'not_assessed'
-		).length
+			(section) => section.result !== '__section__' && section.result !== '__splash__'
+		)
+	);
+
+	// Audit progress analytics (assessable requirements only).
+	const assessableTotal = $derived(assessableTOCSections.length);
+	const filteredAssessableTotal = $derived(
+		assessableTOCSections.filter((section) => {
+			if (contextTreeView.excludeNotApplicableRequirements && section.result === 'not_applicable') {
+				return false;
+			}
+			return true;
+		}).length
+	);
+	const filteredAssessedCount = $derived(
+		assessableTOCSections.filter((section) => {
+			if (section.result === 'not_assessed') {
+				return false;
+			}
+			if (contextTreeView.excludeNotApplicableRequirements && section.result === 'not_applicable') {
+				return false;
+			}
+			return true;
+		}).length
 	);
 
 	// Scroll to a requirement, expanding any collapsed parent section first.
@@ -670,71 +708,83 @@
 			</div>
 		{:else if ra.result !== 'not_applicable'}
 			<div class="flex flex-row flex-wrap items-start gap-x-6 gap-y-2">
-				<div class="flex flex-col gap-1">
-					<span class="text-xs font-semibold text-surface-500 italic"
-						>{complianceAssessment.show_documentation_score
-							? m.implementationScore()
-							: m.score()}</span
-					>
-					<ScoreControl
-						value={ra.score}
-						min={raMin}
-						max={raMax}
-						scoresDefinition={raScoresDef}
-						disabled={isReadOnly}
-						onChange={(v) => {
-							ra.score = v;
-							if (!ra.is_scored) {
-								ra.is_scored = true;
-								update(ra, 'is_scored');
-							}
-							updateScore(ra);
-						}}
-					/>
-				</div>
-				{#if complianceAssessment.show_documentation_score}
-					<div class="flex flex-col gap-1">
-						<span class="text-xs font-semibold text-surface-500 italic"
-							>{m.documentationScore()}</span
-						>
-						<ScoreControl
-							value={ra.documentation_score}
-							min={raMin}
-							max={raMax}
-							scoresDefinition={raScoresDef}
-							isDoc
-							disabled={isReadOnly}
-							onChange={(v) => {
-								ra.documentation_score = v;
-								if (!ra.is_scored) {
-									ra.is_scored = true;
-									update(ra, 'is_scored');
-								}
-								updateScore(ra);
-							}}
-						/>
-					</div>
-				{/if}
+				<ScorePair>
+					{#snippet implementation()}
+						<div class="flex flex-col gap-1">
+							<span class="text-xs font-semibold text-surface-500 italic"
+								>{complianceAssessment.show_documentation_score
+									? m.implementationScore()
+									: m.score()}</span
+							>
+							<ScoreControl
+								value={ra.score}
+								min={raMin}
+								max={raMax}
+								scoresDefinition={raScoresDef}
+								disabled={isReadOnly}
+								onChange={(v) => {
+									ra.score = v;
+									if (!ra.is_scored) {
+										ra.is_scored = true;
+										update(ra, 'is_scored');
+									}
+									updateScore(ra);
+								}}
+							/>
+						</div>
+					{/snippet}
+					{#snippet documentation()}
+						{#if complianceAssessment.show_documentation_score}
+							<div class="flex flex-col gap-1">
+								<span class="text-xs font-semibold text-surface-500 italic"
+									>{m.documentationScore()}</span
+								>
+								<ScoreControl
+									value={ra.documentation_score}
+									min={raMin}
+									max={raMax}
+									scoresDefinition={raScoresDef}
+									isDoc
+									disabled={isReadOnly}
+									onChange={(v) => {
+										ra.documentation_score = v;
+										if (!ra.is_scored) {
+											ra.is_scored = true;
+											update(ra, 'is_scored');
+										}
+										updateScore(ra);
+									}}
+								/>
+							</div>
+						{/if}
+					{/snippet}
+				</ScorePair>
 			</div>
 		{/if}
 	{:else if showScore && complianceAssessment.scoring_enabled && complianceAssessment.show_documentation_score && ra.is_scored}
 		{@const raMin = ra.effective_min_score ?? complianceAssessment.min_score}
 		{@const raMax = ra.effective_max_score ?? complianceAssessment.max_score}
 		<div class="flex items-center gap-4 flex-wrap">
-			<ScoreControl
-				editable={false}
-				value={ra.score}
-				min={raMin}
-				max={raMax}
-				label={m.implementationScoreResult()}
-			/>
-			<ScoreControl
-				editable={false}
-				value={ra.documentation_score}
-				min={raMin}
-				max={raMax}
-				label={m.documentationScoreResult()}
-			/>
+			<ScorePair>
+				{#snippet implementation()}
+					<ScoreControl
+						editable={false}
+						value={ra.score}
+						min={raMin}
+						max={raMax}
+						label={m.implementationScoreResult()}
+					/>
+				{/snippet}
+				{#snippet documentation()}
+					<ScoreControl
+						editable={false}
+						value={ra.documentation_score}
+						min={raMin}
+						max={raMax}
+						label={m.documentationScoreResult()}
+					/>
+				{/snippet}
+			</ScorePair>
 		</div>
 	{:else if showScore && complianceAssessment.scoring_enabled && ra.is_scored}
 		{@const raMin = ra.effective_min_score ?? complianceAssessment.min_score}
@@ -798,6 +848,11 @@
 								<i class="fa-solid {allExpanded ? 'fa-compress' : 'fa-expand'} mr-2"></i>
 								{allExpanded ? m.collapseAll() : m.expandAll()}
 							</button>
+							<ExcludeNotApplicableRequirements
+								bind:excludeNotApplicableRequirements={
+									contextTreeView.excludeNotApplicableRequirements
+								}
+							/>
 						{/if}
 						{#if hasQuestions}
 							<div class="flex items-center justify-center space-x-4">
@@ -842,19 +897,19 @@
 								{m.tableOfContents()}
 							</button>
 						{/if}
-						{#if showResult && assessableTotal > 0}
+						{#if showResult && filteredAssessableTotal > 0}
 							<div class="flex flex-1 items-center gap-3 min-w-[200px]">
 								<span class="text-xs font-medium text-surface-500 shrink-0">
-									{m.progress()}: {assessedCount}/{assessableTotal}
+									{m.progress()}: {filteredAssessedCount}/{filteredAssessableTotal}
 								</span>
 								<div
 									class="flex flex-1 h-5 overflow-hidden rounded-sm border border-surface-200-800 bg-surface-100-900"
 									role="img"
-									aria-label="{m.progress()}: {assessedCount}/{assessableTotal}"
+									aria-label="{m.progress()}: {filteredAssessedCount}/{filteredAssessableTotal}"
 								>
-									{#each resultCounts as opt (opt.value)}
+									{#each filteredResultCounts as opt (opt.value)}
 										{#if opt.count > 0}
-											{@const pct = (opt.count / assessableTotal) * 100}
+											{@const pct = (opt.count / filteredAssessableTotal) * 100}
 											<div
 												class="flex h-full items-center justify-center overflow-hidden"
 												style="width: {pct}%; background-color: {complianceResultColorMap[
@@ -877,26 +932,38 @@
 						{/if}
 						{#if showScore && complianceAssessment.scoring_enabled}
 							<div class="flex items-center gap-2 shrink-0 text-xs font-medium">
-								<span
-									class="inline-flex items-center gap-1 rounded-md bg-surface-100-900 px-2 py-1 text-surface-700-300"
-								>
-									{m.score()}:
-									<span class="font-semibold">{fmtScore(auditScores?.implementation_score)}</span>
-									{#if auditScores?.max_score}<span class="text-surface-400-600"
-											>/{auditScores.max_score}</span
-										>{/if}
-								</span>
-								{#if complianceAssessment.show_documentation_score}
-									<span
-										class="inline-flex items-center gap-1 rounded-md bg-surface-100-900 px-2 py-1 text-surface-700-300"
-									>
-										{m.documentationScore()}:
-										<span class="font-semibold">{fmtScore(auditScores?.documentation_score)}</span>
-										{#if auditScores?.max_score}<span class="text-surface-400-600"
-												>/{auditScores.max_score}</span
-											>{/if}
-									</span>
-								{/if}
+								<ScorePair>
+									{#snippet implementation()}
+										<span
+											class="inline-flex items-center gap-1 rounded-md bg-surface-100-900 px-2 py-1 text-surface-700-300"
+										>
+											{complianceAssessment.show_documentation_score
+												? m.implementationScore()
+												: m.score()}:
+											<span class="font-semibold"
+												>{fmtScore(auditScores?.implementation_score)}</span
+											>
+											{#if auditScores?.max_score}<span class="text-surface-400-600"
+													>/{auditScores.max_score}</span
+												>{/if}
+										</span>
+									{/snippet}
+									{#snippet documentation()}
+										{#if complianceAssessment.show_documentation_score}
+											<span
+												class="inline-flex items-center gap-1 rounded-md bg-surface-100-900 px-2 py-1 text-surface-700-300"
+											>
+												{m.documentationScore()}:
+												<span class="font-semibold"
+													>{fmtScore(auditScores?.documentation_score)}</span
+												>
+												{#if auditScores?.max_score}<span class="text-surface-400-600"
+														>/{auditScores.max_score}</span
+													>{/if}
+											</span>
+										{/if}
+									{/snippet}
+								</ScorePair>
 							</div>
 						{/if}
 					</div>
