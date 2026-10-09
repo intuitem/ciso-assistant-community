@@ -57,7 +57,7 @@ Narrow the inbox with:
 
 | Category | Notification | Who receives it |
 | --- | --- | --- |
-| **Assignments** | You're added as owner of an applied control, owner of a risk scenario, owner of a security exception, author of an audit, or assignee of a task | The person added |
+| **Assignments** | You're added as owner of an applied control, owner of a risk scenario, owner of a security exception, owner of an incident, author of an audit, or assignee of a task | The person added |
 | **Assignments** | An audit assignment is activated, or reopened for editing | The assignee |
 | **Assignments** | A quick form response is ready for your input, or was sent back to you | The respondents |
 | **Approvals** | An audit assignment is submitted for review | The reviewers (the audit's authors if none are set) |
@@ -126,6 +126,7 @@ You receive an email whenever something is assigned to you.
 | **Risk Scenario**         | **Owner**       | You are added as an owner    |
 | **Task (template)**       | **Assigned to** | You are added as an assignee |
 | **Security Exception**    | **Owner**       | You are added as an owner    |
+| **Incident**              | **Owner**      | You are added as an owner    |
 
 > **Note:** Task assignment notifications fire when a **task template** is assigned. Due-date reminders (below) fire on the **task occurrences** generated from that template.
 
