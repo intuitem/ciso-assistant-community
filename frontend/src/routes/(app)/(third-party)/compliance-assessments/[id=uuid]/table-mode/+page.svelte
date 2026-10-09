@@ -130,6 +130,7 @@
 	const showAppliedControls = $derived(fieldVis.showAppliedControls);
 	const showEvidences = $derived(fieldVis.showEvidences);
 	const showRespondentAlignment = $derived(fieldVis.showRespondentAlignment);
+	const showAnnotation = $derived(fieldVis.showAnnotation);
 
 	const hasQuestions = $derived(
 		requirementAssessments.some(
@@ -1296,7 +1297,7 @@
 											{/if}
 
 											<!-- Additional information (annotation / typical evidence / mapping inference) -->
-											{#if !questionnaireMode && (requirementAssessment.requirement.annotation || requirementAssessment.requirement.typical_evidence || requirementAssessment.mapping_inference?.result)}
+											{#if !questionnaireMode && ((requirementAssessment.requirement.annotation && showAnnotation) || requirementAssessment.requirement.typical_evidence || requirementAssessment.mapping_inference?.result)}
 												<div class="card p-3 preset-tonal-secondary text-sm cursor-auto w-full">
 													<h2
 														class="font-medium text-sm flex flex-row justify-between items-center"
@@ -1317,7 +1318,7 @@
 														</button>
 													</h2>
 													{#if !hideSuggestionHashmap[requirementAssessment.id]}
-														{#if requirementAssessment.requirement.annotation}
+														{#if requirementAssessment.requirement.annotation && showAnnotation}
 															<div class="my-2">
 																<p class="font-medium">
 																	<i class="fa-solid fa-pencil"></i>
