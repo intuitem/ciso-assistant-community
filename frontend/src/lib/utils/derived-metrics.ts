@@ -48,3 +48,31 @@ export function datasetNameProblem(
 	if (otherNames.includes(name)) return 'taken';
 	return null;
 }
+
+// ---------- metric formulas (inputs are other metrics) ----------
+
+// How an input's instances in the domain and its sub-domains combine, per
+// period (mirrors metrology.series.COMBINES).
+export const COMBINES = ['one', 'sum', 'avg', 'min', 'max', 'count'] as const;
+export type Combine = (typeof COMBINES)[number];
+
+export interface MetricInput {
+	key: string;
+	// A definition id, or a URN for a formula shipped in a library.
+	definition: string;
+	combine: Combine;
+}
+
+// What the expression of a metric formula may read, in input order.
+export function inputReferences(inputs: unknown): string[] {
+	if (!Array.isArray(inputs)) return [];
+	const refs = inputs
+		.map((input) => (input as Partial<MetricInput> | null)?.key)
+		.filter((key): key is string => typeof key === 'string' && key.length > 0);
+	return refs.length ? [...refs, 'previous'] : [];
+}
+
+// A formula reads objects (datasets) or other metrics (inputs), never both.
+export function formulaKind(inputs: unknown): 'objects' | 'metrics' {
+	return Array.isArray(inputs) && inputs.length ? 'metrics' : 'objects';
+}

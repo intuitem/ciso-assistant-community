@@ -104,11 +104,17 @@ class MetricDefinitionViewSet(BaseModelViewSet):
             return Response(status=status.HTTP_403_FORBIDDEN)
         datasets = data.get("datasets")
         expression = data.get("expression") or ""
-        errors = validate_formula(datasets, expression)
+        inputs = data.get("inputs")
+        definition = MetricDefinition.objects.filter(
+            id=_as_uuid(data.get("definition"))
+        ).first()
+        errors = validate_formula(datasets, expression, inputs, definition)
         if errors:
             return Response(
                 {"ok": False, "errors": [{"code": c, "message": m} for c, m in errors]}
             )
+        if inputs:
+            return self._preview_series(data, inputs, expression, folder)
         try:
             evaluation = evaluate_formula(datasets, expression, folder)
         except DerivedMetricError as e:
@@ -122,6 +128,69 @@ class MetricDefinitionViewSet(BaseModelViewSet):
             )
         return Response(
             {"ok": True, "value": evaluation.value, "datasets": evaluation.datasets}
+        )
+
+    PREVIEW_PERIODS = 24
+
+    def _preview_series(self, data, inputs, expression, folder):
+        """A metric formula's last periods at the frequency the author picks,
+        and what each input resolved to in the folder."""
+        from types import SimpleNamespace
+
+        from metrology.derived import DerivedMetricError
+        from metrology.series import evaluate_series, period_start, shift_period
+        from django.utils import timezone
+
+        frequency = data.get("frequency")
+        if frequency not in MetricInstance.Frequency.values:
+            frequency = MetricInstance.Frequency.MONTHLY
+        shape = SimpleNamespace(
+            category=data.get("category") or MetricDefinition.Category.QUANTITATIVE,
+            choices_definition=data.get("choices_definition") or [],
+        )
+        since = shift_period(
+            period_start(timezone.now(), frequency),
+            frequency,
+            -(self.PREVIEW_PERIODS - 1),
+        )
+        try:
+            evaluation = evaluate_series(
+                inputs, expression, folder, frequency, shape, since=since
+            )
+        except DerivedMetricError as e:
+            return Response(
+                {
+                    "ok": False,
+                    "errors": [
+                        {"code": "derived_evaluation_failed", "message": e.message}
+                    ],
+                }
+            )
+        return Response(
+            {
+                "ok": True,
+                "value": evaluation.value,
+                "periods": [
+                    {
+                        "start": period.start.isoformat(),
+                        "value": period.value,
+                        "skipped": period.skipped,
+                        "inputs": period.inputs,
+                    }
+                    for period in evaluation.periods
+                ],
+                "inputs": {
+                    item.key: [
+                        {
+                            "id": str(instance.id),
+                            "name": instance.name,
+                            "folder": instance.folder.name,
+                        }
+                        for instance in item.instances
+                    ]
+                    for item in evaluation.resolved
+                },
+            }
         )
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
@@ -187,7 +256,8 @@ class MetricInstanceViewSet(BaseModelViewSet):
             user=request.user, perm=permission, folder=instance.folder
         ):
             return Response(status=status.HTTP_403_FORBIDDEN)
-        compute_derived_metric_task(str(instance.id))
+        # A refresh recomputes a metric formula's whole series.
+        compute_derived_metric_task(str(instance.id), full=True)
         return Response({"queued": True}, status=status.HTTP_202_ACCEPTED)
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))

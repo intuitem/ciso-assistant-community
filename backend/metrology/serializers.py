@@ -96,7 +96,11 @@ class MetricDefinitionWriteSerializer(BaseModelSerializer):
             "expression",
             getattr(self.instance, "expression", "") if self.instance else "",
         )
-        errors = validate_formula(datasets, expression)
+        inputs = attrs.get(
+            "inputs",
+            getattr(self.instance, "inputs", None) if self.instance else None,
+        )
+        errors = validate_formula(datasets, expression, inputs, self.instance)
         if errors:
             # One list under `expression`: the form shows the formula as one
             # block, and the codes travel in the messages for the editor.
@@ -145,7 +149,11 @@ class MetricInstanceWriteSerializer(BaseModelSerializer):
         fields = "__all__"
         # The sampler's own bookkeeping: a client stamping last_computed_at
         # in the future would stop the instance from ever being computed.
-        read_only_fields = ["last_computed_at", "last_computation_error"]
+        read_only_fields = [
+            "last_computed_at",
+            "last_computation_error",
+            "recompute_from",
+        ]
 
 
 class MetricInstanceReadSerializer(BaseModelSerializer):
@@ -276,7 +284,7 @@ class CustomMetricSampleWriteSerializer(BaseModelSerializer):
         exclude = ["folder"]
         # What wrote the sample is a fact the server records: through this
         # serializer, always a person.
-        read_only_fields = ["source"]
+        read_only_fields = ["source", "period_start"]
 
 
 class CustomMetricSampleReadSerializer(BaseModelSerializer):

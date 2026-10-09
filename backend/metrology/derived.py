@@ -74,15 +74,23 @@ def is_derived(definition) -> bool:
     return bool((definition.expression or "").strip())
 
 
-def validate_formula(datasets, expression) -> list[tuple[str, str]]:
+def validate_formula(
+    datasets, expression, inputs=None, definition=None
+) -> list[tuple[str, str]]:
     """Save-time checks of a definition's formula, as (code, message) tuples.
-    An empty expression with no datasets is a plain (manual) definition."""
+    An empty expression with no datasets and no inputs is a plain (manual)
+    definition. A formula reads datasets (objects, now) or inputs (other
+    metrics, period by period), never both: past periods cannot be
+    recomputed from present-day objects. ``definition`` is the one being
+    saved, when it exists, so a formula cannot read itself."""
     errors = []
     expression = expression or ""
     if not isinstance(expression, str):
         return [("derived_expression_invalid", "The expression must be text")]
-    if not expression.strip() and not datasets:
+    if not expression.strip() and not datasets and not inputs:
         return errors
+    if inputs:
+        return _validate_metric_formula(datasets, expression, inputs, definition)
     if not isinstance(datasets, dict) or not datasets:
         errors.append(
             ("derived_datasets_missing", "A derived metric needs at least one dataset")
@@ -141,6 +149,34 @@ def validate_formula(datasets, expression) -> list[tuple[str, str]]:
             )
         )
     return errors
+
+
+def _validate_metric_formula(datasets, expression, inputs, definition):
+    from .series import validate_inputs, validate_series_expression
+
+    if datasets:
+        return [
+            (
+                "derived_formula_mixed",
+                (
+                    "A formula reads either datasets or other metrics, not both; "
+                    "make the datasets a metric of their own and add it as an input"
+                ),
+            )
+        ]
+    errors = validate_inputs(inputs, definition)
+    if not expression.strip():
+        return errors + [
+            ("derived_expression_missing", "A derived metric needs an expression")
+        ]
+    if len(expression) > MAX_EXPRESSION_LENGTH:
+        return errors + [("derived_expression_too_long", "The expression is too long")]
+    keys = {
+        spec.get("key")
+        for spec in inputs
+        if isinstance(spec, dict) and isinstance(spec.get("key"), str)
+    }
+    return errors + validate_series_expression(expression, keys)
 
 
 def _grouping_errors(config):
@@ -386,25 +422,36 @@ def due_instances(now=None):
         .exclude(metric_definition__expression="")
         .select_related("metric_definition", "folder")
     )
-    return [instance for instance in candidates if is_due(instance, now)]
+    # A metric formula is also due when an input marked it.
+    return [
+        instance
+        for instance in candidates
+        if is_due(instance, now) or instance.recompute_from is not None
+    ]
 
 
 def _lock_key(instance_id):
     return f"metrology:derived-metric-lock:{instance_id}"
 
 
-def compute_sample(instance, *, write=True, only_if_due=False):
+def compute_sample(instance, *, write=True, only_if_due=False, full=False):
     """Evaluate the instance's formula and, by default, write the sample.
     Records the failure on the instance instead of a sample when the
     evaluation fails; the error is author-facing and retrying is pointless
     until the formula or the data changes. Returns the Evaluation, or None
     when another worker holds the instance's lock or, with ``only_if_due``,
-    when a run queued earlier already computed it."""
+    when a run queued earlier already computed it. A metric formula
+    recomputes its series instead (metrology.series); ``full`` recomputes
+    all of it."""
     from .models import CustomMetricSample
 
     definition = instance.metric_definition
     if not is_derived(definition):
         raise DerivedMetricError("this metric has no formula")
+    if definition.reads_metrics:
+        from .series import compute_series
+
+        return compute_series(instance, write=write, only_if_due=only_if_due, full=full)
     key = _lock_key(instance.id)
     if not cache.add(key, "1", LOCK_TTL_SECONDS):
         return None

@@ -17,6 +17,7 @@
 		formDataCache?: Record<string, any>;
 		initialData?: Record<string, any>;
 		data?: any;
+		object?: Record<string, unknown>;
 	}
 
 	let {
@@ -25,7 +26,8 @@
 		cacheLocks = {},
 		formDataCache = $bindable({}),
 		initialData = {},
-		data = {}
+		data = {},
+		object = {}
 	}: Props = $props();
 
 	const isQualitative = $derived.by(() => {
@@ -59,18 +61,40 @@
 		$choicesDefinitionValue = entries;
 	}
 
-	// Derived metric: datasets edited structurally, one CEL expression, and a
-	// preview that evaluates the formula against a domain without writing.
+	// Derived metric: a formula over objects (datasets, edited structurally)
+	// or over other metrics (inputs, period by period), one CEL expression,
+	// and a preview that evaluates it against a domain without writing.
 	import DatasetEditor from '$lib/components/Metrology/DatasetEditor.svelte';
 	import type { ReadableModel } from '$lib/components/Metrology/DatasetEditor.svelte';
-	import { datasetReferences } from '$lib/utils/derived-metrics';
+	import MetricInputsEditor from '$lib/components/Metrology/MetricInputsEditor.svelte';
+	import type { DefinitionOption } from '$lib/components/Metrology/MetricInputsEditor.svelte';
+	import {
+		datasetReferences,
+		formulaKind,
+		inputReferences,
+		type MetricInput
+	} from '$lib/utils/derived-metrics';
 	import { onMount } from 'svelte';
 
 	const { value: datasetsValue } = formFieldProxy(form, 'datasets');
+	const { value: inputsValue } = formFieldProxy(form, 'inputs');
 	const { value: expressionValue } = formFieldProxy(form, 'expression');
 	const { value: folderValue } = formFieldProxy(form, 'folder');
 	let formulaOpen = $state(false);
 	let models = $state<ReadableModel[]>([]);
+	let definitions = $state<DefinitionOption[]>([]);
+	let kind = $state<'objects' | 'metrics'>('objects');
+	let kindSettled = false;
+	const FREQUENCIES = [
+		['realtime', () => m.realTimeContinuous()],
+		['hourly', () => m.hourly()],
+		['daily', () => m.daily()],
+		['weekly', () => m.weekly()],
+		['monthly', () => m.monthly()],
+		['quarterly', () => m.quarterly()],
+		['yearly', () => m.yearly()]
+	] as const;
+	let previewFrequency = $state('monthly');
 	let domains = $state<{ id: string; str: string }[]>([]);
 	let previewFolder = $state('');
 	onMount(async () => {
@@ -79,6 +103,23 @@
 			if (res.ok) models = await res.json();
 		} catch {
 			models = [];
+		}
+		try {
+			// Inputs are quantitative metrics, never this one.
+			const res = await fetch('/metric-definitions?category=quantitative&limit=1000');
+			if (res.ok) {
+				const body = await res.json();
+				const rows = Array.isArray(body) ? body : (body.results ?? []);
+				definitions = rows
+					.filter((row: { id: string }) => row.id !== object?.id)
+					.map((row: { id: string; name?: string; str?: string; urn?: string | null }) => ({
+						id: row.id,
+						name: row.name ?? row.str ?? row.id,
+						urn: row.urn
+					}));
+			}
+		} catch {
+			definitions = [];
 		}
 		try {
 			const res = await fetch('/folders?content_type=DO&content_type=GL');
@@ -97,17 +138,36 @@
 	$effect(() => {
 		if ($datasetsValue && typeof $datasetsValue === 'object' && Object.keys($datasetsValue).length)
 			formulaOpen = true;
+		if (Array.isArray($inputsValue) && $inputsValue.length) formulaOpen = true;
 		if ($expressionValue) formulaOpen = true;
+		// The stored formula decides the kind once; the author decides after.
+		if (!kindSettled) {
+			kind = formulaKind($inputsValue);
+			kindSettled = true;
+		}
 	});
+	// A formula reads objects or other metrics, never both: switching drops
+	// the other side.
+	function setKind(next: 'objects' | 'metrics') {
+		kind = next;
+		if (next === 'metrics') $datasetsValue = null;
+		else $inputsValue = null;
+		preview = null;
+	}
 	$effect(() => {
 		if (!previewFolder && $folderValue) previewFolder = $folderValue as string;
 	});
 	function clearFormula() {
 		$datasetsValue = null;
+		$inputsValue = null;
 		$expressionValue = '';
 		preview = null;
 	}
-	const references = $derived(datasetReferences($datasetsValue as Record<string, unknown>));
+	const references = $derived(
+		kind === 'metrics'
+			? inputReferences($inputsValue)
+			: datasetReferences($datasetsValue as Record<string, unknown>)
+	);
 	function insertReference(ref: string) {
 		const current = ($expressionValue as string) ?? '';
 		$expressionValue = current && !current.endsWith(' ') ? `${current} ${ref}` : `${current}${ref}`;
@@ -118,8 +178,12 @@
 		ok: boolean;
 		value?: unknown;
 		datasets?: Record<string, unknown>;
+		periods?: { start: string; value: unknown; skipped: boolean }[];
+		inputs?: Record<string, { id: string; name: string; folder: string }[]>;
 		errors?: { code: string; message: string }[];
 	}>(null);
+	// The most recent periods first, as a reader scans a series.
+	const previewPeriods = $derived([...(preview?.periods ?? [])].reverse().slice(0, 12));
 	async function runPreview() {
 		previewBusy = true;
 		preview = null;
@@ -127,11 +191,23 @@
 			const res = await fetch('/fe-api/metrology/preview-formula', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					folder: previewFolder || $folderValue,
-					datasets: $datasetsValue,
-					expression: $expressionValue
-				})
+				body: JSON.stringify(
+					kind === 'metrics'
+						? {
+								folder: previewFolder || $folderValue,
+								inputs: $inputsValue as MetricInput[],
+								expression: $expressionValue,
+								frequency: previewFrequency,
+								category: data?.category,
+								choices_definition: data?.choices_definition,
+								definition: object?.id
+							}
+						: {
+								folder: previewFolder || $folderValue,
+								datasets: $datasetsValue,
+								expression: $expressionValue
+							}
+				)
 			});
 			preview = await res.json();
 		} catch {
@@ -218,11 +294,46 @@
 	</label>
 	<p class="text-xs text-surface-500">{m.derivedMetricHelpText()}</p>
 	{#if formulaOpen}
-		<div class="flex flex-col gap-1">
-			<span class="text-sm font-semibold">{m.datasets()}</span>
-			<span class="text-xs text-surface-500">{m.datasetsHelpText()}</span>
-			<DatasetEditor bind:value={$datasetsValue} {models} />
+		<div class="flex flex-col gap-1" role="radiogroup" aria-label={m.formulaReads()}>
+			<span class="text-sm font-semibold">{m.formulaReads()}</span>
+			<div class="flex flex-wrap gap-4 text-sm">
+				<label class="flex items-center gap-2 cursor-pointer">
+					<input
+						type="radio"
+						class="radio"
+						name="formula-kind"
+						checked={kind === 'objects'}
+						onchange={() => setKind('objects')}
+						data-testid="formula-kind-objects"
+					/>
+					{m.formulaFromObjects()}
+				</label>
+				<label class="flex items-center gap-2 cursor-pointer">
+					<input
+						type="radio"
+						class="radio"
+						name="formula-kind"
+						checked={kind === 'metrics'}
+						onchange={() => setKind('metrics')}
+						data-testid="formula-kind-metrics"
+					/>
+					{m.formulaFromMetrics()}
+				</label>
+			</div>
 		</div>
+		{#if kind === 'metrics'}
+			<div class="flex flex-col gap-1">
+				<span class="text-sm font-semibold">{m.metricInputs()}</span>
+				<span class="text-xs text-surface-500">{m.metricInputsHelpText()}</span>
+				<MetricInputsEditor bind:value={$inputsValue} {definitions} />
+			</div>
+		{:else}
+			<div class="flex flex-col gap-1">
+				<span class="text-sm font-semibold">{m.datasets()}</span>
+				<span class="text-xs text-surface-500">{m.datasetsHelpText()}</span>
+				<DatasetEditor bind:value={$datasetsValue} {models} />
+			</div>
+		{/if}
 		<label class="flex flex-col gap-1">
 			<span class="text-sm font-semibold">{m.expression()}</span>
 			{#if references.length}
@@ -243,9 +354,13 @@
 				rows="2"
 				data-testid="form-input-expression"
 				bind:value={$expressionValue}
-				placeholder="active.count * 100.0 / controls.count"
+				placeholder={kind === 'metrics'
+					? 'clicks * 100.0 / trained'
+					: 'active.count * 100.0 / controls.count'}
 			></textarea>
-			<span class="text-xs text-surface-500">{m.expressionHelpText()}</span>
+			<span class="text-xs text-surface-500"
+				>{kind === 'metrics' ? m.metricExpressionHelpText() : m.expressionHelpText()}</span
+			>
 		</label>
 		<div class="flex items-center gap-2 flex-wrap">
 			<select class="select text-xs w-56" bind:value={previewFolder} title={m.previewDomain()}>
@@ -256,6 +371,18 @@
 					<option value={domain.id}>{domain.str}</option>
 				{/each}
 			</select>
+			{#if kind === 'metrics'}
+				<select
+					class="select text-xs w-40"
+					bind:value={previewFrequency}
+					title={m.previewFrequency()}
+					data-testid="preview-frequency"
+				>
+					{#each FREQUENCIES as [value, label] (value)}
+						<option {value}>{label()}</option>
+					{/each}
+				</select>
+			{/if}
 			<button
 				type="button"
 				class="btn preset-tonal text-xs"
@@ -266,7 +393,49 @@
 			</button>
 		</div>
 		{#if preview}
-			{#if preview.ok}
+			{#if preview.ok && preview.periods}
+				<div class="text-xs rounded-base bg-surface-100-900 p-2 flex flex-col gap-2">
+					<div class="flex flex-col gap-0.5">
+						<span class="font-semibold">{m.resolvedInputs()}</span>
+						{#each Object.entries(preview.inputs ?? {}) as [key, instances] (key)}
+							<div>
+								<span class="font-mono">{key}</span>:
+								{#if instances.length}
+									{instances.map((i) => `${i.name} (${i.folder})`).join(', ')}
+								{:else}
+									<span class="text-surface-500">{m.noInstanceResolved()}</span>
+								{/if}
+							</div>
+						{/each}
+					</div>
+					{#if previewPeriods.length}
+						<table class="w-full" data-testid="preview-periods">
+							<thead>
+								<tr class="text-left text-surface-500">
+									<th class="font-normal pr-4">{m.previewPeriod()}</th>
+									<th class="font-normal">{m.previewResult()}</th>
+								</tr>
+							</thead>
+							<tbody>
+								{#each previewPeriods as period (period.start)}
+									<tr>
+										<td class="font-mono pr-4">{period.start.slice(0, 16).replace('T', ' ')}</td>
+										<td class="font-mono">
+											{#if period.skipped}
+												<span class="text-surface-500">{m.previewSkipped()}</span>
+											{:else}
+												{JSON.stringify(period.value)}
+											{/if}
+										</td>
+									</tr>
+								{/each}
+							</tbody>
+						</table>
+					{:else}
+						<span class="text-surface-500">{m.previewNoPeriods()}</span>
+					{/if}
+				</div>
+			{:else if preview.ok}
 				<div class="text-xs rounded-base bg-surface-100-900 p-2">
 					<div>
 						<span class="font-semibold">{m.previewResult()}:</span>

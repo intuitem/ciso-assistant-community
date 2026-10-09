@@ -134,6 +134,27 @@ Samples are computed on the instance's **collection frequency** (real-time means
 
 Older than a week, the application keeps one derived sample per instance and per day, so a long series does not grow by the hour.
 
+### Metrics computed from other metrics
+
+A derived formula can read other metrics instead of objects, the way a spreadsheet column computes from other columns: a phishing click rate from the clicks and the users trained, a group incident count summed over its sites. In the definition form, choose **The formula reads: Other metrics** and add one **input** per metric. A formula reads either objects or other metrics, not both.
+
+Each input names another quantitative metric definition and how its instances combine:
+
+* **One value**: the input takes the single instance of that metric in the instance's domain and its sub-domains. When there is none, or several, the instance shows an error.
+* **Sum**, **Average**, **Minimum**, **Maximum**, **Count**: the input combines every instance of that metric in the domain and its sub-domains, for example the sites below a group domain.
+
+The instance's **collection frequency** cuts time into calendar periods (quarter hours, hours, days, weeks starting on Monday, months, quarters, years, in UTC), and the expression runs once per period:
+
+* An input's value for a period is its latest sample up to the end of that period. A sample older than the input's staleness threshold (36 hours for a daily metric, 32 days for a monthly one, and so on) no longer counts.
+* When an input has no value, the period is skipped, unless the expression handles it, for example `trained == null ? 0 : trained`.
+* `previous` is the result of the period before, which gives deltas and growth rates.
+
+The series is complete from the start. A new instance computes every period since its inputs' first sample, up to 1,000 periods back; for hourly and real-time metrics, only the last week. When an input sample is added, corrected or deleted, the affected periods are recomputed at the next run, so past values can change. A figure that must not move belongs in a report.
+
+A formula can read another computed metric. A metric cannot read itself, directly or through other formulas. To combine objects and metrics, make the dataset formula a metric of its own and add it as an input; its history starts on the day it was created.
+
+The **Preview** takes a domain and a frequency, lists the instances each input found, and shows the last periods.
+
 <figure><img src="../.gitbook/assets/image (55).png" alt=""><figcaption></figcaption></figure>
 
 ## Dashboards

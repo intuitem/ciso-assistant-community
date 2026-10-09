@@ -104,10 +104,11 @@ def cleanup_old_builtin_metric_samples():
 
 
 @db_task()
-def compute_derived_metric_task(instance_id, only_if_due=False):
+def compute_derived_metric_task(instance_id, only_if_due=False, full=False):
     """One instance, by id: the manual refresh and the sweep both land here.
     The sweep passes ``only_if_due`` so a duplicate it queued while the
-    queue lagged finds the instance already computed and writes nothing."""
+    queue lagged finds the instance already computed and writes nothing.
+    ``full`` recomputes a metric formula's whole series."""
     from metrology.derived import DerivedMetricError, compute_sample
 
     instance = (
@@ -118,7 +119,7 @@ def compute_derived_metric_task(instance_id, only_if_due=False):
     if instance is None:
         return
     try:
-        compute_sample(instance, only_if_due=only_if_due)
+        compute_sample(instance, only_if_due=only_if_due, full=full)
     except DerivedMetricError as e:
         # Recorded on the instance by compute_sample; the log is for operators.
         logger.warning(
@@ -130,18 +131,38 @@ def compute_derived_metric_task(instance_id, only_if_due=False):
 
 @db_periodic_task(crontab(minute="*/15"))
 def compute_due_derived_metrics():
-    """The sweep: every derived instance past its collection interval."""
-    from metrology.derived import due_instances
+    """The sweep: every derived instance past its collection interval, and
+    every metric formula an input marked. Metric formulas run here, in
+    dependency order, so one reading another reads it fresh; dataset
+    formulas are queued, each on its own."""
+    from metrology.derived import DerivedMetricError, compute_sample, due_instances
+    from metrology.series import depth
 
     try:
         due = due_instances()
     except DatabaseError:
         logger.warning("Metrology tables do not exist yet — skipping derived metrics")
         return
+    series = [i for i in due if i.metric_definition.reads_metrics]
     for instance in due:
-        compute_derived_metric_task(str(instance.id), only_if_due=True)
+        if not instance.metric_definition.reads_metrics:
+            compute_derived_metric_task(str(instance.id), only_if_due=True)
+    depths = {}
+    for instance in series:
+        definition = instance.metric_definition
+        if definition.id not in depths:
+            depths[definition.id] = depth(definition)
+    for instance in sorted(series, key=lambda i: depths[i.metric_definition_id]):
+        try:
+            compute_sample(instance, only_if_due=True)
+        except DerivedMetricError as e:
+            logger.warning(
+                "metric formula computation failed",
+                metric_instance_id=str(instance.id),
+                error=e.message,
+            )
     if due:
-        logger.info("derived metrics sweep", queued=len(due))
+        logger.info("derived metrics sweep", due=len(due), formulas=len(series))
 
 
 @db_periodic_task(crontab(hour="3", minute="30"))
