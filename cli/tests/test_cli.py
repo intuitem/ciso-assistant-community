@@ -124,11 +124,30 @@ class TestImportRiskAssessmentCommand:
                     perimeter="Test Perimeter",
                     framework=None,
                     matrix="Test Matrix",
+                    on_conflict="stop",
                     requires_folder=False,
-                    requires_perimeter=True,
+                    requires_perimeter=False,
                     requires_framework=False,
                     requires_matrix=True,
+                    name=None,
                 )
+        finally:
+            os.unlink(file_path)
+
+    def test_import_risk_assessment_perimeter_is_optional(self):
+        runner = CliRunner()
+        with tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False) as tmp:
+            file_path = tmp.name
+
+        try:
+            with patch("clica.upload_data_wizard_file") as mock_upload:
+                result = runner.invoke(
+                    import_risk_assessment,
+                    ["--file", file_path, "--matrix", "Test Matrix"],
+                )
+
+                assert result.exit_code == 0
+                assert mock_upload.call_args.kwargs["perimeter"] is None
         finally:
             os.unlink(file_path)
 

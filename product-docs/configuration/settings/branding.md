@@ -6,6 +6,14 @@ Available on the PRO plan.
 
 Branding settings let you replace the default CISO Assistant visuals with your organisation's identity — useful when the platform is deployed for end-customers, when a parent company hosts multiple subsidiaries, or simply to align the UI with internal design guidelines.
 
+## Where to find it
+
+Go to **Extra → Settings**, then open the **Instance** tab. Editing these settings requires the permission to change global settings.
+
+{% hint style="info" %}
+**Instance** is one of the last tabs on the Settings page. On narrower screens, scroll the tab bar horizontally to reveal it.
+{% endhint %}
+
 ## Settings
 
 - **Client name** — the display name used in headings and email signatures.

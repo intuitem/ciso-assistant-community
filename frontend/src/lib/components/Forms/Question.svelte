@@ -27,6 +27,8 @@
 		references?: Record<string, any[]>;
 		/** Search the objects an object-reference question may point at. */
 		onSearchReferences?: (urn: string, search: string) => Promise<any[]>;
+		/** Object-reference questions shown but not editable (e.g. a fixed subject). */
+		lockedUrns?: string[];
 	}
 
 	let {
@@ -45,7 +47,8 @@
 		onRemoveAttachment,
 		attachmentHref,
 		references = {},
-		onSearchReferences
+		onSearchReferences,
+		lockedUrns = []
 	}: Props = $props();
 
 	// Object-reference pickers: one open dropdown at a time, results per question.
@@ -425,6 +428,8 @@
 						{/if}
 					{:else if question.type === 'object_reference'}
 						{@const picked = references[urn] ?? []}
+						{@const locked =
+							disabled || lockedUrns.some((u) => u.toLowerCase() === urn.toLowerCase())}
 						<div class="flex flex-col gap-2">
 							{#if picked.length}
 								<ul class="flex flex-col gap-1">
@@ -437,7 +442,7 @@
 											{#if option.folder}
 												<span class="shrink-0 text-xs text-surface-400">{option.folder}</span>
 											{/if}
-											{#if !disabled && onSearchReferences}
+											{#if !locked && onSearchReferences}
 												<button
 													type="button"
 													class="shrink-0 text-surface-400 hover:text-error-500"
@@ -450,11 +455,16 @@
 										</li>
 									{/each}
 								</ul>
-							{:else if disabled || !onSearchReferences}
+								{#if locked && !disabled}
+									<p class="text-xs text-surface-500" data-testid="subject-locked">
+										<i class="fa-solid fa-lock mr-1"></i>{m.subjectLockedHint()}
+									</p>
+								{/if}
+							{:else if locked || !onSearchReferences}
 								<p class="text-xs italic text-surface-400">{m.objectReferenceNone()}</p>
 							{/if}
 
-							{#if !disabled && onSearchReferences}
+							{#if !locked && onSearchReferences}
 								<div class="flex items-center gap-2">
 									<input
 										type="text"

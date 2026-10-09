@@ -32,6 +32,7 @@
 	import TriggersPanel from './TriggersPanel.svelte';
 	import VersionsPanel from './VersionsPanel.svelte';
 	import WorkflowDataPanel from './WorkflowDataPanel.svelte';
+	import { parseVariableValue } from './variable-values';
 	import StepNode from './nodes/StepNode.svelte';
 	import ConditionNode from './nodes/ConditionNode.svelte';
 	import TerminalNode from './nodes/TerminalNode.svelte';
@@ -505,6 +506,15 @@
 	let saveTimer: ReturnType<typeof setTimeout> | null = null;
 	let validationErrors = $state<any[]>([]);
 	let publishing = $state(false);
+	// A default the author is still typing and that does not parse is not in
+	// `variables` yet: publishing would validate the previous value instead.
+	let variableDefaultDrafts = $state<Record<string, string>>({});
+	const invalidDefaultKey = $derived(
+		variables.find((v) => {
+			const draft = variableDefaultDrafts[v.id];
+			return draft !== undefined && !parseVariableValue(v.type, draft).ok;
+		})?.key
+	);
 
 	function markDirty() {
 		if (readonly) return;
@@ -532,15 +542,27 @@
 	let referenceRun = $state<any | null>(null);
 	let referencePinned = $state(false);
 	let referenceFetchInFlight = false;
+	let referenceRequest = 0;
 
 	function pickReference(runs: any[]) {
 		return (
-			runs.find(
-				(run: any) => run.status === 'completed' && Object.keys(run.node_outputs ?? {}).length
-			) ??
-			runs.find((run: any) => Object.keys(run.node_outputs ?? {}).length) ??
+			runs.find((run: any) => run.status === 'completed' && run.has_outputs) ??
+			runs.find((run: any) => run.has_outputs) ??
 			null
 		);
+	}
+
+	async function loadRun(run: any) {
+		const request = ++referenceRequest;
+		const res = await fetch(opsUrl('get-instance'), {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ instance: run.id })
+		});
+		const loaded = res.ok ? await res.json() : null;
+		if (!loaded || request !== referenceRequest) return false;
+		referenceRun = loaded;
+		return true;
 	}
 
 	async function ensureReferenceRun() {
@@ -554,7 +576,8 @@
 			});
 			if (!res.ok) return;
 			const data = await res.json();
-			referenceRun = pickReference(data.results ?? data);
+			const candidate = pickReference(data.results ?? data);
+			if (candidate && !referencePinned) await loadRun(candidate);
 		} finally {
 			// Deliberately no "already attempted" latch: while no run has data
 			// yet, every node selection retries, and the runs-panel poll below
@@ -563,18 +586,25 @@
 		}
 	}
 
-	function pinReference(run: any) {
-		referencePinned = true;
-		referenceRun = run;
+	async function pinReference(run: any) {
+		if (await loadRun(run)) referencePinned = true;
 	}
 
 	// Runs-panel polling feeds this: without an explicit pin, the reference
 	// follows the latest run with data, so the browser populates live.
-	function handleRunsRefreshed(runs: any[]) {
-		if (referencePinned) return;
+	async function handleRunsRefreshed(runs: any[]) {
+		if (referencePinned || referenceFetchInFlight) return;
 		const candidate = pickReference(runs);
-		if (candidate && candidate.id !== referenceRun?.id) {
-			referenceRun = candidate;
+		if (
+			candidate &&
+			(candidate.id !== referenceRun?.id || candidate.status !== referenceRun?.status)
+		) {
+			referenceFetchInFlight = true;
+			try {
+				await loadRun(candidate);
+			} finally {
+				referenceFetchInFlight = false;
+			}
 		}
 	}
 
@@ -1618,6 +1648,13 @@
 		return id;
 	}
 
+	// The value every run starts with; null clears it. Validated by type in
+	// the panel before it gets here, and again at publish.
+	function updateVariableDefault(id: string, value: unknown) {
+		variables = variables.map((v) => (v.id === id ? { ...v, default_value: value } : v));
+		markDirty();
+	}
+
 	function removeVariable(id: string) {
 		variables = variables.filter((v) => v.id !== id);
 		// Strip branch conditions that referenced it so the save doesn't 400.
@@ -1951,8 +1988,11 @@
 				<button
 					type="button"
 					class="btn preset-filled-primary-500 text-sm"
-					disabled={publishing || saveState === 'saving'}
+					disabled={publishing || saveState === 'saving' || invalidDefaultKey !== undefined}
 					onclick={publish}
+					title={invalidDefaultKey !== undefined
+						? m.variableValueInvalid({ key: invalidDefaultKey })
+						: undefined}
 					data-testid="publish-workflow"
 				>
 					{#if publishing}
@@ -2361,6 +2401,8 @@
 							columns
 							onAddVariable={addVariable}
 							onRemoveVariable={removeVariable}
+							onUpdateVariableDefault={updateVariableDefault}
+							bind:defaultDrafts={variableDefaultDrafts}
 							onAddSecret={addSecret}
 							onRemoveSecret={removeSecret}
 						/>
@@ -2405,6 +2447,7 @@
 				{readableModels}
 				{fkOptions}
 				{workflowId}
+				versionId={activeVersionId}
 				{registrationsByRef}
 				onRegistrationsChanged={refreshRegistrations}
 				referenceRunId={referenceRun?.id ?? null}

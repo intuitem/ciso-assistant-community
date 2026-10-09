@@ -9,6 +9,7 @@
 	import Select from '$lib/components/Forms/Select.svelte';
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
+	import { getModalStore } from '$lib/components/Modals/stores';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -17,6 +18,7 @@
 		formDataCache?: Record<string, any>;
 		initialData?: Record<string, any>;
 		context: string;
+		object?: Record<string, any>;
 		[key: string]: any;
 	}
 
@@ -27,10 +29,37 @@
 		formDataCache = $bindable({}),
 		initialData = {},
 		context,
+		object = {},
 		...rest
 	}: Props = $props();
 
+	const modalStore = getModalStore();
+	const formStore = (form as any).form;
+	// Leaving the direct estimate replaces the likelihoods typed on operational scenarios
+	const savedMethod = object?.quotation_method;
+	let lastMethod = savedMethod;
+	$effect(() => {
+		const method = $formStore?.quotation_method;
+		if (method === lastMethod) return;
+		const leavingDirectEstimate = savedMethod === 'manual' && lastMethod === 'manual';
+		lastMethod = method;
+		if (!leavingDirectEstimate) return;
+		modalStore.trigger({
+			type: 'confirm',
+			title: m.quotationMethodChangeTitle(),
+			body: m.quotationMethodChangeBody(),
+			response: (confirmed: boolean) => {
+				if (confirmed) return;
+				lastMethod = 'manual';
+				formStore.update((data: Record<string, any>) => ({ ...data, quotation_method: 'manual' }));
+			}
+		});
+	});
+
 	let activeActivity: string | null = $state(null);
+	const responsibilityMatricesEnabled = $derived(
+		!!page.data?.featureflags?.responsibility_matrices
+	);
 	let hasEntities = $state(false);
 
 	onMount(() => {
@@ -76,6 +105,18 @@
 		cacheLock={cacheLocks['status']}
 		bind:cachedValue={formDataCache['status']}
 	/>
+	<AutocompleteSelect
+		{form}
+		optionsEndpoint="classification-levels?is_visible=true&object_classification__is_visible=true"
+		optionsLabelField="label"
+		optionsExtraFields={[['object_classification', 'str']]}
+		field="classification"
+		label={m.classification()}
+		helpText={m.ebiosRmStudyClassificationHelpText()}
+		nullable
+		cacheLock={cacheLocks['classification']}
+		bind:cachedValue={formDataCache['classification']}
+	/>
 	{#if hasEntities}
 		<AutocompleteSelect
 			{form}
@@ -96,6 +137,24 @@
 		label={m.riskMatrix()}
 		helpText={m.ebiosRmMatrixHelpText()}
 	/>
+	<TextField
+		type="date"
+		{form}
+		field="eta"
+		label={m.eta()}
+		helpText={m.etaHelpText()}
+		cacheLock={cacheLocks['eta']}
+		bind:cachedValue={formDataCache['eta']}
+	/>
+	<TextField
+		type="date"
+		{form}
+		field="due_date"
+		label={m.dueDate()}
+		helpText={m.dueDateHelpText()}
+		cacheLock={cacheLocks['due_date']}
+		bind:cachedValue={formDataCache['due_date']}
+	/>
 {:else if context === 'ebiosRmStudy'}
 	<div
 		class="relative p-2 space-y-2 rounded-md {activeActivity === 'one'
@@ -109,6 +168,31 @@
 		>
 			{m.activityOne()}
 		</p>
+		<div class="grid grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-4">
+			<TextField
+				{form}
+				field="ref_id"
+				label={m.refId()}
+				cacheLock={cacheLocks['ref_id']}
+				bind:cachedValue={formDataCache['ref_id']}
+			/>
+			<TextField
+				{form}
+				field="name"
+				label={m.name()}
+				cacheLock={cacheLocks['name']}
+				bind:cachedValue={formDataCache['name']}
+				data-focusindex="0"
+			/>
+		</div>
+		<MarkdownField
+			{form}
+			field="description"
+			label={m.description()}
+			cacheLock={cacheLocks['description']}
+			bind:cachedValue={formDataCache['description']}
+			data-focusindex="1"
+		/>
 		<FolderTreeSelect
 			{form}
 			field="folder"
@@ -124,6 +208,18 @@
 			label={m.status()}
 			cacheLock={cacheLocks['status']}
 			bind:cachedValue={formDataCache['status']}
+		/>
+		<AutocompleteSelect
+			{form}
+			optionsEndpoint="classification-levels?is_visible=true&object_classification__is_visible=true"
+			optionsLabelField="label"
+			optionsExtraFields={[['object_classification', 'str']]}
+			field="classification"
+			label={m.classification()}
+			helpText={m.ebiosRmStudyClassificationHelpText()}
+			nullable
+			cacheLock={cacheLocks['classification']}
+			bind:cachedValue={formDataCache['classification']}
 		/>
 		<AutocompleteSelect
 			{form}
@@ -189,6 +285,52 @@
 			bind:cachedValue={formDataCache['reviewers']}
 			label={m.reviewers()}
 		/>
+		<TextField
+			type="date"
+			{form}
+			field="eta"
+			label={m.eta()}
+			helpText={m.etaHelpText()}
+			cacheLock={cacheLocks['eta']}
+			bind:cachedValue={formDataCache['eta']}
+		/>
+		<TextField
+			type="date"
+			{form}
+			field="due_date"
+			label={m.dueDate()}
+			helpText={m.dueDateHelpText()}
+			cacheLock={cacheLocks['due_date']}
+			bind:cachedValue={formDataCache['due_date']}
+		/>
+		<MarkdownField
+			{form}
+			field="objectives"
+			label={m.objectives()}
+			cacheLock={cacheLocks['objectives']}
+			bind:cachedValue={formDataCache['objectives']}
+		/>
+		<MarkdownField
+			{form}
+			field="constraints_hypotheses"
+			label={m.constraintsHypotheses()}
+			cacheLock={cacheLocks['constraints_hypotheses']}
+			bind:cachedValue={formDataCache['constraints_hypotheses']}
+		/>
+		{#if responsibilityMatricesEnabled}
+			<AutocompleteSelect
+				{form}
+				optionsEndpoint="responsibility-matrices"
+				optionsExtraFields={[['folder', 'str']]}
+				field="responsibility_matrix"
+				label={m.responsibilityMatrix()}
+				helpText={m.ebiosRmStudyResponsibilityMatrixHelpText()}
+				allowUserOptions
+				nullable
+				cacheLock={cacheLocks['responsibility_matrix']}
+				bind:cachedValue={formDataCache['responsibility_matrix']}
+			/>
+		{/if}
 	</div>
 	<div
 		class="relative p-2 space-y-2 rounded-md {activeActivity === 'two'
@@ -227,7 +369,8 @@
 	<MarkdownField
 		{form}
 		field="observation"
-		label={m.observation()}
+		label={m.executiveSummary()}
+		helpText={m.ebiosRmExecutiveSummaryHelpText()}
 		cacheLock={cacheLocks['observation']}
 		bind:cachedValue={formDataCache['observation']}
 	/>

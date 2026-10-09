@@ -39,6 +39,12 @@
 		tags={['assets', 'graph', 'canvas', 'prototype']}
 	/>
 	<Article
+		title="Asset Dependency Map"
+		desc="Focus on one asset and see everything it depends on and everything depending on it, across domains. Link, unlink and create assets in place."
+		link="/experimental/asset-map"
+		tags={['assets', 'graph', 'dependencies', 'prototype']}
+	/>
+	<Article
 		title="Analytics Export"
 		desc="Export all analytics dashboard data as a multi-sheet Excel file (Summary, Risk Levels, Compliance, Controls, Incidents) — ready to use in Power BI or any reporting tool."
 		link="/experimental/analytics-export"

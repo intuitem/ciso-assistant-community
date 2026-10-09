@@ -138,6 +138,15 @@
 		currentFilterSearch = search ? `?${search}` : '';
 	}
 
+	let currentSearch = $state('');
+	const exportFilterSearch = $derived.by(() => {
+		const params = new URLSearchParams(currentFilterSearch);
+		if (currentSearch) params.set('search', currentSearch);
+		else params.delete('search');
+		const search = params.toString();
+		return search ? `?${search}` : '';
+	});
+
 	// The list is already scoped to one kind (the menu links carry it, and the filter
 	// chip keeps it current), so creating from here inherits it instead of asking again.
 	const campaignKinds = $derived(
@@ -185,12 +194,12 @@
 	}
 
 	function modalExport(): void {
-		const hasFilters = currentFilterSearch.length > 0;
+		const hasFilters = exportFilterSearch.length > 0;
 		const groups: ExportGroup[] = hasFilters
 			? [
 					{
 						titleKey: 'exportGroupCurrentView',
-						options: buildTableExportOptions(currentFilterSearch)
+						options: buildTableExportOptions(exportFilterSearch)
 					},
 					{ titleKey: 'exportGroupEntireTable', options: buildTableExportOptions('') }
 				]
@@ -396,6 +405,7 @@
 				numberRowsPerPage={URLModel === 'notifications' ? 50 : undefined}
 				loading={isSyncing}
 				onFilterChange={handleFilterChange}
+				onQueryChange={(query) => (currentSearch = new URLSearchParams(query).get('search') ?? '')}
 			>
 				{#snippet addButton()}
 					<div class="relative">
@@ -419,7 +429,7 @@
 									onclick={handlers(modalAddForm, handleClickForGT)}
 									><i class="fa-solid fa-file-circle-plus"></i>
 								</button>
-								{#if ['applied-controls', 'assets', 'incidents', 'security-exceptions', 'risk-scenarios', 'processings', 'task-templates', 'entities', 'solutions', 'contracts', 'representatives'].includes(URLModel)}
+								{#if ['applied-controls', 'assets', 'incidents', 'security-exceptions', 'risk-scenarios', 'processings', 'task-templates', 'entities', 'solutions', 'contracts', 'representatives', 'entity-assessments', 'folders'].includes(URLModel)}
 									<button
 										class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
 										title={m.exportButton()}

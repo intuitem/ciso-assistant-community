@@ -11,11 +11,12 @@
 
 	interface Props {
 		elementaryActions: ElementaryActionItem[];
-		placedNodeIds: Set<string>;
+		placedActionIds: Set<string>;
 		onCreateAction?: () => void;
+		onEditAction?: (eaId: string) => void;
 	}
 
-	let { elementaryActions, placedNodeIds, onCreateAction }: Props = $props();
+	let { elementaryActions, placedActionIds, onCreateAction, onEditAction }: Props = $props();
 
 	let searchQuery = $state('');
 
@@ -127,22 +128,30 @@
 				{#if !collapsedStages.has(stageConfig.stage)}
 					<div class="space-y-1 mt-1">
 						{#each actions as action}
-							{@const isPlaced = placedNodeIds.has(action.id)}
+							{@const isPlaced = placedActionIds.has(action.id)}
 							<div
-								class="flex items-center gap-2 px-2 py-1.5 rounded-base border text-xs
-									{isPlaced
-									? 'border-surface-200-800 bg-surface-100-900 text-surface-500 cursor-not-allowed opacity-50'
-									: STAGE_COLORS[stageConfig.stage] + ' cursor-grab hover:shadow-sm'}"
-								draggable={!isPlaced}
-								ondragstart={(e) => {
-									if (!isPlaced) handleDragStart(e, action);
-								}}
-								role={isPlaced ? 'presentation' : 'listitem'}
+								class="group flex items-center gap-2 px-2 py-1.5 rounded-base border text-xs {STAGE_COLORS[
+									stageConfig.stage
+								]} cursor-grab hover:shadow-sm"
+								draggable="true"
+								ondragstart={(e) => handleDragStart(e, action)}
+								role="listitem"
 							>
 								{#if action.icon_fa_class}
 									<i class="{action.icon_fa_class} text-[10px]"></i>
 								{/if}
 								<span class="text-wrap flex-1">{action.name}</span>
+								{#if onEditAction}
+									<button
+										type="button"
+										aria-label="{m.edit()} {action.name}"
+										title="{m.edit()} {m.elementaryAction()}"
+										class="inline-flex opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-surface-500 hover:text-primary-500 cursor-pointer"
+										onclick={() => onEditAction(action.id)}
+									>
+										<i class="fa-solid fa-pen-to-square text-[10px]"></i>
+									</button>
+								{/if}
 								{#if isPlaced}
 									<i class="fa-solid fa-check text-[10px] text-success-500"></i>
 								{/if}

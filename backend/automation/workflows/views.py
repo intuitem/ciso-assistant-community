@@ -5,8 +5,11 @@ import json
 import yaml
 from django.contrib.auth.models import Permission
 import django_filters as df
+import uuid
+
+import structlog
 from django.db import transaction
-from django.db.models import Count, Prefetch
+from django.db.models import BooleanField, Count, ExpressionWrapper, Prefetch, Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils.crypto import constant_time_compare
@@ -60,6 +63,9 @@ from .serializers import (
 from .validation import DISABLED_ACTION_TYPES, DISABLED_NODE_TYPES, validate_graph
 
 LONG_CACHE_TTL = 60
+
+
+logger = structlog.get_logger(__name__)
 
 
 class _NoAliasSafeLoader(yaml.SafeLoader):
@@ -352,6 +358,8 @@ class WorkflowVersionViewSet(WorkflowsFeatureGate, BaseModelViewSet):
     permission_overrides = {
         "discard": "delete_workflowversion",
         "publish": "change_workflowversion",
+        # Read-only evaluation for the editor: seeing the version is enough.
+        "preview_expression": "view_workflowversion",
     }
 
     # Versions are lifecycle-managed: the first version is created with its
@@ -445,6 +453,52 @@ class WorkflowVersionViewSet(WorkflowsFeatureGate, BaseModelViewSet):
             return Response({"errors": errors}, status=status.HTTP_400_BAD_REQUEST)
         version.publish(request.user)
         return Response(serialize_graph(version))
+
+    @action(detail=True, methods=["post"], url_path="preview-expression")
+    def preview_expression(self, request, pk=None):
+        """Evaluate the compute rows of one step for the editor, against a
+        reference run of this workflow or the draft's defaults. Evaluation
+        failures come back as 200 results with ok: false: they are the
+        answer, not a fault. Malformed requests get a 400 with a stable code."""
+        from .preview import PreviewRequestError, preview_compute_rows
+
+        version = self.get_object()
+        data = request.data if isinstance(request.data, dict) else {}
+        instance = None
+        run_id = data.get("reference_run")
+        if run_id:
+            try:
+                run_uuid = uuid.UUID(str(run_id))
+            except ValueError:
+                run_uuid = None
+            # Same workflow, and a run this user may view. Instances keep
+            # their folder when a workflow moves, so seeing the version does
+            # not imply seeing every run; without this, a run id and the
+            # expression `nodes` would return every step output.
+            if run_uuid is not None:
+                instance = WorkflowInstance.objects.filter(
+                    id=run_uuid,
+                    workflow=version.workflow,
+                    id__in=RoleAssignment.get_viewable_object_ids(
+                        request.user, WorkflowInstance
+                    ),
+                ).first()
+            if instance is None:
+                return Response(
+                    {"error": "referenceRunNotFound"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        try:
+            results = preview_compute_rows(version, data.get("rows"), instance=instance)
+        except PreviewRequestError as e:
+            logger.warning(
+                "compute_preview_bad_request",
+                code=e.code,
+                version_id=str(version.id),
+                user_id=str(request.user.id),
+            )
+            return Response({"error": e.code}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"results": results})
 
     @action(detail=True, methods=["get"], url_path="required-permissions")
     def required_permissions(self, request, pk=None):
@@ -691,11 +745,18 @@ class WorkflowInstanceViewSet(WorkflowsFeatureGate, BaseModelViewSet):
         active_tokens = WorkflowToken.objects.filter(
             status__in=ACTIVE_TOKEN_STATUSES
         ).select_related("current_node")
-        return queryset.select_related(
+        queryset = queryset.select_related(
             "version__run_as", "initiated_by", "workflow", "folder"
         ).prefetch_related(
             Prefetch("tokens", queryset=active_tokens, to_attr="active_tokens")
         )
+        if self.action == "list":
+            queryset = queryset.defer("node_outputs", "variables").annotate(
+                has_outputs=ExpressionWrapper(
+                    ~Q(node_outputs={}), output_field=BooleanField()
+                )
+            )
+        return queryset
 
     def create(self, request, *args, **kwargs):
         """Launching a run: POST {version: uuid, entry_node_ref?: str}.

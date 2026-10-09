@@ -20,7 +20,7 @@ import structlog
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import UploadedFile
-from django.db import IntegrityError, models
+from django.db import IntegrityError, models, transaction
 from django.db.models import Q
 from django.http import FileResponse, HttpRequest
 from django.utils import timezone
@@ -31,6 +31,7 @@ from rest_framework.views import APIView
 
 from core.base_models import AbstractBaseModel
 from core.constants import COUNTRY_CHOICES
+from core.cyfun import CYFUN_2025_URN
 from core.models import (
     Actor,
     AppliedControl,
@@ -82,14 +83,13 @@ from core.serializers import (
     VulnerabilityWriteSerializer,
 )
 from core.utils import (
-    AUDITOR_ONLY,
     build_questions_dict,
     get_global_currency,
     parse_answers_cell,
+    unescape_excel_formula,
 )
 from data_wizard.arm_helpers import process_arm_file
 from data_wizard.cyfun_helpers import (
-    CYFUN_FRAMEWORK_URN,
     CYFUN_LIBRARY_URN,
     LEVEL_TO_GROUP,
     process_cyfun_file,
@@ -427,21 +427,31 @@ def _resolve_asset_class(value: Any, path_index: dict) -> Optional[AssetClass]:
     return candidates[0] if len(candidates) == 1 else None
 
 
+def _split_label_names(value: Any) -> set[str]:
+    """Split a pipe-, comma- or newline-separated cell into label names."""
+    if not isinstance(value, str):
+        return set()
+    return {name.strip() for name in re.split(r"[|,\n]", value) if name.strip()}
+
+
+def _invalid_label_names(names: set[str]) -> list[str]:
+    """Names FilteringLabel would reject, so a row can fail with a clear message."""
+    field = FilteringLabel._meta.get_field("label")
+    invalid = []
+    for name in names:
+        try:
+            field.run_validators(name)
+        except ValidationError:
+            invalid.append(name)
+    return sorted(invalid)
+
+
 def _resolve_filtering_labels(value: Any) -> list[UUID]:
     """Parse pipe- or comma-separated label names and return list of FilteringLabel IDs.
 
     Labels that do not yet exist are created on the fly.
     """
-    if not isinstance(value, str):
-        return []
-
-    value = value.strip()
-    if not value:
-        return []
-
-    label_names = set(
-        name.strip() for name in re.split(r"[|,\n]", value) if name.strip()
-    )
+    label_names = _split_label_names(value)
     label_ids: list[UUID] = []
     for label_name in label_names:
         label = FilteringLabel.objects.filter(label=label_name).first()
@@ -641,34 +651,46 @@ def _resolve_owners(value: Any) -> list[UUID]:
 
 
 def build_matrix_mappings(risk_matrix: RiskMatrix) -> dict:
-    """Label-to-value mappings for probability and impact, translations included."""
+    """Label-to-value mappings for probability and impact, translations included.
+
+    A level's value is its position in the matrix definition, which is how
+    risk scenarios index levels everywhere else. Levels carry no reliable
+    "id": built-in libraries and builder-published matrices omit it.
+    """
     mappings: dict[str, dict[str, int]] = {"probability": {}, "impact": {}}
 
     try:
         matrix_definition = risk_matrix.json_definition
         for dimension in ("probability", "impact"):
-            for entry in matrix_definition.get(dimension, []):
-                entry_id = entry.get("id")
-                if entry_id is None:
-                    continue
+            for index, entry in enumerate(matrix_definition.get(dimension, [])):
                 name = entry.get("name", "")
                 if name:
-                    mappings[dimension][name.lower()] = entry_id
-                for translation in entry.get("translations", {}).values():
+                    mappings[dimension][name.strip().lower()] = index
+                for translation in (entry.get("translations") or {}).values():
                     translated = translation.get("name", "")
                     if translated:
-                        mappings[dimension][translated.lower()] = entry_id
+                        mappings[dimension][translated.strip().lower()] = index
     except Exception:
         logger.warning("matrix_mappings_build_failed", exc_info=True)
 
     return mappings
 
 
+# Label the exports write for an unrated level (see RiskScenario._get_risk_data).
+NOT_RATED_LABEL = "--"
+
+
+def is_blank_cell(value: Any) -> bool:
+    return value is None or (isinstance(value, str) and not value.strip())
+
+
 def map_risk_value(value: Any, mapping_dict: dict) -> int:
     """Map a probability/impact label to its matrix value, -1 when undefined."""
-    if value is None or value == "":
+    if is_blank_cell(value):
         return -1
     clean_value = str(value).strip().lower()
+    if clean_value == NOT_RATED_LABEL:
+        return -1
     if clean_value in mapping_dict:
         return mapping_dict[clean_value]
     logger.warning(
@@ -1045,9 +1067,21 @@ class RecordConsumer[Context = None](ABC):
             existing = None
             internal_id = record.get("internal_id")
             if internal_id:
-                existing = model_class.objects.filter(
-                    pk=internal_id, id__in=viewable_ids
-                ).first()
+                try:
+                    existing = model_class.objects.filter(
+                        pk=internal_id, id__in=viewable_ids
+                    ).first()
+                except ValidationError, ValueError:
+                    # A hand-edited id would otherwise abort the whole file.
+                    results.add_error(
+                        Error(
+                            record=record, error=f"Invalid internal_id '{internal_id}'"
+                        )
+                    )
+                    if self.on_conflict == ConflictMode.STOP:
+                        results.stopped = True
+                        break
+                    continue
             if existing is None:
                 try:
                     existing = self.find_existing(record_data)
@@ -1071,44 +1105,21 @@ class RecordConsumer[Context = None](ABC):
                         break
                     case ConflictMode.UPDATE:
                         update_data = self._build_update_data(record, record_data)
-                        serializer = self.get_serializer_class()(
-                            instance=existing,
-                            data=update_data,
-                            partial=True,
-                            context={"request": self.request},
-                        )
-                        if serializer.is_valid():
-                            try:
-                                serializer.save()
-                                results.add_updated()
-                            except Exception as e:
-                                results.add_error(Error(record=record, error=str(e)))
+                        error = self._write_record(update_data, instance=existing)
+                        if error:
+                            results.add_error(Error(record=record, error=error))
                         else:
-                            results.add_error(
-                                Error(
-                                    record=record,
-                                    error=str(serializer.errors),
-                                )
-                            )
+                            results.add_updated()
                         continue
 
-            serializer = self.get_serializer_class()(
-                data=record_data, context={"request": self.request}
-            )
-            if serializer.is_valid():
-                try:
-                    serializer.save()
-                    results.add_created()
-                except Exception as e:
-                    results.add_error(Error(record=record, error=str(e)))
-                    if self.on_conflict == ConflictMode.STOP:
-                        results.stopped = True
-                        break
-            else:
-                results.add_error(Error(record=record, error=str(serializer.errors)))
+            error = self._write_record(record_data)
+            if error:
+                results.add_error(Error(record=record, error=error))
                 if self.on_conflict == ConflictMode.STOP:
                     results.stopped = True
                     break
+            else:
+                results.add_created()
 
         for key, names in self.side_effects.items():
             if names:
@@ -1120,6 +1131,40 @@ class RecordConsumer[Context = None](ABC):
             f"Skipped: {results.skipped}, Failed: {results.failed}"
         )
         return results
+
+    def resolve_deferred(self, data: dict, instance=None) -> dict:
+        """Resolve values whose resolution writes to the database.
+
+        Runs only once a row is known to be written, inside the transaction of
+        that write, so a skipped or rejected row leaves nothing behind.
+        *instance* is the record being updated, None on creation.
+        """
+        return data
+
+    def after_write(self, instance, created: bool) -> None:
+        """Follow-up writes for a saved row, inside the transaction of that write."""
+
+    def _write_record(self, data: dict, instance=None) -> Optional[str]:
+        """Create, or update *instance*, from *data*; return an error or None."""
+        with transaction.atomic():
+            # Validation can raise too (e.g. PermissionDenied when linking an
+            # object the user cannot view): that must fail the row, not the file.
+            try:
+                serializer = self.get_serializer_class()(
+                    instance=instance,
+                    data=self.resolve_deferred(data, instance),
+                    partial=instance is not None,
+                    context={"request": self.request},
+                )
+                if not serializer.is_valid():
+                    transaction.set_rollback(True)
+                    return str(serializer.errors)
+                saved = serializer.save()
+                self.after_write(saved, created=instance is None)
+            except Exception as e:
+                transaction.set_rollback(True)
+                return str(e)
+        return None
 
     def _record_side_effects(self, key: str, resolved: SideObjects) -> None:
         self.side_effects.setdefault(key, []).extend(resolved.created)
@@ -1899,8 +1944,10 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
         record_severity = record.get("severity")
         severity = self.SEVERITY_MAP.get(record_severity, -1)
 
-        # Parse priority (1-4)
+        # Parse priority: 1-4, or the "P1".."P4" labels the export writes
         priority = record.get("priority")
+        if isinstance(priority, str):
+            priority = priority.strip().upper().removeprefix("P")
         if isinstance(priority, (int, float)):
             priority = int(priority)
         elif isinstance(priority, str) and priority.isdigit():
@@ -1961,6 +2008,7 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
             "eta": _parse_date(record.get("eta")),
             "due_date": _parse_date(record.get("due_date")),
             "observation": record.get("observation", ""),
+            "recommendation": record.get("recommendation", ""),
             "vulnerabilities": vulnerabilities,
             "applied_controls": applied_controls.ids,
         }
@@ -2035,6 +2083,14 @@ class RiskAssessmentRecordConsumer(RecordConsumer[RiskAssessmentContext]):
             "assets": ["assets", "asset"],
             "filtering_labels": ["filtering_labels", "labels", "label"],
         }
+    )
+    RISK_LEVEL_FIELDS: ClassVar[tuple[str, ...]] = (
+        "inherent_impact",
+        "inherent_proba",
+        "current_impact",
+        "current_proba",
+        "residual_impact",
+        "residual_proba",
     )
 
     def create_context(self) -> tuple[Optional[RiskAssessmentContext], Optional[Error]]:
@@ -2170,21 +2226,6 @@ class RiskAssessmentRecordConsumer(RecordConsumer[RiskAssessmentContext]):
             "ref_id": record.get("ref_id", ""),
             "description": record.get("description", ""),
             "risk_assessment": context.risk_assessment.id,
-            "inherent_impact": map_risk_value(record.get("inherent_impact"), impact),
-            "inherent_proba": map_risk_value(
-                record.get("inherent_proba") or record.get("inherent_probability"),
-                probability,
-            ),
-            "current_impact": map_risk_value(record.get("current_impact"), impact),
-            "current_proba": map_risk_value(
-                record.get("current_proba") or record.get("current_probability"),
-                probability,
-            ),
-            "residual_impact": map_risk_value(record.get("residual_impact"), impact),
-            "residual_proba": map_risk_value(
-                record.get("residual_proba") or record.get("residual_probability"),
-                probability,
-            ),
             "treatment": next(
                 (opt for opt, _ in RiskScenario.TREATMENT_OPTIONS if treatment == opt),
                 "open",
@@ -2198,8 +2239,33 @@ class RiskAssessmentRecordConsumer(RecordConsumer[RiskAssessmentContext]):
             ),
         }
 
+        # A level is only written when its cell holds a matrix label or the
+        # explicit "--" (unrated). Blank cells and unknown labels leave the
+        # field out: a new scenario gets the -1 default, an update keeps the
+        # existing rating. Unknown labels are reported on the row.
+        unmapped = []
+        for field_name in self.RISK_LEVEL_FIELDS:
+            raw = next(
+                (
+                    record[key]
+                    for key in self.SOURCE_KEY_MAP.get(field_name, [field_name])
+                    if not is_blank_cell(record.get(key))
+                ),
+                None,
+            )
+            if raw is None:
+                continue
+            mapping = impact if field_name.endswith("_impact") else probability
+            value = map_risk_value(raw, mapping)
+            if value == -1 and str(raw).strip() != NOT_RATED_LABEL:
+                unmapped.append(f"{field_name} '{str(raw).strip()}'")
+                continue
+            scenario_data[field_name] = value
+
         unresolved = existing_controls.failed + additional_controls.failed
         messages = []
+        if unmapped:
+            messages.append(f"Not in the risk matrix: {', '.join(unmapped)}")
         if unresolved:
             messages.append(f"Could not resolve controls: {', '.join(unresolved)}")
         if assets.failed:
@@ -2780,11 +2846,60 @@ class FolderRecordConsumer(RecordConsumer):
     SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType(
         {
             "parent_folder": ["domain"],
+            "filtering_labels": ["filtering_labels", "labels", "étiquette", "label"],
         }
     )
 
     def create_context(self):
         return None, None
+
+    @cached_property
+    def may_add_labels(self) -> bool:
+        # New labels are created in the root folder (FolderMixin's default).
+        return RoleAssignment.is_access_allowed(
+            user=self.request.user,
+            perm=Permission.objects.get(codename="add_filteringlabel"),
+            folder=Folder.get_root_folder(),
+        )
+
+    def _resolve_parent(self, record: dict) -> tuple[Optional[UUID], Optional[Error]]:
+        """Resolve the `domain` column, a parent domain given by name."""
+        domain_name = str(record.get("domain", "")).strip()
+        if not domain_name:
+            return Folder.get_root_folder().id, None
+
+        # Names are not unique: a row exported with its internal_id keeps its
+        # current parent while that parent's name is unchanged.
+        internal_id = record.get("internal_id")
+        if internal_id:
+            try:
+                current = (
+                    Folder.objects.filter(id=internal_id)
+                    .select_related("parent_folder")
+                    .first()
+                )
+            except ValidationError, ValueError:
+                current = None  # reported when the row is matched
+            parent = current.parent_folder if current else None
+            if parent and parent.name.lower() == domain_name.lower():
+                return parent.id, None
+
+        # The root counts too: files may name it instead of leaving `domain` blank.
+        matching_folders = Folder.objects.filter(
+            name__iexact=domain_name,
+            content_type__in=[Folder.ContentType.DOMAIN, Folder.ContentType.ROOT],
+        )
+        count = matching_folders.count()
+        if count == 0:
+            return None, Error(
+                record=record, error=f"Parent folder '{domain_name}' not found"
+            )
+        if count > 1:
+            return None, Error(
+                record=record,
+                error=f"Multiple folders named '{domain_name}' found; please use a unique name",
+            )
+        return matching_folders.first().id, None
 
     def find_existing(self, record_data: dict) -> Optional[Folder]:
         name = record_data.get("name")
@@ -2799,33 +2914,88 @@ class FolderRecordConsumer(RecordConsumer):
     def prepare_create(
         self, record: dict, context: None
     ) -> tuple[dict, Optional[Error]]:
+        # A domains export escapes formula-like cells; undo it so they round-trip.
+        record = {key: unescape_excel_formula(value) for key, value in record.items()}
         name = record.get("name")
         if not name:
             return {}, Error(record=record, error="Name field is mandatory")
 
-        domain_name = str(record.get("domain", "")).strip()
-        if domain_name:
-            matching_folders = Folder.objects.filter(name__iexact=domain_name)
-            count = matching_folders.count()
-            if count == 0:
-                return {}, Error(
-                    record=record,
-                    error=f"Parent folder '{domain_name}' not found",
-                )
-            if count > 1:
-                return {}, Error(
-                    record=record,
-                    error=f"Multiple folders named '{domain_name}' found; please use a unique name",
-                )
-            parent_folder_id = matching_folders.first().id
-        else:
-            parent_folder_id = Folder.get_root_folder().id
+        parent_folder_id, error = self._resolve_parent(record)
+        if error is not None:
+            return {}, error
 
-        return {
+        data = {
             "name": name,
             "description": record.get("description", ""),
             "parent_folder": parent_folder_id,
-        }, None
+        }
+
+        raw_labels = (
+            record.get("filtering_labels")
+            or record.get("labels")
+            or record.get("étiquette")
+            or record.get("label")
+        )
+        label_names = _split_label_names(raw_labels)
+        invalid_labels = _invalid_label_names(label_names)
+        if invalid_labels:
+            return {}, Error(
+                record=record,
+                error=f"Invalid labels {', '.join(invalid_labels)}: use only "
+                "letters, digits, '_' or '-', 36 characters at most",
+            )
+        if label_names and not self.may_add_labels:
+            existing = set(
+                FilteringLabel.objects.filter(label__in=label_names).values_list(
+                    "label", flat=True
+                )
+            )
+            missing = sorted(label_names - existing)
+            if missing:
+                return {}, Error(
+                    record=record,
+                    error=f"You are not allowed to create labels: {', '.join(missing)}",
+                )
+        # Kept as names: missing labels are created only when the row is written.
+        if label_names:
+            data["filtering_labels"] = raw_labels
+
+        raw_iam_groups = record.get("create_iam_groups")
+        if not is_blank_cell(raw_iam_groups):
+            create_iam_groups = _parse_bool_cell(raw_iam_groups, binary_only=True)
+            if create_iam_groups is None:
+                return {}, Error(
+                    record=record,
+                    error=f"Invalid create_iam_groups '{raw_iam_groups}': "
+                    "use true or false",
+                )
+            data["create_iam_groups"] = create_iam_groups
+
+        return data, None
+
+    def after_write(self, instance: Folder, created: bool) -> None:
+        # The API provisions IAM groups in FolderViewSet.perform_create, which the
+        # import bypasses; on update, the serializer handles the flag change.
+        if created:
+            Folder.create_default_ug_and_ra(instance)
+
+    @cached_property
+    def viewable_label_ids(self) -> set:
+        return set(
+            RoleAssignment.get_viewable_object_ids(self.request.user, FilteringLabel)
+        )
+
+    def resolve_deferred(self, data: dict, instance=None) -> dict:
+        if "filtering_labels" not in data:
+            return data
+        label_ids = _resolve_filtering_labels(data["filtering_labels"])
+        if instance is not None:
+            # The export only lists the labels the user may view: the cell cannot
+            # mention the others, so it must not unlink them.
+            label_ids += instance.filtering_labels.exclude(
+                id__in=self.viewable_label_ids
+            ).values_list("id", flat=True)
+        return {**data, "filtering_labels": label_ids}
 
 
 class VulnerabilityRecordConsumer(RecordConsumer[None]):
@@ -4230,9 +4400,8 @@ class LoadFileView(APIView):
                         ).fillna("")
                     else:
                         file_type = RecordFileType.CSV
-                        # utf-8-sig transparently strips a leading BOM (added to our
-                        # CSV exports for Excel) so the first column header is not corrupted.
-                        df = pd.read_csv(record_file, encoding="utf-8-sig").fillna("")
+                        # Detects the delimiter: our table exports use ';'.
+                        df = read_csv_file(record_file)
 
                     try:
                         df = normalize_df_columns(df)
@@ -4513,7 +4682,16 @@ class LoadFileView(APIView):
         except ValueError as e:
             return fail(e.args[0] if e.args else "UnrecognizedCyfunWorkbook")
 
-        if not LoadedLibrary.objects.filter(urn=CYFUN_LIBRARY_URN).exists():
+        loaded_library = LoadedLibrary.objects.filter(urn=CYFUN_LIBRARY_URN).first()
+        if loaded_library is not None and (
+            StoredLibrary.objects.filter(
+                urn=CYFUN_LIBRARY_URN, version__gt=loaded_library.version
+            ).exists()
+        ):
+            # The import relies on the scoring settings of the current library
+            # (calculation method, visibility...): update the library first.
+            return fail("CyfunLibraryOutdated")
+        if loaded_library is None:
             stored_library = StoredLibrary.objects.filter(urn=CYFUN_LIBRARY_URN).first()
             if stored_library is None:
                 return fail("CyfunLibraryNotFound")
@@ -4522,7 +4700,7 @@ class LoadFileView(APIView):
                 logger.error("CyFun library import failed", error=error)
                 return fail("CyfunLibraryImportFailed")
         try:
-            framework = Framework.objects.get(urn=CYFUN_FRAMEWORK_URN)
+            framework = Framework.objects.get(urn=CYFUN_2025_URN)
         except Framework.DoesNotExist:
             return fail("CyfunFrameworkNotFound")
 
@@ -4546,12 +4724,6 @@ class LoadFileView(APIView):
             "perimeter": perimeter_id,
             "framework": framework.id,
             "folder": folder_id,
-            "score_calculation_method": ComplianceAssessment.CalculationMethod.AVG_OF_AVG,
-            "field_visibility": {
-                "score": dict(AUDITOR_ONLY),
-                "is_scored": dict(AUDITOR_ONLY),
-                "documentation_score": dict(AUDITOR_ONLY),
-            },
         }
         level = parsed["assurance_level"]
         if level:
@@ -4560,21 +4732,25 @@ class LoadFileView(APIView):
         serializer = ComplianceAssessmentWriteSerializer(
             data=assessment_data, context={"request": request}
         )
-        try:
-            serializer.is_valid(raise_exception=True)
-            compliance_assessment = serializer.save()
-            compliance_assessment.create_requirement_assessments()
-        except Exception as e:
-            logger.error("Failed to create CyFun compliance assessment", error=e)
-            return fail("CyfunAssessmentCreationFailed")
-        logger.info(
-            "Created CyFun compliance assessment",
-            id=compliance_assessment.id,
-            assurance_level=level,
-        )
-        return self._reconcile_compliance_requirements(
-            request, parsed["records"], compliance_assessment, framework.id, results
-        )
+        # One transaction: the outcome rules are evaluated once, at commit,
+        # instead of after every imported row.
+        with transaction.atomic():
+            try:
+                serializer.is_valid(raise_exception=True)
+                compliance_assessment = serializer.save()
+                compliance_assessment.create_requirement_assessments()
+            except Exception as e:
+                logger.error("Failed to create CyFun compliance assessment", error=e)
+                transaction.set_rollback(True)
+                return fail("CyfunAssessmentCreationFailed")
+            logger.info(
+                "Created CyFun compliance assessment",
+                id=compliance_assessment.id,
+                assurance_level=level,
+            )
+            return self._reconcile_compliance_requirements(
+                request, parsed["records"], compliance_assessment, framework.id, results
+            )
 
     @staticmethod
     def _resolve_summary_row_template(
@@ -4939,149 +5115,160 @@ class LoadFileView(APIView):
                 )
                 continue
 
+            # Controls this row created; dropped if the row rolls back.
+            row_controls: list[str] = []
             try:
-                # ref_id wins, but a stale ref_id must still fall back to urn.
-                ReqNode = None
-                if ref_id:
-                    ReqNode = RequirementNode.objects.filter(
-                        framework__id=framework_id, ref_id=ref_id
-                    ).first()
-                if ReqNode is None and urn:
-                    ReqNode = RequirementNode.objects.filter(
-                        framework__id=framework_id, urn=urn
-                    ).first()
+                # A savepoint per row: a failing row rolls back alone instead of
+                # aborting the caller's transaction for the rows after it.
+                with transaction.atomic():
+                    # ref_id wins, but a stale ref_id must still fall back to urn.
+                    ReqNode = None
+                    if ref_id:
+                        ReqNode = RequirementNode.objects.filter(
+                            framework__id=framework_id, ref_id=ref_id
+                        ).first()
+                    if ReqNode is None and urn:
+                        ReqNode = RequirementNode.objects.filter(
+                            framework__id=framework_id, urn=urn
+                        ).first()
 
-                requirement_assessment = None
-                if ReqNode:
-                    requirement_assessment = RequirementAssessment.objects.filter(
-                        compliance_assessment=compliance_assessment,
-                        requirement=ReqNode,
-                    ).first()
-                else:
-                    logger.warning("Import attempt: unknown ref_id/urn")
+                    requirement_assessment = None
+                    if ReqNode:
+                        requirement_assessment = RequirementAssessment.objects.filter(
+                            compliance_assessment=compliance_assessment,
+                            requirement=ReqNode,
+                        ).first()
+                    else:
+                        logger.warning("Import attempt: unknown ref_id/urn")
 
-                if requirement_assessment:
-                    compliance_result = record.get("compliance_result")
-                    requirement_progress = record.get("requirement_progress")
-                    observations = record.get("observations")
-                    requirement_data = {}
-                    if compliance_result not in (None, ""):
-                        requirement_data["result"] = compliance_result
-                    if requirement_progress not in (None, ""):
-                        requirement_data["status"] = requirement_progress
-                    if observations not in (None, ""):
-                        requirement_data["observation"] = observations
-                    controls_cell = record.get("applied_controls") or record.get(
-                        "controls"
-                    )
-                    if controls_cell not in (None, ""):
-                        controls = _resolve_applied_controls(
-                            controls_cell, compliance_assessment.folder, request
+                    if requirement_assessment:
+                        compliance_result = record.get("compliance_result")
+                        requirement_progress = record.get("requirement_progress")
+                        observations = record.get("observations")
+                        requirement_data = {}
+                        if compliance_result not in (None, ""):
+                            requirement_data["result"] = compliance_result
+                        if requirement_progress not in (None, ""):
+                            requirement_data["status"] = requirement_progress
+                        if observations not in (None, ""):
+                            requirement_data["observation"] = observations
+                        controls_cell = record.get("applied_controls") or record.get(
+                            "controls"
                         )
-                        controls_created.extend(controls.created)
-                        requirement_data["applied_controls"] = controls.ids
-                        if controls.failed:
-                            results["warnings"].append(
+                        if controls_cell not in (None, ""):
+                            controls = _resolve_applied_controls(
+                                controls_cell, compliance_assessment.folder, request
+                            )
+                            row_controls.extend(controls.created)
+                            requirement_data["applied_controls"] = controls.ids
+                            if controls.failed:
+                                results["warnings"].append(
+                                    {
+                                        "requirement": ReqNode.ref_id or ReqNode.urn,
+                                        "warning": f"Could not resolve controls: {', '.join(controls.failed)}",
+                                    }
+                                )
+                        impl_score = record.get("implementation_score")
+                        doc_score = record.get("documentation_score")
+                        score = record.get("score")
+                        enable_doc_score = False
+                        if impl_score not in (None, "") and doc_score not in (None, ""):
+                            requirement_data.update(
                                 {
-                                    "requirement": ReqNode.ref_id or ReqNode.urn,
-                                    "warning": f"Could not resolve controls: {', '.join(controls.failed)}",
+                                    "score": impl_score,
+                                    "documentation_score": doc_score,
+                                    "is_scored": True,
                                 }
                             )
-                    impl_score = record.get("implementation_score")
-                    doc_score = record.get("documentation_score")
-                    score = record.get("score")
-                    enable_doc_score = False
-                    if impl_score not in (None, "") and doc_score not in (None, ""):
-                        requirement_data.update(
-                            {
-                                "score": impl_score,
-                                "documentation_score": doc_score,
-                                "is_scored": True,
-                            }
-                        )
-                        enable_doc_score = True
-                    elif score not in (None, ""):
-                        requirement_data.update({"score": score, "is_scored": True})
+                            enable_doc_score = True
+                        elif score not in (None, ""):
+                            requirement_data.update({"score": score, "is_scored": True})
 
-                    # Build answers from the "answers" cell
-                    answers_cell = record.get("answers")
-                    questions_dict = build_questions_dict(ReqNode) if ReqNode else None
-                    if answers_cell not in (None, "") and questions_dict:
-                        answers, answer_warnings = parse_answers_cell(
-                            answers_cell, questions_dict
+                        # Build answers from the "answers" cell
+                        answers_cell = record.get("answers")
+                        questions_dict = (
+                            build_questions_dict(ReqNode) if ReqNode else None
                         )
-                        for warning in answer_warnings:
-                            results["warnings"].append(
-                                {
-                                    "requirement": ReqNode.ref_id or ReqNode.urn,
-                                    "warning": warning,
-                                }
+                        if answers_cell not in (None, "") and questions_dict:
+                            answers, answer_warnings = parse_answers_cell(
+                                answers_cell, questions_dict
                             )
-                        # An empty dict means every line was a hint or was
-                        # skipped; sending it would be a no-op write.
-                        if answers:
-                            requirement_data["answers"] = answers
+                            for warning in answer_warnings:
+                                results["warnings"].append(
+                                    {
+                                        "requirement": ReqNode.ref_id or ReqNode.urn,
+                                        "warning": warning,
+                                    }
+                                )
+                            # An empty dict means every line was a hint or was
+                            # skipped; sending it would be a no-op write.
+                            if answers:
+                                requirement_data["answers"] = answers
 
-                    override_cell = record.get("is_score_overridden")
-                    if override_cell not in (None, ""):
-                        override_value = _parse_bool_cell(
-                            override_cell, binary_only=True
+                        override_cell = record.get("is_score_overridden")
+                        if override_cell not in (None, ""):
+                            override_value = _parse_bool_cell(
+                                override_cell, binary_only=True
+                            )
+                            if override_value is None:
+                                results["failed"] += 1
+                                results["errors"].append(
+                                    {
+                                        "record": record,
+                                        "error": f"Invalid is_score_overridden value '{override_cell}': expected a boolean",
+                                    }
+                                )
+                                continue
+                            requirement_data["is_score_overridden"] = override_value
+                        elif (
+                            requirement_data.get("score") not in (None, "")
+                            and requirement_assessment.requirement.questions.exists()
+                        ):
+                            # Imported score on question-driven requirement = override
+                            requirement_data["is_score_overridden"] = True
+
+                        req_serializer = RequirementAssessmentWriteSerializer(
+                            instance=requirement_assessment,
+                            data=requirement_data,
+                            partial=True,
+                            context={"request": request},
                         )
-                        if override_value is None:
+                        if req_serializer.is_valid():
+                            req_serializer.save()
+                            if (
+                                enable_doc_score
+                                and not compliance_assessment.show_documentation_score
+                            ):
+                                # show_documentation_score is a @property backed by
+                                # `field_visibility`; the setter mutates that JSON
+                                # column, so update_fields must point at the concrete
+                                # field.
+                                compliance_assessment.show_documentation_score = True
+                                compliance_assessment.save(
+                                    update_fields=["field_visibility"]
+                                )
+                            results["successful"] += 1
+                        else:
                             results["failed"] += 1
                             results["errors"].append(
-                                {
-                                    "record": record,
-                                    "error": f"Invalid is_score_overridden value '{override_cell}': expected a boolean",
-                                }
+                                {"record": record, "errors": req_serializer.errors}
                             )
-                            continue
-                        requirement_data["is_score_overridden"] = override_value
-                    elif (
-                        requirement_data.get("score") not in (None, "")
-                        and requirement_assessment.requirement.questions.exists()
-                    ):
-                        # Imported score on question-driven requirement = override
-                        requirement_data["is_score_overridden"] = True
-
-                    req_serializer = RequirementAssessmentWriteSerializer(
-                        instance=requirement_assessment,
-                        data=requirement_data,
-                        partial=True,
-                        context={"request": request},
-                    )
-                    if req_serializer.is_valid():
-                        req_serializer.save()
-                        if (
-                            enable_doc_score
-                            and not compliance_assessment.show_documentation_score
-                        ):
-                            # show_documentation_score is a @property backed by
-                            # `field_visibility`; the setter mutates that JSON
-                            # column, so update_fields must point at the concrete
-                            # field.
-                            compliance_assessment.show_documentation_score = True
-                            compliance_assessment.save(
-                                update_fields=["field_visibility"]
-                            )
-                        results["successful"] += 1
                     else:
                         results["failed"] += 1
                         results["errors"].append(
-                            {"record": record, "errors": req_serializer.errors}
+                            {
+                                "record": record,
+                                "error": f"No matching requirement found with ref_id '{ref_id}' or urn '{urn}'",
+                            }
                         )
-                else:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {
-                            "record": record,
-                            "error": f"No matching requirement found with ref_id '{ref_id}' or urn '{urn}'",
-                        }
-                    )
             except Exception as e:
+                row_controls = []
                 logger.warning(f"Error updating requirement assessment: {str(e)}")
                 results["failed"] += 1
                 results["errors"].append({"record": record, "error": str(e)})
+            finally:
+                # Also after a row's early `continue`, which keeps its savepoint.
+                controls_created.extend(row_controls)
 
         if controls_created:
             results.setdefault("details", {})["applied_controls_created"] = len(
@@ -5824,6 +6011,11 @@ class LoadFileView(APIView):
                         solution_data["criticality"] = int(record.get("criticality"))
                     except ValueError, TypeError:
                         pass
+                    # Kept for existing files: the 1-4 value also sets the tier.
+                    from tprm.tiers import tier_for_criticality
+
+                    if tier := tier_for_criticality(record.get("criticality")):
+                        solution_data["tier"] = tier.id
 
                 # Check for existing solution by ref_id or name
                 existing_solution = Solution.objects.filter(ref_id=ref_id).first()

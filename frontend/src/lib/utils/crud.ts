@@ -10,6 +10,8 @@ import LibraryActions from '$lib/components/ModelTable/field/LibraryActions.svel
 import UserGroupNameDisplay from '$lib/components/ModelTable/field/UserGroupNameDisplay.svelte';
 import LecChartPreview from '$lib/components/ModelTable/field/LecChartPreview.svelte';
 import TriggerTypesDisplay from '$lib/components/ModelTable/field/TriggerTypesDisplay.svelte';
+import TierBadge from '$lib/components/ModelTable/field/TierBadge.svelte';
+import TierSource from '$lib/components/ModelTable/field/TierSource.svelte';
 import { listViewFields } from './table';
 import type { TableBatchAction } from './table';
 import type { urlModel } from './types';
@@ -188,6 +190,8 @@ export const MODEL_FEATURE_FLAGS: Record<string, FeatureFlag> = {
 	entities: 'tprm',
 	'entity-assessments': 'tprm',
 	'entity-scores': 'external_ratings',
+	tiers: 'tprm',
+	'entity-tier-changes': 'tprm',
 	representatives: 'tprm',
 	solutions: 'tprm',
 	findings: 'follow_up',
@@ -641,7 +645,10 @@ export const URL_MODEL_MAP: ModelMap = {
 		reverseForeignKeyFields: [
 			{
 				field: 'applied_controls',
-				urlModel: 'document-containers'
+				urlModel: 'document-containers',
+				addExisting: {
+					parentField: 'control_documents'
+				}
 			},
 			{
 				field: 'applied_controls',
@@ -672,20 +679,26 @@ export const URL_MODEL_MAP: ModelMap = {
 			{
 				field: 'applied_controls',
 				urlModel: 'findings',
-				disableCreate: true,
-				disableDelete: true
+				disableDelete: true,
+				addExisting: {
+					parentField: 'findings'
+				}
 			},
 			{
 				field: 'applied_controls',
 				urlModel: 'assets',
 				disableDelete: true,
-				disableCreate: true
+				addExisting: {
+					parentField: 'assets'
+				}
 			},
 			{
 				field: 'applied_controls',
 				urlModel: 'incidents',
-				disableCreate: true,
-				disableDelete: true
+				disableDelete: true,
+				addExisting: {
+					parentField: 'incidents'
+				}
 			}
 		],
 		selectFields: [
@@ -1234,6 +1247,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'library', urlModel: 'loaded-libraries' }
 		],
 		reverseForeignKeyFields: [
+			{ field: 'quick_form', urlModel: 'quick-form-publications' },
 			{ field: 'quick_form', urlModel: 'quick-form-responses', disableCreate: true }
 		]
 	},
@@ -1622,10 +1636,16 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		reverseForeignKeyFields: [
 			{ field: 'entity', urlModel: 'entity-assessments' },
-			{ field: 'entity', urlModel: 'entity-scores' },
 			{ field: 'entity', urlModel: 'representatives' },
 			{ field: 'provider_entity', urlModel: 'solutions' },
-			{ field: 'provider_entity', urlModel: 'contracts' }
+			{ field: 'provider_entity', urlModel: 'contracts' },
+			{ field: 'entity', urlModel: 'entity-scores' },
+			{
+				field: 'entity',
+				urlModel: 'entity-tier-changes',
+				disableCreate: true,
+				disableDelete: true
+			}
 		],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
@@ -1636,7 +1656,8 @@ export const URL_MODEL_MAP: ModelMap = {
 				field: 'relationship',
 				urlModel: 'terminologies',
 				urlParams: 'field_path=entity.relationship'
-			}
+			},
+			{ field: 'tier', urlModel: 'tiers', urlParams: 'is_visible=true' }
 		],
 		selectFields: [
 			{ field: 'country' },
@@ -1673,7 +1694,6 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'entity' },
 			{ field: 'status' },
 			{ field: 'conclusion' },
-			{ field: 'criticality' },
 			{ field: 'due_date', type: 'date' },
 			{ field: 'representatives' },
 			{ field: 'reviewers' },
@@ -1744,7 +1764,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'provider_entity' },
 			{ field: 'recipient_entity' },
 			{ field: 'is_active' },
-			{ field: 'criticality' },
+			{ field: 'tier' },
 			{ field: 'owner' },
 			{ field: 'assets' },
 			{ field: 'dora_ict_service_type' },
@@ -1820,6 +1840,37 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'updated_at', type: 'datetime' },
 			{ field: 'filtering_labels' }
 		]
+	},
+	tiers: {
+		name: 'tier',
+		localName: 'tier',
+		localNamePlural: 'tiers',
+		verboseName: 'Tier',
+		verboseNamePlural: 'Tiers',
+		detailViewFields: [
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'rank' },
+			{ field: 'hexcolor' },
+			{ field: 'is_visible' },
+			{ field: 'entities_count' }
+		],
+		reverseForeignKeyFields: [
+			{ field: 'tier', urlModel: 'entities', disableCreate: true, disableDelete: true }
+		]
+	},
+	'entity-tier-changes': {
+		name: 'entitytierchange',
+		localName: 'entityTierChange',
+		localNamePlural: 'entityTierChanges',
+		verboseName: 'Entity tier change',
+		verboseNamePlural: 'Entity tier changes',
+		foreignKeyFields: [
+			{ field: 'entity', urlModel: 'entities' },
+			{ field: 'tier', urlModel: 'tiers' },
+			{ field: 'previous_tier', urlModel: 'tiers' }
+		],
+		selectFields: [{ field: 'source' }]
 	},
 	'entity-scores': {
 		name: 'entityscore',
@@ -2360,6 +2411,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'compliance_assessments', urlModel: 'compliance-assessments' },
 			{ field: 'reference_entity', urlModel: 'entities' },
+			{ field: 'classification', urlModel: 'classification-levels' },
+			{ field: 'responsibility_matrix', urlModel: 'responsibility-matrices' },
 			{ field: 'risk_assessments', urlModel: 'risk-assessments' },
 			{ field: 'last_risk_assessment', urlModel: 'risk-assessments' },
 			{ field: 'validation_flows', urlModel: 'validation-flows' }
@@ -2411,12 +2464,21 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'terminologies',
 				urlParams: 'field_path=ro_to.risk_origin&is_visible=true'
 			},
+			{
+				field: 'target_objective_category',
+				urlModel: 'terminologies',
+				urlParams: 'field_path=ro_to.target_objective_category&is_visible=true'
+			},
 			{ field: 'folder', urlModel: 'folders' }
 		],
 		selectFields: [
-			{ field: 'motivation', valueType: 'number' },
-			{ field: 'resources', valueType: 'number' },
-			{ field: 'activity', valueType: 'number' }
+			...['motivation', 'resources', 'activity'].map((field) => ({
+				field,
+				valueType: 'number' as const,
+				detail: true,
+				endpointUrl: 'ebios-rm/studies',
+				formNestedField: 'ebios_rm_study'
+			}))
 		]
 	},
 	stakeholders: {
@@ -2426,6 +2488,18 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'stakeholders',
 		verboseName: 'Stakeholder',
 		verboseNamePlural: 'Stakeholders',
+		// Criteria and criticality are shown by StakeholderCriticalityWidget.
+		detailViewFields: [
+			{ field: 'ebios_rm_study' },
+			{ field: 'entity' },
+			{ field: 'category' },
+			{ field: 'is_selected' },
+			{ field: 'applied_controls' },
+			{ field: 'justification' },
+			{ field: 'folder' },
+			{ field: 'created_at' },
+			{ field: 'updated_at' }
+		],
 		foreignKeyFields: [
 			{ field: 'entity', urlModel: 'entities' },
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
@@ -2479,6 +2553,15 @@ export const URL_MODEL_MAP: ModelMap = {
 				field: 'strategic_scenario',
 				urlModel: 'attack-paths',
 				endpointUrl: 'ebios-rm/attack-paths'
+			}
+		],
+		selectFields: [
+			{
+				field: 'gravity',
+				valueType: 'number',
+				detail: true,
+				endpointUrl: 'ebios-rm/studies',
+				formNestedField: 'ebios_rm_study'
 			}
 		],
 		detailViewFields: [
@@ -2647,7 +2730,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'operating_mode', urlModel: 'operating-modes' },
 			{ field: 'elementary_action', urlModel: 'elementary-actions' },
-			{ field: 'antecedents', urlModel: 'elementary-actions' },
+			{ field: 'antecedents', urlModel: 'kill-chains' },
+			{ field: 'assets', urlModel: 'assets' },
 			{ field: 'folder', urlModel: 'folders' }
 		],
 		selectFields: [{ field: 'logic_operator' }]
@@ -4098,6 +4182,17 @@ const FIELD_COMPONENT_MAP = {
 	},
 	workflows: {
 		trigger_types: TriggerTypesDisplay
+	},
+	entities: {
+		tier: TierBadge
+	},
+	solutions: {
+		tier: TierBadge
+	},
+	'entity-tier-changes': {
+		tier: TierBadge,
+		previous_tier: TierBadge,
+		source: TierSource
 	}
 };
 

@@ -30,6 +30,50 @@ class MarkdownSafe(str):
 
 TEMPLATE_BASE_PATH = Path(__file__).parent / "templates" / "emails"
 
+_DAY_UNITS = {
+    "de": ("Tag", "Tagen"),
+    "en": ("day", "days"),
+    "fr": ("jour", "jours"),
+}
+
+_ASSIGNMENT_DECISIONS = {
+    "de": {
+        "closed": "geschlossen",
+        "reopened": "erneut geöffnet",
+        "changes_requested": "zur Überarbeitung zurückgegeben",
+    },
+    "en": {
+        "closed": "closed",
+        "reopened": "reopened",
+        "changes_requested": "returned with changes requested",
+    },
+    "fr": {
+        "closed": "clôturée",
+        "reopened": "rouverte",
+        "changes_requested": "renvoyée avec des modifications demandées",
+    },
+}
+
+
+def _language_code(locale: Optional[str]) -> str:
+    """Normalize a locale such as ``de-DE`` to a supported language code."""
+    language = (locale or "en").split("-")[0].lower()
+    return language if language in _DAY_UNITS else "en"
+
+
+def localize_day_unit(days: int, locale: Optional[str]) -> str:
+    """Return the language-specific day unit for a numeric duration."""
+    singular, plural = _DAY_UNITS[_language_code(locale)]
+    return singular if days == 1 else plural
+
+
+def localize_assignment_decision(decision: str, locale: Optional[str]) -> str:
+    """Return an assignment decision phrased for the recipient's language."""
+    language = _language_code(locale)
+    return _ASSIGNMENT_DECISIONS[language].get(
+        decision, decision.replace("_", " ").lower()
+    )
+
 
 def get_locale_for_email(email: str) -> str:
     """

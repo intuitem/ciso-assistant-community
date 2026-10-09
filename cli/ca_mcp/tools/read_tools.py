@@ -791,6 +791,152 @@ async def get_assets(folder: str = None, limit: int = None, offset: int = None):
         )
 
 
+GAPS_MAX_ASSETS = 50
+
+
+def _gap_cell(value) -> str:
+    if value is None or value == "":
+        return "--"
+    return str(value).replace("|", "\\|").replace("\n", " ")
+
+
+def _gap_met(verdict) -> str:
+    if verdict is True:
+        return "yes"
+    if verdict is False:
+        return "no"
+    return "?"
+
+
+def _asset_gap_table(asset: dict):
+    """Markdown gap table of one asset detail, and whether a row is unmet."""
+    rows = []
+    for section, key in (
+        ("security", "security_objectives_comparison"),
+        ("recovery", "recovery_objectives_comparison"),
+    ):
+        for item in asset.get(key) or []:
+            expectation = item.get("expectation")
+            reality = item.get("reality")
+            if expectation in (None, "") and reality in (None, ""):
+                continue
+            rows.append(
+                (
+                    section,
+                    str(item.get("objective") or "--"),
+                    expectation,
+                    reality,
+                    item.get("verdict"),
+                )
+            )
+
+    asset_type = asset.get("type")
+    if isinstance(asset_type, dict):
+        asset_type = asset_type.get("str")
+    title = f"### {_gap_cell(asset.get('name'))} ({_gap_cell(asset_type)}, ID: {asset.get('id')})\n"
+    if not rows:
+        return title + "No objective or capability set.\n", False
+
+    table = title + "|Type|Criterion|Objective|Capability|Met|\n|---|---|---|---|---|\n"
+    for section, criterion, expectation, reality, verdict in rows:
+        table += (
+            f"|{section}|{criterion}|{_gap_cell(expectation)}|"
+            f"{_gap_cell(reality)}|{_gap_met(verdict)}|\n"
+        )
+    unmet = any(verdict is False for *_, verdict in rows)
+    return table, unmet
+
+
+async def get_asset_security_gaps(
+    asset: str = None, folder: str = None, only_unmet: bool = False
+):
+    """Compare asset objectives (expected) with capabilities (actual), per criterion
+
+    Security criteria use raw 0-4 values; recovery (RTO/RPO/MTD) compares
+    durations, met when the capability is at most the objective.
+    Met: yes | no | ? (one side missing).
+
+    Args:
+        asset: Asset ID/name (one asset)
+        folder: Folder ID/name (every asset of the folder, max 50); scopes `asset` when both are given
+        only_unmet: Keep only assets with at least one unmet criterion (Met = "no"; "?", one side missing, does not count as unmet)
+    """
+    try:
+        from ..resolvers import resolve_asset_id, resolve_folder_id
+
+        filters = {}
+        folder_id = resolve_folder_id(folder) if folder else None
+        if folder:
+            filters["folder"] = folder
+        if only_unmet:
+            filters["only_unmet"] = "true"
+
+        truncation = ""
+        if asset:
+            filters["asset"] = asset
+            asset_id = resolve_asset_id(asset, folder_id=folder_id)
+            res = make_get_request(f"/assets/{asset_id}/")
+            if res.status_code != 200:
+                return http_error_response(res.status_code, res.text)
+            detail = res.json() or {}
+            if folder_id and (detail.get("folder") or {}).get("id") != folder_id:
+                return error_response(
+                    "Not Found",
+                    f"Asset '{asset}' is not in folder '{folder}'",
+                    "Check the asset and folder, then report to the user",
+                    retry_allowed=False,
+                )
+            assets = [detail]
+        else:
+            params = {"limit": GAPS_MAX_ASSETS}
+            if folder_id:
+                params["folder"] = folder_id
+            res = make_get_request("/assets/full/", params=params)
+            if res.status_code != 200:
+                return http_error_response(res.status_code, res.text)
+            assets = get_paginated_results(res.json())
+            total = getattr(assets, "total", None) or len(assets)
+            if total > len(assets):
+                truncation = (
+                    f"Truncated: {len(assets)} of {total} assets checked "
+                    f"(max {GAPS_MAX_ASSETS}). Narrow with folder or asset.\n\n"
+                )
+
+        if not assets:
+            return empty_response("assets", filters)
+
+        sections = []
+        for item in assets:
+            table, unmet = _asset_gap_table(item)
+            if only_unmet and not unmet:
+                continue
+            sections.append(table)
+
+        if not sections:
+            return truncation + empty_response(
+                "assets with unmet objectives" if only_unmet else "assets", filters
+            )
+
+        result = truncation
+        result += f"Security gaps for {len(sections)} asset(s)"
+        if filters:
+            result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
+        result += "\n\n" + "\n".join(sections)
+
+        return success_response(
+            result,
+            "get_asset_security_gaps",
+            "Use update_asset (sec_*/cap_*/dro_*/rcap_*) or applied controls to close the gaps",
+        )
+    except Exception as e:
+        return error_response(
+            "Internal Error",
+            str(e),
+            "Report this error to the user",
+            retry_allowed=False,
+        )
+
+
 async def get_incidents(folder: str = None):
     """List incidents with IDs, severity, and status
 
@@ -1610,7 +1756,12 @@ async def get_users(
     is_applied_control_owner: bool = None,
     exclude_current: bool = None,
 ):
-    """List users with their UUIDs, names and emails
+    """List user accounts with their User UUIDs, names and emails.
+
+    These are User ids, NOT Actor ids: owner/assignee fields (owner,
+    assigned_to, default_assignee) expect Actor ids. Pass an email or name
+    directly to those tools (it is resolved to the actor), or use
+    list_objects("actors") to get Actor UUIDs.
 
     Args:
         search: Search term (name or email)
@@ -1675,7 +1826,79 @@ async def get_users(
         return success_response(
             result,
             "get_users",
-            "Use the UUID column to set the owner field when calling update_applied_control or update_asset",
+            "These are User ids, not Actor ids. To set owner/assigned_to/default_assignee, "
+            "pass the email or name directly, or get Actor UUIDs with list_objects('actors')",
+        )
+    except Exception as e:
+        return error_response(
+            "Internal Error",
+            str(e),
+            "Report this error to the user",
+            retry_allowed=False,
+        )
+
+
+async def get_teams(
+    search: str = None,
+    folder: str = None,
+):
+    """List teams with their UUIDs, names and members.
+
+    These are Team ids, NOT Actor ids: owner/assignee fields (owner,
+    assigned_to, default_assignee) expect Actor ids. Pass a team name
+    directly to those tools (it is resolved to the actor), or use
+    list_objects("actors") to get Actor UUIDs.
+
+    Args:
+        search: Search term (matches team name or description)
+        folder: Folder ID/name
+    """
+    try:
+        from ..resolvers import resolve_folder_id
+
+        params = {}
+        filters = {}
+
+        if search:
+            params["search"] = search
+            filters["search"] = search
+        if folder:
+            params["folder"] = resolve_folder_id(folder)
+            filters["folder"] = folder
+
+        res = make_get_request("/teams/", params=params)
+
+        if res.status_code != 200:
+            return http_error_response(res.status_code, res.text)
+
+        data = res.json()
+        teams = get_paginated_results(data)
+
+        if not teams:
+            return empty_response("teams", filters)
+
+        result = found_line(teams, "teams")
+        if filters:
+            result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
+        result += "\n\n"
+        result += "|UUID|Name|Team Email|Leader|Members|\n"
+        result += "|---|---|---|---|---|\n"
+
+        for team in teams:
+            team_id = team.get("id", "N/A")
+            name = team.get("name", "N/A")
+            team_email = team.get("team_email") or ""
+            leader = team.get("leader") or {}
+            leader_str = leader.get("str", "") if isinstance(leader, dict) else ""
+            members = team.get("members") or []
+
+            result += f"|{team_id}|{name}|{team_email}|{leader_str}|{len(members)}|\n"
+
+        return success_response(
+            result,
+            "get_teams",
+            "These are Team ids, not Actor ids. To set owner/assigned_to/default_assignee, "
+            "pass the team name directly, or get Actor UUIDs with list_objects('actors')",
         )
     except Exception as e:
         return error_response(

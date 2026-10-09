@@ -1087,6 +1087,199 @@ class TestFolderConsumer:
         consumer = FolderRecordConsumer(base_context)
         assert consumer.find_existing({"name": "Ghost"}) is None
 
+    def test_labels_are_resolved(self, base_context):
+        from core.models import FilteringLabel
+
+        existing = FilteringLabel.objects.create(label="Corporate")
+        consumer = FolderRecordConsumer(base_context)
+        record_data, error = consumer.prepare_create(
+            {"name": "Labelled", "labels": "Corporate|Finance"}, None
+        )
+        assert error is None
+        # Nothing is created until the row is written.
+        assert not FilteringLabel.objects.filter(label="Finance").exists()
+        resolved = consumer.resolve_deferred(record_data)
+        assert set(resolved["filtering_labels"]) == {
+            existing.id,
+            FilteringLabel.objects.get(label="Finance").id,
+        }
+
+    def test_label_creation_requires_permission(self, domain_folder):
+        from core.models import FilteringLabel
+
+        FilteringLabel.objects.create(label="Corporate")
+        request = MagicMock()
+        request.user = User.objects.create_user("no-labels@datawizard.test")
+        consumer = FolderRecordConsumer(
+            BaseContext(request=request, folders_map={}, on_conflict=ConflictMode.STOP)
+        )
+
+        # Existing labels can still be linked.
+        _, error = consumer.prepare_create({"name": "A", "labels": "Corporate"}, None)
+        assert error is None
+
+        _, error = consumer.prepare_create(
+            {"name": "B", "labels": "Corporate,Secret"}, None
+        )
+        assert error is not None
+        assert "not allowed to create labels: Secret" in error.error
+        assert not FilteringLabel.objects.filter(label="Secret").exists()
+
+    @pytest.mark.parametrize(
+        ("cell", "expected"), [("yes", True), ("false", False), (True, True)]
+    )
+    def test_create_iam_groups_is_parsed(self, base_context, cell, expected):
+        record_data, error = FolderRecordConsumer(base_context).prepare_create(
+            {"name": "Grouped", "create_iam_groups": cell}, None
+        )
+        assert error is None
+        assert record_data["create_iam_groups"] is expected
+
+    def test_blank_create_iam_groups_is_left_out(self, base_context):
+        record_data, error = FolderRecordConsumer(base_context).prepare_create(
+            {"name": "Plain", "create_iam_groups": ""}, None
+        )
+        assert error is None
+        assert "create_iam_groups" not in record_data
+
+    @pytest.mark.parametrize("cell", ["maybe", 2])
+    def test_invalid_create_iam_groups_fails_the_row(self, base_context, cell):
+        _, error = FolderRecordConsumer(base_context).prepare_create(
+            {"name": "Grouped", "create_iam_groups": cell}, None
+        )
+        assert f"Invalid create_iam_groups '{cell}'" in error.error
+
+    def test_update_keeps_labels_hidden_from_the_user(self, base_context, root_folder):
+        from core.models import FilteringLabel
+
+        public = FilteringLabel.objects.create(label="Public")
+        hidden = FilteringLabel.objects.create(label="Hidden")
+        dropped = FilteringLabel.objects.create(label="Dropped")
+        folder = Folder.objects.create(name="Labelled", parent_folder=root_folder)
+        folder.filtering_labels.set([public, hidden, dropped])
+        consumer = FolderRecordConsumer(base_context)
+        consumer.__dict__["viewable_label_ids"] = {public.id, dropped.id}
+
+        resolved = consumer.resolve_deferred(
+            {"filtering_labels": "Public"}, instance=folder
+        )
+
+        # Visible labels follow the cell; the hidden one stays linked.
+        assert set(resolved["filtering_labels"]) == {public.id, hidden.id}
+
+    def test_permission_error_fails_only_its_row(
+        self, skip_context, all_accessible, monkeypatch
+    ):
+        """Linking an object the user cannot view raises in validation."""
+        from rest_framework.exceptions import PermissionDenied
+
+        from core.serializers import FolderWriteSerializer
+
+        def deny_labels(self, data):
+            if data.get("filtering_labels"):
+                raise PermissionDenied({"filtering_labels": "denied"})
+
+        monkeypatch.setattr(FolderWriteSerializer, "_check_m2m_visibility", deny_labels)
+
+        result = FolderRecordConsumer(skip_context).process_records(
+            [{"name": "Hidden label", "labels": "Secret"}, {"name": "Next row"}]
+        )
+        assert result.failed == 1
+        assert "denied" in str(result.errors)
+        assert result.created == 1
+        assert Folder.objects.filter(name="Next row").exists()
+
+    def test_skipped_row_creates_no_label(
+        self, skip_context, domain_folder, all_accessible
+    ):
+        from core.models import FilteringLabel
+
+        result = FolderRecordConsumer(skip_context).process_records(
+            [{"name": domain_folder.name, "labels": "Orphan"}]
+        )
+        assert result.skipped == 1
+        assert not FilteringLabel.objects.filter(label="Orphan").exists()
+
+    def test_rejected_row_creates_no_label(
+        self, base_context, domain_folder, all_accessible
+    ):
+        """Nesting is rejected on Community, after the labels were resolved."""
+        from core.models import FilteringLabel
+
+        result = FolderRecordConsumer(base_context).process_records(
+            [{"name": "Child", "domain": domain_folder.name, "labels": "Orphan"}]
+        )
+        assert result.failed == 1
+        assert not FilteringLabel.objects.filter(label="Orphan").exists()
+
+    def test_internal_id_keeps_parent_with_shared_name(self, base_context, root_folder):
+        acme = Folder.objects.create(name="ACME", parent_folder=root_folder)
+        beta = Folder.objects.create(name="Beta", parent_folder=root_folder)
+        ops = Folder.objects.create(name="Ops", parent_folder=acme)
+        Folder.objects.create(name="Ops", parent_folder=beta)
+        child = Folder.objects.create(name="Servers", parent_folder=ops)
+        consumer = FolderRecordConsumer(base_context)
+
+        record_data, error = consumer.prepare_create(
+            {"name": "Servers", "domain": "Ops", "internal_id": str(child.id)}, None
+        )
+        assert error is None
+        assert record_data["parent_folder"] == ops.id
+
+        # Without the id, the shared name stays ambiguous.
+        _, error = consumer.prepare_create({"name": "Servers", "domain": "Ops"}, None)
+        assert "Multiple" in error.error
+
+    def test_root_can_be_named_as_parent(self, base_context, root_folder):
+        record_data, error = FolderRecordConsumer(base_context).prepare_create(
+            {"name": "TopLevel", "domain": root_folder.name}, None
+        )
+        assert error is None
+        assert record_data["parent_folder"] == root_folder.id
+
+    def test_parent_lookup_ignores_non_domain_folders(self, base_context, root_folder):
+        domain = Folder.objects.create(
+            name="Ops",
+            parent_folder=root_folder,
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        Folder.objects.create(
+            name="Ops",
+            parent_folder=domain,
+            content_type=Folder.ContentType.ENCLAVE,
+        )
+        record_data, error = FolderRecordConsumer(base_context).prepare_create(
+            {"name": "Child", "domain": "Ops"}, None
+        )
+        assert error is None
+        assert record_data["parent_folder"] == domain.id
+
+    def test_invalid_label_fails_the_row_clearly(self, base_context):
+        from core.models import FilteringLabel
+
+        consumer = FolderRecordConsumer(base_context)
+        _, error = consumer.prepare_create(
+            {"name": "Labelled", "labels": "Corporate,Mon label"}, None
+        )
+        assert error is not None
+        assert "Invalid labels Mon label" in error.error
+        assert not FilteringLabel.objects.exists()
+
+    def test_export_escaping_is_undone(self, base_context):
+        consumer = FolderRecordConsumer(base_context)
+        record_data, error = consumer.prepare_create(
+            {"name": "'=Ops", "description": "'- item", "labels": "'-dash"}, None
+        )
+        assert error is None
+        assert record_data["name"] == "=Ops"
+        assert record_data["description"] == "- item"
+
+    def test_no_labels_leaves_field_unset(self, base_context):
+        consumer = FolderRecordConsumer(base_context)
+        record_data, error = consumer.prepare_create({"name": "Plain"}, None)
+        assert error is None
+        assert "filtering_labels" not in record_data
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # FindingsAssessmentRecordConsumer
@@ -1166,6 +1359,30 @@ class TestFindingsAssessmentConsumer:
         )
         assert result.created == 1
         assert FindingsAssessment.objects.filter(folder=domain_folder).exists()
+
+    @pytest.mark.parametrize("priority", ["P2", "p2", 2, "2"])
+    def test_reads_exported_priority_label_and_recommendation(
+        self, domain_folder, admin_user, priority
+    ):
+        """The xlsx export writes "P1".."P4" and a recommendation column."""
+        ctx = self._findings_context(domain_folder, admin_user)
+        result = _run(
+            FindingsAssessmentRecordConsumer,
+            ctx,
+            [
+                {
+                    "name": "Weak key",
+                    "ref_id": "F-001",
+                    "status": "--",
+                    "priority": priority,
+                    "recommendation": "Rotate the key.",
+                }
+            ],
+        )
+        assert result.created == 1
+        finding = Finding.objects.get(ref_id="F-001")
+        assert finding.priority == 2
+        assert finding.recommendation == "Rotate the key."
 
     def test_target_reuse_updates_existing_and_adds_new(
         self, domain_folder, admin_user
