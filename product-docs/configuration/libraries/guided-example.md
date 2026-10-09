@@ -506,6 +506,6 @@ If you already imported the English library, increase `version` in `library_meta
 
 If you got stuck or want to check your work, [download the completed OHSS Excel workbook](../../.gitbook/assets/octopus-habitat-security-standard.xlsx). It contains every sheet we built in this guide, including the French translations from the extra section. Compare it with your workbook one sheet at a time, starting with `library_meta`, `fwk_meta`, and `fwk_content`, then check the Answers, Scores, and Implementation Groups sheets.
 
-The solution workbook uses `version` `1`. If you already imported your own version 1 of OHSS, set `version` to `2` before uploading it.
+The solution workbook starts at `version` `1`. If you have already imported your own OHSS library and want to use this workbook as a corrected version, set `version` in `library_meta` higher than the version you imported (for example, `2` if yours is `1`), then follow [Update a library](update-library.md).
 
 You can also [view the YAML version](../../.gitbook/assets/octopus-habitat-security-standard.yaml) if you want to inspect the converted library.
