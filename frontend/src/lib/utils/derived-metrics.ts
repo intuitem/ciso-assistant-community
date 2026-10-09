@@ -129,3 +129,62 @@ export function formulaScope(
 	scope.variables.push({ key: 'previous', type: 'last value' });
 	return scope;
 }
+
+// ---------- several instances of one metric in a domain ----------
+
+// Per input key: the instance a "one value" input reads, or the instances a
+// combined input leaves out (mirrors MetricInstance.input_choices).
+export type InputChoice = { pick: string } | { exclude: string[] };
+export type InputChoices = Record<string, InputChoice>;
+
+function withChoice(
+	choices: InputChoices | null | undefined,
+	key: string,
+	choice: InputChoice | null
+): InputChoices | null {
+	const next: InputChoices = { ...(choices ?? {}) };
+	if (choice) next[key] = choice;
+	else delete next[key];
+	return Object.keys(next).length ? next : null;
+}
+
+export function pickInstance(
+	choices: InputChoices | null | undefined,
+	key: string,
+	instanceId: string | null
+): InputChoices | null {
+	return withChoice(choices, key, instanceId ? { pick: instanceId } : null);
+}
+
+export function excludedOf(choices: InputChoices | null | undefined, key: string): string[] {
+	const choice = choices?.[key];
+	return choice && 'exclude' in choice && Array.isArray(choice.exclude) ? choice.exclude : [];
+}
+
+export function pickedOf(choices: InputChoices | null | undefined, key: string): string | null {
+	const choice = choices?.[key];
+	return choice && 'pick' in choice && typeof choice.pick === 'string' ? choice.pick : null;
+}
+
+// Include or leave out one instance of a combined input. Exclusions, not a
+// list of included ones: an instance added later is read without anyone
+// ticking it.
+export function setIncluded(
+	choices: InputChoices | null | undefined,
+	key: string,
+	instanceId: string,
+	included: boolean
+): InputChoices | null {
+	const excluded = new Set(excludedOf(choices, key));
+	if (included) excluded.delete(instanceId);
+	else excluded.add(instanceId);
+	return withChoice(choices, key, excluded.size ? { exclude: [...excluded] } : null);
+}
+
+// The domains that contribute more than one instance to an input: often a
+// duplicate, which a sum would count twice.
+export function foldersWithSeveral(instances: { folder: string }[]): string[] {
+	const counts = new Map<string, number>();
+	for (const { folder } of instances) counts.set(folder, (counts.get(folder) ?? 0) + 1);
+	return [...counts].filter(([, n]) => n > 1).map(([folder]) => folder);
+}

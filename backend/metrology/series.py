@@ -241,12 +241,104 @@ class ResolvedInput:
     instances: list
 
 
-def resolve_inputs(inputs, folder):
-    """Each input's instances in ``folder``'s subtree. 'one' needs exactly
-    one; an error names the input so the author can act on it."""
+def input_candidates(target, folder):
+    """The instances of ``target`` an input may read from ``folder``: its
+    subtree, deprecated ones left out (a replaced instance must not count
+    alongside its replacement)."""
     from .models import MetricInstance
 
-    folder_ids = subtree_folder_ids(folder)
+    return list(
+        MetricInstance.objects.filter(
+            metric_definition=target, folder_id__in=subtree_folder_ids(folder)
+        )
+        .exclude(status=MetricInstance.Status.DEPRECATED)
+        .select_related("folder")
+        .order_by("name", "id")
+    )
+
+
+def validate_input_choices(definition, folder, choices):
+    """Save-time checks of an instance's ``input_choices``, as messages. A
+    pick names a current instance of the input's metric in the instance's
+    domain tree; an exclusion names any instance of it there. Nothing ever
+    reaches outside the tree: the same boundary as the formula itself."""
+    from .models import MetricInstance
+
+    if choices in (None, {}):
+        return []
+    if not isinstance(choices, dict):
+        return ["Input choices must be a mapping of input names"]
+    if definition is None or not definition.reads_metrics:
+        return ["Only a metric computed from other metrics has input choices"]
+    specs = {
+        spec.get("key"): spec
+        for spec in definition.inputs or []
+        if isinstance(spec, dict)
+    }
+    errors = []
+    for key, choice in choices.items():
+        spec = specs.get(key)
+        if spec is None:
+            errors.append(f"'{key}' is not an input of this metric")
+            continue
+        target = resolve_definition(spec.get("definition"))
+        if target is None or not isinstance(choice, dict):
+            errors.append(f"input '{key}': invalid choice")
+            continue
+        combine = spec.get("combine") or "one"
+        expected = "pick" if combine == "one" else "exclude"
+        if set(choice) != {expected}:
+            errors.append(
+                f"input '{key}': a 'one value' input takes a pick"
+                if combine == "one"
+                else f"input '{key}': a combined input takes exclusions"
+            )
+            continue
+        in_tree = MetricInstance.objects.filter(
+            metric_definition=target, folder_id__in=subtree_folder_ids(folder)
+        )
+        if combine == "one":
+            if (
+                not in_tree.exclude(status=MetricInstance.Status.DEPRECATED)
+                .filter(id=_as_uuid(choice["pick"]))
+                .exists()
+            ):
+                errors.append(
+                    f"input '{key}': pick an instance of '{target.name}' in this "
+                    "domain that is not deprecated"
+                )
+            continue
+        excluded = choice["exclude"]
+        ids = [_as_uuid(i) for i in excluded] if isinstance(excluded, list) else None
+        if (
+            ids is None
+            or None in ids
+            or in_tree.filter(id__in=ids).count() != len(set(ids))
+        ):
+            errors.append(
+                f"input '{key}': exclude only instances of '{target.name}' in this domain"
+            )
+    return errors
+
+
+def _as_uuid(value):
+    try:
+        return uuid.UUID(str(value))
+    except ValueError, TypeError, AttributeError:
+        return None
+
+
+def _choice(choices, key):
+    choice = (choices or {}).get(key) if isinstance(choices, dict) else None
+    return choice if isinstance(choice, dict) else {}
+
+
+def resolve_inputs(inputs, folder, choices=None):
+    """Each input's instances in ``folder``'s subtree, honouring the
+    instance's ``choices``: the picked instance of a 'one value' input, the
+    instances a combined input excludes. 'one' needs exactly one instance,
+    picked or alone; a pick that no longer matches is an error, never a
+    fallback. An error names the input so the author can act on it."""
     resolved = []
     for spec in inputs:
         key = spec.get("key")
@@ -255,19 +347,29 @@ def resolve_inputs(inputs, folder):
             raise DerivedMetricError(
                 f"input '{key}': the metric it reads no longer exists"
             )
-        instances = list(
-            MetricInstance.objects.filter(
-                metric_definition=target, folder_id__in=folder_ids
-            )
-            .select_related("folder")
-            .order_by("name", "id")
-        )
+        instances = input_candidates(target, folder)
         combine = spec.get("combine") or "one"
-        if combine == "one" and len(instances) != 1:
-            raise DerivedMetricError(
-                f"input '{key}': {len(instances)} instances of '{target.name}' in "
-                "this domain; 'one value' needs exactly one"
-            )
+        choice = _choice(choices, key)
+        if combine == "one":
+            picked = choice.get("pick")
+            if picked:
+                instances = [i for i in instances if str(i.id) == str(picked)]
+                if not instances:
+                    raise DerivedMetricError(
+                        f"input '{key}': the instance picked for it is no longer "
+                        "in this domain, or is deprecated; pick another one"
+                    )
+            elif len(instances) != 1:
+                raise DerivedMetricError(
+                    f"input '{key}': {len(instances)} instances of '{target.name}' "
+                    "in this domain; pick the one to read in the instance's inputs"
+                    if instances
+                    else f"input '{key}': no instance of '{target.name}' in this domain"
+                )
+        else:
+            # An exclusion of an instance that has since gone excludes nothing.
+            excluded = {str(i) for i in choice.get("exclude") or []}
+            instances = [i for i in instances if str(i.id) not in excluded]
         resolved.append(ResolvedInput(key, combine, target, instances))
     return resolved
 
@@ -349,7 +451,15 @@ def _label(start, frequency):
 
 
 def evaluate_series(
-    inputs, expression, folder, frequency, shape, *, since=None, previous=None
+    inputs,
+    expression,
+    folder,
+    frequency,
+    shape,
+    *,
+    since=None,
+    previous=None,
+    choices=None,
 ):
     """Every period from the first input sample (or ``since``) to now, capped
     at MAX_PERIODS, and for sub-daily periods at the window downsampling
@@ -359,7 +469,7 @@ def evaluate_series(
     from .models import STALENESS_THRESHOLDS
 
     now = timezone.now()
-    evaluation = SeriesEvaluation(resolved=resolve_inputs(inputs, folder))
+    evaluation = SeriesEvaluation(resolved=resolve_inputs(inputs, folder, choices))
     instance_ids = [
         instance.id for item in evaluation.resolved for instance in item.instances
     ]
@@ -522,6 +632,7 @@ def compute_series(instance, *, write=True, only_if_due=False, full=False):
                 definition,
                 since=since,
                 previous=previous,
+                choices=instance.input_choices,
             )
         except DerivedMetricError as e:
             if write:

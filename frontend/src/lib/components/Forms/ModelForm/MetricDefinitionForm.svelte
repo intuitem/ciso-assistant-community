@@ -71,6 +71,7 @@
 	import type { DefinitionOption } from '$lib/components/Metrology/MetricInputsEditor.svelte';
 	import {
 		datasetReferences,
+		foldersWithSeveral,
 		formulaKind,
 		formulaScope,
 		inputReferences,
@@ -196,9 +197,12 @@
 	);
 	// The most recent periods first, as a reader scans a series.
 	const previewPeriods = $derived([...(preview?.periods ?? [])].reverse().slice(0, 12));
+	// Only the latest run may answer: an earlier one finishing late must not
+	// overwrite it.
+	let previewSeq = 0;
 	async function runPreview() {
+		const seq = ++previewSeq;
 		previewBusy = true;
-		preview = null;
 		try {
 			const res = await fetch('/fe-api/metrology/preview-formula', {
 				method: 'POST',
@@ -221,13 +225,33 @@
 							}
 				)
 			});
-			preview = await res.json();
+			const body = await res.json();
+			if (seq === previewSeq) preview = body;
 		} catch {
-			preview = { ok: false, errors: [{ code: 'network', message: m.previewFailed() }] };
+			if (seq === previewSeq)
+				preview = { ok: false, errors: [{ code: 'network', message: m.previewFailed() }] };
 		} finally {
-			previewBusy = false;
+			if (seq === previewSeq) previewBusy = false;
 		}
 	}
+
+	// The preview follows the formula: any change to what it reads, where it
+	// is tried or how often re-runs it, once the author pauses.
+	const previewKey = $derived(
+		JSON.stringify([
+			kind,
+			previewFolder || $folderValue,
+			previewFrequency,
+			$expressionValue,
+			kind === 'metrics' ? $inputsValue : $datasetsValue
+		])
+	);
+	$effect(() => {
+		void previewKey;
+		if (!formulaOpen || !$expressionValue || !(previewFolder || $folderValue)) return;
+		const timer = setTimeout(runPreview, 900);
+		return () => clearTimeout(timer);
+	});
 </script>
 
 <Select
@@ -382,98 +406,130 @@
 				>{kind === 'metrics' ? m.metricExpressionHelpText() : m.expressionHelpText()}</span
 			>
 		</div>
-		<div class="flex items-center gap-2 flex-wrap">
-			<select class="select text-xs w-56" bind:value={previewFolder} title={m.previewDomain()}>
-				{#if !domains.length}
-					<option value={$folderValue}>{m.previewDomain()}</option>
+		<!-- A workbench beside the form, not part of it: nothing here is saved. -->
+		<section
+			class="rounded-container border border-dashed border-surface-300-700 bg-surface-100-900 p-3 flex flex-col gap-2"
+			aria-label={m.tryFormula()}
+			data-testid="formula-preview"
+		>
+			<header class="flex items-center gap-2">
+				<i class="fa-solid fa-flask text-primary-500" aria-hidden="true"></i>
+				<span class="text-sm font-semibold">{m.tryFormula()}</span>
+				{#if previewBusy}
+					<i class="fa-solid fa-spinner fa-spin text-xs text-surface-500" aria-hidden="true"></i>
 				{/if}
-				{#each domains as domain (domain.id)}
-					<option value={domain.id}>{domain.str}</option>
-				{/each}
-			</select>
-			{#if kind === 'metrics'}
+			</header>
+			<p class="text-xs text-surface-500">{m.previewOnlyHint()}</p>
+			<div class="flex items-center gap-2 flex-wrap text-xs">
+				<span>{m.tryOn()}</span>
 				<select
-					class="select text-xs w-40"
-					bind:value={previewFrequency}
-					title={m.previewFrequency()}
-					data-testid="preview-frequency"
+					class="select preset-tonal text-xs w-auto py-0.5"
+					bind:value={previewFolder}
+					aria-label={m.previewDomain()}
+					data-testid="preview-domain"
 				>
-					{#each FREQUENCIES as [value, label] (value)}
-						<option {value}>{label()}</option>
+					{#if !domains.length}
+						<option value={$folderValue}>{m.previewDomain()}</option>
+					{/if}
+					{#each domains as domain (domain.id)}
+						<option value={domain.id}>{domain.str}</option>
 					{/each}
 				</select>
-			{/if}
-			<button
-				type="button"
-				class="btn preset-tonal text-xs"
-				disabled={previewBusy || !(previewFolder || $folderValue) || !$expressionValue}
-				onclick={runPreview}
-			>
-				<i class="fa-solid fa-play mr-1"></i>{m.previewFormula()}
-			</button>
-		</div>
-		{#if preview}
-			{#if preview.ok && preview.periods}
-				<div class="text-xs rounded-base bg-surface-100-900 p-2 flex flex-col gap-2">
-					<div class="flex flex-col gap-0.5">
-						<span class="font-semibold">{m.resolvedInputs()}</span>
-						{#each Object.entries(preview.inputs ?? {}) as [key, instances] (key)}
-							<div>
-								<span class="font-mono">{key}</span>:
-								{#if instances.length}
-									{instances.map((i) => `${i.name} (${i.folder})`).join(', ')}
-								{:else}
-									<span class="text-surface-500">{m.noInstanceResolved()}</span>
-								{/if}
-							</div>
+				{#if kind === 'metrics'}
+					<span class="text-surface-500">·</span>
+					<select
+						class="select preset-tonal text-xs w-auto py-0.5"
+						bind:value={previewFrequency}
+						aria-label={m.previewFrequency()}
+						data-testid="preview-frequency"
+					>
+						{#each FREQUENCIES as [value, label] (value)}
+							<option {value}>{label()}</option>
 						{/each}
-					</div>
-					{#if previewPeriods.length}
-						<table class="w-full" data-testid="preview-periods">
-							<thead>
-								<tr class="text-left text-surface-500">
-									<th class="font-normal pr-4">{m.previewPeriod()}</th>
-									<th class="font-normal">{m.previewResult()}</th>
-								</tr>
-							</thead>
-							<tbody>
-								{#each previewPeriods as period (period.start)}
-									<tr>
-										<td class="font-mono pr-4">{period.start.slice(0, 16).replace('T', ' ')}</td>
-										<td class="font-mono">
-											{#if period.skipped}
-												<span class="text-surface-500">{m.previewSkipped()}</span>
-											{:else}
-												{JSON.stringify(period.value)}
-											{/if}
-										</td>
+					</select>
+				{/if}
+				<button
+					type="button"
+					class="btn btn-sm preset-tonal text-xs ml-auto"
+					disabled={previewBusy || !(previewFolder || $folderValue) || !$expressionValue}
+					onclick={runPreview}
+					data-testid="preview-run"
+				>
+					<i class="fa-solid fa-rotate-right mr-1" aria-hidden="true"></i>{m.runAgain()}
+				</button>
+			</div>
+			{#if preview}
+				{#if preview.ok && preview.periods}
+					<div class="text-xs rounded-base bg-surface-50-950 p-2 flex flex-col gap-2">
+						<div class="flex flex-col gap-0.5">
+							<span class="font-semibold">{m.resolvedInputs()}</span>
+							{#each Object.entries(preview.inputs ?? {}) as [key, instances] (key)}
+								<div>
+									<span class="font-mono">{key}</span>:
+									{#if instances.length}
+										{instances.map((i) => `${i.name} (${i.folder})`).join(', ')}
+										{#each foldersWithSeveral(instances) as folderName (folderName)}
+											<span
+												class="block text-warning-600-400"
+												data-testid="preview-several-instances"
+											>
+												<i class="fa-solid fa-triangle-exclamation mr-1" aria-hidden="true"></i>
+												{m.severalInstancesInFolder({ folder: folderName })}
+											</span>
+										{/each}
+									{:else}
+										<span class="text-surface-500">{m.noInstanceResolved()}</span>
+									{/if}
+								</div>
+							{/each}
+						</div>
+						{#if previewPeriods.length}
+							<table class="w-full" data-testid="preview-periods">
+								<thead>
+									<tr class="text-left text-surface-500">
+										<th class="font-normal pr-4">{m.previewPeriod()}</th>
+										<th class="font-normal">{m.previewResult()}</th>
 									</tr>
-								{/each}
-							</tbody>
-						</table>
-					{:else}
-						<span class="text-surface-500">{m.previewNoPeriods()}</span>
-					{/if}
-				</div>
-			{:else if preview.ok}
-				<div class="text-xs rounded-base bg-surface-100-900 p-2">
-					<div>
-						<span class="font-semibold">{m.previewResult()}:</span>
-						<span class="font-mono">{JSON.stringify(preview.value)}</span>
+								</thead>
+								<tbody>
+									{#each previewPeriods as period (period.start)}
+										<tr>
+											<td class="font-mono pr-4">{period.start.slice(0, 16).replace('T', ' ')}</td>
+											<td class="font-mono">
+												{#if period.skipped}
+													<span class="text-surface-500">{m.previewSkipped()}</span>
+												{:else}
+													{JSON.stringify(period.value)}
+												{/if}
+											</td>
+										</tr>
+									{/each}
+								</tbody>
+							</table>
+						{:else}
+							<span class="text-surface-500">{m.previewNoPeriods()}</span>
+						{/if}
 					</div>
-					<pre class="font-mono whitespace-pre-wrap mt-1">{JSON.stringify(
-							preview.datasets,
-							null,
-							2
-						)}</pre>
-				</div>
-			{:else}
-				<ul class="text-xs text-error-500 list-disc pl-4">
-					{#each preview.errors ?? [] as err (err.message)}
-						<li>{err.message}</li>
-					{/each}
-				</ul>
+				{:else if preview.ok}
+					<div class="text-xs rounded-base bg-surface-50-950 p-2">
+						<div>
+							<span class="font-semibold">{m.previewResult()}:</span>
+							<span class="font-mono">{JSON.stringify(preview.value)}</span>
+						</div>
+						<pre class="font-mono whitespace-pre-wrap mt-1">{JSON.stringify(
+								preview.datasets,
+								null,
+								2
+							)}</pre>
+					</div>
+				{:else}
+					<ul class="text-xs text-error-500 list-disc pl-4">
+						{#each preview.errors ?? [] as err (err.message)}
+							<li>{err.message}</li>
+						{/each}
+					</ul>
+				{/if}
 			{/if}
-		{/if}
+		</section>
 	{/if}
 </div>

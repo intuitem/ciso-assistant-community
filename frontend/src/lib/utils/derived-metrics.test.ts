@@ -2,7 +2,12 @@ import { describe, expect, it } from 'vitest';
 import {
 	aliasOf,
 	datasetNameProblem,
+	excludedOf,
+	foldersWithSeveral,
 	formulaKind,
+	pickInstance,
+	pickedOf,
+	setIncluded,
 	formulaScope,
 	inputReferences,
 	sampleMoment,
@@ -137,5 +142,39 @@ describe('formulaScope', () => {
 		);
 		expect(scope.variables.map((v) => v.key)).toEqual(['clicks', 'headcount', 'previous']);
 		expect(scope.referenceVariables).toEqual({ clicks: 30, headcount: 950 });
+	});
+});
+
+describe('input choices', () => {
+	it('picks the instance a one-value input reads, and clears it', () => {
+		const picked = pickInstance(null, 'clicks', 'fr');
+		expect(picked).toEqual({ clicks: { pick: 'fr' } });
+		expect(pickedOf(picked, 'clicks')).toBe('fr');
+		expect(pickInstance(picked, 'clicks', null)).toBeNull();
+	});
+
+	it('stores exclusions, so instances added later are read', () => {
+		let choices = setIncluded(null, 'sites', 'legacy', false);
+		expect(choices).toEqual({ sites: { exclude: ['legacy'] } });
+		choices = setIncluded(choices, 'sites', 'de', false);
+		expect(excludedOf(choices, 'sites')).toEqual(['legacy', 'de']);
+		choices = setIncluded(choices, 'sites', 'legacy', true);
+		choices = setIncluded(choices, 'sites', 'de', true);
+		expect(choices).toBeNull();
+	});
+
+	it('keeps the other inputs untouched', () => {
+		const choices = setIncluded({ clicks: { pick: 'fr' } }, 'sites', 'legacy', false);
+		expect(choices).toEqual({ clicks: { pick: 'fr' }, sites: { exclude: ['legacy'] } });
+	});
+
+	it('flags the domains contributing several instances', () => {
+		expect(
+			foldersWithSeveral([
+				{ folder: 'ACME France' },
+				{ folder: 'ACME France' },
+				{ folder: 'ACME Spain' }
+			])
+		).toEqual(['ACME France']);
 	});
 });

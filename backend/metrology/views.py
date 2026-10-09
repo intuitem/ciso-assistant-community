@@ -242,6 +242,64 @@ class MetricInstanceViewSet(BaseModelViewSet):
             )
         )
 
+    @action(detail=False, methods=["get"], url_path="input-candidates")
+    def input_candidates(self, request):
+        """For the instance form: each input of a metric formula and the
+        instances it could read from a domain, so the author can pick one or
+        leave some out. Needs the right to add or change metric instances
+        there, as creating or editing the instance would."""
+        from metrology.series import input_candidates, resolve_definition
+
+        definition = MetricDefinition.objects.filter(
+            id=_as_uuid(request.query_params.get("definition"))
+        ).first()
+        folder = Folder.objects.filter(
+            id=_as_uuid(request.query_params.get("folder"))
+        ).first()
+        if definition is None or folder is None:
+            return Response(
+                {"error": "definitionOrFolderNotFound"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        allowed = any(
+            RoleAssignment.is_access_allowed(
+                user=request.user, perm=permission, folder=folder
+            )
+            for permission in Permission.objects.filter(
+                codename__in=["add_metricinstance", "change_metricinstance"]
+            )
+        )
+        if not allowed:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        if not definition.reads_metrics:
+            return Response({"inputs": []})
+        inputs = []
+        for spec in definition.inputs or []:
+            if not isinstance(spec, dict):
+                continue
+            target = resolve_definition(spec.get("definition"))
+            inputs.append(
+                {
+                    "key": spec.get("key"),
+                    "combine": spec.get("combine") or "one",
+                    "definition": (
+                        {"id": str(target.id), "name": target.name} if target else None
+                    ),
+                    "candidates": [
+                        {
+                            "id": str(instance.id),
+                            "name": instance.name,
+                            "folder": instance.folder.name,
+                            "status": instance.status,
+                        }
+                        for instance in (
+                            input_candidates(target, folder) if target else []
+                        )
+                    ],
+                }
+            )
+        return Response({"inputs": inputs})
+
     @action(detail=True, methods=["post"], url_path="refresh")
     def refresh(self, request, pk=None):
         """Recompute a derived metric now. The task is enqueued, never run

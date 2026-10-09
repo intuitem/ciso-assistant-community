@@ -143,6 +143,8 @@ Each input names another quantitative metric definition and how its instances co
 * **One value**: the input takes the single instance of that metric in the instance's domain and its sub-domains. When there is none, or several, the instance shows an error.
 * **Sum**, **Average**, **Minimum**, **Maximum**, **Count**: the input combines every instance of that metric in the domain and its sub-domains, for example the sites below a group domain.
 
+Deprecated instances are never read, so replacing an instance with a new one does not count it twice. When a domain still holds several instances of an input's metric, the instance form lists them under **Inputs of the formula**: pick the one a **One value** input reads, or untick the ones a combined input should leave out. A subsidiary added later is read without anyone ticking it. The definition's **Preview** warns when a domain contributes more than one instance.
+
 The instance's **collection frequency** cuts time into calendar periods (quarter hours, hours, days, weeks starting on Monday, months, quarters, years, in UTC), and the expression runs once per period:
 
 * An input's value for a period is its latest sample up to the end of that period. A sample older than the input's staleness threshold (36 hours for a daily metric, 32 days for a monthly one, and so on) no longer counts.

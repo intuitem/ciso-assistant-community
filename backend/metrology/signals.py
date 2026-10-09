@@ -101,12 +101,21 @@ def sample_changed(sender, instance, **kwargs):
 @receiver(pre_save, sender=MetricInstance)
 def remember_instance_scope(sender, instance, **kwargs):
     instance._previous_scope = None
+    instance._previous_choices = None
     if not instance._state.adding:
-        instance._previous_scope = (
+        row = (
             MetricInstance.objects.filter(pk=instance.pk)
-            .values_list("metric_definition_id", "folder_id", "collection_frequency")
+            .values_list(
+                "metric_definition_id",
+                "folder_id",
+                "collection_frequency",
+                "input_choices",
+            )
             .first()
         )
+        if row is not None:
+            instance._previous_scope = row[:3]
+            instance._previous_choices = row[3]
 
 
 @receiver(post_save, sender=MetricInstance)
@@ -121,6 +130,7 @@ def instance_saved(sender, instance, created, update_fields=None, **kwargs):
         instance.collection_frequency,
     )
     previous = getattr(instance, "_previous_scope", None)
+    _own_series_changed(instance, created, previous, scope)
     if not created and previous == scope:
         return
     if not _has_readers():
@@ -130,6 +140,21 @@ def instance_saved(sender, instance, created, update_fields=None, **kwargs):
     _after_commit(scope[0], scope[1], FULL)
     if previous is not None and previous[:2] != scope[:2]:
         _after_commit(previous[0], previous[1], FULL)
+
+
+def _own_series_changed(instance, created, previous, scope):
+    """A metric formula instance whose inputs now resolve differently (other
+    picks or exclusions, another folder or frequency) recomputes its whole
+    series. A new one has never computed: the sweep backfills it anyway."""
+    from .series import FULL, mark
+
+    if created or not instance.metric_definition.reads_metrics:
+        return
+    choices = getattr(instance, "_previous_choices", None)
+    if previous == scope and choices == instance.input_choices:
+        return
+    instance_id = instance.id
+    transaction.on_commit(lambda: mark([instance_id], FULL))
 
 
 @receiver(pre_delete, sender=MetricInstance)

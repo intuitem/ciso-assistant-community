@@ -226,6 +226,18 @@ class MetricInstance(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
     recompute_from = models.DateTimeField(
         null=True, blank=True, verbose_name=_("Recompute from")
     )
+    # Metric formulas: per input key, the instance a "one value" input reads
+    # ({"pick": id}) or the instances a combined input leaves out
+    # ({"exclude": [ids]}), when the domain holds more than the formula means.
+    input_choices = models.JSONField(
+        blank=True,
+        null=True,
+        verbose_name=_("Input choices"),
+        help_text=_(
+            "For metrics computed from other metrics: which instances an input "
+            "reads when the domain holds several"
+        ),
+    )
 
     fields_to_check = ["ref_id", "name"]
 

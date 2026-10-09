@@ -144,6 +144,27 @@ class MetricInstanceWriteSerializer(BaseModelSerializer):
 
         return super().update(instance, validated_data)
 
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        from metrology.series import validate_input_choices
+
+        def current(name):
+            return attrs.get(name, getattr(self.instance, name, None))
+
+        if (
+            "input_choices" in attrs
+            or "folder" in attrs
+            or "metric_definition" in attrs
+        ):
+            errors = validate_input_choices(
+                current("metric_definition"),
+                current("folder"),
+                current("input_choices"),
+            )
+            if errors:
+                raise serializers.ValidationError({"input_choices": errors})
+        return attrs
+
     class Meta:
         model = MetricInstance
         fields = "__all__"

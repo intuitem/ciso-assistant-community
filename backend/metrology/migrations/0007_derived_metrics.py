@@ -63,6 +63,16 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name="metricinstance",
+            name="input_choices",
+            field=models.JSONField(
+                blank=True,
+                help_text="For metrics computed from other metrics: which instances an input reads when the domain holds several",
+                null=True,
+                verbose_name="Input choices",
+            ),
+        ),
+        migrations.AddField(
+            model_name="metricinstance",
             name="last_computation_error",
             field=models.TextField(
                 blank=True, default="", verbose_name="Last computation error"

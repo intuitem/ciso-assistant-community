@@ -53,12 +53,11 @@ def make_definition(name="Metric", **extra):
 
 def make_instance(folder, definition, frequency="monthly", **extra):
     return MetricInstance.objects.create(
-        name=f"{definition.name} in {folder.name}",
+        name=extra.pop("name", f"{definition.name} in {folder.name}"),
         folder=folder,
         metric_definition=definition,
         collection_frequency=frequency,
-        status=MetricInstance.Status.ACTIVE,
-        **extra,
+        **{"status": MetricInstance.Status.ACTIVE, **extra},
     )
 
 
@@ -224,7 +223,7 @@ class TestSeries:
         with pytest.raises(DerivedMetricError, match="2 instances of"):
             compute_sample(out)
         out.refresh_from_db()
-        assert "'one value' needs exactly one" in out.last_computation_error
+        assert "pick the one to read" in out.last_computation_error
 
     def test_no_input_sample_means_no_series(self, frozen):
         domain = make_domain("Domain")
@@ -685,7 +684,7 @@ class TestPreview:
             }
         )
         assert response.data["ok"] is False
-        assert "0 instances of" in response.data["errors"][0]["message"]
+        assert "no instance of" in response.data["errors"][0]["message"]
 
     def test_the_preview_only_reaches_back_two_years_of_months(self, frozen):
         domain = make_domain("Domain")
@@ -745,3 +744,206 @@ def test_a_library_ships_a_formula_whose_inputs_name_urns(frozen):
     out = make_instance(domain, double)
     compute_sample(out)
     assert stored(out) == {"2026-05-01": 42}
+
+
+# ---------- several instances of one metric in a domain ----------
+
+
+def site(hq, name, definition, value, **extra):
+    instance = make_instance(make_domain(name, hq), definition, **extra)
+    sample(instance, value, at(2026, 5, 3))
+    return instance
+
+
+@pytest.mark.django_db
+class TestInputChoices:
+    def test_a_deprecated_instance_is_never_read(self, frozen):
+        """Deprecate the old one, create a new one: the sum must not count
+        the domain twice while the old value is still fresh."""
+        hq = make_domain("HQ")
+        incidents = make_definition("Incidents")
+        fr = make_domain("FR", hq)
+        old = make_instance(
+            fr, incidents, status=MetricInstance.Status.DEPRECATED, name="Old FR count"
+        )
+        sample(old, 7, at(2026, 5, 2))
+        sample(make_instance(fr, incidents), 3, at(2026, 5, 3))
+        out = make_instance(hq, formula("x", ("x", incidents, "sum")))
+        compute_sample(out)
+        assert stored(out) == {"2026-05-01": 3}
+
+    def test_one_value_reads_the_picked_instance(self, frozen):
+        hq = make_domain("HQ")
+        clicks = make_definition("Clicks")
+        site(hq, "FR", clicks, 10)
+        de = site(hq, "DE", clicks, 4)
+        out = make_instance(hq, formula("x", ("x", clicks, "one")))
+        with pytest.raises(DerivedMetricError, match="pick the one to read"):
+            compute_sample(out)
+        out.input_choices = {"x": {"pick": str(de.id)}}
+        out.save()
+        compute_sample(out, full=True)
+        assert stored(out) == {"2026-05-01": 4}
+
+    def test_a_stale_pick_is_an_error_not_a_fallback(self, frozen):
+        hq = make_domain("HQ")
+        clicks = make_definition("Clicks")
+        site(hq, "FR", clicks, 10)
+        de = site(hq, "DE", clicks, 4)
+        out = make_instance(
+            hq,
+            formula("x", ("x", clicks, "one")),
+            input_choices={"x": {"pick": str(de.id)}},
+        )
+        de.status = MetricInstance.Status.DEPRECATED
+        de.save()
+        with pytest.raises(DerivedMetricError, match="picked for it is no longer"):
+            compute_sample(out)
+
+    def test_exclusions_leave_some_out_and_new_ones_flow_in(self, frozen):
+        hq = make_domain("HQ")
+        incidents = make_definition("Incidents")
+        site(hq, "FR", incidents, 3)
+        legacy = site(hq, "FR legacy", incidents, 50)
+        out = make_instance(
+            hq,
+            formula("x", ("x", incidents, "sum")),
+            input_choices={"x": {"exclude": [str(legacy.id)]}},
+        )
+        compute_sample(out)
+        assert stored(out) == {"2026-05-01": 3}
+        # A subsidiary added later is read without anyone ticking it.
+        site(hq, "ES", incidents, 4)
+        compute_sample(out, full=True)
+        assert stored(out) == {"2026-05-01": 7}
+
+    def test_an_exclusion_of_a_deleted_instance_is_harmless(self, frozen):
+        hq = make_domain("HQ")
+        incidents = make_definition("Incidents")
+        site(hq, "FR", incidents, 3)
+        out = make_instance(
+            hq,
+            formula("x", ("x", incidents, "sum")),
+            input_choices={"x": {"exclude": [str(uuid.uuid4())]}},
+        )
+        compute_sample(out)
+        assert stored(out) == {"2026-05-01": 3}
+
+    def test_changing_the_choices_recomputes_the_whole_series(
+        self, frozen, django_capture_on_commit_callbacks
+    ):
+        hq = make_domain("HQ")
+        incidents = make_definition("Incidents")
+        site(hq, "FR", incidents, 3)
+        legacy = site(hq, "FR legacy", incidents, 50)
+        out = make_instance(hq, formula("x", ("x", incidents, "sum")))
+        compute_sample(out)
+        out.refresh_from_db()
+        assert out.recompute_from is None
+        with django_capture_on_commit_callbacks(execute=True):
+            out.input_choices = {"x": {"exclude": [str(legacy.id)]}}
+            out.save()
+        out.refresh_from_db()
+        assert out.recompute_from == FULL
+
+
+@pytest.mark.django_db
+class TestInputChoicesValidation:
+    def errors(self, instance, choices):
+        from metrology.serializers import MetricInstanceWriteSerializer
+
+        serializer = MetricInstanceWriteSerializer(
+            instance, data={"input_choices": choices}, partial=True
+        )
+        if serializer.is_valid():
+            return []
+        return serializer.errors["input_choices"]
+
+    def setup_case(self):
+        hq = make_domain("HQ")
+        clicks = make_definition("Clicks")
+        fr = site(hq, "FR", clicks, 1)
+        de = site(hq, "DE", clicks, 2)
+        out = make_instance(
+            hq, formula("c + s", ("c", clicks, "one"), ("s", clicks, "sum"))
+        )
+        return hq, clicks, fr, de, out
+
+    def test_a_valid_pick_and_exclusion_pass(self):
+        _hq, _clicks, fr, de, out = self.setup_case()
+        assert (
+            self.errors(
+                out, {"c": {"pick": str(fr.id)}, "s": {"exclude": [str(de.id)]}}
+            )
+            == []
+        )
+
+    def test_nothing_outside_the_domain_tree(self):
+        _hq, clicks, _fr, _de, out = self.setup_case()
+        outside = make_instance(make_domain("Elsewhere"), clicks)
+        assert self.errors(out, {"c": {"pick": str(outside.id)}})
+        assert self.errors(out, {"s": {"exclude": [str(outside.id)]}})
+
+    def test_only_instances_of_the_input_metric(self):
+        hq, _clicks, _fr, _de, out = self.setup_case()
+        other = make_instance(make_domain("FR2", hq), make_definition("Other"))
+        assert self.errors(out, {"c": {"pick": str(other.id)}})
+
+    def test_the_choice_matches_the_combination(self):
+        _hq, _clicks, fr, _de, out = self.setup_case()
+        assert self.errors(out, {"c": {"exclude": [str(fr.id)]}})
+        assert self.errors(out, {"s": {"pick": str(fr.id)}})
+        assert self.errors(out, {"nope": {"pick": str(fr.id)}})
+
+    def test_a_plain_metric_takes_no_choices(self):
+        hq, clicks, fr, _de, _out = self.setup_case()
+        assert self.errors(fr, {"c": {"pick": str(fr.id)}})
+
+
+@pytest.mark.django_db
+class TestInputCandidates:
+    def get(self, user, **params):
+        from metrology.views import MetricInstanceViewSet
+
+        view = MetricInstanceViewSet.as_view({"get": "input_candidates"})
+        request = APIRequestFactory().get(
+            "/metrology/metric-instances/input-candidates/", params
+        )
+        force_authenticate(request, user=user)
+        return view(request)
+
+    def test_each_input_with_what_it_could_read(self, frozen):
+        hq = make_domain("HQ")
+        clicks = make_definition("Clicks")
+        fr = site(hq, "FR", clicks, 1)
+        site(hq, "Old", clicks, 9, status=MetricInstance.Status.DEPRECATED)
+        definition = formula("c", ("c", clicks, "sum"))
+        admin = User.objects.create_superuser(
+            email=f"admin-{uuid.uuid4().hex[:6]}@tests.local"
+        )
+        response = self.get(admin, definition=str(definition.id), folder=str(hq.id))
+        assert response.status_code == 200
+        assert response.data["inputs"] == [
+            {
+                "key": "c",
+                "combine": "sum",
+                "definition": {"id": str(clicks.id), "name": clicks.name},
+                "candidates": [
+                    {
+                        "id": str(fr.id),
+                        "name": fr.name,
+                        "folder": fr.folder.name,
+                        "status": "active",
+                    }
+                ],
+            }
+        ]
+
+    def test_needs_the_right_to_add_or_change_instances_there(self):
+        hq = make_domain("HQ")
+        definition = formula("c", ("c", make_definition("Clicks"), "sum"))
+        nobody = User.objects.create_user(
+            email=f"nobody-{uuid.uuid4().hex[:6]}@tests.local"
+        )
+        response = self.get(nobody, definition=str(definition.id), folder=str(hq.id))
+        assert response.status_code == 403
