@@ -1888,8 +1888,16 @@ class LibraryUpdater:
                     "typical_evidence",
                     "visibility_expression",
                     "implementation_groups",
+                    "min_score",
+                    "max_score",
+                    "scores_definition_ref",
                     "target_score",
                 )
+                requirement_node_defaults = {
+                    "weight": 1,
+                    "importance": RequirementNode.Importance.UNDEFINED,
+                    "display_mode": RequirementNode.DisplayMode.DEFAULT,
+                }
 
                 # Check if score boundaries changed (triggers warning + strategy prompt)
                 score_boundaries_changed = (
@@ -2034,6 +2042,8 @@ class LibraryUpdater:
                         # Consider omissions before applying imported values.
                         for field in clearable_requirement_node_fields:
                             requirement_node_dict.setdefault(field, None)
+                        for field, default in requirement_node_defaults.items():
+                            requirement_node_dict.setdefault(field, default)
                         for key, value in requirement_node_dict.items():
                             setattr(requirement_node_object, key, value)
                         requirement_node_object.clean()
