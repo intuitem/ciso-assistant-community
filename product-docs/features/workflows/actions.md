@@ -253,7 +253,7 @@ Creates or updates one object per entry of a list, in a single step. Use it afte
 
 Every entry is matched and updated the way **Update when it already exists** does on Create object. A failing entry is rolled back on its own and the rest still land.
 
-Output: `model`, `received`, `created`, `updated`, `failed`, `errors` (the first 20, each with its `index` and `reason`), `truncated` (true when the list held more than 2000 entries; the rest are skipped).
+Output: `model`, `received`, `created`, `updated`, `failed`, `errors` (the first 20, each with its `index` and `reason`), `truncated` (true when the list held more than `WORKFLOW_NODE_OUTPUT_MAX_ITEMS` entries, 10 000 by default; the rest are skipped).
 
 Permission: `add_<model>` and `change_<model>`.
 
@@ -433,9 +433,11 @@ Use them when the step is followed by a branch that does something about the fai
 | Count only, keep no items | Count the items without keeping them, for APIs that offer no count of their own. Nothing from the answer is stored |
 | Page limit | 1 to 50, default 10 |
 
-Paging stops when there is no next page, at the page limit, or when the items reach what one step's output can hold: 2000 items, or about 90% of the output budget (`WORKFLOW_NODE_OUTPUT_BUDGET`, 500 000 characters by default). `pages` says how many were read, `count` how many items were gathered, and `truncated` is true when a limit cut the list short. When paging, `body` is left empty: the items are in `items`, and keeping every raw page as well would double what the run stores.
+Paging stops when there is no next page, at the page limit, or when the items reach what one step's output can hold: `WORKFLOW_NODE_OUTPUT_MAX_ITEMS` items (10 000 by default), or about 90% of `WORKFLOW_NODE_OUTPUT_BUDGET` characters (5 000 000 by default). Both are environment variables of the backend. `pages` says how many were read, `count` how many items were gathered, and `truncated` is true when a limit cut the list short. When paging, `body` is left empty: the items are in `items`, and keeping every raw page as well would double what the run stores.
 
 **Sign in with OAuth client credentials** fetches a token before the request and sends it as a bearer token. It takes a **Token URL** (must be `https`), a **Client ID**, a **Client secret** and an optional **Scope**, all *expr*, so the client secret can come from a secret. The token never appears in the output or the run log.
+
+A run keeps every item it gathered, but the builder shows a preview: lists in step outputs and variables are cut to their first 50 entries, followed by a note saying how many more there are. Expressions and the steps themselves always read the full list.
 
 Output mappings accept keys that contain dots, so `body.@odata.count` reads a Microsoft Graph count.
 

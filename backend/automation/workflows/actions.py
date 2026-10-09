@@ -1275,7 +1275,9 @@ class CreateObjectAction(BaseAction):
 
 
 def upsert_max_items():
-    return int(getattr(settings, "WORKFLOW_UPSERT_MAX_ITEMS", 2000))
+    from .engine import node_output_max_items
+
+    return int(getattr(settings, "WORKFLOW_UPSERT_MAX_ITEMS", node_output_max_items()))
 
 
 @register
@@ -3236,7 +3238,9 @@ def http_max_pages():
 
 
 def http_max_items():
-    return int(getattr(settings, "WORKFLOW_HTTP_MAX_ITEMS", 2000))
+    from .engine import node_output_max_items
+
+    return int(getattr(settings, "WORKFLOW_HTTP_MAX_ITEMS", node_output_max_items()))
 
 
 @register
@@ -3378,9 +3382,9 @@ class HttpRequestAction(BaseAction):
             max(int(paginate.get("max_pages") or HTTP_DEFAULT_PAGES), 1),
             http_max_pages(),
         )
-        from .engine import MAX_COLLECTION_ITEMS, node_output_budget
+        from .engine import node_output_budget, node_output_max_items
 
-        max_items = min(http_max_items(), MAX_COLLECTION_ITEMS)
+        max_items = min(http_max_items(), node_output_max_items())
         max_chars = node_output_budget() * 9 // 10
         offset = int(_query_value(url, offset_param) or 0) if offset_param else 0
         items, count, pages, truncated, chars = [], 0, 0, False, 0

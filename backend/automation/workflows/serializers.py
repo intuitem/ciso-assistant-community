@@ -1,9 +1,7 @@
 from django.db import transaction
 from rest_framework import serializers
 
-from core.serializers import BaseModelSerializer
-from core.serializer_fields import FieldsRelatedField, PathField
-
+from automation.workflows.engine import display_preview
 from automation.workflows.models import (
     Workflow,
     WorkflowInstance,
@@ -14,6 +12,8 @@ from automation.workflows.models import (
     WorkflowTrigger,
     WorkflowVersion,
 )
+from core.serializer_fields import FieldsRelatedField, PathField
+from core.serializers import BaseModelSerializer
 
 # Token states shown as a run's "active nodes" (live or stuck, not yet done).
 ACTIVE_TOKEN_STATUSES = [
@@ -137,6 +137,14 @@ class WorkflowInstanceReadSerializer(BaseModelSerializer):
     initiated_by = FieldsRelatedField(["id", "email"])
     active_nodes = serializers.SerializerMethodField()
     run_as = serializers.SerializerMethodField()
+    node_outputs = serializers.SerializerMethodField()
+    variables = serializers.SerializerMethodField()
+
+    def get_node_outputs(self, obj):
+        return display_preview(obj.node_outputs or {})
+
+    def get_variables(self, obj):
+        return display_preview(obj.variables or {})
 
     def get_run_as(self, obj):
         # The identity the run acts as: version.run_as, or the

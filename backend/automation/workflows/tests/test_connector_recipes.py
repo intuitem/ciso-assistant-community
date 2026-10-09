@@ -4,9 +4,10 @@ from urllib.parse import parse_qs, urlsplit
 import pytest
 import yaml
 
-from automation.workflows.engine import start_instance
+from automation.workflows.engine import DISPLAY_MAX_ITEMS, start_instance
 from automation.workflows.import_export import import_workflow
 from automation.workflows.models import WorkflowInstance, WorkflowToken
+from automation.workflows.serializers import WorkflowInstanceReadSerializer
 from automation.workflows.tasks import retry_token_task
 from automation.workflows.tests.helpers import publisher_user
 from automation.workflows.tests.test_landing_zones import make_metric
@@ -244,24 +245,25 @@ class TestDefenderRecipe:
         )
 
     def test_pages_by_offset_and_keeps_one_asset_per_device(self, vendors):
-        vendor = vendors(devices=1500)
+        vendor = vendors(devices=2500)
         domain = make_domain("Defender")
         version = self.install(domain)
         instance = start_instance(version)
         assert instance.status == WorkflowInstance.Status.COMPLETED
         assert vendor.rejected == []
         pages = [parse_qs(urlsplit(url).query) for method, url in vendor.calls[1:]]
-        assert [page["$top"] for page in pages] == [["1000"]] * 2
-        assert [page.get("$skip") for page in pages] == [None, ["1000"]]
-        assert instance.node_outputs["keep_assets"]["created"] == 1500
+        assert [page["$top"] for page in pages] == [["1000"]] * 3
+        assert [page.get("$skip") for page in pages] == [None, ["1000"], ["2000"]]
+        assert instance.node_outputs["keep_assets"]["created"] == 2500
         assert instance.node_outputs["list_devices"]["truncated"] is False
-        assert Asset.objects.filter(folder=domain).count() == 1500
+        assert Asset.objects.filter(folder=domain).count() == 2500
 
         again = start_instance(version)
-        assert again.node_outputs["keep_assets"]["updated"] == 1500
-        assert Asset.objects.filter(folder=domain).count() == 1500
+        assert again.node_outputs["keep_assets"]["updated"] == 2500
+        assert Asset.objects.filter(folder=domain).count() == 2500
 
-    def test_an_inventory_past_the_output_limit_says_so(self, vendors):
+    def test_an_inventory_past_the_output_limit_says_so(self, vendors, settings):
+        settings.WORKFLOW_NODE_OUTPUT_MAX_ITEMS = 2000
         vendors(devices=2500)
         domain = make_domain("Large")
         instance = start_instance(self.install(domain))
@@ -341,3 +343,25 @@ class TestTheFakeIsStrict:
             {"Authorization": "ApiToken s1"},
         )
         assert response.status_code == 400
+
+
+@pytest.mark.django_db
+class TestCanvasGetsAPreview:
+    def test_large_outputs_are_trimmed_for_the_api_only(self, vendors):
+        vendors(devices=1200)
+        domain = make_domain("Preview")
+        instance = start_instance(
+            install_recipe(
+                "workflow-operations-defender-device-inventory",
+                domain,
+                {"tenant_id": "contoso", "client_id": "app"},
+                {"defender_client_secret": "ms"},
+            )
+        )
+        instance.refresh_from_db()
+        assert len(instance.node_outputs["list_devices"]["items"]) == 1200
+        shown = WorkflowInstanceReadSerializer(instance).data["node_outputs"]
+        items = shown["list_devices"]["items"]
+        assert len(items) == DISPLAY_MAX_ITEMS + 1
+        assert items[-1] == f"<{1200 - DISPLAY_MAX_ITEMS} more items>"
+        assert shown["keep_assets"]["created"] == 1200

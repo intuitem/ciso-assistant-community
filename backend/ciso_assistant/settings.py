@@ -263,6 +263,12 @@ ATTACHMENT_MAX_SIZE_MB = os.environ.get("ATTACHMENT_MAX_SIZE_MB", 50)
 WORKFLOW_READ_MAX_LIMIT = int(os.environ.get("WORKFLOW_READ_MAX_LIMIT", 500))
 WORKFLOW_LOOP_MAX_ITEMS = int(os.environ.get("WORKFLOW_LOOP_MAX_ITEMS", 500))
 WORKFLOW_LOOP_MAX_PAGES = int(os.environ.get("WORKFLOW_LOOP_MAX_PAGES", 20))
+WORKFLOW_NODE_OUTPUT_MAX_ITEMS = int(
+    os.environ.get("WORKFLOW_NODE_OUTPUT_MAX_ITEMS", 10_000)
+)
+WORKFLOW_NODE_OUTPUT_BUDGET = int(
+    os.environ.get("WORKFLOW_NODE_OUTPUT_BUDGET", 5_000_000)
+)
 
 # The timeout is the safety net for a provider that stopped answering; it has to
 # outlast the token ceiling, or it fires first and reports a dead provider

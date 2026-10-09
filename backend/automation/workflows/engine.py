@@ -845,8 +845,8 @@ def _loop_stop_reason(state):
     collected = len(state.get("results") or [])
     if state.get("processed", 0) >= loop_max_items():
         return f"stopped after {loop_max_items()} items"
-    if collected >= MAX_COLLECTION_ITEMS:
-        return f"stopped after collecting {MAX_COLLECTION_ITEMS} items"
+    if collected >= node_output_max_items():
+        return f"stopped after collecting {node_output_max_items()} items"
     # Predictive, against the widest item seen: noticing once over means having
     # collected what cannot be kept, and dropping it loses work the run did.
     room = node_output_budget() - state.get("collected_chars", 0)
@@ -1119,22 +1119,33 @@ def _store_node_output(node, output, instance):
 
 
 MAX_LEAF_CHARS = 1000
-MAX_COLLECTION_ITEMS = 2000
 MAX_STRUCTURE_DEPTH = 10
+DISPLAY_MAX_ITEMS = 50
+DISPLAY_BUDGET = 200_000
+
+
+def node_output_max_items():
+    return int(getattr(settings, "WORKFLOW_NODE_OUTPUT_MAX_ITEMS", 10_000))
 
 
 def node_output_budget():
     """Characters one node output may hold. `node_outputs` keeps every node's
     output in one JSONField, rewritten on each node completion."""
-    return int(getattr(settings, "WORKFLOW_NODE_OUTPUT_BUDGET", 500_000))
+    return int(getattr(settings, "WORKFLOW_NODE_OUTPUT_BUDGET", 5_000_000))
 
 
-def _cap_structure(value, budget=None, depth=0, lost=None):
+def display_preview(value):
+    return _cap_structure(value, [DISPLAY_BUDGET], max_items=DISPLAY_MAX_ITEMS)
+
+
+def _cap_structure(value, budget=None, depth=0, lost=None, max_items=None):
     """Bound node_outputs without flattening: dicts and lists keep their shape so
     paths into them keep working. `lost` collects what the caller no longer
     has."""
     if budget is None:
         budget = [node_output_budget()]
+    if max_items is None:
+        max_items = node_output_max_items()
 
     def drop(what, remedy=None):
         if lost is not None:
@@ -1158,32 +1169,34 @@ def _cap_structure(value, budget=None, depth=0, lost=None):
     if isinstance(value, dict):
         capped = {}
         for index, (key, item) in enumerate(value.items()):
-            if index >= MAX_COLLECTION_ITEMS or budget[0] <= 0:
+            if index >= max_items or budget[0] <= 0:
                 drop(
                     f"{len(value) - index} of {len(value)} keys were dropped",
-                    None
-                    if index >= MAX_COLLECTION_ITEMS
+                    "WORKFLOW_NODE_OUTPUT_MAX_ITEMS"
+                    if index >= max_items
                     else "WORKFLOW_NODE_OUTPUT_BUDGET",
                 )
                 capped["<omitted>"] = f"{len(value) - index} more keys"
                 break
             budget[0] -= len(str(key))
-            capped[key] = _cap_structure(item, budget, depth + 1, lost)
+            capped[key] = _cap_structure(item, budget, depth + 1, lost, max_items)
         return capped
 
     if isinstance(value, list):
         capped_items = []
         for index, item in enumerate(value):
-            if index >= MAX_COLLECTION_ITEMS or budget[0] <= 0:
+            if index >= max_items or budget[0] <= 0:
                 drop(
                     f"{len(value) - index} of {len(value)} items were dropped",
-                    None
-                    if index >= MAX_COLLECTION_ITEMS
+                    "WORKFLOW_NODE_OUTPUT_MAX_ITEMS"
+                    if index >= max_items
                     else "WORKFLOW_NODE_OUTPUT_BUDGET",
                 )
                 capped_items.append(f"<{len(value) - index} more items>")
                 break
-            capped_items.append(_cap_structure(item, budget, depth + 1, lost))
+            capped_items.append(
+                _cap_structure(item, budget, depth + 1, lost, max_items)
+            )
         return capped_items
 
     budget[0] -= 8

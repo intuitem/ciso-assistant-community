@@ -8,7 +8,7 @@ from types import SimpleNamespace
 
 from automation.workflows.actions import FatalActionError
 from automation.workflows.engine import (
-    MAX_COLLECTION_ITEMS,
+    node_output_max_items,
     _cap_structure,
     _store_node_output,
     start_instance,
@@ -244,10 +244,11 @@ class TestTruncationIsLoud:
         return lost
 
     def test_dropping_items_from_a_list_is_reported(self):
-        lost = self._lost({"items": list(range(MAX_COLLECTION_ITEMS + 50))})
-        # No remedy: the item cap is an engine constant, so telling the author
-        # to raise the budget setting would send them somewhere that cannot help.
-        assert lost == [(f"50 of {MAX_COLLECTION_ITEMS + 50} items were dropped", None)]
+        cap = node_output_max_items()
+        lost = self._lost({"items": list(range(cap + 50))})
+        assert lost == [
+            (f"50 of {cap + 50} items were dropped", "WORKFLOW_NODE_OUTPUT_MAX_ITEMS")
+        ]
 
     def test_running_out_of_budget_is_reported(self, settings):
         settings.WORKFLOW_NODE_OUTPUT_BUDGET = 2000
