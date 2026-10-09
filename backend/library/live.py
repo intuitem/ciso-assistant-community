@@ -204,6 +204,8 @@ def live_framework_to_object(framework) -> dict:
                 "typical_evidence": node.typical_evidence,
                 "implementation_groups": node.implementation_groups,
                 "visibility_expression": node.visibility_expression,
+                "min_score": node.min_score,
+                "max_score": node.max_score,
                 "target_score": node.target_score,
                 "translations": node.translations or None,
             }

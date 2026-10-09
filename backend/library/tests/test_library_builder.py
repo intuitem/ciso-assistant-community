@@ -813,13 +813,15 @@ def test_publish_refuses_a_draft_with_unresolved_references(admin_client):
 @pytest.mark.django_db
 def test_node_fields_survive_publish_and_export(admin_client):
     """A first load keeps the node's visibility expression, importance and
-    target score; both the draft export and the live serialization carry
+    score scale; both the draft export and the live serialization carry
     them."""
     from library import live
 
     fields = {
         "visibility_expression": 'requirements["r1"].score > 1',
         "importance": "mandatory",
+        "min_score": 0,
+        "max_score": 5,
         "target_score": 3.5,
     }
     draft = _create_draft(
@@ -869,7 +871,8 @@ def test_node_fields_survive_publish_and_export(admin_client):
     serialized = live.live_framework_to_object(node.framework)
     nodes = {n["urn"]: n for n in serialized["requirement_nodes"]}
     assert {name: nodes[node.urn].get(name) for name in fields} == fields
-    assert not {"importance", "target_score"} & nodes[plain.urn].keys()
+    defaults_omitted = {"importance", "min_score", "max_score", "target_score"}
+    assert not defaults_omitted & nodes[plain.urn].keys()
 
 
 @pytest.mark.django_db
