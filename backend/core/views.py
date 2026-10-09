@@ -3822,7 +3822,7 @@ class RiskMatrixViewSet(BaseModelViewSet):
         viewable_matrices = RoleAssignment.get_viewable_object_ids(
             request.user, RiskMatrix
         )
-        matrices = RiskMatrix.objects.filter(id__in=viewable_matrices)
+        matrices = RiskMatrix.objects.filter(id__in=viewable_matrices).order_by("name")
 
         risk_assessment_id = request.query_params.get("risk_assessment")
         if risk_assessment_id:
@@ -3839,10 +3839,10 @@ class RiskMatrixViewSet(BaseModelViewSet):
                 # Use the translated name if available, otherwise fall back to the default name
                 name = translated.get("name") or risk.get("name", "")
                 labels = options.setdefault(i, [])
-                if name not in labels:
+                if name and name not in labels:
                     labels.append(name)
 
-        res = [{"value": k, "label": " | ".join(v)} for k, v in options.items()]
+        res = [{"value": k, "label": " | ".join(v)} for k, v in options.items() if v]
         return Response(res)
 
     @action(detail=False, name="Get impact choices")
@@ -5421,10 +5421,12 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         risk_assessment = self.get_object()
 
         # Get IAM-visible IDs for related objects
-        visible_threat_ids = RoleAssignment.get_viewable_object_ids(
-            request.user, Threat
+        visible_threat_ids = set(
+            RoleAssignment.get_viewable_object_ids(request.user, Threat)
         )
-        visible_asset_ids = RoleAssignment.get_viewable_object_ids(request.user, Asset)
+        visible_asset_ids = set(
+            RoleAssignment.get_viewable_object_ids(request.user, Asset)
+        )
 
         scenarios = RiskScenario.objects.filter(
             risk_assessment=risk_assessment
@@ -5433,7 +5435,9 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         # 1. Threats breakdown: count scenarios per visible threat
         threat_counts: dict[str, int] = defaultdict(int)
         for scenario in scenarios:
-            for threat in scenario.threats.filter(id__in=visible_threat_ids):
+            for threat in scenario.threats.all():
+                if threat.id not in visible_threat_ids:
+                    continue
                 threat_counts[threat.name] += 1
 
         sorted_threats = sorted(threat_counts.items(), key=lambda x: x[1], reverse=True)
@@ -5471,7 +5475,9 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         # 4. Assets at risk: count scenarios per visible asset, sorted
         asset_counts: dict[str, int] = defaultdict(int)
         for scenario in scenarios:
-            for asset in scenario.assets.filter(id__in=visible_asset_ids):
+            for asset in scenario.assets.all():
+                if asset.id not in visible_asset_ids:
+                    continue
                 asset_counts[asset.name] += 1
         sorted_assets = sorted(asset_counts.items(), key=lambda x: x[1], reverse=True)
         assets_data = {
@@ -7690,14 +7696,16 @@ class RiskScenarioFilter(GenericFilterSet):
         field_name="residual_level", widget=QueryArrayWidget
     )
     # Aliased filters for user-friendly query params
-    folder = df.ModelMultipleChoiceFilter(
-        queryset=Folder.objects.all(),
-        field_name="risk_assessment__perimeter__folder",
+    folder = GenericFilterSet.UUIDInFilter(
+        field_name="risk_assessment__folder",
+        lookup_expr="in",
+        widget=QueryArrayWidget,
         label="Folder ID",
     )
-    perimeter = df.ModelMultipleChoiceFilter(
-        queryset=Perimeter.objects.all(),
+    perimeter = GenericFilterSet.UUIDInFilter(
         field_name="risk_assessment__perimeter",
+        lookup_expr="in",
+        widget=QueryArrayWidget,
         label="Perimeter ID",
     )
     within_tolerance = df.ChoiceFilter(
