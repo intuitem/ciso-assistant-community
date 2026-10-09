@@ -132,20 +132,54 @@ export function formulaScope(
 
 // ---------- several instances of one metric in a domain ----------
 
-// Per input key: the instance a "one value" input reads, or the instances a
-// combined input leaves out (mirrors MetricInstance.input_choices).
-export type InputChoice = { pick: string } | { exclude: string[] };
+// Per input key (mirrors MetricInstance.input_choices): how the input's
+// instances combine on this instance when it differs from the definition's
+// default, the instance a "one value" input reads, or the instances a
+// combined input leaves out.
+export interface InputChoice {
+	combine?: Combine;
+	pick?: string;
+	exclude?: string[];
+}
 export type InputChoices = Record<string, InputChoice>;
 
 function withChoice(
 	choices: InputChoices | null | undefined,
 	key: string,
-	choice: InputChoice | null
+	choice: InputChoice
 ): InputChoices | null {
 	const next: InputChoices = { ...(choices ?? {}) };
-	if (choice) next[key] = choice;
+	const kept = Object.fromEntries(
+		Object.entries(choice).filter(([, v]) => v !== undefined && !(Array.isArray(v) && !v.length))
+	) as InputChoice;
+	if (Object.keys(kept).length) next[key] = kept;
 	else delete next[key];
 	return Object.keys(next).length ? next : null;
+}
+
+export function effectiveCombine(
+	choices: InputChoices | null | undefined,
+	key: string,
+	defaultCombine: string
+): Combine {
+	return (choices?.[key]?.combine ?? defaultCombine) as Combine;
+}
+
+// Change how an input combines on this instance. A pick only means
+// something for "one value", exclusions only for the other aggregates: the
+// one that no longer applies is dropped.
+export function setCombine(
+	choices: InputChoices | null | undefined,
+	key: string,
+	combine: Combine,
+	defaultCombine: string
+): InputChoices | null {
+	const current = choices?.[key] ?? {};
+	return withChoice(choices, key, {
+		combine: combine === defaultCombine ? undefined : combine,
+		pick: combine === 'one' ? current.pick : undefined,
+		exclude: combine === 'one' ? undefined : current.exclude
+	});
 }
 
 export function pickInstance(
@@ -153,17 +187,17 @@ export function pickInstance(
 	key: string,
 	instanceId: string | null
 ): InputChoices | null {
-	return withChoice(choices, key, instanceId ? { pick: instanceId } : null);
+	return withChoice(choices, key, { ...(choices?.[key] ?? {}), pick: instanceId ?? undefined });
 }
 
 export function excludedOf(choices: InputChoices | null | undefined, key: string): string[] {
-	const choice = choices?.[key];
-	return choice && 'exclude' in choice && Array.isArray(choice.exclude) ? choice.exclude : [];
+	const excluded = choices?.[key]?.exclude;
+	return Array.isArray(excluded) ? excluded : [];
 }
 
 export function pickedOf(choices: InputChoices | null | undefined, key: string): string | null {
-	const choice = choices?.[key];
-	return choice && 'pick' in choice && typeof choice.pick === 'string' ? choice.pick : null;
+	const picked = choices?.[key]?.pick;
+	return typeof picked === 'string' ? picked : null;
 }
 
 // Include or leave out one instance of a combined input. Exclusions, not a
@@ -178,7 +212,7 @@ export function setIncluded(
 	const excluded = new Set(excludedOf(choices, key));
 	if (included) excluded.delete(instanceId);
 	else excluded.add(instanceId);
-	return withChoice(choices, key, excluded.size ? { exclude: [...excluded] } : null);
+	return withChoice(choices, key, { ...(choices?.[key] ?? {}), exclude: [...excluded] });
 }
 
 // The domains that contribute more than one instance to an input: often a

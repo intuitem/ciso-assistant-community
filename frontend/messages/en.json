@@ -6223,6 +6223,7 @@
 	"combineCount": "Count",
 	"addInput": "Add input",
 	"inputChoices": "Inputs of the formula",
+	"definitionDefault": "definition default",
 	"inputChoicesHelpText": "What each input reads in this domain and its sub-domains. Deprecated instances are never read.",
 	"noInstanceForInput": "No instance of this metric in this domain yet",
 	"readsInstance": "Reads",

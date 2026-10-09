@@ -5,10 +5,14 @@
 	// leaves out. Deprecated instances are never offered: they are never read.
 	import { m } from '$paraglide/messages';
 	import {
+		COMBINES,
+		effectiveCombine,
 		excludedOf,
 		pickedOf,
 		pickInstance,
+		setCombine,
 		setIncluded,
+		type Combine,
 		type InputChoices
 	} from '$lib/utils/derived-metrics';
 
@@ -55,6 +59,7 @@
 
 	const choices = $derived((value ?? null) as InputChoices | null);
 	const COMBINE_LABELS: Record<string, () => string> = {
+		one: () => m.combineOne(),
 		sum: () => m.combineSum(),
 		avg: () => m.combineAvg(),
 		min: () => m.combineMin(),
@@ -73,24 +78,49 @@
 			<span class="text-xs text-surface-500">{m.inputChoicesHelpText()}</span>
 		</div>
 		{#each inputs as input (input.key)}
+			{@const combine = effectiveCombine(choices, input.key, input.combine)}
 			<div class="flex flex-col gap-1" data-testid="input-choice">
-				<div class="text-xs">
+				<div class="flex flex-wrap items-center gap-2 text-xs">
 					<span class="font-mono font-semibold">{input.key}</span>
 					<span class="text-surface-500">· {input.definition?.name ?? '?'}</span>
-					{#if input.combine !== 'one'}
-						<span class="badge preset-tonal-surface text-[10px] ml-1"
-							>{COMBINE_LABELS[input.combine]?.() ?? input.combine}</span
+					{#if input.candidates.length > 1}
+						<!-- The definition sets the default; an instance over a wider
+						     domain may need another aggregate for the same formula. -->
+						<select
+							class="select preset-tonal text-xs w-auto py-0.5 ml-auto"
+							aria-label={m.inputCombine()}
+							value={combine}
+							onchange={(e) =>
+								(value = setCombine(
+									choices,
+									input.key,
+									e.currentTarget.value as Combine,
+									input.combine
+								))}
+							data-testid="input-choice-combine"
+						>
+							{#each COMBINES as option (option)}
+								<option value={option}>
+									{COMBINE_LABELS[option]()}{option === input.combine
+										? ` (${m.definitionDefault()})`
+										: ''}
+								</option>
+							{/each}
+						</select>
+					{:else if combine !== 'one'}
+						<span class="badge preset-tonal-surface text-[10px]"
+							>{COMBINE_LABELS[combine]?.() ?? combine}</span
 						>
 					{/if}
 				</div>
 				{#if input.candidates.length === 0}
 					<p class="text-xs text-warning-600-400">{m.noInstanceForInput()}</p>
-				{:else if input.combine === 'one' && input.candidates.length === 1}
+				{:else if combine === 'one' && input.candidates.length === 1}
 					<p class="text-xs text-surface-500">
 						{m.readsInstance()}
 						{input.candidates[0].name} ({input.candidates[0].folder})
 					</p>
-				{:else if input.combine === 'one'}
+				{:else if combine === 'one'}
 					{@const picked = pickedOf(choices, input.key)}
 					{#if !picked}
 						<p class="text-xs text-warning-600-400">{m.pickInstanceToRead()}</p>

@@ -257,11 +257,20 @@ def input_candidates(target, folder):
     )
 
 
+def effective_combine(spec, choice):
+    """How an input's instances combine on one instance: the instance's own
+    choice when it made one, else the definition's."""
+    return (choice or {}).get("combine") or spec.get("combine") or "one"
+
+
 def validate_input_choices(definition, folder, choices):
-    """Save-time checks of an instance's ``input_choices``, as messages. A
-    pick names a current instance of the input's metric in the instance's
-    domain tree; an exclusion names any instance of it there. Nothing ever
-    reaches outside the tree: the same boundary as the formula itself."""
+    """Save-time checks of an instance's ``input_choices``, as messages. An
+    instance may change how an input combines (the definition only sets the
+    default), pick the instance a one-value input reads, or exclude
+    instances from a combined one. A pick names a current instance of the
+    input's metric in the instance's domain tree; an exclusion names any
+    instance of it there. Nothing ever reaches outside the tree: the same
+    boundary as the formula itself."""
     from .models import MetricInstance
 
     if choices in (None, {}):
@@ -285,19 +294,26 @@ def validate_input_choices(definition, folder, choices):
         if target is None or not isinstance(choice, dict):
             errors.append(f"input '{key}': invalid choice")
             continue
-        combine = spec.get("combine") or "one"
-        expected = "pick" if combine == "one" else "exclude"
-        if set(choice) != {expected}:
+        if "combine" in choice and choice["combine"] not in COMBINES:
             errors.append(
-                f"input '{key}': a 'one value' input takes a pick"
+                f"input '{key}': combine must be one of {', '.join(COMBINES)}"
+            )
+            continue
+        combine = effective_combine(spec, choice)
+        allowed = {"combine", "pick" if combine == "one" else "exclude"}
+        if not set(choice) <= allowed:
+            errors.append(
+                f"input '{key}': a 'one value' input takes a pick, not exclusions"
                 if combine == "one"
-                else f"input '{key}': a combined input takes exclusions"
+                else f"input '{key}': a combined input takes exclusions, not a pick"
             )
             continue
         in_tree = MetricInstance.objects.filter(
             metric_definition=target, folder_id__in=subtree_folder_ids(folder)
         )
         if combine == "one":
+            if "pick" not in choice:
+                continue
             if (
                 not in_tree.exclude(status=MetricInstance.Status.DEPRECATED)
                 .filter(id=_as_uuid(choice["pick"]))
@@ -307,6 +323,8 @@ def validate_input_choices(definition, folder, choices):
                     f"input '{key}': pick an instance of '{target.name}' in this "
                     "domain that is not deprecated"
                 )
+            continue
+        if "exclude" not in choice:
             continue
         excluded = choice["exclude"]
         ids = [_as_uuid(i) for i in excluded] if isinstance(excluded, list) else None
@@ -348,8 +366,8 @@ def resolve_inputs(inputs, folder, choices=None):
                 f"input '{key}': the metric it reads no longer exists"
             )
         instances = input_candidates(target, folder)
-        combine = spec.get("combine") or "one"
         choice = _choice(choices, key)
+        combine = effective_combine(spec, choice)
         if combine == "one":
             picked = choice.get("pick")
             if picked:

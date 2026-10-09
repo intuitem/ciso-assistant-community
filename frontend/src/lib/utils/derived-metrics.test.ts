@@ -2,11 +2,13 @@ import { describe, expect, it } from 'vitest';
 import {
 	aliasOf,
 	datasetNameProblem,
+	effectiveCombine,
 	excludedOf,
 	foldersWithSeveral,
 	formulaKind,
 	pickInstance,
 	pickedOf,
+	setCombine,
 	setIncluded,
 	formulaScope,
 	inputReferences,
@@ -176,5 +178,31 @@ describe('input choices', () => {
 				{ folder: 'ACME Spain' }
 			])
 		).toEqual(['ACME France']);
+	});
+});
+
+describe('aggregate override', () => {
+	it('stores only a change from the definition default', () => {
+		const choices = setCombine(null, 'headcount', 'max', 'sum');
+		expect(choices).toEqual({ headcount: { combine: 'max' } });
+		expect(effectiveCombine(choices, 'headcount', 'sum')).toBe('max');
+		expect(setCombine(choices, 'headcount', 'sum', 'sum')).toBeNull();
+		expect(effectiveCombine(null, 'headcount', 'sum')).toBe('sum');
+	});
+
+	it('drops exclusions when switching to one value, and the pick when leaving it', () => {
+		let choices = setIncluded(null, 'h', 'hr', false);
+		choices = setCombine(choices, 'h', 'one', 'sum');
+		expect(choices).toEqual({ h: { combine: 'one' } });
+		choices = pickInstance(choices, 'h', 'it');
+		expect(choices).toEqual({ h: { combine: 'one', pick: 'it' } });
+		choices = setCombine(choices, 'h', 'avg', 'sum');
+		expect(choices).toEqual({ h: { combine: 'avg' } });
+	});
+
+	it('keeps exclusions between aggregates', () => {
+		let choices = setIncluded(null, 'h', 'hr', false);
+		choices = setCombine(choices, 'h', 'max', 'sum');
+		expect(choices).toEqual({ h: { exclude: ['hr'], combine: 'max' } });
 	});
 });

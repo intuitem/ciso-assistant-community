@@ -947,3 +947,78 @@ class TestInputCandidates:
         )
         response = self.get(nobody, definition=str(definition.id), folder=str(hq.id))
         assert response.status_code == 403
+
+
+@pytest.mark.django_db
+class TestCombineOverride:
+    """The definition sets how an input combines by default; an instance in a
+    wider domain may need another aggregate for the same formula."""
+
+    def test_an_instance_overrides_the_aggregate(self, frozen):
+        hq = make_domain("HQ")
+        clicks = make_definition("Clicks")
+        headcount = make_definition("Headcount")
+        for name, n_clicks in (("FR", 30), ("DE", 10), ("ES", 20)):
+            site(hq, name, clicks, n_clicks)
+        # Headcount is reported twice in the group: by HR and by IT.
+        site(hq, "HR", headcount, 1000)
+        site(hq, "IT", headcount, 1000)
+        rate = formula(
+            "round(clicks * 100.0 / headcount, 1)",
+            ("clicks", clicks, "sum"),
+            ("headcount", headcount, "sum"),
+        )
+        out = make_instance(hq, rate)
+        compute_sample(out)
+        assert stored(out) == {"2026-05-01": 3.0}  # 60 / 2000: headcount doubled
+        out.input_choices = {"headcount": {"combine": "max"}}
+        out.save()
+        compute_sample(out, full=True)
+        assert stored(out) == {"2026-05-01": 6.0}  # 60 / 1000
+
+    def test_switching_to_one_value_reads_the_pick(self, frozen):
+        hq = make_domain("HQ")
+        headcount = make_definition("Headcount")
+        site(hq, "HR", headcount, 900)
+        it = site(hq, "IT", headcount, 1000)
+        out = make_instance(
+            hq,
+            formula("h", ("h", headcount, "sum")),
+            input_choices={"h": {"combine": "one", "pick": str(it.id)}},
+        )
+        compute_sample(out)
+        assert stored(out) == {"2026-05-01": 1000}
+
+    def test_switching_to_one_value_without_a_pick_asks_for_one(self, frozen):
+        hq = make_domain("HQ")
+        headcount = make_definition("Headcount")
+        site(hq, "HR", headcount, 900)
+        site(hq, "IT", headcount, 1000)
+        out = make_instance(
+            hq,
+            formula("h", ("h", headcount, "sum")),
+            input_choices={"h": {"combine": "one"}},
+        )
+        with pytest.raises(DerivedMetricError, match="pick the one to read"):
+            compute_sample(out)
+
+    def test_validation_follows_the_effective_aggregate(self):
+        from metrology.serializers import MetricInstanceWriteSerializer
+
+        hq = make_domain("HQ")
+        headcount = make_definition("Headcount")
+        hr = site(hq, "HR", headcount, 900)
+        out = make_instance(hq, formula("h", ("h", headcount, "sum")))
+
+        def errors(choices):
+            serializer = MetricInstanceWriteSerializer(
+                out, data={"input_choices": choices}, partial=True
+            )
+            return [] if serializer.is_valid() else serializer.errors["input_choices"]
+
+        assert errors({"h": {"combine": "avg"}}) == []
+        assert errors({"h": {"combine": "one", "pick": str(hr.id)}}) == []
+        assert errors({"h": {"combine": "avg", "exclude": [str(hr.id)]}}) == []
+        assert errors({"h": {"combine": "median"}})
+        assert errors({"h": {"combine": "one", "exclude": [str(hr.id)]}})
+        assert errors({"h": {"combine": "max", "pick": str(hr.id)}})

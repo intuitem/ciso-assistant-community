@@ -6773,6 +6773,7 @@
 	"combineCount": "Nombre",
 	"addInput": "Ajouter une entrée",
 	"inputChoices": "Entrées de la formule",
+	"definitionDefault": "par défaut",
 	"inputChoicesHelpText": "Ce que chaque entrée lit dans ce domaine et ses sous-domaines. Les instances obsolètes ne sont jamais lues.",
 	"noInstanceForInput": "Pas encore d'instance de cette métrique dans ce domaine",
 	"readsInstance": "Lit",
