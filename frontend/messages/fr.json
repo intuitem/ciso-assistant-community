@@ -6036,7 +6036,7 @@
 	"lbListFrameworkNamePlaceholder": "Mon référentiel SOC 2",
 	"lbListMatrixNamePlaceholder": "Ma matrice 4x4",
 	"lbListCreateAndEdit": "Créer et éditer",
-	"lbListPackagerPattern": "Le packager doit correspondre à [a-z0-9_-]+",
+	"lbListPackagerPattern": "Le packager doit correspondre à [a-z0-9_-]{1,32}",
 	"lbListQuickHelpFramework": "Le nom et le packager déterminent chaque URN du référentiel. Le packager est mémorisé pour la prochaine fois ; la bibliothèque englobante reste discrète et modifiable dans la vue complète du brouillon jusqu'à la première publication.",
 	"lbListQuickHelpMatrix": "Le nom et le packager déterminent chaque URN de la matrice. Le packager est mémorisé pour la prochaine fois ; la bibliothèque englobante reste discrète et modifiable dans la vue complète du brouillon jusqu'à la première publication.",
 	"lbListReferenceId": "Identifiant de référence",

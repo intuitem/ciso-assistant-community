@@ -1332,6 +1332,10 @@ class LibraryDraft(NameDescriptionMixin, FolderMixin):
     # packager/ref_id columns of LibraryMixin (legacy libraries hold values
     # like "Paul Flatt" there).
     IDENTITY_REGEX = r"^[a-z0-9_-]+$"
+    # The packager is the URN namespace (an RFC 8141 NID is at most 32
+    # characters). Checked when set or changed; the column stays wider so
+    # drafts predating the cap keep theirs.
+    PACKAGER_MAX_LENGTH = 32
 
     packager = models.CharField(
         max_length=100,

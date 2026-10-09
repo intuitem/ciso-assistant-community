@@ -6333,7 +6333,7 @@
 	"lbListFrameworkNamePlaceholder": "My SOC 2 framework",
 	"lbListMatrixNamePlaceholder": "My 4x4 matrix",
 	"lbListCreateAndEdit": "Create and edit",
-	"lbListPackagerPattern": "Packager must match [a-z0-9_-]+",
+	"lbListPackagerPattern": "Packager must match [a-z0-9_-]{1,32}",
 	"lbListQuickHelpFramework": "Name and packager determine every URN of the framework. The packager is remembered for next time; the wrapping library stays out of the way and remains editable in the draft's full view until first publication.",
 	"lbListQuickHelpMatrix": "Name and packager determine every URN of the matrix. The packager is remembered for next time; the wrapping library stays out of the way and remains editable in the draft's full view until first publication.",
 	"lbListReferenceId": "Reference ID",

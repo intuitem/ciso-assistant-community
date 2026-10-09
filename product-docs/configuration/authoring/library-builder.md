@@ -19,7 +19,7 @@ Because a draft serializes to a plain library **YAML**, you can also export it a
 ## Concepts in one minute
 
 - **Draft (`LibraryDraft`)** — the working document. Editing a draft never mutates live objects.
-- **Identity** — a library is identified by its **packager** and **ref_id** (e.g. `packager = acme`, `ref_id = my-policy`). Every URN in the library derives from them: `urn:acme:risk:framework:my-policy`. Identity is **editable while the library is a draft** and **frozen on first publish** — renaming a draft rewrites the whole URN family for you; once published, it's locked.
+- **Identity** — a library is identified by its **packager** and **ref_id** (e.g. `packager = acme`, `ref_id = my-policy`). Every URN in the library derives from them: `urn:acme:risk:framework:my-policy`. The packager holds at most 32 characters. Identity is **editable while the library is a draft** and **frozen on first publish** — renaming a draft rewrites the whole URN family for you; once published, it's locked.
 - **Publish** — the library-level action (on the draft page) that hands the draft to the standard loader, materializing its objects live and freezing the identity.
 - **Library publication states** (the badge on the draft page and the builder list):
   - **Draft** — never published; identity still editable.
@@ -106,6 +106,10 @@ On a requirement node, click **Add question**:
   - **Color** — optional, for visual differentiation.
 
 The order in the editor is the order respondents see. Keep conditional (`depends_on`) chains shallow — a single hop is easy to reason about; chains are expensive to debug.
+
+By default, questions are numbered under their requirement — `1`, `2`, …, a new question taking the next number after the highest one used: their URN ends with `…:question:1`, and their choices with `…:question:1:choice:1`. To refer to a question by name in CEL, give it a ref_id such as `headcount` before its first save: its URN then ends with `:question:headcount`, and a rule reads `answers["<requirement>:question:headcount"].value`.
+
+`<requirement>` is the requirement's id inside its URN, set when the requirement is first saved: its ref_id lowercased, with each run of characters other than `a`–`z`, `0`–`9` and `[]()._-` replaced by a single `-` (accented letters included) (`A 1/Access` gives `a-1-access`), and a `-2`, `-3`, … suffix when that id is already taken. A requirement without ref_id gets a generated id, and imported requirements keep the id already in their URN.
 
 ### Add outcome rules
 
@@ -316,7 +320,7 @@ The two paths compose: an Excel-built library can be imported into a draft and t
 
 The packager used to pre-fill new drafts is an instance-wide setting.
 
-- Go to **Settings → General settings** and set **Default packager** (defaults to `custom`). It must match `^[a-z0-9_-]+$`.
+- Go to **Settings → General settings** and set **Default packager** (defaults to `custom`). It must match `^[a-z0-9_-]+$` and hold at most 32 characters.
 
 Individual users' most recently typed packager is also remembered locally and takes precedence in the quick-create forms.
 
