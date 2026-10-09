@@ -10,6 +10,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { isDark } from '$lib/utils/helpers';
 	import { m } from '$paraglide/messages';
+	import { getLocale } from '$paraglide/runtime';
 	import { canPerformActionOnObject } from '$lib/utils/access-control';
 	import { urlModelForDjangoName, localNameForDjangoName } from '$lib/utils/crud';
 	import type { PageData } from './$types';
@@ -496,6 +497,19 @@
 									<span class="text-warning-700 dark:text-warning-400">
 										<i class="fa-solid fa-triangle-exclamation mr-1"></i>{safeTranslate(row.reason)}
 									</span>
+								{/if}
+								{#if row.ok && row.replaces}
+									<p
+										class="w-full text-xs text-warning-700 dark:text-warning-400"
+										data-testid="tier-from-another-form"
+									>
+										<i class="fa-solid fa-circle-info mr-1"></i>{m.onAcceptReplacesAnotherForm({
+											form: row.replaces.form,
+											date: row.replaces.set_at
+												? new Date(row.replaces.set_at).toLocaleDateString(getLocale())
+												: '—'
+										})}
+									</p>
 								{/if}
 								{#if OVERRIDABLE.has(row.target) && (row.ok || row.reason === 'noTierResolved')}
 									<button

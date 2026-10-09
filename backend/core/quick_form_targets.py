@@ -50,6 +50,10 @@ class Target:
         """The subject's current value and its display."""
         raise NotImplementedError
 
+    def origin(self, subject, response) -> dict | None:
+        """Another form the current value came from, which accepting replaces."""
+        return None
+
     def resolve(self, response, config: dict, override: dict | None = None) -> Proposal:
         raise NotImplementedError
 
