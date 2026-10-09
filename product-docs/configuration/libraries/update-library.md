@@ -18,7 +18,7 @@ Before updating a library, it is strongly recommended to keep a backup copy of t
 4. After the upload, follow [Update a library from the catalog](#update-a-library-from-the-catalog) below to load the new version in your instance.
 
 {% hint style="info" %}
-The upload is rejected if `version` is not higher than the stored version: "This library has already been loaded" for the same version, or "A newer version of this library is already stored" for a lower one. Increase `version` and upload again.
+CISO Assistant accepts the upload only if `version` is higher than the version already stored. Otherwise, it displays *"This library has already been loaded"* (same version) or *"A newer version of this library is already stored"* (older version). Set `version` above the stored value, then upload the file again.
 {% endhint %}
 
 ## Update a library from the Catalog
