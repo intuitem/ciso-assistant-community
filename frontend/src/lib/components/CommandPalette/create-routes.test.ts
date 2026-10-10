@@ -23,22 +23,22 @@ const superuser = {
 const allFlags = new Proxy({}, { get: () => true }) as Record<string, boolean>;
 
 /**
- * Two generic routes exist with overlapping matchers: `THIRD_PARTY_URL_MODEL` models are
- * served by the `(third-party)` one. A dedicated directory wins over both.
+ * Two generic routes split the models between them: `THIRD_PARTY_URL_MODEL` models are
+ * served by the `thirdparty_urlmodels` one. A dedicated directory wins over both.
  */
 function servingPage(urlModel: string): string {
-	const dedicated = `${ROUTES}/(internal)/${urlModel}/+page.svelte`;
+	const dedicated = `${ROUTES}/${urlModel}/+page.svelte`;
 	if (existsSync(dedicated)) return dedicated;
 	if ((THIRD_PARTY_URL_MODEL as readonly string[]).includes(urlModel)) {
-		return `${ROUTES}/(third-party)/[model=thirdparty_urlmodels]/+page.svelte`;
+		return `${ROUTES}/[model=thirdparty_urlmodels]/+page.svelte`;
 	}
-	return `${ROUTES}/(internal)/[model=urlmodel]/+page.svelte`;
+	return `${ROUTES}/[model=internal_urlmodels]/+page.svelte`;
 }
 
 /**
  * Nothing at runtime connects a command to its landing page, so walk each one back to the
  * route file that serves it. Caught `compliance-assessments` and `evidences` resolving to
- * the `(third-party)` route, which had no `consumeCreateIntent`.
+ * the `thirdparty_urlmodels` route, which had no `consumeCreateIntent`.
  */
 describe('every create command lands on a page that opens the form', () => {
 	const commands = buildCreateCommands(superuser, allFlags);
@@ -54,7 +54,7 @@ describe('every create command lands on a page that opens the form', () => {
 		it(`${command.href} (${command.label})`, () => {
 			if (overridden) {
 				// Creation is its own page; there is no intent to consume, just a route to exist.
-				const page = `${ROUTES}/(internal)/${urlModel}/+page.svelte`;
+				const page = `${ROUTES}/${urlModel}/+page.svelte`;
 				expect(existsSync(page), `${command.href} has no page`).toBe(true);
 				expect(command.opensCreateForm).toBe(false);
 				return;

@@ -536,7 +536,7 @@ function roleAccess(
 export function isFieldVisible(
 	complianceAssessment: Record<string, any> | null | undefined,
 	fieldName: string,
-	viewerRole: 'respondent' | 'auditor' = 'auditor'
+	viewerRole: 'respondent' | 'auditor'
 ): boolean {
 	return roleAccess(complianceAssessment, fieldName, viewerRole) !== 'hidden';
 }
@@ -545,7 +545,7 @@ export function isFieldVisible(
 export function isFieldEditable(
 	complianceAssessment: Record<string, any> | null | undefined,
 	fieldName: string,
-	viewerRole: 'respondent' | 'auditor' = 'auditor'
+	viewerRole: 'respondent' | 'auditor'
 ): boolean {
 	return roleAccess(complianceAssessment, fieldName, viewerRole) === 'edit';
 }
@@ -555,7 +555,7 @@ export function isFieldEditable(
  */
 export function getFieldVisibility(
 	complianceAssessment: Record<string, any> | null | undefined,
-	viewerRole: 'respondent' | 'auditor' = 'auditor'
+	viewerRole: 'respondent' | 'auditor'
 ): {
 	showAnswers: boolean;
 	showResult: boolean;

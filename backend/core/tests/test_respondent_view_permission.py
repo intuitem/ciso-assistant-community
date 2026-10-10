@@ -10,6 +10,7 @@ stub that to exercise the classification logic directly (no DB / IAM cache neede
 """
 
 import uuid
+from types import SimpleNamespace
 
 import iam.models
 from core.utils import get_respondent_scoped_folder_ids
@@ -82,3 +83,32 @@ class TestRespondentFolderClassification:
             },
         )
         assert get_respondent_scoped_folder_ids(object()) == {uuid.UUID(respondent)}
+
+
+class TestComplianceAssessmentViewerRole:
+    """The audit detail tells the page which side it is seen from, by the same rule."""
+
+    def _viewer_role(self, folder_id, context):
+        from core.serializers import ComplianceAssessmentReadSerializer
+
+        return ComplianceAssessmentReadSerializer(context=context).get_viewer_role(
+            SimpleNamespace(folder_id=folder_id)
+        )
+
+    def test_respondent_folder(self, monkeypatch):
+        f = str(uuid.uuid4())
+        _stub_perms(monkeypatch, {f: {"view_complianceassessment"}})
+        request = SimpleNamespace(user=object())
+        assert self._viewer_role(uuid.UUID(f), {"request": request}) == "respondent"
+
+    def test_full_view_folder(self, monkeypatch):
+        f = str(uuid.uuid4())
+        _stub_perms(
+            monkeypatch,
+            {f: {"view_complianceassessment", "view_compliance_assessment_full"}},
+        )
+        request = SimpleNamespace(user=object())
+        assert self._viewer_role(uuid.UUID(f), {"request": request}) == "auditor"
+
+    def test_no_requester(self):
+        assert self._viewer_role(uuid.uuid4(), {}) is None

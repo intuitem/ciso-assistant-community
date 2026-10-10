@@ -220,8 +220,8 @@ The PerimeterViewSet exposes quality check data via:
 ### Frontend Implementation
 
 The X-rays page is implemented in:
-- `frontend/src/routes/(app)/(internal)/x-rays/+page.svelte`
-- `frontend/src/routes/(app)/(internal)/x-rays/+page.server.ts`
+- `frontend/src/routes/(app)/x-rays/+page.svelte`
+- `frontend/src/routes/(app)/x-rays/+page.server.ts`
 
 Shared components live in `frontend/src/lib/components/XRays/`:
 - `utils.ts` - severity table, per-`obj_type` column config, aggregation

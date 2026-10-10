@@ -8,9 +8,11 @@ from core.utils import (
     EVERYONE_EDIT,
     HIDDEN,
     build_initial_field_visibility,
+    client_field_visibility,
     is_field_editable_by,
     is_field_visible_to,
     resolve_field_visibility,
+    resolve_visibility_from_overrides,
 )
 
 
@@ -202,3 +204,38 @@ class TestBuildInitialFieldVisibility:
         result = build_initial_field_visibility(fw)
         result["score"]["auditor"] = "read"
         assert DEFAULT_VISIBILITY["score"] == HIDDEN
+
+
+# ---------------------------------------------------------------------------
+# client_field_visibility
+# ---------------------------------------------------------------------------
+
+
+class TestClientFieldVisibility:
+    def test_fills_fields_missing_from_the_stored_map(self):
+        # An audit created before `findings` joined DEFAULT_VISIBILITY.
+        result = client_field_visibility({"result": dict(AUDITOR_ONLY)}, _FW())
+        assert result["result"] == AUDITOR_ONLY
+        assert result["findings"] == DEFAULT_VISIBILITY["findings"]
+        assert set(DEFAULT_VISIBILITY).issubset(result)
+
+    def test_stored_pair_wins(self):
+        result = client_field_visibility({"findings": dict(EVERYONE_EDIT)}, _FW())
+        assert result["findings"] == EVERYONE_EDIT
+
+    def test_agrees_with_what_the_backend_enforces(self):
+        stored = {
+            "result": dict(AUDITOR_ONLY),
+            "findings": "edit",  # malformed: not a pair
+            "custom_field": {"respondent": "read"},
+        }
+        result = client_field_visibility(stored, _FW())
+        for key in set(DEFAULT_VISIBILITY) | set(stored):
+            if key in result:
+                assert result[key] == resolve_visibility_from_overrides(stored, key)
+            else:
+                assert resolve_visibility_from_overrides(stored, key) == EVERYONE_EDIT
+
+    def test_without_a_stored_map_sends_the_new_audit_template(self):
+        fw = _FW({"score": {"respondent": "edit"}})
+        assert client_field_visibility({}, fw) == build_initial_field_visibility(fw)

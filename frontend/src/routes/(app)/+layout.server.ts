@@ -2,6 +2,8 @@ import type { LayoutServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
 import { loadFlash } from 'sveltekit-flash-message/server';
 
+import { thirdPartyNavHrefs } from '$lib/server/nav-access';
+
 const loginPageRegex = /^[a-zA-Z0-9]+:\/\/[^\/]+\/login\/?.*$/;
 
 export const load = loadFlash(async ({ locals, url, cookies, request }) => {
@@ -39,5 +41,7 @@ export const load = loadFlash(async ({ locals, url, cookies, request }) => {
 			});
 		}
 	}
-	return { user, settings, featureflags };
+	// `null`: the sidebar is not restricted to pages from route-access.ts.
+	const openableNavHrefs = user?.is_third_party ? await thirdPartyNavHrefs() : null;
+	return { user, settings, featureflags, openableNavHrefs };
 }) satisfies LayoutServerLoad;

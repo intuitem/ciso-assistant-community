@@ -278,6 +278,21 @@ class CurrentUserView(views.APIView):
         return Response(res_data, status=HTTP_200_OK)
 
 
+class WhoAmIView(views.APIView):
+    """
+    Who the caller is, without current-user's permissions over every folder: the
+    frontend asks on each navigation to a page that third parties may not open.
+    """
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request) -> Response:
+        return Response(
+            {"id": request.user.id, "is_third_party": request.user.is_third_party},
+            status=HTTP_200_OK,
+        )
+
+
 class SessionTokenView(views.APIView):
     """
     API Endpoint for getting the session token from an access token

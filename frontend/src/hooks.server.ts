@@ -15,6 +15,8 @@ import { setFlash } from 'sveltekit-flash-message/server';
 
 import { loadFeatureFlags } from '$lib/feature-flags';
 import { logger, installJsonConsole } from '$lib/server/logger';
+import { reachesPage } from '$lib/server/page-requests';
+import { THIRD_PARTY_HOME, thirdPartyMayOpen } from '$lib/utils/route-access';
 import { paraglideMiddleware } from '$paraglide/server';
 import { sequence } from '@sveltejs/kit/hooks';
 import { defineCustomServerStrategy, toLocale } from '$paraglide/runtime';
@@ -164,6 +166,30 @@ async function validateUserSession(event: RequestEvent): Promise<User | null> {
 }
 
 /**
+ * Asks /iam/whoami/ rather than current-user: the page guard runs on every navigation to a
+ * page third parties may not open. A caller who is not signed in is not a third party
+ * here; the (app) layout sends them to the login page.
+ */
+async function isThirdParty(event: RequestEvent): Promise<boolean> {
+	const token = event.cookies.get('token');
+	if (!token) return false;
+
+	const res = await fetch(`${BASE_API_URL}/iam/whoami/`, {
+		credentials: 'include',
+		headers: {
+			'content-type': 'application/json',
+			Authorization: `Token ${token}`
+		}
+	});
+	if (res.status === 401) return false;
+	if (!res.ok) {
+		logger.error('Error fetching whoami', { status: res.status });
+		error(503, 'Identity unavailable');
+	}
+	return (await res.json()).is_third_party === true;
+}
+
+/**
  * Authenticated JSON, never cached.
  *
  * Every `/fe-api/` route proxies a cookie-authenticated backend call, and the browser
@@ -276,6 +302,17 @@ const handleRequest: Handle = async ({ event, resolve }) => {
 			}
 			return event.locals.featureflags;
 		});
+
+		// Before any load or form action of the page runs; endpoints are left to the backend.
+		const routeId = event.route.id;
+		if (
+			routeId &&
+			reachesPage(event) &&
+			!thirdPartyMayOpen(routeId) &&
+			(await isThirdParty(event))
+		) {
+			redirect(302, THIRD_PARTY_HOME);
+		}
 
 		return await resolve(event, {
 			transformPageChunk: ({ html }) => {

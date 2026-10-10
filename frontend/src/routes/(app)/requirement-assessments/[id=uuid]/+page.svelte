@@ -1,0 +1,452 @@
+<script lang="ts">
+	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
+	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import { complianceResultColorMap, complianceStatusColorMap } from '$lib/utils/constants';
+	import {
+		displayScoreColor,
+		formatScoreValue,
+		getFieldVisibility,
+		getRequirementTitle,
+		getSecureRedirect,
+		alignmentColorMap
+	} from '$lib/utils/helpers';
+	import { safeTranslate } from '$lib/utils/i18n';
+	import { canOpenObjectPage } from '$lib/utils/route-access';
+
+	import { hideSuggestions } from '$lib/utils/stores';
+	import { m } from '$paraglide/messages';
+	import ScorePair from '$lib/components/ComplianceAssessment/ScorePair.svelte';
+	import { Progress, Tabs } from '@skeletonlabs/skeleton-svelte';
+	import type { PageData } from '../[id=uuid]/$types';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import MappingInferenceView from '$lib/components/ComplianceAssessment/MappingInferenceView.svelte';
+	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
+	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
+	import Question from '$lib/components/Forms/Question.svelte';
+	import { countMasked } from '$lib/utils/related-visibility';
+
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
+	const threats = data.requirementAssessment.requirement.associated_threats ?? [];
+	const reference_controls =
+		data.requirementAssessment.requirement.associated_reference_controls ?? [];
+	const annotation = data.requirement.annotation;
+	const typical_evidence = data.requirement.typical_evidence;
+
+	const has_threats = threats.length > 0;
+	const has_reference_controls = reference_controls.length > 0;
+
+	let mappingInference = $derived(data.requirementAssessment.mapping_inference);
+
+	const title = getRequirementTitle(data.requirement.ref_id, data.requirement.name)
+		? getRequirementTitle(data.requirement.ref_id, data.requirement.name)
+		: getRequirementTitle(data.parent.ref_id, data.parent.name);
+
+	let requirementAssessmentsList: string[] = $hideSuggestions;
+
+	let hideSuggestion = $state(
+		requirementAssessmentsList.includes(data.requirementAssessment.id) ? true : false
+	);
+
+	function toggleSuggestions() {
+		if (!requirementAssessmentsList.includes(data.requirementAssessment.id)) {
+			requirementAssessmentsList.push(data.requirementAssessment.id);
+		} else {
+			requirementAssessmentsList = requirementAssessmentsList.filter(
+				(item) => item !== data.requirementAssessment.id
+			);
+		}
+		hideSuggestion = !hideSuggestion;
+		hideSuggestions.set(requirementAssessmentsList);
+	}
+
+	function cancel(): void {
+		const AuditURL = `/compliance-assessments/${data.requirementAssessment.compliance_assessment.id}`;
+		goto(AuditURL);
+	}
+
+	let classesText = $derived(
+		complianceResultColorMap[data.requirementAssessment.result] === '#000000'
+			? 'text-white'
+			: 'text-gray-900'
+	);
+
+	// Effective scale falls back to the CA bounds when the RA has no override.
+	const max_score =
+		data.requirementAssessment.effective_max_score ?? data.complianceAssessmentScore.max_score;
+	const min_score =
+		data.requirementAssessment.effective_min_score ?? data.complianceAssessmentScore.min_score ?? 0;
+	const score = data.requirementAssessment.score;
+	const documentationScore = data.requirementAssessment.documentation_score;
+
+	const fw = data.requirementAssessment.compliance_assessment.framework;
+	const complianceAssessment = data.requirementAssessment.compliance_assessment;
+	const viewerRole: 'respondent' | 'auditor' =
+		data.viewerRole === 'auditor' ? 'auditor' : 'respondent';
+	const {
+		showAppliedControls,
+		showTaskTemplates,
+		showEvidences,
+		showStatus,
+		showResult,
+		showScore,
+		showDocumentationScore,
+		showRespondentAlignment,
+		showComments,
+		showAnswers
+	} = getFieldVisibility(complianceAssessment, viewerRole);
+
+	const canShowAppliedControls = showAppliedControls && !page.data.user.is_third_party;
+	const showFindings = $derived(
+		!!page.data?.featureflags?.findings_from_requirements && !page.data.user.is_third_party
+	);
+
+	function pickDefaultTab(): string {
+		if (canShowAppliedControls) return 'applied_controls';
+		if (showTaskTemplates) return 'task_templates';
+		if (showEvidences) return 'evidence';
+		if (showFindings) return 'findings';
+		return 'applied_controls';
+	}
+	let group = $state(pickDefaultTab());
+</script>
+
+<div class="card space-y-2 p-4 bg-surface-50-950 shadow-sm">
+	<div class="flex flex-row space-x-2 items-center">
+		<code>{data.requirement.urn}</code>
+		{#if showStatus}
+			<span
+				class="badge h-fit"
+				style="background-color: {complianceStatusColorMap[data.requirementAssessment.status] ??
+					'#d1d5db'};"
+			>
+				{safeTranslate(data.requirementAssessment.status)}
+			</span>
+		{/if}
+		{#if showResult}
+			<span
+				class="badge {classesText} h-fit"
+				style="background-color: {complianceResultColorMap[data.requirementAssessment.result] ??
+					'#d1d5db'};"
+			>
+				{safeTranslate(data.requirementAssessment.result)}
+			</span>
+		{/if}
+		{#if showRespondentAlignment && data.requirementAssessment.respondent_alignment}
+			<span class="flex items-center gap-1 text-xs">
+				<span class="italic text-surface-600">{m.respondentAnswered()}:</span>
+				<span
+					class="badge text-xs font-semibold text-white"
+					style="background-color: {alignmentColorMap[
+						data.requirementAssessment.respondent_alignment
+					]}"
+				>
+					{safeTranslate(data.requirementAssessment.respondent_alignment)}
+				</span>
+			</span>
+		{/if}
+		{#if data.requirementAssessment.assessable && typeof data.requirement.weight === 'number' && Number.isFinite(data.requirement.weight) && data.requirement.weight !== 1}
+			<span class="badge h-fit bg-indigo-100 text-indigo-800">
+				{m.requirementWeight()}: {data.requirement.weight}
+			</span>
+		{/if}
+		{#if data.requirement.implementation_groups && data.requirement.implementation_groups.length > 0}
+			<div class="ml-3">
+				<b class="mr-2">{m.implementationGroups()} :</b>
+				{#each data.requirement.implementation_groups as ig}
+					<span class="badge bg-blue-100 mr-2">
+						{ig}
+					</span>
+				{/each}
+			</div>
+		{/if}
+		{#if data.complianceAssessmentScore.scoring_enabled && data.requirementAssessment.is_scored}
+			<ScorePair>
+				{#snippet implementation()}
+					{#if showScore}
+						<div
+							class="shrink-0 relative"
+							title={showDocumentationScore ? m.implementationScore() : m.score()}
+						>
+							<Progress
+								value={formatScoreValue(score, max_score, false, min_score)}
+								min={0}
+								max={100}
+							>
+								<Progress.Circle class="[--size:--spacing(10)]">
+									<Progress.CircleTrack />
+									<Progress.CircleRange
+										class={displayScoreColor(score, max_score, false, min_score)}
+									/>
+								</Progress.Circle>
+								<div class="absolute inset-0 flex items-center justify-center">
+									<span class="text-xs font-bold">{score}</span>
+								</div>
+							</Progress>
+						</div>
+					{/if}
+				{/snippet}
+				{#snippet documentation()}
+					{#if showDocumentationScore}
+						<div class="shrink-0 relative" title={m.documentationScore()}>
+							<Progress
+								value={formatScoreValue(documentationScore, max_score, false, min_score)}
+								min={0}
+								max={100}
+							>
+								<Progress.Circle class="[--size:--spacing(10)]">
+									<Progress.CircleTrack />
+									<Progress.CircleRange
+										class={displayScoreColor(documentationScore, max_score, false, min_score)}
+									/>
+								</Progress.Circle>
+								<div class="absolute inset-0 flex items-center justify-center">
+									<span class="text-xs font-bold">{documentationScore}</span>
+								</div>
+							</Progress>
+						</div>
+					{/if}
+				{/snippet}
+			</ScorePair>
+		{/if}
+		<div class="ml-auto shrink-0 self-center">
+			<AuditTrailButton
+				model="requirement-assessments"
+				objectId={data.requirementAssessment.id}
+				folderId={data.requirementAssessment.folder?.id ?? page.data.user.root_folder_id}
+			/>
+		</div>
+	</div>
+	{#if data.requirement.description}
+		<div class="font-light text-lg card p-4 preset-tonal-primary">
+			<h2 class="font-semibold text-base flex flex-row justify-between">
+				<div>
+					<i class="fa-solid fa-file-lines mr-2"></i>{m.description()}
+				</div>
+			</h2>
+			<MarkdownRenderer content={data.requirement.description} />
+		</div>
+	{/if}
+	{#if has_threats || has_reference_controls || annotation || mappingInference.result}
+		<div class="card p-4 preset-tonal-secondary text-sm flex flex-col justify-evenly cursor-auto">
+			<h2 class="font-semibold text-base flex flex-row justify-between">
+				<div>
+					<i class="fa-solid fa-circle-info mr-2"></i>{m.additionalInformation()}
+				</div>
+				<button onclick={toggleSuggestions}>
+					{#if !hideSuggestion}
+						<i class="fa-solid fa-eye"></i>
+					{:else}
+						<i class="fa-solid fa-eye-slash"></i>
+					{/if}
+				</button>
+			</h2>
+			{#if !hideSuggestion}
+				{#if has_threats || has_reference_controls}
+					<div class="my-2 flex flex-col">
+						<div class="flex-1">
+							{#if reference_controls.length > 0}
+								<p class="font-medium">
+									<i class="fa-solid fa-gears"></i>
+									{m.suggestedReferenceControls()}
+								</p>
+								<ul class="list-disc ml-4">
+									{#each reference_controls as func}
+										<li>
+											{#if func.id && canOpenObjectPage(page.data.user, 'reference-controls')}
+												<a class="anchor" href="/reference-controls/{func.id}">
+													{func.str}
+												</a>
+											{:else}
+												<p>{func.str}</p>
+											{/if}
+										</li>
+									{/each}
+								</ul>
+							{/if}
+						</div>
+						<div class="flex-1">
+							{#if threats.length > 0}
+								<p class="font-medium">
+									<i class="fa-solid fa-gears"></i>
+									{m.threatsCovered()}
+								</p>
+								<ul class="list-disc ml-4">
+									{#each threats as threat}
+										<li>
+											{#if threat.id && canOpenObjectPage(page.data.user, 'threats')}
+												<a class="anchor" href="/threats/{threat.id}">
+													{threat.str}
+												</a>
+											{:else}
+												<p>{threat.str}</p>
+											{/if}
+										</li>
+									{/each}
+								</ul>
+							{/if}
+						</div>
+					</div>
+				{/if}
+				{#if annotation}
+					<div class="my-2">
+						<p class="font-medium">
+							<i class="fa-solid fa-pencil"></i>
+							{m.annotation()}
+						</p>
+						<div class="py-1">
+							<MarkdownRenderer content={annotation} />
+						</div>
+					</div>
+				{/if}
+				{#if typical_evidence}
+					<div class="my-2">
+						<p class="font-medium">
+							<i class="fa-solid fa-pencil"></i>
+							{m.typicalEvidence()}
+						</p>
+						<div class="py-1">
+							<MarkdownRenderer content={typical_evidence} />
+						</div>
+					</div>
+				{/if}
+				{#if mappingInference.result}
+					<MappingInferenceView {mappingInference} />
+				{/if}
+			{/if}
+		</div>
+	{/if}
+	{#if canShowAppliedControls || showTaskTemplates || showEvidences || showFindings}
+		<div>
+			<Tabs
+				value={group}
+				onValueChange={(e) => {
+					group = e.value;
+				}}
+			>
+				<Tabs.List>
+					{#if canShowAppliedControls}
+						<Tabs.Trigger value="applied_controls">{m.appliedControls()}</Tabs.Trigger>
+					{/if}
+					{#if showTaskTemplates}
+						<Tabs.Trigger value="task_templates">{m.taskTemplates()}</Tabs.Trigger>
+					{/if}
+					{#if showEvidences}
+						<Tabs.Trigger value="evidence">{m.evidences()}</Tabs.Trigger>
+					{/if}
+					{#if showFindings}
+						<Tabs.Trigger value="findings">{m.findings()}</Tabs.Trigger>
+					{/if}
+					<Tabs.Indicator />
+				</Tabs.List>
+				{#if canShowAppliedControls}
+					<Tabs.Content value="applied_controls">
+						<div class="flex items-center mb-2 px-2 text-xs space-x-2">
+							<i class="fa-solid fa-info-circle"></i>
+							<p>{m.requirementAppliedControlHelpText()}</p>
+						</div>
+						<div class="h-full flex flex-col space-y-2 rounded-container p-4">
+							<ModelTable
+								source={data.tables['applied-controls']}
+								hideFilters={true}
+								URLModel="applied-controls"
+								expectedCount={countMasked(data.requirementAssessment.applied_controls)}
+								baseEndpoint="/applied-controls?requirement_assessments={page.data
+									.requirementAssessment.id}"
+							/>
+						</div>
+					</Tabs.Content>
+				{/if}
+				{#if showTaskTemplates}
+					<Tabs.Content value="task_templates">
+						<div class="flex items-center mb-2 px-2 text-xs space-x-2">
+							<i class="fa-solid fa-info-circle"></i>
+							<p>{m.requirementTaskTemplateHelpText()}</p>
+						</div>
+						<div class="h-full flex flex-col space-y-2 rounded-container p-4">
+							<ModelTable
+								source={data.tables['task-templates']}
+								hideFilters={true}
+								URLModel="task-templates"
+								expectedCount={countMasked(data.requirementAssessment.task_templates)}
+								baseEndpoint="/task-templates?requirement_assessments={page.data
+									.requirementAssessment.id}"
+							/>
+						</div>
+					</Tabs.Content>
+				{/if}
+				{#if showEvidences}
+					<Tabs.Content value="evidence">
+						<div class="flex items-center mb-2 px-2 text-xs space-x-2">
+							<i class="fa-solid fa-info-circle"></i>
+							<p>{m.requirementEvidenceHelpText()}</p>
+						</div>
+						<div class="h-full flex flex-col space-y-2 rounded-container p-4">
+							<ModelTable
+								source={data.tables['evidences']}
+								hideFilters={true}
+								URLModel="evidences"
+								expectedCount={countMasked(data.requirementAssessment.evidences)}
+								baseEndpoint="/evidences?requirement_assessments={page.data.requirementAssessment
+									.id}"
+							/>
+						</div>
+					</Tabs.Content>
+				{/if}
+				{#if showFindings}
+					<Tabs.Content value="findings">
+						<div class="h-full flex flex-col space-y-2 rounded-container p-4">
+							<ModelTable
+								source={data.tables['findings']}
+								hideFilters={true}
+								URLModel="findings"
+								baseEndpoint="/findings?requirement_assessment={page.data.requirementAssessment.id}"
+							/>
+						</div>
+					</Tabs.Content>
+				{/if}
+			</Tabs>
+		</div>
+	{/if}
+	{#if data.requirementAssessment.requirement.questions != null && Object.keys(data.requirementAssessment.requirement.questions).length !== 0}
+		<h1 class="font-semibold text-sm">{m.questions()}</h1>
+		{#if showAnswers}
+			<div data-testid="read-only-answers-field">
+				<Question
+					questions={data.requirementAssessment.requirement.questions}
+					initialValue={data.requirementAssessment.answers ?? {}}
+					field="answers"
+					disabled={true}
+				/>
+			</div>
+		{:else}
+			{#each Object.entries(data.requirementAssessment.requirement.questions) as [urn, question]}
+				<li class="flex justify-between items-center border rounded-xl p-2 disabled">
+					<p>{question.text} ({safeTranslate(question.type)})</p>
+				</li>
+			{/each}
+		{/if}
+	{/if}
+	{#if data.requirementAssessment.observation}
+		<div class="card p-4 space-y-2 preset-tonal-primary">
+			<h1 class="font-semibold text-sm">{m.observation()}</h1>
+			<div class="text-sm">
+				<MarkdownRenderer content={data.requirementAssessment.observation} />
+			</div>
+		</div>
+	{/if}
+	{#if page.data?.featureflags?.comments && showComments}
+		<CommentsPanel parentType="requirement_assessment" parentId={data.requirementAssessment.id} />
+	{/if}
+	<div class="flex flex-row justify-between space-x-4">
+		<button
+			class="btn bg-surface-400-600 text-white font-semibold w-full"
+			type="button"
+			onclick={cancel}>{m.back()}</button
+		>
+	</div>
+</div>

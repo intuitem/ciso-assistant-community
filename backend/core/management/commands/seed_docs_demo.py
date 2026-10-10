@@ -25,6 +25,7 @@ from core.models import (
     StoredLibrary,
     Threat,
 )
+from core.utils import build_initial_field_visibility
 from global_settings.models import GlobalSettings
 from iam.models import Folder
 
@@ -441,6 +442,7 @@ class Command(BaseCommand):
                     "status": status,
                     "ref_id": ref_id,
                     "due_date": TODAY + timedelta(days=offset),
+                    "field_visibility": build_initial_field_visibility(framework),
                 },
             )
             if created:

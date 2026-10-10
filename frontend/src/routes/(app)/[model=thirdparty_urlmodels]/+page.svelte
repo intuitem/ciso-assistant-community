@@ -1,0 +1,137 @@
+<script lang="ts">
+	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import { consumeCreateIntent } from '$lib/utils/create-intent';
+	import { safeTranslate } from '$lib/utils/i18n';
+	import { m } from '$paraglide/messages';
+	import type { PageData, ActionData } from './$types';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
+	} from '$lib/components/Modals/stores';
+
+	interface Props {
+		data: PageData;
+		form: ActionData;
+	}
+
+	let { data, form }: Props = $props();
+	let URLModel = $derived(data.URLModel);
+
+	const modalStore: ModalStore = getModalStore();
+
+	function modalCreateForm(): void {
+		let modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: data.createForm,
+				model: data.model
+			}
+		};
+		let modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			// Data
+			title: safeTranslate('add-' + data.model.localName)
+		};
+		modalStore.trigger(modal);
+	}
+
+	// `[model=internal_urlmodels]` leaves out `THIRD_PARTY_URL_MODEL`, so for those models
+	// this is the only list page — for internal users too. So the intent lands here.
+	$effect(() => {
+		consumeCreateIntent({ urlModel: URLModel, modelName: data.model.name, open: modalCreateForm });
+	});
+</script>
+
+{#if data.table}
+	<div class="shadow-lg">
+		{#key URLModel}
+			<ModelTable source={data.table} deleteForm={data.deleteForm} {URLModel}>
+				{#snippet addButton()}
+					<div>
+						<span class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs">
+							{#if !['risk-matrices', 'frameworks', 'requirement-mapping-sets', 'user-groups', 'role-assignments'].includes(URLModel)}
+								<button
+									class="inline-block border-e p-3 text-white bg-primary-500 hover:bg-primary-400 w-12 focus:relative"
+									data-testid="add-button"
+									id="add-button"
+									title={safeTranslate('add-' + data.model.localName)}
+									onclick={modalCreateForm}
+									><i class="fa-solid fa-file-circle-plus"></i>
+								</button>
+								{#if ['applied-controls', 'assets'].includes(URLModel)}
+									<a
+										href="{URLModel}/export/"
+										class="inline-block p-3 text-white bg-pink-500 hover:bg-pink-400 dark:bg-pink-600 dark:hover:bg-pink-500 w-12 focus:relative"
+										title={m.exportButton()}
+										data-testid="export-button"><i class="fa-solid fa-download mr-2"></i></a
+									>
+								{/if}
+							{:else if URLModel === 'risk-matrices'}
+								<a
+									href="/libraries?object_type=risk_matrix"
+									class="inline-block p-3 text-white bg-pink-500 hover:bg-pink-400 dark:bg-pink-600 dark:hover:bg-pink-500 w-12 focus:relative"
+									data-testid="add-button"
+									id="add-button"
+									title={m.importMatrices()}><i class="fa-solid fa-file-import mr-2"></i></a
+								>
+							{:else if URLModel === 'frameworks'}
+								<a
+									href="/libraries?object_type=frameworks"
+									class="inline-block p-3 text-white bg-pink-500 hover:bg-pink-400 dark:bg-pink-600 dark:hover:bg-pink-500 w-12 focus:relative"
+									data-testid="add-button"
+									id="add-button"
+									title={m.importFrameworks()}><i class="fa-solid fa-file-import mr-2"></i></a
+								>
+							{:else if URLModel === 'requirement-mapping-sets'}
+								<a
+									href="/libraries?object_type=requirement_mapping_set"
+									class="inline-block p-3 text-white bg-pink-500 hover:bg-pink-400 dark:bg-pink-600 dark:hover:bg-pink-500 w-12 focus:relative"
+									data-testid="add-button"
+									id="add-button"
+									title={m.importMappings()}><i class="fa-solid fa-file-import mr-2"></i></a
+								>
+							{:else if URLModel === 'risk-matrices'}
+								<a
+									href="/libraries?object_type=risk_matrices"
+									class="inline-block p-3 text-white bg-pink-500 hover:bg-pink-400 dark:bg-pink-600 dark:hover:bg-pink-500 w-12 focus:relative"
+									data-testid="add-button"
+									id="add-button"
+									title={m.importMatrices()}><i class="fa-solid fa-file-import mr-2"></i></a
+								>
+							{:else if URLModel === 'frameworks'}
+								<a
+									href="/libraries?object_type=frameworks"
+									class="inline-block p-3 text-white bg-pink-500 hover:bg-pink-400 dark:bg-pink-600 dark:hover:bg-pink-500 w-12 focus:relative"
+									data-testid="add-button"
+									id="add-button"
+									title={m.importFrameworks()}><i class="fa-solid fa-file-import mr-2"></i></a
+								>
+							{:else if URLModel === 'requirement-mapping-sets'}
+								<a
+									href="/libraries?object_type=requirement_mapping_sets"
+									class="inline-block p-3 text-white bg-pink-500 hover:bg-pink-400 dark:bg-pink-600 dark:hover:bg-pink-500 w-12 focus:relative"
+									data-testid="add-button"
+									id="add-button"
+									title={m.importMappings()}><i class="fa-solid fa-file-import mr-2"></i></a
+								>
+							{/if}
+						</span>
+					</div>
+				{/snippet}
+				{#snippet badge(key, row)}
+					{#if URLModel === 'compliance-assessments' && key === 'perimeter' && row.meta?.entity_assessments?.length}
+						<a
+							href="/entity-assessments/{row.meta.entity_assessments[0].id}"
+							class="badge inline-block bg-teal-100 text-teal-800 text-xs px-2 py-0.5 rounded-md border border-teal-200 rotate-[-6deg] font-semibold uppercase tracking-wide hover:bg-teal-200"
+							title={row.meta.entity_assessments[0].str}>tprm</a
+						>
+					{/if}
+				{/snippet}
+			</ModelTable>
+		{/key}
+	</div>
+{/if}

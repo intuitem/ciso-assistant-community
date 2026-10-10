@@ -3746,19 +3746,25 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     field_visibility = serializers.SerializerMethodField()
 
     def get_field_visibility(self, obj):
-        """Return field_visibility with defaults applied.
+        """Return field_visibility with defaults applied, so the frontend always receives
+        a complete map (see client_field_visibility)."""
+        from core.utils import client_field_visibility
 
-        If the stored map is empty (e.g. audits created before the field was
-        populated at creation time), fall back to the code defaults merged with
-        the framework template — the same values a newly created CA would get —
-        so the frontend always receives a complete map.
-        """
-        fv = obj.field_visibility
-        if fv:
-            return fv
-        from core.utils import build_initial_field_visibility
+        return client_field_visibility(obj.field_visibility, obj.framework)
 
-        return build_initial_field_visibility(obj.framework)
+    viewer_role = serializers.SerializerMethodField()
+
+    def get_viewer_role(self, obj):
+        """The side of `field_visibility` the requester sees this audit from, decided as the
+        endpoints that strip fields decide it. None when serialized for no requester."""
+        request = self.context.get("request")
+        if request is None:
+            return None
+        from core.utils import get_respondent_scoped_folder_ids
+
+        if obj.folder_id in get_respondent_scoped_folder_ids(request.user):
+            return "respondent"
+        return "auditor"
 
     # Derived booleans, kept in the API for backwards compatibility. The actual
     # storage is `field_visibility`; clients that want to change these should
@@ -4309,6 +4315,26 @@ class ComplianceAssessmentImportExportSerializer(BaseModelSerializer):
         ]
 
 
+def requester_viewer_role(context, compliance_assessment):
+    """The side of `field_visibility` a requirement assessment is serialized for: the
+    caller's `viewer_role`; else the requester's side of the audit, decided as
+    requirements_list decides it; else, for internal use without a requester, the
+    auditor's."""
+    if "viewer_role" in context:
+        return context["viewer_role"]
+    request = context.get("request")
+    if request is None:
+        return "auditor"
+    from core.utils import get_respondent_scoped_folder_ids
+
+    # Once per request: a list serializes many assessments with one context.
+    folders = context.get("_respondent_folder_ids")
+    if folders is None:
+        folders = get_respondent_scoped_folder_ids(request.user)
+        context["_respondent_folder_ids"] = folders
+    return "respondent" if compliance_assessment.folder_id in folders else "auditor"
+
+
 class RequirementAssessmentReadSerializer(BaseModelSerializer):
     class FilteredNodeSerializer(RequirementNodeReadSerializer):
         class Meta:
@@ -4400,10 +4426,19 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
 
-        viewer_role = self.context.get("viewer_role", "auditor")
         ca = getattr(instance, "compliance_assessment", None)
         if ca is None:
             return data
+        viewer_role = requester_viewer_role(self.context, ca)
+
+        # The nested audit carries the stored map; send the one the audit endpoint sends.
+        nested = data.get("compliance_assessment")
+        if isinstance(nested, dict) and "field_visibility" in nested:
+            from core.utils import client_field_visibility
+
+            nested["field_visibility"] = client_field_visibility(
+                ca.field_visibility, ca.framework
+            )
 
         # Strip fields the viewer is not allowed to read. Resolve through the
         # cascade (CA overrides → DEFAULT_VISIBILITY → EVERYONE_EDIT) so that
@@ -4434,6 +4469,19 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
     findings = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=Finding.objects.all()
     )
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        # What edit forms start from: a respondent gets nothing their audit hides from
+        # them. Auditors keep every field, since their form posts back what it was given.
+        ca = getattr(instance, "compliance_assessment", None)
+        if ca is not None and requester_viewer_role(self.context, ca) == "respondent":
+            from core.utils import is_field_visible_to
+
+            for field_name in list(data.keys()):
+                if not is_field_visible_to(ca, field_name, "respondent"):
+                    data.pop(field_name, None)
+        return data
 
     def to_internal_value(self, data):
         # Strip fields the respondent isn't allowed to write before DRF validates
