@@ -4,9 +4,7 @@ import type { RequestEvent } from '@sveltejs/kit';
 // globs are read: their modules are never imported from here.
 function routeIds(files: Record<string, unknown>): ReadonlySet<string> {
 	return new Set(
-		Object.keys(files).map(
-			(file) => file.slice('/src/routes'.length, file.lastIndexOf('/')) || '/'
-		)
+		Object.keys(files).map((file) => file.slice('/src/routes'.length, file.lastIndexOf('/')) || '/')
 	);
 }
 

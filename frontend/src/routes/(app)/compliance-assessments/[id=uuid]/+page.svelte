@@ -859,9 +859,9 @@
 												{#each visibleValues as val}
 													<li>
 														{#if val.str && val.id}
-															{@const itemUrlModel = URL_MODEL_MAP[data.URLModel]['foreignKeyFields']?.find(
-																(item) => item.field === key
-															)?.urlModel}
+															{@const itemUrlModel = URL_MODEL_MAP[data.URLModel][
+																'foreignKeyFields'
+															]?.find((item) => item.field === key)?.urlModel}
 															{@const itemHref = `/${itemUrlModel}/${val.id}`}
 															{#if canOpenObjectPage(page.data.user, itemUrlModel ?? '')}
 																<Anchor href={itemHref} class="anchor">{val.str}</Anchor>

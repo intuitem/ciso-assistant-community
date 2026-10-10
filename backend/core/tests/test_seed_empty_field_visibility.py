@@ -36,7 +36,8 @@ def test_seeds_audits_without_a_map_and_leaves_the_others():
 
     empty = audit("empty")
     configured = audit(
-        "configured", field_visibility={"result": {"auditor": "edit", "respondent": "hidden"}}
+        "configured",
+        field_visibility={"result": {"auditor": "edit", "respondent": "hidden"}},
     )
 
     migration.seed_empty_field_visibility(apps, None)

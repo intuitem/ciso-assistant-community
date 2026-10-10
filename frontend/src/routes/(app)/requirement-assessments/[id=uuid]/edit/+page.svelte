@@ -860,7 +860,8 @@
 												<button
 													class="btn preset-filled-primary-500 self-end"
 													onclick={modalEvidenceCreateForm}
-													type="button"><i class="fa-solid fa-plus mr-2"></i>{m.addEvidence()}</button
+													type="button"
+													><i class="fa-solid fa-plus mr-2"></i>{m.addEvidence()}</button
 												>
 											{/if}
 										</span>
