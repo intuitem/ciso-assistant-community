@@ -169,6 +169,7 @@
   * [Document templates](guides/documents/document-templates.md)
 * Third-party
   * [Third-Party Risk Management](guides/tprm.md)
+  * [Tiering your vendors](guides/vendor-tiering.md)
   * [Common TPRM pitfalls](guides/tprm-challenges.md)
 
 ## Features
