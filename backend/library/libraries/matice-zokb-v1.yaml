@@ -1,0 +1,133 @@
+urn: urn:zdenekpergl:risk:library:matice-zokb
+locale: en
+ref_id: matice-zokb
+name: Matice ZoKB
+version: 1
+publication_date: 2026-10-04
+provider: zdenekpergl
+packager: zdenekpergl
+objects:
+  risk_matrices:
+  - urn: urn:zdenekpergl:risk:matrix:matice-zokb
+    grid:
+    - - 0
+      - 0
+      - 1
+      - 2
+    - - 0
+      - 1
+      - 2
+      - 2
+    - - 0
+      - 1
+      - 2
+      - 3
+    - - 1
+      - 2
+      - 3
+      - 3
+    name: Matice ZoKB
+    risk:
+    - name: Low
+      hexcolor: '#22C55E'
+      description: The risk is considered acceptable.
+      abbreviation: L
+      translations:
+        cs:
+          name: Akceptovatelné
+          description: Riziko je považováno za akceptovatelné.
+    - name: Medium
+      hexcolor: '#F59E0B'
+      description: The risk can be reduced by less demanding security measures, or in the case of higher demanding security measures, the risk is acceptable.
+      abbreviation: M
+      translations:
+        cs:
+          name: Střední
+          description: Riziko může být sníženo méně náročnými bezpečnostními opatřeními nebo v případě vyšší náročnosti bezpečnostních opatření je riziko akceptovatelné.
+    - name: High
+      hexcolor: '#fecaca'
+      description: The risk is long-term unacceptable, and systematic steps must be initiated to eliminate it. (Requires a formal Risk Treatment Plan - RTP).
+      abbreviation: H
+      translations:
+        cs:
+          name: Vysoké
+          description: Riziko je dlouhodobě nepřípustné a musí být zahájeny systematické kroky k jeho odstranění. (Vyžaduje formální plán zvládání rizik - RTP).
+    - name: Critical
+      hexcolor: '#fe4000'
+      description: The risk is unacceptable, and steps must be initiated immediately to eliminate it.
+      abbreviation: C
+      translations:
+        cs:
+          name: Nepřípustné
+          description: Riziko je nepřípustné a musí být neprodleně zahájeny kroky k jeho odstranění.
+    impact:
+    - name: Low
+      hexcolor: '#BBF7D0'
+      description: Negligible impact. Disruption of the asset will not cause disruption of services to clients or the organization's operations. Financial loss is zero or entirely negligible. The event has no significant effect on personal data protection, credibility, or human health.
+      abbreviation: L
+      translations:
+        cs:
+          name: Zanedbatelný
+          description: Zanedbatelný dopad. Narušení aktiva nezpůsobí narušení služeb klientům ani provozu organizace. Finanční ztráta je nulová nebo zcela zanedbatelná. Událost nemá významný vliv na ochranu osobních údajů, důvěryhodnost ani na zdraví lidí.
+    - name: Medium
+      hexcolor: '#FEF08A'
+      description: Limited impact. Short-term or partial reduction in service quality that does not reach the limits for severe service disruption. Financial loss is limited, and there is no broader threat to reputation.
+      abbreviation: M
+      translations:
+        cs:
+          name: Omezený
+          description: Omezený dopad. Krátkodobé nebo částečné snížení kvality služeb, které však nedosahuje limitů pro závažné narušení služeb. Finanční ztráta je pro poskytovatele omezena a nedochází k širšímu ohrožení reputace.
+    - name: High
+      hexcolor: '#FECACA'
+      description: Significant impact. The event caused or may cause severe disruption of services, financial loss to the provider, or significant harm to other persons in accordance with § 15 of the Cyber Security Act.
+      abbreviation: H
+      translations:
+        cs:
+          name: Významný
+          description: Významný dopad. Událost způsobila nebo může způsobit závažné narušení služeb, finanční ztrátu poskytovateli nebo značnou újmu jiným osobám podle § 15 zákona o kybernetické bezpečnosti.
+    - name: Critical
+      hexcolor: '#fe4000'
+      description: Fatal impact. Long-term unavailability of key regulated services threatening the very existence of the company. Extensive and irreversible financial losses or a direct threat to human health and lives.
+      abbreviation: C
+      translations:
+        cs:
+          name: Fatální
+          description: Fatální dopad. Dlouhodobá nedostupnost klíčových regulovaných služeb ohrožující samotnou existenci společnosti. Rozsáhlé a nevratné finanční ztráty nebo přímé ohrožení zdraví a životů lidí.
+    ref_id: matice-zokb
+    description: Standardized cyber risk assessment matrix created to ensure compliance with the requirements of the Cyber Security Act (ZoKB) and Decree No. 409/2025 Coll., on security measures for regulated service providers. The matrix uses a mandatory four-level scale for assessing impacts and threat probabilities in accordance with Annex 4 of this Decree. It serves as the core mathematical model for evaluating risks of primary and supporting assets.
+    probability:
+    - name: Low
+      hexcolor: '#BBF7D0'
+      description: The threat does not exist or is unlikely. Expected realization of the threat is no more frequent than once every 5 years.
+      abbreviation: L
+      translations:
+        cs:
+          name: Nízká
+          description: Hrozba neexistuje nebo je málo pravděpodobná. Předpokládaná realizace hrozby není častější než jednou za 5 let.
+    - name: Medium
+      hexcolor: '#FEF08A'
+      description: The threat is somewhat likely to likely. Expected realization of the threat is within a range of 1 to 5 years.
+      abbreviation: M
+      translations:
+        cs:
+          name: Střední
+          description: Hrozba je málo pravděpodobná až pravděpodobná. Předpokládaná realizace hrozby je v rozpětí od 1 roku do 5 let.
+    - name: High
+      hexcolor: '#FECACA'
+      description: The threat is likely to very likely. Expected realization of the threat is within a range of 1 month to 1 year.
+      abbreviation: H
+      translations:
+        cs:
+          name: Vysoká
+          description: Hrozba je pravděpodobná až velmi pravděpodobná. Předpokládaná realizace hrozby je v rozpětí od 1 měsíce do 1 roku.
+    - name: Critical
+      hexcolor: '#fe4000'
+      description: The threat is very likely to almost certain. Expected realization of the threat is more frequent than once a month.
+      abbreviation: C
+      translations:
+        cs:
+          name: Kritická
+          description: Hrozba je velmi pravděpodobná až víceméně jistá. Předpokládaná realizace hrozby je častější než jednou za měsíc.
+    translations:
+      cs:
+        description: Standardizovaná matice hodnocení kybernetických rizik vytvořená pro zajištění souladu s požadavky Zákona o kybernetické bezpečnosti (ZoKB) a vyhlášky č. 409/2025 Sb. o bezpečnostních opatřeních poskytovatele regulované služby. Matice využívá závaznou čtyřstupňovou škálu pro hodnocení dopadů a pravděpodobnosti hrozeb a postupuje v souladu s přílohou č. 4 k této vyhlášce. Slouží jako základní matematický model pro vyhodnocování rizik u primárních a podpůrných aktiv.

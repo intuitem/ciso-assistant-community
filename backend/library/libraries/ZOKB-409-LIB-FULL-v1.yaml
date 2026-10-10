@@ -1,0 +1,2539 @@
+urn: urn:intuitem:risk:library:zokb-409-vyssi-full
+locale: cs
+ref_id: ZOKB-409-LIB-FULL
+name: Vyhláška 409/2025
+description: Knihovna obsahující  otázky k posouzení souladu  s  Vyhláškou 409/2025 Sb.
+version: 1
+publication_date: 2026-10-04
+provider: NUKIB
+packager: Zdenek Pergl
+objects:
+  frameworks:
+  - urn: urn:intuitem:risk:framework:zokb-409-full
+    name: Vyhláška 409/2025 (Kompletní analýza)
+    ref_id: ZOKB-409-V-FULL
+    description: Kompletní rámec pro hodnocení shody se všemi podrobnými otázkami.
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-409
+      name: Vyhláška č. 409/2025 Sb.
+      depth: 1
+      ref_id: ZOKB-409
+      assessable: false
+      description: Vyhláška o kybernetické bezpečnosti (Nový ZoKB / NIS2).
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p3
+      name: § 3 - Systém řízení bezpečnosti informací
+      depth: 2
+      ref_id: ZOKB-P3
+      assessable: false
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-409
+      description: "Povinná osoba v rámci systému řízení bezpečnosti informací\na)\
+        \ stanoví cíle systému řízení bezpečnosti informací směřující k zajištění\
+        \ kybernetické bezpečnosti regulované služby,\nb) řídí rizika podle § 8,\n\
+        c) zavede a provádí přiměřená bezpečnostní opatření směřující k zajištění\
+        \ kybernetické bezpečnosti regulované služby na základě cílů systému řízení\
+        \ bezpečnosti informací, bezpečnostních potřeb a řízení rizik,\nd) stanoví\
+        \ a schválí bezpečnostní politiku a bezpečnostní dokumentaci ve vztahu k řízení\
+        \ kybernetické bezpečnosti, která obsahuje hlavní zásady, cíle systému řízení\
+        \ bezpečnosti informací, bezpečnostní potřeby, práva a povinnosti ve vztahu\
+        \ k řízení bezpečnosti informací, a na základě bezpečnostních potřeb a výsledků\
+        \ hodnocení rizik stanoví bezpečnostní politiku a bezpečnostní dokumentaci\
+        \ v dalších oblastech podle § 6,\ne) zajistí provedení auditu kybernetické\
+        \ bezpečnosti podle § 16,\nf) zajistí alespoň jednou ročně vyhodnocení účinnosti\
+        \ systému řízení bezpečnosti informací, které obsahuje \n1. vyhodnocení cílů\
+        \ systému řízení bezpečnosti informací směřujících k zajištění kybernetické\
+        \ bezpečnosti regulované služby,\n2. posouzení naplňování plánu zvládání rizik\
+        \ zpracovaného podle § 8 odst. 1 písm. h),\n3. hodnocení stavu systému řízení\
+        \ bezpečnosti informací včetně revize hodnocení rizik,\n4. posouzení výsledků\
+        \ provedených auditů kybernetické bezpečnosti a kontrol v oblasti kybernetické\
+        \ bezpečnosti,\n5. výsledky předchozího hodnocení účinnosti systému řízení\
+        \ bezpečnosti informací provedených podle tohoto písmene,\n6. posouzení dopadů\
+        \ kybernetických bezpečnostních incidentů na oblast kybernetické bezpečnosti\
+        \ a na poskytované služby podle § 15 a \n7. posouzení významných změn podle\
+        \ § 11,\ng) zpracuje zprávu o přezkoumání systému řízení bezpečnosti informací\
+        \ na základě vyhodnocení účinnosti systému řízení bezpečnosti informací podle\
+        \ písmene f),\nh) aktualizuje systém řízení bezpečnosti informací a relevantní\
+        \ dokumentaci na základě \n1. zjištění z auditů kybernetické bezpečnosti a\
+        \ kontrol v oblasti kybernetické bezpečnosti,\n2. výsledků vyhodnocení účinnosti\
+        \ systému řízení bezpečnosti informací,\n3. dopadů kybernetických bezpečnostních\
+        \ incidentů na poskytované služby a\n4. prováděných významných změn,\ni) řídí\
+        \ provoz a zdroje systému řízení bezpečnosti informací a zaznamenává činnosti\
+        \ spojené se systémem řízení bezpečnosti informací a řízením rizik a \nj)\
+        \ stanoví proces řízení výjimek z pravidel stanovených v bezpečnostní politice\
+        \ podle písmene d)."
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p3-q1
+      name: Je vytvořena politika systému řízení bezpečnosti informací včetně stanovených
+        cílů ISMS?
+      depth: 3
+      ref_id: ZOKB-P3-Q1
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p3
+      description: 'Organizace musí mít vrcholový strategický dokument schválený statutárním
+        orgánem, který jasně deklaruje, že kybernetická bezpečnost je pro organizaci
+        prioritou. Určuje rozsah chráněného prostředí a stanovuje hlavní bezpečnostní
+        cíle. Co doložit při kontrole: Politika kybernetické bezpečnosti (dokument
+        podepsaný vedením), Stanovení rozsahu ISMS (dokumentace vymezení aktiv).'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p3-q2
+      name: Je stanoven rozsah ISMS?
+      depth: 3
+      ref_id: ZOKB-P3-Q2
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p3
+      description: 'Minimálně jednou ročně se musí sejít vedení a vyhodnotit, zda
+        zavedená opatření fungují, zda máme dostatek zdrojů a zda reagujeme na nové
+        hrozby. Nejedná se o IT poradu, ale o formální manažerský přezkum. Co doložit
+        při kontrole: Zpráva o přezkoumání ISMS vrcholovým vedením, Zápis z porady
+        vedení s prokazatelným schválením zprávy.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p3-q3
+      name: Je prováděno pravidelné vyhodnocování a přezkoumávání ISMS a je ISMS na
+        základě těchto výstupů aktualizován?
+      depth: 3
+      ref_id: ZOKB-P3-Q3
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p3
+      description: 'Povinná osoba zajistí alespoň jednou ročně vyhodnocení účinnosti
+        systému řízení bezpečnosti informací. Na základě zjištění z auditů, vyhodnocení
+        účinnosti, dopadů incidentů a významných změn aktualizuje systém řízení bezpečnosti
+        informací a relevantní dokumentaci. Co doložit při kontrole: Zpráva o vyhodnocení
+        účinnosti ISMS, důkazy o následné aktualizaci dokumentace.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p3-q4
+      name: Je kybernetická bezpečnost součástí ostatních procesů organizace?
+      depth: 3
+      ref_id: ZOKB-P3-Q4
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p3
+      description: 'Kybernetická bezpečnost nesmí být izolované IT téma. Musí být
+        zapracována do nákupu, HR, obchodu i vývoje produktů. Co doložit při kontrole:
+        Organizační směrnice (např. směrnice pro nákup, offboarding) a procesní diagramy
+        ukazující integraci KB.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p4
+      name: § 4 - Požadavky na vrcholné vedení
+      depth: 2
+      ref_id: ZOKB-P4
+      assessable: false
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-409
+      description: "(1) Statutární orgán nebo jiná osoba nebo skupina osob v obdobném\
+        \ postavení (dále jen „vrcholné vedení“) s ohledem na systém řízení bezpečnosti\
+        \ informací\na) zajistí, aby všichni jeho členové prokazatelně absolvovali\
+        \ školení podle § 10 odst. 3 písm. a),\nb) zajistí stanovení bezpečnostní\
+        \ politiky a cílů systému řízení bezpečnosti informací podle § 3, slučitelných\
+        \ se strategickým směřováním povinné osoby,\nc) zajistí integraci systému\
+        \ řízení bezpečnosti informací do procesů povinné osoby,\nd) zajistí dostupnost\
+        \ zdrojů potřebných pro systém řízení bezpečnosti informací,\ne) informuje\
+        \ zaměstnance o významu systému řízení bezpečnosti informací a významu dosažení\
+        \ shody s jeho požadavky se všemi dotčenými osobami,\nf) zajistí podporu k\
+        \ dosažení cílů systému řízení bezpečnosti informací,\ng) vede a podporuje\
+        \ zaměstnance k rozvíjení efektivity systému řízení bezpečnosti informací,\n\
+        h) se podílí na vypracování analýzy dopadů podle § 15,\ni) zajistí testování\
+        \ plánů kontinuity činností, plánů obnovy a procesů spojených se zvládáním\
+        \ kybernetických bezpečnostních incidentů,\nj) prosazuje neustálé zlepšování\
+        \ systému řízení bezpečnosti informací,\nk) podporuje osoby zastávající bezpečnostní\
+        \ role při prosazování kybernetické bezpečnosti v oblastech jejich odpovědnosti,\n\
+        l) zajistí stanovení pravidel pro určení administrátorů a osob, které budou\
+        \ zastávat bezpečnostní role,\nm) zajistí, aby byla zachována mlčenlivost\
+        \ všech relevantních osob zejména administrátorů, osob zastávajících bezpečnostní\
+        \ role a dodavatelů a\nn) zajistí pro osoby zastávající bezpečnostní role\
+        \ pravomoci potřebné pro naplňování jejich rolí a zdroje, včetně rozpočtových\
+        \ prostředků k naplňování jejich rolí a plnění souvisejících úkolů.\n(2) Vrcholné\
+        \ vedení se prokazatelně seznamuje se \na) zprávou o přezkoumání systému řízení\
+        \ bezpečnosti informací,\nb) zprávou o hodnocení rizik,\nc) výsledky analýzy\
+        \ dopadů a\nd) výsledky auditů kybernetické bezpečnosti a kontrol v oblasti\
+        \ kybernetické bezpečnosti.\n(3) Vrcholné vedení zřídí výbor pro řízení kybernetické\
+        \ bezpečnosti a určí jeho členy, přičemž\na) zajistí, že členem výboru pro\
+        \ řízení kybernetické bezpečnosti bude alespoň jeden člen vrcholného vedení\
+        \ nebo jím pověřená osoba a manažer kybernetické bezpečnosti,\nb) určí práva\
+        \ a povinnosti výboru pro řízení kybernetické bezpečnosti a jeho členů, související\
+        \ se systémem řízení bezpečnosti informací,\nc) přihlédne při určování složení\
+        \ výboru podle písmene a) a určování práv a povinností jeho členů podle písmene\
+        \ b) k příloze č. 5 k této vyhlášce,\nd) zajistí konání pravidelných jednání\
+        \ výboru pro řízení kybernetické bezpečnosti alespoň jednou ročně,\ne) zajistí\
+        \ vyhotovení záznamu o průběhu jednání výboru pro řízení kybernetické bezpečnosti\
+        \ a \nf) zajistí, že výbor pro řízení kybernetické bezpečnosti je složen z\
+        \ osob s pravomocemi a odbornou způsobilostí pro celkové řízení a rozvoj systému\
+        \ řízení bezpečnosti informací a osob významně se podílejících na řízení a\
+        \ koordinaci činností spojených s kybernetickou bezpečností. \n(4) Vrcholné\
+        \ vedení určí osoby, včetně vymezení jejich práv a povinností souvisejících\
+        \ se systémem řízení bezpečnosti informací, které budou zastávat bezpečnostní\
+        \ role\na) manažera kybernetické bezpečnosti,\nb) architekta kybernetické\
+        \ bezpečnosti,\nc) garanta aktiva a\nd) auditora kybernetické bezpečnosti.\n\
+        (5) Vrcholné vedení zajistí zastupitelnost bezpečnostních rolí uvedených v\
+        \ odstavci 4 písm. a) a b)."
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p4-q1
+      name: Je ISMS integrován do procesů společnosti?
+      depth: 3
+      ref_id: ZOKB-P4-Q1
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p4
+      description: 'Vrcholové vedení zajistí integraci systému řízení bezpečnosti
+        informací do procesů povinné osoby. Co doložit při kontrole: Organizační řád
+        a procesní mapy prokazující začlenění KB do ostatních činností organizace.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p4-q2
+      name: Je zajištěno pravidelné školení vrcholného vedení společnosti?
+      depth: 3
+      ref_id: ZOKB-P4-Q2
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p4
+      description: 'Ředitelé a jednatelé musí být prokazatelně proškoleni, aby rozuměli
+        tomu, jaká kybernetická rizika a dopady na podnikání schvalují. Standardní
+        uživatelské školení nestačí. Co doložit při kontrole: Prezenční listiny ze
+        školení vedení (včetně osnovy zaměřené na řízení rizik), certifikáty.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p4-q3
+      name: Jsou zajištěny dostatečné zdroje na kybernetickou bezpečnost?
+      depth: 3
+      ref_id: ZOKB-P4-Q3
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p4
+      description: 'Vrcholové vedení zajistí dostupnost zdrojů potřebných pro systém
+        řízení bezpečnosti informací a výkon bezpečnostních rolí. Co doložit při kontrole:
+        Schválený a alokovaný rozpočet pro oblast kybernetické bezpečnosti.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p4-q4
+      name: Je zajištěna podpora kybernetické bezpečnosti vedením společnosti?
+      depth: 3
+      ref_id: ZOKB-P4-Q4
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p4
+      description: 'Vedení musí být prokazatelně seznámeno a aktivně podepisovat klíčové
+        výstupy analýzy rizik (SoA, Plán zvládání rizik, BIA). Co doložit při kontrole:
+        Podepsané verze analýzy rizik a plánu zvládání rizik statutárem, Zápisy z
+        jednání Výboru KB.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p4-q5
+      name: Mají osoby zastávající bezpečnostní role dostatečné pravomoci?
+      depth: 3
+      ref_id: ZOKB-P4-Q5
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p4
+      description: 'Vrcholové vedení určí osoby a zajistí pro ně pravomoci potřebné
+        pro naplňování jejich rolí v ISMS. Co doložit při kontrole: Jmenovací dekrety,
+        popisy pracovních míst (Job Descriptions) s jasně definovanými pravomocemi.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p4-q6
+      name: Je zajištěna zastupitelnost bezpečnostních rolí?
+      depth: 3
+      ref_id: ZOKB-P4-Q6
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p4
+      description: 'Vrcholové vedení zajistí zastupitelnost bezpečnostních rolí (především
+        manažera KB a architekta KB). Co doložit při kontrole: Matice zastupitelnosti,
+        formální jmenování zástupců vedením.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p4-q7
+      name: Je určeno složení výboru KB, včetně jeho práv a povinností? Je výbor KB
+        ustanoven a vykonává svou činnost?
+      depth: 3
+      ref_id: ZOKB-P4-Q7
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p4
+      description: 'Vrcholové vedení zřídí výbor pro řízení KB, zajistí jeho jednání
+        alespoň 1x ročně a vyhotovení záznamů. Co doložit při kontrole: Statut výboru,
+        jmenování členů, zápisy z pravidelných jednání s úkoly.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p5
+      name: § 5 - Stanovení bezpečnostních rolí
+      depth: 2
+      ref_id: ZOKB-P5
+      assessable: false
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-409
+      description: '(1) Manažer kybernetické bezpečnosti
+
+        a) je bezpečnostní role odpovědná za systém řízení bezpečnosti informací,
+        přičemž výkonem této role může být pověřena osoba, která je pro tuto činnost
+        vyškolena a prokáže odbornou způsobilost praxí s řízením kybernetické bezpečnosti
+        nebo s řízením bezpečnosti informací
+
+        1. po dobu alespoň tří let, nebo
+
+        2. po dobu jednoho roku, pokud absolvovala studium na vysoké škole,
+
+        b) odpovídá za pravidelné informování vrcholného vedení o
+
+        1. činnostech vyplývajících z rozsahu jeho odpovědnosti a
+
+        2. stavu systému řízení bezpečnosti informací,
+
+        c) nesmí být pověřen výkonem rolí odpovědných za provoz technických aktiv
+        regulované služby.
+
+        (2) Architekt kybernetické bezpečnosti je bezpečnostní role odpovědná za zajištění
+        návrhu implementace bezpečnostních opatření tak, aby byla zajištěna bezpečná
+        architektura regulované služby, přičemž výkonem této role může být pověřena
+        osoba, která je pro tuto činnost vyškolena a prokáže odbornou způsobilost
+        praxí s navrhováním implementace bezpečnostních opatření a zajišťováním bezpečné
+        architektury v délce
+
+        a) alespoň tří let nebo
+
+        b) jednoho roku, pokud absolvovala studium na vysoké škole.
+
+        (3) Garant aktiva je bezpečnostní role odpovědná za zajištění rozvoje, použití
+        a bezpečnost aktiva.
+
+        (4) Auditor kybernetické bezpečnosti
+
+        a) je bezpečnostní role odpovědná za provádění auditu kybernetické bezpečnosti,
+        přičemž výkonem této role může být pověřena osoba, která je pro tuto činnost
+        vyškolena a prokáže odbornou způsobilost praxí s prováděním auditů kybernetické
+        bezpečnosti nebo auditů systému řízení bezpečnosti informací v délce
+
+        1. alespoň tří let nebo
+
+        2. jednoho roku, pokud absolvovala studium na vysoké škole,
+
+        b) zaručuje, že provedení auditu kybernetické bezpečnosti je nestranné a
+
+        c) nesmí být pověřen výkonem jiných bezpečnostních rolí.
+
+        (5) Povinná osoba při určování osob zastávajících bezpečnostní role přihlédne
+        k doporučením uvedeným v příloze č. 5 k této vyhlášce.'
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p5-q1
+      name: Je určen manažer KB? Splňuje požadavky Vyhlášky 409/2025 Sb.?
+      depth: 3
+      ref_id: ZOKB-P5-Q1
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p5
+      description: 'Výkonem role může být pověřena osoba s praxí řízení KB alespoň
+        3 roky, nebo 1 rok při VŠ studiu. Role nesmí být pověřena provozem IT. Co
+        doložit při kontrole: Životopis/praxe, jmenovací dekret a organizační schéma
+        (důkaz oddělení od IT).'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p5-q2
+      name: Je určen architekt KB? Splňuje požadavky Vyhlášky 409/2025 Sb.?
+      depth: 3
+      ref_id: ZOKB-P5-Q2
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p5
+      description: 'Architekt odpovídá za návrh bezpečné architektury. Vyžaduje se
+        praxe 3 roky (nebo 1 s VŠ). Co doložit při kontrole: Doklady o vzdělání a
+        praxi, jmenovací dekret.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p5-q3
+      name: Je určen auditor KB? Splňuje požadavky Vyhlášky 409/2025 Sb.?
+      depth: 3
+      ref_id: ZOKB-P5-Q3
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p5
+      description: 'Auditor provádí nezávislé audity KB, vyžaduje praxi 3 roky (nebo
+        1 s VŠ) a zaručuje nestrannost. Nesmí zastávat jiné bezp. role. Co doložit
+        při kontrole: Jmenovací dekret, prohlášení o nestrannosti, doložení praxe.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p6
+      name: § 6 - Řízení bezpečnostní politiky a bezpečnostní dokumentace
+      depth: 2
+      ref_id: ZOKB-P6
+      assessable: false
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-409
+      description: "(1) Povinná osoba stanoví bezpečnostní politiku ve vztahu k řízení\
+        \ kybernetické bezpečnosti a vede relevantní bezpečnostní politiku a bezpečnostní\
+        \ dokumentaci k opatřením uvedeným v § 3 až 28.\n(2) Povinná osoba dodržuje\
+        \ pravidla a postupy stanovené v bezpečnostní politice a bezpečnostní dokumentaci\
+        \ podle odstavce 1.\n(3) Povinná osoba pravidelně přezkoumává bezpečnostní\
+        \ politiku a bezpečnostní dokumentaci, zajistí jejich aktuálnost a zohlednění\
+        \ jejich relevantních oblastí v provozních pravidlech a postupech a další\
+        \ dokumentaci.\n(4) Povinná osoba určí osobu odpovědnou za pravidelný přezkum\
+        \ a aktualizaci bezpečnostní politiky a bezpečnostní dokumentace podle odstavce\
+        \ 3. \n(5) Bezpečnostní politika a bezpečnostní dokumentace musí být řízeny\
+        \ tak, aby byly\na) dostupné v elektronické nebo listinné podobě,\nb) komunikovány\
+        \ v rámci povinné osoby,\nc) přiměřeně dostupné dotčeným stranám,\nd) chráněny\
+        \ z pohledu důvěrnosti, integrity a dostupnosti a\ne) informace v nich obsažené\
+        \ byly úplné, čitelné, správné, snadno identifikovatelné a vyhledatelné."
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p6-q1
+      name: Je vytvořena kompletní bezpečnostní politika, která je schválena, řízena
+        (včetně verzování a archivace), pravidelně aktualizována a přiměřeně dostupná
+        relevantním rolím?
+      depth: 3
+      ref_id: ZOKB-P6-Q1
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p6
+      description: 'Povinná osoba vede a pravidelně přezkoumává bezpečnostní politiku.
+        Dokumenty musí být řízeny, dostupné a chráněny. Co doložit při kontrole: Řízená
+        a verzovaná dokumentace, publikační platforma (intranet) a směrnice o řízení
+        dokumentů.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p6-q2
+      name: Je určena osoba odpovědna za pravidelný přezkum a aktualizaci bezpečnostní
+        politiky a bezpečnostní dokumentace .
+      depth: 3
+      ref_id: ZOKB-P6-Q2
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p6
+      description: 'Povinná osoba určí osobu odpovědnou za přezkum a aktualizaci bezpečnostní
+        dokumentace. Co doložit při kontrole: Pověření vlastníka dokumentace (např.
+        pověření Manažera KB) v organizačním řádu, plán revizí dokumentů.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p7
+      name: § 7 - Řízení aktiv
+      depth: 2
+      ref_id: ZOKB-P7
+      assessable: false
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-409
+      description: "Povinná osoba v návaznosti na stanovení rozsahu řízení kybernetické\
+        \ bezpečnosti podle § 11 zákona \na) stanoví metodiku pro určování aktiv,\n\
+        b) stanoví metodiku pro hodnocení aktiv včetně stanovení úrovní aktiv, alespoň\
+        \ v rozsahu uvedeném v příloze č. 1 k této vyhlášce,\nc) eviduje garanty aktiv\
+        \ podle § 4 odst. 6 písm. c),\nd) hodnotí primární aktiva z hlediska důvěrnosti,\
+        \ integrity a dostupnosti a zařadí je do jednotlivých úrovní podle písmene\
+        \ b),\ne) posuzuje při hodnocení primárních aktiv alespoň oblasti uvedené\
+        \ v příloze č. 1 k této vyhlášce,\nf) určuje a eviduje relevantní vazby mezi\
+        \ aktivy,\ng) hodnotí podpůrná aktiva a zohledňuje přitom zejména vazby na\
+        \ primární aktiva a\nh) pro jednotlivé úrovně aktiv podle písmene b) stanovuje\
+        \ a zavádí pravidla ochrany nutná pro zabezpečení jejich důvěrnosti, integrity\
+        \ a dostupnosti, která obsahují zejména \n1. přípustné způsoby používání aktiv,\n\
+        2. pravidla pro manipulaci s aktivy,\n3. pravidla pro klasifikaci informací,\n\
+        4. pravidla pro označování aktiv,\n5. pravidla správy výměnných médií,\n6.\
+        \ pravidla pro bezpečné elektronické sdílení a fyzické přenášení aktiv a\n\
+        7. pravidla pro určení způsobu likvidace informací a dat a jejich kopií a\
+        \ likvidace technických aktiv, která jsou nosiči informací a dat s ohledem\
+        \ na úroveň aktiv v souladu s přílohou č. 3 k této vyhlášce."
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p7-q1
+      name: e vytvořena politika řízení aktiv v souladu s Přílohou č. 1 vyhlášky 409/2025
+        Sb.? (metodika identifikace a hodnocení aktiv, pravidla ochrany, manipulace,
+        likvidace)
+      depth: 3
+      ref_id: ZOKB-P7-Q1
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p7
+      description: 'Povinná osoba stanoví metodiku pro určování a hodnocení aktiv
+        a zavádí pravidla ochrany, manipulace a bezpečné likvidace. Co doložit při
+        kontrole: Metodika řízení aktiv pokrývající celý životní cyklus aktiva.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p7-q2
+      name: Dochází k identifikaci, evidenci a hodnocení aktiv včetně jejich vazeb?
+      depth: 3
+      ref_id: ZOKB-P7-Q2
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p7
+      description: 'Povinná osoba hodnotí primární aktiva, určuje vazby a hodnotí
+        podpůrná aktiva s ohledem na tyto vazby. Co doložit při kontrole: Registr
+        aktiv (Asset Register), mapa provázanosti primárních a podpůrných aktiv.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p7-q3
+      name: Je vytvořena politika ochrany osobních údajů?
+      depth: 3
+      ref_id: ZOKB-P7-Q3
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p7
+      description: 'Stanovují se pravidla pro klasifikaci informací a pravidla ochrany
+        k zabezpečení jejich důvěrnosti a integrity. Co doložit při kontrole: Politika
+        klasifikace informací pokrývající osobní a citlivé údaje, Záznamy o činnostech
+        zpracování.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p7-q4
+      name: Jsou určeni a evidováni garanti aktiv?
+      depth: 3
+      ref_id: ZOKB-P7-Q4
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p7
+      description: 'Povinná osoba eviduje garanty aktiv (osoby odpovědné za rozvoj,
+        použití a bezpečnost). Co doložit při kontrole: Registr aktiv s vyplněným
+        sloupcem ''Garant aktiva''.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p8
+      name: § 8 - Řízení rizik
+      depth: 2
+      ref_id: ZOKB-P8
+      assessable: false
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-409
+      description: "(1) Povinná osoba při řízení rizik v návaznosti na § 7\na) stanoví\
+        \ metodiku pro určování a hodnocení rizik, včetně stanovení kritérií pro akceptovatelnost\
+        \ rizik,\nb) při určování rizik s ohledem na aktiva určuje relevantní hrozby\
+        \ a zranitelnosti; přitom zvažuje zejména kategorie hrozeb a zranitelností\
+        \ uvedených v příloze č. 4 k této vyhlášce,\nc) provádí hodnocení rizik v\
+        \ pravidelných intervalech alespoň jednou ročně a při významných změnách určených\
+        \ podle § 11 odst. 1 písm. c), zohlední při hodnocení rizik \n1. relevantní\
+        \ hrozby a zranitelnosti podle písmene b) a posoudí možné dopady na aktiva,\
+        \ přičemž vychází z hodnocení aktiv podle § 7,\n2. významné změny,\n3. změny\
+        \ stanoveného rozsahu podle § 11 zákona,\n4. protiopatření podle § 19 zákona,\n\
+        5. kybernetické bezpečnostní incidenty, včetně dříve řešených,\n6. výsledky\
+        \ auditů kybernetické bezpečnosti a kontrol v oblasti kybernetické bezpečnosti,\n\
+        7. výsledky penetračního testování a skenování zranitelností a\n8. výsledky\
+        \ vyhodnocení účinnosti systému řízení bezpečnosti informací,\nd) při hodnocení\
+        \ rizik postupuje alespoň v rozsahu přílohy č. 2 k této vyhlášce,\ne) na základě\
+        \ provedeného hodnocení rizik podle písmene c) zpracuje zprávu o hodnocení\
+        \ rizik,\nf) zpracuje na základě bezpečnostních potřeb a výsledků hodnocení\
+        \ rizik prohlášení o aplikovatelnosti, které obsahuje přehled všech bezpečnostních\
+        \ opatření požadovaných touto vyhláškou, která\n1. nebyla aplikována, včetně\
+        \ odůvodnění a uvedení případných přijatých náhradních bezpečnostních opatření\
+        \ a\n2. byla aplikována, včetně způsobu plnění,\ng) na základě provedeného\
+        \ hodnocení rizik podle písmene c) a v souladu se stanovenými kritérii pro\
+        \ akceptovatelnost rizik zpracuje plán zvládání rizik, který obsahuje \n1.\
+        \ popis bezpečnostních opatření pro zvládání rizik,\n2. cíle a přínosy bezpečnostních\
+        \ opatření pro zvládání rizik, \n3. určení osoby zajišťující zavedení bezpečnostních\
+        \ opatření pro zvládání rizik,\n4. předpokládané lidské, finanční a technické\
+        \ zdroje pro zavedení bezpečnostních opatření,\n5. požadovaný termín zavedení\
+        \ bezpečnostních opatření, \n6. popis vazeb mezi riziky a příslušnými bezpečnostními\
+        \ opatřeními a \n7. konkrétní způsob realizace bezpečnostních opatření.\n\
+        (2) Povinná osoba v souladu s plánem zvládání rizik zavádí bezpečnostní opatření.\n\
+        (3) Hodnocení rizik může být zajištěno i jinými způsoby, než jak je stanoveno\
+        \ v odstavci 1 písm. c), pokud povinná osoba zajistí stejnou nebo vyšší úroveň\
+        \ procesu hodnocení rizik a postupuje v souladu s odst. 5 přílohy č. 2 k této\
+        \ vyhlášce.\n(4) Povinná osoba může vyloučit zavádění a provádění bezpečnostních\
+        \ opatření stanovených touto vyhláškou pouze na základě řízení rizik."
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p8-q1
+      name: Je vytvořena politika řízení rizik?
+      depth: 3
+      ref_id: ZOKB-P8-Q1
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p8
+      description: 'Povinná osoba stanoví metodiku pro určování a hodnocení rizik,
+        včetně stanovení kritérií pro akceptovatelnost rizik. Co doložit při kontrole:
+        Schválená metodika a politika řízení rizik.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p8-q2
+      name: Dochází k identifikaci, evidenci a hodnocení rizik včetně jejich relevantních
+        hrozeb, zranitelností a dopadů? (včetně rizik spojených s dodavateli)
+      depth: 3
+      ref_id: ZOKB-P8-Q2
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p8
+      description: 'Organizace určuje relevantní hrozby a zranitelnosti a posoudí
+        možné dopady na aktiva (zahrnuje i dodavatele). Co doložit při kontrole: Registr
+        rizik prokazující mapování vazby: Aktivum -> Zranitelnost -> Hrozba -> Dopad.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p8-q3
+      name: Je hodnocení rizik prováděno v pravidelných intervalech, při významných
+        změnách, při změnách rozsahu ISMS, při vydání opatření NUKIBem po KBI?
+      depth: 3
+      ref_id: ZOKB-P8-Q3
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p8
+      description: 'Hodnocení rizik se provádí alespoň jednou ročně a při významných
+        změnách nebo incidentech. Co doložit při kontrole: Záznamy o ročních revizích
+        rizik, zprávy z ad-hoc hodnocení rizik po změnách/incidentech.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p8-q4
+      name: Jsou bezpečnostní opatření zaváděna v souladu s plánem zvládání rizik  (využívajícím
+        metody akceptace, redukce, eliminace, vyhnutí se, sdílení)?
+      depth: 3
+      ref_id: ZOKB-P8-Q4
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p8
+      description: 'Na základě hodnocení rizik se zpracuje plán zvládání rizik a příslušná
+        opatření. Co doložit při kontrole: Plán zvládání rizik (Risk Treatment Plan)
+        s určenými termíny a odpovědnostmi, Prohlášení o aplikovatelnosti (SoA).'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p9
+      name: § 9 - Řízení dodavatelů
+      depth: 2
+      ref_id: ZOKB-P9
+      assessable: false
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-409
+      description: '(1) Povinná osoba při řízení dodavatelů
+
+        a) stanoví pravidla pro dodavatele, která zohledňují požadavky systému řízení
+        bezpečnosti informací,
+
+        b) prokazatelně seznamuje své dodavatele s pravidly podle písmene a) a vyžaduje
+        plnění těchto pravidel,
+
+        c) řídí rizika spojená s dodavateli,
+
+        d) identifikuje a eviduje své významné dodavatele ve smyslu § 2 písm. i),
+
+        e) prokazatelně písemně informuje své významné dodavatele o jejich evidenci
+        podle písmene d),
+
+        f) zajistí v souvislosti s řízením rizik spojených s významnými dodavateli,
+        aby smlouvy uzavírané s významnými dodavateli obsahovaly relevantní ustanovení
+        uvedená v příloze č. 6 k této vyhlášce a
+
+        g) pravidelně přezkoumává plnění smluv s významnými dodavateli z hlediska
+        systému řízení bezpečnosti informací.
+
+        (2) Povinná osoba u významných dodavatelů dále
+
+        a) provádí v rámci výběrového řízení a před uzavřením smlouvy hodnocení rizik
+        souvisejících s plněním přiměřeně podle přílohy č. 2 k této vyhlášce,
+
+        b) stanoví v rámci uzavíraných smluvních vztahů způsoby a úrovně realizace
+        bezpečnostních opatření a určí obsah vzájemné smluvní odpovědnosti za zavedení
+        a kontrolu bezpečnostních opatření,
+
+        c) provádí pravidelné hodnocení rizik a pravidelnou kontrolu zavedených bezpečnostních
+        opatření u poskytovaných plnění pomocí vlastních zdrojů nebo pomocí třetí
+        strany a
+
+        d) zajistí v reakci na rizika a zjištěné nedostatky jejich řešení.
+
+        (3) Náležitosti prokazatelného informování podle odstavce 1 písm. e) jsou
+
+        a) identifikace povinné osoby, včetně uvedení, že povinná osoba je poskytovatelem
+        regulované služby v režimu vyšších povinností,
+
+        b) identifikace regulované služby,
+
+        c) identifikace významného dodavatele a
+
+        d) vyrozumění o skutečnosti, že dodavatel je pro povinnou osobu významným
+        dodavatelem.'
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p9-q1
+      name: Je vytvořena politika řízení dodavatelů včetně pravidel?
+      depth: 3
+      ref_id: ZOKB-P9-Q1
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p9
+      description: 'Povinná osoba stanoví pravidla pro dodavatele, která zohledňují
+        požadavky ISMS. Co doložit při kontrole: Směrnice o řízení dodavatelů, metodika
+        pro výběr a hodnocení dodavatelů.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p9-q2
+      name: Jsou významní dodavatelé evidováni a jsou prokazatelně informováni dle
+        Vyhlášky 409/2025 Sb.?
+      depth: 3
+      ref_id: ZOKB-P9-Q2
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p9
+      description: 'Povinná osoba identifikuje, eviduje své významné dodavatele a
+        prokazatelně je písemně informuje. Co doložit při kontrole: Registr dodavatelů,
+        doručenky či písemná vyrozumění odeslaná významným dodavatelům.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p9-q3
+      name: Jsou dodavatelé seznamováni s pravidly a je požadováno plnění těchto pravidel?
+        Jsou poučováni o svých povinnostech a odpovědnostech?
+      depth: 3
+      ref_id: ZOKB-P9-Q3
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p9
+      description: 'Povinná osoba prokazatelně seznamuje dodavatele s bezpečnostními
+        pravidly a vyžaduje jejich plnění. Co doložit při kontrole: Smluvní ujednání,
+        podepsaná NDA, záznamy z úvodního bezpečnostního proškolení dodavatelů.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p9-q4
+      name: Je ve smlouvě s významnými dodavateli zohledněna příloha č. 5 vyhlášky
+        o bezpečnostních opatřeních poskytovatele regulované služby v režimu vyšších
+        povinností a jsou smlouvy pra...
+      depth: 3
+      ref_id: ZOKB-P9-Q4
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p9
+      description: 'Smlouvy s významnými dodavateli musí obsahovat relevantní ustanovení
+        dle přílohy č. 6 a musí se pravidelně přezkoumávat. Co doložit při kontrole:
+        Vzorové znění bezpečnostní doložky ve smlouvě (SLA), zápisy z ročního přezkumu
+        smluvního plnění.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p9-q5
+      name: Probíhá předsmluvní hodnocení rizik?
+      depth: 3
+      ref_id: ZOKB-P9-Q5
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p9
+      description: 'Před uzavřením smlouvy s významným dodavatelem probíhá hodnocení
+        rizik souvisejících s plněním. Co doložit při kontrole: Zprávy z hodnocení
+        rizik (Risk Assessment) prováděné v rámci výběrového řízení.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p9-q6
+      name: Je určena smluvní odpovědnost za zavedení bezpečnostních opatření a jejich
+        kontrolu? Je kontrolováno dodržování těchto požadavků?
+      depth: 3
+      ref_id: ZOKB-P9-Q6
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p9
+      description: 'Smlouvy definují odpovědnosti a úrovně bezpečnostních opatření.
+        Organizace pravidelně kontroluje plnění. Co doložit při kontrole: Bezpečnostní
+        doložky a SLA reporty dodavatelů, zprávy z auditů dodavatelů.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p9-q7
+      name: Je reagováno na nedostatky při řízení dodavatelů a jsou tyto nedostatky
+        odstraňovány?
+      depth: 3
+      ref_id: ZOKB-P9-Q7
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p9
+      description: 'Organizace v reakci na rizika a zjištěné nedostatky u dodavatelů
+        zajišťuje jejich prokazatelné řešení. Co doložit při kontrole: Tickety z řešení
+        bezpečnostních incidentů s dodavateli, CAPA plány (nápravná opatření).'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p9-q8
+      name: Jsou stanoveným způsobem institucím hlášeny aktuální kontaktní údaje?
+      depth: 3
+      ref_id: ZOKB-P9-Q8
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p9
+      description: 'Tato položka slouží k potvrzení obecné ohlašovací povinnosti dle
+        zákona vůči NÚKIB. Co doložit při kontrole: Potvrzení o zaslání a evidenci
+        aktuálních kontaktních údajů na NÚKIB/příslušný orgán.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p10
+      name: § 10 - Bezpečnost lidských zdrojů
+      depth: 2
+      ref_id: ZOKB-P10
+      assessable: false
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-409
+      description: "(1) Povinná osoba v rámci bezpečnosti lidských zdrojů s ohledem\
+        \ na stav a potřeby systému řízení bezpečnosti informací stanoví plán rozvoje\
+        \ bezpečnostního povědomí, jehož cílem je zajistit odpovídající vzdělávání\
+        \ a zlepšování bezpečnostního povědomí včetně formy, obsahu a rozsahu poučení\
+        \ a školení podle odstavce 2.\n(2) Povinná osoba zahrne do plánu rozvoje bezpečnostního\
+        \ povědomí\na) poučení vrcholného vedení o jeho povinnostech a bezpečnostní\
+        \ politice, zejména v oblastech systému řízení bezpečnosti informací a řízení\
+        \ rizik,\nb) poučení uživatelů, administrátorů a osob zastávajících bezpečnostní\
+        \ role o jejich povinnostech a o bezpečnostní politice,\nc) potřebná teoretická\
+        \ i praktická školení uživatelů, administrátorů a osob zastávajících bezpečnostní\
+        \ role,\nd) pravidla tvorby bezpečných hesel v souladu s § 19 a\ne) relevantní\
+        \ témata uvedená v příloze č. 7 k této vyhlášce.\n(3) Povinná osoba v rámci\
+        \ bezpečnosti lidských zdrojů \na) v souladu s plánem rozvoje bezpečnostního\
+        \ povědomí zajistí\n1. poučení vrcholného vedení o jeho povinnostech, o bezpečnostní\
+        \ politice zejména v oblasti systému řízení bezpečnosti informací, řízení\
+        \ rizik a řízení kontinuity činností formou vstupních a pravidelných školení\
+        \ k získání znalostí a dovedností vedoucích k určování rizik a posouzení vhodnosti\
+        \ zvolených postupů při řízení rizik a jejich dopadů na regulovanou službu.\
+        \ \n2. poučení uživatelů, administrátorů a osob zastávajících bezpečnostní\
+        \ role o jejich povinnostech a o bezpečnostní politice formou vstupních a\
+        \ pravidelných školení,\n3. pravidelná odborná školení osobám zastávajícím\
+        \ bezpečnostní role, přičemž vychází z aktuálních potřeb povinné osoby v oblasti\
+        \ kybernetické bezpečnosti,\n4. pravidelná školení a ověřování bezpečnostního\
+        \ povědomí zaměstnanců v souladu s jejich pracovní náplní,\nb) určí osoby\
+        \ odpovědné za realizaci jednotlivých činností, které jsou v plánu rozvoje\
+        \ bezpečnostního povědomí uvedeny,\nc) hodnotí účinnost plánu rozvoje bezpečnostního\
+        \ povědomí, provedených poučení, školení a dalších činností spojených se zlepšováním\
+        \ bezpečnostního povědomí,\nd) zajistí kontrolu dodržování bezpečnostní politiky\
+        \ ze strany uživatelů, administrátorů a osob zastávajících bezpečnostní role,\n\
+        e) určí pravidla a postupy pro řešení případů porušení stanovených bezpečnostních\
+        \ pravidel ze strany uživatelů, administrátorů a osob zastávajících bezpečnostní\
+        \ role a\nf) zajistí plynulost výkonu činností v případě ukončení nebo změny\
+        \ smluvního vztahu s administrátory a osobami zastávajícími bezpečnostní role.\n\
+        (4) Povinná osoba vede o poučení a školení podle odstavce 3 přehledy, které\
+        \ obsahují předmět poučení a školení včetně seznamu osob, které poučení a\
+        \ školení absolvovaly."
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p10-q1
+      name: Je vytvořena politika řízení lidských zdrojů? Existuje plán rozvoje bezpečnostního
+        povědomí s určenými odpovědnými osobami za jeho realizaci a hodnocení jeho
+        účinnosti? Obsahuje...
+      depth: 3
+      ref_id: ZOKB-P10-Q1
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p10
+      description: 'Povinná osoba stanoví plán rozvoje bezpečnostního povědomí, určí
+        odpovědné osoby a hodnotí jeho účinnost. Co doložit při kontrole: Schválený
+        plán rozvoje bezpečnostního povědomí (školící plán), metodika hodnocení účinnosti
+        školení.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p10-q2
+      name: Jsou prováděna vstupní a pravidelná školení administrátorů, uživatelů
+        a osob zastávajících bezpečnostní role? Probíhá ověřování získaných znalostí?
+      depth: 3
+      ref_id: ZOKB-P10-Q2
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p10
+      description: 'Všichni uživatelé a administrátoři musí projít vstupním a pravidelným
+        školením včetně ověření znalostí. Co doložit při kontrole: Prezenční listiny/logy
+        z e-learningu, výsledky závěrečných testů ověření znalostí.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p10-q3
+      name: Je zajištěna mlčenlivost administrátorů a osob zastávajících bezpečnostní
+        role?
+      depth: 3
+      ref_id: ZOKB-P10-Q3
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p10
+      description: 'Musí být prokazatelně zachována mlčenlivost relevantních osob
+        a dodavatelů s přístupem k citlivým aktivům. Co doložit při kontrole: Podepsané
+        dohody o mlčenlivosti (NDA) prokazující trvání i po skončení pracovního vztahu.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p10-q4
+      name: Je vytvořena politika bezpečného chování uživatelů?
+      depth: 3
+      ref_id: ZOKB-P10-Q4
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p10
+      description: 'Do plánu rozvoje povědomí jsou zahrnuta pravidla pro uživatele
+        a tvorbu bezpečných hesel. Co doložit při kontrole: Směrnice o přijatelném
+        využívání aktiv (Acceptable Use Policy - AUP), podepsaná uživateli.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p10-q5
+      name: Účastní se osoby zastávající bezpečností role odborných školení v souladu
+        s plánem rozvoje bezpečnostního povědomí?
+      depth: 3
+      ref_id: ZOKB-P10-Q5
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p10
+      description: 'Osobám zastávajícím bezpečnostní role musí být poskytnuta pravidelná
+        odborná školení. Co doložit při kontrole: Certifikáty o absolvování odborných
+        kurzů, záznamy o účasti na konferencích a tréninzích.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p10-q6
+      name: Je kontrolováno dodržování bezpečnostních politik?
+      depth: 3
+      ref_id: ZOKB-P10-Q6
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p10
+      description: 'Povinná osoba zajistí kontrolu dodržování bezpečnostní politiky
+        ze strany všech uživatelů a administrátorů. Co doložit při kontrole: Záznamy
+        z interních compliance kontrol, logy monitorovacích a DLP systémů, auditní
+        nálezy.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p10-q7
+      name: Je zajištěno předání odpovědností v případě ukončení smluvního vztahu
+        a řešení v případě porušení bezpečnostních pravidel?
+      depth: 3
+      ref_id: ZOKB-P10-Q7
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p10
+      description: 'Zajistí se plynulost výkonu činností při odchodu rolí a stanoví
+        se pravidla pro řešení případů porušení pravidel. Co doložit při kontrole:
+        Pracovněprávní či kárný řád definující postihy, dokumentovaný proces offboardingu
+        a handoveru (předávací protokoly).'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p10-q8
+      name: Jsou zaměstnanci upozorňováni na nové hrozby a trendy v oblasti kybernetické
+        bezpečnosti?
+      depth: 3
+      ref_id: ZOKB-P10-Q8
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p10
+      description: 'Součástí povědomí je seznamování s relevantními tématy a novými
+        hrozbami (phishing, social engineering). Co doložit při kontrole: Phishingové
+        kampaně, bezpečnostní newslettery, zápisy z porad oddělení.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p10-q9
+      name: Máte procesy garantující okamžité bezpečné odebrání přístupů a plynulost
+        chodu organizace při odchodu administrátorů a rolí KB?
+      depth: 3
+      ref_id: ZOKB-P10-Q9
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p10
+      description: 'Procesní garance bezodkladného odebrání oprávnění při ukončení
+        vztahu administrátorů a speciálních rolí. Co doložit při kontrole: Offboarding
+        checklisty pro VIP/Admin role, ticketovací systém prokazující okamžité splnění.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p11
+      name: § 11 - Řízení změn
+      depth: 2
+      ref_id: ZOKB-P11
+      assessable: false
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-409
+      description: "(1) Povinná osoba při řízení změn u aktiv \na) stanoví pravidla,\
+        \ postupy a kritéria pro určení významných změn,\nb) určí změny, které mají\
+        \ nebo mohou mít vliv na kybernetickou bezpečnost, \nc) určuje u změn určených\
+        \ podle písmene b) významné změny v souladu se stanovenými pravidly, postupy\
+        \ a kritérii pro určení významných změn podle písmene a).\n(2) Povinná osoba\
+        \ u významných změn\na) dokumentuje jejich řízení,\nb) řídí rizika spojená\
+        \ s významnými změnami,\nc) přijímá bezpečnostní opatření za účelem snížení\
+        \ všech nepříznivých dopadů spojených s významnými změnami,\nd) aktualizuje\
+        \ bezpečnostní a provozní dokumentaci,\ne) zajistí jejich testování před uvedením\
+        \ do provozu a\nf) zajistí možnost navrácení do původního stavu.\n(3) Povinná\
+        \ osoba na základě výsledků řízení rizik podle odstavce 2 písm. b) rozhoduje\
+        \ o provedení penetračního testování; pokud rozhodne o provedení penetračního\
+        \ testování, postupuje podle § 24 odst. 5 k této vyhlášce."
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p11-q1
+      name: Je vytvořena politika řízení změn včetně definice významné změny?
+      depth: 3
+      ref_id: ZOKB-P11-Q1
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p11
+      description: 'Povinná osoba stanoví pravidla, postupy a kritéria pro určení
+        významných změn, které mají vliv na kybernetickou bezpečnost. Co doložit při
+        kontrole: Směrnice řízení změn (Change Management Policy) s jasnou definicí
+        ''významné změny''.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p11-q2
+      name: Jsou přezkoumávány možné dopady změn a určovány významné změny (včetně
+        jejich dokumentování)?
+      depth: 3
+      ref_id: ZOKB-P11-Q2
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p11
+      description: 'Před realizací změny probíhá hodnocení rizik a dopadů. Změny jsou
+        formálně dokumentovány a řízeny. Co doložit při kontrole: Záznamy ze schvalovacích
+        komisí (CAB - Change Advisory Board), analýzy dopadu změn na bezpečnost.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p11-q3
+      name: Je řízen proces změny včetně bezpečnostního testování a možnosti navrácení
+        do původního stavu?
+      depth: 3
+      ref_id: ZOKB-P11-Q3
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p11
+      description: 'Zajistí se aktualizace dokumentace, testování před uvedením do
+        provozu a existence plánu navrácení do původního stavu (rollback). Co doložit
+        při kontrole: Change logy obsahující testovací scénáře a rollback plány, reporty
+        z UAT testování.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p11-q4
+      name: Je prováděno penetrační testování a skenování zranitelností a je adekvátně
+        reagováno na zjištěné nedostatky?
+      depth: 3
+      ref_id: ZOKB-P11-Q4
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p11
+      description: 'V závislosti na významné změně (infrastruktura, aplikace) se rozhoduje
+        o provedení penetračních testů. Co doložit při kontrole: Zprávy z penetračních
+        testů po nasazení majoritního releasu, výstupy z vulnerability skenerů.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p12
+      name: § 12 - Akvizice, vývoj a údržba
+      depth: 2
+      ref_id: ZOKB-P12
+      assessable: false
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-409
+      description: '(1) Povinná osoba v souvislosti s plánovanou akvizicí, vývojem
+        a údržbou aktiv
+
+        a) řídí rizika,
+
+        b) řídí významné změny podle § 11,
+
+        c) stanoví bezpečnostní požadavky, které zohlední i relevantní bezpečnostní
+        opatření stanovená touto vyhláškou,
+
+        d) zahrne bezpečnostní požadavky stanovené podle písmene c) do plánované akvizice,
+        vývoje a údržby a
+
+        e) zajistí oddělení provozního, zálohovacího, vývojového, testovacího, administrátorského
+        a jiných specifických prostředí, a zajistí ochranu informací a dat, které
+        se v nich vyskytují.
+
+        (2) Povinná osoba zajistí při provedení akvizice nebo vývoje technického aktiva
+
+        a) využívajícího autentizační mechanismus, zejména za účelem ověření identity
+        uživatelů nebo administrátorů, plnění požadavků podle § 19 odst. 3,
+
+        b) využívajícího kryptografické algoritmy, plnění požadavku podle § 25 odst.
+        1 písm. a) a § 25 odst. 3 písm. a), a
+
+        c) dostupnost bezpečnostních aktualizací po dobu jeho životního cyklu.'
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p12-q1
+      name: Je vytvořena politika akvizice vývoje a údržby?
+      depth: 3
+      ref_id: ZOKB-P12-Q1
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p12
+      description: 'Při plánované akvizici, vývoji a údržbě aktiv se stanovují a řídí
+        rizika a aplikuje politika bezpečného vývoje. Co doložit při kontrole: Metodika
+        bezpečného vývoje softwaru (Secure SDLC) nebo pravidla bezpečné akvizice.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p12-q2
+      name: Jsou stanoveny bezpečnostní požadavky a jsou tyto požadavky zahrnuty do
+        projektu akvizice, vývoje a údržby?
+      depth: 3
+      ref_id: ZOKB-P12-Q2
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p12
+      description: 'Povinná osoba stanoví bezpečnostní požadavky již v rané fázi projektu
+        akvizice či vývoje. Co doložit při kontrole: Projektová dokumentace obsahující
+        kapitolu Security Requirements, specifikace zadání pro dodavatele.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p12-q3
+      name: Je zajištěna bezpečnost a oddělení vývojového, provozního a testovacího
+        prostředí a to včetně ochrany testovacích dat?
+      depth: 3
+      ref_id: ZOKB-P12-Q3
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p12
+      description: 'Oddělí se provozní, testovací, vývojové a zálohovací prostředí.
+        Musí se chránit testovací data. Co doložit při kontrole: Schéma síťové a logické
+        architektury, pravidla pro anonymizaci produkčních dat použitých v testování.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p13
+      name: § 13 - Řízení přístupu
+      depth: 2
+      ref_id: ZOKB-P13
+      assessable: false
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-409
+      description: "(1) Povinná osoba na základě bezpečnostních a provozních potřeb\
+        \ řídí přístup k aktivům a přijímá bezpečnostní opatření, která slouží k zajištění\
+        \ ochrany přístupových a autentizačních údajů, které jsou používány pro ověření\
+        \ identity podle § 19 a 21.\n(2) Povinná osoba dále při řízení přístupu k\
+        \ aktivům \na) řídí přístup na základě skupin a rolí,\nb) přidělí každému\
+        \ uživateli a administrátorovi přistupujícímu k aktivům přístupová práva a\
+        \ oprávnění na úroveň nezbytně nutnou k výkonu práce a jedinečný identifikátor\
+        \ daného typu účtu, přičemž odděluje uživatelské a administrátorské účty jedné\
+        \ osoby,\nc) řídí identifikátory, přístupová práva a oprávnění účtů technických\
+        \ aktiv,\nd) zavádí v souladu s písmenem c) bezpečnostní opatření pro řízení\
+        \ přístupu technických aktiv,\ne) zavádí bezpečnostní opatření potřebná pro\
+        \ bezpečné používání mobilních zařízení a jiných obdobných technických aktiv,\
+        \ popřípadě i bezpečnostní opatření spojená s využitím technických aktiv,\
+        \ která povinná osoba nemá ve své správě,\nf) omezí a kontroluje používání\
+        \ programových prostředků a vybavení, které mohou být schopné překonat systémové\
+        \ nebo aplikační kontroly,\ng) přiděluje a odebírá přístupová práva a oprávnění\
+        \ v souladu s politikou řízení přístupu,\nh) provádí pravidelné přezkoumání\
+        \ veškerých přístupových práv a oprávnění včetně rozdělení do skupin a rolí,\n\
+        i) zajistí bezodkladné odebrání nebo změnu přístupových práv a oprávnění při\
+        \ změně pozice nebo zařazení na základě skupin a rolí,\nj) zajistí deaktivaci\
+        \ účtů a bezodkladné odebrání nebo změnu přístupových práv a oprávnění při\
+        \ ukončení nebo změně smluvního vztahu, na základě kterého došlo ke zřízení\
+        \ přístupu k aktivům, \nk) dokumentuje přidělování a odebírání přístupových\
+        \ práv a oprávnění, a\nl) využívá nástroj pro správu a ověřování identity\
+        \ podle § 19 a nástroj pro řízení přístupových práv a oprávnění podle § 20."
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p13-q1
+      name: Je vytvořena politika řízení přístupů včetně pravidel pro ochranu přihlašovacích
+        údajů? Dochází k evidenci přidělených a odebraných přístupových oprávnění?
+      depth: 3
+      ref_id: ZOKB-P13-Q1
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p13
+      description: 'Organizace na základě bezpečnostních potřeb řídí přístupy a zajišťuje
+        ochranu autentizačních údajů. Přidělení a odebrání se dokumentuje. Co doložit
+        při kontrole: Směrnice řízení identit a přístupů (IAM Policy), logy ze systémů
+        identity managementu.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p13-q2
+      name: Je přístup řízen na základě skupin a rolí?
+      depth: 3
+      ref_id: ZOKB-P13-Q2
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p13
+      description: 'Přístup k aktivům je řízen na základě skupin a rolí uživatelů.
+        Co doložit při kontrole: Role-Based Access Control (RBAC) matice, struktura
+        Active Directory či IdM systému s vymezenými rolemi.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p13-q3
+      name: Jsou uživatelům a administrátorům přidělovány jedinečné identifikátory
+        (nejsou používány sdílené účty)?
+      depth: 3
+      ref_id: ZOKB-P13-Q3
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p13
+      description: 'Každý uživatel i administrátor má jedinečný identifikátor daného
+        typu účtu. Uživatelské a admin účty jedné osoby jsou odděleny. Co doložit
+        při kontrole: Audit uživatelských účtů (prokázání absence generických loginů
+        jako ''host'' nebo ''admin'').'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p13-q4
+      name: Jsou řízeny identifikátory, přístupová práva a oprávnění aplikací a technických
+        účtů?
+      depth: 3
+      ref_id: ZOKB-P13-Q4
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p13
+      description: 'Zavádí se bezpečnostní opatření pro řízení přístupů nejen uživatelů,
+        ale i nepersonálních/technických aktiv a systémových účtů. Co doložit při
+        kontrole: Registr servisních a technických účtů, logy jejich přístupů.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p13-q5
+      name: Je zavedena centrální správa mobilních zařízení?
+      depth: 3
+      ref_id: ZOKB-P13-Q5
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p13
+      description: 'Zavádí se opatření pro bezpečné používání mobilních zařízení a
+        jiných obdobných aktiv. Co doložit při kontrole: MDM (Mobile Device Management)
+        systém, aplikované politiky (např. remote wipe, PIN lockdown).'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p13-q6
+      name: Dochází k odebrání nebo změně přístupových oprávnění u interních a externích
+        rolí ve stanovených případech dle Vyhlášky 409/2025 Sb.?
+      depth: 3
+      ref_id: ZOKB-P13-Q6
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p13
+      description: 'Deaktivace účtů a bezodkladné odebrání oprávnění musí proběhnout
+        při ukončení smluvního vztahu nebo změně pozice. Co doložit při kontrole:
+        Důkazní vzorek: Porovnání data ukončení pracovního poměru z HR s logem o deaktivaci
+        účtu v IT.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p13-q7
+      name: V případě, že je umožněno zaměstnancům používat jejich soukromá zařízení
+        k pracovním účelům (BYOD), jsou stanoveny jednoznačná pravidla a postupy?
+      depth: 3
+      ref_id: ZOKB-P13-Q7
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p13
+      description: 'Bezpečnostní opatření spojená s využitím technických aktiv, která
+        organizace nemá ve své správě (BYOD). Co doložit při kontrole: Směrnice o
+        BYOD, prokazatelně podepsané souhlasy se vzdálenou správou firemního oddílu
+        v zařízení.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p13-q8
+      name: Je zaveden princip need-to-know?
+      depth: 3
+      ref_id: ZOKB-P13-Q8
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p13
+      description: 'Přístup je umožněn pouze k informacím nezbytným pro výkon práce.
+        Co doložit při kontrole: Schvalovací flow (workflow) pro udělení přístupů,
+        prokazující, že oprávnění povoluje vlastník dat.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p13-q9
+      name: Je zaveden princip minimálních oprávnění? (least privileged)
+      depth: 3
+      ref_id: ZOKB-P13-Q9
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p13
+      description: 'Přidělení uživatelům a administrátorům oprávnění pouze na úroveň
+        nezbytně nutnou k výkonu práce. Co doložit při kontrole: Auditní zprávy prokazující
+        omezení lokálních admin práv uživatelům (LAPS).'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p13-q10
+      name: Je zavedena centrální správa možného instalovaného SW? (tzn. uživatelé
+        si nemohou sami instalovat neschválené aplikace)
+      depth: 3
+      ref_id: ZOKB-P13-Q10
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p13
+      description: 'Omezí se používání prostředků, které překonávají systémové kontroly.
+        Co doložit při kontrole: Nastavení koncových stanic (např. AppLocker, odebrání
+        lokálních administrátorských oprávnění), centrální distribuce softwaru.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p13-q11
+      name: Probíhají revize přidělených oprávnění?
+      depth: 3
+      ref_id: ZOKB-P13-Q11
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p13
+      description: 'Provádí se pravidelné přezkoumání veškerých přístupových práv
+        a oprávnění uživatelů, skupin a rolí. Co doložit při kontrole: Zápisy a protokoly
+        z kampaní pro recertifikaci oprávnění potvrzené garanty aktiv.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p13-q12
+      name: Jsou v organizaci formálně řízeny a pravidelně přezkoumávány přístupy,
+        oprávnění a identifikátory nepersonálních účtů a účtů technických aktiv (služební
+        účty, systémové integrace, API klíče)?
+      depth: 3
+      ref_id: ZOKB-P13-Q12
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p13
+      description: 'Pravidelná revize a zabezpečení API klíčů, služebních účtů a integrací,
+        včetně povinnosti bezpečně rotovat jejich hesla. Co doložit při kontrole:
+        Systém na správu hesel (PAM/Vault) s doložením periodické rotace nepersonálních
+        přístupů.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p14
+      name: § 14 - Zvládání kybernetických bezpečnostních událostí a incidentů
+      depth: 2
+      ref_id: ZOKB-P14
+      assessable: false
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-409
+      description: '(1) Povinná osoba při zvládání kybernetických bezpečnostních událostí
+        a incidentů
+
+        a) zavede procesy, pravidla a postupy pro detekci, zaznamenávání a vyhodnocování
+        kybernetických bezpečnostních událostí v souladu s § 21 až 24,
+
+        b) zavede procesy, pravidla a postupy pro koordinaci a zvládání kybernetických
+        bezpečnostních incidentů,
+
+        c) přidělí odpovědnosti pro
+
+        1. detekci, zaznamenávání a vyhodnocování kybernetických bezpečnostních událostí
+        a
+
+        2. koordinaci a zvládání kybernetických bezpečnostních incidentů,
+
+        d) definuje a dodržuje pravidla a postupy pro identifikaci, sběr, získání
+        a uchování věrohodných podkladů potřebných pro analýzu kybernetického bezpečnostního
+        incidentu,
+
+        e) zajistí detekci kybernetických bezpečnostních událostí podle § 21,
+
+        f) zajistí, že uživatelé, administrátoři, osoby zastávající bezpečnostní role,
+        další zaměstnanci a dodavatelé budou oznamovat neobvyklé chování technických
+        aktiv a podezření na zranitelnosti,
+
+        g) zajistí posuzování kybernetických bezpečnostních událostí, při kterých
+        musí být rozhodnuto, zda mají být klasifikovány jako kybernetické bezpečnostní
+        incidenty,
+
+        h) zajistí zvládání kybernetických bezpečnostních incidentů podle stanovených
+        postupů,
+
+        i) přijímá bezpečnostní opatření pro odvrácení a zmírnění dopadu kybernetického
+        bezpečnostního incidentu,
+
+        j) zajistí hlášení kybernetických bezpečnostních incidentů podle § 14 zákona,
+
+        k) prošetří a určí příčiny kybernetického bezpečnostního incidentu,
+
+        l) vede záznamy o kybernetických bezpečnostních incidentech a o jejich zvládání,
+
+        m) zajistí vytvoření závěrečné zprávy o vyřešení kybernetického bezpečnostního
+        incidentu s významným dopadem podle § 15 zákona, včetně popisu příčiny vzniku
+        kybernetické bezpečnostního incidentu s významným dopadem, pokud je známa
+        a
+
+        n) vyhodnotí účinnost řešení kybernetického bezpečnostního incidentu a na
+        základě vyhodnocení stanoví nutná bezpečnostní opatření k zamezení opakování
+        řešeného kybernetického bezpečnostního incidentu, popřípadě aktualizuje stávající
+        bezpečnostní opatření.
+
+        (2) Povinná osoba dále při detekci a vyhodnocování kybernetických bezpečnostních
+        událostí používá nástroje podle § 21 a 24.'
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p14-q1
+      name: Jsou vytvořeny politiky pro nasazení a používání nástroje pro detekci
+        kybernetických bezpečnostních událostí, využití a údržby nástroje pro sběr
+        a vyhodnocení kybernetických bez...
+      depth: 3
+      ref_id: ZOKB-P14-Q1
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p14
+      description: 'Zavede se proces, nástroje a alokují se odpovědnosti pro detekci,
+        zaznamenávání a zvládání událostí a incidentů. Co doložit při kontrole: Směrnice
+        pro zvládání kybernetických bezpečnostních incidentů (Incident Response Plan),
+        stanovený Incident Response tým.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p14-q2
+      name: Je zajištěno, aby interní i externí zaměstnanci oznamovali nestandartní
+        chování zařízeních a systémů?
+      depth: 3
+      ref_id: ZOKB-P14-Q2
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p14
+      description: 'Uživatelé, administrátoři i dodavatelé musí být instruováni a
+        mít prostředky pro hlášení neobvyklého chování technických aktiv. Co doložit
+        při kontrole: Záznamy o školeních k reportingu, existence vyhrazeného kanálu
+        (např. e-mail security@, helpdesk portál).'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p14-q3
+      name: Jsou incidenty posuzovány a kategorizovány dle požadavku Vyhlášky 409/2025
+        Sb.?
+      depth: 3
+      ref_id: ZOKB-P14-Q3
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p14
+      description: 'Musí se posuzovat, zda zjištěná událost naplňuje klasifikaci kybernetického
+        bezpečnostního incidentu. Co doložit při kontrole: Logy z ticketovacího nástroje
+        nebo SIEMu, kde je incident přiřazen do příslušné kategorie (např. s klasifikací
+        závažnosti).'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p14-q4
+      name: Jsou pro odvrácení a zmírnění dopadu kybernetických bezpečnostních incidentů
+        přijímána opatření? Je hodnocena účinnost řešení kybernetických bezpečnostních
+        incidentů? Jsou v záv...
+      depth: 3
+      ref_id: ZOKB-P14-Q4
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p14
+      description: 'Vyhodnocuje se účinnost řešení incidentu a aktualizují se stávající
+        bezpečnostní opatření, aby se zamezilo jeho opakování. Co doložit při kontrole:
+        Závěrečné zprávy o incidentu (Post-Mortem / Lessons Learned), plán CAPA zavedený
+        na základě incidentu.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p14-q5
+      name: Jsou incidenty řádně hlášeny dle požadavku Vyhlášky 409/2025 Sb.? (NÚKIB,
+        CZ.NIC)
+      depth: 3
+      ref_id: ZOKB-P14-Q5
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p14
+      description: 'Zajistí se okamžité hlášení relevantních kybernetických incidentů
+        národnímu CSIRT orgánu. Co doložit při kontrole: Komunikace s dohledovými
+        orgány (NÚKIB), protokoly o odeslání povinného hlášení incidentu.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p14-q6
+      name: Jsou vedeny záznamy o kybernetických bezpečnostních incidentech a jejich
+        zvládání? Jsou prošetřovány a určovány příčiny incidentů?
+      depth: 3
+      ref_id: ZOKB-P14-Q6
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p14
+      description: 'Povinná osoba prošetří, určí a zdokumentuje kořenové příčiny (Root
+        Cause) incidentů a vytvoří závěrečnou zprávu. Co doložit při kontrole: Centrální
+        registr bezpečnostních incidentů obsahující Root Cause Analysis pro každý
+        incident s významným dopadem.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p15
+      name: § 15 - Řízení kontinuity činností
+      depth: 2
+      ref_id: ZOKB-P15
+      assessable: false
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-409
+      description: 'Povinná osoba při řízení kontinuity činností
+
+        a) stanoví metodiku pro provedení analýzy dopadů,
+
+        b) provádí analýzu dopadů, vyhodnocuje a dokumentuje možné dopady kybernetických
+        bezpečnostních incidentů a zohlední hodnocení rizik podle § 8, v rámci kterého
+        posoudí možná rizika související s ohrožením kontinuity činností,
+
+        c) na základě výstupů analýzy dopadů a hodnocení rizik podle písmene b) stanoví
+        cíle řízení kontinuity činností formou určení
+
+        1. minimální úrovně poskytovaných služeb, která je přijatelná pro užívání,
+        provoz a správu regulované služby,
+
+        2. doby obnovení chodu, během které bude po kybernetickém bezpečnostním incidentu
+        obnovena minimální úroveň poskytovaných služeb regulované služby a
+
+        3. bodu obnovení dat jako časové období, za které musí být zpětně obnovena
+        data po kybernetickém bezpečnostním incidentu nebo po selhání technického
+        aktiva,
+
+        d) stanoví politiku řízení kontinuity činností, která obsahuje naplnění cílů
+        podle písmene c) a stanoví práva a povinnosti administrátorů a osob zastávajících
+        bezpečnostní role,
+
+        e) vypracuje, aktualizuje a pravidelně testuje plány kontinuity činností a
+        plány obnovy související s poskytováním regulované služby a
+
+        f) realizuje bezpečnostní opatření pro zvýšení odolnosti podle § 26.'
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p15-q1
+      name: Je vytvořena politika řízení kontinuity činností včetně cílů kontinuity
+        (minimální úroveň poskytovaných služeb, RTO, RPO) a havarijních plánů?
+      depth: 3
+      ref_id: ZOKB-P15-Q1
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p15
+      description: 'Stanoví se politika (BCP), definují se cíle jako doba obnovení
+        (RTO), bod obnovy dat (RPO) a minimální garantované služby. Co doložit při
+        kontrole: Schválená politika řízení kontinuity činností (Business Continuity
+        Plan), Havarijní plány (Disaster Recovery Plans).'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p15-q2
+      name: Je zpracovaná analýza dopadů?
+      depth: 3
+      ref_id: ZOKB-P15-Q2
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p15
+      description: 'Povinná osoba provádí analýzu dopadů (BIA), vyhodnocuje možné
+        dopady incidentů a zohledňuje rizika ohrožení kontinuity. Co doložit při kontrole:
+        Dokument Business Impact Analysis (BIA) prokazatelně diskutovaný a schválený
+        vrcholovým vedením.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p15-q3
+      name: Je zajištěno pravidelné zálohování?
+      depth: 3
+      ref_id: ZOKB-P15-Q3
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p15
+      description: 'Realizují se bezpečnostní opatření pro zvýšení odolnosti a kontinuity,
+        mj. generování a správa záloh informací a nastavení aktiv. Co doložit při
+        kontrole: Zálohovací politika (Backup Policy), protokoly z monitoringu úspěšnosti
+        každodenních záloh.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p15-q4
+      name: Je zajištěno pravidelné testování záloh, havarijních plánů a plánů kontinuity
+        činností?
+      depth: 3
+      ref_id: ZOKB-P15-Q4
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p15
+      description: 'Plány kontinuity činností a plány obnovy, stejně jako samotné
+        zálohy, musí být pravidelně testovány a aktualizovány. Co doložit při kontrole:
+        Reporty z cvičení obnovy ze záloh, scénářové testování BCP/DRP (tabletop cvičení
+        či reálný failover test).'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p16
+      name: § 16 - Provádění auditu kybernetické bezpečnosti
+      depth: 2
+      ref_id: ZOKB-P16
+      assessable: false
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-409
+      description: "(1) Povinná osoba stanoví plán provádění auditu kybernetické bezpečnosti.\n\
+        (2) Povinná osoba při auditu kybernetické bezpečnosti\na) posuzuje, zda byla\
+        \ zavedena bezpečnostní opatření požadovaná zákonem a touto vyhláškou,\nb)\
+        \ posuzuje soulad zavedených bezpečnostních opatření s právními předpisy,\
+        \ vnitřními předpisy, smluvními závazky a nejlepší praxí a\nc) provádí a dokumentuje\
+        \ audit dodržování pravidel a postupů stanovených v bezpečnostní politice,\
+        \ včetně přezkoumání technické shody a dříve stanovených nápravných opatření\
+        \ podle odstavce 3 písm. c).\n(3) Povinná osoba \na) zohlední výsledky auditu\
+        \ kybernetické bezpečnosti podle odstavce 2\n1. v plánu rozvoje bezpečnostního\
+        \ povědomí,\n2. v rámci řízení rizik a\nb) stanoví na základě výsledku auditu\
+        \ kybernetické bezpečnosti podle odstavce 2 případná nápravná opatření.\n\
+        (4) Audit kybernetické bezpečnosti podle odstavce 2 je prováděn\na) při významných\
+        \ změnách, a to v rámci jejich rozsahu,\nb) v pravidelných intervalech alespoň\
+        \ jednou za 2 roky a\nc) v souladu s plánem auditu kybernetické bezpečnosti.\n\
+        (5) Není-li v odůvodněných případech možné provést audit v intervalu podle\
+        \ odstavce 5 písm. b) v celém rozsahu podle odstavce 2, je možné audit kybernetické\
+        \ bezpečnosti provádět průběžně po systematických celcích. V takovém případě\
+        \ je nutno audit v celém rozsahu podle odstavce 2 provést nejpozději do 5\
+        \ let.\n(6) Audit kybernetické bezpečnosti musí být prováděn osobou vyhovující\
+        \ podmínkám stanoveným v § 5 odst. 4, která nezávisle hodnotí správnost a\
+        \ účinnost zavedených bezpečnostních opatření."
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p16-q1
+      name: Je prováděn audit KB v pravidelných intervalech dle Vyhlášky 409/2025
+        Sb.?
+      depth: 3
+      ref_id: ZOKB-P16-Q1
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p16
+      description: 'Audit dodržování pravidel KB se provádí v pravidelných intervalech
+        alespoň jednou za 2 roky a při významných změnách. Co doložit při kontrole:
+        Zprávy z interních nebo nezávislých externích auditů kybernetické bezpečnosti.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p16-q2
+      name: Je stanoven proces a plán provádění auditů KB?
+      depth: 3
+      ref_id: ZOKB-P16-Q2
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p16
+      description: 'Povinná osoba stanoví ucelený plán provádění auditů kybernetické
+        bezpečnosti organizace. Co doložit při kontrole: Schválený harmonogram (plán)
+        interních auditů organizace na aktuální období.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p16-q3
+      name: Jsou zpracovávány zprávy z auditu KB?
+      depth: 3
+      ref_id: ZOKB-P16-Q3
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p16
+      description: 'Audit se řádně provádí, posuzuje shodu s vyhláškou a nejlepší
+        praxí a z jeho výkonu se dokumentují výsledky. Co doložit při kontrole: Formální
+        auditní zprávy zahrnující shrnutí zjištění a manažerské vyhodnocení.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p16-q4
+      name: Jsou výsledky přezkoumání ISMS a auditů KB zohledněny v plánování na další
+        období?
+      depth: 3
+      ref_id: ZOKB-P16-Q4
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p16
+      description: 'Zjištění z auditů vedou ke stanovení nápravných opatření (CAPA)
+        a zohledňují se v plánu rozvoje a řízení rizik. Co doložit při kontrole: Plán
+        nápravných a preventivních opatření (CAPA), důkazy o jejich plnění a zavedení
+        do praxe.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p17
+      name: § 17 - Fyzická bezpečnost
+      depth: 2
+      ref_id: ZOKB-P17
+      assessable: false
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-409
+      description: 'Povinná osoba v rámci fyzické bezpečnosti
+
+        a) předchází poškození, odcizení, zneužití aktiv, neoprávněným zásahům do
+        nich a narušení bezpečnosti poskytování regulované služby,
+
+        b) stanoví fyzický bezpečnostní perimetr ohraničující oblast, ve které jsou
+        uchovávány nebo zpracovávány informace a data, nebo ve které jsou umístěna
+        technická aktiva regulované služby,
+
+        c) rozdělí fyzické bezpečnostní perimetry stanovené podle písmene b) s ohledem
+        na hodnocení umístěných technických aktiv do jednotlivých úrovní fyzické ochrany
+        a tyto stanovené fyzické bezpečnostní perimetry a jejich úrovně fyzické ochrany
+        dokumentuje a
+
+        d) přijme u každého fyzického bezpečnostního perimetru s ohledem na jeho úroveň
+        fyzické ochrany stanovenou podle písmene c) relevantní bezpečnostní opatření
+        fyzické ochrany
+
+        1. k zamezení neoprávněnému vstupu,
+
+        2. k zamezení poškození, odcizení, zneužití aktiv, neoprávněným zásahům do
+        nich a narušení bezpečnosti poskytování regulované služby,
+
+        3. k zajištění fyzické ochrany budov a jiných ohraničených prostor,
+
+        4. pro zajištění detekce narušení fyzického bezpečnostního perimetru a
+
+        5. k evidenci vstupů a přístupů do fyzického bezpečnostního perimetru.'
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p17-q1
+      name: Je vytvořena politika fyzické bezpečnosti?
+      depth: 3
+      ref_id: ZOKB-P17-Q1
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p17
+      description: 'Povinná osoba stanoví fyzické bezpečnostní perimetry, zohlední
+        hodnocení aktiv a určí úroveň jejich fyzické ochrany k zamezení neoprávněnému
+        zásahu. Co doložit při kontrole: Schválená směrnice fyzické bezpečnosti definující
+        ochranná pásma a zóny.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p17-q2
+      name: Ochrana serveroven, datových místností
+      depth: 3
+      ref_id: ZOKB-P17-Q2
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p17
+      description: 'Serverovny jsou kritickým fyzickým perimetrem. Jsou chráněny proti
+        neoprávněnému vstupu a poškození fyzických aktiv. Co doložit při kontrole:
+        Plány prostor, speciální bezpečnostní opatření na místech výskytu ICT (mříže,
+        bezpečnostní dveře, alarm).'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p17-q3
+      name: Kontrolní přístupy (např. čipové karty, zámky)
+      depth: 3
+      ref_id: ZOKB-P17-Q3
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p17
+      description: 'Fyzický bezpečnostní perimetr využívá k zamezení vstupu kontrolních
+        mechanismů. Co doložit při kontrole: Nasazený přístupový systém (ACS - Access
+        Control System) pomocí čipů, karet, biometrie nebo režimových klíčů.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p17-q4
+      name: Dohled (CCTV), zabezpečení okruhů
+      depth: 3
+      ref_id: ZOKB-P17-Q4
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p17
+      description: 'K zajištění ochrany a detekci narušení budov je uplatňován vhodný
+        dohled a elektronická detekce. Co doložit při kontrole: Nasazené kamerové
+        systémy (CCTV), systémy elektronické zabezpečovací signalizace (EZS) s přenosem
+        na PCO (pult centrální ochrany).'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p17-q5
+      name: Návštěvní řád
+      depth: 3
+      ref_id: ZOKB-P17-Q5
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p17
+      description: 'Pravidla pro identifikaci a eskortu návštěv v rámci fyzického
+        bezpečnostního perimetru. Co doložit při kontrole: Vydaný návštěvní řád, Kniha
+        návštěv (včetně povinnosti doprovodu třetích stran).'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p17-q6
+      name: Ochrana před požárem, výpadky el. energie
+      depth: 3
+      ref_id: ZOKB-P17-Q6
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p17
+      description: 'Fyzická bezpečnost musí předcházet poškození budov mj. environmentálními
+        riziky, zejména ohněm. Co doložit při kontrole: Systémy EPS (elektronická
+        požární signalizace), SHZ (stabilní hasicí zařízení v serverovně), UPS/motorgenerátory.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p17-q7
+      name: Je použit a pravidelně kontrolován systém pro kontrolu vstupu?
+      depth: 3
+      ref_id: ZOKB-P17-Q7
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p17
+      description: 'Opatření pro evidenci vstupů do bezpečnostního perimetru musí
+        být udržováno funkční. Co doložit při kontrole: Revizní zprávy a servisní
+        protokoly od systému kontroly vstupu (ACS).'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p17-q8
+      name: Jsou důležitá aktiva chráněna pomocí kamerového systému, jsou záznamy
+        ukládány, sleduje kamery někdo? Je kamerový systém pravidelně kontrolován?
+      depth: 3
+      ref_id: ZOKB-P17-Q8
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p17
+      description: 'K detekci narušení slouží kamery s definovanou dobou retence záznamu
+        a pravidelnou údržbou. Co doložit při kontrole: Smlouva s ostrahou sledující
+        výstupy kamer, revizní zprávy kamerového systému, deklarace o retenci záznamů.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p17-q9
+      name: Nosí osoby oprávněné ke vstupu (např. dodavatelé) identifikační prvek
+        (např. visačka)?
+      depth: 3
+      ref_id: ZOKB-P17-Q9
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p17
+      description: 'Organizace prosazuje vizuální detekci oprávnění ke vstupu cizích
+        osob do střežených zón. Co doložit při kontrole: Fyzická kontrola procesu
+        používání návštěvnických/dodavatelských visaček.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p17-q10
+      name: Je prováděna identifikace osob na vstupu?
+      depth: 3
+      ref_id: ZOKB-P17-Q10
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p17
+      description: 'Opatření fyzické ochrany k zamezení neoprávněného vstupu musí
+        zahrnovat prokazatelnou identifikaci před vstupem do zóny. Co doložit při
+        kontrole: Proces odbavení na recepci nebo prověřování přes vrátnici s předložením
+        průkazu.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p17-q11
+      name: Jsou zařízení přiměřeně zabezpečena při krátkodobému opuštění pracoviště?
+        (např. zamykání počítače, kanceláře, fyzických dokumentů)
+      depth: 3
+      ref_id: ZOKB-P17-Q11
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p17
+      description: 'Předchází se zneužití aktiv v běžných prostorách pravidlem čistého
+        stolu a obrazovky (Clear Desk / Clear Screen). Co doložit při kontrole: Vynucené
+        zamykání obrazovek po určitém čase (GPO) a záznamy z preventivních pochůzek.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p17-q12
+      name: Jsou důležitá aktiva zavírána do trezoru při dlouhodobé nepřítomnosti?
+      depth: 3
+      ref_id: ZOKB-P17-Q12
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p17
+      description: 'Zajištění fyzické ochrany citlivých (zvláštních) informací a HW
+        médií před odcizením při nečinnosti. Co doložit při kontrole: Fyzická existence
+        certifikovaných trezorů/uzamykatelných ohnivzdorných skříní.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p17-q13
+      name: Jsou zmapována a ošetřena rizika související s fyzickým umístěním důležitých
+        aktiv? (např. hořlavý materiál, elektro a vodoinstalace u serveroven, archivů,
+        atd.)
+      depth: 3
+      ref_id: ZOKB-P17-Q13
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p17
+      description: 'Předchází se poškození aktiv volbou lokality bez rizika zatopení,
+        nebezpečí chemických látek atd. Co doložit při kontrole: Záznamy z fyzické
+        analýzy rizik prostor, stavební dispozice bránící prosakům vody k serverovnám.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p17-q14
+      name: Jsou aplikovány standardy bezpečnostních opatření proti přírodním katastrofám
+        apod.?
+      depth: 3
+      ref_id: ZOKB-P17-Q14
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p17
+      description: 'Fyzická opatření zmírňující dopad vyšší moci na regulované služby.
+        Co doložit při kontrole: Hromosvody, revize spalinových cest, plány evakuace,
+        umístění datových center mimo povodňové zóny (doloženo mapou).'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p17-q15
+      name: Je vedena evidence přístupů do zabezpečených prostor? (např. serverovna)
+      depth: 3
+      ref_id: ZOKB-P17-Q15
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p17
+      description: 'Loguje a kontroluje se evidence oprávněných/neoprávněných vstupů
+        do fyzického bezpečnostního perimetru. Co doložit při kontrole: Historie přístupů
+        (log z ACS karet/čipů) k nejdůležitějším dveřím za vybrané období.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p17-q16
+      name: Je veden klíčový režim s fyzickými klíči?
+      depth: 3
+      ref_id: ZOKB-P17-Q16
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p17
+      description: 'U kritických prostor (při absenci čipů, nebo jako záloha) je striktně
+        řízeno vydávání fyzických klíčů. Co doložit při kontrole: Režimová kniha výdeje
+        a uložení klíčů včetně podpisů přebírajících osob.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p18
+      name: § 18 - Bezpečnost komunikačních sítí
+      depth: 2
+      ref_id: ZOKB-P18
+      assessable: false
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-409
+      description: 'Povinná osoba pro ochranu bezpečnosti komunikační sítě, a to včetně
+        jejího síťového perimetru
+
+        a) zajistí a dokumentuje segmentaci komunikační sítě, včetně oddělení provozního,
+        zálohovacího, vývojového, testovacího, administrátorského a jiného specifického
+        prostředí,
+
+        b) zajistí řízení komunikace v rámci komunikační sítě,
+
+        c) zajistí řízení vzdáleného přístupu ke komunikační síti,
+
+        d) zajistí řízení vzdálené správy technických aktiv,
+
+        e) povoluje v souladu s písmeny b), c) a d) pouze takovou komunikaci, která
+        je nezbytná pro řádné zajištění regulované služby,
+
+        f) zajistí v souladu s písmeny c) a d) časové omezení komunikace a opětovné
+        ověření identity administrátorů a uživatelů po stanovené době,
+
+        g) zajistí pomocí aktuálně odolných kryptografických algoritmů upravených
+        v § 25 a síťových protokolů důvěrnost a integritu při přenosu informací a
+        dat,
+
+        h) využívá nástroj, který zajistí ochranu integrity komunikační sítě a
+
+        i) dokumentuje topologii komunikační sítě a infrastruktury.'
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p18-q1
+      name: Je vytvořena politika bezpečnosti komunikačních sítí?
+      depth: 3
+      ref_id: ZOKB-P18-Q1
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p18
+      description: 'Povinná osoba chrání síťový perimetr a vnitřní sítě, řídí vzdálený
+        přístup a zajišťuje důvěrnost/integritu přenosů. Co doložit při kontrole:
+        Směrnice síťové bezpečnosti popisující ochranu perimetru a síťovou architekturu.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p18-q2
+      name: Je provedena dostatečná segmentace sítě? (segmenty např. uživatelské,
+        speciální, DMZ, serverové, modality a analyzátory)
+      depth: 3
+      ref_id: ZOKB-P18-Q2
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p18
+      description: 'Zajistí se a dokumentuje segmentace komunikační sítě včetně oddělení
+        provozního, vývojového, DMZ a dalších specifik. Co doložit při kontrole: Dokumentace
+        topologie sítě vykazující VLAN segmentaci (oddělené uživatelské a serverové
+        segmenty).'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p18-q3
+      name: Je řízena komunikace uvnitř i vně perimetru sítě? (např.. firewall a jeho
+        pravidla, IDS, obrana proti DDOS,...)
+      depth: 3
+      ref_id: ZOKB-P18-Q3
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p18
+      description: 'Organizace používá nástroje bránící síťový perimetr a řídící toky,
+        s povolením pouze nezbytné komunikace. Co doložit při kontrole: Konfigurace
+        Firewalu, aktivní politika Deny-by-Default na perimetru.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p18-q4
+      name: Je při vzdáleném přístupu do vnitřní sítě zřízena VPN?
+      depth: 3
+      ref_id: ZOKB-P18-Q4
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p18
+      description: 'Zajistí se bezpečné řízení vzdáleného přístupu a správy, a opětovné
+        ověření identity. Co doložit při kontrole: Konfigurace VPN koncentrátoru vyžadujícího
+        silnou autentizaci a šifrování pro externí přístup.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p18-q5
+      name: Dochází k aktivní blokaci nežádoucí komunikace? (např. zakázané adresní
+        rozsahy, filtrace URL, IPS)
+      depth: 3
+      ref_id: ZOKB-P18-Q5
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p18
+      description: 'Nástroj, který zajistí ochranu integrity sítě a zablokuje detekovanou
+        škodlivou komunikaci (aktivní zásah do provozu). Co doložit při kontrole:
+        Nasazení Intrusion Prevention System (IPS) na firewallech nebo řešení Next-Gen
+        Firewall (NGFW).'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p18-q6
+      name: Je nasazeno nějaké DLP řešení?
+      depth: 3
+      ref_id: ZOKB-P18-Q6
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p18
+      description: 'Aplikuje se dodatečný dohled bránící úniku dat z chráněných segmentů
+        prostřednictvím sítě. Co doložit při kontrole: Konfigurace Data Loss Prevention
+        (DLP) mechanismů na koncových stanicích a e-mailových branách.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p18-q7
+      name: Je komunikace mezi jednotlivými segmenty sítě řízena? (např. ACL, pravidla
+        na firewallech, routovací tabulky,...)
+      depth: 3
+      ref_id: ZOKB-P18-Q7
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p18
+      description: 'Zajišťuje se, aby komunikace uvnitř sítě (Inter-VLAN) podléhala
+        bezpečnostním kontrolám, povoluje se pouze nutný traffic. Co doložit při kontrole:
+        Interní segmentační firewally, detailní Access Control Listy (ACL) mezi zónami.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p19
+      name: § 19 - Správa a ověřování identit
+      depth: 2
+      ref_id: ZOKB-P19
+      assessable: false
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-409
+      description: "(1) Povinná osoba používá nástroj pro správu a ověření identity\
+        \ administrátorů, uživatelů a technických aktiv, který zajišťuje\na) ověření\
+        \ identity před zahájením jejich aktivit,\nb) řízení počtu možných neúspěšných\
+        \ pokusů o přihlášení,\nc) odolnost uložených a přenášených autentizačních\
+        \ údajů vůči hrozbám a zranitelnostem, které by mohly narušit jejich důvěrnost\
+        \ nebo integritu,\nd) opětovné ověření identity po stanovené době nečinnosti,\n\
+        e) dodržení důvěrnosti při vytváření výchozích autentizačních údajů a při\
+        \ obnově přístupu a\nf) centralizovanou správu identit s ohledem na vazby\
+        \ mezi aktivy.\n(2) Povinná osoba při ověření identity administrátorů, uživatelů\
+        \ a technických aktiv\na) využívá autentizační mechanismus, který je založený\
+        \ na vícefaktorové autentizaci s alespoň dvěma různými typy faktorů, nebo\
+        \ využívá autentizační mechanismus, který je založený na aktuálně odolné kontinuální\
+        \ autentizaci založené na modelu nulové důvěry a\nb) do doby splnění požadavků\
+        \ podle odstavce 2 písm. a), využívá autentizaci pomocí kryptografických klíčů\
+        \ nebo certifikátů.\n(3) Povinná osoba do doby splnění požadavků podle odstavce\
+        \ 2 písm. a) vede evidenci technických aktiv, účtů a autentizačních mechanismů,\
+        \ které tyto požadavky nesplňují, a to včetně odůvodnění.\n(4) Povinná osoba\
+        \ do doby splnění požadavku podle odstavce 2 využívá nástroj založený na autentizaci\
+        \ pomocí identifikátoru účtu a hesla, kdy tento nástroj musí vynucovat pravidlo\n\
+        a) délky hesla alespoň\n1. 12 znaků pro účty uživatelů,\n2. 17 znaků pro účty\
+        \ administrátorů,\n3. 22 znaků pro účty technických aktiv, \nb) umožňující\
+        \ zadat heslo o délce alespoň 64 znaků,\nc) neomezující použití malých a velkých\
+        \ písmen, číslic a speciálních znaků,\nd) umožňující uživatelům a administrátorům\
+        \ změnu hesla, přičemž období mezi dvěma změnami hesla nesmí být kratší než\
+        \ 30 minut,\ne) povinné změny hesla v intervalu alespoň jednou za 18 měsíců\
+        \ a\nf) neumožňující uživatelům a administrátorům\n1. zvolit si jednoduchá\
+        \ a často používaná hesla,\n2. tvořit hesla na základě mnohonásobně opakujících\
+        \ se znaků, přihlašovacího jména, adresy elektronické pošty, názvu systému\
+        \ nebo obdobným způsobem a\n3. opětovné použití dříve používaných hesel s\
+        \ pamětí alespoň 12 předchozích hesel.\n(5) Povinná osoba v souladu s odstavcem\
+        \ 4 zajistí\na) bezodkladné vynucení změny výchozího hesla uživatelů a administrátorů\
+        \ po prvním přihlášení,\nb) bezodkladné vynucení změny výchozího hesla technického\
+        \ aktiva,\nc) vytváření hesla účtu technického aktiva složeného z náhodného\
+        \ řetězce malých a velkých písmen, číslic a speciálních znaků,\nd) bezodkladné\
+        \ vynucení změny přístupového hesla v případě důvodného podezření na jeho\
+        \ kompromitaci,\ne) vytvoření náhodného výchozího hesla nebo identifikátoru\
+        \ sloužícího k vytvoření nebo k obnovení přístupu a zajistí jeho důvěrnost\
+        \ a\nf) bezodkladné zneplatnění hesla nebo identifikátoru sloužícího k vytvoření\
+        \ nebo k obnovení přístupu po jeho prvním použití nebo uplynutí nejvýše 24\
+        \ hodin od jeho vytvoření.\n(6) Povinná osoba u administrátorského účtu zejména\
+        \ určeného pro případ obnovy po kybernetickém bezpečnostním incidentu, musí\
+        \ vynucovat následující pravidla\na) musí být vynucena bezodkladná změna výchozího\
+        \ hesla,\nb) heslo musí být vytvořeno náhodným řetězcem složeným z malých\
+        \ a velkých písmen, číslic a speciálních znaků,\nc) délka hesla musí být alespoň\
+        \ 22 znaků,\nd) heslo musí být bezpečně uloženo,\ne) s účtem a jeho heslem\
+        \ mohou manipulovat pouze pověřené osoby, a to v nezbytně nutných případech,\n\
+        f) musí být vynucena změna hesla po jeho použití, při jakékoli změně odpovědných\
+        \ osob, v případě důvodného podezření na jeho kompromitaci nebo v intervalu\
+        \ alespoň jednou za 18 měsíců a\ng) musí být evidovány manipulace a pokusy\
+        \ o manipulaci s tímto účtem a jeho heslem."
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p19-q1
+      name: Je implementován nástroj pro ověření identity uživatele, který současně
+        zajišťuje ověření identity, řízení počtu neúspěšných pokusů o přihlášení,
+        centralizovanou správu identit ...
+      depth: 3
+      ref_id: ZOKB-P19-Q1
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p19
+      description: 'Ověřování identity využívá centralizovaný nástroj řešící lock-out
+        politiky, expiraci nečinnosti a centrální správu. Co doložit při kontrole:
+        Konfigurace Active Directory (AD), Identity Management (IdM), logy o lock-out
+        účtu (Brute Force ochrana).'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p19-q2
+      name: Je zavedena dvoufaktorová autentizace uživatelů, administrátorů a aplikací?
+      depth: 3
+      ref_id: ZOKB-P19-Q2
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p19
+      description: 'Uživatelé, a obzvláště administrátoři, se ověřují nástrojem založeným
+        na vícefaktorové autentizaci (MFA / 2FA). Co doložit při kontrole: Screenshot
+        nastavení vynucení MFA (např. aplikátory autentizátoru / HW tokeny) pro vybrané/všechny
+        účty.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p19-q3
+      name: V případě, že není zavedena dvoufaktorová autentizace, používá nástroj
+        pro ověření identity autentizaci pomocí kryptografických klíčů? Nebo jsou
+        dodrženy minimální požadavky na ...
+      depth: 3
+      ref_id: ZOKB-P19-Q3
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p19
+      description: 'Pokud chybí 2FA/MFA, vynucují se přísná hesla (min. 12 znaků uživatelé,
+        17 admin, 22 služby), nebo kryptografické klíče. Co doložit při kontrole:
+        Export Password Policy GPO dokazující komplexitu, délku hesel a historii (min.
+        12 posledních hesel zakázáno).'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p19-q4
+      name: Jsou autentizační údaje přenášeny se zachováním důvěrnosti a ukládány
+        ve formě odolné proti offline útokům? (šifrovaná komunikace, hash)
+      depth: 3
+      ref_id: ZOKB-P19-Q4
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p19
+      description: 'Autentizační údaje (hesla) musí být zašifrována pro přenos (TLS)
+        a na uložení se musí využít aktuálně odolných jednocestných funkcí. Co doložit
+        při kontrole: Analýza protokolů v síti (zakázání clear text protokolů jako
+        Telnet/HTTP pro login), algoritmy hashování AD.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p19-q5
+      name: Je vynucena bezodkladná změna u prvotních, výchozích a obnovovacích hesel?
+      depth: 3
+      ref_id: ZOKB-P19-Q5
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p19
+      description: 'Nástroj vynucuje zneplatnění hesel vygenerovaných pro obnovu do
+        24h a vynutí okamžitou změnu hesla při prvním přihlášení. Co doložit při kontrole:
+        Důkazní ukázka testovacího založení uživatele s aktivní vlajkou ''Vyžadovat
+        změnu hesla při prvním přihlášení''.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p20
+      name: § 20 - Řízení přístupových práv a oprávnění
+      depth: 2
+      ref_id: ZOKB-P20
+      assessable: false
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-409
+      description: 'Zaveden proces centralizované kontroly přístupových práv subjektů
+        k aktivům, omezující třetí strany jen na potřebný čas/rozsah. Co doložit při
+        kontrole: Nastavení časově omezených VPN účtů nebo Privileged Access Management
+        (PAM) logů z připojení dodavatele.'
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p20-q1
+      name: Je nastaven proces bezpečného přístupu dodavatelů do vnitřní sítě? (VPN,
+        segmentace, oprávnění apod.)
+      depth: 3
+      ref_id: ZOKB-P20-Q1
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p20
+      description: 'K minimalizaci rizika kompromitace nesmí správci číst poštu či
+        běžně pracovat pod účtem s admin právy. Co doložit při kontrole: Oddělené
+        personální admin účty (''a-jmeno''), architektura Jump serverů pro vstup k
+        aktivům.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p20-q2
+      name: Je zavedeno oddělení administrátorských oprávnění pro správu systému od
+        uživatelských oprávnění? (např. oddělené účty, PIM/PAM, jump server)
+      depth: 3
+      ref_id: ZOKB-P20-Q2
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p20
+      description: 'Povinná osoba řídí oprávnění pro čtení/zápis informací pomocí
+        centralizovaných nástrojů a skupinových oprávnění. Co doložit při kontrole:
+        Role a skupiny (Group policy) v AD, reporty mapování členství uživatelů.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p20-q3
+      name: Je zavedeno centralizované řízení přístupových oprávnění? (např. ACL,
+        nastavení skupin v AD)
+      depth: 3
+      ref_id: ZOKB-P20-Q3
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p20
+      description: Je zavedeno centralizované řízení přístupových oprávnění? (např.
+        ACL, nastavení skupin v AD)
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p21
+      name: § 21 - Detekce kybernetických bezpečnostních událostí
+      depth: 2
+      ref_id: ZOKB-P21
+      assessable: false
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-409
+      description: '(1) Povinná osoba používá nástroj pro detekci kybernetických bezpečnostních
+        událostí, který zajišťuje
+
+        a) ověření a kontrolu přenášených dat v rámci komunikační sítě a mezi komunikačními
+        sítěmi,
+
+        b) ověření a kontrolu přenášených dat na síťovém perimetru komunikační sítě
+        a
+
+        c) aktivní blokování nežádoucí komunikace v rámci komunikační sítě.
+
+        (2) Povinná osoba používá s ohledem na vazby mezi aktivy pro detekci kybernetických
+        bezpečnostních událostí centrálně spravovaný nástroj, který u jednotlivých
+        relevantních technických aktiv zajišťuje
+
+        a) nepřetržitou a automatickou ochranu před škodlivým kódem,
+
+        b) řízení a sledování používání vyměnitelných zařízení a datových nosičů,
+
+        c) řízení automatického spouštění obsahu, zejména u vyměnitelných zařízení
+        a datových nosičů,
+
+        d) řízení oprávnění ke spouštění kódu,
+
+        e) řízení a sledování komunikace aplikací, jejich služeb a procesů,
+
+        f) detekci kybernetických bezpečnostních událostí technických aktiv a
+
+        g) detekci kybernetických bezpečnostních událostí na základě chování technických
+        aktiv, administrátorů a uživatelů.
+
+        (3) Povinná osoba provádí pravidelnou a bezodkladnou aktualizaci nástroje
+        používaného podle odstavce 1 a 2, a to včetně jeho nastavení a detekčních
+        pravidel.'
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p21-q1
+      name: Je vytvořena politika ochrany před škodlivým kódem?
+      depth: 3
+      ref_id: ZOKB-P21-Q1
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p21
+      description: 'Zavádí se pravidla s centrálně spravovaným nástrojem, chránícím
+        zařízení před škodlivým kódem (malware). Co doložit při kontrole: Směrnice
+        o ochraně koncových stanic před škodlivým kódem.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p21-q2
+      name: Je antivirová ochrana nasazena na všech důležitých aktivech?
+      depth: 3
+      ref_id: ZOKB-P21-Q2
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p21
+      description: 'Zajišťuje se nepřetržitá a automatická ochrana před škodlivým
+        kódem na pracovních stanicích a serverech. Co doložit při kontrole: Konzole
+        Antiviru (nebo EDR/XDR), demonstrující 100% pokrytí koncových stanic v doméně.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p21-q3
+      name: Jsou nastavena pravidla pro používání výměnných zařízeních a datových
+        nosičů včetně zakázání automatického spouštění obsahu těchto zařízeních? Jsou
+        tato pravidla implementována ...
+      depth: 3
+      ref_id: ZOKB-P21-Q3
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p21
+      description: 'Omezuje a sleduje se použití USB a dalších médií, je zakázán Auto-Run.
+        Co doložit při kontrole: GPO politika nebo MDM zákaz AutoRun/AutoPlay pro
+        výměnná média.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p21-q4
+      name: Je antivirová ochrana pravidelně aktualizována?
+      depth: 3
+      ref_id: ZOKB-P21-Q4
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p21
+      description: 'Detekční pravidla nástrojů se musí pravidelně a bezodkladně aktualizovat,
+        a to včetně heuristiky nebo signatur. Co doložit při kontrole: Report z antivirové
+        centrály prokazující stáří definic na klientech max v řádu hodin/dní.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p21-q5
+      name: Jsou prováděny pravidelné antivirové testy záloh?
+      depth: 3
+      ref_id: ZOKB-P21-Q5
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p21
+      description: 'Během testování integrity a obnovitelnosti dat ze zálohovacího
+        prostředí se kontroluje přítomnost skrytého malwaru. Co doložit při kontrole:
+        Sandbox testovací reporty (SureBackup apod.) verifikující sterilitu záloh.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p21-q6
+      name: Je řízeno oprávnění ke spouštění kódu? (např. nastavení AD, aplikační
+        whitelist)
+      depth: 3
+      ref_id: ZOKB-P21-Q6
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p21
+      description: 'Zavádí se restrikce na úrovni OS (vykonávání kódu). Co doložit
+        při kontrole: Konfigurace AppLockeru, Windows Defender Application Control
+        (WDAC), nebo zakázání PowerShell execution policy pro běžné uživatele.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p22
+      name: § 22 - Zaznamenávání událostí
+      depth: 2
+      ref_id: ZOKB-P22
+      assessable: false
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-409
+      description: "(1) Povinná osoba na základě hodnocení aktiv a svých bezpečnostních\
+        \ potřeb \na) určí technická aktiva, u kterých je zaznamenávání bezpečnostních\
+        \ a relevantních provozních událostí prováděno a\nb) aktualizuje rozsah technických\
+        \ aktiv podle odstavce 1 písm. a) v pravidelných intervalech a při významných\
+        \ změnách.\n(2) Povinná osoba zaznamenává bezpečnostní a relevantní provozní\
+        \ události \na) detekované podle § 21,\nb) v rámci komunikační sítě,\nc) na\
+        \ síťovém perimetru a\nd) technických aktiv určených podle odstavce 1 písm.\
+        \ a).\n(3) Povinná osoba v rámci zaznamenávání událostí podle odstavce 2,\
+        \ zaznamenává \na) přihlašování a odhlašování ke všem účtům, a to včetně neúspěšných\
+        \ pokusů,\nb) provedení a neúspěšné pokusy o provedení privilegované činnosti,\n\
+        c) manipulace a neúspěšné pokusy o manipulaci s účty, oprávněními a právy,\n\
+        d) neprovedení činností v důsledku nedostatku přístupových práv nebo oprávnění,\n\
+        e) zahájení a ukončení činností technických aktiv,\nf) kritická a chybová\
+        \ hlášení technických aktiv,\ng) přístupy a neúspěšné pokusy o přístupy k\
+        \ záznamům událostí,\nh) manipulace a neúspěšné pokusy o manipulaci se záznamy\
+        \ událostí,\ni) změny a neúspěšné pokusy o změny nastavení nástrojů pro zaznamenávání\
+        \ událostí a\nj) další činnosti uživatelů, které mohou mít vliv na bezpečnost\
+        \ regulované služby.\n(4) Povinná osoba v rámci zaznamenávání událostí podle\
+        \ odstavce 2 zaznamenává následující informace o události\na) datum a čas\
+        \ včetně specifikace časového pásma,\nb) typ činnosti,\nc) jednoznačnou identifikaci\
+        \ technického aktiva, které činnost zaznamenalo, a to i v případě, kdy v komunikační\
+        \ síti dochází ke změně této síťové identifikace,\nd) jednoznačnou identifikaci\
+        \ účtu, pod kterým byla činnost provedena, a to i v případě, kdy v komunikační\
+        \ síti dochází ke změně této síťové identifikace,\ne) jednoznačnou identifikaci\
+        \ zařízení původce, a to i v případě, kdy v komunikační síti dochází ke změně\
+        \ této síťové identifikace a\nf) úspěšnost nebo neúspěšnost činnosti.\n(5)\
+        \ Povinná osoba dále s ohledem na události zaznamenané podle odstavce 2\n\
+        a) zajistí důvěrnost a integritu získaných informací, včetně ochrany před\
+        \ neoprávněným čtením a jakoukoliv změnou,\nb) používá s ohledem na vazby\
+        \ mezi aktivy centralizovaný nástroj pro sběr a uchovávání záznamů těchto\
+        \ událostí a\nc) uchovává záznamy těchto událostí alespoň po dobu 18 měsíců.\n\
+        (6) Povinná osoba zajišťuje nepřetržitou synchronizaci jednotného času technických\
+        \ aktiv."
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p22-q1
+      name: Jsou nastavena pravidla pro logování (obsah logů, aktiva ze kterých se
+        logy uchovávají) a je logování v praxi prováděno?
+      depth: 3
+      ref_id: ZOKB-P22-Q1
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p22
+      description: 'Určují se technická aktiva, u kterých se provádí sběr bezpečnostních
+        a provozních událostí s definovaným obsahem (čas, typ, úspěšnost, účet). Co
+        doložit při kontrole: Logging & Monitoring směrnice a export surových logů
+        (syslog) jako důkaz funkčnosti.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p22-q2
+      name: Jsou logy zabezpečeně uchovávány po dobu nezbytnou dle požadavku Vyhlášky
+        409/2025 Sb.?
+      depth: 3
+      ref_id: ZOKB-P22-Q2
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p22
+      description: 'Logy událostí se shromažďují centralizovaným nástrojem, je zajištěna
+        jejich integrita (čtení pouze - WORM) a retence je alespoň 18 měsíců. Co doložit
+        při kontrole: Nastavení archivace centrálního log serveru/SIEM s garancí 18
+        měsíců.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p22-q3
+      name: Je prováděna synchronizace jednotného času technických aktiv nejméně jednou
+        za 24 hodin? (NTP server)
+      depth: 3
+      ref_id: ZOKB-P22-Q3
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p22
+      description: 'Zajišťuje se nepřetržitá synchronizace jednotného času technických
+        aktiv nutná pro forenzní analýzu záznamů. Co doložit při kontrole: NTP konfigurace
+        klíčových serverů namířených na garantované časové servery.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p22-q4
+      name: Jsou nastavena dostatečná pravidla pro detekci KBU pomocí sondy/IDS/IPS/NBA
+        (např. aktuální pravidla, prahy, signatury) a je vhodně nastaveno jejich sledování
+        provozu? (zvolené ...
+      depth: 3
+      ref_id: ZOKB-P22-Q4
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p22
+      description: 'Aktivní dohled na síťovém perimetru komunikační sítě detekující
+        bezpečnostní a relevantní provozní události. Co doložit při kontrole: Dashboard
+        síťové sondy (Network Behavior Analysis - NBA) nebo IDS vykazující detekci
+        síťových anomálií.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p23
+      name: § 23 - Vyhodnocování kybernetických bezpečnostních událostí
+      depth: 2
+      ref_id: ZOKB-P23
+      assessable: false
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-409
+      description: '(1) Povinná osoba používá nástroj pro nepřetržité vyhodnocování
+        kybernetických bezpečnostních událostí detekovaných podle § 21, který zajišťuje
+
+        a) sběr, vyhledávání a seskupování souvisejících záznamů za účelem detekce
+        kybernetických bezpečnostních událostí,
+
+        b) nepřetržité poskytování informací o detekovaných kybernetických bezpečnostních
+        událostech, včasné varování vybraných bezpečnostních rolí a dalších relevantních
+        osob a
+
+        c) vyhodnocování kybernetických bezpečnostních událostí s cílem identifikace
+        kybernetických bezpečnostních incidentů.
+
+        (2) Povinná osoba při používání nástroje pro nepřetržité vyhodnocování kybernetických
+        bezpečnostních událostí v souladu s odstavcem 1 zajistí
+
+        a) omezení případů nesprávného nebo nežádoucího vyhodnocování kybernetických
+        bezpečnostních událostí,
+
+        b) pravidelnou aktualizaci nastavení nástroje včetně jeho pravidel pro detekci
+        a vyhodnocování kybernetických bezpečnostních událostí a
+
+        c) pravidelnou aktualizaci pravidel pro nepřetržité poskytování informací
+        o detekovaných kybernetických bezpečnostních událostech včetně včasného varování
+        vybraných bezpečnostních rolí a dalších relevantních osob.
+
+        (3) Povinná osoba zajistí využívání informací získaných nástrojem pro vyhodnocení
+        kybernetických bezpečnostních událostí pro optimální nastavení systému řízení
+        bezpečnosti informací regulované služby.'
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p23-q1
+      name: Je využíván log management?
+      depth: 3
+      ref_id: ZOKB-P23-Q1
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p23
+      description: 'Organizace sbírá informace o událostech a uchovává záznamy k analýze.
+        Co doložit při kontrole: Funkční řešení Log Management Systém a prokazatelné
+        napojení primárních aktiv (operační systémy, firewally, sítě).'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p23-q2
+      name: Je využíván SIEM?
+      depth: 3
+      ref_id: ZOKB-P23-Q2
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p23
+      description: 'Využívá se nástroj pro nepřetržité vyhodnocování událostí (seskupování
+        souvisejících záznamů, korelace pro identifikaci incidentu). Co doložit při
+        kontrole: Funkční systém SIEM a ukázka spuštěných korelačních pravidel/alertů.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p23-q3
+      name: Jsou nástroje pro sběr a vyhodnocování KBI dostatečně ošetřeny personálními
+        kapacitami a aktivně se s nimi a jejich výstupy pracuje?
+      depth: 3
+      ref_id: ZOKB-P23-Q3
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p23
+      description: 'K dispozici je personál (SOC) vyhodnocující varování a pravidelně
+        aktualizující pravidla (tuning), k minimalizaci falešných poplachů. Co doložit
+        při kontrole: Záznamy SOC analytiků (např. tiketovací systém hrozeb), dokumentovaný
+        tuning pravidel SIEMu.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p24
+      name: § 24 - Aplikační bezpečnost
+      depth: 2
+      ref_id: ZOKB-P24
+      assessable: false
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-409
+      description: "(1) Povinná osoba pro zajištění bezpečnosti regulované služby\
+        \ užívá technická aktiva, která jsou jejich výrobcem, dodavatelem nebo jinou\
+        \ osobou podporována a zajistí aplikování schválených bezpečnostních aktualizací\
+        \ vydaných pro tato aktiva.\n(2) Povinná osoba do doby plnění odstavce 1 zavede\
+        \ bezpečnostní opatření, která zaručí obdobnou nebo vyšší úroveň bezpečnosti\
+        \ těchto technických aktiv a eviduje technická aktiva\na) která již nejsou\
+        \ výrobcem, dodavatelem nebo jinou osobou podporována a\nb) na která není\
+        \ možné aplikovat poslední schválenou bezpečnostní aktualizaci.\n(3) Povinná\
+        \ osoba v rámci aplikační bezpečnosti zajistí trvalou ochranu aplikací, informací,\
+        \ transakcí a přenášených identifikátorů relací před\na) neoprávněnou činností\
+        \ a\nb) popřením provedených činností.\n(4) Povinná osoba v rámci skenování\
+        \ zranitelností technických aktiv\na) provádí pravidelné skenování zranitelností\
+        \ technických aktiv regulované služby\n1. z vnitřní a vnější komunikační sítě\
+        \ a\n2. alespoň jednou ročně.\nb) zohlední výsledky skenování zranitelností\
+        \ technických aktiv v rámci řízení rizik podle § 8 a zavádí bezpečnostní opatření\
+        \ na základě zjištěných výsledků.\n(5) Povinná osoba v rámci penetračního\
+        \ testování\na) provádí penetrační testování technických aktiv s ohledem na\
+        \ hodnocení těchto aktiv a hodnocení rizik\n1. z vnitřní a vnější komunikační\
+        \ sítě,\n2. před jejich uvedením do provozu a\n3. v souvislosti s významnou\
+        \ změnou podle § 11 odst. 3.\nb) zohlední výsledky penetračního testování\
+        \ při řízení rizik podle § 8 a zavádí bezpečnostní opatření na základě zjištěných\
+        \ výsledků. \nc) provádí v souladu s odstavcem 5 písm. a) bodem 1 pravidelně\
+        \ penetrační testování, a to alespoň jednou za dva roky.\nd) v odůvodněných\
+        \ případech, pokud nemůže provést penetrační testování v rozsahu nebo intervalu\
+        \ stanoveném v odstavci 5 písm. c), může rozdělit toto penetrační testování\
+        \ do systematických celků. V takovém případě je nutno provést penetrační testování\
+        \ v rozsahu stanoveném v odstavci 5 písm. a) nejpozději do 5 let.\ne) u penetračních\
+        \ testů v souladu s odstavcem 5 písm. a) eviduje termín provedení a konkrétní\
+        \ fyzické osoby provádějící toto penetrační testování.\n(6) Povinná osoba\
+        \ provede opětovné otestování nálezu zjištěného na základě provedeného skenování\
+        \ zranitelností nebo penetračního testování za účelem ověření funkčnosti zavedených\
+        \ bezpečnostních opatření."
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p24-q1
+      name: Jsou prováděny penetrační testy v pravidelných intervalech a před uvedením
+        důležitých aktiv do provozu?
+      depth: 3
+      ref_id: ZOKB-P24-Q1
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p24
+      description: 'Penetrační testování technických aktiv probíhá zevnitř i zvenčí
+        sítě před nasazením, při změně, jinak minimálně 1x za dva roky. Co doložit
+        při kontrole: Zprávy o penetračním testování aplikace/infrastruktury podepsané
+        certifikovanými experty, evidence nalezených zranitelností.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p24-q2
+      name: Je zajištěna ochrana aplikací, informací a transakcí před neoprávněnou
+        činností a před popřením provedených činností?
+      depth: 3
+      ref_id: ZOKB-P24-Q2
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p24
+      description: 'Garantuje se aplikační bezpečnost pro nezpochybnitelnost prováděných
+        úkonů uživatelem (non-repudiation). Co doložit při kontrole: Opatření znemožňující
+        přímou manipulaci s databází obejitím aplikační logiky, audit-trailing logy,
+        zavedení digitálních podpisů.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p25
+      name: § 25 - Kryptografické algoritmy
+      depth: 2
+      ref_id: ZOKB-P25
+      assessable: false
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-409
+      description: "(1) Povinná osoba při zajištění bezpečnosti technických aktiv\
+        \ a jejich komunikace \na) používá pouze aktuálně odolné kryptografické algoritmy,\n\
+        b) prosazuje bezpečné nakládání s kryptografickými algoritmy a\nc) zohledňuje\
+        \ doporučení a metodiky v oblasti kryptografických algoritmů vydané Národním\
+        \ úřadem pro kybernetickou a informační bezpečnost.\n(2) Povinná osoba zajišťuje\
+        \ bezpečnou\na) hlasovou, audiovizuální a textovou komunikaci, a to včetně\
+        \ elektronické komunikace, a\nb) nouzovou komunikaci v rámci organizace.\n\
+        (3) Povinná osoba v případě využívání kryptografických klíčů a certifikátů\
+        \ pro ochranu technických aktiv a komunikační sítě používá \na) pouze aktuálně\
+        \ odolné kryptografické klíče a certifikáty a \nb) nástroj pro správu kryptografických\
+        \ klíčů a certifikátů, který\n1. zajistí generování, distribuci, ukládání,\
+        \ změny, omezení platnosti, zneplatnění certifikátů a řádnou likvidaci kryptografických\
+        \ klíčů,\n2. umožní kontrolu a audit a\n3. zajistí důvěrnost a integritu kryptografických\
+        \ klíčů."
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p25-q1
+      name: Je vytvořena politika bezpečného používání kryptografické ochrany?
+      depth: 3
+      ref_id: ZOKB-P25-Q1
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p25
+      description: 'Používají se nástroje k zajištění bezpečnosti pomocí šifer a zohledňují
+        se doporučení NÚKIB v oblasti algoritmů. Co doložit při kontrole: Směrnice
+        pro používání kryptografie (Cryptography Policy).'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p25-q2
+      name: Jsou požívány aktuálně odolné kryptografické algoritmy i s ohledem na
+        doporučení NÚKIB? Je prosazováno bezpečné nakládání s kryptografickými prostředky?
+      depth: 3
+      ref_id: ZOKB-P25-Q2
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p25
+      description: 'Algoritmy (komunikační kanály a uložení dat) odpovídají aktuální
+        odolnosti, prolamované či slabé šifry jsou zakázány. Co doložit při kontrole:
+        Audit konfigurace TLS (pouze v1.2/1.3), skeny síťových služeb vykazující odstranění
+        slabých šifer (např. DES/RC4).'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p25-q3
+      name: Máte pravidla pro bezpečné nakládání s kryptografickými klíči pokrývající
+        celý jejich životní cyklus (od generování po likvidaci)?
+      depth: 3
+      ref_id: ZOKB-P25-Q3
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p25
+      description: 'Nástroj pro správu klíčů zabezpečuje jejich generování, rotace
+        a zneplatnění. Jsou udržovány v důvěrnosti a integritě. Co doložit při kontrole:
+        PKI infrastruktura (certifikační autorita / Key Vault), pravidla rotace certifikátů,
+        plány pro případ úniku privátního klíče.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p26
+      name: § 26 - Zajišťování dostupnosti regulované služby
+      depth: 2
+      ref_id: ZOKB-P26
+      assessable: false
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-409
+      description: "(1) Povinná osoba zavede bezpečnostní opatření pro zajišťování\
+        \ dostupnosti regulované služby, kterými zajistí\na) dostupnost regulované\
+        \ služby podle cílů stanovených podle § 15,\nb) odolnost regulované služby\
+        \ vůči hrozbám a zranitelnostem, které by mohly snížit její dostupnost a\n\
+        c) redundanci aktiv nezbytných pro zajišťování dostupnosti regulované služby.\n\
+        (2) Povinná osoba pro zajišťování dostupnosti regulované služby v souladu\
+        \ s odstavcem 1 vytváří pravidelné zálohy konfigurací a nastavení technických\
+        \ aktiv, informací a dat nezbytných zejména pro účely obnovy regulované služby\
+        \ v případě kybernetického bezpečnostního incidentu.\n(3) Povinná osoba u\
+        \ záloh vytvářených podle odstavce 2 zajistí\na) pravidelné testování jejich\
+        \ integrity, dostupnosti a obnovitelnosti,\nb) dokumentování výsledků testů\
+        \ provedených podle odstavce 3 písm. a),\nc) ochranu ukládaných záloh a dat\
+        \ v nich obsažených před narušením jejich integrity a důvěrnosti, a to zejména\
+        \ šifrováním těchto záloh v souladu s § 25 a\nd) ochranu ukládaných záloh\
+        \ a dat v nich obsažených před narušením jejich dostupnosti.\n(4) Povinná\
+        \ osoba pro zajišťování dostupnosti regulované služby zajistí bezpečnou správu\
+        \ konfigurací a nastavení technických aktiv s ohledem na hodnocení těchto\
+        \ aktiv a hodnocení rizik. \n(5) Povinná osoba za účelem omezení šíření kybernetického\
+        \ bezpečnostního incidentu a snížení jeho dopadu odděluje zálohovací prostředí\
+        \ od jiných prostředí podle § 18 písm. a)."
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p26-q1
+      name: Je nasazena ochrana proti DDoS útokům?
+      depth: 3
+      ref_id: ZOKB-P26-Q1
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p26
+      description: 'Zajišťuje se dostupnost služby před hrozbami typu odepření služby
+        (Distributed Denial of Service). Co doložit při kontrole: Smluvní ujednání
+        s ISP s definovanou scrubbing službou (Anti-DDoS zóna), nebo řešení typu WAF
+        na perimetru.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p26-q2
+      name: Je konektivita do internetu zajištěna od 2 různých poskytovatelů?
+      depth: 3
+      ref_id: ZOKB-P26-Q2
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p26
+      description: 'Součástí redundance aktiv nezbytných pro zajišťování dostupnosti
+        služby (High Availability). Co doložit při kontrole: Uzavřené nezávislé smlouvy
+        a implementace BGP / Failover routingu pro diverzitu spojení.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p26-q3
+      name: Jsou k dispozici 2 nezávislé přívody elektrické energie?
+      depth: 3
+      ref_id: ZOKB-P26-Q3
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p26
+      description: 'Redundance fyzické vrstvy (napájení) klíčových uzlů serveroven.
+        Co doložit při kontrole: Architektura zapojení racků v Datacentru (A-feed,
+        B-feed rozvody).'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p26-q4
+      name: Je k dispozici alternativní zdroj napájení?
+      depth: 3
+      ref_id: ZOKB-P26-Q4
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p26
+      description: 'Bezpečnostní opatření pro zmírnění dopadů rozsáhlých výpadků infrastruktury
+        napájení. Co doložit při kontrole: UPS moduly překrývající čas nutný k nastartování
+        motorgenerátoru, platné revize agregátu.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p26-q5
+      name: Je nainstalována přepěťová ochrana?
+      depth: 3
+      ref_id: ZOKB-P26-Q5
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p26
+      description: 'Součást odolnosti zařízení zajišťujících dostupnost regulované
+        služby proti vnějším poškozením přepětím sítě. Co doložit při kontrole: Revize
+        elektrických prvků včetně bleskojistek a lokálních přepěťových ochran.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p26-q6
+      name: Je zajištěna redundance důležitých aktiv?
+      depth: 3
+      ref_id: ZOKB-P26-Q6
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p26
+      description: 'Stěžejní infrastruktura je zrcadlena za účelem dosažení cílových
+        RTO/RPO bezprostředním failoverem při poruše aktiva. Co doložit při kontrole:
+        Architektonický plán prokazující existenci vysoké dostupnosti (např. Hypervisor
+        clustery, load balancery, zrcadlená datová pole).'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p26-q7
+      name: Je zálohovací prostředí striktně logicky či fyzicky odděleno od primární
+        infrastruktury pro ochranu před kompromitací (ransomware)?
+      depth: 3
+      ref_id: ZOKB-P26-Q7
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p26
+      description: 'Odolnost záloh proti narušení je podmíněna silnou izolací a případným
+        šifrováním dat. Co doložit při kontrole: Topologie zálohovací sítě (oddělené
+        segmenty) nebo immutable (neměnné) úložiště či pravidlo Air-Gap/3-2-1.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p27
+      name: § 27 - Zabezpečení průmyslových, řídicích a obdobných specifických technických
+        aktiv
+      depth: 2
+      ref_id: ZOKB-P27
+      assessable: false
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-409
+      description: "Povinná osoba včetně požadavků uvedených v § 1 až 27 pro zajištění\
+        \ kybernetické bezpečnosti průmyslových, řídicích a obdobných specifických\
+        \ technických aktiv dále využívá nástroje a zavádí bezpečnostní opatření,\
+        \ která zajistí\na) omezení fyzického přístupu k průmyslovým, řídicím a obdobným\
+        \ specifickým technickým aktivům, \nb) omezení oprávnění k přístupu k průmyslovým,\
+        \ řídicím a obdobným specifickým technickým aktivům,\nc) segmentaci komunikačních\
+        \ sítí průmyslových, řídicích a obdobných specifických technických aktiv od\
+        \ jiných prostředí a segmentaci těchto komunikačních sítí podle § 18,\nd)\
+        \ omezení vzdálených přístupů a vzdálené správy průmyslových, řídicích a obdobných\
+        \ specifických technických aktiv,\ne) ochranu jednotlivých průmyslových, řídicích\
+        \ a obdobných specifických technických aktiv před využitím známých zranitelností\
+        \ a hrozeb a\nf) dostupnost a obnovu průmyslových, řídicích a obdobných specifických\
+        \ technických aktiv pro zajištění dostupnosti regulované služby."
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p27-q1
+      name: Jsou bezpečnostní pravidla a opatření aplikována i na průmyslová a specifická
+        zařízení pokud je v organizaci máte? (např. SCADA)
+      depth: 3
+      ref_id: ZOKB-P27-Q1
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p27
+      description: 'Omezení vzdálené správy, řízení práv, fyzického přístupu a segmentace
+        průmyslových, řídicích a OT aktiv od běžného IT. Co doložit při kontrole:
+        Oddělená struktura OT sítě (např. přes firewally v Purdue modelu), přehled
+        ICS/SCADA aktiv podléhajících ochraně.'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p27-q2
+      name: Je zajištěna fyzická ochrana průmyslových a řídicích zařízení (např. uzamčení
+        rozvaděčů, monitorování přístupu)?
+      depth: 3
+      ref_id: ZOKB-P27-Q2
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p27
+      description: 'Podle § 27 písm. a) vyhlášky č. 409/2025 Sb. povinná osoba zajistí
+        omezení fyzického přístupu k průmyslovým a řídicím aktivům. OT prostředí vyžaduje
+        dodatečnou úroveň fyzické ochrany s ohledem na bezpečnost provozu (Safety)
+        a riziko neoprávněné manipulace na místě. Co doložit při kontrole: Směrnice
+        fyzické bezpečnosti specifikující ochranné zóny pro OT infrastrukturu, revize
+        přístupových systémů (ACS) k výrobním/technologickým halám a důkazy o uzamykání
+        technologických rozvaděčů (např. dedikovaný klíčový režim pro obsluhu).'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p27-q3
+      name: Je zaveden a dodržován proces správy záplat a aktualizací pro průmyslové
+        a řídicí systémy, s ohledem na jejich specifické provozní požadavky a rizika?
+      depth: 3
+      ref_id: ZOKB-P27-Q3
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p27
+      description: 'Podle § 27 písm. e) vyhlášky č. 409/2025 Sb. zajistí povinná osoba
+        ochranu OT aktiv před využitím známých zranitelností a hrozeb. Vzhledem ke
+        specifikům ICS/SCADA (riziko výpadku výroby, nepodporované OS u starších strojů)
+        musí být zaveden řízený proces patch managementu nebo doložena kompenzační
+        opatření. Co doložit při kontrole: Plán údržby a aktualizací OT systémů schválený
+        garanty aktiv, záznamy z instalace záplat v definovaných servisních oknech
+        nebo formální zdůvodnění a dokumentace kompenzačních opatření (např. Virtual
+        Patching nasazený na IPS) pro starší systémy (např. Windows XP/7).'
+      implementation_groups:
+      - ALL
+    - urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p27-q4
+      name: Je zajištěna síťová segmentace mezi IT a OT prostředími a jsou aplikována
+        specifická bezpečnostní pravidla pro komunikaci mezi nimi?
+      depth: 3
+      ref_id: ZOKB-P27-Q4
+      assessable: true
+      parent_urn: urn:intuitem:risk:req_node:zokb-409-full-base:zokb-p27
+      description: 'Podle § 27 písm. c) a d) vyhlášky č. 409/2025 Sb. povinná osoba
+        zajistí segmentaci komunikačních sítí OT od jiných prostředí (běžného IT)
+        a striktně omezí vzdálenou správu. Propojení „napřímo“ do produkční OT sítě
+        z kancelářské sítě nebo internetu je auditním selháním. Co doložit při kontrole:
+        Detailní mapy topologie sítě prokazující oddělení IT a OT (architektura dle
+        tzv. Purdue modelu, existence OT DMZ), pravidla firewallů (ACL) povolující
+        pouze striktně nutný provoz a logy z řešení pro bezpečný přístup privilegovaných
+        uživatelů (PAM/Jump servery) při vzdáleném servisu dodavateli.'
+      implementation_groups:
+      - ALL
+    implementation_groups_definition:
+    - name: Všechny sys
+      ref_id: ALL
+      description: Požadavek se vztahuje na systémy v rozsahu.
