@@ -2,6 +2,7 @@ import type { LayoutServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
 import { loadFlash } from 'sveltekit-flash-message/server';
 
+import { thirdPartyNavHrefs } from '$lib/server/nav-access';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { env } from '$env/dynamic/public';
 
@@ -83,6 +84,9 @@ export const load = loadFlash(async ({ fetch, locals, url, cookies, request }) =
 		? env.PUBLIC_LICENSE_EXPIRATION_MESSAGE
 		: '';
 
+	// `null`: the sidebar is not restricted to pages from route-access.ts.
+	const openableNavHrefs = user?.is_third_party ? await thirdPartyNavHrefs() : null;
+
 	return {
 		user,
 		settings,
@@ -90,6 +94,7 @@ export const load = loadFlash(async ({ fetch, locals, url, cookies, request }) =
 		licenseStatus,
 		LICENSE_EXPIRATION_NOTIFY_DAYS,
 		LICENSE_EXPIRATION_MESSAGE,
-		orgTree
+		orgTree,
+		openableNavHrefs
 	};
 }) satisfies LayoutServerLoad;

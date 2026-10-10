@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { URL_MODEL_MAP } from '$lib/utils/crud';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { ensureSelectOptions } from '$lib/utils/select-options';
-import { GET } from '../../routes/(app)/(internal)/select-options/+server';
+import { GET } from '../../routes/(app)/select-options/+server';
 
 const PARENT = '3af191d3-347d-48c9-949b-126280aa33d0';
 

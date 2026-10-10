@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import WebhookEndpointCreateModal from '../../../routes/(app)/(internal)/settings/webhooks/endpoints/WebhookEndpointCreateModal.svelte';
+	import WebhookEndpointCreateModal from '../../../routes/(app)/settings/webhooks/endpoints/WebhookEndpointCreateModal.svelte';
 	import { m } from '$paraglide/messages';
 	import {
 		getModalStore,

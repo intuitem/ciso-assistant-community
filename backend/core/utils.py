@@ -1920,6 +1920,21 @@ def build_initial_field_visibility(framework, base=None):
     return merged
 
 
+def client_field_visibility(stored, framework):
+    """The `field_visibility` sent to clients for an audit.
+
+    A stored map lacks the fields added to DEFAULT_VISIBILITY after the audit was created.
+    The backend falls back to the default for those (resolve_visibility_from_overrides) but
+    the frontend reads a missing field as "everyone edits", so the default is filled in
+    here. An audit without a stored map gets the template a new audit would get.
+    """
+    if not stored:
+        return build_initial_field_visibility(framework)
+    filled = {key: dict(pair) for key, pair in DEFAULT_VISIBILITY.items()}
+    filled.update({key: pair for key, pair in stored.items() if isinstance(pair, dict)})
+    return filled
+
+
 def respondent_progress_counts(
     compliance_assessment, requirement_assessments
 ) -> tuple[int, int, int]:

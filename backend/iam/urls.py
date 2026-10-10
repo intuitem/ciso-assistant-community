@@ -15,12 +15,14 @@ from .views import (
     SCIMTokenViewSet,
     SCIMTokenDeleteView,
     ServiceAccountViewSet,
+    WhoAmIView,
 )
 
 urlpatterns = [
     path(r"logout/", knox_views.LogoutView.as_view(), name="knox_logout"),
     path(r"logoutall/", knox_views.LogoutAllView.as_view(), name="knox_logoutall"),
     path("current-user/", CurrentUserView.as_view(), name="current-user"),
+    path("whoami/", WhoAmIView.as_view(), name="whoami"),
     path("change-password/", ChangePasswordView.as_view(), name="change-password"),
     path("password-reset/", PasswordResetView.as_view(), name="password-reset"),
     path(

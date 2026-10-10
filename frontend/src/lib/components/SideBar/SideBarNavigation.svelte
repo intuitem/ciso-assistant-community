@@ -9,12 +9,18 @@
 	import { driverInstance } from '$lib/utils/stores';
 
 	const user = page.data.user;
+	// Pages a third party may open, from the (app) layout; `null` for everyone else. Only the
+	// sidebar needs it: the command palette is not offered to third parties.
+	const openable: string[] | null = page.data.openableNavHrefs ?? null;
 
 	const items = navData.items
 		.map((item) => ({
 			...item,
 			// Shared with the command palette so the two cannot offer different sets of pages.
-			items: item.items.filter((subItem) => canSeeNavItem(subItem, user))
+			items: item.items.filter(
+				(subItem) =>
+					canSeeNavItem(subItem, user) && (openable === null || openable.includes(subItem.href))
+			)
 		}))
 		.filter((item) => item.items.length > 0); // Filter out items with no sub-items
 

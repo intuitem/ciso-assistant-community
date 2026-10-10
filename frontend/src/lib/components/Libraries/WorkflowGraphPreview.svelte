@@ -6,14 +6,14 @@
 		EDGE_STYLE,
 		EDGE_MARKER,
 		NODE_TYPE_LABELS
-	} from '../../../routes/(app)/(internal)/workflows/[id=uuid]/node-visuals';
-	import StepNode from '../../../routes/(app)/(internal)/workflows/[id=uuid]/nodes/StepNode.svelte';
-	import ConditionNode from '../../../routes/(app)/(internal)/workflows/[id=uuid]/nodes/ConditionNode.svelte';
-	import TerminalNode from '../../../routes/(app)/(internal)/workflows/[id=uuid]/nodes/TerminalNode.svelte';
-	import TriggerNode from '../../../routes/(app)/(internal)/workflows/[id=uuid]/nodes/TriggerNode.svelte';
-	import LoopNode from '../../../routes/(app)/(internal)/workflows/[id=uuid]/nodes/LoopNode.svelte';
-	import WorkflowEdge from '../../../routes/(app)/(internal)/workflows/[id=uuid]/edges/WorkflowEdge.svelte';
-	import { computeLayout } from '../../../routes/(app)/(internal)/workflows/[id=uuid]/graph-layout';
+	} from '../../../routes/(app)/workflows/[id=uuid]/node-visuals';
+	import StepNode from '../../../routes/(app)/workflows/[id=uuid]/nodes/StepNode.svelte';
+	import ConditionNode from '../../../routes/(app)/workflows/[id=uuid]/nodes/ConditionNode.svelte';
+	import TerminalNode from '../../../routes/(app)/workflows/[id=uuid]/nodes/TerminalNode.svelte';
+	import TriggerNode from '../../../routes/(app)/workflows/[id=uuid]/nodes/TriggerNode.svelte';
+	import LoopNode from '../../../routes/(app)/workflows/[id=uuid]/nodes/LoopNode.svelte';
+	import WorkflowEdge from '../../../routes/(app)/workflows/[id=uuid]/edges/WorkflowEdge.svelte';
+	import { computeLayout } from '../../../routes/(app)/workflows/[id=uuid]/graph-layout';
 
 	// The library-export graph shape (ref-keyed, branch NAMES, no positions) —
 	// see backend/workflows/import_export.py. Rendered read-only; no ops proxy,

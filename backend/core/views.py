@@ -11114,10 +11114,20 @@ class RequirementViewSet(BaseModelViewSet):
                 "findings",
             )
         )
+        # Respondents see their assigned assessments only, as in
+        # RequirementAssessmentViewSet; a subquery keeps the counts below join-free.
+        respondent_folders = get_respondent_scoped_folder_ids(request.user)
+        if respondent_folders:
+            requirement_assessments = requirement_assessments.filter(
+                id__in=RequirementAssessment.objects.filter(
+                    ~Q(folder_id__in=respondent_folders)
+                    | Q(assignments__actor__in=Actor.get_all_for_user(request.user))
+                ).values("id")
+            )
         serialized_requirement_assessments = RequirementAssessmentReadSerializer(
             requirement_assessments,
             many=True,
-            context={"viewer_role": "auditor"},
+            context={"request": request},
         ).data
 
         # Group by Domain and Perimeter
@@ -16118,6 +16128,17 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
     # Raising a finding is an edit of the requirement assessment, not an "add" of one:
     # nobody has add_requirementassessment, they are created with the audit.
     permission_overrides = {"findings_binder": "change_requirementassessment"}
+
+    @action(detail=True, name="Get requirement assessment write data")
+    def object(self, request, pk):
+        # With the request, so a respondent's edit form starts without the fields their
+        # audit hides from them.
+        serializer_class = self.get_serializer_class(action="update")
+        return Response(
+            serializer_class(
+                self.get_object(), context=self.get_serializer_context()
+            ).data
+        )
 
     @action(detail=True, methods=["get"], url_path="quality_check")
     def quality_check_detail(self, request, pk):

@@ -192,7 +192,7 @@
 				{/if}
 			</div>
 			<div class="flex items-center gap-2">
-				{#if sideBarVisibleItems.notifications && !data?.user?.is_third_party}
+				{#if sideBarVisibleItems.notifications && (data?.openableNavHrefs?.includes('/notifications') ?? true)}
 					<NotificationBell />
 				{/if}
 				<ThemeToggle />

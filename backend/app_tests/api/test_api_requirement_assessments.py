@@ -8,6 +8,7 @@ from core.models import (
     Framework,
 )
 from core.models import Perimeter, AppliedControl
+from core.utils import client_field_visibility
 from iam.models import Folder
 
 from test_utils import EndpointTestsQueries
@@ -133,7 +134,10 @@ class TestRequirementAssessmentsAuthenticated:
                     "score_calculation_method": compliance_assessment.score_calculation_method,
                     "extended_result_enabled": compliance_assessment.extended_result_enabled,
                     "progress_status_enabled": compliance_assessment.progress_status_enabled,
-                    "field_visibility": compliance_assessment.field_visibility,
+                    "field_visibility": client_field_visibility(
+                        compliance_assessment.field_visibility,
+                        compliance_assessment.framework,
+                    ),
                     "name": compliance_assessment.name,
                     "framework": {
                         "implementation_groups_definition": compliance_assessment.framework.implementation_groups_definition,
@@ -235,7 +239,10 @@ class TestRequirementAssessmentsAuthenticated:
                     "score_calculation_method": compliance_assessment.score_calculation_method,
                     "extended_result_enabled": compliance_assessment.extended_result_enabled,
                     "progress_status_enabled": compliance_assessment.progress_status_enabled,
-                    "field_visibility": compliance_assessment.field_visibility,
+                    "field_visibility": client_field_visibility(
+                        compliance_assessment.field_visibility,
+                        compliance_assessment.framework,
+                    ),
                     "name": compliance_assessment.name,
                     "framework": {
                         "implementation_groups_definition": compliance_assessment.framework.implementation_groups_definition,
@@ -306,7 +313,10 @@ class TestRequirementAssessmentsAuthenticated:
                     "score_calculation_method": compliance_assessment.score_calculation_method,
                     "extended_result_enabled": compliance_assessment.extended_result_enabled,
                     "progress_status_enabled": compliance_assessment.progress_status_enabled,
-                    "field_visibility": compliance_assessment.field_visibility,
+                    "field_visibility": client_field_visibility(
+                        compliance_assessment.field_visibility,
+                        compliance_assessment.framework,
+                    ),
                     "name": compliance_assessment.name,
                     "framework": {
                         "implementation_groups_definition": compliance_assessment.framework.implementation_groups_definition,
