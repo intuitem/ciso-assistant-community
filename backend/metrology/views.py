@@ -4,12 +4,13 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models import Count
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
-from rest_framework import status
+from rest_framework import status, serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from core.views import BaseModelViewSet, LONG_CACHE_TTL
-from iam.models import RoleAssignment
+from iam.models import Folder, RoleAssignment
+from django.contrib.auth.models import Permission
 from metrology.models import (
     MetricDefinition,
     MetricInstance,
@@ -19,7 +20,17 @@ from metrology.models import (
     DashboardWidget,
 )
 from metrology.builtin_metrics import BUILTIN_METRICS, METRIC_TYPE_CHART_TYPES
-from metrology.serializers import BuiltinMetricSampleReadSerializer
+from metrology.serializers import (
+    DERIVED_SAMPLE_READ_ONLY,
+    BuiltinMetricSampleReadSerializer,
+)
+
+
+def _as_uuid(value):
+    try:
+        return uuid.UUID(str(value))
+    except ValueError, TypeError:
+        return None
 
 
 def _user_can_read_target(user, content_type, object_id):
@@ -58,6 +69,131 @@ class MetricDefinitionViewSet(BaseModelViewSet):
             .get_queryset()
             .select_related("folder", "library", "unit")
             .prefetch_related("filtering_labels")
+        )
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get readable models", url_path="readable-models")
+    def readable_models(self, request):
+        """The models a dataset may read, with their fields and the aggregate
+        functions: the same registry the workflow builder uses, served here
+        so the metric form does not depend on the workflows feature flag."""
+        from core.reads.registry import registry_payload
+
+        return Response(registry_payload())
+
+    @action(detail=False, methods=["post"], url_path="preview-formula")
+    def preview_formula(self, request):
+        """Evaluate a derived metric's formula against a folder, writing
+        nothing. The datasets' aggregates and the result come back so an author
+        sees what the expression reads; an evaluation failure is a 200 with
+        ok: false. Needs the right to add metric instances in that folder, the
+        same right that would make the number visible."""
+        from metrology.derived import (
+            DerivedMetricError,
+            evaluate_formula,
+            validate_formula,
+        )
+
+        data = request.data if isinstance(request.data, dict) else {}
+        folder = Folder.objects.filter(id=_as_uuid(data.get("folder"))).first()
+        if folder is None:
+            return Response(
+                {"error": "folderNotFound"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        permission = Permission.objects.filter(codename="add_metricinstance").first()
+        if permission is None or not RoleAssignment.is_access_allowed(
+            user=request.user, perm=permission, folder=folder
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        datasets = data.get("datasets")
+        expression = data.get("expression") or ""
+        inputs = data.get("inputs")
+        definition = MetricDefinition.objects.filter(
+            id=_as_uuid(data.get("definition"))
+        ).first()
+        errors = validate_formula(datasets, expression, inputs, definition)
+        if errors:
+            return Response(
+                {"ok": False, "errors": [{"code": c, "message": m} for c, m in errors]}
+            )
+        if inputs:
+            return self._preview_series(data, inputs, expression, folder)
+        try:
+            evaluation = evaluate_formula(datasets, expression, folder)
+        except DerivedMetricError as e:
+            return Response(
+                {
+                    "ok": False,
+                    "errors": [
+                        {"code": "derived_evaluation_failed", "message": e.message}
+                    ],
+                }
+            )
+        return Response(
+            {"ok": True, "value": evaluation.value, "datasets": evaluation.datasets}
+        )
+
+    PREVIEW_PERIODS = 24
+
+    def _preview_series(self, data, inputs, expression, folder):
+        """A metric formula's last periods at the frequency the author picks,
+        and what each input resolved to in the folder."""
+        from types import SimpleNamespace
+
+        from metrology.derived import DerivedMetricError
+        from metrology.series import evaluate_series, period_start, shift_period
+        from django.utils import timezone
+
+        frequency = data.get("frequency")
+        if frequency not in MetricInstance.Frequency.values:
+            frequency = MetricInstance.Frequency.MONTHLY
+        shape = SimpleNamespace(
+            category=data.get("category") or MetricDefinition.Category.QUANTITATIVE,
+            choices_definition=data.get("choices_definition") or [],
+        )
+        since = shift_period(
+            period_start(timezone.now(), frequency),
+            frequency,
+            -(self.PREVIEW_PERIODS - 1),
+        )
+        try:
+            evaluation = evaluate_series(
+                inputs, expression, folder, frequency, shape, since=since
+            )
+        except DerivedMetricError as e:
+            return Response(
+                {
+                    "ok": False,
+                    "errors": [
+                        {"code": "derived_evaluation_failed", "message": e.message}
+                    ],
+                }
+            )
+        return Response(
+            {
+                "ok": True,
+                "value": evaluation.value,
+                "periods": [
+                    {
+                        "start": period.start.isoformat(),
+                        "value": period.value,
+                        "skipped": period.skipped,
+                        "inputs": period.inputs,
+                    }
+                    for period in evaluation.periods
+                ],
+                "inputs": {
+                    item.key: [
+                        {
+                            "id": str(instance.id),
+                            "name": instance.name,
+                            "folder": instance.folder.name,
+                        }
+                        for instance in item.instances
+                    ]
+                    for item in evaluation.resolved
+                },
+            }
         )
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
@@ -106,6 +242,85 @@ class MetricInstanceViewSet(BaseModelViewSet):
             )
         )
 
+    @action(detail=False, methods=["get"], url_path="input-candidates")
+    def input_candidates(self, request):
+        """For the instance form: each input of a metric formula and the
+        instances it could read from a domain, so the author can pick one or
+        leave some out. Needs the right to add or change metric instances
+        there, as creating or editing the instance would."""
+        from metrology.series import input_candidates, resolve_definition
+
+        definition = MetricDefinition.objects.filter(
+            id=_as_uuid(request.query_params.get("definition"))
+        ).first()
+        folder = Folder.objects.filter(
+            id=_as_uuid(request.query_params.get("folder"))
+        ).first()
+        if definition is None or folder is None:
+            return Response(
+                {"error": "definitionOrFolderNotFound"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        allowed = any(
+            RoleAssignment.is_access_allowed(
+                user=request.user, perm=permission, folder=folder
+            )
+            for permission in Permission.objects.filter(
+                codename__in=["add_metricinstance", "change_metricinstance"]
+            )
+        )
+        if not allowed:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        if not definition.reads_metrics:
+            return Response({"inputs": []})
+        inputs = []
+        for spec in definition.inputs or []:
+            if not isinstance(spec, dict):
+                continue
+            target = resolve_definition(spec.get("definition"))
+            inputs.append(
+                {
+                    "key": spec.get("key"),
+                    "combine": spec.get("combine") or "one",
+                    "definition": (
+                        {"id": str(target.id), "name": target.name} if target else None
+                    ),
+                    "candidates": [
+                        {
+                            "id": str(instance.id),
+                            "name": instance.name,
+                            "folder": instance.folder.name,
+                            "status": instance.status,
+                        }
+                        for instance in (
+                            input_candidates(target, folder) if target else []
+                        )
+                    ],
+                }
+            )
+        return Response({"inputs": inputs})
+
+    @action(detail=True, methods=["post"], url_path="refresh")
+    def refresh(self, request, pk=None):
+        """Recompute a derived metric now. The task is enqueued, never run
+        inline, so a refresh and a scheduled run share one code path and a
+        slow worker-side aggregate never sits on a request."""
+        from metrology.tasks import compute_derived_metric_task
+
+        instance = self.get_object()
+        if not instance.is_derived:
+            return Response(
+                {"error": "metricNotDerived"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        permission = Permission.objects.filter(codename="change_metricinstance").first()
+        if permission is None or not RoleAssignment.is_access_allowed(
+            user=request.user, perm=permission, folder=instance.folder
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        # A refresh recomputes a metric formula's whole series.
+        compute_derived_metric_task(str(instance.id), full=True)
+        return Response({"queued": True}, status=status.HTTP_202_ACCEPTED)
+
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
     def status(self, request):
@@ -123,6 +338,16 @@ class CustomMetricSampleViewSet(BaseModelViewSet):
     filterset_fields = ["folder", "metric_instance", "evidence_revision"]
     search_fields = ["observation"]
     ordering = ["-timestamp"]  # Most recent first
+
+    def perform_destroy(self, instance):
+        # Same refusal as the write serializer: a derived series is its
+        # formula's. A period deleted by hand would never be recomputed, and a
+        # deleted latest sample would change the next computation's `previous`.
+        if instance.metric_instance.is_derived:
+            raise serializers.ValidationError(
+                {"metric_instance": DERIVED_SAMPLE_READ_ONLY}
+            )
+        super().perform_destroy(instance)
 
     def get_queryset(self):
         # raw_value()/display_value() walk metric_instance -> metric_definition to

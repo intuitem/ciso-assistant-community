@@ -715,9 +715,9 @@ def _free_name(model, name, folder):
 
 
 def _build_graph_payload(graph, workflow, folder, warnings):
-    from .actions import _accessible_folder_ids
+    from core.reads import accessible_folder_ids
 
-    accessible = _accessible_folder_ids(folder)
+    accessible = accessible_folder_ids(folder)
     variable_ids = {v["key"]: str(uuid4()) for v in graph.get("variables") or []}
     node_ids = {n["ref"]: str(uuid4()) for n in graph["nodes"]}
     # (node ref, branch index) → fresh branch uuid, so edges can resolve their

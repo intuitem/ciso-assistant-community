@@ -60,11 +60,13 @@ export function treeToGroups(tree: any): Condition[][] | null {
 	if (Object.keys(tree).length === 0) return [];
 	const conditions = Array.isArray(tree.conditions) ? tree.conditions : [];
 	const children = Array.isArray(tree.children) ? tree.children : [];
-	if (tree.operator === 'and') {
+	// The backend reads a missing operator as "and".
+	const operator = tree.operator ?? 'and';
+	if (operator === 'and') {
 		if (children.length) return null;
 		return [conditionsFrom(conditions)];
 	}
-	if (tree.operator === 'or') {
+	if (operator === 'or') {
 		const out: Condition[][] = [];
 		for (const child of children) {
 			if (

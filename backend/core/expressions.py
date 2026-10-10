@@ -36,6 +36,12 @@ class ExpressionError(Exception):
     """A CEL expression that cannot be compiled or evaluated. The message is
     author-facing and already mentions the expression key when known."""
 
+    def __init__(self, message):
+        super().__init__(message)
+        # What an API response may carry: the curated text, never the
+        # exception object itself.
+        self.message = message
+
 
 # celpy reports a missing overload with the grammar rule name; translate the
 # ones an author will actually hit into the operator they wrote.
@@ -175,6 +181,21 @@ def _promoting(op):
     return apply
 
 
+def _null_aware(op, when_one_is_null):
+    """Equality against null never fails: CEL answers false (or true for !=)
+    when exactly one side is null, whatever the other side holds. celpy
+    raises on the type mix, which turned `x == null` into an error for every
+    number and list, and `x == null ? a : b` with it."""
+    promoted = _promoting(op)
+
+    def apply(left, right):
+        if (left is None) != (right is None):
+            return celtypes.BoolType(when_one_is_null)
+        return promoted(left, right)
+
+    return apply
+
+
 def _int_only_mod(left, right):
     """`%` is int-only in CEL and celpy has no double overload, so a mixed or
     double modulo gets a message that says what to do rather than a generic
@@ -196,8 +217,8 @@ OPERATORS = {
     "_<=_": _promoting(bool_le),
     "_>_": _promoting(bool_gt),
     "_>=_": _promoting(bool_ge),
-    "_==_": _promoting(bool_eq),
-    "_!=_": _promoting(bool_ne),
+    "_==_": _null_aware(bool_eq, False),
+    "_!=_": _null_aware(bool_ne, True),
 }
 
 

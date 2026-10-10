@@ -18,6 +18,19 @@
 	const isQualitative = $derived(metricDefinition?.category === 'qualitative');
 	const samples = $derived(data.samples || []);
 
+	let refreshState = $state<'idle' | 'busy' | 'queued' | 'failed'>('idle');
+	async function refreshNow() {
+		refreshState = 'busy';
+		try {
+			const res = await fetch(`/fe-api/metrology/refresh-metric-instance/${metricInstance.id}`, {
+				method: 'POST'
+			});
+			refreshState = res.ok ? 'queued' : 'failed';
+		} catch {
+			refreshState = 'failed';
+		}
+	}
+
 	const modalStore = getModalStore();
 
 	// Watch for modal close and refresh data
@@ -35,7 +48,26 @@
 	});
 </script>
 
-<DetailView {data} {form}>
+<!-- A derived series is its formula's: no sample is typed in by hand. -->
+<DetailView {data} {form} disableCreate={Boolean(metricInstance?.is_derived)}>
+	{#snippet actions()}
+		{#if metricInstance?.is_derived}
+			<button
+				type="button"
+				class="btn preset-filled-primary-500 h-fit"
+				onclick={refreshNow}
+				disabled={refreshState === 'busy'}
+				data-testid="refresh-metric-button"
+			>
+				<i class="fa-solid fa-rotate mr-2"></i>{m.refreshNow()}
+			</button>
+			{#if refreshState === 'queued'}
+				<span class="text-sm text-success-600-400">{m.refreshQueued()}</span>
+			{:else if refreshState === 'failed'}
+				<span class="text-sm text-error-500">{m.refreshFailed()}</span>
+			{/if}
+		{/if}
+	{/snippet}
 	{#snippet widgets()}
 		<div class="h-full flex flex-col space-y-4">
 			<!-- Current Value -->
@@ -44,6 +76,16 @@
 				<div class="text-3xl font-bold text-primary-600">
 					{metricInstance?.current_value || 'N/A'}
 				</div>
+				{#if metricInstance?.is_derived}
+					<p class="text-xs text-surface-500 mt-2">
+						{m.derivedMetricValueHint()}
+					</p>
+					{#if metricInstance?.last_computation_error}
+						<p class="text-xs text-error-500 mt-1">
+							{m.lastComputationError()}: {metricInstance.last_computation_error}
+						</p>
+					{/if}
+				{/if}
 			</div>
 
 			<!-- Sample Timeline Chart -->

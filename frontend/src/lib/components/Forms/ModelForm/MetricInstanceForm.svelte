@@ -7,6 +7,8 @@
 	import { m } from '$paraglide/messages';
 
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
+	import InputChoicesEditor from '$lib/components/Metrology/InputChoicesEditor.svelte';
+	import { formFieldProxy } from 'sveltekit-superforms';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -27,6 +29,12 @@
 		data = {},
 		debug = false
 	}: Props = $props();
+
+	// A metric computed from other metrics: which instances its inputs read
+	// when the domain holds several.
+	const { value: inputChoices } = formFieldProxy(form, 'input_choices');
+	const { value: definitionValue } = formFieldProxy(form, 'metric_definition');
+	const { value: folderValue } = formFieldProxy(form, 'folder');
 </script>
 
 <AutocompleteSelect
@@ -39,6 +47,11 @@
 	bind:cachedValue={formDataCache['metric_definition']}
 	label={m.metricDefinition()}
 	disabled={!!initialData.metric_definition}
+/>
+<InputChoicesEditor
+	bind:value={$inputChoices}
+	definition={$definitionValue as string | undefined}
+	folder={$folderValue as string | undefined}
 />
 <Select
 	{form}

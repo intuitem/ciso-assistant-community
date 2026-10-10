@@ -84,6 +84,31 @@ class MetricDefinitionWriteSerializer(BaseModelSerializer):
 
         return value
 
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        from metrology.derived import validate_formula
+
+        datasets = attrs.get(
+            "datasets",
+            getattr(self.instance, "datasets", None) if self.instance else None,
+        )
+        expression = attrs.get(
+            "expression",
+            getattr(self.instance, "expression", "") if self.instance else "",
+        )
+        inputs = attrs.get(
+            "inputs",
+            getattr(self.instance, "inputs", None) if self.instance else None,
+        )
+        errors = validate_formula(datasets, expression, inputs, self.instance)
+        if errors:
+            # One list under `expression`: the form shows the formula as one
+            # block, and the codes travel in the messages for the editor.
+            raise serializers.ValidationError(
+                {"expression": [message for _code, message in errors]}
+            )
+        return attrs
+
     class Meta:
         model = MetricDefinition
         exclude = ["translations"]
@@ -95,6 +120,7 @@ class MetricDefinitionReadSerializer(ReferentialSerializer):
     library = FieldsRelatedField(["name", "id"])
     unit = FieldsRelatedField(["name", "id"])
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
+    is_derived = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = MetricDefinition
@@ -118,13 +144,42 @@ class MetricInstanceWriteSerializer(BaseModelSerializer):
 
         return super().update(instance, validated_data)
 
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        from metrology.series import validate_input_choices
+
+        def current(name):
+            return attrs.get(name, getattr(self.instance, name, None))
+
+        if (
+            "input_choices" in attrs
+            or "folder" in attrs
+            or "metric_definition" in attrs
+        ):
+            errors = validate_input_choices(
+                current("metric_definition"),
+                current("folder"),
+                current("input_choices"),
+            )
+            if errors:
+                raise serializers.ValidationError({"input_choices": errors})
+        return attrs
+
     class Meta:
         model = MetricInstance
         fields = "__all__"
+        # The sampler's own bookkeeping: a client stamping last_computed_at
+        # in the future would stop the instance from ever being computed.
+        read_only_fields = [
+            "last_computed_at",
+            "last_computation_error",
+            "recompute_from",
+        ]
 
 
 class MetricInstanceReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
+    is_derived = serializers.BooleanField(read_only=True)
     folder = FieldsRelatedField()
     metric_definition = FieldsRelatedField(
         [
@@ -173,6 +228,14 @@ class MetricInstanceReadSerializer(BaseModelSerializer):
 
 
 # CustomMetricSample serializers
+# Shared by the write serializer and the viewset's destroy: the samples of a
+# derived metric are the formula's, in every direction.
+DERIVED_SAMPLE_READ_ONLY = (
+    "This metric is computed from its formula; its samples cannot be written "
+    "or deleted by hand"
+)
+
+
 class CustomMetricSampleWriteSerializer(BaseModelSerializer):
     def create(self, validated_data):
         # Set folder from metric_instance before the permission check in parent class
@@ -195,6 +258,16 @@ class CustomMetricSampleWriteSerializer(BaseModelSerializer):
 
     def validate(self, attrs):
         attrs = super().validate(attrs)
+
+        target = attrs.get("metric_instance") or getattr(
+            self.instance, "metric_instance", None
+        )
+        if target is not None and target.is_derived:
+            # A derived series is its formula's: a typed-in point would
+            # become the next computation's `previous`.
+            raise serializers.ValidationError(
+                {"metric_instance": DERIVED_SAMPLE_READ_ONLY}
+            )
 
         if "value" in attrs:
             value = attrs["value"]
@@ -233,6 +306,9 @@ class CustomMetricSampleWriteSerializer(BaseModelSerializer):
     class Meta:
         model = CustomMetricSample
         exclude = ["folder"]
+        # What wrote the sample is a fact the server records: through this
+        # serializer, always a person.
+        read_only_fields = ["source", "period_start"]
 
 
 class CustomMetricSampleReadSerializer(BaseModelSerializer):

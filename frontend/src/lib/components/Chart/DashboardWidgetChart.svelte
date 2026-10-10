@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { sampleMoment } from '$lib/utils/derived-metrics';
 	import { roundScore } from '$lib/utils/helpers';
 	import { onMount } from 'svelte';
 
@@ -105,12 +106,12 @@
 				try {
 					const value = typeof sample.value === 'string' ? JSON.parse(sample.value) : sample.value;
 					if (isQualitative) {
-						return [sample.timestamp, value?.choice_index ?? null];
+						return [sampleMoment(sample), value?.choice_index ?? null];
 					} else {
-						return [sample.timestamp, value?.result ?? null];
+						return [sampleMoment(sample), value?.result ?? null];
 					}
 				} catch {
-					return [sample.timestamp, null];
+					return [sampleMoment(sample), null];
 				}
 			})
 			.filter((item) => item[1] !== null)
@@ -764,8 +765,8 @@
 					>
 				{/if}
 			</div>
-			<!-- Trend indicator -->
-			{#if chartData.length > 1}
+			<!-- Trend indicator: a percentage change between two levels means nothing -->
+			{#if chartData.length > 1 && !isQualitative}
 				{@const prevValue = rawChartData[rawChartData.length - 2]?.[1]}
 				{@const change = prevValue
 					? (((rawLatestValue - prevValue) / prevValue) * 100).toFixed(1)

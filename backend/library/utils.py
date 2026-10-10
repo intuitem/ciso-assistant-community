@@ -869,6 +869,11 @@ class MetricDefinitionImporter:
             choices_definition=self.metric_definition_data.get("choices_definition"),
             higher_is_better=self.metric_definition_data.get("higher_is_better", True),
             default_target=self.metric_definition_data.get("default_target"),
+            # A formula ships with its definition. Inputs name other
+            # definitions by URN, resolved when an instance computes.
+            datasets=self.metric_definition_data.get("datasets"),
+            expression=self.metric_definition_data.get("expression") or "",
+            inputs=self.metric_definition_data.get("inputs"),
             locale=library_object.locale,
             translations=self.metric_definition_data.get("translations", {}),
             default_locale=library_object.default_locale,
