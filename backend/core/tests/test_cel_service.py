@@ -470,6 +470,70 @@ class TestVisibilityExpression:
         assert ctx["assessment"]["total_count"] == 1
         assert ctx["hidden_requirements"] == ["hidden"]
 
+    def test_hidden_requirement_keeps_visible_answers(self, db):
+        """Hiding a requirement drops its answers only, not those of visible ones.
+
+        Question URNs follow the library scheme `<requirement urn>:question:<id>`,
+        so answer keys are not requirement node ids."""
+        from core.cel_service import build_cel_context, evaluate_outcomes
+
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Vis Answers FW",
+            folder=folder,
+            min_score=0,
+            max_score=100,
+            outcomes_definition=[
+                {
+                    "ref_id": "shown_yes",
+                    "expression": '"shown:question:q1" in answers && '
+                    '"shown:question:q1:choice:yes" in answers["shown:question:q1"].selected_choices',
+                }
+            ],
+        )
+        perimeter = Perimeter.objects.create(name="Vis Answers Perim", folder=folder)
+        ca = ComplianceAssessment.objects.create(
+            name="Vis Answers CA",
+            framework=fw,
+            folder=folder,
+            perimeter=perimeter,
+            min_score=0,
+            max_score=100,
+        )
+        for node_id, visibility in (("shown", None), ("hidden", "false")):
+            rn = RequirementNode.objects.create(
+                framework=fw,
+                urn=f"urn:test:risk:req_node:visans:{node_id}",
+                ref_id=node_id,
+                assessable=True,
+                visibility_expression=visibility,
+                folder=folder,
+            )
+            q = Question.objects.create(
+                requirement_node=rn,
+                urn=f"{rn.urn}:question:q1",
+                text="Question",
+                type="unique_choice",
+                folder=folder,
+            )
+            yes = QuestionChoice.objects.create(
+                question=q, urn=f"{q.urn}:choice:yes", value="Yes", folder=folder
+            )
+            ra = RequirementAssessment.objects.create(
+                compliance_assessment=ca, requirement=rn, folder=folder
+            )
+            Answer.objects.create(
+                requirement_assessment=ra, question=q, folder=folder
+            ).selected_choices.add(yes)
+
+        ctx, hidden_urns = build_cel_context(ca)
+        assert hidden_urns == {"urn:test:risk:req_node:visans:hidden"}
+        assert set(ctx["answers"]) == {"shown:question:q1"}
+
+        evaluate_outcomes(ca)
+        ca.refresh_from_db()
+        assert "shown_yes" in ca.computed_outcome
+
     def test_visibility_no_expression_always_visible(self, cel_setup):
         """Requirements without visibility_expression are always visible."""
         from core.cel_service import build_cel_context
