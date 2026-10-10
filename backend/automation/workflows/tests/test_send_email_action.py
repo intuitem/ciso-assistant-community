@@ -16,6 +16,7 @@ import uuid
 from datetime import timedelta
 
 import pytest
+from contextlib import nullcontext
 from django.core import mail
 from django.utils import timezone
 
@@ -72,9 +73,12 @@ def email_flow(config):
     return version
 
 
+LOCMEM = "django.core.mail.backends.locmem.EmailBackend"
+CONSOLE = "django.core.mail.backends.console.EmailBackend"
+
+
 def configure_smtp(settings):
-    settings.EMAIL_HOST = "smtp.tests.local"
-    settings.EMAIL_PORT = "25"
+    settings.MAILERS = {"default": {"BACKEND": LOCMEM}}
     settings.DEFAULT_FROM_EMAIL = "ciso@tests.local"
 
 
@@ -181,9 +185,7 @@ class TestSendEmail:
         # MAIL_DEBUG deployments swap in the console backend with no
         # EMAIL_HOST/EMAIL_PORT; the settings precheck must not fail the node
         # in exactly the environments meant for testing workflows.
-        settings.EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-        settings.EMAIL_HOST = None
-        settings.EMAIL_PORT = None
+        settings.MAILERS = {"default": {"BACKEND": CONSOLE}}
         settings.DEFAULT_FROM_EMAIL = "noreply@ciso.assistant"
         version = email_flow({"recipients": "a@tests.local", "subject": "S"})
         with django_capture_on_commit_callbacks(execute=True):
@@ -193,8 +195,7 @@ class TestSendEmail:
         assert instance.status == WorkflowInstance.Status.COMPLETED
 
     def test_missing_email_settings_fail_the_node(self, settings):
-        settings.EMAIL_HOST = None
-        settings.EMAIL_PORT = None
+        settings.MAILERS = {}
         settings.DEFAULT_FROM_EMAIL = None
         version = email_flow({"recipients": "a@tests.local", "subject": "S"})
         instance = start_instance(version)
@@ -344,8 +345,10 @@ class TestSendEmail:
         self, settings, dispatch, monkeypatch, django_capture_on_commit_callbacks
     ):
         configure_smtp(settings)
+        # The backend accepts the message but reports nothing sent.
         monkeypatch.setattr(
-            "core.tasks.EmailMessage.send", lambda self, fail_silently=False: 0
+            "django.core.mail.backends.locmem.EmailBackend.send_messages",
+            lambda self, messages: 0,
         )
         version = email_flow({"recipients": "a@tests.local", "subject": "S"})
         with django_capture_on_commit_callbacks(execute=True):
@@ -425,8 +428,8 @@ class TestSendEmail:
 
         connection = DroppingConnection()
         monkeypatch.setattr(
-            "automation.workflows.tasks.get_connection",
-            lambda **kwargs: connection,
+            "automation.workflows.tasks.mailer.open_connection",
+            lambda: nullcontext(connection),
         )
         version = email_flow(
             {

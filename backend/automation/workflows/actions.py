@@ -63,7 +63,7 @@ from core.models import (
     ValidationFlow,
     Vulnerability,
 )
-from core.tasks import get_missing_email_settings
+from core import mailer
 from doc_management.models import (
     DocumentContainer,
     DocumentRevision,
@@ -3189,7 +3189,7 @@ class SendEmailAction(BaseAction):
 
         # No notifications_enable_mailing gate: that toggle governs the
         # digest notifications, not explicit user-authored send_email nodes.
-        missing = get_missing_email_settings()
+        missing = mailer.missing_configuration()
         if missing:
             raise FatalActionError(
                 f"send_email: email is not configured (missing {', '.join(missing)})"

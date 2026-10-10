@@ -410,8 +410,9 @@ def test_the_shipped_recipe_warns_when_the_tool_is_down(
             variable.save()
 
     # Without a mail configuration the run never reaches the warning step.
-    settings.EMAIL_HOST = "smtp.tests.local"
-    settings.EMAIL_PORT = "25"
+    settings.MAILERS = {
+        "default": {"BACKEND": "django.core.mail.backends.locmem.EmailBackend"}
+    }
     settings.DEFAULT_FROM_EMAIL = "ciso@tests.local"
 
     monkeypatch.setattr(

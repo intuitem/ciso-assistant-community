@@ -16,15 +16,16 @@ Event Trigger (serializer / periodic cron)
         v
   check_email_configuration()
   - notifications_enable_mailing enabled?
-  - EMAIL_HOST / EMAIL_PORT / DEFAULT_FROM_EMAIL set?
+  - core.mailer.mailing_enabled()? (a mailer and DEFAULT_FROM_EMAIL set)
   - Recipient email present?
         |
         v
   Email Template Rendering (YAML + string.Template)
         |
         v
-  django.core.mail.send_mail()
-  - Primary server -> Rescue server (fallback)
+  core.mailer.send()
+  - Tries the mailers in settings.MAILERS in order
+  - Fails over only when a server cannot be reached
 ```
 
 There is **no notification model** in the database. Notifications are fire-and-forget emails. Frontend toast notifications are independent and handled client-side only.
@@ -38,18 +39,26 @@ There is **no notification model** in the database. Notifications are fire-and-f
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `EMAIL_HOST` | Yes | SMTP server hostname |
-| `EMAIL_PORT` | Yes | SMTP server port |
+| `EMAIL_PORT` | No | SMTP server port (default: 465 with SSL, 587 with TLS, 25 otherwise) |
 | `EMAIL_HOST_USER` | No | SMTP username |
 | `EMAIL_HOST_PASSWORD` | No | SMTP password |
 | `EMAIL_USE_TLS` | No | Enable TLS (`true`/`false`, default `false`) |
 | `DEFAULT_FROM_EMAIL` | Yes | Sender address (fallback: `noreply@ciso.assistant`) |
-| `EMAIL_HOST_RESCUE` | No | Fallback SMTP server |
+| `EMAIL_HOST_RESCUE` | No | Second SMTP server, used when the first cannot be reached (all mail, not only password resets) |
 | `EMAIL_PORT_RESCUE` | No | Fallback SMTP port |
 | `EMAIL_HOST_USER_RESCUE` | No | Fallback SMTP username |
 | `EMAIL_HOST_PASSWORD_RESCUE` | No | Fallback SMTP password |
 | `EMAIL_USE_TLS_RESCUE` | No | Fallback TLS setting |
+| `EMAIL_TRANSPORT` | No | `smtp` (password, default) or `smtp-oauth2` (bearer token). Also `_RESCUE` |
+| `EMAIL_OAUTH2_GRANT_TYPE`, `EMAIL_OAUTH2_TOKEN_URL`, `EMAIL_OAUTH2_SCOPE` | With `smtp-oauth2` | `client_credentials`, `refresh_token` (RFC 6749) or `jwt_bearer` (RFC 7523); the token URL must be https. Values per provider in the installation docs |
+| `EMAIL_OAUTH2_CLIENT_ID`, `EMAIL_OAUTH2_CLIENT_SECRET`, `EMAIL_OAUTH2_REFRESH_TOKEN` | Per grant | Client credentials and refresh token grants |
+| `EMAIL_OAUTH2_SERVICE_ACCOUNT_FILE`, or `EMAIL_OAUTH2_ISSUER` + `EMAIL_OAUTH2_PRIVATE_KEY`, `EMAIL_OAUTH2_AUDIENCE` | jwt_bearer | Signing identity for the JWT bearer grant (Google service accounts) |
 
-Source: `backend/ciso_assistant/settings.py` (lines 258-275)
+The variables are turned into Django's `MAILERS` setting by `backend/ciso_assistant/mailers.py`. Every send goes through `backend/core/mailer.py`.
+
+### Testing the configuration
+
+`python manage.py send_test_email <address>` sends a test message through `core.mailer.send_test()`, which reports the mailer that delivered and the ones skipped on the way instead of raising. The same function is meant to back a test button in the UI later.
 
 ### Global Setting (UI toggle)
 
@@ -236,7 +245,7 @@ These use a separate mechanism (`User.mailing()` in `backend/iam/models.py`) wit
 | User creation (welcome) | `registration/first_connexion_email.html` | `User.save()` / management command `welcome_mail` |
 | User creation (SSO) | `registration/first_connexion_email_sso.html` | SSO user provisioning |
 
-These emails support the **rescue (fallback) email server**. Notification emails (from `tasks.py`) currently use only the primary server.
+All of these, like the notification emails, go through `core.mailer` and therefore the rescue server.
 
 ### 5. Non-Notification Periodic Tasks
 
