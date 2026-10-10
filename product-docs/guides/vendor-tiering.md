@@ -6,7 +6,7 @@ description: "Rank your third parties on your own criticality scale with a short
 
 A vendor's **tier** says how critical it is to you, on your organisation's own scale: _Critical_, _Important_, _Standard_ or _Low impact_ by default. The tier drives how closely you follow the vendor. A critical one gets the full questionnaire and frequent reviews; a low-impact one, a light check.
 
-You can set a tier by hand, but the point of this guide is to set it from a short **tiering form**. Someone answers a few questions about the vendor, a reviewer accepts the result, and the tier is written onto the vendor along with the answers that justify it.
+You can set a tier by hand, but the point of this guide is to set it from a short **tiering form**. Someone answers a few questions about the vendor. The tier is written onto the vendor along with the answers that justify it, either at once or after a reviewer accepts it.
 
 This walkthrough takes about fifteen minutes. You need an administrator to review the scale and load a form; the rest can be done by anyone who can edit the vendor.
 

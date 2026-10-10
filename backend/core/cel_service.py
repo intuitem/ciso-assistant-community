@@ -1474,6 +1474,7 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
             logger.warning("preview_visibility_error", expression=expression)
 
     context = build_context(hidden, {}) if hidden else initial
+    context["hidden_pages"] = sorted(u for u in hidden if u)
     computed, values = _evaluate_rules(
         env, quick_form.get("outcomes_definition"), context, preview=True
     )
