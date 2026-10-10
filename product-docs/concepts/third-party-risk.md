@@ -43,6 +43,21 @@ Because name and version identify an assessment within a domain, a revision need
 
 The entity list carries a **Last assessment** column — the most recent assessment for each third party, with its date and status — so the register answers "who is overdue for a review?" without opening anything. Third parties that have never been assessed are shown as **Never assessed**, and can be filtered on that.
 
+## Tier
+
+An entity's **tier** is its criticality on your organisation's scale, managed under **Third parties > Criticality**. The default scale has four tiers: _Critical_, _Important_, _Standard_ and _Low impact_. Solutions are ranked on the same scale.
+
+The tier and the entity assessment answer different questions. The tier is a qualification: how much the vendor matters to you, and so how closely to follow it. The assessment is the vendor's posture: how well it protects what you entrust to it. A critical vendor can have an excellent posture.
+
+A tier is set in one of two ways:
+
+- **Assessed.** A tiering form is filled for the entity and accepted. The form computes a value from the answers, and its bands and knock-out rules turn that value into a tier. Two forms ship with the platform, one of them built on the EBIOS RM stakeholder criteria.
+- **Forced.** Someone who can edit the entity picks a tier directly, with an optional reason.
+
+The latest decision wins, whichever way it was made. Each change is kept in the entity's **Tier history**: the tier before and after, who made the change, when, and which response it came from.
+
+See [Tiering your vendors](../guides/vendor-tiering.md) for the walkthrough and how to adapt the forms to your method.
+
 ## External ratings
 
 Many organisations buy a continuous outside-in rating of their vendors. With the **external_ratings** [feature flag](../configuration/settings/feature-flags.md) on, entities gain an **External ratings** tab where those readings are recorded:
@@ -103,4 +118,5 @@ Treating third parties as a parallel surface — rather than just "another perim
 - [Domains](domains.md)
 - [Audits](audits.md)
 - [Guide → Third-party risk management](../guides/tprm.md)
+- [Guide → Tiering your vendors](../guides/vendor-tiering.md)
 - [Vocabulary → Entity / Solution / Contract / Representative / Entity assessment](../introduction/vocabulary.md)

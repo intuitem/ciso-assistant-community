@@ -87,14 +87,15 @@ Instead of deciding, you can send the request back to the requester. It returns 
 
 Once the ready-made one makes sense, build one of your own.
 
-1. Go to **Extra > Library builder**.
+1. Go to **Catalog > Library Builder**.
 2. Click **New quick form**. Give it a name and a packager, then **Create and edit**.
 3. You land in the editor with one page. Add pages, questions and choices.
 
 A few things worth knowing before you design one:
 
 - **Scores and outcomes are what make it more than a web form.** Give choices a score, then write outcome rules over the answers — either on a specific answer ("personal data was ticked") or on the total ("anything above 100 needs a full assessment").
-- **Check your outcomes by filling the form in.** A rule that references a question that does not exist does not raise an error — it silently never fires, and the form looks like it works. Use the preview, answer it, and confirm the outcomes you expect actually appear.
+- **Check your outcomes by filling the form in.** Saving refuses a rule that names a question the form does not have, but not every mistake is caught: a rule that only tests whether an answer exists passes with a typo and never fires. Use the preview, answer it, and confirm the outcomes you expect actually appear.
+- **A form can write back onto what it is about.** A vendor tiering form sets the vendor's tier when accepted. See [Tiering your vendors](vendor-tiering.md).
 - **A published form is versioned like any library.** Re-importing a newer version updates it in place, except for questions already answered by a request that has left draft. Those are kept on purpose — deleting them would rewrite the record a decision was made on.
 
 ## Where to go next

@@ -13,7 +13,7 @@ The distinction from an audit matters. An audit measures an organisation against
 {% hint style="info" %}
 Quick forms are gated by the **Forms and Requests** feature flag, off by default. Turn it on under **Settings → Feature flags**.
 
-You also need **Custom portals**. A portal tile is currently the only way a requester starts a request, so a published form with no portal behind it cannot be reached.
+You also need **Custom portals**. A portal tile is how a requester starts a request, so a published form with no portal behind it cannot be reached. The exception is a form about an object, such as a vendor tiering form: it is started from that object, for example with **Assess tier** on a vendor (see [Writing back onto the subject](#writing-back-onto-the-subject)).
 {% endhint %}
 
 ## Mental model
@@ -25,12 +25,16 @@ graph LR
   PUB -->|scopes| AUD[Audience]
   PUB -->|surfaced on| POR[Portal tile]
   POR -->|filed as| REQ[Request]
+  SUBJ[Subject object] -.->|Assess tier| REQ
   REQ -->|classified by| OUT[Outcomes]
   REQ -->|decided by| REV[Reviewer]
   OUT -.->|may produce| OBJ[Security exception / applied control]
+  REQ -.->|on accept, may write to| SUBJ
 ```
 
 A **quick form** arrives from a **library**, like a framework or a risk matrix does. On its own it cannot be filled — it must first be **published**, which is what names the **audience** allowed to file it and the domain their requests land in. A publication is then surfaced to people through a **portal tile**, which is where they click to start. Someone in that audience files a **request**, answers it, and submits. The answers compute a **score** and fire **outcomes**, which classify the request. A **reviewer** decides. An accepted request can then produce a real governed object, with the link back to the request that caused it.
+
+A form about an object, such as a vendor tiering form, takes a shorter route: it is started from that object, with no publication or portal, and when the form has an **On accept** setting, an accepted request writes its result back onto it.
 
 | User-facing | Internal | Notes |
 |---|---|---|
@@ -121,13 +125,31 @@ Each question can carry a score, and each form can carry **outcome rules** — e
 Two ways to write a rule, both useful:
 
 - **On a specific answer** — "personal data was ticked", "no compensating control is in place". Precise, and reads like the question it depends on.
-- **On the total score** — "anything above 100 needs a full assessment". One threshold to tune, instead of an enumeration that grows each time a choice is added.
+- **On a score** — "anything above 100 needs a full assessment". One threshold to tune, instead of an enumeration that grows each time a choice is added. The score can be the form's, or a page's when each page measures something different (business impact on one, data exposure on another).
 
-Outcomes are what the rest of the platform reacts to. They drive which supervised actions a reviewer is offered, and they are the hook for turning an accepted request into a governed object.
+A rule can also compute a **number** instead of firing: an average, the higher of two page scores, a formula such as the EBIOS RM threat level. The value shows on the request, and later rules read it. That is how a form turns answers into one figure a decision can rest on.
+
+Outcomes are what the rest of the platform reacts to. They drive which supervised actions a reviewer is offered, and they are the hook for turning an accepted request into a governed object or a change to an existing one.
 
 {% hint style="warning" %}
-An outcome rule that references a question that does not exist — a typo, or a question removed later — does not raise an error. It simply never fires, and the form looks like it works. Fill a form in and check the outcomes before relying on them.
+Saving a form refuses a rule that names a question, a page or a rule the form does not have. A rule that only tests whether an answer exists, such as `"q1" in answers`, passes that check even with a typo, and then never fires. Fill a form in and check the outcomes before relying on them.
 {% endhint %}
+
+## Writing back onto the subject
+
+Some forms are _about_ an object: a vendor tiering form is about a vendor. The form names that object in a **subject** question, and the request is then linked to it.
+
+Such a form can say what an accepted request writes onto its subject, in its **On accept** setting. Today that is the vendor's [criticality tier](third-party-risk.md#tier): bands on a score or a number rule, and knock-out rules that force at least a given tier. When several apply, the highest tier wins.
+
+Three things follow:
+
+- **It starts from the object.** **Assess tier** on a vendor opens a request with the vendor filled in and locked. No publication or portal is needed.
+- **The reviewer sees the write before deciding.** The request shows **On accept, this will write** and the value. The reviewer can override it, with a justification. If the vendor's tier came from another form, the request warns that accepting replaces it.
+- **No review when there is nothing to grant.** When the submitter could make the change themselves and every scored question is answered, submitting applies the result at once and closes the request as accepted. A publication can require a review anyway, with **Always require review**.
+
+When the result cannot be written — no subject, a tier missing from the scale, a permission missing — nothing is written and the request goes to review with the reason.
+
+[Tiering your vendors](../guides/vendor-tiering.md) walks through the whole loop.
 
 ## From a request to a real object
 
