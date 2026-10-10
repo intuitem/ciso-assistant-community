@@ -1,4 +1,5 @@
 import uuid
+from decimal import InvalidOperation
 
 import pytest
 
@@ -11,7 +12,7 @@ from automation.workflows.graph import save_graph
 from automation.workflows.models import Workflow, WorkflowInstance, WorkflowVersion
 from automation.workflows.tests.helpers import publisher_user
 from automation.workflows.tests.test_unreachable_tool import edge, make_domain, node
-from core.models import Asset
+from core.models import Asset, round_score
 
 FIELDS = {"name": "{{item.host}}", "ref_id": "{{item.id}}", "type": "SP"}
 
@@ -135,7 +136,15 @@ class TestUpsertAuthorization:
 
 @pytest.mark.django_db
 class TestBadValues:
-    def test_a_value_that_cannot_be_rendered_fails_only_its_item(self):
+    def test_a_value_that_cannot_be_rendered_fails_only_its_item(self, monkeypatch):
+        # Not a huge float: PostgreSQL's jsonb hands 1e300 back as a 301-digit
+        # int, which renders. Make the display rounding fail for one value.
+        def failing_round_score(value):
+            if value == 6.5:
+                raise InvalidOperation
+            return round_score(value)
+
+        monkeypatch.setattr("core.models.round_score", failing_round_score)
         domain = make_domain("HugeFloat")
         version = upsert_flow(
             domain, fields={**FIELDS, "description": "score {{item.score}}"}
@@ -143,7 +152,7 @@ class TestBadValues:
         output = run(
             version,
             [
-                {"host": "bad", "id": "1", "score": 1e300},
+                {"host": "bad", "id": "1", "score": 6.5},
                 {"host": "good", "id": "2", "score": 1.5},
             ],
         ).node_outputs["keep"]

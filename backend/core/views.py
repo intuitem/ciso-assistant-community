@@ -4723,7 +4723,8 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                     [m.name for m in scenario.existing_applied_controls.all()]
                 )
 
-                threats = ",".join([t.name for t in scenario.threats.all()])
+                # ref_id first: names may hold the import's separators
+                threats = ",".join([t.ref_id or t.name for t in scenario.threats.all()])
                 assets = ",".join([t.name for t in scenario.assets.all()])
 
                 row = [
@@ -4819,9 +4820,8 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 escape_excel_formula(m.name)
                 for m in scenario.existing_applied_controls.all()
             )
-            threats = ", ".join(
-                escape_excel_formula(t.name) for t in scenario.threats.all()
-            )
+            # ref_id first: names may hold the import's separators
+            threats = ", ".join(t.ref_id or t.name for t in scenario.threats.all())
             assets = ", ".join(
                 escape_excel_formula(t.name) for t in scenario.assets.all()
             )
@@ -4859,6 +4859,10 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
             df.to_excel(writer, index=False, sheet_name="Risk Assessment")
             worksheet = writer.sheets["Risk Assessment"]
+
+            threat_col_idx = df.columns.get_loc("threats") + 1
+            for row_idx in range(2, len(df) + 2):
+                worksheet.cell(row=row_idx, column=threat_col_idx).data_type = "s"
 
             from openpyxl.styles import Alignment
 

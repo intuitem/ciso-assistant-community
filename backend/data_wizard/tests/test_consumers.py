@@ -44,12 +44,16 @@ from data_wizard.views import (
     PolicyRecordConsumer,
     ProcessingRecordConsumer,
     ReferenceControlRecordConsumer,
+    RiskAssessmentContext,
+    RiskAssessmentRecordConsumer,
     SecurityExceptionRecordConsumer,
+    ThreatLookup,
     ThreatRecordConsumer,
     UserRecordConsumer,
     VulnerabilityRecordConsumer,
     _resolve_asset_class,
     _resolve_filtering_labels,
+    _resolve_threats,
 )
 
 
@@ -1721,3 +1725,112 @@ class TestUpdateModeEdgeCases:
         assert result.stopped is False
         assert result.failed == 1
         assert result.created == 1
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# RiskAssessmentRecordConsumer — threats column
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+@pytest.mark.django_db
+class TestResolveThreats:
+    """Threats link from the assessment's folder and its ancestors only."""
+
+    @staticmethod
+    def _resolve(value, user, folder):
+        return _resolve_threats(value, ThreatLookup.build(user, folder))
+
+    def test_library_threat_resolves_by_ref_id_or_name(
+        self, admin_user, root_folder, domain_folder, all_accessible
+    ):
+        ransomware = Threat.objects.create(
+            ref_id="ICT-001", name="Ransomware", folder=root_folder
+        )
+        resolved = self._resolve("ICT-001\nRANSOMWARE", admin_user, domain_folder)
+        assert resolved.ids == [ransomware.id, ransomware.id]
+        assert not resolved.failed
+
+    def test_domain_threat_shadows_the_library_one(
+        self, admin_user, root_folder, domain_folder, all_accessible
+    ):
+        Threat.objects.create(ref_id="ICT-001", name="Ransomware", folder=root_folder)
+        local = Threat.objects.create(
+            ref_id="ICT-001", name="Ransomware", folder=domain_folder
+        )
+        assert self._resolve("ICT-001", admin_user, domain_folder).ids == [local.id]
+
+    def test_sibling_domain_threat_is_not_a_candidate(
+        self, admin_user, domain_folder, other_folder, all_accessible
+    ):
+        Threat.objects.create(ref_id="T-01", name="Insider", folder=other_folder)
+        resolved = self._resolve("T-01", admin_user, domain_folder)
+        assert resolved.ids == []
+        assert resolved.failed == ["T-01"]
+
+    def test_tie_in_the_nearest_folder_is_ambiguous(
+        self, admin_user, root_folder, domain_folder, all_accessible
+    ):
+        Threat.objects.create(ref_id="T-01", name="Insider", folder=root_folder)
+        Threat.objects.create(ref_id="T-01", name="Insider", folder=domain_folder)
+        Threat.objects.create(ref_id="T-01", name="Rogue admin", folder=domain_folder)
+        resolved = self._resolve("T-01", admin_user, domain_folder)
+        assert resolved.ids == []
+        assert resolved.ambiguous == ["T-01"]
+        assert not resolved.failed
+
+    def test_threat_the_user_may_not_view_is_not_a_candidate(
+        self, admin_user, root_folder, domain_folder
+    ):
+        hidden = Threat.objects.create(
+            ref_id="ICT-001", name="Ransomware", folder=root_folder
+        )
+
+        def _all_but_hidden(user, perm_prefix, model, folder=None):
+            return model.objects.exclude(id=hidden.id).values_list("id", flat=True)
+
+        with patch(
+            "data_wizard.views.RoleAssignment._get_accessible_ids",
+            side_effect=_all_but_hidden,
+        ):
+            resolved = self._resolve("ICT-001", admin_user, domain_folder)
+        assert resolved.failed == ["ICT-001"]
+
+
+@pytest.mark.django_db
+class TestRiskAssessmentConsumerThreats:
+    @staticmethod
+    def _prepare(base_context, folder, record):
+        context = RiskAssessmentContext(
+            risk_assessment=MagicMock(),
+            folder=folder,
+            matrix_mappings={"impact": {}, "probability": {}},
+            threats=ThreatLookup.build(base_context.request.user, folder),
+        )
+        consumer = RiskAssessmentRecordConsumer(base_context)
+        return consumer.prepare_create(record, context)
+
+    def test_singular_threat_column_is_read(
+        self, base_context, root_folder, domain_folder, all_accessible
+    ):
+        phishing = Threat.objects.create(
+            ref_id="ICT-002", name="Phishing", folder=root_folder
+        )
+        data, error = self._prepare(
+            base_context, domain_folder, {"name": "R1", "threat": "ICT-002"}
+        )
+        assert error is None
+        assert data["threats"] == [phishing.id]
+
+    def test_ambiguous_threat_warns_and_is_left_out(
+        self, base_context, root_folder, domain_folder, all_accessible
+    ):
+        Threat.objects.create(ref_id="ICT-002", name="Phishing", folder=root_folder)
+        Threat.objects.create(
+            ref_id="ICT-002", name="Spear phishing", folder=root_folder
+        )
+        data, error = self._prepare(
+            base_context, domain_folder, {"name": "R1", "threats": "ICT-002"}
+        )
+        assert error is not None and error.is_warning is True
+        assert "Ambiguous threats" in error.error
+        assert "threats" not in data
