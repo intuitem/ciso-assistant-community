@@ -8,8 +8,10 @@ the response and a spot-checked record are asserted against the template
 content.
 """
 
+import io
 from pathlib import Path
 
+import openpyxl
 import pytest
 
 from core.models import (
@@ -26,6 +28,7 @@ from core.models import (
     RequirementNode,
     RiskAssessment,
     RiskMatrix,
+    RiskScenario,
     SecurityException,
     Threat,
     Vulnerability,
@@ -45,6 +48,19 @@ def _read_template(filename: str) -> bytes:
 
 
 def _post_template(client, filename: str, model_type: str, folder_id, **extra_headers):
+    return _post_file(
+        client,
+        _read_template(filename),
+        filename,
+        model_type,
+        folder_id,
+        **extra_headers,
+    )
+
+
+def _post_file(
+    client, content: bytes, filename: str, model_type: str, folder_id, **extra_headers
+):
     headers = {
         "HTTP_X_MODEL_TYPE": model_type,
         "HTTP_CONTENT_DISPOSITION": f"attachment; filename={filename}",
@@ -53,7 +69,7 @@ def _post_template(client, filename: str, model_type: str, folder_id, **extra_he
     if folder_id is not None:
         headers["HTTP_X_FOLDER_ID"] = str(folder_id)
     headers.update(extra_headers)
-    return client.post(URL, data=_read_template(filename), **headers)
+    return client.post(URL, data=content, **headers)
 
 
 @pytest.fixture
@@ -278,7 +294,8 @@ class TestSimpleTemplates:
         assert results["failed"] == 1
         assert results["stopped"] is True
         assert "subDomainsRequirePro" in str(results["errors"])
-        Folder.objects.get(name="ACME Corp", parent_folder=root_folder)
+        acme = Folder.objects.get(name="ACME Corp", parent_folder=root_folder)
+        assert list(acme.filtering_labels.values_list("label", flat=True)) == ["Group"]
         assert not Folder.objects.filter(name="IT Department").exists()
 
     def test_security_exceptions_template(
@@ -486,7 +503,17 @@ class TestAssessmentTemplates:
         template_perimeter,
         ebios_4x4_matrix,
         all_accessible,
+        root_folder,
     ):
+        # The template references the INTUITEM Common Catalog threats.
+        threats = {
+            ref_id: Threat.objects.create(ref_id=ref_id, name=name, folder=root_folder)
+            for ref_id, name in [
+                ("ICT-001", "Ransomware"),
+                ("ICT-002", "Phishing"),
+                ("ICT-003", "Malware"),
+            ]
+        }
         resp = _post_template(
             api_client,
             "risk_assessment_template.xlsx",
@@ -510,6 +537,62 @@ class TestAssessmentTemplates:
         ) == ["erp"]
         assert not scenarios.get(ref_id="R03").assets.exists()
         assert results["details"]["assets_created"] == 3
+        assert set(scenarios.get(ref_id="R01").threats.all()) == {
+            threats["ICT-001"],
+            threats["ICT-002"],
+        }
+        assert list(scenarios.get(ref_id="R04").threats.all()) == [threats["ICT-003"]]
+        assert not scenarios.get(ref_id="R02").threats.exists()
+
+    def test_risk_assessment_export_round_trips_threats(
+        self,
+        knox_admin_client,
+        root_folder,
+        domain_folder,
+        template_perimeter,
+        ebios_4x4_matrix,
+    ):
+        # The export writes ref_ids, so a name holding a separator, as this
+        # library threat's does, still resolves once re-imported.
+        library_threat = Threat.objects.create(
+            ref_id="ICT-019", name="Data Breach, Leak and Shadow IT", folder=root_folder
+        )
+        custom_threat = Threat.objects.create(name="Insider leak", folder=domain_folder)
+        source = RiskAssessment.objects.create(
+            name="Source",
+            perimeter=template_perimeter,
+            risk_matrix=ebios_4x4_matrix,
+            folder=domain_folder,
+        )
+        scenario = RiskScenario.objects.create(
+            name="Leak", ref_id="R01", risk_assessment=source
+        )
+        scenario.threats.set([library_threat, custom_threat])
+
+        export = knox_admin_client.get(
+            f"/api/risk-assessments/{source.id}/risk_assessment_xlsx/"
+        )
+        assert export.status_code == 200
+        sheet = openpyxl.load_workbook(io.BytesIO(export.content)).active
+        header = [cell.value for cell in sheet[1]]
+        threats_cell = sheet.cell(row=2, column=header.index("threats") + 1).value
+        assert set(threats_cell.split(", ")) == {"ICT-019", "Insider leak"}
+
+        resp = _post_file(
+            knox_admin_client,
+            export.content,
+            "risk_assessment.xlsx",
+            "RiskAssessment",
+            domain_folder.id,
+            HTTP_X_PERIMETER_ID=str(template_perimeter.id),
+            HTTP_X_MATRIX_ID=str(ebios_4x4_matrix.id),
+        )
+        assert resp.status_code == 200, resp.json()
+        assert resp.json()["results"]["successful"] == 1
+        imported = RiskScenario.objects.exclude(risk_assessment=source).get(
+            ref_id="R01"
+        )
+        assert set(imported.threats.all()) == {library_threat, custom_threat}
 
     def test_business_impact_analysis_template(
         self,

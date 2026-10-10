@@ -44,12 +44,16 @@ from data_wizard.views import (
     PolicyRecordConsumer,
     ProcessingRecordConsumer,
     ReferenceControlRecordConsumer,
+    RiskAssessmentContext,
+    RiskAssessmentRecordConsumer,
     SecurityExceptionRecordConsumer,
+    ThreatLookup,
     ThreatRecordConsumer,
     UserRecordConsumer,
     VulnerabilityRecordConsumer,
     _resolve_asset_class,
     _resolve_filtering_labels,
+    _resolve_threats,
 )
 
 
@@ -1087,6 +1091,199 @@ class TestFolderConsumer:
         consumer = FolderRecordConsumer(base_context)
         assert consumer.find_existing({"name": "Ghost"}) is None
 
+    def test_labels_are_resolved(self, base_context):
+        from core.models import FilteringLabel
+
+        existing = FilteringLabel.objects.create(label="Corporate")
+        consumer = FolderRecordConsumer(base_context)
+        record_data, error = consumer.prepare_create(
+            {"name": "Labelled", "labels": "Corporate|Finance"}, None
+        )
+        assert error is None
+        # Nothing is created until the row is written.
+        assert not FilteringLabel.objects.filter(label="Finance").exists()
+        resolved = consumer.resolve_deferred(record_data)
+        assert set(resolved["filtering_labels"]) == {
+            existing.id,
+            FilteringLabel.objects.get(label="Finance").id,
+        }
+
+    def test_label_creation_requires_permission(self, domain_folder):
+        from core.models import FilteringLabel
+
+        FilteringLabel.objects.create(label="Corporate")
+        request = MagicMock()
+        request.user = User.objects.create_user("no-labels@datawizard.test")
+        consumer = FolderRecordConsumer(
+            BaseContext(request=request, folders_map={}, on_conflict=ConflictMode.STOP)
+        )
+
+        # Existing labels can still be linked.
+        _, error = consumer.prepare_create({"name": "A", "labels": "Corporate"}, None)
+        assert error is None
+
+        _, error = consumer.prepare_create(
+            {"name": "B", "labels": "Corporate,Secret"}, None
+        )
+        assert error is not None
+        assert "not allowed to create labels: Secret" in error.error
+        assert not FilteringLabel.objects.filter(label="Secret").exists()
+
+    @pytest.mark.parametrize(
+        ("cell", "expected"), [("yes", True), ("false", False), (True, True)]
+    )
+    def test_create_iam_groups_is_parsed(self, base_context, cell, expected):
+        record_data, error = FolderRecordConsumer(base_context).prepare_create(
+            {"name": "Grouped", "create_iam_groups": cell}, None
+        )
+        assert error is None
+        assert record_data["create_iam_groups"] is expected
+
+    def test_blank_create_iam_groups_is_left_out(self, base_context):
+        record_data, error = FolderRecordConsumer(base_context).prepare_create(
+            {"name": "Plain", "create_iam_groups": ""}, None
+        )
+        assert error is None
+        assert "create_iam_groups" not in record_data
+
+    @pytest.mark.parametrize("cell", ["maybe", 2])
+    def test_invalid_create_iam_groups_fails_the_row(self, base_context, cell):
+        _, error = FolderRecordConsumer(base_context).prepare_create(
+            {"name": "Grouped", "create_iam_groups": cell}, None
+        )
+        assert f"Invalid create_iam_groups '{cell}'" in error.error
+
+    def test_update_keeps_labels_hidden_from_the_user(self, base_context, root_folder):
+        from core.models import FilteringLabel
+
+        public = FilteringLabel.objects.create(label="Public")
+        hidden = FilteringLabel.objects.create(label="Hidden")
+        dropped = FilteringLabel.objects.create(label="Dropped")
+        folder = Folder.objects.create(name="Labelled", parent_folder=root_folder)
+        folder.filtering_labels.set([public, hidden, dropped])
+        consumer = FolderRecordConsumer(base_context)
+        consumer.__dict__["viewable_label_ids"] = {public.id, dropped.id}
+
+        resolved = consumer.resolve_deferred(
+            {"filtering_labels": "Public"}, instance=folder
+        )
+
+        # Visible labels follow the cell; the hidden one stays linked.
+        assert set(resolved["filtering_labels"]) == {public.id, hidden.id}
+
+    def test_permission_error_fails_only_its_row(
+        self, skip_context, all_accessible, monkeypatch
+    ):
+        """Linking an object the user cannot view raises in validation."""
+        from rest_framework.exceptions import PermissionDenied
+
+        from core.serializers import FolderWriteSerializer
+
+        def deny_labels(self, data):
+            if data.get("filtering_labels"):
+                raise PermissionDenied({"filtering_labels": "denied"})
+
+        monkeypatch.setattr(FolderWriteSerializer, "_check_m2m_visibility", deny_labels)
+
+        result = FolderRecordConsumer(skip_context).process_records(
+            [{"name": "Hidden label", "labels": "Secret"}, {"name": "Next row"}]
+        )
+        assert result.failed == 1
+        assert "denied" in str(result.errors)
+        assert result.created == 1
+        assert Folder.objects.filter(name="Next row").exists()
+
+    def test_skipped_row_creates_no_label(
+        self, skip_context, domain_folder, all_accessible
+    ):
+        from core.models import FilteringLabel
+
+        result = FolderRecordConsumer(skip_context).process_records(
+            [{"name": domain_folder.name, "labels": "Orphan"}]
+        )
+        assert result.skipped == 1
+        assert not FilteringLabel.objects.filter(label="Orphan").exists()
+
+    def test_rejected_row_creates_no_label(
+        self, base_context, domain_folder, all_accessible
+    ):
+        """Nesting is rejected on Community, after the labels were resolved."""
+        from core.models import FilteringLabel
+
+        result = FolderRecordConsumer(base_context).process_records(
+            [{"name": "Child", "domain": domain_folder.name, "labels": "Orphan"}]
+        )
+        assert result.failed == 1
+        assert not FilteringLabel.objects.filter(label="Orphan").exists()
+
+    def test_internal_id_keeps_parent_with_shared_name(self, base_context, root_folder):
+        acme = Folder.objects.create(name="ACME", parent_folder=root_folder)
+        beta = Folder.objects.create(name="Beta", parent_folder=root_folder)
+        ops = Folder.objects.create(name="Ops", parent_folder=acme)
+        Folder.objects.create(name="Ops", parent_folder=beta)
+        child = Folder.objects.create(name="Servers", parent_folder=ops)
+        consumer = FolderRecordConsumer(base_context)
+
+        record_data, error = consumer.prepare_create(
+            {"name": "Servers", "domain": "Ops", "internal_id": str(child.id)}, None
+        )
+        assert error is None
+        assert record_data["parent_folder"] == ops.id
+
+        # Without the id, the shared name stays ambiguous.
+        _, error = consumer.prepare_create({"name": "Servers", "domain": "Ops"}, None)
+        assert "Multiple" in error.error
+
+    def test_root_can_be_named_as_parent(self, base_context, root_folder):
+        record_data, error = FolderRecordConsumer(base_context).prepare_create(
+            {"name": "TopLevel", "domain": root_folder.name}, None
+        )
+        assert error is None
+        assert record_data["parent_folder"] == root_folder.id
+
+    def test_parent_lookup_ignores_non_domain_folders(self, base_context, root_folder):
+        domain = Folder.objects.create(
+            name="Ops",
+            parent_folder=root_folder,
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        Folder.objects.create(
+            name="Ops",
+            parent_folder=domain,
+            content_type=Folder.ContentType.ENCLAVE,
+        )
+        record_data, error = FolderRecordConsumer(base_context).prepare_create(
+            {"name": "Child", "domain": "Ops"}, None
+        )
+        assert error is None
+        assert record_data["parent_folder"] == domain.id
+
+    def test_invalid_label_fails_the_row_clearly(self, base_context):
+        from core.models import FilteringLabel
+
+        consumer = FolderRecordConsumer(base_context)
+        _, error = consumer.prepare_create(
+            {"name": "Labelled", "labels": "Corporate,Mon label"}, None
+        )
+        assert error is not None
+        assert "Invalid labels Mon label" in error.error
+        assert not FilteringLabel.objects.exists()
+
+    def test_export_escaping_is_undone(self, base_context):
+        consumer = FolderRecordConsumer(base_context)
+        record_data, error = consumer.prepare_create(
+            {"name": "'=Ops", "description": "'- item", "labels": "'-dash"}, None
+        )
+        assert error is None
+        assert record_data["name"] == "=Ops"
+        assert record_data["description"] == "- item"
+
+    def test_no_labels_leaves_field_unset(self, base_context):
+        consumer = FolderRecordConsumer(base_context)
+        record_data, error = consumer.prepare_create({"name": "Plain"}, None)
+        assert error is None
+        assert "filtering_labels" not in record_data
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # FindingsAssessmentRecordConsumer
@@ -1528,3 +1725,112 @@ class TestUpdateModeEdgeCases:
         assert result.stopped is False
         assert result.failed == 1
         assert result.created == 1
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# RiskAssessmentRecordConsumer — threats column
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+@pytest.mark.django_db
+class TestResolveThreats:
+    """Threats link from the assessment's folder and its ancestors only."""
+
+    @staticmethod
+    def _resolve(value, user, folder):
+        return _resolve_threats(value, ThreatLookup.build(user, folder))
+
+    def test_library_threat_resolves_by_ref_id_or_name(
+        self, admin_user, root_folder, domain_folder, all_accessible
+    ):
+        ransomware = Threat.objects.create(
+            ref_id="ICT-001", name="Ransomware", folder=root_folder
+        )
+        resolved = self._resolve("ICT-001\nRANSOMWARE", admin_user, domain_folder)
+        assert resolved.ids == [ransomware.id, ransomware.id]
+        assert not resolved.failed
+
+    def test_domain_threat_shadows_the_library_one(
+        self, admin_user, root_folder, domain_folder, all_accessible
+    ):
+        Threat.objects.create(ref_id="ICT-001", name="Ransomware", folder=root_folder)
+        local = Threat.objects.create(
+            ref_id="ICT-001", name="Ransomware", folder=domain_folder
+        )
+        assert self._resolve("ICT-001", admin_user, domain_folder).ids == [local.id]
+
+    def test_sibling_domain_threat_is_not_a_candidate(
+        self, admin_user, domain_folder, other_folder, all_accessible
+    ):
+        Threat.objects.create(ref_id="T-01", name="Insider", folder=other_folder)
+        resolved = self._resolve("T-01", admin_user, domain_folder)
+        assert resolved.ids == []
+        assert resolved.failed == ["T-01"]
+
+    def test_tie_in_the_nearest_folder_is_ambiguous(
+        self, admin_user, root_folder, domain_folder, all_accessible
+    ):
+        Threat.objects.create(ref_id="T-01", name="Insider", folder=root_folder)
+        Threat.objects.create(ref_id="T-01", name="Insider", folder=domain_folder)
+        Threat.objects.create(ref_id="T-01", name="Rogue admin", folder=domain_folder)
+        resolved = self._resolve("T-01", admin_user, domain_folder)
+        assert resolved.ids == []
+        assert resolved.ambiguous == ["T-01"]
+        assert not resolved.failed
+
+    def test_threat_the_user_may_not_view_is_not_a_candidate(
+        self, admin_user, root_folder, domain_folder
+    ):
+        hidden = Threat.objects.create(
+            ref_id="ICT-001", name="Ransomware", folder=root_folder
+        )
+
+        def _all_but_hidden(user, perm_prefix, model, folder=None):
+            return model.objects.exclude(id=hidden.id).values_list("id", flat=True)
+
+        with patch(
+            "data_wizard.views.RoleAssignment._get_accessible_ids",
+            side_effect=_all_but_hidden,
+        ):
+            resolved = self._resolve("ICT-001", admin_user, domain_folder)
+        assert resolved.failed == ["ICT-001"]
+
+
+@pytest.mark.django_db
+class TestRiskAssessmentConsumerThreats:
+    @staticmethod
+    def _prepare(base_context, folder, record):
+        context = RiskAssessmentContext(
+            risk_assessment=MagicMock(),
+            folder=folder,
+            matrix_mappings={"impact": {}, "probability": {}},
+            threats=ThreatLookup.build(base_context.request.user, folder),
+        )
+        consumer = RiskAssessmentRecordConsumer(base_context)
+        return consumer.prepare_create(record, context)
+
+    def test_singular_threat_column_is_read(
+        self, base_context, root_folder, domain_folder, all_accessible
+    ):
+        phishing = Threat.objects.create(
+            ref_id="ICT-002", name="Phishing", folder=root_folder
+        )
+        data, error = self._prepare(
+            base_context, domain_folder, {"name": "R1", "threat": "ICT-002"}
+        )
+        assert error is None
+        assert data["threats"] == [phishing.id]
+
+    def test_ambiguous_threat_warns_and_is_left_out(
+        self, base_context, root_folder, domain_folder, all_accessible
+    ):
+        Threat.objects.create(ref_id="ICT-002", name="Phishing", folder=root_folder)
+        Threat.objects.create(
+            ref_id="ICT-002", name="Spear phishing", folder=root_folder
+        )
+        data, error = self._prepare(
+            base_context, domain_folder, {"name": "R1", "threats": "ICT-002"}
+        )
+        assert error is not None and error.is_warning is True
+        assert "Ambiguous threats" in error.error
+        assert "threats" not in data
