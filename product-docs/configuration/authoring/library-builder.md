@@ -25,7 +25,7 @@ Because a draft serializes to a plain library **YAML**, you can also export it a
   - **Draft** — never published; identity still editable.
   - **Published** — published, with no changes since.
   - **Published · unpublished changes** — published, but edited since; publish again to push the edits live.
-- **Save state** — separate from publication. Inside each object editor (framework/matrix/preset) the badge tracks whether your local edits are **saved to the draft** yet — **Empty**, **Saved to draft**, or **Unsaved changes**. You save in the editor; you publish from the draft page.
+- **Save state** — separate from publication. Inside each object editor (framework/matrix/quick form/preset) the badge tracks whether your local edits are **saved to the draft** yet — **Empty**, **Saved to draft**, or **Unsaved changes**. You save in the editor; you publish from the draft page.
 - **Adopt** — bring an existing custom library (or a library-less framework left by the old builders) into a draft so you can keep editing it, identity preserved.
 - **Clone** — copy objects _by value_ from another library or draft into yours, rebased onto your URN family so they evolve independently.
 
@@ -36,7 +36,7 @@ Because a draft serializes to a plain library **YAML**, you can also export it a
 For the common case — one framework, or one matrix, with no other objects — you don't need to think about libraries at all.
 
 1. Open **Catalog → Library Builder**.
-2. Click **New framework** or **New matrix**.
+2. Click **New framework**, **New matrix** or **New quick form**.
 3. Enter a **name** and a **packager** (your namespace, e.g. `acme`). The packager is remembered after the first time, and the default can be set instance-wide (see [Set the default packager](#set-the-default-packager)).
 4. Click **Create and edit**. The wrapping library is minted behind the scenes — its ref_id is slugged from the name and de-duplicated against your corpus — and you land straight in the object's editor.
 5. Edit and save, then publish from the draft page.
@@ -167,6 +167,58 @@ Deleting a risk level that cells still point at is the most fragile operation: a
 
 Each level section offers four colour palettes — **classic** (green→red), **accessible** (Wong's colourblind-safe set), **warm**, and **cool** — as swatch buttons. Selecting one rewrites every colour in that section in order (overwriting custom hex). Apply the same palette across sections for a coherent look; the _accessible_ palette is the safe default, and keeps risk-level colours monotonic (green → yellow → orange → red).
 
+## Authoring quick forms
+
+A [quick form](../../concepts/quick-forms.md) is a short questionnaire made of pages. Start one with **New quick form** on the builder list, or copy a shipped one into a draft with [Import objects (clone)](#clone-objects-from-another-library-or-draft) and click **Edit visually**. Changing a copy is usually faster than starting blank: the vendor tiering forms are a good base for your own tiering method.
+
+### Build the pages and questions
+
+1. Use **Add page** (or **Add page below** on an existing page) and give each page a name. The table of contents on the left jumps between pages.
+2. On a page, click **Add question** and pick its type: **Single choice**, **Multiple choice**, **Boolean**, **Text**, **Number**, **Date**, **File upload**, or **Object reference** (pick an object of the platform, such as a vendor).
+3. For a choice question, **Add choice** and set, per choice, its value, a **score** (the points it contributes), and a **description**. Respondents see the description behind an info icon next to the choice: use it to say what the level means, so two people pick the same one.
+4. Under **Advanced** on a page, set a weight, an annotation, whether evidence is expected, and a visibility condition on earlier answers.
+5. Set each page's **Page score**: **Sum**, **Maximum** or **Average** of its question scores. Rules read it as `pages["PAGE_ID"].score`.
+
+### Score the form and name its subject
+
+Open **Form settings** at the top of the editor:
+
+- **Score** — how the form score is built from the answers: **Sum of questions**, **Average of questions**, **Sum of page scores** or **Average of page scores**, with a minimum and maximum. Rules read the unrounded value as `response.score`. Scores are decimals: write `3.0` rather than `3` when testing equality.
+- **Subject** — the question where respondents pick what the form is about, for example the vendor being assessed. Only a question that picks a single object can be used. A subject is required for [On accept](#write-back-on-accept).
+
+### Add rules to a form
+
+Rules work as they do for [frameworks](#add-outcome-rules): under **Outcome rules**, **Add rule**, then set an ID, a **CEL Expression**, a label and a color. Set **Result** to **Number** to compute a value instead of a yes/no verdict. Number rules run first, in order, and later rules read them as `values.<ref_id>`.
+
+To write an expression, **Insert condition** builds a test on a question's answer (_is_, _includes_, _is answered_…), and **Use a page's score** inserts a page score. For instance, the EBIOS RM tiering form computes its threat level as `values.dependency * values.penetration / (values.maturity * values.trust)`, from four number rules that turn each answer into a level from 1 to 4.
+
+| Variable | Fields |
+| --- | --- |
+| `response` | `score` (unrounded), `score_sum`, `score_max`, `answered_count`, `total_count`, `complete`, `scored_complete` (every scored question is answered) |
+| `pages["PAGE_ID"]` | `visible`, `score`, `score_max`, `answered_count`, `total_count` |
+| `answers["QUESTION_ID"]` | `value`, `score`, `selected_choices`, `weight`, `type`, `answered` |
+| `values.<ref_id>`, `computed_outcomes`, `hidden_pages` | number rules, yes/no rules above that fired, pages hidden by their condition |
+
+Page visibility conditions run before the rules and cannot read `values`. Saving refuses a rule that names a question, a page or a rule the form does not have, or reads a yes/no rule listed below it.
+
+### Write back on accept
+
+The **On accept** section of **Form settings** says what an accepted response writes onto its subject. It needs a subject question. Today it can set a vendor's criticality tier:
+
+1. Tick **Assign the vendor's criticality tier**.
+2. Choose where the tier comes from. You can combine both:
+   - **From the form score** — bands on `response.score`.
+   - **From rules** — **Use a rule** and pick a rule of the form. A number rule gets bands, like the form score. A yes/no rule gives at least its tier when it fires: a knock-out, such as _a regulated critical function makes the vendor Critical_.
+3. For bands, list the tiers from the most critical down, each with the lowest value that reaches it (**from**). Leave the last band empty to catch everything below. **Add a band** for more.
+
+When several bands and rules apply, the highest tier wins. A response where nothing applies writes nothing and goes to review.
+
+<figure><img src="../../.gitbook/assets/tiering-builder-on-accept.png" alt="The On accept section of the EBIOS RM tiering form: four bands on the threat level"><figcaption><p>Bands on a number rule: Critical from 2.5, Important from 0.9, Standard from 0.2, Low impact below</p></figcaption></figure>
+
+The editor warns when no question gives points but bands read the form score, and when a band names a tier your scale does not have. Bands must go from the most to the least critical tier with decreasing minimums.
+
+Use **Preview** to fill the form as a respondent would and check the computed values before you publish. See [Tiering your vendors](../../guides/vendor-tiering.md) for the full loop.
+
 ## Authoring journey presets
 
 A **journey preset** is a reusable template for a journey — the bundle of audits, risk assessments, and supporting objects a team applies to a new perimeter (_new project intake_, _supplier onboarding_, _annual ISO recertification_). Open the preset editor from a draft.
@@ -245,7 +297,7 @@ When a cloned framework references a control or threat _outside_ the selection, 
 
 ## Publishing and lifecycle
 
-Publishing is a **library-level** action on the draft page. The object editors (framework/matrix/preset) only **save to the draft**; you publish the whole library from the draft page toolbar, which has three controls: **Validate**, **Export**, and **Publish**.
+Publishing is a **library-level** action on the draft page. The object editors (framework/matrix/quick form/preset) only **save to the draft**; you publish the whole library from the draft page toolbar, which has three controls: **Validate**, **Export**, and **Publish**.
 
 ### Validate
 
@@ -335,5 +387,5 @@ Individual users' most recently typed packager is also remembered locally and ta
 - [Library objects](../libraries/library-objects/README.md) — the available objects, with links to their Excel fields and YAML examples.
 - [Guided example: create your first framework](../libraries/guided-example.md) — a step-by-step framework workbook.
 - [Update a library](../libraries/update-library.md) — how to publish a new version and apply it to existing audits.
-- Concepts: [Frameworks](../../concepts/frameworks.md) · [Risk matrices](../../concepts/risk-matrices.md) · [Journeys](../../concepts/journeys.md) · [Mappings](../../concepts/mappings.md).
+- Concepts: [Frameworks](../../concepts/frameworks.md) · [Risk matrices](../../concepts/risk-matrices.md) · [Quick forms](../../concepts/quick-forms.md) · [Journeys](../../concepts/journeys.md) · [Mappings](../../concepts/mappings.md).
 - [Contributing → Frameworks and libraries](../../contributing/framework.md) — how to upstream authored content to the community catalogue.

@@ -134,8 +134,8 @@
 		{#if activeDescription}
 			<Tooltip positioning={{ placement: 'top' }} openDelay={50}>
 				<Tooltip.Trigger>
-					{#snippet child({ props })}
-						<span {...props} class="ml-2 underline">
+					{#snippet element(attributes)}
+						<span {...attributes} class="ml-2 underline">
 							<i class="fa-solid fa-circle-info"></i>
 						</span>
 					{/snippet}
