@@ -4381,8 +4381,6 @@
 	"remoteObjectHelpText": "Виберіть віддалений об'єкт для синхронізації",
 	"webhookEndpointUrl": "URL кінцевої точки вебхука",
 	"webhookEndpointUrlHelpText": "URL, за яким застосунок отримуватиме вхідні вебхуки від стороннього сервісу.",
-	"createRemoteObject": "Створити віддалений об'єкт",
-	"createRemoteObjectHelpText": "Якщо увімкнено, при створенні цього елемента у сторонньому сервісі буде створено відповідний об'єкт.",
 	"metricDefinition": "Визначення метрики",
 	"metricDefinitions": "Визначення метрик",
 	"addMetricDefinition": "Додати визначення метрики",

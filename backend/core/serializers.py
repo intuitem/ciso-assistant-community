@@ -722,8 +722,8 @@ class AssetCapabilityWriteSerializer(AssetCapabilityReadSerializer):
 class IntegrationLinkSerializerMixin(serializers.Serializer):
     """Adds remote-object linking to a model serializer.
 
-    Declares the write-only ``integration_config`` / ``remote_object_id`` /
-    ``create_remote_object`` fields (stripped before the model is written) and
+    Declares the write-only ``integration_config`` / ``remote_object_id``
+    fields (stripped before the model is written) and
     exposes existing ``sync_mappings`` on read, scoped by content type. The
     actual SyncMapping creation / sync scheduling is done by
     ``IntegrationLinkViewSetMixin`` on the viewset.
@@ -738,14 +738,10 @@ class IntegrationLinkSerializerMixin(serializers.Serializer):
     remote_object_id = serializers.CharField(
         required=False, allow_blank=True, allow_null=True, write_only=True
     )
-    create_remote_object = serializers.BooleanField(
-        required=False, default=False, write_only=True
-    )
 
     _INTEGRATION_LINK_FIELDS = (
         "integration_config",
         "remote_object_id",
-        "create_remote_object",
     )
 
     def _strip_integration_link_fields(self, validated_data):
@@ -1601,9 +1597,6 @@ class AppliedControlWriteSerializer(
     remote_object_id = serializers.CharField(
         required=False, allow_blank=True, allow_null=True, write_only=True
     )
-    create_remote_object = serializers.BooleanField(
-        required=False, default=False, write_only=True
-    )
 
     def validate(self, attrs):
         return self.validate_commitment(super().validate(attrs))
@@ -1611,7 +1604,6 @@ class AppliedControlWriteSerializer(
     def create(self, validated_data: Any):
         commitment_data = dict(validated_data)
         self.pop_commitment(validated_data)
-        validated_data.pop("create_remote_object", None)
         validated_data.pop("remote_object_id", None)
         validated_data.pop("integration_config", None)
 

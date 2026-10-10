@@ -3260,8 +3260,6 @@
 	"remoteObjectHelpText": "동기화할 원격 객체를 선택합니다.",
 	"webhookEndpointUrl": "웹훅 엔드포인트 URL",
 	"webhookEndpointUrlHelpText": "애플리케이션이 타사 서비스로부터 들어오는 웹훅을 수신할 URL입니다.",
-	"createRemoteObject": "원격 객체 생성",
-	"createRemoteObjectHelpText": "활성화하면 이 항목이 생성될 때 타사 서비스에도 해당 객체가 생성됩니다.",
 	"metricDefinition": "지표 정의",
 	"metricDefinitions": "지표 정의",
 	"addMetricDefinition": "지표 정의 추가",

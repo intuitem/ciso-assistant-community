@@ -364,7 +364,9 @@
 				optionsEndpoint="settings/integrations/configs?provider__provider_type=itsm"
 				optionsLabelField="provider"
 				field="integration_config"
-				helpText={m.integrationProviderHelpText()}
+				helpText={context === 'create'
+					? m.integrationProviderCreateHelpText()
+					: m.integrationProviderHelpText()}
 				label={m.integrationProvider()}
 			/>
 			{#if $formStore.integration_config}
@@ -385,14 +387,6 @@
 							label={m.remoteObject()}
 						/>
 					{/key}
-				{/if}
-				{#if context === 'create'}
-					<Checkbox
-						{form}
-						field="create_remote_object"
-						label={m.createRemoteObject()}
-						helpText={m.createRemoteObjectHelpText()}
-					/>
 				{/if}
 			{/if}
 		{:else}

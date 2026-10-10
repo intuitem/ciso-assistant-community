@@ -4222,8 +4222,6 @@
 	"remoteObject": "Vzdálený objekt",
 	"remoteObjectHelpText": "Vyberte vzdálený objekt, se kterým chcete synchronizovat.",
 	"webhookEndpointUrlHelpText": "Adresa URL, na kterou bude aplikace přijímat příchozí webhooky ze služby třetí strany.",
-	"createRemoteObject": "Vytvořit vzdálený objekt",
-	"createRemoteObjectHelpText": "Je-li toto zapnuto, při vytvoření položky zde se automaticky založí odpovídající objekt i u třetí strany.",
 	"metricDefinition": "Definice metriky",
 	"metricDefinitions": "Definice metrik",
 	"addMetricDefinition": "Přidat definici metriky",

@@ -3611,8 +3611,6 @@
 	"remoteObjectHelpText": "Vali kaugobjekt, millega sünkroonida",
 	"webhookEndpointUrl": "Webhooki lõpp-punkti URL",
 	"webhookEndpointUrlHelpText": "URL, kuhu rakendus võtab vastu kolmanda osapoole teenusest tulevad webhookid.",
-	"createRemoteObject": "Loo kaugobjekt",
-	"createRemoteObjectHelpText": "Lubamisel luuakse vastav objekt kolmanda osapoole teenuses, kui see kirje luuakse.",
 	"metricDefinition": "Mõõdiku definitsioon",
 	"metricDefinitions": "Mõõdikute definitsioonid",
 	"addMetricDefinition": "Lisa mõõdiku definitsioon",

@@ -4494,8 +4494,6 @@
 	"remoteObjectHelpText": "Wybierz obiekt zdalny do synchronizacji",
 	"webhookEndpointUrl": "URL punktu końcowego webhooka",
 	"webhookEndpointUrlHelpText": "URL, pod którym aplikacja będzie odbierać przychodzące webhooki z usługi zewnętrznej.",
-	"createRemoteObject": "Utwórz obiekt zdalny",
-	"createRemoteObjectHelpText": "Po włączeniu przy tworzeniu tego elementu w usłudze zewnętrznej zostanie utworzony odpowiadający mu obiekt.",
 	"metricDefinition": "Definicja metryki",
 	"metricDefinitions": "Definicje metryk",
 	"addMetricDefinition": "Dodaj definicję metryki",
