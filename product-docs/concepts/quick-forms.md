@@ -29,12 +29,12 @@ graph LR
   REQ -->|classified by| OUT[Outcomes]
   REQ -->|decided by| REV[Reviewer]
   OUT -.->|may produce| OBJ[Security exception / applied control]
-  REQ -.->|on accept, writes to| SUBJ
+  REQ -.->|on accept, may write to| SUBJ
 ```
 
 A **quick form** arrives from a **library**, like a framework or a risk matrix does. On its own it cannot be filled — it must first be **published**, which is what names the **audience** allowed to file it and the domain their requests land in. A publication is then surfaced to people through a **portal tile**, which is where they click to start. Someone in that audience files a **request**, answers it, and submits. The answers compute a **score** and fire **outcomes**, which classify the request. A **reviewer** decides. An accepted request can then produce a real governed object, with the link back to the request that caused it.
 
-A form about an object, such as a vendor tiering form, takes a shorter route: it is started from that object, with no publication or portal, and an accepted request writes its result back onto it.
+A form about an object, such as a vendor tiering form, takes a shorter route: it is started from that object, with no publication or portal, and when the form has an **On accept** setting, an accepted request writes its result back onto it.
 
 | User-facing | Internal | Notes |
 |---|---|---|
