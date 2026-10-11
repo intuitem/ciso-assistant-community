@@ -25,7 +25,6 @@ export const THIRD_PARTY_PAGES: ReadonlySet<string> = new Set([
 	'/my-profile/change-password',
 	'/my-profile/settings',
 	'/[model=thirdparty_urlmodels]',
-	'/[model=thirdparty_urlmodels]/[id=uuid]',
 	'/[model=thirdparty_urlmodels]/[id=uuid]/edit'
 ]);
 
