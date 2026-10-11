@@ -175,12 +175,32 @@ def _build_context_dict(
     return ctx
 
 
+def _with_descendants(framework, urns: set[str]) -> set[str]:
+    """`urns` plus every requirement node below one of them."""
+    from core.models import RequirementNode
+
+    children: dict[str, list[str]] = {}
+    for urn, parent_urn in RequirementNode.objects.filter(
+        framework=framework, parent_urn__isnull=False
+    ).values_list("urn", "parent_urn"):
+        children.setdefault(parent_urn, []).append(urn)
+    result, pending = set(urns), list(urns)
+    while pending:
+        for child in children.get(pending.pop(), ()):
+            if child not in result:
+                result.add(child)
+                pending.append(child)
+    return result
+
+
 def build_cel_context(compliance_assessment) -> tuple[dict, set[str]]:
     """Build the evaluation context dict from a ComplianceAssessment.
 
     Returns (context_dict, hidden_urns) where hidden_urns contains URNs of
-    requirements whose visibility_expression evaluated to false.
-    Hidden URNs may include both assessable and non-assessable (splash screen) nodes.
+    requirements whose visibility_expression evaluated to false, and of every
+    node below one of them: a hidden section hides its whole subtree.
+    Hidden URNs may include both assessable and non-assessable (section, splash
+    screen) nodes.
     """
     from core.models import RequirementAssessment, RequirementNode
     from core.utils import extract_node_id
@@ -289,6 +309,10 @@ def build_cel_context(compliance_assessment) -> tuple[dict, set[str]]:
                     exc_info=True,
                 )
                 # Fail-open: keep requirement visible on error
+
+    # A hidden node hides its descendants, whatever their own expressions say
+    if hidden_urns:
+        hidden_urns = _with_descendants(framework, hidden_urns)
 
     # Phase 3: rebuild context excluding hidden assessable requirements
     hidden_assessable = hidden_urns & {n["urn"] for n in in_scope}

@@ -747,6 +747,94 @@ class TestVisibilityExpression:
         assert "urn:test:risk:req_node:cycle:a" in hidden_urns
         assert "urn:test:risk:req_node:cycle:b" in hidden_urns
 
+    @staticmethod
+    def _tree_audit(nodes, outcomes_definition=None):
+        """Audit on a framework built from (node_id, parent_id, assessable, visibility)."""
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Tree FW",
+            folder=folder,
+            min_score=0,
+            max_score=100,
+            outcomes_definition=outcomes_definition or [],
+        )
+        ca = ComplianceAssessment.objects.create(
+            name="Tree CA",
+            framework=fw,
+            folder=folder,
+            perimeter=Perimeter.objects.create(name="Tree Perim", folder=folder),
+            min_score=0,
+            max_score=100,
+        )
+        base = "urn:test:risk:req_node:tree"
+        for node_id, parent_id, assessable, visibility in nodes:
+            rn = RequirementNode.objects.create(
+                framework=fw,
+                urn=f"{base}:{node_id}",
+                parent_urn=f"{base}:{parent_id}" if parent_id else None,
+                ref_id=node_id,
+                assessable=assessable,
+                visibility_expression=visibility,
+                folder=folder,
+            )
+            if assessable:
+                RequirementAssessment.objects.create(
+                    compliance_assessment=ca, requirement=rn, folder=folder
+                )
+        return ca, base
+
+    def test_hidden_section_hides_its_subtree(self, db):
+        """A hidden section hides every node below it, whatever their own
+        expressions say, so they leave the context, the score and the outcomes."""
+        from core.cel_service import build_cel_context, evaluate_outcomes
+
+        ca, base = self._tree_audit(
+            [
+                ("section", None, False, "false"),
+                ("child", "section", True, "true"),
+                ("subsection", "section", False, None),
+                ("grandchild", "subsection", True, None),
+                ("other", None, True, None),
+            ],
+            outcomes_definition=[
+                {"ref_id": "child_counted", "expression": '"child" in requirements'},
+                {"ref_id": "other_counted", "expression": '"other" in requirements'},
+            ],
+        )
+
+        ctx, hidden_urns = build_cel_context(ca)
+        assert hidden_urns == {
+            f"{base}:{n}" for n in ("section", "child", "subsection", "grandchild")
+        }
+        assert set(ctx["requirements"]) == {"other"}
+        assert ctx["assessment"]["total_count"] == 1
+        assert set(ctx["hidden_requirements"]) == {
+            "section",
+            "child",
+            "subsection",
+            "grandchild",
+        }
+
+        evaluate_outcomes(ca)
+        ca.refresh_from_db()
+        assert set(ca.computed_outcome) == {"other_counted"}
+
+    def test_visible_section_keeps_children_expressions(self, db):
+        """Under a visible section, each child follows its own expression."""
+        from core.cel_service import build_cel_context
+
+        ca, base = self._tree_audit(
+            [
+                ("section", None, False, "true"),
+                ("shown", "section", True, None),
+                ("hidden", "section", True, "false"),
+            ]
+        )
+
+        ctx, hidden_urns = build_cel_context(ca)
+        assert hidden_urns == {f"{base}:hidden"}
+        assert set(ctx["requirements"]) == {"shown"}
+
 
 # ---------------------------------------------------------------------------
 # TestCelTrigger
