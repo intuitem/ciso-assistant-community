@@ -117,10 +117,9 @@ class TestRequirementAssessmentsAuthenticated:
                 "folder": test.folder,
                 "compliance_assessment": compliance_assessment,
                 "requirement": RequirementNode.objects.all()[0],
-                # `score` intentionally omitted: the CA is created via
-                # .objects.create() without seeding field_visibility, so the
-                # cascade resolves score → DEFAULT_VISIBILITY (HIDDEN) and
-                # the API correctly strips score from the response.
+                # `score` intentionally omitted: the CA gets its framework's
+                # template, here the code defaults, so score is HIDDEN and
+                # the API correctly strips it from the response.
             },
             {
                 "folder": {"id": str(test.folder.id), "str": test.folder.name},
@@ -134,7 +133,7 @@ class TestRequirementAssessmentsAuthenticated:
                     "score_calculation_method": compliance_assessment.score_calculation_method,
                     "extended_result_enabled": compliance_assessment.extended_result_enabled,
                     "progress_status_enabled": compliance_assessment.progress_status_enabled,
-                    "field_visibility": DEFAULT_VISIBILITY,  # unseeded audit, framework without overrides,
+                    "field_visibility": DEFAULT_VISIBILITY,  # template of a framework without overrides
                     "name": compliance_assessment.name,
                     "framework": {
                         "implementation_groups_definition": compliance_assessment.framework.implementation_groups_definition,
@@ -236,7 +235,7 @@ class TestRequirementAssessmentsAuthenticated:
                     "score_calculation_method": compliance_assessment.score_calculation_method,
                     "extended_result_enabled": compliance_assessment.extended_result_enabled,
                     "progress_status_enabled": compliance_assessment.progress_status_enabled,
-                    "field_visibility": DEFAULT_VISIBILITY,  # unseeded audit, framework without overrides,
+                    "field_visibility": DEFAULT_VISIBILITY,  # template of a framework without overrides
                     "name": compliance_assessment.name,
                     "framework": {
                         "implementation_groups_definition": compliance_assessment.framework.implementation_groups_definition,

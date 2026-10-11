@@ -9195,6 +9195,14 @@ class ComplianceAssessment(Assessment):
             self.max_score = self.framework.max_score
             self.scores_definition = self.framework.scores_definition
             self.score_scale_preset = None
+        # No visibility map: the framework's template, as a new audit gets it, so pages
+        # and API never read an empty map differently (see client_field_visibility).
+        if not self.field_visibility:
+            from core.utils import build_initial_field_visibility
+
+            self.field_visibility = build_initial_field_visibility(self.framework)
+            if kwargs.get("update_fields") is not None:
+                kwargs["update_fields"] = {*kwargs["update_fields"], "field_visibility"}
         creating = self._state.adding
         loaded = getattr(self, "_loaded_cel_values", {})
         update_fields = kwargs.get("update_fields")
