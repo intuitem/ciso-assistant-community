@@ -1,3 +1,5 @@
+import { readdirSync } from 'node:fs';
+import { join, relative, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { reachesPage } from './page-requests';
 
@@ -55,5 +57,24 @@ describe('reachesPage follows SvelteKit dispatch', () => {
 
 	it('an unmatched path reaches no page', () => {
 		expect(reachesPage(event(null, { accept: NAVIGATION }))).toBe(false);
+	});
+
+	// Found on disk by kit's own file rules (create_manifest_data's `analyze`): a page the
+	// module's globs missed would never be guarded.
+	it('knows every page on disk', () => {
+		const routes = resolve(process.cwd(), 'src/routes');
+		const isPageFile = (name: string) =>
+			/^\+page(@.*)?\.svelte$/.test(name) || /^\+page(\.server)?\.(js|ts)$/.test(name);
+		const pages: string[] = [];
+		const walk = (dir: string) => {
+			const entries = readdirSync(dir, { withFileTypes: true });
+			if (entries.some((e) => e.isFile() && isPageFile(e.name))) {
+				pages.push('/' + relative(routes, dir));
+			}
+			for (const e of entries) if (e.isDirectory()) walk(join(dir, e.name));
+		};
+		walk(routes);
+		expect(pages.length).toBeGreaterThan(100);
+		expect(pages.filter((id) => !reachesPage(event(id, { isDataRequest: true })))).toEqual([]);
 	});
 });

@@ -1,7 +1,8 @@
 import type { RequestEvent } from '@sveltejs/kit';
 
-// The route ids that have a page, and those that have an endpoint. Only the keys of these
-// globs are read: their modules are never imported from here.
+// The route ids that have a page, and those that have an endpoint, by every file name kit
+// accepts for them (create_manifest_data's `analyze`): a page missing here would skip the
+// guard. Only the keys of these globs are read: their modules are never imported from here.
 function routeIds(files: Record<string, unknown>): ReadonlySet<string> {
 	return new Set(
 		Object.keys(files).map((file) => file.slice('/src/routes'.length, file.lastIndexOf('/')) || '/')
@@ -11,11 +12,12 @@ function routeIds(files: Record<string, unknown>): ReadonlySet<string> {
 const PAGES = routeIds(
 	import.meta.glob([
 		'/src/routes/**/+page.svelte',
-		'/src/routes/**/+page.ts',
-		'/src/routes/**/+page.server.ts'
+		'/src/routes/**/+page@*.svelte',
+		'/src/routes/**/+page.{js,ts}',
+		'/src/routes/**/+page.server.{js,ts}'
 	])
 );
-const ENDPOINTS = routeIds(import.meta.glob('/src/routes/**/+server.ts'));
+const ENDPOINTS = routeIds(import.meta.glob('/src/routes/**/+server.{js,ts}'));
 
 /**
  * Whether SvelteKit will hand this request to a page — to render it, load its data or run

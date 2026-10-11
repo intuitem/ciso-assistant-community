@@ -3757,14 +3757,9 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     def get_viewer_role(self, obj):
         """The side of `field_visibility` the requester sees this audit from, decided as the
         endpoints that strip fields decide it. None when serialized for no requester."""
-        request = self.context.get("request")
-        if request is None:
+        if self.context.get("request") is None:
             return None
-        from core.utils import get_respondent_scoped_folder_ids
-
-        if obj.folder_id in get_respondent_scoped_folder_ids(request.user):
-            return "respondent"
-        return "auditor"
+        return requester_viewer_role(self.context, obj)
 
     # Derived booleans, kept in the API for backwards compatibility. The actual
     # storage is `field_visibility`; clients that want to change these should
@@ -4318,13 +4313,16 @@ class ComplianceAssessmentImportExportSerializer(BaseModelSerializer):
 def requester_viewer_role(context, compliance_assessment):
     """The side of `field_visibility` a requirement assessment is serialized for: the
     caller's `viewer_role`; else the requester's side of the audit, decided as
-    requirements_list decides it; else, for internal use without a requester, the
-    auditor's."""
+    requirements_list decides it. With neither, raises rather than guess a side: the
+    auditor's would hand a respondent the fields their audit hides."""
     if "viewer_role" in context:
         return context["viewer_role"]
     request = context.get("request")
     if request is None:
-        return "auditor"
+        raise ValueError(
+            "Serializing a requirement assessment needs the request or a viewer_role "
+            "in the serializer context"
+        )
     from core.utils import get_respondent_scoped_folder_ids
 
     # Once per request: a list serializes many assessments with one context.

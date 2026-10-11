@@ -170,3 +170,19 @@ def test_audit_and_requirement_send_defaults_for_missing_visibility_keys(audit):
     expected = {"auditor": "edit", "respondent": "hidden"}
     assert audit_fv["findings"] == expected
     assert nested_fv["findings"] == expected
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "serializer_name",
+    ["RequirementAssessmentReadSerializer", "RequirementAssessmentWriteSerializer"],
+)
+def test_serializing_for_nobody_raises(audit, serializer_name):
+    # Without a request or a viewer_role there is no side to strip for; guessing the
+    # auditor's would hand the hidden fields to whoever the caller is serving.
+    from core import serializers
+
+    _, assigned, _, _, _ = audit
+    serializer = getattr(serializers, serializer_name)(assigned)
+    with pytest.raises(ValueError, match="viewer_role"):
+        _ = serializer.data

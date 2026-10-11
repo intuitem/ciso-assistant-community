@@ -16,7 +16,12 @@ function pageRouteIds(): string[] {
 	const ids: string[] = [];
 	const walk = (dir: string) => {
 		const entries = readdirSync(dir, { withFileTypes: true });
-		if (entries.some((e) => /^\+page(\.server)?\.(svelte|ts)$/.test(e.name))) {
+		// Every page file name kit accepts (create_manifest_data's `analyze`).
+		if (
+			entries.some(
+				(e) => /^\+page(@.*)?\.svelte$/.test(e.name) || /^\+page(\.server)?\.(js|ts)$/.test(e.name)
+			)
+		) {
 			ids.push('/' + relative(ROUTES, dir));
 		}
 		for (const e of entries) if (e.isDirectory()) walk(join(dir, e.name));
