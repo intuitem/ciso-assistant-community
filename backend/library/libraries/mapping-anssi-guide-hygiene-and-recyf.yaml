@@ -1,0 +1,1432 @@
+urn: urn:intuitem:risk:library:mapping-anssi-guide-hygiene-and-recyf
+locale: fr
+ref_id: mapping-anssi-guide-hygiene-and-recyf
+name: ANSSI - Guide d'hygiène informatique <-> ReCyF
+description: |-
+  Mapping between ANSSI - Guide d'hygiène informatique (42 measures, standard and reinforced levels) and RECYF : RÉFÉRENTIEL CYBER France - Version 2.5 du 17/03/2026. Community mapping produced by intuitem; ANSSI has not published a correspondence table between these two documents.
+copyright: intuitem
+version: 1
+publication_date: 2026-10-12
+provider: intuitem
+packager: intuitem
+dependencies:
+- urn:intuitem:risk:library:anssi-guide-hygiene
+- urn:intuitem:risk:library:recyf
+objects:
+  requirement_mapping_sets:
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-anssi-guide-hygiene-and-recyf
+    ref_id: mapping-anssi-guide-hygiene-and-recyf
+    name: ANSSI - Guide d'hygiène informatique <-> ReCyF
+    description: |-
+      Mapping between ANSSI - Guide d'hygiène informatique (42 measures, standard and reinforced levels) and RECYF : RÉFÉRENTIEL CYBER France - Version 2.5 du 17/03/2026. Community mapping produced by intuitem; ANSSI has not published a correspondence table between these two documents.
+    source_framework_urn: urn:intuitem:risk:framework:anssi-guide-hygiene
+    target_framework_urn: urn:intuitem:risk:framework:recyf
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:1
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:4.5
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:2
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:4.2
+      relationship: intersect
+      strength_of_relationship: 9
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:2
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:4.4
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:2.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:4.1
+      relationship: intersect
+      strength_of_relationship: 9
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:3
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:3.b.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:3
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:3.b.2
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:4
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:5.a.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:4
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:1.1
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:4
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:3.a.1
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:5
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:11.a.6
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:5
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.c.4
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:5
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.a.6
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:6
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:4.4
+      relationship: intersect
+      strength_of_relationship: 9
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:6
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.a.5
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:6
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:6.3
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:6
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.b.3
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:6.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:4.4
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:7
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:9.2
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:7
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:9.1
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:7
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:9.4
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:7
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:9.3
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:7.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:9.3
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:7.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:9.4
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:8
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.a.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:8
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.a.2
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:8
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.a.3
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:8
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:11.a.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:8
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:11.a.4
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:8.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:20.4
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:9
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.c.3
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:9
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.c.4
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:9
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.c.2
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:9
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.c.1
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:10
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.b.5
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:11
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.b.4
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:12
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.b.2
+      relationship: intersect
+      strength_of_relationship: 9
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:12
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.b.6
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:12.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.b.5
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:13
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:8.3
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:13.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:8.3
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:18.1
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:9.6
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:18.3
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:8.5
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.6
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:13.3
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:13.1
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:13.2
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:15
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:9.5
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:15
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:9.7
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:15
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:9.6
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:15.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:9.6
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:16
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:18.3
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:17
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:18.3
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:17.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:18.3
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:17.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.b.3
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:18
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:2.b.5
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:19
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.3
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:19
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.4
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:19
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.1
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:19
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.2
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:19
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.b.3
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:20
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:9.3
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:20
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.4
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:20
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:18.3
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:21
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:8.1
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:21
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:19.10
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:22
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.5
+      relationship: intersect
+      strength_of_relationship: 9
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:22
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.b.4
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:22.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.5
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:22.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:9.7
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:23
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.6
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:23
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.4
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:24
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:9.7
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:24.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.6
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.b.3
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.b.1
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.7
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.b.4
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:8.1
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.b.4
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:3.a.2
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:26
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:6.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:26
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:6.4
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:26
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:6.3
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:26
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:6.2
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:26
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:9.3
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:27
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:19.4
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:27
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:19.6
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:27.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.8
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:28
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:19.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:28
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:19.11
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:28
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:19.9
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:28.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:19.7
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:29
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:11.a.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:29
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.c.2
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:29
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:11.a.5
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:30.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:8.5
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:31
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:8.5
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:32
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:8.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:32.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:8.3
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:33
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:18.3
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:33
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:18.1
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:33.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:18.1
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:34
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:34
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.3
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:34
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.5
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:34
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.4
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:34
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.9
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:34
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:11.b.1
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:34
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:5.a.1
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:35
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.7
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:35
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:5.a.1
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:35
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:3.b.1
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:36
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:20.4
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:36
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:20.5
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:36.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:20.2
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:36.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:20.6
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:37
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:13.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:37
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:13.3
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:37
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:13.5
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:37.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:13.2
+      relationship: intersect
+      strength_of_relationship: 9
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:38.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:17.5
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:38.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:17.1
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:38.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:17.3
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:38.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:17.2
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:38.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:18.4
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:39
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:2.a.3
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:39
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:2.a.2
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:39
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:12.2
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:40
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:12.1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:40
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:12.4
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:40
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:12.6
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:40
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:12.3
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:41.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:16.2
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:41.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:16.3
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:41.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:16.1
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:10
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.b.1
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:27
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:19.5
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.b.5
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-anssi-guide-hygiene-and-recyf-revert
+    ref_id: mapping-anssi-guide-hygiene-and-recyf-revert
+    name: ANSSI - Guide d'hygiène informatique <-> ReCyF
+    description: |-
+      Mapping between ANSSI - Guide d'hygiène informatique (42 measures, standard and reinforced levels) and RECYF : RÉFÉRENTIEL CYBER France - Version 2.5 du 17/03/2026. Community mapping produced by intuitem; ANSSI has not published a correspondence table between these two documents.
+    source_framework_urn: urn:intuitem:risk:framework:recyf
+    target_framework_urn: urn:intuitem:risk:framework:anssi-guide-hygiene
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:4.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:1
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:2
+      relationship: intersect
+      strength_of_relationship: 9
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:4.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:2
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:2.r
+      relationship: intersect
+      strength_of_relationship: 9
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:3.b.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:3
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:3.b.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:3
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:5.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:4
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:4
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:3.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:4
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:11.a.6
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:5
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:10.c.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:5
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:10.a.6
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:5
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:4.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:6
+      relationship: intersect
+      strength_of_relationship: 9
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:10.a.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:6
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:6.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:6
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:10.b.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:6
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:4.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:6.r
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:9.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:7
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:9.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:7
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:9.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:7
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:9.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:7
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:9.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:7.r
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:9.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:7.r
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:10.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:8
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:10.a.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:8
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:10.a.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:8
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:11.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:8
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:11.a.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:8
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:20.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:8.r
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:10.c.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:9
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:10.c.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:9
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:10.c.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:9
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:10.c.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:9
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:10.b.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:10
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:10.b.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:11
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:10.b.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:12
+      relationship: intersect
+      strength_of_relationship: 9
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:10.b.6
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:12
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:10.b.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:12.r
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:8.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:13
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:8.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:13.r
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:18.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:9.6
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:18.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:8.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.6
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:13.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14.r
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:13.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14.r
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:13.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14.r
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:9.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:15
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:9.7
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:15
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:9.6
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:15
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:9.6
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:15.r
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:18.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:16
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:18.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:17
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:18.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:17.r
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:7.b.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:17.r
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:2.b.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:18
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:19
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:19
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:19
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:19
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:7.b.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:19
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:9.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:20
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:20
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:18.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:20
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:21
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:19.10
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:21
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:22
+      relationship: intersect
+      strength_of_relationship: 9
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:7.b.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:22
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:22.r
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:9.7
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:22.r
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.6
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:23
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:23
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:9.7
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:24
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.6
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:24.r
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:7.b.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:7.b.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.7
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:7.b.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:7.b.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25.r
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:3.a.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25.r
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:6.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:26
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:6.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:26
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:6.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:26
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:6.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:26
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:9.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:26
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:19.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:27
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:19.6
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:27
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.8
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:27.r
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:19.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:28
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:19.11
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:28
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:19.9
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:28
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:19.7
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:28.r
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:11.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:29
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:10.c.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:29
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:11.a.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:29
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:8.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:30.r
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:8.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:31
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:32
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:8.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:32.r
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:18.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:33
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:18.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:33
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:18.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:33.r
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:34
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:34
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:34
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:34
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.9
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:34
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:11.b.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:34
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:5.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:34
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.7
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:35
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:5.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:35
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:3.b.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:35
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:20.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:36
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:20.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:36
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:20.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:36.r
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:20.6
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:36.r
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:13.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:37
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:13.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:37
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:13.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:37
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:13.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:37.r
+      relationship: intersect
+      strength_of_relationship: 9
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:17.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:38.r
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:17.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:38.r
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:17.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:38.r
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:17.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:38.r
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:18.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:38.r
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:2.a.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:39
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:2.a.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:39
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:12.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:39
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:12.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:40
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:12.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:40
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:12.6
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:40
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:12.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:40
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:16.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:41.r
+      relationship: intersect
+      strength_of_relationship: 8
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:16.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:41.r
+      relationship: intersect
+      strength_of_relationship: 7
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:16.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:41.r
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:10.b.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:10
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:19.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:27
+      relationship: intersect
+      strength_of_relationship: 6
+      rationale: semantic
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:7.b.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25
+      relationship: intersect
+      strength_of_relationship: 5
+      rationale: semantic
