@@ -1,5 +1,6 @@
 <script lang="ts">
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import { m } from '$paraglide/messages';
 
 	interface Props {
 		value: string;
@@ -17,10 +18,10 @@
 
 	let isEditing = $state(false);
 	let editValue = $state(value ?? '');
+	let isDirty = $derived((editValue ?? '') !== (value ?? ''));
 
 	function startEdit() {
 		if (disabled) return;
-		editValue = value;
 		isEditing = true;
 	}
 
@@ -87,24 +88,33 @@
 			{#if editValue}
 				<MarkdownRenderer content={editValue} />
 			{:else}
-				<p class="text-surface-600-400 italic">{placeholder}</p>
+				<p class="text-surface-600-400 italic">{disabled ? m.noObservation() : placeholder}</p>
 			{/if}
 		</div>
 		{#if !disabled}
-			<div class="flex justify-end items-center">
+			<div class="flex justify-end items-center gap-2">
+				{#if isDirty}
+					<span class="text-xs italic text-warning-600-400">{m.unsavedChanges()}</span>
+				{/if}
 				<div class="flex space-x-2">
 					<button type="button" class="btn btn-sm preset-tonal" onclick={startEdit}>
 						<i class="fas fa-edit mr-1"></i>
 						Edit
 					</button>
-					<button class="btn btn-sm preset-filled-primary-500" onclick={saveChanges} type="button">
-						<i class="fa-solid fa-check mr-1"></i>
-						Save
-					</button>
-					<button class="btn btn-sm preset-tonal" onclick={cancelEdit} type="button">
-						<i class="fa-solid fa-xmark mr-1"></i>
-						Cancel
-					</button>
+					{#if isDirty}
+						<button
+							class="btn btn-sm preset-filled-primary-500"
+							onclick={saveChanges}
+							type="button"
+						>
+							<i class="fa-solid fa-check mr-1"></i>
+							Save
+						</button>
+						<button class="btn btn-sm preset-tonal" onclick={cancelEdit} type="button">
+							<i class="fa-solid fa-xmark mr-1"></i>
+							Cancel
+						</button>
+					{/if}
 				</div>
 			</div>
 		{/if}
