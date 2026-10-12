@@ -2210,7 +2210,6 @@
 	"expirationDate": "Dátum vypršania platnosti",
 	"expirationDateIsInThePastWarning": "Zadaný dátum vypršania platnosti je v minulosti",
 	"filterBy": "Filtrovať podľa",
-	"demoDataAlreadyImported": "Ukážkové údaje už boli importované. Odstráňte alebo premenujte svoju existujúcu DEMO oblasť.",
 	"finding": "Nález",
 	"findings": "Zistenia",
 	"findingsExplorer": "Prehľad kombinovaných zistení",

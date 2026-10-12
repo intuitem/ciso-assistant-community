@@ -2322,7 +2322,6 @@
 	"expirationDate": "Aegumiskuupäev",
 	"expirationDateIsInThePastWarning": "Sisestatud aegumiskuupäev on minevikus",
 	"filterBy": "Filtreeri järgi",
-	"demoDataAlreadyImported": "Demoandmed on juba imporditud. Kustuta või nimeta olemasolev DEMO-valdkond ümber.",
 	"finding": "Leid",
 	"findings": "Leiud",
 	"findingsExplorer": "Koondleidude ülevaade",

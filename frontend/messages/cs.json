@@ -3178,7 +3178,6 @@
 	"securityException": "Výjimka",
 	"addSecurityException": "Přidat výjimku",
 	"filterBy": "Filtrovat podle",
-	"demoDataAlreadyImported": "Ukázková data již byla importována. Smažte nebo přejmenujte svou stávající DEMO doménu.",
 	"findingsExplorer": "Kombinovaný přehled zjištění",
 	"findingsAssessment": "Sledování (Follow-up)",
 	"findingsAssessments": "Sledování (Follow-ups)",

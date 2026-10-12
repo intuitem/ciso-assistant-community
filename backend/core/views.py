@@ -180,6 +180,7 @@ from core.answer_attachments import serialize as serialize_attachment
 from core.answer_attachments import serve as serve_attachment
 from core.models import (
     Commitment,
+    DemoManifest,
     AppliedControl,
     ComplianceAssessment,
     RequirementMappingSet,
@@ -210,13 +211,14 @@ from dateutil import relativedelta as rd
 
 from ebios_rm.models import (
     EbiosRMStudy,
+    KillChain,
     RoTo,
     Stakeholder,
 )
 
-from tprm.models import Entity
+from tprm.models import Entity, SolutionSubcontractor
 from privacy.models import Processing, DataBreach
-from resilience.models import AssetAssessment
+from resilience.models import AssetAssessment, DoraIncidentReport
 
 from .models import *
 from .serializers import *
@@ -9215,6 +9217,21 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
         "prefetch_related": ["filtering_labels"],
     }
 
+    def cascade_preclear(self, instance):
+        # Rows of the domain tree that PROTECT other rows of the same tree.
+        # References from outside the tree are not cleared and still block.
+        folders = instance.get_sub_folders(include_self=True)
+        return [
+            KillChain.objects.filter(folder__in=folders),
+            DoraIncidentReport.objects.filter(folder__in=folders),
+            ComplianceAssessment.objects.filter(
+                folder__in=folders, campaign__isnull=False
+            ),
+            SolutionSubcontractor.objects.filter(
+                solution__provider_entity__folder__in=folders
+            ),
+        ]
+
     def _get_export_queryset(self):
         # Only domains round-trip through the import: the root folder is implicit,
         # and enclaves or personal folders are not created there.
@@ -9874,37 +9891,39 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
         url_path="import-dummy",
     )
     def import_dummy_domain(self, request):
-        from serdes import domain_io
+        """Load the demo dataset (``core.demo``) into its own domain."""
+        from core import demo
 
-        domain_name = "DEMO"
-        try:
-            PROJECT_DIR = Path(__file__).resolve().parent.parent
-            dummy_fixture_path = PROJECT_DIR / "fixtures" / "dummy-domain.bak"
-            if not dummy_fixture_path.exists():
-                logger.error("Dummy domain fixture not found", path=dummy_fixture_path)
-                return Response(
-                    {"error": "dummyDomainFixtureNotFound"},
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                )
-            parsed_data = domain_io.process_uploaded_file(dummy_fixture_path)
-            result = domain_io.import_objects(
-                parsed_data, domain_name, load_missing_libraries=True, user=request.user
-            )
-            logger.info("Dummy domain imported successfully", domain_name=domain_name)
-            return Response(result, status=status.HTTP_200_OK)
-
-        except json.JSONDecodeError:
-            logger.error("Invalid JSON format in dummy fixture file")
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_folder"),
+            folder=Folder.get_root_folder(),
+        ):
             return Response(
-                {"errors": ["Invalid JSON format"]},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                {"error": "userDoesNotHavePermissionToImportDomain"},
+                status=status.HTTP_403_FORBIDDEN,
             )
-        except Exception:
-            logger.error("Error importing dummy domain")
+        existing = Folder.objects.filter(
+            **demo.demo_domain_filter(demo.DEFAULT_DOMAIN)
+        ).first()
+        if existing is not None:
+            # A same-named domain without a manifest is someone's own: never
+            # seed into it.
+            loaded = DemoManifest.objects.filter(domain=existing).exists()
+            return Response(
+                {"error": "demoDataAlreadyLoaded" if loaded else "demoDomainNameTaken"},
+                status=status.HTTP_409_CONFLICT,
+            )
+        try:
+            ctx = demo.seed(out=logger.debug, err=logger.warning)
+        except Exception as e:
+            logger.error("Error loading demo data", error=e, exc_info=True)
             return Response(
                 {"error": "failedToImportDummyDomain"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+        logger.info("Demo data loaded", domain=ctx.domain.name)
+        return Response({"id": str(ctx.domain.pk)}, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=["get"])
     def get_accessible_objects(self, request):

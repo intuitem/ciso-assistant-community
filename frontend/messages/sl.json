@@ -2380,7 +2380,6 @@
 	"expirationDate": "Datum poteka",
 	"expirationDateIsInThePastWarning": "Vneseni datum poteka je v preteklosti",
 	"filterBy": "Filtriraj po",
-	"demoDataAlreadyImported": "Demo podatki so že uvoženi. Izbrišite ali preimenujte obstoječo domeno DEMO.",
 	"finding": "Ugotovitev",
 	"findings": "Ugotovitve",
 	"findingsExplorer": "Združen pregled ugotovitev",
