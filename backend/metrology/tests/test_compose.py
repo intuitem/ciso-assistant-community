@@ -92,6 +92,10 @@ def acme(frozen):  # noqa: F811
     return group, fr, de, instances
 
 
+def definition_of(response):
+    return MetricInstance.objects.get(id=response.data["id"]).metric_definition_id
+
+
 def payload(folder, instances, expression, **extra):
     return {
         "name": extra.pop("name", f"Rate {uuid.uuid4().hex[:6]}"),
@@ -301,6 +305,7 @@ class TestReuse:
             admin(),
         )
         assert third.data["definition"] == {**first.data["definition"], "reused": True}
+        assert definition_of(third) == definition_of(first)
 
     def test_a_different_unit_or_formula_makes_a_new_one(self, acme):
         group, _fr, _de, i = acme
@@ -310,14 +315,14 @@ class TestReuse:
         other = call(
             "post", "compose", payload(group, {"a": i["clicks_fr"]}, "a * 2"), admin()
         )
-        assert other.data["definition"]["id"] != first.data["definition"]["id"]
+        assert definition_of(other) != definition_of(first)
         other = call(
             "post",
             "compose",
             payload(group, {"a": i["clicks_fr"]}, "a", higher_is_better=False),
             admin(),
         )
-        assert other.data["definition"]["id"] != first.data["definition"]["id"]
+        assert definition_of(other) != definition_of(first)
 
     def test_the_definition_outlives_its_first_instance(self, acme):
         group, _fr, _de, i = acme

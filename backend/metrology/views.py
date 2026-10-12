@@ -41,8 +41,6 @@ def _composable(instance):
         "name": instance.name,
         "folder": {"id": str(instance.folder_id), "str": str(instance.folder)},
         "frequency": instance.collection_frequency,
-        "category": definition.category,
-        "status": instance.status,
         "current_value": instance.current_value(),
         "definition": {"id": str(definition.id), "name": definition.name},
     }
@@ -263,7 +261,6 @@ class MetricInstanceViewSet(BaseModelViewSet):
         "filtering_labels",
         "organisation_objectives",
         "evidences",
-        "metric_definition__category",
     ]
     search_fields = ["name", "description", "ref_id"]
 
@@ -329,7 +326,6 @@ class MetricInstanceViewSet(BaseModelViewSet):
                             "id": str(instance.id),
                             "name": instance.name,
                             "folder": instance.folder.name,
-                            "status": instance.status,
                         }
                         for instance in (
                             input_candidates(target, folder) if target else []
@@ -429,11 +425,7 @@ class MetricInstanceViewSet(BaseModelViewSet):
         return Response(
             {
                 "id": str(instance.id),
-                "definition": {
-                    "id": str(definition.id),
-                    "name": definition.name,
-                    "reused": reused,
-                },
+                "definition": {"name": definition.name, "reused": reused},
             },
             status=status.HTTP_201_CREATED,
         )

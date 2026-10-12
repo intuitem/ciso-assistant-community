@@ -136,7 +136,7 @@ export function formulaScope(
 // instances combine on this instance when it differs from the definition's
 // default, the instance a "one value" input reads, or the instances a
 // combined input leaves out.
-export interface InputChoice {
+interface InputChoice {
 	combine?: Combine;
 	pick?: string;
 	exclude?: string[];

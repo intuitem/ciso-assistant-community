@@ -961,7 +961,6 @@ class TestInputCandidates:
                         "id": str(fr.id),
                         "name": fr.name,
                         "folder": fr.folder.name,
-                        "status": "active",
                     }
                 ],
             }
