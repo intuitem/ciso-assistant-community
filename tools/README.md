@@ -14,6 +14,8 @@ The `convert_v1_to_v2.py` script converts any old Excel file to the new v2 forma
 
 Have a look at the provided examples.
 
+For more details on how libraries work and what they can contain, see the [Libraries documentation](https://intuitem.gitbook.io/ciso-assistant/configuration/libraries).
+
 ## Example framework
 
 The structure of an Excel framework file may not be very easy to understand at first glance. That's why `example_framework.xlsx` has been created to help you understand the structure of a framework.

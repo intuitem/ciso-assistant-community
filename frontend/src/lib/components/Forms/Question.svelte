@@ -258,8 +258,8 @@
 										{#if option.description}
 											<Tooltip positioning={{ placement: 'top' }} openDelay={50}>
 												<Tooltip.Trigger>
-													{#snippet child({ props })}
-														<span {...props} class="underline"
+													{#snippet element(attributes)}
+														<span {...attributes} class="underline"
 															><i class="ml-2 fa-solid fa-circle-info"></i></span
 														>
 													{/snippet}
@@ -298,8 +298,8 @@
 									{#if option.description}
 										<Tooltip positioning={{ placement: 'top' }} openDelay={50}>
 											<Tooltip.Trigger>
-												{#snippet child({ props })}
-													<span {...props} class="underline"
+												{#snippet element(attributes)}
+													<span {...attributes} class="underline"
 														><i class="ml-2 fa-solid fa-circle-info"></i></span
 													>
 												{/snippet}

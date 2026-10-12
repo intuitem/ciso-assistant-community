@@ -166,12 +166,22 @@ class RequirementNodeImporter:
                     "implementation_groups"
                 ),
                 display_mode=display_mode,
-                weight=self.requirement_data.get("weight", 1),
+                visibility_expression=self.requirement_data.get(
+                    "visibility_expression"
+                ),
+                weight=(
+                    1
+                    if self.requirement_data.get("weight") is None
+                    else self.requirement_data["weight"]
+                ),
+                importance=self.requirement_data.get("importance")
+                or RequirementNode.Importance.UNDEFINED,
                 min_score=self.requirement_data.get("min_score"),
                 max_score=self.requirement_data.get("max_score"),
                 scores_definition_ref=self.requirement_data.get(
                     "scores_definition_ref"
                 ),
+                target_score=self.requirement_data.get("target_score"),
                 locale=framework_object.locale,
                 default_locale=framework_object.default_locale,
                 translations=self.requirement_data.get("translations", {}),
@@ -394,6 +404,14 @@ class FrameworkImporter:
 
         if error := outcome_rule_id_error(self.framework_data):
             return error
+        from core.cel_service import validate_framework_expressions
+
+        if errors := validate_framework_expressions(self.framework_data):
+            first = errors[0]
+            return (
+                f"[FRAMEWORK_ERROR] {first['where']} {first['ref_id']}: "
+                f"{first['error']}"
+            )
 
         if "requirement_nodes" in self.framework_data:
             requirement_node_data = self.framework_data["requirement_nodes"]

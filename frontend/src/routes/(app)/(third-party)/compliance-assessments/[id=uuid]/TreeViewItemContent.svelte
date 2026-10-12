@@ -8,7 +8,7 @@
 	import { darkenColor } from '$lib/utils/helpers';
 	import type { ReferenceControlSchema, ThreatSchema } from '$lib/utils/schemas';
 	import { Progress } from '@skeletonlabs/skeleton-svelte';
-	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
+	import { displayScoreColor, formatScoreValue, roundScore } from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import type { z } from 'zod';
 	import { m } from '$paraglide/messages';
@@ -209,9 +209,11 @@
 	// Aggregated scores are computed on the backend (see
 	// annotate_tree_with_aggregated_scores in core/helpers.py) so the three
 	// score_calculation_methods share a single implementation with the global
-	// score, and rounded there like it (round_score), so they are shown as is.
+	// score. They are unrounded, like it: only their display rounds.
 	// Shown on hover over the score rings, which carry no label of their own.
 	const scoreLabel = $derived(showDocumentationScore ? m.implementationScore() : m.score());
+
+	const displayed = (value: number | null) => (value == null ? value : roundScore(value));
 
 	function nodeScore(): number | null {
 		const raw = (rest as Record<string, any>).aggregated_score;
@@ -596,7 +598,7 @@
 													/>
 												</Progress.Circle>
 												<div class="absolute inset-0 flex items-center justify-center">
-													<span class="text-xs font-bold">{nodeScore()}</span>
+													<span class="text-xs font-bold">{displayed(nodeScore())}</span>
 												</div>
 											</Progress>
 										</div>
@@ -626,7 +628,9 @@
 														/>
 													</Progress.Circle>
 													<div class="absolute inset-0 flex items-center justify-center">
-														<span class="text-xs font-bold">{nodeDocumentationScore()}</span>
+														<span class="text-xs font-bold"
+															>{displayed(nodeDocumentationScore())}</span
+														>
 													</div>
 												</Progress>
 											</div>
@@ -661,7 +665,7 @@
 												/>
 											</Progress.Circle>
 											<div class="absolute inset-0 flex items-center justify-center">
-												<span class="text-xs font-bold">{nodeScore()}</span>
+												<span class="text-xs font-bold">{displayed(nodeScore())}</span>
 											</div>
 										</Progress>
 									</div>
@@ -691,7 +695,9 @@
 													/>
 												</Progress.Circle>
 												<div class="absolute inset-0 flex items-center justify-center">
-													<span class="text-xs font-bold">{nodeDocumentationScore()}</span>
+													<span class="text-xs font-bold"
+														>{displayed(nodeDocumentationScore())}</span
+													>
 												</div>
 											</Progress>
 										</div>
