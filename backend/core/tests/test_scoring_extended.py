@@ -1594,6 +1594,22 @@ class TestWeightedSum:
         assert _answer(d, "good", "bad") == 0
         assert _answer(d, "bad", "good") == 100
 
+    def test_positive_only_scale_keeps_its_floor(self, weighted_sum_setup):
+        """Choices 10/60 at weight 3 and 20/40 at weight 1: the worst answers land
+        on the lowest the questionnaire can reach, not below it."""
+        d = weighted_sum_setup
+        for key, score in (
+            ("q1_good", 60),
+            ("q1_bad", 10),
+            ("q2_good", 40),
+            ("q2_bad", 20),
+        ):
+            d[key].add_score = score
+            d[key].save(update_fields=["add_score"])
+        assert _answer(d, "bad", "bad") == 30
+        assert _answer(d, "good", "good") == 100
+        assert _answer(d, "good", "bad") == 91
+
     def test_unscored_choice_counts_as_zero(self, weighted_sum_setup):
         """An unscored choice is a valid answer worth 0, so it belongs to the
         reachable range: leaving it out pushed the floor up to the scored choice."""

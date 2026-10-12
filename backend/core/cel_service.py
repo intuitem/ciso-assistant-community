@@ -612,6 +612,9 @@ def _quick_form_snapshot(response) -> dict:
         lo, hi = question_score_bounds(
             [c.add_score or 0 for c in choices], question.type == "multiple_choice"
         )
+        if not question.required:
+            # A question that can be skipped contributes 0.
+            lo, hi = min(lo, 0), max(hi, 0)
         per_question[question.id] = {
             "question": question,
             "page_id": question.page_id,
@@ -1390,7 +1393,11 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
         scores = [
             int(choice.get("add_score") or 0) for choice in entry.get("choices") or []
         ]
-        return question_score_bounds(scores, entry.get("type") == "multiple_choice")
+        lo, hi = question_score_bounds(scores, entry.get("type") == "multiple_choice")
+        if entry.get("required", True) is False:
+            # A question that can be skipped contributes 0.
+            return min(lo, 0), max(hi, 0)
+        return lo, hi
 
     def score_of(entry):
         weight = weight_of(entry)

@@ -1309,12 +1309,18 @@ def project_weighted_sum(total, weighted_lo, weighted_hi, lo, hi):
     """Map a weighted SUM total back onto the unweighted scale of the same questions.
 
     Weights multiply the answers but not the scale the library author designed, so a
-    raw weighted total saturates at max_score whatever the answers. Each side of 0 is
-    scaled on its own, the positive one from weighted_hi to hi and the negative one
-    from weighted_lo to lo, so both ends of the original scale stay reachable and a
-    choice worth 0 stays neutral: with all weights at 1 the two ranges coincide and
-    the total comes back unchanged.
+    raw weighted total saturates at max_score whatever the answers. When the total can
+    reach 0, each side of it is scaled on its own, the positive one from weighted_hi to
+    hi and the negative one from weighted_lo to lo, so both ends of the original scale
+    stay reachable and a choice worth 0 stays neutral. When 0 sits outside the reachable
+    range, the whole range is mapped onto the unweighted one. With all weights at 1 the
+    two ranges coincide and the total comes back unchanged.
     """
+    if weighted_lo > 0 or weighted_hi < 0:
+        span = weighted_hi - weighted_lo
+        if span <= 0:
+            return total
+        return lo + (total - weighted_lo) * (hi - lo) / span
     if total >= 0:
         return total * hi / weighted_hi if weighted_hi > 0 else total
     return total * lo / weighted_lo if weighted_lo < 0 else total

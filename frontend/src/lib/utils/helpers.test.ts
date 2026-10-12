@@ -124,6 +124,12 @@ describe('projectWeightedSum', () => {
 		expect(projectWeightedSum(0, 0, 0, 0, 10)).toBe(0);
 	});
 
+	it('maps the whole range when 0 is out of reach', () => {
+		// Choices 10/60 at weight 3 and 20/40 at weight 1: weighted [50, 220], unweighted [30, 100].
+		expect(projectWeightedSum(50, 50, 220, 30, 100)).toBe(30);
+		expect(projectWeightedSum(220, 50, 220, 30, 100)).toBe(100);
+	});
+
 	it('keeps a choice worth 0 neutral when a question can go negative', () => {
 		// Weight 3 on [-10, 0], weight 1 on [0, 50]: weighted [-30, 50], unweighted [-10, 50].
 		expect(projectWeightedSum(0, -30, 50, -10, 50)).toBe(0);

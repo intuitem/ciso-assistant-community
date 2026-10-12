@@ -333,9 +333,11 @@ export function questionScoreBounds(scores: number[], multiple: boolean): [numbe
 
 /**
  * Map a weighted SUM total back onto the unweighted scale of the same questions
- * (mirrors core.utils.project_weighted_sum). Each side of 0 is scaled on its
- * own, so a choice worth 0 stays neutral. With every weight at 1 the two ranges
- * coincide and the total comes back unchanged.
+ * (mirrors core.utils.project_weighted_sum). When the total can reach 0, each
+ * side of it is scaled on its own, so a choice worth 0 stays neutral. When 0
+ * sits outside the reachable range, the whole range is mapped onto the
+ * unweighted one. With every weight at 1 the two ranges coincide and the total
+ * comes back unchanged.
  */
 export function projectWeightedSum(
 	total: number,
@@ -344,6 +346,10 @@ export function projectWeightedSum(
 	lo: number,
 	hi: number
 ): number {
+	if (weightedLo > 0 || weightedHi < 0) {
+		const span = weightedHi - weightedLo;
+		return span <= 0 ? total : lo + ((total - weightedLo) * (hi - lo)) / span;
+	}
 	if (total >= 0) return weightedHi > 0 ? (total * hi) / weightedHi : total;
 	return weightedLo < 0 ? (total * lo) / weightedLo : total;
 }

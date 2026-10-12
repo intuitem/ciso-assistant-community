@@ -1485,18 +1485,16 @@ def _preview_form(questions):
                         "type": "unique_choice",
                         "text": key,
                         "order": order,
-                        **extra,
+                        **{k: v for k, v in extra.items() if k != "scores"},
                         "choices": [
                             {
-                                "urn": f"{base}:question:{key}:choice:good",
-                                "value": "good",
-                                "add_score": 50,
-                            },
-                            {
-                                "urn": f"{base}:question:{key}:choice:bad",
-                                "value": "bad",
-                                "add_score": 0,
-                            },
+                                "urn": f"{base}:question:{key}:choice:{value}",
+                                "value": value,
+                                "add_score": score,
+                            }
+                            for value, score in zip(
+                                ("good", "bad"), extra.get("scores", (50, 0))
+                            )
                         ],
                     }
                     for order, (key, extra) in enumerate(questions.items(), start=1)
@@ -1524,6 +1522,16 @@ def test_preview_keeps_an_explicit_zero_weight():
     questions = {"ignored": {"weight": 0}, "counted": {"weight": 1}}
     assert _preview_score(questions, {"ignored": "good", "counted": "bad"}) == 0
     assert _preview_score(questions, {"ignored": "bad", "counted": "good"}) == 100
+
+
+def test_preview_keeps_a_skipped_optional_question_neutral():
+    """An optional question can contribute 0, so 0 belongs to its reachable range
+    even when none of its choices scores it."""
+    questions = {
+        "counted": {"weight": 1},
+        "optional": {"weight": 3, "required": False, "scores": (-10, -20)},
+    }
+    assert _preview_score(questions, {"counted": "good"}) == 50
 
 
 def test_preview_scores_a_form_whose_weights_are_all_zero():
