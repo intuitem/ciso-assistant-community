@@ -9914,8 +9914,16 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
                 {"error": "demoDataAlreadyLoaded" if loaded else "demoDomainNameTaken"},
                 status=status.HTTP_409_CONFLICT,
             )
+        # Flags are instance-wide: only switch them on for settings managers.
+        enable_flags = RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="change_globalsettings"),
+            folder=Folder.get_root_folder(),
+        )
         try:
-            ctx = demo.seed(out=logger.debug, err=logger.warning)
+            ctx = demo.seed(
+                enable_flags=enable_flags, out=logger.debug, err=logger.warning
+            )
         except Exception as e:
             logger.error("Error loading demo data", error=e, exc_info=True)
             return Response(

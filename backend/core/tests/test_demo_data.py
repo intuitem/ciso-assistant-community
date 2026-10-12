@@ -329,3 +329,51 @@ def test_seed_switches_on_the_modules_it_fills():
     demo.seed(domain_name=DOMAIN, out=lambda _: None, err=pytest.fail)
     for flag in {f for b in demo.builders() for f in b.feature_flags}:
         assert ff_is_enabled(flag), flag
+
+
+@pytest.mark.django_db
+def test_seed_and_flush_never_touch_a_namesake_domain_without_manifest():
+    theirs = Folder.objects.create(
+        name=DOMAIN,
+        content_type=Folder.ContentType.DOMAIN,
+        parent_folder=Folder.get_root_folder(),
+    )
+    with pytest.raises(demo.NotADemoDomain):
+        demo.flush(DOMAIN)
+    with pytest.raises(demo.NotADemoDomain):
+        demo.seed(domain_name=DOMAIN, modules=["core"], out=lambda _: None)
+    assert Folder.objects.filter(pk=theirs.pk).exists()
+    assert not AppliedControl.objects.filter(folder=theirs).exists()
+
+
+@pytest.mark.django_db
+def test_seed_can_leave_feature_flags_alone():
+    from global_settings.models import GlobalSettings
+
+    demo.seed(
+        domain_name=DOMAIN,
+        modules=["core", "pmbok"],
+        enable_flags=False,
+        out=lambda _: None,
+        err=pytest.fail,
+    )
+    flags = GlobalSettings.objects.filter(
+        name=GlobalSettings.Names.FEATURE_FLAGS
+    ).first()
+    assert not (flags and (flags.value or {}).get("project_management"))
+
+
+@pytest.mark.django_db
+def test_flush_keeps_files_another_domain_still_uses(
+    django_capture_on_commit_callbacks,
+):
+    from doc_management.models import DocumentAttachment
+
+    quiet = {"out": lambda _: None, "err": pytest.fail}
+    demo.seed(domain_name=DOMAIN, modules=["documents"], **quiet)
+    demo.seed(domain_name=f"{DOMAIN} 2", modules=["documents"], **quiet)
+    attachment = DocumentAttachment.objects.exclude(folder__name=DOMAIN).first()
+    shared = attachment.file.name
+    with django_capture_on_commit_callbacks(execute=True):
+        demo.flush(DOMAIN)
+    assert attachment.file.storage.exists(shared)

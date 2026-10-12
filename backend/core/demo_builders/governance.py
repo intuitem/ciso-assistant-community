@@ -1685,7 +1685,10 @@ class FormsBuilder(DemoBuilder):
                 elif question.type == Question.Type.DATE:
                     value = ctx.day(value).isoformat()
                 full[urn] = value
-            title = full[title_urn]
+            title = full.get(title_urn)
+            if not title:
+                ctx.err(f"title question {title_urn} unanswered, request skipped")
+                continue
             response, created = QuickFormResponse.objects.get_or_create(
                 name=title,
                 quick_form=form,

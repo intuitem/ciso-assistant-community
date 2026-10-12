@@ -38,6 +38,10 @@ DEFAULT_DOMAIN = COMPANY
 DEFAULT_DESCRIPTION = "Fictional maker of connected home devices, loaded as demo data."
 
 
+class NotADemoDomain(Exception):
+    """A root domain carries the demo name but no manifest: it is user data."""
+
+
 @dataclass
 class DemoContext:
     domain: models.Model
@@ -190,7 +194,8 @@ def _scoped_models() -> list:
 
 
 def _stored_files(folder_ids: set) -> list[tuple]:
-    """(storage, name) for every file attached to a row in the demo folders."""
+    """(storage, name) for every file attached to a row in the demo folders and
+    to no row outside them (a reseed into another domain reuses blobs)."""
     found = []
     for model in _scoped_models():
         file_fields = [
@@ -199,10 +204,11 @@ def _stored_files(folder_ids: set) -> list[tuple]:
         if not file_fields:
             continue
         rows = model._base_manager.filter(folder_id__in=folder_ids)
+        outside = model._base_manager.exclude(folder_id__in=folder_ids)
         for row in rows.only(*(f.name for f in file_fields)):
             for f in file_fields:
                 value = getattr(row, f.name)
-                if value:
+                if value and not outside.filter(**{f.name: value.name}).exists():
                     found.append((value.storage, value.name))
     return found
 
@@ -281,11 +287,14 @@ def flush(name: str = DEFAULT_DOMAIN) -> int:
     blockers are deleted first, but only when every one of them belongs to the
     demo tree; a single outside reference aborts the whole flush.
     """
+    from core.models import DemoManifest
     from iam.models import Folder
 
     domain = Folder.objects.filter(**demo_domain_filter(name)).first()
     if domain is None:
         return 0
+    if not DemoManifest.objects.filter(domain=domain).exists():
+        raise NotADemoDomain(f"{name!r} has no demo manifest, refusing to delete it")
     folder_ids = _folder_ids(domain)
     cleared = 0
     with transaction.atomic():
@@ -384,9 +393,11 @@ def seed(
     modules: list[str] | None = None,
     frozen: bool = False,
     reset: bool = False,
+    enable_flags: bool = True,
     out: Callable[[str], None] = print,
     err: Callable[[str], None] = print,
 ) -> DemoContext:
+    from core.models import DemoManifest
     from iam.models import Folder
 
     selected = builders(modules)
@@ -403,6 +414,10 @@ def seed(
             **demo_domain_filter(domain_name),
             defaults={"description": description, "create_iam_groups": True},
         )
+        if not created and not DemoManifest.objects.filter(domain=domain).exists():
+            raise NotADemoDomain(
+                f"{domain_name!r} has no demo manifest, refusing to seed into it"
+            )
         before = set() if created else _contents(_folder_ids(domain))
         if created:
             Folder.create_default_ug_and_ra(domain)
@@ -421,7 +436,8 @@ def seed(
             builder.build(ctx)
         freeze_timestamps(ctx, selected)
         write_manifest(ctx, before)
-        enable_feature_flags([f for b in selected for f in b.feature_flags], out)
+        if enable_flags:
+            enable_feature_flags([f for b in selected for f in b.feature_flags], out)
     return ctx
 
 

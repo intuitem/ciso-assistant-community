@@ -8,7 +8,7 @@ content itself lives in per-app ``demo_builders`` modules (see ``core.demo``).
     manage.py seed_demo --docs --flush     # documentation screenshots
 """
 
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 
 from core import demo
 from global_settings.models import GlobalSettings
@@ -59,14 +59,17 @@ class Command(BaseCommand):
 
         anchor = options["anchor"] or ("frozen" if options["docs"] else "today")
         modules = options["modules"]
-        demo.seed(
-            domain_name=options["domain"],
-            modules=[m.strip() for m in modules.split(",")] if modules else None,
-            frozen=anchor == "frozen",
-            reset=options["flush"],
-            out=self.stdout.write,
-            err=self.stderr.write,
-        )
+        try:
+            demo.seed(
+                domain_name=options["domain"],
+                modules=[m.strip() for m in modules.split(",")] if modules else None,
+                frozen=anchor == "frozen",
+                reset=options["flush"],
+                out=self.stdout.write,
+                err=self.stderr.write,
+            )
+        except demo.NotADemoDomain as e:
+            raise CommandError(e) from e
         if options["docs"]:
             self.hide_get_started()
         self.stdout.write(self.style.SUCCESS("demo dataset ready"))
