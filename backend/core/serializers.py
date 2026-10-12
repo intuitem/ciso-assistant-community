@@ -3202,6 +3202,11 @@ class FrameworkWriteSerializer(FrameworkReadSerializer):
         "implementation_groups_definition",
     )
 
+    def validate_field_visibility(self, value):
+        from core.utils import validate_field_visibility
+
+        return validate_field_visibility(value)
+
     def validate(self, attrs):
         attrs = super().validate(attrs)
         if any(field in attrs for field in self.SCORING_DEFAULT_FIELDS):
@@ -3865,6 +3870,11 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
     create_applied_controls_from_suggestions = serializers.BooleanField(
         write_only=True, required=False, default=False
     )
+
+    def validate_field_visibility(self, value):
+        from core.utils import validate_field_visibility
+
+        return validate_field_visibility(value)
 
     def validate(self, attrs):
         # Drop implementation groups that don't exist in the framework.
