@@ -7,7 +7,6 @@ from django.core import mail
 from django.core.management import CommandError, call_command
 
 from core import mailer
-from core.tests.test_mailer import FailingAfterOpenBackend, RefusingBackend  # noqa: F401
 
 LOCMEM = "django.core.mail.backends.locmem.EmailBackend"
 FAKES = "core.tests.test_mailer"

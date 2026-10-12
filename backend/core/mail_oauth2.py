@@ -25,7 +25,6 @@ import httpx
 import jwt
 import structlog
 
-from ciso_assistant.mailers import GRANTS  # noqa: F401  (re-exported for callers)
 
 logger = structlog.get_logger(__name__)
 

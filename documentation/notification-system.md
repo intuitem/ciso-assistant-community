@@ -25,7 +25,7 @@ Event Trigger (serializer / periodic cron)
         v
   core.mailer.send()
   - Tries the mailers in settings.MAILERS in order
-  - Fails over only when a server cannot be reached
+  - Fails over only when a mailer cannot be opened (connection, TLS or login fails)
 ```
 
 There is **no notification model** in the database. Notifications are fire-and-forget emails. Frontend toast notifications are independent and handled client-side only.
@@ -39,16 +39,19 @@ There is **no notification model** in the database. Notifications are fire-and-f
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `EMAIL_HOST` | Yes | SMTP server hostname |
-| `EMAIL_PORT` | No | SMTP server port (default: 465 with SSL, 587 with TLS, 25 otherwise) |
+| `EMAIL_PORT` | No | SMTP server port (default: 465 with SSL, 25 otherwise, STARTTLS included) |
 | `EMAIL_HOST_USER` | No | SMTP username |
 | `EMAIL_HOST_PASSWORD` | No | SMTP password |
-| `EMAIL_USE_TLS` | No | Enable TLS (`true`/`false`, default `false`) |
+| `EMAIL_USE_TLS` | No | STARTTLS (`true`/`false`, default `false`) |
+| `EMAIL_USE_SSL` | No | Implicit TLS, typically port 465 (`true`/`false`, default `false`). Mutually exclusive with `EMAIL_USE_TLS` |
+| `EMAIL_SSL_CERTFILE`, `EMAIL_SSL_KEYFILE` | No | Client certificate and key for relays that require one. Also `_RESCUE` |
 | `DEFAULT_FROM_EMAIL` | Yes | Sender address (fallback: `noreply@ciso.assistant`) |
 | `EMAIL_HOST_RESCUE` | No | Second SMTP server, used when the first cannot be reached (all mail, not only password resets) |
 | `EMAIL_PORT_RESCUE` | No | Fallback SMTP port |
 | `EMAIL_HOST_USER_RESCUE` | No | Fallback SMTP username |
 | `EMAIL_HOST_PASSWORD_RESCUE` | No | Fallback SMTP password |
-| `EMAIL_USE_TLS_RESCUE` | No | Fallback TLS setting |
+| `EMAIL_USE_TLS_RESCUE` | No | Fallback STARTTLS setting |
+| `EMAIL_USE_SSL_RESCUE` | No | Fallback implicit TLS setting |
 | `EMAIL_TRANSPORT` | No | `smtp` (password, default) or `smtp-oauth2` (bearer token). Also `_RESCUE` |
 | `EMAIL_OAUTH2_GRANT_TYPE`, `EMAIL_OAUTH2_TOKEN_URL`, `EMAIL_OAUTH2_SCOPE` | With `smtp-oauth2` | `client_credentials`, `refresh_token` (RFC 6749) or `jwt_bearer` (RFC 7523); the token URL must be https. Values per provider in the installation docs |
 | `EMAIL_OAUTH2_CLIENT_ID`, `EMAIL_OAUTH2_CLIENT_SECRET`, `EMAIL_OAUTH2_REFRESH_TOKEN` | Per grant | Client credentials and refresh token grants |

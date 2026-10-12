@@ -15,7 +15,7 @@ Our own production sends through SendGrid's SMTP relay. Neither change affects i
 
 We will build one mail service in `core`. Every outbound message goes through it. The service reads the mailers from `MAILERS` and tries them in order until one accepts the message. There is no dedicated rescue mailer: a second mailer is just the next entry in the list.
 
-Operators keep using environment variables. The existing SMTP variables keep working unchanged. A new variable, `EMAIL_TRANSPORT`, selects the type of the first mailer and defaults to `smtp`. The allowed values are a fixed list in the code. The existing `_RESCUE` variables keep working and define a second, SMTP-only mailer. Besides plain SMTP, we add OAuth over SMTP for Microsoft 365 and Google Workspace. Templates, i18n and the task queue do not change.
+Operators keep using environment variables. The existing SMTP variables keep working unchanged. A new variable, `EMAIL_TRANSPORT`, selects the type of the first mailer and defaults to `smtp`. The allowed values are a fixed list in the code. The existing `_RESCUE` variables keep working and define a second mailer, with its own `EMAIL_TRANSPORT_RESCUE`. Besides plain SMTP, we add OAuth over SMTP for Microsoft 365 and Google Workspace. Templates, i18n and the task queue do not change.
 
 ## Consequences
 

@@ -96,6 +96,8 @@ class EmailBackend(SMTPEmailBackend):
         try:
             connection.close()
         except Exception:
+            # Releasing a socket that already failed; the original error is
+            # the one worth raising.
             pass
 
 
