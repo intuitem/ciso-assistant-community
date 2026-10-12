@@ -904,13 +904,21 @@
 
 	// Computed in Python from related rows, so there is no column for the backend to
 	// ORDER BY: DRF drops the term and the click does nothing. Better not to offer it.
-	const UNSORTABLE_COMPUTED_COLUMNS = ['completion', 'review_progress', 'schedule'];
+	// Qualify with the model when the same name is a stored column elsewhere:
+	// `progress` is a serializer method on audits but a real field on projects.
+	const UNSORTABLE_COMPUTED_COLUMNS = [
+		'completion',
+		'review_progress',
+		'schedule',
+		'compliance-assessments.progress',
+		'document-containers.progress'
+	];
 
-	// Function to check if a column is multi-value and should not be sortable
-	const isMultiValueColumn = (key: string): boolean => {
+	const isUnsortableColumn = (key: string): boolean => {
 		return (
 			MULTI_VALUE_COLUMNS.includes(key) ||
 			UNSORTABLE_COMPUTED_COLUMNS.includes(key) ||
+			UNSORTABLE_COMPUTED_COLUMNS.includes(`${URLModel}.${key}`) ||
 			(tableSource.body.length > 0 && Array.isArray(tableSource.body[0][key]))
 		);
 	};
@@ -1169,7 +1177,7 @@
 					</th>
 				{/if}
 				{#each renderColumnKeys as key (key)}
-					<Th {handler} orderBy={isMultiValueColumn(key) ? undefined : key} class={regionHeadCell}
+					<Th {handler} orderBy={isUnsortableColumn(key) ? undefined : key} class={regionHeadCell}
 						>{safeTranslate(tableSource.head[key])}</Th
 					>
 				{/each}
