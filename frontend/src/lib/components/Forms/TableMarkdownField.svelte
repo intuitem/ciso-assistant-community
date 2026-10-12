@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import { m } from '$paraglide/messages';
 
@@ -19,6 +20,14 @@
 	let isEditing = $state(false);
 	let editValue = $state(value ?? '');
 	let isDirty = $derived((editValue ?? '') !== (value ?? ''));
+	let syncedValue = value ?? '';
+
+	$effect(() => {
+		const next = value ?? '';
+		if (next === syncedValue) return;
+		if ((untrack(() => editValue) ?? '') === syncedValue) editValue = next;
+		syncedValue = next;
+	});
 
 	function startEdit() {
 		if (disabled) return;
