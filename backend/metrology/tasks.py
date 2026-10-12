@@ -160,6 +160,14 @@ def compute_due_derived_metrics():
                 metric_instance_id=str(instance.id),
                 error=e.message,
             )
+        except Exception:
+            # One instance crashing must not cost every instance after it
+            # its turn: log it with its context and carry on with the sweep.
+            logger.exception(
+                f"{what} computation crashed",
+                computation=what,
+                metric_instance_id=str(instance.id),
+            )
 
     for instance in datasets:
         if instance.metric_definition_id in read_by_series:
