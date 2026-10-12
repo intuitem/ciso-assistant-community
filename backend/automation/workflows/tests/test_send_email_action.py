@@ -441,6 +441,7 @@ class TestSendEmail:
                 self.alive = False
 
             def __enter__(self):
+                self.open()
                 return self
 
             def __exit__(self, *exc_info):
@@ -460,11 +461,8 @@ class TestSendEmail:
 
         @contextmanager
         def session():
-            connection.open()
-            try:
+            with connection:
                 yield connection
-            finally:
-                connection.close()
 
         monkeypatch.setattr(
             "automation.workflows.tasks.mailer.open_connection", session

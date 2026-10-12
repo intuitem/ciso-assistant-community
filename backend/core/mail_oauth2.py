@@ -17,7 +17,6 @@ it has been used are not supported. The token endpoint is an operator-supplied U
 HTTPS because the response carries a bearer secret.
 """
 
-import hashlib
 import json
 import threading
 import time
@@ -50,19 +49,18 @@ def xoauth2_string(user: str, token: str) -> str:
 
 
 def _cache_key(config: dict) -> tuple:
-    # The credentials are part of the key, hashed so the cache never holds
-    # them: a changed secret must not keep serving a token the old one minted.
-    credentials = "\x00".join(
-        config.get(name) or ""
-        for name in ("client_secret", "refresh_token", "private_key")
-    )
+    # The credentials are part of the key so a changed secret never keeps
+    # serving a token the old one minted. They are kept as is: the process
+    # already holds them in settings.MAILERS, and the cache never leaves it.
     return (
         config["token_url"],
         config.get("client_id"),
         config.get("issuer") or config.get("service_account_file"),
         config.get("user"),
         config.get("scope"),
-        hashlib.sha256(credentials.encode()).hexdigest(),
+        config.get("client_secret"),
+        config.get("refresh_token"),
+        config.get("private_key"),
     )
 
 

@@ -498,7 +498,8 @@ def oauth_backend(**overrides):
 def test_open_authenticates_with_xoauth2(tokens):
     backend = oauth_backend(password="ignored")
     assert backend.password is None
-    assert backend.open() is True
+    opened = backend.open()
+    assert opened is True
     connection = FakeSMTP.instances[0]
     assert connection.tls and connection.ehlo
     assert connection.auth_calls == [
@@ -511,7 +512,8 @@ def test_open_authenticates_with_xoauth2(tokens):
 def test_rejected_token_is_retried_once_with_a_fresh_one(tokens):
     FakeSMTP.reject = {"tok-1"}
     backend = oauth_backend()
-    assert backend.open() is True
+    opened = backend.open()
+    assert opened is True
     mechanisms = [call[0] for call in FakeSMTP.instances[0].auth_calls]
     assert mechanisms == ["XOAUTH2", "XOAUTH2"]
     assert tokens == [False, True]
@@ -530,7 +532,8 @@ def test_rejection_lost_to_a_server_delay_retries_on_a_new_session(tokens):
     FakeSMTP.reject = {"tok-1"}
     FakeSMTP.drop_on_reject = True
     backend = oauth_backend()
-    assert backend.open() is True
+    opened = backend.open()
+    assert opened is True
     first, second = FakeSMTP.instances
     assert first.closed is True
     assert [call[1] for call in second.auth_calls] == [
@@ -561,7 +564,8 @@ def test_refused_tokens_are_not_reused_from_the_cache(monkeypatch, drop_on_rejec
     # next session must fetch a new token, not replay a refused one.
     FakeSMTP.reject = set()
     backend = oauth_backend()
-    assert backend.open() is True
+    opened = backend.open()
+    assert opened is True
     assert backend.connection.auth_calls[-1][1].endswith("Bearer tok-c\x01\x01")
 
 
