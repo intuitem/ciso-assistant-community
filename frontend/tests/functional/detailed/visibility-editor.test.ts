@@ -6,7 +6,7 @@ import { m } from '$paraglide/messages';
 const vars = TestContent.generateTestVars();
 const testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
 
-test('CA visibility editor: pill selection round-trips through save/reload', async ({
+test('CA visibility editor: per-role access round-trips through save/reload', async ({
 	logedPage,
 	pages,
 	complianceAssessmentsPage,
@@ -35,60 +35,57 @@ test('CA visibility editor: pill selection round-trips through save/reload', asy
 	await page.getByTestId('edit-button').click();
 	await page.getByText('More').click();
 
+	// Each field has one radio group per role: visibility-<field>-<role>-<access>.
+	const option = (field: string, role: 'auditor' | 'respondent', access: string) =>
+		page.getByTestId(`visibility-${field}-${role}-${access}`);
+	const expectChecked = (field: string, role: 'auditor' | 'respondent', access: string) =>
+		expect(option(field, role, access)).toHaveAttribute('aria-checked', 'true');
+
 	// Default state assertions.
-	// score defaults to HIDDEN → the "hidden" pill is checked.
-	await expect(page.getByTestId('visibility-score-hidden')).toHaveAttribute('aria-checked', 'true');
+	// score defaults to HIDDEN for both roles.
+	await expectChecked('score', 'auditor', 'hidden');
+	await expectChecked('score', 'respondent', 'hidden');
 	// status defaults to AUDITOR_ONLY.
-	await expect(page.getByTestId('visibility-status-auditor')).toHaveAttribute(
-		'aria-checked',
-		'true'
-	);
-	// observation has no DEFAULT_VISIBILITY entry → resolves to "everyone".
-	await expect(page.getByTestId('visibility-observation-everyone')).toHaveAttribute(
-		'aria-checked',
-		'true'
-	);
+	await expectChecked('status', 'auditor', 'edit');
+	await expectChecked('status', 'respondent', 'hidden');
+	// observation has no DEFAULT_VISIBILITY entry → resolves to edit for both roles.
+	await expectChecked('observation', 'auditor', 'edit');
+	await expectChecked('observation', 'respondent', 'edit');
 
-	// Cascade: while score is hidden, documentation_score's non-hidden pills are disabled.
-	await expect(page.getByTestId('visibility-documentation_score-everyone')).toBeDisabled();
-	await expect(page.getByTestId('visibility-documentation_score-auditor')).toBeDisabled();
-	await expect(page.getByTestId('visibility-documentation_score-hidden')).toBeEnabled();
+	// Cascade: while score is hidden, documentation_score cannot be opened up.
+	await expect(option('documentation_score', 'auditor', 'edit')).toBeDisabled();
+	await expect(option('documentation_score', 'auditor', 'read')).toBeDisabled();
+	await expect(option('documentation_score', 'auditor', 'hidden')).toBeEnabled();
+	// The respondent never sees more than the auditor.
+	await expect(option('score', 'respondent', 'edit')).toBeDisabled();
 
-	// Mutate: turn score visible to A+R.
-	await page.getByTestId('visibility-score-everyone').click();
-	await expect(page.getByTestId('visibility-score-everyone')).toHaveAttribute(
-		'aria-checked',
-		'true'
-	);
+	// Mutate: open score to the auditor, then to the respondent.
+	await option('score', 'auditor', 'edit').click();
+	await expectChecked('score', 'auditor', 'edit');
+	await expectChecked('score', 'respondent', 'hidden');
+	await option('score', 'respondent', 'edit').click();
+	await expectChecked('score', 'respondent', 'edit');
 	// Now doc_score's other options unlock.
-	await expect(page.getByTestId('visibility-documentation_score-auditor')).toBeEnabled();
+	await expect(option('documentation_score', 'auditor', 'edit')).toBeEnabled();
 
-	// Restrict status to Hidden.
-	await page.getByTestId('visibility-status-hidden').click();
-	await expect(page.getByTestId('visibility-status-hidden')).toHaveAttribute(
-		'aria-checked',
-		'true'
-	);
+	// Hide status from the auditor: the respondent is dragged down with it.
+	await option('status', 'auditor', 'hidden').click();
+	await expectChecked('status', 'auditor', 'hidden');
+	await expectChecked('status', 'respondent', 'hidden');
 
 	// Save and wait for the navigation back to the detail page.
 	await page.getByTestId('save-button').click();
 	await page.waitForURL(/\/compliance-assessments\/[^/]+$/);
 
-	// Reopen the edit form and assert the chosen pills are still highlighted —
+	// Reopen the edit form and assert the chosen access is still selected —
 	// proving the per-role pair was persisted and read back correctly.
 	await page.getByTestId('edit-button').click();
 	await page.getByText('More').click();
-	await expect(page.getByTestId('visibility-score-everyone')).toHaveAttribute(
-		'aria-checked',
-		'true'
-	);
-	await expect(page.getByTestId('visibility-status-hidden')).toHaveAttribute(
-		'aria-checked',
-		'true'
-	);
-	// status=hidden doesn't constrain anything, but score=everyone preserves
-	// the doc_score row's freedom.
-	await expect(page.getByTestId('visibility-documentation_score-auditor')).toBeEnabled();
+	await expectChecked('score', 'auditor', 'edit');
+	await expectChecked('score', 'respondent', 'edit');
+	await expectChecked('status', 'auditor', 'hidden');
+	await expectChecked('status', 'respondent', 'hidden');
+	await expect(option('documentation_score', 'auditor', 'edit')).toBeEnabled();
 });
 
 test.afterAll('cleanup', async ({ browser }) => {
