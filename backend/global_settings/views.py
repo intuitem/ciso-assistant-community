@@ -12,7 +12,7 @@ from iam.sso.models import SSOSettings
 from integrations.models import IntegrationConfiguration, IntegrationProvider
 from core.serializers import SerializerFactory
 from django.conf import settings
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 from django.views.decorators.http import require_GET
 from .utils import (
     get_instance_feature_flags,
@@ -497,12 +497,18 @@ def infra_config_view(request):
     the public internet — keep it behind the reverse proxy / restricted to
     trusted networks. Only registered when ENABLE_INFRA_CONFIG_MANAGEMENT is set.
     """
-    obj = GlobalSettings.objects.filter(name="infra-config").first()
-    value = obj.value if obj and isinstance(obj.value, dict) else {}
-    allowed_ips = value.get("allowed_ips", [])
-    if not isinstance(allowed_ips, list):
-        allowed_ips = []
-    return JsonResponse({"allowed_ips": allowed_ips})
+    obj = GlobalSettings.objects.filter(name=GlobalSettings.Names.INFRA_CONFIG).first()
+    if obj is None:
+        raise Http404
+
+    data = dict(InfraConfigSerializer(obj).data)
+
+    # The stored JSON isn't schema-checked (admin/migration/import can write anything).
+    for key in ("allowed_ips", "not_rate_limited_ips", "proxy_ips"):
+        if not isinstance(data.get(key), list):
+            data[key] = []
+
+    return JsonResponse(data)
 
 
 @api_view(["GET"])

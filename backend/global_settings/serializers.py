@@ -1,3 +1,4 @@
+from typing import Final
 import copy
 import ipaddress
 import re
@@ -743,9 +744,6 @@ class VulnerabilitySlaSerializer(serializers.ModelSerializer):
         return instance
 
 
-MAX_ALLOWED_IPS = 50
-
-
 class InfraConfigSerializer(serializers.ModelSerializer):
     """
     Serializer for infrastructure configuration settings, stored as a JSON object
@@ -754,12 +752,54 @@ class InfraConfigSerializer(serializers.ModelSerializer):
     over time without a schema change.
     """
 
+    MAX_ALLOWED_IPS: Final[int] = 50
+    """Maximum number of IPs/CIDR ranges allowed in the IP whitelist AND the rate-limiting (proxy/exclude) lists."""
+    MAX_ABSOLUTE_BAN_TIME: Final[int] = 60
+    """Maximum number of minutes an IP can be banned with rate-limiting."""
+    MAX_TIME_WINDOW_SIZE: Final[int] = 15
+    MAX_BAN_TIME: Final[int] = 60
+    DEFAULT_MAX_FAILED_LOGIN_ATTEMPT: Final[int] = 20
+    DEFAULT_TIME_WINDOW_SIZE: Final[int] = 5
+    DEFAULT_BAN_TIME: Final[int] = 4
+    DEFAULT_PROXY_IPS: Final[list[str]] = [
+        "10.0.0.0/8",
+        "172.16.0.0/12",
+        "192.168.0.0/16",
+    ]
+    """Private ranges trusted as reverse proxies by default (which covers all private network ranges to ensure docker-compose setups support)."""
+
     allowed_ips = serializers.ListField(
         child=serializers.CharField(),
         source="value.allowed_ips",
         required=False,
         default=list,
     )
+
+    is_rate_limit_activated = serializers.BooleanField(default=False, required=False, source="value.is_rate_limit_activated")
+    time_window_size = serializers.IntegerField(min_value=1, max_value=MAX_TIME_WINDOW_SIZE, default=DEFAULT_TIME_WINDOW_SIZE, required=False, source="value.time_window_size")
+    """Size of the rate-limiting time window (in minutes)."""
+    ban_time = serializers.IntegerField(min_value=1, max_value=MAX_BAN_TIME, default=DEFAULT_BAN_TIME, required=False, source="value.ban_time")
+    """
+    The ban time is `(ban_time * time_window_size)`.
+
+    So a `ban_time=6` with `time_window_size=5` would lead to a `30` minutes-long ban when going over the failed `max_failed_login_attempts` limit.
+    """
+    max_failed_login_attempts = serializers.IntegerField(min_value=5, max_value=1000, default=DEFAULT_MAX_FAILED_LOGIN_ATTEMPT, required=False, source="value.max_failed_login_attempts")
+    """Number of failed login attempt allowed per IP per time window."""
+    not_rate_limited_ips = serializers.ListField(
+        child=serializers.CharField(),
+        source="value.not_rate_limited_ips",
+        required=False,
+        default=list,
+    )
+    """IPs/CIDR ranges excluded from the rate-limiting algorithm."""
+    proxy_ips = serializers.ListField(
+        child=serializers.CharField(),
+        source="value.proxy_ips",
+        required=False,
+        default=lambda: list(InfraConfigSerializer.DEFAULT_PROXY_IPS),
+    )
+    """IPs from which the backend will look for the `X-Forwarded-For` header to get the real client's IP."""
 
     class Meta:
         model = GlobalSettings
@@ -772,6 +812,38 @@ class InfraConfigSerializer(serializers.ModelSerializer):
             "folder",
         ]
         read_only_fields = ["name"]
+
+    def _validate_ip_addresses(self, ip_addresses: list[str]) -> list[str]:
+        """Validate a list of ip addresses/CIDR ranges."""
+        cleaned_ips = []
+        seen_ips = set()
+        errors = []
+
+        for ip_address in ip_addresses:
+            try:
+                canonical = canonical_ip_or_cidr(ip_address)
+                if canonical not in seen_ips:
+                    seen_ips.add(canonical)
+                    cleaned_ips.append(canonical)
+            except DjangoValidationError as exc:
+                errors.extend(exc.messages)
+                continue
+
+        if len(errors) > 0:
+            raise serializers.ValidationError(errors)
+
+        if len(cleaned_ips) > self.MAX_ALLOWED_IPS:
+            raise serializers.ValidationError(
+                f"You can add at most {self.MAX_ALLOWED_IPS} IP addresses."
+            )
+
+        return cleaned_ips
+
+    def validate_not_rate_limited_ips(self, ip_addresses: list[str]) -> list[str]:
+        return self._validate_ip_addresses(ip_addresses)
+
+    def validate_proxy_ips(self, ip_addresses: list[str]) -> list[str]:
+        return self._validate_ip_addresses(ip_addresses)
 
     def validate_allowed_ips(self, value):
         cleaned = []
@@ -794,13 +866,30 @@ class InfraConfigSerializer(serializers.ModelSerializer):
             cleaned.append(canonical)
         if errors:
             raise serializers.ValidationError(errors)
-        if len(cleaned) > MAX_ALLOWED_IPS:
+        if len(cleaned) > self.MAX_ALLOWED_IPS:
             raise serializers.ValidationError(
-                f"You can add at most {MAX_ALLOWED_IPS} IP addresses."
+                f"You can add at most {self.MAX_ALLOWED_IPS} IP addresses."
             )
         return cleaned
 
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        value = attrs.get("value", {})
+
+        # On a PATCH a field may be absent: fall back to the stored value, then to the field default.
+        stored = self.instance.value if self.instance and isinstance(self.instance.value, dict) else {}
+        time_window_size = value.get("time_window_size", stored.get("time_window_size", self.DEFAULT_TIME_WINDOW_SIZE))
+        ban_time = value.get("ban_time", stored.get("ban_time", self.DEFAULT_BAN_TIME))
+
+        if ban_time * time_window_size > InfraConfigSerializer.MAX_ABSOLUTE_BAN_TIME:
+            raise serializers.ValidationError(
+                {"ban_time": f"ban_time * time_window_size MUST be <= {self.MAX_ABSOLUTE_BAN_TIME} (got {ban_time * time_window_size})."}
+            )
+        return attrs
+
     def update(self, instance, validated_data):
+        from iam.rate_limiting import get_ban_cache
+
         current_value_dict = instance.value if isinstance(instance.value, dict) else {}
         new_value_dict = validated_data.get("value", {})
         value_changed = False
@@ -822,6 +911,8 @@ class InfraConfigSerializer(serializers.ModelSerializer):
         if value_changed:
             instance.value = current_value_dict
             instance.save(update_fields=["value"])
+
+        get_ban_cache().refresh_settings()
 
         return instance
 

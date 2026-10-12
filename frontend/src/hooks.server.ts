@@ -329,6 +329,12 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 		}
 		request.headers.set('Accept-Language', currentLang);
 
+		try {
+			request.headers.set('X-Forwarded-For', event.getClientAddress());
+		} catch {
+			// This might fail as `getClientAddress` is adapter-dependent.
+		}
+
 		const token = event.cookies.get('token');
 		const csrfToken = event.cookies.get('csrftoken');
 
