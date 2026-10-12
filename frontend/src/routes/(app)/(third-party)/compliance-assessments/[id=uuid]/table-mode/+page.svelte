@@ -139,6 +139,16 @@
 	const canEditObservation = $derived(
 		isFieldEditable(complianceAssessment, 'observation', viewerRole)
 	);
+	const canEditResult = $derived(isFieldEditable(complianceAssessment, 'result', viewerRole));
+	const canEditStatus = $derived(isFieldEditable(complianceAssessment, 'status', viewerRole));
+	const canEditExtendedResult = $derived(
+		isFieldEditable(complianceAssessment, 'extended_result', viewerRole)
+	);
+	const canEditScore = $derived(isFieldEditable(complianceAssessment, 'score', viewerRole));
+	const canEditDocumentationScore = $derived(
+		isFieldEditable(complianceAssessment, 'documentation_score', viewerRole)
+	);
+	const canEditAnswers = $derived(isFieldEditable(complianceAssessment, 'answers', viewerRole));
 
 	const hasQuestions = $derived(
 		requirementAssessments.some(
@@ -734,7 +744,7 @@
 								min={raMin}
 								max={raMax}
 								scoresDefinition={raScoresDef}
-								disabled={isReadOnly}
+								disabled={isReadOnly || !canEditScore}
 								onChange={(v) => {
 									ra.score = v;
 									if (!ra.is_scored) {
@@ -758,7 +768,7 @@
 									max={raMax}
 									scoresDefinition={raScoresDef}
 									isDoc
-									disabled={isReadOnly}
+									disabled={isReadOnly || !canEditDocumentationScore}
 									onChange={(v) => {
 										ra.documentation_score = v;
 										if (!ra.is_scored) {
@@ -1241,7 +1251,7 @@
 																	options={result_options}
 																	value={requirementAssessment.result}
 																	colorMap={complianceResultColorMap}
-																	disabled={isReadOnly}
+																	disabled={isReadOnly || !canEditResult}
 																	size="sm"
 																	ariaLabel={m.result()}
 																	onChange={async (newValue) => {
@@ -1267,7 +1277,7 @@
 																	options={status_options}
 																	value={requirementAssessment.status}
 																	colorMap={complianceStatusColorMap}
-																	disabled={isReadOnly}
+																	disabled={isReadOnly || !canEditStatus}
 																	size="sm"
 																	ariaLabel={m.status()}
 																	onChange={(newValue) => {
@@ -1291,7 +1301,7 @@
 																options={extended_result_options}
 																value={requirementAssessment.extended_result}
 																colorMap={extendedResultColorMap}
-																disabled={isReadOnly}
+																disabled={isReadOnly || !canEditExtendedResult}
 																size="sm"
 																ariaLabel={m.extendedResult()}
 																onChange={(newValue) => {
@@ -1432,7 +1442,7 @@
 														questions={requirementAssessment.requirement.questions}
 														initialValue={requirementAssessment.answers}
 														field="answers"
-														disabled={isReadOnly || !questionnaireMode}
+														disabled={isReadOnly || !questionnaireMode || !canEditAnswers}
 														shallow={shallow || !questionnaireMode}
 														onChange={async (urn, newAnswer) => {
 															requirementAssessment.answers[urn] = newAnswer;
