@@ -1899,6 +1899,11 @@ def is_field_editable_by(compliance_assessment, field_name, role):
     return _role_access(compliance_assessment, field_name, role) == "edit"
 
 
+def is_field_read_only_for(compliance_assessment, field_name, role):
+    """Whether a field is shown to the given role without being writable by it."""
+    return _role_access(compliance_assessment, field_name, role) == "read"
+
+
 def build_initial_field_visibility(framework, base=None):
     """Build the initial `field_visibility` map for a new CA.
 
