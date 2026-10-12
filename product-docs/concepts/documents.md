@@ -48,6 +48,8 @@ All three share the same versioning, lifecycle, languages, classification, and l
 
 Each language version moves through its own lifecycle — **Draft → In review → Change requested → Validated → Published → Deprecated** — and every saved change produces a new revision (`v1`, `v2`, …) rather than overwriting the previous text. The **Version history** sidebar lets you read any past revision and diff two of them.
 
+The published revision stays in force until a newer one is published, so the document list keeps reporting it: a document whose `v1` is published and whose `v2` is still in review shows **Published** at 100%. A secondary badge next to the status (`v2 · In review`) flags the revision still in the approval loop, and the document header shows both — the revision in force and the one being worked on. The badge disappears once the two are the same again.
+
 The lifecycle, revision history, and diff mechanics are shared with policy documents and are described in detail under [Policies → Versioning, history, and diff](policies.md#versioning-history-and-diff).
 
 ## Multiple languages

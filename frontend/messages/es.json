@@ -597,6 +597,7 @@
 	"libraryLoadingError": "Se produjo un error durante la carga de su biblioteca.",
 	"processingError": "Error de procesamiento",
 	"libraryAlreadyLoadedError": "Esta biblioteca ya está cargada.",
+	"libraryOutdatedError": "Ya hay guardada una versión más reciente de esta biblioteca. Indique una \"version\" más alta en su archivo para importarlo.",
 	"invalidLibraryFileError": "Archivo de biblioteca no válido. Asegúrese de que el formato sea correcto.",
 	"taintedFormMessage": "¿Desea abandonar esta página? Es posible que no se guarden los cambios que haya realizado.",
 	"riskScenariosStatus": "Estado de los escenarios de riesgo",
@@ -607,7 +608,6 @@
 	"attemptToDeleteOnlyAdminAccountError": "No puede eliminar la única cuenta de administrador de su aplicación.",
 	"attemptToRemoveOnlyAdminUserGroup": "No puede eliminar al único usuario administrador de la aplicación del grupo de usuarios administradores.",
 	"attemptToRemoveSelfFromDomainAdminGroup": "No puede eliminarse a sí mismo de un grupo de administradores de dominio. Pida a otro administrador que lo haga.",
-	"scoringHelpText": "Marcar para habilitar la puntuación",
 	"overrideScore": "Anular la puntuación",
 	"overrideScoreHelpText": "Fijar manualmente la puntuación y dejar de recalcularla a partir de las respuestas",
 	"automaticScore": "Puntuación automática",
@@ -3646,5 +3646,7 @@
 	"attributeMappingGroups": "Mapeo del atributo de grupos",
 	"attributeMappingGroupsHelpText": "Nombre(s) de la afirmación (claim) que contiene las pertenencias a grupos de IdP del usuario. Los grupos encontrados aquí se sincronizan con los grupos de IdP en cada inicio de sesión y conceden los grupos de usuarios de CISO Assistant que un administrador les haya asignado.",
 	"jitProvisioning": "Aprovisionamiento automático de SSO (JIT)",
-	"jitProvisioningDescription": "Habilita la creación automática de cuentas en el primer inicio de sesión mediante SSO y la sincronización de sus pertenencias a grupos de IdP, sin necesidad de SCIM."
+	"jitProvisioningDescription": "Habilita la creación automática de cuentas en el primer inicio de sesión mediante SSO y la sincronización de sus pertenencias a grupos de IdP, sin necesidad de SCIM.",
+	"includeNotApplicableRequirements": "Incluir requisitos no aplicables",
+	"excludeNotApplicableRequirements": "Excluir requisitos no aplicables"
 }

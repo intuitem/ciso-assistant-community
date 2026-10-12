@@ -837,6 +837,7 @@
 	"libraryLoadingError": "라이브러리를 로드하는 중 오류가 발생했습니다",
 	"processingError": "처리 오류",
 	"libraryAlreadyLoadedError": "이 라이브러리는 이미 로드되었습니다",
+	"libraryOutdatedError": "이 라이브러리의 최신 버전이 이미 저장되어 있습니다. 가져오려면 파일의 \"version\" 값을 더 높게 설정하세요.",
 	"invalidLibraryFileError": "잘못된 라이브러리 파일입니다. 형식이 올바른지 확인하세요.",
 	"fileTooLarge": "파일이 너무 큽니다",
 	"invalidFileFormat": "잘못된 파일 형식",
@@ -855,7 +856,6 @@
 	"attemptToDeleteOnlyAdminAccountError": "애플리케이션의 유일한 관리자 계정은 삭제할 수 없습니다.",
 	"attemptToRemoveOnlyAdminUserGroup": "애플리케이션의 유일한 관리자를 관리자 사용자 그룹에서 제거할 수 없습니다.",
 	"attemptToRemoveSelfFromDomainAdminGroup": "도메인 관리자 그룹에서 자신을 제거할 수 없습니다. 다른 관리자에게 요청하세요.",
-	"scoringHelpText": "점수 산정을 활성화하려면 선택하세요",
 	"overrideScore": "점수 재정의",
 	"overrideScoreHelpText": "점수를 수동으로 고정하고 답변으로부터의 재계산을 중지합니다",
 	"automaticScore": "자동 점수",
@@ -4306,5 +4306,7 @@
 	"attributeMappingGroups": "그룹 속성 매핑",
 	"attributeMappingGroupsHelpText": "사용자의 IdP 그룹 멤버십을 전달하는 클레임 이름입니다. 여기에서 찾은 그룹은 로그인할 때마다 IdP 그룹과 동기화되며, 관리자가 매핑한 CISO Assistant 사용자 그룹 권한을 부여합니다.",
 	"jitProvisioning": "SSO 자동 프로비저닝(JIT)",
-	"jitProvisioningDescription": "최초 SSO 로그인 시 계정을 자동으로 생성하고 IdP 그룹 멤버십을 동기화하도록 활성화합니다. SCIM이 필요하지 않습니다."
+	"jitProvisioningDescription": "최초 SSO 로그인 시 계정을 자동으로 생성하고 IdP 그룹 멤버십을 동기화하도록 활성화합니다. SCIM이 필요하지 않습니다.",
+	"includeNotApplicableRequirements": "해당되지 않는 요구사항 포함",
+	"excludeNotApplicableRequirements": "해당되지 않는 요구사항 제외"
 }

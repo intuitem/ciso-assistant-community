@@ -107,6 +107,7 @@ GENERAL_SETTINGS_KEYS = [
     "personal_folders",
     "personal_folders_parent",
     "disable_partially_compliant_result",
+    "documentation_score_first",
     "use_risk_category_label",
     "disabled_email_templates",
 ]

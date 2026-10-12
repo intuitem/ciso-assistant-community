@@ -532,7 +532,9 @@ def detect_sync_sources(ebios_rm_study):
 
     Returns a dict with keys: operational_scenarios, attack_paths,
     strategic_scenarios, feared_events. Each value is a list (may be empty).
-    Returns None if nothing is selected at all.
+    Returns None if nothing is selected at all. When every candidate was
+    deselected in workshop 4, returns the dict with all lists empty so the
+    sync still archives the risk scenarios it previously created.
     """
     result = {
         "operational_scenarios": [],
@@ -551,18 +553,24 @@ def detect_sync_sources(ebios_rm_study):
         )
 
     # Level 1: selected operational scenarios (full EBIOS)
-    selected_os = [
-        os for os in ebios_rm_study.operational_scenarios.all() if os.is_selected
-    ]
+    all_os = list(ebios_rm_study.operational_scenarios.all())
+    selected_os = [os for os in all_os if os.is_selected]
     if selected_os:
         result["operational_scenarios"] = selected_os
-        for os_obj in selected_os:
-            _cover_feared_events(os_obj.ro_to)
-            covered_ss_ids.add(os_obj.attack_path.strategic_scenario_id)
+
+    # Any attack path that already has an operational scenario (selected or
+    # not) was already reviewed at the finest granularity in workshop 4, so
+    # neither it, its strategic scenario, nor its feared events must fall
+    # back to a coarser sync level below — even when the scenario ended up
+    # deselected there.
+    covered_ap_ids = set()
+    for os_obj in all_os:
+        covered_ap_ids.add(os_obj.attack_path_id)
+        covered_ss_ids.add(os_obj.attack_path.strategic_scenario_id)
+        _cover_feared_events(os_obj.ro_to)
 
     # Level 2: selected attack paths not covered by an operational scenario
     selected_ap = list(ebios_rm_study.attackpath_set.filter(is_selected=True))
-    covered_ap_ids = {os_obj.attack_path_id for os_obj in selected_os}
     uncovered_ap = [ap for ap in selected_ap if ap.id not in covered_ap_ids]
     if uncovered_ap:
         result["attack_paths"] = uncovered_ap
@@ -584,7 +592,7 @@ def detect_sync_sources(ebios_rm_study):
     if uncovered_fe:
         result["feared_events"] = uncovered_fe
 
-    if not any(result.values()):
+    if not any(result.values()) and not all_os:
         return None
 
     return result
@@ -632,7 +640,13 @@ def build_sync_preview(ebios_rm_study, sources):
 
     # Determine the sync mode label for the frontend
     active_modes = [k for k, v in sources.items() if v]
-    sync_mode = active_modes[0] if len(active_modes) == 1 else "mixed"
+    if not active_modes:
+        # Everything was deselected in workshop 4.
+        sync_mode = "operational_scenarios"
+    elif len(active_modes) == 1:
+        sync_mode = active_modes[0]
+    else:
+        sync_mode = "mixed"
 
     return {
         "sync_mode": sync_mode,

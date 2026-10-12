@@ -45,7 +45,9 @@ from tprm.models import (
     Representative,
     Solution,
     SolutionSubcontractor,
+    Tier,
 )
+from tprm.tiers import set_entity_tier
 
 
 # ============ Fixtures ============
@@ -267,6 +269,66 @@ class TestTPRMRoundTrip:
         # Contract in the new domain, solutions M2M remapped.
         contract = Contract.objects.get(folder=imported, ref_id="CONTRACT-1")
         assert list(contract.solutions.all()) == [solution]
+
+
+class TestTierRoundTrip:
+    @pytest.mark.django_db
+    def test_tiers_travel_by_key_and_missing_ones_are_not_created(
+        self, root_folder, admin_user
+    ):
+        Tier.create_default_tiers()
+        vital = Tier.objects.create(name="Vital", rank=Tier.next_rank())
+        domain = Folder.objects.create(
+            name="Tier Source",
+            content_type=Folder.ContentType.DOMAIN,
+            parent_folder=root_folder,
+        )
+        high_one = Entity.objects.create(name="High one", ref_id="T-1", folder=domain)
+        vital_one = Entity.objects.create(name="Vital one", ref_id="T-2", folder=domain)
+        set_entity_tier(high_one, Tier.objects.get(key="important"))
+        set_entity_tier(vital_one, vital)
+        Solution.objects.create(
+            name="Payroll",
+            ref_id="S-1",
+            provider_entity=high_one,
+            tier=Tier.objects.get(key="critical"),
+        )
+
+        response = export_domain(domain, admin_user)
+        assert response.status_code == 200
+        # A rename on the target keeps the match; a key it lacks is not created.
+        Tier.objects.filter(key="important").update(name="Business-critical")
+        Tier.objects.filter(pk=vital.pk).update(key="elsewhere")
+
+        result = import_objects(
+            process_uploaded_file(io.BytesIO(response.content)),
+            domain_name="Tier Imported",
+            load_missing_libraries=True,
+            user=admin_user,
+        )
+        assert result["message"] == "Import successful"
+
+        imported = Folder.objects.get(
+            name="Tier Imported", content_type=Folder.ContentType.DOMAIN
+        )
+        high_copy = Entity.objects.get(folder=imported, ref_id="T-1")
+        vital_copy = Entity.objects.get(folder=imported, ref_id="T-2")
+        assert high_copy.tier == Tier.objects.get(key="important")
+        assert high_copy.tier_changes.count() == 1
+        assert vital_copy.tier is None
+        assert not Tier.objects.filter(key="vital").exists()
+        solution_copy = Solution.objects.get(provider_entity=high_copy, ref_id="S-1")
+        assert solution_copy.tier == Tier.objects.get(key="critical")
+
+    @pytest.mark.django_db
+    def test_exports_made_before_keys_still_match_by_name(self):
+        from serdes.domain_io import _imported_tier
+
+        Tier.create_default_tiers()
+        Tier.objects.filter(key="important").update(name="Business-critical")
+        assert _imported_tier("Business-critical") == Tier.objects.get(key="important")
+        assert _imported_tier("important") == Tier.objects.get(key="important")
+        assert _imported_tier("nope") is None
 
 
 # ============ Import error reporting ============

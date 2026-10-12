@@ -3,7 +3,6 @@
 
 	import { applyAction, deserialize } from '$app/forms';
 	import { getToastStore } from '$lib/components/Toast/stores';
-	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import Question from '$lib/components/Forms/Question.svelte';
 	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
 	import Score from '$lib/components/Forms/Score.svelte';
@@ -37,6 +36,7 @@
 	} from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
+	import ScorePair from '$lib/components/ComplianceAssessment/ScorePair.svelte';
 	import { getLocale } from '$paraglide/runtime';
 	import { formatDate } from '$lib/utils/datetime';
 	import { Accordion, Progress } from '@skeletonlabs/skeleton-svelte';
@@ -646,9 +646,15 @@
 	}
 
 	// --- Score forms ---
+	// Entering a score is what makes a requirement scored (as in table mode).
+	function markScored(requirementAssessment: Record<string, any>) {
+		if (!requirementAssessment.is_scored) {
+			requirementAssessment.is_scored = true;
+			update(requirementAssessment, 'is_scored');
+		}
+	}
 	let scoreForms = $state({});
 	let docScoreForms = $state({});
-	let isScoredForms = $state({});
 
 	run(() => {
 		requirementAssessments.forEach((requirementAssessment, index) => {
@@ -661,11 +667,6 @@
 			if (!docScoreForms[id]) {
 				docScoreForms[id] = superForm(requirementAssessment.scoreForm, {
 					id: `requirement-documentation-score-${id}-${index}`
-				});
-			}
-			if (!isScoredForms[id]) {
-				isScoredForms[id] = superForm(requirementAssessment.scoreForm, {
-					id: `requirement-is-scored-${id}-${index}`
 				});
 			}
 		});
@@ -1424,58 +1425,47 @@
 										{@const raScoresDef =
 											requirementAssessment.effective_scores_definition ??
 											complianceAssessment.scores_definition}
-										<Score
-											form={scoreForms[requirementAssessment.id]}
-											min_score={raMin}
-											max_score={raMax}
-											scores_definition={raScoresDef}
-											field="score"
-											label={complianceAssessment.show_documentation_score
-												? m.implementationScore()
-												: m.score()}
-											styles="w-full p-1"
-											onChange={(newScore) => {
-												requirementAssessment.score = newScore;
-												updateScore(requirementAssessment);
-											}}
-											disabled={!canEditScore || !requirementAssessment.is_scored}
-										>
-											{#snippet left()}
-												<div>
-													<Checkbox
-														form={isScoredForms[requirementAssessment.id]}
-														field="is_scored"
-														disabled={!canEditScore}
-														label={''}
-														helpText={m.scoringHelpText()}
-														checkboxComponent="switch"
-														classes="h-full flex flex-row items-center justify-center my-1"
-														classesContainer="h-full flex flex-row items-center space-x-4"
-														onChange={async (newValue) => {
-															requirementAssessment.is_scored = newValue;
-															await update(requirementAssessment, 'is_scored');
-														}}
-													/>
-												</div>
+										<ScorePair>
+											{#snippet implementation()}
+												<Score
+													form={scoreForms[requirementAssessment.id]}
+													min_score={raMin}
+													max_score={raMax}
+													scores_definition={raScoresDef}
+													field="score"
+													label={complianceAssessment.show_documentation_score
+														? m.implementationScore()
+														: m.score()}
+													styles="w-full p-1"
+													onChange={(newScore) => {
+														requirementAssessment.score = newScore;
+														markScored(requirementAssessment);
+														updateScore(requirementAssessment);
+													}}
+													disabled={!canEditScore}
+												/>
 											{/snippet}
-										</Score>
-										{#if showDocumentationScore}
-											<Score
-												form={docScoreForms[requirementAssessment.id]}
-												min_score={raMin}
-												max_score={raMax}
-												scores_definition={raScoresDef}
-												field="documentation_score"
-												label={m.documentationScore()}
-												isDoc={true}
-												styles="w-full p-1"
-												onChange={(newScore) => {
-													requirementAssessment.documentation_score = newScore;
-													updateScore(requirementAssessment);
-												}}
-												disabled={!canEditDocumentationScore || !requirementAssessment.is_scored}
-											/>
-										{/if}
+											{#snippet documentation()}
+												{#if showDocumentationScore}
+													<Score
+														form={docScoreForms[requirementAssessment.id]}
+														min_score={raMin}
+														max_score={raMax}
+														scores_definition={raScoresDef}
+														field="documentation_score"
+														label={m.documentationScore()}
+														isDoc={true}
+														styles="w-full p-1"
+														onChange={(newScore) => {
+															requirementAssessment.documentation_score = newScore;
+															markScored(requirementAssessment);
+															updateScore(requirementAssessment);
+														}}
+														disabled={!canEditDocumentationScore}
+													/>
+												{/if}
+											{/snippet}
+										</ScorePair>
 									{/if}
 								</div>
 							{/if}

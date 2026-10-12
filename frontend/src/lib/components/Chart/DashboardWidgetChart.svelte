@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { roundScore } from '$lib/utils/helpers';
 	import { onMount } from 'svelte';
 
 	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
@@ -134,8 +135,21 @@
 			.sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime())
 	);
 
-	// Combined chart data based on metric type
-	const chartData = $derived(isBuiltinMetric ? builtinChartData : customChartData);
+	// Combined chart data based on metric type. Audit scores are stored
+	// unrounded: thresholds and the trend read the raw values, what is shown is
+	// rounded like on the audit.
+	const rawChartData = $derived(isBuiltinMetric ? builtinChartData : customChartData);
+	const chartData = $derived(
+		isBuiltinMetric
+			? rawChartData.map(([date, value]) => [
+					date,
+					typeof value === 'number' ? roundScore(value) : value
+				])
+			: rawChartData
+	);
+	const rawLatestValue = $derived(
+		rawChartData.length > 0 ? rawChartData[rawChartData.length - 1][1] : null
+	);
 
 	// Get choice names for qualitative metrics
 	const choiceNames = $derived(
@@ -146,7 +160,7 @@
 	const latestValue = $derived(chartData.length > 0 ? chartData[chartData.length - 1][1] : null);
 
 	// Threshold-resolved color for the latest scalar value (null when no threshold matches)
-	const thresholdColor = $derived(resolveThresholdColor(latestValue));
+	const thresholdColor = $derived(resolveThresholdColor(rawLatestValue));
 
 	// For breakdown metrics, get the latest breakdown data
 	const latestBreakdown = $derived(
@@ -752,9 +766,9 @@
 			</div>
 			<!-- Trend indicator -->
 			{#if chartData.length > 1}
-				{@const prevValue = chartData[chartData.length - 2]?.[1]}
+				{@const prevValue = rawChartData[rawChartData.length - 2]?.[1]}
 				{@const change = prevValue
-					? (((latestValue - prevValue) / prevValue) * 100).toFixed(1)
+					? (((rawLatestValue - prevValue) / prevValue) * 100).toFixed(1)
 					: null}
 				{@const isPositiveChange = Number(change) >= 0}
 				{@const isGood = higherIsBetter ? isPositiveChange : !isPositiveChange}
