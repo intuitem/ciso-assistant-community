@@ -6,6 +6,13 @@ import {
 	excludedOf,
 	foldersWithSeveral,
 	formulaKind,
+	formulaKey,
+	keepOrFirst,
+	latestTrend,
+	sparkline,
+	moveItem,
+	quickFormulas,
+	renameReference,
 	pickInstance,
 	pickedOf,
 	setCombine,
@@ -204,5 +211,86 @@ describe('aggregate override', () => {
 		let choices = setIncluded(null, 'h', 'hr', false);
 		choices = setCombine(choices, 'h', 'max', 'sum');
 		expect(choices).toEqual({ h: { exclude: ['hr'], combine: 'max' } });
+	});
+});
+
+describe('a computed metric from instances', () => {
+	it('names a pick after its metric, as an identifier', () => {
+		expect(formulaKey('Taux de clics – Phishing')).toBe('taux_de_clics_phishing');
+		expect(formulaKey('2025 budget')).toBe('m_2025_budget');
+		expect(formulaKey('Previous')).toBe('previous_value');
+		expect(formulaKey('!!!')).toBe('metric');
+		expect(formulaKey('Clicks', ['clicks', 'clicks_2'])).toBe('clicks_3');
+	});
+
+	it('renames whole references only', () => {
+		expect(renameReference('clicks * 100.0 / clicks_2 + x.clicks', 'clicks', 'c')).toBe(
+			'c * 100.0 / clicks_2 + x.clicks'
+		);
+		expect(renameReference('"clicks" + clicks', 'clicks', 'c')).toBe('"clicks" + c');
+	});
+
+	it('offers the common formulas over the picks', () => {
+		expect(quickFormulas(['a'])).toEqual([]);
+		expect(quickFormulas(['a', 'b']).map((f) => f.expression)).toEqual([
+			'a * 100.0 / b',
+			'a - b',
+			'a + b',
+			'(a + b) / 2.0'
+		]);
+		expect(quickFormulas(['a', 'b', 'c']).map((f) => f.kind)).toEqual(['sum', 'average']);
+	});
+
+	it('keeps the chosen domain while it is offered', () => {
+		expect(keepOrFirst('b', [{ id: 'a' }, { id: 'b' }])).toBe('b');
+		expect(keepOrFirst('z', [{ id: 'a' }, { id: 'b' }])).toBe('a');
+		expect(keepOrFirst('z', [])).toBe('');
+	});
+
+	it('moves one pick, keeping the others in order', () => {
+		expect(moveItem(['a', 'b', 'c'], 2, 0)).toEqual(['c', 'a', 'b']);
+		expect(moveItem(['a', 'b', 'c'], 0, 1)).toEqual(['b', 'a', 'c']);
+		expect(moveItem(['a', 'b'], 1, 5)).toEqual(['a', 'b']);
+	});
+});
+
+describe('the preview chart', () => {
+	const periods = [
+		{ start: '2026-01-01', value: 10, skipped: false },
+		{ start: '2026-02-01', value: null, skipped: true },
+		{ start: '2026-03-01', value: 20, skipped: false },
+		{ start: '2026-04-01', value: 15, skipped: false }
+	];
+
+	it('places numbers in their time slot, lowest at the bottom', () => {
+		const chart = sparkline(periods, 100, 40, 0)!;
+		expect(chart.points.map((p) => [p.x, p.y])).toEqual([
+			[0, 40],
+			[66.67, 0],
+			[100, 20]
+		]);
+		expect(chart.line).toBe('M0,40 L66.67,0 L100,20');
+		expect(chart.area).toBe('M0,40 L66.67,0 L100,20 L100,40 L0,40 Z');
+	});
+
+	it('draws a flat series mid-height, and nothing without a trend', () => {
+		const flat = sparkline(
+			[
+				{ start: 'a', value: 3 },
+				{ start: 'b', value: 3 }
+			],
+			10,
+			10,
+			0
+		)!;
+		expect(flat.points.map((p) => p.y)).toEqual([5, 5]);
+		expect(sparkline([{ start: 'a', value: 3 }], 10, 10)).toBeNull();
+	});
+
+	it('tells whether the last move is good news', () => {
+		expect(latestTrend(periods, true)).toEqual({ delta: -5, good: false });
+		expect(latestTrend(periods, false)).toEqual({ delta: -5, good: true });
+		expect(latestTrend([{ value: 1 }, { value: 1 }], true)).toEqual({ delta: 0, good: null });
+		expect(latestTrend([{ value: 1 }], true)).toBeNull();
 	});
 });

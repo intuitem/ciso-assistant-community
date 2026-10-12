@@ -222,3 +222,132 @@ export function foldersWithSeveral(instances: { folder: string }[]): string[] {
 	for (const { folder } of instances) counts.set(folder, (counts.get(folder) ?? 0) + 1);
 	return [...counts].filter(([, n]) => n > 1).map(([folder]) => folder);
 }
+
+// ---------- a computed metric started from instances ----------
+
+// The name a picked instance takes in the formula: its metric's name as an
+// identifier, so the definition reads as a reusable formula (`clicks /
+// headcount`), suffixed when two picks share a metric.
+export function formulaKey(metricName: string, taken: string[] = []): string {
+	let key = (metricName ?? '')
+		.normalize('NFKD')
+		.replace(/[̀-ͯ]/g, '')
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, '_')
+		.replace(/^_+|_+$/g, '')
+		.slice(0, 40)
+		.replace(/_+$/, '');
+	if (!key) key = 'metric';
+	if (/^[0-9]/.test(key)) key = `m_${key}`;
+	if (CONTEXT_ROOTS.has(key)) key = `${key}_value`;
+	let candidate = key;
+	for (let n = 2; taken.includes(candidate); n++) candidate = `${key}_${n}`;
+	return candidate;
+}
+
+// The expression with every reference to `from` now reading `to`. Only whole
+// names: not `from_x`, not a field after a dot, not inside a string.
+export function renameReference(expression: string, from: string, to: string): string {
+	if (!from || from === to) return expression;
+	const parts = expression.split(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/);
+	const name = new RegExp(`(?<![\\w.])${from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?!\\w)`, 'g');
+	return parts.map((part, i) => (i % 2 ? part : part.replace(name, to))).join('');
+}
+
+export type QuickFormula = 'sum' | 'ratio' | 'difference' | 'average';
+
+// One click to a common formula over the picks, for the author to adjust.
+export function quickFormulas(keys: string[]): { kind: QuickFormula; expression: string }[] {
+	if (keys.length < 2) return [];
+	const formulas: { kind: QuickFormula; expression: string }[] = [];
+	if (keys.length === 2) {
+		formulas.push({ kind: 'ratio', expression: `${keys[0]} * 100.0 / ${keys[1]}` });
+		formulas.push({ kind: 'difference', expression: `${keys[0]} - ${keys[1]}` });
+	}
+	formulas.push({ kind: 'sum', expression: keys.join(' + ') });
+	formulas.push({
+		kind: 'average',
+		expression: `(${keys.join(' + ')}) / ${keys.length}.0`
+	});
+	return formulas;
+}
+
+// A select's value once its options change: the author's choice while it is
+// still offered, else the first option.
+export function keepOrFirst(current: string, offered: { id: string }[]): string {
+	return offered.some((o) => o.id === current) ? current : (offered[0]?.id ?? '');
+}
+
+// The list with the item at `from` moved to `to`, the others keeping their
+// order. Out-of-range positions leave it as it was.
+export function moveItem<T>(items: T[], from: number, to: number): T[] {
+	if (from === to || from < 0 || to < 0 || from >= items.length || to >= items.length) return items;
+	const next = [...items];
+	const [item] = next.splice(from, 1);
+	next.splice(to, 0, item);
+	return next;
+}
+
+// ---------- the preview's small chart ----------
+
+export interface SparkPoint {
+	x: number;
+	y: number;
+	start: string;
+	value: number;
+}
+
+// A small time series of the preview's periods, drawn in a `width` by
+// `height` box: the numeric periods as points (a skipped one leaves its slot
+// empty, so the spacing stays true to time), the line through them and the
+// area under it. Null with fewer than two numbers: nothing to draw a trend of.
+export function sparkline(
+	periods: { start: string; value: unknown; skipped?: boolean }[],
+	width: number,
+	height: number,
+	pad = 4
+): { points: SparkPoint[]; line: string; area: string } | null {
+	const slots = periods.length;
+	const numeric = periods
+		.map((period, index) => ({ period, index }))
+		.filter(
+			({ period }) =>
+				!period.skipped && typeof period.value === 'number' && Number.isFinite(period.value)
+		);
+	if (numeric.length < 2) return null;
+	const values = numeric.map(({ period }) => period.value as number);
+	const min = Math.min(...values);
+	const max = Math.max(...values);
+	const span = max - min;
+	const step = slots > 1 ? (width - 2 * pad) / (slots - 1) : 0;
+	const points = numeric.map(({ period, index }) => {
+		const value = period.value as number;
+		// A flat series sits mid-height rather than on the floor.
+		const ratio = span ? (value - min) / span : 0.5;
+		return {
+			x: +(pad + index * step).toFixed(2),
+			y: +(height - pad - ratio * (height - 2 * pad)).toFixed(2),
+			start: period.start,
+			value
+		};
+	});
+	const line = points.map((p, i) => `${i ? 'L' : 'M'}${p.x},${p.y}`).join(' ');
+	const first = points[0];
+	const last = points[points.length - 1];
+	const area = `${line} L${last.x},${height} L${first.x},${height} Z`;
+	return { points, line, area };
+}
+
+// How the latest numeric period moved from the one before, and whether that
+// is good news for this metric. Null without two numbers to compare.
+export function latestTrend(
+	periods: { value: unknown; skipped?: boolean }[],
+	higherIsBetter: boolean
+): { delta: number; good: boolean | null } | null {
+	const values = periods
+		.filter((p) => !p.skipped && typeof p.value === 'number' && Number.isFinite(p.value))
+		.map((p) => p.value as number);
+	if (values.length < 2) return null;
+	const delta = values[values.length - 1] - values[values.length - 2];
+	return { delta, good: delta === 0 ? null : delta > 0 === higherIsBetter };
+}

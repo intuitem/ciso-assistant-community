@@ -146,10 +146,24 @@ class MetricInstanceWriteSerializer(BaseModelSerializer):
 
     def validate(self, attrs):
         attrs = super().validate(attrs)
+        from metrology.compose import unreadable_picks
         from metrology.series import validate_input_choices
 
         def current(name):
             return attrs.get(name, getattr(self.instance, name, None))
+
+        # A pick names an instance whose values the formula will show: one
+        # the author may not read must not be theirs to pick.
+        request = self.context.get("request")
+        if "input_choices" in attrs and request is not None:
+            if unreadable_picks(
+                request.user,
+                attrs["input_choices"],
+                getattr(self.instance, "input_choices", None),
+            ):
+                raise serializers.ValidationError(
+                    {"input_choices": [_("A picked metric instance does not exist")]}
+                )
 
         if (
             "input_choices" in attrs

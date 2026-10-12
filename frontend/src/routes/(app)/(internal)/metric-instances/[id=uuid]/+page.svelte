@@ -3,8 +3,9 @@
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
 	import MetricSampleChart from '$lib/components/Chart/MetricSampleChart.svelte';
 	import { m } from '$paraglide/messages';
-	import { invalidate } from '$app/navigation';
+	import { invalidate, invalidateAll } from '$app/navigation';
 	import { getModalStore } from '$lib/components/Modals/stores';
+	import ComposeMetricModal from '$lib/components/Modals/ComposeMetricModal.svelte';
 	import { onMount } from 'svelte';
 
 	interface Props {
@@ -33,6 +34,32 @@
 
 	const modalStore = getModalStore();
 
+	// A computed metric just created is computed by the worker a moment
+	// later: look again a few times rather than show N/A until a reload.
+	// Counted per instance, outside the effect: each look reloads the data and
+	// re-runs it, and a stopped worker must not keep the page polling.
+	let looks = { id: '', count: 0 };
+	$effect(() => {
+		const id = metricInstance?.id;
+		if (!id || !metricInstance?.is_derived || metricInstance?.last_computed_at) return;
+		if (looks.id !== id) looks = { id, count: 0 };
+		if (looks.count >= 10) return;
+		const timer = setTimeout(() => {
+			looks.count += 1;
+			invalidateAll();
+		}, 2000);
+		return () => clearTimeout(timer);
+	});
+
+	// A formula reads quantitative instances only.
+	const composable = $derived(!isQualitative && !!metricInstance?.id);
+	function useInFormula() {
+		modalStore.trigger({
+			type: 'component',
+			component: { ref: ComposeMetricModal, props: { instanceIds: [metricInstance.id] } }
+		});
+	}
+
 	// Watch for modal close and refresh data
 	let previousModalCount = 0;
 	onMount(() => {
@@ -51,6 +78,16 @@
 <!-- A derived series is its formula's: no sample is typed in by hand. -->
 <DetailView {data} {form} disableCreate={Boolean(metricInstance?.is_derived)}>
 	{#snippet actions()}
+		{#if composable}
+			<button
+				type="button"
+				class="btn preset-tonal-primary h-fit"
+				onclick={useInFormula}
+				data-testid="use-in-formula-button"
+			>
+				<i class="fa-solid fa-calculator mr-2"></i>{m.useInFormula()}
+			</button>
+		{/if}
 		{#if metricInstance?.is_derived}
 			<button
 				type="button"

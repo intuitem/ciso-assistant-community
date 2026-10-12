@@ -33,6 +33,21 @@ def _as_uuid(value):
         return None
 
 
+def _composable(instance):
+    """A metric instance as the "new computed metric" modal lists it."""
+    definition = instance.metric_definition
+    return {
+        "id": str(instance.id),
+        "name": instance.name,
+        "folder": {"id": str(instance.folder_id), "str": str(instance.folder)},
+        "frequency": instance.collection_frequency,
+        "category": definition.category,
+        "status": instance.status,
+        "current_value": instance.current_value(),
+        "definition": {"id": str(definition.id), "name": definition.name},
+    }
+
+
 def _user_can_read_target(user, content_type, object_id):
     target_model = content_type.model_class()
     if target_model is None:
@@ -140,6 +155,7 @@ class MetricDefinitionViewSet(BaseModelViewSet):
         and what each input resolved to in the folder."""
         from types import SimpleNamespace
 
+        from metrology.compose import unreadable_picks
         from metrology.derived import DerivedMetricError
         from metrology.series import evaluate_series, period_start, shift_period
         from django.utils import timezone
@@ -156,9 +172,31 @@ class MetricDefinitionViewSet(BaseModelViewSet):
             frequency,
             -(self.PREVIEW_PERIODS - 1),
         )
+        choices = data.get("input_choices")
+        if choices is not None and not isinstance(choices, dict):
+            choices = None
+        if unreadable_picks(self.request.user, choices):
+            # A pick the author may not read would show them its values.
+            return Response(
+                {
+                    "ok": False,
+                    "errors": [
+                        {
+                            "code": "derived_input_invalid",
+                            "message": "A picked metric instance does not exist",
+                        }
+                    ],
+                }
+            )
         try:
             evaluation = evaluate_series(
-                inputs, expression, folder, frequency, shape, since=since
+                inputs,
+                expression,
+                folder,
+                frequency,
+                shape,
+                since=since,
+                choices=choices,
             )
         except DerivedMetricError as e:
             return Response(
@@ -225,6 +263,7 @@ class MetricInstanceViewSet(BaseModelViewSet):
         "filtering_labels",
         "organisation_objectives",
         "evidences",
+        "metric_definition__category",
     ]
     search_fields = ["name", "description", "ref_id"]
 
@@ -299,6 +338,105 @@ class MetricInstanceViewSet(BaseModelViewSet):
                 }
             )
         return Response({"inputs": inputs})
+
+    COMPOSE_CANDIDATES = 20
+
+    @action(detail=False, methods=["get"], url_path="compose-candidates")
+    def compose_candidates(self, request):
+        """For the "new computed metric" modal: the instances a formula may
+        read, each word of the search matching their name, their metric or
+        their domain, or the ones named by ``instance``. Quantitative, not
+        deprecated, and readable by the user."""
+        from django.db.models import Q
+
+        search = (request.query_params.get("search") or "").strip()
+        found = (
+            self.get_queryset()
+            .filter(metric_definition__category=MetricDefinition.Category.QUANTITATIVE)
+            .exclude(status=MetricInstance.Status.DEPRECATED)
+        )
+        ids = [_as_uuid(i) for i in request.query_params.getlist("instance")]
+        if ids:
+            # The rows a list selection opens the modal with.
+            found = found.filter(id__in=[i for i in ids if i is not None])
+        # Every word somewhere: "clicks france" finds "Phishing clicks"
+        # in ACME France.
+        for word in search.split():
+            found = found.filter(
+                Q(name__icontains=word)
+                | Q(metric_definition__name__icontains=word)
+                | Q(folder__name__icontains=word)
+            )
+        return Response(
+            [
+                _composable(instance)
+                for instance in found.order_by("name", "id")[: self.COMPOSE_CANDIDATES]
+            ]
+        )
+
+    @action(detail=False, methods=["get"], url_path="compose-context")
+    def compose_context(self, request):
+        """For the "new computed metric" modal: where the metric may live
+        and how often it computes, given the picked instances. The domains
+        run from the lowest holding every pick up to the root, keeping those
+        the user may create metrics in; the frequency is the least frequent
+        pick's. Instances the user may not read are left out, as if they did
+        not exist."""
+        from metrology.compose import (
+            common_domain,
+            creatable_in,
+            least_frequent,
+            readable_instances,
+        )
+
+        ids = [_as_uuid(i) for i in request.query_params.getlist("instance")]
+        found = readable_instances(request.user, [i for i in ids if i is not None])
+        picked = [found[i] for i in ids if i in found]
+        lowest = common_domain([instance.folder for instance in picked])
+        domains = (
+            [
+                folder
+                for folder in lowest.get_parent_folders(include_self=True)
+                if creatable_in(request.user, folder)
+            ]
+            if lowest
+            else []
+        )
+        return Response(
+            {
+                "domains": [
+                    {"id": str(folder.id), "str": str(folder)} for folder in domains
+                ],
+                "frequency": least_frequent(
+                    [instance.collection_frequency for instance in picked]
+                ),
+            }
+        )
+
+    @action(detail=False, methods=["post"], url_path="compose")
+    def compose(self, request):
+        """Create a computed metric from instances: the instance and its
+        definition (an identical one is reused), in one go."""
+        from metrology.compose import CompositionError, compose
+
+        try:
+            instance, reused = compose(request.user, request.data)
+        except PermissionError:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        except CompositionError as e:
+            return Response(e.errors, status=status.HTTP_400_BAD_REQUEST)
+        definition = instance.metric_definition
+        return Response(
+            {
+                "id": str(instance.id),
+                "definition": {
+                    "id": str(definition.id),
+                    "name": definition.name,
+                    "reused": reused,
+                },
+            },
+            status=status.HTTP_201_CREATED,
+        )
 
     @action(detail=True, methods=["post"], url_path="refresh")
     def refresh(self, request, pk=None):
