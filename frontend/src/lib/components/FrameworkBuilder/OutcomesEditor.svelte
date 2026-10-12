@@ -25,6 +25,8 @@
 		pages?: { id: string; label: string }[];
 		/** What the expression field suggests. */
 		catalog?: CelCatalog;
+		/** Frameworks: implementation groups a rule can be limited to. */
+		groups?: { id: string; label: string }[];
 	}
 
 	let {
@@ -33,7 +35,8 @@
 		activeLanguage = null,
 		mode = 'framework',
 		pages = [],
-		catalog = { mode: 'framework', nodes: [], questions: [] }
+		catalog = { mode: 'framework', nodes: [], questions: [] },
+		groups = []
 	}: Props = $props();
 
 	// The picker writes, and only ever replaces, a bare page score: a hand-written
@@ -77,6 +80,14 @@
 		);
 		rules = [...rules, { ref_id, annotation: '', color: null, expression: '' }];
 		expandedIndex = rules.length - 1;
+		persist();
+	}
+
+	function toggleGroup(index: number, id: string) {
+		const current = rules[index].implementation_groups ?? [];
+		const next = current.includes(id) ? current.filter((g) => g !== id) : [...current, id];
+		if (next.length) rules[index].implementation_groups = next;
+		else delete rules[index].implementation_groups;
 		persist();
 	}
 
@@ -146,8 +157,14 @@
 							['assessment.score_sum', m.builderCelScoreSum()],
 							['assessment.score_max', m.builderCelScoreMax()],
 							['assessment.answered_count', m.builderCelAnsweredCount()],
-							['assessment.total_count', m.builderCelTotalCount()]
-						]
+							['assessment.total_count', m.builderCelTotalCount()],
+							['assessment.selected_implementation_groups', m.builderCelSelectedGroups()],
+							['assessment.implementation_score', m.builderCelAssessmentImplementationScore()],
+							['assessment.documentation_score', m.builderCelAssessmentDocumentationScore()],
+							['assessment.maturity_score', m.builderCelAssessmentMaturityScore()],
+							['assessment.target_score', m.builderCelAssessmentTargetScore()]
+						],
+						hint: m.builderCelScoresHint()
 					},
 					{
 						title: m.builderCelGroupRequirements(),
@@ -155,9 +172,38 @@
 							['requirements["NODE_ID"].score', m.builderCelReqScore()],
 							['requirements["NODE_ID"].max_score', m.builderCelReqMaxScore()],
 							['requirements["NODE_ID"].result', m.builderCelReqResult()],
-							['requirements["NODE_ID"].status', m.builderCelReqStatus()]
+							['requirements["NODE_ID"].status', m.builderCelReqStatus()],
+							['requirements["NODE_ID"].documentation_score', m.builderCelReqDocumentationScore()],
+							['requirements["NODE_ID"].maturity_score', m.builderCelReqMaturityScore()],
+							['requirements["NODE_ID"].implementation_groups', m.builderCelReqGroups()]
 						],
 						hint: m.builderCelNodeIdHint()
+					},
+					{
+						title: m.builderCelGroupSections(),
+						rows: [
+							['sections["NODE_ID"].maturity_score', m.builderCelSubsetMaturityScore()],
+							['sections["NODE_ID"].implementation_score', m.builderCelSubsetImplementationScore()],
+							['sections["NODE_ID"].documentation_score', m.builderCelSubsetDocumentationScore()],
+							['sections["NODE_ID"].scored_count', m.builderCelSubsetScoredCount()],
+							['sections["NODE_ID"].total_count', m.builderCelSubsetTotalCount()],
+							['sections["NODE_ID"].not_applicable_count', m.builderCelSubsetNotApplicableCount()],
+							['sections["NODE_ID"].min_maturity_score', m.builderCelSubsetMinMaturityScore()],
+							['sections["NODE_ID"].depth', m.builderCelSectionDepth()],
+							['sections["NODE_ID"].ref_id', m.builderCelSectionRefId()]
+						]
+					},
+					{
+						title: m.builderCelGroupImplementationGroups(),
+						rows: [
+							['groups["GROUP_ID"].maturity_score', m.builderCelSubsetMaturityScore()],
+							['groups["GROUP_ID"].implementation_score', m.builderCelSubsetImplementationScore()],
+							['groups["GROUP_ID"].documentation_score', m.builderCelSubsetDocumentationScore()],
+							['groups["GROUP_ID"].scored_count', m.builderCelSubsetScoredCount()],
+							['groups["GROUP_ID"].total_count', m.builderCelSubsetTotalCount()],
+							['groups["GROUP_ID"].not_applicable_count', m.builderCelSubsetNotApplicableCount()],
+							['groups["GROUP_ID"].min_maturity_score', m.builderCelSubsetMinMaturityScore()]
+						]
 					},
 					{
 						title: m.builderCelGroupAnswers(),
@@ -172,6 +218,7 @@
 					{
 						title: m.builderCelGroupOther(),
 						rows: [
+							['values.REF_ID', m.builderCelValues()],
 							['computed_outcomes', m.builderCelComputedOutcomes()],
 							['hidden_requirements', m.builderCelHiddenRequirements()]
 						]
@@ -240,6 +287,13 @@
 					<span class="text-xs text-surface-500 truncate min-w-0">{rule.annotation}</span>
 				{/if}
 
+				{#each rule.implementation_groups ?? [] as group (group)}
+					<span
+						class="text-[10px] font-mono px-1 rounded bg-surface-200-800 text-surface-600-400 shrink-0"
+						>{group}</span
+					>
+				{/each}
+
 				<span class="ml-auto text-xs text-surface-500 font-mono truncate max-w-[200px]">
 					{rule.expression || '...'}
 				</span>
@@ -291,28 +345,52 @@
 						</label>
 					</div>
 
-					{#if mode === 'quick_form'}
-						<label class="block">
-							<span class="text-xs text-surface-600-400">{m.builderRuleKind()}</span>
-							<select
-								class="w-full text-sm border border-surface-200-800 rounded px-2 py-1 bg-surface-50-950"
-								value={rule.kind === 'number' ? 'number' : 'boolean'}
-								onchange={(e) => {
-									if (e.currentTarget.value === 'number') {
-										rules[index].kind = 'number';
-										rules[index].color = null;
-									} else {
-										delete rules[index].kind;
-									}
-									persist();
-								}}
-								data-testid="outcome-rule-kind"
-							>
-								<option value="boolean">{m.builderRuleKindBoolean()}</option>
-								<option value="number">{m.builderRuleKindNumber()}</option>
-							</select>
-							<span class="text-xs text-surface-500">{m.builderRuleKindHint()}</span>
-						</label>
+					<label class="block">
+						<span class="text-xs text-surface-600-400">{m.builderRuleKind()}</span>
+						<select
+							class="w-full text-sm border border-surface-200-800 rounded px-2 py-1 bg-surface-50-950"
+							value={rule.kind === 'number' ? 'number' : 'boolean'}
+							onchange={(e) => {
+								if (e.currentTarget.value === 'number') {
+									rules[index].kind = 'number';
+									rules[index].color = null;
+								} else {
+									delete rules[index].kind;
+								}
+								persist();
+							}}
+							data-testid="outcome-rule-kind"
+						>
+							<option value="boolean">{m.builderRuleKindBoolean()}</option>
+							<option value="number">{m.builderRuleKindNumber()}</option>
+						</select>
+						<span class="text-xs text-surface-500">{m.builderRuleKindHint()}</span>
+					</label>
+
+					{#if mode === 'framework' && groups.length}
+						<div class="block" role="group" aria-label={m.builderRuleGroups()}>
+							<span class="text-xs text-surface-600-400">{m.builderRuleGroups()}</span>
+							<div class="flex flex-wrap gap-1 mt-0.5" data-testid="outcome-rule-groups">
+								{#each groups as group (group.id)}
+									{@const on = (rule.implementation_groups ?? []).includes(group.id)}
+									<button
+										type="button"
+										aria-pressed={on}
+										title={group.label}
+										class="text-xs px-2 py-0.5 rounded-full border {on
+											? 'border-primary-500 bg-primary-100-900 text-primary-800-200'
+											: 'border-surface-200-800 text-surface-600-400 hover:bg-surface-100-900'}"
+										onclick={() => toggleGroup(index, group.id)}>{group.id}</button
+									>
+								{/each}
+								{#if !rule.implementation_groups?.length}
+									<span class="text-xs text-surface-500 self-center"
+										>({m.builderRuleGroupsAll()})</span
+									>
+								{/if}
+							</div>
+							<span class="text-xs text-surface-500">{m.builderRuleGroupsHint()}</span>
+						</div>
 					{/if}
 
 					<div class="block">

@@ -103,8 +103,10 @@ export interface OutcomeRule {
 	annotation: string;
 	color: string | null;
 	expression: string;
-	/** Quick forms: 'number' rules compute a value instead of firing. */
+	/** 'number' rules compute a value instead of firing. */
 	kind?: 'number';
+	/** Frameworks: the rule applies only to audits whose scope includes one of these groups. */
+	implementation_groups?: string[];
 	translations?: Translations | null;
 }
 

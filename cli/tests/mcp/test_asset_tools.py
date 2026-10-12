@@ -456,11 +456,11 @@ class TestAssetSecurityGaps:
 
 class TestRegistration:
     def test_read_only_profile_has_gaps_tool(self):
-        from mcp.server.fastmcp import FastMCP
+        from mcp.server.mcpserver import MCPServer
 
         import ca_mcp.server as server
 
-        fresh = FastMCP("test")
+        fresh = MCPServer("test")
         with (
             patch.object(server, "mcp", fresh),
             patch.object(server, "_registered", False),

@@ -48,7 +48,8 @@ const catalog: CelCatalog = buildCelCatalog(
 		]),
 		node('notes', [question('comment', 'text', 'Comment', [], 'notes')])
 	],
-	'quick_form'
+	'quick_form',
+	[]
 );
 const RULE = { where: 'outcome' as const, values: ['risk'] };
 
@@ -133,6 +134,54 @@ describe('suggestions', () => {
 		);
 		expect(names).toContain('assessment');
 		expect(names).not.toContain('response');
+	});
+});
+
+describe('framework scores', () => {
+	const tree = [
+		{
+			node: {
+				urn: 'urn:test:risk:req_node:fw:gv',
+				ref_id: 'GV',
+				name: 'Govern',
+				assessable: false
+			},
+			questions: [],
+			children: [
+				{
+					node: { urn: 'urn:test:risk:req_node:fw:gv.oc-1', ref_id: 'GV.OC-1', assessable: true },
+					questions: [],
+					children: [],
+					depth: 1
+				}
+			],
+			depth: 0
+		}
+	] as unknown as BuilderNode[];
+	const framework = buildCelCatalog(tree, 'framework', [{ id: 'B', label: 'basic' }]);
+	const rule = { where: 'outcome' as const };
+	const visibility = { where: 'visibility' as const };
+	const at = (text: string, place: typeof rule | typeof visibility = rule) =>
+		celSuggestions(text, text.length, framework, place)?.items.map((i) => i.label) ?? [];
+
+	test('nodes with children are sections, requirements stay assessable nodes', () => {
+		expect(framework.sections).toEqual([{ id: 'gv', label: 'GV Govern' }]);
+		expect(framework.nodes.map((n) => n.id)).toEqual(['gv.oc-1']);
+	});
+
+	test('section and group ids, then their fields', () => {
+		expect(at('sections["')).toEqual(['gv']);
+		expect(at('groups["')).toEqual(['B']);
+		expect(at('groups["B"].mat')).toEqual(['maturity_score', 'min_maturity_score']);
+		expect(at('sections["gv"].de')).toEqual(['depth']);
+	});
+
+	test('the audit scores are for rules only', () => {
+		expect(at('assessment.maturity')).toEqual(['maturity_score']);
+		expect(at('assessment.maturity', visibility)).toEqual([]);
+		expect(at('sections["', visibility)).toEqual([]);
+		expect(at('sec', visibility)).toEqual([]);
+		expect(at('sec')).toEqual(['sections']);
 	});
 });
 

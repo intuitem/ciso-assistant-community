@@ -60,11 +60,11 @@ The matrix is the same for all three tiers; what changes is the `(probability, i
 
 Matrices ship as YAML libraries — the same format as frameworks, with `_meta` and `_content` sheets defining the probability/impact/risk axes and the grid. They are typically authored in Excel using the templates under `tools/excel/matrix/` and converted to YAML.
 
-Designing a matrix correctly — particularly the grid — is non-trivial. Start from one of the existing examples and adapt the levels and grid logic rather than building from scratch. See [Designing your own libraries](../configuration/libraries/custom-libraries.md).
+Designing a matrix correctly — particularly the grid — is non-trivial. Start from one of the existing examples and adapt the levels and grid logic rather than building from scratch. See [Risk Matrices](../configuration/libraries/library-objects/risk-matrices.md) for the workbook fields and an example.
 
 ## Related
 
 - [Risk assessments](risk-assessments.md)
 - [Libraries](libraries.md)
 - [Vocabulary → Risk matrix](../introduction/vocabulary.md)
-- [Designing your own libraries](../configuration/libraries/custom-libraries.md)
+- [Risk Matrices](../configuration/libraries/library-objects/risk-matrices.md)
