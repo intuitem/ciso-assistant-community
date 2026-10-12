@@ -458,7 +458,6 @@ class TestWrappedFrameworkScale:
     """Loaded frameworks store {"scale": [...]}, not a bare list."""
 
     def test_wrapped_scale_flows_to_audit_and_api(self, setup):
-
         wrapped = {
             "scale": [
                 {"score": s, "name": f"L{s}", "translations": {"fr": {"name": f"N{s}"}}}

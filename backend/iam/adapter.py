@@ -38,7 +38,9 @@ User = get_user_model()
 DEFAULT_ATTRIBUTE_MAPPING_GROUPS = ["groups"]
 
 
-def parse_ip(ip_address: str) -> Optional[ipaddress.IPv4Address | ipaddress.IPv6Address]:
+def parse_ip(
+    ip_address: str,
+) -> Optional[ipaddress.IPv4Address | ipaddress.IPv6Address]:
     """
     Parse an IP address (which may come from the `X-Forwarded-For` HTTP header).
 
@@ -64,7 +66,10 @@ def parse_ip(ip_address: str) -> Optional[ipaddress.IPv4Address | ipaddress.IPv6
     return parsed_ip
 
 
-def is_in_networks(target_ip: str | ipaddress.IPv4Address | ipaddress.IPv6Address, ip_networks: list[str]) -> bool:
+def is_in_networks(
+    target_ip: str | ipaddress.IPv4Address | ipaddress.IPv6Address,
+    ip_networks: list[str],
+) -> bool:
     """
     Return `True` if the `target_ip` match one of the IP/CIDR Range in `ip_networks`, return `False` otherwise.
 
@@ -86,7 +91,9 @@ def is_in_networks(target_ip: str | ipaddress.IPv4Address | ipaddress.IPv6Addres
     return False
 
 
-def resolve_client_ip(request: Optional[HttpRequest], proxy_ips: list[str]) -> Optional[str]:
+def resolve_client_ip(
+    request: Optional[HttpRequest], proxy_ips: list[str]
+) -> Optional[str]:
     """Return the real client IP address from which the `request` originates (`None` if it can't be determined)."""
     if request is None:
         return
@@ -111,8 +118,12 @@ def resolve_client_ip(request: Optional[HttpRequest], proxy_ips: list[str]) -> O
 
 
 AUDIT_LOG_COUNT_TIME_UNIT = 86400
-AUDIT_LOG_COUNT: tuple[int, int] = (int(time.monotonic() / AUDIT_LOG_COUNT_TIME_UNIT), 0)
+AUDIT_LOG_COUNT: tuple[int, int] = (
+    int(time.monotonic() / AUDIT_LOG_COUNT_TIME_UNIT),
+    0,
+)
 AUDIT_LOG_LIMIT = 500
+
 
 def create_ip_ban_audit_log(ip_address: str, user: Optional[User]):
     global AUDIT_LOG_COUNT
@@ -142,6 +153,7 @@ def create_ip_ban_audit_log(ip_address: str, user: Optional[User]):
     except Exception:
         logger.exception("Could not create the failed-login ban audit log")
 
+
 class AccountAdapter(DefaultAccountAdapter):
     def is_safe_url(self, url):
         allowed_hosts = {urlparse(settings.CISO_ASSISTANT_URL).hostname} | set(
@@ -157,7 +169,9 @@ class AccountAdapter(DefaultAccountAdapter):
         return False
 
     def authenticate(self, request: HttpRequest, **credentials):
-        infra_settings_obj = GlobalSettings.objects.filter(name=GlobalSettings.Names.INFRA_CONFIG).first()
+        infra_settings_obj = GlobalSettings.objects.filter(
+            name=GlobalSettings.Names.INFRA_CONFIG
+        ).first()
         infra_settings = infra_settings_obj.value if infra_settings_obj else {}
 
         is_rate_limit_activated = infra_settings.get("is_rate_limit_activated", False)
@@ -198,7 +212,9 @@ class AccountAdapter(DefaultAccountAdapter):
         except Exception:
             # Failed login: bad credentials, invalid input or non-local user
             if is_rate_limit_activated and ip_address is not None:
-                create_audit_log = get_ban_cache().register_failed_login(ip_address, email)
+                create_audit_log = get_ban_cache().register_failed_login(
+                    ip_address, email
+                )
 
                 if create_audit_log:
                     user = User.objects.filter(email=email).first() if email else None

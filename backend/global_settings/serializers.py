@@ -775,16 +775,36 @@ class InfraConfigSerializer(serializers.ModelSerializer):
         default=list,
     )
 
-    is_rate_limit_activated = serializers.BooleanField(default=False, required=False, source="value.is_rate_limit_activated")
-    time_window_size = serializers.IntegerField(min_value=1, max_value=MAX_TIME_WINDOW_SIZE, default=DEFAULT_TIME_WINDOW_SIZE, required=False, source="value.time_window_size")
+    is_rate_limit_activated = serializers.BooleanField(
+        default=False, required=False, source="value.is_rate_limit_activated"
+    )
+    time_window_size = serializers.IntegerField(
+        min_value=1,
+        max_value=MAX_TIME_WINDOW_SIZE,
+        default=DEFAULT_TIME_WINDOW_SIZE,
+        required=False,
+        source="value.time_window_size",
+    )
     """Size of the rate-limiting time window (in minutes)."""
-    ban_time = serializers.IntegerField(min_value=1, max_value=MAX_BAN_TIME, default=DEFAULT_BAN_TIME, required=False, source="value.ban_time")
+    ban_time = serializers.IntegerField(
+        min_value=1,
+        max_value=MAX_BAN_TIME,
+        default=DEFAULT_BAN_TIME,
+        required=False,
+        source="value.ban_time",
+    )
     """
     The ban time is `(ban_time * time_window_size)`.
 
     So a `ban_time=6` with `time_window_size=5` would lead to a `30` minutes-long ban when going over the failed `max_failed_login_attempts` limit.
     """
-    max_failed_login_attempts = serializers.IntegerField(min_value=5, max_value=1000, default=DEFAULT_MAX_FAILED_LOGIN_ATTEMPT, required=False, source="value.max_failed_login_attempts")
+    max_failed_login_attempts = serializers.IntegerField(
+        min_value=5,
+        max_value=1000,
+        default=DEFAULT_MAX_FAILED_LOGIN_ATTEMPT,
+        required=False,
+        source="value.max_failed_login_attempts",
+    )
     """Number of failed login attempt allowed per IP per time window."""
     not_rate_limited_ips = serializers.ListField(
         child=serializers.CharField(),
@@ -877,13 +897,22 @@ class InfraConfigSerializer(serializers.ModelSerializer):
         value = attrs.get("value", {})
 
         # On a PATCH a field may be absent: fall back to the stored value, then to the field default.
-        stored = self.instance.value if self.instance and isinstance(self.instance.value, dict) else {}
-        time_window_size = value.get("time_window_size", stored.get("time_window_size", self.DEFAULT_TIME_WINDOW_SIZE))
+        stored = (
+            self.instance.value
+            if self.instance and isinstance(self.instance.value, dict)
+            else {}
+        )
+        time_window_size = value.get(
+            "time_window_size",
+            stored.get("time_window_size", self.DEFAULT_TIME_WINDOW_SIZE),
+        )
         ban_time = value.get("ban_time", stored.get("ban_time", self.DEFAULT_BAN_TIME))
 
         if ban_time * time_window_size > InfraConfigSerializer.MAX_ABSOLUTE_BAN_TIME:
             raise serializers.ValidationError(
-                {"ban_time": f"ban_time * time_window_size MUST be <= {self.MAX_ABSOLUTE_BAN_TIME} (got {ban_time * time_window_size})."}
+                {
+                    "ban_time": f"ban_time * time_window_size MUST be <= {self.MAX_ABSOLUTE_BAN_TIME} (got {ban_time * time_window_size})."
+                }
             )
         return attrs
 

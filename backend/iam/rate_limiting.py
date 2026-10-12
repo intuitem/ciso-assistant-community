@@ -22,6 +22,7 @@ from django.conf import settings
 TIME_WINDOW_UNIT: Final[int] = 60
 """Granularity of the time window (in seconds) (for now time windows have a 1-minute time granularity)."""
 
+
 @dataclass
 class AuditLogLimit:
     RESET_TIME = 86400
@@ -51,13 +52,14 @@ class AuditLogLimit:
         self.log_count += 1
         return self.log_count > self.LOG_LIMIT
 
+
 @dataclass
 class Settings:
     AUDIT_LOG_LIMIT = AuditLogLimit.create()
 
     max_failed_login_attempts: int = 15
     time_window_size: int = 1
-    ban_time: int = 5 # 5*60(ban_time*time_window_size*TIME_WINDOWS_UNIT) = 300 (the ban time is of 300 seconds).
+    ban_time: int = 5  # 5*60(ban_time*time_window_size*TIME_WINDOWS_UNIT) = 300 (the ban time is of 300 seconds).
 
     def replace_with(self, new_settings: Settings) -> bool:
         """Return `true` if the settings actually changed (if any value changed)."""
@@ -65,8 +67,8 @@ class Settings:
             return False
 
         self.max_failed_login_attempts = new_settings.max_failed_login_attempts
-        self.time_window_size = new_settings.time_window_size 
-        self.ban_time = new_settings.ban_time 
+        self.time_window_size = new_settings.time_window_size
+        self.ban_time = new_settings.ban_time
         return True
 
     @staticmethod
@@ -76,8 +78,13 @@ class Settings:
         else:
             infra_config = {}
 
-        max_failed_login_attempts = infra_config.get("max_failed_login_attempts", InfraConfigSerializer.DEFAULT_MAX_FAILED_LOGIN_ATTEMPT)
-        time_window_size = infra_config.get("time_window_size", InfraConfigSerializer.DEFAULT_TIME_WINDOW_SIZE)
+        max_failed_login_attempts = infra_config.get(
+            "max_failed_login_attempts",
+            InfraConfigSerializer.DEFAULT_MAX_FAILED_LOGIN_ATTEMPT,
+        )
+        time_window_size = infra_config.get(
+            "time_window_size", InfraConfigSerializer.DEFAULT_TIME_WINDOW_SIZE
+        )
         ban_time = infra_config.get("ban_time", InfraConfigSerializer.DEFAULT_BAN_TIME)
 
         return Settings(max_failed_login_attempts, time_window_size, ban_time)
@@ -85,14 +92,18 @@ class Settings:
     @staticmethod
     def create() -> Settings:
         try:
-            infra_settings = GlobalSettings.objects.filter(name=GlobalSettings.Names.INFRA_CONFIG).first()
+            infra_settings = GlobalSettings.objects.filter(
+                name=GlobalSettings.Names.INFRA_CONFIG
+            ).first()
         except Exception:
             # The table may not exist yet.
             infra_settings = None
         return Settings.from_infra_settings(infra_settings)
 
+
 # Defaults settings (modified by `_leader_thread` a leader thread is elected.).
 SETTINGS = Settings.from_infra_settings(None)
+
 
 @dataclass
 class BanInfo:
@@ -133,19 +144,22 @@ class BanInfo:
             if self.fail_count >= SETTINGS.max_failed_login_attempts:
                 self.ban_until = current_timestamp_window + SETTINGS.ban_time
 
-        is_banned = (self.ban_until is not None)
+        is_banned = self.ban_until is not None
         is_newly_banned = is_banned
         return is_banned, is_newly_banned
+
 
 @dataclass(frozen=True)
 class IPLookupEntry:
     ip_address: str
     time_window: int
 
+
 class RequestMethod(enum.StrEnum):
     IS_BANNED = "is_banned"
     REGISTER_FAILED_LOGIN = "register_failed_login"
     REFRESH_SETTINGS = "refresh_settings"
+
 
 class Response(ABC):
     METHOD: RequestMethod
@@ -153,9 +167,11 @@ class Response(ABC):
     _METHOD_MAP: ClassVar[dict[RequestMethod, type[Response]]] = {}
 
     def __init_subclass__(cls: type[Response]):
-        _response_method = getattr(cls, "METHOD", None) #TRACE: cls.METHOD
+        _response_method = getattr(cls, "METHOD", None)  # TRACE: cls.METHOD
         if not isinstance(_response_method, RequestMethod):
-            raise TypeError(f"The '{cls.__name__}.METHOD' static class attribute MUST be of RequestMethod type.")
+            raise TypeError(
+                f"The '{cls.__name__}.METHOD' static class attribute MUST be of RequestMethod type."
+            )
 
         Response._METHOD_MAP[_response_method] = cls
         return cls
@@ -193,6 +209,7 @@ class Response(ABC):
         except Exception:
             return
 
+
 @dataclass(frozen=True)
 class ResponseIsBanned(Response):
     METHOD = RequestMethod.IS_BANNED
@@ -200,12 +217,13 @@ class ResponseIsBanned(Response):
     is_banned: bool
 
     def to_json(self):
-        return { "is_banned": self.is_banned }
+        return {"is_banned": self.is_banned}
 
     @staticmethod
     def _from_json(data: dict) -> Optional[ResponseIsBanned]:
         is_banned = data.get("is_banned", False)
         return ResponseIsBanned(is_banned)
+
 
 @dataclass(frozen=True)
 class ResponseRegisterFailedLogin(Response):
@@ -214,12 +232,13 @@ class ResponseRegisterFailedLogin(Response):
     create_audit_log: bool
 
     def to_json(self):
-        return { "create_audit_log": self.create_audit_log }
+        return {"create_audit_log": self.create_audit_log}
 
     @staticmethod
     def _from_json(data: dict) -> Optional[ResponseRegisterFailedLogin]:
         create_audit_log = data.get("create_audit_log", False)
         return ResponseRegisterFailedLogin(create_audit_log)
+
 
 @dataclass(frozen=True)
 class ResponseRefreshSettings(Response):
@@ -232,15 +251,18 @@ class ResponseRefreshSettings(Response):
     def _from_json(data: dict) -> Optional[ResponseRefreshSettings]:
         return ResponseRefreshSettings()
 
+
 class Request(ABC):
     METHOD: RequestMethod
 
     _METHOD_MAP: ClassVar[dict[RequestMethod, type[Request]]] = {}
 
     def __init_subclass__(cls: type[Request]):
-        request_method = getattr(cls, "METHOD", None) #TRACE: cls.METHOD
+        request_method = getattr(cls, "METHOD", None)  # TRACE: cls.METHOD
         if not isinstance(request_method, RequestMethod):
-            raise TypeError(f"The '{cls.__name__}.METHOD' static class attribute MUST be of RequestMethod type.")
+            raise TypeError(
+                f"The '{cls.__name__}.METHOD' static class attribute MUST be of RequestMethod type."
+            )
 
         Request._METHOD_MAP[request_method] = cls
         return cls
@@ -287,7 +309,7 @@ class RequestIsBanned(Request):
     ip_address: str
 
     def _to_json_params(self) -> dict:
-        return { "ip_address": self.ip_address }
+        return {"ip_address": self.ip_address}
 
     @staticmethod
     def _from_json_params(params: dict) -> Optional[RequestIsBanned]:
@@ -303,6 +325,7 @@ class RequestIsBanned(Request):
 
         return RequestIsBanned(ip_address)
 
+
 @dataclass(frozen=True)
 class RequestRegisterFailedLogin(Request):
     METHOD = RequestMethod.REGISTER_FAILED_LOGIN
@@ -311,7 +334,7 @@ class RequestRegisterFailedLogin(Request):
     email: Optional[str]
 
     def _to_json_params(self) -> dict:
-        return { "ip_address": self.ip_address, "email": self.email }
+        return {"ip_address": self.ip_address, "email": self.email}
 
     @staticmethod
     def _from_json_params(params: dict) -> Optional[RequestRegisterFailedLogin]:
@@ -331,6 +354,7 @@ class RequestRegisterFailedLogin(Request):
 
         return RequestRegisterFailedLogin(ip_address, email)
 
+
 @dataclass(frozen=True)
 class RequestRefreshSettings(Request):
     METHOD = RequestMethod.REFRESH_SETTINGS
@@ -341,6 +365,7 @@ class RequestRefreshSettings(Request):
     @staticmethod
     def _from_json_params(params: dict) -> Optional[RequestRefreshSettings]:
         return RequestRefreshSettings()
+
 
 class RPCServer:
     def __init__(self, ban_cache: _BanCache):
@@ -359,13 +384,19 @@ class RPCServer:
         is_banned, create_audit_log = self._ban_cache._check_is_banned(request)
         return ResponseIsBanned(is_banned)
 
-    def _method_register_failed_login(self, request: RequestRegisterFailedLogin) -> ResponseRegisterFailedLogin:
+    def _method_register_failed_login(
+        self, request: RequestRegisterFailedLogin
+    ) -> ResponseRegisterFailedLogin:
         _, create_audit_log = self._ban_cache._check_is_banned(request)
         return ResponseRegisterFailedLogin(create_audit_log)
 
-    def _method_refresh_settings(self, request: RequestRefreshSettings) -> ResponseRefreshSettings:
-        #TODO: The caller MUST provide the InfraSettings(or a subset of it) instead (via `RequestRefreshSettings`).
-        infra_settings = GlobalSettings.objects.get(name=GlobalSettings.Names.INFRA_CONFIG)
+    def _method_refresh_settings(
+        self, request: RequestRefreshSettings
+    ) -> ResponseRefreshSettings:
+        # TODO: The caller MUST provide the InfraSettings(or a subset of it) instead (via `RequestRefreshSettings`).
+        infra_settings = GlobalSettings.objects.get(
+            name=GlobalSettings.Names.INFRA_CONFIG
+        )
         new_settings = Settings.from_infra_settings(infra_settings)
 
         has_changed = SETTINGS.replace_with(new_settings)
@@ -394,14 +425,14 @@ class RPCServer:
 
             request = Request.decode(encoded_request)
             if request is None:
-                conn.sendall(json.dumps({ "error": True }).encode())
+                conn.sendall(json.dumps({"error": True}).encode())
                 return
 
             response = self._handle_request(request)
             encoded_response = response.encode()
             conn.sendall(encoded_response)
         except Exception:
-            conn.sendall(json.dumps({ "error": True }).encode())
+            conn.sendall(json.dumps({"error": True}).encode())
 
     def _handle_accept(self, server: socket.socket):
         client_conn, _ = server.accept()
@@ -431,7 +462,7 @@ class _BanCache:
     ENTRY_LIMIT: Final[int] = 65536
     LEADER_ELECTION_FILE_PATH: Final[Path] = settings.BASE_DIR / "leader_election.lock"
     UNIX_SOCKET_FILE_PATH: Final[Path] = settings.BASE_DIR / "cache.socket"
-    #TODO: Think about user changing (time_window_size, max_failed_login_attempts, ban_time)
+    # TODO: Think about user changing (time_window_size, max_failed_login_attempts, ban_time)
     # The user SHALL NOT be able to change `time_window_size` (adjusting max_failed_login_attempts and ban_time is enough)
     # What impact would it have at runtime (the InfraSetting changes MUST be communicated via the unix socket to be sure the cache settings are updated accordingly).
 
@@ -533,10 +564,12 @@ class _BanCache:
             ip_address_set = self.eviction_cache.get(time_window, set())
             ip_address_set.discard(ip_address_to_evict)
 
-    def _check_is_banned(self, request: RequestIsBanned | RequestRegisterFailedLogin) -> tuple[bool, bool]:
+    def _check_is_banned(
+        self, request: RequestIsBanned | RequestRegisterFailedLogin
+    ) -> tuple[bool, bool]:
         """
         Return a (`is_banned, create_audit_log`) tuple.
-        
+
         - `is_banned` is `True` if the `ip_address` of the `Request` is banned or `False` otherwise.
         - `create_audit_log` is `True` is failed login `LogEntry`(audit log) IP-ban should be created by the caller (RPC caller).
         """
@@ -555,10 +588,16 @@ class _BanCache:
             if len(self.ip_to_ban_info) > _BanCache.ENTRY_LIMIT:
                 self._evict_one_ip_address()
 
-        increment_fail_count = (request.METHOD == RequestMethod.REGISTER_FAILED_LOGIN)
-        is_banned, is_newly_banned = ban_info.check_is_banned(increment_fail_count=increment_fail_count)
+        increment_fail_count = request.METHOD == RequestMethod.REGISTER_FAILED_LOGIN
+        is_banned, is_newly_banned = ban_info.check_is_banned(
+            increment_fail_count=increment_fail_count
+        )
 
-        create_audit_log = (is_newly_banned and isinstance(request, RequestRegisterFailedLogin) and Settings.AUDIT_LOG_LIMIT.try_acquire())
+        create_audit_log = (
+            is_newly_banned
+            and isinstance(request, RequestRegisterFailedLogin)
+            and Settings.AUDIT_LOG_LIMIT.try_acquire()
+        )
         return is_banned, create_audit_log
 
     def _close_connection(self):
@@ -588,7 +627,7 @@ class _BanCache:
             # A slow leader doesn't mean the leader is down (so there's no election).
             self._close_connection()
             return
-        except (OSError, ValueError):
+        except OSError, ValueError:
             # ConnectionRefusedError / FileNotFoundError (socket file gone) / reset / EOF.
             self._close_connection()
             self._try_become_leader()
@@ -615,8 +654,10 @@ class _BanCache:
         request = RequestRefreshSettings()
         self._send_request(request)
 
+
 _BAN_CACHE: Optional[_BanCache] = None
 _BAN_CACHE_LOCK = threading.Lock()
+
 
 def get_ban_cache() -> _BanCache:
     """Return the process-wide ban cache, creating it (and joining the leader election) on first use."""
@@ -626,4 +667,3 @@ def get_ban_cache() -> _BanCache:
             if _BAN_CACHE is None:
                 _BAN_CACHE = _BanCache()
     return _BAN_CACHE
-
