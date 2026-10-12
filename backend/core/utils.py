@@ -2095,6 +2095,16 @@ def escape_excel_formula(value):
     return s
 
 
+def unescape_excel_formula(value):
+    """Undo escape_excel_formula, so an exported value re-imports unchanged."""
+    if not isinstance(value, str) or not value.startswith("'"):
+        return value
+    stripped = value[1:].lstrip()
+    if stripped and stripped[0] in ("=", "+", "-", "@"):
+        return value[1:]
+    return value
+
+
 ILLEGAL_XLSX_CHARS_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
 XLSX_MAX_CELL_CHARS = 32_767
 

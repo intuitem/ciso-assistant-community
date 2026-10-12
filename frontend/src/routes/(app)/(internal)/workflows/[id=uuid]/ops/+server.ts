@@ -199,6 +199,11 @@ export const POST: RequestHandler = async ({ fetch, request, url, params }) => {
 			return proxy(fetch, `${BASE_API_URL}/workflows/workflow-triggers/event-keys/`, 'GET');
 		}
 
+		case 'get-instance': {
+			const instanceId = requireUuid(body.instance, 'instance');
+			return proxy(fetch, `${BASE_API_URL}/workflows/workflow-instances/${instanceId}/`, 'GET');
+		}
+
 		case 'instance-logs': {
 			const instanceId = requireUuid(body.instance, 'instance');
 			return proxy(

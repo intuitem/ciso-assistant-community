@@ -1880,6 +1880,7 @@ class LibraryUpdater:
                 order_id = 0
                 all_fields_to_update = set()
                 # Omitting one of these nullable fields in a new version must clear its previous value.
+                # min_score/max_score are kept: existing scores were recorded on that scale.
                 clearable_requirement_node_fields = (
                     "ref_id",
                     "name",
@@ -1888,7 +1889,14 @@ class LibraryUpdater:
                     "typical_evidence",
                     "visibility_expression",
                     "implementation_groups",
+                    "scores_definition_ref",
+                    "target_score",
                 )
+                requirement_node_defaults = {
+                    "weight": 1,
+                    "importance": RequirementNode.Importance.UNDEFINED,
+                    "display_mode": RequirementNode.DisplayMode.DEFAULT,
+                }
 
                 # Check if score boundaries changed (triggers warning + strategy prompt)
                 score_boundaries_changed = (
@@ -2027,6 +2035,10 @@ class LibraryUpdater:
                         ].lower()
                     requirement_node_dict["order_id"] = order_id
                     order_id += 1
+                    # Omitted or explicit null falls back to the default.
+                    for field, default in requirement_node_defaults.items():
+                        if requirement_node_dict.get(field) is None:
+                            requirement_node_dict[field] = default
 
                     if urn in existing_requirement_node_objects:
                         requirement_node_object = existing_requirement_node_objects[urn]
@@ -12619,15 +12631,15 @@ class RiskAcceptance(NameDescriptionMixin, FolderMixin):
         with transaction.atomic():
             self.state = state
             if state == "accepted":
-                self.accepted_at = datetime.now()
+                self.accepted_at = timezone.now()
                 # iterate over the risk scenarios to set their treatment to accepted
                 for scenario in self.risk_scenarios.all():
                     scenario.treatment = "accept"
                     scenario.save()
             if state == "rejected":
-                self.rejected_at = datetime.now()
+                self.rejected_at = timezone.now()
             elif state == "revoked":
-                self.revoked_at = datetime.now()
+                self.revoked_at = timezone.now()
                 # revert the treatment set on acceptance, leaving scenarios that have
                 # since moved to another treatment, or are still covered by another
                 # accepted acceptance, untouched

@@ -489,6 +489,37 @@ class RiskAcceptanceWriteSerializer(BaseModelSerializer):
             raise serializers.ValidationError(
                 {"approver": "An approver is required to submit for approval."}
             )
+        if self.instance and not {"approver", "folder", "risk_scenarios"} & set(data):
+            return super().validate(data)
+        approver = (
+            data["approver"]
+            if "approver" in data
+            else getattr(self.instance, "approver", None)
+        )
+        if not approver:
+            return super().validate(data)
+        folder = data.get("folder") or (
+            self.instance.folder if self.instance else Folder.get_root_folder()
+        )
+        scenarios = data.get("risk_scenarios")
+        if scenarios is None:
+            scenarios = self.instance.risk_scenarios.all() if self.instance else []
+        folders = {folder} | set(
+            Folder.objects.filter(
+                id__in=RiskScenario.objects.filter(
+                    id__in=[s.id for s in scenarios]
+                ).values("risk_assessment__folder")
+            )
+        )
+        perm = Permission.objects.get(codename="approve_riskacceptance")
+        if any(
+            not RoleAssignment.is_access_allowed(approver, perm, f) for f in folders
+        ):
+            raise serializers.ValidationError(
+                {
+                    "approver": "The approver is not allowed to approve risk acceptances in this domain."
+                }
+            )
         return super().validate(data)
 
     def create(self, validated_data):
