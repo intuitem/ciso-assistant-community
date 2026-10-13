@@ -2282,3 +2282,67 @@ export function fitGrid(rule: OutcomeRule, scales: Scale[]): string[][] {
 		})
 	);
 }
+
+const levelIds = (scales: Scale[], ref?: string) =>
+	scales.find((s) => s.ref_id === ref)?.levels.map((l) => l.ref_id) ?? [];
+
+/** A rating's grid carried onto edited scales: each cell keeps its level by the ids
+ *  of its row and column levels, so deleting or reordering a level moves its row
+ *  instead of shifting every row after it. */
+export function remapGrid(rule: OutcomeRule, before: Scale[], after: Scale[]): string[][] {
+	const [rows, cells] = rule.dimensions ?? [];
+	const oldRows = levelIds(before, rows);
+	const oldCells = levelIds(before, cells);
+	const grid = levelIds(after, rows).map((r) =>
+		levelIds(after, cells).map((c) => rule.grid?.[oldRows.indexOf(r)]?.[oldCells.indexOf(c)] ?? '')
+	);
+	return fitGrid({ ...rule, grid }, after);
+}
+
+const cellTerm = (dim: string, level: string) => `dims.${dim}.level == "${level}"`;
+const CELL = /^\(?dims\.(\w+)\.level == "([^"]*)" && dims\.(\w+)\.level == "([^"]*)"\)?$/;
+
+/** The rules a grid amounts to, one per level it uses: switching to rules, or adding
+ *  a dimension, keeps the classification instead of dropping it. */
+export function gridToRules(rule: OutcomeRule, scales: Scale[]): { level: string; when: string }[] {
+	const [rows, cells] = rule.dimensions ?? [];
+	const grid = fitGrid(rule, scales);
+	const rowIds = levelIds(scales, rows);
+	const cellIds = levelIds(scales, cells);
+	return (rule.levels ?? [])
+		.map((level) => ({
+			level: level.ref_id,
+			when: grid
+				.flatMap((row, yi) =>
+					row.map((cell, xi) =>
+						cell === level.ref_id
+							? `(${cellTerm(rows, rowIds[yi])} && ${cellTerm(cells, cellIds[xi])})`
+							: null
+					)
+				)
+				.filter(Boolean)
+				.join(' || ')
+		}))
+		.filter((r) => r.when);
+}
+
+/** The grid back from rules `gridToRules` wrote, or null when they say anything
+ *  else (rules written by hand cannot be drawn without evaluating them). */
+export function rulesToGrid(rule: OutcomeRule, scales: Scale[]): string[][] | null {
+	const [rows, cells] = rule.dimensions ?? [];
+	const rowIds = levelIds(scales, rows);
+	const cellIds = levelIds(scales, cells);
+	const grid: string[][] = rowIds.map(() => cellIds.map(() => ''));
+	for (const { level, when } of rule.rules ?? []) {
+		for (const part of when.split(' || ')) {
+			const match = CELL.exec(part.trim());
+			if (!match || match[1] !== rows || match[3] !== cells) return null;
+			const yi = rowIds.indexOf(match[2]);
+			const xi = cellIds.indexOf(match[4]);
+			if (yi < 0 || xi < 0) return null;
+			// The first rule that holds wins, as on the server.
+			grid[yi][xi] ||= level;
+		}
+	}
+	return fitGrid({ ...rule, grid }, scales);
+}

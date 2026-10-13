@@ -45,18 +45,26 @@ class ProcessingControlsTarget(Target):
         return [str(c.pk) for c in controls], ", ".join(str(c) for c in controls)
 
     def resolve(self, response, config, override=None) -> Proposal:
+        from core.cel_service import evaluate_quick_form
         from core.models import AppliedControl, Question
 
         # A preview passes the form's results only: the picks are not among them.
         if getattr(response, "pk", None) is None:
             return Proposal(ok=True, value=None, display=_("The measures picked"))
+        # Picks on a page the answers hid no longer count.
+        hidden = set(evaluate_quick_form(response, persist=False)["hidden_pages"])
         ids = set()
         for answer in response.answers.filter(
             question__type=Question.Type.OBJECT_REFERENCE,
             question__config__model="applied_control",
-        ):
+        ).exclude(question__page__urn__in=hidden):
             ids.update(answer.value or [])
-        controls = AppliedControl.objects.filter(pk__in=ids).order_by("name")
+        # Only controls the processing could hold: its domain or one above it. A
+        # response filed elsewhere could offer another domain's controls.
+        folder = response.subject.folder
+        controls = AppliedControl.objects.filter(
+            pk__in=ids, folder__in=[folder, *folder.get_parent_folders()]
+        ).order_by("name")
         return Proposal(
             ok=True,
             value=[str(c.pk) for c in controls],

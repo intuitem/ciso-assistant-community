@@ -1,3 +1,6 @@
+import pytest
+
+
 from core.quick_form_ratings import evaluate_ratings, expand_scales, scales_error
 
 LEVELS = [{"ref_id": "low", "label": "Low"}, {"ref_id": "high", "label": "High"}]
@@ -145,3 +148,58 @@ def test_the_builder_keeps_scales_ratings_and_facts():
     assert [p.get("facts") for p in saved["pages"]] == [
         p.get("facts") for p in form["pages"]
     ]
+
+
+@pytest.mark.parametrize(
+    "scales",
+    [
+        [{"ref_id": "s", "levels": [{"label": "no id"}]}],
+        [{"ref_id": "s", "levels": ["low", "high"]}],
+        [{"ref_id": "s"}],
+        "not a list",
+    ],
+)
+def test_malformed_scales_are_refused_not_crashed(scales):
+    from library.utils import QuickFormImporter
+
+    form = {
+        "urn": "urn:test:risk:quick_form:broken",
+        "ref_id": "broken",
+        "scales_definition": scales,
+        "pages": [
+            {
+                "urn": "urn:test:risk:qf_page:broken:p",
+                "ref_id": "p",
+                "questions": {
+                    "urn:test:risk:qf_page:broken:p:question:q": {
+                        "type": "unique_choice",
+                        "text": "Q",
+                        "config": {"scale": "s"},
+                    }
+                },
+            }
+        ],
+    }
+    error = QuickFormImporter(form).init()
+    assert error and error.startswith("[QUICK_FORM_ERROR]"), error
+
+
+def test_a_rating_scoped_to_a_malformed_page_list_is_refused():
+    form = {
+        "scales_definition": [
+            {"ref_id": "a", "levels": [{"ref_id": "1"}]},
+            {"ref_id": "b", "levels": [{"ref_id": "1"}]},
+        ],
+        "pages": [],
+        "outcomes_definition": [
+            {
+                "ref_id": "r",
+                "kind": "rating",
+                "dimensions": ["a", "b"],
+                "levels": [{"ref_id": "x"}],
+                "grid": [["x"]],
+                "pages": [["nested"]],
+            }
+        ],
+    }
+    assert "pages must be a list" in scales_error(form)

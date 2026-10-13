@@ -63,6 +63,9 @@
 		return { levels, rows, keyOf: (urn: string) => rows.find((r) => r.urn === urn)?.key };
 	}
 
+	// Dark text only on a level's own (light) colour: without one, the theme's text.
+	const onColor = (color?: string | null | false) => (color ? 'text-surface-950' : '');
+
 	const dimLabel = (dimension: Dimension, ref: string) =>
 		dimension.levels.find((l) => l.ref_id === ref)?.label ?? ref;
 </script>
@@ -75,7 +78,7 @@
 		<div class="mt-4 flex flex-col gap-4 lg:flex-row lg:items-start">
 			{#if map}
 				{@const [rowDim, colDim] = rating.dimensions}
-				<div class="flex gap-2">
+				<div class="flex max-w-full min-w-0 gap-2 overflow-x-auto">
 					<div
 						class="flex items-center justify-center text-xs font-semibold text-surface-600-400 [writing-mode:vertical-rl] rotate-180"
 					>
@@ -132,39 +135,41 @@
 					</div>
 				</div>
 			{:else}
-				<table class="table text-sm">
-					<thead>
-						<tr>
-							<th></th>
-							<th></th>
-							{#each rating.dimensions as dimension (dimension.ref_id)}<th>{dimension.label}</th
-								>{/each}
-							<th>{rating.label}</th>
-						</tr>
-					</thead>
-					<tbody>
-						{#each rows as row (row.urn)}
-							{#each row.points as point, i (point.stage)}
-								<tr>
-									<td class="font-semibold">{i === 0 ? `${row.key}. ${row.name}` : ''}</td>
-									<td class="text-xs text-surface-500">
-										{point.stage === CURRENT ? m.currentRisk() : m.residualRisk()}
-									</td>
-									{#each rating.dimensions as dimension (dimension.ref_id)}
-										<td>{dimLabel(dimension, point.dims[dimension.ref_id]?.level)}</td>
-									{/each}
-									<td>
-										<span
-											class="badge text-surface-950"
-											style="background-color: {(point.level && levels[point.level]?.color) ||
-												'transparent'}">{(point.level && levels[point.level]?.label) || '—'}</span
-										>
-									</td>
-								</tr>
+				<div class="max-w-full overflow-x-auto">
+					<table class="table text-sm">
+						<thead>
+							<tr>
+								<th></th>
+								<th></th>
+								{#each rating.dimensions as dimension (dimension.ref_id)}<th>{dimension.label}</th
+									>{/each}
+								<th>{rating.label}</th>
+							</tr>
+						</thead>
+						<tbody>
+							{#each rows as row (row.urn)}
+								{#each row.points as point, i (point.stage)}
+									<tr>
+										<td class="font-semibold">{i === 0 ? `${row.key}. ${row.name}` : ''}</td>
+										<td class="text-xs text-surface-500">
+											{point.stage === CURRENT ? m.currentRisk() : m.residualRisk()}
+										</td>
+										{#each rating.dimensions as dimension (dimension.ref_id)}
+											<td>{dimLabel(dimension, point.dims[dimension.ref_id]?.level)}</td>
+										{/each}
+										<td>
+											<span
+												class="badge {onColor(point.level && levels[point.level]?.color)}"
+												style="background-color: {(point.level && levels[point.level]?.color) ||
+													'transparent'}">{(point.level && levels[point.level]?.label) || '—'}</span
+											>
+										</td>
+									</tr>
+								{/each}
 							{/each}
-						{/each}
-					</tbody>
-				</table>
+						</tbody>
+					</table>
+				</div>
 			{/if}
 			{#if map}
 				<ul class="flex flex-col gap-2 text-sm">
@@ -185,7 +190,7 @@
 								{#each row.points as point, i (point.stage)}
 									{#if i > 0}<span class="text-surface-500">→</span>{/if}
 									<span
-										class="badge text-surface-950"
+										class="badge {onColor(point.level && levels[point.level]?.color)}"
 										style="background-color: {(point.level && levels[point.level]?.color) ||
 											'transparent'}">{(point.level && levels[point.level]?.label) || '—'}</span
 									>

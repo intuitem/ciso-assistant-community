@@ -2,6 +2,7 @@
 	import { deserialize } from '$app/forms';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import Question from '$lib/components/Forms/Question.svelte';
+	import RatingOutcomes from '$lib/components/QuickForms/RatingOutcomes.svelte';
 	import { m } from '$paraglide/messages';
 	import type { PageData } from './$types';
 
@@ -36,7 +37,8 @@
 	const hiddenPages = $derived((view?.pages ?? []).filter((p: any) => p.hidden));
 	const allRules = $derived((view?.outcomes_definition ?? []) as any[]);
 	// Numeric rules never fire; they are listed with their value instead.
-	const rules = $derived(allRules.filter((r) => r.kind !== 'number'));
+	// Ratings draw as maps below the form, not as yes/no outcomes.
+	const rules = $derived(allRules.filter((r) => r.kind !== 'number' && r.kind !== 'rating'));
 	const valueRules = $derived(allRules.filter((r) => r.kind === 'number'));
 	const fired = $derived((view?.computed_outcome ?? {}) as Record<string, any>);
 	const values = $derived((view?.computed_values ?? {}) as Record<string, number>);
@@ -167,6 +169,10 @@
 						</button>
 					</div>
 				{/if}
+			{/if}
+
+			{#if view?.ratings?.length}
+				<RatingOutcomes ratings={view.ratings} pages={visiblePages} />
 			{/if}
 
 			{#if hiddenPages.length}

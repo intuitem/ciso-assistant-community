@@ -456,7 +456,7 @@
 							onchange={(e) => setScale(e.currentTarget.value)}
 						>
 							<option value="">{m.builderCustomChoices()}</option>
-							{#each scales as s (s.ref_id)}
+							{#each scales as s, i (i)}
 								<option value={s.ref_id}>{s.label || s.ref_id}</option>
 							{/each}
 						</select>
@@ -464,7 +464,7 @@
 					{#if scale}
 						{#if scale.levels.length}
 							<ol class="flex flex-wrap gap-1">
-								{#each scale.levels as level (level.ref_id)}
+								{#each scale.levels as level, i (i)}
 									<li class="badge preset-tonal-surface" title={level.description}>
 										{level.label}
 									</li>

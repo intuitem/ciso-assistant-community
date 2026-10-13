@@ -182,10 +182,21 @@ class TestQuickFormImport:
 
         _load(LIBRARY_V2)
         response.refresh_from_db()
-        # New question seeded, dropped choice deselected, nothing else lost.
+        # New question seeded; the dropped choice a draft picked is kept, picked.
         assert response.answers.count() == 5
         assert response.answers.filter(question__urn=f"{PAGE1}:question:dpo").exists()
-        assert response.answers.get(question__urn=Q_SCALE).selected_choices.count() == 0
+        assert list(
+            response.answers.get(question__urn=Q_SCALE).selected_choices.all()
+        ) == [large]
+        assert Question.objects.get(urn=Q_SCALE).choices.filter(urn=C_LARGE).exists()
+
+    def test_update_drops_choices_nobody_picked(self, app_config):
+        form = _load(LIBRARY_V1)
+        response = QuickFormResponse.objects.create(
+            name="Vendor Y", quick_form=form, folder=Folder.get_root_folder()
+        )
+        response.seed_answers()
+        _load(LIBRARY_V2)
         assert (
             not Question.objects.get(urn=Q_SCALE).choices.filter(urn=C_LARGE).exists()
         )
@@ -1398,3 +1409,54 @@ def test_respondent_may_start_a_request_but_sees_only_their_own(app_config):
         == 200
     )
     assert client.post(f"{base}submit/", {}, format="json").status_code == 200
+
+
+@pytest.mark.django_db
+def test_the_fill_preview_offers_scale_levels_and_ratings(app_config):
+    from pathlib import Path
+
+    import yaml
+
+    _user, client = _admin_client()
+    res = client.post(
+        "/api/library-drafts/",
+        {
+            "name": "DPIA draft",
+            "ref_id": "dpia-draft",
+            "packager": "acme",
+            "locale": "en",
+            "folder": str(Folder.get_root_folder().id),
+        },
+        format="json",
+    )
+    assert res.status_code == 201, res.json()
+    source = Path(__file__).resolve().parents[2] / (
+        "library/libraries/quick-form-dpia.yaml"
+    )
+    dpia = yaml.safe_load(source.read_text())["objects"]["quick_forms"][0]
+    LibraryDraft.objects.filter(id=res.json()["id"]).update(
+        content={"quick_forms": [dpia]}
+    )
+    page = "urn:intuitem:risk:qf_page:dpia:illegitimate_access"
+    preview = client.post(
+        f"/api/library-drafts/{res.json()['id']}/quick-form-fill-preview/",
+        {
+            "answers": {
+                f"{page}:question:severity": f"{page}:question:severity:choice:maximum",
+                f"{page}:question:likelihood": f"{page}:question:likelihood:choice:limited",
+            }
+        },
+        format="json",
+    )
+    assert preview.status_code == 200, preview.json()
+    body = preview.json()
+    (risk_page,) = [p for p in body["pages"] if p["urn"] == page]
+    severity = risk_page["questions"][f"{page}:question:severity"]
+    assert [c["urn"].rsplit(":", 1)[-1] for c in severity["choices"]] == [
+        "negligible",
+        "limited",
+        "significant",
+        "maximum",
+    ]
+    (rating,) = body["ratings"]
+    assert [p["level"] for p in rating["points"]] == ["unacceptable"]

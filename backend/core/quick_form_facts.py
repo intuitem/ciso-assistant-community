@@ -48,13 +48,17 @@ def _cell(row, column: str):
 
 
 def read_fact(fact: Fact, subject) -> dict:
+    rows = getattr(subject, fact.relation).all()
+    # One query per relation shown, not one per row.
+    related = {f.name: f for f in rows.model._meta.get_fields() if f.is_relation}
+    columns = [related[c] for c in fact.columns if c in related]
+    rows = rows.select_related(
+        *(f.name for f in columns if f.many_to_one or f.one_to_one)
+    ).prefetch_related(*(f.name for f in columns if f.many_to_many or f.one_to_many))
     return {
         "label": fact.label,
         "columns": [_i18n_key(c) for c in fact.columns],
-        "rows": [
-            [_cell(row, c) for c in fact.columns]
-            for row in getattr(subject, fact.relation).all()
-        ],
+        "rows": [[_cell(row, c) for c in fact.columns] for row in rows],
     }
 
 

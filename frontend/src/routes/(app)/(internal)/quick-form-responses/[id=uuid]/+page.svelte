@@ -47,9 +47,15 @@
 	const currentPage = $derived(visiblePages[pageIndex]);
 	const onResults = $derived(ratings.length > 0 && pageIndex === visiblePages.length);
 	// A rating's values (its rank, per stage) read as levels on the Results step, not as numbers.
+	// Exactly the names a rating makes: `<ref>`, and `<ref>_<stage>` per other stage.
+	const ratingValueNames = $derived(
+		new Set(
+			ratings.flatMap((r) => [r.ref_id, ...r.points.map((p: any) => `${r.ref_id}_${p.stage}`)])
+		)
+	);
 	const numberValues = $derived(
 		Object.entries((content.computed_values ?? {}) as Record<string, number>).filter(
-			([name]) => !ratings.some((r) => name === r.ref_id || name.startsWith(`${r.ref_id}_`))
+			([name]) => !ratingValueNames.has(name)
 		)
 	);
 
@@ -747,7 +753,7 @@
 								{#each row.levels as level, i (i)}
 									{#if i > 0}<span class="text-surface-500">→</span>{/if}
 									<span
-										class="badge text-surface-950"
+										class="badge {level?.color ? 'text-surface-950' : ''}"
 										style="background-color: {level?.color || 'transparent'}"
 										>{level?.label ?? '—'}</span
 									>

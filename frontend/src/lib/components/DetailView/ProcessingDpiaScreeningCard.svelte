@@ -30,16 +30,24 @@
 	// that screen this processing.
 	type Option = { kind: 'form' | 'publication'; id: string; name: string };
 	let screenings: Option[] | null = $state(null);
+	// A failed lookup is not "no form loaded": say so instead.
+	let loadFailed = $state(false);
 	// Which list of forms is open, when there is more than one to choose from.
 	let choosing: 'screening' | 'dpia' | null = $state(null);
 	$effect(() => {
 		// Aborted when the processing changes, so a late answer cannot land on another one.
 		const controller = new AbortController();
+		loadFailed = false;
 		fetch(`/processings/${processing.id}/dpia-screening`, { signal: controller.signal })
-			.then((res) => (res.ok ? res.json() : []))
+			.then((res) => {
+				if (!res.ok) throw new Error(String(res.status));
+				return res.json();
+			})
 			.then((rows) => (screenings = Array.isArray(rows) ? rows : []))
 			.catch(() => {
-				if (!controller.signal.aborted) screenings = [];
+				if (controller.signal.aborted) return;
+				screenings = null;
+				loadFailed = true;
 			});
 		return () => controller.abort();
 	});
@@ -64,7 +72,14 @@
 		});
 		fetch(`/quick-form-responses?${query}`, { signal })
 			.then((res) => (res.ok ? res.json() : null))
-			.then((body) => (dpia = body?.results?.[0] ?? null))
+			// A rejected DPIA is no DPIA: the card offers to start another.
+			.then(
+				(body) =>
+					(dpia =
+						body?.results?.find(
+							(r: Record<string, any>) => !(r.status === 'closed' && r.resolution === 'rejected')
+						) ?? null)
+			)
 			.catch(() => {
 				if (!signal.aborted) dpia = null;
 			});
@@ -151,6 +166,8 @@
 			}
 			editing = false;
 			await invalidateAll();
+		} catch {
+			toastStore.trigger({ message: m.anErrorOccurred(), background: 'preset-filled-error-500' });
 		} finally {
 			saving = false;
 		}
@@ -300,7 +317,7 @@
 
 	{#if !editing}
 		<p class="border-t border-surface-200-800 pt-3 text-xs text-surface-500">
-			{#if screenings?.length === 0}{m.noDpiaScreeningForm()}{/if}
+			{#if loadFailed}{m.anErrorOccurred()}{:else if screenings?.length === 0}{m.noDpiaScreeningForm()}{/if}
 			<a class="anchor" href="/processings/dpia">{m.dpiaStatusOverview()}</a>
 		</p>
 	{/if}

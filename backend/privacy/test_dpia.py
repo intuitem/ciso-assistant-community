@@ -414,7 +414,7 @@ def test_an_accepted_dpia_is_the_processings_dpia(
 
     Processing.objects.filter(pk=processing.pk).update(dpia_required=True)
     overview = admin_client.get("/api/privacy/processings/dpia-overview/").json()
-    assert overview["required_with_dpia"] >= 1
+    assert overview["required_dpia_done"] >= 1
     assert str(processing.id) not in [g["id"] for g in overview["gaps"]]
 
 
@@ -606,3 +606,109 @@ def test_always_review_sends_the_dpia_to_validation(
     assert accepted.status_code == 200, accepted.json()
     processing.refresh_from_db()
     assert processing.dpia == response
+
+
+@pytest.mark.django_db
+def test_a_rejected_dpia_leaves_the_processing_to_do(
+    admin_client, reviewer_client, processing, dpia_form
+):
+    Processing.objects.filter(pk=processing.pk).update(dpia_required=True)
+    url = "/api/privacy/processings/dpia-overview/"
+    response = _start_dpia(admin_client, dpia_form, processing)
+    overview = admin_client.get(url).json()
+    assert overview["required_dpia_in_progress"] == 1
+    assert str(processing.id) not in [g["id"] for g in overview["gaps"]]
+
+    response.status = QuickFormResponse.Status.SUBMITTED
+    response.save(update_fields=["status"])
+    rejected = reviewer_client.post(
+        f"/api/quick-form-responses/{response.id}/set-status/",
+        {"status": "closed", "resolution": "rejected"},
+        format="json",
+    )
+    assert rejected.status_code == 200, rejected.json()
+    overview = admin_client.get(url).json()
+    assert overview["required_dpia_in_progress"] == 0
+    assert overview["required_dpia_done"] == 0
+    assert str(processing.id) in [g["id"] for g in overview["gaps"]]
+
+
+@pytest.mark.django_db
+def test_the_snapshot_is_not_writable_nor_listed(admin_client, processing, dpia_form):
+    response = _start_dpia(admin_client, dpia_form, processing)
+    _complete(admin_client, response)
+    frozen = response.facts_snapshot
+    patched = admin_client.patch(
+        f"/api/quick-form-responses/{response.id}/",
+        {"facts_snapshot": {"processing.purposes": {"rows": [["Invented"]]}}},
+        format="json",
+    )
+    assert patched.status_code in (200, 400), patched.json()
+    response.refresh_from_db()
+    assert response.facts_snapshot == frozen
+    # Only the content endpoint shows facts, to who may view the processing.
+    listed = admin_client.get(f"/api/quick-form-responses/{response.id}/").json()
+    assert "facts_snapshot" not in listed
+
+
+@pytest.mark.django_db
+def test_measures_from_another_domain_are_not_added(
+    admin_client, processing, dpia_form
+):
+    other = Folder.objects.create(
+        name="OtherDomain",
+        content_type=Folder.ContentType.DOMAIN,
+        parent_folder=Folder.get_root_folder(),
+    )
+    elsewhere = AppliedControl.objects.create(name="Elsewhere", folder=other)
+    here = AppliedControl.objects.create(name="Here", folder=processing.folder)
+    response = _start_dpia(admin_client, dpia_form, processing)
+    question = f"{DPIA}:illegitimate_access:question:measures"
+    # Written as an earlier version of the form could have: not through the picker.
+    answer = response.answers.get(question__urn=question)
+    answer.value = [str(elsewhere.id), str(here.id)]
+    answer.save()
+    from privacy.dpia import ProcessingControlsTarget
+
+    proposal = ProcessingControlsTarget().resolve(response, {})
+    assert proposal.value == [str(here.id)]
+
+
+@pytest.mark.django_db
+def test_requirement_history_moves_with_the_processing(admin_client, processing):
+    changed = admin_client.patch(
+        f"/api/privacy/processings/{processing.id}/",
+        {"dpia_required": True, "dpia_required_note": "Large-scale profiling"},
+        format="json",
+    )
+    assert changed.status_code == 200, changed.json()
+    target = Folder.objects.create(
+        name="NewHome",
+        content_type=Folder.ContentType.DOMAIN,
+        parent_folder=Folder.get_root_folder(),
+    )
+    moved = admin_client.patch(
+        f"/api/privacy/processings/{processing.id}/",
+        {"folder": str(target.id)},
+        format="json",
+    )
+    assert moved.status_code == 200, moved.json()
+    assert set(
+        DpiaRequirementChange.objects.filter(processing=processing).values_list(
+            "folder", flat=True
+        )
+    ) == {target.id}
+
+
+def test_the_dpia_is_translated_in_french():
+    import yaml
+
+    source = Path(__file__).resolve().parents[1] / (
+        "library/libraries/quick-form-dpia.yaml"
+    )
+    form = yaml.safe_load(source.read_text())["objects"]["quick_forms"][0]
+    assert form["translations"]["fr"]["name"] == "AIPD"
+    for page in form["pages"]:
+        assert page["translations"]["fr"]["name"], page["urn"]
+        for urn, question in page["questions"].items():
+            assert question["translations"]["fr"]["text"], urn

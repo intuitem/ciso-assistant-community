@@ -19,10 +19,17 @@
 			href: '/processings?dpia_required=true'
 		},
 		{
-			key: 'required_with_dpia',
+			key: 'required_dpia_in_progress',
 			label: m.dpiaRequiredDpiaStarted(),
-			count: overview.required_with_dpia,
+			count: overview.required_dpia_in_progress,
 			color: 'var(--color-warning-500)',
+			href: '/dpias'
+		},
+		{
+			key: 'required_dpia_done',
+			label: m.dpiaRequiredDpiaDone(),
+			count: overview.required_dpia_done,
+			color: 'var(--color-primary-500)',
 			href: '/dpias'
 		},
 		{

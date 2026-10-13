@@ -20,7 +20,7 @@ from django.utils.translation import gettext as _
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.db.models import Count, Prefetch
+from django.db.models import Count, F, Prefetch
 from itertools import chain
 from collections import defaultdict
 
@@ -656,13 +656,25 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
         on_processings = QuickFormResponse.objects.filter(
             subject_content_type=ContentType.objects.get_for_model(Processing)
         )
-        started = on_processings.filter(
-            quick_form__in=forms_with_target("processing.dpia")
-        ).values("subject_object_id")
         required = viewable.filter(dpia_required=True)
-        with_dpia = required.filter(id__in=started).count()
-        # The to-do list: required, and no DPIA started.
-        gaps = required.exclude(id__in=started).select_related("folder")
+        # Done: an accepted DPIA is the processing's DPIA of record.
+        done = required.filter(dpia__isnull=False)
+        # Under way: a DPIA still open. A rejected one is no DPIA.
+        open_dpias = on_processings.filter(
+            quick_form__in=forms_with_target("processing.dpia"),
+            status__in=[
+                QuickFormResponse.Status.DRAFT,
+                QuickFormResponse.Status.SUBMITTED,
+                QuickFormResponse.Status.IN_REVIEW,
+            ],
+        ).values("subject_object_id")
+        in_progress = required.filter(dpia__isnull=True, id__in=open_dpias)
+        # The to-do list: required, no DPIA of record and none under way.
+        gaps = (
+            required.filter(dpia__isnull=True)
+            .exclude(id__in=open_dpias)
+            .select_related("folder")
+        )
         not_required = viewable.filter(dpia_required=False)
         # Screenings waiting on a reviewer, whatever form they came from.
         awaiting_review = on_processings.filter(
@@ -676,8 +688,9 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
         return Response(
             {
                 "total": viewable.count(),
-                "required_with_dpia": with_dpia,
-                "required_without_dpia": required.count() - with_dpia,
+                "required_dpia_done": done.count(),
+                "required_dpia_in_progress": in_progress.count(),
+                "required_without_dpia": gaps.count(),
                 "not_required": not_required.exclude(dpia_required_source="").count(),
                 # Never set by a screening or by hand: the default `False`.
                 "not_assessed": not_required.filter(dpia_required_source="").count(),
@@ -690,7 +703,10 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
                         "folder": p.folder.name,
                         "set_at": p.dpia_required_set_at,
                     }
-                    for p in gaps.order_by("dpia_required_set_at", "name")[:50]
+                    # Oldest first on every database: never dated (backfilled) leads.
+                    for p in gaps.order_by(
+                        F("dpia_required_set_at").asc(nulls_first=True), "name"
+                    )[:50]
                 ],
             }
         )

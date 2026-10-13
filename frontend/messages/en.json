@@ -7290,5 +7290,6 @@
 	"subjectFactsFrozen": "From the record, as it stood when submitted",
 	"subjectFactsEdit": "Edit the record",
 	"subjectFactsNone": "Nothing recorded",
-	"referenceOnSubject": "Already linked"
+	"referenceOnSubject": "Already linked",
+	"dpiaRequiredDpiaDone": "DPIA required, DPIA accepted"
 }

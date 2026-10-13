@@ -7290,5 +7290,6 @@
 	"subjectFactsFrozen": "Issu de la fiche, tel qu'au moment de la soumission",
 	"subjectFactsEdit": "Modifier la fiche",
 	"subjectFactsNone": "Rien n'est renseigné",
-	"referenceOnSubject": "Sur la fiche"
+	"referenceOnSubject": "Sur la fiche",
+	"dpiaRequiredDpiaDone": "AIPD requise, AIPD validée"
 }

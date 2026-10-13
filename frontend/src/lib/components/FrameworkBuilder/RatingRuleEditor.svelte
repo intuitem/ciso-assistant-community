@@ -2,6 +2,8 @@
 	import {
 		fitGrid,
 		getTranslation,
+		gridToRules,
+		rulesToGrid,
 		ruleIdFromLabel,
 		withTranslation,
 		type OutcomeRule,
@@ -37,7 +39,8 @@
 	function update(patch: Partial<OutcomeRule>) {
 		const next: OutcomeRule = { ...rule, ...patch };
 		if (next.rules === undefined && (next.dimensions ?? []).length !== 2) {
-			next.rules = [];
+			// What the grid said becomes rules, so a third dimension loses nothing.
+			next.rules = asRules(rule);
 		}
 		if (next.rules === undefined) {
 			next.grid = fitGrid(next, scales);
@@ -47,23 +50,25 @@
 		onchange(next);
 	}
 
+	const asRules = (from: OutcomeRule) => {
+		const rules = gridToRules(from, scales);
+		return rules.length ? rules : [{ level: levels.at(-1)?.ref_id ?? '', when: 'true' }];
+	};
+
+	// Grid and rules convert into each other, so switching back and forth keeps the
+	// painting (rules written by hand cannot be drawn: the grid then starts afresh).
+	function useGrid(on: boolean) {
+		if (on) {
+			update({ rules: undefined, grid: rulesToGrid(rule, scales) ?? undefined });
+		} else {
+			update({ rules: asRules(rule) });
+		}
+	}
+
 	function setDimension(index: number, ref: string) {
 		const next = [...dimensions];
 		next[index] = ref;
 		update({ dimensions: next });
-	}
-
-	// Kept while rules are on, so switching back to the grid restores what was painted.
-	let lastGrid: string[][] | undefined;
-
-	function useGrid(on: boolean) {
-		if (on) {
-			const { rules: _r, ...rest } = rule;
-			update({ ...rest, rules: undefined, grid: lastGrid ?? rest.grid });
-		} else {
-			lastGrid = rule.grid;
-			update({ rules: [{ level: levels.at(-1)?.ref_id ?? '', when: 'true' }] });
-		}
 	}
 
 	function paint(ri: number, ci: number) {
@@ -148,8 +153,7 @@
 						value={dimension}
 						onchange={(e) => setDimension(index, e.currentTarget.value)}
 					>
-						{#each scales as s (s.ref_id)}<option value={s.ref_id}>{s.label || s.ref_id}</option
-							>{/each}
+						{#each scales as s, i (i)}<option value={s.ref_id}>{s.label || s.ref_id}</option>{/each}
 					</select>
 					{#if dimensions.length > 1}
 						<ConfirmAction
@@ -248,7 +252,7 @@
 	{#if usesGrid && rows && cells}
 		<div>
 			<p class="text-xs text-surface-500">{m.builderRatingGridHelp()}</p>
-			<div class="mt-1 flex gap-2">
+			<div class="mt-1 flex max-w-full gap-2 overflow-x-auto">
 				<div
 					class="flex items-center justify-center text-xs font-semibold text-surface-600-400 [writing-mode:vertical-rl] rotate-180"
 				>
@@ -265,7 +269,11 @@
 						{#each cells.levels as _, ci (ci)}
 							<button
 								type="button"
-								class="h-10 rounded-base border border-surface-200-800 text-[11px] font-medium text-surface-950"
+								class="h-10 rounded-base border border-surface-200-800 text-[11px] font-medium {colorOf(
+									grid[ri][ci]
+								) === 'transparent'
+									? ''
+									: 'text-surface-950'}"
 								style="background-color: {colorOf(grid[ri][ci])};"
 								onclick={() => paint(ri, ci)}
 								data-testid="rating-cell">{labelOf(grid[ri][ci])}</button
@@ -273,7 +281,7 @@
 						{/each}
 					{/each}
 					<div></div>
-					{#each cells.levels as level (level.ref_id)}
+					{#each cells.levels as level, i (i)}
 						<div class="text-center text-xs text-surface-600-400">{level.label}</div>
 					{/each}
 				</div>
@@ -295,7 +303,7 @@
 							value={entry.level}
 							onchange={(e) => setRule(index, { level: e.currentTarget.value })}
 						>
-							{#each levels as level (level.ref_id)}<option value={level.ref_id}
+							{#each levels as level, i (i)}<option value={level.ref_id}
 									>{level.label || level.ref_id}</option
 								>{/each}
 						</select>

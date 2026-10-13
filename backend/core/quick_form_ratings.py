@@ -162,26 +162,52 @@ def _classify(rating: dict, dims: dict, programs: list) -> str | None:
 
 
 def scales_error(quick_form: dict) -> str | None:
-    """Why the form's scales or rating outcomes cannot work, or None."""
+    """Why the form's scales or rating outcomes cannot work, or None. Checked
+    before `expand_scales`, so library input of any shape gets an answer."""
+    definition = quick_form.get("scales_definition")
+    if definition is not None and (
+        not isinstance(definition, list)
+        or not all(
+            isinstance(s, dict) and isinstance(s.get("ref_id"), str) for s in definition
+        )
+    ):
+        return "scales_definition must be a list of scales, each with a ref_id"
     scales = scales_of(quick_form)
     for scale in scales.values():
-        refs = [
-            lvl.get("ref_id")
-            for lvl in scale.get("levels") or []
-            if isinstance(lvl, dict)
-        ]
-        if not refs or not all(refs) or len(set(refs)) != len(refs):
+        levels = scale.get("levels")
+        if not isinstance(levels, list) or not all(
+            isinstance(lvl, dict) for lvl in levels
+        ):
+            return f"scale {scale['ref_id']}: levels must be a list of objects"
+        refs = [lvl.get("ref_id") for lvl in levels]
+        if (
+            not refs
+            or not all(isinstance(r, str) and r for r in refs)
+            or len(set(refs)) != len(refs)
+        ):
             return f"scale {scale['ref_id']}: every level needs a unique ref_id"
-    for page in quick_form.get("pages") or []:
-        for urn, question in (page.get("questions") or {}).items():
+    pages = quick_form.get("pages") or []
+    if not isinstance(pages, list) or not all(isinstance(p, dict) for p in pages):
+        return "pages must be a list of objects"
+    for page in pages:
+        questions = page.get("questions") or {}
+        if not isinstance(questions, dict):
+            continue  # the page importer reports it
+        for urn, question in questions.items():
             scale = _config(question).get("scale")
-            if scale and scale not in scales:
+            if scale is not None and (
+                not isinstance(scale, str) or scale not in scales
+            ):
                 return f"question {urn} uses unknown scale {scale}"
-    page_ids = {page_id(page.get("urn")) for page in quick_form.get("pages") or []}
+    page_ids = {page_id(page.get("urn")) for page in pages}
     for rating in ratings_of(quick_form.get("outcomes_definition")):
         ref = rating["ref_id"]
         names = rating.get("dimensions") or []
-        if not names or any(name not in scales for name in names):
+        if (
+            not isinstance(names, list)
+            or not names
+            or any(not isinstance(n, str) or n not in scales for n in names)
+        ):
             return f"rating {ref}: dimensions must name scales of the form"
         levels = [
             lvl.get("ref_id")
@@ -219,7 +245,10 @@ def scales_error(quick_form: dict) -> str | None:
                     env.compile(str(rule.get("when") or ""))
                 except Exception:
                     return f"rating {ref}: rule for {rule['level']} is not valid CEL"
-        if unknown := set(rating.get("pages") or []) - page_ids:
+        scoped = rating.get("pages") or []
+        if not isinstance(scoped, list) or not all(isinstance(p, str) for p in scoped):
+            return f"rating {ref}: pages must be a list of page ids"
+        if unknown := set(scoped) - page_ids:
             return f"rating {ref}: unknown page {sorted(unknown)[0]}"
     return None
 
@@ -306,7 +335,12 @@ def ratings_for_display(quick_form, results: list[dict]) -> list[dict]:
     scales = scales_of(quick_form)
     points_by_ref = {r["ref_id"]: r["points"] for r in results}
     display = []
-    for rating in ratings_of(quick_form.outcomes_definition):
+    outcomes = (
+        quick_form.get("outcomes_definition")
+        if isinstance(quick_form, dict)
+        else quick_form.outcomes_definition
+    )
+    for rating in ratings_of(outcomes):
         names = rating.get("dimensions") or []
         if not names or any(name not in scales for name in names):
             continue

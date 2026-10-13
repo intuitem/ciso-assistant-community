@@ -1756,8 +1756,15 @@ class LibraryDraftViewSet(BaseModelViewSet):
         see what their logic actually does before publishing anything. Nothing is
         stored — the answers live in the request body.
         """
+        import copy
+
         from core.cel_service import evaluate_quick_form_document
         from core.quick_form_apply import project
+        from core.quick_form_ratings import (
+            expand_scales,
+            ratings_for_display,
+            scales_error,
+        )
 
         draft = self.get_object()
         content = builder.normalize_objects(draft.content or {})
@@ -1777,6 +1784,10 @@ class LibraryDraftViewSet(BaseModelViewSet):
                 logger.warning("Builder rejected the draft", error=e)
                 return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
 
+        # As a load would: scale questions get their levels as choices. A broken
+        # scale is left as is, so the preview still opens while it is fixed.
+        if scales_error(quick_form) is None:
+            quick_form = expand_scales(copy.deepcopy(quick_form))
         answers = request.data.get("answers")
         evaluation = evaluate_quick_form_document(
             quick_form, answers if isinstance(answers, dict) else {}
@@ -1785,6 +1796,9 @@ class LibraryDraftViewSet(BaseModelViewSet):
         return Response(
             {
                 "name": quick_form.get("name") or "",
+                "ratings": ratings_for_display(
+                    quick_form, evaluation.get("ratings") or []
+                ),
                 "description": quick_form.get("description") or "",
                 "outcomes_definition": quick_form.get("outcomes_definition") or [],
                 "pages": [

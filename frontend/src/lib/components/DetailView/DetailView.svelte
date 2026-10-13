@@ -49,14 +49,19 @@
 	const toastStore = getToastStore();
 
 	// The one setting an instance owns on a library form (see QuickForm.always_review).
-	async function setAlwaysReview(value: boolean) {
-		const res = await fetch(`/quick-forms/${data.data?.id}/always-review`, {
+	async function setAlwaysReview(box: HTMLInputElement) {
+		const ok = await fetch(`/quick-forms/${data.data?.id}/always-review`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ always_review: value })
-		});
-		if (!res.ok) {
+			body: JSON.stringify({ always_review: box.checked })
+		})
+			.then((res) => res.ok)
+			.catch(() => false);
+		if (!ok) {
+			// The page data did not change, so the box would keep showing the refused value.
+			box.checked = !box.checked;
 			toastStore.trigger({ message: m.anErrorOccurred(), background: 'preset-filled-error-500' });
+			return;
 		}
 		await invalidateAll();
 	}
@@ -1007,7 +1012,7 @@
 						type="checkbox"
 						class="checkbox"
 						checked={data.data?.always_review}
-						onchange={(e) => setAlwaysReview(e.currentTarget.checked)}
+						onchange={(e) => setAlwaysReview(e.currentTarget)}
 					/>{m.alwaysReview()}
 				</label>
 			{/if}

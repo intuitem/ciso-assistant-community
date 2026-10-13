@@ -12,7 +12,7 @@
 		type BuilderNode,
 		type RequirementNode,
 		type Question,
-		fitGrid,
+		remapGrid,
 		type OutcomeRule,
 		type Scale
 	} from './builder-state';
@@ -219,8 +219,9 @@
 
 	// A scale that gains or loses levels resizes the grids that cross it.
 	function updateScales(scales: Scale[]) {
+		const before = ($frameworkStore.scales_definition ?? []) as Scale[];
 		const outcomes = ($frameworkStore.outcomes_definition ?? []).map((r: OutcomeRule) =>
-			r.kind === 'rating' && r.grid ? { ...r, grid: fitGrid(r, scales) } : r
+			r.kind === 'rating' && r.grid ? { ...r, grid: remapGrid(r, before, scales) } : r
 		);
 		builder.updateFramework({ scales_definition: scales, outcomes_definition: outcomes });
 	}

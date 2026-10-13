@@ -2418,16 +2418,12 @@ class LibraryUpdater:
                     .exclude(response__status=QuickFormResponse.Status.DRAFT)
                     .values_list("question__urn", flat=True)
                 )
+                # Choices any response selected, drafts included: a renamed level
+                # must not empty a draft's answers.
                 decided_choice_urns = set(
                     QuestionChoice.objects.filter(
                         choice_answers__response__quick_form=quick_form
-                    )
-                    .exclude(
-                        choice_answers__response__status=(
-                            QuickFormResponse.Status.DRAFT
-                        )
-                    )
-                    .values_list("urn", flat=True)
+                    ).values_list("urn", flat=True)
                 )
                 # A draft is no record, but it can be weeks of writing (a DPIA):
                 # questions it answered are kept too, with their pages.
@@ -2642,6 +2638,21 @@ class LibraryUpdater:
                     **requirement_mapping_dict,
                 )
 
+    def quick_forms_error(self) -> str | None:
+        """Why a new quick form's scales, ratings or page facts cannot work, before
+        anything is written: expanding malformed scales would raise mid-update."""
+        from core.quick_form_facts import facts_error
+        from core.quick_form_ratings import scales_error
+
+        for quick_form in self.new_quick_forms or []:
+            if not isinstance(quick_form, dict):
+                return "[QUICK_FORM_ERROR] a quick form must be an object"
+            if error := scales_error(quick_form) or facts_error(
+                quick_form.get("pages")
+            ):
+                return f"[QUICK_FORM_ERROR] {error}"
+        return None
+
     def framework_rules_error(self) -> str | None:
         """The checks library import runs on outcome rules and visibility
         expressions, so an update cannot bring in what a load refuses."""
@@ -2662,6 +2673,8 @@ class LibraryUpdater:
     # We should create a LibraryVerifier class in the future that check if the library is valid and use it for a better error handling.
     def update_library(self) -> Union[str, None]:
         if (error_msg := self.framework_rules_error()) is not None:
+            return error_msg
+        if (error_msg := self.quick_forms_error()) is not None:
             return error_msg
         if (error_msg := self.update_dependencies()) is not None:
             return error_msg

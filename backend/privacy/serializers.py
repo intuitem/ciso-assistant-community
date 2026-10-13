@@ -166,6 +166,8 @@ class ProcessingWriteSerializer(BaseModelSerializer):
                     DataRecipient,
                     DataContractor,
                     DataTransfer,
+                    # Its history follows it, or the new domain cannot read it.
+                    DpiaRequirementChange,
                 ]
                 for model in related_models:
                     model.objects.filter(processing=updated_instance).update(

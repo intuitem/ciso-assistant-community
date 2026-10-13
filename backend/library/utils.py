@@ -572,13 +572,19 @@ class QuickFormImporter:
     REQUIRED_FIELDS = {"ref_id", "urn"}
 
     def __init__(self, quick_form_data: dict):
-        from core.quick_form_ratings import expand_scales
+        from core.quick_form_ratings import expand_scales, scales_error
 
+        # Checked first: expanding malformed scales would raise instead of answering.
+        self._scales_error = scales_error(quick_form_data)
         # Questions on a scale get its levels as choices before any page is read.
-        self.quick_form_data = expand_scales(quick_form_data)
+        self.quick_form_data = (
+            quick_form_data if self._scales_error else expand_scales(quick_form_data)
+        )
         self._pages: List[QuickFormPageImporter] = []
 
     def init(self) -> Union[str, None]:
+        if self._scales_error:
+            return f"[QUICK_FORM_ERROR] {self._scales_error}"
         if missing_fields := self.REQUIRED_FIELDS - set(self.quick_form_data.keys()):
             return "Missing the following fields : {}".format(", ".join(missing_fields))
         pages = self.quick_form_data.get("pages")
@@ -603,10 +609,6 @@ class QuickFormImporter:
         if (error := subject_question_error(self.quick_form_data)) is not None:
             return f"[QUICK_FORM_ERROR] {error}"
         if error := outcome_rule_id_error(self.quick_form_data):
-            return f"[QUICK_FORM_ERROR] {error}"
-        from core.quick_form_ratings import scales_error
-
-        if error := scales_error(self.quick_form_data):
             return f"[QUICK_FORM_ERROR] {error}"
         from core.quick_form_apply import validate_on_accept_document
 
