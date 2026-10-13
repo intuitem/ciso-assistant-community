@@ -20,7 +20,7 @@ from django.utils.translation import gettext as _
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.db.models import Count, F, Prefetch
+from django.db.models import Case, Count, F, Prefetch, Q, When
 from itertools import chain
 from collections import defaultdict
 
@@ -43,6 +43,8 @@ from .models import (
     ART9_SPECIAL_CATEGORY_CONDITION_CHOICES,
     TRANSFER_MECHANISM_CHOICES,
 )
+
+DPIA_OVERVIEW_PAGE = 50
 
 EU_COUNTRIES_SET = {
     "AT",
@@ -646,67 +648,131 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
 
     @action(detail=False, url_path="dpia-overview", name="DPIA overview")
     def dpia_overview(self, request):
-        """Where the processings the caller can see stand on DPIAs."""
+        """Where the processings the caller can see stand on DPIAs: a count per
+        state, and one page of processings (`state`, `search`, `offset`), each
+        with its DPIA and any screening awaiting review."""
         from core.models import QuickFormResponse
         from core.quick_form_apply import forms_with_target
 
         viewable = Processing.objects.filter(
             id__in=RoleAssignment.get_viewable_object_ids(request.user, Processing)
         )
+        open_statuses = [
+            QuickFormResponse.Status.DRAFT,
+            QuickFormResponse.Status.SUBMITTED,
+            QuickFormResponse.Status.IN_REVIEW,
+        ]
         on_processings = QuickFormResponse.objects.filter(
             subject_content_type=ContentType.objects.get_for_model(Processing)
         )
         required = viewable.filter(dpia_required=True)
-        # Done: an accepted DPIA is the processing's DPIA of record.
-        done = required.filter(dpia__isnull=False)
         # Under way: a DPIA still open. A rejected one is no DPIA.
         open_dpias = on_processings.filter(
             quick_form__in=forms_with_target("processing.dpia"),
-            status__in=[
-                QuickFormResponse.Status.DRAFT,
-                QuickFormResponse.Status.SUBMITTED,
-                QuickFormResponse.Status.IN_REVIEW,
-            ],
-        ).values("subject_object_id")
-        in_progress = required.filter(dpia__isnull=True, id__in=open_dpias)
-        # The to-do list: required, no DPIA of record and none under way.
-        gaps = (
-            required.filter(dpia__isnull=True)
-            .exclude(id__in=open_dpias)
-            .select_related("folder")
+            status__in=open_statuses,
         )
+        open_ids = open_dpias.values("subject_object_id")
         not_required = viewable.filter(dpia_required=False)
         # Screenings waiting on a reviewer, whatever form they came from.
-        awaiting_review = on_processings.filter(
+        pending_screenings = on_processings.filter(
             quick_form__in=forms_with_target("processing.dpia_required"),
-            subject_object_id__in=viewable.values("id"),
             status__in=[
                 QuickFormResponse.Status.SUBMITTED,
                 QuickFormResponse.Status.IN_REVIEW,
             ],
-        ).count()
+        )
+        by_state = {
+            # The to-do list: required, no DPIA of record and none under way.
+            "required_without_dpia": required.filter(dpia__isnull=True).exclude(
+                id__in=open_ids
+            ),
+            "required_dpia_in_progress": required.filter(
+                dpia__isnull=True, id__in=open_ids
+            ),
+            # Done: an accepted DPIA is the processing's DPIA of record.
+            "required_dpia_done": required.filter(dpia__isnull=False),
+            "not_required": not_required.exclude(dpia_required_source=""),
+            # Never set by a screening or by hand: the default `False`.
+            "not_assessed": not_required.filter(dpia_required_source=""),
+            "awaiting_review": viewable.filter(
+                id__in=pending_screenings.values("subject_object_id")
+            ),
+        }
+        counts = {key: rows.count() for key, rows in by_state.items()}
+
+        rows = by_state.get(request.query_params.get("state", ""), viewable)
+        search = request.query_params.get("search", "").strip()
+        if search:
+            rows = rows.filter(Q(name__icontains=search) | Q(ref_id__icontains=search))
+        # Most urgent first; oldest requirement first, never dated (backfilled) leading.
+        rows = rows.select_related("folder", "dpia").order_by(
+            Case(
+                When(dpia_required=True, dpia__isnull=True, then=0),
+                When(dpia_required=True, then=1),
+                When(dpia_required_source="", then=3),
+                default=2,
+            ),
+            F("dpia_required_set_at").asc(nulls_first=True),
+            "name",
+        )
+        try:
+            offset = max(int(request.query_params.get("offset", 0)), 0)
+        except ValueError:
+            offset = 0
+        page = list(rows[offset : offset + DPIA_OVERVIEW_PAGE])
+
+        # The responses each row links to, only those the caller may open.
+        readable = set(
+            RoleAssignment.get_viewable_object_ids(request.user, QuickFormResponse)
+        )
+        ids = [p.id for p in page]
+        latest_open = {
+            str(r.subject_object_id): r
+            for r in open_dpias.filter(subject_object_id__in=ids).order_by("updated_at")
+        }
+        pending = {
+            str(r.subject_object_id): r
+            for r in pending_screenings.filter(subject_object_id__in=ids).order_by(
+                "updated_at"
+            )
+        }
+
+        def link(response):
+            if response is None or response.id not in readable:
+                return None
+            return {
+                "id": str(response.id),
+                "ref_id": response.ref_id,
+                "status": response.status,
+                "resolution": response.resolution,
+            }
+
+        def state_of(p):
+            if not p.dpia_required:
+                return "not_required" if p.dpia_required_source else "not_assessed"
+            if p.dpia_id:
+                return "required_dpia_done"
+            if str(p.id) in latest_open:
+                return "required_dpia_in_progress"
+            return "required_without_dpia"
+
         return Response(
             {
                 "total": viewable.count(),
-                "required_dpia_done": done.count(),
-                "required_dpia_in_progress": in_progress.count(),
-                "required_without_dpia": gaps.count(),
-                "not_required": not_required.exclude(dpia_required_source="").count(),
-                # Never set by a screening or by hand: the default `False`.
-                "not_assessed": not_required.filter(dpia_required_source="").count(),
-                "awaiting_review": awaiting_review,
-                "gaps": [
+                **counts,
+                "rows_count": rows.count(),
+                "rows": [
                     {
                         "id": str(p.id),
                         "ref_id": p.ref_id,
                         "name": p.name,
                         "folder": p.folder.name,
+                        "state": state_of(p),
                         "set_at": p.dpia_required_set_at,
+                        "dpia": link(p.dpia or latest_open.get(str(p.id))),
+                        "pending_screening": link(pending.get(str(p.id))),
                     }
-                    # Oldest first on every database: never dated (backfilled) leads.
-                    for p in gaps.order_by(
-                        F("dpia_required_set_at").asc(nulls_first=True), "name"
-                    )[:50]
+                    for p in page
                 ],
             }
         )

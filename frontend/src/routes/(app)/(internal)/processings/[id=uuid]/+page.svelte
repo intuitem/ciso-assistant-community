@@ -73,7 +73,7 @@
 	{/snippet}
 
 	{#snippet widgets()}
-		{#if page.data?.featureflags?.dpias !== false}
+		{#if page.data?.featureflags?.dpias && page.data?.featureflags?.quick_forms}
 			<ProcessingDpiaScreeningCard {processing} />
 		{/if}
 		{#if page.data?.featureflags?.validation_flows && processing.validation_flows}

@@ -343,6 +343,11 @@ def test_overview_counts_where_processings_stand(
     assert overview["awaiting_review"] >= 1
     assert overview["not_assessed"] >= 2
 
+    url = "/api/privacy/processings/dpia-overview/"
+    (row,) = admin_client.get(f"{url}?state=awaiting_review&search=pend").json()["rows"]
+    assert row["id"] == str(pending.id)
+    assert row["pending_screening"]["status"] == "submitted"
+
     forms = admin_client.get("/api/privacy/processings/dpia-screening-forms/").json()
     assert [(f["id"], f["problems"]) for f in forms] == [(str(screening_form.id), [])]
 
@@ -415,7 +420,9 @@ def test_an_accepted_dpia_is_the_processings_dpia(
     Processing.objects.filter(pk=processing.pk).update(dpia_required=True)
     overview = admin_client.get("/api/privacy/processings/dpia-overview/").json()
     assert overview["required_dpia_done"] >= 1
-    assert str(processing.id) not in [g["id"] for g in overview["gaps"]]
+    row = next(r for r in overview["rows"] if r["id"] == str(processing.id))
+    assert row["state"] == "required_dpia_done"
+    assert row["dpia"]["id"] == str(response.id)
 
 
 @pytest.mark.django_db
@@ -617,7 +624,10 @@ def test_a_rejected_dpia_leaves_the_processing_to_do(
     response = _start_dpia(admin_client, dpia_form, processing)
     overview = admin_client.get(url).json()
     assert overview["required_dpia_in_progress"] == 1
-    assert str(processing.id) not in [g["id"] for g in overview["gaps"]]
+    gaps = admin_client.get(f"{url}?state=required_without_dpia").json()["rows"]
+    assert str(processing.id) not in [g["id"] for g in gaps]
+    (row,) = admin_client.get(f"{url}?state=required_dpia_in_progress").json()["rows"]
+    assert row["dpia"]["status"] == "draft"
 
     response.status = QuickFormResponse.Status.SUBMITTED
     response.save(update_fields=["status"])
@@ -630,7 +640,9 @@ def test_a_rejected_dpia_leaves_the_processing_to_do(
     overview = admin_client.get(url).json()
     assert overview["required_dpia_in_progress"] == 0
     assert overview["required_dpia_done"] == 0
-    assert str(processing.id) in [g["id"] for g in overview["gaps"]]
+    gaps = admin_client.get(f"{url}?state=required_without_dpia").json()["rows"]
+    assert str(processing.id) in [g["id"] for g in gaps]
+    assert gaps[0]["dpia"] is None
 
 
 @pytest.mark.django_db

@@ -318,7 +318,7 @@
 	{#if !editing}
 		<p class="border-t border-surface-200-800 pt-3 text-xs text-surface-500">
 			{#if loadFailed}{m.anErrorOccurred()}{:else if screenings?.length === 0}{m.noDpiaScreeningForm()}{/if}
-			<a class="anchor" href="/processings/dpia">{m.dpiaStatusOverview()}</a>
+			<a class="anchor" href="/dpias">{m.dpias()}</a>
 		</p>
 	{/if}
 </div>

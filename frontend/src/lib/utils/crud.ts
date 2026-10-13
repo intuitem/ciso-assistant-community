@@ -181,7 +181,6 @@ export const MODEL_FEATURE_FLAGS: Record<string, FeatureFlag> = {
 	campaigns: 'campaigns',
 	contracts: 'contracts',
 	'data-breaches': 'data_breaches',
-	'dpia-requirement-changes': 'dpias',
 	'document-containers': 'document_management',
 	'document-revisions': 'document_management',
 	'managed-documents': 'document_management',

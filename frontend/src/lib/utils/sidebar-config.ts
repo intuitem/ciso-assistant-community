@@ -40,7 +40,6 @@ type SidebarBackendKeys = {
 	right_requests: boolean;
 	data_breaches: boolean;
 	dpias: boolean;
-	dpiaStatusOverview: boolean;
 	auditee_mode: boolean;
 	quick_forms: boolean;
 	advanced_analytics: boolean;
@@ -98,7 +97,6 @@ type SidebarFrontendKeys = {
 	rightRequests: boolean;
 	dataBreaches: boolean;
 	dpias: boolean;
-	dpiaStatusOverview: boolean;
 	auditDashboard: boolean;
 	quickForms: boolean;
 	myRequests: boolean;
@@ -160,8 +158,8 @@ export function getSidebarVisibleItems(
 		purposes: featureFlags?.purposes ?? true,
 		rightRequests: featureFlags?.right_requests ?? true,
 		dataBreaches: featureFlags?.data_breaches ?? true,
-		dpias: featureFlags?.dpias ?? true,
-		dpiaStatusOverview: featureFlags?.dpias ?? true,
+		// DPIAs run on quick forms: without them the review queue is hidden.
+		dpias: (featureFlags?.dpias ?? false) && (featureFlags?.quick_forms ?? false),
 		auditDashboard: featureFlags?.auditee_mode ?? false,
 		quickForms: featureFlags?.quick_forms ?? false,
 		myRequests: featureFlags?.quick_forms ?? false,

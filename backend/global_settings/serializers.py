@@ -501,7 +501,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     data_breaches = serializers.BooleanField(
         source="value.data_breaches", required=False, default=True
     )
-    dpias = serializers.BooleanField(source="value.dpias", required=False, default=True)
+    dpias = serializers.BooleanField(
+        source="value.dpias", required=False, default=False
+    )
     chat_mode = serializers.BooleanField(
         source="value.chat_mode", required=False, default=False
     )
