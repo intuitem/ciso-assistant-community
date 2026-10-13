@@ -508,6 +508,7 @@ export type VisibilityField = (typeof VISIBILITY_FIELDS)[number];
 
 export type RoleAccess = 'edit' | 'read' | 'hidden';
 export type VisibilityPair = { auditor: RoleAccess; respondent: RoleAccess };
+export type VisibilityMap = Record<string, VisibilityPair>;
 
 const EDIT_PAIR: VisibilityPair = { auditor: 'edit', respondent: 'edit' };
 

@@ -1,10 +1,12 @@
 <script lang="ts">
-	import { VISIBILITY_FIELDS, type RoleAccess } from '$lib/utils/helpers';
+	import {
+		VISIBILITY_FIELDS,
+		type RoleAccess,
+		type VisibilityPair as Pair,
+		type VisibilityMap
+	} from '$lib/utils/helpers';
 	import { page } from '$app/stores';
 	import { m } from '$paraglide/messages';
-
-	type Pair = { auditor: RoleAccess; respondent: RoleAccess };
-	type VisibilityMap = Record<string, Pair>;
 
 	interface Props {
 		value: VisibilityMap | null | undefined;

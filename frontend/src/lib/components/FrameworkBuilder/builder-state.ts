@@ -3,7 +3,7 @@ import { writable, type Writable } from 'svelte/store';
 import { apiSaveDraft, BuilderRequestError, type DraftJSON } from './builder-api';
 import { m } from '$paraglide/messages';
 import { safeTranslate } from '$lib/utils/i18n';
-import { resolveComputeResult } from '$lib/utils/helpers';
+import { resolveComputeResult, type VisibilityMap } from '$lib/utils/helpers';
 
 // --- Types ---
 
@@ -135,7 +135,7 @@ export interface Framework {
 	subject_question_urn?: string | null;
 	/** Quick forms: what an accepted response writes, e.g. the vendor's tier. */
 	on_accept?: Record<string, unknown>[];
-	field_visibility: Record<string, string>;
+	field_visibility: VisibilityMap;
 	locale?: string;
 	translations?: Translations | null;
 	available_languages?: string[];
