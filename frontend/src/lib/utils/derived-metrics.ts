@@ -82,9 +82,22 @@ export function formulaKind(inputs: unknown): 'objects' | 'metrics' {
 // Where a sample sits on a time axis. A metric formula's sample answers for a
 // calendar period and is stamped at the period's last instant (UTC), which a
 // browser east of UTC shows as the next day: plot it at the period's start
-// instead, as a period is labelled. Any other sample sits at its timestamp.
-export function sampleMoment(sample: { timestamp: string; period_start?: string | null }): string {
-	return sample.period_start || sample.timestamp;
+// instead, as a period is labelled. A period of a day or longer starts at UTC
+// midnight, which a browser west of UTC would show as the day before: it is
+// placed at the browser's own midnight of that date, so the axis and the
+// tooltip read the period's date whatever the time zone. Sub-daily periods
+// keep their instant. Any other sample sits at its timestamp.
+const UTC_MIDNIGHT = /^(\d{4})-(\d{2})-(\d{2})T00:00:00(?:\.0+)?(?:Z|\+00:00)$/;
+
+export function sampleMoment(sample: {
+	timestamp: string;
+	period_start?: string | null;
+}): string | number {
+	const start = sample.period_start;
+	if (!start) return sample.timestamp;
+	const date = UTC_MIDNIGHT.exec(start);
+	if (!date) return start;
+	return new Date(Number(date[1]), Number(date[2]) - 1, Number(date[3])).getTime();
 }
 
 // ---------- the expression editor ----------
@@ -369,7 +382,8 @@ export function samplesOnPeriods(
 			continue;
 		}
 		if (!value || typeof value !== 'object') continue;
-		const moment = Date.parse(sampleMoment(sample));
+		// Matched on the period's own instant, not where a chart plots it.
+		const moment = Date.parse(sample.period_start || sample.timestamp);
 		if (!Number.isNaN(moment) && !held.has(moment)) {
 			held.set(moment, read(value as Record<string, unknown>));
 		}

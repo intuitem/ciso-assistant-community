@@ -93,14 +93,22 @@ describe('metric formulas', () => {
 });
 
 describe('sampleMoment', () => {
-	it('plots a period sample at its period start, not at its UTC end', () => {
-		// November, stamped at its last instant: shown as December 1st in Paris.
+	it('plots a period sample on its start date in the browser time zone', () => {
+		// November, stamped at its last instant: December 1st in Paris. Its
+		// start, UTC midnight, would be October 31st in New York: the sample
+		// sits at the browser's own midnight of November 1st instead.
+		const moment = sampleMoment({
+			timestamp: '2025-11-30T23:59:59.999999Z',
+			period_start: '2025-11-01T00:00:00Z'
+		});
+		expect(moment).toBe(new Date(2025, 10, 1).getTime());
+		expect(new Date(moment).toLocaleDateString('en-US')).toBe('11/1/2025');
+	});
+
+	it('keeps the instant of a sub-daily period', () => {
 		expect(
-			sampleMoment({
-				timestamp: '2025-11-30T23:59:59.999999Z',
-				period_start: '2025-11-01T00:00:00Z'
-			})
-		).toBe('2025-11-01T00:00:00Z');
+			sampleMoment({ timestamp: '2026-10-05T09:59:59Z', period_start: '2026-10-05T09:00:00Z' })
+		).toBe('2026-10-05T09:00:00Z');
 	});
 
 	it('plots any other sample at its timestamp', () => {
