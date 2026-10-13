@@ -47,15 +47,9 @@
 	}: Props = $props();
 
 	const { value, errors, constraints } = formFieldProxy(form, field);
-	let previous = $state($value);
 
-	$effect(() => {
-		if (previous !== $value && previous !== undefined) {
-			onChange($value);
-		}
-		previous = $value;
-	});
-
+	// onChange fires on user input only: a programmatic reset of the form value
+	// (reload, locale switch, min_score fallback) must never be persisted as a score.
 	run(() => {
 		$value = !disabled ? ($value ?? min_score) : $value;
 	});
@@ -102,6 +96,7 @@
 					step={score_step}
 					{disabled}
 					{...constraints}
+					oninput={() => onChange($value)}
 				/>
 			</div>
 			<div class="shrink-0 relative">

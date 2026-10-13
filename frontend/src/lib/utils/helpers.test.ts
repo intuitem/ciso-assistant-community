@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, test, expect } from 'vitest';
 
-import { normalizeSearchString, getSearchTarget } from './helpers';
+import { normalizeSearchString, getSearchTarget, roundScore } from './helpers';
 
 describe('normalizeSearchString', () => {
 	it('lowercases and strips punctuation from Cyrillic text without emptying it', () => {
@@ -28,5 +28,22 @@ describe('getSearchTarget', () => {
 		const term = normalizeSearchString('доступу');
 		const matches = options.filter((opt) => getSearchTarget(opt as any).includes(term));
 		expect(matches.map((o) => o.value)).toEqual([1]);
+	});
+});
+
+describe('roundScore', () => {
+	test('two decimals, half up, despite float noise', () => {
+		expect(roundScore(68.335)).toBe(68.34);
+		expect(roundScore(1.005)).toBe(1.01);
+		expect(roundScore(2.9971)).toBe(3);
+		expect(roundScore(41.125)).toBe(41.13);
+		expect(roundScore(13 / 3)).toBe(4.33);
+		expect(roundScore(1.234999999)).toBe(1.23);
+		expect(roundScore(2.695)).toBe(2.7);
+	});
+
+	test('percentages keep one decimal, the nothing-scored sentinel stays', () => {
+		expect(roundScore(66.66, 1)).toBe(66.7);
+		expect(roundScore(-1)).toBe(-1);
 	});
 });

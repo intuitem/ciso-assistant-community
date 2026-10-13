@@ -470,6 +470,130 @@ class TestVisibilityExpression:
         assert ctx["assessment"]["total_count"] == 1
         assert ctx["hidden_requirements"] == ["hidden"]
 
+    def test_hidden_requirement_keeps_visible_answers(self, db):
+        """Hiding a requirement drops its answers only, not those of visible ones.
+
+        Question URNs follow the library scheme `<requirement urn>:question:<id>`,
+        so answer keys are not requirement node ids."""
+        from core.cel_service import build_cel_context, evaluate_outcomes
+
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Vis Answers FW",
+            folder=folder,
+            min_score=0,
+            max_score=100,
+            outcomes_definition=[
+                {
+                    "ref_id": "shown_yes",
+                    "expression": '"shown:question:q1" in answers && '
+                    '"shown:question:q1:choice:yes" in answers["shown:question:q1"].selected_choices',
+                }
+            ],
+        )
+        perimeter = Perimeter.objects.create(name="Vis Answers Perim", folder=folder)
+        ca = ComplianceAssessment.objects.create(
+            name="Vis Answers CA",
+            framework=fw,
+            folder=folder,
+            perimeter=perimeter,
+            min_score=0,
+            max_score=100,
+        )
+        for node_id, visibility in (("shown", None), ("hidden", "false")):
+            rn = RequirementNode.objects.create(
+                framework=fw,
+                urn=f"urn:test:risk:req_node:visans:{node_id}",
+                ref_id=node_id,
+                assessable=True,
+                visibility_expression=visibility,
+                folder=folder,
+            )
+            q = Question.objects.create(
+                requirement_node=rn,
+                urn=f"{rn.urn}:question:q1",
+                text="Question",
+                type="unique_choice",
+                folder=folder,
+            )
+            yes = QuestionChoice.objects.create(
+                question=q, urn=f"{q.urn}:choice:yes", value="Yes", folder=folder
+            )
+            ra = RequirementAssessment.objects.create(
+                compliance_assessment=ca, requirement=rn, folder=folder
+            )
+            Answer.objects.create(
+                requirement_assessment=ra, question=q, folder=folder
+            ).selected_choices.add(yes)
+
+        ctx, hidden_urns = build_cel_context(ca)
+        assert hidden_urns == {"urn:test:risk:req_node:visans:hidden"}
+        assert set(ctx["answers"]) == {"shown:question:q1"}
+
+        evaluate_outcomes(ca)
+        ca.refresh_from_db()
+        assert "shown_yes" in ca.computed_outcome
+
+    @pytest.mark.parametrize(
+        "node_ids,question_urn,expected_key",
+        [
+            (
+                ("shown", "hidden"),
+                "urn:myorg:risk:question:visans:{node_id}-q1",
+                "shown-q1",
+            ),
+            (
+                ("ctl:question:shown", "ctl:question:hidden"),
+                "{rn_urn}:question:q1",
+                "ctl:question:shown:question:q1",
+            ),
+        ],
+    )
+    def test_hidden_requirement_keeps_visible_answers_any_question_urn(
+        self, db, node_ids, question_urn, expected_key
+    ):
+        from core.cel_service import build_cel_context
+
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Vis Answers URN FW", folder=folder, min_score=0, max_score=100
+        )
+        perimeter = Perimeter.objects.create(
+            name="Vis Answers URN Perim", folder=folder
+        )
+        ca = ComplianceAssessment.objects.create(
+            name="Vis Answers URN CA",
+            framework=fw,
+            folder=folder,
+            perimeter=perimeter,
+            min_score=0,
+            max_score=100,
+        )
+        for node_id, visibility in zip(node_ids, (None, "false")):
+            rn = RequirementNode.objects.create(
+                framework=fw,
+                urn=f"urn:test:risk:req_node:visans:{node_id}",
+                ref_id=node_id,
+                assessable=True,
+                visibility_expression=visibility,
+                folder=folder,
+            )
+            q = Question.objects.create(
+                requirement_node=rn,
+                urn=question_urn.format(node_id=node_id, rn_urn=rn.urn),
+                text="Question",
+                type="unique_choice",
+                folder=folder,
+            )
+            ra = RequirementAssessment.objects.create(
+                compliance_assessment=ca, requirement=rn, folder=folder
+            )
+            Answer.objects.create(requirement_assessment=ra, question=q, folder=folder)
+
+        ctx, hidden_urns = build_cel_context(ca)
+        assert hidden_urns == {f"urn:test:risk:req_node:visans:{node_ids[1]}"}
+        assert set(ctx["answers"]) == {expected_key}
+
     def test_visibility_no_expression_always_visible(self, cel_setup):
         """Requirements without visibility_expression are always visible."""
         from core.cel_service import build_cel_context
@@ -622,6 +746,94 @@ class TestVisibilityExpression:
         # Both should be hidden (single-pass, no re-evaluation)
         assert "urn:test:risk:req_node:cycle:a" in hidden_urns
         assert "urn:test:risk:req_node:cycle:b" in hidden_urns
+
+    @staticmethod
+    def _tree_audit(nodes, outcomes_definition=None):
+        """Audit on a framework built from (node_id, parent_id, assessable, visibility)."""
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Tree FW",
+            folder=folder,
+            min_score=0,
+            max_score=100,
+            outcomes_definition=outcomes_definition or [],
+        )
+        ca = ComplianceAssessment.objects.create(
+            name="Tree CA",
+            framework=fw,
+            folder=folder,
+            perimeter=Perimeter.objects.create(name="Tree Perim", folder=folder),
+            min_score=0,
+            max_score=100,
+        )
+        base = "urn:test:risk:req_node:tree"
+        for node_id, parent_id, assessable, visibility in nodes:
+            rn = RequirementNode.objects.create(
+                framework=fw,
+                urn=f"{base}:{node_id}",
+                parent_urn=f"{base}:{parent_id}" if parent_id else None,
+                ref_id=node_id,
+                assessable=assessable,
+                visibility_expression=visibility,
+                folder=folder,
+            )
+            if assessable:
+                RequirementAssessment.objects.create(
+                    compliance_assessment=ca, requirement=rn, folder=folder
+                )
+        return ca, base
+
+    def test_hidden_section_hides_its_subtree(self, db):
+        """A hidden section hides every node below it, whatever their own
+        expressions say, so they leave the context, the score and the outcomes."""
+        from core.cel_service import build_cel_context, evaluate_outcomes
+
+        ca, base = self._tree_audit(
+            [
+                ("section", None, False, "false"),
+                ("child", "section", True, "true"),
+                ("subsection", "section", False, None),
+                ("grandchild", "subsection", True, None),
+                ("other", None, True, None),
+            ],
+            outcomes_definition=[
+                {"ref_id": "child_counted", "expression": '"child" in requirements'},
+                {"ref_id": "other_counted", "expression": '"other" in requirements'},
+            ],
+        )
+
+        ctx, hidden_urns = build_cel_context(ca)
+        assert hidden_urns == {
+            f"{base}:{n}" for n in ("section", "child", "subsection", "grandchild")
+        }
+        assert set(ctx["requirements"]) == {"other"}
+        assert ctx["assessment"]["total_count"] == 1
+        assert set(ctx["hidden_requirements"]) == {
+            "section",
+            "child",
+            "subsection",
+            "grandchild",
+        }
+
+        evaluate_outcomes(ca)
+        ca.refresh_from_db()
+        assert set(ca.computed_outcome) == {"other_counted"}
+
+    def test_visible_section_keeps_children_expressions(self, db):
+        """Under a visible section, each child follows its own expression."""
+        from core.cel_service import build_cel_context
+
+        ca, base = self._tree_audit(
+            [
+                ("section", None, False, "true"),
+                ("shown", "section", True, None),
+                ("hidden", "section", True, "false"),
+            ]
+        )
+
+        ctx, hidden_urns = build_cel_context(ca)
+        assert hidden_urns == {f"{base}:hidden"}
+        assert set(ctx["requirements"]) == {"shown"}
 
 
 # ---------------------------------------------------------------------------

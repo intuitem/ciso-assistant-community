@@ -118,3 +118,25 @@ def labels_for(question, folder, ids, user=None):
         else {"id": i, "label": i, "folder": None}
         for i in ids
     ]
+
+
+def subject_question_error(quick_form: dict) -> str | None:
+    """Why a form document's `subject_question_urn` cannot name a subject, or
+    None. It must point at a single-object reference question of the form."""
+    urn = str(quick_form.get("subject_question_urn") or "").lower()
+    if not urn:
+        return None
+    for page in quick_form.get("pages") or []:
+        for q_urn, question in (page.get("questions") or {}).items():
+            if str(q_urn).lower() != urn:
+                continue
+            question = question or {}
+            config = question.get("config") or {}
+            if question.get("type") != "object_reference":
+                return "subject_question_urn must point at an object reference question"
+            if config.get("multiple"):
+                return "subject_question_urn must point at a single-object question"
+            if config.get("model") not in REFERENCEABLE:
+                return "subject_question_urn points at an unknown reference model"
+            return None
+    return "subject_question_urn does not match any question of the form"
