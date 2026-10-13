@@ -343,11 +343,20 @@ class MetricInstanceViewSet(BaseModelViewSet):
             return Response(status=status.HTTP_403_FORBIDDEN)
         if not definition.reads_metrics:
             return Response({"inputs": []})
+        from metrology.compose import readable_instances
+
         inputs = []
         for spec in definition.inputs or []:
             if not isinstance(spec, dict):
                 continue
             target = resolve_definition(spec.get("definition"))
+            # The subtree may hold instances the author may not read: a
+            # candidate they cannot see is not theirs to pick, as the other
+            # endpoints have it (compose.readable_instances).
+            candidates = input_candidates(target, folder) if target else []
+            readable = readable_instances(
+                request.user, [instance.id for instance in candidates]
+            )
             inputs.append(
                 {
                     "key": spec.get("key"),
@@ -361,9 +370,8 @@ class MetricInstanceViewSet(BaseModelViewSet):
                             "name": instance.name,
                             "folder": instance.folder.name,
                         }
-                        for instance in (
-                            input_candidates(target, folder) if target else []
-                        )
+                        for instance in candidates
+                        if instance.id in readable
                     ],
                 }
             )

@@ -982,3 +982,53 @@ class TestPreviewHardening:
         )
         assert response.status_code == 200
         assert response.data["value"] == 40
+
+
+@pytest.mark.django_db
+class TestInputCandidatesAreReadable:
+    def test_names_only_what_the_author_may_read(self, acme):
+        """Rights on ACME alone, not below: France's and Germany's clicks are
+        in the tree but not the user's to see, so the picker must not name
+        them, as the preview and the compose modal already do not."""
+        group, _fr, _de, i = acme
+        clicks = i["clicks_fr"].metric_definition
+        formula = make_definition(
+            "Rate",
+            inputs=[{"key": "c", "definition": str(clicks.id), "combine": "one"}],
+            expression="c",
+        )
+        group_clicks = make_instance(group, clicks, name="Clicks Group")
+        query = {"definition": str(formula.id), "folder": str(group.id)}
+        full = call("get", "input_candidates", query, admin())
+        assert sorted(c["name"] for c in full.data["inputs"][0]["candidates"]) == [
+            "Clicks France",
+            "Clicks Germany",
+            "Clicks Group",
+        ]
+        narrow = call("get", "input_candidates", query, member(group, recursive=False))
+        assert narrow.status_code == 200
+        assert [c["id"] for c in narrow.data["inputs"][0]["candidates"]] == [
+            str(group_clicks.id)
+        ]
+
+
+@pytest.mark.django_db
+class TestAShippedDefinition:
+    def test_is_forked_not_edited_in_place(self, acme):
+        """A definition a library ships is the library's: editing the only
+        metric using it must not rewrite it, so the edit moves the metric to
+        a definition of its own."""
+        edit = TestEdit()
+        made = edit.made(acme)
+        shipped = made.metric_definition
+        MetricDefinition.objects.filter(id=shipped.id).update(
+            urn=f"urn:test:{uuid.uuid4().hex[:6]}"
+        )
+        response = edit.edit(made, expression="clicks * 1000.0 / heads")
+        assert response.status_code == 200, response.data
+        assert response.data["outcome"] == "forked"
+        made.refresh_from_db()
+        shipped.refresh_from_db()
+        assert made.metric_definition_id != shipped.id
+        assert shipped.expression == "clicks * 100.0 / heads"
+        assert made.metric_definition.expression == "clicks * 1000.0 / heads"
