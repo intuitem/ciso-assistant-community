@@ -2346,10 +2346,11 @@ class RecordMeasurementAction(BaseAction):
             )
         value = self._shape(render(config.get("value", ""), context), metric)
         timestamp = self._timestamp(config, context)
-        sample = CustomMetricSample.objects.create(
-            metric_instance=metric,
-            folder=metric.folder,
-            timestamp=timestamp,
+        # One sample per metric and second: a run recording into a taken
+        # second replaces that sample (CustomMetricSample.record).
+        sample, _created = CustomMetricSample.record(
+            metric,
+            timestamp,
             value=value,
             observation=str(render(config.get("observation", ""), context) or ""),
             evidence_revision=self._revision(config, context, instance),
@@ -2359,7 +2360,7 @@ class RecordMeasurementAction(BaseAction):
             "object_id": str(sample.id),
             "metric_instance_id": str(metric.id),
             "value": value,
-            "timestamp": timestamp.isoformat(),
+            "timestamp": sample.timestamp.isoformat(),
         }
 
     @staticmethod

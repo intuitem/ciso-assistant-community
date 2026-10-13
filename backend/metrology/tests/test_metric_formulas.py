@@ -100,7 +100,7 @@ class TestPeriods:
     @pytest.mark.parametrize(
         "frequency, expected",
         [
-            ("realtime", at(2026, 5, 20, 13, 30)),
+            ("15min", at(2026, 5, 20, 13, 30)),
             ("hourly", at(2026, 5, 20, 13)),
             ("daily", at(2026, 5, 20)),
             (None, at(2026, 5, 20)),
@@ -310,6 +310,48 @@ class TestStorage:
         compute_sample(out)
         assert list(stored(out)) == ["2024-01-01", "2025-01-01", "2026-01-01"]
 
+    def test_a_recompute_reads_one_value_per_period_whatever_the_samples(self, frozen):
+        """How often an input is written does not change what a recompute
+        reads: the period's last sample is looked up, never the ones before
+        it."""
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        def evaluate_after(count):
+            domain = make_domain("Domain")
+            base = make_definition("Base")
+            source = make_instance(domain, base)
+            for minute in range(count):
+                sample(
+                    source, minute, at(2026, 5, 1) + datetime.timedelta(minutes=minute)
+                )
+            out_def = formula("x", ("x", base, "one"))
+            with CaptureQueriesContext(connection) as queries:
+                evaluation = evaluate_series(
+                    out_def.inputs, out_def.expression, domain, "monthly", out_def
+                )
+            return len(queries.captured_queries), evaluation.value
+
+        few_queries, few_value = evaluate_after(3)
+        many_queries, many_value = evaluate_after(300)
+        assert (few_value, many_value) == (2, 299)
+        assert many_queries == few_queries
+
+    def test_a_value_that_is_not_a_number_is_passed_over(self, frozen):
+        domain = make_domain("Domain")
+        base = make_definition("Base")
+        source = make_instance(domain, base)
+        sample(source, 4, at(2026, 5, 2))
+        CustomMetricSample.objects.create(
+            metric_instance=source,
+            folder=domain,
+            timestamp=at(2026, 5, 3),
+            value={"result": "not a number"},
+        )
+        out = make_instance(domain, formula("x", ("x", base, "one")))
+        compute_sample(out)
+        assert stored(out) == {"2026-05-01": 4}
+
     def test_sub_daily_periods_stay_inside_the_downsampling_window(self, frozen):
         domain = make_domain("Domain")
         base = make_definition("Base")
@@ -456,7 +498,10 @@ class TestMarks:
 
 @pytest.mark.django_db
 class TestComposition:
-    def test_the_sweep_computes_inputs_before_their_readers(self, frozen):
+    def test_the_job_computes_inputs_before_their_readers(
+        self, frozen, recompute_requests
+    ):
+        from metrology.recompute import compute_marked_formulas
         from metrology.tasks import compute_due_derived_metrics
 
         domain = make_domain("Domain")
@@ -468,18 +513,49 @@ class TestComposition:
         top = make_instance(domain, top_def)
         middle = make_instance(domain, middle_def)
         compute_due_derived_metrics.call_local()
+        # The sweep marks the due formulas and asks for a job; it computes none.
+        assert stored(middle) == {} and recompute_requests
+        assert compute_marked_formulas() == 2
         assert stored(middle) == {"2026-05-01": 8}
         assert stored(top) == {"2026-05-01": 9}
 
-    def test_one_instance_crashing_does_not_stop_the_sweep(self, frozen, monkeypatch):
-        """An unexpected error on one instance is logged and the sweep carries
-        on: the instances after it still get their turn."""
+    def test_a_change_settles_a_chain_in_one_job(
+        self, frozen, django_capture_on_commit_callbacks, recompute_requests
+    ):
+        """The input's sample marks the middle formula only; computing it
+        marks the top one, which the same job takes next."""
+        from metrology.recompute import compute_marked_formulas
+
+        domain = make_domain("Domain")
+        base = make_definition("Base")
+        source = make_instance(domain, base)
+        sample(source, 4, at(2026, 5, 2))
+        middle_def = formula("x * 2", ("x", base, "one"))
+        middle = make_instance(domain, middle_def)
+        top = make_instance(domain, formula("y + 1", ("y", middle_def, "one")))
+        compute_sample(middle)
+        # Computing middle marked top: reloaded, so its run claims that mark.
+        top.refresh_from_db()
+        compute_sample(top)
+        with django_capture_on_commit_callbacks(execute=True):
+            sample(source, 5, at(2026, 5, 9))
+        top.refresh_from_db()
+        assert top.recompute_from is None and recompute_requests
+        assert compute_marked_formulas() == 2
+        assert stored(middle) == {"2026-05-01": 10}
+        assert stored(top) == {"2026-05-01": 11}
+
+    def test_one_instance_crashing_does_not_stop_the_job(self, frozen, monkeypatch):
+        """An unexpected error on one instance is logged and the job carries
+        on: the instances after it still get their turn, and the crashed one,
+        whose mark comes back, waits for the next job instead of looping."""
+        from metrology.recompute import compute_marked_formulas
         from metrology.tasks import compute_due_derived_metrics
 
         domain = make_domain("Domain")
         base = make_definition("Base")
         sample(make_instance(domain, base), 4, at(2026, 5, 2))
-        # Shallow, so the sweep reaches it before the deeper reader below.
+        # Shallow, so the job reaches it before the deeper reader below.
         broken = make_instance(domain, formula("x", ("x", base, "one")))
         middle_def = formula("x * 2", ("x", base, "one"))
         middle = make_instance(domain, middle_def)
@@ -490,20 +566,22 @@ class TestComposition:
                 raise RuntimeError("boom")
             return compute_sample(instance, **kwargs)
 
-        monkeypatch.setattr("metrology.derived.compute_sample", crash_on_broken)
+        monkeypatch.setattr("metrology.recompute.compute_sample", crash_on_broken)
         compute_due_derived_metrics.call_local()
+        assert compute_marked_formulas() == 3
         assert stored(broken) == {}
         assert stored(middle) == {"2026-05-01": 8}
         assert stored(top) == {"2026-05-01": 9}
 
-    def test_the_sweep_computes_a_dataset_input_before_its_reader(
-        self, frozen, monkeypatch
+    def test_a_dataset_sample_marks_the_formulas_reading_it(
+        self, frozen, monkeypatch, django_capture_on_commit_callbacks
     ):
-        """A dataset formula is queued on its own, unless a due metric formula
-        reads it: then it runs first, in the sweep, so the reader does not
-        see the previous tick's value."""
+        """The sweep queues every dataset formula on its own. The sample one
+        writes marks the metric formulas reading it, so the job that follows
+        reads it fresh."""
         from core.models import AppliedControl
         from metrology import tasks
+        from metrology.recompute import compute_marked_formulas
 
         queued = []
         monkeypatch.setattr(
@@ -529,10 +607,17 @@ class TestComposition:
         other = make_instance(domain, unrelated)
         reader = make_instance(domain, formula("x + 1", ("x", counting, "one")))
         tasks.compute_due_derived_metrics.call_local()
-        assert count.raw_value() == 1
+        assert sorted(queued) == sorted([(str(count.id),), (str(other.id),)])
+        compute_sample(count)
+        compute_marked_formulas()
         assert stored(reader) == {"2026-05-01": 2}
-        # The one nobody reads went to the queue as before.
-        assert queued == [(str(other.id),)]
+        AppliedControl.objects.create(name="AC 2", folder=domain, status="active")
+        with django_capture_on_commit_callbacks(execute=True):
+            compute_sample(count)
+        reader.refresh_from_db()
+        assert reader.recompute_from == NOW
+        compute_marked_formulas()
+        assert stored(reader) == {"2026-05-01": 3}
 
     def test_a_reader_is_marked_when_its_input_formula_changes(self, frozen):
         domain = make_domain("Domain")

@@ -4718,7 +4718,7 @@
 	"granularity": "Granularité",
 	"monthly": "Mensuel",
 	"weekly": "Hebdomadaire",
-	"realTimeContinuous": "Temps réel (continu)",
+	"every15Minutes": "Toutes les 15 minutes",
 	"hourly": "Horaire",
 	"daily": "Quotidien",
 	"quarterly": "Trimestriel",

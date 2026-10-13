@@ -4,20 +4,23 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models import Count
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
+import django_filters as df
 from rest_framework import status, serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from core.views import BaseModelViewSet, LONG_CACHE_TTL
+from core.views import BaseModelViewSet, GenericFilterSet, LONG_CACHE_TTL
 from iam.models import Folder, RoleAssignment
 from django.contrib.auth.models import Permission
 from metrology.models import (
+    FREQUENCY_ALIASES,
     MetricDefinition,
     MetricInstance,
     CustomMetricSample,
     BuiltinMetricSample,
     Dashboard,
     DashboardWidget,
+    normalize_frequency,
 )
 from metrology.builtin_metrics import BUILTIN_METRICS, METRIC_TYPE_CHART_TYPES
 from metrology.serializers import (
@@ -283,19 +286,49 @@ class MetricDefinitionViewSet(BaseModelViewSet):
         return Response({p: p for p in providers})
 
 
+class FrequencyFilter(df.ChoiceFilter):
+    """A collection frequency, a deprecated name of one included
+    (models.FREQUENCY_ALIASES)."""
+
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault(
+            "choices",
+            [
+                *MetricInstance.Frequency.choices,
+                *((alias, alias) for alias in FREQUENCY_ALIASES),
+            ],
+        )
+        super().__init__(*args, **kwargs)
+
+    def filter(self, qs, value):
+        return super().filter(qs, normalize_frequency(value))
+
+
+METRIC_INSTANCE_FILTER_FIELDS = [
+    "folder",
+    "metric_definition",
+    "status",
+    "collection_frequency",
+    "owner",
+    "filtering_labels",
+    "organisation_objectives",
+    "evidences",
+]
+
+
+class MetricInstanceFilter(GenericFilterSet):
+    collection_frequency = FrequencyFilter()
+
+    class Meta:
+        model = MetricInstance
+        fields = METRIC_INSTANCE_FILTER_FIELDS
+
+
 class MetricInstanceViewSet(BaseModelViewSet):
     model = MetricInstance
     serializers_module = "metrology.serializers"
-    filterset_fields = [
-        "folder",
-        "metric_definition",
-        "status",
-        "collection_frequency",
-        "owner",
-        "filtering_labels",
-        "organisation_objectives",
-        "evidences",
-    ]
+    filterset_class = MetricInstanceFilter
+    filterset_fields = METRIC_INSTANCE_FILTER_FIELDS
     search_fields = ["name", "description", "ref_id"]
 
     def get_queryset(self):
@@ -593,6 +626,8 @@ class MetricInstanceViewSet(BaseModelViewSet):
         """Recompute a derived metric now. The task is enqueued, never run
         inline, so a refresh and a scheduled run share one code path and a
         slow worker-side aggregate never sits on a request."""
+        from metrology.recompute import recompute_soon
+        from metrology.series import FULL
         from metrology.tasks import compute_derived_metric_task
 
         instance = self.get_object()
@@ -605,8 +640,12 @@ class MetricInstanceViewSet(BaseModelViewSet):
             user=request.user, perm=permission, folder=instance.folder
         ):
             return Response(status=status.HTTP_403_FORBIDDEN)
-        # A refresh recomputes a metric formula's whole series.
-        compute_derived_metric_task(str(instance.id), full=True)
+        if instance.metric_definition.reads_metrics:
+            # A refresh recomputes a metric formula's whole series, in the
+            # recompute job like every metric formula computation.
+            recompute_soon([instance.id], FULL)
+        else:
+            compute_derived_metric_task(str(instance.id))
         return Response({"queued": True}, status=status.HTTP_202_ACCEPTED)
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))

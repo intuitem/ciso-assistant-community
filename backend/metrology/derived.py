@@ -53,8 +53,8 @@ CONTEXT_ROOTS = frozenset({"previous", "metrics", "now", "today"})
 # The per-instance lock below is Django's cache, which this project leaves at
 # its default, LocMemCache: one dictionary per process. It holds between the
 # huey worker threads of one process (the deployed `run_huey -w 2`), which
-# is where the sweep and a queued refresh can collide; the web process never
-# computes. Across worker processes or replicas it holds nothing, and a
+# is where the recompute job and a queued dataset computation run; the web
+# process never computes. Across worker processes or replicas it holds nothing, and a
 # collision then costs an IntegrityError on the per-period constraint (a
 # metric formula) or a duplicate point (a dataset formula), never a wrong
 # value. A lock outlives any sane computation; a crashed worker frees it by
@@ -441,7 +441,7 @@ def shape_value(value, definition):
 # ---------- sampling ----------
 
 FREQUENCY_INTERVALS = {
-    "realtime": datetime.timedelta(minutes=15),
+    "15min": datetime.timedelta(minutes=15),
     "hourly": datetime.timedelta(hours=1),
     "daily": datetime.timedelta(days=1),
     "weekly": datetime.timedelta(days=7),
@@ -472,7 +472,7 @@ def is_due(instance, now=None):
 
 
 def due_instances(now=None):
-    """Derived instances the sweep should compute now: active or stale (the
+    """Derived instances the sweep takes up now: active or stale (the
     staleness sweep flips those back), with a formula, past their interval."""
     from .models import MetricInstance
 

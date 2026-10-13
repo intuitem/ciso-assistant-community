@@ -15,7 +15,6 @@ from __future__ import annotations
 
 import datetime
 import uuid
-from collections import defaultdict
 from dataclasses import dataclass
 from dataclasses import field as dataclass_field
 
@@ -47,7 +46,7 @@ MAX_INPUTS = 20
 MAX_KEY_LENGTH = 64
 # Backfill and recompute never reach further back than this many periods.
 MAX_PERIODS = 1000
-SUB_DAILY = ("realtime", "hourly")
+SUB_DAILY = ("15min", "hourly")
 # recompute_from meaning "the whole series": a formula or an input's set of
 # instances changed, so every period may differ.
 FULL = datetime.datetime(1970, 1, 1, tzinfo=UTC)
@@ -66,7 +65,7 @@ def period_start(moment, frequency):
     hour, day, ISO week (Monday), month, quarter or year, in UTC. No
     frequency means daily."""
     moment = moment.astimezone(UTC)
-    if frequency == "realtime":
+    if frequency == "15min":
         return moment.replace(
             minute=moment.minute - moment.minute % 15, second=0, microsecond=0
         )
@@ -85,7 +84,7 @@ def period_start(moment, frequency):
 
 
 _STEPS = {
-    "realtime": datetime.timedelta(minutes=15),
+    "15min": datetime.timedelta(minutes=15),
     "hourly": datetime.timedelta(hours=1),
     "weekly": datetime.timedelta(days=7),
 }
@@ -461,26 +460,52 @@ def _number(value):
 
 
 class _AsOf:
-    """An instance's samples, read in time order: the last value at or
-    before a moment, unless older than ``max_age``."""
+    """An instance's value at a moment: its last numeric sample at or before
+    it, unless older than ``max_age``. One indexed lookup per moment on
+    (metric_instance, timestamp): the samples before it are never read, so
+    the cost does not grow with how often the input is written."""
 
-    def __init__(self, points, max_age):
-        self.points = points
+    def __init__(self, instance_id, max_age):
+        self.instance_id = instance_id
         self.max_age = max_age
-        self.index = -1
+
+    def _samples(self):
+        from .models import CustomMetricSample
+
+        return CustomMetricSample.objects.filter(metric_instance_id=self.instance_id)
+
+    def first(self, now):
+        """When the instance's first sample up to ``now`` was taken, or None."""
+        return (
+            self._samples()
+            .filter(timestamp__lte=now)
+            .order_by("timestamp")
+            .values_list("timestamp", flat=True)
+            .first()
+        )
 
     def at(self, moment):
-        while (
-            self.index + 1 < len(self.points)
-            and self.points[self.index + 1][0] <= moment
-        ):
-            self.index += 1
-        if self.index < 0:
-            return None
-        stamp, value = self.points[self.index]
+        bound = moment
+        while True:
+            row = (
+                self._samples()
+                .filter(timestamp__lte=bound)
+                .order_by("-timestamp")
+                .values_list("timestamp", "value")
+                .first()
+            )
+            if row is None:
+                return None
+            stamp, value = row
+            number = _number(value)
+            if number is not None:
+                break
+            # A value that is not a number (a malformed legacy row) never
+            # counts: the sample before it does.
+            bound = stamp - datetime.timedelta(microseconds=1)
         if self.max_age is not None and moment - stamp > self.max_age:
             return None
-        return value
+        return number
 
 
 def _combine(combine, values):
@@ -559,9 +584,6 @@ def evaluate_series(
         compile_expression(expression)
     except ExpressionError as e:
         raise DerivedMetricError(f"expression: {e.message}")
-    instance_ids = [
-        instance.id for item in evaluation.resolved for instance in item.instances
-    ]
 
     last = period_start(now, frequency)
     floor = shift_period(last, frequency, -(MAX_PERIODS - 1))
@@ -572,12 +594,18 @@ def evaluate_series(
         floor = max(floor, period_start(since, frequency))
     evaluation.start = floor
 
-    points = defaultdict(list)
-    for instance_id, stamp, value in _input_points(instance_ids, floor, now):
-        number = _number(value)
-        if number is not None:
-            points[instance_id].append((stamp, number))
-    stamps = [series[0][0] for series in points.values() if series]
+    readers = {
+        instance.id: _AsOf(
+            instance.id, STALENESS_THRESHOLDS.get(instance.collection_frequency)
+        )
+        for item in evaluation.resolved
+        for instance in item.instances
+    }
+    stamps = [
+        stamp
+        for stamp in (reader.first(now) for reader in readers.values())
+        if stamp is not None
+    ]
     if not stamps:
         return evaluation
     # Computing starts at the first input sample; ``evaluation.start`` stays
@@ -585,14 +613,6 @@ def evaluate_series(
     # before the floor, when one exists, pulls the start down to the floor.
     start = max(floor, period_start(min(stamps), frequency))
 
-    readers = {
-        instance.id: _AsOf(
-            points.get(instance.id, []),
-            STALENESS_THRESHOLDS.get(instance.collection_frequency),
-        )
-        for item in evaluation.resolved
-        for instance in item.instances
-    }
     keys = {item.key for item in evaluation.resolved}
     current = start
     while current <= last:
@@ -640,39 +660,6 @@ def evaluate_series(
     return evaluation
 
 
-def _input_points(instance_ids, floor, now):
-    """The samples the periods from ``floor`` to ``now`` can read, in time
-    order: every sample inside that window, plus each instance's last one
-    before it, which is what the first periods see. A recompute of the last
-    period or two must not stream years of history to find that one row."""
-    from django.db.models import OuterRef, Q, Subquery
-
-    from .models import CustomMetricSample, MetricInstance
-
-    last_before = (
-        CustomMetricSample.objects.filter(
-            metric_instance=OuterRef("pk"), timestamp__lt=floor
-        )
-        .order_by("-timestamp")
-        .values("id")[:1]
-    )
-    carried = list(
-        MetricInstance.objects.filter(id__in=instance_ids)
-        .annotate(last_before=Subquery(last_before))
-        .exclude(last_before__isnull=True)
-        .values_list("last_before", flat=True)
-    )
-    return (
-        CustomMetricSample.objects.filter(
-            metric_instance_id__in=instance_ids, timestamp__lte=now
-        )
-        .filter(Q(timestamp__gte=floor) | Q(id__in=carried))
-        .order_by("timestamp")
-        .values_list("metric_instance_id", "timestamp", "value")
-        .iterator(chunk_size=2000)
-    )
-
-
 # ---------- the sampler ----------
 
 
@@ -711,7 +698,7 @@ def compute_series(instance, *, write=True, only_if_due=False, full=False):
             # Claimed before the run reads anything. A mark a signal writes
             # while the run is evaluating names a period this run may have
             # read before the change: it lands on an empty column and stays
-            # for the next sweep, instead of being wiped by the save below.
+            # for the next job, instead of being wiped by the save below.
             MetricInstance.objects.filter(id=instance.id).update(recompute_from=None)
             instance.recompute_from = None
         frequency = instance.collection_frequency or "daily"
@@ -862,8 +849,9 @@ def dependents_of(definition):
 
 
 def mark(instance_ids, moment):
-    """Recompute these instances from ``moment``'s period at the next sweep,
-    keeping an earlier mark. ``update()`` sends no signal."""
+    """Recompute these instances from ``moment``'s period in the next
+    recompute job (metrology.recompute), keeping an earlier mark.
+    ``update()`` sends no signal."""
     from django.db.models import Q
 
     from .models import MetricInstance
@@ -886,12 +874,13 @@ def mark_dependents(definition, folder, moment):
 
 def mark_readers(definition, folder_ids, moment):
     """Same, for the readers living in ``folder_ids``: the folder and its
-    ancestors, resolved by the caller while they still exist."""
+    ancestors, resolved by the caller while they still exist. Returns whether
+    any reader was marked."""
     from .models import MetricInstance
 
     dependents = dependents_of(definition)
     if not dependents:
-        return
+        return False
     instance_ids = list(
         MetricInstance.objects.filter(
             metric_definition__in=dependents, folder_id__in=folder_ids
@@ -899,6 +888,7 @@ def mark_readers(definition, folder_ids, moment):
     )
     if instance_ids:
         mark(instance_ids, moment)
+    return bool(instance_ids)
 
 
 def input_closure(definitions):
@@ -919,7 +909,8 @@ def input_closure(definitions):
 
 def depth(definition, seen=None):
     """How many formulas stand between ``definition`` and plain metrics: the
-    sweep computes shallow ones first, so a formula reads fresh inputs."""
+    recompute job computes shallow ones first, so a formula reads fresh
+    inputs."""
     seen = seen if seen is not None else set()
     if definition.id in seen or not definition.reads_metrics:
         return 0

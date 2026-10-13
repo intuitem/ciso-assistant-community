@@ -5010,7 +5010,6 @@
 	"feedOutboundHostsTitle": "Ausgehende Hosts",
 	"feedOutboundHostsHelpText": "Wenn der ausgehende Datenverkehr eingeschränkt ist, lassen Sie diese Hosts zu, damit die aktivierten Feeds ihre Datenquellen erreichen können.",
 	"createExpectedEvidence": "✨ Erwarteten Nachweis „{name}“ erstellen",
-	"realTimeContinuous": "Echtzeit (kontinuierlich)",
 	"hourly": "Stündlich",
 	"daily": "Täglich",
 	"quarterly": "Vierteljährlich",

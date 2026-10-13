@@ -25,7 +25,7 @@ from django.db import transaction
 from core.models import Terminology
 from iam.models import Folder, RoleAssignment
 
-from .models import MetricDefinition, MetricInstance
+from .models import MetricDefinition, MetricInstance, normalize_frequency
 from .series import MAX_INPUTS, validate_inputs, validate_series_expression
 
 # From the most to the least frequent: a computed metric defaults to the
@@ -348,7 +348,7 @@ def compose(user, data, instance=None):
                     f"'{text}' is not one of the levels" for text in unknown
                 ]
 
-    frequency = data.get("collection_frequency") or (
+    frequency = normalize_frequency(data.get("collection_frequency")) or (
         instance.collection_frequency
         if instance is not None
         else least_frequent([picked.collection_frequency for _key, picked in pairs])
@@ -433,9 +433,10 @@ def compose(user, data, instance=None):
     instance_id = str(instance.id)
 
     def compute():
-        from .tasks import compute_derived_metric_task
+        from .recompute import recompute_soon
+        from .series import FULL
 
-        compute_derived_metric_task(instance_id, full=True)
+        recompute_soon([instance_id], FULL)
 
     transaction.on_commit(compute)
     return instance, outcome

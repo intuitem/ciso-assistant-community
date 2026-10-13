@@ -82,7 +82,7 @@
 	let kind = $state<'objects' | 'metrics'>('objects');
 	let kindSettled = false;
 	const FREQUENCIES = [
-		['realtime', () => m.realTimeContinuous()],
+		['15min', () => m.every15Minutes()],
 		['hourly', () => m.hourly()],
 		['daily', () => m.daily()],
 		['weekly', () => m.weekly()],

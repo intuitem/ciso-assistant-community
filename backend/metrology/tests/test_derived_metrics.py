@@ -363,7 +363,7 @@ class TestSweep:
         assert is_due(hourly, now)
         hourly.last_computed_at = now - datetime.timedelta(minutes=50)
         assert not is_due(hourly, now)
-        realtime = make_instance(domain, collection_frequency="realtime")
+        realtime = make_instance(domain, collection_frequency="15min")
         realtime.last_computed_at = now - datetime.timedelta(minutes=14, seconds=57)
         assert is_due(realtime, now)
         realtime.last_computed_at = now - datetime.timedelta(seconds=2)

@@ -4890,7 +4890,7 @@
 	"granularity": "Granularity",
 	"monthly": "Monthly",
 	"weekly": "Weekly",
-	"realTimeContinuous": "Real-time (continuous)",
+	"every15Minutes": "Every 15 minutes",
 	"hourly": "Hourly",
 	"daily": "Daily",
 	"quarterly": "Quarterly",

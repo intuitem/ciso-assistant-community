@@ -1,6 +1,6 @@
 import json
 import structlog
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from django.core.exceptions import ValidationError
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -162,7 +162,9 @@ class MetricInstance(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         DEPRECATED = "deprecated", _("Deprecated")
 
     class Frequency(models.TextChoices):
-        REALTIME = "realtime", _("Real-time (continuous)")
+        # Named by their period: a value never changes meaning, since it also
+        # sets when a metric turns stale (STALENESS_THRESHOLDS).
+        EVERY_15_MINUTES = "15min", _("Every 15 minutes")
         HOURLY = "hourly", _("Hourly")
         DAILY = "daily", _("Daily")
         WEEKLY = "weekly", _("Weekly")
@@ -316,7 +318,7 @@ class MetricInstance(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
 # Strict thresholds suitable for alerting: collection frequency plus a grace
 # period. Also how old an input's value may be when a metric formula reads it.
 STALENESS_THRESHOLDS = {
-    MetricInstance.Frequency.REALTIME: timedelta(minutes=15),
+    MetricInstance.Frequency.EVERY_15_MINUTES: timedelta(minutes=15),
     MetricInstance.Frequency.HOURLY: timedelta(hours=2),
     MetricInstance.Frequency.DAILY: timedelta(hours=36),  # 1.5 days
     MetricInstance.Frequency.WEEKLY: timedelta(days=8),
@@ -324,6 +326,32 @@ STALENESS_THRESHOLDS = {
     MetricInstance.Frequency.QUARTERLY: timedelta(days=95),
     MetricInstance.Frequency.YEARLY: timedelta(days=370),
 }
+
+
+# Names a frequency had before frequencies were named by their period,
+# accepted where a client writes or filters one, and logged as deprecated.
+# "realtime" always meant fifteen minutes. Refused no later than the release
+# that adds a period shorter than fifteen minutes.
+FREQUENCY_ALIASES = {"realtime": MetricInstance.Frequency.EVERY_15_MINUTES.value}
+
+
+def normalize_frequency(value):
+    """``value``, or the frequency a deprecated name of it now stands for."""
+    current = FREQUENCY_ALIASES.get(value) if isinstance(value, str) else None
+    if current is None:
+        return value
+    logger.warning(
+        "Deprecated collection frequency", received=value, replaced_by=current
+    )
+    return current
+
+
+def whole_second(moment):
+    """``moment`` without its fraction of a second: entered samples are kept
+    to the second (CustomMetricSample.record)."""
+    if isinstance(moment, datetime):
+        return moment.replace(microsecond=0)
+    return moment
 
 
 def parse_sample_value(value):
@@ -407,11 +435,46 @@ class CustomMetricSample(AbstractBaseModel, FolderMixin):
                 fields=["metric_instance", "period_start"],
                 condition=models.Q(period_start__isnull=False),
                 name="unique_metric_sample_per_period",
+            ),
+            # One entered sample per instance and second (record()); a
+            # formula's samples keep their own rule, one per period.
+            models.UniqueConstraint(
+                fields=["metric_instance", "timestamp"],
+                condition=~models.Q(source="derived"),
+                name="unique_entered_sample_per_second",
+            ),
+        ]
+        indexes = [
+            # A formula reads an input period by period: the instance's last
+            # sample at or before a moment, one seek on this index.
+            models.Index(
+                fields=["metric_instance", "timestamp"],
+                name="metric_sample_instance_time",
             )
         ]
 
     def __str__(self):
         return f"{self.metric_instance} - {self.timestamp}"
+
+    @classmethod
+    def record(cls, metric_instance, timestamp, **fields):
+        """Write an entered sample, kept to the second: one per instance and
+        second, the last one written wins. A sample for a second that already
+        holds one replaces it entirely (value, observation, evidence and
+        source), so a source writing faster than once a second keeps one
+        sample a second. Safe under concurrent writes: the unique constraint
+        turns the second insert into an update. Returns (sample, created)."""
+        return cls.objects.exclude(source=cls.Source.DERIVED).update_or_create(
+            metric_instance=metric_instance,
+            timestamp=whole_second(timestamp),
+            defaults={
+                "folder": metric_instance.folder,
+                "observation": None,
+                "evidence_revision": None,
+                "source": cls.Source.MANUAL,
+                **fields,
+            },
+        )
 
     def raw_value(self):
         if not self.value:
@@ -526,6 +589,8 @@ class CustomMetricSample(AbstractBaseModel, FolderMixin):
         return "N/A"
 
     def save(self, *args, **kwargs):
+        if self.source != self.Source.DERIVED:
+            self.timestamp = whole_second(self.timestamp)
         super().save(*args, **kwargs)
         self.metric_instance.save(update_fields=["updated_at"])
 
