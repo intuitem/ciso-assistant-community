@@ -151,16 +151,21 @@
 				{/if}
 			</label>
 			<div class="flex-1 min-w-48" data-testid="metric-input-definition">
-				<AutocompleteSelect
-					{form}
-					field={`inputs_${index}_definition`}
-					valuePath={`inputs[${index}].definition`}
-					label={m.inputMetric()}
-					placeholder={m.selectAMetric()}
-					optionsEndpoint="metric-definitions?category=quantitative"
-					optionsSelf={self}
-					onChange={(picked) => setDefinition(row, picked)}
-				/>
+				<!-- The picker binds its form proxy to `valuePath` once, at mount:
+				     a row whose index moves after a removal above it must get a
+				     fresh picker, or it keeps reading and writing the old slot. -->
+				{#key index}
+					<AutocompleteSelect
+						{form}
+						field={`inputs_${index}_definition`}
+						valuePath={`inputs[${index}].definition`}
+						label={m.inputMetric()}
+						placeholder={m.selectAMetric()}
+						optionsEndpoint="metric-definitions?category=quantitative"
+						optionsSelf={self}
+						onChange={(picked) => setDefinition(row, picked)}
+					/>
+				{/key}
 			</div>
 			<label class="flex flex-col gap-1 w-44 shrink-0">
 				<span class="text-xs font-semibold">{m.inputCombine()}</span>
