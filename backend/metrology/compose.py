@@ -9,13 +9,13 @@ to the instance the author picked, and lives in a domain holding them all.
 Editing goes through the same path. What belongs to the instance (name,
 domain, frequency, target, which instance of a metric a pick reads) changes
 on it alone; what belongs to the definition (formula, inputs, result) changes
-the definition in place when nothing else uses it, or when the author asks
-for every metric using it, and otherwise moves this metric to a definition of
-its own.
+the definition in place when nothing else uses it, and otherwise moves this
+metric to a definition of its own, leaving the others untouched.
 """
 
 from __future__ import annotations
 
+import math
 import re
 import uuid
 
@@ -32,6 +32,10 @@ from .series import MAX_INPUTS, validate_inputs, validate_series_expression
 # frequency of its least frequent input, so no period repeats a value.
 FREQUENCY_ORDER = [value for value, _label in MetricInstance.Frequency.choices]
 CREATE = ["add_metricinstance", "add_metricdefinition"]
+# A level's name and reference are what a formula returns: short texts.
+MAX_LEVEL_TEXT = 100
+# MetricDefinition.name's length.
+MAX_NAME_LENGTH = 200
 QUALITATIVE = MetricDefinition.Category.QUALITATIVE
 QUANTITATIVE = MetricDefinition.Category.QUANTITATIVE
 # A CEL string literal, single- or double-quoted, escapes allowed.
@@ -207,6 +211,11 @@ def _clean_levels(raw):
         if not ref_id or not name:
             errors.append("Each level needs a reference and a name")
             continue
+        if len(ref_id) > MAX_LEVEL_TEXT or len(name) > MAX_LEVEL_TEXT:
+            errors.append(
+                f"A level's reference and name are at most {MAX_LEVEL_TEXT} characters"
+            )
+            continue
         clashes = {ref_id.lower(), name.lower()} & seen
         if clashes:
             errors.append(f"'{sorted(clashes)[0]}' names two levels")
@@ -264,7 +273,9 @@ def _definition_name(name, folder):
     taken = MetricDefinition.objects.filter(folder=folder)
     candidate, n = name, 2
     while taken.filter(name__iexact=candidate).exists():
-        candidate = f"{name} ({n})"
+        suffix = f" ({n})"
+        # Room for the suffix: a name at the limit stays valid.
+        candidate = name[: MAX_NAME_LENGTH - len(suffix)] + suffix
         n += 1
     return candidate
 
@@ -360,6 +371,9 @@ def compose(user, data, instance=None):
         try:
             target_value = float(target_value)
         except ValueError, TypeError:
+            target_value = math.nan
+        # inf and nan cannot be stored as JSON: refused, not saved.
+        if not math.isfinite(target_value):
             errors["target_value"] = ["The target must be a number"]
     if errors:
         raise CompositionError(errors)
@@ -393,7 +407,7 @@ def compose(user, data, instance=None):
                 )
             else:
                 definition, outcome = _definition_after_edit(
-                    user, instance, folder, name, specs, expression, shape, data
+                    user, instance, folder, name, specs, expression, shape
                 )
                 moved = instance.folder_id != folder.id
                 instance.name = name
@@ -446,20 +460,32 @@ def _definition_for(user, folder, name, specs, expression, shape):
     return definition, "created"
 
 
-def _definition_after_edit(
-    user, instance, folder, name, specs, expression, shape, data
-):
+def _definition_after_edit(user, instance, folder, name, specs, expression, shape):
     """The definition an edited metric computes with. Unchanged when the
     edit only touched the instance; edited in place when nothing else uses
-    it, or when the author asked for every metric using it
-    (``definition_scope: "all"``) and may change it; otherwise this metric
-    moves to a definition of its own, so the others are left as they were."""
+    it; otherwise this metric moves to a definition of its own, and the
+    other metrics using the old one are left exactly as they were. A shared
+    definition is never edited from one of its metrics: its other metrics'
+    picks are named after its inputs, and their stored history after its
+    result."""
+    from .series import dependents_of
+
     current = instance.metric_definition
     if _same_formula(current, specs, expression, shape):
         return current, "unchanged"
     others = current.metricinstance_set.exclude(id=instance.id).exists()
-    in_place = not others or data.get("definition_scope") == "all"
-    if in_place and permitted(user, ["change_metricdefinition"], current.folder):
+    if not others and permitted(user, ["change_metricdefinition"], current.folder):
+        # Formulas reading this metric read numbers: a level result would
+        # skip every one of their periods and drop their history.
+        if shape["category"] != current.category and dependents_of(current):
+            raise CompositionError(
+                {
+                    "category": [
+                        "Other formulas read this metric as a number: its result "
+                        "type cannot change while they do"
+                    ]
+                }
+            )
         current.category = shape["category"]
         current.choices_definition = shape["levels"] or None
         current.unit = shape["unit"]
@@ -468,7 +494,40 @@ def _definition_after_edit(
         current.expression = expression
         current.save()
         return current, "updated"
+    # Moving to another definition: a formula that picked this metric reads
+    # it as an instance of the old definition, and would lose it.
+    readers = _formulas_picking(instance)
+    if readers:
+        raise CompositionError(
+            {
+                "form": [
+                    "Other metrics read this one ("
+                    + ", ".join(sorted(reader.name for reader in readers)[:5])
+                    + "); its definition is shared, so its formula can only "
+                    "change once they no longer read it"
+                ]
+            }
+        )
     if not permitted(user, ["add_metricdefinition"], folder):
         raise PermissionError
     definition, _outcome = _definition_for(user, folder, name, specs, expression, shape)
     return definition, "forked"
+
+
+def _formulas_picking(instance):
+    """Metric instances whose formula pins ``instance`` as an input."""
+    from .series import dependents_of
+
+    readers = MetricInstance.objects.filter(
+        metric_definition__in=dependents_of(instance.metric_definition)
+    ).exclude(id=instance.id)
+    picked = str(instance.id)
+    return [
+        reader
+        for reader in readers
+        if isinstance(reader.input_choices, dict)
+        and any(
+            isinstance(choice, dict) and str(choice.get("pick")) == picked
+            for choice in reader.input_choices.values()
+        )
+    ]

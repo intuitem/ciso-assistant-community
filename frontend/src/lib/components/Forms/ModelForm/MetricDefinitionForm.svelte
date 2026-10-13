@@ -199,6 +199,8 @@
 			inputs?: Record<string, unknown>;
 		}[];
 		inputs?: Record<string, { id: string; name: string; folder: string }[]>;
+		// Instances the value read that the author may not see: counted, not named.
+		hidden_inputs?: Record<string, number>;
 		errors?: { code: string; message: string }[];
 	}>(null);
 	// What the expression editor completes: the inputs or the datasets, with
@@ -477,8 +479,14 @@
 							<div class="flex flex-col gap-0.5">
 								<span class="font-semibold">{m.resolvedInputs()}</span>
 								{#each Object.entries(preview.inputs ?? {}) as [key, instances] (key)}
+									{@const hidden = preview.hidden_inputs?.[key] ?? 0}
 									<div>
 										<span class="font-mono">{key}</span>:
+										{#if hidden}
+											<span class="text-surface-500" data-testid="preview-hidden-inputs"
+												>{m.instancesNotVisible({ count: hidden })}</span
+											>
+										{/if}
 										{#if instances.length}
 											{instances.map((i) => `${i.name} (${i.folder})`).join(', ')}
 											{#each foldersWithSeveral(instances) as folderName (folderName)}
@@ -490,7 +498,7 @@
 													{m.severalInstancesInFolder({ folder: folderName })}
 												</span>
 											{/each}
-										{:else}
+										{:else if !hidden}
 											<span class="text-surface-500">{m.noInstanceResolved()}</span>
 										{/if}
 									</div>

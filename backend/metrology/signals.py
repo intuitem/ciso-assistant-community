@@ -180,20 +180,27 @@ def remember_formula(sender, instance, **kwargs):
     if not instance._state.adding:
         instance._previous_formula = (
             MetricDefinition.objects.filter(pk=instance.pk)
-            .values_list("inputs", "expression")
+            .values_list("inputs", "expression", "category", "choices_definition")
             .first()
         )
 
 
 @receiver(post_save, sender=MetricDefinition)
 def formula_saved(sender, instance, created, **kwargs):
-    """Editing a metric formula recomputes every instance's whole series."""
+    """Editing a metric formula recomputes every instance's whole series:
+    its inputs or expression, or what its samples mean (the result type, the
+    levels a qualitative sample indexes)."""
     from .series import FULL, mark
 
     previous = getattr(instance, "_previous_formula", None)
     if created or previous is None or not instance.reads_metrics:
         return
-    if previous == (instance.inputs, instance.expression):
+    if previous == (
+        instance.inputs,
+        instance.expression,
+        instance.category,
+        instance.choices_definition,
+    ):
         return
     instance_ids = list(instance.metricinstance_set.values_list("id", flat=True))
 

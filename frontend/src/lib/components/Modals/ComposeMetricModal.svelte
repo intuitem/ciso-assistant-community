@@ -51,7 +51,7 @@
 	// (metric-instances/<id>/composition).
 	interface Composition {
 		composable: boolean;
-		definition: { id: string; name: string; shared_with: number; can_change: boolean };
+		definition: { id: string; name: string; shared_with: number };
 		expression: string;
 		name: string;
 		description?: string | null;
@@ -204,10 +204,8 @@
 	const levelPayload = $derived(levels.map(({ ref_id, name }) => ({ ref_id, name })));
 
 	let errors = $state<Record<string, string[]>>({});
-	// Editing: inputs whose instance is gone, and what an edit of the
-	// definition reaches when other metrics use it.
+	// Editing: inputs whose instance is gone.
 	let missingInputs = $state<string[]>([]);
-	let definitionScope = $state<'this' | 'all'>('this');
 	let initialDefinition = $state<string | null>(null);
 	let saving = $state(false);
 	let contextLoaded = $state(false);
@@ -511,7 +509,6 @@
 					method: editing ? 'PUT' : 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({
-						definition_scope: definitionScope,
 						name: name.trim(),
 						folder,
 						inputs: picked.map((p) => ({ key: p.key, instance: p.id })),
@@ -559,6 +556,18 @@
 	}
 
 	let modalEl = $state<HTMLFormElement | null>(null);
+
+	// Enter submits the modal from its own fields (name, target). In a field
+	// that belongs to a widget (adding a level, searching a picker) Enter is
+	// the widget's: the browser would otherwise submit the form with it.
+	function keepEnterInWidgets(event: KeyboardEvent) {
+		if (event.key !== 'Enter') return;
+		const target = event.target as HTMLElement | null;
+		if (target?.tagName !== 'INPUT') return;
+		if (target.closest('[data-testid="compose-levels"], [data-testid="compose-domain"]')) {
+			event.preventDefault();
+		}
+	}
 
 	onMount(async () => {
 		if (composition) {
@@ -638,6 +647,7 @@
 		bind:this={modalEl}
 		class="card bg-surface-50-950 border border-surface-300-700 shadow-xl w-[min(64rem,calc(100vw-2rem))] max-h-[92vh] overflow-y-auto p-5 flex flex-col gap-5"
 		onsubmit={create}
+		onkeydown={keepEnterInWidgets}
 		data-testid="compose-metric-modal"
 	>
 		<header class="flex items-start justify-between gap-4">
@@ -1243,36 +1253,9 @@
 					<i class="fa-solid fa-clock-rotate-left mr-1" aria-hidden="true"
 					></i>{m.formulaChangeRecomputes()}
 				</p>
-				{#if sharedWith > 0 && composition?.definition.can_change}
-					<p>{m.definitionSharedWith({ count: sharedWith })}</p>
-					<div
-						class="flex flex-wrap gap-4"
-						role="radiogroup"
-						aria-label={m.definitionSharedWith({ count: sharedWith })}
-					>
-						<label class="flex items-center gap-2 cursor-pointer"
-							><input
-								type="radio"
-								class="radio"
-								name="definition-scope"
-								value="this"
-								bind:group={definitionScope}
-								data-testid="compose-scope-this"
-							/>{m.applyToThisMetric()}</label
-						>
-						<label class="flex items-center gap-2 cursor-pointer"
-							><input
-								type="radio"
-								class="radio"
-								name="definition-scope"
-								value="all"
-								bind:group={definitionScope}
-								data-testid="compose-scope-all"
-							/>{m.applyToAllMetrics({ count: sharedWith + 1 })}</label
-						>
-					</div>
-				{:else if sharedWith > 0}
-					<p>{m.definitionSharedReadOnly({ count: sharedWith })}</p>
+				{#if sharedWith > 0}
+					<!-- A shared definition is never edited from one of its metrics. -->
+					<p>{m.definitionSharedFork({ count: sharedWith })}</p>
 				{/if}
 			</div>
 		{/if}

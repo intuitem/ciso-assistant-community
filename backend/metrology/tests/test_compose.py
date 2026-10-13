@@ -10,7 +10,7 @@ from rest_framework.test import APIRequestFactory, force_authenticate
 
 from iam.models import Folder, Role, RoleAssignment, User, UserGroup
 from metrology.compose import common_domain, least_frequent
-from metrology.derived import compute_sample
+from metrology.derived import DerivedMetricError, compute_sample
 from metrology.models import MetricDefinition, MetricInstance
 from metrology.serializers import MetricInstanceWriteSerializer
 from metrology.views import MetricDefinitionViewSet, MetricInstanceViewSet
@@ -624,7 +624,6 @@ class TestEdit:
         assert response.status_code == 200, response.data
         assert response.data["composable"] is True
         assert response.data["definition"]["shared_with"] == 0
-        assert response.data["definition"]["can_change"] is True
         assert [(x["key"], x["instance"]["name"]) for x in response.data["inputs"]] == [
             ("clicks", "Clicks France"),
             ("heads", "Headcount France"),
@@ -678,7 +677,7 @@ class TestEdit:
         assert made.metric_definition_id == definition_id
         assert made.metric_definition.expression == "clicks * 1000.0 / heads"
 
-    def test_a_shared_definition_forks_unless_asked_for_all(self, acme):
+    def test_a_shared_definition_always_forks(self, acme):
         first = self.made(acme, name="First")
         second = self.made(acme, name="Second")
         assert first.metric_definition_id == second.metric_definition_id
@@ -693,14 +692,16 @@ class TestEdit:
         assert first.metric_definition_id != shared
         assert second.metric_definition.expression == "clicks * 100.0 / heads"
 
+        # Asking for every metric using it changes nothing: a shared
+        # definition is never edited from one of its metrics.
         third = self.made(acme, name="Third")
         assert third.metric_definition_id == shared
         response = self.edit(
             third, expression="clicks * 10.0 / heads", definition_scope="all"
         )
-        assert response.data["outcome"] == "updated"
+        assert response.data["outcome"] == "forked"
         second.refresh_from_db()
-        assert second.metric_definition.expression == "clicks * 10.0 / heads"
+        assert second.metric_definition.expression == "clicks * 100.0 / heads"
 
     def test_without_the_right_to_change_the_definition_it_forks(self, acme):
         group, _fr, _de, _i = acme
@@ -732,3 +733,240 @@ class TestEdit:
             group, codenames=["view_metricinstance", "view_metricdefinition"]
         )
         assert self.edit(made, user=reader).status_code == 403
+
+
+@pytest.mark.django_db
+class TestHardening:
+    """What trying to break the modal and its endpoints turned up."""
+
+    DEEP = "(" * 80 + "a" + ")" * 80
+    LONG_CHAIN = "a" + " + a" * 349
+
+    def test_a_formula_nested_too_deep_is_refused_on_save(self, acme):
+        group, _fr, _de, i = acme
+        for expression in (self.DEEP, self.LONG_CHAIN):
+            response = call(
+                "post",
+                "compose",
+                payload(group, {"a": i["clicks_fr"]}, expression),
+                admin(),
+            )
+            assert response.status_code == 400, expression[:20]
+            assert "nested too deeply" in response.data["expression"][0]
+
+    def test_a_formula_nested_too_deep_is_recorded_when_computed(self, acme):
+        """Saved before the guard (or by any other path): computing records
+        the error on the instance instead of crashing the sweep."""
+        group, _fr, _de, i = acme
+        clicks = i["clicks_fr"].metric_definition
+        definition = make_definition(
+            "Deep",
+            inputs=[{"key": "a", "definition": str(clicks.id), "combine": "one"}],
+            expression=self.DEEP,
+        )
+        instance = make_instance(
+            group, definition, input_choices={"a": {"pick": str(i["clicks_fr"].id)}}
+        )
+        with pytest.raises(DerivedMetricError):
+            compute_sample(instance, full=True)
+        instance.refresh_from_db()
+        assert "nested too deeply" in instance.last_computation_error
+
+    def test_a_formula_over_the_length_cap_is_refused(self, acme):
+        group, _fr, _de, i = acme
+        expression = 'a + size("' + "x" * 3000 + '")'
+        response = call(
+            "post",
+            "compose",
+            payload(group, {"a": i["clicks_fr"]}, expression),
+            admin(),
+        )
+        assert response.status_code == 400
+        assert response.data["expression"] == ["The expression is too long"]
+
+    @pytest.mark.parametrize("target", ["inf", "-inf", "Infinity", "1e999", "NaN"])
+    def test_a_target_that_is_not_a_finite_number_is_refused(self, acme, target):
+        group, _fr, _de, i = acme
+        response = call(
+            "post",
+            "compose",
+            payload(group, {"a": i["clicks_fr"]}, "a", target_value=target),
+            admin(),
+        )
+        assert response.status_code == 400
+        assert "target_value" in response.data
+
+    @pytest.mark.parametrize("key", ["a\n", "k" * 65])
+    def test_input_names_are_whole_short_identifiers(self, acme, key):
+        group, _fr, _de, i = acme
+        response = call(
+            "post", "compose", payload(group, {key: i["clicks_fr"]}, "1.0"), admin()
+        )
+        assert response.status_code == 400
+        assert "not a valid input name" in response.data["inputs"][0]
+
+    def test_a_level_text_is_short(self, acme):
+        group, _fr, _de, i = acme
+        response = call(
+            "post",
+            "compose",
+            payload(
+                group,
+                {"a": i["clicks_fr"]},
+                '"Good"',
+                category="qualitative",
+                choices_definition=[
+                    {"ref_id": "G", "name": "Good"},
+                    {"ref_id": "P" * 101, "name": "Poor"},
+                ],
+            ),
+            admin(),
+        )
+        assert response.status_code == 400
+        assert "at most 100" in response.data["choices_definition"][0]
+
+    def test_a_name_at_the_limit_survives_a_definition_name_clash(self, acme):
+        group, _fr, _de, i = acme
+        name = "N" * 200
+        MetricDefinition.objects.create(name=name, folder=group)
+        response = call(
+            "post",
+            "compose",
+            payload(group, {"a": i["clicks_fr"]}, "a", name=name),
+            admin(),
+        )
+        assert response.status_code == 201, response.data
+        made = MetricInstance.objects.get(id=response.data["id"])
+        assert len(made.metric_definition.name) <= 200
+
+    def test_the_result_type_of_a_metric_other_formulas_read_cannot_change(self, acme):
+        group, _fr, _de, i = acme
+        edit = TestEdit()
+        read = edit.made(acme, name="Read")
+        reader = call(
+            "post",
+            "compose",
+            payload(group, {"r": read}, "r * 2.0", name="Reader"),
+            admin(),
+        )
+        assert reader.status_code == 201, reader.data
+        response = edit.edit(
+            read,
+            expression='clicks > 5.0 ? "High" : "Low"',
+            category="qualitative",
+            choices_definition=[
+                {"ref_id": "low", "name": "Low"},
+                {"ref_id": "high", "name": "High"},
+            ],
+        )
+        assert response.status_code == 400
+        assert "result type cannot change" in response.data["category"][0]
+        read.refresh_from_db()
+        assert read.metric_definition.category == "quantitative"
+
+    def test_reordering_levels_recomputes_the_history(
+        self, acme, django_capture_on_commit_callbacks
+    ):
+        """A stored level is a position in the list: reordering the list
+        changes what every stored sample means."""
+        group, _fr, _de, i = acme
+        levels = [{"ref_id": "G", "name": "Good"}, {"ref_id": "P", "name": "Poor"}]
+        response = call(
+            "post",
+            "compose",
+            payload(
+                group,
+                {"clicks": i["clicks_fr"]},
+                'clicks > 5.0 ? "Poor" : "Good"',
+                category="qualitative",
+                choices_definition=levels,
+            ),
+            admin(),
+        )
+        made = MetricInstance.objects.get(id=response.data["id"])
+        compute_sample(made, full=True)
+        MetricInstance.objects.filter(id=made.id).update(recompute_from=None)
+        definition = made.metric_definition
+        with django_capture_on_commit_callbacks(execute=True):
+            definition.choices_definition = list(reversed(levels))
+            definition.save()
+        made.refresh_from_db()
+        assert made.recompute_from is not None
+
+    def test_a_metric_other_formulas_pick_cannot_move_to_its_own_definition(self, acme):
+        group, _fr, _de, i = acme
+        edit = TestEdit()
+        first = edit.made(acme, name="First")
+        edit.made(acme, name="Second")  # shares First's definition
+        reader = call(
+            "post",
+            "compose",
+            payload(group, {"f": first}, "f * 2.0", name="Reader"),
+            admin(),
+        )
+        assert reader.status_code == 201, reader.data
+        response = edit.edit(first, expression="clicks * 1000.0 / heads")
+        assert response.status_code == 400
+        assert "Reader" in response.data["form"][0]
+        first.refresh_from_db()
+        assert first.metric_definition.expression == "clicks * 100.0 / heads"
+
+
+@pytest.mark.django_db
+class TestPreviewHardening:
+    def post(self, body, user):
+        view = MetricDefinitionViewSet.as_view({"post": "preview_formula"})
+        request = APIRequestFactory().post("/x/", body, format="json")
+        force_authenticate(request, user=user)
+        return view(request)
+
+    def test_names_only_what_the_author_may_read(self, acme):
+        group, _fr, _de, i = acme
+        clicks = str(i["clicks_fr"].metric_definition_id)
+        response = self.post(
+            {
+                "folder": str(group.id),
+                "frequency": "monthly",
+                "inputs": [{"key": "a", "definition": clicks, "combine": "sum"}],
+                "expression": "a",
+            },
+            member(group, recursive=False),
+        )
+        assert response.data["ok"] is True, response.data
+        # The value is the domain's, as the metric would compute it; which
+        # instances it read stays hidden.
+        assert response.data["value"] == 40
+        assert response.data["inputs"] == {"a": []}
+        assert response.data["hidden_inputs"] == {"a": 2}
+
+    @pytest.mark.parametrize("levels", [[1, 2], "abc", {"x": 1}])
+    def test_malformed_levels_do_not_crash(self, acme, levels):
+        group, _fr, _de, i = acme
+        clicks = str(i["clicks_fr"].metric_definition_id)
+        response = self.post(
+            {
+                "folder": str(group.id),
+                "inputs": [{"key": "a", "definition": clicks, "combine": "sum"}],
+                "expression": '"low"',
+                "category": "qualitative",
+                "choices_definition": levels,
+            },
+            admin(),
+        )
+        assert response.status_code == 200
+        assert response.data["ok"] is False
+
+    def test_a_malformed_exclusion_does_not_crash(self, acme):
+        group, _fr, _de, i = acme
+        clicks = str(i["clicks_fr"].metric_definition_id)
+        response = self.post(
+            {
+                "folder": str(group.id),
+                "inputs": [{"key": "a", "definition": clicks, "combine": "sum"}],
+                "input_choices": {"a": {"exclude": 5}},
+                "expression": "a",
+            },
+            admin(),
+        )
+        assert response.status_code == 200
+        assert response.data["value"] == 40

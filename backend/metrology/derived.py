@@ -44,7 +44,7 @@ from core.reads import (
     validate_read_config,
 )
 
-DATASET_NAME_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+DATASET_NAME_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*\Z")
 MAX_DATASETS = 10
 MAX_EXPRESSION_LENGTH = 2000
 # Names the expression may read besides the datasets.
@@ -366,6 +366,8 @@ def shape_value(value, definition):
             return {"choice_index": index}
         text = str(value).strip().lower()
         for index, choice in enumerate(choices, start=1):
+            if not isinstance(choice, dict):
+                continue
             names = {
                 str(choice.get("name", "")).strip().lower(),
                 str(choice.get("ref_id", "")).strip().lower(),

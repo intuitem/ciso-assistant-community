@@ -153,7 +153,7 @@ class MetricDefinitionViewSet(BaseModelViewSet):
         and what each input resolved to in the folder."""
         from types import SimpleNamespace
 
-        from metrology.compose import unreadable_picks
+        from metrology.compose import readable_instances, unreadable_picks
         from metrology.derived import DerivedMetricError
         from metrology.series import evaluate_series, period_start, shift_period
         from django.utils import timezone
@@ -161,9 +161,15 @@ class MetricDefinitionViewSet(BaseModelViewSet):
         frequency = data.get("frequency")
         if frequency not in MetricInstance.Frequency.values:
             frequency = MetricInstance.Frequency.MONTHLY
+        category = data.get("category")
+        if category not in MetricDefinition.Category.values:
+            category = MetricDefinition.Category.QUANTITATIVE
+        levels = data.get("choices_definition")
         shape = SimpleNamespace(
-            category=data.get("category") or MetricDefinition.Category.QUANTITATIVE,
-            choices_definition=data.get("choices_definition") or [],
+            category=category,
+            choices_definition=[level for level in levels if isinstance(level, dict)]
+            if isinstance(levels, list)
+            else [],
         )
         since = shift_period(
             period_start(timezone.now(), frequency),
@@ -205,6 +211,12 @@ class MetricDefinitionViewSet(BaseModelViewSet):
                     ],
                 }
             )
+        # The value reads the whole subtree, as the metric would; which
+        # instances it read is only named where the author may read them.
+        resolved_ids = [
+            instance.id for item in evaluation.resolved for instance in item.instances
+        ]
+        readable = readable_instances(self.request.user, resolved_ids)
         return Response(
             {
                 "ok": True,
@@ -226,7 +238,14 @@ class MetricDefinitionViewSet(BaseModelViewSet):
                             "folder": instance.folder.name,
                         }
                         for instance in item.instances
+                        if instance.id in readable
                     ]
+                    for item in evaluation.resolved
+                },
+                "hidden_inputs": {
+                    item.key: sum(
+                        1 for instance in item.instances if instance.id not in readable
+                    )
                     for item in evaluation.resolved
                 },
             }
@@ -440,13 +459,12 @@ class MetricInstanceViewSet(BaseModelViewSet):
         """A computed metric as the modal edits it, and the edit. Only for a
         formula made of picked instances (compose.is_composable): the answer
         says so, and the page sends the author to the definition otherwise.
-        The definition's other users, and whether this user may change it,
-        let the modal ask before an edit reaches beyond this metric."""
+        The definition's other users tell the modal that an edit of the
+        formula will give this metric a definition of its own."""
         from metrology.compose import (
             CompositionError,
             compose,
             is_composable,
-            permitted,
             readable_instances,
         )
 
@@ -480,9 +498,6 @@ class MetricInstanceViewSet(BaseModelViewSet):
             "shared_with": definition.metricinstance_set.exclude(
                 id=instance.id
             ).count(),
-            "can_change": permitted(
-                request.user, ["change_metricdefinition"], definition.folder
-            ),
         }
         if not is_composable(instance):
             return Response(

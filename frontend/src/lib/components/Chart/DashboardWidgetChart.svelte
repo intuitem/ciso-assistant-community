@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { sampleMoment } from '$lib/utils/derived-metrics';
-	import { roundScore } from '$lib/utils/helpers';
+	import { escapeHtml, roundScore } from '$lib/utils/helpers';
 	import { onMount } from 'svelte';
 
 	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
@@ -307,7 +307,9 @@
 					displayValue = formatValueWithUnit(value);
 				}
 
-				return `${date}<br/>${params[0].marker}${displayValue}`;
+				// Rendered as HTML by ECharts: level names and units are typed
+				// text (a formula's results, a definition's levels), escaped.
+				return `${escapeHtml(date)}<br/>${params[0].marker}${escapeHtml(displayValue)}`;
 			}
 		};
 

@@ -7274,15 +7274,13 @@
 	"editFormula": "Modifier la formule",
 	"editComputedMetric": "Modifier la métrique calculée",
 	"formulaChangeRecomputes": "L'enregistrement recalcule les résultats passés de cette métrique avec la nouvelle formule.",
-	"definitionSharedWith": "Autres métriques utilisant sa définition : {count}. Appliquer ce changement à :",
-	"applyToThisMetric": "Cette métrique uniquement",
-	"applyToAllMetrics": "Les {count} métriques qui l'utilisent",
-	"definitionSharedReadOnly": "D'autres métriques utilisent sa définition ({count}), que vous ne pouvez pas modifier : cette métrique reçoit sa propre définition.",
 	"computedMetricSaved": "Métrique calculée enregistrée",
 	"computedMetricSavedForked": "Enregistré : cette métrique a désormais sa propre définition",
 	"inputsToPickAgain": "Choisissez à nouveau les instances de : {keys}",
 	"editComputedMetricHelpText": "Modifiez ce qu'elle lit, sa formule ou son domaine. Le résultat s'affiche avant l'enregistrement.",
 	"editOnDefinition": "Modifier sur sa définition",
 	"pickedSummary": "Choisies ({count}) : {names}",
+	"definitionSharedFork": "D'autres métriques utilisent sa définition ({count}) : l'enregistrement donne à cette métrique sa propre définition et les laisse inchangées.",
+	"instancesNotVisible": "{count} que vous ne pouvez pas voir ;",
 	"useInFormula": "Utiliser dans une formule"
 }

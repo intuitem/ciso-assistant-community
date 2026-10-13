@@ -243,6 +243,16 @@
 		isOpen = !isOpen;
 	}
 
+	// Escape closes the dropdown, and only the dropdown: a modal holding the
+	// select must not close with it and lose what was typed.
+	function handleKeydown(event: KeyboardEvent) {
+		if (event.key !== 'Escape' || !isOpen) return;
+		event.preventDefault();
+		event.stopPropagation();
+		isOpen = false;
+		searchQuery = '';
+	}
+
 	function handleClickOutside(event: MouseEvent) {
 		const target = event.target as HTMLElement;
 		if (!target.closest('.' + selectorClass)) {
@@ -335,7 +345,12 @@
 {#if hidden}
 	<input type="hidden" name={field} value={$value ?? ''} />
 {:else}
-	<div data-testid="form-input-{field.replace(/_/g, '-')}" class="{selectorClass} relative">
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<div
+		data-testid="form-input-{field.replace(/_/g, '-')}"
+		class="{selectorClass} relative"
+		onkeydown={handleKeydown}
+	>
 		<!-- Needed for multipart/form-data forms (e.g. with file attachments) -->
 		<input type="hidden" name={field} value={$value ?? ''} />
 		{#if label !== undefined}

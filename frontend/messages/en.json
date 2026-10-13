@@ -7274,15 +7274,13 @@
 	"editFormula": "Edit formula",
 	"editComputedMetric": "Edit computed metric",
 	"formulaChangeRecomputes": "Saving recomputes this metric's past results with the new formula.",
-	"definitionSharedWith": "Other metrics using its definition: {count}. Apply this change to:",
-	"applyToThisMetric": "Only this metric",
-	"applyToAllMetrics": "All {count} metrics using it",
-	"definitionSharedReadOnly": "Other metrics use its definition ({count}), which is not yours to change: this metric gets a definition of its own.",
 	"computedMetricSaved": "Computed metric saved",
 	"computedMetricSavedForked": "Saved: this metric now has a definition of its own",
 	"inputsToPickAgain": "Pick again the instances of: {keys}",
 	"editComputedMetricHelpText": "Change what it reads, its formula or where it lives. The result shows before you save.",
 	"editOnDefinition": "Edit on its definition",
 	"pickedSummary": "Picked ({count}): {names}",
+	"definitionSharedFork": "Other metrics use its definition ({count}): saving gives this metric a definition of its own and leaves them unchanged.",
+	"instancesNotVisible": "{count} you cannot see;",
 	"useInFormula": "Use in a formula"
 }

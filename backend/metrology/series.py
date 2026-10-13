@@ -29,6 +29,7 @@ from core.reads import subtree_folder_ids
 
 from .derived import (
     DATASET_NAME_RE,
+    MAX_EXPRESSION_LENGTH,
     KEEP_EVERY_SAMPLE_DAYS,
     LOCK_TTL_SECONDS,
     DerivedMetricError,
@@ -43,6 +44,7 @@ COMBINES = ("one", "sum", "avg", "min", "max", "count")
 # Names the expression may read besides the inputs.
 SERIES_ROOTS = frozenset({"previous", "now", "today"})
 MAX_INPUTS = 20
+MAX_KEY_LENGTH = 64
 # Backfill and recompute never reach further back than this many periods.
 MAX_PERIODS = 1000
 SUB_DAILY = ("realtime", "hourly")
@@ -158,6 +160,7 @@ def validate_inputs(inputs, definition=None):
         key = spec.get("key")
         if (
             not isinstance(key, str)
+            or len(key) > MAX_KEY_LENGTH
             or not DATASET_NAME_RE.match(key)
             or key in SERIES_ROOTS
             or key == "metrics"
@@ -167,6 +170,7 @@ def validate_inputs(inputs, definition=None):
                     "derived_input_key_invalid",
                     (
                         f"'{key}' is not a valid input name (letters, digits, _; "
+                        f"at most {MAX_KEY_LENGTH} characters; "
                         "not previous, now, today or metrics)"
                     ),
                 )
@@ -210,6 +214,8 @@ def validate_inputs(inputs, definition=None):
 def validate_series_expression(expression, keys):
     """The expression of a metric formula reads its inputs, ``previous``,
     ``now`` and ``today``; ``metrics`` would read latest values only."""
+    if len(expression) > MAX_EXPRESSION_LENGTH:
+        return [("derived_expression_too_long", "The expression is too long")]
     try:
         compile_expression(expression)
     except ExpressionError as e:
@@ -386,7 +392,8 @@ def resolve_inputs(inputs, folder, choices=None):
                 )
         else:
             # An exclusion of an instance that has since gone excludes nothing.
-            excluded = {str(i) for i in choice.get("exclude") or []}
+            exclude = choice.get("exclude")
+            excluded = {str(i) for i in exclude} if isinstance(exclude, list) else set()
             instances = [i for i in instances if str(i.id) not in excluded]
         resolved.append(ResolvedInput(key, combine, target, instances))
     return resolved

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { sampleMoment } from '$lib/utils/derived-metrics';
+	import { escapeHtml } from '$lib/utils/helpers';
 	import { onMount } from 'svelte';
 
 	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
@@ -81,7 +82,10 @@
 								displayValue = unitName === 'percentage' ? `${value}%` : `${value} ${unitSymbol}`;
 							}
 
-							return `${date}<br/>${params[0].marker}${params[0].seriesName}: ${displayValue}`;
+							// ECharts renders the tooltip as HTML: level names and units
+							// are text people typed (a formula's results, a definition's
+							// levels), so they are escaped, never markup.
+							return `${escapeHtml(date)}<br/>${params[0].marker}${escapeHtml(params[0].seriesName)}: ${escapeHtml(displayValue)}`;
 						}
 					},
 					xAxis: {
