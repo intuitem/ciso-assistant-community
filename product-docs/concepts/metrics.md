@@ -4,7 +4,7 @@
 
 * define your metrics or import their definition
 * instantiate them on your domains
-* feed data to your metric instances
+* feed data to your metric instances, or compute them from other metrics
 * create dashboards with builtin and custom metrics
 
 ## Mental model
@@ -119,45 +119,25 @@ This is the actual data of the metric instance on a given timestamp.&#x20;
 
 Keep in mind that you can add the data manually or through all the supported integrations (API, n8n, etc.). Note that data cannot be in the future.
 
-## Derived metrics
+## Computed metrics
 
-A derived metric computes its own samples from the data already in the instance: the share of applied controls that are active, the average progress of the audits in a domain, the number of controls past their ETA. Nobody types the number in; the application reads it on a schedule.
+A computed metric is an instance whose samples come from a formula rather than from people or integrations: a training coverage from the employees trained and the headcount, a click rate summed over a group's sites, the share of applied controls that are active. Nobody types its numbers in; the application computes them on the instance's collection frequency, and on demand with **Refresh now**.
 
-A derived definition carries two things in addition to the usual fields:
+```mermaid
+graph LR
+  A[Metric instance] -->|input| C[Computed metric]
+  B[Metric instance] -->|input| C
+  O[Objects: controls, audits...] -.->|or datasets| C
+  C -->|samples, period by period| S[Sample]
+```
 
-* **Datasets**: named read configurations, each aggregating objects of one kind. A dataset names a model, optional filters on its fields, and a list of aggregates (count, distinct count, sum, average, minimum, maximum, median, percentile, standard deviation, optionally grouped by a field with a fixed set of values: a status, a yes/no field, a related object). A derived value is visible to everyone who may view the instance, so a dataset cannot group by a field holding free text such as a name or a description. The vocabulary is the one the workflow **Read objects** step uses in its "Numbers about the matches" mode; see the [action reference](../features/workflows/actions.md#numbers-about-the-matches).
-* **Expression**: a [CEL](https://cel.dev) expression over the dataset results, for example `active.count * 100.0 / controls.count`. It can also read `previous` (the instance's latest sample), `metrics.<ref_id>.value` (the latest value of another instance in the same scope, by its reference id; a reference id that several instances in the scope share cannot be read), and `now` / `today`. Dataset filter values accept `{{today}}`, `{{now}}` and offsets such as `{{today-30d}}`. A quantitative metric returns a number; a qualitative one returns the name of a level.
+* **Start from the metrics you track.** Pick metric instances, write a formula, name the result: the application creates the instance and its definition. See [Create a computed metric](../features/metrics/creating.md), or follow [Creating your first computed metric](../guides/first-computed-metric.md).
+* **The formula runs once per period.** The instance's collection frequency cuts time into calendar periods, and each input contributes its latest sample in the period. The series is complete from the start and follows corrections to its inputs. See the [Formula reference](../features/metrics/formulas.md).
+* **The result is a number or a level.** A level metric returns one of an ordered list of texts, such as *On track* and *Behind*.
+* **The formula lives on the definition.** Made from picked metrics, it reads exact instances and editing it never changes another metric. Made on a definition, it combines every metric of a kind in each instance's domain, or reads objects, and editing it changes every instance of the definition. See [Edit a formula](../features/metrics/editing.md) and [Formulas on definitions](../features/metrics/definition-formulas.md).
+* **The domain decides what the formula sees.** A formula reads its instance's domain and sub-domains, with no user identity: the value is a fact about the domain, the same for everyone allowed to see the instance.
 
-The definition is the formula; the **instance** binds it to a domain. Every dataset reads that domain and its sub-domains, nothing above or beside it, and with no user identity: the value is a fact about the domain, the same for everyone allowed to see the instance. To cover several domains at once, create the instance in their common ancestor. Creating a derived instance requires the right to add metric instances in that domain.
-
-Samples are computed on the instance's **collection frequency** (real-time means every quarter of an hour), and on demand with **Refresh now** on the instance page. Samples of a derived metric come from its formula only: they cannot be typed in or recorded by a workflow. A computation that fails, for instance because a worker-side aggregate exceeds the deployment's row ceiling, writes no sample and shows its error on the instance page instead. The definition form offers a **Preview** that evaluates the formula against a domain without writing anything, and shows what each dataset answered.
-
-Older than a week, the application keeps one derived sample per instance and per day, so a long series does not grow by the hour.
-
-### Metrics computed from other metrics
-
-A derived formula can read other metrics instead of objects, the way a spreadsheet column computes from other columns: a phishing click rate from the clicks and the users trained, a group incident count summed over its sites. In the definition form, choose **The formula reads: Other metrics** and add one **input** per metric. A formula reads either objects or other metrics, not both.
-
-Each input names another quantitative metric definition and how its instances combine:
-
-* **One value**: the input takes the single instance of that metric in the instance's domain and its sub-domains. When there is none, or several, the instance shows an error.
-* **Sum**, **Average**, **Minimum**, **Maximum**, **Count**: the input combines every instance of that metric in the domain and its sub-domains, for example the sites below a group domain.
-
-Deprecated instances are never read, so replacing an instance with a new one does not count it twice. When a domain still holds several instances of an input's metric, the instance form lists them under **Inputs of the formula**: pick the one a **One value** input reads, or untick the ones a combined input should leave out. The same block lets an instance change how an input combines: the definition only sets the default, and an instance created higher up may need another one. A click rate created in the global domain, with clicks reported per site but headcount reported twice, sums the clicks and takes the **Maximum** of the headcount. A subsidiary added later is read without anyone ticking it. The definition's **Preview** warns when a domain contributes more than one instance.
-
-The instance's **collection frequency** cuts time into calendar periods (quarter hours, hours, days, weeks starting on Monday, months, quarters, years, in UTC), and the expression runs once per period:
-
-* An input's value for a period is its latest sample up to the end of that period. A sample older than the input's staleness threshold (36 hours for a daily metric, 32 days for a monthly one, and so on) no longer counts.
-* When an input has no value, the period is skipped, unless the expression handles it, for example `trained == null ? 0 : trained`.
-* `previous` is the result of the period before, which gives deltas and growth rates.
-
-The series is complete from the start. A new instance computes every period since its inputs' first sample, up to 1,000 periods back; for hourly and real-time metrics, only the last week. When an input sample is added, corrected or deleted, the affected periods are recomputed at the next run, so past values can change. A figure that must not move belongs in a report.
-
-A formula can read another computed metric. A metric cannot read itself, directly or through other formulas. To combine objects and metrics, make the dataset formula a metric of its own and add it as an input; its history starts on the day it was created.
-
-The **Preview** takes a domain and a frequency, lists the instances each input found, and shows the last periods.
-
-<figure><img src="../.gitbook/assets/image (55).png" alt=""><figcaption></figcaption></figure>
+All of it is described in [Computed metrics](../features/metrics/README.md).
 
 ## Dashboards
 
