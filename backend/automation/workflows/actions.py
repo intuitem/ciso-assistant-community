@@ -454,6 +454,7 @@ CREATABLE_MODELS = {
         "fk_fields": {},
         "params": {
             "approver": None,
+            "requester": None,
             "validation_deadline": None,
             "compliance_assessments": None,
             "evidences": None,
@@ -999,13 +1000,21 @@ def _send_quietly(what, send, **context):
 
 
 def _construct_validation_flow(kwargs, params, instance):
-    """A request for sign-off, from the run's identity. `approver` is a single
-    FK, so a second id would be dropped without a word."""
+    """A request for sign-off, from `requester` or else the run's identity.
+
+    Naming a requester also hands them the right to act on the flow: a
+    `change_requested` can only be answered by the requester, so leaving it on
+    the run's identity strands the request. Both it and `approver` are single
+    FKs, so a second id would be dropped without a word.
+    """
     from .engine import run_identity
 
     approvers = _rows_for(User, params.get("approver"), instance, "approver")
     if len(approvers) > 1:
         raise FatalActionError("create_object: 'approver' names one user, not several")
+    requesters = _rows_for(User, params.get("requester"), instance, "requester")
+    if len(requesters) > 1:
+        raise FatalActionError("create_object: 'requester' names one user, not several")
 
     relations = {
         "compliance_assessments": ComplianceAssessment,
@@ -1019,7 +1028,7 @@ def _construct_validation_flow(kwargs, params, instance):
         if params.get("validation_deadline")
         else None
     )
-    requester = run_identity(instance)
+    requester = requesters[0] if requesters else run_identity(instance)
     with transaction.atomic():
         flow = ValidationFlow.objects.create(
             approver=approvers[0] if approvers else None,
