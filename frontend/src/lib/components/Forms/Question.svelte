@@ -178,6 +178,7 @@
 			{#if isQuestionVisible(question, internalAnswers, questions)}
 				<li
 					class="flex flex-col justify-between gap-2 rounded-xl border border-surface-200-800 bg-surface-50-950 px-4 py-3"
+					data-question-urn={urn}
 				>
 					<p class="flex flex-wrap items-baseline gap-x-2 font-semibold">
 						<span>{question.text}</span>

@@ -501,6 +501,12 @@ export const navData = {
 					fa_icon: 'fa-solid fa-scale-balanced',
 					href: '/dpias',
 					permissions: ['view_dpia']
+				},
+				{
+					name: 'dpiaStatusOverview',
+					fa_icon: 'fa-solid fa-chart-simple',
+					href: '/processings/dpia',
+					permissions: ['view_processing']
 				}
 			]
 		},

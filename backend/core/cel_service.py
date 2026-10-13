@@ -2,11 +2,20 @@
 
 from __future__ import annotations
 
+import copy
 import re
 
 import celpy
 import celpy.celtypes as celtypes
 import structlog
+
+from core.quick_form_ratings import (
+    cel_ratings,
+    evaluate_ratings,
+    expand_scales,
+    probe_ratings,
+    value_names,
+)
 
 from core.quick_form_scoring import (
     aggregate_form,
@@ -781,7 +790,7 @@ def _as_number(result) -> float | None:
 _NOT_PASSED_ON = ("expression", "ref_id", "implementation_groups")
 
 
-def _evaluate_rules(env, rules, context: dict, **log_fields):
+def _evaluate_rules(env, rules, context: dict, seed_values=None, **log_fields):
     """Run outcome rules against `context`, in their order.
 
     Number rules (`kind: number`) run first, each seeing the values computed
@@ -791,7 +800,7 @@ def _evaluate_rules(env, rules, context: dict, **log_fields):
     with their pass-through attributes, and {ref_id: float}. Fail-open per rule:
     an expression error or a non-number result is logged and skipped.
     """
-    values: dict[str, float] = {}
+    values: dict[str, float] = dict(seed_values or {})
     fired: dict[str, dict] = {}
     rules = [r for r in rules or [] if r.get("expression") and r.get("ref_id")]
     base = {
@@ -898,13 +907,19 @@ def _quick_form_probe(quick_form: dict) -> dict:
         "computed_outcomes": {
             str(rule.get("ref_id")): {}
             for rule in quick_form.get("outcomes_definition") or []
-            if rule.get("ref_id") and not is_numeric_rule(rule)
+            if rule.get("ref_id")
+            and not is_numeric_rule(rule)
+            and rule.get("kind") != "rating"
         },
         "values": {
-            str(rule.get("ref_id")): 1.0
-            for rule in quick_form.get("outcomes_definition") or []
-            if rule.get("ref_id") and is_numeric_rule(rule)
+            **{
+                str(rule.get("ref_id")): 1.0
+                for rule in quick_form.get("outcomes_definition") or []
+                if rule.get("ref_id") and is_numeric_rule(rule)
+            },
+            **{name: 1.0 for name in value_names(quick_form)},
         },
+        "ratings": probe_ratings(quick_form),
         "hidden_pages": [],
     }
 
@@ -1060,19 +1075,21 @@ _OUTCOME_REF = re.compile(
 )
 
 
-def _check_rules(rules, probe: dict, check, error) -> None:
+def _check_rules(rules, probe: dict, check, error, rating_values=()) -> None:
     """Check outcome rules in the order they run: a number rule reads the
     number rules above it, a yes/no rule every number rule and the yes/no
     rules above it."""
     for rule in rules:
         kind = rule.get("kind")
-        if kind not in (None, "", "boolean", "number"):
+        if kind not in (None, "", "boolean", "number", "rating"):
             error(
                 str(rule.get("ref_id") or ""),
                 str(rule.get("expression") or ""),
-                f"Unknown rule kind '{kind}': use 'number' or leave it empty",
+                f"Unknown rule kind '{kind}': use 'number', 'rating' or leave it empty",
             )
-    values: dict[str, float] = {}
+    # Rating outcomes are computed before any rule, from their scales.
+    values: dict[str, float] = {name: 1.0 for name in rating_values}
+    rules = [r for r in rules if r.get("kind") != "rating"]
     for rule in [r for r in rules if is_numeric_rule(r)]:
         ref_id = str(rule.get("ref_id") or "")
         expression = str(rule.get("expression") or "")
@@ -1237,7 +1254,10 @@ def validate_quick_form_expressions(quick_form: dict) -> list[dict]:
         )
 
     # Visibility is resolved before any rule runs, so it cannot read `values`.
-    visibility_probe = {k: v for k, v in raw_probe.items() if k != "values"}
+    # Visibility runs before any value or rating is computed.
+    visibility_probe = {
+        k: v for k, v in raw_probe.items() if k not in ("values", "ratings")
+    }
     for page in quick_form.get("pages") or []:
         _check(
             "page_visibility",
@@ -1254,6 +1274,7 @@ def validate_quick_form_expressions(quick_form: dict) -> list[dict]:
         lambda ref_id, expression, message: _error(
             "outcome", ref_id, expression, message
         ),
+        rating_values=value_names(quick_form),
     )
     return errors
 
@@ -1307,6 +1328,8 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
     from core.utils import _is_question_visible, extract_node_id
 
     answers = answers or {}
+    # A draft names its scales; the choices they stand for exist only once imported.
+    quick_form = expand_scales(copy.deepcopy(quick_form))
     pages = []
     questions_by_urn = {}
     for page in quick_form.get("pages") or []:
@@ -1474,8 +1497,27 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
             logger.warning("preview_visibility_error", expression=expression)
 
     context = build_context(hidden, {}) if hidden else initial
+    rating_values, ratings = evaluate_ratings(
+        quick_form,
+        [
+            {
+                "urn": page.get("urn"),
+                "answers": [
+                    (entry.get("config") or {}, (selected_of(entry) or [None])[0])
+                    for entry in page["_questions"]
+                ],
+            }
+            for page in pages
+            if page.get("urn") not in hidden
+        ],
+    )
+    context["ratings"] = cel_ratings(ratings)
     computed, values = _evaluate_rules(
-        env, quick_form.get("outcomes_definition"), context, preview=True
+        env,
+        quick_form.get("outcomes_definition"),
+        context,
+        seed_values=rating_values,
+        preview=True,
     )
     context["values"] = values
 
@@ -1503,6 +1545,7 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
         "score": score,
         "computed_outcome": computed,
         "computed_values": values,
+        "ratings": ratings,
         "context": context,
     }
 
@@ -1557,15 +1600,37 @@ def evaluate_quick_form(response, persist: bool = True) -> dict:
     )
     context["hidden_pages"] = sorted(hidden_page_urns)
 
+    rating_values, ratings = evaluate_ratings(
+        form,
+        [
+            {
+                "urn": page["urn"],
+                "answers": [
+                    (
+                        entry["question"].config or {},
+                        entry["selected"][0].urn if entry["selected"] else None,
+                    )
+                    for entry in snapshot["per_question"].values()
+                    if entry["page_id"] == page["id"]
+                ],
+            }
+            for page in snapshot["pages"]
+            if page["id"] not in hidden_page_ids
+        ],
+    )
+    context["ratings"] = cel_ratings(ratings)
     computed, values = _evaluate_rules(
         env,
         form.outcomes_definition,
         context,
+        seed_values=rating_values,
         quick_form_response_id=str(response.pk),
     )
     context["values"] = values
     has_rules = bool(form.outcomes_definition)
-    has_numeric = any(is_numeric_rule(r) for r in form.outcomes_definition or [])
+    has_numeric = bool(rating_values) or any(
+        is_numeric_rule(r) for r in form.outcomes_definition or []
+    )
     computed_outcome = computed if has_rules else None
     computed_values = values if has_numeric else None
 
@@ -1616,4 +1681,5 @@ def evaluate_quick_form(response, persist: bool = True) -> dict:
         "score": score,
         "computed_outcome": computed_outcome,
         "computed_values": computed_values,
+        "ratings": ratings,
     }

@@ -121,7 +121,7 @@ export const URL_MODEL = [
 	'processings',
 	'right-requests',
 	'data-breaches',
-	'dpias',
+	'dpia-requirement-changes',
 	'purposes',
 	'personal-data',
 	'data-subjects',

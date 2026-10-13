@@ -46,7 +46,7 @@
 	const scoreThresholds = $derived<Threshold[]>(config.bands?.thresholds ?? []);
 	const mapping = $derived<MappingRow[]>(config.mapping ?? []);
 	const numericRules = $derived(rules.filter((r) => r.kind === 'number'));
-	const yesNoRules = $derived(rules.filter((r) => r.kind !== 'number'));
+	const yesNoRules = $derived(rules.filter((r) => r.kind !== 'number' && r.kind !== 'rating'));
 	const knownKeys = $derived(new Set(tiers.map((t) => t.key)));
 	const forVendors = $derived(subjectModel === 'entity');
 

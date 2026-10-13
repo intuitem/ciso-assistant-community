@@ -20372,6 +20372,28 @@ class QuestionViewSet(BaseModelViewSet):
             qs = qs.filter(requirement_node__framework_id=framework_id)
         return qs
 
+    def destroy(self, request, *args, **kwargs):
+        # Deleting cascades into the quick form responses' answers.
+        if _answered_in_responses(Answer.objects.filter(question=self.get_object())):
+            return Response(
+                {"error": "questionAnsweredInResponses"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return super().destroy(request, *args, **kwargs)
+
+
+def _answered_in_responses(answers) -> bool:
+    """Whether any quick form response holds an answer among `answers`."""
+    return (
+        answers.filter(response__isnull=False)
+        .filter(
+            Q(value__isnull=False)
+            | Q(selected_choices__isnull=False)
+            | Q(attachments__isnull=False)
+        )
+        .exists()
+    )
+
 
 class QuestionChoiceViewSet(BaseModelViewSet):
     """API endpoint for QuestionChoice CRUD."""
@@ -20385,6 +20407,17 @@ class QuestionChoiceViewSet(BaseModelViewSet):
 
     def get_queryset(self):
         return super().get_queryset().select_related("question", "folder")
+
+    def destroy(self, request, *args, **kwargs):
+        # Deleting silently empties the responses' selections.
+        if _answered_in_responses(
+            Answer.objects.filter(selected_choices=self.get_object())
+        ):
+            return Response(
+                {"error": "choiceSelectedInResponses"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return super().destroy(request, *args, **kwargs)
 
 
 class AnswerViewSet(BaseModelViewSet):
@@ -20745,10 +20778,7 @@ def emit_quick_form_event(response, action):
 
 
 def emit_quick_form_submitted(response):
-    from privacy.screening import apply_screening_verdict
-
     emit_quick_form_event(response, "submitted")
-    apply_screening_verdict(response)
 
 
 def _reference_labels(response, user=None):
@@ -20879,6 +20909,7 @@ def quick_form_response_content(response, user=None):
     questions, the answers dict, hidden pages, progress, score and outcome. Shared by
     the reviewer surface and the requester's own, so the two cannot drift."""
     from core.cel_service import evaluate_quick_form
+    from core.quick_form_ratings import ratings_for_display
     from core.utils import build_answers_dict
 
     evaluation = evaluate_quick_form(response, persist=False)
@@ -20925,6 +20956,10 @@ def quick_form_response_content(response, user=None):
             "answers": answers,
             "attachments": attachments,
             "references": references,
+            # Rating outcomes with their points, labels in the active language.
+            "ratings": ratings_for_display(
+                response.quick_form, evaluation.get("ratings") or []
+            ),
             "produced_objects": response.produced_objects or [],
             "hidden_pages": evaluation["hidden_pages"],
             "missing_required": evaluation["missing_required"],
@@ -21606,6 +21641,12 @@ class QuickFormResponseViewSet(BaseModelViewSet):
         if self.request.query_params.get("mine") in ("true", "1"):
             user_actors = Actor.get_all_for_user(self.request.user)
             qs = qs.filter(respondents__in=user_actors).distinct()
+        # What the responses record, whatever form they came from: `processing.dpia`
+        # lists every DPIA, clones and custom templates included.
+        if target := self.request.query_params.get("target"):
+            from core.quick_form_apply import forms_with_target
+
+            qs = qs.filter(quick_form__in=forms_with_target(target))
         return qs
 
     def destroy(self, request, *args, **kwargs):

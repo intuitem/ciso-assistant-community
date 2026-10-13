@@ -569,7 +569,10 @@ class QuickFormImporter:
     REQUIRED_FIELDS = {"ref_id", "urn"}
 
     def __init__(self, quick_form_data: dict):
-        self.quick_form_data = quick_form_data
+        from core.quick_form_ratings import expand_scales
+
+        # Questions on a scale get its levels as choices before any page is read.
+        self.quick_form_data = expand_scales(quick_form_data)
         self._pages: List[QuickFormPageImporter] = []
 
     def init(self) -> Union[str, None]:
@@ -597,6 +600,10 @@ class QuickFormImporter:
         if (error := subject_question_error(self.quick_form_data)) is not None:
             return f"[QUICK_FORM_ERROR] {error}"
         if error := outcome_rule_id_error(self.quick_form_data):
+            return f"[QUICK_FORM_ERROR] {error}"
+        from core.quick_form_ratings import scales_error
+
+        if error := scales_error(self.quick_form_data):
             return f"[QUICK_FORM_ERROR] {error}"
         from core.quick_form_apply import validate_on_accept_document
 
@@ -638,6 +645,7 @@ class QuickFormImporter:
                 outcomes_definition=self.quick_form_data.get("outcomes_definition")
                 or [],
                 scores_definition=self.quick_form_data.get("scores_definition"),
+                scales_definition=self.quick_form_data.get("scales_definition") or [],
                 urn_namespace=urn.split(":")[1] if urn.startswith("urn:") else "custom",
                 provider=library_object.provider,
                 locale=library_object.locale,

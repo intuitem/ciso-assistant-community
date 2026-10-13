@@ -1,7 +1,6 @@
 from core.serializers import BaseModelSerializer
 from django.db import transaction
 from rest_framework import serializers
-from core.models import RiskMatrix
 from core.serializer_fields import FieldsRelatedField
 from .models import (
     Purpose,
@@ -13,8 +12,9 @@ from .models import (
     Processing,
     RightRequest,
     DataBreach,
-    Dpia,
+    DpiaRequirementChange,
 )
+from .dpia_requirement import set_dpia_required
 
 
 # Purpose Serializers
@@ -119,15 +119,45 @@ class DataTransferReadSerializer(BaseModelSerializer):
 
 # Processing Serializers
 class ProcessingWriteSerializer(BaseModelSerializer):
+    # Not a model field: the reason given for a DPIA requirement change, kept
+    # on its history row.
+    dpia_required_note = serializers.CharField(
+        write_only=True, required=False, allow_blank=True, default=""
+    )
+
     class Meta:
         model = Processing
         fields = "__all__"
-        read_only_fields = ["dpia_screening"]
+        read_only_fields = [
+            "dpia_screening",
+            "dpia",
+            "dpia_required_source",
+            "dpia_required_set_at",
+        ]
+
+    def create(self, validated_data):
+        note = validated_data.pop("dpia_required_note", "")
+        required = validated_data.pop("dpia_required", False)
+        instance = super().create(validated_data)
+        if required:
+            set_dpia_required(instance, True, user=self._user(), note=note)
+        return instance
+
+    def _user(self):
+        request = self.context.get("request")
+        return getattr(request, "user", None)
 
     def update(self, instance, validated_data):
+        note = validated_data.pop("dpia_required_note", "")
+        has_required = "dpia_required" in validated_data
+        required = validated_data.pop("dpia_required", None)
         old_folder_id = instance.folder_id
         with transaction.atomic():
             updated_instance = super().update(instance, validated_data)
+            if has_required:
+                set_dpia_required(
+                    updated_instance, bool(required), user=self._user(), note=note
+                )
             if old_folder_id != updated_instance.folder_id:
                 related_models = [
                     Purpose,
@@ -155,6 +185,7 @@ class ProcessingReadSerializer(BaseModelSerializer):
     dpia_screening = FieldsRelatedField(
         ["id", "ref_id", "status", "outcome_refs", "computed_outcome", "submitted_at"]
     )
+    dpia = FieldsRelatedField(["id", "ref_id", "status", "submitted_at"])
     personal_data_categories = serializers.SerializerMethodField()
     data_subject_categories = serializers.SerializerMethodField()
 
@@ -226,72 +257,12 @@ class DataBreachReadSerializer(BaseModelSerializer):
         fields = "__all__"
 
 
-# Dpia Serializers
-class DpiaWriteSerializer(BaseModelSerializer):
-    risk_matrix = serializers.PrimaryKeyRelatedField(
-        queryset=RiskMatrix.objects.all(),
-        write_only=True,
-        required=False,
-        allow_null=True,
-    )
-    reasons = serializers.ListField(
-        child=serializers.ChoiceField(choices=Dpia.Reason.choices),
-        required=False,
-    )
-
-    class Meta:
-        model = Dpia
-        exclude = ["folder"]
-        read_only_fields = ["screening"]
-
-    def create(self, validated_data):
-        from core.models import QuickFormResponse
-        from .dpia import create_risk_registers
-        from .screening import screening_reasons
-
-        screening = validated_data["processing"].dpia_screening
-        if screening and screening.status != QuickFormResponse.Status.DRAFT:
-            validated_data["screening"] = screening
-            if not validated_data.get("reasons"):
-                validated_data["reasons"] = screening_reasons(screening)
-
-        from core.models import RiskAssessment, RiskScenario
-        from core.views import check_folder_add_permission
-
-        risk_matrix = validated_data.pop("risk_matrix", None)
-        with transaction.atomic():
-            instance = super().create(validated_data)
-            if risk_matrix:
-                check_folder_add_permission(
-                    self.context["request"].user,
-                    instance.folder,
-                    RiskAssessment,
-                    RiskScenario,
-                )
-                create_risk_registers(instance, risk_matrix)
-        return instance
-
-    def update(self, instance, validated_data):
-        validated_data.pop("risk_matrix", None)
-        return super().update(instance, validated_data)
-
-
-class DpiaReadSerializer(BaseModelSerializer):
-    folder = FieldsRelatedField()
-    perimeter = FieldsRelatedField()
+class DpiaRequirementChangeReadSerializer(BaseModelSerializer):
     processing = FieldsRelatedField()
-    authors = FieldsRelatedField(many=True)
-    reviewers = FieldsRelatedField(many=True)
-    validated_by = FieldsRelatedField()
-    design_risk_assessment = FieldsRelatedField()
-    incident_risk_assessment = FieldsRelatedField()
-    screening = FieldsRelatedField(["id", "ref_id", "outcome_refs"])
-    reasons = serializers.SerializerMethodField()
-
-    def get_reasons(self, obj):
-        labels = dict(Dpia.Reason.choices)
-        return [{"str": str(labels.get(r, r))} for r in obj.reasons]
+    response = FieldsRelatedField(["id", "ref_id"])
+    changed_by = FieldsRelatedField(["id", "email"])
+    folder = FieldsRelatedField()
 
     class Meta:
-        model = Dpia
-        fields = "__all__"
+        model = DpiaRequirementChange
+        exclude = []

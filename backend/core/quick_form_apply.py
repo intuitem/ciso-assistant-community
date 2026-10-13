@@ -47,6 +47,18 @@ def targets_of(quick_form) -> list[str]:
     return [target.key for _, target in form_targets(quick_form)]
 
 
+def forms_with_target(key: str) -> list:
+    """Ids of the forms whose accepted responses write `key`, clones included."""
+    from core.models import QuickForm
+
+    # JSON `contains` is not portable to SQLite: the forms are few, read them.
+    return [
+        quick_form.id
+        for quick_form in QuickForm.objects.exclude(on_accept=[])
+        if key in targets_of(quick_form)
+    ]
+
+
 def configured_targets(response) -> list[tuple[dict, object]]:
     return form_targets(response.quick_form)
 

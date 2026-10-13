@@ -2366,8 +2366,11 @@ class LibraryUpdater:
         """Upsert quick forms, pages and questions by URN, prune what the new
         version dropped, then reconcile every live response: seed answers for
         new questions, drop selections that no longer exist, re-evaluate."""
+        from core.quick_form_ratings import expand_scales
+
         for new_quick_form in self.new_quick_forms:
             with transaction.atomic():
+                new_quick_form = expand_scales(new_quick_form)
                 pages = new_quick_form.get("pages") or []
                 urn = new_quick_form["urn"].lower()
                 form_fields = {
@@ -2380,6 +2383,7 @@ class LibraryUpdater:
                     "outcomes_definition": new_quick_form.get("outcomes_definition")
                     or [],
                     "scores_definition": new_quick_form.get("scores_definition"),
+                    "scales_definition": new_quick_form.get("scales_definition") or [],
                     "ref_id_prefix": new_quick_form.get("ref_id_prefix") or "",
                     "title_question_urn": (
                         new_quick_form.get("title_question_urn") or ""
@@ -2424,6 +2428,21 @@ class LibraryUpdater:
                     )
                     .values_list("urn", flat=True)
                 )
+                # A draft is no record, but it can be weeks of writing (a DPIA):
+                # questions it answered are kept too, with their pages.
+                decided_question_urns |= {
+                    answer.question.urn
+                    for answer in Answer.objects.filter(
+                        response__quick_form=quick_form,
+                        question__page__quick_form=quick_form,
+                        response__status=QuickFormResponse.Status.DRAFT,
+                    )
+                    .select_related("question")
+                    .prefetch_related("selected_choices", "attachments")
+                    if answer.value not in (None, "", [])
+                    or answer.selected_choices.all()
+                    or answer.attachments.all()
+                }
 
                 incoming_page_urns = set()
                 for order, page in enumerate(pages):
@@ -4327,6 +4346,10 @@ class QuickForm(ReferentialObjectMixin, I18nObjectMixin):
     )
     scores_definition = models.JSONField(
         blank=True, null=True, verbose_name=_("Scores definition")
+    )
+    # Ordered levels questions share (`config.scale`), see core.quick_form_ratings.
+    scales_definition = models.JSONField(
+        default=list, blank=True, verbose_name=_("Scales definition")
     )
     title_question_urn = models.CharField(
         max_length=255,

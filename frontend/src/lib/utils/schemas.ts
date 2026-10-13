@@ -710,7 +710,6 @@ export const GeneralSettingsSchema = z.object({
 	documentation_score_first: z.boolean().default(false).optional(),
 	use_risk_category_label: z.boolean().default(false).optional(),
 	personal_folders_parent: z.string().uuid().optional().nullable(),
-	dpia_screening_form: z.string().uuid().optional().nullable(),
 	currency: z.enum(CURRENCY_SYMBOLS).default('€'),
 	daily_rate: z.number().default(500).optional(),
 	mapping_max_depth: z.coerce.number().int().min(2).max(5).default(3).optional(),
@@ -1206,37 +1205,6 @@ export const dataBreachSchema = z.object({
 	incident: z.string().optional(),
 	reference_link: z.string().url().optional().or(z.literal('')),
 	observation: z.string().optional()
-});
-
-export const dpiaSchema = z.object({
-	...NameDescriptionMixin,
-	ref_id: z.string().optional().default(''),
-	processing: z.string(),
-	perimeter: z.string().optional().nullable(),
-	version: z.string().optional().default('1.0'),
-	status: z.string().optional().nullable().default('planned'),
-	eta: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
-	due_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
-	authors: z.array(z.string().optional()).optional(),
-	reviewers: z.array(z.string().optional()).optional(),
-	reasons: z.array(z.string()).optional().default([]),
-	scope_boundaries: z.string().optional(),
-	necessity: z.string().optional(),
-	proportionality: z.string().optional(),
-	method_statement: z.string().optional(),
-	risk_matrix: z.string().optional().nullable(),
-	design_risk_assessment: z.string().optional().nullable(),
-	incident_risk_assessment: z.string().optional().nullable(),
-	dpo_opinion: z.string().optional(),
-	dpo_advice_applied: z.string().optional(),
-	data_subject_views: z.string().optional(),
-	views_not_sought_reason: z.string().optional(),
-	decision: z.string().optional().default(''),
-	conditions: z.string().optional(),
-	validated_by: z.string().optional().nullable(),
-	validated_at: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
-	review_due: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
-	observation: z.string().optional().nullable()
 });
 
 export const purposeSchema = z.object({
@@ -2279,7 +2247,6 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	processings: processingSchema,
 	'right-requests': rightRequestSchema,
 	'data-breaches': dataBreachSchema,
-	dpias: dpiaSchema,
 	purposes: purposeSchema,
 	'personal-data': personalDataSchema,
 	'data-subjects': dataSubjectSchema,

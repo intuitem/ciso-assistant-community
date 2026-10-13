@@ -11,7 +11,7 @@ from .views import (
     ProcessingViewSet,
     RightRequestViewSet,
     DataBreachViewSet,
-    DpiaViewSet,
+    DpiaRequirementChangeViewSet,
 )
 
 router = DefaultRouter()
@@ -24,7 +24,11 @@ router.register(r"data-transfers", DataTransferViewSet, basename="data-transfers
 router.register(r"processings", ProcessingViewSet, basename="processings")
 router.register(r"right-requests", RightRequestViewSet, basename="right-requests")
 router.register(r"data-breaches", DataBreachViewSet, basename="data-breaches")
-router.register(r"dpias", DpiaViewSet, basename="dpias")
+router.register(
+    r"dpia-requirement-changes",
+    DpiaRequirementChangeViewSet,
+    basename="dpia-requirement-changes",
+)
 
 urlpatterns = [
     path("", include(router.urls)),

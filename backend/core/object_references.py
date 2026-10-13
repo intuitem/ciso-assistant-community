@@ -13,6 +13,7 @@ REFERENCEABLE = {
     "vulnerability": {"model": "core.Vulnerability", "label": "name"},
     "perimeter": {"model": "core.Perimeter", "label": "name"},
     "entity": {"model": "tprm.Entity", "label": "name"},
+    "processing": {"model": "privacy.Processing", "label": "name"},
 }
 
 

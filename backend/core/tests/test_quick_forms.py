@@ -190,6 +190,60 @@ class TestQuickFormImport:
             not Question.objects.get(urn=Q_SCALE).choices.filter(urn=C_LARGE).exists()
         )
 
+    def test_update_keeps_what_drafts_wrote(self, app_config):
+        form = _load(LIBRARY_V1)
+        response = QuickFormResponse.objects.create(
+            name="DPIA", quick_form=form, folder=Folder.get_root_folder()
+        )
+        response.seed_answers()
+        written = response.answers.get(question__urn=Q_COMMENT)
+        written.value = "Weeks of writing"
+        written.save()
+
+        # v2 without the comment (answered) nor the headcount (left blank).
+        dropped = (
+            LIBRARY_V1.replace("version: 1", "version: 2")
+            .replace(
+                f"""            {Q_HEADCOUNT}:
+              type: number
+              text: How many data subjects?
+""",
+                "",
+            )
+            .replace(
+                f"""            {Q_COMMENT}:
+              type: text
+              text: Anything else?
+              required: false
+""",
+                "",
+            )
+        )
+        _load(dropped)
+        assert response.answers.get(question__urn=Q_COMMENT).value == "Weeks of writing"
+        assert not Question.objects.filter(urn=Q_HEADCOUNT).exists()
+
+    def test_answered_questions_and_choices_cannot_be_deleted(self, app_config):
+        _user, client = _admin_client()
+        form = _load(LIBRARY_V1)
+        response = QuickFormResponse.objects.create(
+            name="r", quick_form=form, folder=Folder.get_root_folder()
+        )
+        response.seed_answers()
+        scale = Question.objects.get(urn=Q_SCALE)
+        large = scale.choices.get(urn=C_LARGE)
+        response.answers.get(question=scale).selected_choices.set([large])
+
+        refused = client.delete(f"/api/questions/{scale.id}/")
+        assert refused.status_code == 400
+        assert refused.json()["error"] == "questionAnsweredInResponses"
+        refused = client.delete(f"/api/question-choices/{large.id}/")
+        assert refused.json()["error"] == "choiceSelectedInResponses"
+        small = scale.choices.get(urn=C_SMALL)
+        assert client.delete(f"/api/question-choices/{small.id}/").status_code == 204
+        blank = Question.objects.get(urn=Q_HEADCOUNT)
+        assert client.delete(f"/api/questions/{blank.id}/").status_code == 204
+
 
 @pytest.mark.django_db
 class TestParentConstraints:

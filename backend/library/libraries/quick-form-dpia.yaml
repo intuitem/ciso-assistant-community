@@ -1,0 +1,489 @@
+urn: urn:intuitem:risk:library:dpia
+locale: en
+ref_id: dpia
+name: Data protection impact assessment (DPIA)
+description: 'A DPIA following the structure of the CNIL PIA method: context, core principles, risks to
+  data subjects and validation. Accepting a response records it as the processing''s DPIA.'
+copyright: © intuitem
+version: 5
+publication_date: '2026-10-12'
+provider: intuitem
+packager: intuitem
+objects:
+  quick_forms:
+  - urn: urn:intuitem:risk:quick_form:dpia
+    ref_id: dpia
+    name: DPIA
+    description: Data protection impact assessment of a processing.
+    ref_id_prefix: DPIA
+    subject_question_urn: urn:intuitem:risk:qf_page:dpia:overview:question:processing
+    on_accept:
+    - target: processing.dpia
+      config: {}
+    scales_definition:
+    - ref_id: severity
+      label: Severity
+      translations:
+        fr:
+          label: Gravité
+      levels:
+      - ref_id: negligible
+        label: Negligible
+        description: Data subjects are not affected, or face minor inconveniences they overcome without
+          difficulty.
+        translations:
+          fr:
+            label: Négligeable
+            description: Les personnes ne sont pas impactées ou subissent des désagréments mineurs qu'elles
+              surmontent sans difficulté.
+      - ref_id: limited
+        label: Limited
+        description: Data subjects face significant inconveniences they overcome despite some difficulty.
+        translations:
+          fr:
+            label: Limitée
+            description: Les personnes subissent des désagréments significatifs qu'elles surmontent malgré
+              quelques difficultés.
+      - ref_id: significant
+        label: Significant
+        description: Data subjects face significant consequences they overcome only with serious difficulty.
+        translations:
+          fr:
+            label: Importante
+            description: Les personnes subissent des conséquences significatives qu'elles ne surmontent
+              qu'avec de sérieuses difficultés.
+      - ref_id: maximum
+        label: Maximum
+        description: Data subjects face significant, possibly irreversible consequences they may not overcome.
+        translations:
+          fr:
+            label: Maximale
+            description: Les personnes subissent des conséquences significatives, voire irrémédiables,
+              qu'elles pourraient ne pas surmonter.
+    - ref_id: likelihood
+      label: Likelihood
+      translations:
+        fr:
+          label: Vraisemblance
+      levels:
+      - ref_id: negligible
+        label: Negligible
+        description: The feared event does not seem possible given the properties of the supporting assets.
+        translations:
+          fr:
+            label: Négligeable
+            description: L'événement redouté ne semble pas pouvoir se produire compte tenu des propriétés
+              des supports.
+      - ref_id: limited
+        label: Limited
+        description: The feared event seems difficult to bring about given the properties of the supporting
+          assets.
+        translations:
+          fr:
+            label: Limitée
+            description: L'événement redouté semble difficile à provoquer compte tenu des propriétés des
+              supports.
+      - ref_id: significant
+        label: Significant
+        description: The feared event seems possible given the properties of the supporting assets.
+        translations:
+          fr:
+            label: Importante
+            description: L'événement redouté semble possible compte tenu des propriétés des supports.
+      - ref_id: maximum
+        label: Maximum
+        description: The feared event seems easy to bring about given the properties of the supporting
+          assets.
+        translations:
+          fr:
+            label: Maximale
+            description: L'événement redouté semble facile à provoquer compte tenu des propriétés des
+              supports.
+    outcomes_definition:
+    - ref_id: privacy_risk
+      kind: rating
+      label: Privacy risk
+      translations:
+        fr:
+          label: Risque vie privée
+      dimensions:
+      - severity
+      - likelihood
+      levels:
+      - ref_id: acceptable
+        label: Acceptable
+        description: The risk can be accepted with the measures in place.
+        translations:
+          fr:
+            label: Acceptable
+            description: Le risque peut être accepté avec les mesures en place.
+        color: '#BBF7D0'
+      - ref_id: to_reduce
+        label: To reduce
+        description: Additional measures should reduce the risk before the processing goes ahead.
+        translations:
+          fr:
+            label: À réduire
+            description: Des mesures complémentaires doivent réduire le risque avant la mise en œuvre
+              du traitement.
+        color: '#FEF08A'
+      - ref_id: unacceptable
+        label: Unacceptable
+        description: The risk is not acceptable. Reduce it or consult the supervisory authority.
+        translations:
+          fr:
+            label: Inacceptable
+            description: Le risque n'est pas acceptable. Le réduire ou consulter l'autorité de contrôle.
+        color: '#FCA5A5'
+      grid:
+      - - acceptable
+        - acceptable
+        - acceptable
+        - to_reduce
+      - - acceptable
+        - to_reduce
+        - to_reduce
+        - to_reduce
+      - - to_reduce
+        - to_reduce
+        - unacceptable
+        - unacceptable
+      - - unacceptable
+        - unacceptable
+        - unacceptable
+        - unacceptable
+    - ref_id: residual_risk_unacceptable
+      label: 'Residual risk unacceptable: consult the supervisory authority'
+      description: A risk stays unacceptable once the planned measures are in place. Article 36 GDPR requires
+        prior consultation of the supervisory authority.
+      color: '#dc2626'
+      expression: has(values.privacy_risk_residual) && values.privacy_risk_residual >= 3.0
+    pages:
+    - urn: urn:intuitem:risk:qf_page:dpia:overview
+      ref_id: overview
+      name: 'Context: overview'
+      description: 'Identify the processing under study and present it.
+
+
+        Keep the completed response as the record of the assessment: Article 35 GDPR requires it.'
+      questions:
+        urn:intuitem:risk:qf_page:dpia:overview:question:processing:
+          type: object_reference
+          text: Processing
+          config:
+            model: processing
+        urn:intuitem:risk:qf_page:dpia:overview:question:description:
+          type: text
+          text: What is the processing under study? (name, purpose, expected benefits, context of use)
+        urn:intuitem:risk:qf_page:dpia:overview:question:responsibilities:
+          type: text
+          text: What are the responsibilities linked to the processing? (controller, processors, joint
+            controllers)
+        urn:intuitem:risk:qf_page:dpia:overview:question:standards:
+          type: text
+          text: Which standards apply to the processing? (approved codes of conduct, certifications…)
+          required: false
+    - urn: urn:intuitem:risk:qf_page:dpia:data
+      ref_id: data
+      name: 'Context: data, processes and supports'
+      description: 'Delimit and describe the processing in detail. The processing record already lists
+        its personal data, retention periods, recipients and supporting assets: describe here what it
+        does not.'
+      questions:
+        urn:intuitem:risk:qf_page:dpia:data:question:data:
+          type: text
+          text: What data is processed? (with retention periods, recipients and who can access it)
+        urn:intuitem:risk:qf_page:dpia:data:question:lifecycle:
+          type: text
+          text: How does the data lifecycle unfold, from collection to deletion?
+        urn:intuitem:risk:qf_page:dpia:data:question:supports:
+          type: text
+          text: What does the data rely on? (information systems, software, networks, people, paper…)
+    - urn: urn:intuitem:risk:qf_page:dpia:proportionality
+      ref_id: proportionality
+      name: 'Core principles: proportionality and necessity'
+      description: Show that the processing complies with the core data protection principles.
+      questions:
+        urn:intuitem:risk:qf_page:dpia:proportionality:question:purposes:
+          type: text
+          text: Are the purposes specified, explicit and legitimate?
+        urn:intuitem:risk:qf_page:dpia:proportionality:question:legal_basis:
+          type: text
+          text: What is the legal basis that makes the processing lawful?
+        urn:intuitem:risk:qf_page:dpia:proportionality:question:minimisation:
+          type: text
+          text: Is the data adequate, relevant and limited to what is necessary for the purposes?
+        urn:intuitem:risk:qf_page:dpia:proportionality:question:accuracy:
+          type: text
+          text: Is the data accurate and kept up to date?
+        urn:intuitem:risk:qf_page:dpia:proportionality:question:retention:
+          type: text
+          text: What are the retention periods, and why are they necessary?
+    - urn: urn:intuitem:risk:qf_page:dpia:rights
+      ref_id: rights
+      name: 'Core principles: measures protecting data subjects'' rights'
+      description: Show how data subjects can exercise their rights.
+      questions:
+        urn:intuitem:risk:qf_page:dpia:rights:question:information:
+          type: text
+          text: How are data subjects informed about the processing?
+        urn:intuitem:risk:qf_page:dpia:rights:question:consent:
+          type: text
+          text: If applicable, how is the data subjects' consent obtained?
+          required: false
+        urn:intuitem:risk:qf_page:dpia:rights:question:access_portability:
+          type: text
+          text: How can data subjects exercise their rights of access and to data portability?
+        urn:intuitem:risk:qf_page:dpia:rights:question:rectification_erasure:
+          type: text
+          text: How can data subjects exercise their rights to rectification and erasure?
+        urn:intuitem:risk:qf_page:dpia:rights:question:restriction_objection:
+          type: text
+          text: How can data subjects exercise their rights to restriction and to object?
+        urn:intuitem:risk:qf_page:dpia:rights:question:processors:
+          type: text
+          text: Are the processors' obligations clearly set out and governed by a contract?
+        urn:intuitem:risk:qf_page:dpia:rights:question:transfers:
+          type: text
+          text: If data is transferred outside the EU, is it adequately protected?
+          required: false
+    - urn: urn:intuitem:risk:qf_page:dpia:measures
+      ref_id: measures
+      name: 'Risks: existing or planned measures'
+      description: List the measures, existing or planned, that contribute to data security. Each one
+        is an applied control, so its owner, due date and status are tracked like any other.
+      questions:
+        urn:intuitem:risk:qf_page:dpia:measures:question:measures:
+          type: object_reference
+          text: Which measures are in place or planned?
+          config:
+            model: applied_control
+            multiple: true
+        urn:intuitem:risk:qf_page:dpia:measures:question:notes:
+          type: text
+          text: Anything to add about these measures?
+          required: false
+    - urn: urn:intuitem:risk:qf_page:dpia:illegitimate_access
+      ref_id: illegitimate_access
+      name: 'Risks: illegitimate access to data'
+      description: Analyse the causes and consequences of an illegitimate access to data, then estimate
+        its severity and likelihood given the measures in place. Then estimate them again as they will
+        stand once the planned measures are implemented.
+      questions:
+        urn:intuitem:risk:qf_page:dpia:illegitimate_access:question:impacts:
+          type: text
+          text: What would the main impacts on the data subjects be if this happened?
+        urn:intuitem:risk:qf_page:dpia:illegitimate_access:question:threats:
+          type: text
+          text: What are the main threats that could make it happen?
+        urn:intuitem:risk:qf_page:dpia:illegitimate_access:question:sources:
+          type: text
+          text: Which risk sources could be behind it (internal or external people, non-human sources)?
+        urn:intuitem:risk:qf_page:dpia:illegitimate_access:question:measures:
+          type: object_reference
+          text: Which measures contribute to treating this risk?
+          config:
+            model: applied_control
+            multiple: true
+          required: false
+        urn:intuitem:risk:qf_page:dpia:illegitimate_access:question:severity:
+          type: unique_choice
+          text: How severe is the risk, given the potential impacts and the measures in place?
+          config:
+            widget: slider
+            scale: severity
+        urn:intuitem:risk:qf_page:dpia:illegitimate_access:question:severity_justification:
+          type: text
+          text: Justify the severity
+        urn:intuitem:risk:qf_page:dpia:illegitimate_access:question:likelihood:
+          type: unique_choice
+          text: How likely is the risk, given the threats, the risk sources and the measures in place?
+          config:
+            widget: slider
+            scale: likelihood
+        urn:intuitem:risk:qf_page:dpia:illegitimate_access:question:likelihood_justification:
+          type: text
+          text: Justify the likelihood
+        urn:intuitem:risk:qf_page:dpia:illegitimate_access:question:residual_severity:
+          type: unique_choice
+          text: Severity once the planned measures are implemented
+          config:
+            widget: slider
+            scale: severity
+            stage: residual
+          required: false
+        urn:intuitem:risk:qf_page:dpia:illegitimate_access:question:residual_likelihood:
+          type: unique_choice
+          text: Likelihood once the planned measures are implemented
+          config:
+            widget: slider
+            scale: likelihood
+            stage: residual
+          required: false
+    - urn: urn:intuitem:risk:qf_page:dpia:unwanted_modification
+      ref_id: unwanted_modification
+      name: 'Risks: unwanted modification of data'
+      description: Analyse the causes and consequences of an unwanted modification of data, then estimate
+        its severity and likelihood given the measures in place. Then estimate them again as they will
+        stand once the planned measures are implemented.
+      questions:
+        urn:intuitem:risk:qf_page:dpia:unwanted_modification:question:impacts:
+          type: text
+          text: What would the main impacts on the data subjects be if this happened?
+        urn:intuitem:risk:qf_page:dpia:unwanted_modification:question:threats:
+          type: text
+          text: What are the main threats that could make it happen?
+        urn:intuitem:risk:qf_page:dpia:unwanted_modification:question:sources:
+          type: text
+          text: Which risk sources could be behind it (internal or external people, non-human sources)?
+        urn:intuitem:risk:qf_page:dpia:unwanted_modification:question:measures:
+          type: object_reference
+          text: Which measures contribute to treating this risk?
+          config:
+            model: applied_control
+            multiple: true
+          required: false
+        urn:intuitem:risk:qf_page:dpia:unwanted_modification:question:severity:
+          type: unique_choice
+          text: How severe is the risk, given the potential impacts and the measures in place?
+          config:
+            widget: slider
+            scale: severity
+        urn:intuitem:risk:qf_page:dpia:unwanted_modification:question:severity_justification:
+          type: text
+          text: Justify the severity
+        urn:intuitem:risk:qf_page:dpia:unwanted_modification:question:likelihood:
+          type: unique_choice
+          text: How likely is the risk, given the threats, the risk sources and the measures in place?
+          config:
+            widget: slider
+            scale: likelihood
+        urn:intuitem:risk:qf_page:dpia:unwanted_modification:question:likelihood_justification:
+          type: text
+          text: Justify the likelihood
+        urn:intuitem:risk:qf_page:dpia:unwanted_modification:question:residual_severity:
+          type: unique_choice
+          text: Severity once the planned measures are implemented
+          config:
+            widget: slider
+            scale: severity
+            stage: residual
+          required: false
+        urn:intuitem:risk:qf_page:dpia:unwanted_modification:question:residual_likelihood:
+          type: unique_choice
+          text: Likelihood once the planned measures are implemented
+          config:
+            widget: slider
+            scale: likelihood
+            stage: residual
+          required: false
+    - urn: urn:intuitem:risk:qf_page:dpia:disappearance
+      ref_id: disappearance
+      name: 'Risks: disappearance of data'
+      description: Analyse the causes and consequences of a disappearance of data, then estimate its severity
+        and likelihood given the measures in place. Then estimate them again as they will stand once the
+        planned measures are implemented.
+      questions:
+        urn:intuitem:risk:qf_page:dpia:disappearance:question:impacts:
+          type: text
+          text: What would the main impacts on the data subjects be if this happened?
+        urn:intuitem:risk:qf_page:dpia:disappearance:question:threats:
+          type: text
+          text: What are the main threats that could make it happen?
+        urn:intuitem:risk:qf_page:dpia:disappearance:question:sources:
+          type: text
+          text: Which risk sources could be behind it (internal or external people, non-human sources)?
+        urn:intuitem:risk:qf_page:dpia:disappearance:question:measures:
+          type: object_reference
+          text: Which measures contribute to treating this risk?
+          config:
+            model: applied_control
+            multiple: true
+          required: false
+        urn:intuitem:risk:qf_page:dpia:disappearance:question:severity:
+          type: unique_choice
+          text: How severe is the risk, given the potential impacts and the measures in place?
+          config:
+            widget: slider
+            scale: severity
+        urn:intuitem:risk:qf_page:dpia:disappearance:question:severity_justification:
+          type: text
+          text: Justify the severity
+        urn:intuitem:risk:qf_page:dpia:disappearance:question:likelihood:
+          type: unique_choice
+          text: How likely is the risk, given the threats, the risk sources and the measures in place?
+          config:
+            widget: slider
+            scale: likelihood
+        urn:intuitem:risk:qf_page:dpia:disappearance:question:likelihood_justification:
+          type: text
+          text: Justify the likelihood
+        urn:intuitem:risk:qf_page:dpia:disappearance:question:residual_severity:
+          type: unique_choice
+          text: Severity once the planned measures are implemented
+          config:
+            widget: slider
+            scale: severity
+            stage: residual
+          required: false
+        urn:intuitem:risk:qf_page:dpia:disappearance:question:residual_likelihood:
+          type: unique_choice
+          text: Likelihood once the planned measures are implemented
+          config:
+            widget: slider
+            scale: likelihood
+            stage: residual
+          required: false
+    - urn: urn:intuitem:risk:qf_page:dpia:by_design
+      ref_id: by_design
+      name: 'Risks: by-design risks'
+      description: Risks the processing creates for data subjects even when everything works as intended
+        (profiling, excessive monitoring, unfair automated decisions…), beyond security incidents.
+      questions:
+        urn:intuitem:risk:qf_page:dpia:by_design:question:risks:
+          type: text
+          text: Which risks does the processing create by design?
+          required: false
+        urn:intuitem:risk:qf_page:dpia:by_design:question:measures:
+          type: object_reference
+          text: Which measures treat them?
+          config:
+            model: applied_control
+            multiple: true
+          required: false
+    - urn: urn:intuitem:risk:qf_page:dpia:validation
+      ref_id: validation
+      name: Validation
+      description: Record the opinions sought and the decision on the processing.
+      questions:
+        urn:intuitem:risk:qf_page:dpia:validation:question:dpo_opinion:
+          type: text
+          text: What is the DPO's opinion?
+        urn:intuitem:risk:qf_page:dpia:validation:question:dpo_advice_applied:
+          type: text
+          text: How was the DPO's advice applied, or why not?
+          required: false
+        urn:intuitem:risk:qf_page:dpia:validation:question:data_subject_views:
+          type: text
+          text: What are the views of the data subjects or their representatives?
+          required: false
+        urn:intuitem:risk:qf_page:dpia:validation:question:views_not_sought_reason:
+          type: text
+          text: If their views were not sought, why not?
+          required: false
+        urn:intuitem:risk:qf_page:dpia:validation:question:decision:
+          type: unique_choice
+          text: Decision
+          choices:
+          - urn: urn:intuitem:risk:qf_page:dpia:validation:question:decision:choice:proceed
+            value: Proceed
+          - urn: urn:intuitem:risk:qf_page:dpia:validation:question:decision:choice:proceed_conditionally
+            value: Proceed with conditions
+          - urn: urn:intuitem:risk:qf_page:dpia:validation:question:decision:choice:consult_sa
+            value: Consult the supervisory authority
+          - urn: urn:intuitem:risk:qf_page:dpia:validation:question:decision:choice:abandon
+            value: Abandon
+        urn:intuitem:risk:qf_page:dpia:validation:question:conditions:
+          type: text
+          text: Conditions and action plan
+          required: false

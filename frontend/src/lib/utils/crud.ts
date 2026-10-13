@@ -12,6 +12,8 @@ import LecChartPreview from '$lib/components/ModelTable/field/LecChartPreview.sv
 import TriggerTypesDisplay from '$lib/components/ModelTable/field/TriggerTypesDisplay.svelte';
 import TierBadge from '$lib/components/ModelTable/field/TierBadge.svelte';
 import TierSource from '$lib/components/ModelTable/field/TierSource.svelte';
+import DpiaRequirementSource from '$lib/components/ModelTable/field/DpiaRequirementSource.svelte';
+import DpiaRequiredBadge from '$lib/components/ModelTable/field/DpiaRequiredBadge.svelte';
 import { listViewFields } from './table';
 import type { TableBatchAction } from './table';
 import type { urlModel } from './types';
@@ -179,7 +181,7 @@ export const MODEL_FEATURE_FLAGS: Record<string, FeatureFlag> = {
 	campaigns: 'campaigns',
 	contracts: 'contracts',
 	'data-breaches': 'data_breaches',
-	dpias: 'dpias',
+	'dpia-requirement-changes': 'dpias',
 	'document-containers': 'document_management',
 	'document-revisions': 'document_management',
 	'managed-documents': 'document_management',
@@ -2121,7 +2123,12 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'processing', urlModel: 'data-recipients' },
 			{ field: 'processing', urlModel: 'data-contractors' },
 			{ field: 'processing', urlModel: 'data-transfers' },
-			{ field: 'processing', urlModel: 'dpias' },
+			{
+				field: 'processing',
+				urlModel: 'dpia-requirement-changes',
+				disableCreate: true,
+				disableDelete: true
+			},
 			{
 				field: 'processings',
 				urlModel: 'right-requests',
@@ -2236,60 +2243,18 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'updated_at', type: 'datetime' }
 		]
 	},
-	dpias: {
-		endpointUrl: 'privacy/dpias',
-		name: 'dpia',
-		localName: 'dpia',
-		localNamePlural: 'dpias',
-		verboseName: 'DPIA',
-		verboseNamePlural: 'DPIAs',
-		markdownFields: [
-			'scope_boundaries',
-			'necessity',
-			'proportionality',
-			'method_statement',
-			'dpo_opinion',
-			'dpo_advice_applied',
-			'data_subject_views',
-			'views_not_sought_reason',
-			'conditions',
-			'observation'
-		],
-		selectFields: [{ field: 'status' }, { field: 'decision' }, { field: 'reasons' }],
+	'dpia-requirement-changes': {
+		endpointUrl: 'privacy/dpia-requirement-changes',
+		name: 'dpiarequirementchange',
+		localName: 'dpiaRequirementChange',
+		localNamePlural: 'dpiaRequirementChanges',
+		verboseName: 'DPIA requirement change',
+		verboseNamePlural: 'DPIA requirement changes',
 		foreignKeyFields: [
 			{ field: 'processing', urlModel: 'processings' },
-			{ field: 'perimeter', urlModel: 'perimeters' },
-			{ field: 'screening', urlModel: 'quick-form-responses' },
-			{ field: 'authors', urlModel: 'actors', urlParams: 'is_third_party=false' },
-			{ field: 'reviewers', urlModel: 'actors', urlParams: 'is_third_party=false' },
-			{ field: 'validated_by', urlModel: 'actors', urlParams: 'is_third_party=false' },
-			{ field: 'design_risk_assessment', urlModel: 'risk-assessments' },
-			{ field: 'incident_risk_assessment', urlModel: 'risk-assessments' },
-			{ field: 'risk_matrix', urlModel: 'risk-matrices' }
+			{ field: 'response', urlModel: 'quick-form-responses' }
 		],
-		detailViewFields: [
-			{ field: 'ref_id' },
-			{ field: 'name' },
-			{ field: 'description' },
-			{ field: 'processing' },
-			{ field: 'version' },
-			{ field: 'status' },
-			{ field: 'screening' },
-			{ field: 'reasons' },
-			{ field: 'authors' },
-			{ field: 'reviewers' },
-			{ field: 'design_risk_assessment' },
-			{ field: 'incident_risk_assessment' },
-			{ field: 'decision' },
-			{ field: 'validated_by' },
-			{ field: 'validated_at', type: 'date' },
-			{ field: 'review_due', type: 'date' },
-			{ field: 'eta', type: 'date' },
-			{ field: 'due_date', type: 'date' },
-			{ field: 'folder' },
-			{ field: 'created_at', type: 'datetime' },
-			{ field: 'updated_at', type: 'datetime' }
-		]
+		selectFields: [{ field: 'source' }]
 	},
 	purposes: {
 		endpointUrl: 'privacy/purposes',
@@ -4193,6 +4158,14 @@ const FIELD_COMPONENT_MAP = {
 		tier: TierBadge,
 		previous_tier: TierBadge,
 		source: TierSource
+	},
+	processings: {
+		dpia_required: DpiaRequiredBadge
+	},
+	'dpia-requirement-changes': {
+		dpia_required: DpiaRequiredBadge,
+		previous_dpia_required: DpiaRequiredBadge,
+		source: DpiaRequirementSource
 	}
 };
 

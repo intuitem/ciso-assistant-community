@@ -53,7 +53,6 @@
 	import DataTransferForm from './ModelForm/DataTransferForm.svelte';
 	import RightRequestForm from './ModelForm/RightRequestForm.svelte';
 	import DataBreachForm from './ModelForm/DataBreachForm.svelte';
-	import DpiaForm from './ModelForm/DpiaForm.svelte';
 	import EbiosRmForm from './ModelForm/EbiosRmForm.svelte';
 	import FearedEventForm from './ModelForm/FearedEventForm.svelte';
 	import RoToForm from './ModelForm/RoToForm.svelte';
@@ -815,8 +814,6 @@
 				{initialData}
 				{...rest}
 			/>
-		{:else if URLModel === 'dpias'}
-			<DpiaForm {form} {model} {cacheLocks} {formDataCache} {context} {initialData} {...rest} />
 		{:else if URLModel === 'ebios-rm'}
 			<EbiosRmForm {form} {model} {cacheLocks} {formDataCache} {context} {object} {...rest} />
 		{:else if URLModel === 'feared-events'}

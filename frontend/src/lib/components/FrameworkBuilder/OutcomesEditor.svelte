@@ -4,8 +4,10 @@
 		ruleIdFromLabel,
 		ruleIdProblem,
 		withTranslation,
-		type OutcomeRule
+		type OutcomeRule,
+		type Scale
 	} from './builder-state';
+	import RatingRuleEditor from './RatingRuleEditor.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { createHandleGatedDragHandlers } from './builder-utils.svelte';
 	import ConfirmAction from './ConfirmAction.svelte';
@@ -27,6 +29,8 @@
 		catalog?: CelCatalog;
 		/** Frameworks: implementation groups a rule can be limited to. */
 		groups?: { id: string; label: string }[];
+		/** Quick forms: the scales a rating can measure. */
+		scales?: Scale[];
 	}
 
 	let {
@@ -36,7 +40,8 @@
 		mode = 'framework',
 		pages = [],
 		catalog = { mode: 'framework', nodes: [], questions: [] },
-		groups = []
+		groups = [],
+		scales = []
 	}: Props = $props();
 
 	// The picker writes, and only ever replaces, a bare page score: a hand-written
@@ -79,6 +84,44 @@
 			rules.map((r) => r.ref_id)
 		);
 		rules = [...rules, { ref_id, annotation: '', color: null, expression: '' }];
+		expandedIndex = rules.length - 1;
+		persist();
+	}
+
+	// A rating starts as a grid on the first two scales with three levels, graded
+	// from the low corner to the high one; the author repaints the cells.
+	function addRating() {
+		const ref_id = ruleIdFromLabel(
+			'rating',
+			rules.map((r) => r.ref_id)
+		);
+		const levels = [
+			{ ref_id: 'low', label: m.builderRatingLow(), color: '#BBF7D0' },
+			{ ref_id: 'medium', label: m.builderRatingMedium(), color: '#FEF08A' },
+			{ ref_id: 'high', label: m.builderRatingHigh(), color: '#FCA5A5' }
+		];
+		const rowsScale = scales[0];
+		const cellsScale = scales[1] ?? scales[0];
+		const span = Math.max(1, rowsScale.levels.length + cellsScale.levels.length - 2);
+		const grid = rowsScale.levels.map((_, ri) =>
+			cellsScale.levels.map(
+				(_, ci) => levels[Math.min(2, Math.floor(((ri + ci) / span) * 3))].ref_id
+			)
+		);
+		rules = [
+			...rules,
+			{
+				ref_id,
+				annotation: '',
+				color: null,
+				expression: '',
+				kind: 'rating',
+				label: m.builderRatingDefaultLabel(),
+				dimensions: [rowsScale.ref_id, cellsScale.ref_id],
+				levels,
+				grid
+			}
+		];
 		expandedIndex = rules.length - 1;
 		persist();
 	}
@@ -139,6 +182,14 @@
 							['answers["Q_NODE_ID"].weight', m.builderCelAnswerWeight()],
 							['answers["Q_NODE_ID"].type', m.builderCelAnswerType()],
 							['answers["Q_NODE_ID"].answered', m.builderCelAnswerAnswered()]
+						]
+					},
+					{
+						title: m.builderCelGroupRatings(),
+						rows: [
+							['values.RATING_ID', m.builderCelRatingValue()],
+							['ratings["RATING_ID"].points', m.builderCelRatingPoints()],
+							['dims["SCALE_ID"].rank / .value', m.builderCelRatingDims()]
 						]
 					},
 					{
@@ -245,6 +296,16 @@
 		>
 			<i class="fa-solid fa-plus mr-1"></i>{m.builderAddRule()}
 		</button>
+		{#if mode === 'quick_form' && scales.length}
+			<button
+				type="button"
+				class="text-xs text-blue-600 hover:text-blue-700 font-medium"
+				onclick={addRating}
+				data-testid="add-rating"
+			>
+				<i class="fa-solid fa-table-cells mr-1"></i>{m.builderAddRating()}
+			</button>
+		{/if}
 	</div>
 
 	{#each rules as rule, index (index)}
@@ -272,6 +333,11 @@
 						class="text-[10px] font-mono font-semibold px-1 rounded bg-surface-200-800 text-surface-600-400"
 						title={m.builderRuleKindNumber()}>#</span
 					>
+				{:else if rule.kind === 'rating'}
+					<i
+						class="fa-solid fa-table-cells text-xs text-surface-600-400"
+						title={m.builderRuleKindRating()}
+					></i>
 				{:else if rule.color}
 					<span
 						class="w-3 h-3 rounded-full shrink-0 border border-surface-200-800"
@@ -283,8 +349,10 @@
 					{rule.ref_id || m.builderUntitledRule()}
 				</span>
 
-				{#if rule.annotation}
-					<span class="text-xs text-surface-500 truncate min-w-0">{rule.annotation}</span>
+				{#if rule.annotation || rule.label}
+					<span class="text-xs text-surface-500 truncate min-w-0"
+						>{rule.annotation || rule.label}</span
+					>
 				{/if}
 
 				{#each rule.implementation_groups ?? [] as group (group)}
@@ -295,7 +363,7 @@
 				{/each}
 
 				<span class="ml-auto text-xs text-surface-500 font-mono truncate max-w-[200px]">
-					{rule.expression || '...'}
+					{rule.kind === 'rating' ? (rule.dimensions ?? []).join(' × ') : rule.expression || '...'}
 				</span>
 
 				<button
@@ -309,8 +377,21 @@
 				<ConfirmAction onconfirm={() => deleteRule(index)} />
 			</div>
 
-			<!-- Expanded details -->
-			{#if expandedIndex === index}
+			<!-- Expanded details: a rating has no expression, it gets its own editor. -->
+			{#if expandedIndex === index && rule.kind === 'rating'}
+				<div class="px-3 pb-3 pt-2 border-t border-surface-200-800">
+					<RatingRuleEditor
+						{rule}
+						{scales}
+						{pages}
+						{activeLanguage}
+						onchange={(next) => {
+							rules[index] = next;
+							persist();
+						}}
+					/>
+				</div>
+			{:else if expandedIndex === index}
 				{@const idProblem = ruleIdProblem(rule.ref_id ?? '', otherIds(index))}
 				<div class="px-3 pb-3 pt-1 border-t border-surface-200-800 space-y-2">
 					<div class="grid grid-cols-2 gap-2">

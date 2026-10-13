@@ -1,25 +1,26 @@
 from pathlib import Path
 
 import pytest
+from knox.models import AuthToken
+from rest_framework.test import APIClient
+
 from core.models import (
     AppliedControl,
     Asset,
     QuickForm,
+    QuickFormApplication,
     QuickFormResponse,
-    RiskMatrix,
     StoredLibrary,
     Terminology,
 )
 from core.startup import startup
-from global_settings.models import GlobalSettings
-from global_settings.serializers import validate_dpia_screening_form_value
 from iam.models import Folder, User, UserGroup
-from knox.models import AuthToken
-from rest_framework.exceptions import ValidationError
-from rest_framework.test import APIClient
-
-from privacy.models import Dpia, PersonalData, Processing, Purpose
-from privacy.screening import screening_reasons
+from privacy.models import (
+    DpiaRequirementChange,
+    PersonalData,
+    Processing,
+    Purpose,
+)
 
 
 @pytest.fixture
@@ -27,9 +28,8 @@ def app_config():
     startup(sender=None, **{})
 
 
-@pytest.fixture
-def admin_client(app_config):
-    user = User.objects.create_user(email="dpia-admin@test.local", is_published=True)
+def _admin_client(email):
+    user = User.objects.create_user(email=email, is_published=True)
     admin_group = UserGroup.objects.get(name="BI-UG-ADM")
     user.folder = admin_group.folder
     user.save()
@@ -41,14 +41,14 @@ def admin_client(app_config):
 
 
 @pytest.fixture
-def privacy_matrix(app_config):
-    stored = StoredLibrary.objects.get(
-        urn="urn:intuitem:risk:library:risk-matrix-4x4-privacy"
-    )
-    assert stored.load() is None
-    return RiskMatrix.objects.get(
-        urn="urn:intuitem:risk:matrix:risk-matrix-4x4-privacy"
-    )
+def admin_client(app_config):
+    return _admin_client("dpia-admin@test.local")
+
+
+@pytest.fixture
+def reviewer_client(app_config):
+    """A second administrator: nobody reviews their own request."""
+    return _admin_client("dpia-reviewer@test.local")
 
 
 @pytest.fixture
@@ -77,77 +77,21 @@ def processing(app_config):
     return processing
 
 
-@pytest.mark.django_db
-def test_create_seeds_both_risk_registers(admin_client, processing, privacy_matrix):
-    response = admin_client.post(
-        "/api/privacy/dpias/",
-        {
-            "name": "DPIA loyalty",
-            "processing": str(processing.id),
-            "reasons": ["evaluation_scoring", "large_scale"],
-            "risk_matrix": str(privacy_matrix.id),
-        },
-        format="json",
-    )
-    assert response.status_code == 201, response.json()
-
-    dpia = Dpia.objects.get(id=response.json()["id"])
-    assert dpia.folder == processing.folder
-    assert dpia.design_risk_assessment.risk_scenarios.count() == 0
-    incident = dpia.incident_risk_assessment.risk_scenarios.all()
-    assert incident.count() == 3
-    assert all(s.assets.filter(name="CRM").exists() for s in incident)
-
-
-@pytest.mark.django_db
-def test_report_projects_the_processing(admin_client, processing, privacy_matrix):
-    dpia = Dpia.objects.create(name="DPIA", processing=processing)
-    response = admin_client.get(f"/api/privacy/dpias/{dpia.id}/report/")
-    assert response.status_code == 200
-    report = response.json()
-
-    assert report["overview"]["processing"]["name"] == "Loyalty programme"
-    assert report["description"]["purposes"][0]["name"] == "Profiling"
-    assert report["description"]["supporting_assets"][0]["name"] == "CRM"
-    assert report["measures"][0]["edpb_status"] == "partially_implemented"
-    assert "incident_risk_assessment" in report["missing"]
-    assert "decision" in report["missing"]
-
-
-@pytest.mark.django_db
-def test_risk_registers_action_is_idempotent(admin_client, processing, privacy_matrix):
-    dpia = Dpia.objects.create(name="DPIA", processing=processing)
-    url = f"/api/privacy/dpias/{dpia.id}/risk-registers/"
-    first = admin_client.post(
-        url, {"risk_matrix": str(privacy_matrix.id)}, format="json"
-    )
-    second = admin_client.post(
-        url, {"risk_matrix": str(privacy_matrix.id)}, format="json"
-    )
-    assert first.status_code == 200
-    assert first.json() == second.json()
-    dpia.refresh_from_db()
-    assert dpia.incident_risk_assessment.risk_scenarios.count() == 3
-
-
-@pytest.mark.django_db
-def test_unknown_reason_is_rejected(admin_client, processing):
-    response = admin_client.post(
-        "/api/privacy/dpias/",
-        {"name": "DPIA", "processing": str(processing.id), "reasons": ["gut_feeling"]},
-        format="json",
-    )
-    assert response.status_code == 400
-    assert "reasons" in response.json()
-
-
 SCREENING = "urn:intuitem:risk:qf_page:pre-dpia-screening"
-CRITERIA = f"{SCREENING}:criteria:question:criteria"
-EXEMPTION = f"{SCREENING}:exemption:question:exemption"
-BASE_ANSWERS = {
-    f"{SCREENING}:identification:question:role": f"{SCREENING}:identification:question:role:choice:controller",
-    f"{SCREENING}:identification:question:stage": f"{SCREENING}:identification:question:stage:choice:new",
-}
+TARGET = "processing.dpia_required"
+
+
+def _answers(page, criteria, exemption=None):
+    question = f"{page}:criteria:question:criteria"
+    answers = {
+        f"{page}:identification:question:role": f"{page}:identification:question:role:choice:controller",
+        f"{page}:identification:question:stage": f"{page}:identification:question:stage:choice:new",
+        question: [f"{question}:choice:{c}" for c in criteria],
+    }
+    if exemption:
+        question = f"{page}:exemption:question:exemption"
+        answers[question] = f"{question}:choice:{exemption}"
+    return answers
 
 
 @pytest.fixture
@@ -156,15 +100,20 @@ def screening_form(app_config):
         urn="urn:intuitem:risk:library:pre-dpia-screening"
     )
     assert stored.load() is None
+    return QuickForm.objects.get(urn="urn:intuitem:risk:quick_form:pre-dpia-screening")
 
 
-def _screen(client, processing, answers):
-    started = client.post(f"/api/privacy/processings/{processing.id}/dpia-screening/")
-    assert started.status_code == 201, started.json()
-    response_id = started.json()["id"]
+def _screen(client, quick_form, processing, answers):
+    started = client.post(
+        f"/api/quick-forms/{quick_form.id}/start/",
+        {"subject": str(processing.id)},
+        format="json",
+    )
+    assert started.status_code == 200, started.json()
+    response_id = started.json()["redirect"].rsplit("/", 1)[-1]
     patched = client.patch(
         f"/api/quick-form-responses/{response_id}/",
-        {"answers": {**BASE_ANSWERS, **answers}},
+        {"answers": answers},
         format="json",
     )
     assert patched.status_code == 200, patched.json()
@@ -175,102 +124,97 @@ def _screen(client, processing, answers):
     )
     assert submitted.status_code == 200, submitted.json()
     processing.refresh_from_db()
-    return response_id
+    return QuickFormResponse.objects.get(id=response_id)
 
 
 @pytest.mark.django_db
-def test_screening_is_prefilled_and_resumed(admin_client, processing, screening_form):
-    url = f"/api/privacy/processings/{processing.id}/dpia-screening/"
-    first = admin_client.post(url)
-    assert first.status_code == 201
-    second = admin_client.post(url)
-    assert second.status_code == 200
-    assert second.json()["id"] == first.json()["id"]
-
-    processing.refresh_from_db()
-    assert str(processing.dpia_screening_id) == first.json()["id"]
-    content = admin_client.get(
-        f"/api/quick-form-responses/{first.json()['id']}/content/"
+def test_screening_is_offered_and_bound_to_the_processing(
+    admin_client, processing, screening_form
+):
+    options = admin_client.get(
+        "/api/quick-forms/assess-options/",
+        {"target": TARGET, "subject": str(processing.id)},
     )
-    answers = content.json()["answers"]
-    assert answers[f"{SCREENING}:identification:question:name"] == "Loyalty programme"
-    assert answers[f"{SCREENING}:identification:question:purpose"] == "Profiling"
+    assert [o["id"] for o in options.json()] == [str(screening_form.id)]
+
+    url = f"/api/quick-forms/{screening_form.id}/start/"
+    first = admin_client.post(url, {"subject": str(processing.id)}, format="json")
+    second = admin_client.post(url, {"subject": str(processing.id)}, format="json")
+    assert second.json()["resumed"] is True
+    assert first.json()["redirect"] == second.json()["redirect"]
+    response = QuickFormResponse.objects.get(
+        id=first.json()["redirect"].rsplit("/", 1)[-1]
+    )
+    assert response.subject_object_id == processing.id
+    assert response.folder_id == processing.folder_id
 
 
 @pytest.mark.django_db
 def test_two_criteria_mark_the_dpia_required(admin_client, processing, screening_form):
-    _screen(
+    response = _screen(
         admin_client,
+        screening_form,
         processing,
-        {
-            CRITERIA: [
-                f"{CRITERIA}:choice:evaluation_scoring",
-                f"{CRITERIA}:choice:large_scale",
-            ],
-            EXEMPTION: f"{EXEMPTION}:choice:none",
-        },
+        _answers(SCREENING, ["evaluation_scoring", "large_scale"], exemption="none"),
     )
+    assert response.status == QuickFormResponse.Status.CLOSED
     assert processing.dpia_required is True
+    assert processing.dpia_screening_id == response.id
+    application = QuickFormApplication.objects.get(response=response)
+    assert (application.previous_value, application.new_value) == (False, True)
 
 
 @pytest.mark.django_db
 def test_no_criterion_clears_the_flag(admin_client, processing, screening_form):
     Processing.objects.filter(pk=processing.pk).update(dpia_required=True)
-    _screen(admin_client, processing, {CRITERIA: [f"{CRITERIA}:choice:none"]})
+    _screen(admin_client, screening_form, processing, _answers(SCREENING, ["none"]))
     assert processing.dpia_required is False
 
 
 @pytest.mark.django_db
-def test_claimed_exemption_leaves_the_flag_alone(
-    admin_client, processing, screening_form
-):
-    _screen(
+def test_every_screening_applies_on_submit(admin_client, processing, screening_form):
+    recommended = _screen(
         admin_client,
+        screening_form,
         processing,
-        {
-            CRITERIA: [
-                f"{CRITERIA}:choice:evaluation_scoring",
-                f"{CRITERIA}:choice:large_scale",
-            ],
-            EXEMPTION: f"{EXEMPTION}:choice:list",
-        },
+        _answers(SCREENING, ["large_scale"]),
     )
+    assert recommended.status == QuickFormResponse.Status.CLOSED
+    assert recommended.decided_by == recommended.submitted_by
+    assert processing.dpia_required is True
+
+    exempted = _screen(
+        admin_client,
+        screening_form,
+        processing,
+        _answers(SCREENING, ["evaluation_scoring", "large_scale"], exemption="list"),
+    )
+    assert exempted.status == QuickFormResponse.Status.CLOSED
     assert processing.dpia_required is False
+    assert processing.dpia_required_source == "assessment"
+
+
+def _exemptions_go_to_review(quick_form):
+    """A form of your own that leaves exemptions to a reviewer."""
+    config = quick_form.on_accept[0]["config"]
+    config["mapping"] = [
+        r for r in config["mapping"] if r["outcome"] != "exemption_claimed"
+    ]
+    config["review"] = ["exemption_claimed"]
+    quick_form.save(update_fields=["on_accept"])
 
 
 @pytest.mark.django_db
-def test_dpia_inherits_the_screening(admin_client, processing, screening_form):
-    response_id = _screen(
-        admin_client,
-        processing,
-        {
-            CRITERIA: [
-                f"{CRITERIA}:choice:sensitive_data",
-                f"{CRITERIA}:choice:vulnerable_subjects",
-            ],
-            EXEMPTION: f"{EXEMPTION}:choice:none",
-        },
+def test_nothing_offered_without_a_screening_form(admin_client, processing):
+    options = admin_client.get(
+        "/api/quick-forms/assess-options/",
+        {"target": TARGET, "subject": str(processing.id)},
     )
-    created = admin_client.post(
-        "/api/privacy/dpias/",
-        {"name": "DPIA", "processing": str(processing.id)},
-        format="json",
-    )
-    assert created.status_code == 201, created.json()
-    dpia = Dpia.objects.get(id=created.json()["id"])
-    assert str(dpia.screening_id) == response_id
-    assert dpia.reasons == ["sensitive_data", "vulnerable_subjects"]
+    assert options.json() == []
 
 
 @pytest.mark.django_db
-def test_screening_needs_the_library(admin_client, processing):
-    response = admin_client.post(
-        f"/api/privacy/processings/{processing.id}/dpia-screening/"
-    )
-    assert response.status_code == 400
-
-
-def _load_custom_screening():
+def test_a_cloned_form_drives_the_screening(admin_client, processing):
     source = Path(__file__).resolve().parent.parent / (
         "library/libraries/quick-form-pre-dpia-screening.yaml"
     )
@@ -284,64 +228,236 @@ def _load_custom_screening():
     stored, error = StoredLibrary.store_library_content(content.encode())
     assert error is None, error
     assert stored.load() is None
-    return QuickForm.objects.get(urn="urn:acme:risk:quick_form:pre-dpia-screening")
+    custom = QuickForm.objects.get(urn="urn:acme:risk:quick_form:pre-dpia-screening")
 
-
-@pytest.mark.django_db
-def test_configured_custom_form_drives_the_screening(admin_client, processing):
-    custom = _load_custom_screening()
-    GlobalSettings.objects.update_or_create(
-        name="general", defaults={"value": {"dpia_screening_form": str(custom.id)}}
+    response = _screen(
+        admin_client,
+        custom,
+        processing,
+        _answers(
+            "urn:acme:risk:qf_page:pre-dpia-screening",
+            ["large_scale", "prevents_rights"],
+            exemption="none",
+        ),
     )
-    acme = "urn:acme:risk:qf_page:pre-dpia-screening"
-    started = admin_client.post(
-        f"/api/privacy/processings/{processing.id}/dpia-screening/"
-    )
-    assert started.status_code == 201
-    response = QuickFormResponse.objects.get(id=started.json()["id"])
-    assert response.quick_form_id == custom.id
-
-    criteria = f"{acme}:criteria:question:criteria"
-    exemption = f"{acme}:exemption:question:exemption"
-    admin_client.patch(
-        f"/api/quick-form-responses/{response.id}/",
-        {
-            "answers": {
-                f"{acme}:identification:question:role": f"{acme}:identification:question:role:choice:controller",
-                f"{acme}:identification:question:stage": f"{acme}:identification:question:stage:choice:new",
-                criteria: [
-                    f"{criteria}:choice:large_scale",
-                    f"{criteria}:choice:prevents_rights",
-                ],
-                exemption: f"{exemption}:choice:none",
-            }
-        },
-        format="json",
-    )
-    submitted = admin_client.post(
-        f"/api/quick-form-responses/{response.id}/set-status/",
-        {"status": "submitted"},
-        format="json",
-    )
-    assert submitted.status_code == 200, submitted.json()
-    processing.refresh_from_db()
     assert processing.dpia_required is True
-    assert screening_reasons(response) == ["large_scale", "prevents_rights"]
-    content = admin_client.get(f"/api/quick-form-responses/{response.id}/content/")
-    assert (
-        content.json()["answers"][f"{acme}:identification:question:name"]
-        == "Loyalty programme"
+    assert response.quick_form == custom
+
+
+@pytest.mark.django_db
+def test_an_applied_screening_is_dated_and_logged(
+    admin_client, processing, screening_form
+):
+    response = _screen(
+        admin_client,
+        screening_form,
+        processing,
+        _answers(SCREENING, ["evaluation_scoring", "large_scale"], exemption="none"),
+    )
+    assert processing.dpia_required_source == "assessment"
+    assert processing.dpia_required_set_at is not None
+    change = DpiaRequirementChange.objects.get(processing=processing)
+    assert (change.previous_dpia_required, change.dpia_required) == (False, True)
+    assert (change.source, change.response_id) == ("assessment", response.id)
+    assert change.folder_id == processing.folder_id
+
+
+@pytest.mark.django_db
+def test_a_manual_change_keeps_its_reason(admin_client, processing):
+    url = f"/api/privacy/processings/{processing.id}/"
+    changed = admin_client.patch(
+        url,
+        {"dpia_required": True, "dpia_required_note": "DPO call"},
+        format="json",
+    )
+    assert changed.status_code == 200, changed.json()
+    # Re-saving the same value, or other fields, writes no history.
+    admin_client.patch(url, {"dpia_required": True}, format="json")
+    admin_client.patch(url, {"description": "Edited"}, format="json")
+
+    processing.refresh_from_db()
+    assert processing.dpia_required_source == "manual"
+    change = DpiaRequirementChange.objects.get(processing=processing)
+    assert (change.source, change.note) == ("manual", "DPO call")
+    history = admin_client.get(
+        "/api/privacy/dpia-requirement-changes/", {"processing": str(processing.id)}
+    )
+    assert history.json()["count"] == 1
+
+
+@pytest.mark.django_db
+def test_a_reviewer_settles_an_exemption(
+    admin_client, reviewer_client, processing, screening_form
+):
+    _exemptions_go_to_review(screening_form)
+    response = _screen(
+        admin_client,
+        screening_form,
+        processing,
+        _answers(SCREENING, ["evaluation_scoring", "large_scale"], exemption="list"),
+    )
+    url = f"/api/quick-form-responses/{response.id}/set-status/"
+    accept = {"status": "closed", "resolution": "accepted"}
+    no_note = reviewer_client.post(
+        url, {**accept, "overrides": {TARGET: {"value": False}}}, format="json"
+    )
+    assert no_note.status_code == 400
+
+    accepted = reviewer_client.post(
+        url,
+        {**accept, "overrides": {TARGET: {"value": False, "note": "On the CNIL list"}}},
+        format="json",
+    )
+    assert accepted.status_code == 200, accepted.json()
+    processing.refresh_from_db()
+    assert processing.dpia_required is False
+    assert processing.dpia_required_source == "override"
+    assert processing.dpia_screening_id == response.id
+    change = DpiaRequirementChange.objects.get(processing=processing)
+    assert (change.source, change.note) == ("override", "On the CNIL list")
+
+
+@pytest.mark.django_db
+def test_overview_counts_where_processings_stand(
+    admin_client, processing, screening_form
+):
+    domain = processing.folder
+    Processing.objects.create(name="Untouched", folder=domain)
+    _screen(
+        admin_client,
+        screening_form,
+        processing,
+        _answers(SCREENING, ["evaluation_scoring", "large_scale"], exemption="none"),
+    )
+    _exemptions_go_to_review(screening_form)
+    pending = Processing.objects.create(name="Pending", folder=domain)
+    _screen(
+        admin_client,
+        screening_form,
+        pending,
+        _answers(SCREENING, ["evaluation_scoring", "large_scale"], exemption="list"),
+    )
+
+    overview = admin_client.get("/api/privacy/processings/dpia-overview/").json()
+    assert overview["required_without_dpia"] >= 1
+    assert overview["awaiting_review"] >= 1
+    assert overview["not_assessed"] >= 2
+
+    forms = admin_client.get("/api/privacy/processings/dpia-screening-forms/").json()
+    assert [(f["id"], f["problems"]) for f in forms] == [(str(screening_form.id), [])]
+
+
+DPIA = "urn:intuitem:risk:qf_page:dpia"
+
+
+@pytest.fixture
+def dpia_form(app_config):
+    stored = StoredLibrary.objects.get(urn="urn:intuitem:risk:library:dpia")
+    assert stored.load() is None
+    return QuickForm.objects.get(urn="urn:intuitem:risk:quick_form:dpia")
+
+
+def _start_dpia(client, quick_form, processing):
+    options = client.get(
+        "/api/quick-forms/assess-options/",
+        {"target": "processing.dpia", "subject": str(processing.id)},
+    ).json()
+    assert [o["id"] for o in options] == [str(quick_form.id)]
+    started = client.post(
+        f"/api/quick-forms/{quick_form.id}/start/",
+        {"subject": str(processing.id)},
+        format="json",
+    )
+    assert started.status_code == 200, started.json()
+    return QuickFormResponse.objects.get(
+        id=started.json()["redirect"].rsplit("/", 1)[-1]
     )
 
 
 @pytest.mark.django_db
-def test_setting_rejects_a_form_without_the_required_outcome(app_config):
-    stored = StoredLibrary.objects.get(
-        urn="urn:intuitem:risk:library:derogation-request"
+def test_a_dpia_is_a_form_on_the_processing(admin_client, processing, dpia_form):
+    response = _start_dpia(admin_client, dpia_form, processing)
+    assert response.subject == processing
+    assert response.ref_id.startswith("DPIA")
+    measures = response.answers.get(question__urn=f"{DPIA}:measures:question:measures")
+    assert measures.question.config == {"model": "applied_control", "multiple": True}
+
+    listed = admin_client.get(
+        "/api/quick-form-responses/", {"target": "processing.dpia"}
+    ).json()
+    assert [r["id"] for r in listed["results"]] == [str(response.id)]
+    screenings = admin_client.get(
+        "/api/quick-form-responses/", {"target": TARGET}
+    ).json()
+    assert screenings["count"] == 0
+
+
+@pytest.mark.django_db
+def test_an_accepted_dpia_is_the_processings_dpia(
+    admin_client, reviewer_client, processing, dpia_form
+):
+    response = _start_dpia(admin_client, dpia_form, processing)
+    response.status = QuickFormResponse.Status.SUBMITTED
+    response.save(update_fields=["status"])
+    accepted = reviewer_client.post(
+        f"/api/quick-form-responses/{response.id}/set-status/",
+        {"status": "closed", "resolution": "accepted"},
+        format="json",
     )
-    assert stored.load() is None
-    derogation = QuickForm.objects.get(
-        urn="urn:intuitem:risk:quick_form:derogation-request"
+    assert accepted.status_code == 200, accepted.json()
+    processing.refresh_from_db()
+    assert processing.dpia == response
+
+    Processing.objects.filter(pk=processing.pk).update(dpia_required=True)
+    overview = admin_client.get("/api/privacy/processings/dpia-overview/").json()
+    assert overview["required_with_dpia"] >= 1
+    assert str(processing.id) not in [g["id"] for g in overview["gaps"]]
+
+
+@pytest.mark.django_db
+def test_the_form_rating_rates_each_risk(admin_client, processing, dpia_form):
+    response = _start_dpia(admin_client, dpia_form, processing)
+    page = f"{DPIA}:illegitimate_access:question"
+    answers = {
+        f"{page}:severity": f"{page}:severity:choice:maximum",
+        f"{page}:likelihood": f"{page}:likelihood:choice:negligible",
+        f"{page}:residual_severity": f"{page}:residual_severity:choice:limited",
+        f"{page}:residual_likelihood": f"{page}:residual_likelihood:choice:limited",
+    }
+    patched = admin_client.patch(
+        f"/api/quick-form-responses/{response.id}/", {"answers": answers}, format="json"
     )
-    with pytest.raises(ValidationError):
-        validate_dpia_screening_form_value(str(derogation.id))
+    assert patched.status_code == 200, patched.json()
+    url = f"/api/quick-form-responses/{response.id}/content/"
+
+    content = admin_client.get(url).json()
+    (rating,) = content["ratings"]
+    assert (rating["ref_id"], rating["dimensions"][0]["label"]) == (
+        "privacy_risk",
+        "Severity",
+    )
+    points = {p["stage"]: p["level"] for p in rating["points"]}
+    # A maximum severity is never acceptable; limited × limited is to reduce.
+    assert points == {"current": "unacceptable", "residual": "to_reduce"}
+    assert content["computed_values"]["privacy_risk"] == 3.0
+    assert "residual_risk_unacceptable" not in (content["computed_outcome"] or {})
+
+    french = admin_client.get(url, HTTP_ACCEPT_LANGUAGE="fr").json()
+    assert french["ratings"][0]["dimensions"][0]["label"] == "Gravité"
+    severity = next(p for p in french["pages"] if f"{page}:severity" in p["questions"])
+    labels = [c["value"] for c in severity["questions"][f"{page}:severity"]["choices"]]
+    assert labels[0] == "Négligeable"
+
+    answers[f"{page}:residual_severity"] = f"{page}:residual_severity:choice:maximum"
+    admin_client.patch(
+        f"/api/quick-form-responses/{response.id}/", {"answers": answers}, format="json"
+    )
+    content = admin_client.get(url).json()
+    assert "residual_risk_unacceptable" in content["computed_outcome"]
+
+
+def test_the_dpia_target_previews_without_a_response():
+    from core.quick_form_apply import project
+
+    (row,) = project([{"target": "processing.dpia", "config": {}}], {}, {})
+    assert row["ok"], row

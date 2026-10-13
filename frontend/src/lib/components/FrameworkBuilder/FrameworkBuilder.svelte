@@ -11,8 +11,12 @@
 		type Framework,
 		type BuilderNode,
 		type RequirementNode,
-		type Question
+		type Question,
+		fitGrid,
+		type OutcomeRule,
+		type Scale
 	} from './builder-state';
+	import ScalesEditor from './ScalesEditor.svelte';
 	import type { DraftJSON } from './builder-api';
 	import {
 		localeLabel,
@@ -199,6 +203,26 @@
 				scores_definition: { ...current, aggregation: value }
 			});
 		}
+	}
+
+	// Scales questions or ratings use: deleting one would break them.
+	let usedScales = $derived(
+		[
+			...$rootNodesStore.flatMap((bn) =>
+				bn.questions.map((bq) => (bq.question.config as { scale?: string } | null)?.scale ?? '')
+			),
+			...($frameworkStore.outcomes_definition ?? []).flatMap((r) =>
+				r.kind === 'rating' ? (r.dimensions ?? []) : []
+			)
+		].filter(Boolean)
+	);
+
+	// A scale that gains or loses levels resizes the grids that cross it.
+	function updateScales(scales: Scale[]) {
+		const outcomes = ($frameworkStore.outcomes_definition ?? []).map((r: OutcomeRule) =>
+			r.kind === 'rating' && r.grid ? { ...r, grid: fitGrid(r, scales) } : r
+		);
+		builder.updateFramework({ scales_definition: scales, outcomes_definition: outcomes });
 	}
 
 	// Single-object reference questions that can name what a response is about.
@@ -1035,6 +1059,16 @@
 									{/if}
 								</div>
 							{/if}
+							{#if mode === 'quick_form'}
+								<div class={SECTION_CARD}>
+									<ScalesEditor
+										scales={$frameworkStore.scales_definition ?? []}
+										used={usedScales}
+										activeLanguage={$activeLanguageStore}
+										onupdate={updateScales}
+									/>
+								</div>
+							{/if}
 							<!-- Outcome rules -->
 							<div class={SECTION_CARD}>
 								<OutcomesEditor
@@ -1045,6 +1079,7 @@
 									pages={rulePages}
 									catalog={celCatalog}
 									groups={ruleGroups}
+									scales={$frameworkStore.scales_definition ?? []}
 								/>
 							</div>
 

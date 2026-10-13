@@ -11,11 +11,12 @@ from core.views import (
     BaseModelViewSet as AbstractBaseModelViewSet,
     ExportMixin,
     actor_prefetch,
-    check_folder_add_permission,
     escape_excel_formula,
 )
 from django_filters.rest_framework import DjangoFilterBackend
+from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponse
+from django.utils.translation import gettext as _
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -36,7 +37,8 @@ from .models import (
     Processing,
     RightRequest,
     DataBreach,
-    Dpia,
+    DpiaRequirementChange,
+    DpiaRequirementSource,
     ART6_LAWFUL_BASIS_CHOICES,
     ART9_SPECIAL_CATEGORY_CONDITION_CHOICES,
     TRANSFER_MECHANISM_CHOICES,
@@ -340,13 +342,15 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
         "perimeters",
         "personal_data__category",
         "data_subjects__category",
+        "dpia_required",
+        "dpia_required_source",
     ]
 
     def get_queryset(self):
         return (
             super()
             .get_queryset()
-            .select_related("folder")
+            .select_related("folder", "dpia_screening")
             .prefetch_related(
                 "personal_data__category",
                 "data_subjects",
@@ -587,29 +591,6 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
     def status(self, request):
         return Response(dict(Processing.STATUS_CHOICES))
 
-    @action(detail=True, methods=["post"], url_path="dpia-screening")
-    def dpia_screening(self, request, pk=None):
-        from django.contrib.auth.models import Permission
-        from .screening import start_screening
-
-        processing = self.get_object()
-        if not RoleAssignment.is_access_allowed(
-            user=request.user,
-            perm=Permission.objects.get(codename="change_processing"),
-            folder=processing.folder,
-        ):
-            return Response(status=status.HTTP_403_FORBIDDEN)
-        response, resumed = start_screening(processing, request)
-        return Response(
-            {
-                "id": response.id,
-                "ref_id": response.ref_id,
-                "resumed": resumed,
-                "redirect": f"/quick-form-responses/{response.id}",
-            },
-            status=status.HTTP_200_OK if resumed else status.HTTP_201_CREATED,
-        )
-
     @action(detail=False, name="Get all processing assigned_to actors")
     def assigned_to(self, request):
         return Response(
@@ -617,6 +598,101 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
                 Actor.objects.filter(assigned_processings__isnull=False).distinct(),
                 many=True,
             ).data
+        )
+
+    @action(detail=False, name="Get DPIA requirement choices")
+    def dpia_required(self, request):
+        return Response({"true": _("DPIA required"), "false": _("No DPIA required")})
+
+    @action(detail=False, name="Get DPIA requirement source choices")
+    def dpia_required_source(self, request):
+        return Response(dict(DpiaRequirementSource.choices))
+
+    @action(detail=False, url_path="dpia-screening-forms", name="DPIA screening forms")
+    def dpia_screening_forms(self, request):
+        """Forms the caller can see whose accepted responses set a processing's
+        DPIA requirement, with what keeps them from applying."""
+        from core.models import QuickForm
+        from core.quick_form_apply import on_accept_health
+
+        viewable = RoleAssignment.get_viewable_object_ids(request.user, QuickForm)
+        rows = []
+        cache: dict = {}
+        for quick_form in (
+            QuickForm.objects.filter(id__in=viewable)
+            .exclude(on_accept=[])
+            .select_related("library")
+            .order_by("name")
+        ):
+            health = next(
+                (
+                    h
+                    for h in on_accept_health(quick_form, cache)
+                    if h["target"] == "processing.dpia_required"
+                ),
+                None,
+            )
+            if health is None:
+                continue
+            rows.append(
+                {
+                    "id": str(quick_form.id),
+                    "name": quick_form.get_name_translated,
+                    "library": quick_form.library.name if quick_form.library else None,
+                    "problems": health["problems"],
+                }
+            )
+        return Response(rows)
+
+    @action(detail=False, url_path="dpia-overview", name="DPIA overview")
+    def dpia_overview(self, request):
+        """Where the processings the caller can see stand on DPIAs."""
+        from core.models import QuickFormResponse
+        from core.quick_form_apply import forms_with_target
+
+        viewable = Processing.objects.filter(
+            id__in=RoleAssignment.get_viewable_object_ids(request.user, Processing)
+        )
+        on_processings = QuickFormResponse.objects.filter(
+            subject_content_type=ContentType.objects.get_for_model(Processing)
+        )
+        started = on_processings.filter(
+            quick_form__in=forms_with_target("processing.dpia")
+        ).values("subject_object_id")
+        required = viewable.filter(dpia_required=True)
+        with_dpia = required.filter(id__in=started).count()
+        # The to-do list: required, and no DPIA started.
+        gaps = required.exclude(id__in=started).select_related("folder")
+        not_required = viewable.filter(dpia_required=False)
+        # Screenings waiting on a reviewer, whatever form they came from.
+        awaiting_review = on_processings.filter(
+            quick_form__in=forms_with_target("processing.dpia_required"),
+            subject_object_id__in=viewable.values("id"),
+            status__in=[
+                QuickFormResponse.Status.SUBMITTED,
+                QuickFormResponse.Status.IN_REVIEW,
+            ],
+        ).count()
+        return Response(
+            {
+                "total": viewable.count(),
+                "required_with_dpia": with_dpia,
+                "required_without_dpia": required.count() - with_dpia,
+                "not_required": not_required.exclude(dpia_required_source="").count(),
+                # Never set by a screening or by hand: the default `False`.
+                "not_assessed": not_required.filter(dpia_required_source="").count(),
+                "awaiting_review": awaiting_review,
+                "gaps": [
+                    {
+                        "id": str(p.id),
+                        "ref_id": p.ref_id,
+                        "name": p.name,
+                        "folder": p.folder.name,
+                        "set_at": p.dpia_required_set_at,
+                    }
+                    for p in gaps.order_by("dpia_required_set_at", "name")[:50]
+                ],
+            }
         )
 
     @action(detail=False, name="processing metrics")
@@ -907,78 +983,21 @@ class DataBreachViewSet(BaseModelViewSet):
         return Response(dict(DataBreach.STATUS_CHOICES))
 
 
-class DpiaViewSet(BaseModelViewSet):
-    """
-    API endpoint that allows DPIAs to be viewed or edited.
-    """
+class DpiaRequirementChangeViewSet(BaseModelViewSet):
+    """History of DPIA requirement changes. Written only by `set_dpia_required`."""
 
-    model = Dpia
-    filterset_fields = [
-        "name",
-        "folder",
-        "perimeter",
-        "processing",
-        "status",
-        "decision",
-        "authors",
-        "reviewers",
-        "validated_by",
-        "review_due",
-    ]
-    search_fields = ["name", "ref_id", "description"]
+    model = DpiaRequirementChange
+    http_method_names = ["get", "head", "options"]
+    filterset_fields = ["processing", "dpia_required", "source", "changed_by", "folder"]
+    ordering = ["-created_at"]
 
     def get_queryset(self):
         return (
             super()
             .get_queryset()
-            .select_related(
-                "folder",
-                "perimeter",
-                "processing",
-                "validated_by",
-                "design_risk_assessment",
-                "incident_risk_assessment",
-            )
-            .prefetch_related("authors", "reviewers")
+            .select_related("processing", "response", "changed_by", "folder")
         )
 
-    @action(detail=False, name="Get status choices")
-    def status(self, request):
-        return Response(dict(Dpia.Status.choices))
-
-    @action(detail=False, name="Get decision choices")
-    def decision(self, request):
-        return Response(dict(Dpia.Decision.choices))
-
-    @action(detail=False, name="Get reason choices")
-    def reasons(self, request):
-        return Response(dict(Dpia.Reason.choices))
-
-    @action(detail=True, name="DPIA report")
-    def report(self, request, pk=None):
-        from .dpia import build_report
-
-        return Response(build_report(self.get_object()))
-
-    @action(detail=True, methods=["post"], url_path="risk-registers")
-    def risk_registers(self, request, pk=None):
-        from core.models import RiskAssessment, RiskMatrix, RiskScenario
-        from .dpia import create_risk_registers
-
-        dpia = self.get_object()
-        check_folder_add_permission(
-            request.user, dpia.folder, RiskAssessment, RiskScenario
-        )
-        matrix = RiskMatrix.objects.filter(pk=request.data.get("risk_matrix")).first()
-        if matrix is None:
-            return Response(
-                {"risk_matrix": "This field is required."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        create_risk_registers(dpia, matrix)
-        return Response(
-            {
-                "design_risk_assessment": dpia.design_risk_assessment_id,
-                "incident_risk_assessment": dpia.incident_risk_assessment_id,
-            }
-        )
+    @action(detail=False, name="Get source choices")
+    def source(self, request):
+        return Response(dict(DpiaRequirementSource.choices))

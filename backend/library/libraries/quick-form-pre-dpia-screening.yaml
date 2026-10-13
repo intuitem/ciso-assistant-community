@@ -7,7 +7,7 @@ description: >
   WP29/EDPB criteria as CNIL applies them. Two or more criteria met means a
   DPIA is required.
 copyright: © intuitem
-version: 1
+version: 3
 publication_date: 2026-09-28
 provider: intuitem
 packager: intuitem
@@ -17,8 +17,20 @@ objects:
       ref_id: pre-dpia-screening
       name: Pre-DPIA screening
       description: Is a data protection impact assessment required for this processing?
-      title_question_urn: urn:intuitem:risk:qf_page:pre-dpia-screening:identification:question:name
-      ref_id_prefix: DPIA
+      ref_id_prefix: PDS
+      subject_question_urn: urn:intuitem:risk:qf_page:pre-dpia-screening:identification:question:processing
+      on_accept:
+        - target: processing.dpia_required
+          config:
+            mapping:
+              - outcome: dpia_required
+                value: true
+              - outcome: dpia_recommended
+                value: true
+              - outcome: dpia_not_required
+                value: false
+              - outcome: exemption_claimed
+                value: false
       scores_definition:
         min: 0
         max: 9
@@ -26,22 +38,23 @@ objects:
       outcomes_definition:
         - ref_id: dpia_required
           label: DPIA required
-          color: red
+          color: '#dc2626'
           description: Two or more criteria are met — a full DPIA must be carried out before the processing starts.
-          expression: 'response.score_sum >= 2'
+          expression: 'response.score_sum >= 2 && !("exemption:question:exemption" in answers && answers["exemption:question:exemption"].answered && !("exemption:question:exemption:choice:none" in answers["exemption:question:exemption"].selected_choices))'
         - ref_id: dpia_recommended
           label: DPIA recommended
-          color: orange
-          description: One criterion is met. A DPIA is not mandatory but the DPO should confirm.
+          color: '#ea580c'
+          description: One criterion is met. A DPIA is not mandatory, but the screening errs on the safe side and marks it required; set it manually if the DPO decides otherwise.
           expression: 'response.score_sum == 1'
         - ref_id: dpia_not_required
           label: No DPIA required
-          color: green
+          color: '#16a34a'
           description: No criterion is met. Record this screening as the justification.
           expression: 'response.complete && response.score_sum == 0'
         - ref_id: exemption_claimed
-          label: Exemption claimed — DPO review needed
-          color: purple
+          label: Exemption claimed — no DPIA required
+          description: Two or more criteria are met but an exemption applies. Keep its reference with this screening.
+          color: '#7c3aed'
           expression: '"exemption:question:exemption" in answers && answers["exemption:question:exemption"].answered && !("exemption:question:exemption:choice:none" in answers["exemption:question:exemption"].selected_choices)'
       pages:
         - urn: urn:intuitem:risk:qf_page:pre-dpia-screening:identification
@@ -54,12 +67,11 @@ objects:
             processing activity. Keep the completed response as evidence of the
             decision — Article 35(1) GDPR requires you to be able to justify it.
           questions:
-            urn:intuitem:risk:qf_page:pre-dpia-screening:identification:question:name:
-              type: text
-              text: Name of the processing activity
-            urn:intuitem:risk:qf_page:pre-dpia-screening:identification:question:purpose:
-              type: text
-              text: Purpose of the processing
+            urn:intuitem:risk:qf_page:pre-dpia-screening:identification:question:processing:
+              type: object_reference
+              text: Processing
+              config:
+                model: processing
             urn:intuitem:risk:qf_page:pre-dpia-screening:identification:question:role:
               type: unique_choice
               text: Our role

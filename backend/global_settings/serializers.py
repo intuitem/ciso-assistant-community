@@ -66,32 +66,6 @@ def validate_default_dashboard_value(value):
     return str(value)
 
 
-def validate_dpia_screening_form_value(value):
-    from core.models import QuickForm
-    from privacy.screening import is_screening_compatible
-
-    if value in (None, ""):
-        return None
-    try:
-        uuid.UUID(str(value))
-    except ValueError, TypeError:
-        raise serializers.ValidationError(
-            {"dpia_screening_form": "Must be a valid UUID."}
-        )
-    quick_form = QuickForm.objects.filter(id=value).first()
-    if quick_form is None:
-        raise serializers.ValidationError(
-            {"dpia_screening_form": "Quick form does not exist."}
-        )
-    if not is_screening_compatible(quick_form):
-        raise serializers.ValidationError(
-            {
-                "dpia_screening_form": "This quick form has no dpia_required outcome, so it cannot drive the DPIA screening."
-            }
-        )
-    return str(value)
-
-
 GENERAL_SETTINGS_KEYS = [
     "security_objective_scale",
     "organisation_score_scale",
@@ -136,7 +110,6 @@ GENERAL_SETTINGS_KEYS = [
     "documentation_score_first",
     "use_risk_category_label",
     "disabled_email_templates",
-    "dpia_screening_form",
 ]
 
 LLM_URL_DEFAULTS = {
@@ -313,8 +286,6 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                 validated_data["value"][key] = temp
             if key == "default_custom_analytics_dashboard":
                 validated_data["value"][key] = validate_default_dashboard_value(value)
-            if key == "dpia_screening_form":
-                validated_data["value"][key] = validate_dpia_screening_form_value(value)
         # Get new currency value
         new_currency = validated_data["value"].get("currency")
 

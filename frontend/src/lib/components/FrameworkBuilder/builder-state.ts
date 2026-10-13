@@ -98,13 +98,38 @@ export interface RequirementNode {
 	folder: { id: string; str: string } | string;
 }
 
+export interface ScaleLevel {
+	ref_id: string;
+	label: string;
+	description?: string;
+	color?: string;
+	translations?: Record<string, { label?: string; description?: string }>;
+}
+
+export interface Scale {
+	ref_id: string;
+	label?: string;
+	levels: ScaleLevel[];
+	translations?: Record<string, { label?: string }>;
+}
+
 export interface OutcomeRule {
 	ref_id: string;
 	annotation: string;
 	color: string | null;
 	expression: string;
-	/** 'number' rules compute a value instead of firing. */
-	kind?: 'number';
+	/** 'number' rules compute a value instead of firing; 'rating' classifies the
+	 *  answers to its scales into named levels (see core.quick_form_ratings). */
+	kind?: 'number' | 'rating';
+	/** Ratings: the scales measured, their named levels, and either a grid (two
+	 *  dimensions; rows: the first, low to high) or rules (`when` CEL over `dims`),
+	 *  plus, optionally, the page ids that feed it. */
+	dimensions?: string[];
+	label?: string;
+	levels?: { ref_id: string; label: string; color?: string; translations?: Translations }[];
+	grid?: string[][];
+	rules?: { level: string; when: string }[];
+	pages?: string[];
 	/** Frameworks: the rule applies only to audits whose scope includes one of these groups. */
 	implementation_groups?: string[];
 	translations?: Translations | null;
@@ -135,6 +160,8 @@ export interface Framework {
 	subject_question_urn?: string | null;
 	/** Quick forms: what an accepted response writes, e.g. the vendor's tier. */
 	on_accept?: Record<string, unknown>[];
+	/** Quick forms: ordered levels questions share (`config.scale`). */
+	scales_definition?: Scale[];
 	field_visibility: Record<string, string>;
 	locale?: string;
 	translations?: Translations | null;
@@ -824,6 +851,7 @@ export function serializeDraft(fw: Framework, rootNodes: BuilderNode[]): DraftJS
 			outcomes_definition: fw.outcomes_definition as Record<string, unknown>[] | null,
 			subject_question_urn: fw.subject_question_urn ?? null,
 			on_accept: fw.on_accept ?? [],
+			scales_definition: (fw.scales_definition ?? []) as unknown as Record<string, unknown>[],
 			field_visibility: fw.field_visibility,
 			urn_namespace: fw.urn_namespace,
 			ref_id: fw.ref_id
@@ -861,6 +889,7 @@ export function hydrateDraft(
 		outcomes_definition: meta.outcomes_definition as OutcomeRule[] | null,
 		subject_question_urn: (meta.subject_question_urn ?? null) as string | null,
 		on_accept: (meta.on_accept ?? []) as Record<string, unknown>[],
+		scales_definition: (meta.scales_definition ?? []) as unknown as Scale[],
 		field_visibility: meta.field_visibility ?? {},
 		urn_namespace: meta.urn_namespace ?? 'custom',
 		ref_id: meta.ref_id ?? null
@@ -1891,13 +1920,37 @@ export function createBuilderState(
 			newLocale,
 			['name', 'description']
 		);
-		// Swap nested translations in outcomes_definition entries
+		// Swap nested translations in outcomes_definition entries, and in a rating's levels
 		const swappedOutcomes = swapJsonArrayTranslations(
 			fw.outcomes_definition as Record<string, unknown>[] | null,
 			oldLocale,
 			newLocale,
-			['annotation']
+			['annotation', 'label']
+		)?.map((rule) =>
+			Array.isArray(rule.levels)
+				? {
+						...rule,
+						levels: swapJsonArrayTranslations(rule.levels, oldLocale, newLocale, ['label'])
+					}
+				: rule
 		);
+		// Swap nested translations in scales_definition entries and their levels
+		const swappedScales = (
+			swapJsonArrayTranslations(
+				(fw.scales_definition ?? []) as unknown as Record<string, unknown>[],
+				oldLocale,
+				newLocale,
+				['label']
+			) ?? []
+		).map((scale) => ({
+			...scale,
+			levels: swapJsonArrayTranslations(
+				(scale.levels ?? []) as Record<string, unknown>[],
+				oldLocale,
+				newLocale,
+				['label', 'description']
+			)
+		})) as unknown as Scale[];
 
 		// Update available_languages
 		const langs = new Set(fw.available_languages ?? []);
@@ -1913,7 +1966,8 @@ export function createBuilderState(
 			translations: fwTrans,
 			scores_definition: swappedScores,
 			implementation_groups_definition: swappedIgs,
-			outcomes_definition: swappedOutcomes as typeof f.outcomes_definition,
+			outcomes_definition: swappedOutcomes as unknown as typeof f.outcomes_definition,
+			scales_definition: swappedScales,
 			available_languages: [...langs].sort()
 		}));
 
@@ -2211,4 +2265,20 @@ export function setBuilderContext(store: BuilderStore) {
 
 export function getBuilderContext(): BuilderStore {
 	return getContext<BuilderStore>(CONTEXT_KEY);
+}
+
+/** A rating's grid sized to its two dimensions: one row per level of the first (low
+ *  to high), one cell per level of the second, unknown or missing cells set to the
+ *  first level. */
+export function fitGrid(rule: OutcomeRule, scales: Scale[]): string[][] {
+	const size = (ref?: string) => scales.find((s) => s.ref_id === ref)?.levels.length ?? 0;
+	const levels = (rule.levels ?? []).map((l) => l.ref_id);
+	const fallback = levels[0] ?? '';
+	const [rows, cells] = rule.dimensions ?? [];
+	return Array.from({ length: size(rows) }, (_, yi) =>
+		Array.from({ length: size(cells) }, (_, xi) => {
+			const cell = rule.grid?.[yi]?.[xi];
+			return cell && levels.includes(cell) ? cell : fallback;
+		})
+	);
 }
