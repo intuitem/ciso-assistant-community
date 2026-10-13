@@ -465,6 +465,7 @@ class MetricInstanceViewSet(BaseModelViewSet):
             CompositionError,
             compose,
             is_composable,
+            permitted,
             readable_instances,
         )
 
@@ -504,11 +505,23 @@ class MetricInstanceViewSet(BaseModelViewSet):
             ).count(),
         }
         if not is_composable(instance):
+            # Edited on the definition itself, which every metric using it
+            # follows: the drawer previews it where this metric lives, at its
+            # frequency, and follows its recomputation after a save.
             return Response(
                 {
                     "composable": False,
                     "definition": about,
                     "expression": definition.expression,
+                    "folder": {
+                        "id": str(instance.folder_id),
+                        "str": str(instance.folder),
+                    },
+                    "collection_frequency": instance.collection_frequency,
+                    "last_computed_at": instance.last_computed_at,
+                    "can_change_definition": permitted(
+                        request.user, ["change_metricdefinition"], definition.folder
+                    ),
                 }
             )
         picks = {

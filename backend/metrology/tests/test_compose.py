@@ -641,7 +641,16 @@ class TestEdit:
         response = call("get", "composition", {}, admin(), pk=str(instance.id))
         assert response.data["composable"] is False
         assert response.data["definition"]["id"] == str(summed.id)
+        # Where the drawer previews it, and whether it may save it.
+        assert response.data["folder"]["id"] == str(group.id)
+        assert response.data["collection_frequency"] == instance.collection_frequency
+        assert response.data["can_change_definition"] is True
         assert self.edit_raw(instance).status_code == 400
+        # The definition lives above this member's domain: theirs to read only.
+        user = member(group)
+        response = call("get", "composition", {}, user, pk=str(instance.id))
+        assert response.status_code == 200, response.data
+        assert response.data["can_change_definition"] is False
 
     def edit_raw(self, instance):
         return call("put", "composition", {}, admin(), pk=str(instance.id))

@@ -40,12 +40,12 @@
 
 	// Editing a computed metric: its formula, shown here and edited in the
 	// drawer the metric's page uses, so the formula and its picks have one
-	// place to change. A formula the drawer cannot show is edited on its
-	// definition.
+	// place to change, whether the formula is the metric's own or its
+	// definition's.
 	import { onMount, tick } from 'svelte';
-	import { goto } from '$app/navigation';
 	import FormulaDrawer from '$lib/components/Metrology/FormulaDrawer.svelte';
 	import type { Composition, Saved } from '$lib/components/Metrology/ComposeMetricEditor.svelte';
+	import type { DefinitionComposition } from '$lib/components/Metrology/DefinitionFormulaPanel.svelte';
 
 	let composition = $state<any>(null);
 	async function loadComposition() {
@@ -59,9 +59,10 @@
 	}
 	onMount(loadComposition);
 
-	let editedComposition = $state<Composition | null>(null);
+	let editedComposition = $state<Composition | DefinitionComposition | null>(null);
 	let editFormulaButton = $state<HTMLButtonElement | null>(null);
-	// Remounts the definition picker on a save: it shows a fork's new name.
+	// Remounts the definition picker and the input choices on a save: they
+	// show a fork's new name, and a changed definition's inputs.
 	let definitionVersion = $state(0);
 
 	async function closeFormula() {
@@ -88,12 +89,6 @@
 	const formula = $derived((composition?.expression ?? '') as string);
 
 	function editFormula() {
-		if (!composition?.composable) {
-			goto(
-				`/metric-definitions/${composition.definition.id}/edit?next=${encodeURIComponent(`/metric-instances/${object.id}`)}`
-			);
-			return;
-		}
 		editedComposition = composition;
 	}
 </script>
@@ -116,12 +111,7 @@
 			bind:this={editFormulaButton}
 			data-testid="instance-edit-formula"
 		>
-			{#if composition?.composable}
-				{m.editFormula()}
-			{:else}
-				<i class="fa-solid fa-arrow-up-right-from-square mr-1" aria-hidden="true"
-				></i>{m.editOnDefinition()}
-			{/if}
+			{m.editFormula()}
 		</button>
 	</div>
 {/if}
@@ -149,11 +139,13 @@
 	/>
 {/key}
 {#if !composition?.composable}
-	<InputChoicesEditor
-		bind:value={$inputChoices}
-		definition={$definitionValue as string | undefined}
-		folder={$folderValue as string | undefined}
-	/>
+	{#key definitionVersion}
+		<InputChoicesEditor
+			bind:value={$inputChoices}
+			definition={$definitionValue as string | undefined}
+			folder={$folderValue as string | undefined}
+		/>
+	{/key}
 {/if}
 <Select
 	{form}

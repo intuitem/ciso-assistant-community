@@ -3,12 +3,13 @@
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
 	import MetricSampleChart from '$lib/components/Chart/MetricSampleChart.svelte';
 	import { m } from '$paraglide/messages';
-	import { goto, invalidate, invalidateAll } from '$app/navigation';
+	import { invalidate, invalidateAll } from '$app/navigation';
 	import { page } from '$app/state';
 	import { getModalStore } from '$lib/components/Modals/stores';
 	import ComposeMetricModal from '$lib/components/Modals/ComposeMetricModal.svelte';
 	import FormulaDrawer from '$lib/components/Metrology/FormulaDrawer.svelte';
 	import type { Composition } from '$lib/components/Metrology/ComposeMetricEditor.svelte';
+	import type { DefinitionComposition } from '$lib/components/Metrology/DefinitionFormulaPanel.svelte';
 	import { onDestroy, onMount, tick } from 'svelte';
 	import { get } from 'svelte/store';
 	import { tableRefreshers } from '$lib/utils/stores';
@@ -90,33 +91,16 @@
 
 	const modalStore = getModalStore();
 
-	// Edit formula: a drawer beside the metric, for a formula made of picked
-	// instances; any other formula is edited on its definition.
+	// Edit formula: a drawer beside the metric, for any formula: its own
+	// (picked instances) or its definition's.
 	let formulaBusy = $state(false);
-	let editedComposition = $state<Composition | null>(null);
+	let editedComposition = $state<Composition | DefinitionComposition | null>(null);
 	let editFormulaButton = $state<HTMLButtonElement | null>(null);
 	async function closeFormula() {
 		editedComposition = null;
 		await tick();
 		editFormulaButton?.focus();
 	}
-	// Known when the page opens, so the button says where it leads: the modal,
-	// or the definition for a formula the modal does not edit.
-	let formulaComposable = $state<boolean | null>(null);
-	// Asked once per metric: the page data reloads while a recomputation runs.
-	let composableAskedFor = '';
-	$effect(() => {
-		const id = metricInstance?.id;
-		if (!id || !metricInstance?.is_derived || composableAskedFor === id) return;
-		composableAskedFor = id;
-		formulaComposable = null;
-		fetch(`/fe-api/metrology/composition/${id}`)
-			.then((res) => (res.ok ? res.json() : null))
-			.then((body) => {
-				if (body && metricInstance?.id === id) formulaComposable = !!body.composable;
-			})
-			.catch(() => {});
-	});
 	async function editFormula() {
 		// Open already: a second fetch would start the edit over.
 		if (editedComposition) return;
@@ -126,12 +110,6 @@
 			const composition = res.ok ? await res.json() : null;
 			if (!composition) {
 				refreshState = 'failed';
-				return;
-			}
-			if (!composition.composable) {
-				await goto(
-					`/metric-definitions/${composition.definition.id}/edit?next=${encodeURIComponent(page.url.pathname)}`
-				);
 				return;
 			}
 			editedComposition = composition;
@@ -214,13 +192,9 @@
 				data-testid="edit-formula-button"
 			>
 				<i
-					class="fa-solid {formulaBusy
-						? 'fa-spinner fa-spin'
-						: formulaComposable === false
-							? 'fa-arrow-up-right-from-square'
-							: 'fa-square-root-variable'} mr-2"
+					class="fa-solid {formulaBusy ? 'fa-spinner fa-spin' : 'fa-square-root-variable'} mr-2"
 					aria-hidden="true"
-				></i>{formulaComposable === false ? m.editOnDefinition() : m.editFormula()}
+				></i>{m.editFormula()}
 			</button>
 			<button
 				type="button"

@@ -1,14 +1,18 @@
 <script lang="ts">
 	// A computed metric's formula, edited beside the metric: no backdrop, so
 	// the page stays readable while the drawer shows the new line against the
-	// metric as it is now.
+	// metric as it is now. A formula of picked metrics is the metric's own;
+	// any other is its definition's, edited as the definition form does.
 	import { fly } from 'svelte/transition';
 	import ComposeMetricEditor, { type Composition, type Saved } from './ComposeMetricEditor.svelte';
+	import DefinitionFormulaPanel, {
+		type DefinitionComposition
+	} from './DefinitionFormulaPanel.svelte';
 
 	interface Props {
 		instanceId: string;
 		// Null: the drawer is closed.
-		composition: Composition | null;
+		composition: Composition | DefinitionComposition | null;
 		onClose: () => void;
 		onSaved: (saved: Saved) => void;
 	}
@@ -24,18 +28,30 @@
 		transition:fly={{ x: 420, duration: 220 }}
 		role="dialog"
 		aria-modal="false"
-		aria-label={composition.name}
+		aria-label={composition.composable ? composition.name : composition.definition.name}
 		data-testid="formula-drawer"
 	>
-		<ComposeMetricEditor
-			layout="drawer"
-			{instanceId}
-			{composition}
-			{onClose}
-			onSaved={(saved) => {
-				onSaved(saved);
-				onClose();
-			}}
-		/>
+		{#if composition.composable}
+			<ComposeMetricEditor
+				layout="drawer"
+				{instanceId}
+				{composition}
+				{onClose}
+				onSaved={(saved) => {
+					onSaved(saved);
+					onClose();
+				}}
+			/>
+		{:else}
+			<DefinitionFormulaPanel
+				{instanceId}
+				{composition}
+				{onClose}
+				onSaved={(saved) => {
+					onSaved(saved);
+					onClose();
+				}}
+			/>
+		{/if}
 	</aside>
 {/if}
