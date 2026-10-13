@@ -8,7 +8,7 @@
 	import { m } from '$paraglide/messages';
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
 	import RingProgress from '$lib/components/DataViz/RingProgress.svelte';
-	import { displayScoreColor, getScoreHexColor } from '$lib/utils/helpers';
+	import { displayScoreColor, getScoreHexColor, roundScore } from '$lib/utils/helpers';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import ComparisonRadarChart from '$lib/components/Chart/ComparisonRadarChart.svelte';
 
@@ -309,8 +309,10 @@
 					name="maturity_radar"
 					title={m.maturity()}
 					labels={data.baseAudit.radar_data.labels}
-					baseData={data.baseAudit.radar_data.maturity_scores}
-					compareData={data.compareAudit.radar_data.maturity_scores}
+					baseData={data.baseAudit.radar_data.maturity_scores.map((v: number) => roundScore(v))}
+					compareData={data.compareAudit.radar_data.maturity_scores.map((v: number) =>
+						roundScore(v)
+					)}
 					baseName={data.baseAudit.name}
 					compareName={data.compareAudit.name}
 					maxValue={data.baseAudit.max_score || 100}

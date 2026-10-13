@@ -63,6 +63,29 @@ The export writes each requirement's **score** into the official template, so a 
 - Observations from requirement assessments populate the comments column.
 - Only those cells change: the rest of the official tool (cover page, formulas, summary sheet, charts, score dropdowns) is preserved untouched, and the summary is recalculated when the file is opened.
 
+## Checking the CCB conformity criteria
+
+CyFun 2025 audits check, as you score, the conditions of the CCB's Conformity Assessment Scheme for their assurance level:
+
+|                                                                           | BASIC        | IMPORTANT    | ESSENTIAL                                                  |
+| ------------------------------------------------------------------------- | ------------ | ------------ | ---------------------------------------------------------- |
+| Total maturity                                                            | ≥ 2.5        | ≥ 3          | ≥ 3.5                                                      |
+| Each key measure, including those of the lower levels                     | ≥ 2.5        | ≥ 3          | ≥ 3                                                        |
+| Each category                                                             | –            | –            | ≥ 3                                                        |
+| Requirements marked **Not applicable** (measures excluded from the scope) | at most 1    | at most 3    | at most 5                                                  |
+| Never excluded                                                            | key measures | key measures | key measures and controls linked to the management aspects |
+
+On the audit page, a tile counts the criteria met (for instance _4 / 4 outcomes met_) and turns green when they all are; click it to see each criterion, met or not met, with one column per level and a **CCB conformity criteria met** line when all the criteria of that level hold.
+
+- **Which levels.** An audit shows the criteria of the levels it covers: BASIC when its BASIC implementation group is selected, IMPORTANT for IMPORTANT, ESSENTIAL for ESSENTIAL. An audit without implementation groups covers the whole framework and shows all three levels. An audit limited to key measures shows none: key measures alone are not a level.
+- **How it counts.** The total maturity is the maturity score of the level's requirements, computed like the audit's. A key measure's maturity is the average of its documentation and implementation scores; a key measure that is not applicable or not scored fails. A category is a second-level node such as GV.OC. Scores are compared unrounded, as in the CCB tools: a maturity of 2.497 shows as 2.50 but does not reach 2.5.
+- **When it updates.** The criteria are re-evaluated whenever a score, a documentation score or a compliance changes, and when the audit's scope or scoring settings change.
+- **Who sees it.** The criteria show to whoever sees the audit's **Compliance** field (see [field visibility](../../guides/customize-audit.md#field-visibility)).
+
+The check matches the CCB tool only with the CCB's scoring settings described [above](#before-you-export), which new CyFun 2025 audits get by default: **Average of averages**, **Anchor N/A to target score** with the level's target, and the documentation score shown. With other settings — for instance on audits created before these defaults — the verdict can differ from the tool's.
+
+This is a self-check: conformity is confirmed by the Conformity Assessment Body, from the official self-assessment tool's summary.
+
 ## Related
 
 - [CyFun framework on the CCB website](https://atwork.safeonweb.be/tools-resources/cyberfundamentals-framework)

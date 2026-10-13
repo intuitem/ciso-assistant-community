@@ -515,7 +515,7 @@ class TestDeepTreeAvgOfAvg:
         ca.save()
 
         scores = ca.get_global_score()
-        assert scores["implementation_score"] == 68.33
+        assert scores["implementation_score"] == pytest.approx(205 / 3)
 
     def test_flat_avg_differs_from_recursive(self, deep_tree_setup):
         """
@@ -535,7 +535,7 @@ class TestDeepTreeAvgOfAvg:
         avg_of_avg_score = ca.get_global_score()["implementation_score"]
 
         assert avg_score == 66.0
-        assert avg_of_avg_score == 68.33
+        assert avg_of_avg_score == pytest.approx(205 / 3)
         assert avg_score != avg_of_avg_score
 
 
@@ -557,7 +557,7 @@ class TestAnchorNaToTarget:
             # AVG_OF_AVG with target=3:
             #   Section A: (80+60)/2=70, Section B: (40×1+3×3)/4=12.25
             #   avg(70, 12.25) = 41.1
-            ("average_of_averages", True, 3, 41.13),
+            ("average_of_averages", True, 3, 41.125),
             # Anchor disabled: N/A excluded → (80+60+40)/(1+1+1) = 60.0
             ("average", False, 3, 60.0),
         ],
@@ -580,7 +580,7 @@ class TestAnchorNaToTarget:
         ca.target_score = target
         ca.save()
 
-        assert ca.get_global_score()["implementation_score"] == expected
+        assert ca.get_global_score()["implementation_score"] == pytest.approx(expected)
 
 
 @pytest.mark.django_db
@@ -705,7 +705,7 @@ class TestThreeLayerScoring:
         scores = ca.get_global_score()
         assert scores["implementation_score"] == 77.5
         assert scores["documentation_score"] == 76.25
-        assert scores["maturity_score"] == 76.88
+        assert scores["maturity_score"] == 76.875
 
     def test_doc_score_null_treated_as_zero(self, scoring_setup):
         """
@@ -838,7 +838,7 @@ class TestAnnotateTreeAggregatedScores:
         # which collects C1(2.25) and C2(=S3=R4=4): F1 = avg(2.25, 4) = 3.125
         # Display values are rounded half up, like the global score and the
         # CCB workbooks (Python's round() would give 3.12).
-        assert self._find(tree, "F1")["aggregated_score"] == 3.13
+        assert self._find(tree, "F1")["aggregated_score"] == 3.125
 
     def test_avg_per_node_is_flat_weighted_over_subtree_leaves(self, deep_tree_setup):
         """

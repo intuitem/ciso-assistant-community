@@ -22,7 +22,7 @@ description: 'The CyberFundamentals Framework is a framework owned by the Centre
 
   Version 2025-10-01'
 copyright: "\u24B8 Centre for Cybersecurity Belgium (CCB)"
-version: 9
+version: 10
 publication_date: 2026-10-05
 provider: CCB
 packager: intuitem
@@ -21087,6 +21087,144 @@ objects:
           name: essential - managementaspecten
         fr:
           name: essential - aspects de management
+    outcomes_definition:
+    - ref_id: basic_maturity
+      implementation_groups:
+      - B
+      expression: groups["B"].maturity_score >= 2.5
+      annotation: 'BASIC: total maturity of at least 2.5'
+      translations:
+        fr:
+          annotation: 'BASIC : maturité totale d’au moins 2,5'
+        nl:
+          annotation: 'BASIC: totale maturiteit van minstens 2,5'
+    - ref_id: basic_key_measures
+      implementation_groups:
+      - B
+      expression: groups["BK"].min_maturity_score >= 2.5
+      annotation: 'BASIC: every key measure at 2.5 or more'
+      translations:
+        fr:
+          annotation: 'BASIC : chaque mesure clé à 2,5 ou plus'
+        nl:
+          annotation: 'BASIC: elke kernmaatregel op 2,5 of meer'
+    - ref_id: basic_exclusions
+      implementation_groups:
+      - B
+      expression: groups["B"].not_applicable_count <= 1 && groups["BK"].not_applicable_count
+        == 0
+      annotation: 'BASIC: at most 1 exclusion, none on a key measure'
+      translations:
+        fr:
+          annotation: 'BASIC : au plus 1 exclusion, aucune sur une mesure clé'
+        nl:
+          annotation: 'BASIC: hoogstens 1 uitsluiting, geen op een kernmaatregel'
+    - ref_id: basic_criteria_met
+      implementation_groups:
+      - B
+      expression: '"basic_maturity" in computed_outcomes && "basic_key_measures" in computed_outcomes
+        && "basic_exclusions" in computed_outcomes'
+      annotation: 'BASIC: CCB conformity criteria met'
+      translations:
+        fr:
+          annotation: 'BASIC : critères de conformité du CCB atteints'
+        nl:
+          annotation: 'BASIC: CCB-conformiteitscriteria behaald'
+    - ref_id: important_maturity
+      implementation_groups:
+      - I
+      expression: groups["I"].maturity_score >= 3.0
+      annotation: 'IMPORTANT: total maturity of at least 3'
+      translations:
+        fr:
+          annotation: 'IMPORTANT : maturité totale d’au moins 3'
+        nl:
+          annotation: 'IMPORTANT: totale maturiteit van minstens 3'
+    - ref_id: important_key_measures
+      implementation_groups:
+      - I
+      expression: groups["IK"].min_maturity_score >= 3.0
+      annotation: 'IMPORTANT: every key measure at 3 or more'
+      translations:
+        fr:
+          annotation: 'IMPORTANT : chaque mesure clé à 3 ou plus'
+        nl:
+          annotation: 'IMPORTANT: elke kernmaatregel op 3 of meer'
+    - ref_id: important_exclusions
+      implementation_groups:
+      - I
+      expression: groups["I"].not_applicable_count <= 3 && groups["IK"].not_applicable_count
+        == 0
+      annotation: 'IMPORTANT: at most 3 exclusions, none on a key measure'
+      translations:
+        fr:
+          annotation: 'IMPORTANT : au plus 3 exclusions, aucune sur une mesure clé'
+        nl:
+          annotation: 'IMPORTANT: hoogstens 3 uitsluitingen, geen op een kernmaatregel'
+    - ref_id: important_criteria_met
+      implementation_groups:
+      - I
+      expression: '"important_maturity" in computed_outcomes && "important_key_measures" in computed_outcomes
+        && "important_exclusions" in computed_outcomes'
+      annotation: 'IMPORTANT: CCB conformity criteria met'
+      translations:
+        fr:
+          annotation: 'IMPORTANT : critères de conformité du CCB atteints'
+        nl:
+          annotation: 'IMPORTANT: CCB-conformiteitscriteria behaald'
+    - ref_id: essential_maturity
+      implementation_groups:
+      - E
+      expression: groups["E"].maturity_score >= 3.5
+      annotation: 'ESSENTIAL: total maturity of at least 3.5'
+      translations:
+        fr:
+          annotation: 'ESSENTIAL : maturité totale d’au moins 3,5'
+        nl:
+          annotation: 'ESSENTIAL: totale maturiteit van minstens 3,5'
+    - ref_id: essential_key_measures
+      implementation_groups:
+      - E
+      expression: groups["EK"].min_maturity_score >= 3.0
+      annotation: 'ESSENTIAL: every key measure at 3 or more'
+      translations:
+        fr:
+          annotation: 'ESSENTIAL : chaque mesure clé à 3 ou plus'
+        nl:
+          annotation: 'ESSENTIAL: elke kernmaatregel op 3 of meer'
+    - ref_id: essential_categories
+      implementation_groups:
+      - E
+      expression: sections.all(s, sections[s].depth != 2 || sections[s].maturity_score >= 3.0)
+      annotation: 'ESSENTIAL: every category at 3 or more'
+      translations:
+        fr:
+          annotation: 'ESSENTIAL : chaque catégorie à 3 ou plus'
+        nl:
+          annotation: 'ESSENTIAL: elke categorie op 3 of meer'
+    - ref_id: essential_exclusions
+      implementation_groups:
+      - E
+      expression: groups["E"].not_applicable_count <= 5 && groups["EK"].not_applicable_count
+        == 0 && groups["EG"].not_applicable_count == 0
+      annotation: 'ESSENTIAL: at most 5 exclusions, none on a key measure or management aspect'
+      translations:
+        fr:
+          annotation: 'ESSENTIAL : au plus 5 exclusions, aucune sur une mesure clé ou un aspect
+            de management'
+        nl:
+          annotation: 'ESSENTIAL: hoogstens 5 uitsluitingen, geen op een kernmaatregel of managementaspect'
+    - ref_id: essential_criteria_met
+      implementation_groups:
+      - E
+      expression: '"essential_maturity" in computed_outcomes && "essential_key_measures" in computed_outcomes
+        && "essential_categories" in computed_outcomes && "essential_exclusions" in computed_outcomes'
+      annotation: 'ESSENTIAL: CCB conformity criteria met'
+      translations:
+        fr:
+          annotation: 'ESSENTIAL : critères de conformité du CCB atteints'
+        nl:
+          annotation: 'ESSENTIAL: CCB-conformiteitscriteria behaald'
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv
       assessable: false
