@@ -612,13 +612,33 @@
 			}
 			errors =
 				res.status === 400 && body && typeof body === 'object'
-					? body
+					? formErrors(body)
 					: { form: [m.anErrorOccurred()] };
 		} catch {
 			errors = { form: [m.anErrorOccurred()] };
 		} finally {
 			saving = false;
 		}
+	}
+
+	// A 400 by field, as the modal shows it. What the backend answers outside
+	// a field (a metric that is no longer composable, DRF's own non-field or
+	// detail messages) goes under the form, or the refusal would be silent.
+	function formErrors(body: Record<string, unknown>): Record<string, string[]> {
+		const messages = (value: unknown): string[] =>
+			Array.isArray(value) ? value.map(String) : typeof value === 'string' ? [value] : [];
+		const codes: Record<string, () => string> = {
+			metricNotComposable: m.computedMetricNotComposable
+		};
+		const code = typeof body.error === 'string' ? body.error : null;
+		const form = [
+			...messages(body.form),
+			...messages(body.non_field_errors),
+			...messages(body.detail),
+			...(code ? [codes[code]?.() ?? code] : [])
+		];
+		const { error: _error, non_field_errors: _nfe, detail: _detail, ...rest } = body;
+		return { ...(rest as Record<string, string[]>), ...(form.length ? { form } : {}) };
 	}
 
 	let rootEl = $state<HTMLFormElement | null>(null);

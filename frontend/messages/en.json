@@ -7274,6 +7274,7 @@
 	"editFormula": "Edit formula",
 	"editComputedMetric": "Edit computed metric",
 	"formulaChangeRecomputes": "Saving recomputes this metric's past results with the new formula.",
+	"computedMetricNotComposable": "This metric can no longer be edited here: its formula changed. Edit it on its definition.",
 	"computedMetricSaved": "Computed metric saved",
 	"computedMetricSavedForked": "Saved: this metric now has a definition of its own",
 	"inputsToPickAgain": "Pick again the instances of: {keys}",
