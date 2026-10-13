@@ -474,7 +474,14 @@ def _definition_after_edit(user, instance, folder, name, specs, expression, shap
     if _same_formula(current, specs, expression, shape):
         return current, "unchanged"
     others = current.metricinstance_set.exclude(id=instance.id).exists()
-    if not others and permitted(user, ["change_metricdefinition"], current.folder):
+    # A definition a library ships is the library's, not the author's: an
+    # edit forks, as it would for a shared one.
+    shipped = current.library_id is not None or bool(current.urn)
+    if (
+        not others
+        and not shipped
+        and permitted(user, ["change_metricdefinition"], current.folder)
+    ):
         # Formulas reading this metric read numbers: a level result would
         # skip every one of their periods and drop their history.
         if shape["category"] != current.category and dependents_of(current):
