@@ -168,7 +168,9 @@
 	}
 
 	function isOptionAllowed(field: string, role: Role, access: RoleAccess): boolean {
-		if (role === 'auditor') return withinParent(field, 'auditor', access);
+		// An auditor choice no respondent access fits would snap the field back to hidden.
+		if (role === 'auditor')
+			return withinParent(field, 'auditor', access) && respondentOptions(field, access).length > 0;
 		return respondentOptions(field, readPair(field).auditor).includes(access);
 	}
 
