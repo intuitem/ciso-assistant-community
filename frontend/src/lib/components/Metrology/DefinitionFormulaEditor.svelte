@@ -7,6 +7,8 @@
 			start: string;
 			value: unknown;
 			skipped: boolean;
+			// Why the period computed nothing, when the expression failed on it.
+			error?: string | null;
 			inputs?: Record<string, unknown>;
 		}[];
 		inputs?: Record<string, { id: string; name: string; folder: string }[]>;
@@ -395,7 +397,12 @@
 										<td class="font-mono pr-4">{period.start.slice(0, 16).replace('T', ' ')}</td>
 										<td class="font-mono">
 											{#if period.skipped}
-												<span class="text-surface-500">{m.previewSkipped()}</span>
+												<span class="text-surface-500" title={period.error ?? undefined}>
+													{m.previewSkipped()}
+												</span>
+												{#if period.error}
+													<span class="text-error-500 text-xs ml-2">{period.error}</span>
+												{/if}
 											{:else}
 												{JSON.stringify(period.value)}
 											{/if}

@@ -211,6 +211,20 @@ class MetricDefinitionViewSet(BaseModelViewSet):
                     ],
                 }
             )
+        if evaluation.errors and all(period.skipped for period in evaluation.periods):
+            # Every period failed the same way, most likely: the formula is
+            # wrong, and the first failure says how.
+            return Response(
+                {
+                    "ok": False,
+                    "errors": [
+                        {
+                            "code": "derived_evaluation_failed",
+                            "message": evaluation.errors[0],
+                        }
+                    ],
+                }
+            )
         # The value reads the whole subtree, as the metric would; which
         # instances it read is only named where the author may read them.
         resolved_ids = [
@@ -226,6 +240,7 @@ class MetricDefinitionViewSet(BaseModelViewSet):
                         "start": period.start.isoformat(),
                         "value": period.value,
                         "skipped": period.skipped,
+                        "error": period.error,
                         "inputs": period.inputs,
                     }
                     for period in evaluation.periods

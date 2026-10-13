@@ -459,6 +459,8 @@
 			start: string;
 			value: unknown;
 			skipped: boolean;
+			// Why the period computed nothing, when the expression failed on it.
+			error?: string | null;
 			inputs?: Record<string, unknown>;
 		}[];
 		errors?: { code: string; message: string }[];
@@ -1221,7 +1223,12 @@
 										<td class="font-mono py-0.5">{period.start.slice(0, 10)}</td>
 										<td class="font-mono text-right">
 											{#if period.skipped}
-												<span class="text-surface-500">{m.previewSkipped()}</span>
+												<span class="text-surface-500" title={period.error ?? undefined}>
+													{m.previewSkipped()}
+												</span>
+												{#if period.error}
+													<span class="text-error-500 text-xs ml-2">{period.error}</span>
+												{/if}
 											{:else}
 												{formatValue(period.value)}
 											{/if}

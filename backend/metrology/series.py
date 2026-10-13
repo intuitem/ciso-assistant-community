@@ -506,8 +506,10 @@ class PeriodResult:
     timestamp: datetime.datetime
     value: object = None
     envelope: dict | None = None
-    #: The expression could not run because an input had no value.
+    #: The expression could not run because an input had no value, or it
+    #: failed on this period's values (``error`` says how).
     skipped: bool = False
+    error: str | None = None
     inputs: dict = dataclass_field(default_factory=dict)
 
 
@@ -519,6 +521,9 @@ class SeriesEvaluation:
     #: Where the recomputed range begins: periods from here on that produced
     #: nothing lose their stored sample.
     start: datetime.datetime | None = None
+    #: The periods the expression failed on, as "<period>: <message>": the
+    #: rest of the series still computes and these are reported once.
+    errors: list = dataclass_field(default_factory=list)
 
 
 def _label(start, frequency):
@@ -540,11 +545,20 @@ def evaluate_series(
     at MAX_PERIODS, and for sub-daily periods at the window downsampling
     keeps. ``shape`` carries the output's category and levels. ``previous``
     is the value of the period before the first one computed. Writes
-    nothing. Raises DerivedMetricError naming the input or the period."""
+    nothing. Raises DerivedMetricError naming the input; a period the
+    expression fails on (a division by zero, a text that is not a level) is
+    skipped and listed in ``errors``, so one bad month does not freeze the
+    whole series."""
     from .models import STALENESS_THRESHOLDS
 
     now = timezone.now()
     evaluation = SeriesEvaluation(resolved=resolve_inputs(inputs, folder, choices))
+    # An expression that does not compile fails every period alike: that is
+    # the formula's fault, reported once, not a period's.
+    try:
+        compile_expression(expression)
+    except ExpressionError as e:
+        raise DerivedMetricError(f"expression: {e.message}")
     instance_ids = [
         instance.id for item in evaluation.resolved for instance in item.instances
     ]
@@ -603,17 +617,21 @@ def evaluate_series(
             value = evaluate(expression, context)
         except ExpressionError as e:
             if not missing:
-                raise DerivedMetricError(
-                    f"{_label(current, frequency)}: expression: {e.message}"
-                )
+                period.error = f"expression: {e.message}"
             value = None
-        if value is None:
-            period.skipped = True
-        else:
+        if value is not None:
             try:
                 period.envelope = shape_value(value, shape)
             except DerivedMetricError as e:
-                raise DerivedMetricError(f"{_label(current, frequency)}: {e.message}")
+                period.error = e.message
+                value = None
+        if value is None:
+            period.skipped = True
+            if period.error is not None:
+                evaluation.errors.append(
+                    f"{_label(current, frequency)}: {period.error}"
+                )
+        else:
             period.value = value
             evaluation.value = value
         previous = period.value
@@ -741,7 +759,7 @@ def compute_series(instance, *, write=True, only_if_due=False, full=False):
         if write:
             changed_from = _store(instance, evaluation)
             instance.last_computed_at = now
-            instance.last_computation_error = ""
+            instance.last_computation_error = _period_errors(evaluation)
             instance.save(
                 update_fields=[
                     "last_computed_at",
@@ -757,6 +775,17 @@ def compute_series(instance, *, write=True, only_if_due=False, full=False):
         return evaluation
     finally:
         cache.delete(key)
+
+
+def _period_errors(evaluation):
+    """What the instance records when some periods failed: the first one,
+    and how many more."""
+    errors = evaluation.errors
+    if not errors:
+        return ""
+    if len(errors) == 1:
+        return errors[0]
+    return f"{errors[0]} (and {len(errors) - 1} more periods)"
 
 
 def _store(instance, evaluation):
