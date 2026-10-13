@@ -970,23 +970,26 @@
 											</button>
 										</span>
 									{/if}
-									<!-- Wraps under a long formula name rather than shrink to nothing. -->
-									<span class="flex flex-col min-w-[8rem] flex-1">
-										<span class="text-sm truncate" title={pick.name}>{pick.name}</span>
-										<span class="text-xs text-surface-600-400 truncate">{pick.folder.str}</span>
+									<!-- The metric, its value and its remove button move as one: under
+									     a long formula name in a narrow drawer, never apart. -->
+									<span class="flex items-center gap-3 flex-1 min-w-[14rem]">
+										<span class="flex flex-col min-w-0 flex-1">
+											<span class="text-sm truncate" title={pick.name}>{pick.name}</span>
+											<span class="text-xs text-surface-600-400 truncate">{pick.folder.str}</span>
+										</span>
+										<span class="font-mono text-sm text-surface-700-300 shrink-0"
+											>{pick.current_value}</span
+										>
+										<button
+											type="button"
+											class="btn-icon btn-icon-sm hover:preset-tonal-error shrink-0"
+											title={m.remove()}
+											aria-label={`${m.remove()}: ${pick.name}`}
+											onclick={() => remove(index)}
+										>
+											<i class="fa-solid fa-xmark" aria-hidden="true"></i>
+										</button>
 									</span>
-									<span class="ml-auto font-mono text-sm text-surface-700-300 shrink-0"
-										>{pick.current_value}</span
-									>
-									<button
-										type="button"
-										class="btn-icon btn-icon-sm hover:preset-tonal-error shrink-0"
-										title={m.remove()}
-										aria-label={`${m.remove()}: ${pick.name}`}
-										onclick={() => remove(index)}
-									>
-										<i class="fa-solid fa-xmark" aria-hidden="true"></i>
-									</button>
 								</li>
 							{/each}
 						</ul>
@@ -1151,7 +1154,7 @@
 						>
 							{formatValue(preview.value)}
 						</span>
-						{#if unitLabel}
+						{#if unitLabel && !isLevel}
 							<span class="text-sm text-surface-500">{unitLabel}</span>
 						{/if}
 						{#if trend}
