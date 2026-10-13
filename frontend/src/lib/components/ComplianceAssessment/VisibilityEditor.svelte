@@ -155,13 +155,17 @@
 	}
 
 	// Keep the respondent's access when it still fits, else take the most restrictive one that does.
+	// `maxRespondent` caps what the respondent may end up with (used by cascades).
 	function fitPair(
 		field: string,
 		auditor: RoleAccess,
 		respondent: RoleAccess,
-		map: VisibilityMap
+		map: VisibilityMap,
+		maxRespondent: RoleAccess = 'edit'
 	): Pair {
-		const options = respondentOptions(field, auditor, map);
+		const options = respondentOptions(field, auditor, map).filter(
+			(option) => ACCESS_RANK[option] <= ACCESS_RANK[maxRespondent]
+		);
 		if (options.includes(respondent)) return { auditor, respondent };
 		if (options.length) return { auditor, respondent: options[0] };
 		return { auditor: 'hidden', respondent: 'hidden' };
@@ -187,13 +191,14 @@
 			next['is_scored'] = { ...pair };
 		}
 		// Clamp child fields down to the parent's new access, then refit their respondent.
+		// A cascade only ever lowers access: if no pair fits, the child is hidden.
 		for (const child of CHILDREN_OF[field] ?? []) {
 			const childPair = readPair(child, next);
 			const auditor =
 				ACCESS_RANK[childPair.auditor] > ACCESS_RANK[pair.auditor]
 					? pair.auditor
 					: childPair.auditor;
-			next[child] = fitPair(child, auditor, childPair.respondent, next);
+			next[child] = fitPair(child, auditor, childPair.respondent, next, childPair.respondent);
 		}
 		onChange(next);
 	}
