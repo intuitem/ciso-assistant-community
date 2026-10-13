@@ -50,7 +50,15 @@ MAX_DATASETS = 10
 MAX_EXPRESSION_LENGTH = 2000
 # Names the expression may read besides the datasets.
 CONTEXT_ROOTS = frozenset({"previous", "metrics", "now", "today"})
-# A lock outlives any sane computation; a crashed worker frees it by expiry.
+# The per-instance lock below is Django's cache, which this project leaves at
+# its default, LocMemCache: one dictionary per process. It holds between the
+# huey worker threads of one process (the deployed `run_huey -w 2`), which
+# is where the sweep and a queued refresh can collide; the web process never
+# computes. Across worker processes or replicas it holds nothing, and a
+# collision then costs an IntegrityError on the per-period constraint (a
+# metric formula) or a duplicate point (a dataset formula), never a wrong
+# value. A lock outlives any sane computation; a crashed worker frees it by
+# expiry.
 LOCK_TTL_SECONDS = 600
 
 logger = structlog.get_logger(__name__)
