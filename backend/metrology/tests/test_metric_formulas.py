@@ -474,7 +474,6 @@ class TestComposition:
     def test_one_instance_crashing_does_not_stop_the_sweep(self, frozen, monkeypatch):
         """An unexpected error on one instance is logged and the sweep carries
         on: the instances after it still get their turn."""
-        import metrology.derived as derived
         from metrology.tasks import compute_due_derived_metrics
 
         domain = make_domain("Domain")
@@ -486,14 +485,12 @@ class TestComposition:
         middle = make_instance(domain, middle_def)
         top = make_instance(domain, formula("y + 1", ("y", middle_def, "one")))
 
-        real_compute = derived.compute_sample
-
         def crash_on_broken(instance, **kwargs):
             if instance.id == broken.id:
                 raise RuntimeError("boom")
-            return real_compute(instance, **kwargs)
+            return compute_sample(instance, **kwargs)
 
-        monkeypatch.setattr(derived, "compute_sample", crash_on_broken)
+        monkeypatch.setattr("metrology.derived.compute_sample", crash_on_broken)
         compute_due_derived_metrics.call_local()
         assert stored(broken) == {}
         assert stored(middle) == {"2026-05-01": 8}

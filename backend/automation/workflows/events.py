@@ -26,7 +26,7 @@ import structlog
 
 from iam.models import Folder
 
-from core.reads import subtree_folder_ids, walk_conditions  # noqa: F401 (re-exported)
+from core.reads import subtree_folder_ids
 from core.reads import validate_filter_tree as _validate_filter_tree
 from .models import Condition, WorkflowInstance, WorkflowNode, WorkflowTrigger
 

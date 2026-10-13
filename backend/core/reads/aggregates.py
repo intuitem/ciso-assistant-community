@@ -109,23 +109,17 @@ AGGREGATES: dict[str, AggregateFn] = {
         build=lambda f: Count(f, distinct=True),
         fold=lambda values: len(set(values)),
     ),
-    "sum": AggregateFn(
-        "sum", ENGINE_DB, True, NUMERIC_ONLY, build=lambda f: Sum(f), fold=sum
-    ),
+    "sum": AggregateFn("sum", ENGINE_DB, True, NUMERIC_ONLY, build=Sum, fold=sum),
     "avg": AggregateFn(
         "avg",
         ENGINE_DB,
         True,
         NUMERIC_ONLY,
-        build=lambda f: Avg(f),
-        fold=lambda values: statistics.fmean(values),
+        build=Avg,
+        fold=statistics.fmean,
     ),
-    "min": AggregateFn(
-        "min", ENGINE_DB, True, ORDERABLE, build=lambda f: Min(f), fold=min
-    ),
-    "max": AggregateFn(
-        "max", ENGINE_DB, True, ORDERABLE, build=lambda f: Max(f), fold=max
-    ),
+    "min": AggregateFn("min", ENGINE_DB, True, ORDERABLE, build=Min, fold=min),
+    "max": AggregateFn("max", ENGINE_DB, True, ORDERABLE, build=Max, fold=max),
     "median": AggregateFn(
         "median", ENGINE_PYTHON, True, NUMERIC_ONLY, fold=statistics.median
     ),

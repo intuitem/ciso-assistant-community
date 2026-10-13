@@ -807,12 +807,10 @@ class TestFilterValueFailures:
         ]
 
     def test_a_stale_matrix_level_is_named(self, monkeypatch):
-        import metrology.derived as derived
-
         def stale(*_args, **_kwargs):
             raise IndexError("list index out of range")
 
-        monkeypatch.setattr(derived, "run_aggregate_read", stale)
+        monkeypatch.setattr("metrology.derived.run_aggregate_read", stale)
         with pytest.raises(DerivedMetricError, match="no longer exists"):
             evaluate_formula({"c": CONTROLS}, "c.count", make_domain("Domain"))
 

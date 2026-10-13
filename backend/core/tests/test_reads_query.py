@@ -343,7 +343,7 @@ class TestScopedPrefetches:
         parent = make_domain("Parent")
         mine = make_domain("Mine", parent)
         sibling = make_domain("Sibling", parent)
-        _audit, (assessment,) = make_audit(mine)
+        _, (assessment,) = make_audit(mine)
         self.link(assessment, mine, "own")
         self.link(assessment, parent, "inherited")
         self.link(assessment, sibling, "foreign")
@@ -366,7 +366,7 @@ class TestScopedPrefetches:
 
     def test_related_rows_follow_the_identity(self):
         domain = make_domain("Domain")
-        _audit, (assessment,) = make_audit(domain)
+        _, (assessment,) = make_audit(domain)
         self.link(assessment, domain, "seen")
         self.link(assessment, domain, "hidden")
 

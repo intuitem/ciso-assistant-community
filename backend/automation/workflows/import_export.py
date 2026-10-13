@@ -899,7 +899,9 @@ def _strip_foreign_folder_filters(filters, workflow, label, warnings):
     emptied group) when nothing survives. Trees without folder conditions pass
     through untouched (pruning normalizes the shape, which would break
     round-trip fidelity)."""
-    from .events import _workflow_scope, walk_conditions
+    from core.reads import walk_conditions
+
+    from .events import _workflow_scope
 
     if not isinstance(filters, dict) or not filters:
         return filters if isinstance(filters, dict) else {}
