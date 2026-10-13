@@ -14,10 +14,34 @@ description: 'Based on the ENISA SME Cyber Resilience Maturity Assessment Model 
   Intermediate (2.6-3.9), Advanced (4.0-5.0). It is intended as a self-check aid,
   not a substitute for formal legal or conformity advice.'
 copyright: ENISA
-version: 2
+version: 3
 publication_date: 2026-07-13
 provider: ENISA
 packager: intuitem
+translations:
+  de:
+    name: ENISA-Reifegradbewertung der Cyberresilienz für KMU (CRA)
+    description: 'Basiert auf dem ENISA-Modell zur Reifegradbewertung der Cyberresilienz für
+      Kleinstunternehmen sowie kleine und mittlere Unternehmen (Tool v1.1). Diese Selbstbewertung
+      hilft Organisationen, ihren aktuellen Reifegrad im Hinblick auf den Cyber Resilience
+      Act (CRA) in fünf Bereichen zu prüfen: Governance und Dokumentation; Risikomanagement
+      und Security by Design und by Default; Schwachstellen- und Patchmanagement; Management
+      des Produktlebenszyklus; sowie Sensibilisierung, Kompetenz und Fähigkeiten. Jede Frage
+      wird durch Auswahl der Beschreibung beantwortet, die der aktuellen Praxis entspricht.
+      Dadurch wird der Reifegradwert automatisch festgelegt (1 Initial bis 5 Optimiert). Reifegradbereiche:
+      Basis (1,0–2,5), Mittel (2,6–3,9), Fortgeschritten (4,0–5,0). Das Modell dient als Hilfsmittel
+      zur Selbstbewertung und ersetzt keine formelle Rechts- oder Konformitätsberatung.
+
+
+      Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung der englischen Bibliotheksinhalte
+      mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten; keine
+      offizielle oder von ENISA autorisierte deutsche Übersetzung. Quelle: [ENISA, SME Cyber
+      Resilience Maturity Assessment Model (Tool v1.1)](https://www.enisa.europa.eu/publications/sme-cyber-resilience-maturity-assessment-model).
+      Das Original wurde für diese deutsche Fassung übersetzt; Reifegradwerte und Bewertungslogik
+      wurden nicht verändert.'
+    copyright: '© European Union Agency for Cybersecurity (ENISA), 2026. Ausgangsveröffentlichung
+      unter [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Deutsche Übersetzung:
+      KI-gestützt erstellt und durch den KI-Assistenten geprüft; nicht von ENISA autorisiert.'
 objects:
   framework:
     urn: urn:intuitem:risk:framework:enisa-sme-cra-maturity
@@ -32,6 +56,27 @@ objects:
       which sets the maturity score (1 Initial to 5 Optimised) automatically. Maturity
       bands: Basic (1.0-2.5), Intermediate (2.6-3.9), Advanced (4.0-5.0). It is intended
       as a self-check aid, not a substitute for formal legal or conformity advice.'
+    translations:
+      de:
+        name: ENISA-Reifegradbewertung der Cyberresilienz für KMU (CRA)
+        description: 'Basiert auf dem ENISA-Modell zur Reifegradbewertung der Cyberresilienz für
+          Kleinstunternehmen sowie kleine und mittlere Unternehmen (Tool v1.1). Diese Selbstbewertung
+          hilft Organisationen, ihren aktuellen Reifegrad im Hinblick auf den Cyber Resilience
+          Act (CRA) in fünf Bereichen zu prüfen: Governance und Dokumentation; Risikomanagement
+          und Security by Design und by Default; Schwachstellen- und Patchmanagement; Management
+          des Produktlebenszyklus; sowie Sensibilisierung, Kompetenz und Fähigkeiten. Jede Frage
+          wird durch Auswahl der Beschreibung beantwortet, die der aktuellen Praxis entspricht.
+          Dadurch wird der Reifegradwert automatisch festgelegt (1 Initial bis 5 Optimiert). Reifegradbereiche:
+          Basis (1,0–2,5), Mittel (2,6–3,9), Fortgeschritten (4,0–5,0). Das Modell dient als Hilfsmittel
+          zur Selbstbewertung und ersetzt keine formelle Rechts- oder Konformitätsberatung.
+
+
+          Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung der englischen Bibliotheksinhalte
+          mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten; keine
+          offizielle oder von ENISA autorisierte deutsche Übersetzung. Quelle: [ENISA, SME Cyber
+          Resilience Maturity Assessment Model (Tool v1.1)](https://www.enisa.europa.eu/publications/sme-cyber-resilience-maturity-assessment-model).
+          Das Original wurde für diese deutsche Fassung übersetzt; Reifegradwerte und Bewertungslogik
+          wurden nicht verändert.'
     min_score: 1
     max_score: 5
     field_visibility:
@@ -49,18 +94,38 @@ objects:
         respondent: hidden
     scores_definition:
     - score: 1
+      translations:
+        de:
+          name: Initial
+          description: Nicht umgesetzt
       name: Initial
       description: Not implemented
     - score: 2
+      translations:
+        de:
+          name: Grundlegend
+          description: Informell oder anlassbezogen
       name: Basic
       description: Informal or ad hoc
     - score: 3
+      translations:
+        de:
+          name: In Entwicklung
+          description: Dokumentiert, aber nicht durchgängig angewendet
       name: Developing
       description: Documented but inconsistently applied
     - score: 4
+      translations:
+        de:
+          name: Gesteuert
+          description: Durchgängig angewendet und regelmäßig überprüft
       name: Managed
       description: Consistently applied and regularly reviewed
     - score: 5
+      translations:
+        de:
+          name: Optimiert
+          description: Anhand von Kennzahlen bewertet, überwacht und kontinuierlich verbessert
       name: Optimised
       description: Measured, monitored and continuously improved
     requirement_nodes:
@@ -68,32 +133,59 @@ objects:
       assessable: false
       depth: 1
       ref_id: '1'
+      translations:
+        de:
+          name: Governance und Dokumentation
       name: Governance and Documentation
     - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.1
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1
       ref_id: '1.1'
+      translations:
+        de:
+          name: Richtlinien zur Produktsicherheit
       name: Product security policies
       questions:
         urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.1:question:1:
           type: unique_choice
+          translations:
+            de:
+              text: Verfügen Sie über schriftlich festgehaltene und genehmigte Richtlinien zur Produktsicherheit?
           text: Do you have written and approved product security policies?
           choices:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.1:question:1:choice:1
+            translations:
+              de:
+                value: 1 Es gibt keine Richtlinien oder Leitlinien zur Produktsicherheit
             value: 1 No product security policies or guidelines exist
             add_score: 1
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.1:question:1:choice:2
+            translations:
+              de:
+                value: 2 Einige grundlegende Leitlinien sind vorhanden, aber informell oder unvollständig
             value: 2 Some basic guidelines exist but are informal or incomplete
             add_score: 2
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.1:question:1:choice:3
+            translations:
+              de:
+                value: 3 Dokumentierte Richtlinien oder Leitlinien sind vorhanden, aber nicht formell
+                  genehmigt oder nicht durchgängig in Gebrauch
             value: 3 Documented policies or guidelines exist but are not formally
               approved or consistently used
             add_score: 3
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.1:question:1:choice:4
+            translations:
+              de:
+                value: 4 Die Richtlinien sind formell genehmigt, dokumentiert und werden im Allgemeinen
+                  angewendet
             value: 4 Policies are formally approved, documented and generally applied
             add_score: 4
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.1:question:1:choice:5
+            translations:
+              de:
+                value: 5 Die Richtlinien sind formell genehmigt, werden durchgängig angewendet, regelmäßig
+                  überprüft und kontinuierlich verbessert
             value: 5 Policies are formally approved, consistently applied, regularly
               reviewed and continuously improved
             add_score: 5
@@ -104,29 +196,55 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1
       ref_id: '1.2'
+      translations:
+        de:
+          name: Rollen und Verantwortlichkeiten
       name: Roles and responsibilities
       questions:
         urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.2:question:1:
           type: unique_choice
+          translations:
+            de:
+              text: Sind Rollen und Verantwortlichkeiten für Tätigkeiten zur Produktsicherheit klar
+                definiert (z. B. Entwicklung, Schwachstellenmanagement, Updates)?
           text: Are roles and responsibilities clearly defined for product security
             activities (e.g. development, vulnerability management, updates)?
           choices:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.2:question:1:choice:1
+            translations:
+              de:
+                value: 1 Es sind keine Rollen oder Verantwortlichkeiten definiert
             value: 1 No roles or responsibilities are defined
             add_score: 1
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.2:question:1:choice:2
+            translations:
+              de:
+                value: 2 Verantwortlichkeiten bestehen informell, sind aber unklar oder nicht einheitlich
+                  zugewiesen
             value: 2 Responsibilities exist informally but are unclear or inconsistently
               assigned
             add_score: 2
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.2:question:1:choice:3
+            translations:
+              de:
+                value: 3 Verantwortlichkeiten sind dokumentiert, werden in der Praxis aber nicht durchgängig
+                  wahrgenommen
             value: 3 Responsibilities are documented but not consistently applied
               in practice
             add_score: 3
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.2:question:1:choice:4
+            translations:
+              de:
+                value: 4 Verantwortlichkeiten sind klar definiert und dokumentiert und werden durchgängig
+                  wahrgenommen
             value: 4 Responsibilities are clearly defined, documented and consistently
               applied
             add_score: 4
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.2:question:1:choice:5
+            translations:
+              de:
+                value: 5 Verantwortlichkeiten sind klar definiert und kommuniziert, werden durchgängig
+                  wahrgenommen, regelmäßig überprüft und kontinuierlich verbessert
             value: 5 Responsibilities are clearly defined, communicated, consistently
               applied, regularly reviewed and continuously improved
             add_score: 5
@@ -137,29 +255,55 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1
       ref_id: '1.3'
+      translations:
+        de:
+          name: Technische Produktdokumentation
       name: Product technical documentation
       questions:
         urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.3:question:1:
           type: unique_choice
+          translations:
+            de:
+              text: Pflegen Sie eine technische Dokumentation auf Produktebene, die implementierte Sicherheitsfunktionen,
+                Risikobeurteilungen, Entwurfsentscheidungen und Updateverfahren beschreibt?
           text: Do you maintain product-level technical documentation describing implemented
             security features, risk assessments, design decisions and update procedures?
           choices:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.3:question:1:choice:1
+            translations:
+              de:
+                value: 1 Es gibt keine Dokumentation zur Produktsicherheit
             value: 1 No product security documentation exists
             add_score: 1
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.3:question:1:choice:2
+            translations:
+              de:
+                value: 2 Es gibt eine begrenzte oder unvollständige Dokumentation, die nur einige Aspekte
+                  abdeckt
             value: 2 Limited or incomplete documentation exists covering only some
               aspects
             add_score: 2
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.3:question:1:choice:3
+            translations:
+              de:
+                value: 3 Eine Dokumentation deckt die meisten erforderlichen Aspekte ab, ist aber unvollständig
+                  oder wird nicht durchgängig gepflegt
             value: 3 Documentation covering most required aspects exists but is incomplete
               or not consistently maintained
             add_score: 3
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.3:question:1:choice:4
+            translations:
+              de:
+                value: 4 Die Dokumentation ist für die meisten Produkte vollständig und wird durchgängig
+                  gepflegt
             value: 4 Documentation is complete for most products and consistently
               maintained
             add_score: 4
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.3:question:1:choice:5
+            translations:
+              de:
+                value: 5 Die Dokumentation ist für alle Produkte vollständig, wird nach einem formell
+                  festgelegten Verfahren gepflegt, regelmäßig überprüft und kontinuierlich verbessert
             value: 5 Documentation is complete for all products, formally maintained,
               regularly reviewed and continuously improved
             add_score: 5
@@ -170,26 +314,50 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1
       ref_id: '1.4'
+      translations:
+        de:
+          name: Überprüfung der Produktsicherheit
       name: Product security review process
       questions:
         urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.4:question:1:
           type: unique_choice
+          translations:
+            de:
+              text: Gibt es einen Prozess zur regelmäßigen Überprüfung der Produktsicherheit und der
+                Qualität der zugehörigen Dokumentation?
           text: Is there a process to regularly review product security and the quality
             of related documentation?
           choices:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.4:question:1:choice:1
+            translations:
+              de:
+                value: 1 Es gibt keinen Überprüfungsprozess
             value: 1 No review process exists
             add_score: 1
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.4:question:1:choice:2
+            translations:
+              de:
+                value: 2 Überprüfungen erfolgen informell oder gelegentlich
             value: 2 Reviews happen informally or occasionally
             add_score: 2
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.4:question:1:choice:3
+            translations:
+              de:
+                value: 3 Ein dokumentierter Überprüfungsprozess ist vorhanden, wird aber nicht durchgängig
+                  angewendet
             value: 3 A documented review process exists but is not consistently applied
             add_score: 3
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.4:question:1:choice:4
+            translations:
+              de:
+                value: 4 Überprüfungen werden durchgängig durchgeführt und dokumentiert
             value: 4 Reviews are consistently performed and documented
             add_score: 4
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.4:question:1:choice:5
+            translations:
+              de:
+                value: 5 Überprüfungen werden anhand von Kennzahlen bewertet, nachverfolgt und kontinuierlich
+                  verbessert
             value: 5 Reviews are measured, tracked and continuously improved
             add_score: 5
       reference_controls:
@@ -200,28 +368,53 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1
       ref_id: '1.5'
+      translations:
+        de:
+          name: Kenntnis der Behörden und Konformitätsanforderungen
       name: Authorities and conformity awareness
       questions:
         urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.5:question:1:
           type: unique_choice
+          translations:
+            de:
+              text: Kennen Sie die für die Durchsetzung des CRA zuständige Marktüberwachungsbehörde,
+                das für Ihre Produkte geltende Konformitätsbewertungsverfahren und die Vorgehensweise
+                für die Zusammenarbeit mit den zuständigen Behörden bei Bedarf?
           text: Are you aware of the Market Surveillance Authority responsible for
             enforcing the CRA, the conformity assessment procedure applicable to your
             products, and how to interact with relevant authorities if needed?
           choices:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.5:question:1:choice:1
+            translations:
+              de:
+                value: 1 Behörden und Verpflichtungen sind nicht bekannt
             value: 1 No awareness of authorities or obligations
             add_score: 1
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.5:question:1:choice:2
+            translations:
+              de:
+                value: 2 Es bestehen begrenzte Kenntnisse, aber kein klares Verständnis der Verpflichtungen
             value: 2 Limited awareness but no clear understanding of obligations
             add_score: 2
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.5:question:1:choice:3
+            translations:
+              de:
+                value: 3 Behörden und Verpflichtungen sind bekannt, aber nicht formell dokumentiert
             value: 3 Authorities and obligations are known but not formally documented
             add_score: 3
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.5:question:1:choice:4
+            translations:
+              de:
+                value: 4 Zuständige Behörden und Verpflichtungen sind festgehalten, Prozesse für die Zusammenarbeit
+                  sind definiert; Verpflichtungen und Prozesse werden eingehalten
             value: 4 Authorities, obligations and interaction processes are defined
               and followed
             add_score: 4
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:1.5:question:1:choice:5
+            translations:
+              de:
+                value: 5 Die Vermittlung dieser Kenntnisse und die Prozesse für die Zusammenarbeit sind
+                  formell geregelt, werden gepflegt und regelmäßig überprüft
             value: 5 Awareness and interaction processes are formalised, maintained
               and regularly reviewed
             add_score: 5
@@ -231,33 +424,60 @@ objects:
       assessable: false
       depth: 1
       ref_id: '2'
+      translations:
+        de:
+          name: Risikomanagement und Security by Design und by Default
       name: Risk Management and Security by Design and by Default
     - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.1
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2
       ref_id: '2.1'
+      translations:
+        de:
+          name: Beurteilung von Cybersicherheitsrisiken
       name: Cybersecurity risk assessments
       questions:
         urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.1:question:1:
           type: unique_choice
+          translations:
+            de:
+              text: Führen Sie Beurteilungen von Cybersicherheitsrisiken durch und nutzen Sie die Ergebnisse
+                als Grundlage für Entscheidungen über Produktentwurf, Entwicklung, Konfiguration und
+                Komponentenmanagement?
           text: Do you perform cybersecurity risk assessments and use the results
             to guide product design, development, configuration and component management
             decisions?
           choices:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.1:question:1:choice:1
+            translations:
+              de:
+                value: 1 Es werden keine Risikobeurteilungen durchgeführt
             value: 1 No risk assessments are performed
             add_score: 1
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.1:question:1:choice:2
+            translations:
+              de:
+                value: 2 Risikobeurteilungen erfolgen informell und beeinflussen Entscheidungen nur selten
             value: 2 Risk assessments are informal and rarely influence decisions
             add_score: 2
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.1:question:1:choice:3
+            translations:
+              de:
+                value: 3 Risikobeurteilungen sind dokumentiert, werden aber nicht durchgängig genutzt
             value: 3 Risk assessments are documented but not consistently used
             add_score: 3
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.1:question:1:choice:4
+            translations:
+              de:
+                value: 4 Risikobeurteilungen werden systematisch durchgeführt und dienen als Entscheidungsgrundlage
             value: 4 Risk assessments are systematically performed and guide decisions
             add_score: 4
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.1:question:1:choice:5
+            translations:
+              de:
+                value: 5 Risikobeurteilungen erfolgen nach einem formell festgelegten Verfahren, sind
+                  in die Prozesse integriert und werden kontinuierlich verbessert
             value: 5 Risk assessments are formal, integrated into processes and continuously
               improved
             add_score: 5
@@ -269,26 +489,49 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2
       ref_id: '2.2'
+      translations:
+        de:
+          name: Security by Design
       name: Security by design
       questions:
         urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.2:question:1:
           type: unique_choice
+          translations:
+            de:
+              text: Werden Produkte von Anfang an nach den Grundsätzen von Security by Design entworfen?
           text: Are products designed using security-by-design principles from the
             outset?
           choices:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.2:question:1:choice:1
+            translations:
+              de:
+                value: 1 Security by Design wird nicht berücksichtigt
             value: 1 Security-by-design is not considered
             add_score: 1
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.2:question:1:choice:2
+            translations:
+              de:
+                value: 2 Security by Design wird gelegentlich oder erst spät in der Entwicklung berücksichtigt
             value: 2 Considered occasionally or late in development
             add_score: 2
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.2:question:1:choice:3
+            translations:
+              de:
+                value: 3 Security by Design wird beim Entwurf angewendet, aber nicht durchgängig
             value: 3 Applied during design but not consistently
             add_score: 3
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.2:question:1:choice:4
+            translations:
+              de:
+                value: 4 Security by Design wird produktübergreifend durchgängig angewendet und regelmäßig
+                  überprüft
             value: 4 Consistently applied across products and regularly reviewed
             add_score: 4
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.2:question:1:choice:5
+            translations:
+              de:
+                value: 5 Security by Design ist vollständig in die Entwicklung integriert und wird kontinuierlich
+                  verbessert
             value: 5 Fully integrated into development and continuously improved
             add_score: 5
       reference_controls:
@@ -299,25 +542,46 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2
       ref_id: '2.3'
+      translations:
+        de:
+          name: Sichere Voreinstellungen
       name: Secure by default
       questions:
         urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.3:question:1:
           type: unique_choice
+          translations:
+            de:
+              text: Werden Produkte mit standardmäßig sicheren Konfigurationen und Einstellungen ausgeliefert?
           text: Are products delivered with secure-by-default configurations and settings?
           choices:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.3:question:1:choice:1
+            translations:
+              de:
+                value: 1 Es sind keine sicheren Voreinstellungen definiert
             value: 1 No secure defaults are defined
             add_score: 1
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.3:question:1:choice:2
+            translations:
+              de:
+                value: 2 Sichere Einstellungen sind vorhanden, aber uneinheitlich
             value: 2 Secure settings exist but are inconsistent
             add_score: 2
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.3:question:1:choice:3
+            translations:
+              de:
+                value: 3 Sichere Voreinstellungen sind definiert, werden aber nicht durchgängig angewendet
             value: 3 Secure defaults are defined but not consistently applied
             add_score: 3
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.3:question:1:choice:4
+            translations:
+              de:
+                value: 4 Sichere Voreinstellungen werden durchgängig angewendet und überprüft
             value: 4 Secure defaults are consistently applied and reviewed
             add_score: 4
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.3:question:1:choice:5
+            translations:
+              de:
+                value: 5 Sichere Voreinstellungen werden durchgesetzt, getestet und kontinuierlich verbessert
             value: 5 Secure defaults are enforced, tested and continuously improved
             add_score: 5
       reference_controls:
@@ -327,27 +591,51 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2
       ref_id: '2.4'
+      translations:
+        de:
+          name: Sicherheitstests vor der Freigabe
       name: Pre-release security testing
       questions:
         urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.4:question:1:
           type: unique_choice
+          translations:
+            de:
+              text: Führen Sie Sicherheitsprüfungen und Tests durch, bevor Sie ein Produkt freigeben
+                oder aktualisieren, und in welchem Umfang werden dabei automatisierte Werkzeuge eingesetzt?
           text: Do you perform security checks and testing before releasing or updating
             a product, and to what extent are automated tools used?
           choices:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.4:question:1:choice:1
+            translations:
+              de:
+                value: 1 Es werden keine Sicherheitstests durchgeführt
             value: 1 No security testing is performed
             add_score: 1
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.4:question:1:choice:2
+            translations:
+              de:
+                value: 2 Tests erfolgen gelegentlich und überwiegend manuell
             value: 2 Testing is occasional and mostly manual
             add_score: 2
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.4:question:1:choice:3
+            translations:
+              de:
+                value: 3 Tests sind dokumentiert und umfassen einige automatisierte Werkzeuge
             value: 3 Testing is documented and includes some automated tools
             add_score: 3
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.4:question:1:choice:4
+            translations:
+              de:
+                value: 4 Tests sind systematisch in die Entwicklungsabläufe integriert und werden regelmäßig
+                  überprüft
             value: 4 Testing is systematically integrated into development workflows
               and regularly reviewed
             add_score: 4
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.4:question:1:choice:5
+            translations:
+              de:
+                value: 5 Tests sind risikobasiert, soweit zweckmäßig automatisiert, werden überwacht und
+                  kontinuierlich verbessert
             value: 5 Testing is risk-based, automated where appropriate, monitored
               and continuously improved
             add_score: 5
@@ -359,26 +647,49 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2
       ref_id: '2.5'
+      translations:
+        de:
+          name: Überprüfung von Risiken und Bedrohungen
       name: Risk and threat review
       questions:
         urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.5:question:1:
           type: unique_choice
+          translations:
+            de:
+              text: Werden Risikobeurteilungen, Konfigurationen und Komponenten von Drittanbietern überprüft
+                und aktualisiert, wenn sich Risiken ändern oder neue Bedrohungen entstehen?
           text: When risks change or new threats emerge, are risk assessments, configurations
             and third-party components reviewed and updated?
           choices:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.5:question:1:choice:1
+            translations:
+              de:
+                value: 1 Es gibt keinen strukturierten Überprüfungs- oder Aktualisierungsprozess
             value: 1 No structured review or update process exists
             add_score: 1
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.5:question:1:choice:2
+            translations:
+              de:
+                value: 2 Aktualisierungen erfolgen informell oder gelegentlich
             value: 2 Updates are informal or occasional
             add_score: 2
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.5:question:1:choice:3
+            translations:
+              de:
+                value: 3 Überprüfungen sind dokumentiert, werden aber nicht durchgängig durchgeführt
             value: 3 Reviews are documented but not consistently applied
             add_score: 3
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.5:question:1:choice:4
+            translations:
+              de:
+                value: 4 Überprüfungen und Aktualisierungen werden produktübergreifend durchgängig durchgeführt
             value: 4 Reviews and updates are consistently performed across products
             add_score: 4
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.5:question:1:choice:5
+            translations:
+              de:
+                value: 5 Eine kontinuierliche Überwachung und strukturierte Aktualisierungen sind etabliert
+                  und werden kontinuierlich verbessert
             value: 5 Continuous monitoring and structured updates are in place and
               continuously improved
             add_score: 5
@@ -389,33 +700,60 @@ objects:
       assessable: false
       depth: 1
       ref_id: '3'
+      translations:
+        de:
+          name: Schwachstellen- und Patchmanagement
       name: Vulnerability and Patch Management
     - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.1
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3
       ref_id: '3.1'
+      translations:
+        de:
+          name: Annahme und Nachverfolgung von Schwachstellenmeldungen
       name: Vulnerability intake and tracking
       questions:
         urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.1:question:1:
           type: unique_choice
+          translations:
+            de:
+              text: Gibt es einen Prozess, um Schwachstellenmeldungen von Kunden, Forschenden oder eigenen
+                Mitarbeitenden entgegenzunehmen, ihren Eingang zu bestätigen, sie zu erfassen und nachzuverfolgen?
           text: Do you have a process to receive, acknowledge, record and track vulnerabilities
             reported by customers, researchers or internal staff?
           choices:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.1:question:1:choice:1
+            translations:
+              de:
+                value: 1 Es gibt keine Nachverfolgung von Schwachstellen
             value: 1 No vulnerability tracking exists
             add_score: 1
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.1:question:1:choice:2
+            translations:
+              de:
+                value: 2 Schwachstellen werden informell behandelt
             value: 2 Vulnerabilities are handled informally
             add_score: 2
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.1:question:1:choice:3
+            translations:
+              de:
+                value: 3 Ein dokumentierter Nachverfolgungsprozess ist vorhanden, wird aber nicht durchgängig
+                  angewendet
             value: 3 A documented tracking process exists but is not consistently
               applied
             add_score: 3
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.1:question:1:choice:4
+            translations:
+              de:
+                value: 4 Schwachstellen werden durchgängig nachverfolgt und überprüft
             value: 4 Vulnerabilities are consistently tracked and reviewed
             add_score: 4
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.1:question:1:choice:5
+            translations:
+              de:
+                value: 5 Die Nachverfolgung wird anhand von Kennzahlen bewertet, ist in die Abläufe integriert
+                  und wird kontinuierlich verbessert
             value: 5 Tracking is measured, integrated and continuously improved
             add_score: 5
       reference_controls:
@@ -426,26 +764,49 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3
       ref_id: '3.2'
+      translations:
+        de:
+          name: Prozess für Sicherheitsupdates
       name: Security update process
       questions:
         urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.2:question:1:
           type: unique_choice
+          translations:
+            de:
+              text: Gibt es einen festgelegten Prozess, um Sicherheitsupdates für unterstützte Produkte
+                zu erstellen, zu testen, bereitzustellen und die Kunden darüber zu informieren?
           text: Do you have a defined process for creating, testing, delivering and
             communicating security updates to customers for supported products?
           choices:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.2:question:1:choice:1
+            translations:
+              de:
+                value: 1 Es gibt keinen Updateprozess
             value: 1 No update process exists
             add_score: 1
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.2:question:1:choice:2
+            translations:
+              de:
+                value: 2 Updates werden informell gehandhabt
             value: 2 Updates are handled informally
             add_score: 2
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.2:question:1:choice:3
+            translations:
+              de:
+                value: 3 Ein dokumentierter Prozess ist vorhanden, wird aber nicht durchgängig eingehalten
             value: 3 A documented process exists but is not consistently followed
             add_score: 3
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.2:question:1:choice:4
+            translations:
+              de:
+                value: 4 Updates werden durchgängig verwaltet, getestet und bereitgestellt
             value: 4 Updates are consistently managed, tested and delivered
             add_score: 4
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.2:question:1:choice:5
+            translations:
+              de:
+                value: 5 Der Prozess wird überwacht, anhand von Kennzahlen bewertet und kontinuierlich
+                  verbessert
             value: 5 The process is monitored, measured and continuously improved
             add_score: 5
       reference_controls:
@@ -455,27 +816,51 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3
       ref_id: '3.3'
+      translations:
+        de:
+          name: Software-Stückliste (SBOM)
       name: Software Bill of Materials (SBOM)
       questions:
         urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.3:question:1:
           type: unique_choice
+          translations:
+            de:
+              text: Pflegen und nutzen Sie eine Software-Stückliste (SBOM), um das Management von Schwachstellen
+                und Abhängigkeiten zu unterstützen?
           text: Do you maintain and use a SBOM to support vulnerability and dependency
             management?
           choices:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.3:question:1:choice:1
+            translations:
+              de:
+                value: 1 Es wird keine SBOM erstellt oder gepflegt
             value: 1 No SBOM is created or maintained
             add_score: 1
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.3:question:1:choice:2
+            translations:
+              de:
+                value: 2 Eine SBOM wird gelegentlich oder manuell erstellt
             value: 2 SBOM is created occasionally or manually
             add_score: 2
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.3:question:1:choice:3
+            translations:
+              de:
+                value: 3 Für die meisten Produkte ist eine SBOM dokumentiert, sie wird aber nicht durchgängig
+                  gepflegt oder genutzt
             value: 3 SBOM is documented for most products but not consistently maintained
               or used
             add_score: 3
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.3:question:1:choice:4
+            translations:
+              de:
+                value: 4 Die SBOM wird systematisch gepflegt und im Schwachstellenmanagement genutzt
             value: 4 SBOM is systematically maintained and used in vulnerability management
             add_score: 4
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.3:question:1:choice:5
+            translations:
+              de:
+                value: 5 Der Umgang mit der SBOM ist in die Abläufe integriert, soweit zweckmäßig automatisiert
+                  und wird kontinuierlich verbessert
             value: 5 SBOM is integrated, automated where appropriate and continuously
               improved
             add_score: 5
@@ -486,27 +871,51 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3
       ref_id: '3.4'
+      translations:
+        de:
+          name: Risikobasierte Priorisierung
       name: Risk-based prioritisation
       questions:
         urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.4:question:1:
           type: unique_choice
+          translations:
+            de:
+              text: Werden Schwachstellen und Updates anhand des Risikos und der möglichen Auswirkungen
+                priorisiert?
           text: Are vulnerabilities and updates prioritised based on risk and potential
             impact?
           choices:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.4:question:1:choice:1
+            translations:
+              de:
+                value: 1 Es erfolgt keine Priorisierung
             value: 1 No prioritisation is performed
             add_score: 1
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.4:question:1:choice:2
+            translations:
+              de:
+                value: 2 Die Priorisierung erfolgt informell
             value: 2 Prioritisation is informal
             add_score: 2
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.4:question:1:choice:3
+            translations:
+              de:
+                value: 3 Ein dokumentierter Priorisierungsansatz ist vorhanden, wird aber nicht durchgängig
+                  angewendet
             value: 3 A documented prioritisation approach exists but is not consistently
               applied
             add_score: 3
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.4:question:1:choice:4
+            translations:
+              de:
+                value: 4 Die Priorisierung erfolgt durchgängig risikobasiert und wird konsequent umgesetzt
             value: 4 Prioritisation is consistently risk-based and applied
             add_score: 4
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.4:question:1:choice:5
+            translations:
+              de:
+                value: 5 Die Priorisierung wird anhand von Kennzahlen bewertet, überprüft und kontinuierlich
+                  verbessert
             value: 5 Prioritisation is measured, reviewed and continuously improved
             add_score: 5
       reference_controls:
@@ -516,26 +925,49 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3
       ref_id: '3.5'
+      translations:
+        de:
+          name: Überprüfung der Schwachstellenbehebung
       name: Fix verification
       questions:
         urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.5:question:1:
           type: unique_choice
+          translations:
+            de:
+              text: Überprüfen Sie, ob Sicherheitsupdates die gemeldeten Schwachstellen wirksam beheben,
+                und bewahren Sie Nachweise dieser Überprüfung auf?
           text: Do you verify that security updates effectively resolve reported vulnerabilities
             and maintain evidence of this verification?
           choices:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.5:question:1:choice:1
+            translations:
+              de:
+                value: 1 Es erfolgt keine Überprüfung
             value: 1 No verification is performed
             add_score: 1
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.5:question:1:choice:2
+            translations:
+              de:
+                value: 2 Die Überprüfung erfolgt informell oder gelegentlich
             value: 2 Verification is informal or occasional
             add_score: 2
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.5:question:1:choice:3
+            translations:
+              de:
+                value: 3 Die Überprüfung ist dokumentiert, wird aber nicht durchgängig durchgeführt
             value: 3 Verification is documented but not consistently applied
             add_score: 3
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.5:question:1:choice:4
+            translations:
+              de:
+                value: 4 Die Überprüfung wird durchgängig durchgeführt und dokumentiert
             value: 4 Verification is consistently performed and documented
             add_score: 4
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.5:question:1:choice:5
+            translations:
+              de:
+                value: 5 Das Prüfverfahren wird anhand von Kennzahlen bewertet, überprüft und kontinuierlich
+                  verbessert
             value: 5 Verification is measured, reviewed and continuously improved
             add_score: 5
       reference_controls:
@@ -545,32 +977,59 @@ objects:
       assessable: false
       depth: 1
       ref_id: '4'
+      translations:
+        de:
+          name: Management des Produktlebenszyklus
       name: Product Lifecycle Management
     - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.1
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4
       ref_id: '4.1'
+      translations:
+        de:
+          name: Sicherheit in der Betriebsphase
       name: Operational-phase security
       questions:
         urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.1:question:1:
           type: unique_choice
+          translations:
+            de:
+              text: Gibt es eine festgelegte Vorgehensweise für das Management der Produktsicherheit
+                während der Betriebsphase?
           text: Is there a defined approach to managing product security during the
             operational phase?
           choices:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.1:question:1:choice:1
+            translations:
+              de:
+                value: 1 Es gibt keine strukturierte Vorgehensweise
             value: 1 No structured approach exists
             add_score: 1
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.1:question:1:choice:2
+            translations:
+              de:
+                value: 2 Einige Praktiken sind vorhanden, aber informell
             value: 2 Some practices exist but are informal
             add_score: 2
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.1:question:1:choice:3
+            translations:
+              de:
+                value: 3 Eine dokumentierte Vorgehensweise ist vorhanden, wird aber nicht durchgängig
+                  angewendet
             value: 3 A documented approach exists but is not consistently applied
             add_score: 3
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.1:question:1:choice:4
+            translations:
+              de:
+                value: 4 Die Vorgehensweise wird durchgängig angewendet und überprüft
             value: 4 The approach is consistently applied and reviewed
             add_score: 4
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.1:question:1:choice:5
+            translations:
+              de:
+                value: 5 Die Vorgehensweise wird überwacht, anhand von Kennzahlen bewertet und kontinuierlich
+                  verbessert
             value: 5 The approach is monitored, measured and continuously improved
             add_score: 5
       reference_controls:
@@ -581,27 +1040,50 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4
       ref_id: '4.2'
+      translations:
+        de:
+          name: Unterstützungszeiträume und Lebenszyklusende
       name: Support periods and end-of-life
       questions:
         urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.2:question:1:
           type: unique_choice
+          translations:
+            de:
+              text: Wird der Produktlebenszyklus aktiv gesteuert, einschließlich festgelegter Unterstützungszeiträume,
+                Verantwortlichkeiten für Updates, Regelungen zum Lebenszyklusende und Kommunikation
+                mit den Kunden?
           text: Is the product lifecycle management actively managed, including defined
             support periods, update responsibilities, end-of-life arrangements and
             communication with customers?
           choices:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.2:question:1:choice:1
+            translations:
+              de:
+                value: 1 Es gibt kein Lebenszyklusmanagement
             value: 1 No lifecycle management exists
             add_score: 1
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.2:question:1:choice:2
+            translations:
+              de:
+                value: 2 Tätigkeiten im Lebenszyklus erfolgen informell
             value: 2 Lifecycle activities are informal
             add_score: 2
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.2:question:1:choice:3
+            translations:
+              de:
+                value: 3 Lebenszyklusprozesse sind dokumentiert, werden aber nicht durchgängig angewendet
             value: 3 Lifecycle processes are documented but not consistently applied
             add_score: 3
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.2:question:1:choice:4
+            translations:
+              de:
+                value: 4 Das Lebenszyklusmanagement wird durchgängig umgesetzt und kommuniziert
             value: 4 Lifecycle management is consistently applied and communicated
             add_score: 4
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.2:question:1:choice:5
+            translations:
+              de:
+                value: 5 Das Lebenszyklusmanagement wird überwacht, überprüft und kontinuierlich verbessert
             value: 5 Lifecycle management is monitored, reviewed and continuously
               improved
             add_score: 5
@@ -613,27 +1095,51 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4
       ref_id: '4.3'
+      translations:
+        de:
+          name: Kontinuierliche Produktverbesserung
       name: Continuous product improvement
       questions:
         urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.3:question:1:
           type: unique_choice
+          translations:
+            de:
+              text: Werden Erfahrungen aus dem Produktbetrieb, Nachbesprechungen von Vorfällen und Rückmeldungen
+                von Kunden genutzt, um Produkte im Laufe der Zeit zu verbessern?
           text: Is experience from product operation, post-incident reviews and customer
             input used to improve products over time?
           choices:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.3:question:1:choice:1
+            translations:
+              de:
+                value: 1 Es gibt keine strukturierte Verbesserung
             value: 1 No structured improvement exists
             add_score: 1
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.3:question:1:choice:2
+            translations:
+              de:
+                value: 2 Verbesserungen erfolgen gelegentlich und informell
             value: 2 Improvements are occasional and informal
             add_score: 2
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.3:question:1:choice:3
+            translations:
+              de:
+                value: 3 Ein dokumentierter Verbesserungsansatz ist vorhanden, wird aber nicht durchgängig
+                  angewendet
             value: 3 A documented improvement approach exists but is not consistently
               applied
             add_score: 3
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.3:question:1:choice:4
+            translations:
+              de:
+                value: 4 Verbesserungen werden durchgängig umgesetzt und nachverfolgt
             value: 4 Improvements are consistently implemented and tracked
             add_score: 4
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.3:question:1:choice:5
+            translations:
+              de:
+                value: 5 Die kontinuierliche Verbesserung wird anhand von Kennzahlen bewertet und ist
+                  in das Produktmanagement integriert
             value: 5 Continuous improvement is measured and integrated into product
               management
             add_score: 5
@@ -644,27 +1150,50 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4
       ref_id: '4.4'
+      translations:
+        de:
+          name: Strukturierte Behandlung von Sicherheitsproblemen
       name: Structured issue handling
       questions:
         urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.4:question:1:
           type: unique_choice
+          translations:
+            de:
+              text: Gibt es eine strukturierte und erprobte Vorgehensweise zur Behandlung festgestellter
+                Produktsicherheitsprobleme?
           text: Is there a structured and tested way to address identified product
             security issues?
           choices:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.4:question:1:choice:1
+            translations:
+              de:
+                value: 1 Es gibt keine festgelegte Methode
             value: 1 No defined method exists
             add_score: 1
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.4:question:1:choice:2
+            translations:
+              de:
+                value: 2 Probleme werden uneinheitlich behandelt
             value: 2 Issues are handled inconsistently
             add_score: 2
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.4:question:1:choice:3
+            translations:
+              de:
+                value: 3 Eine dokumentierte Methode ist vorhanden, wird aber nicht durchgängig angewendet
+                  oder erprobt
             value: 3 A documented method exists but is not consistently applied or
               tested
             add_score: 3
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.4:question:1:choice:4
+            translations:
+              de:
+                value: 4 Probleme werden nach einem einheitlichen und überprüften Prozess behandelt
             value: 4 Issues are handled through a consistent and reviewed process
             add_score: 4
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.4:question:1:choice:5
+            translations:
+              de:
+                value: 5 Der Prozess wird erprobt, anhand von Kennzahlen bewertet und kontinuierlich verbessert
             value: 5 The process is tested, measured and continuously improved
             add_score: 5
       reference_controls:
@@ -675,26 +1204,49 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4
       ref_id: '4.5'
+      translations:
+        de:
+          name: Überwachung im Betrieb
       name: Operational monitoring
       questions:
         urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.5:question:1:
           type: unique_choice
+          translations:
+            de:
+              text: Werden Produkte während des Betriebs überwacht, um Sicherheitsrisiken, Schwachstellen
+                und neu entstehende Bedrohungen zu erkennen?
           text: Are products monitored during operation to identify security risks,
             vulnerabilities and emerging threats?
           choices:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.5:question:1:choice:1
+            translations:
+              de:
+                value: 1 Es gibt keine Überwachung
             value: 1 No monitoring exists
             add_score: 1
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.5:question:1:choice:2
+            translations:
+              de:
+                value: 2 Die Überwachung erfolgt informell oder gelegentlich
             value: 2 Monitoring is informal or occasional
             add_score: 2
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.5:question:1:choice:3
+            translations:
+              de:
+                value: 3 Die Überwachung ist dokumentiert, wird aber nicht durchgängig durchgeführt
             value: 3 Monitoring is documented but not consistently applied
             add_score: 3
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.5:question:1:choice:4
+            translations:
+              de:
+                value: 4 Die Überwachung wird durchgängig durchgeführt und die Ergebnisse werden nachverfolgt
             value: 4 Monitoring is consistently performed and results are tracked
             add_score: 4
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:4.5:question:1:choice:5
+            translations:
+              de:
+                value: 5 Die Überwachung ist in die Abläufe integriert, erfolgt risikobasiert und wird
+                  kontinuierlich verbessert
             value: 5 Monitoring is integrated, risk-based and continuously improved
             add_score: 5
       reference_controls:
@@ -704,33 +1256,59 @@ objects:
       assessable: false
       depth: 1
       ref_id: '5'
+      translations:
+        de:
+          name: Sensibilisierung, Kompetenz und Fähigkeiten
       name: Awareness, Competence and Skills
     - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.1
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5
       ref_id: '5.1'
+      translations:
+        de:
+          name: Verfügbarkeit von Fachkenntnissen
       name: Skills availability
       questions:
         urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.1:question:1:
           type: unique_choice
+          translations:
+            de:
+              text: Stehen ausreichende Fachkenntnisse zur Verfügung, um Produkte sicher zu entwerfen,
+                zu entwickeln und zu warten, bei begrenzten internen Kapazitäten auch durch externe
+                Expertise?
           text: Are sufficient skills available to design, develop and maintain products
             in a secure way, including through external expertise where internal capacity
             is limited?
           choices:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.1:question:1:choice:1
+            translations:
+              de:
+                value: 1 Es ist keine einschlägige Expertise vorhanden
             value: 1 No relevant expertise is available
             add_score: 1
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.1:question:1:choice:2
+            translations:
+              de:
+                value: 2 Expertise ist in begrenztem Umfang vorhanden und wird informell eingesetzt
             value: 2 Limited expertise is available and applied informally
             add_score: 2
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.1:question:1:choice:3
+            translations:
+              de:
+                value: 3 Fachkenntnisse sind dokumentiert, reichen aber nicht durchgängig aus
             value: 3 Skills are documented but not consistently sufficient
             add_score: 3
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.1:question:1:choice:4
+            translations:
+              de:
+                value: 4 Die Fachkenntnisse sind ausreichend, werden angewendet und regelmäßig überprüft
             value: 4 Skills are sufficient, applied and regularly reviewed
             add_score: 4
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.1:question:1:choice:5
+            translations:
+              de:
+                value: 5 Die Fachkenntnisse werden beurteilt, weiterentwickelt und kontinuierlich verbessert
             value: 5 Skills are assessed, developed and continuously improved
             add_score: 5
       reference_controls:
@@ -740,27 +1318,50 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5
       ref_id: '5.2'
+      translations:
+        de:
+          name: Rollenbezogene Schulungen
       name: Role-based training
       questions:
         urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.2:question:1:
           type: unique_choice
+          translations:
+            de:
+              text: Erhalten die betreffenden Mitarbeitenden geeignete Schulungen zu Cybersicherheitspraktiken,
+                die für ihre Rollen relevant sind, einschließlich Produktrisikomanagement, Schwachstellenmanagement
+                und Security by Design?
           text: Do relevant staff receive appropriate training on cybersecurity practices
             relevant to their roles, including product risk management, vulnerability
             management, and security-by-design?
           choices:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.2:question:1:choice:1
+            translations:
+              de:
+                value: 1 Es werden keine Schulungen angeboten
             value: 1 No training is provided
             add_score: 1
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.2:question:1:choice:2
+            translations:
+              de:
+                value: 2 Schulungen erfolgen informell oder gelegentlich
             value: 2 Training is informal or occasional
             add_score: 2
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.2:question:1:choice:3
+            translations:
+              de:
+                value: 3 Schulungen sind dokumentiert, werden aber nicht durchgängig durchgeführt
             value: 3 Training is documented but not consistently delivered
             add_score: 3
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.2:question:1:choice:4
+            translations:
+              de:
+                value: 4 Schulungen werden regelmäßig durchgeführt und überprüft
             value: 4 Training is regularly delivered and reviewed
             add_score: 4
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.2:question:1:choice:5
+            translations:
+              de:
+                value: 5 Die Wirksamkeit der Schulungen wird beurteilt und kontinuierlich verbessert
             value: 5 Training effectiveness is assessed and continuously improved
             add_score: 5
       reference_controls:
@@ -771,26 +1372,48 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5
       ref_id: '5.3'
+      translations:
+        de:
+          name: Sicherheitskultur
       name: Security culture
       questions:
         urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.3:question:1:
           type: unique_choice
+          translations:
+            de:
+              text: Fördert die Organisation eine Kultur der verantwortungsvollen Produktentwicklung,
+                des offenen Meldens von Problemen und des Bewusstseins für Produktrisiken?
           text: Does the organisation promote a culture of responsible product development,
             open reporting and awareness of product risks?
           choices:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.3:question:1:choice:1
+            translations:
+              de:
+                value: 1 Es gibt keine strukturierte Unterstützung
             value: 1 No structured support exists
             add_score: 1
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.3:question:1:choice:2
+            translations:
+              de:
+                value: 2 Risiken und Produktverantwortung werden gelegentlich besprochen
             value: 2 Risk and product responsibility are discussed occasionally
             add_score: 2
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.3:question:1:choice:3
+            translations:
+              de:
+                value: 3 Erwartungen werden den Mitarbeitenden kommuniziert
             value: 3 Expectations are communicated to staff
             add_score: 3
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.3:question:1:choice:4
+            translations:
+              de:
+                value: 4 Verantwortungsvolle Praktiken sind Bestandteil der täglichen Arbeit am Produkt
             value: 4 Responsible practices are part of normal product work
             add_score: 4
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.3:question:1:choice:5
+            translations:
+              de:
+                value: 5 Überlegungen zu Produktrisiken beeinflussen Entscheidungen in der gesamten Organisation
             value: 5 Product risk considerations influence decisions across the organisation
             add_score: 5
       reference_controls:
@@ -800,26 +1423,49 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5
       ref_id: '5.4'
+      translations:
+        de:
+          name: Externe Sicherheitsinformationen
       name: External security information
       questions:
         urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.4:question:1:
           type: unique_choice
+          translations:
+            de:
+              text: Verfolgen Sie relevante externe Informationen zur Produktsicherheit (z. B. Sicherheitshinweise
+                und Warnmeldungen)?
           text: Do you follow relevant external product security information (e.g.
             advisories, alerts)?
           choices:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.4:question:1:choice:1
+            translations:
+              de:
+                value: 1 Externe Informationen werden nicht verfolgt
             value: 1 No external information is followed
             add_score: 1
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.4:question:1:choice:2
+            translations:
+              de:
+                value: 2 Informationen werden gelegentlich verfolgt
             value: 2 Information is followed occasionally
             add_score: 2
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.4:question:1:choice:3
+            translations:
+              de:
+                value: 3 Informationsquellen sind dokumentiert, werden aber nicht durchgängig genutzt
             value: 3 Sources are documented but not consistently used
             add_score: 3
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.4:question:1:choice:4
+            translations:
+              de:
+                value: 4 Informationen werden durchgängig beobachtet und genutzt
             value: 4 Information is consistently monitored and used
             add_score: 4
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.4:question:1:choice:5
+            translations:
+              de:
+                value: 5 Die Auseinandersetzung mit externen Sicherheitsinformationen erfolgt aktiv, ist
+                  in die Abläufe integriert und wird kontinuierlich verbessert
             value: 5 Engagement is active, integrated and continuously improved
             add_score: 5
       reference_controls:
@@ -830,26 +1476,50 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5
       ref_id: '5.5'
+      translations:
+        de:
+          name: Kompetenzbeurteilung
       name: Competence assessment
       questions:
         urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.5:question:1:
           type: unique_choice
+          translations:
+            de:
+              text: Beurteilen und überprüfen Sie, ob Ihr Team über die erforderlichen Fähigkeiten und
+                Kompetenzen verfügt, um die Sicherheit der Produkte aufrechtzuerhalten?
           text: Do you assess and validate that your team has the required skills
             and competence to maintain secure products?
           choices:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.5:question:1:choice:1
+            translations:
+              de:
+                value: 1 Es erfolgt keine Beurteilung
             value: 1 No assessment exists
             add_score: 1
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.5:question:1:choice:2
+            translations:
+              de:
+                value: 2 Die Beurteilung erfolgt informell
             value: 2 Assessment is informal
             add_score: 2
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.5:question:1:choice:3
+            translations:
+              de:
+                value: 3 Die Beurteilung ist dokumentiert, wird aber nicht durchgängig durchgeführt
             value: 3 Assessment is documented but not consistently applied
             add_score: 3
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.5:question:1:choice:4
+            translations:
+              de:
+                value: 4 Die Beurteilung wird durchgängig durchgeführt und festgestellte Lücken werden
+                  angegangen
             value: 4 Assessment is consistently performed and gaps addressed
             add_score: 4
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.5:question:1:choice:5
+            translations:
+              de:
+                value: 5 Die Kompetenz wird anhand von Kennzahlen bewertet, nachverfolgt und kontinuierlich
+                  verbessert
             value: 5 Competence is measured, tracked and continuously improved
             add_score: 5
       reference_controls:
