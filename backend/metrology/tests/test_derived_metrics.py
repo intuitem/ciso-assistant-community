@@ -759,6 +759,26 @@ class TestFilterValueFailures:
         # Django's own wording stays in the log.
         assert "YYYY-MM-DD" not in instance.last_computation_error
 
+    def test_an_offset_beyond_the_calendar_is_refused_at_save(self):
+        """A {{today-Nd}} large enough overflowed timedelta at run time: the
+        preview 500ed and a saved definition crashed its task at every sweep,
+        last_computed_at never set, with nothing recorded for the author."""
+        errors = validate_formula(self.late("{{today-99999999999d}}"), "late.count")
+        assert [code for code, _message in errors] == ["derived_dataset_invalid"]
+        assert "reaches further than" in errors[0][1]
+        assert validate_formula(self.late("{{today-36500d}}"), "late.count") == []
+
+    def test_an_offset_beyond_the_calendar_is_recorded_not_raised_raw(self):
+        domain = make_domain("Domain")
+        instance = make_instance(
+            domain, make_definition("late.count", self.late("{{today+99999999d}}"))
+        )
+        with pytest.raises(DerivedMetricError, match="outside the calendar"):
+            compute_sample(instance)
+        instance.refresh_from_db()
+        assert instance.last_computed_at is not None
+        assert "outside the calendar" in instance.last_computation_error
+
     def test_the_preview_answers_the_same_failure_without_a_500(self):
         domain = make_domain("Domain")
         view = MetricDefinitionViewSet.as_view({"post": "preview_formula"})

@@ -42,6 +42,7 @@ from core.reads import (
     run_aggregate_read,
     subtree_folder_ids,
     validate_read_config,
+    walk_conditions,
 )
 
 DATASET_NAME_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*\Z")
@@ -55,6 +56,9 @@ LOCK_TTL_SECONDS = 600
 logger = structlog.get_logger(__name__)
 
 _TIME_TOKEN_RE = re.compile(r"\{\{\s*(today|now)\s*(?:([+-])\s*(\d+)\s*d)?\s*\}\}")
+# How far a ``{{today-Nd}}`` offset may reach: a century. Further is a typo,
+# and far enough overflows the calendar at run time.
+MAX_TIME_TOKEN_DAYS = 36500
 
 
 class DerivedMetricError(Exception):
@@ -127,6 +131,8 @@ def validate_formula(
         for code, message in validate_read_config(_aggregate_config(config)):
             errors.append(("derived_dataset_invalid", f"dataset '{name}': {message}"))
         for message in _grouping_errors(config):
+            errors.append(("derived_dataset_invalid", f"dataset '{name}': {message}"))
+        for message in _time_token_errors(config):
             errors.append(("derived_dataset_invalid", f"dataset '{name}': {message}"))
     if not expression.strip():
         errors.append(
@@ -203,6 +209,33 @@ def _grouping_errors(config):
         and isinstance(spec["group_by"], str)
         and spec["group_by"] not in categorical
     ]
+
+
+def _time_token_errors(config):
+    """Time tokens in the filter values whose offset reaches beyond
+    MAX_TIME_TOKEN_DAYS. Resolved at every run, so a bad one would fail the
+    computation every sweep rather than the save."""
+    tree = config.get("filters")
+    if not isinstance(tree, dict):
+        return []
+    try:
+        conditions = list(walk_conditions(tree))
+    except AttributeError, TypeError:
+        # A malformed tree: the read validation reports it.
+        return []
+    errors = []
+    for condition in conditions:
+        value = condition.get("value") if isinstance(condition, dict) else None
+        for item in value if isinstance(value, list) else [value]:
+            if not isinstance(item, str):
+                continue
+            for match in _TIME_TOKEN_RE.finditer(item):
+                if match.group(3) and int(match.group(3)) > MAX_TIME_TOKEN_DAYS:
+                    errors.append(
+                        f"'{match.group(0)}' reaches further than "
+                        f"{MAX_TIME_TOKEN_DAYS} days"
+                    )
+    return errors
 
 
 def _aggregate_config(config):
@@ -336,6 +369,12 @@ def evaluate_formula(datasets, expression, folder, *, previous=None, exclude_id=
             # old level indices; a computed cell lookup then runs past it.
             raise DerivedMetricError(
                 f"dataset '{name}': a stored level no longer exists in the risk matrix"
+            )
+        except OverflowError:
+            # A time token whose offset leaves the calendar, in a definition
+            # saved before the bound or written around it.
+            raise DerivedMetricError(
+                f"dataset '{name}': a time offset reaches outside the calendar"
             )
     referenced = _referenced_metrics(expression)
     evaluation.context = {
