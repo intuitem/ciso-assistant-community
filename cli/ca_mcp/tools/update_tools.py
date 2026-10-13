@@ -28,12 +28,15 @@ from ..resolvers import (
     resolve_threat_id,
     resolve_entity_id,
     resolve_incident_id,
+    _is_uuid,
 )
 from .write_tools import (
     _normalize_applied_control_status,
     _collect_asset_objective_changes,
     _build_asset_objectives,
     _ignored_fields_warning,
+    MANUAL_TIMELINE_ENTRY_TYPES,
+    INVALID_TIMELINE_ENTRY_TYPE_ERROR,
 )
 
 
@@ -1616,3 +1619,67 @@ async def update_incident(
             return f"Error updating incident: {res.status_code} - {res.text}"
     except Exception as e:
         return f"Error in update_incident: {str(e)}"
+
+
+async def update_timeline_entry(
+    timeline_entry_id: str,
+    entry: str = None,
+    entry_type: str = None,
+    timestamp: str = None,
+    observation: str = None,
+    evidences: list = None,
+) -> str:
+    """Partially update an incident timeline entry (only provided fields are updated)
+
+    Only manual entries (detection, mitigation, observation) can be modified;
+    automatic severity/status change entries are read-only history.
+
+    Args:
+        timeline_entry_id: Timeline entry UUID (see list_objects("timeline_entries"))
+        entry: Short entry text, max 200 characters
+        entry_type: detection | mitigation | observation
+        timestamp: Date/time of the event (ISO 8601 with timezone, e.g. 2026-01-01T10:00:00Z; must not be in the future)
+        observation: Detailed observation notes
+        evidences: List of evidence UUIDs (replaces existing; empty list clears)
+    """
+    payload = {
+        k: v
+        for k, v in {
+            "entry": entry,
+            "entry_type": entry_type,
+            "timestamp": timestamp,
+            "observation": observation,
+            "evidences": evidences,
+        }.items()
+        if v is not None
+    }
+    if not _is_uuid(timeline_entry_id):
+        return "Error: timeline_entry_id must be a UUID"
+    if not payload:
+        return "Error: No fields provided to update"
+    if entry_type is not None and entry_type not in MANUAL_TIMELINE_ENTRY_TYPES:
+        return INVALID_TIMELINE_ENTRY_TYPE_ERROR
+    try:
+        endpoint = f"/timeline-entries/{timeline_entry_id}/"
+
+        current = make_get_request(endpoint)
+        if current.status_code != 200:
+            return (
+                f"Error updating timeline entry: {current.status_code} - {current.text}"
+            )
+        current_type = current.json().get("entry_type")
+        if current_type not in MANUAL_TIMELINE_ENTRY_TYPES:
+            return f"Error: cannot modify automatic timeline entry ({current_type})"
+
+        res = make_patch_request(endpoint, payload)
+
+        if res.status_code == 200:
+            updated = res.json()
+            return (
+                f"Updated timeline entry: {updated.get('entry')} "
+                f"(ID: {updated.get('id')})"
+            )
+        else:
+            return f"Error updating timeline entry: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in update_timeline_entry: {str(e)}"

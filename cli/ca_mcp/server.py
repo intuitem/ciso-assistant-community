@@ -81,6 +81,7 @@ from .tools.write_tools import (
     create_task_template,
     create_vulnerability,
     create_incident,
+    create_timeline_entry,
 )
 
 from .tools.update_tools import (
@@ -100,6 +101,7 @@ from .tools.update_tools import (
     update_vulnerability,
     delete_vulnerability,
     update_incident,
+    update_timeline_entry,
 )
 
 from .tools.tprm_tools import (
@@ -237,6 +239,8 @@ WRITE_TOOLS = [
     delete_vulnerability,
     create_incident,
     update_incident,
+    create_timeline_entry,
+    update_timeline_entry,
     update_asset,
     update_risk_scenario,
     update_applied_control,

@@ -16,6 +16,7 @@ from ..resolvers import (
     resolve_risk_level_index,
     resolve_threat_id,
     resolve_entity_id,
+    resolve_incident_id,
     parse_duration,
 )
 from ..config import GLOBAL_FOLDER_ID
@@ -1696,3 +1697,75 @@ async def create_incident(
             return f"Error creating incident: {res.status_code} - {res.text}"
     except Exception as e:
         return f"Error in create_incident: {str(e)}"
+
+
+# Backend TimelineEntry.EntryType.get_manual_entry_types(); severity_changed and
+# status_changed are system-generated history and never accepted as input.
+MANUAL_TIMELINE_ENTRY_TYPES = ("detection", "mitigation", "observation")
+INVALID_TIMELINE_ENTRY_TYPE_ERROR = (
+    f"Error: entry_type must be one of {', '.join(MANUAL_TIMELINE_ENTRY_TYPES)}"
+)
+
+
+async def create_timeline_entry(
+    incident_id: str,
+    entry: str,
+    entry_type: str = None,
+    timestamp: str = None,
+    observation: str = None,
+    evidences: list = None,
+) -> str:
+    """Add an entry to an incident's timeline (detection, mitigation or observation)
+
+    The author is the API user and the folder is the incident's folder.
+
+    Args:
+        incident_id: Incident UUID or name (required)
+        entry: Short entry text, max 200 characters (required)
+        entry_type: detection | mitigation | observation (default: observation)
+        timestamp: Date/time of the event (ISO 8601 with timezone, e.g. 2026-01-01T10:00:00Z; defaults to now, must not be in the future)
+        observation: Detailed observation notes
+        evidences: List of evidence UUIDs
+    """
+    if entry_type is not None and entry_type not in MANUAL_TIMELINE_ENTRY_TYPES:
+        return INVALID_TIMELINE_ENTRY_TYPE_ERROR
+    try:
+        resolved_incident = resolve_incident_id(incident_id)
+
+        # Send the incident's folder so the backend RBAC add check is scoped to
+        # the incident's domain (it falls back to the root folder otherwise).
+        incident_res = make_get_request(f"/incidents/{resolved_incident}/")
+        if incident_res.status_code != 200:
+            return (
+                f"Error creating timeline entry: {incident_res.status_code} - "
+                f"{incident_res.text}"
+            )
+        folder = incident_res.json().get("folder")
+        if isinstance(folder, dict):
+            folder = folder.get("id")
+
+        payload = {"incident": resolved_incident, "entry": entry}
+        if folder:
+            payload["folder"] = folder
+
+        scalars = {
+            "entry_type": entry_type,
+            "timestamp": timestamp,
+            "observation": observation,
+        }
+        payload.update({k: v for k, v in scalars.items() if v is not None})
+        if evidences is not None:
+            payload["evidences"] = evidences
+
+        res = make_post_request("/timeline-entries/", payload)
+
+        if res.status_code == 201:
+            created = res.json()
+            return (
+                f"Created timeline entry: {created.get('entry')} "
+                f"(ID: {created.get('id')})"
+            )
+        else:
+            return f"Error creating timeline entry: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in create_timeline_entry: {str(e)}"

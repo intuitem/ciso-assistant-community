@@ -116,6 +116,16 @@ HARD = [
         {"create_incident"},
         {"ransomware"},
     ),
+    (
+        "Add a mitigation to the Ransomware incident timeline: isolated the file server",
+        {"create_timeline_entry"},
+        {"ransomware"},
+    ),
+    (
+        "Correct the observation of timeline entry 11111111-1111-1111-1111-111111111111",
+        {"update_timeline_entry"},
+        {"11111111-1111-1111-1111-111111111111"},
+    ),
     # -- French, harder phrasing
     (
         "Quels sont les risques les plus critiques pour nos actifs ?",
