@@ -475,7 +475,7 @@ export const navData = {
 				{
 					name: 'processorRegister',
 					fa_icon: 'fa-solid fa-handshake',
-					href: '/processings?role=privacy_data_processor&role=privacy_sub_processor',
+					href: '/processings?role=privacy_data_processor',
 					permissions: ['view_processing']
 				},
 				{

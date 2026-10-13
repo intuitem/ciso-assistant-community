@@ -28,7 +28,6 @@ class Migration(migrations.Migration):
                     ("privacy_controller", "Controller"),
                     ("privacy_joint_controller", "Joint Controller"),
                     ("privacy_data_processor", "Data Processor"),
-                    ("privacy_sub_processor", "Sub-processor"),
                 ],
                 default="privacy_controller",
                 max_length=30,

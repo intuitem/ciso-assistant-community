@@ -82,7 +82,6 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
         ("privacy_controller", "Controller"),
         ("privacy_joint_controller", "Joint Controller"),
         ("privacy_data_processor", "Data Processor"),
-        ("privacy_sub_processor", "Sub-processor"),
     )
 
     ref_id = models.CharField(max_length=100, blank=True)

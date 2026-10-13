@@ -241,6 +241,3 @@ export const SECURITY_OBJECTIVE_SCALE_MAP = {
 	'1-5': ['1', '2', '3', '4', '5'],
 	'FIPS-199': ['low', 'moderate', 'moderate', 'high', 'high']
 };
-
-// Processing roles that belong to the GDPR Art. 30(2) processor register
-export const PROCESSOR_ROLES = ['privacy_data_processor', 'privacy_sub_processor'];

@@ -5,9 +5,9 @@
 	import Select from '../Select.svelte';
 	import Checkbox from '../Checkbox.svelte';
 	import { formFieldProxy, type SuperValidated } from 'sveltekit-superforms';
-	import { PROCESSOR_ROLES } from '$lib/utils/constants';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import * as m from '$paraglide/messages.js';
+	import { safeTranslate } from '$lib/utils/i18n';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -29,14 +29,12 @@
 	// Preset once when created from the processor register (same as CampaignForm's kind);
 	// an effect here loops, since writing the form re-derives `initialData`.
 	if (initialData.role) roleValue.set(initialData.role);
-	const isProcessor = $derived(PROCESSOR_ROLES.includes($roleValue as string));
+	const isProcessor = $derived($roleValue === 'privacy_data_processor');
 	// Art. 30(1)(a) needs co-controllers, Art. 30(2)(a) the controllers served
 	const controllersLabel = $derived(
 		$roleValue === 'privacy_joint_controller'
 			? m.processingCoControllers()
-			: $roleValue === 'privacy_sub_processor'
-				? m.processingSubProcessorClients()
-				: m.processingControllers()
+			: m.processingControllers()
 	);
 </script>
 
@@ -68,6 +66,18 @@
 		bind:cachedValue={formDataCache['controllers']}
 		label={controllersLabel}
 		helpText={m.processingControllersHelpText()}
+		optionsInfoFields={{
+			fields: [
+				{
+					field: 'relationship',
+					display: (relationships) =>
+						(relationships ?? []).map((r) => safeTranslate(r.str || r.name || r)).join(' | ')
+				}
+			],
+			position: 'suffix',
+			separator: ' | ',
+			classes: 'text-xs text-surface-500'
+		}}
 	/>
 {/if}
 <AutocompleteSelect

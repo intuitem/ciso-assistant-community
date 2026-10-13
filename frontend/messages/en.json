@@ -7155,11 +7155,10 @@
 	"lowImpact": "Low impact",
 	"privacyController": "Controller",
 	"processingRole": "GDPR role",
-	"processingRoleHelpText": "Controller and joint controller processings form your Art. 30(1) register; processor and sub-processor ones form your Art. 30(2) register",
-	"processingControllers": "Controllers (clients)",
+	"processingRoleHelpText": "Controller and joint controller processings form your Art. 30(1) register; processor ones (including as a sub-processor) form your Art. 30(2) register",
+	"processingControllers": "Clients (controllers or processors)",
 	"processingControllersHelpText": "Joint controllers you share this processing with, or the clients on whose behalf you carry it out",
-	"controllers": "Controllers (clients)",
+	"controllers": "Clients (controllers or processors)",
 	"processorRegister": "Processor register",
-	"processingCoControllers": "Co-controllers",
-	"processingSubProcessorClients": "Clients (controllers or processors)"
+	"processingCoControllers": "Co-controllers"
 }
