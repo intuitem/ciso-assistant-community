@@ -112,6 +112,14 @@
 			hoverClass: 'hover:border-indigo-400 hover:bg-indigo-50',
 			label: m.workflows()
 		},
+		quick_forms: {
+			type: 'string',
+			field: 'object_type',
+			icon: findIconInSidebar('catalog', 'quickForms', 'fa-clipboard-question'),
+			selectedClass: 'bg-gradient-to-r from-teal-500 to-teal-600 text-white shadow-teal-200',
+			hoverClass: 'hover:border-teal-400 hover:bg-teal-50',
+			label: m.quickForms()
+		},
 		preset: {
 			type: 'string',
 			field: 'object_type',
@@ -132,7 +140,13 @@
 
 	const filterTypes = Object.keys(filterConfiguration);
 
-	let quickFilterSelected: Record<string, boolean> = $state({});
+	// Read straight from the table's filters, so a button can never disagree with
+	// them; no state of our own to keep in sync.
+	function isSelected(filterValues: Record<string, any>, key: string): boolean {
+		const config = filterConfiguration[key];
+		const values: { value: string }[] = filterValues[config.field] ?? [];
+		return values.some((f) => f.value === (config.type === 'boolean' ? 'true' : key));
+	}
 </script>
 
 <div class="card bg-surface-50-950 py-2 shadow-sm">
@@ -140,19 +154,6 @@
 		source={data.storedLibrariesTable}
 		URLModel="stored-libraries"
 		deleteForm={data.deleteForm}
-		onFilterChange={(filters) => {
-			// Assign each key once: resetting every key to false before setting it back
-			// writes state this effect reads, which loops until Svelte aborts the update.
-			for (const key in filterConfiguration) {
-				const config = filterConfiguration[key];
-				const filterValues = filters[config.field] ?? [];
-
-				quickFilterSelected[key] =
-					config.type === 'string'
-						? filterValues.some((f) => f.value === key)
-						: filterValues.some((f) => f.value === 'true');
-			}
-		}}
 	>
 		{#snippet quickFilters(filterValues, form, invalidateTable)}
 			<div
@@ -160,10 +161,11 @@
 			>
 				{#each filterTypes as key}
 					{@const config = filterConfiguration[key]}
+					{@const selected = isSelected(filterValues, key)}
 
 					<button
 						class="group relative px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 ease-out transform hover:scale-105 active:scale-95 shadow-sm hover:shadow-md
-                        {quickFilterSelected[key]
+                        {selected
 							? config.selectedClass
 							: `bg-surface-50-950 text-surface-700-300 border-2 border-surface-300-700 ${config.hoverClass}`}"
 						onclick={() => {
@@ -180,24 +182,18 @@
 								const newValues = Array.from(currentValues);
 								filterValues[config.field] = newValues.map((v) => ({ value: v }));
 							} else if (config.type === 'boolean') {
-								if (quickFilterSelected[key]) {
-									filterValues[config.field] = [];
-								} else {
-									filterValues[config.field] = [{ value: 'true' }];
-								}
+								filterValues[config.field] = selected ? [] : [{ value: 'true' }];
 							}
 						}}
 					>
 						<span class="flex items-center gap-2">
 							<i
-								class="fa-solid {config.icon} transition-transform duration-200 {quickFilterSelected[
-									key
-								]
+								class="fa-solid {config.icon} transition-transform duration-200 {selected
 									? 'scale-110'
 									: 'group-hover:scale-110'}"
 							></i>
 							<span class="font-semibold">{config.label}</span>
-							{#if quickFilterSelected[key]}
+							{#if selected}
 								<svg class="h-4 w-4 ml-1" fill="currentColor" viewBox="0 0 20 20">
 									<path
 										fill-rule="evenodd"

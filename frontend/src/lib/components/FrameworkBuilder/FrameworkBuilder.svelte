@@ -1,11 +1,13 @@
 <script lang="ts">
-	import { onMount, onDestroy, tick } from 'svelte';
+	import { onMount, onDestroy, tick, untrack } from 'svelte';
+	import { get } from 'svelte/store';
 	import { beforeNavigate } from '$app/navigation';
 	import {
 		createBuilderState,
 		setBuilderContext,
 		getTranslation,
 		withTranslation,
+		extractNodeId,
 		type Framework,
 		type BuilderNode,
 		type RequirementNode,
@@ -15,10 +17,12 @@
 	import {
 		localeLabel,
 		createCopyHandler,
-		createHandleGatedDragHandlers
+		createHandleGatedDragHandlers,
+		REFERENCEABLE_MODELS
 	} from './builder-utils.svelte';
 	import { locales as supportedLocales } from '$paraglide/runtime';
 	import { m } from '$paraglide/messages';
+	import { safeTranslate } from '$lib/utils/i18n';
 	import { installKeyboardHandlers } from './keyboard';
 	import {
 		createCollapsedStore,
@@ -32,6 +36,9 @@
 	import AddNodeMenu from './AddNodeMenu.svelte';
 	import EmptyState from './EmptyState.svelte';
 	import OutcomesEditor from './OutcomesEditor.svelte';
+	import { SECTION_CARD, SECTION_ICON, SECTION_TITLE } from './section-style';
+	import { buildCelCatalog, setCelCatalogContext } from './cel-complete';
+	import OnAcceptEditor from './OnAcceptEditor.svelte';
 	import ImplementationGroupsEditor from './ImplementationGroupsEditor.svelte';
 	import VisibilityEditor from '$lib/components/ComplianceAssessment/VisibilityEditor.svelte';
 	import { initReferentialCatalog } from './referential-catalog';
@@ -194,6 +201,129 @@
 		}
 	}
 
+	// Single-object reference questions that can name what a response is about.
+	// Only saved questions (with a URN) can be picked.
+	let subjectCandidates = $derived(
+		$rootNodesStore
+			.flatMap((bn) => bn.questions.map((bq) => bq.question))
+			.filter(
+				(q) =>
+					(q.type as string) === 'object_reference' &&
+					!!q.urn &&
+					!(q.config as Record<string, unknown> | null)?.multiple
+			)
+	);
+
+	let subjectModel = $derived(
+		(subjectCandidates.find(
+			(q) => q.urn.toLowerCase() === ($frameworkStore.subject_question_urn ?? '').toLowerCase()
+		)?.config?.model as string | undefined) ?? null
+	);
+
+	// What a new subject question will point at; vendors first, the common case.
+	let newSubjectModel = $state<string>('entity');
+
+	/** Add a single-object question at the top of the first page and make it the
+	 * subject, so an author never has to know that a subject is a question. */
+	function addSubjectQuestion(model: string) {
+		if (!get(builder.rootNodes).length) builder.addNode({ parent: null });
+		const page = get(builder.rootNodes)[0]?.node;
+		if (!page) return;
+		const question = builder.addQuestion(page.id, 'object_reference' as Question['type']);
+		if (!question) return;
+		builder.updateQuestion(question.id, { text: safeTranslate(model), config: { model } });
+		const count = get(builder.rootNodes)[0].questions.length;
+		if (count > 1) builder.reorderQuestions(page.id, count - 1, 0);
+		builder.updateFramework({ subject_question_urn: question.urn });
+	}
+
+	// The form score only moves when a choice question gives points, as on the server.
+	const formGivesPoints = $derived.by(() => {
+		const walk = (nodes: BuilderNode[]): boolean =>
+			nodes.some(
+				(bn) =>
+					bn.questions.some(
+						({ question }) =>
+							(question.type === 'unique_choice' || question.type === 'multiple_choice') &&
+							question.choices.some((c) => c.add_score !== null && c.add_score !== undefined)
+					) || walk(bn.children)
+			);
+		return walk($rootNodesStore);
+	});
+
+	const ruleGroups = $derived(
+		($frameworkStore.implementation_groups_definition ?? [])
+			.map((g) => g as Record<string, unknown>)
+			.filter((g) => g.ref_id)
+			.map((g) => ({ id: String(g.ref_id), label: String(g.name ?? g.ref_id) }))
+	);
+
+	// What the expression fields suggest: every page, requirement, question and choice.
+	const celCatalog = $derived(buildCelCatalog($rootNodesStore, mode, ruleGroups));
+	setCelCatalogContext(() => celCatalog);
+
+	// Pages as rules address them (`pages["<node id>"]`), named for the author.
+	let rulePages = $derived(
+		mode === 'quick_form'
+			? $rootNodesStore
+					.map((bn) => ({
+						id: extractNodeId(bn.node.urn) ?? '',
+						label: bn.node.name || bn.node.ref_id || ''
+					}))
+					.filter((p) => p.id)
+			: []
+	);
+
+	// A form whose first object question appears is almost always about that
+	// object: pick it as subject then. Never over an author's choice, and never
+	// on load, so existing forms are left as they are.
+	// A subject whose question is gone (deleted, or no longer a single-object
+	// reference) would only fail the next save: drop it so it can be re-picked.
+	$effect(() => {
+		const urns = new Set(subjectCandidates.map((q) => q.urn.toLowerCase()));
+		untrack(() => {
+			const subject = $frameworkStore.subject_question_urn;
+			if (mode === 'quick_form' && subject && !urns.has(subject.toLowerCase())) {
+				builder.updateFramework({ subject_question_urn: null });
+			}
+		});
+	});
+
+	let previousCandidateCount = untrack(() => subjectCandidates.length);
+	$effect(() => {
+		const count = subjectCandidates.length;
+		const first = subjectCandidates[0];
+		untrack(() => {
+			if (
+				mode === 'quick_form' &&
+				count === 1 &&
+				previousCandidateCount === 0 &&
+				!$frameworkStore.subject_question_urn
+			) {
+				builder.updateFramework({ subject_question_urn: first.urn });
+			}
+			previousCandidateCount = count;
+		});
+	});
+
+	// Quick forms keep their score settings as {min, max, aggregation} in
+	// scores_definition; frameworks use the scale editor above instead.
+	function quickFormScore(): { min: number; max: number; aggregation: string } {
+		const def = $frameworkStore.scores_definition;
+		const rec = def && typeof def === 'object' && !Array.isArray(def) ? def : {};
+		return {
+			min: typeof rec.min === 'number' ? rec.min : 0,
+			max: typeof rec.max === 'number' ? rec.max : 100,
+			aggregation: typeof rec.aggregation === 'string' ? rec.aggregation : 'sum'
+		};
+	}
+
+	function setQuickFormScore(patch: Partial<{ min: number; max: number; aggregation: string }>) {
+		const def = $frameworkStore.scores_definition;
+		const base = def && typeof def === 'object' && !Array.isArray(def) ? { ...def } : {};
+		builder.updateFramework({ scores_definition: { ...quickFormScore(), ...base, ...patch } });
+	}
+
 	function collectAllParentIds(tree: BuilderNode[]): string[] {
 		const ids: string[] = [];
 		function walk(list: BuilderNode[]) {
@@ -238,11 +368,53 @@
 		}
 	});
 
+	// Most fields commit on `change`, which fires on blur: saving from inside one
+	// would send the value from before the edit. Blur commits it, then focus and
+	// caret go back so the author keeps typing.
+	function commitFocusedField(): () => void {
+		const el = document.activeElement;
+		if (!(
+			el instanceof HTMLInputElement ||
+			el instanceof HTMLTextAreaElement ||
+			el instanceof HTMLSelectElement
+		)) {
+			return () => {};
+		}
+		const caret =
+			el instanceof HTMLSelectElement ? null : ([el.selectionStart, el.selectionEnd] as const);
+		el.blur();
+		return () => {
+			el.focus();
+			if (caret && caret[0] !== null && el instanceof HTMLTextAreaElement) {
+				el.setSelectionRange(caret[0], caret[1]);
+			} else if (caret && caret[0] !== null && el instanceof HTMLInputElement) {
+				// Some input types (number, color) have no caret to restore.
+				try {
+					el.setSelectionRange(caret[0], caret[1]);
+				} catch {
+					/* not a text input */
+				}
+			}
+		};
+	}
+
 	// Ctrl+S / Cmd+S keyboard shortcut
-	function handleKeydown(e: KeyboardEvent) {
+	// The fallback is for empty or invalid input only: 0 is a valid bound.
+	function intOr(raw: string, fallback: number): number {
+		const value = parseInt(raw);
+		return Number.isNaN(value) ? fallback : value;
+	}
+
+	async function handleKeydown(e: KeyboardEvent) {
 		if ((e.ctrlKey || e.metaKey) && e.key === 's') {
 			e.preventDefault();
-			builder.flushDraft();
+			const refocus = commitFocusedField();
+			// After the save: a returned URN map re-renders the fields.
+			try {
+				await builder.flushDraft();
+			} finally {
+				refocus();
+			}
 		}
 	}
 
@@ -329,8 +501,19 @@
 	<div class="flex">
 		<BuilderToC />
 
-		<div class="flex-1 min-w-0">
+		<!-- An edit in progress counts as unsaved even before its field commits
+		     (on blur): the Save button shows and leaving the page warns. -->
+		<div class="flex-1 min-w-0" oninput={() => unsavedStore.set(true)}>
 			<div class="max-w-5xl mx-auto px-6 py-8 space-y-8">
+				{#if $errorsStore.has('save-draft')}
+					<div
+						class="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700 whitespace-pre-line"
+						role="alert"
+						data-testid="builder-save-error"
+					>
+						<i class="fa-solid fa-triangle-exclamation mr-1"></i>{$errorsStore.get('save-draft')}
+					</div>
+				{/if}
 				<!-- Framework metadata -->
 				<div class="space-y-2" data-framework-metadata>
 					{#if $activeLanguageStore}
@@ -406,7 +589,9 @@
 						/>
 						<textarea
 							value={$frameworkStore.description ?? ''}
-							placeholder={m.builderFrameworkDescriptionPlaceholder()}
+							placeholder={mode === 'quick_form'
+								? m.builderFormDescriptionPlaceholder()
+								: m.builderFrameworkDescriptionPlaceholder()}
 							rows="2"
 							class="w-full text-sm text-surface-600-400 bg-transparent border-0 border-b border-transparent hover:border-surface-300-700 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none py-1"
 							onblur={(e) => {
@@ -449,7 +634,9 @@
 									: 'fa-chevron-right'} text-[10px] text-surface-500"
 							></i>
 							<span class="text-xs font-semibold text-surface-600-400 uppercase tracking-wider"
-								>{m.builderFrameworkSettings()}</span
+								>{mode === 'quick_form'
+									? m.builderFormSettings()
+									: m.builderFrameworkSettings()}</span
 							>
 							{#if !showSettings}
 								<span class="text-xs text-surface-500">{settingsSummary}</span>
@@ -466,7 +653,9 @@
 								>
 								<textarea
 									value={$frameworkStore.annotation ?? ''}
-									placeholder={m.builderFrameworkAnnotationPlaceholder()}
+									placeholder={mode === 'quick_form'
+										? m.builderFormAnnotationPlaceholder()
+										: m.builderFrameworkAnnotationPlaceholder()}
 									rows="2"
 									class="mt-1 w-full text-sm text-surface-600-400 bg-transparent border border-surface-200-800 rounded-lg px-3 py-2 hover:border-surface-300-700 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
 									onblur={(e) => {
@@ -523,29 +712,126 @@
 								<p class="text-[10px] text-surface-500 mt-0.5">
 									{m.urnPreview()}
 									<code
-										>urn:{$frameworkStore.urn_namespace ??
-											'custom'}:risk:framework:{$frameworkStore.ref_id || '…'}</code
+										>urn:{$frameworkStore.urn_namespace ?? 'custom'}:risk:{mode === 'quick_form'
+											? 'quick_form'
+											: 'framework'}:{$frameworkStore.ref_id || '…'}</code
 									>
 									{#if lockUrnEdits}
-										{m.urnLockedComplianceAssessment()}
+										{mode === 'quick_form'
+											? m.urnLockedQuickFormResponses()
+											: m.urnLockedComplianceAssessment()}
 									{/if}
 								</p>
 							</div>
 
+							{#if mode === 'quick_form'}
+								<div class={SECTION_CARD} data-testid="quick-form-score-settings">
+									<p class={SECTION_TITLE}>
+										<i class="{SECTION_ICON} fa-calculator" aria-hidden="true"
+										></i>{m.builderQuickFormScore()}
+									</p>
+									<div class="grid grid-cols-3 gap-3">
+										<label class="block">
+											<span class="text-xs text-surface-600-400">{m.aggregation()}</span>
+											<select
+												value={quickFormScore().aggregation}
+												class="w-full text-sm border border-surface-200-800 rounded px-2 py-1 bg-surface-50-950"
+												onchange={(e) => setQuickFormScore({ aggregation: e.currentTarget.value })}
+											>
+												<option value="sum">{m.builderScoreSumOfQuestions()}</option>
+												<option value="mean">{m.builderScoreMeanOfQuestions()}</option>
+												<option value="pages_sum">{m.builderScoreSumOfPages()}</option>
+												<option value="pages_mean">{m.builderScoreMeanOfPages()}</option>
+											</select>
+										</label>
+										<label class="block">
+											<span class="text-xs text-surface-600-400">{m.minScore()}</span>
+											<input
+												type="number"
+												value={quickFormScore().min}
+												class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1"
+												onblur={(e) => setQuickFormScore({ min: intOr(e.currentTarget.value, 0) })}
+											/>
+										</label>
+										<label class="block">
+											<span class="text-xs text-surface-600-400">{m.maxScore()}</span>
+											<input
+												type="number"
+												value={quickFormScore().max}
+												class="input w-full text-sm border border-surface-200-800 rounded px-2 py-1"
+												onblur={(e) =>
+													setQuickFormScore({ max: intOr(e.currentTarget.value, 100) })}
+											/>
+										</label>
+									</div>
+									<p class="text-xs text-surface-500">{m.builderQuickFormScoreHint()}</p>
+								</div>
+								<div class={SECTION_CARD} data-testid="subject-question">
+									<p class={SECTION_TITLE}>
+										<i class="{SECTION_ICON} fa-crosshairs" aria-hidden="true"
+										></i>{m.builderSubjectQuestion()}
+									</p>
+									<select
+										value={$frameworkStore.subject_question_urn ?? ''}
+										aria-label={m.builderSubjectQuestion()}
+										class="w-full text-sm border border-surface-200-800 rounded px-2 py-1 bg-surface-50-950"
+										onchange={(e) =>
+											builder.updateFramework({
+												subject_question_urn: e.currentTarget.value || null
+											})}
+									>
+										<option value="">{m.builderNoSubjectQuestion()}</option>
+										{#each subjectCandidates as question (question.urn)}
+											<option value={question.urn}
+												>{question.text || question.ref_id || question.urn} ({safeTranslate(
+													String(question.config?.model ?? '')
+												)})</option
+											>
+										{/each}
+									</select>
+									<p class="text-xs text-surface-500">{m.builderSubjectQuestionHint()}</p>
+									{#if !subjectCandidates.length}
+										<span
+											class="mt-1.5 flex flex-wrap items-center gap-2"
+											data-testid="add-subject"
+										>
+											<select
+												class="text-xs border border-surface-200-800 rounded px-2 py-1 bg-surface-50-950"
+												aria-label={m.builderReferenceModel()}
+												bind:value={newSubjectModel}
+											>
+												{#each REFERENCEABLE_MODELS as model}
+													<option value={model}>{safeTranslate(model)}</option>
+												{/each}
+											</select>
+											<button
+												type="button"
+												class="btn btn-sm preset-tonal-primary"
+												onclick={() => addSubjectQuestion(newSubjectModel)}
+												data-testid="add-subject-question"
+											>
+												<i class="fa-solid fa-plus mr-1"></i>{m.builderAddSubjectQuestion()}
+											</button>
+										</span>
+									{/if}
+								</div>
+							{/if}
+
 							{#if mode === 'framework'}
 								<!-- Scoring settings -->
-								<div class="space-y-1.5">
+								<div class={SECTION_CARD}>
 									<button
 										type="button"
-										class="flex items-center gap-1.5 text-xs font-medium text-surface-600-400 uppercase tracking-wider hover:text-surface-700-300 transition-colors"
+										class="{SECTION_TITLE} hover:text-primary-600 transition-colors"
 										onclick={() => (showScoringSettings = !showScoringSettings)}
 									>
+										<i class="{SECTION_ICON} fa-gauge" aria-hidden="true"></i>
+										{m.builderScoringSettings()}
 										<i
 											class="fa-solid {showScoringSettings
 												? 'fa-chevron-down'
-												: 'fa-chevron-right'} text-[9px]"
+												: 'fa-chevron-right'} text-[9px] text-surface-500"
 										></i>
-										{m.builderScoringSettings()}
 									</button>
 									{#if showScoringSettings}
 										<div
@@ -750,45 +1036,68 @@
 								</div>
 							{/if}
 							<!-- Outcome rules -->
-							<OutcomesEditor
-								outcomes={$frameworkStore.outcomes_definition ?? []}
-								onupdate={(rules) => builder.updateFramework({ outcomes_definition: rules })}
-								activeLanguage={$activeLanguageStore}
-								{mode}
-							/>
+							<div class={SECTION_CARD}>
+								<OutcomesEditor
+									outcomes={$frameworkStore.outcomes_definition ?? []}
+									onupdate={(rules) => builder.updateFramework({ outcomes_definition: rules })}
+									activeLanguage={$activeLanguageStore}
+									{mode}
+									pages={rulePages}
+									catalog={celCatalog}
+									groups={ruleGroups}
+								/>
+							</div>
+
+							{#if mode === 'quick_form'}
+								<div class={SECTION_CARD}>
+									<OnAcceptEditor
+										value={($frameworkStore.on_accept ?? []) as any[]}
+										rules={$frameworkStore.outcomes_definition ?? []}
+										{subjectModel}
+										onaddvendorsubject={() => addSubjectQuestion('entity')}
+										scored={formGivesPoints}
+										onupdate={(on_accept) => builder.updateFramework({ on_accept })}
+									/>
+								</div>
+							{/if}
 
 							{#if mode === 'framework'}
 								<!-- Implementation groups -->
-								<ImplementationGroupsEditor
-									groups={($frameworkStore.implementation_groups_definition ?? []).map((g) => {
-										const rec = g as Record<string, unknown>;
-										return {
-											ref_id: (rec.ref_id as string) ?? '',
-											name: (rec.name as string) ?? '',
-											description: (rec.description as string) ?? '',
-											default_selected: (rec.default_selected as boolean) ?? false,
-											// Not edited here, but kept: audits of the group are proposed it.
-											target_score: (rec.target_score as number | null | undefined) ?? undefined,
-											translations:
-												(rec.translations as Record<string, Record<string, string>>) ?? null
-										};
-									})}
-									onupdate={(groups) =>
-										builder.updateFramework({ implementation_groups_definition: groups })}
-									activeLanguage={$activeLanguageStore}
-								/>
+								<div class={SECTION_CARD}>
+									<ImplementationGroupsEditor
+										groups={($frameworkStore.implementation_groups_definition ?? []).map((g) => {
+											const rec = g as Record<string, unknown>;
+											return {
+												ref_id: (rec.ref_id as string) ?? '',
+												name: (rec.name as string) ?? '',
+												description: (rec.description as string) ?? '',
+												default_selected: (rec.default_selected as boolean) ?? false,
+												// Not edited here, but kept: audits of the group are proposed it.
+												target_score: (rec.target_score as number | null | undefined) ?? undefined,
+												translations:
+													(rec.translations as Record<string, Record<string, string>>) ?? null
+											};
+										})}
+										onupdate={(groups) =>
+											builder.updateFramework({ implementation_groups_definition: groups })}
+										activeLanguage={$activeLanguageStore}
+									/>
+								</div>
 
 								<!-- Field Visibility -->
-								<VisibilityEditor
-									value={$frameworkStore.field_visibility}
-									onChange={(next) => builder.updateFramework({ field_visibility: next })}
-								/>
+								<div class={SECTION_CARD}>
+									<VisibilityEditor
+										value={$frameworkStore.field_visibility}
+										onChange={(next) => builder.updateFramework({ field_visibility: next })}
+									/>
+								</div>
 							{/if}
 							<!-- Languages -->
-							<div class="space-y-1.5">
-								<span class="text-xs font-medium text-surface-600-400 uppercase tracking-wider"
-									>{m.builderLanguagesSection()}</span
-								>
+							<div class={SECTION_CARD}>
+								<p class={SECTION_TITLE}>
+									<i class="{SECTION_ICON} fa-language" aria-hidden="true"
+									></i>{m.builderLanguagesSection()}
+								</p>
 								<p class="text-xs text-surface-500">
 									{m.builderLanguagesHint()}
 								</p>
@@ -891,7 +1200,7 @@
 
 				<!-- Global errors -->
 				{#each [...$errorsStore.entries()] as [key, message] (key)}
-					{#if key.startsWith('add-') || key.startsWith('reorder-') || key === 'save-draft'}
+					{#if key.startsWith('add-') || key.startsWith('reorder-')}
 						<div class="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-600">
 							{message}
 						</div>

@@ -93,6 +93,8 @@ export const URL_MODEL = [
 	'contracts',
 	'custom-fields',
 	'entity-scores',
+	'tiers',
+	'entity-tier-changes',
 	'representatives',
 	'vulnerabilities',
 	'security-advisories',

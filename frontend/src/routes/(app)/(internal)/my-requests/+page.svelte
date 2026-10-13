@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { ruleLabel } from '$lib/components/QuickForms/rule-label';
 	import { invalidateAll, goto } from '$app/navigation';
 	import { deserialize } from '$app/forms';
 	import { m } from '$paraglide/messages';
@@ -42,7 +43,7 @@
 	const outcomes = (r: any) =>
 		Object.entries(r.computed_outcome ?? {}).map(([ref_id, v]: [string, any]) => ({
 			ref_id,
-			label: v?.label ?? v?.annotation ?? ref_id,
+			label: ruleLabel(v, ref_id),
 			color: v?.color
 		}));
 	const fmt = (d: string | null) =>

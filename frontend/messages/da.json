@@ -632,6 +632,7 @@
 	"libraryLoadingError": "Der opstod en fejl under indlæsning af biblioteket",
 	"processingError": "Behandlingsfejl",
 	"libraryAlreadyLoadedError": "Dette bibliotek er allerede indlæst",
+	"libraryOutdatedError": "En nyere version af dette bibliotek er allerede gemt. Angiv en højere \"version\" i din fil for at importere den.",
 	"invalidLibraryFileError": "Ugyldig biblioteksfil. Kontroller at formatet er korrekt",
 	"taintedFormMessage": "Vil du forlade denne side? Ændringer du har lavet gemmes muligvis ikke",
 	"riskScenariosStatus": "Status for risikoscenarier",
@@ -1914,5 +1915,7 @@
 	"attributeMappingGroups": "Attributtilknytning for grupper",
 	"attributeMappingGroupsHelpText": "Claim-navn(e), der indeholder brugerens IdP-gruppemedlemskaber. Grupper fundet her synkroniseres til IdP-grupper ved hvert login og giver adgang til de CISO Assistant-brugergrupper, som en administrator har tilknyttet dem.",
 	"jitProvisioning": "SSO-automatisk provisionering (JIT)",
-	"jitProvisioningDescription": "Aktivér automatisk oprettelse af konti ved første SSO-login og synkronisering af deres IdP-gruppemedlemskaber, uden krav om SCIM."
+	"jitProvisioningDescription": "Aktivér automatisk oprettelse af konti ved første SSO-login og synkronisering af deres IdP-gruppemedlemskaber, uden krav om SCIM.",
+	"includeNotApplicableRequirements": "Inkluder ikke relevante krav",
+	"excludeNotApplicableRequirements": "Ekskluder ikke relevante krav"
 }
