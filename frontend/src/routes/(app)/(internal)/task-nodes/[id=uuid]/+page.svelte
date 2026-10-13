@@ -56,6 +56,22 @@
 	}
 
 	let taskNode = $derived(data.data);
+	const canChangeNode = $derived(
+		canPerformActionOnObject({
+			user: page.data.user,
+			action: 'change',
+			model: 'tasknode',
+			object: taskNode
+		})
+	);
+	const canChangeTemplate = $derived(
+		canPerformActionOnObject({
+			user: page.data.user,
+			action: 'change',
+			model: 'tasktemplate',
+			object: taskNode.task_template
+		})
+	);
 
 	async function submitStatusChange(status: string): void {
 		const formData = new FormData();
@@ -394,12 +410,17 @@
 				<Anchor href={`/evidences/${evidence.id}/`} label={evidence.str}>
 					<i class="fa-solid fa-eye ml-2 text-primary-500"></i>
 				</Anchor>
-				<button class="text-primary-500" onclick={(_) => removeEvidence(evidence.id, true)}>
-					<i class="fa-solid fa-square-arrow-up-right"></i>
-				</button>
-				<button class="text-error-500" onclick={(_) => removeEvidence(evidence.id, false)}>
-					<i class="fa-solid fa-square-minus"></i>
-				</button>
+				<!-- remove: change_tasknode; move also edits the template: change_tasktemplate -->
+				{#if canChangeNode && canChangeTemplate}
+					<button class="text-primary-500" onclick={(_) => removeEvidence(evidence.id, true)}>
+						<i class="fa-solid fa-square-arrow-up-right"></i>
+					</button>
+				{/if}
+				{#if canChangeNode}
+					<button class="text-error-500" onclick={(_) => removeEvidence(evidence.id, false)}>
+						<i class="fa-solid fa-square-minus"></i>
+					</button>
+				{/if}
 			</div>
 		{/each}
 	</div>

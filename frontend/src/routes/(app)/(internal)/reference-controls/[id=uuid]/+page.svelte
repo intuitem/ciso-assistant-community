@@ -11,6 +11,7 @@
 	} from '$lib/components/Modals/stores';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import List from '$lib/components/List/List.svelte';
+	import { hasPermissionAnywhere } from '$lib/utils/access-control';
 
 	interface Props {
 		data: PageData;
@@ -58,17 +59,20 @@
 
 <DetailView {data}>
 	{#snippet actions()}
-		<button
-			class="btn text-gray-100 bg-linear-to-r from-sky-500 to-cyan-500 h-fit"
-			data-testid="sync-to-actions-button"
-			onclick={async () => {
-				await modalConfirmSyncAppliedControls();
-			}}
-		>
-			<span class="mr-2">
-				<i class="fa-solid fa-arrows-rotate mr-2"></i>
-			</span>
-			{m.syncToAppliedControl()}
-		</button>
+		<!-- The sync only writes applied controls the user may change. -->
+		{#if hasPermissionAnywhere(page.data.user, 'change_appliedcontrol')}
+			<button
+				class="btn text-gray-100 bg-linear-to-r from-sky-500 to-cyan-500 h-fit"
+				data-testid="sync-to-actions-button"
+				onclick={async () => {
+					await modalConfirmSyncAppliedControls();
+				}}
+			>
+				<span class="mr-2">
+					<i class="fa-solid fa-arrows-rotate mr-2"></i>
+				</span>
+				{m.syncToAppliedControl()}
+			</button>
+		{/if}
 	{/snippet}
 </DetailView>

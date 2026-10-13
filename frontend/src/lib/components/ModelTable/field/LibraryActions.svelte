@@ -99,7 +99,8 @@
 {/if}
 <!-- This condition must check that the libary is a LoadedLibrary object and that there is an available update for it -->
 <!-- Should we put a is_upgradable BooleanField directly into the LoadedLibrary model or query the database everytime we load the loaded libraries menu to check if there is an update available or not among the stored liaries ? -->
-{#if actionsURLModel === 'stored-libraries' && library.is_update}
+<!-- Updating needs add_loadedlibrary on the root folder, like load/unload: admins only. -->
+{#if actionsURLModel === 'stored-libraries' && library.is_update && page.data.user.is_admin}
 	{#if loading.form && loading.library === library.urn}
 		{@render loadingSpinner()}
 	{:else}

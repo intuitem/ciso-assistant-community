@@ -429,12 +429,14 @@
 
 	let displayEditButton = $derived(function () {
 		return (
-			(canEditObject &&
-				!['Submitted', 'Accepted', 'Rejected', 'Revoked'].includes(data.data.state) &&
+			canEditObject &&
+			// Terminologies and entities stay editable when builtin/library-backed,
+			// but still need the change permission on their folder.
+			((!['Submitted', 'Accepted', 'Rejected', 'Revoked'].includes(data.data.state) &&
 				!data.data.urn &&
 				!data.data.builtin) ||
-			data?.urlModel === 'terminologies' ||
-			data?.urlModel === 'entities'
+				data?.urlModel === 'terminologies' ||
+				data?.urlModel === 'entities')
 		);
 	});
 

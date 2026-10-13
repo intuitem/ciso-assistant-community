@@ -4,6 +4,8 @@
 	import { m } from '$paraglide/messages';
 	import { getFlash } from 'sveltekit-flash-message';
 	import { page } from '$app/stores';
+	import { page as pageState } from '$app/state';
+	import { canPerformActionOnObject } from '$lib/utils/access-control';
 
 	interface Props {
 		row: any;
@@ -14,6 +16,15 @@
 
 	const flash = getFlash(page);
 	const isActive = $derived(row?.meta?.is_active !== false);
+	// set-active is a PATCH on the workflow: change_workflow on its folder.
+	const canChange = $derived(
+		canPerformActionOnObject({
+			user: pageState.data.user,
+			action: 'change',
+			model: 'workflow',
+			object: row?.meta
+		})
+	);
 
 	async function toggleActive() {
 		const endpoint = `/workflows/${row?.meta?.id}/ops?action=set-active`;
@@ -35,12 +46,14 @@
 	}
 </script>
 
-<ContextMenu.Item
-	class="flex h-10 select-none items-center rounded-base py-3 pl-3 pr-1.5 text-sm font-medium outline-hidden ring-0! ring-transparent! data-highlighted:bg-muted cursor-pointer"
-	onclick={toggleActive}
->
-	<div class="flex items-center">
-		<i class="fa-solid {isActive ? 'fa-pause' : 'fa-play'} mr-2 text-surface-500"></i>
-		{isActive ? m.disableWorkflow() : m.enableWorkflow()}
-	</div>
-</ContextMenu.Item>
+{#if canChange}
+	<ContextMenu.Item
+		class="flex h-10 select-none items-center rounded-base py-3 pl-3 pr-1.5 text-sm font-medium outline-hidden ring-0! ring-transparent! data-highlighted:bg-muted cursor-pointer"
+		onclick={toggleActive}
+	>
+		<div class="flex items-center">
+			<i class="fa-solid {isActive ? 'fa-pause' : 'fa-play'} mr-2 text-surface-500"></i>
+			{isActive ? m.disableWorkflow() : m.enableWorkflow()}
+		</div>
+	</ContextMenu.Item>
+{/if}

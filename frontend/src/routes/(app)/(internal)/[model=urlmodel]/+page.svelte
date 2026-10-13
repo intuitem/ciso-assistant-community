@@ -12,6 +12,7 @@
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { buildCustomFieldFilters, listViewFields } from '$lib/utils/table';
 	import { NON_CREATABLE_URL_MODELS } from '$lib/utils/crud';
+	import { hasPermissionAnywhere, isAccessAllowed } from '$lib/utils/access-control';
 	import { consumeCreateIntent } from '$lib/utils/create-intent';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { driverInstance, tableRefreshers } from '$lib/utils/stores';
@@ -369,12 +370,15 @@
 		>
 			<i class="fa-solid fa-circle-info text-primary-500"></i>
 			<span>{m.quickFormsAuthoredInBuilder()}</span>
-			<a
-				href="/experimental/library-builder"
-				class="btn btn-sm preset-outlined-primary-500 ml-auto"
-			>
-				<i class="fa-solid fa-shapes mr-1"></i>{m.lbListLibraryBuilder()}
-			</a>
+			<!-- Every builder action needs *_librarydraft (administrators only). -->
+			{#if hasPermissionAnywhere(page.data.user, 'add_librarydraft')}
+				<a
+					href="/experimental/library-builder"
+					class="btn btn-sm preset-outlined-primary-500 ml-auto"
+				>
+					<i class="fa-solid fa-shapes mr-1"></i>{m.lbListLibraryBuilder()}
+				</a>
+			{/if}
 		</div>
 	{/if}
 	{#if URLModel === 'quick-form-responses'}
@@ -497,7 +501,8 @@
 										data-testid="analytics-button"><i class="fa-solid fa-chart-pie"></i></a
 									>
 								{/if}
-								{#if URLModel === 'security-advisories'}
+								<!-- Catalog syncs are IsGlobalAdmin on the backend (sec_intel/views.py). -->
+								{#if URLModel === 'security-advisories' && page.data.user?.is_admin}
 									<button
 										class="inline-block p-3 w-12 focus:relative bg-blue-100 hover:bg-blue-200 dark:bg-blue-500/20 dark:hover:bg-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
 										title={m.syncKev()}
@@ -536,7 +541,7 @@
 										data-testid="import-templates-button"><i class="fa-solid fa-file-import"></i></a
 									>
 								{/if}
-								{#if URLModel === 'cwes'}
+								{#if URLModel === 'cwes' && page.data.user?.is_admin}
 									<button
 										class="inline-block p-3 btn-mini-tertiary w-12 focus:relative disabled:opacity-50 disabled:cursor-not-allowed"
 										title={m.syncCweCatalog()}
@@ -594,14 +599,17 @@
 									>
 								{/if}
 								{#if URLModel === 'folders'}
-									<button
-										class="text-white inline-block border-e p-3 bg-sky-400 hover:bg-sky-300 w-12 focus:relative"
-										data-testid="import-button"
-										title={safeTranslate('importFolder')}
-										aria-label={safeTranslate('importFolder')}
-										onclick={modalFolderImportForm}
-										><i class="fa-solid fa-file-import"></i>
-									</button>
+									<!-- Domain import needs add_folder on the root folder, not on any folder. -->
+									{#if isAccessAllowed(page.data.user, 'add_folder', page.data.user?.root_folder_id)}
+										<button
+											class="text-white inline-block border-e p-3 bg-sky-400 hover:bg-sky-300 w-12 focus:relative"
+											data-testid="import-button"
+											title={safeTranslate('importFolder')}
+											aria-label={safeTranslate('importFolder')}
+											onclick={modalFolderImportForm}
+											><i class="fa-solid fa-file-import"></i>
+										</button>
+									{/if}
 									<Anchor
 										href="x-rays/inspect"
 										class="inline-block p-3 btn-mini-secondary w-12 focus:relative"

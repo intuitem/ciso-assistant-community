@@ -231,7 +231,7 @@ export const navData = {
 					name: 'lbListLibraryBuilder',
 					fa_icon: 'fas fa-shapes',
 					href: '/experimental/library-builder',
-					permissions: ['add_threat', 'add_riskmatrix', 'add_referencecontrol', 'add_framework']
+					permissions: ['add_librarydraft']
 				}
 			]
 		},

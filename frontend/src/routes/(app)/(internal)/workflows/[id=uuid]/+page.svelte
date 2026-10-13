@@ -1,12 +1,20 @@
 <script lang="ts">
+	import { page } from '$app/state';
+	import { isAccessAllowed } from '$lib/utils/access-control';
 	import WorkflowCanvas from './WorkflowCanvas.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 
+	// Mirror the backend's per-action requirements on the workflow's folder, so
+	// view-only roles (e.g. analysts) get a read-only canvas instead of 403s.
+	const folderId = $derived(data.workflow.folder?.id ?? data.workflow.folder);
+	const can = (codename: string) => isAccessAllowed(page.data.user, codename, folderId);
+	const canEdit = $derived(can('change_workflow') && can('change_workflowversion'));
+
 	// Published versions are directly editable: the canvas silently clones them
 	// into a draft on the first change and tracks the badge itself.
-	const readonly = $derived(data.activeVersion.status === 'archived');
+	const readonly = $derived(data.activeVersion.status === 'archived' || !canEdit);
 	// A draft can be discarded only when a published version exists to fall
 	// back to. Loading a published version implies one exists, so this also
 	// covers the auto-drafted (ensureDraft) case without re-deriving.
@@ -69,6 +77,9 @@
 			versions={data.versions}
 			versionPinned={data.versionPinned}
 			fkOptions={data.fkOptions}
+			canRun={can('add_workflowinstance')}
+			canRestore={can('add_workflowversion')}
+			canChangeTriggers={can('change_workflowtrigger')}
 			onDiscarded={() => (canvasEpoch += 1)}
 		/>
 	{/key}

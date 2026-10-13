@@ -11,9 +11,11 @@
 		registrations: any[];
 		workflowId: string;
 		onRefresh: () => void;
+		/** change_workflowtrigger on the workflow's folder: toggling and rotating. */
+		canChange?: boolean;
 	}
 
-	let { registrations, workflowId, onRefresh }: Props = $props();
+	let { registrations, workflowId, onRefresh, canChange = true }: Props = $props();
 
 	const ops = (action: string, body: Record<string, unknown>) => postOps(workflowId, action, body);
 
@@ -126,6 +128,7 @@
 					<Switch
 						name="trigger-enabled-{registration.id}"
 						checked={registration.enabled}
+						disabled={!canChange}
 						onCheckedChange={() => toggleEnabled(registration)}
 						data-testid="toggle-trigger"
 					>
@@ -185,15 +188,17 @@
 								></i>
 							</button>
 						{/if}
-						<button
-							type="button"
-							title={m.rotateSecret()}
-							class="btn-icon preset-tonal w-6 h-6 text-[10px] shrink-0"
-							onclick={() => rotateSecret(registration)}
-							data-testid="rotate-trigger-secret-row"
-						>
-							<i class="fa-solid fa-rotate"></i>
-						</button>
+						{#if canChange}
+							<button
+								type="button"
+								title={m.rotateSecret()}
+								class="btn-icon preset-tonal w-6 h-6 text-[10px] shrink-0"
+								onclick={() => rotateSecret(registration)}
+								data-testid="rotate-trigger-secret-row"
+							>
+								<i class="fa-solid fa-rotate"></i>
+							</button>
+						{/if}
 					{/if}
 
 					{#if badge}

@@ -114,7 +114,8 @@
 								</option>
 							{/each}
 						</select>
-						{#if page.data?.settings?.show_get_started !== false}
+						<!-- Same gate as the top-bar entry: its actions (demo data, flags) are admin-only. -->
+						{#if page.data?.user?.is_admin && page.data?.settings?.show_get_started !== false}
 							<button
 								onclick={() => {
 									openState = false;

@@ -8,6 +8,8 @@
 		type ModalStore
 	} from '$lib/components/Modals/stores';
 	import { Tooltip } from '@skeletonlabs/skeleton-svelte';
+	import { page } from '$app/state';
+	import { canPerformActionOnObject } from '$lib/utils/access-control';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
 	import type { PageData } from './$types';
@@ -101,8 +103,20 @@
 	// Null counts as draft, same as the backend: the column is nullable and campaigns
 	// created before it had a default carry no status at all.
 	const isDraft = $derived(!data.data?.status || data.data.status === 'draft');
+	// The start action checks change_campaign and, being a detail POST, add_campaign
+	// on the campaign's folder (domain managers hold both, analysts neither).
+	const mayStart = $derived(
+		['change', 'add'].every((action) =>
+			canPerformActionOnObject({
+				user: page.data.user,
+				action: action as 'change' | 'add',
+				model: 'campaign',
+				object: data.data
+			})
+		)
+	);
 	const canStart = $derived(
-		targets.length > 0 && (isDraft || draftAssignments > 0 || unassignedTargets > 0)
+		mayStart && targets.length > 0 && (isDraft || draftAssignments > 0 || unassignedTargets > 0)
 	);
 
 	const modalStore: ModalStore = getModalStore();

@@ -7,6 +7,7 @@
 	import ExportModal, { type ExportGroup } from '$lib/components/Modals/ExportModal.svelte';
 	import RingProgress from '$lib/components/DataViz/RingProgress.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { canPerformActionOnObject } from '$lib/utils/access-control';
 	import type { ModalComponent, ModalSettings } from '$lib/components/Modals/stores';
 	import { getToastStore } from '$lib/components/Toast/stores';
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
@@ -22,6 +23,16 @@
 	}
 
 	let { data, form }: Props = $props();
+
+	// A new revision is a clone: add_entityassessment on the source's folder.
+	const canClone = $derived(
+		canPerformActionOnObject({
+			user: $page.data.user,
+			action: 'add',
+			model: 'entityassessment',
+			object: data.data
+		})
+	);
 
 	// Offered whenever there is a questionnaire: representatives may be added later,
 	// and sending is what wires them in. The backend explains when nobody is assigned.
@@ -167,14 +178,16 @@
 				>
 					<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
 				</button>
-				<button
-					class="btn preset-filled-secondary-500 h-fit"
-					onclick={handleClone}
-					disabled={isCloning}
-					data-testid="clone-assessment-button"
-				>
-					<i class="fa-solid fa-copy mr-2"></i>{m.newRevision()}
-				</button>
+				{#if canClone}
+					<button
+						class="btn preset-filled-secondary-500 h-fit"
+						onclick={handleClone}
+						disabled={isCloning}
+						data-testid="clone-assessment-button"
+					>
+						<i class="fa-solid fa-copy mr-2"></i>{m.newRevision()}
+					</button>
+				{/if}
 			{/if}
 			{#if reviewAssignments.length > 0}
 				<a href={reviewHref} class="btn preset-filled-secondary-500 h-fit">

@@ -6,7 +6,9 @@
 	import { m } from '$paraglide/messages';
 	import { getFlash } from 'sveltekit-flash-message';
 	import { page } from '$app/stores';
+	import { page as pageState } from '$app/state';
 	import { getModalStore, type ModalComponent } from '$lib/components/Modals/stores';
+	import { hasPermissionAnywhere } from '$lib/utils/access-control';
 	import WorkflowPreviewModal from './WorkflowPreviewModal.svelte';
 
 	interface Props {
@@ -20,6 +22,9 @@
 
 	const flash = getFlash(page);
 	const modalStore = getModalStore();
+	// The backend needs add_workflow on the target folder; the picker below
+	// already lists only those, so hide the action when there are none.
+	const canInstantiate = $derived(hasPermissionAnywhere(pageState.data.user, 'add_workflow'));
 
 	function openPreview() {
 		const component: ModalComponent = {
@@ -88,16 +93,18 @@
 			>
 				<i class="fa-solid fa-eye mr-1"></i>{m.previewWorkflow()}
 			</button>
-			<button
-				type="button"
-				class="btn preset-filled-primary-500 text-sm"
-				onclick={() => (instantiating = !instantiating)}
-				data-testid="instantiate-workflows"
-			>
-				<i class="fa-solid fa-wand-magic-sparkles mr-1"></i>{m.instantiateWorkflow()}
-			</button>
+			{#if canInstantiate}
+				<button
+					type="button"
+					class="btn preset-filled-primary-500 text-sm"
+					onclick={() => (instantiating = !instantiating)}
+					data-testid="instantiate-workflows"
+				>
+					<i class="fa-solid fa-wand-magic-sparkles mr-1"></i>{m.instantiateWorkflow()}
+				</button>
+			{/if}
 		</div>
-		{#if instantiating}
+		{#if instantiating && canInstantiate}
 			<div class="flex items-end gap-2">
 				<div class="w-64" data-testid="instantiate-folder">
 					<FolderTreeSelect

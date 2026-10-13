@@ -3694,6 +3694,10 @@ class ReferenceControlViewSet(BaseModelViewSet):
     """
 
     model = ReferenceControl
+    # The sync writes only to applied controls the user may change (see
+    # _get_syncable_applied_controls); the reference control itself is only read.
+    # Without this, the POST would demand `add_referencecontrol` (admin-only).
+    permission_overrides = {"sync_applied_controls": "view_referencecontrol"}
     autocomplete_fields = ["category"]
     filterset_fields = [
         "folder",
@@ -19872,6 +19876,9 @@ class TaskNodeViewSet(BaseModelViewSet):
     filterset_class = TaskNodeFilterSet
     search_fields = ["observation"]
     ordering = ["due_date"]
+    # Unlinking an evidence edits the node; as a detail POST it would otherwise
+    # demand `add_tasknode`, which no role holds (nodes are generated).
+    permission_overrides = {"remove_evidence": "change_tasknode"}
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -19896,6 +19903,15 @@ class TaskNodeViewSet(BaseModelViewSet):
         )
 
         evidence = Evidence.objects.get(id=evidence_id, id__in=accessible_evidence_ids)
+        # Moving also edits the template, which needs its own right.
+        if to_move and not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="change_tasktemplate"),
+            folder=Folder.get_folder(task_node.task_template),
+        ):
+            return Response(
+                {"error": "permissionDenied"}, status=status.HTTP_403_FORBIDDEN
+            )
         task_node.evidences.remove(evidence)
         if to_move:
             task_node.task_template.evidences.add(evidence)
@@ -20512,6 +20528,9 @@ class QuickFormViewSet(BaseModelViewSet):
     http_method_names = ["get", "head", "options", "post"]
     filterset_fields = ["folder", "library"]
     search_fields = ["name", "description", "ref_id"]
+    # `preview` only evaluates answers, it persists nothing: reading the form is
+    # enough. Without this, the POST would demand `add_quickform` (admin-only).
+    permission_overrides = {"preview": "view_quickform"}
 
     def get_queryset(self):
         return super().get_queryset().select_related("folder", "library")

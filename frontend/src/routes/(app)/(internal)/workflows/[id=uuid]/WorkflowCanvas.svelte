@@ -61,6 +61,12 @@
 		versions?: any[];
 		versionPinned?: boolean;
 		fkOptions?: Record<string, any[]>;
+		/** add_workflowinstance: execute / replay a run. */
+		canRun?: boolean;
+		/** add_workflowversion: restore an archived version as a draft. */
+		canRestore?: boolean;
+		/** change_workflowtrigger: toggle triggers, rotate webhook secrets. */
+		canChangeTriggers?: boolean;
 	}
 
 	let {
@@ -83,7 +89,10 @@
 		workflowTimeoutSeconds = 0,
 		versions = [],
 		versionPinned = false,
-		fkOptions = {}
+		fkOptions = {},
+		canRun = true,
+		canRestore = true,
+		canChangeTriggers = true
 	}: Props = $props();
 
 	// A published version is directly editable: the first save transparently
@@ -2127,193 +2136,197 @@
 									<i class="fa-solid fa-pause mr-1"></i>{m.workflowPaused()}
 								</span>
 							{/if}
-							<div class="relative">
-								<div class="flex items-stretch">
-									<button
-										type="button"
-										class="btn preset-filled-primary-500 text-sm rounded-r-none"
-										disabled={running}
-										onclick={runWorkflow}
-										data-testid="run-workflow"
-									>
-										{#if running}
-											<i class="fa-solid fa-spinner fa-spin mr-1"></i>
-										{:else}
-											<i class="fa-solid fa-play mr-1"></i>
-										{/if}
-										{m.executeWorkflow()}
-									</button>
-									<button
-										type="button"
-										class="btn preset-filled-primary-500 text-sm rounded-l-none border-l border-primary-400 px-2"
-										disabled={running}
-										onclick={() => {
-											runMenuOpen = !runMenuOpen;
-											runPickerOpen = false;
-										}}
-										aria-label={m.runWithVariables()}
-										data-testid="run-workflow-menu"
-									>
-										<i class="fa-solid fa-chevron-down text-xs"></i>
-									</button>
-								</div>
-								{#if runMenuOpen}
-									<div
-										class="absolute right-0 top-full mt-1 z-10 w-60 rounded-base border border-surface-200-800 bg-surface-50-950 shadow-lg"
-										data-testid="run-menu"
-									>
+							{#if canRun}
+								<div class="relative">
+									<div class="flex items-stretch">
 										<button
 											type="button"
-											class="w-full flex items-center gap-2 px-3 py-2 text-xs text-surface-800-200 hover:bg-surface-100-900 cursor-pointer text-left disabled:opacity-50 disabled:cursor-not-allowed"
-											disabled={variables.length === 0}
-											title={variables.length === 0 ? m.noVariablesToSeed() : undefined}
-											onclick={openRunVars}
-											data-testid="run-with-variables"
+											class="btn preset-filled-primary-500 text-sm rounded-r-none"
+											disabled={running}
+											onclick={runWorkflow}
+											data-testid="run-workflow"
 										>
-											<i class="fa-solid fa-flask w-4 text-center text-surface-500"></i>
-											{m.runWithVariables()}
+											{#if running}
+												<i class="fa-solid fa-spinner fa-spin mr-1"></i>
+											{:else}
+												<i class="fa-solid fa-play mr-1"></i>
+											{/if}
+											{m.executeWorkflow()}
+										</button>
+										<button
+											type="button"
+											class="btn preset-filled-primary-500 text-sm rounded-l-none border-l border-primary-400 px-2"
+											disabled={running}
+											onclick={() => {
+												runMenuOpen = !runMenuOpen;
+												runPickerOpen = false;
+											}}
+											aria-label={m.runWithVariables()}
+											data-testid="run-workflow-menu"
+										>
+											<i class="fa-solid fa-chevron-down text-xs"></i>
 										</button>
 									</div>
-								{/if}
-								{#if runVarsOpen}
-									<div
-										class="absolute right-0 top-full mt-1 z-10 w-80 rounded-base border border-surface-200-800 bg-surface-50-950 shadow-lg"
-										data-testid="run-vars-panel"
-									>
-										<p
-											class="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-surface-500 border-b border-surface-200-800"
-										>
-											{m.runWithVariables()}
-										</p>
-										<div class="max-h-72 overflow-y-auto p-3 space-y-2">
-											<p class="text-[11px] text-surface-500">{m.runWithVariablesHint()}</p>
-											{#each variables as variable (variable.id)}
-												<label class="block">
-													<span
-														class="flex items-center gap-1.5 text-xs text-surface-700-300 mb-0.5"
-													>
-														<span class="font-mono">{variable.key}</span>
-														<span class="badge preset-tonal-surface text-[9px]"
-															>{variable.type}</span
-														>
-													</span>
-													{#if variable.type === 'boolean'}
-														<select
-															class="select w-full text-xs"
-															value={varSeeds[variable.key]}
-															onchange={(e) => {
-																varSeeds[variable.key] = e.currentTarget.value;
-																varTouched[variable.key] = true;
-															}}
-															data-testid="seed-{variable.key}"
-														>
-															<option value="">--</option>
-															<option value="true">true</option>
-															<option value="false">false</option>
-														</select>
-													{:else if variable.type === 'json'}
-														<textarea
-															class="textarea w-full text-xs font-mono"
-															rows="2"
-															value={varSeeds[variable.key]}
-															oninput={(e) => {
-																varSeeds[variable.key] = e.currentTarget.value;
-																varTouched[variable.key] = true;
-															}}
-															data-testid="seed-{variable.key}"
-														></textarea>
-													{:else}
-														<input
-															class="input w-full text-xs"
-															type={variable.type === 'number'
-																? 'number'
-																: variable.type === 'date'
-																	? 'date'
-																	: 'text'}
-															value={varSeeds[variable.key]}
-															oninput={(e) => {
-																varSeeds[variable.key] = e.currentTarget.value;
-																varTouched[variable.key] = true;
-															}}
-															data-testid="seed-{variable.key}"
-														/>
-													{/if}
-												</label>
-											{/each}
-										</div>
+									{#if runMenuOpen}
 										<div
-											class="flex items-center justify-between gap-2 px-3 py-2 border-t border-surface-200-800"
+											class="absolute right-0 top-full mt-1 z-10 w-60 rounded-base border border-surface-200-800 bg-surface-50-950 shadow-lg"
+											data-testid="run-menu"
 										>
-											{#if runVarsError}
-												<span
-													class="text-[11px] text-error-500 truncate"
-													data-testid="run-vars-error">{runVarsError}</span
-												>
-											{:else}
-												<span></span>
-											{/if}
-											<div class="flex items-center gap-1.5 shrink-0">
-												<button
-													type="button"
-													class="btn preset-tonal text-xs"
-													onclick={() => (runVarsOpen = false)}
-												>
-													{m.cancel()}
-												</button>
-												<button
-													type="button"
-													class="btn preset-filled-primary-500 text-xs"
-													disabled={running}
-													onclick={runWithVariables}
-													data-testid="run-vars-confirm"
-												>
-													{#if running}
-														<i class="fa-solid fa-spinner fa-spin mr-1"></i>
-													{:else}
-														<i class="fa-solid fa-play mr-1"></i>
-													{/if}
-													{m.executeWorkflow()}
-												</button>
-											</div>
+											<button
+												type="button"
+												class="w-full flex items-center gap-2 px-3 py-2 text-xs text-surface-800-200 hover:bg-surface-100-900 cursor-pointer text-left disabled:opacity-50 disabled:cursor-not-allowed"
+												disabled={variables.length === 0}
+												title={variables.length === 0 ? m.noVariablesToSeed() : undefined}
+												onclick={openRunVars}
+												data-testid="run-with-variables"
+											>
+												<i class="fa-solid fa-flask w-4 text-center text-surface-500"></i>
+												{m.runWithVariables()}
+											</button>
 										</div>
-									</div>
-								{/if}
-								{#if runPickerOpen}
-									<div
-										class="absolute right-0 top-full mt-1 z-10 w-60 rounded-base border border-surface-200-800 bg-surface-50-950 shadow-lg"
-										data-testid="run-trigger-picker"
-									>
-										<p
-											class="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-surface-500 border-b border-surface-200-800"
+									{/if}
+									{#if runVarsOpen}
+										<div
+											class="absolute right-0 top-full mt-1 z-10 w-80 rounded-base border border-surface-200-800 bg-surface-50-950 shadow-lg"
+											data-testid="run-vars-panel"
 										>
-											{m.chooseTriggerToRun()}
-										</p>
-										<ul>
-											{#each triggerNodes as triggerNode (triggerNode.id)}
-												{@const domain = triggerNode.data.domain as any}
-												<li>
+											<p
+												class="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-surface-500 border-b border-surface-200-800"
+											>
+												{m.runWithVariables()}
+											</p>
+											<div class="max-h-72 overflow-y-auto p-3 space-y-2">
+												<p class="text-[11px] text-surface-500">{m.runWithVariablesHint()}</p>
+												{#each variables as variable (variable.id)}
+													<label class="block">
+														<span
+															class="flex items-center gap-1.5 text-xs text-surface-700-300 mb-0.5"
+														>
+															<span class="font-mono">{variable.key}</span>
+															<span class="badge preset-tonal-surface text-[9px]"
+																>{variable.type}</span
+															>
+														</span>
+														{#if variable.type === 'boolean'}
+															<select
+																class="select w-full text-xs"
+																value={varSeeds[variable.key]}
+																onchange={(e) => {
+																	varSeeds[variable.key] = e.currentTarget.value;
+																	varTouched[variable.key] = true;
+																}}
+																data-testid="seed-{variable.key}"
+															>
+																<option value="">--</option>
+																<option value="true">true</option>
+																<option value="false">false</option>
+															</select>
+														{:else if variable.type === 'json'}
+															<textarea
+																class="textarea w-full text-xs font-mono"
+																rows="2"
+																value={varSeeds[variable.key]}
+																oninput={(e) => {
+																	varSeeds[variable.key] = e.currentTarget.value;
+																	varTouched[variable.key] = true;
+																}}
+																data-testid="seed-{variable.key}"
+															></textarea>
+														{:else}
+															<input
+																class="input w-full text-xs"
+																type={variable.type === 'number'
+																	? 'number'
+																	: variable.type === 'date'
+																		? 'date'
+																		: 'text'}
+																value={varSeeds[variable.key]}
+																oninput={(e) => {
+																	varSeeds[variable.key] = e.currentTarget.value;
+																	varTouched[variable.key] = true;
+																}}
+																data-testid="seed-{variable.key}"
+															/>
+														{/if}
+													</label>
+												{/each}
+											</div>
+											<div
+												class="flex items-center justify-between gap-2 px-3 py-2 border-t border-surface-200-800"
+											>
+												{#if runVarsError}
+													<span
+														class="text-[11px] text-error-500 truncate"
+														data-testid="run-vars-error">{runVarsError}</span
+													>
+												{:else}
+													<span></span>
+												{/if}
+												<div class="flex items-center gap-1.5 shrink-0">
 													<button
 														type="button"
-														class="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-surface-800-200 hover:bg-surface-100-900 cursor-pointer text-left"
-														onclick={() => startRun(domain.ref ?? null)}
+														class="btn preset-tonal text-xs"
+														onclick={() => (runVarsOpen = false)}
 													>
-														<i
-															class="fa-solid {TRIGGER_ICONS[domain.trigger_config?.type] ??
-																'fa-bolt'} w-4 text-center text-surface-500"
-														></i>
-														<span class="truncate">{triggerNode.data.label}</span>
-														{#if domain.ref}
-															<span class="ml-auto font-mono text-[9px] text-surface-500 shrink-0">
-																{domain.ref}
-															</span>
-														{/if}
+														{m.cancel()}
 													</button>
-												</li>
-											{/each}
-										</ul>
-									</div>
-								{/if}
-							</div>
+													<button
+														type="button"
+														class="btn preset-filled-primary-500 text-xs"
+														disabled={running}
+														onclick={runWithVariables}
+														data-testid="run-vars-confirm"
+													>
+														{#if running}
+															<i class="fa-solid fa-spinner fa-spin mr-1"></i>
+														{:else}
+															<i class="fa-solid fa-play mr-1"></i>
+														{/if}
+														{m.executeWorkflow()}
+													</button>
+												</div>
+											</div>
+										</div>
+									{/if}
+									{#if runPickerOpen}
+										<div
+											class="absolute right-0 top-full mt-1 z-10 w-60 rounded-base border border-surface-200-800 bg-surface-50-950 shadow-lg"
+											data-testid="run-trigger-picker"
+										>
+											<p
+												class="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-surface-500 border-b border-surface-200-800"
+											>
+												{m.chooseTriggerToRun()}
+											</p>
+											<ul>
+												{#each triggerNodes as triggerNode (triggerNode.id)}
+													{@const domain = triggerNode.data.domain as any}
+													<li>
+														<button
+															type="button"
+															class="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-surface-800-200 hover:bg-surface-100-900 cursor-pointer text-left"
+															onclick={() => startRun(domain.ref ?? null)}
+														>
+															<i
+																class="fa-solid {TRIGGER_ICONS[domain.trigger_config?.type] ??
+																	'fa-bolt'} w-4 text-center text-surface-500"
+															></i>
+															<span class="truncate">{triggerNode.data.label}</span>
+															{#if domain.ref}
+																<span
+																	class="ml-auto font-mono text-[9px] text-surface-500 shrink-0"
+																>
+																	{domain.ref}
+																</span>
+															{/if}
+														</button>
+													</li>
+												{/each}
+											</ul>
+										</div>
+									{/if}
+								</div>
+							{/if}
 						</div>
 					</Panel>
 
@@ -2367,7 +2380,12 @@
 			</div>
 
 			{#if triggersOpen}
-				<TriggersPanel {registrations} {workflowId} onRefresh={refreshRegistrations} />
+				<TriggersPanel
+					{registrations}
+					{workflowId}
+					onRefresh={refreshRegistrations}
+					canChange={canChangeTriggers}
+				/>
 			{/if}
 
 			{#if versionsOpen}
@@ -2383,7 +2401,7 @@
 					{versions}
 					{activeVersionId}
 					onSelect={selectVersion}
-					onRestore={restoreVersion}
+					onRestore={canRestore ? restoreVersion : undefined}
 				/>
 			{/if}
 

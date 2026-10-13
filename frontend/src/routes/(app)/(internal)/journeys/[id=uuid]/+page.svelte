@@ -5,6 +5,7 @@
 	import { goto } from '$lib/utils/breadcrumbs';
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { page } from '$app/stores';
+	import { isAccessAllowed } from '$lib/utils/access-control';
 	import { getModalStore } from '$lib/components/Modals/stores';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
@@ -14,6 +15,18 @@
 	import { z } from 'zod';
 
 	let { data }: { data: PageData } = $props();
+
+	// When the stored library is newer than the Preset row, `upgrade` first
+	// re-loads it, which needs add_loadedlibrary on the root folder (admins).
+	const canUpgrade = $derived.by(() => {
+		const latest = data.journey.latest_version;
+		if (!latest || latest <= data.journey.applied_version) return false;
+		const needsLibraryLoad = latest > (data.journey.preset?.version ?? latest);
+		return (
+			!needsLibraryLoad ||
+			isAccessAllowed($page.data.user, 'add_loadedlibrary', $page.data.user?.root_folder_id)
+		);
+	});
 
 	const modalStore = getModalStore();
 
@@ -316,7 +329,7 @@
 				</div>
 				<!-- Toolbar -->
 				<div class="flex items-center gap-2 px-4 py-2.5">
-					{#if data.journey.latest_version && data.journey.latest_version > data.journey.applied_version}
+					{#if canUpgrade}
 						<button
 							type="button"
 							class="btn btn-sm preset-filled-warning-500"
