@@ -4700,6 +4700,7 @@
 	"statusUpdatedSuccessfully": "Statut mis à jour avec succès",
 	"observationUpdatedSuccessfully": "Observation mise à jour avec succès",
 	"taskTemplateEvidenceHelpText": "Preuves attendues, liées à chaque occurrence pour y déposer une révision.\n✨ Saisissez un nouveau nom pour la créer dans le domaine de cette tâche.",
+	"createIncidentNamed": "✨ Créer l'incident « {name} »",
 	"createExpectedEvidence": "✨ Créer la preuve attendue « {name} »",
 	"unassigned": "Non assigné",
 	"addEvidenceRevisionFor": "Ajouter une révision pour :\n{evidenceName}",

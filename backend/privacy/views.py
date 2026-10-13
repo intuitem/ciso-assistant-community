@@ -20,6 +20,7 @@ from django.utils.translation import gettext as _
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from django.db import transaction
 from django.db.models import Case, Count, F, Prefetch, Q, When
 from itertools import chain
 from collections import defaultdict
@@ -1051,6 +1052,56 @@ class DataBreachViewSet(BaseModelViewSet):
                 "evidences",
             )
         )
+
+    def _process_incident(self, request) -> None:
+        """Turn a name typed into the incident picker into an incident.
+
+        Like the responsibility matrix of an EBIOS RM study: reuse an incident of
+        that name the user can see in the breach's domain, otherwise create one
+        there through its write serializer (add permission checked).
+        """
+        value = request.data.get("incident")
+        if not value or not isinstance(value, str):
+            return
+        try:
+            uuid.UUID(value)
+            return
+        except ValueError:
+            pass
+        from core.models import Incident
+        from core.serializers import IncidentWriteSerializer
+
+        folder_id = request.data.get("folder")
+        if not folder_id and self.kwargs.get("pk"):
+            folder_id = self.get_object().folder_id
+        folder = Folder.objects.filter(id=folder_id).first()
+        if folder is None:
+            return
+        incident = Incident.objects.filter(
+            name=value,
+            folder=folder,
+            id__in=RoleAssignment.get_viewable_object_ids(request.user, Incident),
+        ).first()
+        if incident is None:
+            serializer = IncidentWriteSerializer(
+                data={"name": value, "folder": str(folder.id)},
+                context={"request": request},
+            )
+            serializer.is_valid(raise_exception=True)
+            incident = serializer.save()
+        if hasattr(request.data, "_mutable"):
+            request.data._mutable = True
+        request.data["incident"] = str(incident.id)
+
+    def create(self, request, *args, **kwargs):
+        with transaction.atomic():
+            self._process_incident(request)
+            return super().create(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        with transaction.atomic():
+            self._process_incident(request)
+            return super().update(request, *args, **kwargs)
 
     @action(detail=False, name="Get breach type choices")
     def breach_type(self, request):

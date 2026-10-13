@@ -4872,6 +4872,7 @@
 	"statusUpdatedSuccessfully": "Status updated successfully",
 	"observationUpdatedSuccessfully": "Observation updated successfully",
 	"taskTemplateEvidenceHelpText": "Expected evidence, linked to every occurrence so a revision can be filed for each.\n✨ Type a new name to create it in this task's domain.",
+	"createIncidentNamed": "✨ Create incident \"{name}\"",
 	"createExpectedEvidence": "✨ Create expected evidence \"{name}\"",
 	"unassigned": "Unassigned",
 	"addEvidenceRevisionFor": "Add revision for:\n{evidenceName}",
