@@ -458,6 +458,31 @@ def resolve_vulnerability_id(vulnerability_name_or_id: str) -> str:
     return str(vulnerabilities[0]["id"])
 
 
+def resolve_incident_id(incident_name_or_id: str) -> str:
+    """Resolve an incident name or UUID to its UUID.
+
+    The incidents endpoint has no `name` filter, so names are looked up via
+    `search` and then matched exactly (case-sensitive) on `name`.
+    """
+    if _is_uuid(incident_name_or_id):
+        return incident_name_or_id
+
+    results, error = fetch_all_results(
+        "/incidents/", params={"search": incident_name_or_id}
+    )
+    if error:
+        raise ValueError(f"Incident '{incident_name_or_id}' API error: {error}")
+
+    matches = [r for r in results if r.get("name") == incident_name_or_id]
+    if not matches:
+        raise ValueError(f"Incident '{incident_name_or_id}' not found")
+    if len(matches) > 1:
+        raise ValueError(
+            f"Ambiguous incident name '{incident_name_or_id}', found {len(matches)}"
+        )
+    return matches[0]["id"]
+
+
 def resolve_team_id(team_name_or_id: str) -> str:
     """Helper function to resolve team name to UUID
     If already a UUID, returns it. If a name, looks it up via API.

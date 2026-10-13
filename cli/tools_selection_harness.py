@@ -111,6 +111,11 @@ HARD = [
     ("Create a new asset called Web Server 01", {"create_asset"}, {"web server 01"}),
     ("Add a threat named Supply chain compromise", {"create_threat"}, {"supply chain"}),
     ("Create a new domain called Legal", {"create_folder"}, {"legal"}),
+    (
+        "Record a new incident called Ransomware on file server",
+        {"create_incident"},
+        {"ransomware"},
+    ),
     # -- French, harder phrasing
     (
         "Quels sont les risques les plus critiques pour nos actifs ?",

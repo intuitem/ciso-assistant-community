@@ -14,6 +14,8 @@ from ..resolvers import (
     resolve_reference_control_id,
     resolve_qualification_ids,
     resolve_risk_level_index,
+    resolve_threat_id,
+    resolve_entity_id,
     parse_duration,
 )
 from ..config import GLOBAL_FOLDER_ID
@@ -1590,3 +1592,107 @@ async def create_vulnerability(
             return f"Error creating vulnerability: {res.status_code} - {res.text}"
     except Exception as e:
         return f"Error in create_vulnerability: {str(e)}"
+
+
+async def create_incident(
+    name: str,
+    description: str = None,
+    ref_id: str = None,
+    status: str = None,
+    severity: int = None,
+    detection: str = None,
+    reported_at: str = None,
+    occurred_at: str = None,
+    resolved_at: str = None,
+    resolution: str = None,
+    is_bcp_activated: bool = None,
+    link: str = None,
+    folder_id: str = None,
+    threats: list = None,
+    owners: list = None,
+    assets: list = None,
+    qualifications: list = None,
+    entities: list = None,
+    applied_controls: list = None,
+    filtering_labels: list = None,
+) -> str:
+    """Create a new incident
+
+    Args:
+        name: Incident name (required)
+        description: Description
+        ref_id: Reference ID
+        status: new | ongoing | resolved | closed | dismissed (default: new)
+        severity: 1 (critical) | 2 (major) | 3 (moderate) | 4 (minor) | 5 (low) | 6 (unknown) (default: 3)
+        detection: internally_detected | externally_detected
+        reported_at: Reported date/time (ISO 8601, defaults to now)
+        occurred_at: Occurrence date/time (ISO 8601, must not be after reported_at)
+        resolved_at: Resolution date/time (ISO 8601, must not be before occurred_at or reported_at)
+        resolution: Resolution notes
+        is_bcp_activated: Whether the business continuity plan was activated
+        link: External link (e.g. ticket URL)
+        folder_id: Folder ID/name (default: Global)
+        threats: List of threat IDs/names (resolved within folder_id when given)
+        owners: List of owners as actor UUIDs, emails or names
+        assets: List of asset IDs/names (resolved within folder_id when given)
+        qualifications: List of qualifications: letters C/I/A/T, names or UUIDs
+        entities: List of third-party entity IDs/names
+        applied_controls: List of applied control IDs/names (resolved within folder_id when given)
+        filtering_labels: List of label UUIDs
+    """
+    try:
+        scope_folder = resolve_folder_id(folder_id) if folder_id else None
+        folder = scope_folder or GLOBAL_FOLDER_ID
+
+        payload = {"name": name}
+        if folder:
+            payload["folder"] = folder
+
+        scalars = {
+            "description": description,
+            "ref_id": ref_id,
+            "status": status,
+            "severity": severity,
+            "detection": detection,
+            "reported_at": reported_at,
+            "occurred_at": occurred_at,
+            "resolved_at": resolved_at,
+            "resolution": resolution,
+            "is_bcp_activated": is_bcp_activated,
+            "link": link,
+        }
+        payload.update({k: v for k, v in scalars.items() if v is not None})
+
+        if threats:
+            payload["threats"] = [
+                resolve_threat_id(t, folder_id=scope_folder) for t in threats
+            ]
+        if owners:
+            payload["owners"] = resolve_actor_ids(owners)
+        if assets:
+            payload["assets"] = [
+                resolve_asset_id(a, folder_id=scope_folder) for a in assets
+            ]
+        if qualifications:
+            payload["qualifications"] = resolve_qualification_ids(qualifications)
+        if entities:
+            payload["entities"] = [resolve_entity_id(e) for e in entities]
+        if applied_controls:
+            payload["applied_controls"] = [
+                resolve_applied_control_id(c, folder_id=scope_folder)
+                for c in applied_controls
+            ]
+        if filtering_labels:
+            payload["filtering_labels"] = filtering_labels
+
+        res = make_post_request("/incidents/", payload)
+
+        if res.status_code == 201:
+            incident = res.json()
+            return (
+                f"Created incident: {incident.get('name')} (ID: {incident.get('id')})"
+            )
+        else:
+            return f"Error creating incident: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in create_incident: {str(e)}"

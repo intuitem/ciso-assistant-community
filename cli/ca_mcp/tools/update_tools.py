@@ -25,6 +25,9 @@ from ..resolvers import (
     resolve_team_id,
     resolve_user_id,
     resolve_user_ids,
+    resolve_threat_id,
+    resolve_entity_id,
+    resolve_incident_id,
 )
 from .write_tools import (
     _normalize_applied_control_status,
@@ -1500,3 +1503,116 @@ async def delete_vulnerability(vulnerability_id: str) -> str:
             return f"Error deleting vulnerability: {res.status_code} - {res.text}"
     except Exception as e:
         return f"Error in delete_vulnerability: {str(e)}"
+
+
+async def update_incident(
+    incident_id: str,
+    name: str = None,
+    description: str = None,
+    ref_id: str = None,
+    status: str = None,
+    severity: int = None,
+    detection: str = None,
+    reported_at: str = None,
+    occurred_at: str = None,
+    resolved_at: str = None,
+    resolution: str = None,
+    is_bcp_activated: bool = None,
+    link: str = None,
+    folder_id: str = None,
+    threats: list = None,
+    owners: list = None,
+    assets: list = None,
+    qualifications: list = None,
+    entities: list = None,
+    applied_controls: list = None,
+    filtering_labels: list = None,
+) -> str:
+    """Partially update an incident (only provided fields are updated)
+
+    Relation lists replace the existing set; pass an empty list to clear a relation.
+
+    Args:
+        incident_id: Incident UUID or name
+        name: New name
+        description: Description
+        ref_id: Reference ID
+        status: new | ongoing | resolved | closed | dismissed
+        severity: 1 (critical) | 2 (major) | 3 (moderate) | 4 (minor) | 5 (low) | 6 (unknown)
+        detection: internally_detected | externally_detected
+        reported_at: Reported date/time (ISO 8601)
+        occurred_at: Occurrence date/time (ISO 8601, must not be after reported_at)
+        resolved_at: Resolution date/time (ISO 8601, must not be before occurred_at or reported_at)
+        resolution: Resolution notes
+        is_bcp_activated: Whether the business continuity plan was activated
+        link: External link (e.g. ticket URL)
+        folder_id: Folder ID/name
+        threats: List of threat IDs/names (resolved within folder_id when given; replaces existing)
+        owners: List of owners as actor UUIDs, emails or names (replaces existing)
+        assets: List of asset IDs/names (resolved within folder_id when given; replaces existing)
+        qualifications: List of qualifications: letters C/I/A/T, names or UUIDs (replaces existing)
+        entities: List of third-party entity IDs/names (replaces existing)
+        applied_controls: List of applied control IDs/names (resolved within folder_id when given; replaces existing)
+        filtering_labels: List of label UUIDs (replaces existing)
+    """
+    try:
+        resolved_id = resolve_incident_id(incident_id)
+
+        payload = {}
+        scope_folder = None
+        if folder_id is not None:
+            scope_folder = resolve_folder_id(folder_id)
+            payload["folder"] = scope_folder
+
+        scalars = {
+            "name": name,
+            "description": description,
+            "ref_id": ref_id,
+            "status": status,
+            "severity": severity,
+            "detection": detection,
+            "reported_at": reported_at,
+            "occurred_at": occurred_at,
+            "resolved_at": resolved_at,
+            "resolution": resolution,
+            "is_bcp_activated": is_bcp_activated,
+            "link": link,
+        }
+        payload.update({k: v for k, v in scalars.items() if v is not None})
+
+        if threats is not None:
+            payload["threats"] = [
+                resolve_threat_id(t, folder_id=scope_folder) for t in threats
+            ]
+        if owners is not None:
+            payload["owners"] = resolve_actor_ids(owners)
+        if assets is not None:
+            payload["assets"] = [
+                resolve_asset_id(a, folder_id=scope_folder) for a in assets
+            ]
+        if qualifications is not None:
+            payload["qualifications"] = resolve_qualification_ids(qualifications)
+        if entities is not None:
+            payload["entities"] = [resolve_entity_id(e) for e in entities]
+        if applied_controls is not None:
+            payload["applied_controls"] = [
+                resolve_applied_control_id(c, folder_id=scope_folder)
+                for c in applied_controls
+            ]
+        if filtering_labels is not None:
+            payload["filtering_labels"] = filtering_labels
+
+        if not payload:
+            return "Error: No fields provided to update"
+
+        res = make_patch_request(f"/incidents/{resolved_id}/", payload)
+
+        if res.status_code == 200:
+            incident = res.json()
+            return (
+                f"Updated incident: {incident.get('name')} (ID: {incident.get('id')})"
+            )
+        else:
+            return f"Error updating incident: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in update_incident: {str(e)}"

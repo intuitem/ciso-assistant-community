@@ -80,6 +80,7 @@ from .tools.write_tools import (
     refresh_quantitative_risk_study_simulations,
     create_task_template,
     create_vulnerability,
+    create_incident,
 )
 
 from .tools.update_tools import (
@@ -98,6 +99,7 @@ from .tools.update_tools import (
     delete_task_template,
     update_vulnerability,
     delete_vulnerability,
+    update_incident,
 )
 
 from .tools.tprm_tools import (
@@ -233,6 +235,8 @@ WRITE_TOOLS = [
     create_vulnerability,
     update_vulnerability,
     delete_vulnerability,
+    create_incident,
+    update_incident,
     update_asset,
     update_risk_scenario,
     update_applied_control,
