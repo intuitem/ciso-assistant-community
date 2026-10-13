@@ -117,7 +117,7 @@ def test_a_rating_reads_only_its_pages():
     assert "unknown page" in scales_error(form)
 
 
-def test_the_builder_keeps_scales_and_ratings():
+def test_the_builder_keeps_scales_ratings_and_facts():
     from pathlib import Path
 
     import yaml
@@ -141,3 +141,7 @@ def test_the_builder_keeps_scales_and_ratings():
     (page,) = [p for p in saved["pages"] if severity in p["questions"]]
     assert page["questions"][severity]["config"]["scale"] == "severity"
     assert not page["questions"][severity].get("choices")
+    # Pages keep the facts they show.
+    assert [p.get("facts") for p in saved["pages"]] == [
+        p.get("facts") for p in form["pages"]
+    ]

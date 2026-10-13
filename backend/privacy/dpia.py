@@ -28,3 +28,40 @@ class ProcessingDpiaTarget(Target):
     def apply(self, subject, proposal, *, response, user) -> None:
         subject.dpia = response
         subject.save(update_fields=["dpia"])
+
+
+@register
+class ProcessingControlsTarget(Target):
+    """`processing.controls`: the measures the form picks join the processing's
+    controls. Only adds: a control the form leaves out stays on the processing."""
+
+    key = "processing.controls"
+    subject_model = "privacy.Processing"
+    permission = "change_processing"
+    label = "associatedControls"
+
+    def current(self, subject):
+        controls = list(subject.associated_controls.order_by("name"))
+        return [str(c.pk) for c in controls], ", ".join(str(c) for c in controls)
+
+    def resolve(self, response, config, override=None) -> Proposal:
+        from core.models import AppliedControl, Question
+
+        # A preview passes the form's results only: the picks are not among them.
+        if getattr(response, "pk", None) is None:
+            return Proposal(ok=True, value=None, display=_("The measures picked"))
+        ids = set()
+        for answer in response.answers.filter(
+            question__type=Question.Type.OBJECT_REFERENCE,
+            question__config__model="applied_control",
+        ):
+            ids.update(answer.value or [])
+        controls = AppliedControl.objects.filter(pk__in=ids).order_by("name")
+        return Proposal(
+            ok=True,
+            value=[str(c.pk) for c in controls],
+            display=", ".join(str(c) for c in controls) or _("None"),
+        )
+
+    def apply(self, subject, proposal, *, response, user) -> None:
+        subject.associated_controls.add(*proposal.value)

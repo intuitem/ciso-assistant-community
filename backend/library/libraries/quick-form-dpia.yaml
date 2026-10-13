@@ -3,10 +3,11 @@ locale: en
 ref_id: dpia
 name: Data protection impact assessment (DPIA)
 description: 'A DPIA following the structure of the CNIL PIA method: context, core principles, risks to
-  data subjects and validation. Accepting a response records it as the processing''s DPIA.'
+  data subjects and validation. Accepting a response records it as the processing''s DPIA and adds the
+  measures it picks to the processing.'
 copyright: © intuitem
-version: 5
-publication_date: '2026-10-12'
+version: 6
+publication_date: '2026-10-13'
 provider: intuitem
 packager: intuitem
 objects:
@@ -19,6 +20,8 @@ objects:
     subject_question_urn: urn:intuitem:risk:qf_page:dpia:overview:question:processing
     on_accept:
     - target: processing.dpia
+      config: {}
+    - target: processing.controls
       config: {}
     scales_definition:
     - ref_id: severity
@@ -162,7 +165,8 @@ objects:
     - urn: urn:intuitem:risk:qf_page:dpia:overview
       ref_id: overview
       name: 'Context: overview'
-      description: 'Identify the processing under study and present it.
+      description: 'Identify the processing under study. Its purposes, data, parties and measures come
+        from its record: the following pages show them for you to assess.
 
 
         Keep the completed response as the record of the assessment: Article 35 GDPR requires it.'
@@ -172,13 +176,9 @@ objects:
           text: Processing
           config:
             model: processing
-        urn:intuitem:risk:qf_page:dpia:overview:question:description:
+        urn:intuitem:risk:qf_page:dpia:overview:question:benefits:
           type: text
-          text: What is the processing under study? (name, purpose, expected benefits, context of use)
-        urn:intuitem:risk:qf_page:dpia:overview:question:responsibilities:
-          type: text
-          text: What are the responsibilities linked to the processing? (controller, processors, joint
-            controllers)
+          text: What benefits are expected from the processing, and in what context is it used?
         urn:intuitem:risk:qf_page:dpia:overview:question:standards:
           type: text
           text: Which standards apply to the processing? (approved codes of conduct, certifications…)
@@ -186,30 +186,36 @@ objects:
     - urn: urn:intuitem:risk:qf_page:dpia:data
       ref_id: data
       name: 'Context: data, processes and supports'
-      description: 'Delimit and describe the processing in detail. The processing record already lists
-        its personal data, retention periods, recipients and supporting assets: describe here what it
-        does not.'
+      description: 'The data processed, about whom and for whom. Shown from the processing''s record.
+        To correct it, edit the processing: submitting this form keeps a copy of what was assessed.'
+      facts:
+      - processing.personal_data
+      - processing.data_subjects
+      - processing.recipients
       questions:
-        urn:intuitem:risk:qf_page:dpia:data:question:data:
+        urn:intuitem:risk:qf_page:dpia:data:question:access:
           type: text
-          text: What data is processed? (with retention periods, recipients and who can access it)
+          text: Who can access the data, beyond the recipients listed?
         urn:intuitem:risk:qf_page:dpia:data:question:lifecycle:
           type: text
           text: How does the data lifecycle unfold, from collection to deletion?
         urn:intuitem:risk:qf_page:dpia:data:question:supports:
           type: text
-          text: What does the data rely on? (information systems, software, networks, people, paper…)
+          text: What else does the data rely on, beyond the assets listed? (people, paper…)
+          required: false
     - urn: urn:intuitem:risk:qf_page:dpia:proportionality
       ref_id: proportionality
       name: 'Core principles: proportionality and necessity'
-      description: Show that the processing complies with the core data protection principles.
+      description: 'Show that the processing complies with the core data protection principles. Shown
+        from the processing''s record. To correct it, edit the processing: submitting this form keeps
+        a copy of what was assessed.'
+      facts:
+      - processing.purposes
       questions:
         urn:intuitem:risk:qf_page:dpia:proportionality:question:purposes:
           type: text
-          text: Are the purposes specified, explicit and legitimate?
-        urn:intuitem:risk:qf_page:dpia:proportionality:question:legal_basis:
-          type: text
-          text: What is the legal basis that makes the processing lawful?
+          text: Are these purposes specified, explicit and legitimate, and does each rest on the right
+            legal basis?
         urn:intuitem:risk:qf_page:dpia:proportionality:question:minimisation:
           type: text
           text: Is the data adequate, relevant and limited to what is necessary for the purposes?
@@ -218,11 +224,15 @@ objects:
           text: Is the data accurate and kept up to date?
         urn:intuitem:risk:qf_page:dpia:proportionality:question:retention:
           type: text
-          text: What are the retention periods, and why are they necessary?
+          text: Why are the retention periods recorded for each kind of data necessary?
     - urn: urn:intuitem:risk:qf_page:dpia:rights
       ref_id: rights
       name: 'Core principles: measures protecting data subjects'' rights'
-      description: Show how data subjects can exercise their rights.
+      description: 'Show how data subjects can exercise their rights. Shown from the processing''s record.
+        To correct it, edit the processing: submitting this form keeps a copy of what was assessed.'
+      facts:
+      - processing.contractors
+      - processing.transfers
       questions:
         urn:intuitem:risk:qf_page:dpia:rights:question:information:
           type: text
@@ -242,23 +252,28 @@ objects:
           text: How can data subjects exercise their rights to restriction and to object?
         urn:intuitem:risk:qf_page:dpia:rights:question:processors:
           type: text
-          text: Are the processors' obligations clearly set out and governed by a contract?
+          text: Is a contract setting out their obligations in place with each of these parties?
         urn:intuitem:risk:qf_page:dpia:rights:question:transfers:
           type: text
-          text: If data is transferred outside the EU, is it adequately protected?
+          text: Do the safeguards listed protect the data transferred outside the EU adequately?
           required: false
     - urn: urn:intuitem:risk:qf_page:dpia:measures
       ref_id: measures
       name: 'Risks: existing or planned measures'
-      description: List the measures, existing or planned, that contribute to data security. Each one
-        is an applied control, so its owner, due date and status are tracked like any other.
+      description: The measures the processing already has, existing or planned. Each is an applied control,
+        so its owner, due date and status are tracked like any other. Measures picked in this form join
+        the processing once the DPIA is accepted.
+      facts:
+      - processing.controls
       questions:
         urn:intuitem:risk:qf_page:dpia:measures:question:measures:
           type: object_reference
-          text: Which measures are in place or planned?
+          text: Which measures should the processing add?
           config:
             model: applied_control
             multiple: true
+            subject_field: associated_controls
+          required: false
         urn:intuitem:risk:qf_page:dpia:measures:question:notes:
           type: text
           text: Anything to add about these measures?
@@ -281,10 +296,11 @@ objects:
           text: Which risk sources could be behind it (internal or external people, non-human sources)?
         urn:intuitem:risk:qf_page:dpia:illegitimate_access:question:measures:
           type: object_reference
-          text: Which measures contribute to treating this risk?
+          text: Which measures treat this risk?
           config:
             model: applied_control
             multiple: true
+            subject_field: associated_controls
           required: false
         urn:intuitem:risk:qf_page:dpia:illegitimate_access:question:severity:
           type: unique_choice
@@ -338,10 +354,11 @@ objects:
           text: Which risk sources could be behind it (internal or external people, non-human sources)?
         urn:intuitem:risk:qf_page:dpia:unwanted_modification:question:measures:
           type: object_reference
-          text: Which measures contribute to treating this risk?
+          text: Which measures treat this risk?
           config:
             model: applied_control
             multiple: true
+            subject_field: associated_controls
           required: false
         urn:intuitem:risk:qf_page:dpia:unwanted_modification:question:severity:
           type: unique_choice
@@ -395,10 +412,11 @@ objects:
           text: Which risk sources could be behind it (internal or external people, non-human sources)?
         urn:intuitem:risk:qf_page:dpia:disappearance:question:measures:
           type: object_reference
-          text: Which measures contribute to treating this risk?
+          text: Which measures treat this risk?
           config:
             model: applied_control
             multiple: true
+            subject_field: associated_controls
           required: false
         urn:intuitem:risk:qf_page:dpia:disappearance:question:severity:
           type: unique_choice
@@ -450,6 +468,7 @@ objects:
           config:
             model: applied_control
             multiple: true
+            subject_field: associated_controls
           required: false
     - urn: urn:intuitem:risk:qf_page:dpia:validation
       ref_id: validation

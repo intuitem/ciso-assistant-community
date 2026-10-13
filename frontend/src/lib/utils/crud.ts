@@ -1242,7 +1242,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder' },
 			{ field: 'library' },
 			{ field: 'pages_count' },
-			{ field: 'responses_count' }
+			{ field: 'responses_count' },
+			{ field: 'always_review' }
 		],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },

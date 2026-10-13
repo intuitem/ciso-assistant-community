@@ -223,6 +223,27 @@ class TestQuickFormImport:
         assert response.answers.get(question__urn=Q_COMMENT).value == "Weeks of writing"
         assert not Question.objects.filter(urn=Q_HEADCOUNT).exists()
 
+    def test_always_review_comes_from_the_first_load_only(self, app_config):
+        reviewed = LIBRARY_V1.replace(
+            "      description: Is a DPIA required?\n",
+            "      description: Is a DPIA required?\n      always_review: true\n",
+        )
+        form = _load(reviewed)
+        assert form.always_review is True
+
+        _user, client = _admin_client()
+        url = f"/api/quick-forms/{form.id}/always-review/"
+        assert (
+            client.post(url, {"always_review": "no"}, format="json").status_code == 400
+        )
+        assert client.post(url, {"always_review": False}, format="json").json() == {
+            "always_review": False
+        }
+        # The library still says true: an update keeps the instance's choice.
+        _load(reviewed.replace("version: 1", "version: 2"))
+        form.refresh_from_db()
+        assert form.always_review is False
+
     def test_answered_questions_and_choices_cannot_be_deleted(self, app_config):
         _user, client = _admin_client()
         form = _load(LIBRARY_V1)

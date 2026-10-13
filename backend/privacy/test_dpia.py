@@ -380,7 +380,11 @@ def test_a_dpia_is_a_form_on_the_processing(admin_client, processing, dpia_form)
     assert response.subject == processing
     assert response.ref_id.startswith("DPIA")
     measures = response.answers.get(question__urn=f"{DPIA}:measures:question:measures")
-    assert measures.question.config == {"model": "applied_control", "multiple": True}
+    assert measures.question.config == {
+        "model": "applied_control",
+        "multiple": True,
+        "subject_field": "associated_controls",
+    }
 
     listed = admin_client.get(
         "/api/quick-form-responses/", {"target": "processing.dpia"}
@@ -461,3 +465,144 @@ def test_the_dpia_target_previews_without_a_response():
 
     (row,) = project([{"target": "processing.dpia", "config": {}}], {}, {})
     assert row["ok"], row
+
+
+def _complete(client, response, extra=None):
+    """Answer every required question still empty, then submit."""
+    url = f"/api/quick-form-responses/{response.id}/"
+    content = client.get(f"{url}content/").json()
+    answers = dict(extra or {})
+    for page in content["pages"]:
+        for urn, question in page["questions"].items():
+            if question.get("required") is False or content["answers"].get(urn):
+                continue
+            if question["type"] == "text":
+                answers.setdefault(urn, "Noted")
+            elif question["type"] == "unique_choice":
+                answers.setdefault(urn, question["choices"][0]["urn"])
+    patched = client.patch(url, {"answers": answers}, format="json")
+    assert patched.status_code == 200, patched.json()
+    submitted = client.post(f"{url}set-status/", {"status": "submitted"}, format="json")
+    assert submitted.status_code == 200, submitted.json()
+    response.refresh_from_db()
+
+
+@pytest.mark.django_db
+def test_pages_show_the_processing_record_frozen_on_submit(
+    admin_client, reviewer_client, processing, dpia_form
+):
+    response = _start_dpia(admin_client, dpia_form, processing)
+    url = f"/api/quick-form-responses/{response.id}/content/"
+    content = admin_client.get(url).json()
+    data_page = next(p for p in content["pages"] if p["ref_id"] == "data")
+    assert data_page["facts"] == [
+        "processing.personal_data",
+        "processing.data_subjects",
+        "processing.recipients",
+    ]
+    purposes = content["facts"]["processing.purposes"]
+    assert purposes["columns"] == ["name", "legalBasis", "article9Condition"]
+    assert purposes["rows"] == [["Profiling", "privacy_consent", None]]
+    (row,) = content["facts"]["processing.personal_data"]["rows"]
+    assert row[-1] == "CRM"
+    assert content["facts"]["processing.controls"]["rows"] == [
+        ["Pseudonymisation", "in_progress", None]
+    ]
+
+    _complete(admin_client, response)
+    assert response.facts_snapshot["processing.purposes"] == purposes
+    Purpose.objects.create(
+        processing=processing, name="Marketing", legal_basis="privacy_consent"
+    )
+    # Submitted: the record assessed, not the processing as it is now.
+    frozen = admin_client.get(url).json()["facts"]["processing.purposes"]
+    assert [r[0] for r in frozen["rows"]] == ["Profiling"]
+
+    # Its submitter could accept, so it closed at once: reopen it for review.
+    QuickFormResponse.objects.filter(pk=response.pk).update(
+        status=QuickFormResponse.Status.SUBMITTED, resolution=""
+    )
+    sent_back = reviewer_client.post(
+        f"/api/quick-form-responses/{response.id}/set-status/",
+        {"status": "draft"},
+        format="json",
+    )
+    assert sent_back.status_code == 200, sent_back.json()
+    live = admin_client.get(url).json()["facts"]["processing.purposes"]
+    assert sorted(r[0] for r in live["rows"]) == ["Marketing", "Profiling"]
+
+
+@pytest.mark.django_db
+def test_the_processings_measures_are_offered_first(
+    admin_client, processing, dpia_form
+):
+    response = _start_dpia(admin_client, dpia_form, processing)
+    AppliedControl.objects.create(name="Access review", folder=processing.folder)
+    options = admin_client.get(
+        f"/api/quick-form-responses/{response.id}/reference-options/",
+        {"question": f"{DPIA}:illegitimate_access:question:measures"},
+    ).json()["results"]
+    names = [o["label"] for o in options]
+    assert names.index("Pseudonymisation") < names.index("Access review")
+    assert options[0]["on_subject"] is True
+    assert "on_subject" not in options[names.index("Access review")]
+
+
+@pytest.mark.django_db
+def test_accepting_adds_the_picked_measures_to_the_processing(
+    admin_client, processing, dpia_form
+):
+    response = _start_dpia(admin_client, dpia_form, processing)
+    review = AppliedControl.objects.create(
+        name="Access review", folder=processing.folder
+    )
+    kept = processing.associated_controls.get()
+    _complete(
+        admin_client,
+        response,
+        {f"{DPIA}:illegitimate_access:question:measures": [str(review.id)]},
+    )
+    # Its submitter may change the processing: accepted on submit.
+    assert response.resolution == QuickFormResponse.Resolution.ACCEPTED
+    assert set(processing.associated_controls.all()) == {kept, review}
+    log = QuickFormApplication.objects.get(
+        response=response, target="processing.controls"
+    )
+    assert log.new_value == [str(review.id)]
+    assert log.previous_display == "Pseudonymisation"
+
+
+def test_a_page_naming_an_unknown_fact_is_refused():
+    from core.quick_form_facts import facts_error
+
+    assert facts_error([{"urn": "p", "facts": ["processing.purposes"]}]) is None
+    assert "processing.nope" in facts_error(
+        [{"urn": "p", "facts": ["processing.nope"]}]
+    )
+
+
+@pytest.mark.django_db
+def test_always_review_sends_the_dpia_to_validation(
+    admin_client, reviewer_client, processing, dpia_form
+):
+    switched = admin_client.post(
+        f"/api/quick-forms/{dpia_form.id}/always-review/",
+        {"always_review": True},
+        format="json",
+    )
+    assert switched.status_code == 200, switched.json()
+    response = _start_dpia(admin_client, dpia_form, processing)
+    _complete(admin_client, response)
+    # Not applied on submit, although its submitter could change the processing.
+    assert response.status == QuickFormResponse.Status.SUBMITTED
+    processing.refresh_from_db()
+    assert processing.dpia is None
+
+    accepted = reviewer_client.post(
+        f"/api/quick-form-responses/{response.id}/set-status/",
+        {"status": "closed", "resolution": "accepted"},
+        format="json",
+    )
+    assert accepted.status_code == 200, accepted.json()
+    processing.refresh_from_db()
+    assert processing.dpia == response

@@ -2404,6 +2404,7 @@ class LibraryUpdater:
                         **self.i18n_object_dict,
                         **form_fields,
                         "library": self.old_library,
+                        "always_review": bool(new_quick_form.get("always_review")),
                     },
                 )
 
@@ -2459,6 +2460,7 @@ class LibraryUpdater:
                         "aggregation": normalize_page_aggregation(
                             page.get("aggregation")
                         ),
+                        "facts": page.get("facts") or [],
                     }
                     page_object, _ = QuickFormPage.objects.update_or_create(
                         quick_form=quick_form,
@@ -4378,6 +4380,16 @@ class QuickForm(ReferentialObjectMixin, I18nObjectMixin):
     on_accept = models.JSONField(
         default=list, blank=True, verbose_name=_("Apply on accept")
     )
+    # Off: a submitter who could make every on-accept change by hand gets it applied
+    # on submit. The library sets it on first load only: an update keeps the choice.
+    always_review = models.BooleanField(
+        default=False,
+        verbose_name=_("Always require review"),
+        help_text=_(
+            "Even when the person submitting could make the change themselves, "
+            "an accepted review is needed before anything is written."
+        ),
+    )
     ref_id_prefix = models.CharField(
         max_length=8,
         blank=True,
@@ -4451,6 +4463,12 @@ class QuickFormPage(ReferentialObjectMixin, I18nObjectMixin):
         default=Aggregation.SUM,
         verbose_name=_("Aggregation"),
         help_text=_("How the page's question scores combine into the page score"),
+    )
+    facts = models.JSONField(
+        default=list,
+        blank=True,
+        verbose_name=_("Facts"),
+        help_text=_("The subject's records the page shows (see core.quick_form_facts)"),
     )
 
     fields_to_check = ["urn"]
@@ -11684,6 +11702,10 @@ class QuickFormResponse(
     # `computed_outcome`, whose every key reads as a classification that fired.
     computed_values = models.JSONField(
         blank=True, null=True, verbose_name=_("Computed values")
+    )
+    # The facts the pages showed, frozen on submit; null while live.
+    facts_snapshot = models.JSONField(
+        blank=True, null=True, verbose_name=_("Facts snapshot")
     )
     # What the response is about, read from the form's subject question. Generic
     # because entity is the first subject type, not the only one.

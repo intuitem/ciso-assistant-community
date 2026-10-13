@@ -357,6 +357,15 @@ def project(
     return rows
 
 
+def always_reviewed(response) -> bool:
+    """The form or the publication it was filed through asks for a review even
+    when the submitter could make every change themselves."""
+    publication = getattr(response, "publication", None)
+    return response.quick_form.always_review or bool(
+        publication is not None and publication.always_review
+    )
+
+
 def can_apply_on_submit(response, user, *, scored_complete: bool = True) -> bool:
     """Whether submitting can apply the form's targets at once: every
     target is ready and its permission on the subject is the submitter's own,
@@ -364,10 +373,9 @@ def can_apply_on_submit(response, user, *, scored_complete: bool = True) -> bool
     (no subject, nothing resolved, a missing right, scored questions left
     unanswered — they score 0 and would read as the lowest result) goes to
     review."""
-    publication = getattr(response, "publication", None)
     if (
         not scored_complete
-        or (publication is not None and publication.always_review)
+        or always_reviewed(response)
         or not configured_targets(response)
     ):
         return False

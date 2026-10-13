@@ -252,7 +252,8 @@ from core import commitment
 
 import structlog
 
-from core.quick_form_apply import project, targets_of
+from core.quick_form_apply import always_reviewed, project, targets_of
+from core.quick_form_facts import facts_for, freeze_facts
 from core.quick_form_targets import get_target
 
 logger = structlog.get_logger(__name__)
@@ -20517,6 +20518,27 @@ class QuickFormViewSet(BaseModelViewSet):
     def create(self, request, *args, **kwargs):
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
+    @action(detail=True, methods=["post"], url_path="always-review")
+    def always_review(self, request, pk=None):
+        """The one setting an instance owns on a library form: whether accepting
+        always takes a review, even when the submitter could apply it."""
+        quick_form = self.get_object()
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="change_quickform"),
+            folder=quick_form.folder,
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        value = request.data.get("always_review")
+        if not isinstance(value, bool):
+            return Response(
+                {"error": "alwaysReviewMustBeBoolean"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        quick_form.always_review = value
+        quick_form.save(update_fields=["always_review", "updated_at"])
+        return Response({"always_review": value})
+
     @staticmethod
     def _assessable(request, target_key, subject_id):
         """(target, subject, may_start): the object a form would assess, and
@@ -20827,10 +20849,7 @@ def _close_on_submit(response, user, evaluation=None) -> list[dict] | None:
     from core.cel_service import evaluate_quick_form
     from core.quick_form_apply import apply_on_accept
 
-    publication = response.publication
-    if not response.quick_form.on_accept or (
-        publication is not None and publication.always_review
-    ):
+    if not response.quick_form.on_accept or always_reviewed(response):
         return None
     if evaluation is None:
         evaluation = evaluate_quick_form(response, persist=True)
@@ -20931,6 +20950,7 @@ def quick_form_response_content(response, user=None):
                 "description": page.get_description_translated,
                 "order": page.order,
                 "hidden": page.urn in hidden,
+                "facts": page.facts or [],
                 "questions": page.get_questions_translated() or {},
             }
         )
@@ -20982,6 +21002,8 @@ def quick_form_response_content(response, user=None):
             and (response.publication is None or response.publication.show_projection)
             else [],
             "subject": subject,
+            # The subject's records the pages show: only to who may view it.
+            "facts": facts_for(response) if subject_readable else {},
             "applications": [
                 {
                     "target": a.target,
@@ -21254,6 +21276,7 @@ class MyRequestViewSet(viewsets.ViewSet):
             "observation",
             "updated_at",
         ]
+        update_fields += freeze_facts(response)
         sla_due = _outcome_sla_due_date(response)
         if sla_due is not None and (
             response.due_date is None or sla_due < response.due_date
@@ -21339,6 +21362,7 @@ class MyRequestViewSet(viewsets.ViewSet):
                     response.folder,
                     request.query_params.get("search", ""),
                     user=request.user,
+                    subject=response.subject,
                 )
             )
         except ReferenceError_ as e:
@@ -21755,6 +21779,7 @@ class QuickFormResponseViewSet(BaseModelViewSet):
                     response.folder,
                     request.query_params.get("search", ""),
                     user=request.user,
+                    subject=response.subject,
                 )
             )
         except ReferenceError_ as e:
@@ -22135,6 +22160,7 @@ class QuickFormResponseViewSet(BaseModelViewSet):
             # response is reassigned, and the reviewer set is derived against it.
             response.submitted_by = request.user
             update_fields += ["submitted_at", "submitted_by"]
+            update_fields += freeze_facts(response)
             sla_due = _outcome_sla_due_date(response)
             # Most urgent wins, and an outcome never loosens a date a human set.
             if sla_due is not None and (
@@ -22142,6 +22168,10 @@ class QuickFormResponseViewSet(BaseModelViewSet):
             ):
                 response.due_date = sla_due
                 update_fields.append("due_date")
+        elif new_status == QuickFormResponse.Status.DRAFT:
+            # Sent back: the pages read the subject live again until resubmitted.
+            response.facts_snapshot = None
+            update_fields.append("facts_snapshot")
         response.save(update_fields=update_fields)
 
         on_accept = None

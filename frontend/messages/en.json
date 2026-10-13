@@ -7285,5 +7285,10 @@
 	"builderCelGroupRatings": "Ratings",
 	"builderCelRatingValue": "Rank of the highest level among the current points (values.RATING_ID_residual for the residual stage)",
 	"builderCelRatingPoints": "Every point: page, stage, dims, level and rank",
-	"builderCelRatingDims": "In a rating's rules: a dimension's rank and value"
+	"builderCelRatingDims": "In a rating's rules: a dimension's rank and value",
+	"subjectFactsLive": "From the record, read-only",
+	"subjectFactsFrozen": "From the record, as it stood when submitted",
+	"subjectFactsEdit": "Edit the record",
+	"subjectFactsNone": "Nothing recorded",
+	"referenceOnSubject": "Already linked"
 }

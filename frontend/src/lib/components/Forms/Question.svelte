@@ -503,6 +503,11 @@
 															: 'fa-circle'} text-xs opacity-60"
 													></i>
 													<span class="min-w-0 grow truncate">{option.label}</span>
+													{#if option.on_subject}
+														<span class="badge preset-tonal-primary shrink-0 text-xs"
+															>{m.referenceOnSubject()}</span
+														>
+													{/if}
 													{#if option.folder}
 														<span class="shrink-0 text-xs text-surface-400">{option.folder}</span>
 													{/if}

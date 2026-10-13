@@ -6,5 +6,5 @@ class PrivacyConfig(AppConfig):
     name = "privacy"
 
     def ready(self):
-        # Registers the `processing.dpia_required` and `processing.dpia` targets.
-        from privacy import dpia, screening  # noqa: F401
+        # Registers the processing targets and the facts forms can show.
+        from privacy import dpia, facts, screening  # noqa: F401

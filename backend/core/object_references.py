@@ -50,14 +50,27 @@ def _queryset(entry, folder, user=None):
     return qs.filter(Q(id__in=viewable) | Q(folder=folder))
 
 
-def options_for(question, folder, search="", limit=50, user=None):
+def options_for(question, folder, search="", limit=50, user=None, subject=None):
+    """`config.subject_field` names the subject's relation holding objects of this
+    model (a processing's `associated_controls`): those come first, flagged."""
     key, entry, _multiple = config_for(question)
     qs = _queryset(entry, folder, user)
     label_field = entry["label"]
     if search:
         qs = qs.filter(**{f"{label_field}__icontains": search})
-    rows = qs.order_by(label_field)[:limit]
-    return {"model": key, "results": [_row(o, label_field) for o in rows]}
+    config = question.config if isinstance(question.config, dict) else {}
+    related = getattr(subject, config.get("subject_field") or "", None)
+    # Only a relation to this very model: the name comes from the library.
+    ours = (
+        qs.filter(pk__in=related.all())
+        if getattr(related, "model", None) is qs.model
+        else qs.none()
+    )
+    first = list(ours.order_by(label_field)[:limit])
+    rest = qs.exclude(pk__in=[o.pk for o in first]).order_by(label_field)
+    results = [{**_row(o, label_field), "on_subject": True} for o in first]
+    results += [_row(o, label_field) for o in rest[: limit - len(first)]]
+    return {"model": key, "results": results}
 
 
 def _row(obj, label_field):

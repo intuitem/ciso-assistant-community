@@ -534,7 +534,9 @@ class QuickFormPageImporter:
         aggregation = self.page_data.get("aggregation")
         if aggregation is not None and aggregation not in PAGE_AGGREGATIONS:
             return "aggregation must be one of {}".format(", ".join(PAGE_AGGREGATIONS))
-        return None
+        from core.quick_form_facts import facts_error
+
+        return facts_error([self.page_data])
 
     def import_page(self, quick_form: QuickForm):
         # update_or_create scoped to the form: create on fresh loads, in-place
@@ -554,6 +556,7 @@ class QuickFormPageImporter:
                 aggregation=normalize_page_aggregation(
                     self.page_data.get("aggregation")
                 ),
+                facts=self.page_data.get("facts") or [],
                 locale=quick_form.locale,
                 default_locale=quick_form.default_locale,
                 translations=self.page_data.get("translations", {}),
@@ -653,6 +656,10 @@ class QuickFormImporter:
                 translations=self.quick_form_data.get("translations", {}),
             ),
         )
+        if created and self.quick_form_data.get("always_review"):
+            # First load only: re-imports keep what the instance chose.
+            quick_form.always_review = True
+            quick_form.save(update_fields=["always_review"])
         for page in self._pages:
             page.import_page(quick_form)
         if not created:

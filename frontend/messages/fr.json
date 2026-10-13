@@ -7285,5 +7285,10 @@
 	"builderCelGroupRatings": "Notations",
 	"builderCelRatingValue": "Rang du niveau le plus élevé parmi les points actuels (values.RATING_ID_residual pour l'étape résiduelle)",
 	"builderCelRatingPoints": "Chaque point : page, étape, dimensions, niveau et rang",
-	"builderCelRatingDims": "Dans les règles d'une notation : rang et valeur d'une dimension"
+	"builderCelRatingDims": "Dans les règles d'une notation : rang et valeur d'une dimension",
+	"subjectFactsLive": "Issu de la fiche, en lecture seule",
+	"subjectFactsFrozen": "Issu de la fiche, tel qu'au moment de la soumission",
+	"subjectFactsEdit": "Modifier la fiche",
+	"subjectFactsNone": "Rien n'est renseigné",
+	"referenceOnSubject": "Sur la fiche"
 }

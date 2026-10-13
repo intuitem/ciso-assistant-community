@@ -6,6 +6,7 @@
 	import { tick } from 'svelte';
 	import Question from '$lib/components/Forms/Question.svelte';
 	import RatingOutcomes from '$lib/components/QuickForms/RatingOutcomes.svelte';
+	import SubjectFacts from '$lib/components/QuickForms/SubjectFacts.svelte';
 	import ProjectionCard from '$lib/components/QuickForms/ProjectionCard.svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import { getToastStore } from '$lib/components/Toast/stores';
@@ -757,6 +758,14 @@
 							<MarkdownRenderer content={currentPage.description} class="text-sm mt-1" />
 						{/if}
 					</div>
+					<SubjectFacts
+						facts={content.facts ?? {}}
+						keys={currentPage.facts ?? []}
+						frozen={response.status !== 'draft'}
+						href={content.subject?.str && SUBJECT_ROUTES[content.subject.model ?? '']
+							? `/${SUBJECT_ROUTES[content.subject.model ?? '']}/${content.subject.id}`
+							: null}
+					/>
 					{#if !canEditAnswers}
 						<p class="text-xs text-surface-500">{m.quickFormReadOnly()}</p>
 					{/if}

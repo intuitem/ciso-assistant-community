@@ -48,6 +48,19 @@
 	const modalStore: ModalStore = getModalStore();
 	const toastStore = getToastStore();
 
+	// The one setting an instance owns on a library form (see QuickForm.always_review).
+	async function setAlwaysReview(value: boolean) {
+		const res = await fetch(`/quick-forms/${data.data?.id}/always-review`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ always_review: value })
+		});
+		if (!res.ok) {
+			toastStore.trigger({ message: m.anErrorOccurred(), background: 'preset-filled-error-500' });
+		}
+		await invalidateAll();
+	}
+
 	const defaultExcludes = ['id', 'str', 'path', 'sync_mappings'];
 
 	// Format the raw numbers of the ROSI explanation per the active locale.
@@ -984,6 +997,20 @@
 				</button>
 			{/if}
 			{@render actions?.()}
+			{#if data.urlModel === 'quick-forms' && hasPermissionAnywhere(user, 'change_quickform')}
+				<label
+					class="flex h-fit items-center gap-2 text-sm"
+					title={m.alwaysReviewHelpText()}
+					data-testid="quick-form-always-review"
+				>
+					<input
+						type="checkbox"
+						class="checkbox"
+						checked={data.data?.always_review}
+						onchange={(e) => setAlwaysReview(e.currentTarget.checked)}
+					/>{m.alwaysReview()}
+				</label>
+			{/if}
 			{#if data.urlModel === 'quick-forms'}
 				<!-- Answering a form is the only way to see what its conditions and outcomes
 				     actually do; the same preview serves drafts in the builder. -->
