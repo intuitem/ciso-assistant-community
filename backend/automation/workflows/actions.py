@@ -101,6 +101,10 @@ class FatalActionError(ActionError):
     retry schedule."""
 
 
+class PermissionDeniedError(FatalActionError):
+    """The run identity lacks a permission an action needs."""
+
+
 class DeferredTask:
     """Returned by an action's execute() instead of an output dict when its
     side effect must run outside the engine transaction (network I/O must not
@@ -157,7 +161,12 @@ def dig(data, path, default=None):
     into lists: `body.severity.0.score`); `default` when the path breaks. Pass
     MISSING as the default to tell a broken path from a present null."""
     current = data
-    for part in str(path).split("."):
+    parts = str(path).split(".")
+    while parts:
+        rest = ".".join(parts)
+        if isinstance(current, dict) and len(parts) > 1 and rest in current:
+            return current[rest]
+        part = parts.pop(0)
         if isinstance(current, dict) and part in current:
             current = current[part]
         elif isinstance(current, list) and part.isdigit() and int(part) < len(current):
@@ -877,17 +886,24 @@ def _link_targets(obj, params, instance, relations):
             getattr(obj, name).set(rows)
 
 
-def _authorize_creation_folder(model, folder, instance):
+def _authorize_creation_folder(model, folder, instance, verb="add"):
     """The create permission, checked where the row will actually land."""
     from . import authz
     from .engine import run_identity
 
-    codename = f"add_{model._meta.model_name}"
+    codename = f"{verb}_{model._meta.model_name}"
+    memo = getattr(instance, "_authz_memo", None)
+    key = (codename, getattr(folder, "id", folder))
+    if memo is not None and key in memo:
+        return
     if not authz.can(run_identity(instance), codename, folder):
-        raise ActionError(
-            f"create_object: this workflow may not create a "
+        raise PermissionDeniedError(
+            f"create_object: this workflow may not "
+            f"{'create' if verb == 'add' else 'update'} a "
             f"{model._meta.model_name} in '{folder}'"
         )
+    if memo is not None:
+        memo.add(key)
 
 
 _TASK_TARGETS = {
@@ -1165,11 +1181,12 @@ def _construction_params(entry, fields, instance):
 class CreateObjectAction(BaseAction):
     action_type = "create_object"
 
-    def execute(self, config, instance):
+    def execute(self, config, instance, fields=None):
         entry = CREATABLE_MODELS.get(config.get("model"))
         if entry is None:
             raise ActionError(f"create_object: unknown model '{config.get('model')}'")
-        fields = render(config.get("fields", {}), _render_context(instance))
+        if fields is None:
+            fields = render(config.get("fields", {}), _render_context(instance))
         kwargs = {
             key: value
             for key, value in fields.items()
@@ -1228,6 +1245,10 @@ class CreateObjectAction(BaseAction):
         created = True
         if config.get("upsert"):
             obj = _upsert_match(entry, kwargs, folder)
+            if obj is not None:
+                _authorize_creation_folder(
+                    entry["model"], obj.folder, instance, verb="change"
+                )
 
         if constructor:
             params = _construction_params(entry, fields, instance)
@@ -1273,6 +1294,91 @@ class CreateObjectAction(BaseAction):
         }
 
 
+def upsert_max_items():
+    return _item_cap("WORKFLOW_UPSERT_MAX_ITEMS")
+
+
+def _item_cap(setting):
+    from .engine import node_output_max_items
+
+    return int(getattr(settings, setting, node_output_max_items()))
+
+
+@register
+class UpsertObjectsAction(BaseAction):
+    action_type = "upsert_objects"
+
+    def execute(self, config, instance):
+        model = config.get("model")
+        if model not in CREATABLE_MODELS:
+            raise FatalActionError(f"upsert_objects: unknown model '{model}'")
+        context = _render_context(instance)
+        items = _resolve_list(config.get("items"), context, "upsert_objects: 'items'")
+        limit = upsert_max_items()
+        truncated = len(items) > limit
+        instance._authz_memo = set()
+        instance._creation_folder_memo = _creation_folder(instance)
+        try:
+            return self._upsert_all(
+                config, instance, model, context, items[:limit], truncated, len(items)
+            )
+        finally:
+            del instance._authz_memo
+            del instance._creation_folder_memo
+
+    def _upsert_all(self, config, instance, model, context, items, truncated, received):
+        from decimal import InvalidOperation
+
+        from django.db import DatabaseError, transaction
+
+        stop_on_error = config.get("on_item_error") == "stop"
+        single = {"type": "create_object", "model": model, "upsert": True}
+        created = updated = failed = 0
+        errors = []
+        for index, item in enumerate(items):
+            try:
+                fields = render(
+                    config.get("fields") or {},
+                    {**context, "item": item, "index": index},
+                )
+                with transaction.atomic():
+                    result = CreateObjectAction().execute(single, instance, fields)
+            except PermissionDeniedError:
+                raise
+            except (
+                ActionError,
+                ValidationError,
+                DatabaseError,
+                InvalidOperation,
+                ValueError,
+                TypeError,
+            ) as e:
+                if stop_on_error:
+                    raise
+                failed += 1
+                if len(errors) < 20:
+                    reason = (
+                        e.args[0]
+                        if isinstance(e, ActionError) and e.args
+                        else type(e).__name__
+                    )
+                    errors.append({"index": index, "reason": reason})
+                continue
+            if result["created"]:
+                created += 1
+            else:
+                updated += 1
+        return {
+            "model": model,
+            "received": received,
+            "created": created,
+            "updated": updated,
+            "failed": failed,
+            "errors": errors,
+            "truncated": truncated,
+        }
+
+
 def _upsert_match(entry, kwargs, folder):
     """The row an upsert would update, if it is already there."""
     match = {key: kwargs.get(key) for key in _match_fields(entry)}
@@ -1290,6 +1396,9 @@ def _upsert_match(entry, kwargs, folder):
 def _creation_folder(instance):
     """The triggering object's folder when there is one: an object created because of X
     belongs where X lives, not where the workflow does."""
+    cached = getattr(instance, "_creation_folder_memo", None)
+    if cached is not None:
+        return cached
     trigger_obj = _triggering_object(instance)
     folder = getattr(trigger_obj, "folder", None)
     return folder or instance.folder
@@ -3154,6 +3263,7 @@ def _carries_credentials(url, config, headers):
 
     return (
         bool(SECRETS_REFERENCE_RE.search(_json.dumps(config)))
+        or bool(config.get("oauth"))
         or any(str(key).lower() == "authorization" for key in (headers or {}))
         or bool(urlsplit(url).username or urlsplit(url).password)
     )
@@ -3171,6 +3281,15 @@ HTTP_METHODS = frozenset({"GET", "POST", "PUT", "PATCH", "DELETE"})
 HTTP_MIN_TIMEOUT = 1
 HTTP_MAX_TIMEOUT = 30
 HTTP_DEFAULT_TIMEOUT = 15
+HTTP_DEFAULT_PAGES = 10
+
+
+def http_max_pages():
+    return int(getattr(settings, "WORKFLOW_HTTP_MAX_PAGES", 50))
+
+
+def http_max_items():
+    return _item_cap("WORKFLOW_HTTP_MAX_ITEMS")
 
 
 @register
@@ -3233,7 +3352,15 @@ class HttpRequestAction(BaseAction):
                 else:
                     kwargs["data"] = body
         try:
-            response = requests.request(method, url, **kwargs)
+            if config.get("oauth"):
+                headers["Authorization"] = "Bearer " + self._fetch_token(
+                    render(config.get("oauth"), context), timeout
+                )
+            paginate = render(config.get("paginate"), context)
+            if not paginate:
+                response = requests.request(method, url, **kwargs)
+                return self._finish(config, response, host)
+            return self._paginate(config, paginate, method, url, kwargs, host)
         except requests.RequestException as e:
             # Network failures stay on the retry path.
             if not _as_bool(config.get("allow_connection_error")):
@@ -3247,6 +3374,164 @@ class HttpRequestAction(BaseAction):
                 reason=type(e).__name__,
             )
 
+    @staticmethod
+    def _fetch_token(oauth, timeout):
+        import requests
+        from core.net_safety import (
+            BlockedRequestError,
+            DnsLookupError,
+            assert_public_url_unless_dev,
+        )
+
+        token_url = str(oauth.get("token_url") or "")
+        token_host = urlsplit(token_url).hostname or "token endpoint"
+        if urlsplit(token_url).scheme != "https":
+            raise FatalActionError("http_request: the token URL must be https")
+        try:
+            assert_public_url_unless_dev(token_url, allowed_schemes=("https",))
+        except (BlockedRequestError, DnsLookupError) as e:
+            raise ActionError(
+                f"http_request: {type(e).__name__} for host '{token_host}'"
+            )
+        data = {
+            "grant_type": "client_credentials",
+            "client_id": oauth.get("client_id") or "",
+            "client_secret": oauth.get("client_secret") or "",
+        }
+        if oauth.get("scope"):
+            data["scope"] = oauth["scope"]
+        response = requests.post(
+            token_url, data=data, timeout=timeout, allow_redirects=False
+        )
+        answer = json_loads_or_none(response.text)
+        token = answer.get("access_token") if isinstance(answer, dict) else None
+        if token:
+            return token
+        error = (
+            FatalActionError
+            if 400 <= response.status_code < 500 and response.status_code != 429
+            else ActionError
+        )
+        raise error(
+            f"http_request: no token from '{token_host}' (HTTP {response.status_code})"
+        )
+
+    def _paginate(self, config, paginate, method, url, kwargs, host):
+        import json
+
+        import requests
+        from core.net_safety import (
+            BlockedRequestError,
+            DnsLookupError,
+            assert_public_url_unless_dev,
+        )
+
+        items_path = paginate.get("items") or ""
+        next_path = paginate.get("next") or ""
+        cursor_param = paginate.get("cursor_param") or ""
+        offset_param = paginate.get("offset_param") or ""
+        count_only = _as_bool(paginate.get("count_only"))
+        keep = [str(key) for key in paginate.get("keep") or []]
+        max_pages = min(
+            max(
+                _paging_int(paginate.get("max_pages"), "max_pages", HTTP_DEFAULT_PAGES),
+                1,
+            ),
+            http_max_pages(),
+        )
+        from .engine import node_output_budget, node_output_max_items
+
+        max_items = min(http_max_items(), node_output_max_items())
+        max_chars = node_output_budget() * 9 // 10
+        offset = (
+            _paging_int(_query_value(url, offset_param), offset_param, 0)
+            if offset_param
+            else 0
+        )
+        items, count, pages, truncated, chars, largest = [], 0, 0, False, 0, 0
+        requested = {url}
+        while True:
+            response = requests.request(method, url, **kwargs)
+            pages += 1
+            output = self._finish(config, response, host)
+            if output["status"] >= 400:
+                truncated = pages > 1
+                break
+            page_items = dig(output["body"], items_path) if items_path else None
+            if not isinstance(page_items, list):
+                raise ActionError(
+                    f"http_request: '{items_path}' is not a list in the answer "
+                    f"from '{host}'"
+                )
+            largest = max(largest, len(page_items))
+            if keep:
+                page_items = [
+                    {key: item[key] for key in keep if key in item}
+                    if isinstance(item, dict)
+                    else item
+                    for item in page_items
+                ]
+            if not count_only:
+                for item in page_items:
+                    size = len(json.dumps(item, default=str))
+                    if len(items) >= max_items or chars + size > max_chars:
+                        truncated = True
+                        break
+                    items.append(item)
+                    chars += size
+                count = len(items)
+                if truncated:
+                    break
+            else:
+                count += len(page_items)
+            if offset_param:
+                if not page_items:
+                    break
+                offset += len(page_items)
+                following = str(offset)
+            else:
+                following = dig(output["body"], next_path) if next_path else None
+                if not following:
+                    break
+            if pages >= max_pages:
+                truncated = not (offset_param and len(page_items) < largest)
+                break
+            url = self._next_url(
+                url, str(following), offset_param or cursor_param, host
+            )
+            if url in requested:
+                raise ActionError(
+                    f"http_request: '{host}' pointed back to a page already read"
+                )
+            requested.add(url)
+            try:
+                assert_public_url_unless_dev(url, allowed_schemes=("https", "http"))
+            except (BlockedRequestError, DnsLookupError) as e:
+                raise ActionError(f"http_request: {type(e).__name__} for host '{host}'")
+        return {
+            **output,
+            "body": output["body"] if output["status"] >= 400 else None,
+            "items": None if count_only else items,
+            "count": count,
+            "pages": pages,
+            "truncated": truncated,
+        }
+
+    @staticmethod
+    def _next_url(url, following, param, host):
+        from urllib.parse import urljoin
+
+        if param:
+            return _with_query_param(url, param, following)
+        following = urljoin(url, following)
+        current, target = urlsplit(url), urlsplit(following)
+        if (target.scheme, target.netloc) != (current.scheme, current.netloc):
+            raise FatalActionError(
+                f"http_request: the next page points away from '{host}'"
+            )
+        return following
+
+    def _finish(self, config, response, host):
         try:
             response_body = response.json()
         except ValueError:
@@ -3275,7 +3560,41 @@ class HttpRequestAction(BaseAction):
             "unreachable": unreachable,
             "host": host,
             "reason": reason,
+            "items": None,
+            "count": None,
+            "pages": 0,
+            "truncated": False,
         }
+
+
+def _paging_int(value, name, default):
+    if value in (None, ""):
+        return default
+    try:
+        return int(value)
+    except ValueError, TypeError:
+        raise FatalActionError(f"http_request: paging '{name}' is not a number")
+
+
+def _query_value(url, key):
+    from urllib.parse import parse_qsl
+
+    return dict(parse_qsl(urlsplit(url).query, keep_blank_values=True)).get(key)
+
+
+def _with_query_param(url, key, value):
+    from urllib.parse import parse_qsl, quote, urlencode, urlunsplit
+
+    parts = urlsplit(url)
+    query = [
+        (name, current)
+        for name, current in parse_qsl(parts.query, keep_blank_values=True)
+        if name != key
+    ]
+    query.append((key, value))
+    return urlunsplit(
+        parts._replace(query=urlencode(query, quote_via=quote, safe="$'(),"))
+    )
 
 
 def json_loads_or_none(value):
@@ -3644,6 +3963,10 @@ def _as_bool(value):
 # against the workflow's folder.
 def required_permissions(action_config):
     action_type = (action_config or {}).get("type")
+    if action_type == "upsert_objects":
+        return required_permissions(
+            {**action_config, "type": "create_object", "upsert": True}
+        )
     if action_type == "create_object":
         entry = CREATABLE_MODELS.get(action_config.get("model"))
         if entry is None:
@@ -3802,12 +4125,28 @@ def validate_read_config(node):
     return errors
 
 
+def validate_upsert_objects_config(node):
+    config = node.action_config or {}
+    if config.get("type") != "upsert_objects":
+        return []
+    errors = []
+    if not config.get("items"):
+        errors.append(("action_upsert_missing_items", "A list of items is required"))
+    return errors + _validate_create(
+        {**config, "type": "create_object", "upsert": True}
+    )
+
+
 def validate_create_config(node):
     """Publish-time checks for create_object nodes, same contract as
     validate_read_config."""
     config = node.action_config or {}
     if config.get("type") != "create_object":
         return []
+    return _validate_create(config)
+
+
+def _validate_create(config):
     entry = CREATABLE_MODELS.get(config.get("model"))
     if entry is None:
         return [
@@ -4024,6 +4363,81 @@ def validate_http_request_config(node):
                 "Credentials may only travel over https",
             )
         )
+    errors.extend(_validate_http_oauth(config.get("oauth")))
+    errors.extend(_validate_http_paginate(config.get("paginate")))
+    return errors
+
+
+def _validate_http_oauth(oauth):
+    if oauth in (None, "", {}):
+        return []
+    if not isinstance(oauth, dict):
+        return [("action_http_bad_oauth", "OAuth settings must be name/value pairs")]
+    errors = []
+    for key in ("token_url", "client_id", "client_secret"):
+        if not str(oauth.get(key) or "").strip():
+            errors.append(
+                ("action_http_oauth_missing", f"OAuth needs a {key.replace('_', ' ')}")
+            )
+    client_secret = str(oauth.get("client_secret") or "").strip()
+    if client_secret and not SECRETS_REFERENCE_RE.search(client_secret):
+        errors.append(
+            (
+                "action_http_oauth_secret_literal",
+                (
+                    "The client secret must come from a workflow secret, such as "
+                    "{{secrets.client_secret}}"
+                ),
+            )
+        )
+    token_url = str(oauth.get("token_url") or "")
+    if (
+        token_url
+        and not _is_templated(token_url)
+        and urlsplit(token_url).scheme != "https"
+    ):
+        errors.append(
+            ("action_http_credentials_need_https", "The token URL must be https")
+        )
+    return errors
+
+
+def _validate_http_paginate(paginate):
+    if paginate in (None, "", {}):
+        return []
+    if not isinstance(paginate, dict):
+        return [
+            ("action_http_bad_paginate", "Paging settings must be name/value pairs")
+        ]
+    errors = []
+    if not str(paginate.get("items") or "").strip():
+        errors.append(
+            ("action_http_paginate_missing", "Paging needs the path to the items")
+        )
+    offset_param = str(paginate.get("offset_param") or "").strip()
+    if not offset_param and not str(paginate.get("next") or "").strip():
+        errors.append(
+            ("action_http_paginate_missing", "Paging needs the path to the next page")
+        )
+    keep = paginate.get("keep")
+    if keep not in (None, "", []) and (
+        not isinstance(keep, list) or not all(isinstance(k, str) for k in keep)
+    ):
+        errors.append(
+            ("action_http_bad_keep", "Fields to keep must be a list of names")
+        )
+    max_pages = paginate.get("max_pages")
+    if max_pages not in ("", None) and not _is_templated(max_pages):
+        try:
+            if not 1 <= int(max_pages) <= http_max_pages():
+                raise ValueError
+        except ValueError, TypeError:
+            errors.append(
+                (
+                    "action_http_bad_max_pages",
+                    f"The page limit must be between 1 and {http_max_pages()}",
+                )
+            )
     return errors
 
 
@@ -4415,6 +4829,7 @@ def _is_templated(value):
 ACTION_CONFIG_VALIDATORS = {
     "read_objects": validate_read_config,
     "create_object": validate_create_config,
+    "upsert_objects": validate_upsert_objects_config,
     "update_object": validate_update_config,
     "attach_evidence": validate_attach_evidence_config,
     "record_measurement": validate_record_measurement_config,
