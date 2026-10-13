@@ -168,8 +168,15 @@
 	/>
 {/if}
 
-<!-- A derived series is its formula's: no sample is typed in by hand. -->
-<DetailView {data} {form} disableCreate={Boolean(metricInstance?.is_derived)}>
+<!-- A derived series is its formula's: no sample is typed in, edited or
+     deleted by hand (the backend refuses each). -->
+<DetailView
+	{data}
+	{form}
+	disableCreate={Boolean(metricInstance?.is_derived)}
+	disableEdit={Boolean(metricInstance?.is_derived)}
+	disableDelete={Boolean(metricInstance?.is_derived)}
+>
 	{#snippet actions()}
 		{#if composable}
 			<button
