@@ -5831,8 +5831,6 @@
 	"skip": "Pomiń",
 	"fieldVisibility": "Widoczność pól",
 	"fieldVisibilityHelpText": "Określ, które pola oceny może wyświetlać i edytować każda rola.",
-	"visibilityAuditorRespondent": "Audytor + respondent",
-	"visibilityAuditorOnly": "Tylko audytor",
 	"visibilityHidden": "Ukryte",
 	"answers": "Odpowiedzi",
 	"respondentAlignment": "Zgodność respondenta",

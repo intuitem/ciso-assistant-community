@@ -1535,8 +1535,6 @@
 	"builderUnsavedChangesNavigation": "Vannak nem mentett módosításai, amelyek el fognak veszni. Mégis kilép?",
 	"fieldVisibility": "Mezők láthatósága",
 	"fieldVisibilityHelpText": "Szabályozza, hogy az egyes szerepkörök mely mezőket láthatják és szerkeszthetik.",
-	"visibilityAuditorRespondent": "Auditor + Válaszadó",
-	"visibilityAuditorOnly": "Csak auditor",
 	"visibilityHidden": "Rejtett",
 	"answers": "Válaszok",
 	"respondentAlignment": "Válaszadó egyeztetése",

@@ -5857,8 +5857,6 @@
 	"skip": "Ignorer",
 	"fieldVisibility": "Visibilité des champs",
 	"fieldVisibilityHelpText": "Contrôle quels champs d'évaluation chaque rôle peut voir et éditer.",
-	"visibilityAuditorRespondent": "Auditeur + Répondant",
-	"visibilityAuditorOnly": "Auditeur uniquement",
 	"visibilityHidden": "Masqué",
 	"visibilityRoleAuditor": "Auditeur",
 	"visibilityRoleRespondent": "Répondant",

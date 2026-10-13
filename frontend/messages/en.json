@@ -5847,8 +5847,6 @@
 	"skip": "Skip",
 	"fieldVisibility": "Field visibility",
 	"fieldVisibilityHelpText": "Control which assessment fields each viewer role can see and edit.",
-	"visibilityAuditorRespondent": "Auditor + Respondent",
-	"visibilityAuditorOnly": "Auditor only",
 	"visibilityHidden": "Hidden",
 	"visibilityRoleAuditor": "Auditor",
 	"visibilityRoleRespondent": "Respondent",

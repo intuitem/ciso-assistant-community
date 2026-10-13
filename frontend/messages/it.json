@@ -2760,8 +2760,6 @@
 	"builderUnsavedChangesNavigation": "Hai modifiche non salvate che andranno perse. Uscire comunque?",
 	"fieldVisibility": "Visibilità dei campi",
 	"fieldVisibilityHelpText": "Controlla quali campi ogni ruolo può vedere e modificare.",
-	"visibilityAuditorRespondent": "Revisore + Rispondente",
-	"visibilityAuditorOnly": "Solo revisore",
 	"visibilityHidden": "Nascosto",
 	"answers": "Risposte",
 	"respondentAlignment": "Allineamento del rispondente",

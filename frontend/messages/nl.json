@@ -3446,8 +3446,6 @@
 	"builderUnsavedChangesNavigation": "Je hebt niet-opgeslagen wijzigingen die verloren gaan. Toch verlaten?",
 	"fieldVisibility": "Veldzichtbaarheid",
 	"fieldVisibilityHelpText": "Bepaal welke velden elke rol kan zien en bewerken.",
-	"visibilityAuditorRespondent": "Auditor + Respondent",
-	"visibilityAuditorOnly": "Alleen auditor",
 	"visibilityHidden": "Verborgen",
 	"answers": "Antwoorden",
 	"respondentAlignment": "Afstemming respondent",

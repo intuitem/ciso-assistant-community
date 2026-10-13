@@ -1531,8 +1531,6 @@
 	"builderUnsavedChangesNavigation": "Máte neuložené změny, které budou ztraceny. Opravdu chcete odejít?",
 	"fieldVisibility": "Viditelnost polí",
 	"fieldVisibilityHelpText": "Nastavte, která pole hodnocení může vidět a upravovat každá role čtenáře.",
-	"visibilityAuditorRespondent": "Auditor + Respondent",
-	"visibilityAuditorOnly": "Pouze auditor",
 	"visibilityHidden": "Skryto",
 	"answers": "Odpovědi",
 	"respondentAlignment": "Shoda respondenta",

@@ -1552,8 +1552,6 @@
 	"builderUnsavedChangesNavigation": "Você tem alterações não salvas que serão perdidas. Sair mesmo assim?",
 	"fieldVisibility": "Visibilidade de campos",
 	"fieldVisibilityHelpText": "Controle quais campos cada papel pode ver e editar.",
-	"visibilityAuditorRespondent": "Auditor + Respondente",
-	"visibilityAuditorOnly": "Apenas auditor",
 	"visibilityHidden": "Oculto",
 	"answers": "Respostas",
 	"respondentAlignment": "Alinhamento do respondente",

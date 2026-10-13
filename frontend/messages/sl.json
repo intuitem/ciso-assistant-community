@@ -5215,8 +5215,6 @@
 	"skip": "Preskoči",
 	"fieldVisibility": "Vidnost polja",
 	"fieldVisibilityHelpText": "Nadzorujte, katera polja ocenjevanja lahko vidi in ureja posamezna vloga ocenjevalca.",
-	"visibilityAuditorRespondent": "Revizor + Anketiranec",
-	"visibilityAuditorOnly": "Samo revizor",
 	"visibilityHidden": "Skrito",
 	"answers": "Odgovori",
 	"respondentAlignment": "Usklajenost anketiranca",

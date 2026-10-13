@@ -4249,8 +4249,6 @@
 	"builderUnsavedChangesNavigation": "저장되지 않은 변경 사항이 있어 손실됩니다. 그래도 나가시겠습니까?",
 	"fieldVisibility": "필드 가시성",
 	"fieldVisibilityHelpText": "각 역할이 볼 수 있고 편집할 수 있는 필드를 제어합니다.",
-	"visibilityAuditorRespondent": "감사자 + 응답자",
-	"visibilityAuditorOnly": "감사자 전용",
 	"visibilityHidden": "숨김",
 	"answers": "답변",
 	"respondentAlignment": "응답자 정렬",
