@@ -3342,6 +3342,12 @@ class ProcessingRecordConsumer(RecordConsumer):
     _STATUS_BY_DISPLAY: ClassVar[Mapping[str, str]] = MappingProxyType(
         {v.lower(): k for k, v in Processing.STATUS_CHOICES}
     )
+    _ROLE_KEYS: ClassVar[frozenset[str]] = frozenset(
+        k for k, _ in Processing.ROLE_CHOICES
+    )
+    _ROLE_BY_DISPLAY: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {v.lower(): k for k, v in Processing.ROLE_CHOICES}
+    )
 
     def _build_update_data(self, record: dict, record_data: dict) -> dict:
         update_data = super()._build_update_data(record, record_data)
@@ -3373,12 +3379,21 @@ class ProcessingRecordConsumer(RecordConsumer):
         else:
             status_value = "privacy_draft"
 
+        record_role_value = record.get("role", "")
+        if record_role_value in self._ROLE_KEYS:
+            role_value = record_role_value
+        else:
+            role_value = self._ROLE_BY_DISPLAY.get(
+                str(record_role_value).lower(), "privacy_controller"
+            )
+
         data = {
             "name": name,
             "description": record.get("description", ""),
             "ref_id": record.get("ref_id", ""),
             "folder": domain,
             "status": status_value,
+            "role": role_value,
             "information_channel": record.get("information_channel", ""),
             "usage_channel": record.get("usage_channel", ""),
             "dpia_required": record.get("dpia_required", False),
@@ -3397,6 +3412,16 @@ class ProcessingRecordConsumer(RecordConsumer):
                     field_path=Terminology.FieldPath.PROCESSING_NATURE,
                     name__in=nature_names,
                 ).values_list("id", flat=True)
+            )
+
+        # Resolve M2M: controllers (by entity name)
+        record_controllers = record.get("controllers")
+        if record_controllers:
+            entity_names = [n.strip() for n in str(record_controllers).split(",")]
+            data["controllers"] = list(
+                Entity.objects.filter(name__in=entity_names).values_list(
+                    "id", flat=True
+                )
             )
 
         # Resolve M2M: assigned_to (by user email → Actor)

@@ -12,6 +12,7 @@
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { buildCustomFieldFilters, listViewFields } from '$lib/utils/table';
 	import { NON_CREATABLE_URL_MODELS } from '$lib/utils/crud';
+	import { PROCESSOR_ROLES } from '$lib/utils/constants';
 	import { consumeCreateIntent } from '$lib/utils/create-intent';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { driverInstance, tableRefreshers } from '$lib/utils/stores';
@@ -270,6 +271,12 @@
 			// Only ask when the list spans both kinds and the choice is genuinely open.
 			if (campaignKinds.length === 1) return modalCreateForm({ kind: campaignKinds[0] });
 			return modalCampaignKind();
+		}
+		if (URLModel === 'processings') {
+			// Opened from the processor register: new entries start as processor ones.
+			const roles = new URLSearchParams(currentFilterSearch.replace(/^\?/, '')).getAll('role');
+			if (roles.length && roles.every((r) => PROCESSOR_ROLES.includes(r)))
+				return modalCreateForm({ role: 'privacy_data_processor' });
 		}
 		modalCreateForm();
 	}

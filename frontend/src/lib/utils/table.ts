@@ -2718,11 +2718,34 @@ export const listViewFields = {
 		}
 	},
 	processings: {
-		head: ['refId', 'name', 'description', 'status', 'processingNature', 'labels', 'folder'],
-		body: ['ref_id', 'name', 'description', 'status', 'nature', 'filtering_labels', 'folder'],
+		head: [
+			'refId',
+			'name',
+			'description',
+			'status',
+			'processingRole',
+			'processingNature',
+			'labels',
+			'folder'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'description',
+			'status',
+			'role',
+			'nature',
+			'filtering_labels',
+			'folder'
+		],
 		optionalFields: {
-			head: ['personalDataCategories', 'dataSubjectCategories', 'updatedAt'],
-			body: ['personal_data_categories', 'data_subject_categories', 'updated_at']
+			head: [
+				'processingControllers',
+				'personalDataCategories',
+				'dataSubjectCategories',
+				'updatedAt'
+			],
+			body: ['controllers', 'personal_data_categories', 'data_subject_categories', 'updated_at']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -2736,6 +2759,25 @@ export const listViewFields = {
 				}
 			},
 			status: PROCESSING_STATUS_FILTER,
+			role: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'processings/role',
+					optionsLabelField: 'label',
+					optionsValueField: 'value',
+					label: 'processingRole',
+					browserCache: 'force-cache',
+					multiple: true
+				}
+			},
+			controllers: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'entities',
+					label: 'processingControllers',
+					multiple: true
+				}
+			},
 			nature: PROCESSING_NATURE_FILTER,
 			personal_data__category: PERSONAL_DATA_CATEGORY_FILTER,
 			data_subjects__category: DATA_SUBJECT_CATEGORY_FILTER,

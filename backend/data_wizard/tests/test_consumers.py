@@ -961,6 +961,20 @@ class TestProcessingConsumer:
         )
         assert error is None
         assert record_data["name"] == "HR Payroll Processing"
+        assert record_data["role"] == "privacy_controller"
+
+    def test_role_and_controllers_from_export(self, base_context, domain_folder):
+        from tprm.models import Entity
+
+        client = Entity.objects.create(name="Client A", folder=domain_folder)
+        consumer = ProcessingRecordConsumer(base_context)
+        record_data, error = consumer.prepare_create(
+            {"name": "Hosting", "role": "Data Processor", "controllers": "Client A"},
+            None,
+        )
+        assert error is None
+        assert record_data["role"] == "privacy_data_processor"
+        assert record_data["controllers"] == [client.id]
 
     def test_find_existing_by_ref_id(self, base_context, domain_folder):
         from privacy.models import Processing

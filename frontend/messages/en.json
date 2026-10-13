@@ -7152,5 +7152,14 @@
 	"leastCritical": "Least critical",
 	"tierInHistoryCannotDelete": "This tier appears in the tier history. Hide it instead.",
 	"standard": "Standard",
-	"lowImpact": "Low impact"
+	"lowImpact": "Low impact",
+	"privacyController": "Controller",
+	"processingRole": "GDPR role",
+	"processingRoleHelpText": "Controller and joint controller processings form your Art. 30(1) register; processor and sub-processor ones form your Art. 30(2) register",
+	"processingControllers": "Controllers (clients)",
+	"processingControllersHelpText": "Joint controllers you share this processing with, or the clients on whose behalf you carry it out",
+	"controllers": "Controllers (clients)",
+	"processorRegister": "Processor register",
+	"processingCoControllers": "Co-controllers",
+	"processingSubProcessorClients": "Clients (controllers or processors)"
 }

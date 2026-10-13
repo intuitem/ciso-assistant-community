@@ -78,8 +78,24 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
         ("privacy_approved", "Approved"),
         ("privacy_deprecated", "Deprecated"),
     )
+    ROLE_CHOICES = (
+        ("privacy_controller", "Controller"),
+        ("privacy_joint_controller", "Joint Controller"),
+        ("privacy_data_processor", "Data Processor"),
+        ("privacy_sub_processor", "Sub-processor"),
+    )
 
     ref_id = models.CharField(max_length=100, blank=True)
+    # Art. 30(1) register for controller roles, Art. 30(2) for processor roles
+    role = models.CharField(
+        max_length=30, choices=ROLE_CHOICES, default="privacy_controller"
+    )
+    controllers = models.ManyToManyField(
+        Entity,
+        blank=True,
+        related_name="processings_as_processor",
+        help_text="Controllers on whose behalf this processing is carried out",
+    )
     nature = models.ManyToManyField(
         Terminology,
         blank=True,

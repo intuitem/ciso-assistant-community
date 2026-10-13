@@ -121,6 +121,14 @@ class ProcessingWriteSerializer(BaseModelSerializer):
         model = Processing
         fields = "__all__"
 
+    def validate(self, data):
+        data = super().validate(data)
+        role = data.get("role") or getattr(self.instance, "role", "privacy_controller")
+        # Only joint controllers and processors act alongside or for other controllers
+        if role == "privacy_controller":
+            data["controllers"] = []
+        return data
+
     def update(self, instance, validated_data):
         old_folder_id = instance.folder_id
         with transaction.atomic():
@@ -145,6 +153,7 @@ class ProcessingReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     filtering_labels = FieldsRelatedField(many=True)
     nature = FieldsRelatedField(many=True)
+    controllers = FieldsRelatedField(many=True)
     associated_controls = FieldsRelatedField(["id", "name"], many=True)
     assigned_to = FieldsRelatedField(many=True)
     purposes = FieldsRelatedField(["name", "id", "legal_basis"], many=True)

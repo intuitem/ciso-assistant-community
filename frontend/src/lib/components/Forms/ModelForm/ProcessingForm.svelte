@@ -4,7 +4,8 @@
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import Select from '../Select.svelte';
 	import Checkbox from '../Checkbox.svelte';
-	import type { SuperValidated } from 'sveltekit-superforms';
+	import { formFieldProxy, type SuperValidated } from 'sveltekit-superforms';
+	import { PROCESSOR_ROLES } from '$lib/utils/constants';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import * as m from '$paraglide/messages.js';
 
@@ -23,6 +24,20 @@
 		formDataCache = $bindable({}),
 		initialData = {}
 	}: Props = $props();
+
+	const { value: roleValue } = formFieldProxy(form as any, 'role');
+	// Preset once when created from the processor register (same as CampaignForm's kind);
+	// an effect here loops, since writing the form re-derives `initialData`.
+	if (initialData.role) roleValue.set(initialData.role);
+	const isProcessor = $derived(PROCESSOR_ROLES.includes($roleValue as string));
+	// Art. 30(1)(a) needs co-controllers, Art. 30(2)(a) the controllers served
+	const controllersLabel = $derived(
+		$roleValue === 'privacy_joint_controller'
+			? m.processingCoControllers()
+			: $roleValue === 'privacy_sub_processor'
+				? m.processingSubProcessorClients()
+				: m.processingControllers()
+	);
 </script>
 
 <AutocompleteSelect
@@ -33,6 +48,28 @@
 	bind:cachedValue={formDataCache['status']}
 	label={m.status()}
 />
+<AutocompleteSelect
+	{form}
+	field="role"
+	options={model.selectOptions['role']}
+	cacheLock={cacheLocks['role']}
+	bind:cachedValue={formDataCache['role']}
+	label={m.processingRole()}
+	helpText={m.processingRoleHelpText()}
+/>
+{#if isProcessor || $roleValue === 'privacy_joint_controller'}
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="entities"
+		optionsExtraFields={[['folder', 'str']]}
+		field="controllers"
+		cacheLock={cacheLocks['controllers']}
+		bind:cachedValue={formDataCache['controllers']}
+		label={controllersLabel}
+		helpText={m.processingControllersHelpText()}
+	/>
+{/if}
 <AutocompleteSelect
 	{form}
 	multiple
@@ -68,21 +105,23 @@
 	allowUserOptions="append"
 />
 
-<Checkbox
-	{form}
-	field="dpia_required"
-	label={m.dpiaRequired()}
-	cacheLock={cacheLocks['dpia_required']}
-	bind:cachedValue={formDataCache['dpia_required']}
-/>
-<TextField
-	{form}
-	field="dpia_reference"
-	label={m.dpiaReference()}
-	helpText={m.dpiaReferenceHelpText()}
-	cacheLock={cacheLocks['dpia_reference']}
-	bind:cachedValue={formDataCache['dpia_reference']}
-/>
+{#if !isProcessor}
+	<Checkbox
+		{form}
+		field="dpia_required"
+		label={m.dpiaRequired()}
+		cacheLock={cacheLocks['dpia_required']}
+		bind:cachedValue={formDataCache['dpia_required']}
+	/>
+	<TextField
+		{form}
+		field="dpia_reference"
+		label={m.dpiaReference()}
+		helpText={m.dpiaReferenceHelpText()}
+		cacheLock={cacheLocks['dpia_reference']}
+		bind:cachedValue={formDataCache['dpia_reference']}
+	/>
+{/if}
 <AutocompleteSelect
 	{form}
 	multiple

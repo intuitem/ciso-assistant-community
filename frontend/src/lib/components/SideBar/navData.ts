@@ -469,7 +469,13 @@ export const navData = {
 				{
 					name: 'processingsRegister',
 					fa_icon: 'fa-solid fa-clipboard-list',
-					href: '/processings',
+					href: '/processings?role=privacy_controller&role=privacy_joint_controller',
+					permissions: ['view_processing']
+				},
+				{
+					name: 'processorRegister',
+					fa_icon: 'fa-solid fa-handshake',
+					href: '/processings?role=privacy_data_processor&role=privacy_sub_processor',
 					permissions: ['view_processing']
 				},
 				{
