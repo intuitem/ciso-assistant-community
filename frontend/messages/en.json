@@ -3725,6 +3725,7 @@
 	"internalProcesses": "Internal processes",
 	"financialCapacity": "Financial capacity",
 	"companyCulture": "Company culture / communication",
+	"companyCultureCommunication": "Company culture / communication",
 	"weeksOfMonthErrorMessage": "You need to specify at least one week for the selected day(s)",
 	"associatedQuantitativeRiskHypotheses": "Associated hypotheses",
 	"associatedQuantitativeRiskScenarios": "Associated scenarios",
