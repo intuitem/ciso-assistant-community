@@ -162,18 +162,36 @@ class TestCreateEvidence:
         with (
             _Mocks() as m,
             patch.object(write_tools.config, "MAX_UPLOAD_MB", 2),
-            patch.object(Path, "read_bytes") as read,
+            patch.object(Path, "open") as read,
         ):
             out = run(write_tools.create_evidence(file_path=str(path)))
         assert out == "Error: file too large: 2.0 MB (max 2 MB)"
         read.assert_not_called()
         m.assert_no_request()
 
+    def test_file_grown_after_size_check_is_refused(self, tmp_path):
+        path = _file(tmp_path, "growing.log", b"x" * 10)
+        real_open = Path.open
+
+        def grow_then_open(self, *args, **kwargs):
+            with open(self, "wb") as grown:  # builtin open: Path.open is patched
+                grown.write(b"x" * 2_000_001)
+            return real_open(self, *args, **kwargs)
+
+        with (
+            _Mocks() as m,
+            patch.object(write_tools.config, "MAX_UPLOAD_MB", 2),
+            patch.object(Path, "open", grow_then_open),
+        ):
+            out = run(write_tools.create_evidence(file_path=str(path)))
+        assert out == "Error: file too large: over 2.0 MB (max 2 MB)"
+        m.assert_no_request()
+
     def test_refused_over_http(self, tmp_path):
         path = _file(tmp_path, "alert.png")
         with (
             _Mocks(is_http=True) as m,
-            patch.object(Path, "read_bytes") as read_bytes,
+            patch.object(Path, "open") as read_bytes,
         ):
             out = run(write_tools.create_evidence(file_path=str(path)))
         assert out == (
@@ -199,13 +217,45 @@ class TestCreateEvidence:
         assert out == 'Error uploading attachment: 400 - {"detail":"too large"}'
         m.delete.assert_called_once_with(f"/evidences/{UUID_A}/")
 
-    def test_upload_exception_deletes_evidence(self, tmp_path):
+    def _upload_raises(self, tmp_path, check, delete=None):
+        """Upload raises; `check` is the GET /evidences/<id>/ outcome."""
         path = _file(tmp_path, "alert.png")
-        with _Mocks() as m:
+        get = (
+            {"side_effect": check}
+            if isinstance(check, Exception)
+            else {"return_value": check}
+        )
+        with (
+            _Mocks() as m,
+            patch.object(write_tools, "make_get_request", **get) as g,
+        ):
             m.up.side_effect = TimeoutError("read timed out")
+            if delete is not None:
+                m.delete.side_effect = delete
             out = run(write_tools.create_evidence(file_path=str(path)))
+        g.assert_called_once_with(f"/evidences/{UUID_A}/")
+        return out, m
+
+    def test_upload_exception_but_file_stored_is_success(self, tmp_path):
+        stored = _response(200, {"id": UUID_A, "attachment": "/media/alert.png"})
+        out, m = self._upload_raises(tmp_path, stored)
+        assert out.startswith(f"Created evidence: Alert (ID: {UUID_A})")
+        m.delete.assert_not_called()
+
+    def test_upload_exception_without_file_deletes_evidence(self, tmp_path):
+        out, m = self._upload_raises(
+            tmp_path, _response(200, {"id": UUID_A, "attachment": None})
+        )
         assert out == "Error in create_evidence: read timed out"
         m.delete.assert_called_once_with(f"/evidences/{UUID_A}/")
+
+    def test_upload_exception_unverifiable_keeps_evidence(self, tmp_path):
+        out, m = self._upload_raises(tmp_path, ConnectionError("unreachable"))
+        assert out == (
+            "Error uploading attachment, outcome unknown: read timed out "
+            f"(evidence {UUID_A} kept: check it before retrying)"
+        )
+        m.delete.assert_not_called()
 
     def test_empty_file_is_refused(self, tmp_path):
         path = _file(tmp_path, "blank.png", b"")
@@ -226,11 +276,11 @@ class TestCreateEvidence:
         )
 
     def test_raising_rollback_keeps_the_upload_error(self, tmp_path):
-        path = _file(tmp_path, "alert.png")
-        with _Mocks() as m:
-            m.up.side_effect = TimeoutError("read timed out")
-            m.delete.side_effect = ConnectionError("connection reset")
-            out = run(write_tools.create_evidence(file_path=str(path)))
+        out, _ = self._upload_raises(
+            tmp_path,
+            _response(200, {"id": UUID_A, "attachment": None}),
+            delete=ConnectionError("connection reset"),
+        )
         assert out == (
             "Error in create_evidence: read timed out"
             f" (could not delete empty evidence {UUID_A}, remove it manually)"

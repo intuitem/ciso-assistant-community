@@ -1630,6 +1630,18 @@ def _delete_evidence_quietly(evidence_id) -> bool:
         return False
 
 
+def _attachment_stored(evidence_id):
+    """After an upload exception: True/False if the server says whether the
+    file was stored, None when that cannot be checked either."""
+    try:
+        res = make_get_request(f"/evidences/{evidence_id}/")
+        if res.status_code != 200:
+            return None
+        return bool(res.json().get("attachment"))
+    except Exception:
+        return None
+
+
 def _rollback_note(evidence_id) -> str:
     if _delete_evidence_quietly(evidence_id):
         return ""
@@ -1681,14 +1693,17 @@ async def create_evidence(
             )
         if not path.is_file():
             return f"Error: file not found: {file_path}"
+        limit = config.MAX_UPLOAD_MB * 1000**2
+        too_large = f"(max {config.MAX_UPLOAD_MB} MB)"
         size = path.stat().st_size
-        if size > config.MAX_UPLOAD_MB * 1000**2:
-            return (
-                f"Error: file too large: {_human_size(size)} "
-                f"(max {config.MAX_UPLOAD_MB} MB)"
-            )
+        if size > limit:
+            return f"Error: file too large: {_human_size(size)} {too_large}"
 
-        data = path.read_bytes()
+        # Bounded read: the file may have grown since the size check.
+        with path.open("rb") as f:
+            data = f.read(limit + 1)
+        if len(data) > limit:
+            return f"Error: file too large: over {_human_size(limit)} {too_large}"
         if not data:
             # the backend answers 200 to an empty body without storing anything
             return f"Error: file is empty: {file_path}"
@@ -1710,13 +1725,28 @@ async def create_evidence(
         evidence = res.json()
         evidence_id = evidence.get("id")
 
+        created = (
+            f"Created evidence: {evidence.get('name')} (ID: {evidence_id}) "
+            f"with attachment {filename} ({_human_size(len(data))})"
+        )
+
         # Do not leave an empty evidence behind a failed upload.
         try:
             upload = make_upload_request(
                 f"/evidences/{evidence_id}/upload/", filename, data
             )
         except Exception as e:
-            return f"Error in create_evidence: {str(e)}{_rollback_note(evidence_id)}"
+            # A network error does not say whether the server stored the file
+            # (e.g. a timeout after the body was sent): ask before deleting.
+            stored = _attachment_stored(evidence_id)
+            if stored:
+                return created
+            if stored is False:
+                return f"Error in create_evidence: {e}{_rollback_note(evidence_id)}"
+            return (
+                f"Error uploading attachment, outcome unknown: {e} "
+                f"(evidence {evidence_id} kept: check it before retrying)"
+            )
 
         if upload.status_code != 200:
             return (
@@ -1724,9 +1754,6 @@ async def create_evidence(
                 f"{_rollback_note(evidence_id)}"
             )
 
-        return (
-            f"Created evidence: {evidence.get('name')} (ID: {evidence_id}) "
-            f"with attachment {filename} ({_human_size(len(data))})"
-        )
+        return created
     except Exception as e:
         return f"Error in create_evidence: {str(e)}"
