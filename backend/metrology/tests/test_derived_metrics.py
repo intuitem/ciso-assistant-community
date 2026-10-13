@@ -1052,3 +1052,32 @@ class TestMalformedFormulaPayloads:
             response = view(request)
             assert response.status_code == 200, payload
             assert response.data["ok"] is False
+
+
+@pytest.mark.django_db
+class TestADefinitionOtherFormulasRead:
+    def test_keeps_its_result_type(self):
+        """Formulas reading it read numbers: a level result would skip every
+        one of their periods and drop their history. The compose drawer
+        refused this; the definition form and the API now do too."""
+        from metrology.tests.test_metric_formulas import formula
+        from metrology.tests.test_metric_formulas import (
+            make_definition as plain_definition,
+        )
+
+        base = plain_definition("Base")
+        formula("b * 2", ("b", base, "one"))
+        serializer = MetricDefinitionWriteSerializer(
+            base,
+            data={"category": MetricDefinition.Category.QUALITATIVE},
+            partial=True,
+        )
+        assert not serializer.is_valid()
+        assert "result type cannot change" in str(serializer.errors["category"])
+        unread = plain_definition("Unread")
+        serializer = MetricDefinitionWriteSerializer(
+            unread,
+            data={"category": MetricDefinition.Category.QUALITATIVE},
+            partial=True,
+        )
+        assert serializer.is_valid(), serializer.errors

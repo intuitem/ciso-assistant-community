@@ -107,6 +107,28 @@ class MetricDefinitionWriteSerializer(BaseModelSerializer):
             raise serializers.ValidationError(
                 {"expression": [message for _code, message in errors]}
             )
+        if (
+            self.instance is not None
+            and "category" in attrs
+            and attrs["category"] != self.instance.category
+            and self.instance.category == MetricDefinition.Category.QUANTITATIVE
+        ):
+            # Formulas reading this metric read numbers: a level result would
+            # skip every one of their periods and drop their history. The
+            # same refusal the compose drawer makes.
+            from metrology.series import dependents_of
+
+            if dependents_of(self.instance):
+                raise serializers.ValidationError(
+                    {
+                        "category": [
+                            _(
+                                "Other formulas read this metric as a number: its "
+                                "result type cannot change while they do"
+                            )
+                        ]
+                    }
+                )
         return attrs
 
     class Meta:
