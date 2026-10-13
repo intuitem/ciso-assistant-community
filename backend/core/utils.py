@@ -1911,8 +1911,9 @@ VISIBILITY_ACCESS = ("edit", "read", "hidden")
 def validate_field_visibility(value):
     """Reject `field_visibility` maps the visibility editor cannot produce.
 
-    Pairs may be partial (a framework can override a single role), so the
-    auditor/respondent rule only applies when both roles are given.
+    Pairs may be partial (a framework can override a single role). A missing
+    role resolves to "edit" at runtime, so hiding the auditor requires the
+    respondent to be explicitly hidden too.
     """
     from rest_framework import serializers
 
@@ -1932,7 +1933,7 @@ def validate_field_visibility(value):
                 )
         # The auditor sees at least what the respondent sees.
         auditor_hidden = pair.get("auditor") == "hidden"
-        if auditor_hidden and pair.get("respondent", "hidden") != "hidden":
+        if auditor_hidden and pair.get("respondent", "edit") != "hidden":
             raise serializers.ValidationError(
                 f"{field_name}: cannot be visible to the respondent while hidden from the auditor."
             )
