@@ -123,6 +123,7 @@ def sample_changed(sender, instance, **kwargs):
 def remember_instance_scope(sender, instance, **kwargs):
     instance._previous_scope = None
     instance._previous_choices = None
+    instance._previous_status = None
     if not instance._state.adding:
         row = (
             MetricInstance.objects.filter(pk=instance.pk)
@@ -131,19 +132,33 @@ def remember_instance_scope(sender, instance, **kwargs):
                 "folder_id",
                 "collection_frequency",
                 "input_choices",
+                "status",
             )
             .first()
         )
         if row is not None:
             instance._previous_scope = row[:3]
             instance._previous_choices = row[3]
+            instance._previous_status = row[4]
+
+
+def _deprecation_flipped(instance):
+    """A deprecated instance is left out when an input resolves
+    (series.input_candidates): deprecating or reactivating one changes what
+    every reader sums, whatever else the save touched."""
+    previous = getattr(instance, "_previous_status", None)
+    deprecated = MetricInstance.Status.DEPRECATED
+    return previous is not None and (previous == deprecated) != (
+        instance.status == deprecated
+    )
 
 
 @receiver(post_save, sender=MetricInstance)
 def instance_saved(sender, instance, created, update_fields=None, **kwargs):
     from .series import FULL
 
-    if update_fields is not None and set(update_fields) <= _BOOKKEEPING:
+    flipped = _deprecation_flipped(instance)
+    if update_fields is not None and set(update_fields) <= _BOOKKEEPING and not flipped:
         return
     scope = (
         instance.metric_definition_id,
@@ -152,7 +167,7 @@ def instance_saved(sender, instance, created, update_fields=None, **kwargs):
     )
     previous = getattr(instance, "_previous_scope", None)
     _own_series_changed(instance, created, previous, scope)
-    if not created and previous == scope:
+    if not created and previous == scope and not flipped:
         return
     if not _has_readers():
         return

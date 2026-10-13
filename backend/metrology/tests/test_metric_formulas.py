@@ -1243,3 +1243,124 @@ class TestShippedFormulasAreValidated:
         )
         assert "only quantitative" in reader.is_valid()
         assert level.is_valid() is None
+
+
+@pytest.mark.django_db
+class TestAPeriodTheExpressionFailsOn:
+    """One bad month (a division by zero, a text that is not a level) used to
+    raise for the whole series: nothing stored, the series frozen until the
+    formula changed. It is skipped like a missing input, and reported."""
+
+    def test_the_rest_of_the_series_still_computes(self, frozen):
+        domain = make_domain("Domain")
+        a_def, b_def = make_definition("A"), make_definition("B")
+        a, b = make_instance(domain, a_def), make_instance(domain, b_def)
+        for month, (x, y) in enumerate([(6, 2), (6, 0), (9, 3)]):
+            sample(a, x, at(2026, 3 + month, 10))
+            sample(b, y, at(2026, 3 + month, 10))
+        out = make_instance(
+            domain, formula("a / b", ("a", a_def, "one"), ("b", b_def, "one"))
+        )
+        evaluation = compute_sample(out)
+        assert stored(out) == {"2026-03-01": 3, "2026-05-01": 3}
+        assert evaluation.errors == ["2026-04-01: expression: division by zero"]
+        out.refresh_from_db()
+        assert out.last_computed_at is not None
+        assert out.last_computation_error == (
+            "2026-04-01: expression: division by zero"
+        )
+        # The next run, with April fixed, clears the report.
+        sample(b, 1, at(2026, 4, 20))
+        compute_sample(out, full=True)
+        out.refresh_from_db()
+        assert stored(out) == {"2026-03-01": 3, "2026-04-01": 6, "2026-05-01": 3}
+        assert out.last_computation_error == ""
+
+    def test_a_text_that_is_not_a_level_skips_its_period(self, frozen):
+        domain = make_domain("Domain")
+        a_def = make_definition("A")
+        a = make_instance(domain, a_def)
+        sample(a, 1, at(2026, 4, 10))
+        sample(a, 2, at(2026, 5, 10))
+        out = make_instance(
+            domain,
+            formula(
+                'a == 1 ? "low" : "nope"',
+                ("a", a_def, "one"),
+                category=MetricDefinition.Category.QUALITATIVE,
+                choices_definition=[{"ref_id": "low", "name": "Low"}],
+            ),
+        )
+        evaluation = compute_sample(out)
+        assert stored(out) == {"2026-04-01": 1}
+        assert evaluation.errors == ["2026-05-01: 'nope' is not a level of this metric"]
+
+    def test_several_bad_periods_are_counted(self, frozen):
+        domain = make_domain("Domain")
+        a_def = make_definition("A")
+        a = make_instance(domain, a_def)
+        for month in range(3):
+            sample(a, 0, at(2026, 3 + month, 10))
+        out = make_instance(domain, formula("1 / a", ("a", a_def, "one")))
+        compute_sample(out)
+        out.refresh_from_db()
+        assert stored(out) == {}
+        assert out.last_computation_error == (
+            "2026-03-01: expression: division by zero (and 2 more periods)"
+        )
+
+
+@pytest.mark.django_db
+class TestDeprecatingAnInput:
+    """A deprecated instance is left out when an input resolves, so flipping
+    the status changes what every reader sums: the readers recompute whole,
+    even when the save touches the status alone."""
+
+    def setup(self, frozen):
+        domain = make_domain("Domain")
+        base = make_definition("Base")
+        one = make_instance(domain, base, name="one")
+        two = make_instance(domain, base, name="two")
+        sample(one, 1, at(2026, 5, 10))
+        sample(two, 10, at(2026, 5, 10))
+        out = make_instance(domain, formula("x", ("x", base, "sum")))
+        compute_sample(out)
+        out.refresh_from_db()
+        assert stored(out) == {"2026-05-01": 11}
+        assert out.recompute_from is None
+        return two, out
+
+    def test_deprecating_marks_the_readers_whole(
+        self, frozen, django_capture_on_commit_callbacks
+    ):
+        two, out = self.setup(frozen)
+        with django_capture_on_commit_callbacks(execute=True):
+            two.status = MetricInstance.Status.DEPRECATED
+            two.save()
+        out.refresh_from_db()
+        assert out.recompute_from == FULL
+        compute_sample(out, only_if_due=True)
+        assert stored(out) == {"2026-05-01": 1}
+
+    def test_reactivating_marks_them_too_even_as_a_status_only_save(
+        self, frozen, django_capture_on_commit_callbacks
+    ):
+        two, out = self.setup(frozen)
+        two.status = MetricInstance.Status.DEPRECATED
+        two.save()
+        MetricInstance.objects.filter(id=out.id).update(recompute_from=None)
+        with django_capture_on_commit_callbacks(execute=True):
+            two.status = MetricInstance.Status.ACTIVE
+            two.save(update_fields=["status", "updated_at"])
+        out.refresh_from_db()
+        assert out.recompute_from == FULL
+
+    def test_the_staleness_sweep_still_marks_nothing(
+        self, frozen, django_capture_on_commit_callbacks
+    ):
+        two, out = self.setup(frozen)
+        with django_capture_on_commit_callbacks(execute=True):
+            two.status = MetricInstance.Status.STALE
+            two.save(update_fields=["status", "updated_at"])
+        out.refresh_from_db()
+        assert out.recompute_from is None
