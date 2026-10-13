@@ -7283,5 +7283,6 @@
 	"inputsToPickAgain": "Pick again the instances of: {keys}",
 	"editComputedMetricHelpText": "Change what it reads, its formula or where it lives. The result shows before you save.",
 	"editOnDefinition": "Edit on its definition",
+	"pickedSummary": "Picked ({count}): {names}",
 	"useInFormula": "Use in a formula"
 }

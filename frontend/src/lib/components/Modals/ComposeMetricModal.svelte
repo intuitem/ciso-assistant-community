@@ -220,7 +220,9 @@
 	let resultsOpen = $state(false);
 	let highlighted = $state(0);
 	let searchSeq = 0;
-	const offered = $derived(results.filter((r) => !picked.some((p) => p.id === r.id)));
+	// Picked instances stay in the results, checked: the list shows what is
+	// picked while it covers the picked rows below it.
+	const pickedIds = $derived(new Set(picked.map((p) => p.id)));
 
 	// What the results answer: Enter must never add a match for an older query.
 	let resultsQuery: string | null = null;
@@ -264,6 +266,13 @@
 		picked = picked.filter((_, i) => i !== index);
 	}
 
+	// A result picks, or unpicks when already picked.
+	function toggle(candidate: Candidate) {
+		const index = picked.findIndex((p) => p.id === candidate.id);
+		if (index === -1) add(candidate);
+		else remove(index);
+	}
+
 	// The order is the inputs' order in the definition, and the quick
 	// formulas read it: the first pick is the ratio's numerator.
 	let dragFrom = $state<number | null>(null);
@@ -288,20 +297,22 @@
 		if (event.key === 'ArrowDown') {
 			event.preventDefault();
 			resultsOpen = true;
-			highlighted = Math.min(highlighted + 1, offered.length - 1);
+			highlighted = Math.min(highlighted + 1, results.length - 1);
 		} else if (event.key === 'ArrowUp') {
 			event.preventDefault();
 			highlighted = Math.max(highlighted - 1, 0);
 		} else if (event.key === 'Enter') {
 			event.preventDefault();
 			if (resultsQuery === query.trim()) {
-				if (offered[highlighted]) add(offered[highlighted]);
+				if (results[highlighted]) toggle(results[highlighted]);
 				return;
 			}
-			// Typed faster than the search answered: answer it now, take the best match.
+			// Typed faster than the search answered: answer it now and add the
+			// best match not picked yet (never unpick on a blind Enter).
 			resultsOpen = true;
 			search().then(() => {
-				if (resultsQuery === query.trim() && offered[0]) add(offered[0]);
+				const best = results.find((r) => !pickedIds.has(r.id));
+				if (resultsQuery === query.trim() && best) add(best);
 			});
 		} else if (event.key === 'Escape' && resultsOpen) {
 			// A search field clears itself on Escape, which reads as typing and
@@ -670,7 +681,7 @@
 							placeholder={m.searchMetricInstances()}
 							autocomplete="off"
 							role="combobox"
-							aria-expanded={resultsOpen && offered.length > 0}
+							aria-expanded={resultsOpen && results.length > 0}
 							aria-controls="compose-results"
 							onfocus={() => {
 								resultsOpen = true;
@@ -686,21 +697,47 @@
 							<ul
 								id="compose-results"
 								role="listbox"
+								aria-multiselectable="true"
 								class="absolute left-0 right-0 top-full mt-1 z-50 max-h-72 overflow-auto card bg-surface-50-950 border border-surface-200-800 shadow-lg py-1"
 							>
-								{#each offered as candidate, index (candidate.id)}
-									<li role="option" aria-selected={index === highlighted}>
+								{#if picked.length}
+									<!-- The picks this list covers, summed up where the eye is. -->
+									<li
+										class="sticky top-0 z-10 bg-surface-100-900 border-b border-surface-200-800 px-3 py-1.5 text-xs text-surface-700-300 truncate"
+										role="presentation"
+										title={picked.map((p) => p.name).join(', ')}
+										data-testid="compose-picked-summary"
+									>
+										<i class="fa-solid fa-list-check text-primary-500 mr-1" aria-hidden="true"></i>
+										{m.pickedSummary({
+											count: picked.length,
+											names: picked.map((p) => p.name).join(', ')
+										})}
+									</li>
+								{/if}
+								{#each results as candidate, index (candidate.id)}
+									{@const isPicked = pickedIds.has(candidate.id)}
+									<li role="option" aria-selected={isPicked}>
 										<button
 											type="button"
 											class="w-full flex items-center gap-3 px-3 py-2 text-left cursor-pointer {index ===
 											highlighted
 												? 'bg-primary-100-900'
-												: 'hover:bg-surface-100-900'}"
+												: isPicked
+													? 'bg-primary-50-950 hover:bg-surface-100-900'
+													: 'hover:bg-surface-100-900'}"
 											onmousedown={(e) => e.preventDefault()}
 											onmouseenter={() => (highlighted = index)}
-											onclick={() => add(candidate)}
+											onclick={() => toggle(candidate)}
+											title={isPicked ? m.remove() : undefined}
 											data-testid="compose-candidate"
 										>
+											<i
+												class="{isPicked
+													? 'fa-solid fa-square-check text-primary-500'
+													: 'fa-regular fa-square text-surface-400-600'} shrink-0"
+												aria-hidden="true"
+											></i>
 											<span class="flex flex-col min-w-0">
 												<span class="text-sm font-medium truncate">{candidate.name}</span>
 												<span class="text-xs text-surface-600-400 truncate">
