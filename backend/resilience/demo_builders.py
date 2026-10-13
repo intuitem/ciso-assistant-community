@@ -1,12 +1,12 @@
 """Resilience demo: business impact analyses and DORA incident reporting.
 
 The BIAs cover the online store and checkout, the Brno assembly line and the
-device cloud (connectivity and OTA), each in its sub-domain. They rate the
+device cloud (connectivity and OTA), each on its perimeter. They rate the
 assets from ``core`` on the 5x5 ISO 27005 matrix, with escalation thresholds
 laid out on a shared timeline (1h .. 1 week) so the impact table renders as a
 staircase. DORA reports belong to the payments subsidiary and need a
-``core.Incident``; ``build_dora`` creates four of them in the "Online Store &
-Payments" sub-domain, under ref_ids and names no other builder uses.
+``core.Incident``; ``build_dora`` creates four of them under ref_ids and names
+no other builder uses.
 """
 
 from datetime import UTC, datetime, time
@@ -23,20 +23,18 @@ from resilience.models import (
 )
 
 MATRIX_LIBRARY = "urn:intuitem:risk:library:risk-matrix-5x5-iso27005"
-PAYMENTS = "Online Store & Payments"
 
 HOUR = 3600
 DAY = 24 * HOUR
 
-# key (used below only), name, status, perimeter ref_id, sub-domain,
-# due offset, description.
+# key (used below only), name, status, perimeter ref_id, due offset,
+# description.
 BIAS = [
     (
         "BIA.2026.01",
         "2026 BIA — online store and checkout",
         "in_progress",
         "PER.002",
-        PAYMENTS,
         45,
         (
             "Annual impact analysis of the revenue chain, from browsing and card "
@@ -49,7 +47,6 @@ BIAS = [
         "2026 BIA — Brno assembly line",
         "in_review",
         "PER.003",
-        "Manufacturing",
         20,
         (
             "Impact of an OT outage on the two assembly lines (Kelvin and "
@@ -63,7 +60,6 @@ BIAS = [
         "2025 BIA — device cloud connectivity and OTA",
         "done",
         "PER.001",
-        "Connected Products",
         -75,
         (
             "What happens to installed devices when the device cloud is down: "
@@ -77,7 +73,6 @@ BIAS = [
         "2026 BIA — Keystone hub v3 launch readiness",
         "planned",
         "PER.004",
-        "Connected Products",
         120,
         "Scoping only: workshops with the Keystone programme leads are booked for Q3.",
     ),
@@ -662,9 +657,6 @@ class ResilienceBuilder(DemoBuilder):
         self.build_bias(ctx)
         self.build_dora(ctx)
 
-    def subdomain(self, ctx, name):
-        return next((f for f in ctx.refs["subdomains"] if f.name == name), ctx.domain)
-
     def build_bias(self, ctx):
         matrix = RiskMatrix.objects.filter(urn__icontains="5x5-iso27005").first()
         if matrix is None:
@@ -680,10 +672,10 @@ class ResilienceBuilder(DemoBuilder):
             )
         }
         bias = {}
-        for key, name, status, perimeter, folder, offset, description in BIAS:
+        for key, name, status, perimeter, offset, description in BIAS:
             bia, _ = BusinessImpactAnalysis.objects.get_or_create(
                 name=name,
-                folder=self.subdomain(ctx, folder),
+                folder=ctx.domain,
                 defaults={
                     "risk_matrix": matrix,
                     "perimeter": perimeters.get(perimeter),
@@ -738,7 +730,7 @@ class ResilienceBuilder(DemoBuilder):
 
     def build_dora(self, ctx):
         assets = {asset.name: asset for asset in ctx.refs["assets"]}
-        folder = self.subdomain(ctx, PAYMENTS)
+        folder = ctx.domain
         incidents = {}
         for (
             name,

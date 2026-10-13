@@ -14,7 +14,6 @@ from typing import ClassVar
 
 from core.demo import COMPANY, PAY_ENTITY, DemoBuilder, register
 from core.models import Terminology
-from iam.models import Folder
 from metrology.models import (
     CustomMetricSample,
     Dashboard,
@@ -24,11 +23,6 @@ from metrology.models import (
 )
 
 METRICS_LIBRARY = "urn:intuitem:risk:library:core-cybersecurity-metrics"
-
-CONNECTED = "Connected Products"
-PLANT = "Manufacturing"
-STORE = "Online Store & Payments"
-CORPORATE = "Corporate IT"
 
 MATURITY_LEVELS = [
     ("Initial", "Ad hoc, undocumented practices."),
@@ -121,7 +115,7 @@ DEFINITIONS = [
     ),
 ]
 
-# ref_id, name, library definition ref_id, sub-domain, status,
+# ref_id, name, library definition ref_id, status,
 # frequency, (start, end) or None for no samples, months of samples, months
 # since the last sample, decimals, observation for the latest sample.
 INSTANCES = [
@@ -129,7 +123,6 @@ INSTANCES = [
         "KPI.01",
         "Phishing simulation click rate — all staff",
         "AWR-02",
-        None,
         "active",
         "monthly",
         (14.0, 4.5),
@@ -142,7 +135,6 @@ INSTANCES = [
         "KPI.02",
         "Security awareness training completion",
         "AWR-01",
-        None,
         "active",
         "monthly",
         (62.0, 93.0),
@@ -155,7 +147,6 @@ INSTANCES = [
         "KPI.03",
         "OTA rollout success rate — Kelvin and Keystone fleet",
         "VULN-03",
-        CONNECTED,
         "active",
         "monthly",
         (95.8, 99.3),
@@ -168,7 +159,6 @@ INSTANCES = [
         "KPI.04",
         "Devices on supported firmware — connected fleet",
         "VULN-03",
-        CONNECTED,
         "active",
         "monthly",
         (76.0, 91.0),
@@ -181,7 +171,6 @@ INSTANCES = [
         "KPI.05",
         "Median days to fix critical firmware vulnerabilities",
         "VULN-02",
-        CONNECTED,
         "active",
         "monthly",
         (64.0, 21.0),
@@ -194,7 +183,6 @@ INSTANCES = [
         "KPI.06",
         "PCI DSS external scan pass rate",
         "GOV-01",
-        STORE,
         "active",
         "monthly",
         (78.0, 97.0),
@@ -207,7 +195,6 @@ INSTANCES = [
         "KPI.07",
         "Mean time to respond to incidents",
         "INC-03",
-        None,
         "active",
         "monthly",
         (11.0, 5.0),
@@ -220,7 +207,6 @@ INSTANCES = [
         "KPI.08",
         "Brno plant unplanned downtime from cyber causes",
         "RES-06",
-        PLANT,
         "active",
         "monthly",
         (14.0, 1.5),
@@ -233,7 +219,6 @@ INSTANCES = [
         "KPI.09",
         "Security monitoring maturity — Brno plant OT",
         "MON-01",
-        PLANT,
         "active",
         "quarterly",
         (1.0, 3.0),
@@ -246,7 +231,6 @@ INSTANCES = [
         "KPI.10",
         "Open vulnerability reports from the disclosure programme",
         "VULN-01",
-        CONNECTED,
         "active",
         "monthly",
         (23.0, 8.0),
@@ -259,7 +243,6 @@ INSTANCES = [
         "KPI.11",
         "Backup test success rate — Brno warehouse systems",
         "RES-03",
-        PLANT,
         "stale",
         "monthly",
         (80.0, 92.0),
@@ -272,7 +255,6 @@ INSTANCES = [
         "KPI.12",
         "Supplier assessment coverage — critical vendors",
         "TPR-01",
-        None,
         "draft",
         "quarterly",
         None,
@@ -285,7 +267,6 @@ INSTANCES = [
         "KPI.13",
         "Open critical and high vulnerabilities — legacy MES",
         "VULN-01",
-        PLANT,
         "deprecated",
         "monthly",
         (42.0, 35.0),
@@ -298,7 +279,6 @@ INSTANCES = [
         "KPI.14",
         "MFA adoption — workforce accounts",
         "IAM-01",
-        CORPORATE,
         "active",
         "monthly",
         (71.0, 97.5),
@@ -311,7 +291,6 @@ INSTANCES = [
         "KPI.15",
         "Open critical and high vulnerabilities — cardholder data environment",
         "VULN-01",
-        STORE,
         "active",
         "monthly",
         (17.0, 3.0),
@@ -324,7 +303,6 @@ INSTANCES = [
         "KPI.16",
         "Immutable backup coverage — device cloud",
         "RES-02",
-        CONNECTED,
         "active",
         "monthly",
         (58.0, 91.0),
@@ -337,7 +315,6 @@ INSTANCES = [
         "KPI.17",
         "Critical vulnerability remediation time — corporate IT",
         "VULN-02",
-        CORPORATE,
         "active",
         "monthly",
         (24.0, 9.0),
@@ -348,13 +325,12 @@ INSTANCES = [
     ),
 ]
 
-# Dashboard: ref_id, name, sub-domain, description, widgets.
+# Dashboard: ref_id, name, description, widgets.
 # Widget: (instance ref_id or None for text, chart type, x, y, w, h, title, text).
 DASHBOARDS = [
     (
         "DB.01",
         "Monthly security KPIs",
-        None,
         (
             "Board pack: the headline indicators reviewed at the monthly security "
             "steering committee chaired by the CISO."
@@ -386,7 +362,6 @@ DASHBOARDS = [
     (
         "DB.02",
         "Brno plant resilience",
-        PLANT,
         "Cyber downtime, restore readiness and OT monitoring for the plant management.",
         [
             ("KPI.09", "kpi_card", 0, 0, 4, 2, None, None),
@@ -398,7 +373,6 @@ DASHBOARDS = [
     (
         "DB.03",
         "Product security (CRA)",
-        CONNECTED,
         (
             "PSIRT and firmware indicators reviewed monthly by the Head of Product "
             "Security, the evidence base for the CRA vulnerability handling duties."
@@ -428,7 +402,6 @@ DASHBOARDS = [
     (
         "DB.04",
         f"{PAY_ENTITY} security posture",
-        STORE,
         (
             "PCI DSS and DORA indicators reported quarterly to the Payments Risk "
             "Officer and the subsidiary board."
@@ -475,11 +448,6 @@ class MetrologyBuilder(DemoBuilder):
                 ("dashboard__ref_id", "position_y", "position_x"),
             ),
         ]
-
-    def folder(self, ctx, subdomain):
-        if subdomain is None:
-            return ctx.domain
-        return Folder.objects.get(name=subdomain, parent_folder=ctx.domain)
 
     def build(self, ctx):
         definitions = self.build_definitions(ctx)
@@ -534,7 +502,6 @@ class MetrologyBuilder(DemoBuilder):
             ref_id,
             name,
             definition_ref,
-            subdomain,
             status,
             frequency,
             trend,
@@ -550,7 +517,7 @@ class MetrologyBuilder(DemoBuilder):
             # save() copies the definition's default target, as in the UI.
             instance, created = MetricInstance.objects.get_or_create(
                 ref_id=ref_id,
-                folder=self.folder(ctx, subdomain),
+                folder=ctx.domain,
                 defaults={
                     "name": name,
                     "metric_definition": definition,
@@ -595,10 +562,10 @@ class MetrologyBuilder(DemoBuilder):
             )
 
     def build_dashboards(self, ctx, instances):
-        for ref_id, name, subdomain, description, widgets in DASHBOARDS:
+        for ref_id, name, description, widgets in DASHBOARDS:
             dashboard, created = Dashboard.objects.get_or_create(
                 ref_id=ref_id,
-                folder=self.folder(ctx, subdomain),
+                folder=ctx.domain,
                 defaults={"name": name, "description": description},
             )
             if not created:

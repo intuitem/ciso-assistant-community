@@ -14,20 +14,15 @@ from crq.models import (
     QuantitativeRiskScenario,
     QuantitativeRiskStudy,
 )
-from iam.models import Folder
 
 LOGNORMAL = "LOGNORMAL-CI90"
 
-CONNECTED = "Connected Products"
-PLANT = "Manufacturing"
-
-# ref_id, name, sub-domain (None = root demo domain), status, eta, due date,
+# ref_id, name, status, eta, due date,
 # loss threshold, risk tolerance (probability, acceptable loss) x2, description.
 STUDIES = [
     (
         "CRQ.2026.01",
         "FY2026 cyber loss exposure",
-        None,
         "in_progress",
         30,
         60,
@@ -42,7 +37,6 @@ STUDIES = [
     (
         "CRQ.2026.02",
         "Brno plant OT disruption study",
-        PLANT,
         "planned",
         90,
         120,
@@ -58,7 +52,6 @@ STUDIES = [
     (
         "CRQ.2026.03",
         "Connected products CRA exposure",
-        CONNECTED,
         "in_progress",
         45,
         75,
@@ -410,7 +403,6 @@ class CrqBuilder(DemoBuilder):
         for (
             ref_id,
             name,
-            subdomain,
             status,
             eta,
             due,
@@ -418,14 +410,9 @@ class CrqBuilder(DemoBuilder):
             points,
             description,
         ) in STUDIES:
-            folder = (
-                Folder.objects.get(name=subdomain, parent_folder=ctx.domain)
-                if subdomain
-                else ctx.domain
-            )
             study, created = QuantitativeRiskStudy.objects.get_or_create(
                 name=name,
-                folder=folder,
+                folder=ctx.domain,
                 defaults={
                     "ref_id": ref_id,
                     "description": description,

@@ -40,16 +40,13 @@ from core.models import Asset, Framework, RequirementNode
 
 K8S_LIBRARY = "urn:intuitem:risk:library:cis-benchmark-kubernetes"
 
-CORPORATE = "Corporate IT"
-CONNECTED = "Connected Products"
-
-# Library file stem, sub-domain (None = demo domain), lifecycle, publish offset.
+# Library file stem, lifecycle, publish offset.
 # lifecycle: "draft" (never published), "published", "republished" (v1
 # archived, v2 published) or "paused" (published, then switched off).
 WORKFLOWS = [
-    ("workflow-compliance-audit-progress-digest", None, "published", -60),
-    ("workflow-risk-exception-expiry", CORPORATE, "paused", -120),
-    ("workflow-compliance-audit-closed", None, "draft", None),
+    ("workflow-compliance-audit-progress-digest", "published", -60),
+    ("workflow-risk-exception-expiry", "paused", -120),
+    ("workflow-compliance-audit-closed", "draft", None),
 ]
 
 DIGEST = "workflow-compliance-audit-progress-digest"
@@ -68,7 +65,7 @@ def edges(*pairs):
     ]
 
 
-# Authored workflows, in the shipped document format: (document, sub-domain,
+# Authored workflows, in the shipped document format: (document,
 # lifecycle, publish offset).
 PSIRT = "psirt@example.com"
 CRA_TRIAGE = {
@@ -244,8 +241,8 @@ SUPPLIER_RENEWAL = {
     },
 }
 AUTHORED = [
-    (CRA_TRIAGE, CONNECTED, "republished", -150),
-    (SUPPLIER_RENEWAL, None, "published", -70),
+    (CRA_TRIAGE, "republished", -150),
+    (SUPPLIER_RENEWAL, "published", -70),
 ]
 
 # Past PSIRT intake runs: day offset, vulnerability reported.
@@ -343,16 +340,11 @@ class AutomationBuilder(DemoBuilder):
         ]
 
     def build(self, ctx):
-        subdomains = {folder.name: folder for folder in ctx.refs["subdomains"]}
-
-        def folder_for(name):
-            return subdomains.get(name, ctx.domain) if name else ctx.domain
-
-        for stem, subdomain, lifecycle, offset in WORKFLOWS:
+        for stem, lifecycle, offset in WORKFLOWS:
             document, entry = load_document(stem)
             workflow = self.build_workflow(
                 ctx,
-                folder_for(subdomain),
+                ctx.domain,
                 entry,
                 document.get("version"),
                 lifecycle,
@@ -360,9 +352,9 @@ class AutomationBuilder(DemoBuilder):
             )
             if workflow is not None and stem == DIGEST:
                 self.build_runs(ctx, workflow)
-        for entry, subdomain, lifecycle, offset in AUTHORED:
+        for entry, lifecycle, offset in AUTHORED:
             workflow = self.build_workflow(
-                ctx, folder_for(subdomain), entry, 1, lifecycle, offset, strict=True
+                ctx, ctx.domain, entry, 1, lifecycle, offset, strict=True
             )
             if workflow is not None and entry is CRA_TRIAGE:
                 self.build_triage_runs(ctx, workflow)

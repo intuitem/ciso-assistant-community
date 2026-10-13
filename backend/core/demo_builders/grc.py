@@ -3,7 +3,7 @@
 Content is a fixed vocabulary; the only randomness comes from ``ctx.rng``.
 Builders that need objects from another builder read them from ``ctx.refs``:
 
-- ``core``: ``subdomains``, ``assets``, ``controls``, ``perimeters``
+- ``core``: ``assets``, ``controls``, ``perimeters``
 - ``compliance``: ``framework``, ``audits``
 - ``risk``: ``risk_assessment``, ``threats``, ``risk_scenarios``
 """
@@ -34,14 +34,6 @@ IEC_62443_LIBRARY = "urn:intuitem:risk:library:iec-62443-3-3-2013"
 CRA_LIBRARY = "urn:intuitem:risk:library:cra-resolution-annexes"
 NIS2_LIBRARY = "urn:intuitem:risk:library:nis2-directive"
 NIST_CSF_LIBRARY = "urn:intuitem:risk:library:nist-csf-2.0"
-
-# Positional: other builders read ctx.refs["subdomains"][i] in this order.
-SUBDOMAINS = [
-    "Corporate IT",
-    "Manufacturing",
-    "Connected Products",
-    "Online Store & Payments",
-]
 
 PERIMETERS = [
     ("PER.001", "Device cloud platform", "in_prod"),
@@ -348,7 +340,7 @@ CONTROL_COSTS = {
     "AC.018": (40000, 35, 0, 5),
 }
 
-# ref_id, name, framework URN, perimeter ref_id, sub-domain, status, due offset,
+# ref_id, name, framework URN, perimeter ref_id, status, due offset,
 # share of requirements given a result (the lead ISO audit is filled in fully).
 AUDITS = [
     (
@@ -356,7 +348,6 @@ AUDITS = [
         "ISO 27001:2022 — annual certification audit",
         ISO27001_LIBRARY,
         "PER.001",
-        None,
         "in_progress",
         45,
         1.0,
@@ -366,7 +357,6 @@ AUDITS = [
         "ISO 27001:2022 — Brno plant readiness review",
         ISO27001_LIBRARY,
         "PER.003",
-        None,
         "done",
         -30,
         1.0,
@@ -376,7 +366,6 @@ AUDITS = [
         f"PCI DSS 4.0.1 — {PAY_ENTITY} self-assessment",
         PCI_DSS_LIBRARY,
         "PER.002",
-        "Online Store & Payments",
         "in_progress",
         75,
         0.6,
@@ -386,7 +375,6 @@ AUDITS = [
         "IEC 62443-3-3 — assembly line zones",
         IEC_62443_LIBRARY,
         "PER.003",
-        "Manufacturing",
         "in_progress",
         100,
         0.4,
@@ -396,7 +384,6 @@ AUDITS = [
         "CRA essential requirements — Keystone hub v3",
         CRA_LIBRARY,
         "PER.004",
-        "Connected Products",
         "in_progress",
         160,
         0.3,
@@ -406,7 +393,6 @@ AUDITS = [
         "NIS2 — important entity gap analysis",
         NIS2_LIBRARY,
         None,
-        None,
         "done",
         -15,
         1.0,
@@ -415,7 +401,6 @@ AUDITS = [
         "AUD.2026.07",
         "NIST CSF 2.0 — minimum security baseline",
         NIST_CSF_LIBRARY,
-        None,
         None,
         "in_progress",
         90,
@@ -650,7 +635,7 @@ RESULT_CYCLE = [
 
 @register
 class CoreBuilder(DemoBuilder):
-    """Sub-domains, perimeters, assets and applied controls."""
+    """Perimeters, assets and applied controls."""
 
     name = "core"
     libraries = (ISO27001_LIBRARY,)
@@ -667,12 +652,6 @@ class CoreBuilder(DemoBuilder):
         self.build_org(ctx)
         ctx.refs["assets"] = self.build_assets(ctx)
         ctx.refs["controls"] = self.build_controls(ctx, ctx.refs["assets"])
-        # By name, never "all children": other builders add folders under the
-        # domain (questionnaire enclaves), which would shift positional picks.
-        ctx.refs["subdomains"] = [
-            Folder.objects.get(name=name, parent_folder=ctx.domain)
-            for name in SUBDOMAINS
-        ]
         ctx.refs["perimeters"] = list(
             Perimeter.objects.filter(folder=ctx.domain).order_by("ref_id")
         )
@@ -685,12 +664,6 @@ class CoreBuilder(DemoBuilder):
         ]
 
     def build_org(self, ctx):
-        for name in SUBDOMAINS:
-            Folder.objects.get_or_create(
-                name=name,
-                parent_folder=ctx.domain,
-                defaults={"content_type": Folder.ContentType.DOMAIN},
-            )
         for ref_id, name, lc_status in PERIMETERS:
             Perimeter.objects.get_or_create(
                 name=name,
@@ -818,14 +791,12 @@ class ComplianceBuilder(DemoBuilder):
 
     def build(self, ctx):
         perimeters = {p.ref_id: p for p in ctx.refs["perimeters"]}
-        subdomains = {f.name: f for f in ctx.refs["subdomains"]}
         audits = []
         for (
             ref_id,
             name,
             library,
             perimeter,
-            subdomain,
             status,
             offset,
             share,
@@ -836,7 +807,7 @@ class ComplianceBuilder(DemoBuilder):
                 continue
             audit, created = ComplianceAssessment.objects.get_or_create(
                 name=name,
-                folder=subdomains[subdomain] if subdomain else ctx.domain,
+                folder=ctx.domain,
                 defaults={
                     "framework": framework,
                     "perimeter": perimeters.get(perimeter),
@@ -941,12 +912,9 @@ class RiskBuilder(DemoBuilder):
             threats[ref_id] = threat
         self.add_scenarios(ctx, assessment, SCENARIOS, threats)
 
-        payments = next(
-            f for f in ctx.refs["subdomains"] if f.name == "Online Store & Payments"
-        )
         pay_assessment, created = RiskAssessment.objects.get_or_create(
             name=f"{PAY_ENTITY} ICT risk assessment",
-            folder=payments,
+            folder=ctx.domain,
             defaults={
                 "risk_matrix": matrix,
                 "perimeter": next(

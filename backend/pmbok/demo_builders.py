@@ -27,19 +27,12 @@ from pmbok.models import (
 
 CURRENCY = "EUR"
 
-CORPORATE_IT = "Corporate IT"
-MANUFACTURING = "Manufacturing"
-PRODUCTS = "Connected Products"
-STORE = "Online Store & Payments"
-
-# ref_id, name, kind, parent ref_id, folder name (None = root demo domain),
-# status, health, priority, start, end, progress, budget, actual cost.
+# ref_id, name, kind, parent ref_id, status, health, priority, start, end, progress, budget, actual cost.
 PROJECTS = [
     (
         "PF.2026",
         f"{COMPANY} security portfolio 2026",
         "portfolio",
-        None,
         None,
         "in_progress",
         "amber",
@@ -55,7 +48,6 @@ PROJECTS = [
         "Certification and assurance programme",
         "program",
         "PF.2026",
-        None,
         "in_progress",
         "amber",
         1,
@@ -70,7 +62,6 @@ PROJECTS = [
         "ISO 27001 recertification",
         "project",
         "PRG.01",
-        CORPORATE_IT,
         "in_progress",
         "green",
         1,
@@ -85,7 +76,6 @@ PROJECTS = [
         f"PCI DSS 4.0.1 compliance — {PAY_ENTITY}",
         "project",
         "PRG.01",
-        STORE,
         "in_progress",
         "red",
         1,
@@ -100,7 +90,6 @@ PROJECTS = [
         "Cyber Resilience Act readiness programme",
         "program",
         "PF.2026",
-        PRODUCTS,
         "in_progress",
         "amber",
         1,
@@ -115,7 +104,6 @@ PROJECTS = [
         "Keystone hub v3 secure-by-design",
         "project",
         "PRG.02",
-        PRODUCTS,
         "in_progress",
         "green",
         1,
@@ -130,7 +118,6 @@ PROJECTS = [
         "PSIRT and coordinated disclosure set-up",
         "project",
         "PRG.02",
-        PRODUCTS,
         "closing",
         "green",
         2,
@@ -145,7 +132,6 @@ PROJECTS = [
         "Workforce IAM modernisation",
         "project",
         "PF.2026",
-        CORPORATE_IT,
         "planning",
         "green",
         2,
@@ -160,7 +146,6 @@ PROJECTS = [
         "OT segmentation of the Brno plant",
         "project",
         "PF.2026",
-        MANUFACTURING,
         "on_hold",
         "amber",
         1,
@@ -175,7 +160,6 @@ PROJECTS = [
         "Checkout page script integrity",
         "project",
         "PRG.01",
-        STORE,
         "in_progress",
         "amber",
         1,
@@ -190,7 +174,6 @@ PROJECTS = [
         "SOC platform migration",
         "project",
         "PF.2026",
-        CORPORATE_IT,
         "closed",
         "green",
         2,
@@ -205,7 +188,6 @@ PROJECTS = [
         "Supplier security assurance programme",
         "project",
         "PF.2026",
-        None,
         "draft",
         None,
         3,
@@ -220,7 +202,6 @@ PROJECTS = [
         "Device cloud certificate rotation",
         "project",
         "PF.2026",
-        PRODUCTS,
         "initiated",
         "green",
         3,
@@ -235,7 +216,6 @@ PROJECTS = [
         "Plant historian cloud migration",
         "project",
         "PF.2026",
-        MANUFACTURING,
         "cancelled",
         None,
         4,
@@ -849,14 +829,12 @@ class PmbokBuilder(DemoBuilder):
         return collections
 
     def build_projects(self, ctx):
-        folders = {f.name: f for f in ctx.refs["subdomains"]}
         projects = {}
         for (
             ref_id,
             name,
             kind,
             parent,
-            folder_name,
             status,
             health,
             priority,
@@ -867,7 +845,7 @@ class PmbokBuilder(DemoBuilder):
             cost,
         ) in PROJECTS:
             text = PROJECT_TEXT.get(ref_id, {})
-            folder = folders.get(folder_name, ctx.domain) if folder_name else ctx.domain
+            folder = ctx.domain
             existing = Project.objects.filter(name=name, folder=folder).first()
             if existing:
                 projects[ref_id] = existing

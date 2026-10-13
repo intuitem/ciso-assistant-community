@@ -23,7 +23,6 @@ from core.models import (
     RequirementAssessment,
     Terminology,
 )
-from iam.models import Folder
 from tprm.models import (
     Contract,
     Entity,
@@ -44,18 +43,10 @@ VDD_FRAMEWORK = "urn:intuitem:risk:framework:vendor-due-diligence"
 # Tier keys of the default scale, most critical first.
 CRITICAL, IMPORTANT, STANDARD, LOW = "critical", "important", "standard", "low-impact"
 
-# Sub-domains of the core builder.
-CORP, MFG, PRODUCTS, STORE = (
-    "Corporate IT",
-    "Manufacturing",
-    "Connected Products",
-    "Online Store & Payments",
-)
-
 # Contracts provided by (or to) the company itself use this pseudo-key.
 MAIN = "main"
 
-# key, ref_id, name, sub-domain (None = root demo domain), country, currency,
+# key, ref_id, name, country, currency,
 # relationship, description, mission, (dependency, penetration, maturity,
 # trust), optional parent, DORA fields, legal identifiers, active flag.
 ENTITIES = [
@@ -99,7 +90,6 @@ ENTITIES = [
         "key": "pellion",
         "ref_id": "TP-002",
         "name": "Pellion Payments SA",
-        "subdomain": STORE,
         "country": "BE",
         "currency": "EUR",
         "relationship": "supplier",
@@ -122,7 +112,6 @@ ENTITIES = [
         "key": "shenwa",
         "ref_id": "TP-003",
         "name": "Shenwa Contract Manufacturing Co., Ltd.",
-        "subdomain": MFG,
         "country": "CN",
         "currency": "USD",
         "relationship": "contractor",
@@ -141,7 +130,6 @@ ENTITIES = [
         "key": "orbisil",
         "ref_id": "TP-004",
         "name": "Orbisil Semiconductors Ltd.",
-        "subdomain": PRODUCTS,
         "country": "TW",
         "currency": "USD",
         "relationship": "supplier",
@@ -159,7 +147,6 @@ ENTITIES = [
         "key": "tallbridge",
         "ref_id": "TP-005",
         "name": "Tallbridge Logistics s.r.o.",
-        "subdomain": STORE,
         "country": "CZ",
         "currency": "EUR",
         "relationship": "contractor",
@@ -174,7 +161,6 @@ ENTITIES = [
         "key": "mireo",
         "ref_id": "TP-006",
         "name": "Mireo Support Lda.",
-        "subdomain": PRODUCTS,
         "country": "PT",
         "currency": "EUR",
         "relationship": "contractor",
@@ -192,7 +178,6 @@ ENTITIES = [
         "key": "brightline",
         "ref_id": "TP-007",
         "name": "Brightline Identity Oy",
-        "subdomain": CORP,
         "country": "FI",
         "currency": "EUR",
         "relationship": "supplier",
@@ -208,7 +193,6 @@ ENTITIES = [
         "key": "linterra",
         "ref_id": "TP-008",
         "name": "Linterra Automation GmbH",
-        "subdomain": MFG,
         "country": "AT",
         "currency": "EUR",
         "relationship": "contractor",
@@ -226,7 +210,6 @@ ENTITIES = [
         "key": "fennick",
         "ref_id": "TP-009",
         "name": "Fennick Analytics Ltd",
-        "subdomain": PRODUCTS,
         "country": "IE",
         "currency": "EUR",
         "relationship": "supplier",
@@ -244,7 +227,6 @@ ENTITIES = [
         "key": "quorra",
         "ref_id": "TP-010",
         "name": "Quorra Mail SAS",
-        "subdomain": STORE,
         "country": "FR",
         "currency": "EUR",
         "relationship": "supplier",
@@ -287,7 +269,6 @@ ENTITIES = [
         "key": "huaxin",
         "ref_id": "TP-013",
         "name": "Huaxin PCB Assembly (Dongguan) Co., Ltd.",
-        "subdomain": MFG,
         "country": "CN",
         "currency": "CNY",
         "relationship": "contractor",
@@ -302,7 +283,6 @@ ENTITIES = [
         "key": "sentai",
         "ref_id": "TP-014",
         "name": "Sentai Wafer Foundry Corp.",
-        "subdomain": PRODUCTS,
         "country": "TW",
         "currency": "USD",
         "relationship": "supplier",
@@ -314,7 +294,6 @@ ENTITIES = [
         "key": "portavia",
         "ref_id": "TP-015",
         "name": "Portavia Remote Access GmbH",
-        "subdomain": MFG,
         "country": "DE",
         "currency": "EUR",
         "relationship": "supplier",
@@ -329,7 +308,6 @@ ENTITIES = [
         "key": "domora",
         "ref_id": "CL-001",
         "name": "Domora Retail SA",
-        "subdomain": STORE,
         "country": "FR",
         "currency": "EUR",
         "relationship": "client",
@@ -344,7 +322,6 @@ ENTITIES = [
         "key": "huisplein",
         "ref_id": "CL-002",
         "name": "Huisplein Elektronica B.V.",
-        "subdomain": STORE,
         "country": "NL",
         "currency": "EUR",
         "relationship": "partner",
@@ -360,7 +337,6 @@ ENTITIES = [
         "ref_id": "GRP-001",
         "name": PAY_ENTITY,
         "parent": MAIN,
-        "subdomain": STORE,
         "country": "FR",
         "currency": "EUR",
         "relationship": "other",
@@ -383,7 +359,6 @@ ENTITIES = [
         "key": "corvel",
         "ref_id": "TP-016",
         "name": "Corvel Fulfilment a.s.",
-        "subdomain": STORE,
         "country": "CZ",
         "currency": "CZK",
         "relationship": "contractor",
@@ -1343,11 +1318,6 @@ class TprmBuilder(DemoBuilder):
         self.build_assessments(ctx, entities, solutions)
         ctx.out(f"tprm seeded with {len(entities)} third parties")
 
-    def folder_for(self, ctx, subdomain):
-        if subdomain is None:
-            return ctx.domain
-        return Folder.objects.get(parent_folder=ctx.domain, name=subdomain)
-
     def build_entities(self, ctx, tiers, main):
         relationships = {
             term.name: term
@@ -1360,7 +1330,7 @@ class TprmBuilder(DemoBuilder):
             dependency, penetration, maturity, trust = spec["levels"]
             entity, created = Entity.objects.get_or_create(
                 name=spec["name"],
-                folder=self.folder_for(ctx, spec.get("subdomain")),
+                folder=ctx.domain,
                 defaults={
                     "ref_id": spec["ref_id"],
                     "description": spec["description"],

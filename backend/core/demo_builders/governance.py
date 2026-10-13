@@ -45,7 +45,6 @@ from core.utils import (
     assign_audit_to,
     build_initial_field_visibility,
 )
-from iam.models import Folder
 
 CRA_LIBRARY = "urn:intuitem:risk:library:enisa-sme-cra-maturity"
 DEROGATION_LIBRARY = "urn:intuitem:risk:library:derogation-request"
@@ -53,13 +52,11 @@ VENDOR_REVIEW_LIBRARY = "urn:intuitem:risk:library:vendor-review-request"
 
 MAIL_DOMAIN = f"{COMPANY.lower().replace(' ', '')}.example"
 
-# name, sub-domain (None = root demo domain), mailbox, description.
-# Teams that the pmbok builder also uses sit in the root domain under the same
-# name, so both builders share one row whichever runs first.
+# name, mailbox, description. Teams that the pmbok builder also uses share
+# one row (same name and folder) whichever builder runs first.
 TEAMS = [
     (
         "GRC Office",
-        None,
         "grc",
         (
             "Reports to the CISO. Owns the ISMS, the risk register, the ISO 27001 "
@@ -68,7 +65,6 @@ TEAMS = [
     ),
     (
         "Security Operations Centre",
-        None,
         "soc",
         (
             "24/7 monitoring of the device cloud, the store and corporate IT; "
@@ -77,7 +73,6 @@ TEAMS = [
     ),
     (
         "IT Operations",
-        None,
         "itops",
         (
             "Corporate infrastructure, endpoints, the workforce identity provider "
@@ -86,7 +81,6 @@ TEAMS = [
     ),
     (
         "Data Protection Office",
-        None,
         "dpo",
         (
             "The DPO and privacy analysts: records of processing, DPIAs, data "
@@ -95,7 +89,6 @@ TEAMS = [
     ),
     (
         "Procurement",
-        None,
         "procurement",
         (
             "Supplier selection, contracts and the supplier security questionnaire, "
@@ -104,13 +97,11 @@ TEAMS = [
     ),
     (
         "People & Culture",
-        None,
         "people",
         "HR, onboarding and leavers, security awareness and phishing simulations.",
     ),
     (
         "Facilities & Site Security",
-        None,
         "facilities",
         (
             "Badges, CCTV and visitor management at the Lyon HQ, the Brno plant and "
@@ -119,7 +110,6 @@ TEAMS = [
     ),
     (
         "Cloud Platform",
-        "Connected Products",
         "cloud-platform",
         (
             "Runs the device cloud on Kestrava Cloud: Kubernetes, the MQTT device "
@@ -128,7 +118,6 @@ TEAMS = [
     ),
     (
         "PSIRT",
-        "Connected Products",
         "psirt",
         (
             "Product security incident response team, run by the Head of Product "
@@ -137,7 +126,6 @@ TEAMS = [
     ),
     (
         "Firmware Engineering",
-        "Connected Products",
         "firmware",
         (
             "Kelvin, Lookout and Keystone firmware, the CI build farm, code signing "
@@ -146,7 +134,6 @@ TEAMS = [
     ),
     (
         "OT Engineering",
-        "Manufacturing",
         "ot-eng",
         (
             "PLC, SCADA and plant network engineering at the Brno assembly plant, "
@@ -155,7 +142,6 @@ TEAMS = [
     ),
     (
         "Store Engineering",
-        "Online Store & Payments",
         "store-eng",
         (
             "Builds the online store web front, checkout and the companion app's "
@@ -164,7 +150,6 @@ TEAMS = [
     ),
     (
         "Payments Risk",
-        "Online Store & Payments",
         "payments-risk",
         (
             f"{PAY_ENTITY} second line: the Payments Risk Officer, PCI DSS "
@@ -1195,14 +1180,6 @@ PUBLICATIONS = [
 ]
 
 
-def _subdomain(ctx, name):
-    if name is None:
-        return ctx.domain
-    return (
-        Folder.objects.filter(name=name, parent_folder=ctx.domain).first() or ctx.domain
-    )
-
-
 def _team_actors(ctx):
     return {
         actor.team.name: actor
@@ -1263,10 +1240,10 @@ class GovernanceBuilder(DemoBuilder):
         self.build_cra_audit(ctx, actors)
 
     def build_teams(self, ctx):
-        for name, subdomain, mailbox, description in TEAMS:
+        for name, mailbox, description in TEAMS:
             Team.objects.get_or_create(
                 name=name,
-                folder=_subdomain(ctx, subdomain),
+                folder=ctx.domain,
                 defaults={
                     "description": description,
                     "team_email": f"{mailbox}@{MAIL_DOMAIN}",

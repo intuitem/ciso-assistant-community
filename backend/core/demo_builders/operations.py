@@ -34,19 +34,10 @@ from core.models import (
     Vulnerability,
 )
 from core.utils import _generate_occurrences
-from iam.models import Folder
 
 
 def _ts(ctx, offset, hour, minute=0):
     return datetime.combine(ctx.day(offset), time(hour, minute), tzinfo=UTC)
-
-
-def _subdomain(ctx, name):
-    if name is None:
-        return ctx.domain
-    return (
-        Folder.objects.filter(name=name, parent_folder=ctx.domain).first() or ctx.domain
-    )
 
 
 def _controls(ctx, ref_ids):
@@ -2004,7 +1995,7 @@ FINDINGS = [
     ),
 ]
 
-# ref, name, severity, status, sub-domain, assets, controls, detected, due,
+# ref, name, severity, status, assets, controls, detected, due,
 # eta, description.
 VULNERABILITIES = [
     (
@@ -2012,7 +2003,6 @@ VULNERABILITIES = [
         "OpenSSH regreSSHion (CVE-2024-6387) on bastion hosts",
         4,
         "fixed",
-        "Corporate IT",
         ("Corporate VPN gateway",),
         ("AC.010",),
         -150,
@@ -2025,7 +2015,6 @@ VULNERABILITIES = [
         "Assembly cell PLCs accept a shared engineering password",
         4,
         "mitigated",
-        "Manufacturing",
         ("Assembly cell PLCs", "Production line control"),
         ("AC.017", "AC.007"),
         -40,
@@ -2041,7 +2030,6 @@ VULNERABILITIES = [
         "Unsupported operating system on the plant SCADA server",
         3,
         "mitigated",
-        "Manufacturing",
         ("Plant SCADA server",),
         ("AC.007",),
         -90,
@@ -2057,7 +2045,6 @@ VULNERABILITIES = [
         "PostgreSQL minor version behind security release",
         2,
         "potential",
-        "Connected Products",
         ("PostgreSQL primary",),
         ("AC.010",),
         -10,
@@ -2070,7 +2057,6 @@ VULNERABILITIES = [
         "Kubernetes API server reachable from the corporate network",
         3,
         "exploitable",
-        "Connected Products",
         ("Device cloud Kubernetes cluster",),
         ("AC.007",),
         -28,
@@ -2083,7 +2069,6 @@ VULNERABILITIES = [
         "Framework debug mode leaks stack traces on the device cloud API",
         2,
         "fixed",
-        "Connected Products",
         ("Device cloud Kubernetes cluster",),
         (),
         -25,
@@ -2096,7 +2081,6 @@ VULNERABILITIES = [
         "Outdated WebView helper in the companion app analytics SDK",
         1,
         "potential",
-        "Connected Products",
         ("Companion mobile app",),
         (),
         -25,
@@ -2109,7 +2093,6 @@ VULNERABILITIES = [
         "Firmware CI plugin with arbitrary file read",
         3,
         "mitigated",
-        "Connected Products",
         ("Firmware CI build farm",),
         ("AC.010", "AC.013"),
         -60,
@@ -2125,7 +2108,6 @@ VULNERABILITIES = [
         "Self-signed certificate on Brno warehouse label printers",
         0,
         "not_exploitable",
-        "Manufacturing",
         (),
         (),
         -70,
@@ -2138,7 +2120,6 @@ VULNERABILITIES = [
         "Public listing flagged on the S3 evidence bucket",
         2,
         "unaffected",
-        "Corporate IT",
         ("S3 evidence bucket",),
         (),
         -15,
@@ -2154,7 +2135,6 @@ VULNERABILITIES = [
         "Lookout clip links predictable and not authorised",
         4,
         "fixed",
-        "Connected Products",
         ("Customer and device accounts", "Device cloud Kubernetes cluster"),
         ("AC.010",),
         -31,
@@ -2170,7 +2150,6 @@ VULNERABILITIES = [
         "Debug UART root shell on Keystone hub production units",
         2,
         "mitigated",
-        "Connected Products",
         ("Device firmware and signing keys",),
         ("AC.018",),
         -18,
@@ -2186,7 +2165,6 @@ VULNERABILITIES = [
         "Outdated BusyBox DHCP client in Keystone hub firmware",
         3,
         "exploitable",
-        "Connected Products",
         ("Device firmware and signing keys",),
         ("AC.015", "AC.010"),
         -12,
@@ -2202,7 +2180,6 @@ VULNERABILITIES = [
         "Shared commissioning code on one Keystone hub production batch",
         3,
         "mitigated",
-        "Connected Products",
         ("Device firmware and signing keys",),
         ("AC.018",),
         -45,
@@ -2432,7 +2409,6 @@ class FindingsBuilder(DemoBuilder):
             name,
             severity,
             status,
-            subdomain,
             assets,
             controls,
             detected,
@@ -2444,7 +2420,7 @@ class FindingsBuilder(DemoBuilder):
             # the instance's (non-demo) settings.
             vulnerability, created = Vulnerability.objects.get_or_create(
                 ref_id=ref_id,
-                folder=_subdomain(ctx, subdomain),
+                folder=ctx.domain,
                 defaults={
                     "name": name,
                     "description": description,
@@ -2615,7 +2591,7 @@ class FindingsBuilder(DemoBuilder):
 # Incidents
 # ---------------------------------------------------------------------------
 
-# ref, name, description, status, severity, detection, sub-domain, occurred and
+# ref, name, description, status, severity, detection, occurred and
 # resolved as (day offset, hour, minute), threats, assets, controls,
 # qualifications, BCP activated, resolution, timeline. Timeline entries:
 # (day offset, hour, minute, type, entry, observation). The status/severity
@@ -2632,7 +2608,6 @@ INCIDENTS = [
         "resolved",
         3,
         "internally_detected",
-        "Corporate IT",
         (-41, 8, 10),
         (-38, 17, 0),
         ("Supply chain compromise",),
@@ -2699,7 +2674,6 @@ INCIDENTS = [
         "closed",
         2,
         "internally_detected",
-        "Manufacturing",
         (-75, 2, 55),
         (-72, 16, 0),
         ("Ransomware deployment", "OT intrusion through remote maintenance"),
@@ -2781,7 +2755,6 @@ INCIDENTS = [
         "new",
         4,
         "internally_detected",
-        "Corporate IT",
         (-2, 17, 45),
         None,
         (),
@@ -2816,7 +2789,6 @@ INCIDENTS = [
         "dismissed",
         5,
         "internally_detected",
-        "Corporate IT",
         (-20, 7, 30),
         (-19, 9, 20),
         (),
@@ -2855,7 +2827,6 @@ INCIDENTS = [
         "resolved",
         3,
         "internally_detected",
-        "Manufacturing",
         (-33, 5, 50),
         (-32, 11, 0),
         (),
@@ -2903,7 +2874,6 @@ INCIDENTS = [
         "resolved",
         2,
         "externally_detected",
-        "Connected Products",
         (-33, 2, 0),
         (-26, 17, 0),
         ("Cloud misconfiguration",),
@@ -2992,7 +2962,6 @@ INCIDENTS = [
         "resolved",
         3,
         "internally_detected",
-        "Online Store & Payments",
         (-55, 10, 4),
         (-54, 10, 0),
         ("Denial of service",),
@@ -3080,7 +3049,6 @@ class IncidentsBuilder(DemoBuilder):
             status,
             severity,
             detection,
-            subdomain,
             occurred,
             resolved,
             threat_names,
@@ -3093,7 +3061,7 @@ class IncidentsBuilder(DemoBuilder):
         ) in INCIDENTS:
             incident, created = Incident.objects.get_or_create(
                 ref_id=ref_id,
-                folder=_subdomain(ctx, subdomain),
+                folder=ctx.domain,
                 defaults={
                     "name": name,
                     "description": description,

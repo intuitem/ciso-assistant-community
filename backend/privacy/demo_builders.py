@@ -1,6 +1,6 @@
 """Privacy demo: a GDPR record of processing activities.
 
-Eleven processings spread over the demo domain and its sub-domains (store
+Eleven processings in the demo domain (store
 orders, camera video, thermostat telemetry, app analytics, support, marketing,
 HR, recruitment, plant CCTV, instalment credit checks, the hub beta), each with
 its purposes, personal data, data subjects, recipients, processors and
@@ -14,7 +14,6 @@ from typing import ClassVar
 
 from core.demo import COMPANY, PAY_ENTITY, DemoBuilder, register
 from core.models import Terminology
-from iam.models import Folder
 from privacy.models import (
     DataBreach,
     DataContractor,
@@ -27,12 +26,11 @@ from privacy.models import (
     RightRequest,
 )
 
-# Each processing: header, then its children. Folder None is the demo domain.
+# Each processing: header, then its children.
 PROCESSINGS = [
     {
         "ref_id": "ROPA-001",
         "name": "Online store orders and customer accounts",
-        "folder": "Online Store & Payments",
         "status": "privacy_approved",
         "description": (
             "Customer account creation, checkout, delivery, returns and warranty "
@@ -124,7 +122,6 @@ PROCESSINGS = [
     {
         "ref_id": "ROPA-002",
         "name": "Lookout camera video storage",
-        "folder": "Connected Products",
         "status": "privacy_approved",
         "description": (
             "Cloud storage and playback of motion-triggered clips recorded by "
@@ -229,7 +226,6 @@ PROCESSINGS = [
     {
         "ref_id": "ROPA-003",
         "name": "Kelvin energy usage telemetry",
-        "folder": "Connected Products",
         "status": "privacy_approved",
         "description": (
             "Temperature, setpoint and heating runtime readings sent by Kelvin "
@@ -309,7 +305,6 @@ PROCESSINGS = [
     {
         "ref_id": "ROPA-004",
         "name": "Companion app product analytics",
-        "folder": "Connected Products",
         "status": "privacy_in_review",
         "description": (
             "Screen views, feature usage and crash reports collected by the "
@@ -383,7 +378,6 @@ PROCESSINGS = [
     {
         "ref_id": "ROPA-005",
         "name": "Customer support and returns (RMA)",
-        "folder": None,
         "status": "privacy_approved",
         "description": (
             "Tickets, chat, calls and return merchandise authorisations handled "
@@ -487,7 +481,6 @@ PROCESSINGS = [
     {
         "ref_id": "ROPA-006",
         "name": "Marketing emails",
-        "folder": "Online Store & Payments",
         "status": "privacy_in_review",
         "description": (
             "Product launch announcements, promotions and newsletters sent to "
@@ -561,7 +554,6 @@ PROCESSINGS = [
     {
         "ref_id": "ROPA-007",
         "name": "Payroll and HR administration",
-        "folder": "Corporate IT",
         "status": "privacy_approved",
         "description": (
             "Payroll, leave, benefits and statutory declarations for the 1,400 "
@@ -676,7 +668,6 @@ PROCESSINGS = [
     {
         "ref_id": "ROPA-008",
         "name": "Recruitment",
-        "folder": "Corporate IT",
         "status": "privacy_draft",
         "description": (
             "Applicant tracking from job posting to hiring decision, including "
@@ -750,7 +741,6 @@ PROCESSINGS = [
     {
         "ref_id": "ROPA-009",
         "name": "Brno plant CCTV and access badges",
-        "folder": "Manufacturing",
         "status": "privacy_approved",
         "description": (
             "Video surveillance of the assembly hall, warehouse and loading bays, "
@@ -819,7 +809,6 @@ PROCESSINGS = [
     {
         "ref_id": "ROPA-010",
         "name": "Instalment payment credit checks",
-        "folder": "Online Store & Payments",
         "status": "privacy_approved",
         "description": (
             f"Creditworthiness assessment run by {PAY_ENTITY} before granting "
@@ -899,7 +888,6 @@ PROCESSINGS = [
     {
         "ref_id": "ROPA-011",
         "name": "Keystone hub v3 beta programme",
-        "folder": "Connected Products",
         "status": "privacy_draft",
         "description": (
             "Recruitment of 300 beta testers, detailed diagnostics upload and "
@@ -1106,10 +1094,6 @@ class PrivacyBuilder(DemoBuilder):
         ctx.out(f"{len(processings)} processings seeded")
 
     def build_processings(self, ctx):
-        folders = {
-            folder.name: folder
-            for folder in Folder.objects.filter(parent_folder=ctx.domain)
-        }
         terms = {
             (term.field_path, term.name): term
             for term in Terminology.objects.filter(
@@ -1126,7 +1110,7 @@ class PrivacyBuilder(DemoBuilder):
         perimeters = {p.ref_id: p for p in ctx.refs["perimeters"]}
         processings = {}
         for spec in PROCESSINGS:
-            folder = folders.get(spec["folder"], ctx.domain)
+            folder = ctx.domain
             processing, created = Processing.objects.get_or_create(
                 name=spec["name"],
                 folder=folder,

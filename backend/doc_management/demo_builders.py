@@ -34,11 +34,6 @@ DEPRECATED = DocumentRevision.Status.DEPRECATED
 
 MAIL_DOMAIN = f"{COMPANY.split()[0].lower()}.example"
 
-CORPORATE_IT = "Corporate IT"
-MANUFACTURING = "Manufacturing"
-PRODUCTS = "Connected Products"
-STORE = "Online Store & Payments"
-
 TEMPLATES = [
     (
         "secpol-policy",
@@ -1042,7 +1037,7 @@ MINUTES_Q3 = [
 
 NO_LINKS = {"policies": False, "controls": (), "assets": ()}
 
-# ref_id, name, type, folder name (None = demo domain), template ref_id,
+# ref_id, name, type, template ref_id,
 # description, links,
 # locales: {locale: (sections, [(status, day offset, change summary, comments)])}
 DOCUMENTS = [
@@ -1050,7 +1045,6 @@ DOCUMENTS = [
         "POL-001",
         "Information Security Policy",
         "policy",
-        None,
         "secpol-policy",
         "Top-level security policy approved by the Executive Committee.",
         {"policies": True, "controls": (), "assets": ()},
@@ -1082,7 +1076,6 @@ DOCUMENTS = [
         "POL-002",
         "Access Control Policy",
         "policy",
-        CORPORATE_IT,
         "secpol-policy",
         "Account lifecycle, authentication, privileged access and reviews.",
         {
@@ -1112,7 +1105,6 @@ DOCUMENTS = [
         "POL-003",
         "Backup and Recovery Policy",
         "policy",
-        CORPORATE_IT,
         "secpol-policy",
         "Backup tiers, protection of copies and restore testing.",
         {
@@ -1135,7 +1127,6 @@ DOCUMENTS = [
         "PRO-001",
         "Incident Response Procedure",
         "procedure",
-        None,
         "secpol-procedure",
         "From first report to post-incident review, with every reporting clock.",
         {"policies": False, "controls": ("AC.008",), "assets": ()},
@@ -1163,7 +1154,6 @@ DOCUMENTS = [
         "POL-004",
         "Acceptable Use Policy",
         "policy",
-        None,
         "secpol-policy",
         "Rules every account and device holder signs at onboarding.",
         NO_LINKS,
@@ -1190,7 +1180,6 @@ DOCUMENTS = [
         "PRO-002",
         "Vulnerability Management Procedure",
         "procedure",
-        CORPORATE_IT,
         "secpol-procedure",
         "Scanning cadence, remediation deadlines and exceptions for IT systems.",
         {
@@ -1204,7 +1193,6 @@ DOCUMENTS = [
         "POL-005",
         "Coordinated Vulnerability Disclosure Policy",
         "policy",
-        PRODUCTS,
         "secpol-product-standard",
         (
             "How researchers report product vulnerabilities and how the PSIRT "
@@ -1237,7 +1225,6 @@ DOCUMENTS = [
         "POL-006",
         "Secure Development Lifecycle for Firmware",
         "policy",
-        PRODUCTS,
         "secpol-product-standard",
         (
             "Threat modelling, secure coding, SBOM, signing and secure defaults for "
@@ -1276,7 +1263,6 @@ DOCUMENTS = [
         "POL-007",
         "OT Security Policy — Brno Assembly Plant",
         "policy",
-        MANUFACTURING,
         "secpol-policy",
         "Zones and conduits, remote maintenance and change control for the plant OT.",
         {
@@ -1307,7 +1293,6 @@ DOCUMENTS = [
         "POL-008",
         "Supplier Security Policy",
         "policy",
-        None,
         "secpol-policy",
         "Supplier tiers, due diligence, contract clauses and exit.",
         {"policies": False, "controls": ("AC.004",), "assets": ()},
@@ -1331,7 +1316,6 @@ DOCUMENTS = [
         "Security Committee Charter",
         "charter",
         None,
-        None,
         "Mandate, membership and cadence of the Security Committee.",
         NO_LINKS,
         {"en": (CHARTER, [(PUBLISHED, -330, "Initial issue.", "")])},
@@ -1340,7 +1324,6 @@ DOCUMENTS = [
         "REC-001",
         "Security Committee minutes — Q2 2026",
         "meeting_minutes",
-        None,
         "secpol-minutes",
         "Decisions and actions of the quarterly Security Committee.",
         NO_LINKS,
@@ -1350,7 +1333,6 @@ DOCUMENTS = [
         "REC-002",
         "Security Committee minutes — Q3 2026",
         "meeting_minutes",
-        None,
         "secpol-minutes",
         "Decisions and actions of the quarterly Security Committee.",
         NO_LINKS,
@@ -1454,9 +1436,8 @@ class DocumentsBuilder(DemoBuilder):
 
     def build(self, ctx):
         self.build_templates(ctx)
-        folders = {f.name: f for f in ctx.refs["subdomains"]}
         for spec in DOCUMENTS:
-            self.build_document(ctx, folders, *spec)
+            self.build_document(ctx, *spec)
         self.build_linked(ctx)
 
     def build_templates(self, ctx):
@@ -1478,17 +1459,15 @@ class DocumentsBuilder(DemoBuilder):
     def build_document(
         self,
         ctx,
-        folders,
         ref_id,
         name,
         document_type,
-        folder_name,
         template,
         description,
         links,
         locales,
     ):
-        folder = folders.get(folder_name, ctx.domain) if folder_name else ctx.domain
+        folder = ctx.domain
         container, created = DocumentContainer.objects.get_or_create(
             name=name,
             folder=folder,

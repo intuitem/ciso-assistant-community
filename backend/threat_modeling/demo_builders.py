@@ -7,7 +7,6 @@ tactic lane, exactly as after picking techniques in the matrix.
 from typing import ClassVar
 
 from core.demo import DemoBuilder, register
-from iam.models import Folder
 from sec_intel.models import Technique, TTPCatalog
 from threat_modeling.models import ThreatModel, ThreatModelEdge, ThreatModelNode
 
@@ -25,7 +24,7 @@ APP = "Companion mobile app"
 STORE = "Online store web front"
 CHECKOUT = "Store checkout and payments"
 
-# ref_id, name, sub-domain (None = root), linked risk scenario ref_ids,
+# ref_id, name, linked risk scenario ref_ids,
 # description, nodes, edges.
 # Node: (technique ref_id, tactic ref_id, highlighted, asset names,
 # control ref_ids, note). Edges index into the node list.
@@ -33,7 +32,6 @@ MODELS = [
     (
         "TM.01",
         "Ransomware kill chain on the Brno assembly plant",
-        "Manufacturing",
         ["RS.01"],
         (
             "Most likely path to RS.01, from the 2025 tabletop and the CERT "
@@ -74,7 +72,6 @@ MODELS = [
     (
         "TM.02",
         "Plant remote maintenance path",
-        "Manufacturing",
         ["RS.08"],
         (
             "Linterra Automation's remote maintenance access, from the vendor VPN "
@@ -114,7 +111,6 @@ MODELS = [
     (
         "TM.03",
         "Device cloud: MQTT gateway and OTA service",
-        "Connected Products",
         ["RS.04", "RS.07", "RS.05"],
         (
             "Paths to the installed base through the firmware supply chain, the "
@@ -176,7 +172,6 @@ MODELS = [
     (
         "TM.04",
         "Companion app and device pairing",
-        "Connected Products",
         ["RS.02"],
         (
             "Account takeover and pairing abuse leading to control of devices and "
@@ -223,7 +218,6 @@ MODELS = [
     (
         "TM.05",
         "Online store checkout",
-        "Online Store & Payments",
         ["RS.09", "RS.06"],
         (
             "Payment page skimming through a third-party script, and launch-day "
@@ -263,7 +257,6 @@ MODELS = [
     (
         "TM.06",
         "Insider exfiltration of product designs",
-        None,
         ["RS.03"],
         "Departing engineer with legitimate access to the firmware and CAD repositories.",
         [
@@ -335,15 +328,10 @@ class ThreatModelingBuilder(DemoBuilder):
         assets = {asset.name: asset for asset in ctx.refs["assets"]}
         controls = {control.ref_id: control for control in ctx.refs["controls"]}
         scenarios = {s.ref_id: s for s in ctx.refs.get("risk_scenarios", [])}
-        for ref_id, name, subdomain, scenario_refs, description, nodes, edges in MODELS:
-            folder = (
-                Folder.objects.get(name=subdomain, parent_folder=ctx.domain)
-                if subdomain
-                else ctx.domain
-            )
+        for ref_id, name, scenario_refs, description, nodes, edges in MODELS:
             model, created = ThreatModel.objects.get_or_create(
                 name=name,
-                folder=folder,
+                folder=ctx.domain,
                 defaults={
                     "ref_id": ref_id,
                     "catalog": catalog,

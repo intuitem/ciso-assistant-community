@@ -13703,6 +13703,9 @@ class DemoManifest(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # Internal bookkeeping with no API: never resolved through IAM.
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
+
     def __str__(self):
         return f"demo v{self.version} in {self.domain}"
 
