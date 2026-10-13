@@ -467,8 +467,12 @@ def resolve_incident_id(incident_name_or_id: str) -> str:
     if _is_uuid(incident_name_or_id):
         return incident_name_or_id
 
+    # No item cap: search also matches description/ref_id, so the exact
+    # name may sit beyond the default limit.
     results, error = fetch_all_results(
-        "/incidents/", params={"search": incident_name_or_id}
+        "/incidents/",
+        params={"search": incident_name_or_id},
+        max_items=None,
     )
     if error:
         raise ValueError(f"Incident '{incident_name_or_id}' API error: {error}")

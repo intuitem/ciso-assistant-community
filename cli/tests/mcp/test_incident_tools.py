@@ -191,12 +191,13 @@ class TestUpdateIncident:
         )
         with (
             self._patch_ok() as patch_req,
-            patch.object(resolvers, "fetch_all_results", side_effect=fake),
+            patch.object(resolvers, "fetch_all_results", side_effect=fake) as fetch,
         ):
             result = run(
                 update_tools.update_incident(incident_id="Phishing", status="closed")
             )
         assert fake.calls == [("/incidents/", {"search": "Phishing"})]
+        assert fetch.call_args.kwargs["max_items"] is None
         assert patch_req.call_args.args == (
             f"/incidents/{UUID_C}/",
             {"status": "closed"},
