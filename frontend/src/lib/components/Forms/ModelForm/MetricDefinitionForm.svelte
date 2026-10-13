@@ -77,13 +77,24 @@
 		inputReferences,
 		type MetricInput
 	} from '$lib/utils/derived-metrics';
-	import { onMount } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 
 	const { value: datasetsValue } = formFieldProxy(form, 'datasets');
 	const { value: inputsValue } = formFieldProxy(form, 'inputs');
 	const { value: expressionValue } = formFieldProxy(form, 'expression');
 	const { value: folderValue } = formFieldProxy(form, 'folder');
 	let formulaOpen = $state(false);
+	// v1 creates computed metrics from metric instances (the compose modal):
+	// the formula block only shows to edit a definition that already has one,
+	// such as a formula over objects or one shipped in a library.
+	const editsFormula = untrack(() => {
+		const datasets = $datasetsValue;
+		return (
+			Boolean(($expressionValue as string | undefined)?.trim()) ||
+			(Array.isArray($inputsValue) && $inputsValue.length > 0) ||
+			(!!datasets && typeof datasets === 'object' && Object.keys(datasets).length > 0)
+		);
+	});
 	let models = $state<ReadableModel[]>([]);
 	let definitions = $state<DefinitionOption[]>([]);
 	let kind = $state<'objects' | 'metrics'>('objects');
@@ -314,222 +325,226 @@
 	label={m.labels()}
 />
 
-<div class="form-group rounded-base border border-surface-200-800 p-3 flex flex-col gap-2">
-	<label class="flex items-center gap-2 text-sm font-semibold cursor-pointer">
-		<input
-			type="checkbox"
-			class="checkbox"
-			checked={formulaOpen}
-			onchange={(e) => {
-				formulaOpen = e.currentTarget.checked;
-				if (!formulaOpen) clearFormula();
-			}}
-			data-testid="derived-metric-toggle"
-		/>
-		{m.derivedMetric()}
-	</label>
-	<p class="text-xs text-surface-500">{m.derivedMetricHelpText()}</p>
-	{#if formulaOpen}
-		<div class="flex flex-col gap-1" role="radiogroup" aria-label={m.formulaReads()}>
-			<span class="text-sm font-semibold">{m.formulaReads()}</span>
-			<div class="flex flex-wrap gap-4 text-sm">
-				<label class="flex items-center gap-2 cursor-pointer">
-					<input
-						type="radio"
-						class="radio"
-						name="formula-kind"
-						checked={kind === 'objects'}
-						onchange={() => setKind('objects')}
-						data-testid="formula-kind-objects"
-					/>
-					{m.formulaFromObjects()}
-				</label>
-				<label class="flex items-center gap-2 cursor-pointer">
-					<input
-						type="radio"
-						class="radio"
-						name="formula-kind"
-						checked={kind === 'metrics'}
-						onchange={() => setKind('metrics')}
-						data-testid="formula-kind-metrics"
-					/>
-					{m.formulaFromMetrics()}
-				</label>
+{#if editsFormula}
+	<div class="form-group rounded-base border border-surface-200-800 p-3 flex flex-col gap-2">
+		<label class="flex items-center gap-2 text-sm font-semibold cursor-pointer">
+			<input
+				type="checkbox"
+				class="checkbox"
+				checked={formulaOpen}
+				onchange={(e) => {
+					formulaOpen = e.currentTarget.checked;
+					if (!formulaOpen) clearFormula();
+				}}
+				data-testid="derived-metric-toggle"
+			/>
+			{m.derivedMetric()}
+		</label>
+		<p class="text-xs text-surface-500">{m.derivedMetricHelpText()}</p>
+		{#if formulaOpen}
+			<div class="flex flex-col gap-1" role="radiogroup" aria-label={m.formulaReads()}>
+				<span class="text-sm font-semibold">{m.formulaReads()}</span>
+				<div class="flex flex-wrap gap-4 text-sm">
+					<label class="flex items-center gap-2 cursor-pointer">
+						<input
+							type="radio"
+							class="radio"
+							name="formula-kind"
+							checked={kind === 'objects'}
+							onchange={() => setKind('objects')}
+							data-testid="formula-kind-objects"
+						/>
+						{m.formulaFromObjects()}
+					</label>
+					<label class="flex items-center gap-2 cursor-pointer">
+						<input
+							type="radio"
+							class="radio"
+							name="formula-kind"
+							checked={kind === 'metrics'}
+							onchange={() => setKind('metrics')}
+							data-testid="formula-kind-metrics"
+						/>
+						{m.formulaFromMetrics()}
+					</label>
+				</div>
 			</div>
-		</div>
-		{#if kind === 'metrics'}
-			<div class="flex flex-col gap-1">
-				<span class="text-sm font-semibold">{m.metricInputs()}</span>
-				<span class="text-xs text-surface-500">{m.metricInputsHelpText()}</span>
-				<MetricInputsEditor bind:value={$inputsValue} {definitions} {form} self={object} />
-			</div>
-		{:else}
-			<div class="flex flex-col gap-1">
-				<span class="text-sm font-semibold">{m.datasets()}</span>
-				<span class="text-xs text-surface-500">{m.datasetsHelpText()}</span>
-				<DatasetEditor bind:value={$datasetsValue} {models} />
-			</div>
-		{/if}
-		<!-- Not a <label>: a label forwards any click inside it to its first
-		     labelable descendant, here the first reference chip, which then
-		     inserts that name. -->
-		<div class="flex flex-col gap-1" role="group" aria-labelledby="derived-expression-label">
-			<span id="derived-expression-label" class="text-sm font-semibold">{m.expression()}</span>
-			{#if references.length}
-				<div class="flex flex-wrap items-center gap-1.5">
-					<span class="text-xs text-surface-500">{m.clickToInsert()}</span>
-					{#each references as ref (ref)}
-						<button
-							type="button"
-							class="chip preset-outlined-primary-500 text-primary-700-300 hover:preset-filled-primary-500 cursor-pointer gap-1 px-2 py-0.5 text-xs font-mono transition-colors"
-							title={m.insertReference()}
-							aria-label={`${m.insertReference()}: ${ref}`}
-							onclick={() => insertReference(ref)}
-							data-testid="expression-reference"
-						>
-							<i class="fa-solid fa-plus text-[10px]" aria-hidden="true"></i>{ref}
-						</button>
-					{/each}
+			{#if kind === 'metrics'}
+				<div class="flex flex-col gap-1">
+					<span class="text-sm font-semibold">{m.metricInputs()}</span>
+					<span class="text-xs text-surface-500">{m.metricInputsHelpText()}</span>
+					<MetricInputsEditor bind:value={$inputsValue} {definitions} {form} self={object} />
+				</div>
+			{:else}
+				<div class="flex flex-col gap-1">
+					<span class="text-sm font-semibold">{m.datasets()}</span>
+					<span class="text-xs text-surface-500">{m.datasetsHelpText()}</span>
+					<DatasetEditor bind:value={$datasetsValue} {models} />
 				</div>
 			{/if}
-			<CelInput
-				bind:value={
-					() => ($expressionValue as string | undefined) ?? '', (next) => ($expressionValue = next)
-				}
-				scope={celScope}
-				testid="form-input-expression"
-				placeholder={kind === 'metrics'
-					? 'clicks * 100.0 / trained'
-					: 'active.count * 100.0 / controls.count'}
-			/>
-			<span class="text-xs text-surface-500"
-				>{kind === 'metrics' ? m.metricExpressionHelpText() : m.expressionHelpText()}</span
-			>
-		</div>
-		<!-- A workbench beside the form, not part of it: nothing here is saved. -->
-		<section
-			class="rounded-container border border-dashed border-surface-300-700 bg-surface-100-900 p-3 flex flex-col gap-2"
-			aria-label={m.tryFormula()}
-			data-testid="formula-preview"
-		>
-			<header class="flex items-center gap-2">
-				<i class="fa-solid fa-flask text-primary-500" aria-hidden="true"></i>
-				<span class="text-sm font-semibold">{m.tryFormula()}</span>
-				{#if previewBusy}
-					<i class="fa-solid fa-spinner fa-spin text-xs text-surface-500" aria-hidden="true"></i>
+			<!-- Not a <label>: a label forwards any click inside it to its first
+		     labelable descendant, here the first reference chip, which then
+		     inserts that name. -->
+			<div class="flex flex-col gap-1" role="group" aria-labelledby="derived-expression-label">
+				<span id="derived-expression-label" class="text-sm font-semibold">{m.expression()}</span>
+				{#if references.length}
+					<div class="flex flex-wrap items-center gap-1.5">
+						<span class="text-xs text-surface-500">{m.clickToInsert()}</span>
+						{#each references as ref (ref)}
+							<button
+								type="button"
+								class="chip preset-outlined-primary-500 text-primary-700-300 hover:preset-filled-primary-500 cursor-pointer gap-1 px-2 py-0.5 text-xs font-mono transition-colors"
+								title={m.insertReference()}
+								aria-label={`${m.insertReference()}: ${ref}`}
+								onclick={() => insertReference(ref)}
+								data-testid="expression-reference"
+							>
+								<i class="fa-solid fa-plus text-[10px]" aria-hidden="true"></i>{ref}
+							</button>
+						{/each}
+					</div>
 				{/if}
-			</header>
-			<p class="text-xs text-surface-500">{m.previewOnlyHint()}</p>
-			<div class="flex items-center gap-2 flex-wrap text-xs">
-				<span>{m.tryOn()}</span>
-				<select
-					class="select preset-tonal text-xs w-auto py-0.5"
-					bind:value={previewFolder}
-					aria-label={m.previewDomain()}
-					data-testid="preview-domain"
+				<CelInput
+					bind:value={
+						() => ($expressionValue as string | undefined) ?? '',
+						(next) => ($expressionValue = next)
+					}
+					scope={celScope}
+					testid="form-input-expression"
+					placeholder={kind === 'metrics'
+						? 'clicks * 100.0 / trained'
+						: 'active.count * 100.0 / controls.count'}
+				/>
+				<span class="text-xs text-surface-500"
+					>{kind === 'metrics' ? m.metricExpressionHelpText() : m.expressionHelpText()}</span
 				>
-					{#if !domains.length}
-						<option value={$folderValue}>{m.previewDomain()}</option>
+			</div>
+			<!-- A workbench beside the form, not part of it: nothing here is saved. -->
+			<section
+				class="rounded-container border border-dashed border-surface-300-700 bg-surface-100-900 p-3 flex flex-col gap-2"
+				aria-label={m.tryFormula()}
+				data-testid="formula-preview"
+			>
+				<header class="flex items-center gap-2">
+					<i class="fa-solid fa-flask text-primary-500" aria-hidden="true"></i>
+					<span class="text-sm font-semibold">{m.tryFormula()}</span>
+					{#if previewBusy}
+						<i class="fa-solid fa-spinner fa-spin text-xs text-surface-500" aria-hidden="true"></i>
 					{/if}
-					{#each domains as domain (domain.id)}
-						<option value={domain.id}>{domain.str}</option>
-					{/each}
-				</select>
-				{#if kind === 'metrics'}
-					<span class="text-surface-500">·</span>
+				</header>
+				<p class="text-xs text-surface-500">{m.previewOnlyHint()}</p>
+				<div class="flex items-center gap-2 flex-wrap text-xs">
+					<span>{m.tryOn()}</span>
 					<select
 						class="select preset-tonal text-xs w-auto py-0.5"
-						bind:value={previewFrequency}
-						aria-label={m.previewFrequency()}
-						data-testid="preview-frequency"
+						bind:value={previewFolder}
+						aria-label={m.previewDomain()}
+						data-testid="preview-domain"
 					>
-						{#each FREQUENCIES as [value, label] (value)}
-							<option {value}>{label()}</option>
+						{#if !domains.length}
+							<option value={$folderValue}>{m.previewDomain()}</option>
+						{/if}
+						{#each domains as domain (domain.id)}
+							<option value={domain.id}>{domain.str}</option>
 						{/each}
 					</select>
-				{/if}
-				<button
-					type="button"
-					class="btn btn-sm preset-tonal text-xs ml-auto"
-					disabled={previewBusy || !(previewFolder || $folderValue) || !$expressionValue}
-					onclick={runPreview}
-					data-testid="preview-run"
-				>
-					<i class="fa-solid fa-rotate-right mr-1" aria-hidden="true"></i>{m.runAgain()}
-				</button>
-			</div>
-			{#if preview}
-				{#if preview.ok && preview.periods}
-					<div class="text-xs rounded-base bg-surface-50-950 p-2 flex flex-col gap-2">
-						<div class="flex flex-col gap-0.5">
-							<span class="font-semibold">{m.resolvedInputs()}</span>
-							{#each Object.entries(preview.inputs ?? {}) as [key, instances] (key)}
-								<div>
-									<span class="font-mono">{key}</span>:
-									{#if instances.length}
-										{instances.map((i) => `${i.name} (${i.folder})`).join(', ')}
-										{#each foldersWithSeveral(instances) as folderName (folderName)}
-											<span
-												class="block text-warning-600-400"
-												data-testid="preview-several-instances"
-											>
-												<i class="fa-solid fa-triangle-exclamation mr-1" aria-hidden="true"></i>
-												{m.severalInstancesInFolder({ folder: folderName })}
-											</span>
-										{/each}
-									{:else}
-										<span class="text-surface-500">{m.noInstanceResolved()}</span>
-									{/if}
-								</div>
+					{#if kind === 'metrics'}
+						<span class="text-surface-500">·</span>
+						<select
+							class="select preset-tonal text-xs w-auto py-0.5"
+							bind:value={previewFrequency}
+							aria-label={m.previewFrequency()}
+							data-testid="preview-frequency"
+						>
+							{#each FREQUENCIES as [value, label] (value)}
+								<option {value}>{label()}</option>
 							{/each}
-						</div>
-						{#if previewPeriods.length}
-							<table class="w-full" data-testid="preview-periods">
-								<thead>
-									<tr class="text-left text-surface-500">
-										<th class="font-normal pr-4">{m.previewPeriod()}</th>
-										<th class="font-normal">{m.previewResult()}</th>
-									</tr>
-								</thead>
-								<tbody>
-									{#each previewPeriods as period (period.start)}
-										<tr>
-											<td class="font-mono pr-4">{period.start.slice(0, 16).replace('T', ' ')}</td>
-											<td class="font-mono">
-												{#if period.skipped}
-													<span class="text-surface-500">{m.previewSkipped()}</span>
-												{:else}
-													{JSON.stringify(period.value)}
-												{/if}
-											</td>
+						</select>
+					{/if}
+					<button
+						type="button"
+						class="btn btn-sm preset-tonal text-xs ml-auto"
+						disabled={previewBusy || !(previewFolder || $folderValue) || !$expressionValue}
+						onclick={runPreview}
+						data-testid="preview-run"
+					>
+						<i class="fa-solid fa-rotate-right mr-1" aria-hidden="true"></i>{m.runAgain()}
+					</button>
+				</div>
+				{#if preview}
+					{#if preview.ok && preview.periods}
+						<div class="text-xs rounded-base bg-surface-50-950 p-2 flex flex-col gap-2">
+							<div class="flex flex-col gap-0.5">
+								<span class="font-semibold">{m.resolvedInputs()}</span>
+								{#each Object.entries(preview.inputs ?? {}) as [key, instances] (key)}
+									<div>
+										<span class="font-mono">{key}</span>:
+										{#if instances.length}
+											{instances.map((i) => `${i.name} (${i.folder})`).join(', ')}
+											{#each foldersWithSeveral(instances) as folderName (folderName)}
+												<span
+													class="block text-warning-600-400"
+													data-testid="preview-several-instances"
+												>
+													<i class="fa-solid fa-triangle-exclamation mr-1" aria-hidden="true"></i>
+													{m.severalInstancesInFolder({ folder: folderName })}
+												</span>
+											{/each}
+										{:else}
+											<span class="text-surface-500">{m.noInstanceResolved()}</span>
+										{/if}
+									</div>
+								{/each}
+							</div>
+							{#if previewPeriods.length}
+								<table class="w-full" data-testid="preview-periods">
+									<thead>
+										<tr class="text-left text-surface-500">
+											<th class="font-normal pr-4">{m.previewPeriod()}</th>
+											<th class="font-normal">{m.previewResult()}</th>
 										</tr>
-									{/each}
-								</tbody>
-							</table>
-						{:else}
-							<span class="text-surface-500">{m.previewNoPeriods()}</span>
-						{/if}
-					</div>
-				{:else if preview.ok}
-					<div class="text-xs rounded-base bg-surface-50-950 p-2">
-						<div>
-							<span class="font-semibold">{m.previewResult()}:</span>
-							<span class="font-mono">{JSON.stringify(preview.value)}</span>
+									</thead>
+									<tbody>
+										{#each previewPeriods as period (period.start)}
+											<tr>
+												<td class="font-mono pr-4">{period.start.slice(0, 16).replace('T', ' ')}</td
+												>
+												<td class="font-mono">
+													{#if period.skipped}
+														<span class="text-surface-500">{m.previewSkipped()}</span>
+													{:else}
+														{JSON.stringify(period.value)}
+													{/if}
+												</td>
+											</tr>
+										{/each}
+									</tbody>
+								</table>
+							{:else}
+								<span class="text-surface-500">{m.previewNoPeriods()}</span>
+							{/if}
 						</div>
-						<pre class="font-mono whitespace-pre-wrap mt-1">{JSON.stringify(
-								preview.datasets,
-								null,
-								2
-							)}</pre>
-					</div>
-				{:else}
-					<ul class="text-xs text-error-500 list-disc pl-4">
-						{#each preview.errors ?? [] as err (err.message)}
-							<li>{err.message}</li>
-						{/each}
-					</ul>
+					{:else if preview.ok}
+						<div class="text-xs rounded-base bg-surface-50-950 p-2">
+							<div>
+								<span class="font-semibold">{m.previewResult()}:</span>
+								<span class="font-mono">{JSON.stringify(preview.value)}</span>
+							</div>
+							<pre class="font-mono whitespace-pre-wrap mt-1">{JSON.stringify(
+									preview.datasets,
+									null,
+									2
+								)}</pre>
+						</div>
+					{:else}
+						<ul class="text-xs text-error-500 list-disc pl-4">
+							{#each preview.errors ?? [] as err (err.message)}
+								<li>{err.message}</li>
+							{/each}
+						</ul>
+					{/if}
 				{/if}
-			{/if}
-		</section>
-	{/if}
-</div>
+			</section>
+		{/if}
+	</div>
+{/if}
