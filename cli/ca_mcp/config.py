@@ -40,6 +40,9 @@ HTTP_TIMEOUT = 30  # seconds
 DEFAULT_PAGE_LIMIT = int(os.getenv("CA_MCP_PAGE_LIMIT", "100"))
 MAX_TOTAL_ITEMS = int(os.getenv("CA_MCP_MAX_ITEMS", "200"))
 MAX_RESPONSE_CHARS = int(os.getenv("CA_MCP_MAX_RESPONSE_CHARS", "20000"))
+# Mirrors the backend ATTACHMENT_MAX_SIZE_MB default; the API does not expose
+# the server value, which still applies on upload.
+MAX_UPLOAD_MB = int(os.getenv("CA_MCP_MAX_UPLOAD_MB", "50"))
 
 TRANSPORT = os.getenv("CA_MCP_TRANSPORT", "stdio").lower()
 IS_HTTP = TRANSPORT in ("http", "streamable-http")

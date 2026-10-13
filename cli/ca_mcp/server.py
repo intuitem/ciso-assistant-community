@@ -80,6 +80,7 @@ from .tools.write_tools import (
     refresh_quantitative_risk_study_simulations,
     create_task_template,
     create_vulnerability,
+    create_evidence,
 )
 
 from .tools.update_tools import (
@@ -233,6 +234,7 @@ WRITE_TOOLS = [
     create_vulnerability,
     update_vulnerability,
     delete_vulnerability,
+    create_evidence,
     update_asset,
     update_risk_scenario,
     update_applied_control,
