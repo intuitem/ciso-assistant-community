@@ -44,15 +44,36 @@ def _deleting():
 
 
 def _after_commit(definition_id, folder_id, moment):
-    def apply():
-        from iam.models import Folder
+    """Mark the readers of ``definition_id``'s instances in ``folder_id`` and
+    above once the transaction commits. The folders are resolved now, while
+    they exist: a sub-domain being deleted, with the input instances it
+    holds, is gone by the time the callback runs."""
+    from iam.models import Folder
 
-        from .series import mark_dependents
+    # Up the parent_folder chain, not through Folder.ancestors: a cascade
+    # clears that relation before the instances' own signals fire, while the
+    # folder rows themselves go last.
+    folder_ids = []
+    current = folder_id
+    while current is not None and current not in folder_ids:
+        row = (
+            Folder.objects.filter(id=current)
+            .values_list("id", "parent_folder_id")
+            .first()
+        )
+        if row is None:
+            break
+        folder_ids.append(row[0])
+        current = row[1]
+    if not folder_ids:
+        return
+
+    def apply():
+        from .series import mark_readers
 
         definition = MetricDefinition.objects.filter(id=definition_id).first()
-        folder = Folder.objects.filter(id=folder_id).first()
-        if definition is not None and folder is not None:
-            mark_dependents(definition, folder, moment)
+        if definition is not None:
+            mark_readers(definition, folder_ids, moment)
 
     transaction.on_commit(apply)
 

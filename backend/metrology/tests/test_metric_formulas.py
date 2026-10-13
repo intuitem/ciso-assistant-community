@@ -1049,3 +1049,100 @@ class TestCombineOverride:
         assert errors({"h": {"combine": "median"}})
         assert errors({"h": {"combine": "one", "exclude": [str(hr.id)]}})
         assert errors({"h": {"combine": "max", "pick": str(hr.id)}})
+
+
+@pytest.mark.django_db
+class TestMarksDuringAndAroundRuns:
+    def test_a_mark_written_during_a_run_survives_it(self, frozen, monkeypatch):
+        """An input sample lands while the reader's series is being computed,
+        in another process: its mark names a period this run may have read
+        before the change, so the run's own bookkeeping must not wipe it."""
+        domain = make_domain("D")
+        a = make_definition("A")
+        ia = make_instance(domain, a)
+        sample(ia, 1, at(2026, 4, 10))
+        sample(ia, 2, at(2026, 5, 10))
+        fi = make_instance(domain, formula("a * 2", ("a", a, "one")))
+        compute_sample(fi)
+        fi.refresh_from_db()
+        assert fi.recompute_from is None
+
+        real = series.evaluate_series
+
+        def racing(*args, **kwargs):
+            series.mark([fi.id], at(2026, 4, 1))
+            return real(*args, **kwargs)
+
+        monkeypatch.setattr(series, "evaluate_series", racing)
+        compute_sample(fi)
+        fi.refresh_from_db()
+        assert fi.recompute_from == at(2026, 4, 1)
+
+    def test_a_crash_gives_the_claimed_mark_back(self, frozen, monkeypatch):
+        domain = make_domain("D")
+        a = make_definition("A")
+        ia = make_instance(domain, a)
+        sample(ia, 1, at(2026, 5, 10))
+        fi = make_instance(domain, formula("a * 2", ("a", a, "one")))
+        compute_sample(fi)
+        series.mark([fi.id], at(2026, 5, 1))
+
+        def crashing(*args, **kwargs):
+            raise RuntimeError("database went away")
+
+        monkeypatch.setattr(series, "evaluate_series", crashing)
+        fi.refresh_from_db()
+        with pytest.raises(RuntimeError):
+            compute_sample(fi)
+        fi.refresh_from_db()
+        assert fi.recompute_from == at(2026, 5, 1)
+
+    def test_a_formula_error_answers_the_mark(self, frozen):
+        domain = make_domain("D")
+        a = make_definition("A")
+        make_instance(domain, a, name="one")
+        make_instance(domain, a, name="two")
+        fi = make_instance(domain, formula("a * 2", ("a", a, "one")))
+        series.mark([fi.id], FULL)
+        fi.refresh_from_db()
+        with pytest.raises(DerivedMetricError):
+            compute_sample(fi)
+        fi.refresh_from_db()
+        assert fi.recompute_from is None
+        assert "pick the one" in fi.last_computation_error
+
+
+@pytest.mark.django_db(transaction=True)
+class TestDeletingASubDomain:
+    def test_the_readers_above_are_marked_whole(self, frozen):
+        """A site closes: its domain goes with the input instance and every
+        sample. The group figure summing the sites must recompute its whole
+        history, and the per-sample signals must not each queue a mark."""
+        from metrology import signals as sig
+
+        hq = make_domain("HQ")
+        fr = make_domain("FR", hq)
+        a = make_definition("A")
+        ia = make_instance(fr, a)
+        for day in range(1, 15):
+            sample(ia, day, at(2026, 5, day))
+        fi = make_instance(hq, formula("a * 2", ("a", a, "sum")))
+        compute_sample(fi)
+        fi.refresh_from_db()
+        assert fi.recompute_from is None
+
+        calls = []
+        original = sig._after_commit
+
+        def counting(definition_id, folder_id, moment):
+            calls.append(moment)
+            original(definition_id, folder_id, moment)
+
+        sig._after_commit = counting
+        try:
+            fr.delete()
+        finally:
+            sig._after_commit = original
+        fi.refresh_from_db()
+        assert calls == [FULL]
+        assert fi.recompute_from == FULL

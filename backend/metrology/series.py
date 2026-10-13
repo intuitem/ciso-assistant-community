@@ -627,6 +627,8 @@ def compute_series(instance, *, write=True, only_if_due=False, full=False):
     changed: the one an input marked, else the one the last run reached.
     Returns the SeriesEvaluation, or None when another worker holds the lock
     or, with ``only_if_due``, when there is nothing to do."""
+    from .models import MetricInstance
+
     definition = instance.metric_definition
     key = _lock_key(instance.id)
     if not cache.add(key, "1", LOCK_TTL_SECONDS):
@@ -636,12 +638,20 @@ def compute_series(instance, *, write=True, only_if_due=False, full=False):
             instance.refresh_from_db(fields=["last_computed_at", "recompute_from"])
             if not series_due(instance):
                 return None
+        marked = instance.recompute_from
+        if write and marked is not None:
+            # Claimed before the run reads anything. A mark a signal writes
+            # while the run is evaluating names a period this run may have
+            # read before the change: it lands on an empty column and stays
+            # for the next sweep, instead of being wiped by the save below.
+            MetricInstance.objects.filter(id=instance.id).update(recompute_from=None)
+            instance.recompute_from = None
         frequency = instance.collection_frequency or "daily"
         since = None
         if not full and instance.last_computed_at is not None:
             since = instance.last_computed_at
-            if instance.recompute_from is not None:
-                since = min(since, instance.recompute_from)
+            if marked is not None:
+                since = min(since, marked)
         previous = None
         if since is not None and since != FULL:
             previous = _stored_value(
@@ -660,29 +670,32 @@ def compute_series(instance, *, write=True, only_if_due=False, full=False):
                 choices=instance.input_choices,
             )
         except DerivedMetricError as e:
+            # The mark is answered: retrying is pointless until the formula
+            # or the inputs change, and each of those marks the series anew.
             if write:
                 instance.last_computed_at = now
                 instance.last_computation_error = e.message
-                instance.recompute_from = None
                 instance.save(
                     update_fields=[
                         "last_computed_at",
                         "last_computation_error",
-                        "recompute_from",
                         "updated_at",
                     ]
                 )
+            raise
+        except Exception:
+            # A crash answered nothing: the claimed mark goes back.
+            if write and marked is not None:
+                mark([instance.id], marked)
             raise
         if write:
             changed_from = _store(instance, evaluation)
             instance.last_computed_at = now
             instance.last_computation_error = ""
-            instance.recompute_from = None
             instance.save(
                 update_fields=[
                     "last_computed_at",
                     "last_computation_error",
-                    "recompute_from",
                     "updated_at",
                 ]
             )
@@ -785,15 +798,24 @@ def mark_dependents(definition, folder, moment):
     """An instance of ``definition`` in ``folder`` changed from ``moment``
     (FULL for its very presence): every formula reading it, in that folder or
     above, recomputes from there."""
+    mark_readers(
+        definition,
+        [f.id for f in folder.get_parent_folders(include_self=True)],
+        moment,
+    )
+
+
+def mark_readers(definition, folder_ids, moment):
+    """Same, for the readers living in ``folder_ids``: the folder and its
+    ancestors, resolved by the caller while they still exist."""
     from .models import MetricInstance
 
     dependents = dependents_of(definition)
     if not dependents:
         return
-    ancestors = [f.id for f in folder.get_parent_folders(include_self=True)]
     instance_ids = list(
         MetricInstance.objects.filter(
-            metric_definition__in=dependents, folder_id__in=ancestors
+            metric_definition__in=dependents, folder_id__in=folder_ids
         ).values_list("id", flat=True)
     )
     if instance_ids:
