@@ -127,6 +127,8 @@
 	const showResult = $derived(fieldVis.showResult);
 	const showExtendedResult = $derived(fieldVis.showExtendedResult);
 	const showScore = $derived(fieldVis.showScore);
+	const showStatus = $derived(fieldVis.showStatus);
+	const showDocumentationScore = $derived(fieldVis.showDocumentationScore);
 	const showObservation = $derived(fieldVis.showObservation);
 	const showAppliedControls = $derived(fieldVis.showAppliedControls);
 	const showEvidences = $derived(fieldVis.showEvidences);
@@ -757,7 +759,7 @@
 						</div>
 					{/snippet}
 					{#snippet documentation()}
-						{#if complianceAssessment.show_documentation_score}
+						{#if complianceAssessment.show_documentation_score && showDocumentationScore}
 							<div class="flex flex-col gap-1">
 								<span class="text-xs font-semibold text-surface-500 italic"
 									>{m.documentationScore()}</span
@@ -784,7 +786,7 @@
 				</ScorePair>
 			</div>
 		{/if}
-	{:else if showScore && complianceAssessment.scoring_enabled && complianceAssessment.show_documentation_score && ra.is_scored}
+	{:else if showScore && showDocumentationScore && complianceAssessment.scoring_enabled && complianceAssessment.show_documentation_score && ra.is_scored}
 		{@const raMin = ra.effective_min_score ?? complianceAssessment.min_score}
 		{@const raMax = ra.effective_max_score ?? complianceAssessment.max_score}
 		<div class="flex items-center gap-4 flex-wrap">
@@ -972,7 +974,7 @@
 										</span>
 									{/snippet}
 									{#snippet documentation()}
-										{#if complianceAssessment.show_documentation_score}
+										{#if complianceAssessment.show_documentation_score && showDocumentationScore}
 											<span
 												class="inline-flex items-center gap-1 rounded-md bg-surface-100-900 px-2 py-1 text-surface-700-300"
 											>
@@ -1232,7 +1234,7 @@
 											{/if}
 
 											<!-- Row B: result / status / score -->
-											{#if !questionnaireMode && (showResult || (showExtendedResult && complianceAssessment.extended_result_enabled) || (!shallow && complianceAssessment.scoring_enabled))}
+											{#if !questionnaireMode && (showResult || (showStatus && complianceAssessment.progress_status_enabled) || (showExtendedResult && complianceAssessment.extended_result_enabled) || (!shallow && complianceAssessment.scoring_enabled))}
 												<div class="flex flex-wrap items-start gap-x-6 gap-y-3">
 													{#if !questionnaireMode && showResult}
 														<div class="flex flex-col gap-1">
@@ -1268,29 +1270,27 @@
 																/>
 															{/if}
 														</div>
-														{#if complianceAssessment.progress_status_enabled}
-															<div class="flex flex-col gap-1">
-																<span class="text-xs font-semibold text-surface-500 italic"
-																	>{m.status()}</span
-																>
-																<SegmentedControl
-																	options={status_options}
-																	value={requirementAssessment.status}
-																	colorMap={complianceStatusColorMap}
-																	disabled={isReadOnly || !canEditStatus}
-																	size="sm"
-																	ariaLabel={m.status()}
-																	onChange={(newValue) => {
-																		const newStatus =
-																			requirementAssessment.status === newValue
-																				? 'to_do'
-																				: newValue;
-																		requirementAssessment.status = newStatus;
-																		update(requirementAssessment, 'status');
-																	}}
-																/>
-															</div>
-														{/if}
+													{/if}
+													{#if !questionnaireMode && showStatus && complianceAssessment.progress_status_enabled}
+														<div class="flex flex-col gap-1">
+															<span class="text-xs font-semibold text-surface-500 italic"
+																>{m.status()}</span
+															>
+															<SegmentedControl
+																options={status_options}
+																value={requirementAssessment.status}
+																colorMap={complianceStatusColorMap}
+																disabled={isReadOnly || !canEditStatus}
+																size="sm"
+																ariaLabel={m.status()}
+																onChange={(newValue) => {
+																	const newStatus =
+																		requirementAssessment.status === newValue ? 'to_do' : newValue;
+																	requirementAssessment.status = newStatus;
+																	update(requirementAssessment, 'status');
+																}}
+															/>
+														</div>
 													{/if}
 													{#if showExtendedResult && complianceAssessment.extended_result_enabled}
 														<div class="flex flex-col gap-1">
