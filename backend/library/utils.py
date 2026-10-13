@@ -828,14 +828,33 @@ class MetricDefinitionImporter:
     REQUIRED_FIELDS = {"ref_id", "urn"}
     CATEGORIES = set(_category[0] for _category in MetricDefinition.Category.choices)
 
-    def __init__(self, metric_definition_data: dict):
+    def __init__(self, metric_definition_data: dict, shipped: dict | None = None):
         self.metric_definition_data = metric_definition_data
+        # Every definition of the library by URN: a formula may read one that
+        # is imported after it.
+        self.shipped = shipped or {}
 
     def is_valid(self) -> Union[str, None]:
+        from metrology.derived import validate_formula
+
         if missing_fields := self.REQUIRED_FIELDS - set(
             self.metric_definition_data.keys()
         ):
             return "Missing the following fields : {}".format(", ".join(missing_fields))
+
+        # A shipped formula is held to the same checks as one typed in: the
+        # sampler would otherwise fail on it at every tick.
+        formula_errors = validate_formula(
+            self.metric_definition_data.get("datasets"),
+            self.metric_definition_data.get("expression") or "",
+            self.metric_definition_data.get("inputs"),
+            shipped=self.shipped,
+            own_urn=self.metric_definition_data.get("urn"),
+        )
+        if formula_errors:
+            return "Invalid formula: {}".format(
+                "; ".join(message for _code, message in formula_errors)
+            )
 
         if (category := self.metric_definition_data.get("category")) is not None:
             if category not in MetricDefinitionImporter.CATEGORIES:
@@ -1101,9 +1120,14 @@ class LibraryImporter:
     ) -> Union[str, None]:
         metric_definition_importers = []
         import_errors = []
+        shipped = {
+            str(data["urn"]).lower(): data
+            for data in metric_definitions
+            if isinstance(data, dict) and data.get("urn")
+        }
         for index, metric_definition_data in enumerate(metric_definitions):
             metric_definition_importer = MetricDefinitionImporter(
-                metric_definition_data
+                metric_definition_data, shipped
             )
             metric_definition_importers.append(metric_definition_importer)
             if (

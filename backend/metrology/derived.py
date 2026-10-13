@@ -71,14 +71,17 @@ class DerivedMetricError(Exception):
 
 
 def validate_formula(
-    datasets, expression, inputs=None, definition=None
+    datasets, expression, inputs=None, definition=None, *, shipped=None, own_urn=None
 ) -> list[tuple[str, str]]:
     """Save-time checks of a definition's formula, as (code, message) tuples.
     An empty expression with no datasets and no inputs is a plain (manual)
     definition. A formula reads datasets (objects, now) or inputs (other
     metrics, period by period), never both: past periods cannot be
     recomputed from present-day objects. ``definition`` is the one being
-    saved, when it exists, so a formula cannot read itself."""
+    saved, when it exists, so a formula cannot read itself. A library import
+    passes the definitions it ships as ``shipped`` ({urn: data}) and the one
+    being checked as ``own_urn``: its inputs may name them before they
+    exist."""
     errors = []
     expression = expression or ""
     if not isinstance(expression, str):
@@ -86,7 +89,9 @@ def validate_formula(
     if not expression.strip() and not datasets and not inputs:
         return errors
     if inputs:
-        return _validate_metric_formula(datasets, expression, inputs, definition)
+        return _validate_metric_formula(
+            datasets, expression, inputs, definition, shipped, own_urn
+        )
     if not isinstance(datasets, dict) or not datasets:
         errors.append(
             ("derived_datasets_missing", "A derived metric needs at least one dataset")
@@ -147,7 +152,9 @@ def validate_formula(
     return errors
 
 
-def _validate_metric_formula(datasets, expression, inputs, definition):
+def _validate_metric_formula(
+    datasets, expression, inputs, definition, shipped=None, own_urn=None
+):
     from .series import validate_inputs, validate_series_expression
 
     if datasets:
@@ -160,7 +167,7 @@ def _validate_metric_formula(datasets, expression, inputs, definition):
                 ),
             )
         ]
-    errors = validate_inputs(inputs, definition)
+    errors = validate_inputs(inputs, definition, shipped=shipped, own_urn=own_urn)
     if not expression.strip():
         return errors + [
             ("derived_expression_missing", "A derived metric needs an expression")

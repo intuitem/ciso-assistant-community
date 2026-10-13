@@ -1146,3 +1146,100 @@ class TestDeletingASubDomain:
         fi.refresh_from_db()
         assert calls == [FULL]
         assert fi.recompute_from == FULL
+
+
+@pytest.mark.django_db
+class TestShippedFormulasAreValidated:
+    """A library's formulas are checked before anything is imported, with
+    the library's own definitions known by URN whatever their order."""
+
+    def importers(self, *definitions):
+        from library.utils import MetricDefinitionImporter
+
+        shipped = {data["urn"].lower(): data for data in definitions}
+        return [MetricDefinitionImporter(data, shipped) for data in definitions]
+
+    def test_an_input_may_name_a_sibling_shipped_after_it(self):
+        suffix = uuid.uuid4().hex[:6]
+        double, clicks = self.importers(
+            {
+                "urn": f"urn:test:metric:{suffix}:double",
+                "ref_id": "DOUBLE",
+                "inputs": [
+                    {
+                        "key": "c",
+                        "definition": f"urn:test:metric:{suffix}:clicks",
+                        "combine": "sum",
+                    }
+                ],
+                "expression": "c * 2",
+            },
+            {"urn": f"urn:test:metric:{suffix}:clicks", "ref_id": "CLICKS"},
+        )
+        assert double.is_valid() is None
+        assert clicks.is_valid() is None
+
+    def test_a_broken_formula_refuses_the_library(self):
+        suffix = uuid.uuid4().hex[:6]
+        (bad,) = self.importers(
+            {
+                "urn": f"urn:test:metric:{suffix}:bad",
+                "ref_id": "BAD",
+                "inputs": 5,
+                "expression": "x",
+            }
+        )
+        assert "Invalid formula" in bad.is_valid()
+        (unknown,) = self.importers(
+            {
+                "urn": f"urn:test:metric:{suffix}:unknown",
+                "ref_id": "UNKNOWN",
+                "inputs": [{"key": "c", "definition": "urn:test:metric:nowhere"}],
+                "expression": "c",
+            }
+        )
+        assert "no such metric definition" in unknown.is_valid()
+
+    def test_a_cycle_within_the_library_is_refused(self):
+        suffix = uuid.uuid4().hex[:6]
+        a_urn, b_urn = (
+            f"urn:test:metric:{suffix}:a",
+            f"urn:test:metric:{suffix}:b",
+        )
+        a, b = self.importers(
+            {
+                "urn": a_urn,
+                "ref_id": "A",
+                "inputs": [{"key": "b", "definition": b_urn}],
+                "expression": "b + 1",
+            },
+            {
+                "urn": b_urn,
+                "ref_id": "B",
+                "inputs": [{"key": "a", "definition": a_urn}],
+                "expression": "a + 1",
+            },
+        )
+        assert "depends on this metric" in a.is_valid()
+        assert "depends on this metric" in b.is_valid()
+
+    def test_a_qualitative_sibling_cannot_be_an_input(self):
+        suffix = uuid.uuid4().hex[:6]
+        reader, level = self.importers(
+            {
+                "urn": f"urn:test:metric:{suffix}:reader",
+                "ref_id": "READER",
+                "inputs": [
+                    {"key": "l", "definition": f"urn:test:metric:{suffix}:level"}
+                ],
+                "expression": "l",
+            },
+            {
+                "urn": f"urn:test:metric:{suffix}:level",
+                "ref_id": "LEVEL",
+                "category": "qualitative",
+                "choices_definition": [{"name": "low"}, {"name": "high"}],
+            },
+        )
+        assert "only quantitative" in reader.is_valid()
+        assert level.is_valid() is None

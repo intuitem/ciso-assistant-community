@@ -141,11 +141,42 @@ def _reaches(start, goal_id, seen=None):
     return False
 
 
-def validate_inputs(inputs, definition=None):
+def _shipped(shipped, ref):
+    """The data of the definition a library ships under ``ref``, or None."""
+    if not shipped or not isinstance(ref, str):
+        return None
+    return shipped.get(ref.lower())
+
+
+def _shipped_reaches(shipped, start_urn, goal_urn, seen=None):
+    """Whether ``goal_urn`` is among the shipped ``start_urn``'s inputs, at
+    any depth, within the library."""
+    seen = seen if seen is not None else set()
+    if start_urn in seen:
+        return False
+    seen.add(start_urn)
+    data = shipped.get(start_urn) or {}
+    for spec in data.get("inputs") or []:
+        ref = spec.get("definition") if isinstance(spec, dict) else None
+        if not isinstance(ref, str):
+            continue
+        if ref.lower() == goal_urn or _shipped_reaches(
+            shipped, ref.lower(), goal_urn, seen
+        ):
+            return True
+    return False
+
+
+def validate_inputs(inputs, definition=None, *, shipped=None, own_urn=None):
     """Save-time checks of a metric formula's inputs, as (code, message)
     tuples. ``definition`` is the definition being saved, when it exists:
-    an input may not read it, directly or through other formulas."""
+    an input may not read it, directly or through other formulas. A library
+    import passes what it ships as ``shipped`` ({urn: data}), since an input
+    may name a definition of the same library, imported after this one."""
     from .models import MetricDefinition
+
+    shipped = {str(urn).lower(): data for urn, data in (shipped or {}).items()}
+    own_urn = own_urn.lower() if isinstance(own_urn, str) else None
 
     if not isinstance(inputs, list) or not inputs:
         return [("derived_inputs_missing", "A metric formula needs at least one input")]
@@ -188,7 +219,26 @@ def validate_inputs(inputs, definition=None):
                 )
             )
         target = resolve_definition(spec.get("definition"))
-        if target is None:
+        shipped_target = _shipped(shipped, spec.get("definition"))
+        if target is None and shipped_target is not None:
+            ref = spec["definition"].lower()
+            if shipped_target.get("category", "quantitative") != "quantitative":
+                errors.append(
+                    (
+                        "derived_input_invalid",
+                        f"input '{key}': only quantitative metrics can be inputs",
+                    )
+                )
+            elif own_urn is not None and (
+                ref == own_urn or _shipped_reaches(shipped, ref, own_urn)
+            ):
+                errors.append(
+                    (
+                        "derived_input_cycle",
+                        f"input '{key}': '{ref}' depends on this metric",
+                    )
+                )
+        elif target is None:
             errors.append(
                 ("derived_input_invalid", f"input '{key}': no such metric definition")
             )
