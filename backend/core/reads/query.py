@@ -62,6 +62,13 @@ def read_mode(config):
     return config.get("mode") or MODE_LIST
 
 
+def entry_for(model):
+    """The READABLE_MODELS entry a config's ``model`` names, or None. A model
+    that is not a string (a list, a mapping) names nothing rather than
+    crashing the lookup."""
+    return READABLE_MODELS.get(model) if isinstance(model, str) else None
+
+
 # ---------- scope ----------
 
 
@@ -143,7 +150,13 @@ def effective_computed(entry: ReadEntry, config):
     requested = config.get("include") or []
     if isinstance(requested, str):
         requested = [requested]
-    unknown = [name for name in requested if name not in entry.optional_computed]
+    if not isinstance(requested, list):
+        raise ReadError("'include' must be a list of names")
+    unknown = [
+        name
+        for name in requested
+        if not isinstance(name, str) or name not in entry.optional_computed
+    ]
     if unknown:
         raise ReadError(
             f"'{unknown[0]}' is not includable for model '{config.get('model')}'"
@@ -231,7 +244,7 @@ def build_queryset(config, scope: ReadScope, resolve=_identity):
     Raises ReadError for anything the config gets wrong. A value a column
     cannot hold is Django's to refuse, which it does while the filter is
     applied here or when the queryset evaluates; callers wrap both."""
-    entry = READABLE_MODELS.get(config.get("model"))
+    entry = entry_for(config.get("model"))
     if entry is None:
         raise ReadError(f"unknown model '{config.get('model')}'")
     mode = read_mode(config)
@@ -293,7 +306,7 @@ def validate_read_config(config, *, ops=None, modes=READ_MODES):
     nothing here touches the database. ``ops`` widens the operator set the
     shape check accepts (an unknown operator is then reported per condition);
     ``modes`` is the set of modes the caller supports."""
-    entry = READABLE_MODELS.get(config.get("model"))
+    entry = entry_for(config.get("model"))
     if entry is None:
         return [
             (

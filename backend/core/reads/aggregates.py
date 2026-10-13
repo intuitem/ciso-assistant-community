@@ -191,6 +191,8 @@ def _computed_target(entry, field, config):
     requested = config.get("include") or []
     if isinstance(requested, str):
         requested = [requested]
+    if not isinstance(requested, list):
+        requested = []
     if name in entry.computed or (
         name in requested and name in entry.optional_computed
     ):
@@ -203,7 +205,8 @@ def normalize_aggregate(spec, entry, config, taken=()):
     author needs; ``taken`` holds the aliases already used by earlier specs."""
     if not isinstance(spec, dict):
         raise ReadError("an aggregate must be a mapping with 'fn'")
-    fn = AGGREGATES.get(spec.get("fn"))
+    fn_name = spec.get("fn")
+    fn = AGGREGATES.get(fn_name) if isinstance(fn_name, str) else None
     if fn is None:
         raise ReadError(f"unknown aggregate function '{spec.get('fn')}'")
     field = spec.get("field") or None

@@ -36,9 +36,9 @@ from core.expressions import (
 )
 from core.reads import (
     MODE_AGGREGATE,
-    READABLE_MODELS,
     ReadError,
     ReadScope,
+    entry_for,
     run_aggregate_read,
     subtree_folder_ids,
     validate_read_config,
@@ -169,7 +169,7 @@ def _validate_metric_formula(datasets, expression, inputs, definition):
         return errors + [("derived_expression_too_long", "The expression is too long")]
     keys = {
         spec.get("key")
-        for spec in inputs
+        for spec in (inputs if isinstance(inputs, list) else [])
         if isinstance(spec, dict) and isinstance(spec.get("key"), str)
     }
     return errors + validate_series_expression(expression, keys)
@@ -179,7 +179,7 @@ def _grouping_errors(config):
     """A derived value is visible to whoever may view the instance, without
     their read rights on the rows: a breakdown may name categories (a status,
     a related object's id) but never row content (a name, a description)."""
-    entry = READABLE_MODELS.get(config.get("model"))
+    entry = entry_for(config.get("model"))
     aggregates = config.get("aggregates")
     if entry is None or not isinstance(aggregates, list):
         return []
@@ -192,6 +192,8 @@ def _grouping_errors(config):
         for spec in aggregates
         if isinstance(spec, dict)
         and spec.get("group_by")
+        # A group_by that is not a name is refused by the read validation.
+        and isinstance(spec["group_by"], str)
         and spec["group_by"] not in categorical
     ]
 

@@ -974,3 +974,61 @@ class TestChoiceEndpointsCache:
         response = view(request)
         response.render()
         assert "max-age" in response.get("Cache-Control", "")
+
+
+@pytest.mark.django_db
+class TestMalformedFormulaPayloads:
+    """A client may send any JSON shape: a value that is not a string where
+    a name is expected is refused with a validation message, never a 500."""
+
+    def codes(self, datasets, expression, inputs=None):
+        return [code for code, _m in validate_formula(datasets, expression, inputs)]
+
+    def test_inputs_that_are_not_a_list(self):
+        for inputs in (5, True, {"a": 1}, "abc"):
+            assert "derived_inputs_missing" in self.codes(None, "x", inputs), inputs
+
+    def test_a_group_by_that_is_not_a_name(self):
+        dataset = {**CONTROLS, "aggregates": [{"fn": "count", "group_by": ["status"]}]}
+        assert self.codes({"c": dataset}, "c.count") == ["derived_dataset_invalid"]
+
+    def test_a_model_that_is_not_a_name(self):
+        for model in (["applied_control"], {"k": "v"}, 7):
+            assert self.codes({"c": {**CONTROLS, "model": model}}, "c.count") == [
+                "derived_dataset_invalid"
+            ], model
+
+    def test_a_function_or_include_that_is_not_a_name(self):
+        dataset = {**CONTROLS, "aggregates": [{"fn": ["count"]}]}
+        assert self.codes({"c": dataset}, "c.count") == ["derived_dataset_invalid"]
+        dataset = {**CONTROLS, "include": [["quality_check"]]}
+        assert "derived_dataset_invalid" in self.codes({"c": dataset}, "c.count")
+
+    def test_the_preview_answers_instead_of_a_500(self):
+        domain = make_domain("Domain")
+        view = MetricDefinitionViewSet.as_view({"post": "preview_formula"})
+        user = User.objects.create_superuser(
+            email=f"admin-{uuid.uuid4().hex[:6]}@tests.local"
+        )
+        for payload in (
+            {"inputs": 5, "expression": "x"},
+            {
+                "datasets": {
+                    "c": {
+                        **CONTROLS,
+                        "aggregates": [{"fn": "count", "group_by": ["status"]}],
+                    }
+                },
+                "expression": "c.count",
+            },
+            {"datasets": {"c": {**CONTROLS, "model": ["x"]}}, "expression": "c.count"},
+        ):
+            request = APIRequestFactory().post(
+                "/metrology/metric-definitions/preview-formula/",
+                {"folder": str(domain.id), **payload},
+                format="json",
+            )
+            force_authenticate(request, user=user)
+            response = view(request)
+            assert response.status_code == 200, payload
+            assert response.data["ok"] is False
