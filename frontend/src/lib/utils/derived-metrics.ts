@@ -351,3 +351,81 @@ export function latestTrend(
 	const delta = values[values.length - 1] - values[values.length - 2];
 	return { delta, good: delta === 0 ? null : delta > 0 === higherIsBetter };
 }
+
+// ---------- a level (qualitative) result ----------
+
+export interface Level {
+	ref_id: string;
+	name: string;
+	// Read from the formula, not typed in: it goes when the formula stops
+	// returning it.
+	auto?: boolean;
+}
+
+const STRING_LITERAL = /"((?:[^"\\]|\\.)*)"|'((?:[^'\\]|\\.)*)'/g;
+
+// The quoted texts of an expression, in order, each once (mirrors
+// metrology.compose.string_literals). Inputs are numbers, so in a level
+// formula these are the levels it returns.
+export function stringLiterals(expression: string): string[] {
+	const seen: string[] = [];
+	for (const match of (expression ?? '').matchAll(STRING_LITERAL)) {
+		const text = match[1] ?? match[2] ?? '';
+		if (!seen.includes(text)) seen.push(text);
+	}
+	return seen;
+}
+
+function answersTo(level: Level, text: string): boolean {
+	const t = text.trim().toLowerCase();
+	return level.name.trim().toLowerCase() === t || level.ref_id.trim().toLowerCase() === t;
+}
+
+// The levels once the formula returns `texts`: the author's levels and order
+// stay, a level read from the formula goes when the formula drops it, and a
+// new text is added at the end.
+export function syncLevels(levels: Level[], texts: string[]): Level[] {
+	const kept = levels.filter((level) => !level.auto || texts.some((t) => answersTo(level, t)));
+	const taken = kept.flatMap((level) => [level.ref_id.toLowerCase(), level.name.toLowerCase()]);
+	const added: Level[] = [];
+	for (const text of texts) {
+		if (!text.trim() || kept.some((level) => answersTo(level, text))) continue;
+		const ref_id = formulaKey(text, taken);
+		taken.push(ref_id, text.toLowerCase());
+		added.push({ ref_id, name: text, auto: true });
+	}
+	return added.length || kept.length !== levels.length ? [...kept, ...added] : levels;
+}
+
+// Texts the formula returns that no level answers to.
+export function unknownLevels(expression: string, levels: Level[]): string[] {
+	return stringLiterals(expression).filter((text) => !levels.some((l) => answersTo(l, text)));
+}
+
+// The expression with every quoted `from` now quoting `to`.
+export function renameLiteral(expression: string, from: string, to: string): string {
+	if (!from || from === to) return expression;
+	return expression.replace(STRING_LITERAL, (whole, double, single) => {
+		const text = double ?? single;
+		if (text !== from) return whole;
+		return double !== undefined ? `"${to}"` : `'${to}'`;
+	});
+}
+
+// The 1-based position of the level a result names (its name, its ref_id or
+// its position, as the backend reads it), or null.
+export function levelIndex(value: unknown, levels: Level[]): number | null {
+	if (typeof value === 'number') {
+		return Number.isInteger(value) && value >= 1 && value <= levels.length ? value : null;
+	}
+	if (typeof value !== 'string') return null;
+	const index = levels.findIndex((level) => answersTo(level, value));
+	return index === -1 ? null : index + 1;
+}
+
+// A starting point for a level formula over the picks.
+export function levelStarter(keys: string[]): string {
+	if (!keys.length) return '';
+	const measure = keys.length >= 2 ? `${keys[0]} * 100.0 / ${keys[1]}` : keys[0];
+	return `${measure} >= 50.0 ? "High" : "Low"`;
+}

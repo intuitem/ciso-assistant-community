@@ -416,7 +416,7 @@ class MetricInstanceViewSet(BaseModelViewSet):
         from metrology.compose import CompositionError, compose
 
         try:
-            instance, reused = compose(request.user, request.data)
+            instance, outcome = compose(request.user, request.data)
         except PermissionError:
             return Response(status=status.HTTP_403_FORBIDDEN)
         except CompositionError as e:
@@ -425,9 +425,112 @@ class MetricInstanceViewSet(BaseModelViewSet):
         return Response(
             {
                 "id": str(instance.id),
-                "definition": {"name": definition.name, "reused": reused},
+                "definition": {"name": definition.name, "reused": outcome == "reused"},
             },
             status=status.HTTP_201_CREATED,
+        )
+
+    @action(
+        detail=True,
+        methods=["get", "put"],
+        url_path="composition",
+        url_name="composition",
+    )
+    def composition(self, request, pk=None):
+        """A computed metric as the modal edits it, and the edit. Only for a
+        formula made of picked instances (compose.is_composable): the answer
+        says so, and the page sends the author to the definition otherwise.
+        The definition's other users, and whether this user may change it,
+        let the modal ask before an edit reaches beyond this metric."""
+        from metrology.compose import (
+            CompositionError,
+            compose,
+            is_composable,
+            permitted,
+            readable_instances,
+        )
+
+        instance = self.get_object()
+        definition = instance.metric_definition
+        if request.method == "PUT":
+            if not is_composable(instance):
+                return Response(
+                    {"error": "metricNotComposable"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            try:
+                instance, outcome = compose(request.user, request.data, instance)
+            except PermissionError:
+                return Response(status=status.HTTP_403_FORBIDDEN)
+            except CompositionError as e:
+                return Response(e.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "id": str(instance.id),
+                    "outcome": outcome,
+                    "definition": {"name": instance.metric_definition.name},
+                    # Before the recomputation the save queued: a page can
+                    # follow it until this stamp moves.
+                    "last_computed_at": instance.last_computed_at,
+                }
+            )
+        about = {
+            "id": str(definition.id),
+            "name": definition.name,
+            "shared_with": definition.metricinstance_set.exclude(
+                id=instance.id
+            ).count(),
+            "can_change": permitted(
+                request.user, ["change_metricdefinition"], definition.folder
+            ),
+        }
+        if not is_composable(instance):
+            return Response(
+                {
+                    "composable": False,
+                    "definition": about,
+                    "expression": definition.expression,
+                }
+            )
+        picks = {
+            key: _as_uuid(choice.get("pick"))
+            for key, choice in instance.input_choices.items()
+            if isinstance(choice, dict)
+        }
+        found = readable_instances(request.user, [i for i in picks.values() if i])
+        return Response(
+            {
+                "composable": True,
+                "definition": about,
+                "name": instance.name,
+                "description": instance.description,
+                "folder": {"id": str(instance.folder_id), "str": str(instance.folder)},
+                "collection_frequency": instance.collection_frequency,
+                "target_value": instance.target_value,
+                "category": definition.category,
+                "choices_definition": [
+                    {"ref_id": choice.get("ref_id"), "name": choice.get("name")}
+                    for choice in definition.choices_definition or []
+                    if isinstance(choice, dict)
+                ],
+                "unit": str(definition.unit_id) if definition.unit_id else None,
+                "higher_is_better": definition.higher_is_better,
+                "expression": definition.expression,
+                # An input whose instance is gone or not the user's to read
+                # comes back without one, for the author to pick again.
+                "inputs": [
+                    {
+                        "key": spec.get("key"),
+                        "instance": (
+                            _composable(found[picks[spec.get("key")]])
+                            if picks.get(spec.get("key")) in found
+                            else None
+                        ),
+                    }
+                    for spec in definition.inputs or []
+                    if isinstance(spec, dict)
+                ],
+            }
         )
 
     @action(detail=True, methods=["post"], url_path="refresh")

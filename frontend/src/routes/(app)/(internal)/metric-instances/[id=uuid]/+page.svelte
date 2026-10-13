@@ -3,10 +3,13 @@
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
 	import MetricSampleChart from '$lib/components/Chart/MetricSampleChart.svelte';
 	import { m } from '$paraglide/messages';
-	import { invalidate, invalidateAll } from '$app/navigation';
+	import { goto, invalidate, invalidateAll, replaceState } from '$app/navigation';
+	import { page } from '$app/state';
 	import { getModalStore } from '$lib/components/Modals/stores';
 	import ComposeMetricModal from '$lib/components/Modals/ComposeMetricModal.svelte';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
+	import { get } from 'svelte/store';
+	import { tableRefreshers } from '$lib/utils/stores';
 
 	interface Props {
 		data: PageData;
@@ -19,20 +22,135 @@
 	const isQualitative = $derived(metricDefinition?.category === 'qualitative');
 	const samples = $derived(data.samples || []);
 
-	let refreshState = $state<'idle' | 'busy' | 'queued' | 'failed'>('idle');
+	// Refresh now queues the computation; the worker stamps last_computed_at
+	// when it is done, so the page looks again until that stamp moves, then
+	// shows the new value and samples without a reload.
+	const REFRESH_LOOK_MS = 1500;
+	const REFRESH_LOOKS = 20;
+	let refreshState = $state<'idle' | 'refreshing' | 'done' | 'slow' | 'failed'>('idle');
+	let refreshRun = 0;
+
+	function refreshSampleTables() {
+		for (const [endpoint, refresh] of Object.entries(get(tableRefreshers))) {
+			if (endpoint.includes('custom-metric-samples')) refresh();
+		}
+	}
+
 	async function refreshNow() {
-		refreshState = 'busy';
+		const run = ++refreshRun;
+		const before = metricInstance?.last_computed_at ?? null;
+		refreshState = 'refreshing';
 		try {
 			const res = await fetch(`/fe-api/metrology/refresh-metric-instance/${metricInstance.id}`, {
 				method: 'POST'
 			});
-			refreshState = res.ok ? 'queued' : 'failed';
+			if (!res.ok) {
+				refreshState = 'failed';
+				return;
+			}
 		} catch {
 			refreshState = 'failed';
+			return;
 		}
+		await followComputation(run, before);
 	}
 
+	// Stamps compared as moments: the save answers in another format than the
+	// page's data.
+	function stamp(value: string | null | undefined): number | null {
+		const time = value ? Date.parse(value) : NaN;
+		return Number.isNaN(time) ? null : time;
+	}
+
+	// Until the worker's stamp moves past `before`: shared by Refresh now and
+	// a saved formula, which queues the same recomputation.
+	async function followComputation(run: number, before: string | null) {
+		refreshState = 'refreshing';
+		for (let look = 0; look < REFRESH_LOOKS; look++) {
+			await new Promise((resolve) => setTimeout(resolve, REFRESH_LOOK_MS));
+			// Left the page, or clicked again: this run has nothing more to do.
+			if (run !== refreshRun) return;
+			await invalidateAll();
+			if (stamp(data.data?.last_computed_at) !== stamp(before)) {
+				refreshSampleTables();
+				refreshState = 'done';
+				setTimeout(() => {
+					if (run === refreshRun && refreshState === 'done') refreshState = 'idle';
+				}, 3000);
+				return;
+			}
+		}
+		refreshState = 'slow';
+	}
+	onDestroy(() => {
+		refreshRun++;
+	});
+
+	// Arrived from the edit page after a formula save: follow the
+	// recomputation it queued, then drop the marker from the address.
+	onMount(() => {
+		const before = page.url.searchParams.get('recomputing');
+		if (before === null) return;
+		const url = new URL(page.url);
+		url.searchParams.delete('recomputing');
+		replaceState(url, {});
+		followComputation(++refreshRun, before || null);
+	});
+
 	const modalStore = getModalStore();
+
+	// Edit formula: the creation modal, filled in, for a formula made of
+	// picked instances; any other formula is edited on its definition.
+	let formulaBusy = $state(false);
+	// Known when the page opens, so the button says where it leads: the modal,
+	// or the definition for a formula the modal does not edit.
+	let formulaComposable = $state<boolean | null>(null);
+	// Asked once per metric: the page data reloads while a recomputation runs.
+	let composableAskedFor = '';
+	$effect(() => {
+		const id = metricInstance?.id;
+		if (!id || !metricInstance?.is_derived || composableAskedFor === id) return;
+		composableAskedFor = id;
+		formulaComposable = null;
+		fetch(`/fe-api/metrology/composition/${id}`)
+			.then((res) => (res.ok ? res.json() : null))
+			.then((body) => {
+				if (body && metricInstance?.id === id) formulaComposable = !!body.composable;
+			})
+			.catch(() => {});
+	});
+	async function editFormula() {
+		formulaBusy = true;
+		try {
+			const res = await fetch(`/fe-api/metrology/composition/${metricInstance.id}`);
+			const composition = res.ok ? await res.json() : null;
+			if (!composition) {
+				refreshState = 'failed';
+				return;
+			}
+			if (!composition.composable) {
+				await goto(
+					`/metric-definitions/${composition.definition.id}/edit?next=${encodeURIComponent(page.url.pathname)}`
+				);
+				return;
+			}
+			modalStore.trigger({
+				type: 'component',
+				component: {
+					ref: ComposeMetricModal,
+					props: {
+						instanceId: metricInstance.id,
+						composition,
+						onSaved: (saved: { last_computed_at?: string | null }) => {
+							followComputation(++refreshRun, saved.last_computed_at ?? null);
+						}
+					}
+				}
+			});
+		} finally {
+			formulaBusy = false;
+		}
+	}
 
 	// A computed metric just created is computed by the worker a moment
 	// later: look again a few times rather than show N/A until a reload.
@@ -91,18 +209,44 @@
 		{#if metricInstance?.is_derived}
 			<button
 				type="button"
+				class="btn preset-tonal-primary h-fit"
+				onclick={editFormula}
+				disabled={formulaBusy}
+				data-testid="edit-formula-button"
+			>
+				<i
+					class="fa-solid {formulaBusy
+						? 'fa-spinner fa-spin'
+						: formulaComposable === false
+							? 'fa-arrow-up-right-from-square'
+							: 'fa-square-root-variable'} mr-2"
+					aria-hidden="true"
+				></i>{formulaComposable === false ? m.editOnDefinition() : m.editFormula()}
+			</button>
+			<button
+				type="button"
 				class="btn preset-filled-primary-500 h-fit"
 				onclick={refreshNow}
-				disabled={refreshState === 'busy'}
+				disabled={refreshState === 'refreshing'}
+				aria-busy={refreshState === 'refreshing'}
 				data-testid="refresh-metric-button"
 			>
-				<i class="fa-solid fa-rotate mr-2"></i>{m.refreshNow()}
+				<i
+					class="fa-solid fa-rotate mr-2 {refreshState === 'refreshing' ? 'fa-spin' : ''}"
+					aria-hidden="true"
+				></i>{refreshState === 'refreshing' ? m.refreshing() : m.refreshNow()}
 			</button>
-			{#if refreshState === 'queued'}
-				<span class="text-sm text-success-600-400">{m.refreshQueued()}</span>
-			{:else if refreshState === 'failed'}
-				<span class="text-sm text-error-500">{m.refreshFailed()}</span>
-			{/if}
+			<span class="text-sm" role="status" data-testid="refresh-metric-status">
+				{#if refreshState === 'done'}
+					<span class="text-success-600-400">
+						<i class="fa-solid fa-check mr-1" aria-hidden="true"></i>{m.refreshDone()}
+					</span>
+				{:else if refreshState === 'slow'}
+					<span class="text-surface-600-400">{m.refreshSlow()}</span>
+				{:else if refreshState === 'failed'}
+					<span class="text-error-500">{m.refreshFailed()}</span>
+				{/if}
+			</span>
 		{/if}
 	{/snippet}
 	{#snippet widgets()}
@@ -110,7 +254,13 @@
 			<!-- Current Value -->
 			<div class="card p-4 bg-surface-50-950 shadow-sm">
 				<h3 class="text-lg font-semibold mb-3">{m.currentValue()}</h3>
-				<div class="text-3xl font-bold text-primary-600">
+				<!-- Dimmed while the worker recomputes: the number is about to change. -->
+				<div
+					class="text-3xl font-bold text-primary-600 transition-opacity {refreshState ===
+					'refreshing'
+						? 'opacity-40 animate-pulse'
+						: ''}"
+				>
 					{metricInstance?.current_value || 'N/A'}
 				</div>
 				{#if metricInstance?.is_derived}
@@ -128,7 +278,8 @@
 			<!-- Sample Timeline Chart -->
 			<div class="card p-4 bg-surface-50-950 shadow-sm">
 				<h3 class="text-lg font-semibold mb-3">{m.sampleTimeline()}</h3>
-				{#key samples.length}
+				<!-- A recomputation can rewrite values without changing their count. -->
+				{#key `${samples.length}|${metricInstance?.last_computed_at ?? ''}`}
 					<MetricSampleChart {samples} {metricDefinition} height="h-80" />
 				{/key}
 			</div>

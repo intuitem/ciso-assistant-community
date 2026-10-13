@@ -5,10 +5,18 @@ metric definition and an instance of it. The definition is an ordinary metric
 formula: one 'one value' input per picked instance, on that instance's metric
 and named after it, so it can be reused anywhere. The instance pins each input
 to the instance the author picked, and lives in a domain holding them all.
+
+Editing goes through the same path. What belongs to the instance (name,
+domain, frequency, target, which instance of a metric a pick reads) changes
+on it alone; what belongs to the definition (formula, inputs, result) changes
+the definition in place when nothing else uses it, or when the author asks
+for every metric using it, and otherwise moves this metric to a definition of
+its own.
 """
 
 from __future__ import annotations
 
+import re
 import uuid
 
 from django.core.exceptions import ValidationError
@@ -24,6 +32,10 @@ from .series import MAX_INPUTS, validate_inputs, validate_series_expression
 # frequency of its least frequent input, so no period repeats a value.
 FREQUENCY_ORDER = [value for value, _label in MetricInstance.Frequency.choices]
 CREATE = ["add_metricinstance", "add_metricdefinition"]
+QUALITATIVE = MetricDefinition.Category.QUALITATIVE
+QUANTITATIVE = MetricDefinition.Category.QUANTITATIVE
+# A CEL string literal, single- or double-quoted, escapes allowed.
+STRING_LITERAL = re.compile(r'"((?:[^"\\]|\\.)*)"|\'((?:[^\'\\]|\\.)*)\'')
 
 
 class CompositionError(Exception):
@@ -96,20 +108,43 @@ def unreadable_picks(user, choices, previous=None):
     return [pick for pick, i in zip(new, ids) if i not in readable]
 
 
-def creatable_in(user, folder):
-    """Whether the user may create both the definition and the instance in
-    ``folder``."""
+def permitted(user, codenames, folder):
+    """Whether the user holds every one of ``codenames`` in ``folder``."""
     from django.contrib.auth.models import Permission
 
-    permissions = list(Permission.objects.filter(codename__in=CREATE))
-    return len(permissions) == len(CREATE) and all(
+    permissions = list(Permission.objects.filter(codename__in=codenames))
+    return len(permissions) == len(codenames) and all(
         RoleAssignment.is_access_allowed(user=user, perm=permission, folder=folder)
         for permission in permissions
     )
 
 
-def _clean_inputs(user, raw, folder):
-    """The picked instances as (key, instance) pairs, and the errors."""
+def creatable_in(user, folder):
+    """Whether the user may create both the definition and the instance in
+    ``folder``."""
+    return permitted(user, CREATE, folder)
+
+
+def is_composable(instance):
+    """Whether the modal can show the instance's formula: one made of picked
+    instances, each input one value pinned to an instance. A combined input
+    or a formula over objects is edited on its definition."""
+    definition = instance.metric_definition
+    if not definition.reads_metrics or definition.datasets:
+        return False
+    choices = instance.input_choices if isinstance(instance.input_choices, dict) else {}
+    for spec in definition.inputs or []:
+        if not isinstance(spec, dict) or spec.get("combine", "one") != "one":
+            return False
+        choice = choices.get(spec.get("key"))
+        if not isinstance(choice, dict) or not choice.get("pick"):
+            return False
+    return True
+
+
+def _clean_inputs(user, raw, folder, itself=None):
+    """The picked instances as (key, instance) pairs, and the errors.
+    ``itself`` is the instance being edited: it cannot read itself."""
     if not isinstance(raw, list) or not raw:
         return [], ["Pick at least one metric instance"]
     if len(raw) > MAX_INPUTS:
@@ -133,7 +168,9 @@ def _clean_inputs(user, raw, folder):
             errors.append(f"'{picked.name}' is picked twice")
             continue
         seen.add(instance_id)
-        if picked.status == MetricInstance.Status.DEPRECATED:
+        if itself is not None and picked.id == itself.id:
+            errors.append(f"'{key}': a metric cannot read itself")
+        elif picked.status == MetricInstance.Status.DEPRECATED:
             errors.append(f"'{key}': '{picked.name}' is deprecated")
         elif picked.folder_id not in subtree:
             errors.append(
@@ -144,7 +181,42 @@ def _clean_inputs(user, raw, folder):
     return pairs, errors
 
 
-def _same_formula(definition, specs, expression, unit, higher_is_better):
+def string_literals(expression):
+    """The quoted texts of an expression, in order, each once. Inputs are
+    numbers, so in a qualitative formula these are the levels it returns."""
+    seen = []
+    for match in STRING_LITERAL.finditer(expression or ""):
+        text = match.group(1) if match.group(1) is not None else match.group(2)
+        if text not in seen:
+            seen.append(text)
+    return seen
+
+
+def _clean_levels(raw):
+    """A qualitative result's levels as [{ref_id, name}], in order, and the
+    errors. Both names and ref_ids are what an expression may return, so
+    neither may repeat."""
+    if not isinstance(raw, list) or len(raw) < 2:
+        return [], ["A level metric needs at least two levels"]
+    levels, errors, seen = [], [], set()
+    for item in raw:
+        ref_id = item.get("ref_id") if isinstance(item, dict) else None
+        name = item.get("name") if isinstance(item, dict) else None
+        ref_id = ref_id.strip() if isinstance(ref_id, str) else ""
+        name = name.strip() if isinstance(name, str) else ""
+        if not ref_id or not name:
+            errors.append("Each level needs a reference and a name")
+            continue
+        clashes = {ref_id.lower(), name.lower()} & seen
+        if clashes:
+            errors.append(f"'{sorted(clashes)[0]}' names two levels")
+            continue
+        seen |= {ref_id.lower(), name.lower()}
+        levels.append({"ref_id": ref_id, "name": name})
+    return levels, errors
+
+
+def _same_formula(definition, specs, expression, shape):
     def normalized(inputs):
         return sorted(
             (spec.get("key"), spec.get("definition"), spec.get("combine", "one"))
@@ -152,26 +224,36 @@ def _same_formula(definition, specs, expression, unit, higher_is_better):
             if isinstance(spec, dict)
         )
 
+    def levels(choices):
+        return [
+            (choice.get("ref_id"), choice.get("name"))
+            for choice in choices or []
+            if isinstance(choice, dict)
+        ]
+
+    unit = shape["unit"]
     return (
         definition.expression.strip() == expression.strip()
         and normalized(definition.inputs) == normalized(specs)
+        and definition.category == shape["category"]
+        and levels(definition.choices_definition) == levels(shape["levels"])
         and definition.unit_id == (unit.id if unit else None)
-        and definition.higher_is_better == higher_is_better
+        and definition.higher_is_better == shape["higher_is_better"]
     )
 
 
-def _existing_definition(user, folder, specs, expression, unit, higher_is_better):
+def _existing_definition(user, folder, specs, expression, shape):
     """A definition the user can read, in the domain or above it, computing
-    exactly this formula: the same metric computed in another domain reuses
-    it instead of copying it."""
+    exactly this formula into the same result: the same metric computed in
+    another domain reuses it instead of copying it."""
     candidates = MetricDefinition.objects.filter(
         folder__in=folder.get_parent_folders(include_self=True),
-        category=MetricDefinition.Category.QUANTITATIVE,
+        category=shape["category"],
         expression=expression,
     ).exclude(inputs__isnull=True)
     for definition in candidates.order_by("created_at", "id"):
         if _same_formula(
-            definition, specs, expression, unit, higher_is_better
+            definition, specs, expression, shape
         ) and RoleAssignment.is_object_readable(user, MetricDefinition, definition.id):
             return definition
     return None
@@ -187,31 +269,41 @@ def _definition_name(name, folder):
     return candidate
 
 
-def compose(user, data):
-    """Create a computed metric from ``data``: (instance, reused), where
-    ``reused`` tells whether an identical definition already existed. Raises
-    CompositionError with the errors by field, or PermissionError when the
-    user may not create metrics in the domain."""
+def compose(user, data, instance=None):
+    """Create a computed metric from ``data``, or edit ``instance``, one the
+    modal can show (is_composable). Returns (instance, outcome): "created",
+    or "reused" when an identical definition already existed; when editing,
+    "unchanged" (the definition stays), "updated" (edited in place) or
+    "forked" (this metric moved to a definition of its own, new or
+    identical). Raises CompositionError with the errors by field, or
+    PermissionError when the user may not write where it would."""
     data = data if isinstance(data, dict) else {}
     errors = {}
 
     folder = Folder.objects.filter(id=_as_uuid(data.get("folder"))).first()
     if folder is None:
         raise CompositionError({"folder": ["Choose a domain"]})
-    if not creatable_in(user, folder):
+    if instance is None:
+        if not creatable_in(user, folder):
+            raise PermissionError
+    elif not (
+        permitted(user, ["change_metricinstance"], instance.folder)
+        and permitted(user, ["change_metricinstance"], folder)
+    ):
         raise PermissionError
+    current = instance.metric_definition if instance is not None else None
 
     name = data.get("name")
     if not isinstance(name, str) or not name.strip():
         errors["name"] = ["Name the metric"]
-    pairs, input_errors = _clean_inputs(user, data.get("inputs"), folder)
+    pairs, input_errors = _clean_inputs(user, data.get("inputs"), folder, instance)
     specs = [
         {"key": key, "definition": str(picked.metric_definition_id), "combine": "one"}
         for key, picked in pairs
     ]
     if specs or not input_errors:
         # With nothing usable picked, the pick errors already say why.
-        input_errors += [message for _code, message in validate_inputs(specs)]
+        input_errors += [message for _code, message in validate_inputs(specs, current)]
     if input_errors:
         errors["inputs"] = input_errors
     expression = data.get("expression")
@@ -224,13 +316,36 @@ def compose(user, data):
         if expression_errors:
             errors["expression"] = [message for _code, message in expression_errors]
 
-    frequency = data.get("collection_frequency") or least_frequent(
-        [picked.collection_frequency for _key, picked in pairs]
+    # The result: a number, or one of an ordered list of levels.
+    category = data.get("category") or QUANTITATIVE
+    levels = []
+    if category not in MetricDefinition.Category.values:
+        errors["category"] = ["Unknown result type"]
+    elif category == QUALITATIVE:
+        levels, level_errors = _clean_levels(data.get("choices_definition"))
+        if level_errors:
+            errors["choices_definition"] = level_errors
+        elif isinstance(expression, str) and "expression" not in errors:
+            known = {text.lower() for level in levels for text in level.values()}
+            unknown = [
+                text
+                for text in string_literals(expression)
+                if text.lower() not in known
+            ]
+            if unknown:
+                errors["expression"] = [
+                    f"'{text}' is not one of the levels" for text in unknown
+                ]
+
+    frequency = data.get("collection_frequency") or (
+        instance.collection_frequency
+        if instance is not None
+        else least_frequent([picked.collection_frequency for _key, picked in pairs])
     )
     if frequency not in MetricInstance.Frequency.values:
         errors["collection_frequency"] = ["Unknown frequency"]
     unit = None
-    if data.get("unit"):
+    if data.get("unit") and category != QUALITATIVE:
         unit = Terminology.objects.filter(
             id=_as_uuid(data.get("unit")),
             field_path=Terminology.FieldPath.METRIC_UNIT,
@@ -239,7 +354,7 @@ def compose(user, data):
         if unit is None:
             errors["unit"] = ["Unknown unit"]
     target_value = data.get("target_value")
-    if target_value in ("", None):
+    if target_value in ("", None) or category == QUALITATIVE:
         target_value = None
     else:
         try:
@@ -250,36 +365,48 @@ def compose(user, data):
         raise CompositionError(errors)
 
     name = name.strip()
-    higher_is_better = data.get("higher_is_better", True) is not False
+    shape = {
+        "category": category,
+        "levels": levels,
+        "unit": unit,
+        "higher_is_better": data.get("higher_is_better", True) is not False,
+    }
+    picks = {key: {"pick": str(picked.id)} for key, picked in pairs}
     try:
         with transaction.atomic():
-            definition = _existing_definition(
-                user, folder, specs, expression, unit, higher_is_better
-            )
-            reused = definition is not None
-            if definition is None:
-                definition = MetricDefinition.objects.create(
-                    name=_definition_name(name, folder),
-                    folder=folder,
-                    category=MetricDefinition.Category.QUANTITATIVE,
-                    unit=unit,
-                    higher_is_better=higher_is_better,
-                    inputs=specs,
-                    expression=expression,
+            if instance is None:
+                definition, outcome = _definition_for(
+                    user, folder, name, specs, expression, shape
                 )
-            instance = MetricInstance.objects.create(
-                name=name,
-                description=data.get("description") or "",
-                folder=folder,
-                metric_definition=definition,
-                status=MetricInstance.Status.ACTIVE,
-                collection_frequency=frequency,
-                target_value=target_value,
-                # Pinned, every one: the author picked these instances, and a
-                # second instance of a metric appearing later in the domain
-                # must not change what this one reads.
-                input_choices={key: {"pick": str(picked.id)} for key, picked in pairs},
-            )
+                instance = MetricInstance.objects.create(
+                    name=name,
+                    description=data.get("description") or "",
+                    folder=folder,
+                    metric_definition=definition,
+                    status=MetricInstance.Status.ACTIVE,
+                    collection_frequency=frequency,
+                    target_value=target_value,
+                    # Pinned, every one: the author picked these instances, and
+                    # a second instance of a metric appearing later in the
+                    # domain must not change what this one reads.
+                    input_choices=picks,
+                )
+            else:
+                definition, outcome = _definition_after_edit(
+                    user, instance, folder, name, specs, expression, shape, data
+                )
+                moved = instance.folder_id != folder.id
+                instance.name = name
+                if "description" in data:
+                    instance.description = data.get("description") or ""
+                instance.folder = folder
+                instance.metric_definition = definition
+                instance.collection_frequency = frequency
+                instance.target_value = target_value
+                instance.input_choices = picks
+                instance.save()
+                if moved:
+                    instance.samples.update(folder=folder)
     except ValidationError as e:
         # A name another instance of the domain already has.
         raise CompositionError(
@@ -297,4 +424,51 @@ def compose(user, data):
         compute_derived_metric_task(instance_id, full=True)
 
     transaction.on_commit(compute)
-    return instance, reused
+    return instance, outcome
+
+
+def _definition_for(user, folder, name, specs, expression, shape):
+    """An identical definition the user can read, or a new one in
+    ``folder``: (definition, "reused" | "created")."""
+    definition = _existing_definition(user, folder, specs, expression, shape)
+    if definition is not None:
+        return definition, "reused"
+    definition = MetricDefinition.objects.create(
+        name=_definition_name(name, folder),
+        folder=folder,
+        category=shape["category"],
+        choices_definition=shape["levels"] or None,
+        unit=shape["unit"],
+        higher_is_better=shape["higher_is_better"],
+        inputs=specs,
+        expression=expression,
+    )
+    return definition, "created"
+
+
+def _definition_after_edit(
+    user, instance, folder, name, specs, expression, shape, data
+):
+    """The definition an edited metric computes with. Unchanged when the
+    edit only touched the instance; edited in place when nothing else uses
+    it, or when the author asked for every metric using it
+    (``definition_scope: "all"``) and may change it; otherwise this metric
+    moves to a definition of its own, so the others are left as they were."""
+    current = instance.metric_definition
+    if _same_formula(current, specs, expression, shape):
+        return current, "unchanged"
+    others = current.metricinstance_set.exclude(id=instance.id).exists()
+    in_place = not others or data.get("definition_scope") == "all"
+    if in_place and permitted(user, ["change_metricdefinition"], current.folder):
+        current.category = shape["category"]
+        current.choices_definition = shape["levels"] or None
+        current.unit = shape["unit"]
+        current.higher_is_better = shape["higher_is_better"]
+        current.inputs = specs
+        current.expression = expression
+        current.save()
+        return current, "updated"
+    if not permitted(user, ["add_metricdefinition"], folder):
+        raise PermissionError
+    definition, _outcome = _definition_for(user, folder, name, specs, expression, shape)
+    return definition, "forked"

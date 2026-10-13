@@ -2,11 +2,17 @@
 	// A computed metric started from instances: pick them, write a formula,
 	// name it. The backend makes the definition (or reuses an identical one)
 	// and the instance, pinned to the picks, in a domain holding them all.
-	import { onMount, tick } from 'svelte';
+	import { onMount, tick, untrack } from 'svelte';
 	import { flip } from 'svelte/animate';
 	import { goto } from '$app/navigation';
 	import { m } from '$paraglide/messages';
 	import CelInput from '$lib/components/Cel/CelInput.svelte';
+	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
+	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import OrderedEntryList from '$lib/components/OrderedEntryList.svelte';
+	import { defaults, superForm, type SuperForm } from 'sveltekit-superforms';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
+	import { z } from 'zod';
 	import { getModalStore, type ModalStore } from './stores';
 	import { getToastStore } from '$lib/components/Toast/stores';
 	import {
@@ -15,10 +21,17 @@
 		formulaScope,
 		keepOrFirst,
 		latestTrend,
+		levelIndex,
+		levelStarter,
 		moveItem,
 		sparkline,
 		quickFormulas,
+		renameLiteral,
 		renameReference,
+		stringLiterals,
+		syncLevels,
+		unknownLevels,
+		type Level,
 		type QuickFormula,
 		type SparkPoint
 	} from '$lib/utils/derived-metrics';
@@ -34,13 +47,35 @@
 	interface Picked extends Candidate {
 		key: string;
 	}
+	// A computed metric as the backend hands it over for editing
+	// (metric-instances/<id>/composition).
+	interface Composition {
+		composable: boolean;
+		definition: { id: string; name: string; shared_with: number; can_change: boolean };
+		expression: string;
+		name: string;
+		description?: string | null;
+		folder: { id: string; str: string };
+		collection_frequency: string | null;
+		target_value: number | null;
+		category: 'quantitative' | 'qualitative';
+		choices_definition: { ref_id: string | null; name: string | null }[];
+		unit: string | null;
+		higher_is_better: boolean;
+		inputs: { key: string; instance: Candidate | null }[];
+	}
 	interface Props {
 		parent: any;
 		// Instances to start with: a list selection, or the instance page.
 		instanceIds?: string[];
+		// Editing: the metric, as it is now.
+		instanceId?: string;
+		composition?: Composition;
+		onSaved?: (saved: { last_computed_at?: string | null }) => void;
 	}
 
-	let { parent, instanceIds = [] }: Props = $props();
+	let { parent, instanceIds = [], instanceId, composition, onSaved }: Props = $props();
+	const editing = $derived(!!instanceId && !!composition);
 
 	const modalStore: ModalStore = getModalStore();
 	const toastStore = getToastStore();
@@ -68,11 +103,112 @@
 	let folder = $state('');
 	let frequency = $state('monthly');
 	let frequencyChosen = false;
+	// The domain follows the picks (the lowest holding them all) until the
+	// author chooses one; then it stays while it is still offered.
+	let folderChosen = false;
+	// The usual domain picker needs a form to bind to: a client-side one, its
+	// value mirrored into `folder`. Not named "folder", or the picker would
+	// offer the personal space, where the picks can never be.
+	// It also backs the "use the levels of" definition picker.
+	const domainSchema = z.object({
+		target_folder: z.string(),
+		levels_from: z.string().nullable().optional()
+	});
+	const domainForm = superForm(
+		defaults({ target_folder: '', levels_from: null }, zod(domainSchema)),
+		{
+			dataType: 'json',
+			taintedMessage: false,
+			validators: zod(domainSchema),
+			SPA: true
+		}
+	);
+	// AutocompleteSelect types its form loosely; the same form, as it expects it.
+	const levelsForm = domainForm as unknown as SuperForm<Record<string, unknown>, any>;
 	let units = $state<{ id: string; label: string }[]>([]);
 	let unit = $state('');
 	let target = $state('');
 	let higherIsBetter = $state(true);
+
+	// The result: a number, or one of an ordered list of levels (a qualitative
+	// metric). The levels follow the texts the formula returns until the
+	// author takes them from an existing definition.
+	let resultKind = $state<'number' | 'level'>('number');
+	const isLevel = $derived(resultKind === 'level');
+	let levels = $state<Level[]>([]);
+	let levelsFrom = $state<string | null>(null);
+	// The levels as they were before the editor's last change: tells a
+	// rename, which the formula follows, from a reorder.
+	let previousLevels: Level[] = [];
+
+	function setLevels(next: Level[]) {
+		levels = next;
+		previousLevels = next;
+	}
+
+	$effect(() => {
+		if (!isLevel || levelsFrom) return;
+		const texts = stringLiterals(expression);
+		const timer = setTimeout(() => {
+			const current = untrack(() => levels);
+			const next = syncLevels(current, texts);
+			if (next !== current) setLevels(next);
+		}, 300);
+		return () => clearTimeout(timer);
+	});
+
+	function onLevelsChange(next: Level[]) {
+		let renamed = expression;
+		for (const level of next) {
+			const before =
+				previousLevels.find((p) => p.ref_id === level.ref_id) ??
+				previousLevels.find((p) => p.name === level.name);
+			if (!before) continue;
+			renamed = renameLiteral(renamed, before.name, level.name);
+			renamed = renameLiteral(renamed, before.ref_id, level.ref_id);
+		}
+		expression = renamed;
+		setLevels(next);
+	}
+
+	async function useLevelsOf(id: unknown) {
+		if (typeof id !== 'string' || !id) {
+			levelsFrom = null;
+			return;
+		}
+		try {
+			const res = await fetch(`/fe-api/metrology/metric-definitions/${id}`);
+			if (!res.ok) return;
+			const body = await res.json();
+			const choices: { ref_id?: unknown; name?: unknown }[] = Array.isArray(body.choices_definition)
+				? body.choices_definition
+				: [];
+			// A level without a reference (older or imported definitions) gets
+			// one from its name: the new definition needs both.
+			const taken: string[] = [];
+			setLevels(
+				choices.map((choice) => {
+					const name = String(choice.name ?? '');
+					const ref_id = String(choice.ref_id ?? '').trim() || formulaKey(name, taken);
+					taken.push(ref_id.toLowerCase(), name.toLowerCase());
+					return { ref_id, name };
+				})
+			);
+			levelsFrom = typeof body.name === 'string' ? body.name : id;
+		} catch {
+			// The picker stays as it was; the author can pick again.
+		}
+	}
+
+	const unknownTexts = $derived(isLevel ? unknownLevels(expression, levels) : []);
+	const levelPayload = $derived(levels.map(({ ref_id, name }) => ({ ref_id, name })));
+
 	let errors = $state<Record<string, string[]>>({});
+	// Editing: inputs whose instance is gone, and what an edit of the
+	// definition reaches when other metrics use it.
+	let missingInputs = $state<string[]>([]);
+	let definitionScope = $state<'this' | 'all'>('this');
+	let initialDefinition = $state<string | null>(null);
 	let saving = $state(false);
 	let contextLoaded = $state(false);
 
@@ -213,11 +349,29 @@
 	}
 
 	const keys = $derived(picked.map((p) => p.key));
-	const quick = $derived(expression.trim() ? [] : quickFormulas(keys));
+	const quick = $derived(expression.trim() || isLevel ? [] : quickFormulas(keys));
+	const starter = $derived(isLevel && !expression.trim() ? levelStarter(keys) : '');
 	const inputs = $derived(
 		picked.map((p) => ({ key: p.key, definition: p.definition.id, combine: 'one' as const }))
 	);
 	const choices = $derived(Object.fromEntries(picked.map((p) => [p.key, { pick: p.id }])));
+
+	// What the definition holds (mirrors compose._same_formula): an edit that
+	// changes it may reach other metrics, and recomputes the past.
+	const definitionState = $derived(
+		JSON.stringify([
+			inputs.map((input) => `${input.key}:${input.definition}`).sort(),
+			expression.trim(),
+			isLevel,
+			isLevel ? levelPayload : [],
+			isLevel ? null : unit || null,
+			higherIsBetter
+		])
+	);
+	const definitionChanged = $derived(
+		editing && initialDefinition !== null && definitionState !== initialDefinition
+	);
+	const sharedWith = $derived(composition?.definition.shared_with ?? 0);
 
 	// ---------- where it lives and how often ----------
 
@@ -237,7 +391,8 @@
 			.then((body) => {
 				if (seq !== contextSeq || !body) return;
 				domains = body.domains ?? [];
-				folder = keepOrFirst(folder, domains);
+				folder = folderChosen ? keepOrFirst(folder, domains) : (domains[0]?.id ?? '');
+				domainForm.form.update((data) => ({ ...data, target_folder: folder }));
 				if (!frequencyChosen && body.frequency) frequency = body.frequency;
 				contextLoaded = true;
 			})
@@ -265,7 +420,12 @@
 	// The last year or so of periods, as a small chart under the value.
 	const CHART = { width: 240, height: 64, periods: 12 };
 	const chartId = $props.id();
-	const chartPeriods = $derived((preview?.periods ?? []).slice(-CHART.periods));
+	// A level plots at its position in the list.
+	const chartPeriods = $derived(
+		(preview?.periods ?? [])
+			.slice(-CHART.periods)
+			.map((period) => (isLevel ? { ...period, value: levelIndex(period.value, levels) } : period))
+	);
 	const chart = $derived(sparkline(chartPeriods, CHART.width, CHART.height, 6));
 	const trend = $derived(latestTrend(chartPeriods, higherIsBetter));
 	let hovered = $state<SparkPoint | null>(null);
@@ -284,7 +444,8 @@
 					inputs,
 					input_choices: choices,
 					expression,
-					category: 'quantitative'
+					category: isLevel ? 'qualitative' : 'quantitative',
+					choices_definition: isLevel ? levelPayload : undefined
 				})
 			});
 			const body = await res.json();
@@ -296,7 +457,9 @@
 			if (seq === previewSeq) previewBusy = false;
 		}
 	}
-	const previewKey = $derived(JSON.stringify([folder, frequency, inputs, choices, expression]));
+	const previewKey = $derived(
+		JSON.stringify([folder, frequency, inputs, choices, expression, isLevel, levelPayload])
+	);
 	$effect(() => {
 		void previewKey;
 		if (!folder || !picked.length || !expression.trim()) {
@@ -310,7 +473,13 @@
 	function formatValue(value: unknown): string {
 		if (typeof value === 'number')
 			return Number.isInteger(value) ? String(value) : value.toFixed(2);
+		if (typeof value === 'string') return value;
 		return value === null || value === undefined ? '—' : JSON.stringify(value);
+	}
+
+	// A charted level is its position: show its name.
+	function formatPoint(value: number): string {
+		return isLevel ? (levels[value - 1]?.name ?? formatValue(value)) : formatValue(value);
 	}
 
 	// ---------- creating ----------
@@ -325,21 +494,37 @@
 		saving = true;
 		errors = {};
 		try {
-			const res = await fetch('/fe-api/metrology/compose', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					name: name.trim(),
-					folder,
-					inputs: picked.map((p) => ({ key: p.key, instance: p.id })),
-					expression,
-					collection_frequency: frequency,
-					unit: unit || null,
-					target_value: target === '' ? null : target,
-					higher_is_better: higherIsBetter
-				})
-			});
+			const res = await fetch(
+				editing ? `/fe-api/metrology/composition/${instanceId}` : '/fe-api/metrology/compose',
+				{
+					method: editing ? 'PUT' : 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						definition_scope: definitionScope,
+						name: name.trim(),
+						folder,
+						inputs: picked.map((p) => ({ key: p.key, instance: p.id })),
+						expression,
+						collection_frequency: frequency,
+						category: isLevel ? 'qualitative' : 'quantitative',
+						choices_definition: isLevel ? levelPayload : undefined,
+						unit: isLevel ? null : unit || null,
+						target_value: isLevel || target === '' ? null : target,
+						higher_is_better: higherIsBetter
+					})
+				}
+			);
 			const body = await res.json().catch(() => ({}));
+			if (editing && res.ok) {
+				toastStore.trigger({
+					message:
+						body.outcome === 'forked' ? m.computedMetricSavedForked() : m.computedMetricSaved(),
+					background: 'preset-filled-success-500'
+				});
+				modalStore.close();
+				onSaved?.(body);
+				return;
+			}
 			if (res.status === 201) {
 				toastStore.trigger({
 					message: body.definition?.reused
@@ -365,9 +550,36 @@
 	let modalEl = $state<HTMLFormElement | null>(null);
 
 	onMount(async () => {
+		if (composition) {
+			const c = composition;
+			picked = c.inputs
+				.filter((input) => input.instance)
+				.map((input) => ({ ...(input.instance as Candidate), key: input.key }));
+			missingInputs = c.inputs.filter((input) => !input.instance).map((input) => input.key);
+			expression = c.expression;
+			resultKind = c.category === 'qualitative' ? 'level' : 'number';
+			setLevels(
+				(c.choices_definition ?? []).map((choice) => ({
+					ref_id: choice.ref_id ?? '',
+					name: choice.name ?? ''
+				}))
+			);
+			name = c.name;
+			folder = c.folder.id;
+			folderChosen = true;
+			domainForm.form.update((data) => ({ ...data, target_folder: folder }));
+			frequency = c.collection_frequency ?? 'monthly';
+			frequencyChosen = true;
+			unit = c.unit ?? '';
+			target =
+				c.target_value === null || c.target_value === undefined ? '' : String(c.target_value);
+			higherIsBetter = c.higher_is_better;
+			await tick();
+			initialDefinition = definitionState;
+		}
 		// Opened with picks (a selection, an instance page): the formula is
 		// the next thing to do. Otherwise picking is.
-		if (!instanceIds.length) searchInput?.focus();
+		else if (!instanceIds.length) searchInput?.focus();
 		const loads: Promise<void>[] = [
 			fetch('/terminologies?field_path=metric_definition.unit&is_visible=true')
 				.then((res) => (res.ok ? res.json() : []))
@@ -421,9 +633,11 @@
 			<div class="flex flex-col gap-1">
 				<h2 class="text-2xl font-bold flex items-center gap-2">
 					<i class="fa-solid fa-calculator text-primary-500" aria-hidden="true"></i>
-					{m.newComputedMetric()}
+					{editing ? m.editComputedMetric() : m.newComputedMetric()}
 				</h2>
-				<p class="text-sm text-surface-600-400">{m.newComputedMetricHelpText()}</p>
+				<p class="text-sm text-surface-600-400">
+					{editing ? m.editComputedMetricHelpText() : m.newComputedMetricHelpText()}
+				</p>
 			</div>
 			<button
 				type="button"
@@ -617,6 +831,12 @@
 					{:else}
 						<p class="text-xs text-surface-500">{m.composeEmptyHint()}</p>
 					{/if}
+					{#if missingInputs.length}
+						<p class="text-xs text-warning-600-400" data-testid="compose-missing-inputs">
+							<i class="fa-solid fa-triangle-exclamation mr-1" aria-hidden="true"
+							></i>{m.inputsToPickAgain({ keys: missingInputs.join(', ') })}
+						</p>
+					{/if}
 					{#each errors.inputs ?? [] as message (message)}
 						<p class="text-xs text-error-500">{message}</p>
 					{/each}
@@ -624,10 +844,49 @@
 
 				<!-- 2. The formula -->
 				<section class="flex flex-col gap-2" aria-labelledby="compose-formula-title">
-					<h3 id="compose-formula-title" class="text-sm font-semibold">
-						<span class="badge-icon preset-filled-primary-500 size-5 text-xs mr-1">2</span>
-						{m.formula()}
-					</h3>
+					<div class="flex items-center justify-between gap-2 flex-wrap">
+						<h3 id="compose-formula-title" class="text-sm font-semibold">
+							<span class="badge-icon preset-filled-primary-500 size-5 text-xs mr-1">2</span>
+							{m.formula()}
+						</h3>
+						<div
+							class="flex items-center gap-1 text-xs"
+							role="radiogroup"
+							aria-label={m.resultType()}
+							data-testid="compose-result-kind"
+						>
+							<span class="text-surface-500 mr-1">{m.resultType()}</span>
+							{#each [['number', m.resultNumber()], ['level', m.resultLevel()]] as [kind, label] (kind)}
+								<button
+									type="button"
+									role="radio"
+									aria-checked={resultKind === kind}
+									class="btn btn-sm text-xs py-0.5 {resultKind === kind
+										? 'preset-filled-primary-500'
+										: 'preset-tonal'}"
+									onclick={() => (resultKind = kind as 'number' | 'level')}
+									data-testid="compose-result-{kind}"
+								>
+									<i
+										class="fa-solid {kind === 'number' ? 'fa-hashtag' : 'fa-list-ol'} mr-1"
+										aria-hidden="true"
+									></i>{label}
+								</button>
+							{/each}
+						</div>
+					</div>
+					{#if starter}
+						<div class="flex flex-wrap items-center gap-1.5">
+							<span class="text-xs text-surface-500">{m.startFrom()}</span>
+							<button
+								type="button"
+								class="btn btn-sm preset-tonal-secondary text-xs py-0.5"
+								title={starter}
+								onclick={() => (expression = starter)}
+								data-testid="compose-quick-threshold">{m.quickFormulaThreshold()}</button
+							>
+						</div>
+					{/if}
 					{#if quick.length}
 						<div class="flex flex-wrap items-center gap-1.5">
 							<span class="text-xs text-surface-500">{m.startFrom()}</span>
@@ -648,16 +907,54 @@
 						bind:value={expression}
 						scope={celScope}
 						testid="compose-expression"
-						placeholder={keys.length >= 2
-							? `${keys[0]} * 100.0 / ${keys[1]}`
-							: keys.length
-								? `${keys[0]} * 2`
-								: 'clicks * 100.0 / headcount'}
+						placeholder={isLevel
+							? levelStarter(keys) || 'rate >= 50.0 ? "High" : "Low"'
+							: keys.length >= 2
+								? `${keys[0]} * 100.0 / ${keys[1]}`
+								: keys.length
+									? `${keys[0]} * 2`
+									: 'clicks * 100.0 / headcount'}
 					/>
 					<span class="text-xs text-surface-500">{m.metricExpressionHelpText()}</span>
 					{#each errors.expression ?? [] as message (message)}
 						<p class="text-xs text-error-500">{message}</p>
 					{/each}
+					{#if isLevel}
+						<!-- The levels, as the definition form shows them: edit, add, reorder. -->
+						<div
+							class="flex flex-col gap-2 rounded-base border border-surface-200-800 p-3"
+							data-testid="compose-levels"
+						>
+							<div class="flex items-center justify-between gap-2 flex-wrap">
+								<span class="text-sm font-semibold">{m.levels()}</span>
+								<div class="w-72">
+									<AutocompleteSelect
+										form={levelsForm}
+										field="levels_from"
+										optionsEndpoint="metric-definitions"
+										optionsDetailedUrlParameters={[['category', 'qualitative']]}
+										placeholder={m.useLevelsOf()}
+										nullable
+										portalDropdown
+										onChange={useLevelsOf}
+									/>
+								</div>
+							</div>
+							<p class="text-xs text-surface-500">
+								{levelsFrom ? m.levelsCopiedHelpText({ name: levelsFrom }) : m.levelsHelpText()}
+							</p>
+							<OrderedEntryList bind:entries={levels} onchange={onLevelsChange} />
+							{#each unknownTexts as text (text)}
+								<p class="text-xs text-warning-600-400" data-testid="compose-unknown-level">
+									<i class="fa-solid fa-triangle-exclamation mr-1" aria-hidden="true"
+									></i>{m.notALevel({ text })}
+								</p>
+							{/each}
+							{#each errors.choices_definition ?? [] as message (message)}
+								<p class="text-xs text-error-500">{message}</p>
+							{/each}
+						</div>
+					{/if}
 				</section>
 			</div>
 
@@ -705,7 +1002,7 @@
 											: 'fa-minus'}"
 									aria-hidden="true"
 								></i>
-								{trend.delta > 0 ? '+' : ''}{formatValue(trend.delta)}
+								{#if !isLevel}{trend.delta > 0 ? '+' : ''}{formatValue(trend.delta)}{/if}
 							</span>
 						{/if}
 					</div>
@@ -770,7 +1067,7 @@
 								{#if hovered}
 									<span>{hovered.start.slice(0, 10)}</span>
 									<span class="text-surface-900-100 font-semibold"
-										>{formatValue(hovered.value)}</span
+										>{formatPoint(hovered.value)}</span
 									>
 								{:else}
 									<span>{chart.points[0].start.slice(0, 10)}</span>
@@ -834,22 +1131,24 @@
 						<span class="text-xs text-error-500">{message}</span>
 					{/each}
 				</label>
-				<label class="label flex flex-col gap-1">
+				<!-- Not a <label>: it would forward clicks to the picker's first button. -->
+				<div class="flex flex-col gap-1" data-testid="compose-domain">
 					<span class="text-xs font-semibold">{m.domain()}</span>
-					<select
-						class="select"
-						bind:value={folder}
+					<FolderTreeSelect
+						form={domainForm}
+						field="target_folder"
+						writePermission={null}
+						allowedIds={domains.map((domain) => domain.id)}
 						disabled={!domains.length}
-						data-testid="compose-domain"
-					>
-						{#each domains as domain (domain.id)}
-							<option value={domain.id}>{domain.str}</option>
-						{/each}
-					</select>
+						onChange={(value: unknown) => {
+							folder = typeof value === 'string' ? value : '';
+							folderChosen = true;
+						}}
+					/>
 					{#if contextLoaded && !domains.length}
 						<span class="text-xs text-error-500">{m.noDomainToCreateIn()}</span>
 					{/if}
-				</label>
+				</div>
 				<label class="label flex flex-col gap-1">
 					<span class="text-xs font-semibold">{m.collectionFrequency()}</span>
 					<select
@@ -863,38 +1162,83 @@
 						{/each}
 					</select>
 				</label>
-				<label class="label flex flex-col gap-1">
-					<span class="text-xs font-semibold">{m.unit()}</span>
-					<select class="select" bind:value={unit} data-testid="compose-unit">
-						<option value="">—</option>
-						{#each units as option (option.id)}
-							<option value={option.id}>{option.label}</option>
+				{#if !isLevel}
+					<label class="label flex flex-col gap-1">
+						<span class="text-xs font-semibold">{m.unit()}</span>
+						<select class="select" bind:value={unit} data-testid="compose-unit">
+							<option value="">—</option>
+							{#each units as option (option.id)}
+								<option value={option.id}>{option.label}</option>
+							{/each}
+						</select>
+					</label>
+					<label class="label flex flex-col gap-1">
+						<span class="text-xs font-semibold">{m.targetValue()}</span>
+						<input
+							class="input"
+							type="number"
+							step="any"
+							bind:value={target}
+							data-testid="compose-target"
+						/>
+						{#each errors.target_value ?? [] as message (message)}
+							<span class="text-xs text-error-500">{message}</span>
 						{/each}
-					</select>
-				</label>
-				<label class="label flex flex-col gap-1">
-					<span class="text-xs font-semibold">{m.targetValue()}</span>
-					<input
-						class="input"
-						type="number"
-						step="any"
-						bind:value={target}
-						data-testid="compose-target"
-					/>
-					{#each errors.target_value ?? [] as message (message)}
-						<span class="text-xs text-error-500">{message}</span>
-					{/each}
-				</label>
+					</label>
+				{/if}
 				<label class="flex items-center gap-2 cursor-pointer self-end pb-2">
 					<input type="checkbox" class="checkbox" bind:checked={higherIsBetter} />
 					<span class="text-sm">{m.higherIsBetter()}</span>
 				</label>
 			</div>
-			{#each [...(errors.folder ?? []), ...(errors.collection_frequency ?? []), ...(errors.unit ?? []), ...(errors.form ?? [])] as message (message)}
+			{#each [...(errors.folder ?? []), ...(errors.collection_frequency ?? []), ...(errors.unit ?? []), ...(errors.category ?? []), ...(errors.form ?? [])] as message (message)}
 				<p class="text-xs text-error-500">{message}</p>
 			{/each}
 		</section>
 
+		{#if definitionChanged}
+			<!-- An edit of the formula reaches the past, and maybe other metrics. -->
+			<div
+				class="rounded-base border border-warning-500 bg-warning-50-950 p-3 text-sm flex flex-col gap-2"
+				data-testid="compose-definition-scope"
+			>
+				<p>
+					<i class="fa-solid fa-clock-rotate-left mr-1" aria-hidden="true"
+					></i>{m.formulaChangeRecomputes()}
+				</p>
+				{#if sharedWith > 0 && composition?.definition.can_change}
+					<p>{m.definitionSharedWith({ count: sharedWith })}</p>
+					<div
+						class="flex flex-wrap gap-4"
+						role="radiogroup"
+						aria-label={m.definitionSharedWith({ count: sharedWith })}
+					>
+						<label class="flex items-center gap-2 cursor-pointer"
+							><input
+								type="radio"
+								class="radio"
+								name="definition-scope"
+								value="this"
+								bind:group={definitionScope}
+								data-testid="compose-scope-this"
+							/>{m.applyToThisMetric()}</label
+						>
+						<label class="flex items-center gap-2 cursor-pointer"
+							><input
+								type="radio"
+								class="radio"
+								name="definition-scope"
+								value="all"
+								bind:group={definitionScope}
+								data-testid="compose-scope-all"
+							/>{m.applyToAllMetrics({ count: sharedWith + 1 })}</label
+						>
+					</div>
+				{:else if sharedWith > 0}
+					<p>{m.definitionSharedReadOnly({ count: sharedWith })}</p>
+				{/if}
+			</div>
+		{/if}
 		<footer class="flex items-center justify-end gap-2 border-t border-surface-200-800 pt-4">
 			<button type="button" class="btn preset-tonal" onclick={parent.onClose}>{m.cancel()}</button>
 			<button
@@ -908,7 +1252,7 @@
 				{:else}
 					<i class="fa-solid fa-check mr-2" aria-hidden="true"></i>
 				{/if}
-				{m.createComputedMetric()}
+				{editing ? m.save() : m.createComputedMetric()}
 			</button>
 		</footer>
 	</form>

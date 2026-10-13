@@ -18,6 +18,7 @@
 		initialData?: Record<string, any>;
 		data?: any;
 		debug?: boolean;
+		object?: Record<string, any>;
 	}
 
 	let {
@@ -27,7 +28,8 @@
 		formDataCache = $bindable({}),
 		initialData = {},
 		data = {},
-		debug = false
+		debug = false,
+		object = {}
 	}: Props = $props();
 
 	// A metric computed from other metrics: which instances its inputs read
@@ -35,7 +37,79 @@
 	const { value: inputChoices } = formFieldProxy(form, 'input_choices');
 	const { value: definitionValue } = formFieldProxy(form, 'metric_definition');
 	const { value: folderValue } = formFieldProxy(form, 'folder');
+
+	// Editing a computed metric: its formula, shown here and edited in the
+	// creation modal, so the formula and its picks have one place to change.
+	// A formula the modal cannot show is edited on its definition.
+	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
+	import { getModalStore } from '$lib/components/Modals/stores';
+	import ComposeMetricModal from '$lib/components/Modals/ComposeMetricModal.svelte';
+
+	const modalStore = getModalStore();
+	let composition = $state<any>(null);
+	onMount(async () => {
+		if (!object?.id) return;
+		try {
+			const res = await fetch(`/fe-api/metrology/composition/${object.id}`);
+			if (res.ok) composition = await res.json();
+		} catch {
+			composition = null;
+		}
+	});
+	const formula = $derived((composition?.expression ?? '') as string);
+
+	function editFormula() {
+		if (!composition?.composable) {
+			goto(
+				`/metric-definitions/${composition.definition.id}/edit?next=${encodeURIComponent(`/metric-instances/${object.id}`)}`
+			);
+			return;
+		}
+		modalStore.trigger({
+			type: 'component',
+			component: {
+				ref: ComposeMetricModal,
+				props: {
+					instanceId: object.id,
+					composition,
+					// This form now holds the metric as it was: back to the
+					// metric, which follows the recomputation the save queued.
+					onSaved: (saved: { last_computed_at?: string | null }) =>
+						goto(
+							`/metric-instances/${object.id}?recomputing=${encodeURIComponent(saved.last_computed_at ?? '')}`
+						)
+				}
+			}
+		});
+	}
 </script>
+
+{#if formula}
+	<div
+		class="card bg-surface-100-900 border border-surface-200-800 p-3 flex items-center gap-3"
+		data-testid="instance-formula"
+	>
+		<i class="fa-solid fa-square-root-variable text-primary-500" aria-hidden="true"></i>
+		<div class="flex-1 min-w-0">
+			<span class="text-xs font-semibold block">{m.formula()}</span>
+			<code class="text-xs block truncate" title={formula}>{formula}</code>
+		</div>
+		<button
+			type="button"
+			class="btn btn-sm preset-tonal-primary shrink-0"
+			onclick={editFormula}
+			data-testid="instance-edit-formula"
+		>
+			{#if composition?.composable}
+				{m.editFormula()}
+			{:else}
+				<i class="fa-solid fa-arrow-up-right-from-square mr-1" aria-hidden="true"
+				></i>{m.editOnDefinition()}
+			{/if}
+		</button>
+	</div>
+{/if}
 
 <AutocompleteSelect
 	{form}
@@ -48,11 +122,13 @@
 	label={m.metricDefinition()}
 	disabled={!!initialData.metric_definition}
 />
-<InputChoicesEditor
-	bind:value={$inputChoices}
-	definition={$definitionValue as string | undefined}
-	folder={$folderValue as string | undefined}
-/>
+{#if !composition?.composable}
+	<InputChoicesEditor
+		bind:value={$inputChoices}
+		definition={$definitionValue as string | undefined}
+		folder={$folderValue as string | undefined}
+	/>
+{/if}
 <Select
 	{form}
 	options={model.selectOptions['status']}

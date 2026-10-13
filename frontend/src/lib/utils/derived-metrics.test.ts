@@ -8,6 +8,12 @@ import {
 	formulaKind,
 	formulaKey,
 	keepOrFirst,
+	levelIndex,
+	levelStarter,
+	renameLiteral,
+	stringLiterals,
+	syncLevels,
+	unknownLevels,
 	latestTrend,
 	sparkline,
 	moveItem,
@@ -292,5 +298,57 @@ describe('the preview chart', () => {
 		expect(latestTrend(periods, false)).toEqual({ delta: -5, good: true });
 		expect(latestTrend([{ value: 1 }, { value: 1 }], true)).toEqual({ delta: 0, good: null });
 		expect(latestTrend([{ value: 1 }], true)).toBeNull();
+	});
+});
+
+describe('a level result', () => {
+	it('reads the texts a formula returns, once each, in order', () => {
+		expect(stringLiterals(`r > 80.0 ? "Good" : r > 50.0 ? 'Fair' : "Good"`)).toEqual([
+			'Good',
+			'Fair'
+		]);
+		expect(stringLiterals('r * 2')).toEqual([]);
+	});
+
+	it('follows the formula and keeps what the author did', () => {
+		let levels = syncLevels([], ['Good', 'Poor']);
+		expect(levels).toEqual([
+			{ ref_id: 'good', name: 'Good', auto: true },
+			{ ref_id: 'poor', name: 'Poor', auto: true }
+		]);
+		// Reordered by the author, a typed-in level added: both stay.
+		levels = [levels[1], levels[0], { ref_id: 'na', name: 'N/A' }];
+		levels = syncLevels(levels, ['Good', 'Poor', 'Fair']);
+		expect(levels.map((l) => l.name)).toEqual(['Poor', 'Good', 'N/A', 'Fair']);
+		// The formula drops Fair: it goes; N/A was typed in: it stays.
+		levels = syncLevels(levels, ['Good', 'Poor']);
+		expect(levels.map((l) => l.name)).toEqual(['Poor', 'Good', 'N/A']);
+		// Nothing changed: the same list, so a reactive caller does not loop.
+		expect(syncLevels(levels, ['Good', 'Poor'])).toBe(levels);
+	});
+
+	it('answers to a level name or reference, any case', () => {
+		const levels = [
+			{ ref_id: 'G', name: 'Good' },
+			{ ref_id: 'P', name: 'Poor' }
+		];
+		expect(unknownLevels(`x ? "good" : "p"`, levels)).toEqual([]);
+		expect(unknownLevels(`x ? "Bad" : "P"`, levels)).toEqual(['Bad']);
+		expect(levelIndex('POOR', levels)).toBe(2);
+		expect(levelIndex(1, levels)).toBe(1);
+		expect(levelIndex(3, levels)).toBeNull();
+		expect(levelIndex('Bad', levels)).toBeNull();
+	});
+
+	it('renames a level in the formula, quotes kept', () => {
+		expect(renameLiteral(`x ? "Good" : 'Good' + "Goods"`, 'Good', 'Great')).toBe(
+			`x ? "Great" : 'Great' + "Goods"`
+		);
+	});
+
+	it('starts a level formula from the picks', () => {
+		expect(levelStarter(['a', 'b'])).toBe('a * 100.0 / b >= 50.0 ? "High" : "Low"');
+		expect(levelStarter(['a'])).toBe('a >= 50.0 ? "High" : "Low"');
+		expect(levelStarter([])).toBe('');
 	});
 });

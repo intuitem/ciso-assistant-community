@@ -1114,6 +1114,7 @@
 				{formDataCache}
 				initialData={{ ...initialData, ...additionalInitialData }}
 				{data}
+				{object}
 				{...rest}
 			/>
 		{:else if URLModel === 'custom-metric-samples'}

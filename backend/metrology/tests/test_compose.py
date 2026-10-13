@@ -457,3 +457,278 @@ class TestPicksMustBeReadable:
         )
         assert not serializer.is_valid()
         assert "input_choices" in serializer.errors
+
+
+LEVELS = [{"ref_id": "G", "name": "Good"}, {"ref_id": "P", "name": "Poor"}]
+
+
+@pytest.mark.django_db
+class TestLevels:
+    def test_a_level_result_records_the_level(self, acme):
+        group, _fr, _de, i = acme
+        response = call(
+            "post",
+            "compose",
+            payload(
+                group,
+                {"clicks": i["clicks_fr"]},
+                'clicks > 5.0 ? "Poor" : "Good"',
+                category="qualitative",
+                choices_definition=LEVELS,
+            ),
+            admin(),
+        )
+        assert response.status_code == 201, response.data
+        made = MetricInstance.objects.get(id=response.data["id"])
+        definition = made.metric_definition
+        assert definition.category == "qualitative"
+        assert definition.choices_definition == LEVELS
+        assert definition.unit is None
+        compute_sample(made)
+        # France clicks: 10, so "Poor", the second level.
+        assert stored(made) == {"2026-05-01": 2}
+
+    def test_a_text_the_levels_do_not_know_is_refused(self, acme):
+        group, _fr, _de, i = acme
+        response = call(
+            "post",
+            "compose",
+            payload(
+                group,
+                {"clicks": i["clicks_fr"]},
+                "clicks > 5.0 ? 'Bad' : 'G'",
+                category="qualitative",
+                choices_definition=LEVELS,
+            ),
+            admin(),
+        )
+        assert response.status_code == 400
+        # A level answers to its reference too: 'G' is Good.
+        assert response.data["expression"] == ["'Bad' is not one of the levels"]
+
+    @pytest.mark.parametrize(
+        "levels, message",
+        [
+            ([{"ref_id": "G", "name": "Good"}], "at least two levels"),
+            (
+                [{"ref_id": "G", "name": "Good"}, {"ref_id": "", "name": "Poor"}],
+                "a reference and a name",
+            ),
+            (
+                [{"ref_id": "G", "name": "Good"}, {"ref_id": "g", "name": "Poor"}],
+                "names two levels",
+            ),
+        ],
+    )
+    def test_levels_are_named_once(self, acme, levels, message):
+        group, _fr, _de, i = acme
+        response = call(
+            "post",
+            "compose",
+            payload(
+                group,
+                {"clicks": i["clicks_fr"]},
+                "1",
+                category="qualitative",
+                choices_definition=levels,
+            ),
+            admin(),
+        )
+        assert response.status_code == 400
+        assert message in " ".join(response.data["choices_definition"])
+
+    def test_reuse_needs_the_same_levels(self, acme):
+        group, _fr, _de, i = acme
+        body = {
+            "category": "qualitative",
+            "choices_definition": LEVELS,
+        }
+        expression = 'clicks > 5.0 ? "Poor" : "Good"'
+        first = call(
+            "post",
+            "compose",
+            payload(group, {"clicks": i["clicks_fr"]}, expression, **body),
+            admin(),
+        )
+        same = call(
+            "post",
+            "compose",
+            payload(group, {"clicks": i["clicks_fr"]}, expression, **body),
+            admin(),
+        )
+        assert definition_of(same) == definition_of(first)
+        reordered = call(
+            "post",
+            "compose",
+            payload(
+                group,
+                {"clicks": i["clicks_fr"]},
+                expression,
+                category="qualitative",
+                choices_definition=list(reversed(LEVELS)),
+            ),
+            admin(),
+        )
+        assert definition_of(reordered) != definition_of(first)
+        numeric = call(
+            "post",
+            "compose",
+            payload(group, {"clicks": i["clicks_fr"]}, "clicks"),
+            admin(),
+        )
+        assert (
+            MetricInstance.objects.get(id=numeric.data["id"]).metric_definition.category
+            == "quantitative"
+        )
+
+
+@pytest.mark.django_db
+class TestEdit:
+    """What an edit changes: the instance alone, its definition in place, or
+    this metric moved to a definition of its own."""
+
+    def made(self, acme, user=None, **extra):
+        group, _fr, _de, i = acme
+        response = call(
+            "post",
+            "compose",
+            payload(
+                group,
+                {"clicks": i["clicks_fr"], "heads": i["heads_fr"]},
+                "clicks * 100.0 / heads",
+                **extra,
+            ),
+            user or admin(),
+        )
+        assert response.status_code == 201, response.data
+        return MetricInstance.objects.get(id=response.data["id"])
+
+    def edit(self, instance, user=None, **changes):
+        state = call("get", "composition", {}, admin(), pk=str(instance.id)).data
+        body = {
+            "name": state["name"],
+            "folder": state["folder"]["id"],
+            "collection_frequency": state["collection_frequency"],
+            "expression": state["expression"],
+            "inputs": [
+                {"key": item["key"], "instance": item["instance"]["id"]}
+                for item in state["inputs"]
+            ],
+            **changes,
+        }
+        return call("put", "composition", body, user or admin(), pk=str(instance.id))
+
+    def test_reads_back_what_the_modal_shows(self, acme):
+        made = self.made(acme)
+        response = call("get", "composition", {}, admin(), pk=str(made.id))
+        assert response.status_code == 200, response.data
+        assert response.data["composable"] is True
+        assert response.data["definition"]["shared_with"] == 0
+        assert response.data["definition"]["can_change"] is True
+        assert [(x["key"], x["instance"]["name"]) for x in response.data["inputs"]] == [
+            ("clicks", "Clicks France"),
+            ("heads", "Headcount France"),
+        ]
+
+    def test_a_formula_over_combined_inputs_is_edited_on_its_definition(self, acme):
+        group, _fr, _de, i = acme
+        clicks = i["clicks_fr"].metric_definition
+        summed = make_definition(
+            "Summed",
+            inputs=[{"key": "c", "definition": str(clicks.id), "combine": "sum"}],
+            expression="c",
+        )
+        instance = make_instance(group, summed)
+        response = call("get", "composition", {}, admin(), pk=str(instance.id))
+        assert response.data["composable"] is False
+        assert response.data["definition"]["id"] == str(summed.id)
+        assert self.edit_raw(instance).status_code == 400
+
+    def edit_raw(self, instance):
+        return call("put", "composition", {}, admin(), pk=str(instance.id))
+
+    def test_instance_only_changes_keep_the_definition(self, acme):
+        _group, _fr, _de, i = acme
+        made = self.made(acme)
+        definition_id = made.metric_definition_id
+        # Germany's clicks: another instance of the same metric.
+        response = self.edit(
+            made,
+            name="Rate renamed",
+            inputs=[
+                {"key": "clicks", "instance": str(i["clicks_de"].id)},
+                {"key": "heads", "instance": str(i["heads_fr"].id)},
+            ],
+        )
+        assert response.status_code == 200, response.data
+        assert response.data["outcome"] == "unchanged"
+        made.refresh_from_db()
+        assert made.name == "Rate renamed"
+        assert made.metric_definition_id == definition_id
+        assert made.input_choices["clicks"] == {"pick": str(i["clicks_de"].id)}
+        compute_sample(made, full=True)
+        assert stored(made) == {"2026-05-01": 30.0}
+
+    def test_an_unshared_definition_is_edited_in_place(self, acme):
+        made = self.made(acme)
+        definition_id = made.metric_definition_id
+        response = self.edit(made, expression="clicks * 1000.0 / heads")
+        assert response.data["outcome"] == "updated"
+        made.refresh_from_db()
+        assert made.metric_definition_id == definition_id
+        assert made.metric_definition.expression == "clicks * 1000.0 / heads"
+
+    def test_a_shared_definition_forks_unless_asked_for_all(self, acme):
+        first = self.made(acme, name="First")
+        second = self.made(acme, name="Second")
+        assert first.metric_definition_id == second.metric_definition_id
+        shared = first.metric_definition_id
+        state = call("get", "composition", {}, admin(), pk=str(first.id)).data
+        assert state["definition"]["shared_with"] == 1
+
+        response = self.edit(first, expression="clicks * 1000.0 / heads")
+        assert response.data["outcome"] == "forked"
+        first.refresh_from_db()
+        second.refresh_from_db()
+        assert first.metric_definition_id != shared
+        assert second.metric_definition.expression == "clicks * 100.0 / heads"
+
+        third = self.made(acme, name="Third")
+        assert third.metric_definition_id == shared
+        response = self.edit(
+            third, expression="clicks * 10.0 / heads", definition_scope="all"
+        )
+        assert response.data["outcome"] == "updated"
+        second.refresh_from_db()
+        assert second.metric_definition.expression == "clicks * 10.0 / heads"
+
+    def test_without_the_right_to_change_the_definition_it_forks(self, acme):
+        group, _fr, _de, _i = acme
+        first = self.made(acme, name="First")
+        self.made(acme, name="Second")
+        user = member(
+            group, codenames=[c for c in WRITE if c != "change_metricdefinition"]
+        )
+        response = self.edit(
+            first, user=user, expression="clicks / heads", definition_scope="all"
+        )
+        assert response.status_code == 200, response.data
+        assert response.data["outcome"] == "forked"
+
+    def test_a_metric_cannot_read_itself(self, acme):
+        made = self.made(acme)
+        response = self.edit(
+            made,
+            inputs=[{"key": "clicks", "instance": str(made.id)}],
+            expression="clicks",
+        )
+        assert response.status_code == 400
+        assert "cannot read itself" in response.data["inputs"][0]
+
+    def test_needs_the_right_to_change_the_metric(self, acme):
+        group, _fr, _de, _i = acme
+        made = self.made(acme)
+        reader = member(
+            group, codenames=["view_metricinstance", "view_metricdefinition"]
+        )
+        assert self.edit(made, user=reader).status_code == 403
