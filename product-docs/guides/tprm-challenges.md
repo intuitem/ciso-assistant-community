@@ -17,7 +17,7 @@ Walk through this checklist in order:
 2. **The representative has no user account.** When you create a representative, the **Create user** checkbox is what actually provisions credentials. Without it, the representative is only a contact record — no one to log in or be assigned questions. Re-open the representative form and tick the box, or recreate the representative.
 3. **The entity assessment has no audit.** The questionnaire lives on the audit attached to the assessment. If **Create audit** was not ticked at assessment creation, there is no questionnaire to send. Either edit the assessment and attach an audit using an existing framework, or recreate it with **Create audit** checked.
 4. **The auditee-assessment is still in Draft.** If the assignments never transitioned to **In progress** after you clicked **Send questionnaire**, the invitation mail almost certainly failed to send. See [the mailer section below](#the-mailer-is-not-configured) to fix SMTP, then retry. In parallel, you can start the assessment manually from the underlying audit by flipping the assignment statuses yourself — this follows the same mechanics as the internal [respondent mode](../features/assignments.md), so the same workflow applies once you open the audit's **Assignments** panel.
-5. **Field visibility hides the requirements from the respondent.** If every assessable field is set to **Auditor only** or **Hidden**, the respondent loads the audit and sees nothing actionable. See [Field visibility on the entity-assessment audit](#field-visibility-on-the-entity-assessment-audit).
+5. **Field visibility hides the requirements from the respondent.** If every assessable field is _Hidden_ for the respondent, the respondent loads the audit and sees nothing actionable. See [Field visibility on the entity-assessment audit](#field-visibility-on-the-entity-assessment-audit).
 
 If all five are clean and the assignment still does not progress, check the backend logs for mailer errors and confirm the representative's email is reachable from your network.
 
@@ -57,24 +57,22 @@ To reach it:
 1. Open the entity assessment.
 2. Click through to its linked audit.
 3. **Edit** the audit and open the **More** dropdown.
-4. The **Field visibility** panel is the second block, with one pill per field.
+4. The **Field visibility** panel is the second block, with one row per field and one column per role.
 
-Each field can be set to one of three states:
-
-| Pill                                       | Auditor (you) | Respondent (third party) |
-| ------------------------------------------ | ------------- | ------------------------ |
-| **Auditor + Respondent** _(green)_ | edit          | edit                     |
-| **Auditor only** _(amber)_         | edit          | hidden                   |
-| **Hidden** _(rose)_                | hidden        | hidden                   |
+For each field, set what you (the auditor) and the third party (the respondent) can do with it: **Edit**, **Read** (see but not change) or **Hidden**. Pick the auditor's column first; the respondent is only offered what fits it (for instance, the respondent can never see a field hidden from you).
 
 For a third-party questionnaire you typically want:
 
-- **Answers**, **Result**, **Observation**, **Applied controls**, **Evidences** → _Auditor + Respondent_ so the vendor can fill them in.
-- **Status**, **Extended result** → _Auditor only_ so the vendor cannot self-assign a final lifecycle state or qualifier.
+- **Answers**, **Observation**, **Evidences** → _Edit / Edit_ so the vendor can fill them in.
+- **Respondent alignment** → _Read / Edit_ when you use it: the vendor states it, you review it without changing it.
+- **Result** → _Edit / Hidden_ while the vendor answers; switch to _Edit / Read_ to share your verdict.
+- **Status**, **Extended result** → _Edit / Hidden_ so the vendor cannot self-assign a final lifecycle state or qualifier.
 - **Score**, **Documentation score** → _Hidden_ (the default), unless you explicitly want the vendor to score themselves.
-- **Comments** → flip to _Auditor only_ on sensitive engagements, so internal back-and-forth is not exposed to the vendor.
+- **Comments** → _Edit / Hidden_ on sensitive engagements, so internal back-and-forth is not exposed to the vendor.
 
-Parent / child constraints are enforced live: **Documentation score** cannot be more permissive than **Score**, and **Extended result** cannot be more permissive than **Result**. Lowering a parent auto-clamps the child.
+Fields set to _Read_ show as disabled for that role, both in the respondent view and in your table mode.
+
+Parent / child constraints are enforced live, per role: **Documentation score** cannot be more permissive than **Score**, and **Extended result** cannot be more permissive than **Result**. Lowering a parent auto-clamps the child.
 
 Defaults cascade: audit override → framework default → platform default. If you keep getting the same wrong defaults across new assessments, fix it on the **framework** (Authoring → Framework → field visibility) so every audit spawned from it starts correct.
 
