@@ -202,7 +202,6 @@
   * [Create a computed metric](features/metrics/creating.md)
   * [Edit a formula](features/metrics/editing.md)
   * [Formula reference](features/metrics/formulas.md)
-  * [Formulas on definitions](features/metrics/definition-formulas.md)
   * [Troubleshooting](features/metrics/troubleshooting.md)
 * [Audit advanced analytics](features/audit-analytics.md)
 * [Framework report](features/framework-report.md)

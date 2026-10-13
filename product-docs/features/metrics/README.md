@@ -36,19 +36,15 @@ A computed metric has no button to add a sample: its samples come from its formu
 
 ## Where the formula lives
 
-Every metric instance has a [metric definition](../../concepts/metrics.md#metric-definitions), and a computed metric's formula belongs to its definition. Which definition depends on how the metric was made:
+Every metric instance has a [metric definition](../../concepts/metrics.md#metric-definitions), and a computed metric's formula belongs to its definition. The New computed metric window creates that definition for the metric, or reuses an identical one when it already exists, so the same indicator computed in several domains shares one definition.
 
-- **Made from picked metrics** (the New computed metric window): the formula reads exact instances, such as *Employees trained · Spain* and *Headcount · Spain*. The definition was created for it, or reused when an identical one already existed. Editing it never changes another metric: if other metrics share the definition, this one gets a copy of its own when you save.
-- **Made on a definition** (the definition form, or a library): the formula reads every metric of a kind in the instance's domain and its sub-domains, for example the sum of all *Phishing simulation clicks* below a group. Several instances share that definition on purpose, one per domain, so editing the formula changes all of them, and the drawer says how many.
-
-Both kinds open in the same drawer from **Edit formula**. See [Formulas on definitions](definition-formulas.md) for the second kind and for formulas over objects (controls, audits, incidents) rather than metrics.
+Editing the formula never changes another metric: if other metrics share the definition, the one you edit gets a copy of its own when you save. See [Edit a formula](editing.md).
 
 ## In this section
 
 - [Create a computed metric](creating.md): the New computed metric window, step by step
 - [Edit a formula](editing.md): the drawer, the before/after chart, shared definitions
 - [Formula reference](formulas.md): the language, periods, missing values, levels
-- [Formulas on definitions](definition-formulas.md): combined inputs, formulas over objects, per-instance choices
 - [Troubleshooting](troubleshooting.md): messages and what to do about them
 
 New to metrics? Read the [Metrics concept page](../../concepts/metrics.md) first, or follow [Creating your first computed metric](../../guides/first-computed-metric.md).

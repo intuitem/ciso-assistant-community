@@ -30,7 +30,7 @@ The new metric must live in a domain that holds every picked metric, and you nee
 ### Create metric or Save stays off
 
 - **Creating**: a name, a domain, at least one metric and a formula are all needed.
-- **Editing**: nothing has changed yet; or the drawer shows that the domain does not hold every picked metric; or, for a formula that is its definition's, the drawer says the definition is not yours to change.
+- **Editing**: nothing has changed yet, or the drawer shows that the domain does not hold every picked metric.
 
 ### The live result says a period is *skipped*
 
@@ -63,7 +63,6 @@ The metric's page shows the error of the last computation under its value. The m
 | a period, then `expression:` and a reason such as `division by zero` | The formula failed although every input had a value | Guard it, for example `headcount == 0 ? null : …`, then **Refresh now** |
 | `is not a level of this metric` | A level formula returned a text that is not one of its levels | Fix the formula or the levels |
 | `the expression must return a number` | A number formula returned a text or a yes/no | Fix the formula |
-| an input name and several instances | A **One value** input found more than one instance in the domain | Choose one under **Inputs of the formula** on the metric's edit form. See [Choosing per instance](definition-formulas.md#choosing-per-instance) |
 
 ### Past values changed
 

@@ -121,21 +121,20 @@ Keep in mind that you can add the data manually or through all the supported int
 
 ## Computed metrics
 
-A computed metric is an instance whose samples come from a formula rather than from people or integrations: a training coverage from the employees trained and the headcount, a click rate summed over a group's sites, the share of applied controls that are active. Nobody types its numbers in; the application computes them on the instance's collection frequency, and on demand with **Refresh now**.
+A computed metric is an instance whose samples come from a formula rather than from people or integrations: a training coverage from the employees trained and the headcount, a click rate from the clicks and the people tested, a status level from a threshold on either. Nobody types its numbers in; the application computes them on the instance's collection frequency, and on demand with **Refresh now**.
 
 ```mermaid
 graph LR
   A[Metric instance] -->|input| C[Computed metric]
   B[Metric instance] -->|input| C
-  O[Objects: controls, audits...] -.->|or datasets| C
   C -->|samples, period by period| S[Sample]
 ```
 
 * **Start from the metrics you track.** Pick metric instances, write a formula, name the result: the application creates the instance and its definition. See [Create a computed metric](../features/metrics/creating.md), or follow [Creating your first computed metric](../guides/first-computed-metric.md).
 * **The formula runs once per period.** The instance's collection frequency cuts time into calendar periods, and each input contributes its latest sample in the period. The series is complete from the start and follows corrections to its inputs. See the [Formula reference](../features/metrics/formulas.md).
 * **The result is a number or a level.** A level metric returns one of an ordered list of texts, such as *On track* and *Behind*.
-* **The formula lives on the definition.** Made from picked metrics, it reads exact instances and editing it never changes another metric. Made on a definition, it combines every metric of a kind in each instance's domain, or reads objects, and editing it changes every instance of the definition. See [Edit a formula](../features/metrics/editing.md) and [Formulas on definitions](../features/metrics/definition-formulas.md).
-* **The domain decides what the formula sees.** A formula reads its instance's domain and sub-domains, with no user identity: the value is a fact about the domain, the same for everyone allowed to see the instance.
+* **The formula lives on the definition.** The application creates the definition with the metric, or reuses an identical one, and the formula reads exactly the instances you picked. Editing it never changes another metric. See [Edit a formula](../features/metrics/editing.md).
+* **The domain holds what the formula reads.** A computed metric lives in a domain holding every metric it reads, and its value is the same for everyone allowed to see it.
 
 All of it is described in [Computed metrics](../features/metrics/README.md).
 

@@ -13,11 +13,9 @@ The button is in two places:
 - on the metric's page, next to **Refresh now**;
 - on the metric's edit form, in the **Formula** card at the top.
 
-The drawer has two forms, depending on [where the formula lives](README.md#where-the-formula-lives): a formula made of picked metrics, or a formula that is its definition's.
+## What the drawer shows
 
-## A formula made of picked metrics
-
-This is the formula of a metric created with the [New computed metric](creating.md) window. The drawer shows its first two steps as you know them, **Metrics to combine** and **Formula**, and a third, **How to read it**, holding the unit and **Higher is better**.
+The drawer shows the steps of the [New computed metric](creating.md) window you already know, **Metrics to combine** and **Formula**, and a third, **How to read it**, holding the unit and **Higher is better**.
 
 The metric's name, domain, collection frequency and target are not in the drawer: they stay on the metric's edit form, which is where you change them.
 
@@ -64,21 +62,9 @@ Making a copy of a shared definition needs the right to add metric definitions i
 
 If a metric the formula read was deleted, or is no longer visible to you, its row is missing and the drawer says "Pick again the instances of: *name*". Pick a replacement under the same name, or rewrite the formula without it.
 
-## A formula that is its definition's
+### A formula that comes with its definition
 
-Some formulas are not made of picked metrics: they combine every metric of a kind in the domain (the sum of all clicks below a group, the maximum across sites), or they read objects such as controls and audits. Those formulas belong to the definition, which several metrics share on purpose, one per domain. The drawer says so at the top: "Its formula is its definition's, *name*: every metric using it follows."
-
-<figure><img src="../../.gitbook/assets/metrics-drawer-definition.png" alt="The drawer for a definition formula: what the formula reads, its inputs with how their instances combine, and the expression"><figcaption><p>The definition's formula, as on the definition form</p></figcaption></figure>
-
-The drawer shows the same block as the [definition form](definition-formulas.md): what the formula reads, its inputs and how each combines, the expression, and **Try it**.
-
-**Try it** starts on this metric's domain and collection frequency, so it previews exactly what this metric would hold, and draws the **Now** line beside the result. Try it on another domain or frequency to see what the formula gives there; the **Now** line then disappears, since this metric is not computed there.
-
-<figure><img src="../../.gitbook/assets/metrics-drawer-definition-preview.png" alt="Try it on the metric's own domain, with the current results dashed and the edited ones solid, and a warning that five other metrics use the definition"><figcaption><p>The warning counts the other metrics a save will change</p></figcaption></figure>
-
-Saving changes the definition, so every metric using it gets the new formula. The drawer counts them above **Save**: "Other metrics use this definition (5): saving changes their formula too." This metric is recomputed right away; the others are recomputed on their own schedule.
-
-If you may not change the definition, the drawer says "You can try this formula here, but its definition is not yours to change." and **Save** stays off. You can still try changes in the preview.
+A metric whose formula comes with its definition, for example from a library, opens that formula in the drawer instead. Saving it changes every metric using the definition, and the drawer says how many before you save.
 
 ## Closing the drawer
 
