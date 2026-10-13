@@ -7277,10 +7277,15 @@
 	"computedMetricSaved": "Métrique calculée enregistrée",
 	"computedMetricSavedForked": "Enregistré : cette métrique a désormais sa propre définition",
 	"inputsToPickAgain": "Choisissez à nouveau les instances de : {keys}",
-	"editComputedMetricHelpText": "Modifiez ce qu'elle lit, sa formule ou son domaine. Le résultat s'affiche avant l'enregistrement.",
+	"editComputedMetricHelpText": "Modifiez ce qu'elle lit et sa formule. Le nouveau résultat s'affiche face à l'actuel avant l'enregistrement.",
 	"editOnDefinition": "Modifier sur sa définition",
 	"pickedSummary": "Choisies ({count}) : {names}",
 	"definitionSharedFork": "D'autres métriques utilisent sa définition ({count}) : l'enregistrement donne à cette métrique sa propre définition et les laisse inchangées.",
+	"formulaNow": "Actuel",
+	"formulaNew": "Avec cette formule",
+	"howToReadIt": "Lecture du résultat",
+	"keepEditing": "Continuer l'édition",
+	"pickOutsideDomain": "{domain} ne contient pas toutes les métriques choisies : choisissez-en dans ce domaine, ou déplacez d'abord cette métrique vers un domaine plus haut.",
 	"instancesNotVisible": "{count} que vous ne pouvez pas voir ;",
 	"useInFormula": "Utiliser dans une formule"
 }

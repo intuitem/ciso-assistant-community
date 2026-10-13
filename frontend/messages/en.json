@@ -7277,10 +7277,15 @@
 	"computedMetricSaved": "Computed metric saved",
 	"computedMetricSavedForked": "Saved: this metric now has a definition of its own",
 	"inputsToPickAgain": "Pick again the instances of: {keys}",
-	"editComputedMetricHelpText": "Change what it reads, its formula or where it lives. The result shows before you save.",
+	"editComputedMetricHelpText": "Change what it reads and its formula. The new result shows against the current one before you save.",
 	"editOnDefinition": "Edit on its definition",
 	"pickedSummary": "Picked ({count}): {names}",
 	"definitionSharedFork": "Other metrics use its definition ({count}): saving gives this metric a definition of its own and leaves them unchanged.",
+	"formulaNow": "Now",
+	"formulaNew": "With this formula",
+	"howToReadIt": "How to read it",
+	"keepEditing": "Keep editing",
+	"pickOutsideDomain": "{domain} does not hold every picked metric: pick metrics within it, or move this metric to a higher domain first.",
 	"instancesNotVisible": "{count} you cannot see;",
 	"useInFormula": "Use in a formula"
 }

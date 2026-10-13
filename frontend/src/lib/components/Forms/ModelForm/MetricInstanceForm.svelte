@@ -2,7 +2,7 @@
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import Select from '../Select.svelte';
-	import type { SuperValidated } from 'sveltekit-superforms';
+	import type { SuperForm, SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 
@@ -39,16 +39,16 @@
 	const { value: folderValue } = formFieldProxy(form, 'folder');
 
 	// Editing a computed metric: its formula, shown here and edited in the
-	// creation modal, so the formula and its picks have one place to change.
-	// A formula the modal cannot show is edited on its definition.
-	import { onMount } from 'svelte';
+	// drawer the metric's page uses, so the formula and its picks have one
+	// place to change. A formula the drawer cannot show is edited on its
+	// definition.
+	import { onMount, tick } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { getModalStore } from '$lib/components/Modals/stores';
-	import ComposeMetricModal from '$lib/components/Modals/ComposeMetricModal.svelte';
+	import FormulaDrawer from '$lib/components/Metrology/FormulaDrawer.svelte';
+	import type { Composition, Saved } from '$lib/components/Metrology/ComposeMetricEditor.svelte';
 
-	const modalStore = getModalStore();
 	let composition = $state<any>(null);
-	onMount(async () => {
+	async function loadComposition() {
 		if (!object?.id) return;
 		try {
 			const res = await fetch(`/fe-api/metrology/composition/${object.id}`);
@@ -56,7 +56,35 @@
 		} catch {
 			composition = null;
 		}
-	});
+	}
+	onMount(loadComposition);
+
+	let editedComposition = $state<Composition | null>(null);
+	let editFormulaButton = $state<HTMLButtonElement | null>(null);
+	// Remounts the definition picker on a save: it shows a fork's new name.
+	let definitionVersion = $state(0);
+
+	async function closeFormula() {
+		editedComposition = null;
+		await tick();
+		editFormulaButton?.focus();
+	}
+
+	// The save wrote the definition and the picks: this form holds them too,
+	// and would write the old ones back. It adopts them, untainted (they are
+	// saved already), and keeps whatever else the author was editing.
+	async function formulaSaved(saved: Saved) {
+		(form as unknown as SuperForm<Record<string, unknown>>).form.update(
+			(data: Record<string, unknown>) => ({
+				...data,
+				...(saved.metric_definition ? { metric_definition: saved.metric_definition } : {}),
+				...(saved.input_choices ? { input_choices: saved.input_choices } : {})
+			}),
+			{ taint: false }
+		);
+		definitionVersion += 1;
+		await loadComposition();
+	}
 	const formula = $derived((composition?.expression ?? '') as string);
 
 	function editFormula() {
@@ -66,22 +94,7 @@
 			);
 			return;
 		}
-		modalStore.trigger({
-			type: 'component',
-			component: {
-				ref: ComposeMetricModal,
-				props: {
-					instanceId: object.id,
-					composition,
-					// This form now holds the metric as it was: back to the
-					// metric, which follows the recomputation the save queued.
-					onSaved: (saved: { last_computed_at?: string | null }) =>
-						goto(
-							`/metric-instances/${object.id}?recomputing=${encodeURIComponent(saved.last_computed_at ?? '')}`
-						)
-				}
-			}
-		});
+		editedComposition = composition;
 	}
 </script>
 
@@ -99,6 +112,8 @@
 			type="button"
 			class="btn btn-sm preset-tonal-primary shrink-0"
 			onclick={editFormula}
+			aria-expanded={!!editedComposition}
+			bind:this={editFormulaButton}
 			data-testid="instance-edit-formula"
 		>
 			{#if composition?.composable}
@@ -111,17 +126,28 @@
 	</div>
 {/if}
 
-<AutocompleteSelect
-	{form}
-	optionsEndpoint="metric-definitions"
-	optionsLabelField="auto"
-	optionsExtraFields={[['folder', 'str']]}
-	field="metric_definition"
-	cacheLock={cacheLocks['metric_definition']}
-	bind:cachedValue={formDataCache['metric_definition']}
-	label={m.metricDefinition()}
-	disabled={!!initialData.metric_definition}
-/>
+{#if object?.id}
+	<FormulaDrawer
+		instanceId={object.id}
+		composition={editedComposition}
+		onClose={closeFormula}
+		onSaved={formulaSaved}
+	/>
+{/if}
+
+{#key definitionVersion}
+	<AutocompleteSelect
+		{form}
+		optionsEndpoint="metric-definitions"
+		optionsLabelField="auto"
+		optionsExtraFields={[['folder', 'str']]}
+		field="metric_definition"
+		cacheLock={cacheLocks['metric_definition']}
+		bind:cachedValue={formDataCache['metric_definition']}
+		label={m.metricDefinition()}
+		disabled={!!initialData.metric_definition}
+	/>
+{/key}
 {#if !composition?.composable}
 	<InputChoicesEditor
 		bind:value={$inputChoices}

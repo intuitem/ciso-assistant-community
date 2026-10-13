@@ -3,11 +3,13 @@
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
 	import MetricSampleChart from '$lib/components/Chart/MetricSampleChart.svelte';
 	import { m } from '$paraglide/messages';
-	import { goto, invalidate, invalidateAll, replaceState } from '$app/navigation';
+	import { goto, invalidate, invalidateAll } from '$app/navigation';
 	import { page } from '$app/state';
 	import { getModalStore } from '$lib/components/Modals/stores';
 	import ComposeMetricModal from '$lib/components/Modals/ComposeMetricModal.svelte';
-	import { onDestroy, onMount } from 'svelte';
+	import FormulaDrawer from '$lib/components/Metrology/FormulaDrawer.svelte';
+	import type { Composition } from '$lib/components/Metrology/ComposeMetricEditor.svelte';
+	import { onDestroy, onMount, tick } from 'svelte';
 	import { get } from 'svelte/store';
 	import { tableRefreshers } from '$lib/utils/stores';
 
@@ -86,22 +88,18 @@
 		refreshRun++;
 	});
 
-	// Arrived from the edit page after a formula save: follow the
-	// recomputation it queued, then drop the marker from the address.
-	onMount(() => {
-		const before = page.url.searchParams.get('recomputing');
-		if (before === null) return;
-		const url = new URL(page.url);
-		url.searchParams.delete('recomputing');
-		replaceState(url, {});
-		followComputation(++refreshRun, before || null);
-	});
-
 	const modalStore = getModalStore();
 
-	// Edit formula: the creation modal, filled in, for a formula made of
-	// picked instances; any other formula is edited on its definition.
+	// Edit formula: a drawer beside the metric, for a formula made of picked
+	// instances; any other formula is edited on its definition.
 	let formulaBusy = $state(false);
+	let editedComposition = $state<Composition | null>(null);
+	let editFormulaButton = $state<HTMLButtonElement | null>(null);
+	async function closeFormula() {
+		editedComposition = null;
+		await tick();
+		editFormulaButton?.focus();
+	}
 	// Known when the page opens, so the button says where it leads: the modal,
 	// or the definition for a formula the modal does not edit.
 	let formulaComposable = $state<boolean | null>(null);
@@ -120,6 +118,8 @@
 			.catch(() => {});
 	});
 	async function editFormula() {
+		// Open already: a second fetch would start the edit over.
+		if (editedComposition) return;
 		formulaBusy = true;
 		try {
 			const res = await fetch(`/fe-api/metrology/composition/${metricInstance.id}`);
@@ -134,19 +134,7 @@
 				);
 				return;
 			}
-			modalStore.trigger({
-				type: 'component',
-				component: {
-					ref: ComposeMetricModal,
-					props: {
-						instanceId: metricInstance.id,
-						composition,
-						onSaved: (saved: { last_computed_at?: string | null }) => {
-							followComputation(++refreshRun, saved.last_computed_at ?? null);
-						}
-					}
-				}
-			});
+			editedComposition = composition;
 		} finally {
 			formulaBusy = false;
 		}
@@ -193,6 +181,15 @@
 	});
 </script>
 
+{#if metricInstance?.id}
+	<FormulaDrawer
+		instanceId={metricInstance.id}
+		composition={editedComposition}
+		onClose={closeFormula}
+		onSaved={(saved) => followComputation(++refreshRun, saved.last_computed_at ?? null)}
+	/>
+{/if}
+
 <!-- A derived series is its formula's: no sample is typed in by hand. -->
 <DetailView {data} {form} disableCreate={Boolean(metricInstance?.is_derived)}>
 	{#snippet actions()}
@@ -212,6 +209,8 @@
 				class="btn preset-tonal-primary h-fit"
 				onclick={editFormula}
 				disabled={formulaBusy}
+				aria-expanded={!!editedComposition}
+				bind:this={editFormulaButton}
 				data-testid="edit-formula-button"
 			>
 				<i

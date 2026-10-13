@@ -301,23 +301,22 @@ export interface SparkPoint {
 // `height` box: the numeric periods as points (a skipped one leaves its slot
 // empty, so the spacing stays true to time), the line through them and the
 // area under it. Null with fewer than two numbers: nothing to draw a trend of.
+// `range` puts two lines on one scale (sparkRange): a before/after chart.
 export function sparkline(
 	periods: { start: string; value: unknown; skipped?: boolean }[],
 	width: number,
 	height: number,
-	pad = 4
+	pad = 4,
+	range?: { min: number; max: number } | null
 ): { points: SparkPoint[]; line: string; area: string } | null {
 	const slots = periods.length;
 	const numeric = periods
 		.map((period, index) => ({ period, index }))
-		.filter(
-			({ period }) =>
-				!period.skipped && typeof period.value === 'number' && Number.isFinite(period.value)
-		);
+		.filter(({ period }) => isPlotted(period));
 	if (numeric.length < 2) return null;
 	const values = numeric.map(({ period }) => period.value as number);
-	const min = Math.min(...values);
-	const max = Math.max(...values);
+	const min = range ? range.min : Math.min(...values);
+	const max = range ? range.max : Math.max(...values);
 	const span = max - min;
 	const step = slots > 1 ? (width - 2 * pad) / (slots - 1) : 0;
 	const points = numeric.map(({ period, index }) => {
@@ -336,6 +335,49 @@ export function sparkline(
 	const last = points[points.length - 1];
 	const area = `${line} L${last.x},${height} L${first.x},${height} Z`;
 	return { points, line, area };
+}
+
+function isPlotted(period: { value: unknown; skipped?: boolean }): boolean {
+	return !period.skipped && typeof period.value === 'number' && Number.isFinite(period.value);
+}
+
+// The scale several series share: the lowest and highest of their numbers.
+export function sparkRange(
+	...series: { value: unknown; skipped?: boolean }[][]
+): { min: number; max: number } | null {
+	const values = series
+		.flat()
+		.filter(isPlotted)
+		.map((period) => period.value as number);
+	return values.length ? { min: Math.min(...values), max: Math.max(...values) } : null;
+}
+
+// What a metric holds now, on a preview's periods: its samples matched by
+// period start, so the now and new lines of a comparison share their slots.
+// `read` turns a sample's value into the number to plot, or null.
+export function samplesOnPeriods(
+	periods: { start: string }[],
+	samples: { timestamp: string; period_start?: string | null; value: unknown }[],
+	read: (value: Record<string, unknown>) => unknown
+): { start: string; value: unknown; skipped: boolean }[] {
+	const held = new Map<number, unknown>();
+	for (const sample of samples) {
+		let value = sample.value;
+		try {
+			if (typeof value === 'string') value = JSON.parse(value);
+		} catch {
+			continue;
+		}
+		if (!value || typeof value !== 'object') continue;
+		const moment = Date.parse(sampleMoment(sample));
+		if (!Number.isNaN(moment) && !held.has(moment)) {
+			held.set(moment, read(value as Record<string, unknown>));
+		}
+	}
+	return periods.map((period) => {
+		const value = held.get(Date.parse(period.start));
+		return { start: period.start, value: value ?? null, skipped: value === undefined };
+	});
 }
 
 // How the latest numeric period moved from the one before, and whether that

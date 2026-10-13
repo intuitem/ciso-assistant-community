@@ -15,7 +15,9 @@ import {
 	syncLevels,
 	unknownLevels,
 	latestTrend,
+	samplesOnPeriods,
 	sparkline,
+	sparkRange,
 	moveItem,
 	quickFormulas,
 	renameReference,
@@ -291,6 +293,43 @@ describe('the preview chart', () => {
 		)!;
 		expect(flat.points.map((p) => p.y)).toEqual([5, 5]);
 		expect(sparkline([{ start: 'a', value: 3 }], 10, 10)).toBeNull();
+	});
+
+	it('puts two lines on one scale', () => {
+		const now = [
+			{ start: 'a', value: 0 },
+			{ start: 'b', value: 10 }
+		];
+		const next = [
+			{ start: 'a', value: 5 },
+			{ start: 'b', value: 20 }
+		];
+		const range = sparkRange(now, next, [{ value: 'High' }, { value: 99, skipped: true }]);
+		expect(range).toEqual({ min: 0, max: 20 });
+		expect(sparkline(now, 10, 20, 0, range)!.points.map((p) => p.y)).toEqual([20, 10]);
+		expect(sparkline(next, 10, 20, 0, range)!.points.map((p) => p.y)).toEqual([15, 0]);
+		expect(sparkRange([{ value: null }])).toBeNull();
+	});
+
+	it('matches samples to periods by their start', () => {
+		const matched = samplesOnPeriods(
+			[{ start: '2026-01-01T00:00:00Z' }, { start: '2026-02-01T00:00:00Z' }],
+			[
+				// The same moment, written another way.
+				{
+					timestamp: '2026-01-31T10:00:00Z',
+					period_start: '2026-01-01T00:00:00+00:00',
+					value: '{"result": 7}'
+				},
+				{ timestamp: '2026-03-01T00:00:00Z', value: { result: 9 } },
+				{ timestamp: '2026-02-01T00:00:00Z', value: 'not json' }
+			],
+			(value) => value.result
+		);
+		expect(matched).toEqual([
+			{ start: '2026-01-01T00:00:00Z', value: 7, skipped: false },
+			{ start: '2026-02-01T00:00:00Z', value: null, skipped: true }
+		]);
 	});
 
 	it('tells whether the last move is good news', () => {

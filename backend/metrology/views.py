@@ -487,6 +487,10 @@ class MetricInstanceViewSet(BaseModelViewSet):
                     "id": str(instance.id),
                     "outcome": outcome,
                     "definition": {"name": instance.metric_definition.name},
+                    # What the instance's edit form holds and would write
+                    # back: a form left open adopts them, or undoes the edit.
+                    "metric_definition": str(instance.metric_definition_id),
+                    "input_choices": instance.input_choices,
                     # Before the recomputation the save queued: a page can
                     # follow it until this stamp moves.
                     "last_computed_at": instance.last_computed_at,

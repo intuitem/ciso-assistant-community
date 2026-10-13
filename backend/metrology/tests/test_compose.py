@@ -691,6 +691,9 @@ class TestEdit:
         second.refresh_from_db()
         assert first.metric_definition_id != shared
         assert second.metric_definition.expression == "clicks * 100.0 / heads"
+        # What an edit form left open must adopt, or its save undoes the fork.
+        assert response.data["metric_definition"] == str(first.metric_definition_id)
+        assert response.data["input_choices"] == first.input_choices
 
         # Asking for every metric using it changes nothing: a shared
         # definition is never edited from one of its metrics.
