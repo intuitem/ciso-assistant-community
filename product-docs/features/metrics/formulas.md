@@ -71,7 +71,7 @@ A metric whose result is a **Level** returns one of its levels, by:
 Names and Ref IDs are matched without regard to case. A text that is not one of the levels is an error, which the editor warns about as you type: *'Medium' is not one of the levels*.
 
 ```
-coverage >= 90.0 ? "On track" : coverage >= 60.0 ? "Behind" : "Off track"
+coverage < 60.0 ? "Off track" : coverage < 90.0 ? "Behind" : "On track"
 ```
 
 ## Examples

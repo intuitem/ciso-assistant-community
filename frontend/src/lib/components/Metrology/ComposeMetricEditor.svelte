@@ -1079,7 +1079,7 @@
 						scope={celScope}
 						testid="compose-expression"
 						placeholder={isLevel
-							? levelStarter(keys) || 'rate >= 50.0 ? "High" : "Low"'
+							? levelStarter(keys) || 'rate < 50.0 ? "Low" : "High"'
 							: keys.length >= 2
 								? `${keys[0]} * 100.0 / ${keys[1]}`
 								: keys.length

@@ -7266,7 +7266,7 @@
 	"resultNumber": "Nombre",
 	"resultLevel": "Niveau",
 	"levels": "Niveaux",
-	"levelsHelpText": "Remplis à partir des textes que renvoie votre formule. Ordonnez-les du premier au dernier : « plus haut est mieux » suit cet ordre.",
+	"levelsHelpText": "Remplis à partir des textes que renvoie votre formule. Ordonnez-les du pire au meilleur : avec « plus haut est mieux » coché, le dernier niveau est le meilleur.",
 	"levelsCopiedHelpText": "Les niveaux de {name}. Votre formule renvoie leurs noms ou références.",
 	"useLevelsOf": "Utiliser les niveaux de…",
 	"notALevel": "« {text} » ne fait pas partie des niveaux",

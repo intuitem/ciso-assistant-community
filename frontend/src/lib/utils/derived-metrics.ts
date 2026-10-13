@@ -469,5 +469,7 @@ export function levelIndex(value: unknown, levels: Level[]): number | null {
 export function levelStarter(keys: string[]): string {
 	if (!keys.length) return '';
 	const measure = keys.length >= 2 ? `${keys[0]} * 100.0 / ${keys[1]}` : keys[0];
-	return `${measure} >= 50.0 ? "High" : "Low"`;
+	// Worst level first: the levels fill in the order the texts appear, and
+	// "higher is better" (ticked by default) makes the last one the best.
+	return `${measure} < 50.0 ? "Low" : "High"`;
 }

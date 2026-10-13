@@ -42,7 +42,7 @@ Write the formula in the field, using the names from step 1. Suggestions appear 
 **Result** decides what the metric holds:
 
 - **Number**: a quantity, such as a percentage, a count or a duration.
-- **Level**: one of an ordered list of texts, such as *High* and *Low*. See [Levels](#levels).
+- **Level**: one of an ordered list of texts, such as *Low* and *High*. See [Levels](#levels).
 
 When the formula is empty, **Start from:** offers ready-made formulas over your picks:
 
@@ -52,7 +52,7 @@ When the formula is empty, **Start from:** offers ready-made formulas over your 
 | **Difference** | exactly two metrics | `first - second` |
 | **Sum** | two or more | every pick added up |
 | **Average** | two or more | the sum divided by the number of picks |
-| **Threshold** | a level result, one or more | `first >= 50.0 ? "High" : "Low"`, or the ratio of the first two against 50, to adjust |
+| **Threshold** | a level result, one or more | `first < 50.0 ? "Low" : "High"`, or the ratio of the first two against 50, to adjust. Low comes first, so High is the best level |
 
 The formula runs once per period of the metric's collection frequency, with each input's value for that period. `previous` is the result of the period before. The [Formula reference](formulas.md) covers the language: arithmetic, conditions, missing values and the available functions.
 
@@ -64,10 +64,10 @@ Write `100.0`, not `100`, when a division must keep its decimals. Two whole numb
 
 Choose **Result: Level** and the formula returns texts. The **Levels** box lists them, filled from the texts in your formula as you type.
 
-<figure><img src="../../.gitbook/assets/metrics-compose-levels.png" alt="A level formula returning High or Low, the levels list with High first and Low second, and the latest result showing High"><figcaption><p>A threshold turned into levels: the list follows the texts the formula returns</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/metrics-compose-levels.png" alt="A level formula returning Low or High, the levels list with Low first and High second, and the latest result showing High"><figcaption><p>A threshold turned into levels: the list follows the texts the formula returns, worst first</p></figcaption></figure>
 
 - Each level has a **Ref ID** and a **Name**. The formula may return either.
-- Order the levels from first to last by dragging them. **Higher is better** reads this order: ticked, each level is better than the one before it, so the last is the best; unticked, the first is the best. It decides whether a change of level shows as good or bad news.
+- Order the levels from worst to best by dragging them. They fill in the order the texts appear in the formula, so writing the worst outcome first saves a drag. **Higher is better** reads this order: ticked, each level is better than the one before it, so the last is the best; unticked, the first is the best. It decides whether a change of level shows as good or bad news.
 - Rename a level and the formula's text follows.
 - **Use the levels of…** copies the levels of an existing level metric, so several metrics share one scale. After that, the list no longer follows the formula: write the formula to return those names or references.
 - A text the formula returns that is not a level shows a warning, such as *'Medium' is not one of the levels*.

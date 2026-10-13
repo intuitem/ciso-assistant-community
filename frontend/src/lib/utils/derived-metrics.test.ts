@@ -386,8 +386,8 @@ describe('a level result', () => {
 	});
 
 	it('starts a level formula from the picks', () => {
-		expect(levelStarter(['a', 'b'])).toBe('a * 100.0 / b >= 50.0 ? "High" : "Low"');
-		expect(levelStarter(['a'])).toBe('a >= 50.0 ? "High" : "Low"');
+		expect(levelStarter(['a', 'b'])).toBe('a * 100.0 / b < 50.0 ? "Low" : "High"');
+		expect(levelStarter(['a'])).toBe('a < 50.0 ? "Low" : "High"');
 		expect(levelStarter([])).toBe('');
 	});
 });

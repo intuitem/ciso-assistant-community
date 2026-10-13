@@ -58,8 +58,8 @@ A level reads better on a dashboard than a percentage: *On track* or *Behind*.
 
 1. On *Training coverage · Spain*, click **Use in a formula**. The window opens with the metric already picked and its name, `training_coverage_spain`, in the formula.
 2. Next to **Result**, choose **Level**.
-3. Write `training_coverage_spain >= 90.0 ? "On track" : "Behind"`. The **Levels** box fills with *On track* and *Behind*.
-4. Order the levels from worst to best: drag *Behind* above *On track*. With **Higher is better** ticked, the last level is the best, so moving up to *On track* shows as good news.
+3. Write `training_coverage_spain < 90.0 ? "Behind" : "On track"`. The **Levels** box fills with *Behind*, then *On track*, in the order the texts appear.
+4. Check the order: worst first, best last. With **Higher is better** ticked, the last level is the best, so moving up to *On track* shows as good news. Drag a level to change the order.
 5. Name it *Training status · Spain* and click **Create metric**.
 
 The status recomputes whenever the coverage does. Both metrics can go on a [dashboard](../features/dashboards.md).
