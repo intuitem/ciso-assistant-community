@@ -194,11 +194,83 @@ class EntityAssessmentSerializersTestCase(TestCase):
         self.assertEqual(
             mock_audit_create.call_args[1]["framework"].id, self.framework.id
         )
-        self.assertEqual(mock_audit_create.call_args[1]["perimeter"], self.perimeter)
+        # Enclave audits carry no perimeter, even when the entity assessment has one.
+        self.assertNotIn("perimeter", mock_audit_create.call_args[1])
         self.assertEqual(
             mock_audit_create.call_args[1]["selected_implementation_groups"],
             data["selected_implementation_groups"],
         )
+
+    def test_created_audit_lands_on_the_serializer_instance(self):
+        """The respondent assignment that follows reads
+        instance.compliance_assessment, so creating the audit must leave it on
+        the object the serializer is holding — not only in the database."""
+        with patch("iam.models.RoleAssignment.is_access_allowed", return_value=True):
+            serializer = EntityAssessmentWriteSerializer(
+                data={
+                    "name": "Assessment with questionnaire",
+                    "entity": self.entity.id,
+                    "folder": self.folder.id,
+                    "perimeter": self.perimeter.id,
+                    "create_audit": True,
+                    "framework": self.framework.id,
+                    "selected_implementation_groups": ["group1"],
+                },
+                context={"request": MagicMock()},
+            )
+            self.assertTrue(serializer.is_valid(), serializer.errors)
+            instance = serializer.save()
+
+        self.assertIsNotNone(instance.compliance_assessment)
+        self.assertEqual(
+            instance.compliance_assessment.selected_implementation_groups, ["group1"]
+        )
+        # The questionnaire lives in its own enclave, and the audit is real:
+        # a bare create would leave it without requirements.
+        self.assertEqual(
+            instance.compliance_assessment.folder.content_type,
+            Folder.ContentType.ENCLAVE,
+        )
+
+    def test_link_audit_checks_change_complianceassessment_on_audit_folder(self):
+        """Linking an existing audit relocates it, so the gate must be
+        change_complianceassessment in the audit's own folder — not this
+        serializer's change_entityassessment."""
+        audit_folder = Folder.objects.create(name="Audit Folder")
+        audit = ComplianceAssessment.objects.create(
+            name="Linkable Audit", framework=self.framework, folder=audit_folder
+        )
+        assessment = EntityAssessment.objects.create(
+            name="Link Target", entity=self.entity, folder=self.folder
+        )
+        request = MagicMock()
+        request.user = self.user
+
+        checked = []
+
+        def record_access(user, perm, folder):
+            checked.append((perm.codename, folder))
+            return True
+
+        with patch(
+            "iam.models.RoleAssignment.is_access_allowed", side_effect=record_access
+        ):
+            serializer = EntityAssessmentWriteSerializer(
+                instance=assessment,
+                data={"link_audit": audit.id},
+                partial=True,
+                context={"request": request},
+            )
+            self.assertTrue(serializer.is_valid(), serializer.errors)
+            serializer.save()
+
+        self.assertIn(("change_complianceassessment", audit_folder), checked)
+        self.assertNotIn(("change_entityassessment", audit_folder), checked)
+        assessment.refresh_from_db()
+        audit.refresh_from_db()
+        self.assertEqual(assessment.compliance_assessment_id, audit.id)
+        self.assertEqual(audit.folder.content_type, Folder.ContentType.ENCLAVE)
+        self.assertIsNone(audit.perimeter)
 
     @patch("iam.models.RoleAssignment.is_access_allowed", return_value=True)
     def test_entity_assessment_write_serializer_without_framework(
@@ -239,8 +311,8 @@ class EntityAssessmentSerializersTestCase(TestCase):
         request.user.is_authenticated = True
 
         with patch(
-            "iam.models.RoleAssignment.get_accessible_object_ids",
-            return_value=([new_rep.id], None),
+            "iam.models.RoleAssignment._get_accessible_ids",
+            return_value=([new_rep.id]),
         ):
             serializer = EntityAssessmentWriteSerializer(
                 self.assessment, data=data, partial=True, context={"request": request}
@@ -438,6 +510,20 @@ class SolutionSerializersTestCase(TestCase):
         self.assertIn("provider_entity", data)
         self.assertIn("recipient_entity", data)
         self.assertIn("assets", data)
+
+    def test_solution_read_serializer_dora_ict_service_type_is_raw_code(self):
+        """The frontend maps dora_ict_service_type to a translation from the EBA
+        code, so the read serializer must expose the raw value, not the display
+        label. Sibling DORA choice fields keep the display label on purpose:
+        their labels are what the frontend translates from."""
+        self.solution.dora_ict_service_type = "eba_TA:S02"
+        self.solution.dora_reliance_level = "eba_ZZ:x795"
+        self.solution.save()
+
+        data = SolutionReadSerializer(self.solution).data
+
+        self.assertEqual(data["dora_ict_service_type"], "eba_TA:S02")
+        self.assertEqual(data["dora_reliance_level"], "Low reliance")
 
     @patch("iam.models.RoleAssignment.is_access_allowed", return_value=True)
     def test_solution_write_serializer(self, mock_is_access_allowed):

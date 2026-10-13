@@ -8,6 +8,7 @@ from core.serializers import (
 from core.models import AppliedControl
 from core.utils import get_global_currency
 from pmbok.models import GenericCollection
+from threat_modeling.models import ThreatModel
 
 from .models import (
     QuantitativeRiskHypothesis,
@@ -138,6 +139,12 @@ class QuantitativeRiskStudyReadSerializer(BaseModelSerializer):
 
 
 class QuantitativeRiskScenarioWriteSerializer(BaseModelSerializer):
+    FLAGGED_FIELDS = {"threat_models": "threat_modeling"}
+
+    threat_models = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=ThreatModel.objects.all()
+    )
+
     class Meta:
         model = QuantitativeRiskScenario
         exclude = ["created_at", "updated_at"]
@@ -173,10 +180,13 @@ class QuantitativeRiskScenarioWriteSerializer(BaseModelSerializer):
 
 
 class QuantitativeRiskScenarioReadSerializer(BaseModelSerializer):
+    FLAGGED_FIELDS = {"threat_models": "threat_modeling"}
+
     quantitative_risk_study = FieldsRelatedField()
     assets = FieldsRelatedField(many=True)
     owner = FieldsRelatedField(many=True)
     threats = FieldsRelatedField(many=True)
+    threat_models = FieldsRelatedField(many=True)
     vulnerabilities = FieldsRelatedField(many=True)
     qualifications = FieldsRelatedField(many=True)
     folder = FieldsRelatedField()

@@ -5,6 +5,7 @@
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import ClassificationBadge from '$lib/components/ClassificationBadge.svelte';
 	import DocumentReferencesPanel from '$lib/components/DocumentEditor/DocumentReferencesPanel.svelte';
+	import PdfPreview from '$lib/components/AttachmentPreview/PdfPreview.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -65,7 +66,7 @@
 								<a
 									href={`/documents/${data.container?.id}/read/pdf?rev=${data.revision.id}`}
 									data-sveltekit-reload
-									class="btn btn-sm variant-soft"
+									class="btn btn-sm preset-tonal"
 								>
 									<i class="fa-solid fa-file-pdf mr-2"></i>{m.exportPdf()}
 								</a>
@@ -138,22 +139,18 @@
 				href={linkUrl}
 				target="_blank"
 				rel="noopener noreferrer"
-				class="btn btn-sm variant-filled-primary shrink-0"
+				class="btn btn-sm preset-filled-primary-500 shrink-0"
 			>
 				<i class="fa-solid fa-arrow-up-right-from-square mr-2"></i>{m.open()}
 			</a>
 		</div>
 	{:else if isUploaded && fileUrl}
 		<div class="space-y-4">
-			<a href={fileUrl} target="_blank" rel="noopener" class="btn btn-sm variant-filled-primary">
+			<a href={fileUrl} target="_blank" rel="noopener" class="btn btn-sm preset-filled-primary-500">
 				<i class="fa-solid fa-download mr-2"></i>{m.download()}
 			</a>
 			{#if isPdf}
-				<iframe
-					src={fileUrl}
-					title={data.container?.name}
-					class="h-[75vh] w-full rounded-xl border border-surface-200-800 shadow-sm"
-				></iframe>
+				<PdfPreview src={fileUrl} title={data.container?.name} class="h-[75vh] w-full shadow-sm" />
 			{/if}
 		</div>
 	{:else if data.content}

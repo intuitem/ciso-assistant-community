@@ -83,7 +83,8 @@
 			folder: ea.folder?.id ?? ea.folder ?? data.data.folder,
 			attack_stage: getStageNumber(ea.attack_stage),
 			icon: ea.icon?.toLowerCase(),
-			threat: ea.threat?.id ?? ea.threat ?? null
+			threat: ea.threat?.id ?? ea.threat ?? null,
+			technique: ea.technique?.id ?? ea.technique ?? null
 		};
 
 		const eaSchema = modelSchema('elementary-actions');
@@ -206,6 +207,9 @@
 		<OperatingModeGraph
 			elementaryActions={data.elementaryActions}
 			killChainSteps={data.killChainSteps}
+			probabilityChoices={data.probabilityChoices}
+			ratingKit={data.ratingKit}
+			quotationMethod={data.object?.quotation_method}
 			operatingModeId={data.operatingModeId}
 			graphColumns={data.data.graph_columns ?? {}}
 			readonly={!editMode}

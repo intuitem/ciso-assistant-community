@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from django.utils.formats import date_format
 
@@ -5,7 +6,7 @@ import magic
 import structlog
 from django.db import models, transaction
 from django.db.models import CharField, Value, Case, When
-from django.db.models.functions import Lower, Cast
+from django.db.models.functions import Coalesce, Lower, Cast, NullIf
 import django_filters as df
 from django.contrib.auth.models import Permission
 from rest_framework import serializers, status
@@ -26,8 +27,15 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.conf import settings
 from django.core.exceptions import ValidationError
 
-from core.views import BaseModelViewSet, GenericFilterSet, RoleFilter
-from core.utils import MAIN_ENTITY_DEFAULT_NAME
+from core.views import (
+    BaseModelViewSet,
+    ComplianceAssessmentViewSet,
+    ExportMixin,
+    GenericFilterSet,
+    RoleFilter,
+    SmartOrderingFilter,
+)
+from core.utils import MAIN_ENTITY_DEFAULT_NAME, get_respondent_scoped_folder_ids
 from iam.models import User, Role, UserGroup, RoleAssignment
 from tprm.models import Entity
 
@@ -38,8 +46,20 @@ import shutil
 from pathlib import Path
 import humanize
 
-from core.models import CustomEmailTemplate, CustomWordTemplate, CustomDocHtmlTemplate
-from .models import ClientSettings
+from core.models import (
+    Actor,
+    AppliedControl,
+    ComplianceAssessment,
+    CustomDocHtmlTemplate,
+    CustomEmailTemplate,
+    CustomWordTemplate,
+    FindingsAssessment,
+    RiskAssessment,
+    SecurityException,
+)
+from global_settings.models import GlobalSettings
+from resilience.models import BusinessImpactAnalysis
+from .models import ClientSettings, LogEntryAction
 from .serializers import (
     ClientSettingsReadSerializer,
     CustomEmailTemplateReadSerializer,
@@ -64,6 +84,15 @@ logger = structlog.get_logger(__name__)
 
 class ClientSettingsViewSet(BaseModelViewSet):
     model = ClientSettings
+
+    # No role holds add_clientsettings (the row is created by AppConfig), so the
+    # image actions authorize as edits of the existing singleton.
+    permission_overrides = {
+        "upload_logo": "change_clientsettings",
+        "upload_favicon": "change_clientsettings",
+        "delete_logo": "change_clientsettings",
+        "delete_favicon": "change_clientsettings",
+    }
 
     def create(self, request, *args, **kwargs):
         return Response(
@@ -145,13 +174,16 @@ class ClientSettingsViewSet(BaseModelViewSet):
         )
 
     def handle_file_upload(self, request, pk, field_name):
+        # Raises 403/404 before anything is read; the blanket except below must
+        # not turn an authorization failure into a 400.
+        settings = self.get_object()
+
         if "file" not in request.FILES:
             return Response(
                 {"error": "No file provided"}, status=status.HTTP_400_BAD_REQUEST
             )
 
         try:
-            settings = ClientSettings.objects.get(id=pk)
             file = request.FILES["file"]
             content_type = magic.Magic(mime=True).from_buffer(file.read())
 
@@ -169,11 +201,13 @@ class ClientSettingsViewSet(BaseModelViewSet):
                 )
 
             setattr(settings, field_name, request.FILES["file"])
+            settings.full_clean()
             settings.save()
             return Response(status=status.HTTP_200_OK)
-        except ClientSettings.DoesNotExist:
+        except ValidationError:
             return Response(
-                {"error": "Client settings not found"}, status=status.HTTP_404_NOT_FOUND
+                {field_name: "invalidFileType"},
+                status=status.HTTP_400_BAD_REQUEST,
             )
         except Exception as e:
             logger.error("Error uploading file", exc_info=e)
@@ -200,41 +234,22 @@ class ClientSettingsViewSet(BaseModelViewSet):
     def upload_favicon(self, request, pk):
         return self.handle_file_upload(request, pk, "favicon")
 
+    def handle_file_delete(self, field_name):
+        settings = self.get_object()
+        image = getattr(settings, field_name)
+        if not image:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        image.delete()
+        settings.save()
+        return Response(status=status.HTTP_200_OK)
+
     @action(methods=["put"], detail=True, url_path="logo/delete")
     def delete_logo(self, request, pk):
-        (
-            object_ids_view,
-            _,
-            _,
-        ) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, ClientSettings
-        )
-        response = Response(status=status.HTTP_403_FORBIDDEN)
-        if UUID(pk) in object_ids_view:
-            settings = self.get_object()
-            if settings.logo:
-                settings.logo.delete()
-                settings.save()
-                response = Response(status=status.HTTP_200_OK)
-        return response
+        return self.handle_file_delete("logo")
 
     @action(methods=["put"], detail=True, url_path="favicon/delete")
     def delete_favicon(self, request, pk):
-        (
-            object_ids_view,
-            _,
-            _,
-        ) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, ClientSettings
-        )
-        response = Response(status=status.HTTP_403_FORBIDDEN)
-        if UUID(pk) in object_ids_view:
-            settings = self.get_object()
-            if settings.favicon:
-                settings.favicon.delete()
-                settings.save()
-                response = Response(status=status.HTTP_200_OK)
-        return response
+        return self.handle_file_delete("favicon")
 
 
 class LicenseStatusView(APIView):
@@ -268,6 +283,28 @@ class LicenseStatusView(APIView):
             return Response({"status": "expired", "days_expired": days_expired})
 
 
+class RoleFilterSet(GenericFilterSet):
+    read_only = df.BooleanFilter(method="filter_read_only")
+
+    class Meta:
+        model = Role
+        fields = ["builtin"]
+
+    def filter_read_only(self, queryset, name, value):
+        """
+        A role is read-only when none of its permissions is a non-view
+        permission. A role with no permissions at all counts as read-only.
+
+        No regex here: the negative lookahead this used to rely on is not
+        supported by PostgreSQL's POSIX regexes (it only worked on SQLite,
+        whose regex operator is Python-backed).
+        """
+        write_permissions = Permission.objects.exclude(codename__startswith="view_")
+        if value:
+            return queryset.exclude(permissions__in=write_permissions)
+        return queryset.filter(permissions__in=write_permissions).distinct()
+
+
 class RoleViewSet(BaseModelViewSet):
     """
     API endpoint that allows roles to be viewed or edited
@@ -275,10 +312,19 @@ class RoleViewSet(BaseModelViewSet):
 
     model = Role
     ordering_fields = ["name"]
+    filterset_class = RoleFilterSet
     filter_backends = [
         DjangoFilterBackend,
         RoleFilter,
     ]
+
+    def get_queryset(self):
+        # Hide only dedicated per-SA roles; a shared builtin role stays visible.
+        return (
+            super()
+            .get_queryset()
+            .exclude(service_accounts__isnull=False, builtin=False)
+        )
 
     def _get_default_permissions(self):
         return Permission.objects.filter(
@@ -302,14 +348,22 @@ class RoleViewSet(BaseModelViewSet):
 
             user_groups = []
             role_assignments = []
+            processed_folders = []
 
             for folder in folders:
+                if (
+                    folder.content_type == Folder.ContentType.DOMAIN
+                    and not folder.create_iam_groups
+                ):
+                    continue
+
                 ug, _ = UserGroup.objects.get_or_create(
                     folder=folder,
                     name=role.name,
                     defaults={"builtin": True},
                 )
                 user_groups.append(ug)
+                processed_folders.append(folder)
 
                 role_assignments.append(
                     RoleAssignment(
@@ -323,7 +377,7 @@ class RoleViewSet(BaseModelViewSet):
             RoleAssignment.objects.bulk_create(role_assignments)
 
             # M2M must be handled after bulk_create
-            for ra, folder in zip(role_assignments, folders):
+            for ra, folder in zip(role_assignments, processed_folders):
                 ra.perimeter_folders.add(folder)
 
     def perform_update(self, serializer):
@@ -509,13 +563,37 @@ class LogEntryFilterSet(GenericFilterSet):
         return queryset.filter(q)
 
 
+def _format_log_action(action):
+    try:
+        return LogEntryAction(action).to_string()
+    except ValueError:
+        return str(action)
+
+
+def _format_log_changes(changes):
+    if not changes:
+        return ""
+    if isinstance(changes, str):
+        try:
+            changes = json.loads(changes)
+        except ValueError:
+            return changes
+    if isinstance(changes, dict) and "password" in changes:
+        changes = {**changes, "password": ["[old password]", "[new password]"]}
+    return json.dumps(changes, ensure_ascii=False, default=str)
+
+
 class LogEntryViewSet(
-    mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
+    ExportMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
 ):
+    model = LogEntry
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
-        filters.OrderingFilter,
+        SmartOrderingFilter,
     ]
     ordering = ["-timestamp"]
     ordering_fields = "__all__"
@@ -531,6 +609,69 @@ class LogEntryViewSet(
 
     permission_classes = (IsAuthenticated,)
     serializer_class = LogEntrySerializer
+
+    export_config = {
+        "filename": "audit_log",
+        "select_related": ["content_type", "actor"],
+        "wrap_columns": ["changes"],
+        "fields": {
+            "timestamp": {
+                "source": "timestamp",
+                "label": "timestamp",
+                "format": lambda d: d.isoformat() if d else "",
+            },
+            "actor": {"source": "actor_label", "label": "actor"},
+            "action": {
+                "source": "action",
+                "label": "action",
+                "format": _format_log_action,
+            },
+            "content_type": {"source": "content_type.model", "label": "model"},
+            "object_id": {"source": "object_pk", "label": "object_id"},
+            "object": {"source": "object_repr", "label": "object"},
+            "folder": {"source": "folder", "label": "folder"},
+            "changes": {
+                "source": "changes",
+                "label": "changes",
+                "format": _format_log_changes,
+            },
+            "remote_addr": {"source": "remote_addr", "label": "remote_addr"},
+        },
+    }
+
+    def _get_export_queryset(self):
+        self._folder_paths = {
+            str(folder.id): folder.get_folder_full_path_string()
+            for folder in Folder.objects.all()
+        }
+        return (
+            super()
+            ._get_export_queryset()
+            .annotate(
+                actor_label=Coalesce(
+                    NullIf("actor_email", Value("")),
+                    "actor__email",
+                    Value(""),
+                    output_field=CharField(),
+                )
+            )
+        )
+
+    def _resolve_field_value(self, obj, field_config):
+        if field_config.get("source") == "folder":
+            folder_id = (obj.additional_data or {}).get("folder_id")
+            return self._folder_paths.get(str(folder_id), "") if folder_id else ""
+        return super()._resolve_field_value(obj, field_config)
+
+    @action(detail=False, name="Export as XLSX")
+    def export_xlsx(self, request):
+        max_rows = settings.AUDITLOG_EXPORT_XLSX_MAX_ROWS
+        if self.filter_queryset(self.get_queryset()).count() > max_rows:
+            return Response(
+                {"error": "tooManyRowsForXlsx", "max_rows": max_rows},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return super().export_xlsx(request)
 
     def get_queryset(self):
         if not RoleAssignment.is_access_allowed(
@@ -575,7 +716,7 @@ class CustomEmailTemplateViewSet(BaseModelViewSet):
             return CustomEmailTemplate.objects.none()
         return CustomEmailTemplate.objects.all()
 
-    def get_serializer_class(self):
+    def get_serializer_class(self, **kwargs):
         if self.request.method in ("POST", "PUT", "PATCH"):
             return CustomEmailTemplateWriteSerializer
         return CustomEmailTemplateReadSerializer
@@ -591,6 +732,10 @@ class CustomEmailTemplateViewSet(BaseModelViewSet):
         )
         override_set = {(k, l) for k, l in overrides}
 
+        from core.email_utils import get_disabled_email_templates
+
+        disabled_templates = get_disabled_email_templates()
+
         result = []
         for key, meta in EMAIL_TEMPLATE_REGISTRY.items():
             result.append(
@@ -602,9 +747,56 @@ class CustomEmailTemplateViewSet(BaseModelViewSet):
                     "overrides": [
                         lang for lang in ["en", "fr"] if (key, lang) in override_set
                     ],
+                    "is_enabled": key not in disabled_templates,
                 }
             )
         return Response(result)
+
+    @action(methods=["post"], detail=False, url_path="set-enabled")
+    def set_enabled(self, request):
+        """Enable or disable sending of a given email template."""
+        if not self._has_permission(request):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        template_key = request.data.get("template_key")
+        is_enabled = request.data.get("is_enabled")
+        if template_key not in EMAIL_TEMPLATE_REGISTRY:
+            return Response(
+                {"error": "Unknown template key"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        if not isinstance(is_enabled, bool):
+            return Response(
+                {"error": "is_enabled must be a boolean"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        with transaction.atomic():
+            general = (
+                GlobalSettings.objects.select_for_update()
+                .filter(name="general")
+                .first()
+            )
+            if general is None:
+                return Response(
+                    {"error": "General settings not initialized"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            value = general.value if isinstance(general.value, dict) else {}
+            disabled = {
+                key
+                for key in value.get("disabled_email_templates", [])
+                if isinstance(key, str)
+            }
+            if is_enabled:
+                disabled.discard(template_key)
+            else:
+                disabled.add(template_key)
+            value["disabled_email_templates"] = sorted(disabled)
+            general.value = value
+            general.save(update_fields=["value"])
+
+        return Response({"template_key": template_key, "is_enabled": is_enabled})
 
     @action(
         methods=["get"],
@@ -666,7 +858,7 @@ class CustomWordTemplateViewSet(BaseModelViewSet):
             return CustomWordTemplate.objects.none()
         return CustomWordTemplate.objects.all()
 
-    def get_serializer_class(self):
+    def get_serializer_class(self, **kwargs):
         if self.request.method in ("POST", "PUT", "PATCH"):
             return CustomWordTemplateWriteSerializer
         return CustomWordTemplateReadSerializer
@@ -1170,3 +1362,170 @@ class ObjectAuditTrailView(APIView):
         if model_name == "user" and isinstance(changes, dict) and "password" in changes:
             return {**changes, "password": ["***", "***"]}
         return changes
+
+
+class TimelineEntriesView(APIView):
+    """
+    Aggregate feed for the insights timeline (Gantt) page.
+
+    Replaces six fetch-all list calls with one request returning, per model,
+    only the fields the timeline renders. Rows are scoped per model through
+    RoleAssignment.get_accessible_object_ids, the same kernel the list
+    endpoints use (superusers included), and compliance assessments
+    additionally get the respondent scoping of their list queryset.
+    """
+
+    ASSESSMENT_MODELS = [
+        (RiskAssessment, "risk_assessments"),
+        (BusinessImpactAnalysis, "business_impact_analyses"),
+        (FindingsAssessment, "findings_assessments"),
+    ]
+
+    def get(self, request):
+        user = request.user
+        actor_ids: set = set()
+        entries: list[dict] = []
+
+        def accessible_ids(model):
+            # Same kernel call as BaseModelViewSet.get_queryset: a queryset of
+            # the ids the user may view, usable directly in id__in filters.
+            return RoleAssignment.get_viewable_object_ids(user, model)
+
+        def owner_ids_map(model, field_name, object_ids):
+            """Map object id to its owning actor ids via the M2M through
+            table (one query per model, no per-row fan-out)."""
+            field = model._meta.get_field(field_name)
+            through = field.remote_field.through
+            source = f"{field.m2m_field_name()}_id"
+            target = f"{field.m2m_reverse_field_name()}_id"
+            mapping: dict = {}
+            for object_id, actor_id in through.objects.filter(
+                **{f"{source}__in": object_ids}
+            ).values_list(source, target):
+                mapping.setdefault(object_id, []).append(actor_id)
+                actor_ids.add(actor_id)
+            return mapping
+
+        # Applied controls: bar (start_date + eta) or milestone (eta only)
+        ac_ids = accessible_ids(AppliedControl)
+        ac_owners = owner_ids_map(AppliedControl, "owner", ac_ids)
+        for row in (
+            AppliedControl.objects.filter(id__in=ac_ids)
+            .order_by("created_at")
+            .values("id", "name", "start_date", "eta", "progress_field", "folder_id")
+        ):
+            entries.append(
+                {
+                    "model": "applied_controls",
+                    "id": row["id"],
+                    "name": row["name"],
+                    "folder": row["folder_id"],
+                    "start_date": row["start_date"],
+                    "eta": row["eta"],
+                    "progress_field": row["progress_field"],
+                    "owners": ac_owners.get(row["id"], []),
+                }
+            )
+
+        # Compliance assessments: eta/due_date milestone with progress.
+        # Progress reuses the bucketed bulk computation of the list endpoint
+        # (ComplianceAssessmentViewSet._get_optimized_object_data) so the
+        # rendered percentage matches ComplianceAssessmentListSerializer.
+        ca_qs = ComplianceAssessment.objects.filter(
+            id__in=accessible_ids(ComplianceAssessment)
+        )
+        respondent_folders = get_respondent_scoped_folder_ids(user)
+        if respondent_folders:
+            user_actors = Actor.get_all_for_user(user)
+            ca_qs = ca_qs.filter(
+                ~models.Q(folder_id__in=respondent_folders)
+                | models.Q(requirement_assignments__actor__in=user_actors)
+            ).distinct()
+        audits = list(ca_qs.select_related("folder").order_by("created_at"))
+        optimized = ComplianceAssessmentViewSet()._get_optimized_object_data(audits)
+        total_map = optimized.get("total_requirements", {})
+        assessed_map = optimized.get("assessed_requirements", {})
+        for audit in audits:
+            total = total_map.get(audit.id, 0)
+            assessed = assessed_map.get(audit.id, 0)
+            entries.append(
+                {
+                    "model": "compliance_assessments",
+                    "id": audit.id,
+                    "name": audit.name,
+                    "folder": audit.folder_id,
+                    "eta": audit.eta,
+                    "due_date": audit.due_date,
+                    "created_at": audit.created_at,
+                    # Same computation as ComplianceAssessmentListSerializer.get_progress
+                    "progress": int((assessed / total) * 100) if total else 0,
+                    # No owners: the compliance list serializer does not expose
+                    # authors, so the timeline never showed them (parity).
+                }
+            )
+
+        # Risk assessments, BIAs, findings assessments: eta/due_date milestone
+        for model, key in self.ASSESSMENT_MODELS:
+            ids = accessible_ids(model)
+            owners = owner_ids_map(model, "authors", ids)
+            for row in (
+                model.objects.filter(id__in=ids)
+                .order_by("created_at")
+                .values("id", "name", "eta", "due_date", "created_at", "folder_id")
+            ):
+                entries.append(
+                    {
+                        "model": key,
+                        "id": row["id"],
+                        "name": row["name"],
+                        "folder": row["folder_id"],
+                        "eta": row["eta"],
+                        "due_date": row["due_date"],
+                        "created_at": row["created_at"],
+                        "owners": owners.get(row["id"], []),
+                    }
+                )
+
+        # Security exceptions: expiration_date milestone
+        se_ids = accessible_ids(SecurityException)
+        se_owners = owner_ids_map(SecurityException, "owners", se_ids)
+        for row in (
+            SecurityException.objects.filter(id__in=se_ids)
+            .order_by("created_at")
+            .values("id", "name", "expiration_date", "created_at", "folder_id")
+        ):
+            entries.append(
+                {
+                    "model": "security_exceptions",
+                    "id": row["id"],
+                    "name": row["name"],
+                    "folder": row["folder_id"],
+                    "expiration_date": row["expiration_date"],
+                    "created_at": row["created_at"],
+                    "owners": se_owners.get(row["id"], []),
+                }
+            )
+
+        # Resolve actor display names once for every model (same strings as
+        # FieldsRelatedField's "str", i.e. str(actor)). Restricted to actors
+        # the requester can view, matching the related-field masking the list
+        # endpoints apply to owners/authors.
+        actor_qs = Actor.objects.filter(id__in=actor_ids)
+        try:
+            actor_qs = actor_qs.filter(id__in=accessible_ids(Actor))
+        except NotImplementedError, Permission.DoesNotExist:
+            # Model not IAM-scoped: list endpoints skip masking too.
+            pass
+        actor_labels = {
+            actor.id: str(actor)
+            for actor in actor_qs.select_related("user", "team", "entity")
+        }
+        for entry in entries:
+            if "owners" in entry:
+                entry["owners"] = [
+                    actor_labels[actor_id]
+                    for actor_id in entry["owners"]
+                    if actor_id in actor_labels
+                ]
+
+        return Response(entries)

@@ -2,10 +2,11 @@ import { defaultDeleteFormAction, defaultWriteFormAction } from '$lib/utils/acti
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo } from '$lib/utils/crud';
 import { formatSelectFieldData } from '$lib/utils/load';
+import { fetchAllPages } from '$lib/utils/pagination';
 import { modelSchema } from '$lib/utils/schemas';
 import { listViewFields } from '$lib/utils/table';
 import type { ModelInfo, urlModel } from '$lib/utils/types';
-import { type TableSource } from '@skeletonlabs/skeleton-svelte';
+import { type TableSource } from '$lib/components/ModelTable/types';
 import { type Actions } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
@@ -37,9 +38,13 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	if (model.selectFields) {
 		await Promise.all(
 			model.selectFields.map(async (selectField) => {
-				const url = model.endpointUrl
-					? `${BASE_API_URL}/${model.endpointUrl}/${selectField.field}/`
-					: `${BASE_API_URL}/${model.urlModel}/${selectField.field}/`;
+				// Choices that depend on the study's matrix are served per study
+				const studyScoped = selectField.detail && selectField.formNestedField === 'ebios_rm_study';
+				const url = studyScoped
+					? `${BASE_API_URL}/${selectField.endpointUrl}/${params.id}/${selectField.field}/`
+					: model.endpointUrl
+						? `${BASE_API_URL}/${model.endpointUrl}/${selectField.field}/`
+						: `${BASE_API_URL}/${model.urlModel}/${selectField.field}/`;
 				const response = await fetch(url);
 				if (!response.ok) {
 					console.error(`Failed to fetch data from ${url}: ${response.statusText}`);
@@ -54,12 +59,10 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	}
 	model.selectOptions = selectOptions;
 
-	const missingAttackPathResponse = await fetch(
+	const scenariosWithoutAttackPath = await fetchAllPages(
+		fetch,
 		`${BASE_API_URL}/ebios-rm/strategic-scenarios/?ebios_rm_study=${params.id}&attack_paths__isnull=true`
-	);
-	const scenariosWithoutAttackPath = missingAttackPathResponse.ok
-		? await missingAttackPathResponse.json()
-		: [];
+	).catch(() => []);
 
 	const headData: Record<string, string> = listViewFields[URLModel as urlModel].body.reduce(
 		(obj, key, index) => {

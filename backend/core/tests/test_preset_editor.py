@@ -29,9 +29,7 @@ def app_config():
 
 @pytest.fixture
 def admin_client(app_config):
-    admin = User.objects.create_superuser(
-        "admin@preset-editor-tests.com", is_published=True
-    )
+    admin = User.objects.create_superuser("admin@preset-editor-tests.com")
     admin_group = UserGroup.objects.get(name="BI-UG-ADM")
     admin.folder = admin_group.folder
     admin.save()
@@ -84,7 +82,11 @@ def test_apply_preset_creates_linked_journey(admin_client, loaded_framework):
     )
     response = admin_client.post(
         f"/api/presets/{preset.id}/apply/",
-        {"folder_name": "Applied folder", "apply_feature_flags": False},
+        {
+            "folder_name": "Applied folder",
+            "create_objects": True,
+            "apply_feature_flags": False,
+        },
         format="json",
     )
     assert response.status_code == 201, response.data

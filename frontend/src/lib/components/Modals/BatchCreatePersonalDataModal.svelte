@@ -2,6 +2,7 @@
 	import { m } from '$paraglide/messages';
 	import { getModalStore, type ModalStore } from './stores';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { fetchAllPages } from '$lib/utils/pagination';
 	import { invalidateAll } from '$app/navigation';
 	import { getToastStore } from '$lib/components/Toast/stores';
 	import { onMount } from 'svelte';
@@ -9,16 +10,16 @@
 	const modalStore: ModalStore = getModalStore();
 	const toastStore = getToastStore();
 
-	const cBase = 'card bg-surface-50-950 p-6 w-modal-wide space-y-6';
+	const cBase = 'card bg-surface-100-900 border border-surface-500 p-6 w-modal-wide space-y-6';
 	const cHeader = 'text-xl font-medium text-surface-900-100';
 
 	interface Props {
 		parent: any;
-		processingId: string;
+		parentId: string;
 		urlModel: string;
 	}
 
-	let { parent, processingId, urlModel }: Props = $props();
+	let { parent, parentId, urlModel }: Props = $props();
 
 	// Groups defined by category key prefixes/ranges, labels fetched from backend
 	const groupDefinitions: { label: string; keys: string[] }[] = [
@@ -157,19 +158,19 @@
 
 	onMount(async () => {
 		try {
-			const [catRes, delRes] = await Promise.all([
-				fetch(`/terminologies?field_path=personal_data.category&is_visible=true`),
+			const [terms, delRes] = await Promise.all([
+				fetchAllPages(
+					fetch,
+					`/terminologies?field_path=personal_data.category&is_visible=true`
+				).catch(() => []),
 				fetch(`/${urlModel}/batch-create?options=deletion_policy`)
 			]);
-			if (catRes.ok) {
-				const terms = (await catRes.json()).results ?? [];
-				const knownKeys = new Set(groupDefinitions.flatMap((g) => g.keys));
-				for (const t of terms) {
-					categoryLabels[t.name] = t.translated_name ?? t.name;
-					codeToId[t.name] = t.id;
-					if (!knownKeys.has(t.name)) {
-						customCategories.push({ value: t.name, label: t.translated_name ?? t.name });
-					}
+			const knownKeys = new Set(groupDefinitions.flatMap((g) => g.keys));
+			for (const t of terms) {
+				categoryLabels[t.name] = t.translated_name ?? t.name;
+				codeToId[t.name] = t.id;
+				if (!knownKeys.has(t.name)) {
+					customCategories.push({ value: t.name, label: t.translated_name ?? t.name });
 				}
 			}
 			if (delRes.ok) {
@@ -220,7 +221,7 @@
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
-					processing: processingId,
+					processing: parentId,
 					categories: selectedCategories.map((c) => codeToId[c]).filter(Boolean),
 					retention,
 					deletion_policy: deletionPolicy,

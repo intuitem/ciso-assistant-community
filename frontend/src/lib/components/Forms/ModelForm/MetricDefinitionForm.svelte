@@ -78,6 +78,7 @@
 	<AutocompleteSelect
 		{form}
 		optionsEndpoint="terminologies?field_path=metric_definition.unit&is_visible=true"
+		optionsLabelField="translated_name"
 		field="unit"
 		label={m.unit()}
 		cacheLock={cacheLocks['unit']}

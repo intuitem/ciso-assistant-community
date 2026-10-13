@@ -78,9 +78,11 @@
 	{form}
 	field="bia"
 	optionsEndpoint="business-impact-analysis"
+	optionsExtraFields={[['folder', 'str']]}
 	cacheLock={cacheLocks['bia']}
 	bind:cachedValue={formDataCache['bia']}
 	label={m.bia()}
+	helpText={m.biaHelpText()}
 	hidden={initialData.bia}
 />
 <AutocompleteSelect
@@ -88,6 +90,10 @@
 	multiple
 	optionsEndpoint="applied-controls"
 	optionsExtraFields={[['folder', 'str']]}
+	optionsInfoFields={{
+		fields: [{ field: 'category', translate: true }],
+		position: 'prefix'
+	}}
 	field="associated_controls"
 	cacheLock={cacheLocks['associated_controls']}
 	bind:cachedValue={formDataCache['associated_controls']}

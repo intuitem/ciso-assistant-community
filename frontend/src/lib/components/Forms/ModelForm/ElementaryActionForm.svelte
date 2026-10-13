@@ -21,8 +21,35 @@
 		formDataCache = $bindable({}),
 		initialData = {}
 	}: Props = $props();
+
+	const formStore = (form as any).form;
+
+	// A technique fills what the user hasn't written yet
+	async function prefill(id: string | null) {
+		if (!id) return;
+		const res = await fetch(`/techniques/${id}`);
+		if (!res.ok) return;
+		const technique = await res.json();
+		formStore.update((data: Record<string, any>) => ({
+			...data,
+			name: data.name || technique.name,
+			description: data.description || technique.description || ''
+		}));
+	}
 </script>
 
+<AutocompleteSelect
+	{form}
+	nullable
+	optionsEndpoint="techniques"
+	field="technique"
+	optionsLabelField="auto"
+	cacheLock={cacheLocks['technique']}
+	bind:cachedValue={formDataCache['technique']}
+	label={m.technique()}
+	helpText={m.elementaryActionTechniqueHelp()}
+	onChange={prefill}
+/>
 <Select
 	{form}
 	options={model.selectOptions['attack_stage']}
@@ -34,6 +61,7 @@
 />
 <AutocompleteSelect
 	{form}
+	nullable
 	optionsEndpoint="threats"
 	field="threat"
 	optionsLabelField="auto"

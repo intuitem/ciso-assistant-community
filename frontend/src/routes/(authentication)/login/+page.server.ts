@@ -28,8 +28,9 @@ interface AuthenticationFlow {
 
 export const load: PageServerLoad = async ({ fetch, request, locals }) => {
 	// redirect user if already logged in
-	if (locals.user) {
-		redirect(302, locals.user.is_auditee ? '/auditee-dashboard' : '/analytics');
+	const user = await locals.getUser();
+	if (user) {
+		redirect(302, user.is_auditee ? '/auditee-dashboard' : '/analytics');
 	}
 
 	const form = await superValidate(request, zod(loginSchema));

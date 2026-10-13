@@ -3,7 +3,7 @@
 	import { m } from '$paraglide/messages';
 	import { page } from '$app/state';
 	import { Progress } from '@skeletonlabs/skeleton-svelte';
-	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
+	import { displayScoreColor, formatScoreValue, roundScore } from '$lib/utils/helpers';
 	import type { PageData } from './$types';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { canPerformAction } from '$lib/utils/access-control';
@@ -120,7 +120,9 @@
 												<Progress
 													value={formatScoreValue(
 														assessment.global_score.maturity_score,
-														assessment.global_score.max_score
+														assessment.global_score.max_score,
+														false,
+														assessment.global_score.min_score
 													)}
 													min={0}
 													max={100}
@@ -130,13 +132,15 @@
 														<Progress.CircleRange
 															class={displayScoreColor(
 																assessment.global_score.maturity_score,
-																assessment.global_score.max_score
+																assessment.global_score.max_score,
+																false,
+																assessment.global_score.min_score
 															)}
 														/>
 													</Progress.Circle>
 													<div class="absolute inset-0 flex items-center justify-center">
 														<p class="font-semibold text-2xl">
-															{assessment.global_score.maturity_score}
+															{roundScore(assessment.global_score.maturity_score)}
 														</p>
 													</div>
 												</Progress>

@@ -53,7 +53,9 @@
 
 	const links = $derived({
 		back: `/experimental/library-builder/${draft.id}`,
-		preview: null
+		preview: `/experimental/library-builder/${draft.id}/framework/preview?framework_urn=${encodeURIComponent(
+			editorData.framework_urn
+		)}`
 		// No exportYaml: export is a whole-library action, offered on the
 		// library page, not inside the framework editor.
 	});

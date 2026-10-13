@@ -7,8 +7,6 @@ from core.models import Terminology
 
 from tprm.models import Entity
 
-from ebios_rm.tests.fixtures import *
-
 
 @pytest.mark.django_db
 class TestStakeholder:
@@ -33,6 +31,36 @@ class TestStakeholder:
 
         assert stakeholder.current_criticality == 0
         assert stakeholder.residual_criticality == 0
+
+    @pytest.mark.usefixtures(
+        "basic_ebios_rm_study_fixture",
+    )
+    def test_read_serializer_exposes_entity_default_criteria(self):
+        from ebios_rm.serializers import StakeholderReadSerializer
+
+        study = EbiosRMStudy.objects.get(name="test study")
+        entity = Entity.objects.create(
+            name="Cloud provider",
+            default_dependency=3,
+            default_penetration=2,
+            default_maturity=2,
+            default_trust=3,
+        )
+        category = Terminology.objects.get(
+            name="supplier", field_path=Terminology.FieldPath.ENTITY_RELATIONSHIP
+        )
+        stakeholder = Stakeholder.objects.create(
+            entity=entity, category=category, ebios_rm_study=study
+        )
+
+        data = StakeholderReadSerializer(stakeholder).data["entity"]
+
+        assert (
+            data["default_dependency"],
+            data["default_penetration"],
+            data["default_maturity"],
+            data["default_trust"],
+        ) == (3, 2, 2, 3)
 
 
 class TestStakeholderOrderingFilter:
@@ -73,31 +101,31 @@ class TestStakeholderOrderingFilter:
     def test_entity_field_remapped_to_entity_name(self):
         f, request, qs, view = self._make_filter_with_ordering("entity")
         result = f.get_ordering(request, qs, view)
-        assert result == ["entity__name"]
+        assert result == ["entity__name", "pk"]
 
     def test_descending_entity_preserves_minus_prefix(self):
         f, request, qs, view = self._make_filter_with_ordering("-entity")
         result = f.get_ordering(request, qs, view)
-        assert result == ["-entity__name"]
+        assert result == ["-entity__name", "pk"]
 
     def test_unmapped_field_passes_through_unchanged(self):
         f, request, qs, view = self._make_filter_with_ordering("current_dependency")
         result = f.get_ordering(request, qs, view)
-        assert result == ["current_dependency"]
+        assert result == ["current_dependency", "pk"]
 
     def test_criticality_field_remapped_to_annotation(self):
         f, request, qs, view = self._make_filter_with_ordering("current_criticality")
         result = f.get_ordering(request, qs, view)
-        assert result == ["_current_criticality"]
+        assert result == ["_current_criticality", "pk"]
 
     def test_descending_criticality_preserves_minus_prefix(self):
         f, request, qs, view = self._make_filter_with_ordering("-residual_criticality")
         result = f.get_ordering(request, qs, view)
-        assert result == ["-_residual_criticality"]
+        assert result == ["-_residual_criticality", "pk"]
 
     def test_combined_ordering_entity_and_criticality(self):
         f, request, qs, view = self._make_filter_with_ordering(
             "entity,current_criticality"
         )
         result = f.get_ordering(request, qs, view)
-        assert result == ["entity__name", "_current_criticality"]
+        assert result == ["entity__name", "_current_criticality", "pk"]

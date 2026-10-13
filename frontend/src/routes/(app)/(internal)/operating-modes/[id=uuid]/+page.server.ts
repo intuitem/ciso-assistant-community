@@ -5,6 +5,8 @@ import { nestedDeleteFormAction, nestedWriteFormAction } from '$lib/utils/action
 import { loadDetail } from '$lib/utils/load';
 import { defaultWriteFormAction } from '$lib/utils/actions';
 import { BASE_API_URL } from '$lib/utils/constants';
+import { fetchAllPages } from '$lib/utils/pagination';
+import { discardBody } from '$lib/utils/responses';
 import { modelSchema } from '$lib/utils/schemas';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
@@ -21,18 +23,34 @@ export const load: PageServerLoad = async (event) => {
 	const eaModel = getModelInfo('elementary-actions');
 	const eaCreateSchema = modelSchema('elementary-actions');
 
-	const [detail, objectResponse, eaRes, kcRes, attackStageRes, iconRes] = await Promise.all([
+	const readOptional = (res: Response) => (res.ok ? res.json() : discardBody(res).then(() => null));
+
+	const [
+		detail,
+		object,
+		elementaryActions,
+		killChainSteps,
+		attackStageData,
+		iconData,
+		probabilityChoices
+	] = await Promise.all([
 		loadDetail({ event, model: model, id: event.params.id }),
-		event.fetch(objectEndpoint),
-		event.fetch(eaEndpoint),
-		event.fetch(killChainEndpoint),
-		event.fetch(`${BASE_API_URL}/${eaModel.endpointUrl}/attack_stage/`),
-		event.fetch(`${BASE_API_URL}/${eaModel.endpointUrl}/icon/`)
+		event.fetch(objectEndpoint).then((res) => res.json()),
+		fetchAllPages<any>(event.fetch, eaEndpoint),
+		fetchAllPages<any>(event.fetch, killChainEndpoint),
+		event.fetch(`${BASE_API_URL}/${eaModel.endpointUrl}/attack_stage/`).then(readOptional),
+		event.fetch(`${BASE_API_URL}/${eaModel.endpointUrl}/icon/`).then(readOptional),
+		event
+			.fetch(`${BASE_API_URL}/${model.endpointUrl}/${event.params.id}/likelihood/`)
+			.then(readOptional)
 	]);
 
-	const object = await objectResponse.json();
-	const eaData = await eaRes.json();
-	const kcData = await kcRes.json();
+	const studyId = detail.data?.ebios_rm_study?.id;
+	const ratingKit = studyId
+		? await event
+				.fetch(`${BASE_API_URL}/ebios-rm/studies/${studyId}/rating-kit/`)
+				.then(readOptional)
+		: null;
 
 	const eaInitialData: Record<string, any> = {};
 	if (object.folder) {
@@ -44,15 +62,13 @@ export const load: PageServerLoad = async (event) => {
 	const eaCreateForm = await superValidate(eaInitialData, zod(eaCreateSchema), { errors: false });
 
 	const eaSelectOptions: Record<string, any> = {};
-	if (attackStageRes.ok) {
-		const attackStageData = await attackStageRes.json();
+	if (attackStageData) {
 		eaSelectOptions['attack_stage'] = Object.entries(attackStageData).map(([key, value]) => ({
 			label: value,
 			value: parseInt(key)
 		}));
 	}
-	if (iconRes.ok) {
-		const iconData = await iconRes.json();
+	if (iconData) {
 		eaSelectOptions['icon'] = Object.entries(iconData).map(([key, value]) => ({
 			label: value,
 			value: key
@@ -63,8 +79,10 @@ export const load: PageServerLoad = async (event) => {
 		...detail,
 		model,
 		object,
-		elementaryActions: eaData.results ?? eaData,
-		killChainSteps: kcData.results ?? kcData,
+		elementaryActions,
+		killChainSteps,
+		probabilityChoices: probabilityChoices ?? {},
+		ratingKit,
 		operatingModeId: event.params.id,
 		eaModel: {
 			urlModel: 'elementary-actions',
@@ -133,7 +151,7 @@ export const actions: Actions = {
 			setFlash(
 				{
 					type: 'error',
-					message: errData.errors?.join(', ') ?? m.errorOccurred()
+					message: errData.errors?.join(', ') ?? m.anErrorOccurred()
 				},
 				event
 			);

@@ -1,8 +1,9 @@
 import { listViewFields } from '$lib/utils/table';
-import { type TableSource } from '@skeletonlabs/skeleton-svelte';
+import { type TableSource } from '$lib/components/ModelTable/types';
 import { urlParamModelVerboseName, urlParamModelDescriptionKey } from '$lib/utils/crud';
 import { CUSTOM_FIELD_HOST_MODELS, type CustomFieldDef } from '$lib/utils/customFields';
 import { BASE_API_URL } from '$lib/utils/constants';
+import { fetchAllPages } from '$lib/utils/pagination';
 
 export const load = async ({ fetch, params }) => {
 	// Full column superset (defaults + optional), unfiltered: ModelTable strips flag-disabled
@@ -16,8 +17,9 @@ export const load = async ({ fetch, params }) => {
 	}, {});
 
 	// `description` is a standard field on most objects — offer it as an opt-in column
-	// (off by default) wherever a model doesn't already surface it.
-	if (base && !body.includes('description')) {
+	// (off by default) wherever a model doesn't already surface it. A model without one
+	// opts out, so the picker never offers a column that can only be blank.
+	if (base && base.hasDescription !== false && !body.includes('description')) {
 		headData['description'] = 'description';
 	}
 
@@ -25,13 +27,13 @@ export const load = async ({ fetch, params }) => {
 	let customFields: CustomFieldDef[] = [];
 	const contentType = CUSTOM_FIELD_HOST_MODELS[params.model];
 	if (contentType) {
-		const res = await fetch(`${BASE_API_URL}/custom-fields/?model=${contentType}`);
-		if (res.ok) {
-			customFields = (await res.json()).results ?? [];
-			// Visible fields become opt-in columns (offered in the picker, off by default).
-			for (const def of customFields) {
-				if (def.visible) headData[`cf__${def.key}`] = def.label_localized;
-			}
+		customFields = await fetchAllPages<CustomFieldDef>(
+			fetch,
+			`${BASE_API_URL}/custom-fields/?model=${contentType}`
+		).catch(() => []);
+		// Visible fields become opt-in columns (offered in the picker, off by default).
+		for (const def of customFields) {
+			if (def.visible) headData[`cf__${def.key}`] = def.label_localized;
 		}
 	}
 

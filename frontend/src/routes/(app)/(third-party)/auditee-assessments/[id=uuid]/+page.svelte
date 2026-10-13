@@ -3,7 +3,6 @@
 
 	import { applyAction, deserialize } from '$app/forms';
 	import { getToastStore } from '$lib/components/Toast/stores';
-	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import Question from '$lib/components/Forms/Question.svelte';
 	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
 	import Score from '$lib/components/Forms/Score.svelte';
@@ -37,6 +36,7 @@
 	} from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
+	import ScorePair from '$lib/components/ComplianceAssessment/ScorePair.svelte';
 	import { getLocale } from '$paraglide/runtime';
 	import { formatDate } from '$lib/utils/datetime';
 	import { Accordion, Progress } from '@skeletonlabs/skeleton-svelte';
@@ -82,6 +82,7 @@
 	const showDocumentationScore = $derived(fieldVis.showDocumentationScore);
 	const showObservation = $derived(fieldVis.showObservation);
 	const showAppliedControls = $derived(fieldVis.showAppliedControls);
+	const showTaskTemplates = $derived(fieldVis.showTaskTemplates);
 	const showEvidences = $derived(fieldVis.showEvidences);
 	const showRespondentAlignment = $derived(fieldVis.showRespondentAlignment);
 	const showComments = $derived(fieldVis.showComments);
@@ -112,6 +113,10 @@
 	const canEditDocumentationScore = $derived(isFieldEditable('documentation_score'));
 	const canEditObservation = $derived(isFieldEditable('observation'));
 	const canEditAppliedControls = $derived(isFieldEditable('applied_controls'));
+	const canEditTaskTemplates = $derived(isFieldEditable('task_templates'));
+	// The promise is the point of showing a respondent their tasks, so the panel rides
+	// along with the flag rather than needing a page they cannot reach.
+	const showCommitment = $derived(!!page.data?.featureflags?.commitment_management);
 	const canEditEvidences = $derived(isFieldEditable('evidences'));
 	const canEditAnswers = $derived(isFieldEditable('answers'));
 	const canEditAlignment = $derived(isFieldEditable('respondent_alignment'));
@@ -179,13 +184,13 @@
 						await invalidateAll();
 						toastStore.trigger({
 							message: m.statusUpdatedSuccessfully(),
-							background: 'variant-filled-success',
+							background: 'preset-filled-success-500',
 							timeout: 3000
 						});
 					} else {
 						toastStore.trigger({
 							message: result.data?.submitBody?.error || m.submissionFailed(),
-							background: 'variant-filled-error',
+							background: 'preset-filled-error-500',
 							timeout: 5000
 						});
 					}
@@ -193,7 +198,7 @@
 					console.error('Error submitting assignment:', error);
 					toastStore.trigger({
 						message: m.anErrorOccurred(),
-						background: 'variant-filled-error',
+						background: 'preset-filled-error-500',
 						timeout: 3000
 					});
 				} finally {
@@ -202,6 +207,75 @@
 			}
 		};
 		modalStore.trigger(modal);
+	}
+
+	const canReview = $derived(isAuditor && assignmentStatus === 'submitted');
+
+	async function transitionAssignment(status: string, reviewerObservation = '') {
+		isSubmitting = true;
+		try {
+			const body = new FormData();
+			body.set('status', status);
+			body.set('reviewer_observation', reviewerObservation);
+			const response = await fetch(`?/reviewAssignment`, { method: 'POST', body });
+			const result = deserialize(await response.text());
+			if (result.type === 'success' && result.data?.submitStatus === 200) {
+				await applyAction(result);
+				await invalidateAll();
+				toastStore.trigger({
+					message: m.statusUpdatedSuccessfully(),
+					background: 'preset-filled-success-500',
+					timeout: 3000
+				});
+			} else {
+				toastStore.trigger({
+					message: result.data?.submitBody?.error || m.submissionFailed(),
+					background: 'preset-filled-error-500',
+					timeout: 5000
+				});
+			}
+		} catch (error) {
+			console.error('Error transitioning assignment:', error);
+			toastStore.trigger({
+				message: m.anErrorOccurred(),
+				background: 'preset-filled-error-500',
+				timeout: 3000
+			});
+		} finally {
+			isSubmitting = false;
+		}
+	}
+
+	function handleRequestChanges() {
+		// The transition refuses without a note.
+		modalStore.trigger({
+			type: 'prompt',
+			title: m.requestChanges(),
+			body: m.reviewerObservation(),
+			value: '',
+			modalClasses: 'w-full max-w-2xl',
+			valueAttr: {
+				multiline: true,
+				rows: 6,
+				required: true,
+				placeholder: m.reviewerObservationPlaceholder()
+			},
+			response: (note: string | false) => {
+				if (note === false || !`${note ?? ''}`.trim()) return;
+				transitionAssignment('changes_requested', `${note}`.trim());
+			}
+		});
+	}
+
+	function handleCloseAssignment() {
+		modalStore.trigger({
+			type: 'confirm',
+			title: m.closeAssignment(),
+			body: m.closeAssignmentConfirm(),
+			response: (confirmed: boolean) => {
+				if (confirmed) transitionAssignment('closed');
+			}
+		});
 	}
 
 	const requirementHashmap = $derived(
@@ -310,11 +384,33 @@
 		}, 0)
 	);
 	const useQuestionProgress = $derived(showAnswers && totalQuestions > 0);
+	// Respondents track their own work: when the alignment field is in use,
+	// the fallback progress counts their alignment answers, not the results
+	// (which the auditor can set independently).
+	const useAlignmentProgress = $derived(!isAuditor && showRespondentAlignment);
+	// Mirrors the backend auto-map (alignment answer -> result) for ToC dots.
+	const alignmentResultEquivalent: Record<string, string> = {
+		yes: 'compliant',
+		no: 'non_compliant',
+		in_progress: 'partially_compliant',
+		not_applicable: 'not_applicable'
+	};
 
 	const totalAssessable = $derived(assessableItems.length);
-	const assessedCount = $derived(
-		assessableItems.filter((item) => item.data.result !== 'not_assessed').length
-	);
+	// Per-item completion, mirroring the backend auditee-dashboard rules.
+	// This page is respondent-oriented ON PURPOSE: the audit-level progress
+	// mode (status-driven / score above minimum) does NOT apply here, since
+	// respondents can neither see nor edit those fields. A question-bearing
+	// requirement completes through its answers (whether or not they compute
+	// a result), alignment-driven ones through the respondent's alignment
+	// answer, the rest through the result.
+	function isItemDone(item: { data: Record<string, any> }): boolean {
+		const visible = item.data.visible_questions ?? 0;
+		if (visible > 0) return (item.data.answered_questions ?? 0) >= visible;
+		if (useAlignmentProgress) return Boolean(item.data.respondent_alignment);
+		return item.data.result !== 'not_assessed';
+	}
+	const assessedCount = $derived(assessableItems.filter(isItemDone).length);
 	const progressPercent = $derived(
 		useQuestionProgress
 			? Math.round((answeredQuestions / totalQuestions) * 100)
@@ -425,6 +521,92 @@
 		modalStore.trigger(modal);
 	}
 
+	// Which task's commitment panel is open: the table stays scannable and the
+	// promise is one click away.
+	let expandedTask = $state<string | null>(null);
+
+	const REVIEW_STATES = [
+		{ id: 'changes_requested', label: m.reviewChangesRequested(), color: '#ef4444' },
+		{ id: 'resubmitted', label: m.reviewResubmitted(), color: '#f59e0b' },
+		{ id: 'accepted', label: m.reviewAccepted(), color: '#10b981' }
+	];
+	const reviewStateMeta = (state: string | null | undefined) =>
+		REVIEW_STATES.find((s) => s.id === state);
+
+	// Half-finished flags stay on the reviewer's side until the round is sent back.
+	const showReviewFlags = $derived(isAuditor || assignmentStatus !== 'submitted');
+	function goToFirstFlagged() {
+		tocFilterReview = 'changes_requested';
+		const first = tocSections.find((s) => s.reviewState === 'changes_requested');
+		if (first) goTo(first.index);
+	}
+
+	// A refused write (a locked round, a field the respondent may not set) would
+	// otherwise re-render unflagged and read as a dead button.
+	async function applied(res: Response): Promise<boolean> {
+		const result = deserialize(await res.text());
+		if (result.type === 'success') return true;
+		toastStore.trigger({
+			message: m.anErrorOccurred(),
+			background: 'preset-filled-error-500',
+			timeout: 3000
+		});
+		return false;
+	}
+
+	// One at a time: the buttons sit side by side, and two verdicts in flight land in
+	// whatever order the server finishes them.
+	let reviewPending = $state(false);
+
+	async function setReviewState(requirementAssessment: Record<string, any>, state: string) {
+		if (reviewPending) return;
+		reviewPending = true;
+		try {
+			const next = requirementAssessment.review_state === state ? '' : state;
+			const res = await fetch('?/updateRequirementAssessment', {
+				method: 'POST',
+				body: JSON.stringify({ id: requirementAssessment.id, review_state: next })
+			});
+			if (!(await applied(res))) return;
+			await invalidateAll();
+		} finally {
+			reviewPending = false;
+		}
+	}
+
+	function scrollToComments() {
+		document.getElementById('requirement-comments')?.scrollIntoView({ behavior: 'smooth' });
+	}
+
+	const taskStatusOptions = $derived(data.taskTemplateModel?.selectOptions?.status ?? []);
+
+	async function updateTaskStatus(taskId: string, status: string) {
+		const res = await fetch('?/updateTaskTemplateStatus', {
+			method: 'POST',
+			body: JSON.stringify({ id: taskId, status })
+		});
+		if (!(await applied(res))) return;
+		await invalidateAll();
+	}
+
+	function modalTaskTemplateCreateForm(createform: SuperForm<any>): void {
+		const modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: createform,
+				formAction: '?/createTaskTemplate',
+				invalidateAll: true,
+				model: data.taskTemplateModel,
+				debug: false
+			}
+		};
+		modalStore.trigger({
+			type: 'component',
+			component: modalComponent,
+			title: m.addTaskTemplate()
+		});
+	}
+
 	function modalEvidenceCreateForm(createform: SuperForm<any>): void {
 		const modalComponent: ModalComponent = {
 			ref: CreateModal,
@@ -464,9 +646,15 @@
 	}
 
 	// --- Score forms ---
+	// Entering a score is what makes a requirement scored (as in table mode).
+	function markScored(requirementAssessment: Record<string, any>) {
+		if (!requirementAssessment.is_scored) {
+			requirementAssessment.is_scored = true;
+			update(requirementAssessment, 'is_scored');
+		}
+	}
 	let scoreForms = $state({});
 	let docScoreForms = $state({});
-	let isScoredForms = $state({});
 
 	run(() => {
 		requirementAssessments.forEach((requirementAssessment, index) => {
@@ -479,11 +667,6 @@
 			if (!docScoreForms[id]) {
 				docScoreForms[id] = superForm(requirementAssessment.scoreForm, {
 					id: `requirement-documentation-score-${id}-${index}`
-				});
-			}
-			if (!isScoredForms[id]) {
-				isScoredForms[id] = superForm(requirementAssessment.scoreForm, {
-					id: `requirement-is-scored-${id}-${index}`
 				});
 			}
 		});
@@ -551,6 +734,9 @@
 				id: item.data.id,
 				title,
 				result: item.data.result,
+				reviewState: item.data.review_state,
+				alignment: item.data.respondent_alignment,
+				hasVisibleQuestions: (item.data.visible_questions ?? 0) > 0,
 				questionColor: getQuestionStatus(item)
 			};
 		})
@@ -559,14 +745,30 @@
 	// ToC visibility and filtering
 	let tocCollapsed = $state(false);
 	let tocFilterResult = $state<string | null>(null);
+	let tocFilterReview = $state<string | null>(null);
 	const resultCounts = $derived(
 		result_options.map((opt) => ({
 			...opt,
 			count: tocSections.filter((s) => s.result === opt.id).length
 		}))
 	);
+	// Same entries the jump walks, so the count cannot promise a missing row.
+	const changesRequestedCount = $derived(
+		showReviewFlags ? tocSections.filter((s) => s.reviewState === 'changes_requested').length : 0
+	);
+
+	const reviewStateCounts = $derived(
+		REVIEW_STATES.map((state) => ({
+			...state,
+			count: tocSections.filter((s) => s.reviewState === state.id).length
+		}))
+	);
 	const filteredTocSections = $derived(
-		tocFilterResult ? tocSections.filter((s) => s.result === tocFilterResult) : tocSections
+		tocSections.filter(
+			(s) =>
+				(!tocFilterResult || s.result === tocFilterResult) &&
+				(!tocFilterReview || s.reviewState === tocFilterReview)
+		)
 	);
 
 	// Keyboard navigation
@@ -590,6 +792,7 @@
 
 	import { page } from '$app/state';
 	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
+	import CommitmentPanel from '$lib/components/CommitmentPanel/CommitmentPanel.svelte';
 	import { onMount } from 'svelte';
 	onMount(() => {
 		document.addEventListener('keydown', handleKeydown);
@@ -635,6 +838,21 @@
 						</button>
 					{/if}
 				{/each}
+				{#each reviewStateCounts as state}
+					{#if state.count > 0 && showReviewFlags}
+						<button
+							class="px-2 py-1 text-[10px] rounded transition-colors flex items-center gap-1.5
+								{tocFilterReview === state.id
+								? 'bg-surface-700-300 text-white font-semibold'
+								: 'bg-surface-50-950 text-surface-700-300 hover:bg-surface-200-800 border border-surface-200-800'}"
+							onclick={() => (tocFilterReview = tocFilterReview === state.id ? null : state.id)}
+							title={state.label}
+						>
+							<i class="fa-solid fa-flag text-[9px]" style="color: {state.color};"></i>
+							{state.count}
+						</button>
+					{/if}
+				{/each}
 			</div>
 			<nav class="p-2 space-y-0.5">
 				{#each filteredTocSections as section}
@@ -660,11 +878,23 @@
 								class="inline-block w-2 h-2 rounded-full flex-shrink-0"
 								style="background-color: {section.result === '__splash__'
 									? '#a855f7'
-									: useQuestionProgress
+									: useQuestionProgress || section.hasVisibleQuestions
 										? section.questionColor
-										: (complianceResultColorMap[section.result] ?? '#d1d5db')};"
+										: useAlignmentProgress
+											? (complianceResultColorMap[
+													alignmentResultEquivalent[section.alignment] ?? ''
+												] ?? '#d1d5db')
+											: (complianceResultColorMap[section.result] ?? '#d1d5db')};"
 							></span>
 							<span class="truncate">{section.title}</span>
+							{#if showReviewFlags && reviewStateMeta(section.reviewState)}
+								{@const meta = reviewStateMeta(section.reviewState)}
+								<i
+									class="fa-solid fa-flag text-[9px] ml-auto flex-shrink-0"
+									style="color: {meta?.color};"
+									title={meta?.label}
+								></i>
+							{/if}
 						</button>
 					{/if}
 				{/each}
@@ -772,6 +1002,17 @@
 						{reviewerObservation}
 					</div>
 				{/if}
+				{#if changesRequestedCount > 0}
+					<button
+						type="button"
+						class="ml-11 btn btn-sm preset-tonal-error w-fit"
+						onclick={goToFirstFlagged}
+					>
+						<i class="fa-solid fa-flag mr-2"></i>{m.itemsNeedingChanges({
+							count: changesRequestedCount
+						})}
+					</button>
+				{/if}
 				{#if assignment?.events?.length > 0}
 					<button
 						class="ml-11 badge bg-surface-200-800 text-surface-600-400 text-xs hover:bg-surface-200-800 cursor-pointer transition-colors"
@@ -796,6 +1037,40 @@
 					<i class="fa-solid fa-hourglass text-surface-400-600 text-sm"></i>
 				</div>
 				<p class="text-sm text-surface-600-400 font-medium">{m.assignmentAwaitingStart()}</p>
+			</div>
+		{/if}
+
+		{#if canReview}
+			<div class="flex flex-col items-end gap-2">
+				<div class="flex items-center gap-2">
+					{#if changesRequestedCount > 0}
+						<span class="text-xs text-surface-600-400">
+							<i class="fa-solid fa-flag text-red-500 mr-1"></i>{changesRequestedCount}
+							{m.itemsFlaggedForChanges()}
+						</span>
+					{/if}
+					<button
+						class="btn preset-tonal-error"
+						onclick={handleRequestChanges}
+						disabled={isSubmitting}
+						data-testid="request-changes-button"
+					>
+						<i class="fa-solid fa-rotate-left mr-2"></i>{m.requestChanges()}
+					</button>
+					<button
+						class="btn preset-filled-success-500"
+						onclick={handleCloseAssignment}
+						disabled={isSubmitting}
+						data-testid="close-assignment-button"
+					>
+						{#if isSubmitting}
+							<i class="fa-solid fa-spinner fa-spin mr-2"></i>
+						{:else}
+							<i class="fa-solid fa-check mr-2"></i>
+						{/if}
+						{m.closeAssignment()}
+					</button>
+				</div>
 			</div>
 		{/if}
 
@@ -866,7 +1141,7 @@
 				class="card bg-surface-50-950 shadow-md border-t-[3px] border-t-orange-400 px-6 py-5 flex flex-col space-y-4"
 			>
 				<!-- Requirement title -->
-				<div class="flex items-start justify-between">
+				<div class="flex items-start justify-between gap-4">
 					<div>
 						<h3 class="text-xl font-semibold text-orange-600">
 							{getTitle(requirementAssessment)}
@@ -875,7 +1150,57 @@
 							<p class="text-sm text-surface-600-400 mt-0.5">{requirement.ref_id}</p>
 						{/if}
 					</div>
+					{#if isAuditor}
+						<div class="flex items-center gap-1 flex-shrink-0">
+							<button
+								type="button"
+								class="btn btn-sm {requirementAssessment.review_state === 'changes_requested'
+									? 'preset-filled-error-500'
+									: 'preset-tonal-surface'}"
+								onclick={() => setReviewState(requirementAssessment, 'changes_requested')}
+								disabled={reviewPending}
+								title={m.requestChanges()}
+							>
+								<i class="fa-solid fa-flag mr-1"></i>{m.requestChanges()}
+							</button>
+							<button
+								type="button"
+								class="btn btn-sm {requirementAssessment.review_state === 'accepted'
+									? 'preset-filled-success-500'
+									: 'preset-tonal-surface'}"
+								onclick={() => setReviewState(requirementAssessment, 'accepted')}
+								disabled={reviewPending}
+								title={m.markAsAccepted()}
+							>
+								<i class="fa-solid fa-check"></i>
+							</button>
+						</div>
+					{:else if showReviewFlags && reviewStateMeta(requirementAssessment.review_state)}
+						{@const meta = reviewStateMeta(requirementAssessment.review_state)}
+						<span
+							class="badge text-xs flex-shrink-0"
+							style="background-color: {meta?.color}1a; color: {meta?.color};"
+						>
+							<i class="fa-solid fa-flag mr-1"></i>{meta?.label}
+						</span>
+					{/if}
 				</div>
+				{#if showReviewFlags && !isAuditor && requirementAssessment.review_state === 'changes_requested'}
+					<div
+						class="bg-red-50 border-l-[3px] border-l-red-500 rounded-md px-4 py-2 flex items-center justify-between gap-3 text-sm text-red-800"
+					>
+						<span><i class="fa-solid fa-comment-dots mr-2"></i>{m.changesRequestedItemHint()}</span>
+						{#if page.data?.featureflags?.comments && showComments}
+							<button
+								type="button"
+								class="btn btn-sm preset-tonal-error"
+								onclick={scrollToComments}
+							>
+								{m.seeComments()}
+							</button>
+						{/if}
+					</div>
+				{/if}
 
 				<!-- Description -->
 				{#if requirement.description}
@@ -1100,58 +1425,47 @@
 										{@const raScoresDef =
 											requirementAssessment.effective_scores_definition ??
 											complianceAssessment.scores_definition}
-										<Score
-											form={scoreForms[requirementAssessment.id]}
-											min_score={raMin}
-											max_score={raMax}
-											scores_definition={raScoresDef}
-											field="score"
-											label={complianceAssessment.show_documentation_score
-												? m.implementationScore()
-												: m.score()}
-											styles="w-full p-1"
-											onChange={(newScore) => {
-												requirementAssessment.score = newScore;
-												updateScore(requirementAssessment);
-											}}
-											disabled={!canEditScore || !requirementAssessment.is_scored}
-										>
-											{#snippet left()}
-												<div>
-													<Checkbox
-														form={isScoredForms[requirementAssessment.id]}
-														field="is_scored"
-														disabled={!canEditScore}
-														label={''}
-														helpText={m.scoringHelpText()}
-														checkboxComponent="switch"
-														classes="h-full flex flex-row items-center justify-center my-1"
-														classesContainer="h-full flex flex-row items-center space-x-4"
-														onChange={async (newValue) => {
-															requirementAssessment.is_scored = newValue;
-															await update(requirementAssessment, 'is_scored');
-														}}
-													/>
-												</div>
+										<ScorePair>
+											{#snippet implementation()}
+												<Score
+													form={scoreForms[requirementAssessment.id]}
+													min_score={raMin}
+													max_score={raMax}
+													scores_definition={raScoresDef}
+													field="score"
+													label={complianceAssessment.show_documentation_score
+														? m.implementationScore()
+														: m.score()}
+													styles="w-full p-1"
+													onChange={(newScore) => {
+														requirementAssessment.score = newScore;
+														markScored(requirementAssessment);
+														updateScore(requirementAssessment);
+													}}
+													disabled={!canEditScore}
+												/>
 											{/snippet}
-										</Score>
-										{#if showDocumentationScore}
-											<Score
-												form={docScoreForms[requirementAssessment.id]}
-												min_score={raMin}
-												max_score={raMax}
-												scores_definition={raScoresDef}
-												field="documentation_score"
-												label={m.documentationScore()}
-												isDoc={true}
-												styles="w-full p-1"
-												onChange={(newScore) => {
-													requirementAssessment.documentation_score = newScore;
-													updateScore(requirementAssessment);
-												}}
-												disabled={!canEditDocumentationScore || !requirementAssessment.is_scored}
-											/>
-										{/if}
+											{#snippet documentation()}
+												{#if showDocumentationScore}
+													<Score
+														form={docScoreForms[requirementAssessment.id]}
+														min_score={raMin}
+														max_score={raMax}
+														scores_definition={raScoresDef}
+														field="documentation_score"
+														label={m.documentationScore()}
+														isDoc={true}
+														styles="w-full p-1"
+														onChange={(newScore) => {
+															requirementAssessment.documentation_score = newScore;
+															markScored(requirementAssessment);
+															updateScore(requirementAssessment);
+														}}
+														disabled={!canEditDocumentationScore}
+													/>
+												{/if}
+											{/snippet}
+										</ScorePair>
 									{/if}
 								</div>
 							{/if}
@@ -1217,6 +1531,148 @@
 													</p>
 												{/each}
 											</div>
+										</Accordion.ItemContent>
+									</Accordion.Item>
+								{/if}
+
+								<!-- Tasks -->
+								{#if showTaskTemplates}
+									<Accordion.Item value="taskTemplates">
+										<Accordion.ItemTrigger
+											class="flex w-full items-center cursor-pointer"
+											data-testid="task-templates-accordion-trigger"
+										>
+											<p class="flex flex-1 items-center space-x-2 text-left">
+												<span>{m.taskTemplates()}</span>
+												{#if requirementAssessment.task_templates != null}
+													<span class="badge preset-tonal-primary"
+														>{requirementAssessment.task_templates.length}</span
+													>
+												{/if}
+											</p>
+
+											<Accordion.ItemIndicator
+												class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+												><svg
+													xmlns="http://www.w3.org/2000/svg"
+													width="14px"
+													height="14px"
+													viewBox="0 0 448 512"
+													><path
+														d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+													/></svg
+												></Accordion.ItemIndicator
+											>
+										</Accordion.ItemTrigger>
+										<Accordion.ItemContent>
+											{#if canEditTaskTemplates}
+												<div class="flex flex-row space-x-2 items-center mb-2">
+													<button
+														class="btn preset-filled-primary-500 self-start"
+														type="button"
+														data-testid="add-task-template-button"
+														onclick={() =>
+															modalTaskTemplateCreateForm(
+																requirementAssessment.taskTemplateCreateForm
+															)}
+													>
+														<i class="fa-solid fa-plus mr-2"></i>{m.addTaskTemplate()}
+													</button>
+													<button
+														class="btn preset-filled-secondary-500 self-start"
+														type="button"
+														onclick={() =>
+															modalUpdateForm(requirementAssessment, 'selectTaskTemplates')}
+													>
+														<i class="fa-solid fa-hand-pointer mr-2"></i>{m.taskTemplates()}
+													</button>
+												</div>
+											{/if}
+											{#if !requirementAssessment.task_templates?.length}
+												<p class="text-sm text-surface-600-400 p-2">{m.noTaskTemplates()}</p>
+											{:else}
+												<table class="w-full text-sm">
+													<thead class="text-surface-600-400 border-b border-surface-200-800">
+														<tr>
+															<th class="text-left font-medium py-1">{m.name()}</th>
+															<th class="text-left font-medium py-1">{m.eta()}</th>
+															<th class="text-left font-medium py-1">{m.status()}</th>
+															{#if showCommitment}
+																<th class="text-left font-medium py-1">{m.commitment()}</th>
+																<th class="w-8"></th>
+															{/if}
+														</tr>
+													</thead>
+													<tbody>
+														{#each requirementAssessment.task_templates ?? [] as task}
+															<tr class="border-b border-surface-100-900">
+																<td class="py-2">
+																	<i class="fa-solid fa-list-check mr-2 text-surface-500"
+																	></i>{task.str}
+																</td>
+																<td class="py-2">{task.task_date ?? '--'}</td>
+																<td class="py-2">
+																	{#if task.status && canEditTaskTemplates}
+																		<select
+																			class="select select-sm text-xs w-36"
+																			aria-label={m.status()}
+																			value={task.status}
+																			onchange={(e) =>
+																				updateTaskStatus(task.id, e.currentTarget.value)}
+																		>
+																			{#each taskStatusOptions as option}
+																				<option value={option.value}
+																					>{safeTranslate(option.label)}</option
+																				>
+																			{/each}
+																		</select>
+																	{:else}
+																		{task.status ? safeTranslate(task.status) : '--'}
+																	{/if}
+																</td>
+																{#if showCommitment}
+																	<td class="py-2">
+																		{task.commitment_state && task.commitment_state !== '--'
+																			? safeTranslate(task.commitment_state)
+																			: '--'}
+																		{#if task.committed_eta}
+																			<span class="text-xs text-surface-600-400"
+																				>({task.committed_eta})</span
+																			>
+																		{/if}
+																	</td>
+																	<td class="py-2 text-right">
+																		<button
+																			type="button"
+																			class="btn-icon btn-icon-sm preset-tonal-surface"
+																			aria-label={m.commitment()}
+																			onclick={() =>
+																				(expandedTask = expandedTask === task.id ? null : task.id)}
+																		>
+																			<i
+																				class="fa-solid {expandedTask === task.id
+																					? 'fa-chevron-up'
+																					: 'fa-chevron-down'}"
+																			></i>
+																		</button>
+																	</td>
+																{/if}
+															</tr>
+															{#if showCommitment && expandedTask === task.id}
+																<tr>
+																	<td colspan="5" class="pb-3">
+																		<CommitmentPanel
+																			urlModel="task-templates"
+																			object={task}
+																			readOnly={!canEditTaskTemplates}
+																		/>
+																	</td>
+																</tr>
+															{/if}
+														{/each}
+													</tbody>
+												</table>
+											{/if}
 										</Accordion.ItemContent>
 									</Accordion.Item>
 								{/if}
@@ -1310,7 +1766,12 @@
 					{/key}
 				{/if}
 				{#if page.data?.featureflags?.comments && showComments}
-					<CommentsPanel parentType="requirement_assessment" parentId={requirementAssessment.id} />
+					<div id="requirement-comments">
+						<CommentsPanel
+							parentType="requirement_assessment"
+							parentId={requirementAssessment.id}
+						/>
+					</div>
 				{/if}
 			</div>
 		{/if}
@@ -1439,7 +1900,7 @@
 
 			<!-- Footer -->
 			<div class="p-4 border-t bg-surface-100-900 rounded-b-lg">
-				<button class="btn preset-filled-surface-500 w-full" onclick={closeHistoryModal}>
+				<button class="btn preset-filled-surface-900-100 w-full" onclick={closeHistoryModal}>
 					{m.close()}
 				</button>
 			</div>

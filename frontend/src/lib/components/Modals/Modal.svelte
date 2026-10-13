@@ -1,6 +1,9 @@
 <script lang="ts" module>
-	import { dynamicTransition } from '$lib/components/utils/transitions';
-	import { type Transition, type TransitionParams } from '@skeletonlabs/skeleton-svelte';
+	import {
+		dynamicTransition,
+		type Transition,
+		type TransitionParams
+	} from '$lib/components/utils/transitions';
 	import { fade, fly } from 'svelte/transition';
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -25,35 +28,34 @@
 	const dispatch = createEventDispatcher<ModalEvent>();
 
 	// Types
-	import type { CssClasses, SvelteEvent } from '@skeletonlabs/skeleton-svelte';
-	import type { ModalComponent, ModalSettings } from '@skeletonlabs/skeleton-svelte';
-	import { getModalStore } from './stores';
+	import type { SvelteEvent } from '$lib/utils/types';
+	import { getModalStore, type ModalComponent, type ModalSettings } from './stores';
 
 	interface Props {
 		// Props (components)
 		components?: Record<string, ModalComponent>;
 		// Props (backdrop)
-		position?: CssClasses;
+		position?: string;
 		// Props (modal)
-		background?: CssClasses;
-		width?: CssClasses;
-		height?: CssClasses;
-		padding?: CssClasses;
-		spacing?: CssClasses;
-		rounded?: CssClasses;
-		shadow?: CssClasses;
-		zIndex?: CssClasses;
+		background?: string;
+		width?: string;
+		height?: string;
+		padding?: string;
+		spacing?: string;
+		rounded?: string;
+		shadow?: string;
+		zIndex?: string;
 		// Props (buttons)
-		buttonNeutral?: CssClasses;
-		buttonPositive?: CssClasses;
-		buttonTextCancel?: CssClasses;
-		buttonTextConfirm?: CssClasses;
-		buttonTextSubmit?: CssClasses;
+		buttonNeutral?: string;
+		buttonPositive?: string;
+		buttonTextCancel?: string;
+		buttonTextConfirm?: string;
+		buttonTextSubmit?: string;
 		// Props (regions)
-		regionBackdrop?: CssClasses;
-		regionHeader?: CssClasses;
-		regionBody?: CssClasses;
-		regionFooter?: CssClasses;
+		regionBackdrop?: string;
+		regionHeader?: string;
+		regionBody?: string;
+		regionFooter?: string;
 		// Props (transition)
 		transitions?: any;
 		transitionIn?: TransitionIn;
@@ -100,9 +102,9 @@
 	}: Props = $props();
 
 	// Base Styles
-	const cBackdrop = 'fixed top-0 left-0 right-0 bottom-0 bg-surface-950/50 p-4';
+	const cBackdrop = 'fixed top-0 left-0 right-0 bottom-0 bg-surface-950/50 dark:bg-black/60 p-4';
 	const cTransitionLayer = 'w-full h-fit min-h-full flex justify-center';
-	const cModal = 'block overflow-y-auto';
+	const cModal = 'block overflow-y-auto border border-surface-500';
 	const cModalImage = 'w-full h-auto';
 
 	// Local
@@ -329,14 +331,25 @@
 								>
 							</footer>
 						{:else if $modalStore[0].type === 'prompt'}
+							{@const { multiline, rows, ...valueAttr } = $modalStore[0].valueAttr ?? {}}
 							<form class="space-y-4" onsubmit={onPromptSubmit}>
-								<input
-									class="modal-prompt-input input"
-									name="prompt"
-									type="text"
-									bind:value={promptValue}
-									{...$modalStore[0].valueAttr}
-								/>
+								{#if multiline}
+									<textarea
+										class="modal-prompt-input textarea w-full"
+										name="prompt"
+										rows={rows ?? 5}
+										bind:value={promptValue}
+										{...valueAttr}
+									></textarea>
+								{:else}
+									<input
+										class="modal-prompt-input input"
+										name="prompt"
+										type="text"
+										bind:value={promptValue}
+										{...valueAttr}
+									/>
+								{/if}
 								<footer class="modal-footer {regionFooter}">
 									<button type="button" class="btn {buttonNeutral}" onclick={onClose}
 										>{buttonTextCancel}</button

@@ -84,7 +84,7 @@
 					legend: showLegend
 						? {
 								top: 'bottom',
-								right: '0',
+								...(orientation === 'horizontal' ? { left: 'center' } : { right: '0' }),
 								orient: orientation
 							}
 						: { show: false },

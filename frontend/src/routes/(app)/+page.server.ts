@@ -3,13 +3,14 @@ import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ url, locals, fetch }) => {
-	if (locals.user?.is_auditee) {
+	const user = await locals.getUser();
+	if (user?.is_auditee) {
 		redirect(302, '/auditee-dashboard');
 	}
 	// Landing mode: the user's own preference wins, else the admin global default.
 	// 'analytics' | 'respondent' | 'portal'
-	const landing = locals.user?.preferences?.ui?.landing || locals.settings?.default_landing;
-	if (landing === 'portal' && locals.featureflags?.custom_portals) {
+	const landing = user?.preferences?.ui?.landing || (await locals.getSettings())?.default_landing;
+	if (landing === 'portal' && (await locals.getFeatureFlags())?.custom_portals) {
 		let hasPortals = false;
 		try {
 			const res = await fetch(`${BASE_API_URL}/portals/mine/`);

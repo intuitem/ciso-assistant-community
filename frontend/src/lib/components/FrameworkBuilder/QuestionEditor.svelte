@@ -9,9 +9,15 @@
 	import TypeSelector from './TypeSelector.svelte';
 	import ChoiceListEditor from './ChoiceListEditor.svelte';
 	import DependsOnEditor from './DependsOnEditor.svelte';
-	import { QUESTION_TYPES, inferVariant, defaultConfigFor } from './builder-utils.svelte';
+	import {
+		QUESTION_TYPES,
+		inferVariant,
+		defaultConfigFor,
+		REFERENCEABLE_MODELS
+	} from './builder-utils.svelte';
 	import ConfirmAction from './ConfirmAction.svelte';
 	import { m } from '$paraglide/messages';
+	import { safeTranslate } from '$lib/utils/i18n';
 
 	interface Props {
 		question: Question;
@@ -43,6 +49,15 @@
 	const sliderMin = $derived(Number((question.config as { min?: number } | null)?.min ?? 0));
 	const sliderMax = $derived(Number((question.config as { max?: number } | null)?.max ?? 100));
 	const sliderStep = $derived(Number((question.config as { step?: number } | null)?.step ?? 1));
+
+	const fileConfig = $derived((question.config as Record<string, unknown> | null) ?? {});
+	const fileMultiple = $derived(!!fileConfig.multiple);
+	const fileMaxFiles = $derived(Number(fileConfig.max_files ?? 1));
+	const fileMaxSize = $derived(Number(fileConfig.max_size_mb ?? 10));
+	const fileAccept = $derived(String(fileConfig.accept ?? ''));
+
+	const refModel = $derived(String(fileConfig.model ?? 'applied_control'));
+	const refMultiple = $derived(!!fileConfig.multiple);
 
 	// Real-time mirror of the publish-time slider validation in `builder-state.ts`,
 	// so authors see the problem while editing instead of only when they click
@@ -98,6 +113,11 @@
 
 	function updateSliderConfig(patch: Record<string, number>) {
 		const current = (question.config as Record<string, unknown> | null) ?? { widget: 'slider' };
+		saveField('config', { ...current, ...patch });
+	}
+
+	function patchConfig(patch: Record<string, unknown>) {
+		const current = (question.config as Record<string, unknown> | null) ?? {};
 		saveField('config', { ...current, ...patch });
 	}
 </script>
@@ -211,6 +231,84 @@
 				</div>
 			{/if}
 
+			{#if currentVariant === 'file'}
+				<div class="flex flex-wrap items-center gap-3">
+					<label class="flex items-center gap-1.5">
+						<input
+							type="checkbox"
+							class="checkbox"
+							checked={fileMultiple}
+							onchange={(e) =>
+								patchConfig({
+									multiple: e.currentTarget.checked,
+									max_files: e.currentTarget.checked ? Math.max(fileMaxFiles, 2) : 1
+								})}
+						/>
+						<span class="text-xs text-surface-600-400">{m.builderFileMultiple()}</span>
+					</label>
+					{#if fileMultiple}
+						<label class="flex items-center gap-1.5">
+							<span class="text-xs text-surface-600-400">{m.builderFileMaxFiles()}</span>
+							<input
+								type="number"
+								min="1"
+								class="input w-20 text-xs"
+								value={fileMaxFiles}
+								onchange={(e) => patchConfig({ max_files: Number(e.currentTarget.value) })}
+							/>
+						</label>
+					{/if}
+					<label class="flex items-center gap-1.5">
+						<span class="text-xs text-surface-600-400">{m.builderFileMaxSize()}</span>
+						<input
+							type="number"
+							min="1"
+							class="input w-20 text-xs"
+							value={fileMaxSize}
+							onchange={(e) => patchConfig({ max_size_mb: Number(e.currentTarget.value) })}
+						/>
+					</label>
+					<label class="flex items-center gap-1.5">
+						<span class="text-xs text-surface-600-400">{m.builderFileAccept()}</span>
+						<input
+							type="text"
+							class="input w-40 text-xs"
+							placeholder=".pdf,.docx"
+							value={fileAccept}
+							onchange={(e) => patchConfig({ accept: e.currentTarget.value })}
+						/>
+					</label>
+				</div>
+				<p class="text-[10px] text-surface-500">{m.builderFileHint()}</p>
+			{/if}
+
+			{#if question.type === 'object_reference'}
+				<div class="flex flex-wrap items-center gap-3">
+					<label class="flex items-center gap-1.5">
+						<span class="text-xs text-surface-600-400">{m.builderReferenceModel()}</span>
+						<select
+							class="select text-xs"
+							value={refModel}
+							onchange={(e) => patchConfig({ model: e.currentTarget.value })}
+						>
+							{#each REFERENCEABLE_MODELS as model}
+								<option value={model}>{safeTranslate(model)}</option>
+							{/each}
+						</select>
+					</label>
+					<label class="flex items-center gap-1.5">
+						<input
+							type="checkbox"
+							class="checkbox"
+							checked={refMultiple}
+							onchange={(e) => patchConfig({ multiple: e.currentTarget.checked })}
+						/>
+						<span class="text-xs text-surface-600-400">{m.builderReferenceMultiple()}</span>
+					</label>
+				</div>
+				<p class="text-[10px] text-surface-500">{m.builderReferenceHint()}</p>
+			{/if}
+
 			{#if sliderConfigError}
 				<p class="text-xs text-amber-600">
 					<i class="fa-solid fa-triangle-exclamation mr-1"></i>
@@ -286,6 +384,17 @@
 						}}
 					/>
 				</label>
+				{#if builder.mode === 'quick_form'}
+					<label class="flex items-center gap-2 pt-5 text-xs text-surface-600-400 cursor-pointer">
+						<input
+							type="checkbox"
+							checked={question.required ?? true}
+							class="w-4 h-4 rounded border-surface-300-700 cursor-pointer"
+							onchange={(e) => saveField('required', e.currentTarget.checked)}
+						/>
+						{m.builderRequired()}
+					</label>
+				{/if}
 				<label class="block">
 					<span class="text-xs text-surface-600-400">{m.annotation()}</span>
 					<input

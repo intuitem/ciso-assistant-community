@@ -122,7 +122,9 @@
 				<div class="card p-4 bg-surface-50-950 shadow-xs grow">
 					<div class="font-bold text-xl mb-4">{m.recoveryInsights()}</div>
 					<div class="flex items-center justify-center">
-						<ActivityTracker metrics={data.metrics} />
+						{#key data.metrics}
+							<ActivityTracker metrics={data.metrics} />
+						{/key}
 					</div>
 				</div>
 				{#if page.data?.featureflags?.validation_flows}

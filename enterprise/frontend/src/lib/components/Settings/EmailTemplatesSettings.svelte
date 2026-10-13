@@ -1,6 +1,7 @@
 <script lang="ts">
 	import * as m from '$paraglide/messages';
 	import { LOCALE_DISPLAY_MAP } from '$lib/utils/constants';
+	import { fetchAllPages } from '$lib/utils/pagination';
 	import {
 		getModalStore,
 		type ModalStore,
@@ -16,6 +17,7 @@
 		category: string;
 		variables: string[];
 		overrides: string[];
+		is_enabled: boolean;
 	}
 
 	interface TemplateCategory {
@@ -79,17 +81,23 @@
 		loading = true;
 		error = '';
 		try {
-			const [availableRes, overridesRes] = await Promise.all([
+			const [availableRes, overridesData] = await Promise.all([
 				fetch('/fe-api/custom-email-templates/available'),
-				fetch('/fe-api/custom-email-templates')
+				fetchAllPages<TemplateOverride>(fetch, '/fe-api/custom-email-templates')
 			]);
 
-			if (!availableRes.ok || !overridesRes.ok) {
+			if (!availableRes.ok) {
 				throw new Error('Failed to load templates');
 			}
-			availableTemplates = await availableRes.json();
-			const data = await overridesRes.json();
-			overrides = data.results || data;
+			const available = await availableRes.json();
+			// Default to enabled when the backend does not report the flag. Read-only
+			// here: it only dims the row and shows a badge, since sending is configured
+			// in Settings > Notifications.
+			availableTemplates = available.map((t: TemplateInfo) => ({
+				...t,
+				is_enabled: t.is_enabled ?? true
+			}));
+			overrides = overridesData;
 		} catch {
 			error = 'Failed to load templates';
 		}
@@ -258,6 +266,9 @@
 
 <div class="flex flex-col gap-6">
 	<span class="text-surface-600-400">{m.emailTemplatesDescription()}</span>
+	<!-- Whether a notification goes out at all is an operational setting and lives in
+	     Settings > Notifications. This page is only about what it says. -->
+	<p class="text-sm text-surface-600-400 mt-1">{m.emailTemplatesSendingHint()}</p>
 
 	{#if successMessage}
 		<div class="alert preset-filled-success-500 p-3">
@@ -397,10 +408,6 @@
 					<i class="fa-solid fa-check mr-1"></i>
 					{m.save()}
 				</button>
-				<button class="btn preset-outlined-surface-500" type="button" onclick={loadDefault}>
-					<i class="fa-solid fa-file-lines mr-1 text-xs"></i>
-					{m.loadDefault()}
-				</button>
 				<div class="flex-1"></div>
 				<button class="btn preset-outlined-surface-500" type="button" onclick={cancelEdit}>
 					{m.cancel()}
@@ -431,7 +438,7 @@
 						<div
 							class="flex items-center gap-4 px-4 py-3 hover:bg-surface-100-900 transition-colors"
 						>
-							<div class="flex-1 min-w-0">
+							<div class="flex-1 min-w-0 {template.is_enabled ? '' : 'opacity-50'}">
 								<div class="flex items-center gap-2">
 									<span class="font-medium">{templateName(template.template_key)}</span>
 									{#if customLangs.length > 0}
@@ -440,6 +447,11 @@
 												{lang.toUpperCase()}
 											</span>
 										{/each}
+									{/if}
+									{#if !template.is_enabled}
+										<span class="badge preset-filled-surface-900-100 text-xs">
+											{m.emailSendingDisabled()}
+										</span>
 									{/if}
 								</div>
 								<p class="text-sm text-surface-600-400 truncate">

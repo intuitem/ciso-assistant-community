@@ -1,4 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { discardBody } from '$lib/utils/responses';
 
 import { error, type NumericRange } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
@@ -10,8 +11,14 @@ export const GET: RequestHandler = async ({ fetch, url, params }) => {
 
 	const [res, contentRes] = await Promise.all([fetch(endpoint), fetch(contentEndpoint)]);
 
-	if (!res.ok) error(res.status as NumericRange<400, 599>, await res.json());
-	if (!contentRes.ok) error(contentRes.status as NumericRange<400, 599>, await contentRes.json());
+	if (!res.ok) {
+		await discardBody(contentRes);
+		error(res.status as NumericRange<400, 599>, await res.json());
+	}
+	if (!contentRes.ok) {
+		await discardBody(res);
+		error(contentRes.status as NumericRange<400, 599>, await contentRes.json());
+	}
 
 	const data = await res.json();
 	const content = await contentRes.json();

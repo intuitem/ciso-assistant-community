@@ -1,5 +1,5 @@
 from django.db import models
-from iam.models import User, FolderMixin, PublishInRootFolderMixin
+from iam.models import FolderMixin
 from tprm.models import Entity
 from core.models import Actor, AppliedControl, Asset, Evidence, Incident, Perimeter
 from core.models import FilteringLabelMixin, Terminology
@@ -386,9 +386,11 @@ class DataContractor(ProcessingChildMixin, NameDescriptionFolderMixin):
         max_length=255, choices=RELATIONSHIP_TYPE_CHOICES
     )
     country = models.CharField(max_length=3, choices=COUNTRY_CHOICES)
-    documentation_link = models.URLField(blank=True)
+    documentation_link = models.URLField(blank=True, max_length=2048)
 
     fields_to_check = ["entity", "relationship_type", "processing"]
+
+    IAM_SCOPE_FIELD = "entity"
 
     def __str__(self):
         return self.name if self.name else self.relationship_type
@@ -417,9 +419,11 @@ class DataTransfer(ProcessingChildMixin, NameDescriptionFolderMixin):
         max_length=255, choices=TRANSFER_MECHANISM_CHOICES, blank=True
     )
     guarantees = models.TextField(blank=True)
-    documentation_link = models.URLField(blank=True)
+    documentation_link = models.URLField(blank=True, max_length=2048)
 
     fields_to_check = ["entity", "country", "processing"]
+
+    IAM_SCOPE_FIELD = "entity"
 
     def __str__(self):
         return self.name if self.name else self.country

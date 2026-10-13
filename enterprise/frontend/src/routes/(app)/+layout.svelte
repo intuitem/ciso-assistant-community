@@ -3,8 +3,9 @@
 
 	import CommandPalette from '$lib/components/CommandPalette/CommandPalette.svelte';
 	import ThemeToggle from '$lib/components/ThemeToggle/ThemeToggle.svelte';
+	import NotificationBell from '$lib/components/NotificationBell/NotificationBell.svelte';
 	import ChatWidget from '$lib/components/ChatWidget/ChatWidget.svelte';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { safeTranslate, setUseRiskCategoryLabel } from '$lib/utils/i18n';
 	import { AppBar } from '@skeletonlabs/skeleton-svelte';
 	import '../../app.css';
 
@@ -147,6 +148,14 @@
 
 	const modalStore: ModalStore = getModalStore();
 
+	// Sync the qualification/risk-category wording flag before children render
+	// (hydration would otherwise flip labels back), then keep it in sync when
+	// settings are invalidated.
+	setUseRiskCategoryLabel(data?.settings?.use_risk_category_label);
+	$effect.pre(() => {
+		setUseRiskCategoryLabel(data?.settings?.use_risk_category_label);
+	});
+
 	const clientSettings = $derived($page.data.clientSettings);
 
 	// Initialize external link interceptor
@@ -215,6 +224,9 @@
 					{/if}
 				</div>
 				<div class="flex items-center gap-3 shrink-0">
+					{#if sideBarVisibleItems.notifications && !data?.user?.is_third_party}
+						<NotificationBell />
+					{/if}
 					<ThemeToggle />
 					{#if data?.featureflags?.custom_portals && !data?.user?.is_third_party}
 						<a
@@ -229,6 +241,8 @@
 					{/if}
 					<button
 						onclick={() => commandPalette?.toggle()}
+						aria-label={m.search()}
+						data-testid="command-palette-trigger"
 						class="flex items-center gap-2 shrink-0 rounded-lg border border-surface-200-800 bg-surface-100-900/80 px-3 py-1.5
 			text-xs text-surface-600-400 hover:bg-surface-200-800 hover:border-surface-300-700 hover:text-surface-700-300
 			transition-all duration-150 cursor-pointer"

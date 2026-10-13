@@ -25,7 +25,7 @@ Notes:
 
 - Always include the trailing slash on endpoints (`/api/assets/`, not `/api/assets`).
 - Your endpoint URL is your instance URL with `/api/` appended (assuming default proxy settings).
-- Pro SaaS users need to open a support request to expose the API on their instance — it is disabled by default.
+- API access is IP-restricted: the calling machine must be on the [Allowed IPs whitelist](../configuration/settings/infra-config-allowed-ip.md) (**Settings → Infrastructure**). On SaaS the allowlist is self-service and API access is closed until you add your caller IPs; on-premises, enable the allowlist with `ENABLE_INFRA_CONFIG_MANAGEMENT=True` or handle IP filtering in your own infrastructure.
 
 ## Browsing the schema
 
@@ -38,4 +38,5 @@ Two ways to read the API surface:
 
 ## Related
 
+- [Allowed IP whitelist](../configuration/settings/infra-config-allowed-ip.md) — open API access to your callers
 - [Philosophy → Open by default, extensible by design](../introduction/philosophy.md)

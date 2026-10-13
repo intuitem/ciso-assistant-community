@@ -3,9 +3,11 @@ import type { RequestHandler } from './$types';
 
 const BACKEND_ERROR = JSON.stringify({ detail: 'Chat service unavailable' });
 
-export const GET: RequestHandler = async ({ fetch }) => {
+export const GET: RequestHandler = async ({ fetch, url }) => {
 	try {
-		const res = await fetch(`${BASE_API_URL}/chat/sessions/`);
+		// Forward query params so paging keeps working if this endpoint ever
+		// returns a paginated envelope instead of a plain array.
+		const res = await fetch(`${BASE_API_URL}/chat/sessions/${url.search}`);
 		return new Response(await res.text(), {
 			status: res.status,
 			headers: { 'Content-Type': res.headers.get('Content-Type') ?? 'application/json' }

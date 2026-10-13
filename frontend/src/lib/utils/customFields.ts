@@ -5,7 +5,8 @@ export const CUSTOM_FIELD_HOST_MODELS: Record<string, string> = {
 	assets: 'core.asset',
 	'applied-controls': 'core.appliedcontrol',
 	policies: 'core.appliedcontrol',
-	projects: 'pmbok.project'
+	projects: 'pmbok.project',
+	'security-exceptions': 'core.securityexception'
 };
 
 export interface CustomFieldChoice {

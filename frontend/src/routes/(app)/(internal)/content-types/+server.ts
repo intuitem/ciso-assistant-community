@@ -2,8 +2,10 @@ import { error, type NumericRange } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { BASE_API_URL } from '$lib/utils/constants';
 
-export const GET: RequestHandler = async ({ fetch }) => {
-	const endpoint = `${BASE_API_URL}/content-types/`;
+export const GET: RequestHandler = async ({ fetch, url }) => {
+	const endpoint = `${BASE_API_URL}/content-types/${
+		url.searchParams.size ? '?' + url.searchParams.toString() : ''
+	}`;
 
 	const res = await fetch(endpoint);
 	if (!res.ok) {

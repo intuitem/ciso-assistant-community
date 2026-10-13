@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+
+	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
 	import { safeTranslate } from '$lib/utils/i18n';
 
 	interface SankeyNode {
@@ -57,93 +59,87 @@
 
 	const chart_id = `${name}_div`;
 
-	onMount(async () => {
-		const echarts = await import('echarts');
-		let chart = echarts.init(
-			document.getElementById(chart_id),
-			document.documentElement.classList.contains('dark') ? 'dark' : null,
-			{ renderer: 'svg' }
-		);
-
-		const option = {
-			title: {
-				text: title,
-				left: 'center',
-				textStyle: {
-					fontSize: 16,
-					fontWeight: 'bold'
-				}
-			},
-			tooltip: {
-				trigger: 'item',
-				triggerOn: 'mousemove',
-				formatter: function (params) {
-					if (params.dataType === 'edge') {
-						// For links/flows, get node names by index
-						const sourceNode = translatedNodes[params.data.source];
-						const targetNode = translatedNodes[params.data.target];
-						return `${sourceNode.name} → ${targetNode.name}<br/>Count: ${params.value}`;
-					} else {
-						// For nodes, show the node name and its total count
-						return `${params.name}<br/>Count: ${params.value}`;
-					}
-				}
-			},
-			series: [
-				{
-					type: 'sankey',
-					data: translatedNodes,
-					links: links,
-					emphasis: {
-						focus: 'adjacency'
+	onMount(() => {
+		let dispose: (() => void) | undefined;
+		let active = true;
+		(async () => {
+			const echarts = await import('echarts');
+			if (!active) return;
+			const el = document.getElementById(chart_id);
+			if (!el) return;
+			dispose = mountThemeAwareChart(echarts, el, () => {
+				const option = {
+					title: {
+						text: title,
+						left: 'center',
+						textStyle: {
+							fontSize: 16,
+							fontWeight: 'bold'
+						}
 					},
-					lineStyle: {
-						color: 'gradient',
-						curveness: 0.5
-					},
-					layoutIterations: 10,
-					orient: 'horizontal',
-					draggable: true,
-					focusNodeAdjacency: true,
-					nodeWidth: 30,
-					nodeGap: 15,
-					levels: [
-						{
-							depth: 0,
-							itemStyle: {
-								color: '#3B82F6' // Personal Data - Blue
-							}
-						},
-						{
-							depth: 1,
-							itemStyle: {
-								color: '#8B5CF6' // Processing - Purple
-							}
-						},
-						{
-							depth: 2,
-							itemStyle: {
-								color: '#10B981' // Legal Basis - Green
+					tooltip: {
+						trigger: 'item',
+						triggerOn: 'mousemove',
+						formatter: function (params) {
+							if (params.dataType === 'edge') {
+								// For links/flows, get node names by index
+								const sourceNode = translatedNodes[params.data.source];
+								const targetNode = translatedNodes[params.data.target];
+								return `${sourceNode.name} → ${targetNode.name}<br/>Count: ${params.value}`;
+							} else {
+								// For nodes, show the node name and its total count
+								return `${params.name}<br/>Count: ${params.value}`;
 							}
 						}
+					},
+					series: [
+						{
+							type: 'sankey',
+							data: translatedNodes,
+							links: links,
+							emphasis: {
+								focus: 'adjacency'
+							},
+							lineStyle: {
+								color: 'gradient',
+								curveness: 0.5
+							},
+							layoutIterations: 10,
+							orient: 'horizontal',
+							draggable: true,
+							focusNodeAdjacency: true,
+							nodeWidth: 30,
+							nodeGap: 15,
+							levels: [
+								{
+									depth: 0,
+									itemStyle: {
+										color: '#3B82F6' // Personal Data - Blue
+									}
+								},
+								{
+									depth: 1,
+									itemStyle: {
+										color: '#8B5CF6' // Processing - Purple
+									}
+								},
+								{
+									depth: 2,
+									itemStyle: {
+										color: '#10B981' // Legal Basis - Green
+									}
+								}
+							]
+						}
 					]
-				}
-			]
-		};
+				};
 
-		option.backgroundColor = 'transparent';
-		chart.setOption(option);
-
-		const resizeHandler = function () {
-			chart.resize();
-		};
-
-		window.addEventListener('resize', resizeHandler);
-
-		// Cleanup function
+				return option;
+			});
+		})();
 		return () => {
-			chart.dispose();
-			window.removeEventListener('resize', resizeHandler);
+			active = false;
+			dispose?.();
 		};
 	});
 </script>

@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { page } from '$app/stores';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import type { SuperForm } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
@@ -11,9 +13,10 @@
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
 		initialData?: Record<string, any>;
+		object?: any;
+		context?: string;
 		updated_fields?: Set<string>;
 		[key: string]: any;
-		object?: any;
 	}
 
 	let {
@@ -24,6 +27,7 @@
 		initialData = {},
 		updated_fields = new Set(),
 		object,
+		context = 'default',
 		...rest
 	}: Props = $props();
 
@@ -60,6 +64,7 @@
 	cacheLock={cacheLocks['risk_assessment']}
 	bind:cachedValue={formDataCache['risk_assessment']}
 	label={m.riskAssessment()}
+	helpText={m.riskAssessmentHelpText()}
 	hidden={initialData.risk_assessment}
 	onChange={async (e) => {
 		if (e) {

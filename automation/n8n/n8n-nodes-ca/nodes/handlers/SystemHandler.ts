@@ -45,6 +45,6 @@ export class SystemHandler extends BaseResourceHandler {
   }
 
   private async listUsers(): Promise<IDataObject> {
-    return this.request("GET", "/users/");
+    return this.listAll("/users/");
   }
 }

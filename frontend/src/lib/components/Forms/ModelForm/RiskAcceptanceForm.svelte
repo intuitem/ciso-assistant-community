@@ -1,7 +1,7 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
-	import TextArea from '$lib/components/Forms/TextArea.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import { formFieldProxy, type SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
@@ -40,7 +40,7 @@
 	bind:cachedValue={formDataCache['expiry_date']}
 />
 {#if object.id && page.data.user.id === object.approver}
-	<TextArea
+	<MarkdownField
 		disabled={page.data.user.id !== object.approver}
 		{form}
 		field="justification"

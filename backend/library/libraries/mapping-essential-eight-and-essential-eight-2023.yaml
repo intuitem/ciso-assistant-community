@@ -1,0 +1,790 @@
+urn: urn:intuitem:risk:library:mapping-essential-eight-and-essential-eight-2023
+locale: en
+ref_id: mapping-essential-eight-and-essential-eight-2023
+name: Essential Eight Maturity Model (11/2023) - legacy -> Essential Eight Maturity Model (November 2023)
+description: Transition mapping from the legacy Essential Eight Maturity Model (11/2023) - legacy library
+  to Essential Eight Maturity Model (November 2023), rebuilt from ASD's official material. Identical statements
+  are mapped as equal. The legacy library had flattened three requirements that ASD replaces at a higher
+  maturity level; the statements it lacked are mapped from the statement it kept in their place.
+copyright: intuitem
+version: 1
+publication_date: '2026-09-29'
+provider: intuitem
+packager: intuitem
+dependencies:
+- urn:intuitem:risk:library:essential-eight
+- urn:intuitem:risk:library:essential-eight-2023
+objects:
+  requirement_mapping_set:
+    urn: urn:intuitem:risk:req_mapping_set:mapping-essential-eight-and-essential-eight-2023
+    ref_id: mapping-essential-eight-and-essential-eight-2023
+    name: Essential Eight Maturity Model (11/2023) - legacy -> Essential Eight Maturity Model (November
+      2023)
+    description: Transition mapping from the legacy Essential Eight Maturity Model (11/2023) - legacy
+      library to Essential Eight Maturity Model (November 2023), rebuilt from ASD's official material.
+      Identical statements are mapped as equal. The legacy library had flattened three requirements that
+      ASD replaces at a higher maturity level; the statements it lacked are mapped from the statement
+      it kept in their place.
+    source_framework_urn: urn:intuitem:risk:framework:essential-eight
+    target_framework_urn: urn:intuitem:risk:framework:essential-eight-2023
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node3
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1807
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node4
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1808
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node5
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1698
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node6
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1699
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node7
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1700
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node8
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1876
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node9
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1690
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node11
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1691
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node10
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1692
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node11
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1901
+      relationship: superset
+      rationale: semantic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node12
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1693
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node13
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1905
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node14
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-1704
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node15
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pa:ism-0304
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node17
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1807
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node18
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1808
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node19
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1701
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node20
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1702
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node21
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1703
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node22
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1900
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node23
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1877
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node24
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1694
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node26
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1695
+      relationship: subset
+      rationale: semantic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node25
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1696
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node26
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1902
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node27
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1879
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node28
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1697
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node29
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1903
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node30
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1904
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node31
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1407
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node32
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:pos:ism-1501
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node34
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1504
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node35
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1679
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node36
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1680
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node37
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1892
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node38
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1893
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node39
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1681
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node40
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1173
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node41
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-0974
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node42
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1505
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node43
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1401
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node44
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1872
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node45
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1873
+      relationship: superset
+      rationale: semantic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node45
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1874
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node46
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1682
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node47
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1894
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node48
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1683
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node49
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1815
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node50
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1906
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node51
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1907
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node52
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-0109
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node53
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1228
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node54
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-0123
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node55
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-0140
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node56
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:mfa:ism-1819
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node58
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1507
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node59
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1647
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node60
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1648
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node61
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-0445
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node62
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1508
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node63
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1175
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node64
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1883
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node65
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1898
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node66
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1380
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node67
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1687
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node68
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1688
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node69
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1689
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node70
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1649
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node71
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1387
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node72
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1685
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node73
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1896
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node74
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1861
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node75
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1686
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node76
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1897
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node77
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1509
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node78
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1650
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node79
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1815
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node80
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1906
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node81
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1907
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node82
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-0109
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node83
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1228
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node84
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-0123
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node85
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-0140
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node86
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rap:ism-1819
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node88
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-0843
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node89
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1490
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node90
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1656
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node91
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1870
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node92
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1871
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node93
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1657
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node94
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1658
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node95
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1544
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node96
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1659
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node97
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1582
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node98
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1660
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node99
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1815
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node100
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1906
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node101
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1907
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node102
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-0109
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node103
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1228
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node104
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-0123
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node105
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-0140
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node106
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:ac:ism-1819
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node108
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom:ism-1671
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node109
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom:ism-1674
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node110
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom:ism-1890
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node111
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom:ism-1487
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node112
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom:ism-1675
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node113
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom:ism-1891
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node114
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom:ism-1676
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node115
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom:ism-1488
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node116
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom:ism-1672
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node117
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom:ism-1673
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node118
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rmom:ism-1489
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node120
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1654
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node121
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1486
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node122
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1485
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node123
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1412
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node124
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1585
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node125
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1667
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node126
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1668
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node127
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1669
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node128
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1542
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node129
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1859
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node130
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1823
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node131
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1670
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node132
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1860
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node133
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1824
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node134
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1655
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node135
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1621
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node136
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1622
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node137
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1623
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node138
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1889
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node139
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1815
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node140
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1906
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node141
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1907
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node142
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-0109
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node143
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1228
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node144
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-0123
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node145
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-0140
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node146
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:uah:ism-1819
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node148
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rb:ism-1511
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node149
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rb:ism-1810
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node150
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rb:ism-1811
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node151
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rb:ism-1515
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node152
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rb:ism-1812
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node153
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rb:ism-1813
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node154
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rb:ism-1705
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node155
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rb:ism-1706
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node156
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rb:ism-1814
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node157
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rb:ism-1707
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null
+    - source_requirement_urn: urn:intuitem:risk:req_node:essential-eight:node158
+      target_requirement_urn: urn:intuitem:risk:req_node:essential-eight-2023:rb:ism-1708
+      relationship: equal
+      rationale: syntactic
+      strength_of_relationship: null

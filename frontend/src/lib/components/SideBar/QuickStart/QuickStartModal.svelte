@@ -39,7 +39,8 @@
 	let closeModal = true;
 
 	// Base Classes
-	const cBase = 'card bg-surface-50-950 p-4 w-fit max-w-4xl shadow-xl space-y-4';
+	const cBase =
+		'card bg-surface-100-900 border border-surface-500 p-4 w-fit max-w-4xl shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 
 	const form = defaults(

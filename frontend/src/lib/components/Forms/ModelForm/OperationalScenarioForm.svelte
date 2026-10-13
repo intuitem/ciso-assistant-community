@@ -4,7 +4,7 @@
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import { m } from '$paraglide/messages';
-	import TextArea from '../TextArea.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import Select from '../Select.svelte';
 	import { page } from '$app/state';
 	import TextField from '../TextField.svelte';
@@ -82,10 +82,24 @@
 		field="threats"
 		cacheLock={cacheLocks['threats']}
 		bind:cachedValue={formDataCache['threats']}
-		label={m.elementaryActionsTechniques()}
+		label={m.threats()}
 		helpText={m.operationalScenarioThreatsHelpText()}
 	/>
-	<TextArea
+	{#if page.data.featureflags?.ttps}
+		<AutocompleteSelect
+			{form}
+			multiple
+			lazy
+			optionsEndpoint="techniques"
+			optionsLabelField="str"
+			field="techniques"
+			cacheLock={cacheLocks['techniques']}
+			bind:cachedValue={formDataCache['techniques']}
+			label={m.techniques()}
+			helpText={m.operationalScenarioTechniquesHelpText()}
+		/>
+	{/if}
+	<MarkdownField
 		{form}
 		field="operating_modes_description"
 		label={m.operatingModesDescription()}
@@ -117,8 +131,18 @@
 			bind:cachedValue={formDataCache['likelihood']}
 			helpText={m.likelihoodHelpText()}
 		/>
+	{:else if object.quotation_method}
+		<Select
+			{form}
+			options={(model.selectOptions?.['likelihood'] ?? []).filter((o) => o.value !== -1)}
+			field="likelihood_forced"
+			label={m.forcedLikelihood()}
+			helpText={m.forcedLikelihoodHelpText()}
+			cacheLock={cacheLocks['likelihood_forced']}
+			bind:cachedValue={formDataCache['likelihood_forced']}
+		/>
 	{/if}
-	<TextArea
+	<MarkdownField
 		{form}
 		field="justification"
 		label={m.justification()}

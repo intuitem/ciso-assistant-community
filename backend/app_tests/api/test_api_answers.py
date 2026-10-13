@@ -24,7 +24,6 @@ def framework_with_questions(app_config):
     fw = Framework.objects.create(
         name="Answer Test Framework",
         folder=folder,
-        is_published=True,
         min_score=0,
         max_score=100,
     )
@@ -34,7 +33,6 @@ def framework_with_questions(app_config):
         ref_id="ANS-REQ-001",
         assessable=True,
         folder=folder,
-        is_published=True,
     )
     q = Question.objects.create(
         requirement_node=rn,
@@ -44,7 +42,6 @@ def framework_with_questions(app_config):
         type=Question.Type.UNIQUE_CHOICE,
         order=0,
         folder=folder,
-        is_published=True,
     )
     c1 = QuestionChoice.objects.create(
         question=q,
@@ -55,7 +52,6 @@ def framework_with_questions(app_config):
         compute_result="true",
         order=0,
         folder=folder,
-        is_published=True,
     )
     c2 = QuestionChoice.objects.create(
         question=q,
@@ -66,7 +62,6 @@ def framework_with_questions(app_config):
         compute_result="false",
         order=1,
         folder=folder,
-        is_published=True,
     )
 
     from core.models import Perimeter
@@ -80,7 +75,6 @@ def framework_with_questions(app_config):
         framework=fw,
         folder=folder,
         perimeter=perimeter,
-        is_published=True,
     )
     ra = RequirementAssessment.objects.create(
         compliance_assessment=ca,
@@ -105,7 +99,6 @@ def framework_with_multi_choice(app_config):
     fw = Framework.objects.create(
         name="Multi Choice FW",
         folder=folder,
-        is_published=True,
     )
     rn = RequirementNode.objects.create(
         framework=fw,
@@ -113,7 +106,6 @@ def framework_with_multi_choice(app_config):
         ref_id="MC-REQ",
         assessable=True,
         folder=folder,
-        is_published=True,
     )
     q = Question.objects.create(
         requirement_node=rn,
@@ -122,7 +114,6 @@ def framework_with_multi_choice(app_config):
         type=Question.Type.MULTIPLE_CHOICE,
         order=0,
         folder=folder,
-        is_published=True,
     )
     c1 = QuestionChoice.objects.create(
         question=q,
@@ -131,7 +122,6 @@ def framework_with_multi_choice(app_config):
         value="A",
         order=0,
         folder=folder,
-        is_published=True,
     )
     c2 = QuestionChoice.objects.create(
         question=q,
@@ -140,7 +130,6 @@ def framework_with_multi_choice(app_config):
         value="B",
         order=1,
         folder=folder,
-        is_published=True,
     )
     c3 = QuestionChoice.objects.create(
         question=q,
@@ -149,7 +138,6 @@ def framework_with_multi_choice(app_config):
         value="C",
         order=2,
         folder=folder,
-        is_published=True,
     )
 
     from core.models import Perimeter
@@ -160,7 +148,6 @@ def framework_with_multi_choice(app_config):
         framework=fw,
         folder=folder,
         perimeter=perimeter,
-        is_published=True,
     )
     ra = RequirementAssessment.objects.create(
         compliance_assessment=ca,
@@ -342,7 +329,6 @@ class TestAnswerEndpoints:
             type=Question.Type.UNIQUE_CHOICE,
             order=1,
             folder=folder,
-            is_published=True,
         )
         other_choice = QuestionChoice.objects.create(
             question=other_q,
@@ -351,7 +337,6 @@ class TestAnswerEndpoints:
             value="Other",
             order=0,
             folder=folder,
-            is_published=True,
         )
 
         response = authenticated_client.post(

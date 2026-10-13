@@ -42,7 +42,7 @@ export const load: PageServerLoad = async ({ fetch, locals }) => {
 		const providerData = await providerResponse.json();
 		const provider = providerData.results[0];
 		config = {
-			folder_id: locals.user.root_folder_id,
+			folder_id: (await locals.getUser())?.root_folder_id,
 			provider_id: provider.id
 		};
 	}

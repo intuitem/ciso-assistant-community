@@ -4,9 +4,14 @@ import time
 from .helpers import get_referential_translation
 from typing import List, Union
 
+from core.object_references import subject_question_error
+from core.quick_form_scoring import PAGE_AGGREGATIONS, normalize_page_aggregation
+
 # interesting thread: https://stackoverflow.com/questions/27743711/can-i-speedup-yaml
 from core.models import (
     Framework,
+    QuickForm,
+    QuickFormPage,
     Preset,
     Question,
     QuestionChoice,
@@ -21,6 +26,7 @@ from core.models import (
     Threat,
     _sync_questions_from_data,
 )
+from sec_intel.models import Tactic, Technique, TTPCatalog
 from metrology.models import MetricDefinition
 from django.db import transaction
 from iam.models import Folder
@@ -99,6 +105,20 @@ def preview_library(framework: dict) -> dict[str, list]:
     return preview
 
 
+def outcome_rule_id_error(data: dict) -> str | None:
+    """The first outcome rule whose ref_id cannot be used, as a load error."""
+    from core.cel_service import RULE_ID_MESSAGES, outcome_rule_id_errors
+
+    rules = data.get("outcomes_definition") or []
+    if errors := outcome_rule_id_errors(rules):
+        first = errors[0]
+        return (
+            f"Outcome rule {first['index'] + 1} ({first['ref_id'] or 'no ID'}): "
+            f"{RULE_ID_MESSAGES[first['error']]}"
+        )
+    return None
+
+
 class RequirementNodeImporter:
     REQUIRED_FIELDS = {"urn"}
 
@@ -115,6 +135,16 @@ class RequirementNodeImporter:
         if parent_urn:
             parent_urn = parent_urn.lower()
 
+        display_mode = self.requirement_data.get(
+            "display_mode", RequirementNode.DisplayMode.DEFAULT
+        )
+        # Splash screens are never assessable: a splash+assessable node would
+        # surface as a regular requirement in the respondent view.
+        assessable = (
+            self.requirement_data.get("assessable")
+            and display_mode != RequirementNode.DisplayMode.SPLASH
+        )
+
         # update_or_create scoped to the framework: identical to create()
         # for fresh imports, updates in place when the framework row was
         # adopted (see FrameworkImporter.import_framework).
@@ -124,7 +154,7 @@ class RequirementNodeImporter:
             defaults=dict(
                 folder=Folder.get_root_folder(),
                 parent_urn=parent_urn,
-                assessable=self.requirement_data.get("assessable"),
+                assessable=assessable,
                 ref_id=self.requirement_data.get("ref_id"),
                 annotation=self.requirement_data.get("annotation"),
                 typical_evidence=self.requirement_data.get("typical_evidence"),
@@ -135,19 +165,26 @@ class RequirementNodeImporter:
                 implementation_groups=self.requirement_data.get(
                     "implementation_groups"
                 ),
-                display_mode=self.requirement_data.get(
-                    "display_mode", RequirementNode.DisplayMode.DEFAULT
+                display_mode=display_mode,
+                visibility_expression=self.requirement_data.get(
+                    "visibility_expression"
                 ),
-                weight=self.requirement_data.get("weight", 1),
+                weight=(
+                    1
+                    if self.requirement_data.get("weight") is None
+                    else self.requirement_data["weight"]
+                ),
+                importance=self.requirement_data.get("importance")
+                or RequirementNode.Importance.UNDEFINED,
                 min_score=self.requirement_data.get("min_score"),
                 max_score=self.requirement_data.get("max_score"),
                 scores_definition_ref=self.requirement_data.get(
                     "scores_definition_ref"
                 ),
+                target_score=self.requirement_data.get("target_score"),
                 locale=framework_object.locale,
                 default_locale=framework_object.default_locale,
                 translations=self.requirement_data.get("translations", {}),
-                is_published=True,
             ),
         )
         requirement_node.clean()
@@ -365,6 +402,17 @@ class FrameworkImporter:
                 ", ".join(detected_object_fields)
             )
 
+        if error := outcome_rule_id_error(self.framework_data):
+            return error
+        from core.cel_service import validate_framework_expressions
+
+        if errors := validate_framework_expressions(self.framework_data):
+            first = errors[0]
+            return (
+                f"[FRAMEWORK_ERROR] {first['where']} {first['ref_id']}: "
+                f"{first['error']}"
+            )
+
         if "requirement_nodes" in self.framework_data:
             requirement_node_data = self.framework_data["requirement_nodes"]
             if (
@@ -393,6 +441,22 @@ class FrameworkImporter:
         if isinstance(scores_definition, list):
             scores_definition = {"scale": scores_definition}
 
+        score_calculation_method = self.framework_data.get(
+            "score_calculation_method", "average"
+        )
+        Framework.validate_score_calculation_method(score_calculation_method)
+        Framework.validate_scoring_defaults(
+            min_score=min_score,
+            max_score=max_score,
+            anchor_na_to_target=bool(
+                self.framework_data.get("anchor_na_to_target", False)
+            ),
+            target_score=self.framework_data.get("target_score"),
+            implementation_groups_definition=self.framework_data.get(
+                "implementation_groups_definition"
+            ),
+        )
+
         # update_or_create: identical to create() for normal loads (no row
         # exists yet) and adopts a pre-existing library-less framework in
         # place — same URN family, same rows, audits untouched (the adopted
@@ -419,6 +483,7 @@ class FrameworkImporter:
                 ref_id=self.framework_data["ref_id"],
                 name=self.framework_data.get("name"),
                 description=self.framework_data.get("description"),
+                annotation=self.framework_data.get("annotation"),
                 min_score=min_score,
                 max_score=max_score,
                 scores_definition=scores_definition,
@@ -426,11 +491,19 @@ class FrameworkImporter:
                     "implementation_groups_definition"
                 ),
                 outcomes_definition=self.framework_data.get("outcomes_definition", []),
+                field_visibility=self.framework_data.get("field_visibility") or {},
+                score_scale_locked=bool(
+                    self.framework_data.get("score_scale_locked", False)
+                ),
+                score_calculation_method=score_calculation_method,
+                anchor_na_to_target=bool(
+                    self.framework_data.get("anchor_na_to_target", False)
+                ),
+                target_score=self.framework_data.get("target_score"),
                 provider=library_object.provider,
                 locale=library_object.locale,
                 default_locale=library_object.default_locale,
                 translations=self.framework_data.get("translations", {}),
-                is_published=True,
             ),
         )
         for requirement_node in self._requirement_nodes:
@@ -443,6 +516,237 @@ class FrameworkImporter:
                     rn.requirement_data["urn"].lower() for rn in self._requirement_nodes
                 ]
             ).delete()
+
+
+class QuickFormPageImporter:
+    REQUIRED_FIELDS = {"urn"}
+
+    def __init__(self, page_data: dict, index: int):
+        self.page_data = page_data
+        self.index = index
+
+    def is_valid(self) -> Union[str, None]:
+        if missing_fields := self.REQUIRED_FIELDS - set(self.page_data.keys()):
+            return "Missing the following fields : {}".format(", ".join(missing_fields))
+        questions = self.page_data.get("questions")
+        if questions is not None and not isinstance(questions, dict):
+            return "questions must be an object keyed by URN"
+        aggregation = self.page_data.get("aggregation")
+        if aggregation is not None and aggregation not in PAGE_AGGREGATIONS:
+            return "aggregation must be one of {}".format(", ".join(PAGE_AGGREGATIONS))
+        return None
+
+    def import_page(self, quick_form: QuickForm):
+        # update_or_create scoped to the form: create on fresh loads, in-place
+        # update when the form row was adopted.
+        page, _ = QuickFormPage.objects.update_or_create(
+            quick_form=quick_form,
+            urn=self.page_data["urn"].lower(),
+            defaults=dict(
+                folder=Folder.get_root_folder(),
+                ref_id=self.page_data.get("ref_id"),
+                name=self.page_data.get("name"),
+                description=self.page_data.get("description"),
+                annotation=self.page_data.get("annotation"),
+                provider=quick_form.provider,
+                order=self.index,
+                visibility_expression=self.page_data.get("visibility_expression"),
+                aggregation=normalize_page_aggregation(
+                    self.page_data.get("aggregation")
+                ),
+                locale=quick_form.locale,
+                default_locale=quick_form.default_locale,
+                translations=self.page_data.get("translations", {}),
+            ),
+        )
+        questions_data = self.page_data.get("questions")
+        _sync_questions_from_data(
+            page, questions_data if isinstance(questions_data, dict) else {}
+        )
+
+
+class QuickFormImporter:
+    REQUIRED_FIELDS = {"ref_id", "urn"}
+
+    def __init__(self, quick_form_data: dict):
+        self.quick_form_data = quick_form_data
+        self._pages: List[QuickFormPageImporter] = []
+
+    def init(self) -> Union[str, None]:
+        if missing_fields := self.REQUIRED_FIELDS - set(self.quick_form_data.keys()):
+            return "Missing the following fields : {}".format(", ".join(missing_fields))
+        pages = self.quick_form_data.get("pages")
+        if not isinstance(pages, list) or not pages:
+            return "A quick form must define at least one page"
+        errors = []
+        for index, page_data in enumerate(pages):
+            if not isinstance(page_data, dict):
+                errors.append((index, "must be an object"))
+                continue
+            importer = QuickFormPageImporter(page_data, index)
+            self._pages.append(importer)
+            if (error := importer.is_valid()) is not None:
+                errors.append((index, error))
+        if errors:
+            index, error = errors[0]
+            return (
+                f"[QUICK_FORM_ERROR] {len(errors)} invalid page"
+                f"{'s' if len(errors) > 1 else ''} detected, page {index + 1} "
+                f"has the following error : {error}"
+            )
+        if (error := subject_question_error(self.quick_form_data)) is not None:
+            return f"[QUICK_FORM_ERROR] {error}"
+        if error := outcome_rule_id_error(self.quick_form_data):
+            return f"[QUICK_FORM_ERROR] {error}"
+        from core.quick_form_apply import validate_on_accept_document
+
+        if errors := validate_on_accept_document(self.quick_form_data):
+            first = errors[0]
+            return f"[QUICK_FORM_ERROR] on_accept {first['ref_id']}: {first['error']}"
+        return None
+
+    def import_quick_form(self, library_object: LoadedLibrary):
+        urn = self.quick_form_data["urn"].lower()
+        existing = QuickForm.objects.filter(urn=urn).first()
+        if existing is not None and (
+            existing.library_id is not None or existing.locale != library_object.locale
+        ):
+            raise IntegrityError(
+                f"Quick form {urn} already exists and belongs to a library; "
+                f"cannot be adopted by {library_object.urn}"
+            )
+        quick_form, created = QuickForm.objects.update_or_create(
+            urn=urn,
+            defaults=dict(
+                folder=Folder.get_root_folder(),
+                library=library_object,
+                ref_id=self.quick_form_data["ref_id"],
+                name=self.quick_form_data.get("name"),
+                description=self.quick_form_data.get("description"),
+                annotation=self.quick_form_data.get("annotation"),
+                # Carried here as well as in `update_quick_forms`: a field honoured on
+                # re-import but dropped on first load silently works only for authors
+                # who happened to publish twice.
+                ref_id_prefix=self.quick_form_data.get("ref_id_prefix") or "",
+                title_question_urn=str(
+                    self.quick_form_data.get("title_question_urn") or ""
+                ).lower(),
+                subject_question_urn=str(
+                    self.quick_form_data.get("subject_question_urn") or ""
+                ).lower(),
+                on_accept=self.quick_form_data.get("on_accept") or [],
+                outcomes_definition=self.quick_form_data.get("outcomes_definition")
+                or [],
+                scores_definition=self.quick_form_data.get("scores_definition"),
+                urn_namespace=urn.split(":")[1] if urn.startswith("urn:") else "custom",
+                provider=library_object.provider,
+                locale=library_object.locale,
+                default_locale=library_object.default_locale,
+                translations=self.quick_form_data.get("translations", {}),
+            ),
+        )
+        for page in self._pages:
+            page.import_page(quick_form)
+        if not created:
+            QuickFormPage.objects.filter(quick_form=quick_form).exclude(
+                urn__in=[p.page_data["urn"].lower() for p in self._pages]
+            ).delete()
+
+
+class ReferentialImporterMixin:
+    # ref_id is optional: some publishers (e.g. ANSSI fiches méthode) number nothing.
+    REQUIRED_FIELDS = {"urn"}
+
+    def __init__(self, data: dict, index: int = 0):
+        self.data = data
+        self.index = index
+        self._object = None
+
+    def is_valid(self) -> Union[str, None]:
+        if missing_fields := self.REQUIRED_FIELDS - set(self.data.keys()):
+            return "Missing the following fields : {}".format(", ".join(missing_fields))
+
+    def _common(self, library_object: LoadedLibrary) -> dict:
+        return dict(
+            library=library_object,
+            urn=self.data["urn"].lower(),
+            ref_id=self.data.get("ref_id"),
+            name=self.data.get("name"),
+            description=self.data.get("description"),
+            annotation=self.data.get("annotation"),
+            provider=library_object.provider,
+            locale=library_object.locale,
+            translations=self.data.get("translations", {}),
+            default_locale=library_object.default_locale,
+        )
+
+    def _resolve(self, model, urn: str, field: str):
+        identifier = self.data.get("ref_id", self.data.get("urn"))
+        if not urn:
+            message = f"Missing {field} reference in '{identifier}'."
+            logger.error(message)
+            raise ValueError(message)
+        try:
+            return model.objects.get(urn=urn.lower())
+        except model.DoesNotExist as exc:
+            message = f"Unknown {field} '{urn}' referenced in '{identifier}'."
+            logger.error(message)
+            raise ValueError(message) from exc
+
+
+class TTPCatalogImporter(ReferentialImporterMixin):
+    def import_object(self, library_object: LoadedLibrary):
+        self._object = TTPCatalog.objects.create(
+            **self._common(library_object),
+            grouping_definition=self.data.get("grouping_definition"),
+        )
+
+
+class TacticImporter(ReferentialImporterMixin):
+    REQUIRED_FIELDS = {"urn", "catalog_urn"}
+
+    def import_object(self, library_object: LoadedLibrary):
+        self._object = Tactic.objects.create(
+            **self._common(library_object),
+            catalog=self._resolve(TTPCatalog, self.data["catalog_urn"], "TTP catalog"),
+            order_id=self.data.get("order_id", self.index),
+        )
+
+
+class TechniqueImporter(ReferentialImporterMixin):
+    def import_object(self, library_object: LoadedLibrary):
+        catalog = None
+        if catalog_urn := self.data.get("catalog_urn"):
+            catalog = self._resolve(TTPCatalog, catalog_urn, "TTP catalog")
+        self._object = Technique.objects.create(
+            **self._common(library_object),
+            catalog=catalog,
+            order_id=self.data.get("order_id", self.index),
+            groups=self.data.get("groups"),
+            is_deprecated=self.data.get("is_deprecated", False),
+        )
+
+    def link_object(self):
+        """Resolve links whose targets may not exist at create time."""
+        if self._object is None:
+            return
+
+        if parent_urn := self.data.get("parent_urn"):
+            self._object.parent = self._resolve(
+                Technique, parent_urn, "parent technique"
+            )
+            self._object.save(update_fields=["parent"])
+
+        for field, model, key in (
+            ("tactics", Tactic, "tactic"),
+            ("reference_controls", ReferenceControl, "reference control"),
+        ):
+            targets = [
+                self._resolve(model, urn, key) for urn in self.data.get(field, [])
+            ]
+            # .set() not .add(): links removed from the document must be dropped
+            if targets or getattr(self._object, field).exists():
+                getattr(self._object, field).set(targets)
 
 
 class ThreatImporter:
@@ -463,8 +767,8 @@ class ThreatImporter:
             ref_id=self.threat_data["ref_id"],
             name=self.threat_data.get("name"),
             description=self.threat_data.get("description"),
+            annotation=self.threat_data.get("annotation"),
             provider=library_object.provider,
-            is_published=True,
             locale=library_object.locale,
             translations=self.threat_data.get("translations", {}),
             default_locale=library_object.default_locale,  # Change this in the future ?
@@ -509,11 +813,11 @@ class ReferenceControlImporter:
             ref_id=self.reference_control_data["ref_id"],
             name=self.reference_control_data.get("name"),
             description=self.reference_control_data.get("description"),
+            annotation=self.reference_control_data.get("annotation"),
             provider=library_object.provider,
             typical_evidence=self.reference_control_data.get("typical_evidence"),
             category=self.reference_control_data.get("category"),
             csf_function=self.reference_control_data.get("csf_function"),
-            is_published=True,
             locale=library_object.locale,
             translations=self.reference_control_data.get("translations", {}),
             default_locale=library_object.default_locale,  # Change this in the future ?
@@ -565,7 +869,6 @@ class MetricDefinitionImporter:
             choices_definition=self.metric_definition_data.get("choices_definition"),
             higher_is_better=self.metric_definition_data.get("higher_is_better", True),
             default_target=self.metric_definition_data.get("default_target"),
-            is_published=True,
             locale=library_object.locale,
             translations=self.metric_definition_data.get("translations", {}),
             default_locale=library_object.default_locale,
@@ -575,7 +878,14 @@ class MetricDefinitionImporter:
 # The couple (URN, locale) is unique. ===> Check this in the future
 class RiskMatrixImporter:
     REQUIRED_FIELDS = {"ref_id", "urn", "json_definition"}
-    MATRIX_FIELDS = {"probability", "impact", "risk", "grid", "strength_of_knowledge"}
+    MATRIX_FIELDS = {
+        "probability",
+        "impact",
+        "risk",
+        "grid",
+        "strength_of_knowledge",
+        "ebios_rm",
+    }
 
     def __init__(self, risk_matrix_data: dict):
         self.risk_matrix_data = risk_matrix_data
@@ -623,6 +933,7 @@ class RiskMatrixImporter:
                 folder=Folder.get_root_folder(),
                 name=self.risk_matrix_data.get("name"),
                 description=self.risk_matrix_data.get("description"),
+                annotation=self.risk_matrix_data.get("annotation"),
                 provider=library_object.provider,
                 ref_id=self.risk_matrix_data.get("ref_id"),
                 json_definition=matrix_data,
@@ -630,7 +941,6 @@ class RiskMatrixImporter:
                 locale=library_object.locale,
                 default_locale=library_object.default_locale,  # Change this in the future ?
                 translations=self.risk_matrix_data.get("translations", {}),
-                is_published=True,
             ),
         )
         logger.info(
@@ -645,6 +955,9 @@ class LibraryImporter:
 
     REQUIRED_FIELDS = {"ref_id", "urn", "locale", "objects", "version"}
     OBJECT_FIELDS = [
+        "ttp_catalogs",
+        "tactics",
+        "techniques",
         "threats",
         "reference_controls",
         "metric_definitions",
@@ -652,9 +965,11 @@ class LibraryImporter:
         "risk_matrices",
         "framework",  # This field name is deprecated
         "frameworks",
+        "quick_forms",
         "requirement_mapping_set",  # This field name is deprecated
         "requirement_mapping_sets",
         "preset",
+        "workflows",
     ]
     NON_DEPRECATED_OBJECT_FIELDS = [
         field
@@ -665,11 +980,62 @@ class LibraryImporter:
     def __init__(self, library: StoredLibrary):
         self._library = library
         self._frameworks = []
+        self._quick_forms = []
+        self._ttp_catalogs = []
+        self._tactics = []
+        self._techniques = []
         self._threats = []
         self._reference_controls = []
         self._metric_definitions = []
         self._risk_matrices = []
         self._requirement_mapping_sets = []
+        self._workflows = []
+
+    def init_workflows(self, workflows: List[dict]) -> Union[str, None]:
+        """Structural validation of workflow objects; actual
+        creation happens in import_objects via the workflows app."""
+        from automation.workflows.import_export import (
+            WorkflowImportError,
+            validate_workflow_document,
+        )
+
+        if not isinstance(workflows, list) or not workflows:
+            return "objects.workflows must be a non-empty list"
+        for index, entry in enumerate(workflows):
+            try:
+                validate_workflow_document(entry)
+            except WorkflowImportError as e:
+                return f"objects.workflows[{index}]: {e.message}"
+        self._workflows = workflows
+
+    def _init_referential(self, data, importer_cls, attr, label):
+        importers, errors = [], []
+        for index, item in enumerate(data):
+            importer = importer_cls(item, index)
+            importers.append(importer)
+            if (error := importer.is_valid()) is not None:
+                errors.append((index, error))
+        setattr(self, attr, importers)
+        if errors:
+            index, error = errors[0]
+            return (
+                f"[{label.upper()}_ERROR] {len(errors)} invalid {label}"
+                f"{'s' if len(errors) > 1 else ''} detected, entry {index + 1} "
+                f"has the following error : {error}"
+            )
+
+    def init_ttp_catalogs(self, data) -> Union[str, None]:
+        return self._init_referential(
+            data, TTPCatalogImporter, "_ttp_catalogs", "ttp_catalog"
+        )
+
+    def init_tactics(self, data) -> Union[str, None]:
+        return self._init_referential(data, TacticImporter, "_tactics", "tactic")
+
+    def init_techniques(self, data) -> Union[str, None]:
+        return self._init_referential(
+            data, TechniqueImporter, "_techniques", "technique"
+        )
 
     def init_threats(self, threats: List[dict]) -> Union[str, None]:
         threat_importers = []
@@ -831,6 +1197,28 @@ class LibraryImporter:
                 invalid_framework_error,
             )
 
+    def init_quick_forms(self, quick_forms: List[dict]) -> Union[str, None]:
+        importers = []
+        import_errors = []
+        for index, quick_form_data in enumerate(quick_forms):
+            if not isinstance(quick_form_data, dict):
+                import_errors.append((index, "must be an object"))
+                continue
+            importer = QuickFormImporter(quick_form_data)
+            importers.append(importer)
+            if (error := importer.init()) is not None:
+                import_errors.append((index, error))
+        self._quick_forms = importers
+        if import_errors:
+            index, error = import_errors[0]
+            ordinal = {1: "st", 2: "nd", 3: "rd"}.get(index + 1, "th")
+            return (
+                f"[QUICK_FORM_ERROR] {len(import_errors)} invalid quick form"
+                f"{'s' if len(import_errors) > 1 else ''} detected, the "
+                f"{index + 1}{ordinal} quick form has the following error : {error}"
+            )
+        return None
+
     def init(self) -> Union[str, None]:
         """missing_fields = self.REQUIRED_FIELDS - set(self._library_data.keys())
         if missing_fields:
@@ -876,6 +1264,16 @@ class LibraryImporter:
                 logger.error("Framework import error", error=framework_import_error)
                 return framework_import_error
 
+        if "quick_forms" in library_objects:
+            quick_forms_data = library_objects["quick_forms"]
+            if isinstance(quick_forms_data, dict):
+                quick_forms_data = [quick_forms_data]
+            if not isinstance(quick_forms_data, list):
+                return "[QUICK_FORM_ERROR] The 'quick_forms' field must be a list."
+            if (error := self.init_quick_forms(quick_forms_data)) is not None:
+                logger.error("Quick form import error", error=error)
+                return error
+
         if (
             "requirement_mapping_set" in library_objects
             and "requirement_mapping_sets" in library_objects
@@ -900,6 +1298,16 @@ class LibraryImporter:
                     error=requirement_mapping_set_import_error,
                 )
                 return requirement_mapping_set_import_error
+
+        for key, initialiser in (
+            ("ttp_catalogs", self.init_ttp_catalogs),
+            ("tactics", self.init_tactics),
+            ("techniques", self.init_techniques),
+        ):
+            if key in library_objects:
+                if (error := initialiser(library_objects[key])) is not None:
+                    logger.error("TTP import error", key=key, error=error)
+                    return error
 
         if "threats" in library_objects:
             threat_data = library_objects["threats"]
@@ -941,6 +1349,14 @@ class LibraryImporter:
                 )
             ) is not None:
                 return metric_definition_import_error
+
+        if "workflows" in library_objects:
+            if (
+                workflow_import_error := self.init_workflows(
+                    library_objects["workflows"]
+                )
+            ) is not None:
+                return workflow_import_error
 
     def check_and_import_dependencies(self) -> Union[str, None]:
         """Check and import library dependencies."""
@@ -1000,7 +1416,6 @@ class LibraryImporter:
                 "publication_date": self._library.publication_date,
                 "copyright": self._library.copyright,
                 "folder": Folder.get_root_folder(),  # TODO: make this configurable,
-                "is_published": True,
                 "builtin": self._library.builtin,
                 "objects_meta": self._library.objects_meta,
                 "translations": self._library.translations,
@@ -1013,11 +1428,24 @@ class LibraryImporter:
     def import_objects(self, library_object: LoadedLibrary):
         """Import library objects."""
 
+        for ttp_catalog in self._ttp_catalogs:
+            ttp_catalog.import_object(library_object)
+
+        for tactic in self._tactics:
+            tactic.import_object(library_object)
+
+        for technique in self._techniques:
+            technique.import_object(library_object)
+
         for threat in self._threats:
             threat.import_threat(library_object)
 
         for reference_control in self._reference_controls:
             reference_control.import_reference_control(library_object)
+
+        # after reference controls: techniques link to them and to parents
+        for technique in self._techniques:
+            technique.link_object()
 
         for metric_definition in self._metric_definitions:
             metric_definition.import_metric_definition(library_object)
@@ -1028,8 +1456,32 @@ class LibraryImporter:
         for framework in self._frameworks:
             framework.import_framework(library_object)
 
+        for quick_form in self._quick_forms:
+            quick_form.import_quick_form(library_object)
+
         for requirement_mapping_set in self._requirement_mapping_sets:
             requirement_mapping_set.load(library_object)
+
+        # Workflows divorce at load: created as plain user documents
+        # with provenance stamped, no FK to the library — unload leaves them,
+        # update never mutates them.
+        if self._workflows:
+            from iam.models import Folder as IamFolder
+
+            from automation.workflows.import_export import import_workflow
+
+            for entry in self._workflows:
+                _workflow, warnings = import_workflow(
+                    entry,
+                    IamFolder.get_root_folder(),
+                    source_version=self._library.version,
+                )
+                for warning in warnings:
+                    logger.warning(
+                        "Workflow library load warning",
+                        library=self._library.urn,
+                        warning=warning,
+                    )
 
     @transaction.atomic
     def _import_library(self):
@@ -1052,6 +1504,9 @@ class LibraryImporter:
         if error_msg is not None:
             return error_msg
 
+        from automation.workflows.graph import GraphValidationError
+        from automation.workflows.import_export import WorkflowImportError
+
         for _ in range(10):
             try:
                 self._import_library()
@@ -1061,6 +1516,14 @@ class LibraryImporter:
                     time.sleep(3)
                 else:
                     raise e
+            except (WorkflowImportError, GraphValidationError) as e:
+                # A malformed workflow object must surface as the error-string
+                # contract, not a 500 (structural checks run at init_workflows,
+                # but save_graph can still reject at load).
+                logger.error(
+                    "Workflow library load error", error=e, library=self._library
+                )
+                return getattr(e, "message", str(e))
             except Exception as e:
                 logger.error("Library import error", error=e, library=self._library)
                 raise e

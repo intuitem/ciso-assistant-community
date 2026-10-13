@@ -52,8 +52,8 @@
 	</Anchor>
 </div>
 
-{#if data.scenariosWithoutAttackPath.count > 0}
-	{@const missingScenarios = data.scenariosWithoutAttackPath.results}
+{#if data.scenariosWithoutAttackPath.length > 0}
+	{@const missingScenarios = data.scenariosWithoutAttackPath}
 	<section class="my-6">
 		<div
 			class="flex items-start gap-3 rounded-xl border border-warning-300 bg-warning-100 p-4 shadow-xs"

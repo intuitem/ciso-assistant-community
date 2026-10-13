@@ -166,13 +166,16 @@ export class PageDetail extends BasePage {
 		const content = this.page
 			.getByTestId('tree-item-content')
 			.filter({ hasText: new RegExp(`^${value}\n*.*`) });
+		const row = this.page
+			.getByTestId('tree-item')
+			.filter({ has: content, hasNotText: path.length != 0 ? path.at(-1) : undefined });
 		return {
 			content: content,
-			progressRadial: this.page
-				.getByTestId('tree-item')
-				.filter({ has: content, hasNotText: path.length != 0 ? path.at(-1) : undefined })
-				.getByTestId('tree-item-lead')
-				.getByTestId('progress-ring-svg'),
+			// Status/result badges live inside tree-item-content (merged into the
+			// same clickable row as the title/description, see CA-1843), not in a
+			// separate tree-item-lead sibling.
+			badges: row.getByTestId('tree-item-badges'),
+			progressRadial: row.getByTestId('progress-ring-svg'),
 			default: this.page.getByTestId('tree-item').filter({ hasText: new RegExp(`^${value}\n*.*`) })
 		};
 	}

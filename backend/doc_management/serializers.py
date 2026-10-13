@@ -20,11 +20,23 @@ class DocumentContainerReadSerializer(BaseModelSerializer):
     applied_controls = FieldsRelatedField(many=True)
     task_templates = FieldsRelatedField(many=True)
     processings = FieldsRelatedField(many=True)
+    assets = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     classification = serializers.SerializerMethodField()
     document_count = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
+    progress = serializers.SerializerMethodField()
+    pending_revision = serializers.SerializerMethodField()
     source = serializers.SerializerMethodField()
+
+    STATUS_PROGRESS = {
+        DocumentRevision.Status.DRAFT: 25,
+        DocumentRevision.Status.DEPRECATED: 0,
+        DocumentRevision.Status.IN_REVIEW: 50,
+        DocumentRevision.Status.CHANGE_REQUESTED: 50,
+        DocumentRevision.Status.VALIDATED: 75,
+        DocumentRevision.Status.PUBLISHED: 100,
+    }
 
     class Meta:
         model = DocumentContainer
@@ -67,6 +79,40 @@ class DocumentContainerReadSerializer(BaseModelSerializer):
         if doc and doc.current_revision_id:
             return doc.current_revision.status
         return None
+
+    def get_progress(self, obj):
+        """Rough completion percentage derived from the workflow status."""
+        doc = self._default_doc(obj)
+        if doc and doc.current_revision_id:
+            return self.STATUS_PROGRESS.get(doc.current_revision.status)
+        return None
+
+    def get_pending_revision(self, obj):
+        """Newest revision still in the approval loop, or None.
+
+        `status` above reports the revision in force, which stays on the
+        published one until a publish repoints it, so work in progress would
+        otherwise never show up in the list. The revision in force is excluded:
+        a new document points current_revision at its own draft, and reporting
+        it here would show the same revision twice.
+        """
+        doc = self._default_doc(obj)
+        if not doc:
+            return None
+        rev = next(
+            (
+                r
+                for r in sorted(
+                    doc.revisions.all(), key=lambda r: r.version_number, reverse=True
+                )
+                if r.status in DocumentRevision.ACTIVE_STATUSES
+                and r.id != doc.current_revision_id
+            ),
+            None,
+        )
+        if not rev:
+            return None
+        return {"version_number": rev.version_number, "status": rev.status}
 
 
 class DocumentContainerWriteSerializer(BaseModelSerializer):
@@ -143,9 +189,7 @@ class ManagedDocumentWriteSerializer(BaseModelSerializer):
         if template_name := validated_data.get("template_used"):
             locale = validated_data.get("locale", "en")
             accessible_ids = (
-                RoleAssignment.get_accessible_object_ids(
-                    Folder.get_root_folder(), request.user, DocumentTemplate
-                )[0]
+                RoleAssignment.get_viewable_object_ids(request.user, DocumentTemplate)
                 if request
                 else []
             )
@@ -178,14 +222,12 @@ class ManagedDocumentWriteSerializer(BaseModelSerializer):
                             name=validated_data.get("name")
                             or getattr(policy, "name", ""),
                             folder=policy.folder,
-                            is_published=policy.is_published,
                         )
                         container.policies.add(policy)
                 else:
                     container = DocumentContainer.objects.create(
                         document_type=document_type,
                         name=validated_data.get("name", ""),
-                        is_published=False,
                         **(
                             {"folder": validated_data["folder"]}
                             if validated_data.get("folder")

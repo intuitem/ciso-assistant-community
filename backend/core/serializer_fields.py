@@ -32,7 +32,7 @@ class FieldsRelatedField(serializers.RelatedField):
     fields: list of fields to be serialized
     """
 
-    fields = []
+    related_fields = []
 
     def __init__(
         self,
@@ -41,14 +41,14 @@ class FieldsRelatedField(serializers.RelatedField):
         **kwargs,
     ):
         kwargs["read_only"] = True
-        self.fields = fields
+        self.related_fields = fields
         self.serializer = serializer
         super().__init__(**kwargs)
 
     def to_representation(
         self, value, fields: list[str | dict[str, list[str]]] | None = None
     ) -> dict[str, Any]:
-        fields = fields or self.fields
+        fields = fields or self.related_fields
         if self.serializer is not None:
             data: dict = self.serializer(value).data
             if fields is not None:

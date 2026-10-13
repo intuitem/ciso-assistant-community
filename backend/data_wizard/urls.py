@@ -8,4 +8,9 @@ urlpatterns = [
         views.LoadFileView.as_view(),
         name="load-file",
     ),
+    path(
+        "templates/<str:model_type>/",
+        views.ImportTemplateView.as_view(),
+        name="import-template",
+    ),
 ]

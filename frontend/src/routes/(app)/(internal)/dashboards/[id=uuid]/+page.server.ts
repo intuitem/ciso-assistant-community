@@ -1,6 +1,7 @@
 import { getModelInfo } from '$lib/utils/crud';
 import { loadDetail } from '$lib/utils/load';
 import { BASE_API_URL } from '$lib/utils/constants';
+import { fetchAllPages } from '$lib/utils/pagination';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async (event) => {
@@ -14,11 +15,9 @@ export const load: PageServerLoad = async (event) => {
 
 	// Fetch widgets for this dashboard
 	const widgetsEndpoint = `${BASE_API_URL}/metrology/dashboard-widgets/?dashboard=${event.params.id}`;
-	const widgetsResponse = await event.fetch(widgetsEndpoint);
-	const widgetsData = widgetsResponse.ok ? await widgetsResponse.json() : { results: [] };
+	const widgets = await fetchAllPages(event.fetch, widgetsEndpoint).catch(() => []);
 
 	// For each widget, fetch samples (either custom or builtin)
-	const widgets = widgetsData.results || [];
 	const widgetsWithSamples = await Promise.all(
 		widgets.map(async (widget: any) => {
 			// Check if this is a builtin metric widget
@@ -50,12 +49,11 @@ export const load: PageServerLoad = async (event) => {
 				if (!metricInstanceId) return { ...widget, samples: [], builtinSamples: [] };
 
 				const samplesEndpoint = `${BASE_API_URL}/metrology/custom-metric-samples/?metric_instance=${metricInstanceId}`;
-				const samplesResponse = await event.fetch(samplesEndpoint);
-				const samplesData = samplesResponse.ok ? await samplesResponse.json() : { results: [] };
+				const samples = await fetchAllPages(event.fetch, samplesEndpoint).catch(() => []);
 
 				return {
 					...widget,
-					samples: samplesData.results || [],
+					samples,
 					builtinSamples: []
 				};
 			}

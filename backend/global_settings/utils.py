@@ -1,10 +1,23 @@
+import functools
+import importlib
 import json
+
+from django.conf import settings as django_settings
+from django.core.cache import cache
 
 from global_settings.models import GlobalSettings
 from global_settings.serializers import FeatureFlagsSerializer
 import structlog
 
 logger = structlog.get_logger(__name__)
+
+FEATURE_FLAGS_CACHE_KEY = "global_settings.feature_flags"
+# With the default LocMemCache this is per-process: the invalidation at the
+# write points is immediate in the worker that handled the write; other
+# workers converge within the TTL.
+FEATURE_FLAGS_CACHE_TTL = 30  # seconds
+
+_CACHE_MISS = object()
 
 SETTINGS_MASK_PLACEHOLDER = "**********"
 
@@ -74,18 +87,89 @@ def redact_secret_value(value: str) -> str:
     return SETTINGS_MASK_PLACEHOLDER
 
 
+def _edition_feature_flags_serializer():
+    """The edition's FeatureFlags serializer — the single source of truth for the
+    flag vocabulary, defaults and hideable set. The enterprise overlay swaps it
+    in via MODULE_PATHS["serializers"]."""
+    serializer_class = FeatureFlagsSerializer
+    module_path = django_settings.MODULE_PATHS.get("serializers")
+    if module_path:
+        module = importlib.import_module(module_path)
+        serializer_class = getattr(module, "FeatureFlagsSerializer", serializer_class)
+    return serializer_class
+
+
+@functools.cache
+def get_supported_feature_flags() -> frozenset:
+    """Flags supported by this edition."""
+    return frozenset(
+        field.source.split(".")[-1]
+        for field in _edition_feature_flags_serializer()().fields.values()
+        if getattr(field, "source", None) and field.source.startswith("value.")
+    )
+
+
+@functools.cache
+def get_user_hideable_feature_flags() -> frozenset:
+    """Flags a user may switch off for themselves, intersected with the supported
+    set so an edition cannot declare one it doesn't have."""
+    declared = getattr(
+        _edition_feature_flags_serializer(), "USER_HIDEABLE_FLAGS", frozenset()
+    )
+    return frozenset(declared) & get_supported_feature_flags()
+
+
+def get_feature_flag_defaults() -> dict:
+    """The value each supported flag takes when nothing was chosen, read off the
+    edition's serializer like `get_supported_feature_flags`."""
+    from rest_framework.fields import empty
+
+    serializer_class = _edition_feature_flags_serializer()
+    defaults = {}
+    for field in serializer_class().fields.values():
+        source = getattr(field, "source", None)
+        if not source or not source.startswith("value."):
+            continue
+        if field.default is not empty:
+            defaults[source.split(".")[-1]] = field.default
+    return defaults
+
+
+def clear_feature_flags_cache():
+    cache.delete(FEATURE_FLAGS_CACHE_KEY)
+
+
+def get_feature_flags() -> dict | None:
+    """Return the feature-flags dict, cached for FEATURE_FLAGS_CACHE_TTL
+    seconds so per-request RBAC resolution doesn't hit the settings table.
+    Returns None when the row is absent or malformed — warned once per TTL,
+    not once per flag check."""
+    flags = cache.get(FEATURE_FLAGS_CACHE_KEY, _CACHE_MISS)
+    if flags is not _CACHE_MISS:
+        return flags
+    ff_settings = (
+        GlobalSettings.objects.filter(name=GlobalSettings.Names.FEATURE_FLAGS)
+        .only("value")
+        .first()
+    )
+    if ff_settings is None or not isinstance(ff_settings.value, dict):
+        logger.warning("Feature flags settings not found, returning False")
+        flags = None
+    else:
+        flags = ff_settings.value
+    cache.set(FEATURE_FLAGS_CACHE_KEY, flags, FEATURE_FLAGS_CACHE_TTL)
+    return flags
+
+
 def ff_is_enabled(feature_flag: str):
-    ff_settings = GlobalSettings.objects.filter(
-        name=GlobalSettings.Names.FEATURE_FLAGS
-    ).first()
-    if ff_settings is None:
-        logger.warning(
-            "Feature flags settings not found, returning False",
-            feature_flag=feature_flag,
-        )
+    if feature_flag not in get_supported_feature_flags():
+        # Not a flag of this edition (e.g. an enterprise-only flag on CE):
+        # False by construction, without touching the settings row.
         return False
 
-    flags: dict[str, bool] = ff_settings.value
+    flags = get_feature_flags()
+    if flags is None:
+        return False
 
     if (flag := flags.get(feature_flag)) is None:
         logger.warning(
@@ -94,6 +178,53 @@ def ff_is_enabled(feature_flag: str):
         return False
 
     return flag
+
+
+USER_FEATURE_FLAGS_PREFERENCE_KEY = "feature_flags"
+
+
+def get_user_hidden_feature_flags(user) -> dict:
+    """The user's own hide choices: hideable flags set to False, nothing else.
+    Sparse, so a flag a release adds is visible without a backfill."""
+    preferences = getattr(user, "preferences", None)
+    stored = (
+        preferences.get(USER_FEATURE_FLAGS_PREFERENCE_KEY)
+        if isinstance(preferences, dict)
+        else None
+    )
+    if not isinstance(stored, dict):
+        return {}
+    hideable = get_user_hideable_feature_flags()
+    return {
+        name: False
+        for name, value in stored.items()
+        if value is False and name in hideable
+    }
+
+
+def get_instance_feature_flags() -> dict:
+    """Every supported flag, answering exactly as `ff_is_enabled` would — this
+    drives what the UI offers, so it must never claim more than enforcement
+    grants. Hence a missing row, a malformed one and an absent key all read
+    False, and the declared defaults are not a fallback.
+
+    Supported-only: an env-gated flag (chat_mode) can linger in the row after
+    being switched off, and the serializer drops it from the admin view.
+    """
+    flags = get_feature_flags() or {}
+    return {name: bool(flags.get(name)) for name in get_supported_feature_flags()}
+
+
+def resolve_feature_flags(user) -> dict:
+    """The instance flags narrowed by this user's hides. Narrowing only, by
+    construction: a user choice can turn a flag off, never on. Gating access
+    stays with `ff_is_enabled`.
+    """
+    return get_instance_feature_flags() | get_user_hidden_feature_flags(user)
+
+
+def idp_group_role_inheritance_enabled() -> bool:
+    return ff_is_enabled("idp_groups") or ff_is_enabled("jit_provisioning")
 
 
 def general_setting_is_enabled(key: str) -> bool:

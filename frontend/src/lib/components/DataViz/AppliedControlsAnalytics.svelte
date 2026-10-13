@@ -50,6 +50,9 @@
 
 	let { analyticsData = null, analyticsEndpoint, showBudget = true }: Props = $props();
 
+	// Owners the caller may not see are merged server-side into one anonymous bucket.
+	const RESTRICTED_KEY = '_restricted';
+
 	let fetched: AnalyticsData | null = $state(null);
 	let loading = $state(!!analyticsEndpoint && !analyticsData);
 	let error = $state(false);

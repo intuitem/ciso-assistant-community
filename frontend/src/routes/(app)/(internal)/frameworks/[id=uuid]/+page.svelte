@@ -3,7 +3,7 @@
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime';
 	import { formatDate } from '$lib/utils/datetime';
-	import type { TreeViewNode } from '@skeletonlabs/skeleton-svelte';
+	import type { TreeViewNode } from '$lib/components/TreeView/types';
 	import type { PageData } from './$types';
 	import TreeViewItemContent from './TreeViewItemContent.svelte';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
@@ -46,7 +46,7 @@
 	function assessableNodesCount(nodes: TreeViewNode[]): number {
 		let count = 0;
 		for (const node of nodes) {
-			if (node.contentProps.assessable) count++;
+			if (node.contentProps?.assessable) count++;
 			if (node.children) count += assessableNodesCount(node.children);
 		}
 		return count;
@@ -79,11 +79,6 @@
 				{#if fw.ref_id}
 					{#if fw.provider}<span class="text-surface-300-700">·</span>{/if}
 					<span class="font-mono normal-case text-surface-600-400">{fw.ref_id}</span>
-				{/if}
-				{#if fw.is_published}
-					<span class="badge preset-tonal-success normal-case text-[10px] ml-1"
-						>{m.published()}</span
-					>
 				{/if}
 				{#if fw.has_update}
 					<a
@@ -214,18 +209,6 @@
 						<dd>{formatDate(new Date(fw.updated_at), true, getLocale())}</dd>
 					</div>
 				{/if}
-				<div class="flex flex-col">
-					<dt class="text-xs text-surface-600-400">{m.published()}</dt>
-					<dd>
-						<span
-							class="badge {fw.is_published
-								? 'preset-tonal-success'
-								: 'preset-tonal-surface'} text-xs"
-						>
-							{fw.is_published ? '✓' : '—'}
-						</span>
-					</dd>
-				</div>
 				{#if fw.has_update}
 					<div class="flex flex-col">
 						<dt class="text-xs text-surface-600-400">{m.updateAvailable()}</dt>

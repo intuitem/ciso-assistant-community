@@ -90,8 +90,22 @@ export function getScoreHexColor(
 	}
 }
 
+/**
+ * A score as displayed: two decimals, half up, like the CCB CyFun tools' 0.00
+ * format and the backend's `round_score`. Scores are computed unrounded; only
+ * their display rounds. As the backend, float noise is cleared at nine
+ * decimals first (68.335 * 100 is 6833.4999…, which must show 68.34, while
+ * 1.234999999 stays below the tie); the rounding then runs on integers.
+ */
+export function roundScore(value: number, decimals = 2): number {
+	const nanos = Math.round(Math.abs(value) * 1e9);
+	const step = 10 ** (9 - decimals);
+	const rounded = Math.floor((nanos + step / 2) / step) / 10 ** decimals;
+	return value < 0 ? -rounded : rounded;
+}
+
 export function formatScoreValue(
-	value: number,
+	value: number | null,
 	max_score: number,
 	fullDonut = false,
 	min_score = 0
@@ -143,13 +157,23 @@ export function stringify(value: string | number | boolean | null = null) {
  */
 export function formatActorName(
 	actor:
-		| { first_name?: string; last_name?: string; email?: string; str?: string }
-		| null
-		| undefined
+		{ first_name?: string; last_name?: string; email?: string; str?: string } | null | undefined
 ): string {
 	if (!actor) return '';
 	const full = `${actor.first_name || ''} ${actor.last_name || ''}`.trim();
 	return full || actor.email || actor.str || '';
+}
+
+const HTML_ESCAPES: Record<string, string> = {
+	'&': '&amp;',
+	'<': '&lt;',
+	'>': '&gt;',
+	'"': '&quot;',
+	"'": '&#39;'
+};
+
+export function escapeHtml(value: unknown): string {
+	return String(value ?? '').replace(/[&<>"']/g, (char) => HTML_ESCAPES[char]);
 }
 
 export function isDark(hexcolor: string | undefined): boolean {
@@ -240,7 +264,7 @@ export function normalizeSearchString(str: string): string {
 		.toLowerCase()
 		.normalize('NFD') // Decompose accented characters
 		.replace(/\p{Diacritic}/gu, '') // Remove combining marks (diacritics)
-		.replace(/[^\w\s-]/g, ' ') // Replace special chars with spaces
+		.replace(/[^\p{L}\p{N}\s-]/gu, ' ') // Replace special chars with spaces (unicode-aware, keeps e.g. Cyrillic)
 		.replace(/\s+/g, ' ') // Collapse multiple spaces
 		.trim();
 }
@@ -318,6 +342,11 @@ export function computeRequirementScoreAndResult(requirementAssessment: any, ans
 
 	for (const [q_urn, question] of Object.entries<any>(questions)) {
 		if (!isQuestionVisible(question, answers, questions)) continue;
+
+		// Free-text questions are informational: they have no choices and can be anything,
+		// so it does not make very much sense to take them into account.
+		// Skip them out. (mirrors RequirementAssessment.recompute_assessment).
+		if (question.type === 'text') continue;
 
 		visibleCount++;
 
@@ -469,6 +498,7 @@ export const VISIBILITY_FIELDS = [
 	'score',
 	'documentation_score',
 	'applied_controls',
+	'task_templates',
 	'evidences',
 	'observation',
 	'comments'
@@ -534,6 +564,7 @@ export function getFieldVisibility(
 	showDocumentationScore: boolean;
 	showObservation: boolean;
 	showAppliedControls: boolean;
+	showTaskTemplates: boolean;
 	showEvidences: boolean;
 	showRespondentAlignment: boolean;
 	showComments: boolean;
@@ -547,6 +578,7 @@ export function getFieldVisibility(
 		showDocumentationScore: isFieldVisible(complianceAssessment, 'documentation_score', viewerRole),
 		showObservation: isFieldVisible(complianceAssessment, 'observation', viewerRole),
 		showAppliedControls: isFieldVisible(complianceAssessment, 'applied_controls', viewerRole),
+		showTaskTemplates: isFieldVisible(complianceAssessment, 'task_templates', viewerRole),
 		showEvidences: isFieldVisible(complianceAssessment, 'evidences', viewerRole),
 		showRespondentAlignment: isFieldVisible(
 			complianceAssessment,

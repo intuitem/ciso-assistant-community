@@ -1,0 +1,82 @@
+import { isRedirect } from '@sveltejs/kit';
+import { describe, expect, it, vi } from 'vitest';
+
+// $lib/server/logger reads $env/dynamic/private, a SvelteKit virtual module
+// vitest cannot resolve; mocking it keeps hooks.server.ts importable here.
+vi.mock('$lib/server/logger', () => ({
+	installJsonConsole: () => {},
+	logger: { debug: () => {}, info: () => {}, warning: () => {}, error: () => {} }
+}));
+
+const { handleFetch } = await import('./hooks.server');
+const { ALLAUTH_API_URL } = await import('$lib/utils/constants');
+
+const SSO_USER = { is_sso: true };
+const LOCAL_USER = { is_sso: false };
+
+const SESSION_COOKIES = ['token', 'allauth_session_token'];
+
+const REAUTHENTICATION_REQUIRED = {
+	status: 401,
+	data: { flows: [{ id: 'reauthenticate' }] },
+	meta: { is_authenticated: true }
+};
+const SESSION_GONE = { status: 401, meta: { is_authenticated: false } };
+
+function callWith(getUser: () => Promise<Record<string, unknown> | null>, body: unknown) {
+	const jar = new Map(SESSION_COOKIES.map((name) => [name, `${name}-value`]));
+	const response = handleFetch({
+		request: new Request(`${ALLAUTH_API_URL}/account/authenticators`),
+		fetch: vi.fn(
+			async () =>
+				new Response(JSON.stringify(body), {
+					status: 401,
+					headers: { 'content-type': 'application/json' }
+				})
+		),
+		event: {
+			url: new URL('http://localhost:5173/my-profile/settings'),
+			cookies: {
+				get: (name: string) => jar.get(name),
+				set: (name: string, value: string) => jar.set(name, value),
+				delete: (name: string) => jar.delete(name)
+			},
+			// Only getUser, never locals.user: a form action runs before any load,
+			// so nothing has resolved it by the time handleFetch decides.
+			locals: { getUser }
+		}
+	} as never);
+	return { response, jar };
+}
+
+describe('handleFetch, 401 from an allauth account endpoint', () => {
+	it('signs out a local user so they can re-enter their password', async () => {
+		await expect(
+			callWith(async () => LOCAL_USER, REAUTHENTICATION_REQUIRED).response
+		).rejects.toSatisfy(isRedirect);
+	});
+
+	it('keeps an SSO user, who has no password to re-enter', async () => {
+		const { response, jar } = callWith(async () => SSO_USER, REAUTHENTICATION_REQUIRED);
+
+		expect((await response).status).toBe(401);
+		// Exact set: the session cookies survive, and no flash cookie is added.
+		// A logout that deleted them without redirecting would still return 401.
+		expect([...jar.keys()]).toEqual(SESSION_COOKIES);
+	});
+
+	it('signs out an SSO user whose allauth session is gone', async () => {
+		await expect(callWith(async () => SSO_USER, SESSION_GONE).response).rejects.toSatisfy(
+			isRedirect
+		);
+	});
+
+	it('keeps the session when the current-user lookup fails', async () => {
+		const { response, jar } = callWith(async () => {
+			throw new TypeError('fetch failed');
+		}, REAUTHENTICATION_REQUIRED);
+
+		expect((await response).status).toBe(401);
+		expect([...jar.keys()]).toEqual(SESSION_COOKIES);
+	});
+});

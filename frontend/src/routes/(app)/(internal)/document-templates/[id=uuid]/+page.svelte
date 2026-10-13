@@ -64,7 +64,7 @@
 					href="/document-templates/{t.id}/edit?next={encodeURIComponent(
 						`/document-templates/${t.id}`
 					)}"
-					class="btn btn-sm variant-filled-primary shrink-0"
+					class="btn btn-sm preset-filled-primary-500 shrink-0"
 				>
 					<i class="fa-solid fa-pen mr-2"></i>{m.edit()}
 				</a>

@@ -1,0 +1,138 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:eric:risk:library:risk-matrix-3x3-mult
+locale: fr
+ref_id: risk-matrix-3x3-mult-eric
+name: Matrice 3x3 multiplicative-eric
+description: Matrice de risque simple 3x3 multiplicative eric
+copyright: domaine public
+version: 3
+publication_date: 2026-07-19
+provider: intuitem
+packager: intuitem
+translations:
+  en:
+    name: 3x3 multiplicative matrix eric
+    description: simple 3x3 multiplicative matrix eric
+    copyright: public domain
+objects:
+  risk_matrix:
+  - urn: urn:eric:risk:matrix:3x3-mult
+    ref_id: risk-matrix-3x3-mult
+    name: Matrice 3x3 multiplicative eric
+    description: Matrice de risque simple 3x3 multiplicative eric
+    probability:
+    - id: 0
+      abbreviation: '1'
+      name: '[1] peu probable'
+      description: 0-33%
+      translations:
+        en:
+          name: '[1] unlikely'
+          description: 0-33%
+    - id: 1
+      abbreviation: '2'
+      name: '[2] moyennement probable'
+      description: 34-66%
+      translations:
+        en:
+          name: '[2] rather likely'
+          description: 34-66%
+    - id: 2
+      abbreviation: '3'
+      name: "[3] tr\xE8s probable"
+      description: '>66%'
+      translations:
+        en:
+          name: '[3] very likely'
+          description: '>66%'
+    impact:
+    - id: 0
+      abbreviation: '1'
+      name: '[1] mineur'
+      description: impact mineur
+      translations:
+        en:
+          name: '[1] minor'
+          description: minor impact
+    - id: 1
+      abbreviation: '2'
+      name: "[2] mod\xE9r\xE9"
+      description: "impact mod\xE9r\xE9"
+      translations:
+        en:
+          name: '[2] moderate'
+          description: moderate impact
+    - id: 2
+      abbreviation: '3'
+      name: '[3] majeur'
+      description: impact majeur
+      translations:
+        en:
+          name: '[3] major'
+          description: major impact
+    risk:
+    - id: 0
+      abbreviation: '1'
+      name: '[1] faible'
+      description: "n\xE9gligeable"
+      translations:
+        en:
+          name: '[1] low'
+          description: negligible
+    - id: 1
+      abbreviation: '2'
+      name: '[2] moyen'
+      description: "tol\xE9rable"
+      translations:
+        en:
+          name: '[2] medium'
+          description: tolerable
+    - id: 2
+      abbreviation: '3'
+      name: '[3] moyen'
+      description: "tol\xE9rable"
+      translations:
+        en:
+          name: '[3] medium'
+          description: tolerable
+    - id: 3
+      abbreviation: '4'
+      name: '[4] moyen'
+      description: "tol\xE9rable"
+      translations:
+        en:
+          name: '[4] medium'
+          description: tolerable
+    - id: 4
+      abbreviation: '6'
+      name: '[6] fort'
+      description: "rem\xE9diation sous 6 mois"
+      translations:
+        en:
+          name: '[6] high'
+          description: remediation within 6 months
+    - id: 5
+      abbreviation: '9'
+      name: '[9] critique'
+      description: "Rem\xE9diation sous 2 mois"
+      translations:
+        en:
+          name: '[9] critical'
+          description: Remediation within 2 months
+    grid:
+    - - 0
+      - 1
+      - 2
+    - - 1
+      - 3
+      - 4
+    - - 2
+      - 4
+      - 5
+    annotation: "# coucou en fran\xE7ais"
+    translations:
+      en:
+        name: 3x3 multiplicative matrix eric
+        description: simple 3x3 multiplicative matrix eric
+        annotation: '# hey in english'

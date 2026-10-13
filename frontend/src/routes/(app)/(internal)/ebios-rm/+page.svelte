@@ -9,6 +9,7 @@
 		type ModalSettings,
 		type ModalStore
 	} from '$lib/components/Modals/stores';
+	import { consumeCreateIntent } from '$lib/utils/create-intent';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -35,6 +36,10 @@
 		};
 		modalStore.trigger(modal);
 	}
+
+	$effect(() => {
+		consumeCreateIntent({ urlModel: URLModel, modelName: data.model.name, open: modalCreateForm });
+	});
 </script>
 
 <ModelTable source={data.table} deleteForm={data.deleteForm} {URLModel}>

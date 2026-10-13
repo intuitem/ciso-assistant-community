@@ -1,0 +1,1131 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:cis-benchmark-github
+locale: en
+ref_id: cis-benchmark-github
+name: CIS GitHub Benchmark
+description: CIS GitHub Benchmark v1.2.0
+copyright: "\xA9 CIS Security"
+version: 1
+publication_date: 2026-02-18
+provider: CIS
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:cis-benchmark-github
+    ref_id: cis-benchmark-github
+    name: CIS GitHub Benchmark
+    description: CIS GitHub Benchmark v1.2.0
+    implementation_groups_definition:
+    - ref_id: A
+      name: Automatic
+      description: null
+    - ref_id: M
+      name: Manual
+      description: null
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1
+      assessable: false
+      depth: 1
+      ref_id: '1'
+      name: Source Code
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1
+      ref_id: '1.1'
+      name: Code Changes
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.1
+      ref_id: 1.1.1
+      name: Ensure any changes to code are tracked in a version control platform
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.1
+      ref_id: 1.1.2
+      name: Ensure any change to code can be traced back to its associated task
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.1
+      ref_id: 1.1.3
+      name: Ensure any change to code receives approval of two strongly authenticated
+        users
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.1
+      ref_id: 1.1.4
+      name: Ensure previous approvals are dismissed when updates are introduced to
+        a code change proposal
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.1
+      ref_id: 1.1.5
+      name: Ensure there are restrictions on who can dismiss code change reviews
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.1.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.1
+      ref_id: 1.1.6
+      name: Ensure code owners are set for extra sensitive code or configuration
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.1.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.1
+      ref_id: 1.1.7
+      name: Ensure code owner's review is required when a change affects owned code
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.1.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.1
+      ref_id: 1.1.8
+      name: Ensure inactive branches are periodically reviewed and removed
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.1.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.1
+      ref_id: 1.1.9
+      name: Ensure all checks have passed before merging new code
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.1.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.1
+      ref_id: 1.1.10
+      name: Ensure open Git branches are up to date before they can be merged into
+        code base
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.1.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.1
+      ref_id: 1.1.11
+      name: Ensure all open comments are resolved before allowing code change merging
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.1.12
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.1
+      ref_id: 1.1.12
+      name: Ensure verification of signed commits for new changes before merging
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.1.13
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.1
+      ref_id: 1.1.13
+      name: Ensure linear history is required
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.1.14
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.1
+      ref_id: 1.1.14
+      name: Ensure branch protection rules are enforced for administrators
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.1.15
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.1
+      ref_id: 1.1.15
+      name: Ensure pushing or merging of new code is restricted to specific individuals
+        or teams
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.1.16
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.1
+      ref_id: 1.1.16
+      name: Ensure force push code to branches is denied
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.1.17
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.1
+      ref_id: 1.1.17
+      name: Ensure branch deletions are denied
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.1.18
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.1
+      ref_id: 1.1.18
+      name: Ensure any merging of code is automatically scanned for risks
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.1.19
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.1
+      ref_id: 1.1.19
+      name: Ensure any changes to branch protection rules are audited
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.1.20
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.1
+      ref_id: 1.1.20
+      name: Ensure branch protection is enforced on the default branch
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1
+      ref_id: '1.2'
+      name: Repository Management
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.2
+      ref_id: 1.2.1
+      name: Ensure all public repositories contain a SECURITY.md file
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.2
+      ref_id: 1.2.2
+      name: Ensure repository creation is limited to specific members
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.2
+      ref_id: 1.2.3
+      name: Ensure repository deletion is limited to specific users
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.2
+      ref_id: 1.2.4
+      name: Ensure issue deletion is limited to specific users
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.2.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.2
+      ref_id: 1.2.5
+      name: Ensure all copies (forks) of code are tracked and accounted for
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.2.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.2
+      ref_id: 1.2.6
+      name: Ensure all code projects are tracked for changes in visibility status
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.2.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.2
+      ref_id: 1.2.7
+      name: Ensure inactive repositories are reviewed and archived periodically
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1
+      ref_id: '1.3'
+      name: Contribution Access
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.3
+      ref_id: 1.3.1
+      name: Ensure inactive users are reviewed and removed periodically
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.3
+      ref_id: 1.3.2
+      name: Ensure team creation is limited to specific members
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.3
+      ref_id: 1.3.3
+      name: Ensure minimum number of administrators are set for the organization
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.3.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.3
+      ref_id: 1.3.4
+      name: Ensure Multi-Factor Authentication (MFA) is required for contributors
+        of new code
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.3.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.3
+      ref_id: 1.3.5
+      name: Ensure the organization is requiring members to use Multi-Factor Authentication
+        (MFA)
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.3.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.3
+      ref_id: 1.3.6
+      name: Ensure new members are required to be invited using company-approved email
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.3.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.3
+      ref_id: 1.3.7
+      name: Ensure two administrators are set for each repository
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.3.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.3
+      ref_id: 1.3.8
+      name: Ensure strict base permissions are set for repositories
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.3.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.3
+      ref_id: 1.3.9
+      name: "Ensure an organization\u2019s identity is confirmed with a \u201CVerified\u201D\
+        \ badge"
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.3.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.3
+      ref_id: 1.3.10
+      name: Ensure Source Code Management (SCM) email notifications are restricted
+        to verified domains
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.3.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.3
+      ref_id: 1.3.11
+      name: Ensure an organization provides SSH certificates
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.3.12
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.3
+      ref_id: 1.3.12
+      name: Ensure Git access is limited based on IP addresses
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.3.13
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.3
+      ref_id: 1.3.13
+      name: Ensure anomalous code behavior is tracked
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1
+      ref_id: '1.4'
+      name: Third-Party
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.4
+      ref_id: 1.4.1
+      name: Ensure administrator approval is required for every installed application
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.4
+      ref_id: 1.4.2
+      name: Ensure stale applications are reviewed and inactive ones are removed
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.4
+      ref_id: 1.4.3
+      name: Ensure the access granted to each installed application is limited to
+        the least privilege needed
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.4.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.4
+      ref_id: 1.4.4
+      name: Ensure only secured webhooks are used
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1
+      ref_id: '1.5'
+      name: Code Risks
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.5
+      ref_id: 1.5.1
+      name: Ensure scanners are in place to identify and prevent sensitive data in
+        code
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.5
+      ref_id: 1.5.2
+      name: Ensure scanners are in place to secure Continuous Integration (CI) pipeline
+        instructions
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.5.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.5
+      ref_id: 1.5.3
+      name: Ensure scanners are in place to secure Infrastructure as Code (IaC) instructions
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.5.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.5
+      ref_id: 1.5.4
+      name: Ensure scanners are in place for code vulnerabilities
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.5.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.5
+      ref_id: 1.5.5
+      name: Ensure scanners are in place for open-source vulnerabilities in used packages
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.5.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:1.5
+      ref_id: 1.5.6
+      name: Ensure scanners are in place for open-source license issues in used packages
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:2
+      assessable: false
+      depth: 1
+      ref_id: '2'
+      name: Build Pipelines
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:2
+      ref_id: '2.1'
+      name: Build Environment
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.1
+      ref_id: 2.1.1
+      name: Ensure each pipeline has a single responsibility
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.1
+      ref_id: 2.1.2
+      name: Ensure all aspects of the pipeline infrastructure and configuration are
+        immutable
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.1
+      ref_id: 2.1.3
+      name: Ensure the build environment is logged
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.1
+      ref_id: 2.1.4
+      name: Ensure the creation of the build environment is automated
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.1
+      ref_id: 2.1.5
+      name: Ensure access to build environments is limited
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.1.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.1
+      ref_id: 2.1.6
+      name: Ensure users must authenticate to access the build environment
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.1.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.1
+      ref_id: 2.1.7
+      name: Ensure build secrets are limited to the minimal necessary scope
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.1.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.1
+      ref_id: 2.1.8
+      name: Ensure the build infrastructure is automatically scanned for vulnerabilities
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.1.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.1
+      ref_id: 2.1.9
+      name: Ensure default passwords are not used
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.1.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.1
+      ref_id: 2.1.10
+      name: Ensure webhooks of the build environment are secured
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.1.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.1
+      ref_id: 2.1.11
+      name: Ensure minimum number of administrators are set for the build environment
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:2
+      ref_id: '2.2'
+      name: Build Worker
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.2
+      ref_id: 2.2.1
+      name: Ensure build workers are single-used
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.2
+      ref_id: 2.2.2
+      name: Ensure build worker environments and commands are passed and not pulled
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.2
+      ref_id: 2.2.3
+      name: Ensure the duties of each build worker are segregated
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.2
+      ref_id: 2.2.4
+      name: Ensure build workers have minimal network connectivity
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.2.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.2
+      ref_id: 2.2.5
+      name: Ensure run-time security is enforced for build workers
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.2.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.2
+      ref_id: 2.2.6
+      name: Ensure build workers are automatically scanned for vulnerabilities
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.2.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.2
+      ref_id: 2.2.7
+      name: Ensure build workers' deployment configuration is stored in a version
+        control platform
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.2.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.2
+      ref_id: 2.2.8
+      name: Ensure resource consumption of build workers is monitored
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:2
+      ref_id: '2.3'
+      name: Pipeline Instructions
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.3
+      ref_id: 2.3.1
+      name: Ensure all build steps are defined as code
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.3
+      ref_id: 2.3.2
+      name: Ensure steps have clearly defined build stage input and output
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.3
+      ref_id: 2.3.3
+      name: Ensure output is written to a separate, secured storage repository
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.3.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.3
+      ref_id: 2.3.4
+      name: Ensure changes to pipeline files are tracked and reviewed
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.3.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.3
+      ref_id: 2.3.5
+      name: Ensure access to build process triggering is minimized
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.3.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.3
+      ref_id: 2.3.6
+      name: Ensure pipelines are automatically scanned for misconfigurations
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.3.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.3
+      ref_id: 2.3.7
+      name: Ensure pipelines are automatically scanned for vulnerabilities
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.3.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.3
+      ref_id: 2.3.8
+      name: Ensure scanners are in place to identify and prevent sensitive data in
+        pipeline files
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:2
+      ref_id: '2.4'
+      name: Pipeline Integrity
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.4
+      ref_id: 2.4.1
+      name: Ensure all artifacts on all releases are signed
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.4
+      ref_id: 2.4.2
+      name: Ensure all external dependencies used in the build process are locked
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.4
+      ref_id: 2.4.3
+      name: Ensure dependencies are validated before being used
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.4.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.4
+      ref_id: 2.4.4
+      name: Ensure the build pipeline creates reproducible artifacts
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.4.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.4
+      ref_id: 2.4.5
+      name: Ensure pipeline steps produce a Software Bill of Materials (SBOM)
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.4.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:2.4
+      ref_id: 2.4.6
+      name: Ensure pipeline steps sign the Software Bill of Materials (SBOM) produced
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:3
+      assessable: false
+      depth: 1
+      ref_id: '3'
+      name: Dependencies
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:3.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:3
+      ref_id: '3.1'
+      name: Third-Party Packages
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:3.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:3.1
+      ref_id: 3.1.1
+      name: Ensure third-party artifacts and open-source libraries are verified
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:3.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:3.1
+      ref_id: 3.1.2
+      name: Ensure Software Bill of Materials (SBOM) is required from all third-party
+        suppliers
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:3.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:3.1
+      ref_id: 3.1.3
+      name: Ensure signed metadata of the build process is required and verified
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:3.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:3.1
+      ref_id: 3.1.4
+      name: Ensure dependencies are monitored between open-source components
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:3.1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:3.1
+      ref_id: 3.1.5
+      name: Ensure trusted package managers and repositories are defined and prioritized
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:3.1.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:3.1
+      ref_id: 3.1.6
+      name: Ensure a signed Software Bill of Materials (SBOM) of the code is supplied
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:3.1.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:3.1
+      ref_id: 3.1.7
+      name: Ensure dependencies are pinned to a specific, verified version
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:3.1.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:3.1
+      ref_id: 3.1.8
+      name: Ensure all packages used are more than 60 days old
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:3.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:3
+      ref_id: '3.2'
+      name: Validate Packages
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:3.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:3.2
+      ref_id: 3.2.1
+      name: Ensure an organization-wide dependency usage policy is enforced
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:3.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:3.2
+      ref_id: 3.2.2
+      name: Ensure packages are automatically scanned for known vulnerabilities
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:3.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:3.2
+      ref_id: 3.2.3
+      name: Ensure packages are automatically scanned for license implications
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:3.2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:3.2
+      ref_id: 3.2.4
+      name: Ensure packages are automatically scanned for ownership change
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: Artifacts
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:4.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:4
+      ref_id: '4.1'
+      name: Verification
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:4.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:4.1
+      ref_id: 4.1.1
+      name: Ensure all artifacts are signed by the build pipeline itself
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:4.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:4.1
+      ref_id: 4.1.2
+      name: Ensure artifacts are encrypted before distribution
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:4.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:4.1
+      ref_id: 4.1.3
+      name: Ensure only authorized platforms have decryption capabilities of artifacts
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:4.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:4
+      ref_id: '4.2'
+      name: Access to Artifacts
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:4.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:4.2
+      ref_id: 4.2.1
+      name: Ensure the authority to certify artifacts is limited
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:4.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:4.2
+      ref_id: 4.2.2
+      name: Ensure number of permitted users who may upload new artifacts is minimized
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:4.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:4.2
+      ref_id: 4.2.3
+      name: Ensure user access to the package registry utilizes Multi-Factor Authentication
+        (MFA)
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:4.2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:4.2
+      ref_id: 4.2.4
+      name: Ensure user management of the package registry is not local
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:4.2.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:4.2
+      ref_id: 4.2.5
+      name: Ensure anonymous access to artifacts is revoked
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:4.2.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:4.2
+      ref_id: 4.2.6
+      name: Ensure minimum number of administrators are set for the package registry
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:4.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:4
+      ref_id: '4.3'
+      name: Package Registries
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:4.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:4.3
+      ref_id: 4.3.1
+      name: Ensure all signed artifacts are validated upon uploading the package registry
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:4.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:4.3
+      ref_id: 4.3.2
+      name: Ensure all versions of an existing artifact have their signatures validated
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:4.3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:4.3
+      ref_id: 4.3.3
+      name: Ensure changes in package registry configuration are audited
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:4.3.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:4.3
+      ref_id: 4.3.4
+      name: Ensure webhooks of the repository are secured
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:4.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:4
+      ref_id: '4.4'
+      name: Origin Traceability
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:4.4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:4.4
+      ref_id: 4.4.1
+      name: Ensure artifacts contain information about their origin
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: Deployment
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:5.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:5
+      ref_id: '5.1'
+      name: Deployment Configuration
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:5.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:5.1
+      ref_id: 5.1.1
+      name: Ensure deployment configuration files are separated from source code
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:5.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:5.1
+      ref_id: 5.1.2
+      name: Ensure changes in deployment configuration are audited
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:5.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:5.1
+      ref_id: 5.1.3
+      name: Ensure scanners are in place to identify and prevent sensitive data in
+        deployment configuration
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:5.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:5.1
+      ref_id: 5.1.4
+      name: Limit access to deployment configurations
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:5.1.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:5.1
+      ref_id: 5.1.5
+      name: Scan Infrastructure as Code (IaC)
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:5.1.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:5.1
+      ref_id: 5.1.6
+      name: Ensure deployment configuration manifests are verified
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:5.1.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:5.1
+      ref_id: 5.1.7
+      name: Ensure deployment configuration manifests are pinned to a specific, verified
+        version
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:5.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:5
+      ref_id: '5.2'
+      name: Deployment Environment
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:5.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:5.2
+      ref_id: 5.2.1
+      name: Ensure deployments are automated
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:5.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:5.2
+      ref_id: 5.2.2
+      name: Ensure the deployment environment is reproducible
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:5.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:5.2
+      ref_id: 5.2.3
+      name: Ensure access to production environment is limited
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-github:5.2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-github:5.2
+      ref_id: 5.2.4
+      name: Ensure default passwords are not used
+      implementation_groups:
+      - M

@@ -107,6 +107,13 @@ class PortalWriteSerializer(BaseModelSerializer):
                 not isinstance(i, dict) for i in items
             ):
                 raise serializers.ValidationError("section items must be objects")
+            for item in items:
+                missing = _tile_missing_target(item)
+                if missing:
+                    title = item.get("title") or item.get("kind") or "tile"
+                    raise serializers.ValidationError(
+                        f"'{title}' has no {missing}; it would fail when clicked."
+                    )
         return value
 
     def validate(self, data):
@@ -124,6 +131,32 @@ class PortalWriteSerializer(BaseModelSerializer):
                     {"is_primary": "Only an administrator can set the primary portal."}
                 )
         return super().validate(data)
+
+
+# What a tile needs before anyone can click it. Mirrored by tile-validation.ts in the
+# editor, which warns the author before they get here.
+def _tile_missing_target(item):
+    kind = item.get("kind")
+    target = item.get("target") or {}
+    if not isinstance(target, dict):
+        return "target"
+    if kind in ("create", "navigate"):
+        return None if target.get("model") else "model"
+    if kind == "assessment":
+        return None if target.get("framework") else "framework"
+    if kind == "quickForm":
+        # Either wiring will do: a publication carries its own form.
+        if target.get("publication") or target.get("quick_form"):
+            return None
+        return "quick form"
+    if kind == "framework":
+        return None if target.get("snapshot") else "framework snapshot"
+    if kind == "certificationDocument":
+        key = "token" if target.get("dest") == "document" else "url"
+        return None if target.get(key) else key
+    if kind in ("external", "link"):
+        return None if target.get("url") else "url"
+    return None
 
 
 class FrameworkSnapshotReadSerializer(BaseModelSerializer):

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { m } from '$paraglide/messages';
+	import * as m from '$paraglide/messages';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import FileInput from '../FileInput.svelte';
 	import Checkbox from '../Checkbox.svelte';
@@ -55,6 +55,12 @@
 		field="load_missing_libraries"
 		label={m.loadMissingLibraries()}
 		helpText={m.loadMissingLibrariesHelpText()}
+	/>
+	<Checkbox
+		{form}
+		field="create_missing_asset_classes"
+		label={m.createMissingAssetClasses()}
+		helpText={m.createMissingAssetClassesHelpText()}
 	/>
 {:else}
 	<AutocompleteSelect

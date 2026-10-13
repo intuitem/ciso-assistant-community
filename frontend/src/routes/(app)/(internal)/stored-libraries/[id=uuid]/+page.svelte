@@ -16,22 +16,35 @@
 	import TreeViewItemContent from '../../frameworks/[id=uuid]/TreeViewItemContent.svelte';
 	import TreeExpandCollapseToggle from '$lib/components/TreeView/TreeExpandCollapseToggle.svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import InstantiateWorkflows from '$lib/components/Libraries/InstantiateWorkflows.svelte';
 
 	let { data } = $props();
 	let loading = $state({ form: false, library: '' });
 	let expandedNodes: string[] = $state([]);
 	const showRisks = true;
 
+	// The instantiate action lives on the LOADED counterpart.
+	// Two data shapes reach this page: stored data (loaded_library holds the
+	// counterpart id, null when not loaded) and, for exclusively-loaded
+	// libraries, the loader already swapped to loaded data (its id differs
+	// from the route param).
+	const loadedLibraryId = $derived(
+		data.library.loaded_library ?? (data.library.id !== page.params.id ? data.library.id : null)
+	);
+	const workflowCount = $derived(data.library.objects_meta?.workflows ?? 0);
+
 	interface LibraryObjects {
 		[key: string]: any;
 	}
 
-	const libraryObjects: LibraryObjects = data?.library?.objects ?? [];
-	const riskMatrices = libraryObjects['risk_matrix'] ?? [];
-	const referenceControls = libraryObjects['reference_controls'] ?? [];
-	const threats = libraryObjects['threats'] ?? [];
-	const metricDefinitions = libraryObjects['metric_definitions'] ?? [];
-	const framework = libraryObjects['framework'];
+	// Derived, not plain consts: previewing another library reuses the component, so
+	// a captured value would show the previous one.
+	const libraryObjects: LibraryObjects = $derived(data?.library?.objects ?? {});
+	const riskMatrices = $derived(libraryObjects['risk_matrix'] ?? []);
+	const referenceControls = $derived(libraryObjects['reference_controls'] ?? []);
+	const threats = $derived(libraryObjects['threats'] ?? []);
+	const metricDefinitions = $derived(libraryObjects['metric_definitions'] ?? []);
+	const framework = $derived(libraryObjects['framework']);
 
 	function transformToTreeView(nodes) {
 		return nodes.map(([id, node]) => {
@@ -44,13 +57,13 @@
 		});
 	}
 
-	const riskMatricesTable: TableSource = {
+	const riskMatricesTable: TableSource = $derived({
 		head: { name: 'name', description: 'description' },
 		body: tableSourceMapper(riskMatrices, ['name', 'description']),
 		meta: { count: riskMatrices.length }
-	};
+	});
 
-	const referenceControlsTable: TableSource = {
+	const referenceControlsTable: TableSource = $derived({
 		head: {
 			ref_id: 'ref',
 			name: 'name',
@@ -66,15 +79,15 @@
 			'csf_function'
 		]),
 		meta: { count: referenceControls.length }
-	};
+	});
 
-	const threatsTable: TableSource = {
+	const threatsTable: TableSource = $derived({
 		head: { ref_id: 'ref', name: 'name', description: 'description' },
 		body: tableSourceMapper(threats, ['ref_id', 'name', 'description']),
 		meta: { count: threats.length }
-	};
+	});
 
-	const metricDefinitionsTable: TableSource = {
+	const metricDefinitionsTable: TableSource = $derived({
 		head: {
 			ref_id: 'ref',
 			name: 'name',
@@ -90,7 +103,7 @@
 			'unit'
 		]),
 		meta: { count: metricDefinitions.length }
-	};
+	});
 
 	function riskMatricesPreview(riskMatrices: []) {
 		let riskMatricesDumps = [];
@@ -224,6 +237,10 @@
 			{/if}
 		</div>
 	</div>
+
+	{#if loadedLibraryId}
+		<InstantiateWorkflows {loadedLibraryId} count={workflowCount} />
+	{/if}
 
 	{#if riskMatrices.length > 0}
 		<Dropdown

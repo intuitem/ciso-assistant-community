@@ -119,7 +119,7 @@
 			<i class="text-xs fa-solid fa-info-circle"></i> Learn more
 		</div>
 		<div
-			class="card p-2 variant-ghost-primary text-sm flex flex-row cursor-auto {classesShowInfo(
+			class="card p-2 preset-outlined-primary-500 text-sm flex flex-row cursor-auto {classesShowInfo(
 				showInfo
 			)}"
 		>

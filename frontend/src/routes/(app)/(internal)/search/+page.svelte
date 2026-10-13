@@ -361,6 +361,13 @@
 					</div>
 				</div>
 			{/each}
+		{:else if data.error}
+			<div class="empty-state" style="--stagger: 2">
+				<div class="empty-icon">
+					<i class="fa-solid fa-triangle-exclamation"></i>
+				</div>
+				<span class="empty-text">{m.anErrorOccurred()}</span>
+			</div>
 		{:else}
 			<div class="empty-state" style="--stagger: 2">
 				<div class="empty-icon">

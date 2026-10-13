@@ -97,7 +97,7 @@
 			class="flex flex-col items-center justify-center bg-surface-200-800 min-h-20 border-dotted border-black border-2 text-center p-1 {classesCellText(
 				xHeader.hexcolor
 			)}"
-			style="background: {xHeader.hexcolor ?? '#FFFFFF'}"
+			style={xHeader.hexcolor ? `background: ${xHeader.hexcolor}` : ''}
 			data-testid="x-axis-header-{j}"
 		>
 			<Tooltip openDelay={0} closeDelay={100}>
@@ -171,7 +171,7 @@
 						class="flex flex-col items-center min-h-20 justify-center bg-surface-200-800 border-dotted border-black border-2 text-center p-1 {classesCellText(
 							yHeader.hexcolor
 						)}"
-						style="background: {yHeader.hexcolor ?? '#FFFFFF'}"
+						style={yHeader.hexcolor ? `background: ${yHeader.hexcolor}` : ''}
 						data-testid="y-axis-header-{i}"
 					>
 						<Tooltip openDelay={0} closeDelay={100} positioning={{ placement: 'bottom-end' }}>

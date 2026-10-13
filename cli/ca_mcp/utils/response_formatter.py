@@ -6,6 +6,29 @@ by providing clear completion signals and next-step guidance.
 
 from typing import Optional, Dict, Any
 
+from ..config import MAX_RESPONSE_CHARS
+
+
+# success_response appends a truncation notice plus [SUCCESS]/NEXT/WARNING lines
+# after _cap runs, so the cap has to leave room for them or the final response
+# overshoots MAX_RESPONSE_CHARS.
+_METADATA_HEADROOM = 400
+
+
+def _cap(data: str) -> str:
+    """Bound a single tool response. Truncates on a row boundary so a markdown
+    table never ends mid-row, leaving headroom for the appended metadata."""
+    budget = MAX_RESPONSE_CHARS - _METADATA_HEADROOM
+    if len(data) <= budget:
+        return data
+    cut = data.rfind("\n", 0, budget)
+    if cut <= 0:
+        cut = budget
+    return (
+        data[:cut] + f"\n\n[TRUNCATED at {cut} of {len(data)} characters. "
+        "Re-run with filters or a smaller limit to see the rest.]\n"
+    )
+
 
 def success_response(
     data: str, tool_name: str, next_action: Optional[str] = None
@@ -20,7 +43,7 @@ def success_response(
     Returns:
         Formatted response string with success markers
     """
-    response = f"{data}\n\n"
+    response = f"{_cap(data)}\n\n"
     response += f"[SUCCESS] {tool_name} completed.\n"
 
     if next_action:
@@ -28,7 +51,7 @@ def success_response(
     else:
         response += "NEXT: Use this data to answer the user's question.\n"
 
-    response += "WARNING: Do not call this tool again with identical parameters.\n"
+    response += "WARNING: Do not repeat this call with identical parameters.\n"
 
     return response
 

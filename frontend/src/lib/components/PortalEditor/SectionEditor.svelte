@@ -66,7 +66,9 @@
 	</div>
 
 	<div class="space-y-3 pl-6">
-		{#each section.items as item, ii}
+		<!-- Keyed on the object: ids are optional, and unkeyed the per-tile form state
+		     would land on a neighbour when reordering. -->
+		{#each section.items as item, ii (item)}
 			<TileEditor
 				{item}
 				{ctx}

@@ -1,6 +1,26 @@
 import { m } from '$paraglide/messages';
 import { toCamelCase } from '$lib/utils/locales';
 
+// Alternate wording for the "qualification" concept, driven by the
+// use_risk_category_label general setting (display only). The flag is synced
+// from hooks.server.ts on the server and from the (app) layout on the client,
+// so every translation of these keys — table headers, detail fields, filters,
+// direct safeTranslate calls — swaps automatically.
+const RISK_CATEGORY_KEY_MAP: Record<string, string> = {
+	qualification: 'riskCategory',
+	qualifications: 'riskCategories',
+	qualificationsChartTitle: 'riskCategoriesChartTitle',
+	noQualificationsFoundOnRiskScenarios: 'noRiskCategoriesFoundOnRiskScenarios',
+	noQualificationsData: 'noRiskCategoriesData',
+	incidentQualificationsRadar: 'incidentRiskCategoriesRadar'
+};
+
+let useRiskCategoryLabel = false;
+
+export function setUseRiskCategoryLabel(value: unknown): void {
+	useRiskCategoryLabel = value === true;
+}
+
 /**
  * Unafe translate function that doesn't return anything if the key if the translation is not found.
  * @param key The key to translate.
@@ -13,6 +33,13 @@ export function unsafeTranslate(
 	options = {}
 ): string | undefined {
 	try {
+		if (
+			useRiskCategoryLabel &&
+			typeof key === 'string' &&
+			Object.hasOwn(RISK_CATEGORY_KEY_MAP, key)
+		) {
+			key = RISK_CATEGORY_KEY_MAP[key];
+		}
 		if (
 			typeof key === 'object' &&
 			key !== null &&
@@ -33,10 +60,11 @@ export function unsafeTranslate(
 		if (Object.hasOwn(m, key) && typeof m[key] === 'function') {
 			return m[key](params, options);
 		}
-		// Choice labels containing a colon (e.g. DORA termination reasons) would be
-		// captured by the prefix:suffix branch below before reaching the camelCase
-		// lookup; try a punctuation-stripped camelCase key first so they can translate.
-		if (typeof key === 'string' && key.includes(':')) {
+		// Choice labels containing a colon (e.g. DORA termination reasons) or a slash
+		// (e.g. "Company culture / communication") would be captured by the prefix:suffix
+		// or per-part split branches below; try a punctuation-stripped camelCase key
+		// first so a label with a whole-label message translates as one.
+		if (typeof key === 'string' && (key.includes(':') || key.includes('/'))) {
 			const sanitizedKey = toCamelCase(
 				key
 					.replace(/[^\w\s]/g, ' ')
@@ -101,4 +129,21 @@ export function unsafeTranslate(
  */
 export function safeTranslate(key: string, params = {}, options = {}): string {
 	return unsafeTranslate(key, params, options) || key;
+}
+
+/**
+ * Translate a select option, preferring the key derived from its value.
+ * Choice endpoints serve the English label from the Django choices, which is
+ * not always the message key — privacy choices key on their `privacy_*` value —
+ * so a label-only lookup leaves those options untranslated. The value is what
+ * tables and detail views translate, so it wins here too.
+ * @param label The option label, used when the value has no message key.
+ * @param value The option value, the canonical message key for choice fields.
+ */
+export function translateChoiceLabel(label: unknown, value: unknown): string {
+	if (typeof value === 'string') {
+		const fromValue = safeTranslate(value);
+		if (fromValue !== value) return fromValue;
+	}
+	return safeTranslate(label as string);
 }

@@ -1,4 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { fetchAllPages } from '$lib/utils/pagination';
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 
@@ -10,14 +11,10 @@ export const load: PageServerLoad = async ({ fetch, params }) => {
 	const draft = await draftRes.json();
 
 	// Scaffold references target loaded-library URNs (see the retired
-	// standalone preset editor): same picker data as before. A non-OK DRF
-	// response still parses as JSON ({"detail": …}), so gate on r.ok or the
-	// pickers would receive the error object instead of a list.
-	const fetchList = (url: string): Promise<any[]> =>
-		fetch(url)
-			.then((r) => (r.ok ? r.json() : Promise.reject(new Error(`${r.status}`))))
-			.then((d) => d.results ?? d)
-			.catch(() => []);
+	// standalone preset editor): same picker data as before. fetchAllPages
+	// throws on a non-OK response, so the pickers fall back to [] instead of
+	// receiving a DRF error object.
+	const fetchList = (url: string): Promise<any[]> => fetchAllPages(fetch, url).catch(() => []);
 	const [frameworks, riskMatrices, frameworkDetails] = await Promise.all([
 		fetchList(`${BASE_API_URL}/loaded-libraries/?object_type=framework&ordering=name`),
 		fetchList(`${BASE_API_URL}/loaded-libraries/?object_type=risk_matrix&ordering=name`),

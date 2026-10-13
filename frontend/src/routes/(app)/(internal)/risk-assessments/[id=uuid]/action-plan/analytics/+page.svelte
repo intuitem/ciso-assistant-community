@@ -15,7 +15,7 @@
 	<div class="flex items-center gap-3">
 		<Anchor
 			href={`/risk-assessments/${data.risk_assessment.id}/action-plan`}
-			class="btn variant-ghost-surface"
+			class="btn preset-outlined-surface-500"
 		>
 			<i class="fa-solid fa-arrow-left mr-2" aria-hidden="true"></i>{m.actionPlan()}
 		</Anchor>

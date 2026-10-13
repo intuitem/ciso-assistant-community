@@ -7,10 +7,10 @@
 // submission round-trip. Each action proxies straight to the backend.
 
 import { BASE_API_URL } from '$lib/utils/constants';
-import { error, json, type NumericRange } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
+import { UUID_RE, proxyJson } from '$lib/utils/jsonProxy';
 import type { RequestHandler } from './$types';
 
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 function requireUuid(value: unknown, field: string): string {
 	if (typeof value !== 'string' || !UUID_RE.test(value)) {
 		error(400, { detail: `Invalid UUID for "${field}"` });
@@ -18,23 +18,7 @@ function requireUuid(value: unknown, field: string): string {
 	return value;
 }
 
-async function proxy(
-	fetchFn: typeof fetch,
-	url: string,
-	method: string,
-	body?: unknown
-): Promise<Response> {
-	const opts: RequestInit = {
-		method,
-		headers: { 'Content-Type': 'application/json' }
-	};
-	if (body !== undefined) opts.body = JSON.stringify(body);
-	const res = await fetchFn(url, opts);
-	if (res.status === 204) return new Response(null, { status: 204 });
-	const data = await res.json().catch(() => ({}));
-	if (!res.ok) error(res.status as NumericRange<400, 599>, data);
-	return json(data, { status: res.status });
-}
+const proxy = proxyJson;
 
 export const POST: RequestHandler = async ({ fetch, params, request, url }) => {
 	const action = url.searchParams.get('action');

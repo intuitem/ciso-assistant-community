@@ -2,6 +2,13 @@
 	import { m } from '$paraglide/messages';
 	import { invalidateAll, goto } from '$app/navigation';
 	import { LOCALE_MAP } from '$lib/utils/locales';
+	import {
+		APPROVED_REVISION_STATUSES,
+		pickInForceRevisionToShow
+	} from '$lib/utils/documentRevisions';
+	import { safeTranslate } from '$lib/utils/i18n';
+	import { page } from '$app/state';
+	import { canPerformActionOnObject } from '$lib/utils/access-control';
 	import { getToastStore } from '$lib/components/Toast/stores';
 	import {
 		getModalStore,
@@ -54,6 +61,26 @@
 	};
 
 	let status = $derived(currentRevision?.status as string | undefined);
+	let inForceRevision = $derived(pickInForceRevisionToShow(revisions, currentRevision?.id));
+	// RBACPermissions maps POST to add_<model>, hence add_documentrevision here.
+	let canTransition = $derived(
+		canPerformActionOnObject({
+			user: page.data.user,
+			action: 'add',
+			model: 'documentrevision',
+			object: currentRevision ?? document ?? parent
+		})
+	);
+	// Deletes the whole locale variant, not a revision.
+	let canDeleteDocument = $derived(
+		canPerformActionOnObject({
+			user: page.data.user,
+			action: 'delete',
+			model: 'manageddocument',
+			object: document ?? parent
+		})
+	);
+
 	let isDraft = $derived(status === 'draft' || status === 'change_requested');
 	let isInReview = $derived(status === 'in_review');
 	let isValidated = $derived(status === 'validated');
@@ -167,7 +194,10 @@
 				method: 'DELETE'
 			});
 			if (res.ok) await goto(backHref);
-			else notifyError(m.deleteFailed());
+			else {
+				const data = await res.json().catch(() => null);
+				notifyError(data?.detail || data?.error || m.deleteFailed());
+			}
 		} finally {
 			busy = false;
 		}
@@ -198,9 +228,16 @@
 					{parent?.name || m.untitled()}
 				</h1>
 				{#if currentRevision}
-					<span class="badge {statusStyles[status ?? 'draft']} mt-1 text-xs">
-						{status} · v{currentRevision.version_number}
-					</span>
+					<div class="mt-1 flex flex-wrap items-center gap-1.5">
+						{#if inForceRevision}
+							<span class="badge {statusStyles.published} text-xs">
+								{m.published()} · v{inForceRevision.version_number}
+							</span>
+						{/if}
+						<span class="badge {statusStyles[status ?? 'draft']} text-xs">
+							{safeTranslate(status ?? 'draft')} · v{currentRevision.version_number}
+						</span>
+					</div>
 				{/if}
 			</div>
 		</div>
@@ -252,13 +289,13 @@
 					<input type="url" bind:value={newLangUrl} class="input mt-1" placeholder="https://…" />
 				</label>
 				<button
-					class="btn btn-sm variant-filled-primary"
+					class="btn btn-sm preset-filled-primary-500"
 					disabled={busy || !newLocale || !newLangUrl.trim()}
 					onclick={addLanguage}
 				>
 					{m.add()}
 				</button>
-				<button class="btn btn-sm variant-soft" onclick={() => (addingLang = false)}>
+				<button class="btn btn-sm preset-tonal" onclick={() => (addingLang = false)}>
 					{m.cancel()}
 				</button>
 			</div>
@@ -274,13 +311,14 @@
 			</label>
 			<div class="flex gap-2">
 				<button
-					class="btn btn-sm variant-filled-primary"
-					disabled={busy || !editUrl.trim()}
+					class="btn btn-sm preset-filled-primary-500"
+					disabled={busy || !editUrl.trim() || !canTransition}
+					title={canTransition ? undefined : m.permissionDenied()}
 					onclick={saveLink}
 				>
 					{m.save()}
 				</button>
-				<button class="btn btn-sm variant-soft" onclick={() => (editing = false)}>
+				<button class="btn btn-sm preset-tonal" onclick={() => (editing = false)}>
 					{m.cancel()}
 				</button>
 			</div>
@@ -290,12 +328,12 @@
 					href={currentUrl}
 					target="_blank"
 					rel="noopener noreferrer"
-					class="btn variant-filled-primary"
+					class="btn preset-filled-primary-500"
 				>
 					<i class="fa-solid fa-arrow-up-right-from-square mr-2"></i>{m.open()}
 				</a>
 				{#if canEditLink}
-					<button class="btn btn-sm variant-soft" disabled={busy} onclick={startEdit}>
+					<button class="btn btn-sm preset-tonal" disabled={busy} onclick={startEdit}>
 						<i class="fa-solid fa-pen mr-2"></i>{m.edit()}
 					</button>
 				{/if}
@@ -306,7 +344,7 @@
 		{:else}
 			<p class="text-sm text-surface-500">{m.noLinkSet()}</p>
 			{#if canEditLink}
-				<button class="btn btn-sm variant-filled-primary" onclick={startEdit}>
+				<button class="btn btn-sm preset-filled-primary-500" onclick={startEdit}>
 					<i class="fa-solid fa-plus mr-2"></i>{m.add()}
 				</button>
 			{/if}
@@ -335,24 +373,45 @@
 		<!-- Lifecycle actions -->
 		<div class="flex flex-wrap items-center gap-2 border-t border-surface-200-800 pt-4">
 			{#if isDraft}
-				<button class="btn btn-sm variant-filled-primary" disabled={busy} onclick={submitForReview}>
+				<button
+					class="btn btn-sm preset-filled-primary-500"
+					disabled={busy || !canTransition}
+					title={canTransition ? undefined : m.permissionDenied()}
+					onclick={submitForReview}
+				>
 					{m.submitForReview()}
 				</button>
 			{:else if isInReview}
-				<button class="btn btn-sm variant-filled-success" disabled={busy} onclick={approve}>
+				<button
+					class="btn btn-sm preset-filled-success-500"
+					disabled={busy || !canTransition}
+					title={canTransition ? undefined : m.permissionDenied()}
+					onclick={approve}
+				>
 					{m.approve()}
 				</button>
-				<button class="btn btn-sm variant-soft-error" disabled={busy} onclick={requestChanges}>
+				<button
+					class="btn btn-sm preset-tonal-error"
+					disabled={busy || !canTransition}
+					title={canTransition ? undefined : m.permissionDenied()}
+					onclick={requestChanges}
+				>
 					{m.requestChanges()}
 				</button>
 			{:else if isValidated}
-				<button class="btn btn-sm variant-filled-success" disabled={busy} onclick={publish}>
+				<button
+					class="btn btn-sm preset-filled-success-500"
+					disabled={busy || !canTransition}
+					title={canTransition ? undefined : m.permissionDenied()}
+					onclick={publish}
+				>
 					{m.publish()}
 				</button>
 			{/if}
 			<button
-				class="btn btn-sm variant-soft-error ml-auto"
-				disabled={busy}
+				class="btn btn-sm preset-tonal-error ml-auto"
+				disabled={busy || !canDeleteDocument}
+				title={canDeleteDocument ? undefined : m.permissionDenied()}
 				onclick={deleteDocument}
 			>
 				<i class="fa-solid fa-trash mr-2"></i>{m.delete()}
@@ -371,7 +430,15 @@
 			>
 				{#each revisions as rev (rev.id)}
 					<li class="flex items-center justify-between gap-2 px-4 py-2.5 text-sm">
-						<span>v{rev.version_number} · {rev.status_display ?? rev.status}</span>
+						<span class="min-w-0">
+							v{rev.version_number} · {rev.status_display ?? rev.status}
+							{#if rev.reviewer && APPROVED_REVISION_STATUSES.includes(rev.status)}
+								<span class="block truncate text-xs text-surface-500">
+									<i class="fa-solid fa-circle-check text-[9px] opacity-70"></i>
+									{m.approvedBy()}: {rev.reviewer.str || rev.reviewer.email || ''}
+								</span>
+							{/if}
+						</span>
 						{#if rev.url}
 							<a
 								href={rev.url}

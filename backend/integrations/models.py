@@ -4,7 +4,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.db import models
 
 from core.base_models import AbstractBaseModel
-from iam.models import FolderMixin
+from iam.models import FolderMixin, Folder
 
 
 class IntegrationProvider(AbstractBaseModel, FolderMixin):
@@ -35,7 +35,9 @@ class IntegrationConfiguration(AbstractBaseModel, FolderMixin):
 
     # Webhook configuration
     webhook_secret = models.CharField(max_length=255)
-    webhook_url = models.URLField(blank=True)  # For registering with remote system
+    webhook_url = models.URLField(
+        blank=True, max_length=2048
+    )  # For registering with remote system
 
     is_active = models.BooleanField(default=True)
     last_sync_at = models.DateTimeField(null=True, blank=True)
@@ -63,6 +65,8 @@ class IntegrationSchemaCache(AbstractBaseModel):
     choices = models.JSONField(default=dict)  # {"table:field": [{value, label}], ...}
 
     fetched_at = models.DateTimeField(null=True, blank=True)
+
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
 
 
 class SyncMapping(AbstractBaseModel, FolderMixin):
@@ -136,15 +140,17 @@ class SyncEvent(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
 
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
+
 
 # Sync state (SyncMapping/SyncEvent) is high-volume and intentionally untracked.
 auditlog.register(
     IntegrationProvider,
-    exclude_fields=["created_at", "updated_at", "is_published"],
+    exclude_fields=["created_at", "updated_at"],
 )
 auditlog.register(
     IntegrationConfiguration,
-    exclude_fields=["created_at", "updated_at", "is_published", "last_sync_at"],
+    exclude_fields=["created_at", "updated_at", "last_sync_at"],
     mask_fields=["credentials", "webhook_secret"],
     mask_callable="global_settings.utils.redact_secret_value",
 )

@@ -1,12 +1,14 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
-	import type { SuperValidated } from 'sveltekit-superforms';
+	import type { SuperForm } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
+	import Select from '$lib/components/Forms/Select.svelte';
+	import { languageOptions } from '$lib/utils/locales';
 	interface Props {
-		form: SuperValidated<any>;
+		form: SuperForm<any>;
 		model: ModelInfo;
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
@@ -22,6 +24,16 @@
 		object = {},
 		context = 'default'
 	}: Props = $props();
+
+	const languageChoices = $derived(languageOptions(model.selectOptions?.['language']));
+
+	// On edit it stays off: one deliberately left without an account must not grow one.
+	let userDefaultApplied = false;
+	$effect(() => {
+		if (userDefaultApplied || context !== 'create') return;
+		userDefaultApplied = true;
+		form.form.update((d) => ({ ...d, create_user: true }));
+	});
 </script>
 
 <TextField
@@ -62,9 +74,20 @@
 		bind:cachedValue={formDataCache['create_user']}
 	/>
 {/if}
+<Select
+	{form}
+	field="language"
+	blank
+	options={languageChoices}
+	label={m.language()}
+	helpText={m.representativeLanguageHelpText()}
+	cacheLock={cacheLocks['language']}
+	bind:cachedValue={formDataCache['language']}
+/>
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="entities"
+	optionsExtraFields={[['folder', 'str']]}
 	field="entity"
 	cacheLock={cacheLocks['entity']}
 	bind:cachedValue={formDataCache['entity']}

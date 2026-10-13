@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+
+	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
 	import { m } from '$paraglide/messages';
 
 	interface SunburstData {
@@ -48,152 +50,152 @@
 	const translatedData = translateData(data);
 	const chart_id = `${name}_div`;
 
-	onMount(async () => {
-		const echarts = await import('echarts');
-		let chart = echarts.init(
-			document.getElementById(chart_id),
-			document.documentElement.classList.contains('dark') ? 'dark' : null,
-			{ renderer: 'svg' }
-		);
-
-		const option = {
-			title: {
-				text: title,
-				left: 'center',
-				textStyle: {
-					fontWeight: 'bold',
-					fontSize: 14
-				}
-			},
-			tooltip: {
-				trigger: 'item',
-				backgroundColor: 'rgba(50, 50, 50, 0.9)',
-				borderColor: '#777',
-				borderWidth: 1,
-				textStyle: {
-					color: '#fff',
-					fontSize: 12
-				},
-				formatter: function (params: any) {
-					// Use ECharts' treePathInfo to get the full path
-					const path = params.treePathInfo
-						? params.treePathInfo.map((node: any) => node.name).join(' → ')
-						: params.name;
-
-					const count = params.data.value || 0;
-					const percentage = params.percent ? `${params.percent.toFixed(1)}%` : '';
-
-					return `
-						<div style="max-width: 300px; word-wrap: break-word;">
-							<strong>${m.pathLabel()}:</strong><br/>
-							${path}<br/>
-							<strong>${m.countLabel()}:</strong> ${count} ${m.controlsLabel()}
-							${percentage ? `<br/><strong>${m.percentage()}:</strong> ${percentage}` : ''}
-						</div>
-					`;
-				}
-			},
-			series: {
-				type: 'sunburst',
-				data: translatedData,
-				radius: [0, '95%'],
-				center: ['50%', '50%'],
-				sort: undefined,
-				emphasis: {
-					focus: 'ancestor'
-				},
-				levels: [
-					{
-						// Root level - no labels to avoid clutter
-						label: {
-							show: false
-						}
-					},
-					{
-						// Level 1: CSF Functions
-						r0: '15%',
-						r: '40%',
-						itemStyle: {
-							borderWidth: 1,
-							borderColor: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff'
-						},
-						label: {
-							show: true,
-							fontSize: 12,
+	onMount(() => {
+		let dispose: (() => void) | undefined;
+		let active = true;
+		(async () => {
+			const echarts = await import('echarts');
+			if (!active) return;
+			const el = document.getElementById(chart_id);
+			if (!el) return;
+			dispose = mountThemeAwareChart(echarts, el, () => {
+				const option = {
+					title: {
+						text: title,
+						left: 'center',
+						textStyle: {
 							fontWeight: 'bold',
-							color: '#333',
-							rotate: 'radial',
-							align: 'center',
-							minAngle: 10 // Only show labels if segment is large enough
+							fontSize: 14
 						}
 					},
-					{
-						// Level 2: Categories
-						r0: '40%',
-						r: '65%',
-						itemStyle: {
-							borderWidth: 1,
-							borderColor: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff'
+					tooltip: {
+						trigger: 'item',
+						backgroundColor: 'rgba(50, 50, 50, 0.9)',
+						borderColor: '#777',
+						borderWidth: 1,
+						textStyle: {
+							color: '#fff',
+							fontSize: 12
 						},
-						label: {
-							show: true,
-							fontSize: 10,
-							color: '#555',
-							rotate: 'tangential',
-							minAngle: 15 // Only show labels if segment is large enough
+						formatter: function (params: any) {
+							// Use ECharts' treePathInfo to get the full path
+							const path = params.treePathInfo
+								? params.treePathInfo.map((node: any) => node.name).join(' → ')
+								: params.name;
+
+							const count = params.data.value || 0;
+							const percentage = params.percent ? `${params.percent.toFixed(1)}%` : '';
+
+							return `
+								<div style="max-width: 300px; word-wrap: break-word;">
+									<strong>${m.pathLabel()}:</strong><br/>
+									${path}<br/>
+									<strong>${m.countLabel()}:</strong> ${count} ${m.controlsLabel()}
+									${percentage ? `<br/><strong>${m.percentage()}:</strong> ${percentage}` : ''}
+								</div>
+							`;
 						}
 					},
-					{
-						// Level 3: Priority
-						r0: '65%',
-						r: '85%',
-						itemStyle: {
-							borderWidth: 1,
-							borderColor: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff'
+					series: {
+						type: 'sunburst',
+						data: translatedData,
+						radius: [0, '95%'],
+						center: ['50%', '50%'],
+						sort: undefined,
+						emphasis: {
+							focus: 'ancestor'
 						},
-						label: {
-							show: true,
-							fontSize: 9,
-							color: '#666',
-							rotate: 'tangential',
-							minAngle: 20 // Only show labels if segment is large enough
-						}
-					},
-					{
-						// Level 4: Status (outermost)
-						r0: '85%',
-						r: '98%',
-						itemStyle: {
-							borderWidth: 1,
-							borderColor: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff'
-						},
-						label: {
-							show: true,
-							fontSize: 8,
-							color: '#777',
-							rotate: 'tangential',
-							minAngle: 25 // Only show labels if segment is large enough
-						}
+						levels: [
+							{
+								// Root level - no labels to avoid clutter
+								label: {
+									show: false
+								}
+							},
+							{
+								// Level 1: CSF Functions
+								r0: '15%',
+								r: '40%',
+								itemStyle: {
+									borderWidth: 1,
+									borderColor: document.documentElement.classList.contains('dark')
+										? '#1e293b'
+										: '#fff'
+								},
+								label: {
+									show: true,
+									fontSize: 12,
+									fontWeight: 'bold',
+									color: '#333',
+									rotate: 'radial',
+									align: 'center',
+									minAngle: 10 // Only show labels if segment is large enough
+								}
+							},
+							{
+								// Level 2: Categories
+								r0: '40%',
+								r: '65%',
+								itemStyle: {
+									borderWidth: 1,
+									borderColor: document.documentElement.classList.contains('dark')
+										? '#1e293b'
+										: '#fff'
+								},
+								label: {
+									show: true,
+									fontSize: 10,
+									color: '#555',
+									rotate: 'tangential',
+									minAngle: 15 // Only show labels if segment is large enough
+								}
+							},
+							{
+								// Level 3: Priority
+								r0: '65%',
+								r: '85%',
+								itemStyle: {
+									borderWidth: 1,
+									borderColor: document.documentElement.classList.contains('dark')
+										? '#1e293b'
+										: '#fff'
+								},
+								label: {
+									show: true,
+									fontSize: 9,
+									color: '#666',
+									rotate: 'tangential',
+									minAngle: 20 // Only show labels if segment is large enough
+								}
+							},
+							{
+								// Level 4: Status (outermost)
+								r0: '85%',
+								r: '98%',
+								itemStyle: {
+									borderWidth: 1,
+									borderColor: document.documentElement.classList.contains('dark')
+										? '#1e293b'
+										: '#fff'
+								},
+								label: {
+									show: true,
+									fontSize: 8,
+									color: '#777',
+									rotate: 'tangential',
+									minAngle: 25 // Only show labels if segment is large enough
+								}
+							}
+						]
 					}
-				]
-			}
-		};
+				};
 
-		option.backgroundColor = 'transparent';
-		chart.setOption(option);
-
-		const resizeHandler = function () {
-			chart.resize();
-		};
-
-		window.addEventListener('resize', resizeHandler);
-
-		// Cleanup function
+				return option;
+			});
+		})();
 		return () => {
-			if (chart) {
-				chart.dispose();
-			}
-			window.removeEventListener('resize', resizeHandler);
+			active = false;
+			dispose?.();
 		};
 	});
 </script>

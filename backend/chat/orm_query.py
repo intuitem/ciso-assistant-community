@@ -14,6 +14,14 @@ from django.apps import apps
 from django.db.models import Q, Count
 from django.utils import timezone
 
+from .risk_levels import (
+    LEVEL_FIELDS,
+    known_level_names,
+    level_label,
+    matrices_for_scenarios,
+    resolve_levels_by_matrix,
+)
+
 logger = structlog.get_logger(__name__)
 
 # Page size for paginated list results
@@ -22,9 +30,7 @@ LIST_PAGE_SIZE = 20
 SUMMARY_THRESHOLD = 30
 
 
-def execute_tool_query(
-    arguments: dict, accessible_folder_ids: list[str], parsed_context=None
-) -> dict | None:
+def execute_tool_query(arguments: dict, scope, parsed_context=None) -> dict | None:
     """
     Execute a structured query from tool call arguments.
 
@@ -34,9 +40,12 @@ def execute_tool_query(
         domain: folder/domain name filter
         status, treatment, result: status-like filters
         priority, category, effort, severity: categorization filters
+        risk_level, risk_level_scope: risk scenario rating filters
         date_filter: "overdue", "due_this_month", "expiring_this_month", "created_recently"
         search: text search in name/description/ref_id
         page: page number (default 1)
+
+    scope: ReadScope — every row returned is one the user could read via the API.
 
     parsed_context: optional ParsedContext from page_context.py — when provided,
         queries are auto-scoped to the parent object (e.g., risk scenarios for
@@ -57,14 +66,13 @@ def execute_tool_query(
     except LookupError:
         return None
 
-    # Base queryset filtered by accessible folders
-    qs = model_class.objects.all()
-    if model_name == "Folder":
-        qs = qs.filter(id__in=accessible_folder_ids)
-    elif hasattr(model_class, "folder_id"):
-        qs = qs.filter(folder_id__in=accessible_folder_ids)
-    elif hasattr(model_class, "compliance_assessment"):
-        qs = qs.filter(compliance_assessment__folder_id__in=accessible_folder_ids)
+    qs = scope.queryset(model_class)
+    if model_name == "RiskScenario":
+        qs = qs.select_related("risk_assessment__risk_matrix")
+    if model_name == "RequirementAssessment":
+        # Non-assessable nodes are headings. Progress, the donut and flash mode
+        # all ignore them, so counting them here would disagree with the page.
+        qs = qs.filter(requirement__assessable=True)
 
     filters_applied = []
 
@@ -79,12 +87,18 @@ def execute_tool_query(
     # Domain/folder filter
     domain = arguments.get("domain")
     if domain:
-        folder_ids = _resolve_domain(domain, accessible_folder_ids)
+        folder_ids = _resolve_domain(domain, scope.folder_ids)
         if folder_ids:
-            if hasattr(model_class, "folder_id"):
+            if model_name == "Folder":
+                qs = qs.filter(id__in=folder_ids)
+            elif hasattr(model_class, "folder_id"):
                 qs = qs.filter(folder_id__in=folder_ids)
             elif hasattr(model_class, "compliance_assessment"):
                 qs = qs.filter(compliance_assessment__folder_id__in=folder_ids)
+            else:
+                # No folder to filter on — say so rather than silently widening
+                folder_ids = []
+        if folder_ids:
             filters_applied.append(f"domain = {domain}")
         else:
             # Domain not found — return empty result rather than unfiltered
@@ -98,60 +112,83 @@ def execute_tool_query(
                 "objects": [],
             }
 
-    # Status filter — validate against model's actual choices
-    status = arguments.get("status")
-    if status and hasattr(model_class, "status"):
-        field = model_class._meta.get_field("status")
-        valid_statuses = {c[0] for c in field.choices} if field.choices else None
-        if valid_statuses is None or status in valid_statuses:
-            qs = qs.filter(status=status)
-            filters_applied.append(f"status = {status}")
+    # Choice-field filters. All accept several values so a question like
+    # "non-compliant or partially compliant" is one authoritative count rather
+    # than two counts the model has to add up itself.
+    # Severity is resolved per model: Incident's 1..6 is not core.Severity's -1..4.
+    for field in (
+        "status",
+        "treatment",
+        "result",
+        "priority",
+        "category",
+        "effort",
+        "severity",
+    ):
+        raw = arguments.get(field)
+        if raw is None or raw == "" or not hasattr(model_class, field):
+            continue
+        values, labels = [], []
+        for candidate in _as_list(raw):
+            resolved = _resolve_choice_value(model_class, field, candidate)
+            if resolved is None:
+                continue
+            if resolved not in values:
+                values.append(resolved)
+                labels.append(_choice_label(model_class, field, resolved))
+        if not values:
+            return _unresolved_filter_result(
+                model_class,
+                field,
+                raw,
+                model_name,
+                display_name,
+                url_slug,
+                action,
+                filters_applied,
+            )
+        qs = qs.filter(**{f"{field}__in": values})
+        filters_applied.append(f"{field} = {' or '.join(labels)}")
 
-    # Treatment filter (RiskScenario)
-    treatment = arguments.get("treatment")
-    if treatment and hasattr(model_class, "treatment"):
-        qs = qs.filter(treatment=treatment)
-        filters_applied.append(f"treatment = {treatment}")
-
-    # Result filter (RequirementAssessment)
-    result_filter = arguments.get("result")
-    if result_filter and hasattr(model_class, "result"):
-        qs = qs.filter(result=result_filter)
-        filters_applied.append(f"result = {result_filter}")
-
-    # Priority filter
-    priority = arguments.get("priority")
-    if priority is not None and hasattr(model_class, "priority"):
-        try:
-            priority = int(priority)
-        except TypeError, ValueError:
-            priority = None
-        if priority is not None:
-            qs = qs.filter(priority=priority)
-            filters_applied.append(f"priority = P{priority}")
-
-    # Category filter
-    category = arguments.get("category")
-    if category and hasattr(model_class, "category"):
-        qs = qs.filter(category=category)
-        filters_applied.append(f"category = {category}")
-
-    # Effort filter
-    effort = arguments.get("effort")
-    if effort and hasattr(model_class, "effort"):
-        qs = qs.filter(effort=effort)
-        filters_applied.append(f"effort = {effort}")
-
-    # Severity filter
-    severity = arguments.get("severity")
-    if severity is not None and hasattr(model_class, "severity"):
-        try:
-            severity = int(severity)
-        except TypeError, ValueError:
-            severity = None
-        if severity is not None:
-            qs = qs.filter(severity=severity)
-            filters_applied.append(f"severity = {severity}")
+    # Risk level — resolved against the risk matrix wording
+    risk_level = arguments.get("risk_level")
+    if risk_level and model_name == "RiskScenario":
+        level_scope = arguments.get("risk_level_scope") or "current"
+        level_field = LEVEL_FIELDS.get(level_scope, "current_level")
+        terms = _as_list(risk_level)
+        matrices = matrices_for_scenarios(qs)
+        per_matrix: dict[str, set[int]] = {}
+        for term in terms:
+            for matrix_id, levels in resolve_levels_by_matrix(term, matrices).items():
+                per_matrix.setdefault(matrix_id, set()).update(levels)
+        wanted = " or ".join(str(t) for t in terms)
+        if per_matrix:
+            level_q = Q()
+            for matrix_id, levels in per_matrix.items():
+                level_q |= Q(
+                    risk_assessment__risk_matrix_id=matrix_id,
+                    **{f"{level_field}__in": sorted(levels)},
+                )
+            qs = qs.filter(level_q)
+            filters_applied.append(f"{level_scope} risk level = {wanted}")
+        else:
+            known = known_level_names(matrices)
+            return {
+                "model_name": model_name,
+                "display_name": display_name,
+                "url_slug": url_slug,
+                "query_type": action,
+                "filters_applied": filters_applied
+                + [f"{level_scope} risk level = {wanted} (unknown)"],
+                "total_count": 0,
+                "objects": [],
+                "note": (
+                    f"'{wanted}' is not a level of the risk matrix in use. "
+                    f"Levels available: {', '.join(known)}."
+                    if known
+                    else f"'{wanted}' is not a level of the risk matrix in use."
+                ),
+            }
 
     # Date filter
     date_filter = arguments.get("date_filter")
@@ -348,10 +385,92 @@ def format_query_result(result: dict) -> str:
         if has_more:
             parts.append('\n(User can ask for "next page" or "page N" to see more)')
 
+    if result.get("note"):
+        parts.append(result["note"])
+
     return "\n".join(parts)
 
 
 # --- Internal helpers ---
+
+
+def _unresolved_filter_result(
+    model_class,
+    field_name: str,
+    value,
+    model_name: str,
+    display_name: str,
+    url_slug: str,
+    action: str,
+    filters_applied: list[str],
+) -> dict:
+    """Empty result for an unrecognised filter value — never the unfiltered set."""
+    try:
+        labels = [
+            str(label)
+            for _, label in (model_class._meta.get_field(field_name).choices or [])
+        ]
+    except Exception:
+        labels = []
+    note = f"'{value}' is not a valid {field_name} for {display_name}."
+    if labels:
+        note += f" Valid values: {', '.join(labels)}."
+    return {
+        "model_name": model_name,
+        "display_name": display_name,
+        "url_slug": url_slug,
+        "query_type": action,
+        "filters_applied": filters_applied + [f"{field_name} = {value} (unknown)"],
+        "total_count": 0,
+        "objects": [],
+        "note": note,
+    }
+
+
+def _as_list(value) -> list:
+    """Accept a scalar, a list, or a comma-separated string from the model."""
+    if isinstance(value, (list, tuple, set)):
+        return [v for v in value if v not in (None, "")]
+    if isinstance(value, str) and "," in value:
+        return [v.strip() for v in value.split(",") if v.strip()]
+    return [value]
+
+
+def _choice_label(model_class, field_name: str, value) -> str:
+    try:
+        labels = dict(model_class._meta.get_field(field_name).choices or [])
+    except Exception:
+        labels = {}
+    return str(labels.get(value, value))
+
+
+def _resolve_choice_value(model_class, field_name: str, value):
+    """Match a stored value (3, "3") or its label ("high"); None if neither."""
+    try:
+        field = model_class._meta.get_field(field_name)
+    except Exception:
+        return None
+
+    choices = list(field.choices or [])
+    if not choices:
+        try:
+            return int(value)
+        except TypeError, ValueError:
+            return None
+
+    for stored, label in choices:
+        if value == stored or str(value).strip() == str(stored):
+            return stored
+        if str(value).strip().casefold() == str(label).strip().casefold():
+            return stored
+
+    logger.info(
+        "Dropping unresolvable %s value for %s: %r",
+        field_name,
+        model_class.__name__,
+        value,
+    )
+    return None
 
 
 def _is_valid_relation(model_class, field_name: str) -> bool:
@@ -512,10 +631,10 @@ def _format_object_lines(objects: list[dict], url_slug: str = "") -> list[str]:
         ):
             if obj.get(key):
                 extras.append(f"{key}={obj[key]}")
-        if obj.get("current_risk_level") is not None:
-            extras.append(f"current_risk={obj['current_risk_level']}")
-        if obj.get("residual_risk_level") is not None:
-            extras.append(f"residual_risk={obj['residual_risk_level']}")
+        for scope in ("inherent", "current", "residual"):
+            level = obj.get(f"{scope}_risk_level")
+            if level is not None:
+                extras.append(f"{scope}_risk={level}")
         if obj.get("eta"):
             extras.append(f"eta={obj['eta']}")
         if obj.get("folder"):
@@ -592,19 +711,13 @@ def _serialize_objects(queryset, model_class, model_name: str) -> list[dict]:
         if hasattr(obj, "expiry_date") and obj.expiry_date:
             data["expiry_date"] = str(obj.expiry_date)
 
-        # Risk levels
-        if (
-            hasattr(obj, "current_level")
-            and obj.current_level is not None
-            and obj.current_level >= 0
-        ):
-            data["current_risk_level"] = obj.current_level
-        if (
-            hasattr(obj, "residual_level")
-            and obj.residual_level is not None
-            and obj.residual_level >= 0
-        ):
-            data["residual_risk_level"] = obj.residual_level
+        # Risk levels, labelled with the matrix wording rather than the index
+        if model_name == "RiskScenario":
+            matrix = getattr(getattr(obj, "risk_assessment", None), "risk_matrix", None)
+            for scope, level_field in LEVEL_FIELDS.items():
+                level = getattr(obj, level_field, None)
+                if level is not None and level >= 0:
+                    data[f"{scope}_risk_level"] = level_label(matrix, level)
 
         # Folder
         if hasattr(obj, "folder") and obj.folder:
@@ -615,48 +728,72 @@ def _serialize_objects(queryset, model_class, model_name: str) -> list[dict]:
     return objects
 
 
+def _choice_breakdown(qs, model_class, field: str, order_by: str) -> dict:
+    """Count per value of a choice field, keyed by the human label."""
+    try:
+        labels = dict(model_class._meta.get_field(field).choices or [])
+    except Exception:
+        labels = {}
+    counts = qs.values(field).annotate(count=Count("id")).order_by(order_by)
+    breakdown = {}
+    for item in counts:
+        if not item["count"]:
+            continue
+        value = item[field]
+        label = labels.get(value) or value or "--"
+        breakdown[str(label)] = breakdown.get(str(label), 0) + item["count"]
+    return breakdown
+
+
+def _risk_level_breakdowns(qs) -> dict:
+    """Count risk scenarios per level label, highest level first, per scope."""
+    matrices = {str(m.id): m for m in matrices_for_scenarios(qs)}
+    if not matrices:
+        return {}
+
+    breakdowns = {}
+    for scope, level_field in LEVEL_FIELDS.items():
+        counts = qs.values("risk_assessment__risk_matrix_id", level_field).annotate(
+            count=Count("id")
+        )
+        buckets: dict[str, list] = {}
+        for item in counts:
+            level = item[level_field]
+            matrix = matrices.get(str(item["risk_assessment__risk_matrix_id"]))
+            label = level_label(matrix, level)
+            bucket = buckets.setdefault(label, [level if level is not None else -1, 0])
+            bucket[0] = max(bucket[0], level if level is not None else -1)
+            bucket[1] += item["count"]
+
+        if not buckets or set(buckets) == {"--"}:
+            continue
+        breakdowns[f"{scope.capitalize()} risk level breakdown"] = {
+            label: count
+            for label, (_, count) in sorted(
+                buckets.items(), key=lambda kv: kv[1][0], reverse=True
+            )
+        }
+    return breakdowns
+
+
 def _build_summary(
     qs, model_class, model_name, display_name, url_slug, filters_applied, total_count
 ) -> dict:
     """Build a summary/breakdown of the queryset."""
     summary = {}
 
-    if hasattr(model_class, "status"):
-        status_counts = (
-            qs.values("status").annotate(count=Count("id")).order_by("-count")
-        )
-        if status_counts:
-            summary["Status breakdown"] = {
-                (item["status"] or "--"): item["count"] for item in status_counts
-            }
-
-    if hasattr(model_class, "treatment"):
-        treatment_counts = (
-            qs.values("treatment").annotate(count=Count("id")).order_by("-count")
-        )
-        if treatment_counts:
-            summary["Treatment breakdown"] = {
-                (item["treatment"] or "--"): item["count"] for item in treatment_counts
-            }
-
-    if hasattr(model_class, "result"):
-        result_counts = (
-            qs.values("result").annotate(count=Count("id")).order_by("-count")
-        )
-        if result_counts:
-            summary["Result breakdown"] = {
-                (item["result"] or "--"): item["count"] for item in result_counts
-            }
-
-    if hasattr(model_class, "priority"):
-        priority_counts = (
-            qs.values("priority").annotate(count=Count("id")).order_by("priority")
-        )
-        if priority_counts:
-            summary["Priority breakdown"] = {
-                (f"P{item['priority']}" if item["priority"] else "--"): item["count"]
-                for item in priority_counts
-            }
+    for field, title, order_by in (
+        ("status", "Status breakdown", "-count"),
+        ("treatment", "Treatment breakdown", "-count"),
+        ("result", "Result breakdown", "-count"),
+        ("priority", "Priority breakdown", "priority"),
+        ("severity", "Severity breakdown", "-severity"),
+    ):
+        if not hasattr(model_class, field):
+            continue
+        breakdown = _choice_breakdown(qs, model_class, field, order_by)
+        if breakdown:
+            summary[title] = breakdown
 
     if hasattr(model_class, "category"):
         cat_counts = (
@@ -673,6 +810,9 @@ def _build_summary(
             summary["Type breakdown"] = {
                 (item["type"] or "--"): item["count"] for item in type_counts
             }
+
+    if model_name == "RiskScenario":
+        summary.update(_risk_level_breakdowns(qs))
 
     if hasattr(model_class, "folder"):
         folder_counts = (

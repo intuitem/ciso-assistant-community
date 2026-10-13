@@ -47,7 +47,7 @@
 		<span class="text-sm font-semibold">{title}</span>
 		<button
 			type="button"
-			class="btn btn-sm variant-soft-primary"
+			class="btn btn-sm preset-tonal-primary"
 			onclick={addLocale}
 			disabled={Object.keys(value ?? {}).length >= locales.length}
 		>
@@ -73,7 +73,7 @@
 				</select>
 				<button
 					type="button"
-					class="btn-icon btn-icon-sm variant-soft-error"
+					class="btn-icon btn-icon-sm preset-tonal-error"
 					onclick={() => removeLocale(loc)}
 					title={m.delete()}
 				>

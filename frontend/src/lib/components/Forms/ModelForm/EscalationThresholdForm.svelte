@@ -2,12 +2,13 @@
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import Duration from '../Duration.svelte';
-	import TextArea from '$lib/components/Forms/TextArea.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import Select from '../Select.svelte';
 	import NumberField from '$lib/components/Forms/NumberField.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
+	import { safeTranslate } from '$lib/utils/i18n';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -55,7 +56,7 @@
 	optionsEndpoint="terminologies?field_path=qualifications&is_visible=true"
 	field="qualifications"
 	optionsLabelField="translated_name"
-	label={m.qualifications()}
+	label={safeTranslate('qualifications')}
 />
 <Select
 	{form}
@@ -65,7 +66,7 @@
 	cacheLock={cacheLocks['quali_impact']}
 	bind:cachedValue={formDataCache['quali_impact']}
 />
-<TextArea
+<MarkdownField
 	{form}
 	field="justification"
 	label={m.justification()}

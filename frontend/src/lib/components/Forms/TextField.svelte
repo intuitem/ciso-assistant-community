@@ -5,12 +5,12 @@
 	import { onMount } from 'svelte';
 	import type { CacheLock } from '$lib/utils/types';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import type { CssClasses } from '@skeletonlabs/skeleton-svelte';
 
 	interface Props {
 		class?: string;
 		type?: string;
-		classesContainer?: CssClasses;
+		step?: string | number;
+		classesContainer?: string;
 		label?: string | undefined;
 		field: string;
 		valuePath?: any; // the place where the value is stored in the form. This is useful for nested objects
@@ -27,6 +27,7 @@
 	let {
 		class: _class = '',
 		type = 'text',
+		step = 'any',
 		classesContainer = '',
 		label = $bindable(),
 		field,
@@ -161,6 +162,7 @@
 				bind:value={$value}
 				{...$constraints}
 				{...rest}
+				{...type === 'number' ? { step } : {}}
 				{disabled}
 				{required}
 			/>

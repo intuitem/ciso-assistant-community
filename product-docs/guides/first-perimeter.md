@@ -17,6 +17,8 @@ How to create a perimeter
 1. Once logged in, the first step is to create a domain. Let's call it R\&D.
 2. Then we create the perimeter inside of it or from the perimeter list view.
 
+<figure><img src="../.gitbook/assets/perimeters-list.png" alt=""><figcaption><p>The perimeter list once the first perimeter exists</p></figcaption></figure>
+
 {% hint style="success" %}
 That's it! you just created your first perimeter. The next step will be to create an audit.
 {% endhint %}

@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
+	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
+
 	interface Props {
 		width?: string;
 		height?: string;
@@ -19,80 +21,82 @@
 	// export let values: waterfallData; // Set the types for these variables later on
 
 	const chart_id = `${name}_div`;
-	onMount(async () => {
-		const echarts = await import('echarts');
-		let chart = echarts.init(
-			document.getElementById(chart_id),
-			document.documentElement.classList.contains('dark') ? 'dark' : null,
-			{ renderer: 'svg' }
-		);
-
-		// specify chart configuration item and data
-		var option = {
-			tooltip: {
-				trigger: 'axis',
-				axisPointer: {
-					type: 'shadow'
-				},
-				formatter: function (params) {
-					var tar = params[1];
-					return tar.name + '<br/>' + tar.seriesName + ' : ' + tar.value;
-				}
-			},
-			grid: {
-				left: '3%',
-				right: '4%',
-				bottom: '3%',
-				containLabel: true
-			},
-			xAxis: {
-				type: 'category',
-				splitLine: { show: false },
-				data: ['Total', 'To do', 'In progress', 'On hold', 'Done', 'Expired']
-			},
-			yAxis: {
-				type: 'value',
-				show: false
-			},
-			series: [
-				{
-					name: 'Placeholder',
-					type: 'bar',
-					stack: 'Total',
-					itemStyle: {
-						borderColor: 'transparent',
-						color: 'transparent'
-					},
-					emphasis: {
-						itemStyle: {
-							borderColor: 'transparent',
-							color: 'transparent'
+	onMount(() => {
+		let dispose: (() => void) | undefined;
+		let active = true;
+		(async () => {
+			const echarts = await import('echarts');
+			if (!active) return;
+			const el = document.getElementById(chart_id);
+			if (!el) return;
+			dispose = mountThemeAwareChart(echarts, el, () => {
+				// specify chart configuration item and data
+				var option = {
+					tooltip: {
+						trigger: 'axis',
+						axisPointer: {
+							type: 'shadow'
+						},
+						formatter: function (params) {
+							var tar = params[1];
+							return tar.name + '<br/>' + tar.seriesName + ' : ' + tar.value;
 						}
 					},
-					data: [0, 170, 140, 120, 30, 0]
-				},
-				{
-					name: 'Progress',
-					type: 'bar',
-					stack: 'Total',
-					label: {
-						show: true,
-						position: 'inside'
+					grid: {
+						left: '3%',
+						right: '4%',
+						bottom: '3%',
+						containLabel: true
 					},
-					data: [290, 120, 30, 0, 90, 0]
-				}
-			]
+					xAxis: {
+						type: 'category',
+						splitLine: { show: false },
+						data: ['Total', 'To do', 'In progress', 'On hold', 'Done', 'Expired']
+					},
+					yAxis: {
+						type: 'value',
+						show: false
+					},
+					series: [
+						{
+							name: 'Placeholder',
+							type: 'bar',
+							stack: 'Total',
+							itemStyle: {
+								borderColor: 'transparent',
+								color: 'transparent'
+							},
+							emphasis: {
+								itemStyle: {
+									borderColor: 'transparent',
+									color: 'transparent'
+								}
+							},
+							data: [0, 170, 140, 120, 30, 0]
+						},
+						{
+							name: 'Progress',
+							type: 'bar',
+							stack: 'Total',
+							label: {
+								show: true,
+								position: 'inside'
+							},
+							data: [290, 120, 30, 0, 90, 0]
+						}
+					]
+				};
+
+				// console.debug(option);
+
+				// use configuration item and data specified to show chart
+				return option;
+			});
+		})();
+		return () => {
+			active = false;
+			dispose?.();
 		};
-
-		// console.debug(option);
-
-		// use configuration item and data specified to show chart
-		option.backgroundColor = 'transparent';
-		chart.setOption(option);
-
-		window.addEventListener('resize', function () {
-			chart.resize();
-		});
 	});
 </script>
 

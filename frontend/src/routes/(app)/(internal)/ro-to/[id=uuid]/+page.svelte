@@ -3,6 +3,7 @@
 	import { m } from '$paraglide/messages';
 	import { page } from '$app/state';
 	import { pageTitle } from '$lib/utils/stores';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
@@ -25,12 +26,13 @@
 		}
 	});
 
-	const pertinenceColor: Record<string, string> = {
-		undefined: 'bg-surface-200-800 text-surface-700-300',
-		irrelevant: 'bg-green-200 text-green-700',
-		partially_relevant: 'bg-yellow-200 text-yellow-700',
-		fairly_relevant: 'bg-orange-200 text-orange-700',
-		highly_relevant: 'bg-red-200 text-red-700'
+	// Keyed by level (0 = undefined): labels come from the study's matrix.
+	const pertinenceColor: Record<number, string> = {
+		0: 'bg-surface-200-800 text-surface-700-300',
+		1: 'bg-green-200 text-green-700',
+		2: 'bg-yellow-200 text-yellow-700',
+		3: 'bg-orange-200 text-orange-700',
+		4: 'bg-red-200 text-red-700'
 	};
 
 	const user = page.data.user;
@@ -132,7 +134,7 @@
 				<i class="fa-solid fa-equals"></i>
 				<p class="flex flex-col items-center">
 					<span class="text-xs text-surface-600-400">{m.pertinence()}</span>
-					<span class="badge text-sm font-bold {pertinenceColor[roto.pertinence]}"
+					<span class="badge text-sm font-bold {pertinenceColor[roto.pertinence_level]}"
 						>{safeTranslate(roto.pertinence)}</span
 					>
 				</p>
@@ -177,7 +179,7 @@
 				<ModelTable
 					backgroundColor="bg-surface-50-950"
 					regionBody="bg-surface-50-950"
-					regionHeadCell="uppercase bg-surface-50-950 text-surface-700-300"
+					regionHeadCell="bg-surface-50-950 text-surface-700-300"
 					source={data.table}
 					URLModel="feared-events"
 					baseEndpoint={'feared-events/?ro_to_couples=' + roto.id}
@@ -193,7 +195,7 @@
 					<span>{m.justification()}</span>
 				</h3>
 				{#if roto.justification}
-					<p class="text-surface-600-400">{roto.justification}</p>
+					<MarkdownRenderer content={roto.justification} />
 				{:else}
 					<p class="text-surface-600-400">{m.noJustification()}</p>
 				{/if}

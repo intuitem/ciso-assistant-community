@@ -7,6 +7,9 @@
 	import { m } from '$paraglide/messages';
 	import { TYPE_TO_MODEL, MODEL_TO_TYPE, SCAFFOLD_TYPES } from '$lib/utils/modelTargets';
 	import TranslationsEditor from '../../TranslationsEditor.svelte';
+	import { getToastStore } from '$lib/components/Toast/stores';
+
+	const toastStore = getToastStore();
 
 	let { data }: { data: PageData } = $props();
 	$pageTitle = m.lbPresetPageTitle({ name: data.preset.name });
@@ -90,7 +93,9 @@
 	let initialJson = $state('');
 	let loading = $state(true);
 	let saving = $state(false);
-	let errorMsg = $state('');
+	function triggerError(message: string) {
+		toastStore.trigger({ message, background: 'preset-filled-error-500' });
+	}
 	let confirmDiscard = $state(false);
 	let isReadOnly = $derived(!data.preset.is_user_authored);
 
@@ -133,7 +138,6 @@
 
 	async function loadDraft() {
 		loading = true;
-		errorMsg = '';
 		try {
 			const r = await fetch(apiBase, {
 				method: 'POST',
@@ -141,14 +145,17 @@
 				body: JSON.stringify({ action: 'start-editing' })
 			});
 			if (!r.ok) {
-				errorMsg = m.lbPresetFailedToLoadDraft({ detail: r.status });
+				const j = await r.json().catch(() => ({}));
+				triggerError(
+					safeTranslate(formatError(j)) || m.lbPresetFailedToLoadDraft({ detail: r.status })
+				);
 				return;
 			}
 			const j = await r.json();
 			draft = normalize(j.editing_draft);
 			initialJson = JSON.stringify(draft);
 		} catch (e) {
-			errorMsg = m.lbPresetFailedToLoadDraft({ detail: (e as Error).message ?? e });
+			triggerError(m.lbPresetFailedToLoadDraft({ detail: (e as Error).message ?? e }));
 		} finally {
 			loading = false;
 		}
@@ -182,7 +189,6 @@
 	async function save() {
 		if (!draft) return;
 		saving = true;
-		errorMsg = '';
 		try {
 			const r = await fetch(apiBase, {
 				method: 'PATCH',
@@ -191,14 +197,15 @@
 			});
 			const j = await r.json().catch(() => ({}));
 			if (!r.ok) {
-				errorMsg =
-					safeTranslate(formatError(j)) || m.lbPresetFailedToSaveDraft({ detail: r.status });
+				triggerError(
+					safeTranslate(formatError(j)) || m.lbPresetFailedToSaveDraft({ detail: r.status })
+				);
 				return;
 			}
 			draft = normalize(j.editing_draft);
 			initialJson = JSON.stringify(draft);
 		} catch (e) {
-			errorMsg = m.lbPresetFailedToSaveDraft({ detail: (e as Error).message ?? e });
+			triggerError(m.lbPresetFailedToSaveDraft({ detail: (e as Error).message ?? e }));
 		} finally {
 			saving = false;
 		}
@@ -214,6 +221,7 @@
 		if (!j) return m.lbPresetUnknownError();
 		if (typeof j === 'string') return j;
 		if (j.detail) return j.detail;
+		if (j.error) return j.error;
 		try {
 			return JSON.stringify(j);
 		} catch {
@@ -683,7 +691,7 @@
 {:else if loading}
 	<div class="p-6">{m.lbPresetLoadingDraft()}</div>
 {:else if !draft}
-	<div class="p-6 text-red-700">{m.lbPresetFailedToLoadDraftShort()}</div>
+	<div class="p-6 text-error-500">{m.lbPresetFailedToLoadDraftShort()}</div>
 {:else}
 	{#if needsProjectManagement}
 		<div
@@ -792,28 +800,19 @@
 		</div>
 
 		<div class="max-w-4xl mx-auto px-6 py-8 space-y-8">
-			{#if errorMsg}
-				<div
-					class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg text-sm flex items-start gap-2"
-				>
-					<i class="fa-solid fa-triangle-exclamation mt-0.5 text-red-600"></i>
-					<span class="flex-1">{errorMsg}</span>
-				</div>
-			{/if}
-
 			<!-- Preset metadata: inline-editable title + description -->
 			<div class="space-y-1">
 				<input
 					type="text"
 					bind:value={draft.journey_meta.name}
 					placeholder={m.lbPresetNamePlaceholder()}
-					class="w-full text-2xl font-bold bg-transparent border-0 border-b-2 border-transparent hover:border-surface-300-700 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors py-1"
+					class="w-full text-2xl font-bold bg-transparent border-0 border-b-2 border-transparent hover:border-surface-300-700 focus:border-blue-500 outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors py-1 placeholder:text-surface-500 placeholder:font-normal"
 				/>
 				<textarea
 					bind:value={draft.journey_meta.description}
 					placeholder={m.lbPresetDescriptionPlaceholder()}
 					rows="2"
-					class="w-full text-sm text-surface-600-400 bg-transparent border-0 border-b border-transparent hover:border-surface-300-700 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none py-1"
+					class="w-full text-sm text-surface-600-400 bg-transparent border-0 border-b border-transparent hover:border-surface-300-700 focus:border-blue-500 outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none py-1 placeholder:text-surface-500"
 				></textarea>
 				<details class="pt-1" open={Object.keys(draft.journey_meta.translations).length > 0}>
 					<summary class="text-xs text-surface-500 cursor-pointer select-none">
@@ -936,7 +935,7 @@
 										type="text"
 										value={step.title}
 										placeholder={m.lbPresetStepNamePlaceholder()}
-										class="w-full text-base font-semibold bg-transparent border-0 border-b-2 border-transparent hover:border-surface-300-700 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors py-0.5"
+										class="w-full text-base font-semibold bg-transparent border-0 border-b-2 border-transparent hover:border-surface-300-700 focus:border-blue-500 outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors py-0.5 placeholder:text-surface-500 placeholder:font-normal"
 										oninput={(e) =>
 											setStepField(i, { title: (e.target as HTMLInputElement).value })}
 									/>
@@ -944,7 +943,7 @@
 										value={step.description ?? ''}
 										placeholder={m.lbPresetDescriptionOptional()}
 										rows="2"
-										class="w-full text-sm text-surface-600-400 bg-transparent border-0 border-b border-transparent hover:border-surface-200-800 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none py-0.5"
+										class="w-full text-sm text-surface-600-400 bg-transparent border-0 border-b border-transparent hover:border-surface-200-800 focus:border-blue-500 outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none py-0.5 placeholder:text-surface-500"
 										oninput={(e) =>
 											setStepField(i, { description: (e.target as HTMLTextAreaElement).value })}
 									></textarea>
@@ -1259,7 +1258,7 @@
 												{#each displayParamRows(step) as row, ri (ri)}
 													<div class="flex gap-2 mb-1.5">
 														<input
-															class="flex-1 text-sm bg-surface-50-950 border border-surface-200-800 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors font-mono"
+															class="input flex-1 text-sm rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors font-mono"
 															placeholder={m.lbPresetParamKeyPlaceholder()}
 															value={row.k}
 															oninput={(e) => {
@@ -1269,7 +1268,7 @@
 															}}
 														/>
 														<input
-															class="flex-1 text-sm bg-surface-50-950 border border-surface-200-800 rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
+															class="input flex-1 text-sm rounded-lg px-2.5 py-1.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-colors"
 															placeholder={m.lbPresetParamValuePlaceholder()}
 															value={row.v}
 															oninput={(e) => {

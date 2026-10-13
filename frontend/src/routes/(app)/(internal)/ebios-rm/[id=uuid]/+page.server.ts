@@ -1,4 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { discardBody } from '$lib/utils/responses';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { safeTranslate } from '$lib/utils/i18n';
 import { m } from '$paraglide/messages';
@@ -76,6 +77,8 @@ export const actions: Actions = {
 		});
 		if (!stepRes.ok) {
 			console.error(await stepRes.text());
+		} else {
+			await discardBody(stepRes);
 		}
 
 		// Create the risk assessment
@@ -98,11 +101,15 @@ export const actions: Actions = {
 		const writtenObject = await createRes.json();
 
 		// Auto-sync from EBIOS RM study
-		await event.fetch(`${BASE_API_URL}/risk-assessments/${writtenObject.id}/sync_from_ebios_rm/`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({})
-		});
+		const syncRes = await event.fetch(
+			`${BASE_API_URL}/risk-assessments/${writtenObject.id}/sync_from_ebios_rm/`,
+			{
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({})
+			}
+		);
+		await discardBody(syncRes);
 
 		// Flash success and let ModelForm handle the redirect (closes modal)
 		const modelVerboseName = urlParamModelVerboseName('risk-assessments');
@@ -147,6 +154,7 @@ export const actions: Actions = {
 			console.error(response);
 			return fail(400, { form });
 		}
+		await discardBody(res);
 
 		return { success: true, form };
 	}

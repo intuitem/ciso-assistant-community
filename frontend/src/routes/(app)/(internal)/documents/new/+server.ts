@@ -11,7 +11,7 @@ const LINK_FIELDS = [
 ] as const;
 
 export const POST: RequestHandler = async ({ request, fetch, locals }) => {
-	if (!locals.featureflags?.document_management) error(404, 'Not found');
+	if (!(await locals.getFeatureFlags())?.document_management) error(404, 'Not found');
 
 	const fd = await request.formData();
 	const source = String(fd.get('source') ?? 'author');

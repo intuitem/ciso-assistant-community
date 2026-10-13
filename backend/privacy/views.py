@@ -1,18 +1,24 @@
+import io
+import re
 import uuid
 
+import pandas as pd
+
 from core.constants import COUNTRY_CHOICES
-from core.models import Actor, Terminology
+from core.models import Actor, Terminology, ValidationFlow
 from core.serializers import ActorReadSerializer
 from core.views import (
     BaseModelViewSet as AbstractBaseModelViewSet,
     ExportMixin,
+    actor_prefetch,
     escape_excel_formula,
 )
 from django_filters.rest_framework import DjangoFilterBackend
+from django.http import HttpResponse
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.db.models import Count
+from django.db.models import Count, Prefetch
 from itertools import chain
 from collections import defaultdict
 
@@ -144,9 +150,7 @@ class PersonalDataViewSet(BaseModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        (viewable_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, Processing
-        )
+        viewable_ids = RoleAssignment.get_viewable_object_ids(request.user, Processing)
         try:
             processing = Processing.objects.filter(id__in=viewable_ids).get(
                 id=processing_uuid
@@ -340,7 +344,21 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
         return (
             super()
             .get_queryset()
-            .prefetch_related("personal_data__category", "data_subjects")
+            .select_related("folder")
+            .prefetch_related(
+                "personal_data__category",
+                "data_subjects",
+                "nature",
+                "associated_controls",
+                actor_prefetch("assigned_to"),
+                "evidences",
+                "purposes",
+                "perimeters",
+                Prefetch(
+                    "validationflow_set",
+                    queryset=ValidationFlow.objects.select_related("approver"),
+                ),
+            )
         )
 
     export_config = {
@@ -388,6 +406,181 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
         "prefetch_related": ["filtering_labels", "nature", "assigned_to"],
     }
 
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path="export-xlsx",
+        name="Export processing as XLSX",
+    )
+    def export_record_xlsx(self, request, pk):
+        processing = self.get_object()
+
+        def txt(value):
+            return escape_excel_formula(value) if isinstance(value, str) else value
+
+        processing_rows = [
+            {
+                "ref_id": txt(processing.ref_id),
+                "name": txt(processing.name),
+                "description": txt(processing.description or ""),
+                "domain": txt(processing.folder.name),
+                "status": processing.status,
+                "processing_nature": ",".join(
+                    txt(n.name) for n in processing.nature.all()
+                ),
+                "information_channel": txt(processing.information_channel),
+                "usage_channel": txt(processing.usage_channel),
+                "dpia_required": processing.dpia_required,
+                "dpia_reference": txt(processing.dpia_reference),
+                "assigned_to": ",".join(
+                    txt(a.user.email if a.user else str(a))
+                    for a in processing.assigned_to.all()
+                ),
+                "labels": ",".join(
+                    txt(label.label) for label in processing.filtering_labels.all()
+                ),
+            }
+        ]
+
+        sheets = [
+            ("Processing", list(processing_rows[0].keys()), processing_rows),
+            (
+                "Purposes",
+                ["name", "description", "legal_basis", "article_9_condition"],
+                [
+                    {
+                        "name": txt(purpose.name or ""),
+                        "description": txt(purpose.description or ""),
+                        "legal_basis": purpose.legal_basis,
+                        "article_9_condition": purpose.article_9_condition or "",
+                    }
+                    for purpose in processing.purposes.all()
+                ],
+            ),
+            (
+                "Personal data",
+                [
+                    "name",
+                    "description",
+                    "category",
+                    "retention",
+                    "deletion_policy",
+                    "is_sensitive",
+                    "assets",
+                ],
+                [
+                    {
+                        "name": txt(item.name or ""),
+                        "description": txt(item.description or ""),
+                        "category": txt(item.category.name),
+                        "retention": txt(item.retention),
+                        "deletion_policy": item.deletion_policy,
+                        "is_sensitive": item.is_sensitive,
+                        "assets": ",".join(
+                            txt(asset.name) for asset in item.assets.all()
+                        ),
+                    }
+                    for item in processing.personal_data.select_related(
+                        "category"
+                    ).prefetch_related("assets")
+                ],
+            ),
+            (
+                "Data subjects",
+                ["name", "description", "category"],
+                [
+                    {
+                        "name": txt(subject.name or ""),
+                        "description": txt(subject.description or ""),
+                        "category": subject.category,
+                    }
+                    for subject in processing.data_subjects.all()
+                ],
+            ),
+            (
+                "Data recipients",
+                ["name", "description", "category"],
+                [
+                    {
+                        "name": txt(recipient.name or ""),
+                        "description": txt(recipient.description or ""),
+                        "category": recipient.category,
+                    }
+                    for recipient in processing.data_recipients.all()
+                ],
+            ),
+            (
+                "Contractors",
+                [
+                    "name",
+                    "description",
+                    "entity",
+                    "relationship_type",
+                    "country",
+                    "documentation_link",
+                ],
+                [
+                    {
+                        "name": txt(contractor.name or ""),
+                        "description": txt(contractor.description or ""),
+                        "entity": txt(contractor.entity.name)
+                        if contractor.entity
+                        else "",
+                        "relationship_type": contractor.relationship_type,
+                        "country": contractor.country,
+                        "documentation_link": txt(contractor.documentation_link),
+                    }
+                    for contractor in processing.contractors_involved.select_related(
+                        "entity"
+                    )
+                ],
+            ),
+            (
+                "Transfers",
+                [
+                    "name",
+                    "description",
+                    "entity",
+                    "country",
+                    "transfer_mechanism",
+                    "guarantees",
+                    "documentation_link",
+                ],
+                [
+                    {
+                        "name": txt(transfer.name or ""),
+                        "description": txt(transfer.description or ""),
+                        "entity": txt(transfer.entity.name) if transfer.entity else "",
+                        "country": transfer.country,
+                        "transfer_mechanism": transfer.transfer_mechanism,
+                        "guarantees": txt(transfer.guarantees),
+                        "documentation_link": txt(transfer.documentation_link),
+                    }
+                    for transfer in processing.data_transfers.select_related("entity")
+                ],
+            ),
+        ]
+
+        buffer = io.BytesIO()
+        with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
+            for sheet_name, columns, rows in sheets:
+                pd.DataFrame(rows, columns=columns).to_excel(
+                    writer, sheet_name=sheet_name, index=False
+                )
+        buffer.seek(0)
+
+        slug = re.sub(
+            r"[^A-Za-z0-9_-]+", "-", processing.ref_id or processing.name
+        ).strip("-")[:60] or str(processing.id)
+        response = HttpResponse(
+            buffer.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response["Content-Disposition"] = (
+            f'attachment; filename="processing-{slug}.xlsx"'
+        )
+        return response
+
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(Processing.STATUS_CHOICES))
@@ -407,41 +600,28 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
 
     @action(detail=False, name="aggregated metrics")
     def agg_metrics(self, request):
-        (viewable_processings, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
-            user=request.user,
-            object_type=Processing,
+        viewable_processings = RoleAssignment.get_viewable_object_ids(
+            request.user, Processing
         )
-        (viewable_data_contractors, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
-            user=request.user,
-            object_type=DataContractor,
+        viewable_data_contractors = RoleAssignment.get_viewable_object_ids(
+            request.user, DataContractor
         )
-        (viewable_data_transfers, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
-            user=request.user,
-            object_type=DataTransfer,
+        viewable_data_transfers = RoleAssignment.get_viewable_object_ids(
+            request.user, DataTransfer
         )
-        (viewable_right_requests, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
-            user=request.user,
-            object_type=RightRequest,
+        viewable_right_requests = RoleAssignment.get_viewable_object_ids(
+            request.user, RightRequest
         )
-        (viewable_data_breaches, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
-            user=request.user,
-            object_type=DataBreach,
+        viewable_data_breaches = RoleAssignment.get_viewable_object_ids(
+            request.user, DataBreach
         )
-        (viewable_personal_data, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
-            user=request.user,
-            object_type=PersonalData,
+        viewable_personal_data = RoleAssignment.get_viewable_object_ids(
+            request.user, PersonalData
         )
-        (viewable_data_recipients, _, _) = RoleAssignment.get_accessible_object_ids(
-            folder=Folder.get_root_folder(),
-            user=request.user,
-            object_type=DataRecipient,
+        viewable_data_recipients = RoleAssignment.get_viewable_object_ids(
+            request.user, DataRecipient
         )
+
         processings_count = len(viewable_processings)
 
         pd_categories = PersonalData.get_categories_count(
@@ -633,6 +813,7 @@ class RightRequestViewSet(BaseModelViewSet):
         "status",
         "processings",
         "folder",
+        "due_date",
     ]
 
     @action(detail=False, name="Get request type choices")
@@ -669,7 +850,24 @@ class DataBreachViewSet(BaseModelViewSet):
         "affected_processings",
         "incident",
         "evidences",
+        "discovered_on",
+        "authority_notified_on",
     ]
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related("folder", "incident")
+            .prefetch_related(
+                "assigned_to",
+                "authorities",
+                "affected_processings",
+                "affected_personal_data",
+                "remediation_measures",
+                "evidences",
+            )
+        )
 
     @action(detail=False, name="Get breach type choices")
     def breach_type(self, request):

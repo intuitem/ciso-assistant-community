@@ -1,4 +1,5 @@
 import json
+import structlog
 from datetime import timedelta
 
 from django.core.exceptions import ValidationError
@@ -9,7 +10,10 @@ from django.db.models import Avg, Count, OuterRef, Q, Subquery, Sum
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from core.base_models import AbstractBaseModel, NameDescriptionMixin
+from core.base_models import (
+    AbstractBaseModel,
+    NameDescriptionMixin,
+)
 from core.models import (
     Actor,
     AppliedControl,
@@ -35,7 +39,9 @@ from core.models import (
     Vulnerability,
 )
 from global_settings.models import GlobalSettings
-from iam.models import Folder, FolderMixin, PublishInRootFolderMixin, User
+from iam.models import Folder, FolderMixin
+
+logger = structlog.getLogger(__name__)
 
 
 class MetricDefinition(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMixin):
@@ -79,7 +85,6 @@ class MetricDefinition(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
             "Format: [{'name': 'Low', 'description': '', 'translations': {'fr': {'name': 'Faible', 'description': ''}}}]"
         ),
     )
-    is_published = models.BooleanField(default=True, verbose_name=_("Published"))
     higher_is_better = models.BooleanField(
         default=True,
         verbose_name=_("Higher is better"),
@@ -111,9 +116,7 @@ class MetricDefinition(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
         return self.display_short
 
 
-class MetricInstance(
-    NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
-):
+class MetricInstance(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
     class Status(models.TextChoices):
         DRAFT = "draft", _("Draft")
         ACTIVE = "active", _("Active")
@@ -172,6 +175,7 @@ class MetricInstance(
         blank=True,
         null=True,
     )
+
     fields_to_check = ["ref_id", "name"]
 
     class Meta:
@@ -189,7 +193,13 @@ class MetricInstance(
         super().save(*args, **kwargs)
 
     def get_latest_sample(self):
-        return self.samples.first()  # ordering is important
+        # last_refresh, current_value and raw_value each want the same row, so the
+        # lookup is memoised per instance. When the caller prefetched `samples`,
+        # first() reads the prefetch cache and costs nothing; ordering is the
+        # model's own ("-timestamp"), so first() really is the latest.
+        if "_latest_sample" not in self.__dict__:
+            self.__dict__["_latest_sample"] = self.samples.first()
+        return self.__dict__["_latest_sample"]
 
     def last_refresh(self):
         latest_sample = self.get_latest_sample()
@@ -291,13 +301,33 @@ class CustomMetricSample(AbstractBaseModel, FolderMixin):
         else:
             value_dict = self.value
 
+        if not isinstance(value_dict, dict):
+            logger.warning(
+                "CustomMetricSample.value is not a dict, expected "
+                '{"result": ...} or {"choice_index": ...}',
+                sample_id=str(self.pk),
+                metric_instance_id=str(self.metric_instance_id),
+                value_type=type(value_dict).__name__,
+            )
+            return None
+
         metric_definition = self.metric_instance.metric_definition
 
         if metric_definition.category == MetricDefinition.Category.QUALITATIVE:
-            return value_dict.get("choice_index")
+            choice_index = value_dict.get("choice_index")
+            if (
+                isinstance(choice_index, bool)
+                or not isinstance(choice_index, int)
+                or choice_index < 1
+            ):
+                return None
+            return choice_index
 
         elif metric_definition.category == MetricDefinition.Category.QUANTITATIVE:
-            return value_dict.get("result")
+            result = value_dict.get("result")
+            if isinstance(result, bool) or not isinstance(result, (int, float)):
+                return None
+            return result
 
         return None
 
@@ -313,14 +343,27 @@ class CustomMetricSample(AbstractBaseModel, FolderMixin):
         else:
             value_dict = self.value
 
+        if not isinstance(value_dict, dict):
+            return "N/A"
+
         metric_definition = self.metric_instance.metric_definition
 
         if metric_definition.category == MetricDefinition.Category.QUALITATIVE:
             choice_index = value_dict.get("choice_index")
             if (
-                choice_index is not None
-                and metric_definition.choices_definition
-                and isinstance(metric_definition.choices_definition, list)
+                isinstance(choice_index, bool)
+                or not isinstance(choice_index, int)
+                or choice_index < 1
+            ):
+                logger.warning(
+                    "CustomMetricSample.value.choice_index is not a valid index",
+                    sample_id=str(self.pk),
+                    metric_instance_id=str(self.metric_instance_id),
+                    value_type=type(choice_index).__name__,
+                )
+                return "N/A"
+            if metric_definition.choices_definition and isinstance(
+                metric_definition.choices_definition, list
             ):
                 # choices_definition is 1-indexed.
                 array_index = choice_index - 1
@@ -328,10 +371,20 @@ class CustomMetricSample(AbstractBaseModel, FolderMixin):
                     choice = metric_definition.choices_definition[array_index]
                     choice_name = choice.get("name", "")
                     return f"[{choice_index}] {choice_name}"
-            return str(choice_index) if choice_index is not None else "N/A"
+            return str(choice_index)
 
         elif metric_definition.category == MetricDefinition.Category.QUANTITATIVE:
             result = value_dict.get("result")
+            if isinstance(result, bool):
+                result = None
+            elif result is not None and not isinstance(result, (int, float)):
+                logger.warning(
+                    "CustomMetricSample.value.result is not numeric",
+                    sample_id=str(self.pk),
+                    metric_instance_id=str(self.metric_instance_id),
+                    value_type=type(result).__name__,
+                )
+                result = None
             if result is not None:
                 if metric_definition.unit:
                     unit = (
@@ -393,6 +446,8 @@ class BuiltinMetricSample(AbstractBaseModel):
             "Format depends on object type (e.g., progress, result_breakdown, etc.)"
         ),
     )
+
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
 
     class Meta:
         verbose_name = _("Builtin metric sample")
@@ -935,7 +990,10 @@ class Dashboard(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
 
     @property
     def widget_count(self):
-        return self.widgets.count()
+        # The list endpoint annotates this to avoid a COUNT per row; a lone
+        # object (detail view, admin) still counts on demand.
+        annotated = self.__dict__.get("_widget_count")
+        return annotated if annotated is not None else self.widgets.count()
 
 
 class DashboardWidget(AbstractBaseModel, FolderMixin):
@@ -951,6 +1009,7 @@ class DashboardWidget(AbstractBaseModel, FolderMixin):
         AREA = "area", _("Area Chart")
         GAUGE = "gauge", _("Gauge")
         SPARKLINE = "sparkline", _("Sparkline")
+        SMALL_MULTIPLES = "small_multiples", _("Small Multiples")
         TABLE = "table", _("Table")
         TEXT = "text", _("Text")
 

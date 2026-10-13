@@ -2,6 +2,7 @@
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
+	import NumberField from '$lib/components/Forms/NumberField.svelte';
 	import Select from '../Select.svelte';
 	import type { SuperForm } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
@@ -69,17 +70,6 @@
 	bind:cachedValue={formDataCache['authors']}
 	label={m.authors()}
 />
-<AutocompleteSelect
-	multiple
-	{form}
-	optionsEndpoint="evidences"
-	optionsExtraFields={[['folder', 'str']]}
-	optionsLabelField="auto"
-	field="evidences"
-	label={m.evidences()}
-	cacheLock={cacheLocks['evidences']}
-	bind:cachedValue={formDataCache['evidences']}
-/>
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
 	<AutocompleteSelect
 		{form}
@@ -94,6 +84,22 @@
 		cacheLock={cacheLocks['reviewers']}
 		bind:cachedValue={formDataCache['reviewers']}
 		label={m.reviewers()}
+	/>
+	<MarkdownField
+		{form}
+		field="objectives"
+		label={m.objectives()}
+		helpText={m.findingsAssessmentObjectivesHelpText()}
+		cacheLock={cacheLocks['objectives']}
+		bind:cachedValue={formDataCache['objectives']}
+	/>
+	<TextField
+		type="date"
+		{form}
+		field="start_date"
+		label={m.startDate()}
+		cacheLock={cacheLocks['start_date']}
+		bind:cachedValue={formDataCache['start_date']}
 	/>
 	<TextField
 		type="date"
@@ -113,12 +119,60 @@
 		cacheLock={cacheLocks['due_date']}
 		bind:cachedValue={formDataCache['due_date']}
 	/>
+	<TextField
+		type="date"
+		{form}
+		field="reported_at"
+		label={m.reportedAt()}
+		helpText={m.reportedAtHelpText()}
+		cacheLock={cacheLocks['reported_at']}
+		bind:cachedValue={formDataCache['reported_at']}
+	/>
+	<NumberField
+		{form}
+		field="budget"
+		label={m.budget()}
+		min={0}
+		step={0.01}
+		cacheLock={cacheLocks['budget']}
+		bind:cachedValue={formDataCache['budget']}
+	/>
+	<NumberField
+		{form}
+		field="expenses"
+		label={m.expenses()}
+		helpText={m.expensesHelpText()}
+		min={0}
+		step={0.01}
+		cacheLock={cacheLocks['expenses']}
+		bind:cachedValue={formDataCache['expenses']}
+	/>
+	<TextField
+		{form}
+		field="reference_link"
+		label={m.referenceLink()}
+		helpText={m.linkHelpText()}
+		cacheLock={cacheLocks['reference_link']}
+		bind:cachedValue={formDataCache['reference_link']}
+	/>
 	<MarkdownField
 		{form}
 		field="observation"
 		label={m.observation()}
 		cacheLock={cacheLocks['observation']}
 		bind:cachedValue={formDataCache['observation']}
+	/>
+	<AutocompleteSelect
+		multiple
+		{form}
+		createFromSelection={true}
+		optionsEndpoint="filtering-labels"
+		optionsLabelField="label"
+		translateOptions={false}
+		field="filtering_labels"
+		helpText={m.labelsHelpText()}
+		label={m.labels()}
+		allowUserOptions="append"
 	/>
 	<Checkbox
 		{form}

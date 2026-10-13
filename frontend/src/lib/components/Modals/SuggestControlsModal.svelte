@@ -8,7 +8,7 @@
 	const modalStore: ModalStore = getModalStore();
 	const flash = getFlash(page);
 
-	const cBase = 'card bg-surface-50-950 p-4 w-modal shadow-xl space-y-4';
+	const cBase = 'card bg-surface-100-900 border border-surface-500 p-4 w-modal shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 
 	type SuggestionStatus = 'create' | 'reuse' | 'linked';

@@ -5,11 +5,11 @@
 	import { getModalStore, type ModalStore } from './stores';
 	import { m } from '$paraglide/messages';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
-	import TextArea from '$lib/components/Forms/TextArea.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 
 	const modalStore: ModalStore = getModalStore();
 
-	const cBase = 'card bg-surface-50-950 p-4 w-modal shadow-xl space-y-4';
+	const cBase = 'card bg-surface-100-900 border border-surface-500 p-4 w-modal shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 	const cForm = 'p-4 space-y-4 rounded-container';
 
@@ -70,7 +70,7 @@
 			}}
 		>
 			{#snippet children({ form })}
-				<TextArea
+				<MarkdownField
 					{form}
 					field="justification"
 					label={m.riskAcceptanceJustificationLabel()}

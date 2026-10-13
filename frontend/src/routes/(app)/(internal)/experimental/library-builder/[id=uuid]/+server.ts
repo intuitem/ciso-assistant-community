@@ -6,6 +6,7 @@ const POST_ACTIONS: Record<string, string> = {
 	publish: 'publish',
 	'import-objects': 'import-objects',
 	'add-framework': 'add-framework',
+	'add-quick-form': 'add-quick-form',
 	'upsert-object': 'upsert-object',
 	'delete-object': 'delete-object',
 	'preset-editor-preview': 'preset-editor-preview'

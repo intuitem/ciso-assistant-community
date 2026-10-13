@@ -1,5 +1,7 @@
 import difflib
+import html
 import mimetypes
+import re
 from uuid import UUID
 
 import requests
@@ -21,12 +23,13 @@ from rest_framework.parsers import (
     MultiPartParser,
 )
 from rest_framework.response import Response
-import weasyprint
 from weasyprint import HTML
+from weasyprint.urls import URLFetcher, URLFetcherResponse
 
 import django_filters as df
 
 from core.net_safety import BlockedRequestError, assert_public_url
+from core.typst_render import render_mermaid_svg
 from core.validators import validate_file_name, validate_file_size
 from core.views import BaseModelViewSet, GenericFilterSet
 from iam.models import RoleAssignment, Folder
@@ -38,6 +41,7 @@ from .models import (
     DocumentRevision,
     DocumentTemplate,
     ManagedDocument,
+    record_document_edit,
 )
 
 
@@ -110,29 +114,66 @@ def _get_user_lang(request):
 
 
 _PDF_FETCH_MAX_BYTES = 10 * 1024 * 1024
+_DATA_URL_FETCHER = URLFetcher(allowed_protocols=("data",), allow_redirects=False)
 
 
-# WeasyPrint passes a configured `ssl_context` we don't thread through:
-# deployments needing a custom CA for embedded images won't get it. File
-# an issue if that becomes a real need.
-def _safe_url_fetcher(url, timeout=10, ssl_context=None):
-    if url.startswith("data:"):
-        return weasyprint.default_url_fetcher(url)
-    assert_public_url(url, allowed_schemes=("https",))
-    r = requests.get(url, timeout=timeout, allow_redirects=False, stream=True)
-    try:
-        status_code = r.status_code
-        final_url = r.url
-        content_type = r.headers.get("Content-Type", "application/octet-stream")
-        if 300 <= status_code < 400:
-            raise BlockedRequestError(f"Redirects not followed: {url}")
-        content = r.raw.read(_PDF_FETCH_MAX_BYTES + 1, decode_content=True)
-    finally:
-        r.close()
-    if len(content) > _PDF_FETCH_MAX_BYTES:
-        raise BlockedRequestError(f"Response exceeds {_PDF_FETCH_MAX_BYTES} bytes")
-    mime = content_type.split(";")[0].strip() or None
-    return {"string": content, "mime_type": mime, "redirected_url": final_url}
+# Must be a URLFetcher subclass, not a plain callable: since 70.0 WeasyPrint
+# reads `url_fetcher._fail_on_errors` unguarded when a fetch raises, so a bare
+# function turns every blocked resource into an AttributeError that escapes the
+# URLFetchingError handling and aborts the whole render.
+# A configured `ssl_context` is not threaded through: deployments needing a
+# custom CA for embedded images won't get it. File an issue if that becomes a
+# real need.
+class _SafeURLFetcher(URLFetcher):
+    def fetch(self, url, headers=None):
+        if url.startswith("data:"):
+            return _DATA_URL_FETCHER.fetch(url)
+        assert_public_url(url, allowed_schemes=("https",))
+        r = requests.get(url, timeout=self._timeout, allow_redirects=False, stream=True)
+        try:
+            status_code = r.status_code
+            final_url = r.url
+            content_type = r.headers.get("Content-Type", "application/octet-stream")
+            if 300 <= status_code < 400:
+                raise BlockedRequestError(f"Redirects not followed: {url}")
+            content = r.raw.read(_PDF_FETCH_MAX_BYTES + 1, decode_content=True)
+        finally:
+            r.close()
+        if len(content) > _PDF_FETCH_MAX_BYTES:
+            raise BlockedRequestError(f"Response exceeds {_PDF_FETCH_MAX_BYTES} bytes")
+        mime = content_type.split(";")[0].strip() or "application/octet-stream"
+        return URLFetcherResponse(final_url, content, {"Content-Type": mime})
+
+
+_safe_url_fetcher = _SafeURLFetcher()
+
+_MERMAID_BLOCK_RE = re.compile(
+    r'<pre><code class="language-mermaid">(.*?)</code></pre>', re.DOTALL
+)
+MERMAID_MAX_BLOCKS_PER_DOCUMENT = 20
+MERMAID_MAX_CHARS_PER_DOCUMENT = 100_000
+
+
+def _render_mermaid_blocks(content_html: str) -> str:
+    """Swap mermaid code blocks for rendered SVG; blocks that fail to render or exceed
+    the per-document budget stay as code."""
+    budget = {
+        "blocks": MERMAID_MAX_BLOCKS_PER_DOCUMENT,
+        "chars": MERMAID_MAX_CHARS_PER_DOCUMENT,
+    }
+
+    def replace(match):
+        source = html.unescape(match.group(1))
+        if budget["blocks"] <= 0 or len(source) > budget["chars"]:
+            return match.group(0)
+        budget["blocks"] -= 1
+        budget["chars"] -= len(source)
+        svg = render_mermaid_svg(source)
+        if svg is None:
+            return match.group(0)
+        return f'<div class="mermaid-diagram">{svg.decode()}</div>'
+
+    return _MERMAID_BLOCK_RE.sub(replace, content_html)
 
 
 class DocumentContainerFilter(GenericFilterSet):
@@ -156,6 +197,7 @@ class DocumentContainerFilter(GenericFilterSet):
             "applied_controls",
             "task_templates",
             "processings",
+            "assets",
         ]
 
     def filter_status(self, queryset, name, value):
@@ -196,9 +238,20 @@ class DocumentContainerViewSet(BaseModelViewSet):
                 "applied_controls",
                 "task_templates",
                 "processings",
+                "assets",
                 models.Prefetch(
                     "documents",
-                    queryset=ManagedDocument.objects.select_related("current_revision"),
+                    # `revisions` feeds pending_revision in the serializer;
+                    # `catalog` reuses this queryset for five more fields, so
+                    # restricting it here turns each of those into its own query.
+                    queryset=ManagedDocument.objects.select_related(
+                        "current_revision"
+                    ).prefetch_related(
+                        models.Prefetch(
+                            "revisions",
+                            queryset=DocumentRevision.objects.defer("content"),
+                        )
+                    ),
                 ),
             )
         )
@@ -236,9 +289,7 @@ class DocumentContainerViewSet(BaseModelViewSet):
         to) and incoming (linked from)."""
         container = self.get_object()
         accessible = set(
-            RoleAssignment.get_accessible_object_ids(
-                Folder.get_root_folder(), request.user, DocumentContainer
-            )[0]
+            RoleAssignment.get_viewable_object_ids(request.user, DocumentContainer)
         )
         outgoing = [
             {"id": str(r.target_container_id), "str": r.target_container.name}
@@ -362,7 +413,6 @@ class DocumentContainerViewSet(BaseModelViewSet):
                 document_type=document_type,
                 name=request.data.get("name") or getattr(upload, "name", ""),
                 folder=folder,
-                is_published=False,
             )
             document = ManagedDocument.objects.create(
                 container=container,
@@ -434,7 +484,6 @@ class DocumentContainerViewSet(BaseModelViewSet):
                 document_type=document_type,
                 name=request.data.get("name") or "",
                 folder=folder,
-                is_published=False,
             )
             document = ManagedDocument.objects.create(
                 container=container,
@@ -573,9 +622,9 @@ class ManagedDocumentViewSet(BaseModelViewSet):
         # TODO(revisit): custom templates in Global aren't shared to domain-only
         # users (only built-ins are). If Global should act as a shared library,
         # also OR in root-folder templates here.
-        accessible_ids = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, DocumentTemplate
-        )[0]
+        accessible_ids = RoleAssignment.get_viewable_object_ids(
+            request.user, DocumentTemplate
+        )
 
         def for_locale(locale):
             qs = DocumentTemplate.objects.filter(locale=locale).filter(
@@ -836,6 +885,8 @@ class DocumentAttachmentViewSet(BaseModelViewSet):
     API endpoint for serving document attachment files.
     """
 
+    http_method_names = ["get", "head", "options"]
+
     model = DocumentAttachment
 
     @action(detail=True, methods=["get"])
@@ -845,9 +896,11 @@ class DocumentAttachmentViewSet(BaseModelViewSet):
             pk_uuid = UUID(pk)
         except ValueError, AttributeError:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        object_ids_view = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, DocumentAttachment
-        )[0]
+
+        object_ids_view = RoleAssignment.get_viewable_object_ids(
+            request.user, DocumentAttachment
+        )
+
         if pk_uuid not in object_ids_view:
             return Response(status=status.HTTP_403_FORBIDDEN)
         attachment = self.get_object()
@@ -900,9 +953,10 @@ class DocumentRevisionViewSet(BaseModelViewSet):
             pk_uuid = UUID(pk)
         except ValueError, AttributeError:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        object_ids_view = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, DocumentRevision
-        )[0]
+        object_ids_view = RoleAssignment.get_viewable_object_ids(
+            request.user, DocumentRevision
+        )
+
         if pk_uuid not in object_ids_view:
             return Response(status=status.HTTP_403_FORBIDDEN)
         revision = self.get_object()
@@ -960,23 +1014,7 @@ class DocumentRevisionViewSet(BaseModelViewSet):
                 )
         old_content = instance.content
         instance = serializer.save()
-        # Record edit history for draft revisions, only if content actually changed
-        if (
-            instance.status == DocumentRevision.Status.DRAFT
-            and instance.content != old_content
-        ):
-            DocumentEdit.objects.create(
-                revision=instance,
-                editor=self.request.user,
-                summary=instance.change_summary or "",
-                content_snapshot=instance.content,
-            )
-            # Cap edit history to the 20 most recent entries per revision
-            MAX_EDITS_PER_REVISION = 20
-            edit_ids_to_keep = instance.edits.order_by("-created_at").values_list(
-                "pk", flat=True
-            )[:MAX_EDITS_PER_REVISION]
-            instance.edits.exclude(pk__in=list(edit_ids_to_keep)).delete()
+        record_document_edit(instance, self.request.user, old_content)
 
     @action(detail=True, methods=["post"], url_path="start-editing")
     def start_editing(self, request, pk=None):
@@ -1312,16 +1350,20 @@ class DocumentRevisionViewSet(BaseModelViewSet):
             revision.content,
             extensions=["tables", "fenced_code", "toc", "nl2br"],
         )
-        accessible_ids = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), user, DocumentAttachment
-        )[0]
+        content_html = _render_mermaid_blocks(content_html)
+        accessible_ids = RoleAssignment.get_viewable_object_ids(
+            user, DocumentAttachment
+        )
+
         content_html = mark_safe(self._inline_images(content_html, set(accessible_ids)))
-        author_name = ""
-        if revision.author:
-            author_name = (
-                f"{revision.author.first_name} {revision.author.last_name}".strip()
-                or revision.author.email
-            )
+
+        author_name = str(revision.author) if revision.author else ""
+        reviewer_name = (
+            str(revision.reviewer)
+            if revision.reviewer
+            and revision.status in DocumentRevision.APPROVED_STATUSES
+            else ""
+        )
         doc = revision.document
         container = getattr(doc, "container", None)
         document_type_label = ""
@@ -1349,6 +1391,7 @@ class DocumentRevisionViewSet(BaseModelViewSet):
             "status": revision.status,
             "status_display": revision.get_status_display(),
             "author_name": author_name,
+            "reviewer_name": reviewer_name,
             "published_at": (
                 revision.published_at.strftime("%Y-%m-%d")
                 if revision.published_at

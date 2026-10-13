@@ -14,10 +14,10 @@ from rest_framework import status
 from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.pagination import LimitOffsetPagination
+from core.pagination import CustomLimitOffsetPagination
 from core.models import EvidenceRevision
 from core.utils import compare_schema_versions
-from iam.models import User
+from iam.models import User, Folder
 from serdes.serializers import LoadBackupSerializer
 
 from django.db.models.signals import post_save
@@ -36,10 +36,10 @@ class ExportBackupView(APIView):
     def get(self, request, *args, **kwargs):
         if not request.user.has_backup_permission:
             return Response(status=status.HTTP_403_FORBIDDEN)
-        response = HttpResponse(content_type="application/json")
+        response = HttpResponse(content_type="application/gzip")
         timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
         response["Content-Disposition"] = (
-            f'attachment; filename="ciso-assistant-db-{settings.VERSION}-{timestamp}.json"'
+            f'attachment; filename="ciso-assistant-db-{settings.VERSION}-{timestamp}.json.gz"'
         )
 
         buffer = io.StringIO()
@@ -137,6 +137,8 @@ class LoadBackupView(APIView):
                         "auditlog.logentry",
                     ],
                 )
+                # Invalidate the root folder cache (as the backup may have changed the root folder).
+                Folder._init_root_folder()
 
         except Exception as e:
             logger.error("Error while loading backup", exc_info=e)
@@ -653,7 +655,7 @@ class AttachmentMetadataView(APIView):
             queryset = queryset.filter(created_at__lte=created_before)
 
         queryset = queryset.order_by("created_at", "id")
-        paginator = LimitOffsetPagination()
+        paginator = CustomLimitOffsetPagination()
         paginated_queryset = paginator.paginate_queryset(queryset, request)
 
         results = []

@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.utils.translation import gettext_lazy as _
+from django.utils.text import slugify
+from django.utils.translation import get_language, gettext_lazy as _
 from django.core.validators import MaxValueValidator, MinValueValidator
 from core.base_models import (
     ActorSyncManager,
@@ -34,17 +35,103 @@ from core.dora import (
     DORA_REINTEGRATION_POSSIBILITY_CHOICES,
     DORA_DISCONTINUING_IMPACT_CHOICES,
 )
-from iam.models import Folder, FolderMixin, PublishInRootFolderMixin
+from iam.models import Folder, FolderMixin
 from iam.views import User
 
 from auditlog.registry import auditlog
+
+
+class TierSource(models.TextChoices):
+    ASSESSMENT = "assessment", _("Assessment")
+    OVERRIDE = "override", _("Override")
+    MANUAL = "manual", _("Manual")
+
+
+class Tier(NameDescriptionMixin, FolderMixin):
+    """One level of the organisation's vendor tier scale. Ordered by `rank`,
+    higher meaning more critical; global, so it lives in the root folder."""
+
+    # Four levels, like the 1-4 criticality of entity assessments and solutions,
+    # named in the vocabulary of DORA / EBA outsourcing ("critical or important").
+    DEFAULT_TIERS = [
+        {"name": "critical", "rank": 4, "hexcolor": "#dc2626"},
+        {"name": "important", "rank": 3, "hexcolor": "#ea580c"},
+        {"name": "standard", "rank": 2, "hexcolor": "#ca8a04"},
+        {"name": "low-impact", "rank": 1, "hexcolor": "#16a34a"},
+    ]
+
+    # What forms reference a tier by: set once from the name, never changed, so
+    # renaming or reordering the scale cannot repoint a form to another tier.
+    key = models.SlugField(max_length=100, unique=True, verbose_name=_("Key"))
+    rank = models.PositiveIntegerField(unique=True, verbose_name=_("Rank"))
+    hexcolor = models.CharField(
+        max_length=9, blank=True, default="", verbose_name=_("Color")
+    )
+    builtin = models.BooleanField(default=False, verbose_name=_("Built-in"))
+    is_visible = models.BooleanField(default=True, verbose_name=_("Is visible"))
+    translations = models.JSONField(
+        default=dict, blank=True, null=True, verbose_name=_("Translations")
+    )
+
+    fields_to_check = ["name"]
+
+    class Meta:
+        ordering = ["-rank"]
+        verbose_name = _("Tier")
+        verbose_name_plural = _("Tiers")
+
+    def __str__(self) -> str:
+        t = (self.translations or {}).get(get_language(), {})
+        return (t.get("name") if isinstance(t, dict) else None) or self.name
+
+    def save(self, *args, **kwargs):
+        self.folder = Folder.get_root_folder()
+        if not self.key:
+            self.key = self.free_key(self.name)
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def free_key(cls, name: str) -> str:
+        base = slugify(name)[:90] or "tier"
+        key, n = base, 1
+        while cls.objects.filter(key=key).exists():
+            n += 1
+            key = f"{base}-{n}"
+        return key
+
+    @classmethod
+    def create_default_tiers(cls):
+        # Seeded once: the scale belongs to the organisation, so a restart must
+        # not undo a rename, a recolour or a deletion.
+        if cls.objects.exists():
+            return
+        for tier in cls.DEFAULT_TIERS:
+            cls.objects.create(**tier, builtin=True)
+
+    @classmethod
+    def make_room_at_the_bottom(cls) -> int:
+        """Shift every rank up by one and return the freed rank 1. Call inside a
+        transaction. Parked above the current range first: rank is unique, and a
+        row-by-row `+ 1` collides with its neighbour (SQLite cannot defer the
+        constraint). The rows are locked through a plain select: Django drops
+        `select_for_update` from an aggregate."""
+        ranks = list(cls.objects.select_for_update().values_list("rank", flat=True))
+        top = max(ranks, default=0)
+        if top:
+            cls.objects.update(rank=models.F("rank") + top + 1)
+            cls.objects.update(rank=models.F("rank") - top)
+        return 1
+
+    @classmethod
+    def next_rank(cls) -> int:
+        top = cls.objects.aggregate(top=models.Max("rank"))["top"]
+        return (top or 0) + 1
 
 
 class Entity(
     ActorSyncMixin,
     NameDescriptionMixin,
     FolderMixin,
-    PublishInRootFolderMixin,
     FilteringLabelMixin,
 ):
     """
@@ -118,6 +205,11 @@ class Entity(
         verbose_name=_("Legal identifiers"),
         help_text=_("Legal identifiers (LEI, EUID, VAT, DUNS, etc.)"),
     )
+    address = models.TextField(
+        blank=True,
+        verbose_name=_("Address"),
+        help_text=_("Postal address, as it should appear on formal documents"),
+    )
     country = models.CharField(
         max_length=3,
         choices=COUNTRY_CHOICES,
@@ -165,6 +257,37 @@ class Entity(
         verbose_name=_("DORA provider person type"),
         help_text=_("Type of person for ICT third-party service providers"),
     )
+    # Current tier only; written through `tprm.tiers.set_entity_tier`, which
+    # also appends the EntityTierChange history row.
+    tier = models.ForeignKey(
+        Tier,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="entities",
+        verbose_name=_("Tier"),
+    )
+    tier_source = models.CharField(
+        max_length=20,
+        choices=TierSource.choices,
+        blank=True,
+        default="",
+        verbose_name=_("Tier source"),
+    )
+    tier_set_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("Tier set at")
+    )
+    # Set when score bands produced the tier: orders entities within a tier.
+    tier_value = models.FloatField(null=True, blank=True, verbose_name=_("Tier value"))
+    tier_response = models.ForeignKey(
+        "core.QuickFormResponse",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name=_("Tier assessment"),
+        help_text=_("The accepted response the current tier came from"),
+    )
 
     fields_to_check = ["name"]
 
@@ -193,6 +316,8 @@ class EntityAssessment(Assessment):
         OK = "ok", _("Ok")
         NA = "not_applicable", _("Not applicable")
 
+    # Superseded by the entity's tier (qualification, not posture); kept, hidden
+    # in the UI, until integrations move over.
     criticality = models.IntegerField(default=0, verbose_name=_("Criticality"))
     penetration = models.IntegerField(default=0, verbose_name=_("Penetration"))
     dependency = models.IntegerField(default=0, verbose_name=_("Dependency"))
@@ -227,12 +352,20 @@ class EntityAssessment(Assessment):
         blank=True,
         null=True,
     )
+    expiry_date = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name=_("Expiry date"),
+        help_text=_("Date after which the conclusion is no longer considered valid"),
+    )
     reference_link = models.URLField(
         blank=True,
         null=True,
         max_length=2048,
         verbose_name=_("Reference link"),
     )
+
+    IAM_SCOPE_FIELD = "entity"
 
     class Meta:
         verbose_name = _("Entity assessment")
@@ -262,6 +395,8 @@ class Representative(AbstractBaseModel, FilteringLabelMixin):
 
     fields_to_check = ["email"]
 
+    IAM_SCOPE_FIELD = "entity"
+
 
 class Solution(NameDescriptionMixin, FilteringLabelMixin):
     """
@@ -285,7 +420,16 @@ class Solution(NameDescriptionMixin, FilteringLabelMixin):
     ref_id = models.CharField(max_length=255, blank=True)
     is_active = models.BooleanField(default=True, verbose_name=_("Is active"))
     reference_link = models.URLField(blank=True, null=True, max_length=2048)
+    # Superseded by `tier`; kept, hidden in the UI, until integrations move over.
     criticality = models.IntegerField(default=0, verbose_name=_("Criticality"))
+    tier = models.ForeignKey(
+        Tier,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="solutions",
+        verbose_name=_("Tier"),
+    )
     owner = models.ManyToManyField(
         Actor,
         blank=True,
@@ -394,6 +538,8 @@ class Solution(NameDescriptionMixin, FilteringLabelMixin):
 
     fields_to_check = ["name", "provider_entity"]
 
+    IAM_SCOPE_FIELD = "provider_entity"
+
     class Meta:
         verbose_name = _("Solution")
         verbose_name_plural = _("Solutions")
@@ -442,6 +588,8 @@ class SolutionSubcontractor(AbstractBaseModel):
         null=True,
         blank=True,
     )
+
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
 
     class Meta:
         verbose_name = _("Solution subcontractor")
@@ -634,7 +782,156 @@ class Contract(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         verbose_name_plural = _("Contracts")
 
 
+class EntityScore(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
+    """A rating an external service publishes about an entity, dated so readings
+    accumulate as history. `scale_max` makes providers comparable."""
+
+    entity = models.ForeignKey(
+        Entity,
+        on_delete=models.CASCADE,
+        related_name="scores",
+        verbose_name=_("Entity"),
+    )
+    provider = models.ForeignKey(
+        Terminology,
+        on_delete=models.PROTECT,
+        related_name="entity_scores",
+        limit_choices_to={
+            "field_path": Terminology.FieldPath.ENTITY_SCORE_PROVIDER,
+            "is_visible": True,
+        },
+        verbose_name=_("Provider"),
+        help_text=_("Service that published this score"),
+    )
+    score = models.FloatField(
+        verbose_name=_("Score"),
+        help_text=_("Value as published by the provider"),
+    )
+    scale_max = models.FloatField(
+        default=100,
+        validators=[MinValueValidator(1)],
+        verbose_name=_("Scale maximum"),
+        help_text=_("Top of the provider's scale, so scores can be compared"),
+    )
+    grade = models.CharField(
+        max_length=8,
+        blank=True,
+        verbose_name=_("Grade"),
+        help_text=_("Letter rating, when the provider publishes one (A, B+, ...)"),
+    )
+    as_of = models.DateField(
+        verbose_name=_("As of"),
+        help_text=_("Date the provider published this score"),
+    )
+    url = models.URLField(
+        blank=True,
+        max_length=2048,
+        verbose_name=_("Link"),
+        help_text=_("Link to the report on the provider's platform"),
+    )
+    observation = models.TextField(blank=True, null=True, verbose_name=_("Observation"))
+
+    fields_to_check = ["entity", "provider", "as_of"]
+
+    class Meta:
+        verbose_name = _("Entity score")
+        verbose_name_plural = _("Entity scores")
+        ordering = ["-as_of"]
+        constraints = [
+            # One reading per provider per day, for writes that skip the serializer.
+            models.UniqueConstraint(
+                fields=["entity", "provider", "as_of"],
+                name="unique_entity_score_per_provider_and_date",
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.entity} - {self.provider}: {self.score}"
+
+    @property
+    def normalized_score(self) -> float | None:
+        """The score on a 0-100 scale."""
+        if not self.scale_max:
+            return None
+        return round((self.score / self.scale_max) * 100, 1)
+
+    def save(self, *args, **kwargs):
+        # As visible as the entity it is about.
+        if self.entity_id:
+            self.folder = self.entity.folder
+        super().save(*args, **kwargs)
+
+
+class EntityTierChange(AbstractBaseModel, FolderMixin):
+    """One change of an entity's tier, whatever the path (form, API, batch,
+    accepted response). Append-only; `created_at` is when it happened."""
+
+    entity = models.ForeignKey(
+        Entity,
+        on_delete=models.CASCADE,
+        related_name="tier_changes",
+        verbose_name=_("Entity"),
+    )
+    tier = models.ForeignKey(
+        Tier,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="changes",
+        verbose_name=_("Tier"),
+        help_text=_("Empty when the tier was cleared"),
+    )
+    previous_tier = models.ForeignKey(
+        Tier,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name=_("Previous tier"),
+    )
+    source = models.CharField(
+        max_length=20, choices=TierSource.choices, verbose_name=_("Source")
+    )
+    value = models.FloatField(null=True, blank=True, verbose_name=_("Value"))
+    response = models.ForeignKey(
+        "core.QuickFormResponse",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name=_("Assessment"),
+    )
+    changed_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="entity_tier_changes",
+        verbose_name=_("Changed by"),
+    )
+    note = models.TextField(blank=True, default="", verbose_name=_("Note"))
+
+    class Meta:
+        verbose_name = _("Entity tier change")
+        verbose_name_plural = _("Entity tier changes")
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        return f"{self.entity}: {self.previous_tier} → {self.tier}"
+
+    def save(self, *args, **kwargs):
+        # As visible as the entity it is about.
+        if self.entity_id:
+            self.folder = self.entity.folder
+        super().save(*args, **kwargs)
+
+
 common_exclude = ["created_at", "updated_at"]
+
+auditlog.register(
+    Tier,
+    exclude_fields=common_exclude,
+)
 
 auditlog.register(
     Entity,
@@ -654,5 +951,9 @@ auditlog.register(
 )
 auditlog.register(
     Contract,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    EntityScore,
     exclude_fields=common_exclude,
 )

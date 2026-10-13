@@ -11,7 +11,6 @@ let testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
 const entityAssessment = {
 	name: 'Test entity assessment',
 	// folder is inherited from the entity via initialData, no need to specify it
-	perimeter: vars.folderName + '/' + vars.perimeterName,
 	create_audit: true,
 	framework: vars.questionnaire.name,
 	representatives: 'third-party@tests.com'
@@ -183,7 +182,6 @@ test('user can create representatives, solutions and entity assessments inside e
 test('third-party representative can set their password', async ({ sideBar, mailer, page }) => {
 	test.slow();
 	await test.step('set password and log in as third party representative', async () => {
-		await expect(mailer.page.getByText('{{').last()).toBeHidden(); // Wait for mailhog to load the emails
 		const welcomeMail = await mailer.getEmailBySubject('Welcome to CISO Assistant!');
 		await welcomeMail.hasWelcomeEmailDetails();
 		await welcomeMail.hasEmailRecipient('third-party@tests.com');
@@ -277,7 +275,7 @@ test('third-party representative can fill their assigned audit', async ({
 		await page.getByTestId('create-evidence-button').click();
 		await page.getByTestId('form-input-name').click();
 		await page.getByTestId('form-input-name').fill('tp-evidence');
-		await page.getByTestId('form-input-filtering-labels').getByRole('textbox').click();
+		await page.getByTestId('form-input-filtering-labels').getByRole('combobox').click();
 		let objectCreatedToast = thirdPartyAuthenticatedPage.isToastVisible(
 			'The evidence object has been successfully created' + /.+/.source
 		);
@@ -292,7 +290,9 @@ test('third-party representative can fill their assigned audit', async ({
 	await test.step('check that selected evidences were updated', async () => {
 		await page.getByTestId('select-evidence-button').click();
 		await expect(page.getByTestId('modal-title')).toBeVisible();
-		await expect(page.getByRole('option').first()).toContainText(/.*tp-evidence.*/);
+		await expect(page.getByTestId('form-input-evidences').locator('div.multiselect')).toContainText(
+			/.*tp-evidence.*/
+		);
 		await page.getByTestId('cancel-button').click();
 	});
 });

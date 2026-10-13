@@ -103,28 +103,36 @@ The docker compose file can be adjusted to pass extra parameters to suit your se
 
 <!-- FEATURES:START -->
 <details>
-<summary><strong>📋 Full feature list</strong> — click to expand (searchable, 57 features)</summary>
+<summary><strong>📋 Full feature list</strong> — click to expand (searchable, 73 features)</summary>
 
 **Compliance & frameworks**
 - Audit and campaigns management
 - Automatic mapping
 - Mapping explorer
 - Custom frameworks supported
-- +167 frameworks included
+- +220 frameworks included
 - Policies management
+- Document management
 - Evidence management
 
 **Risk management**
 - Risk assessments and registers
 - EBIOS RM module
+- Threat modeling
 - Risk acceptance workflows
 - Business Impact Analysis
 - Cyber Risk Quantification
+- Risk trajectory & projection
 - Vulnerability management
 - Vulnerability enrichment
+- Security advisories & CWE
+- TTP catalogs
 
 **Third-party risk**
 - Third-party risk management
+- Contracts management
+- DORA register of information
+- External security ratings
 
 **Operations & remediation**
 - Action plan tracking and prioritization
@@ -134,8 +142,10 @@ The docker compose file can be adjusted to pass extra parameters to suit your se
 - Task management
 - Kanban boards
 - Periodic checks
+- Technical posture management
 - Exceptions tracking
 - Incidents management
+- DORA incident reporting
 - Validation & approval flows
 - Email reminders
 
@@ -145,19 +155,25 @@ The docker compose file can be adjusted to pass extra parameters to suit your se
 - Automated quality checks
 - Advanced insights
 - Custom metrics tracking
+- Power BI connector
 
 **Collaboration & productivity**
 - Assignments & respondent mode
+- Requests management
+- Quick forms
 - Comments & collaboration
 - Universal search
 - Command palette
+- In-app notifications center
 
 **Automation & integrations**
+- Workflow automation
 - Comprehensive REST API
 - CLI for automation
 - Data import wizard
 - Kafka integration
 - MCP support
+- AI assistant with RAG
 - Outgoing webhooks
 - Jira & ServiceNow integrations
 - Consultant features (e.g. single-domain export/import)
@@ -182,7 +198,7 @@ The docker compose file can be adjusted to pass extra parameters to suit your se
 - Multi-level domains
 - Kubernetes (Helm) deployment
 - Open Source
-- Available in +26 languages
+- Available in +27 languages
 
 </details>
 <!-- FEATURES:END -->
@@ -239,7 +255,7 @@ Read more here: [AI engine](backend/chat/README.md)
 7. CMMC v2 🇺🇸
 8. PSPF 🇦🇺
 9. General Data Protection Regulation (GDPR): Full text and checklist from GDPR.EU 🇪🇺
-10. Essential Eight 🇦🇺
+10. Essential Eight (Maturity Model, November 2023) 🇦🇺
 11. NYDFS 500 with 2023-11 amendments 🇺🇸
 12. DORA (Act, RTS, ITS and GL) 🇪🇺
 13. NIST AI Risk Management Framework 🇺🇸🤖
@@ -254,14 +270,14 @@ Read more here: [AI engine](backend/chat/README.md)
 22. Cyber Resilience Act (CRA) 🇪🇺
 23. TIBER-EU 🇪🇺
 24. NIST Privacy Framework 🇺🇸
-25. TISAX (VDA ISA) v5.1 and v6.0 🚘
+25. TISAX (VDA ISA) v5.1, v6.0 and v2027 🚘
 26. ANSSI hygiene guide 🇫🇷
 27. Essential Cybersecurity Controls (ECC) 🇸🇦
 28. CIS Controls v8\* 🌐
 29. CSA CCM (Cloud Controls Matrix)\* ☁️
 30. FADP (Federal Act on Data Protection) 🇨🇭
 31. NIST SP 800-171 rev2 (2021) 🇺🇸
-32. ANSSI : recommandations de sécurité pour un système d'IA générative 🇫🇷🤖
+32. ANSSI : Recommandations de sécurité pour un système d'IA générative (v1.0) 🇫🇷🤖
 33. NIST SP 800-218: Secure Software Development Framework (SSDF) 🖥️
 34. GSA FedRAMP rev5 ☁️🇺🇸
 35. Cadre Conformité Cyber France (3CF) v1 (2021) ✈️🇫🇷
@@ -277,18 +293,18 @@ Read more here: [AI engine](backend/chat/README.md)
 45. EU AI Act 🇪🇺🤖
 46. FBI CJIS 🇺🇸👮
 47. Operational Technology Cybersecurity Controls (OTCC) 🇸🇦
-48. Secure Controls Framework (SCF) 🇺🇸🌐
+48. Secure Controls Framework (SCF) 2026.3 🇺🇸🌐
 49. NCSC - Cyber Assessment Framework (CAF) v3.2 🇬🇧
 50. California Consumer Privacy Act (CCPA) 🇺🇸
 51. California Consumer Privacy Act Regulations 🇺🇸
 52. NCSC Cyber Essentials 🇬🇧
 53. Directive Nationale de la Sécurité des Systèmes d'Information (DNSSI) Maroc 🇲🇦
-54. Part-IS ✈️🇪🇺
+54. Part-IS (Consolidated 16-10-2025) ✈️🇪🇺
 55. ENS Esquema Nacional de seguridad 🇪🇸
 56. Korea ISA ISMS-P 🇰🇷
 57. Swiss ICT minimum standard 🇨🇭
 58. Adobe Common Controls Framework (CCF) v5 🌐
-59. BSI Cloud Computing Compliance Criteria Catalogue (C5) 🇩🇪
+59. BSI Cloud Computing Compliance Criteria Catalogue (C5) 2020 and 2026 🇩🇪
 60. Référentiel d’Audit de la Sécurité des Systèmes d’Information, ANCS Tunisie 🇹🇳
 61. ECB Cyber resilience oversight expectations for financial market infrastructures 🇪🇺
 62. Mindeststandard-des-BSI-zur-Nutzung-externer-Cloud-Dienste (Version 2.1) 🇩🇪
@@ -299,11 +315,11 @@ Read more here: [AI engine](backend/chat/README.md)
 67. International Traffic in Arms Regulations (ITAR) 🇺🇸
 68. Federal Trade Commission (FTC) Standards for Safeguarding Customer Information 🇺🇸
 69. OWASP's checklist for LLM governance and security 🌐
-70. Recommandations pour les architectures des systèmes d’information sensibles ou à diffusion restreinte (ANSSI) 🇫🇷
-71. CIS benchmark for Kubernetes v1.10 🌐
+70. ANSSI : Recommandations pour les architectures des systèmes d’information sensibles ou à diffusion restreinte (v1.2) 🇫🇷
+71. CIS Benchmarks — Kubernetes (v1.10, v2.0.1), AWS, Azure, GCP, Microsoft 365, Google Workspace, GitHub, GitLab, Debian 12/13, Ubuntu 24.04 LTS, Windows 11 🌐
 72. De tekniske minimumskrav for statslige myndigheder 🇩🇰
 73. Google SAIF framework 🤖
-74. Recommandations relatives à l'administration sécurisée des SI (ANSSI) 🇫🇷
+74. ANSSI : Recommandations relatives à l'administration sécurisée des SI (v3.0) 🇫🇷
 75. Prudential Standard CPS 230 - Operational Risk Management (APRA) 🇦🇺
 76. Prudential Standard CPS 234 - Information Security (APRA) 🇦🇺
 77. Vehicle Cyber Security Audit (VCSA) v1.1 🚘
@@ -315,7 +331,7 @@ Read more here: [AI engine](backend/chat/README.md)
 83. CCB CyberFundamentals Framework 2025 🇧🇪
 84. Prestataires de détection des incidents de sécurité (PDIS) - Référentiel d’exigences 🇫🇷
 85. Vendor Due Diligence - simple baseline - intuitem 🌐
-86. Points de contrôle Active Directory (AD) - ANSSI 🇫🇷
+86. ANSSI : Points de contrôle Active Directory (AD) (Avril 2026) 🇫🇷
 87. ISO 42001:2023 outline - Artificial Intelligence Management System, including Annex A 🤖🌐
 88. India's Digital Personal Data Protection Act (DPDPA) - 2023 🇮🇳
 89. E-ITS (Estonia's national cyber security standard) - 2024 🇪🇪
@@ -331,9 +347,9 @@ Read more here: [AI engine](backend/chat/README.md)
 99. PSSI État 🇫🇷
 100. Checklist de dossier d'homologation 🇫🇷
 101. Cahier des charges Label EBIOS RM v3.1 🇫🇷
-102. SecNumCloud v3.2 Annexe 2 : recommandations aux commanditaires ☁️🇫🇷
+102. SecNumCloud v3.2 Annexe 2 : Recommandations aux commanditaires ☁️🇫🇷
 103. CCB CyberFundamentals Small - Self assessment 🇧🇪
-104. Mitre ATT&CK v18.1 - Threat catalog 🌐
+104. Mitre ATT&CK v19.1 - Threats and Mitigations catalog 🌐
 105. Mitre D3FEND - Reference controls 🌐
 106. OWASP Top 10 Web - Threat catalog 🐝🌐
 107. OWASP MAS Threat Modelling Guide - Threat catalog 🐝📱
@@ -349,15 +365,26 @@ Read more here: [AI engine](backend/chat/README.md)
 117. Personal Data Protection Law (PDPL) 🇸🇦
 118. NCSC - Cyber Assessment Framework (CAF) v4.0 🇬🇧
 119. Algemene Beveiligingseisen voor Rijksoverheidsopdrachten (ABRO) 2026 🇳🇱
+120. Algemene Beveiligingseisen voor Defensieopdrachten (ABDO) 2019 🇳🇱
+121. ANSSI : Cybersécurité des systèmes industriels - Mesures détaillées 🇫🇷🏭
+122. Cbw (NIS2) Control Framework v1.2 🇳🇱
+123. ENISA SME Cyber Resilience Maturity Assessment (CRA) 🇪🇺
+124. ISO 27701:2025 outline - Privacy Information Management System, including Annex A 🌐
+125. Plumber CI/CD Security Checks 🖥️
+126. UNESCO AI Maturity Framework 🤖🌐
+127. OWASP Top 10 for Agentic Applications 2026 🐝🤖
+128. Personal Information Protection Law (PIPL) 🇨🇳
+129. Personal Information Protection Compliance Audit Measures and Guideline (CAC) 🇨🇳
+130. OWASP Software Assurance Maturity Model (SAMM) v2.2 🐝🖥️
 
 ### Community contributions
 
 1. PGSSI-S (Politique Générale de Sécurité des Systèmes d'Information de Santé) 🇫🇷
-2. ANSSI : Recommandations de configuration d'un système GNU/Linux 🇫🇷
+2. ANSSI : Recommandations de configuration d'un système GNU/Linux (v2.0) 🇫🇷
 3. PSSI-MCAS (Politique de sécurité des systèmes d’information pour les ministères chargés des affaires sociales) 🇫🇷
-4. ANSSI : Recommandations pour la protection des systèmes d'information essentiels 🇫🇷
-5. ANSSI : Recommandations de sécurité pour l'architecture d'un système de journalisation 🇫🇷
-6. ANSSI : Recommandations de sécurité relatives à TLS 🇫🇷
+4. ANSSI : Recommandations pour la protection des systèmes d'information essentiels (v1.0) 🇫🇷
+5. ANSSI : Recommandations de sécurité pour l'architecture d'un système de journalisation (v2.0) 🇫🇷
+6. ANSSI : Recommandations de sécurité relatives à TLS (v1.2) 🇫🇷
 7. New Zealand Information Security Manual (NZISM) 🇳🇿
 8. Clausier de sécurité numérique du Club RSSI Santé 🇫🇷
 9. Référentiel National de Sécurité de l’Information (RNSI), MPT Algérie 🇩🇿
@@ -367,10 +394,10 @@ Read more here: [AI engine](backend/chat/README.md)
 13. PSSIE du Bénin, ANSSI Bénin 🇧🇯
 14. IGI 1300 / II 901 - Liste des exigences pour la mise en oeuvre d'un SI classifié (ANSSI) 🇫🇷
 15. Référentiel Général de Sécurité 2.0 - Annexe B2 🇫🇷
-16. Recommandations sur la sécurisation des systèmes de contrôle d'accès physique et de vidéoprotection 🇫🇷
-17. Recommandations pour un usage sécurisé d’(Open)SSH 🇫🇷
-18. Recommandations de sécurité relatives à IPsec pour la protection des flux réseau 🇫🇷
-19. Recommandations relatives à l'interconnexion d'un système d'information à internet 🇫🇷
+16. ANSSI : Recommandations sur la sécurisation des systèmes de contrôle d'accès physique et de vidéoprotection (v2.2) 🇫🇷
+17. ANSSI : Recommandations pour un usage sécurisé d’(Open)SSH (v1.3) 🇫🇷
+18. ANSSI : Recommandations de sécurité relatives à IPsec pour la protection des flux réseau (v1.1) 🇫🇷
+19. ANSSI : Recommandations relatives à l'interconnexion d'un système d'information à internet (v3.0) 🇫🇷
 20. Guides des mécanismes cryptographiques 🇫🇷
 21. Swift Customer Security Controls Framework (CSCF) v2025 🏦🌐
 22. OWASP Application Security Verification Standard (ASVS) 5 🐝🖥️
@@ -387,6 +414,9 @@ Read more here: [AI engine](backend/chat/README.md)
 33. AI Defense Matrix 🤖🌐
 34. Zero Trust for Operational Technology (ZT OT) 🇺🇸🏭
 35. T.C. CBDDO Bilgi ve İletişim Güvenliği Rehberi (BİGR) 🇹🇷
+36. NCA NCNICC-1:2025 🇸🇦
+37. NCA ECC-2:2024 🇸🇦
+38. NCA CCC-1:2020 🇸🇦
 
 <br/>
 
@@ -400,7 +430,6 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 ### Coming soon
 
 - Indonesia PDP 🇮🇩
-- OWASP SAMM
 - COBAC R-2024/01
 - ICO Data protection self-assessment 🇬🇧
 - ASD ISM 🇦🇺
@@ -551,7 +580,7 @@ export DJANGO_DEBUG=True
 # Default url is set to http://localhost:5173 but you can change it, e.g. to use https with a caddy proxy
 export CISO_ASSISTANT_URL=https://localhost:8443
 
-# Setup a development mailer with Mailhog for example
+# Setup a development mailer with Mailpit for example
 export EMAIL_HOST_USER=''
 export EMAIL_HOST_PASSWORD=''
 export DEFAULT_FROM_EMAIL=ciso-assistant@ciso-assistantcloud.com
@@ -843,9 +872,25 @@ PATs respect MFA: they are issued from an authenticated session, so an account p
 
 ## Setting CISO Assistant for production
 
-The docker-compose.yml highlights a relevant configuration with a Caddy proxy in front of the frontend. It exposes API calls only for SSO. Note that docker-compose.yml exposes the full API, which is not yet recommended for production.
+The docker-compose.yml highlights a relevant configuration for testing, with a Caddy proxy in front of the frontend. It exposes the full API, which is not yet recommended for production.
 
-Set `DJANGO_DEBUG=False` for security reasons.
+For production, the config builder can be used to generate a more hardened and tailored docker-compose.yml file, though several hardening steps are still required.
+
+The following recommendations apply for production:
+- Set `DJANGO_DEBUG=False` for security reasons.
+- Pin versions to the latest production version for all images (backend, frontend, reverse proxy)
+- Harden the network configuration to expose only the relevant ports, and filter the URLs to limit full API access to trusted IP ranges.
+  If public API access is restricted and SSO is enabled, keep these endpoints reachable by the browser or identity provider:
+  - `/api/iam/sso/redirect/`
+  - `/api/accounts/saml/0/acs/`
+  - `/api/accounts/saml/0/acs/finish/`
+  - `/api/accounts/oidc/openid_connect/login/callback/`
+  - `/api/accounts/saml/0/sls/` (only with SAML single logout enabled)
+- Use non-root deployment, as explained below.
+- Use a valid certificate for the reverse proxy
+- If the reverse proxy is not running on the same host as the backend and frontend, use a VPN like wireguard between the nodes.
+- Use an encrypted volume for the database, and manage the encryption key cautiously.
+- Manage secrets in environment variables instead of putting them directly in the docker-compose.yml file.
 
 > [!NOTE]
 > The frontend cannot infer the host automatically, so you need to either set the ORIGIN variable, or the `HOST_HEADER` and `PROTOCOL_HEADER` variables. Please see [the sveltekit doc](https://kit.svelte.dev/docs/adapter-node#environment-variables-origin-protocolheader-hostheader-and-port-header) on this tricky issue. Beware that this approach does not work with "pnpm run dev", which should not be a worry for production.
@@ -879,18 +924,29 @@ Reference is `en.json`; coverage = share of reference keys present in each local
 
 ## Built With 💜
 
-- [Django](https://www.djangoproject.com/) - Python Web Development Framework
-- [SvelteKit](https://kit.svelte.dev/) - Frontend Framework
-- [eCharts](https://echarts.apache.org) - Charting library
-- [unovis](https://unovis.dev) - Complementary charting library
-- [Gunicorn](https://gunicorn.org/) - Python WSGI HTTP Server for UNIX
 - [Caddy](https://caddyserver.com) - The coolest reverse Proxy
-- [Gitbook](https://www.gitbook.com) - Documentation platform
-- [PostgreSQL](https://www.postgresql.org/) - Open Source RDBMS
-- [SQLite](https://www.sqlite.org/index.html) - Open Source RDBMS
+- [Django](https://www.djangoproject.com/) - Python Web Development Framework
+- [Django REST Framework](https://www.django-rest-framework.org/) - Toolkit for building Web APIs
+- [django-allauth](https://allauth.org/) - Authentication, MFA and SSO
 - [Docker](https://www.docker.com/) - Container Engine
-- [inlang](https://inlang.com/) - The ecosystem to globalize your software
+- [eCharts](https://echarts.apache.org) - Charting library
+- [Font Awesome](https://fontawesome.com) - Icons
+- [Gitbook](https://www.gitbook.com) - Documentation platform
+- [Gunicorn](https://gunicorn.org/) - Python WSGI HTTP Server for UNIX
 - [Huey](https://huey.readthedocs.io/en/latest/) - A lightweight task queue
+- [inlang](https://inlang.com/) - The ecosystem to globalize your software
+- [PostgreSQL](https://www.postgresql.org/) - Open Source RDBMS
+- [Qdrant](https://qdrant.tech) - Vector database powering the AI features
+- [Sentence Transformers](https://sbert.net) - Embeddings for semantic search
+- [Skeleton](https://www.skeleton.dev) - UI toolkit for Svelte and Tailwind
+- [SQLite](https://www.sqlite.org/index.html) - Open Source RDBMS
+- [Svelte](https://svelte.dev) & [SvelteKit](https://svelte.dev/docs/kit) - Frontend Framework
+- [Svelte Flow](https://svelteflow.dev) - Node-based graph editors
+- [Tailwind CSS](https://tailwindcss.com) - Utility-first CSS framework
+- [Typst](https://typst.app) - The new foundation for documents
+- [unovis](https://unovis.dev) - Complementary charting library
+- [Vite](https://vite.dev) - Frontend build tool
+- [WeasyPrint](https://weasyprint.org/) - HTML to PDF rendering
 
 ## Security
 

@@ -3,10 +3,10 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import { m } from '$paraglide/messages';
-	import TextArea from '../TextArea.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import Checkbox from '../Checkbox.svelte';
 	import RadioGroup from '../RadioGroup.svelte';
-	import { type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton-svelte';
+	import { type ModalComponent, type ModalSettings } from '$lib/components/Modals/stores';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import { page } from '$app/state';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -121,6 +121,7 @@
 				<AutocompleteSelect
 					{form}
 					optionsEndpoint="entities"
+					optionsExtraFields={[['folder', 'str']]}
 					field="entity"
 					cacheLock={cacheLocks['entity']}
 					bind:cachedValue={formDataCache['entity']}
@@ -256,7 +257,7 @@
 				label={m.selected()}
 				helpText={m.stakeholderIsSelectedHelpText()}
 			/>
-			<TextArea
+			<MarkdownField
 				{form}
 				field="justification"
 				label={m.justification()}
@@ -287,6 +288,10 @@
 					{form}
 					optionsEndpoint="applied-controls"
 					optionsExtraFields={[['folder', 'str']]}
+					optionsInfoFields={{
+						fields: [{ field: 'category', translate: true }],
+						position: 'prefix'
+					}}
 					field="applied_controls"
 					label={m.appliedControls()}
 				/>

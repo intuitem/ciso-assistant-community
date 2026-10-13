@@ -18,16 +18,22 @@ export const load: PageLoad = async ({ fetch, params, url }) => {
 		}
 	}
 
+	// The tree endpoint 400s on a library with no framework, and the page only
+	// renders it when there is one, so don't ask.
+	const hasFramework = Boolean(library.objects_meta?.framework);
+
 	return {
-		tree: fetch(`${endpoint}/tree?${queryParams}`)
-			.then((res) => {
-				if (!res.ok) throw new Error(`Failed to fetch tree: ${res.status}`);
-				return res.json();
-			})
-			.catch((error) => {
-				console.error('Error fetching tree:', error);
-				return {};
-			}),
+		tree: hasFramework
+			? fetch(`${endpoint}/tree?${queryParams}`)
+					.then((res) => {
+						if (!res.ok) throw new Error(`Failed to fetch tree: ${res.status}`);
+						return res.json();
+					})
+					.catch((error) => {
+						console.error('Error fetching tree:', error);
+						return {};
+					})
+			: Promise.resolve({}),
 		library,
 		title: library.name
 	};
