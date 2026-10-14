@@ -1863,11 +1863,11 @@ class LibraryUpdater:
                     rn.urn.lower(): rn
                     for rn in RequirementNode.objects.filter(framework=new_framework)
                 }
-                node_ids_with_questions = set(
-                    Question.objects.filter(
-                        requirement_node__framework=new_framework
-                    ).values_list("requirement_node_id", flat=True)
-                )
+                question_urns_by_node_id = defaultdict(set)
+                for node_id, question_urn in Question.objects.filter(
+                    requirement_node__framework=new_framework
+                ).values_list("requirement_node_id", "urn"):
+                    question_urns_by_node_id[node_id].add(question_urn)
                 existing_requirement_assessment_objects = defaultdict(list)
                 for ra in RequirementAssessment.objects.filter(
                     requirement__framework=new_framework
@@ -2085,19 +2085,12 @@ class LibraryUpdater:
                     # A node that lost all its questions omits the key.
                     if (
                         questions is None
-                        and requirement_node_object.pk in node_ids_with_questions
+                        and requirement_node_object.pk in question_urns_by_node_id
                     ):
                         questions = {}
 
-                    previous_question_urns = (
-                        set(
-                            requirement_node_object.questions.values_list(
-                                "urn", flat=True
-                            )
-                        )
-                        if questions is not None
-                        and requirement_node_object.pk in node_ids_with_questions
-                        else set()
+                    previous_question_urns = question_urns_by_node_id.get(
+                        requirement_node_object.pk, set()
                     )
 
                     # Sync questions for both new and existing nodes
