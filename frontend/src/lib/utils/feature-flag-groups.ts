@@ -329,6 +329,11 @@ export function getFeatureFlagGroups(availableKeys: string[]): FeatureFlagGroup[
 			description: m.extraDescription(),
 			fields: [
 				{
+					field: 'infra_config_management',
+					label: m.infraConfig(),
+					description: m.infraConfigDescription()
+				},
+				{
 					field: 'focus_mode',
 					label: m.focusMode(),
 					description: m.focusModeTooltip()
