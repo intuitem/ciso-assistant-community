@@ -428,3 +428,37 @@ class TestAssetFullEndpoint:
         assert str(asset_b.id) not in bulk, (
             f"scoped reader saw cross-folder asset {asset_b.id} in /full/"
         )
+
+
+@pytest.mark.django_db
+class TestAssetObjectivesWrite:
+    """#4526: objectives/capabilities are written as the stored dict, not the
+    display list returned on read."""
+
+    def test_patch_capabilities_dict_persists(self, authenticated_client):
+        asset = Asset.objects.create(
+            folder=Folder.get_root_folder(), name="s", type=Asset.Type.SUPPORT
+        )
+        payload = {
+            "security_capabilities": {
+                "objectives": {"confidentiality": {"value": 2, "is_enabled": True}}
+            }
+        }
+        r = authenticated_client.patch(
+            f"/api/assets/{asset.id}/", payload, format="json"
+        )
+        assert r.status_code == status.HTTP_200_OK, r.content
+        asset.refresh_from_db()
+        assert asset.security_capabilities == payload["security_capabilities"]
+
+    def test_patch_display_list_is_rejected(self, authenticated_client):
+        asset = Asset.objects.create(
+            folder=Folder.get_root_folder(), name="s", type=Asset.Type.SUPPORT
+        )
+        r = authenticated_client.patch(
+            f"/api/assets/{asset.id}/",
+            {"security_capabilities": [{"confidentiality": 3}]},
+            format="json",
+        )
+        assert r.status_code == status.HTTP_400_BAD_REQUEST
+        assert "security_capabilities" in r.json()

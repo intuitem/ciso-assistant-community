@@ -27,6 +27,7 @@ from core.commitment import COMMITMENT_LIST_FIELDS, CommitmentSerializerMixin
 from iam.models import *
 from django.contrib.auth.models import Permission
 
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 from django.core.exceptions import FieldDoesNotExist
@@ -45,15 +46,8 @@ class SerializerFactory:
     """
 
     def __init__(self, *modules: str):
-        # Flatten modules because some callers pass a list as an argument
-        flat_modules = []
-        for mod in modules:
-            if isinstance(mod, list):
-                flat_modules.extend(mod)
-            elif mod:
-                flat_modules.append(mod)
         # Reverse to prioritize later modules
-        self.modules = list(reversed(flat_modules))
+        self.modules = list(reversed(modules))
 
     def get_serializer(self, base_name: str, action: str):
         if action in ["list", "retrieve"]:
@@ -77,13 +71,9 @@ class SerializerFactory:
         for module_name in self.modules:
             try:
                 serializer_module = importlib.import_module(module_name)
-            except ModuleNotFoundError:
-                continue
-
-            try:
                 serializer_class = getattr(serializer_module, serializer_name)
                 return serializer_class
-            except AttributeError:
+            except ModuleNotFoundError, AttributeError:
                 continue
 
         raise ValueError(
@@ -832,31 +822,44 @@ class AssetWriteSerializer(
         model = Asset
         exclude = ["business_value"]
 
-    def to_internal_value(self, data):
-        # Convert array of objects from Swagger/API to the expected dict format
-        for field in [
-            "security_objectives",
-            "security_capabilities",
-            "disaster_recovery_objectives",
-            "recovery_capabilities",
-        ]:
-            if field in data and isinstance(data[field], list):
-                converted = {"objectives": {}}
-                for item in data[field]:
-                    if not isinstance(item, dict):
-                        raise serializers.ValidationError({field: ["Array items must be objects."]})
-                    for key, val in item.items():
-                        if isinstance(val, dict) and "value" in val:
-                            converted["objectives"][key] = val
-                        elif isinstance(val, int):
-                            converted["objectives"][key] = {
-                                "value": val,
-                                "is_enabled": True,
-                            }
-                        else:
-                            raise serializers.ValidationError({field: [f"Unsupported value for '{key}'."]})
-                data[field] = converted
-        return super().to_internal_value(data)
+    def get_fields(self):
+        fields = super().get_fields()
+        # Document the stored dict shape: reads return a display list that can't be written back (#4526)
+        for name, jsonschema, example in (
+            (
+                "security_objectives",
+                Asset.SECURITY_OBJECTIVES_JSONSCHEMA,
+                {"confidentiality": {"value": 2, "is_enabled": True}},
+            ),
+            (
+                "security_capabilities",
+                Asset.SECURITY_OBJECTIVES_JSONSCHEMA,
+                {"confidentiality": {"value": 2, "is_enabled": True}},
+            ),
+            (
+                "disaster_recovery_objectives",
+                Asset.DISASTER_RECOVERY_OBJECTIVES_JSONSCHEMA,
+                {"rto": {"value": 3600}},
+            ),
+            (
+                "recovery_capabilities",
+                Asset.DISASTER_RECOVERY_OBJECTIVES_JSONSCHEMA,
+                {"rto": {"value": 3600}},
+            ),
+        ):
+            (item,) = jsonschema["properties"]["objectives"][
+                "patternProperties"
+            ].values()
+            # OpenAPI 3.0 has no patternProperties
+            schema = {
+                "type": "object",
+                "properties": {
+                    "objectives": {"type": "object", "additionalProperties": item}
+                },
+                "example": {"objectives": example},
+            }
+            extend_schema_field(schema)(fields[name])
+        return fields
 
     def validate(self, data):
         parent_assets = data.get("parent_assets", [])
