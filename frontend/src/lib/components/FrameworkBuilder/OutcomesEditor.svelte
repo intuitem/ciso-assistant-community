@@ -31,6 +31,8 @@
 		groups?: { id: string; label: string }[];
 		/** Quick forms: the scales a rating can measure. */
 		scales?: Scale[];
+		measured?: string[];
+		onaddscales?: (scales: Scale[]) => void;
 	}
 
 	let {
@@ -41,7 +43,9 @@
 		pages = [],
 		catalog = { mode: 'framework', nodes: [], questions: [] },
 		groups = [],
-		scales = []
+		scales = [],
+		measured = [],
+		onaddscales = () => {}
 	}: Props = $props();
 
 	// The picker writes, and only ever replaces, a bare page score: a hand-written
@@ -88,41 +92,86 @@
 		persist();
 	}
 
-	// A rating starts as a grid on the first two scales with three levels, graded
-	// from the low corner to the high one; the author repaints the cells.
-	function addRating() {
-		const ref_id = ruleIdFromLabel(
-			'rating',
-			rules.map((r) => r.ref_id)
-		);
+	function newScales(count: number): Scale[] {
+		const taken = scales.map((s) => s.ref_id);
+		return Array.from({ length: count }, (_, i) => {
+			const label = m.builderNewScaleLabel({ n: scales.length + i + 1 });
+			const ref_id = ruleIdFromLabel(label, taken);
+			taken.push(ref_id);
+			return {
+				ref_id,
+				label,
+				levels: [
+					{ ref_id: 'low', label: m.builderRatingLow() },
+					{ ref_id: 'medium', label: m.builderRatingMedium() },
+					{ ref_id: 'high', label: m.builderRatingHigh() }
+				]
+			};
+		});
+	}
+
+	function addScale(): Scale {
+		const [scale] = newScales(1);
+		onaddscales([scale]);
+		return scale;
+	}
+
+	// A rating starts as a grid on two scales with three levels, graded from the low
+	// corner to the high one; the author repaints the cells.
+	function asRating(rule: OutcomeRule): OutcomeRule {
+		const added = newScales(Math.max(0, 2 - scales.length));
+		if (added.length) onaddscales(added);
+		const [rowsScale, cellsScale] = [...scales, ...added];
 		const levels = [
 			{ ref_id: 'low', label: m.builderRatingLow(), color: '#BBF7D0' },
 			{ ref_id: 'medium', label: m.builderRatingMedium(), color: '#FEF08A' },
 			{ ref_id: 'high', label: m.builderRatingHigh(), color: '#FCA5A5' }
 		];
-		const rowsScale = scales[0];
-		const cellsScale = scales[1] ?? scales[0];
 		const span = Math.max(1, rowsScale.levels.length + cellsScale.levels.length - 2);
 		const grid = rowsScale.levels.map((_, ri) =>
 			cellsScale.levels.map(
 				(_, ci) => levels[Math.min(2, Math.floor(((ri + ci) / span) * 3))].ref_id
 			)
 		);
-		rules = [
-			...rules,
-			{
-				ref_id,
-				annotation: '',
-				color: null,
-				expression: '',
-				kind: 'rating',
-				label: m.builderRatingDefaultLabel(),
-				dimensions: [rowsScale.ref_id, cellsScale.ref_id],
-				levels,
-				grid
-			}
-		];
-		expandedIndex = rules.length - 1;
+		return {
+			ref_id: rule.ref_id,
+			annotation: '',
+			color: null,
+			expression: '',
+			kind: 'rating',
+			label: rule.annotation || m.builderRatingDefaultLabel(),
+			dimensions: [rowsScale.ref_id, cellsScale.ref_id],
+			levels,
+			grid
+		};
+	}
+
+	type Kind = 'boolean' | 'number' | 'rating';
+	const kindOf = (rule: OutcomeRule): Kind => rule.kind ?? 'boolean';
+	const discards = (rule: OutcomeRule, kind: Kind) =>
+		kind !== kindOf(rule) &&
+		(kindOf(rule) === 'rating' || (kind === 'rating' && !!rule.expression?.trim()));
+	let pendingKind: { index: number; kind: Kind } | null = $state(null);
+
+	function setKind(index: number, kind: Kind) {
+		const rule = rules[index];
+		pendingKind = null;
+		if (kind === 'rating') {
+			rules[index] = asRating(rule);
+		} else {
+			const next: OutcomeRule = {
+				ref_id: rule.ref_id,
+				annotation: rule.annotation || rule.label || '',
+				color: kind === 'number' ? null : rule.color,
+				expression: kindOf(rule) === 'rating' ? '' : rule.expression,
+				...(rule.implementation_groups
+					? { implementation_groups: rule.implementation_groups }
+					: {}),
+				...(rule.translations ? { translations: rule.translations } : {})
+			};
+			if (kind === 'number') next.kind = 'number';
+			rules[index] = next;
+		}
 		persist();
 	}
 
@@ -296,17 +345,49 @@
 		>
 			<i class="fa-solid fa-plus mr-1"></i>{m.builderAddRule()}
 		</button>
-		{#if mode === 'quick_form' && scales.length}
-			<button
-				type="button"
-				class="text-xs text-blue-600 hover:text-blue-700 font-medium"
-				onclick={addRating}
-				data-testid="add-rating"
-			>
-				<i class="fa-solid fa-table-cells mr-1"></i>{m.builderAddRating()}
-			</button>
-		{/if}
 	</div>
+
+	{#snippet kindSelect(rule: OutcomeRule, index: number)}
+		<label class="block">
+			<span class="text-xs text-surface-600-400">{m.builderRuleKind()}</span>
+			<select
+				class="w-full text-sm border border-surface-200-800 rounded px-2 py-1 bg-surface-50-950"
+				value={kindOf(rule)}
+				onchange={(e) => {
+					const kind = e.currentTarget.value as Kind;
+					if (discards(rule, kind)) {
+						e.currentTarget.value = kindOf(rule);
+						pendingKind = { index, kind };
+					} else {
+						setKind(index, kind);
+					}
+				}}
+				data-testid="outcome-rule-kind"
+			>
+				<option value="boolean">{m.builderRuleKindBoolean()}</option>
+				<option value="number">{m.builderRuleKindNumber()}</option>
+				{#if mode === 'quick_form'}
+					<option value="rating">{m.builderRatingDefaultLabel()}</option>
+				{/if}
+			</select>
+			{#if pendingKind?.index === index}
+				<span class="flex flex-wrap items-center gap-2 mt-1">
+					<span class="text-xs text-red-600 font-medium">{m.builderKindChangeDiscards()}</span>
+					<button
+						type="button"
+						class="text-xs text-red-600 font-medium"
+						onclick={() => setKind(index, pendingKind!.kind)}>{m.confirm()}</button
+					>
+					<button
+						type="button"
+						class="text-xs text-surface-600-400"
+						onclick={() => (pendingKind = null)}>{m.cancel()}</button
+					>
+				</span>
+			{/if}
+			<span class="text-xs text-surface-500">{m.builderRuleKindHint()}</span>
+		</label>
+	{/snippet}
 
 	{#each rules as rule, index (index)}
 		<div
@@ -379,11 +460,14 @@
 
 			<!-- Expanded details: a rating has no expression, it gets its own editor. -->
 			{#if expandedIndex === index && rule.kind === 'rating'}
-				<div class="px-3 pb-3 pt-2 border-t border-surface-200-800">
+				<div class="px-3 pb-3 pt-2 border-t border-surface-200-800 space-y-3">
+					{@render kindSelect(rule, index)}
 					<RatingRuleEditor
 						{rule}
 						{scales}
 						{pages}
+						{measured}
+						onaddscale={addScale}
 						{activeLanguage}
 						onchange={(next) => {
 							rules[index] = next;
@@ -426,27 +510,7 @@
 						</label>
 					</div>
 
-					<label class="block">
-						<span class="text-xs text-surface-600-400">{m.builderRuleKind()}</span>
-						<select
-							class="w-full text-sm border border-surface-200-800 rounded px-2 py-1 bg-surface-50-950"
-							value={rule.kind === 'number' ? 'number' : 'boolean'}
-							onchange={(e) => {
-								if (e.currentTarget.value === 'number') {
-									rules[index].kind = 'number';
-									rules[index].color = null;
-								} else {
-									delete rules[index].kind;
-								}
-								persist();
-							}}
-							data-testid="outcome-rule-kind"
-						>
-							<option value="boolean">{m.builderRuleKindBoolean()}</option>
-							<option value="number">{m.builderRuleKindNumber()}</option>
-						</select>
-						<span class="text-xs text-surface-500">{m.builderRuleKindHint()}</span>
-					</label>
+					{@render kindSelect(rule, index)}
 
 					{#if mode === 'framework' && groups.length}
 						<div class="block" role="group" aria-label={m.builderRuleGroups()}>

@@ -206,11 +206,16 @@
 	}
 
 	// Scales questions or ratings use: deleting one would break them.
+	let measuredScales = $derived(
+		$rootNodesStore
+			.flatMap((bn) =>
+				bn.questions.map((bq) => (bq.question.config as { scale?: string } | null)?.scale ?? '')
+			)
+			.filter(Boolean)
+	);
 	let usedScales = $derived(
 		[
-			...$rootNodesStore.flatMap((bn) =>
-				bn.questions.map((bq) => (bq.question.config as { scale?: string } | null)?.scale ?? '')
-			),
+			...measuredScales,
 			...($frameworkStore.outcomes_definition ?? []).flatMap((r) =>
 				r.kind === 'rating' ? (r.dimensions ?? []) : []
 			)
@@ -1081,6 +1086,12 @@
 									catalog={celCatalog}
 									groups={ruleGroups}
 									scales={$frameworkStore.scales_definition ?? []}
+									measured={measuredScales}
+									onaddscales={(added) =>
+										updateScales([
+											...(($frameworkStore.scales_definition ?? []) as Scale[]),
+											...added
+										])}
 								/>
 							</div>
 

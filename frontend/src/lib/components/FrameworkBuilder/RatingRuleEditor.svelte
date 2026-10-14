@@ -19,11 +19,21 @@
 		rule: OutcomeRule;
 		scales: Scale[];
 		pages: { id: string; label: string }[];
+		measured?: string[];
+		onaddscale?: () => Scale;
 		activeLanguage?: string | null;
 		onchange: (rule: OutcomeRule) => void;
 	}
 
-	let { rule, scales, pages, activeLanguage = null, onchange }: Props = $props();
+	let {
+		rule,
+		scales,
+		pages,
+		measured = [],
+		onaddscale,
+		activeLanguage = null,
+		onchange
+	}: Props = $props();
 
 	const scaleOf = (ref?: string) => scales.find((s) => s.ref_id === ref);
 	const dimensions = $derived(rule.dimensions ?? []);
@@ -36,14 +46,14 @@
 	const labelOf = (ref: string) => levels.find((l) => l.ref_id === ref)?.label ?? ref;
 
 	// A grid only exists for two dimensions; with any other number, rules classify.
-	function update(patch: Partial<OutcomeRule>) {
+	function update(patch: Partial<OutcomeRule>, added: Scale[] = []) {
 		const next: OutcomeRule = { ...rule, ...patch };
 		if (next.rules === undefined && (next.dimensions ?? []).length !== 2) {
 			// What the grid said becomes rules, so a third dimension loses nothing.
 			next.rules = asRules(rule);
 		}
 		if (next.rules === undefined) {
-			next.grid = fitGrid(next, scales);
+			next.grid = fitGrid(next, [...scales, ...added]);
 		} else {
 			delete next.grid;
 		}
@@ -63,6 +73,13 @@
 		} else {
 			update({ rules: asRules(rule) });
 		}
+	}
+
+	function addDimension() {
+		const unused = scales.find((s) => !dimensions.includes(s.ref_id));
+		const added = unused || !onaddscale ? [] : [onaddscale()];
+		const ref = unused?.ref_id ?? added[0]?.ref_id;
+		if (ref) update({ dimensions: [...dimensions, ref] }, added);
 	}
 
 	function setDimension(index: number, ref: string) {
@@ -160,14 +177,15 @@
 							onconfirm={() => update({ dimensions: dimensions.filter((_, i) => i !== index) })}
 						/>
 					{/if}
+					{#if dimension && !measured.includes(dimension)}
+						<span class="text-xs text-warning-700 dark:text-warning-300"
+							>{m.builderRatingDimensionUnmeasured()}</span
+						>
+					{/if}
 				</li>
 			{/each}
 			<li>
-				<button
-					type="button"
-					class="btn btn-sm preset-tonal"
-					onclick={() => update({ dimensions: [...dimensions, scales[0]?.ref_id ?? ''] })}
-				>
+				<button type="button" class="btn btn-sm preset-tonal" onclick={addDimension}>
 					<i class="fa-solid fa-plus mr-1"></i>{m.builderRatingAddDimension()}
 				</button>
 			</li>
