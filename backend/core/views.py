@@ -20713,65 +20713,16 @@ class QuickFormViewSet(BaseModelViewSet):
     def preview(self, request, pk):
         """Answer a published form without creating a response.
 
-        Same evaluator as the draft preview — the live rows are turned back into the
+        The draft preview's pipeline — the live rows are turned back into the
         document shape it takes — so an author checking a published form and one
-        checking a draft are looking at the same rules.
+        checking a draft see the same thing.
         """
-        from core.cel_service import evaluate_quick_form_document
+        from core.quick_form_preview import fill_preview, loaded_form_document
 
-        quick_form = self.get_object()
-        pages = []
-        for page in (
-            QuickFormPage.objects.filter(quick_form=quick_form)
-            .prefetch_related("questions__choices")
-            .order_by("order")
-        ):
-            pages.append(
-                {
-                    "urn": page.urn,
-                    "ref_id": page.ref_id,
-                    "name": page.get_name_translated,
-                    "description": page.get_description_translated,
-                    "visibility_expression": page.visibility_expression,
-                    "aggregation": page.aggregation,
-                    "questions": page.get_questions_translated() or {},
-                }
-            )
-        document = {
-            "urn": quick_form.urn,
-            "pages": pages,
-            "outcomes_definition": quick_form.outcomes_definition or [],
-            "scores_definition": quick_form.scores_definition,
-        }
-        answers = request.data.get("answers")
-        evaluation = evaluate_quick_form_document(
-            document, answers if isinstance(answers, dict) else {}
-        )
-        hidden = set(evaluation["hidden_pages"])
         return Response(
-            {
-                "name": quick_form.get_name_translated,
-                "description": quick_form.get_description_translated,
-                "outcomes_definition": document["outcomes_definition"],
-                "pages": [{**page, "hidden": page["urn"] in hidden} for page in pages],
-                "hidden_pages": evaluation["hidden_pages"],
-                "missing_required": evaluation["missing_required"],
-                "progress": evaluation["progress"],
-                "score": evaluation["score"],
-                "computed_outcome": evaluation["computed_outcome"],
-                "computed_values": evaluation["computed_values"],
-                "scored_complete": evaluation["context"]["response"]["scored_complete"],
-                # Authors want to see where answers lead.
-                "projection": project(
-                    quick_form.on_accept,
-                    evaluation["computed_values"],
-                    evaluation["computed_outcome"],
-                    ready=evaluation["context"]["response"]["scored_complete"],
-                    score=evaluation["score"],
-                )
-                if quick_form.on_accept
-                else [],
-            }
+            fill_preview(
+                loaded_form_document(self.get_object()), request.data.get("answers")
+            )
         )
 
     @action(detail=True, methods=["get"], name="Quick form pages")

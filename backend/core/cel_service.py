@@ -1568,6 +1568,8 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
         "computed_values": values,
         "ratings": ratings,
         "context": context,
+        # The form as evaluated: scale questions with their levels as choices.
+        "quick_form": quick_form,
     }
 
 

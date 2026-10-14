@@ -1754,17 +1754,10 @@ class LibraryDraftViewSet(BaseModelViewSet):
         live rows: this renders the pages and evaluates the real conditional
         visibility, scoring and outcome rules against trial answers, so an author can
         see what their logic actually does before publishing anything. Nothing is
-        stored — the answers live in the request body.
+        stored — the answers live in the request body. Same pipeline as a loaded
+        form's preview (`core.quick_form_preview`).
         """
-        import copy
-
-        from core.cel_service import evaluate_quick_form_document
-        from core.quick_form_apply import project
-        from core.quick_form_ratings import (
-            expand_scales,
-            ratings_for_display,
-            scales_error,
-        )
+        from core.quick_form_preview import fill_preview
 
         draft = self.get_object()
         content = builder.normalize_objects(draft.content or {})
@@ -1784,50 +1777,7 @@ class LibraryDraftViewSet(BaseModelViewSet):
                 logger.warning("Builder rejected the draft", error=e)
                 return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
 
-        # As a load would: scale questions get their levels as choices. A broken
-        # scale is left as is, so the preview still opens while it is fixed.
-        if scales_error(quick_form) is None:
-            quick_form = expand_scales(copy.deepcopy(quick_form))
-        answers = request.data.get("answers")
-        evaluation = evaluate_quick_form_document(
-            quick_form, answers if isinstance(answers, dict) else {}
-        )
-        hidden = set(evaluation["hidden_pages"])
-        return Response(
-            {
-                "name": quick_form.get("name") or "",
-                "ratings": ratings_for_display(
-                    quick_form, evaluation.get("ratings") or []
-                ),
-                "description": quick_form.get("description") or "",
-                "outcomes_definition": quick_form.get("outcomes_definition") or [],
-                "pages": [
-                    {
-                        "urn": page.get("urn"),
-                        "ref_id": page.get("ref_id"),
-                        "name": page.get("name") or "",
-                        "description": page.get("description") or "",
-                        "hidden": page.get("urn") in hidden,
-                        "questions": page.get("questions") or {},
-                    }
-                    for page in quick_form.get("pages") or []
-                ],
-                "hidden_pages": evaluation["hidden_pages"],
-                "missing_required": evaluation["missing_required"],
-                "progress": evaluation["progress"],
-                "score": evaluation["score"],
-                "scored_complete": evaluation["context"]["response"]["scored_complete"],
-                "computed_outcome": evaluation["computed_outcome"],
-                "computed_values": evaluation["computed_values"],
-                "projection": project(
-                    quick_form.get("on_accept") or [],
-                    evaluation["computed_values"],
-                    evaluation["computed_outcome"],
-                    ready=evaluation["context"]["response"]["scored_complete"],
-                    score=evaluation["score"],
-                ),
-            }
-        )
+        return Response(fill_preview(quick_form, request.data.get("answers")))
 
     @action(detail=True, methods=["post"], url_path="quick-form-editor-preview")
     def quick_form_editor_preview(self, request, pk):

@@ -467,6 +467,29 @@ def test_the_form_rating_rates_each_risk(admin_client, processing, dpia_form):
     assert "residual_risk_unacceptable" in content["computed_outcome"]
 
 
+@pytest.mark.django_db
+def test_the_loaded_forms_preview_rates_each_risk(admin_client, dpia_form):
+    """The preview of a loaded form reads its scales as a response does: it used to
+    rebuild the form without them, so no rating ever came out."""
+    page = f"{DPIA}:illegitimate_access:question"
+    answers = {
+        f"{page}:severity": f"{page}:severity:choice:maximum",
+        f"{page}:likelihood": f"{page}:likelihood:choice:limited",
+        f"{page}:residual_severity": f"{page}:residual_severity:choice:significant",
+        f"{page}:residual_likelihood": f"{page}:residual_likelihood:choice:significant",
+    }
+    res = admin_client.post(
+        f"/api/quick-forms/{dpia_form.id}/preview/", {"answers": answers}, format="json"
+    )
+    assert res.status_code == 200, res.json()
+    body = res.json()
+    (rating,) = body["ratings"]
+    points = {p["stage"]: p["level"] for p in rating["points"]}
+    assert points == {"current": "unacceptable", "residual": "unacceptable"}
+    assert body["computed_values"]["privacy_risk_residual"] == 3.0
+    assert "residual_risk_unacceptable" in body["computed_outcome"]
+
+
 def test_the_dpia_target_previews_without_a_response():
     from core.quick_form_apply import project
 
