@@ -107,6 +107,7 @@ READER_PERMISSIONS_LIST = [
     "view_datatransfer",
     "view_rightrequest",
     "view_databreach",
+    "view_dpiarequirementchange",
     # campaigns,
     "view_campaign",
     "view_organisationobjective",
@@ -316,6 +317,7 @@ APPROVER_PERMISSIONS_LIST = [
     "view_organisationissue",
     # privacy,
     "view_processing",
+    "view_dpiarequirementchange",
     "view_purpose",
     "view_personaldata",
     "view_datasubject",
@@ -706,6 +708,7 @@ ANALYST_PERMISSIONS_LIST = [
     "change_databreach",
     "view_databreach",
     "delete_databreach",
+    "view_dpiarequirementchange",
     # workflows — view-only for v1 (analyst is a workflow consumer, not an
     # author/operator yet); expand when the analyst tier is fleshed out.
     "view_workflow",
@@ -1223,6 +1226,7 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_databreach",
     "view_databreach",
     "delete_databreach",
+    "view_dpiarequirementchange",
     # workflows
     "view_workflow",
     "add_workflow",
@@ -1752,6 +1756,7 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "change_databreach",
     "view_databreach",
     "delete_databreach",
+    "view_dpiarequirementchange",
     # incidents,
     "add_incident",
     "view_incident",

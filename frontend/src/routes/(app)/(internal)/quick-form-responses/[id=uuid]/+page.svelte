@@ -3,7 +3,10 @@
 	import { deserialize } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import { page } from '$app/state';
+	import { tick } from 'svelte';
 	import Question from '$lib/components/Forms/Question.svelte';
+	import RatingOutcomes from '$lib/components/QuickForms/RatingOutcomes.svelte';
+	import SubjectFacts from '$lib/components/QuickForms/SubjectFacts.svelte';
 	import ProjectionCard from '$lib/components/QuickForms/ProjectionCard.svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import { getToastStore } from '$lib/components/Toast/stores';
@@ -22,7 +25,8 @@
 		risk_scenario: 'risk-scenarios',
 		vulnerability: 'vulnerabilities',
 		perimeter: 'perimeters',
-		entity: 'entities'
+		entity: 'entities',
+		processing: 'processings'
 	};
 
 	let { data }: { data: PageData } = $props();
@@ -33,11 +37,40 @@
 	const content = $derived(data.content);
 	const visiblePages = $derived((content.pages ?? []).filter((p: any) => !p.hidden));
 
+	// Rating outcomes get a last "Results" step after the pages.
+	const ratings = $derived((content.ratings ?? []) as any[]);
+	const stepCount = $derived(visiblePages.length + (ratings.length ? 1 : 0));
 	let pageIndex = $state(0);
 	$effect(() => {
-		if (pageIndex > visiblePages.length - 1) pageIndex = Math.max(0, visiblePages.length - 1);
+		if (pageIndex > stepCount - 1) pageIndex = Math.max(0, stepCount - 1);
 	});
 	const currentPage = $derived(visiblePages[pageIndex]);
+	const onResults = $derived(ratings.length > 0 && pageIndex === visiblePages.length);
+	// A rating's values (its rank, per stage) read as levels on the Results step, not as numbers.
+	// Exactly the names a rating makes: `<ref>`, and `<ref>_<stage>` per other stage.
+	const ratingValueNames = $derived(
+		new Set(
+			ratings.flatMap((r) => [r.ref_id, ...r.points.map((p: any) => `${r.ref_id}_${p.stage}`)])
+		)
+	);
+	const numberValues = $derived(
+		Object.entries((content.computed_values ?? {}) as Record<string, number>).filter(
+			([name]) => !ratingValueNames.has(name)
+		)
+	);
+
+	// What the page's answers make on each rating, e.g. "Privacy risk: Unacceptable → To reduce".
+	function pageLevels(urn: string) {
+		return ratings
+			.map((rating) => {
+				const levels = Object.fromEntries(rating.levels.map((l: any) => [l.ref_id, l]));
+				const points = rating.points
+					.filter((p: any) => p.page === urn)
+					.sort((a: any, b: any) => Number(b.stage === 'current') - Number(a.stage === 'current'));
+				return { label: rating.label, levels: points.map((p: any) => levels[p.level]) };
+			})
+			.filter((row) => row.levels.length);
+	}
 
 	const canEdit = $derived(
 		canPerformActionOnObject({
@@ -63,10 +96,42 @@
 	const suggestedActions = $derived((data.suggestedActions ?? []) as any[]);
 	const acceptPreview = $derived((data.acceptPreview ?? []) as any[]);
 
-	// Override at accept, per target. Only the tier target offers it for now.
-	const OVERRIDABLE = new Set(['entity.tier']);
-	let overrides: Record<string, { tier: string; note: string }> = $state({});
-	let overrideTiers: { id: string; name: string }[] = $state([]);
+	// Override at accept, per target: what the reviewer may pick, the refusals
+	// that still leave the call to them, and the payload the target reads.
+	type OverrideOption = { id: string; name: string };
+	const OVERRIDABLE: Record<
+		string,
+		{
+			reasons: string[];
+			options: () => Promise<OverrideOption[] | null>;
+			payload: (value: string) => Record<string, unknown>;
+		}
+	> = {
+		'entity.tier': {
+			reasons: ['noTierResolved'],
+			options: async () => {
+				try {
+					const res = await fetch('/tiers?is_visible=true');
+					const body = res.ok ? await res.json().catch(() => null) : null;
+					const tiers = body?.results ?? body;
+					return Array.isArray(tiers) && tiers.length ? tiers : null;
+				} catch {
+					return null;
+				}
+			},
+			payload: (value) => ({ tier: value })
+		},
+		'processing.dpia_required': {
+			reasons: ['reviewerDecides', 'noVerdictResolved', 'conflictingVerdicts'],
+			options: async () => [
+				{ id: 'true', name: m.dpiaRequiredYes() },
+				{ id: 'false', name: m.dpiaRequiredNo() }
+			],
+			payload: (value) => ({ value: value === 'true' })
+		}
+	};
+	let overrides: Record<string, { value: string; note: string }> = $state({});
+	let overrideOptions: Record<string, OverrideOption[]> = $state({});
 
 	async function toggleOverride(target: string) {
 		if (overrides[target]) {
@@ -74,42 +139,54 @@
 			overrides = rest;
 			return;
 		}
-		if (!overrideTiers.length) {
-			let tiers: unknown = null;
-			try {
-				const res = await fetch('/tiers?is_visible=true');
-				const body = res.ok ? await res.json().catch(() => null) : null;
-				tiers = body?.results ?? body;
-			} catch {
-				tiers = null;
-			}
-			if (!Array.isArray(tiers) || !tiers.length) {
+		if (!overrideOptions[target]) {
+			const options = await OVERRIDABLE[target].options();
+			if (!options) {
 				toastStore.trigger({
 					message: m.anErrorOccurred(),
 					background: 'preset-filled-error-500'
 				});
 				return;
 			}
-			overrideTiers = tiers;
+			overrideOptions = { ...overrideOptions, [target]: options };
 		}
-		overrides = { ...overrides, [target]: { tier: '', note: '' } };
+		overrides = { ...overrides, [target]: { value: '', note: '' } };
 	}
 
 	const activeOverrides = $derived(
-		Object.fromEntries(Object.entries(overrides).filter(([, o]) => o.tier))
+		Object.fromEntries(
+			Object.entries(overrides)
+				.filter(([, o]) => o.value)
+				.map(([target, o]) => [target, { ...OVERRIDABLE[target].payload(o.value), note: o.note }])
+		)
 	);
 
 	// "Why can't I submit?" has to be answerable from the screen. The server resolves
 	// visibility, so it tells us which required questions are still blank.
 	const missingRequired = $derived(
 		((content.missing_required ?? []) as string[]).map((urn) => {
-			for (const page of content.pages ?? []) {
+			for (const [index, page] of visiblePages.entries()) {
 				const q = page.questions?.[urn];
-				if (q) return { urn, page: page.name, text: q.text || urn };
+				if (q) return { urn, page: page.name, index, text: q.text || urn };
 			}
-			return { urn, page: '', text: urn };
+			return { urn, page: '', index: -1, text: urn };
 		})
 	);
+	// Open the question's page, then bring the question into view.
+	async function goToQuestion(q: { urn: string; index: number }) {
+		if (q.index < 0) return;
+		pageIndex = q.index;
+		await tick();
+		const el = document.querySelector<HTMLElement>(`[data-question-urn="${CSS.escape(q.urn)}"]`);
+		if (!el) return;
+		el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+		el.querySelector<HTMLElement>('input, textarea, select, button')?.focus({
+			preventScroll: true
+		});
+		el.classList.add('ring-2', 'ring-warning-500');
+		setTimeout(() => el.classList.remove('ring-2', 'ring-warning-500'), 2000);
+	}
+
 	// A requester edits their own draft; a reviewer edits by folder permission.
 	const canEditAnswers = $derived(!!content.can_edit_answers);
 
@@ -260,9 +337,16 @@
 				<ul class="mt-2 list-inside list-disc text-xs text-amber-800 dark:text-amber-300">
 					{#each missingRequired as q (q.urn)}
 						<li>
-							{q.text}{#if q.page}<span class="text-amber-600 dark:text-amber-400">
-									&nbsp;— {q.page}</span
-								>{/if}
+							<button
+								type="button"
+								class="cursor-pointer text-left underline-offset-2 hover:underline"
+								onclick={() => goToQuestion(q)}
+								data-testid="missing-required-question"
+							>
+								{q.text}{#if q.page}<span class="text-amber-600 dark:text-amber-400">
+										&nbsp;— {q.page}</span
+									>{/if}
+							</button>
 						</li>
 					{/each}
 				</ul>
@@ -309,13 +393,13 @@
 			</div>
 		{/if}
 
-		{#if content.computed_values && Object.keys(content.computed_values).length > 0 && content.scored_complete !== false}
+		{#if numberValues.length && content.scored_complete !== false}
 			{@const rules = (content.quick_form?.outcomes_definition ?? []) as any[]}
 			<div class="flex flex-wrap items-center gap-3" data-testid="computed-values">
 				<span class="text-xs font-semibold uppercase tracking-wider text-surface-500"
 					>{m.computedValues()}</span
 				>
-				{#each Object.entries(content.computed_values) as [refId, value]}
+				{#each numberValues as [refId, value]}
 					{@const rule = rules.find((r) => r.ref_id === refId)}
 					<span class="text-sm">
 						<span class="text-surface-600-400">{ruleLabel(rule, refId)}</span>
@@ -511,7 +595,7 @@
 										})}
 									</p>
 								{/if}
-								{#if OVERRIDABLE.has(row.target) && (row.ok || row.reason === 'noTierResolved')}
+								{#if OVERRIDABLE[row.target] && (row.ok || OVERRIDABLE[row.target].reasons.includes(row.reason))}
 									<button
 										type="button"
 										class="text-xs anchor"
@@ -523,10 +607,10 @@
 								{/if}
 								{#if overrides[row.target]}
 									<div class="flex w-full flex-wrap items-center gap-2" data-testid="override-form">
-										<select class="select w-40 text-sm" bind:value={overrides[row.target].tier}>
+										<select class="select w-40 text-sm" bind:value={overrides[row.target].value}>
 											<option value="">--</option>
-											{#each overrideTiers as tier (tier.id)}
-												<option value={tier.id}>{safeTranslate(tier.name)}</option>
+											{#each overrideOptions[row.target] ?? [] as option (option.id)}
+												<option value={option.id}>{safeTranslate(option.name)}</option>
 											{/each}
 										</select>
 										<input
@@ -633,17 +717,61 @@
 					</button>
 				</li>
 			{/each}
+			{#if ratings.length}
+				<li>
+					<button
+						type="button"
+						class="px-3 py-1 rounded-full border transition-colors {onResults
+							? 'bg-primary-500 text-white border-primary-500'
+							: 'border-surface-300-700 hover:border-primary-300'}"
+						onclick={() => (pageIndex = visiblePages.length)}
+						data-testid="results-step"
+					>
+						<i class="fa-solid fa-table-cells mr-1"></i>{m.results()}
+					</button>
+				</li>
+			{/if}
 		</ol>
+
+		{#if onResults}
+			<div class="flex flex-col gap-4">
+				<RatingOutcomes {ratings} pages={visiblePages} />
+			</div>
+		{/if}
 
 		{#if currentPage}
 			{#key currentPage.urn}
 				<div class="card bg-surface-50-950 shadow-sm p-4 space-y-4">
 					<div>
 						<h2 class="text-lg font-semibold">{currentPage.name}</h2>
+						{#each pageLevels(currentPage.urn) as row (row.label)}
+							<p
+								class="mt-1 flex flex-wrap items-center gap-1 text-xs"
+								data-testid="page-rating-level"
+							>
+								<span class="text-surface-600-400">{row.label}:</span>
+								{#each row.levels as level, i (i)}
+									{#if i > 0}<span class="text-surface-500">→</span>{/if}
+									<span
+										class="badge {level?.color ? 'text-surface-950' : ''}"
+										style="background-color: {level?.color || 'transparent'}"
+										>{level?.label ?? '—'}</span
+									>
+								{/each}
+							</p>
+						{/each}
 						{#if currentPage.description}
 							<MarkdownRenderer content={currentPage.description} class="text-sm mt-1" />
 						{/if}
 					</div>
+					<SubjectFacts
+						facts={content.facts ?? {}}
+						keys={currentPage.facts ?? []}
+						frozen={response.status !== 'draft'}
+						href={content.subject?.str && SUBJECT_ROUTES[content.subject.model ?? '']
+							? `/${SUBJECT_ROUTES[content.subject.model ?? '']}/${content.subject.id}`
+							: null}
+					/>
 					{#if !canEditAnswers}
 						<p class="text-xs text-surface-500">{m.quickFormReadOnly()}</p>
 					{/if}
@@ -665,28 +793,27 @@
 					/>
 				</div>
 			{/key}
-
-			{#if visiblePages.length > 1}
-				<div class="flex items-center justify-between">
-					<button
-						type="button"
-						class="btn preset-outlined-surface-500 enabled:hover:bg-surface-200-800"
-						disabled={pageIndex === 0}
-						onclick={() => (pageIndex = Math.max(0, pageIndex - 1))}
-					>
-						<i class="fa-solid fa-chevron-left mr-1"></i>{m.previous()}
-					</button>
-					<span class="text-sm text-surface-500">{pageIndex + 1} / {visiblePages.length}</span>
-					<button
-						type="button"
-						class="btn preset-filled-primary-500"
-						disabled={pageIndex >= visiblePages.length - 1}
-						onclick={() => (pageIndex = Math.min(visiblePages.length - 1, pageIndex + 1))}
-					>
-						{m.next()}<i class="fa-solid fa-chevron-right ml-1"></i>
-					</button>
-				</div>
-			{/if}
+		{/if}
+		{#if stepCount > 1}
+			<div class="flex items-center justify-between">
+				<button
+					type="button"
+					class="btn preset-outlined-surface-500 enabled:hover:bg-surface-200-800"
+					disabled={pageIndex === 0}
+					onclick={() => (pageIndex = Math.max(0, pageIndex - 1))}
+				>
+					<i class="fa-solid fa-chevron-left mr-1"></i>{m.previous()}
+				</button>
+				<span class="text-sm text-surface-500">{pageIndex + 1} / {stepCount}</span>
+				<button
+					type="button"
+					class="btn preset-filled-primary-500"
+					disabled={pageIndex >= stepCount - 1}
+					onclick={() => (pageIndex = Math.min(stepCount - 1, pageIndex + 1))}
+				>
+					{m.next()}<i class="fa-solid fa-chevron-right ml-1"></i>
+				</button>
+			</div>
 		{/if}
 	{/if}
 </div>

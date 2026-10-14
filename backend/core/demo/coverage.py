@@ -64,6 +64,7 @@ EXCLUDED = {
     "integrations.IntegrationProvider": EXTERNAL,
     "metrology.BuiltinMetricSample": RUNTIME,
     "notifications.Notification": RUNTIME,
+    "privacy.DpiaRequirementChange": RUNTIME,
     "portals.Portal": EXTERNAL,
     "portals.PortalPreset": EXTERNAL,
     "portals.PublicDocument": EXTERNAL,

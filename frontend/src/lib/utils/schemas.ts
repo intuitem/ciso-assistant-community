@@ -802,6 +802,7 @@ export const FeatureFlagsSchema = z.object({
 	purposes: z.boolean().optional(),
 	right_requests: z.boolean().optional(),
 	data_breaches: z.boolean().optional(),
+	dpias: z.boolean().optional(),
 	chat_mode: z.boolean().optional(),
 	auditee_mode: z.boolean().optional(),
 	quick_forms: z.boolean().optional(),

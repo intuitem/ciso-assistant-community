@@ -14,6 +14,12 @@ from django.utils import timezone
 import uuid
 
 
+class DpiaRequirementSource(models.TextChoices):
+    ASSESSMENT = "assessment", _("Assessment")
+    OVERRIDE = "override", _("Override")
+    MANUAL = "manual", _("Manual")
+
+
 class NameDescriptionFolderMixin(NameDescriptionMixin, FolderMixin):
     class Meta:
         abstract = True
@@ -114,6 +120,35 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
     usage_channel = models.CharField(max_length=255, blank=True)
     dpia_required = models.BooleanField(default=False, blank=True)
     dpia_reference = models.CharField(max_length=255, blank=True)
+    dpia_screening = models.ForeignKey(
+        "core.QuickFormResponse",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="screened_processings",
+        verbose_name=_("DPIA screening"),
+    )
+    # The DPIA last validated for this processing, a quick form response.
+    dpia = models.ForeignKey(
+        "core.QuickFormResponse",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="assessed_processings",
+        verbose_name=_("DPIA"),
+    )
+    # Who or what last set `dpia_required`; written through
+    # `privacy.dpia_requirement.set_dpia_required` with its history row.
+    dpia_required_source = models.CharField(
+        max_length=20,
+        choices=DpiaRequirementSource.choices,
+        blank=True,
+        default="",
+        verbose_name=_("DPIA requirement source"),
+    )
+    dpia_required_set_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("DPIA requirement set at")
+    )
     has_sensitive_personal_data = models.BooleanField(default=False)
     associated_controls = models.ManyToManyField(
         AppliedControl, blank=True, related_name="processings"
@@ -592,6 +627,54 @@ class DataBreach(NameDescriptionFolderMixin):
         ordering = ["-discovered_on"]
         verbose_name = "Data Breach"
         verbose_name_plural = "Data Breaches"
+
+
+class DpiaRequirementChange(AbstractBaseModel, FolderMixin):
+    """One change of a processing's `dpia_required`, whatever the path (form,
+    API, batch, accepted screening). Append-only; `created_at` is when it
+    happened."""
+
+    processing = models.ForeignKey(
+        Processing,
+        on_delete=models.CASCADE,
+        related_name="dpia_requirement_changes",
+        verbose_name=_("Processing"),
+    )
+    dpia_required = models.BooleanField(verbose_name=_("DPIA required"))
+    previous_dpia_required = models.BooleanField(
+        null=True, blank=True, verbose_name=_("Previously required")
+    )
+    source = models.CharField(
+        max_length=20,
+        choices=DpiaRequirementSource.choices,
+        verbose_name=_("Source"),
+    )
+    response = models.ForeignKey(
+        "core.QuickFormResponse",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name=_("Screening"),
+    )
+    changed_by = models.ForeignKey(
+        "iam.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="dpia_requirement_changes",
+        verbose_name=_("Changed by"),
+    )
+    note = models.TextField(blank=True, default="", verbose_name=_("Note"))
+
+    class Meta:
+        verbose_name = _("DPIA requirement change")
+        verbose_name_plural = _("DPIA requirement changes")
+        ordering = ["-created_at"]
+
+    def save(self, *args, **kwargs):
+        self.folder = self.processing.folder
+        super().save(*args, **kwargs)
 
 
 common_exclude = ["created_at", "updated_at"]
