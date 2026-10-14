@@ -3996,6 +3996,25 @@ export interface ParentActionConfig {
 
 export type TableBatchAction = BatchActionConfig | ParentActionConfig;
 
+export const quickFilterPresets: Partial<
+	Record<urlModel, { label: string; icon: string; field: string; values: string[] }[]>
+> = {
+	processings: [
+		{
+			label: 'controllerRegister',
+			icon: 'fa-clipboard-list',
+			field: 'role',
+			values: ['privacy_controller', 'privacy_joint_controller']
+		},
+		{
+			label: 'processorRegister',
+			icon: 'fa-handshake',
+			field: 'role',
+			values: ['privacy_data_processor']
+		}
+	]
+};
+
 export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 	// The whole vocabulary: read stops the reminder, delete removes the message (§4).
 	notifications: [

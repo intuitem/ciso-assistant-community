@@ -7245,6 +7245,7 @@
 	"processingControllers": "Clients (responsables de traitement ou sous-traitants)",
 	"processingControllersHelpText": "Responsables conjoints avec qui vous partagez ce traitement, ou clients pour le compte desquels vous le réalisez",
 	"controllers": "Clients (responsables de traitement ou sous-traitants)",
+	"controllerRegister": "Registre des traitements",
 	"processorRegister": "Registre des sous-traitants",
 	"processingCoControllers": "Responsables conjoints",
 	"newComputedMetric": "Nouvelle métrique calculée",

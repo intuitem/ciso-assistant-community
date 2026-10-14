@@ -7245,6 +7245,7 @@
 	"processingControllers": "Clients (controllers or processors)",
 	"processingControllersHelpText": "Joint controllers you share this processing with, or the clients on whose behalf you carry it out",
 	"controllers": "Clients (controllers or processors)",
+	"controllerRegister": "Controller register",
 	"processorRegister": "Processor register",
 	"processingCoControllers": "Co-controllers",
 	"newComputedMetric": "New computed metric",
