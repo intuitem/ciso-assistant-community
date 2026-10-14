@@ -183,7 +183,7 @@ def make_upload_request(endpoint, filename, data):
     Args:
         endpoint: API endpoint (e.g., "/evidences/{id}/upload/")
         filename: Original file name, carried in Content-Disposition
-        data: File content (bytes)
+        data: File content (bytes or a binary file object, streamed)
 
     Returns:
         Response object

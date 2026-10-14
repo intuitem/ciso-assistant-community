@@ -340,6 +340,8 @@ def register_tools(read_only: bool = False):
         mcp.tool(annotations=_annotations(tool, is_read=True))(_offload(tool))
     if not read_only:
         for tool in WRITE_TOOLS:
+            if config.IS_HTTP and tool is create_evidence:
+                continue
             mcp.tool(annotations=_annotations(tool, is_read=False))(_offload(tool))
     _registered = True
 

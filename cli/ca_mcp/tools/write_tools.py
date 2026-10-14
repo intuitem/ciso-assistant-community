@@ -2,7 +2,6 @@
 
 from pathlib import Path
 
-from .. import config
 from ..client import (
     make_post_request,
     make_get_request,
@@ -1600,18 +1599,6 @@ async def create_vulnerability(
         return f"Error in create_vulnerability: {str(e)}"
 
 
-# Same list as the backend ALLOWED_UPLOAD_EXTENSIONS (backend/core/validators.py).
-EVIDENCE_ALLOWED_EXTENSIONS = tuple(
-    f".{ext}"
-    for ext in (
-        "jpg", "jpeg", "png", "doc", "docx", "odt", "ppt", "pptx", "txt", "xls",
-        "xlsx", "ods", "csv", "md", "pdf", "json", "yaml", "yml", "toml", "xml",
-        "msg", "eml", "zip", "7z", "tar", "gz", "log", "svg", "mp4", "mov", "gif",
-        "webp",
-    )
-)  # fmt: skip
-
-
 def _human_size(num_bytes: int) -> str:
     """Decimal units, matching the backend's ATTACHMENT_MAX_SIZE_MB check."""
     if num_bytes < 1000:
@@ -1631,8 +1618,8 @@ def _delete_evidence_quietly(evidence_id) -> bool:
 
 
 def _attachment_stored(evidence_id):
-    """After an upload exception: True/False if the server says whether the
-    file was stored, None when that cannot be checked either."""
+    """True/False if the server says whether the file was stored, None when
+    that cannot be checked."""
     try:
         res = make_get_request(f"/evidences/{evidence_id}/")
         if res.status_code != 200:
@@ -1657,7 +1644,7 @@ async def create_evidence(
     """Create a new evidence with one attachment read from a local file
 
     One file per call: call again to attach several files (one evidence each).
-    Only available with the local stdio transport; refused over HTTP.
+    Only available with the local stdio transport.
     The returned evidence ID can then be linked through the `evidences`
     parameter of other tools (e.g. task templates).
 
@@ -1668,44 +1655,20 @@ async def create_evidence(
     path: ask the user to save the file and give its path.
 
     Args:
-        file_path: Local path to the file (~ is expanded). Allowed types: the
-            backend's upload list (images, PDF, office, text, mail, archives,
-            video); max size CA_MCP_MAX_UPLOAD_MB (default 50 MB)
+        file_path: Local path to the file (~ is expanded); not inside a
+            hidden directory. The server checks the file type and size
         name: Evidence name (defaults to the file name)
         description: Description
         folder_id: Folder ID/name
     """
     try:
-        # A path sent to a remote server would point at the server's disk:
-        # useless for the user, and an exfiltration channel for a manipulated agent.
-        if config.IS_HTTP:
-            return (
-                "Error: create_evidence is only available with the local stdio "
-                "transport"
-            )
-
-        path = Path(file_path).expanduser()
-        extension = path.suffix.lower()
-        if extension not in EVIDENCE_ALLOWED_EXTENSIONS:
-            return (
-                f"Error: unsupported file type '{extension}' "
-                f"(allowed: {', '.join(EVIDENCE_ALLOWED_EXTENSIONS)})"
-            )
+        path = Path(file_path).expanduser().resolve()
+        if any(part.startswith(".") for part in path.parts):
+            return f"Error: refusing a hidden file or directory: {file_path}"
         if not path.is_file():
             return f"Error: file not found: {file_path}"
-        limit = config.MAX_UPLOAD_MB * 1000**2
-        too_large = f"(max {config.MAX_UPLOAD_MB} MB)"
         size = path.stat().st_size
-        if size > limit:
-            return f"Error: file too large: {_human_size(size)} {too_large}"
-
-        # Bounded read: the file may have grown since the size check.
-        with path.open("rb") as f:
-            data = f.read(limit + 1)
-        if len(data) > limit:
-            return f"Error: file too large: over {_human_size(limit)} {too_large}"
-        if not data:
-            # the backend answers 200 to an empty body without storing anything
+        if not size:
             return f"Error: file is empty: {file_path}"
         filename = path.name
 
@@ -1727,22 +1690,17 @@ async def create_evidence(
 
         created = (
             f"Created evidence: {evidence.get('name')} (ID: {evidence_id}) "
-            f"with attachment {filename} ({_human_size(len(data))})"
+            f"with attachment {filename} ({_human_size(size)})"
         )
 
-        # Do not leave an empty evidence behind a failed upload.
         try:
-            upload = make_upload_request(
-                f"/evidences/{evidence_id}/upload/", filename, data
-            )
+            with path.open("rb") as f:
+                upload = make_upload_request(
+                    f"/evidences/{evidence_id}/upload/", filename, f
+                )
         except Exception as e:
-            # A network error does not say whether the server stored the file
-            # (e.g. a timeout after the body was sent): ask before deleting.
-            stored = _attachment_stored(evidence_id)
-            if stored:
+            if _attachment_stored(evidence_id):
                 return created
-            if stored is False:
-                return f"Error in create_evidence: {e}{_rollback_note(evidence_id)}"
             return (
                 f"Error uploading attachment, outcome unknown: {e} "
                 f"(evidence {evidence_id} kept: check it before retrying)"
@@ -1751,6 +1709,11 @@ async def create_evidence(
         if upload.status_code != 200:
             return (
                 f"Error uploading attachment: {upload.status_code} - {upload.text}"
+                f"{_rollback_note(evidence_id)}"
+            )
+        if _attachment_stored(evidence_id) is False:
+            return (
+                "Error uploading attachment: the server stored no file"
                 f"{_rollback_note(evidence_id)}"
             )
 

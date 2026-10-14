@@ -4,6 +4,7 @@ Network calls are mocked at their import sites, as in
 test_risk_review_tools.py; files are real, under pytest's tmp_path.
 """
 
+import asyncio
 import sys
 from pathlib import Path
 from unittest.mock import patch
@@ -27,24 +28,29 @@ PNG_BYTES = b"\x89PNG\r\n\x1a\n" + b"\x00" * 24
 class _Mocks:
     """Patch every network entry point of create_evidence at once."""
 
-    def __init__(self, create=None, upload=None, is_http=False):
+    def __init__(self, create=None, upload=None, check=None):
         self.create = create or _response(201, {"id": UUID_A, "name": "Alert"})
         self.upload = upload or _response(200)
-        self.is_http = is_http
+        self.check = check or _response(200, {"attachment": "/media/alert.png"})
+        self.sent = []
+
+    def _send(self, endpoint, filename, f):
+        self.sent.append(f.read())
+        return self.upload
 
     def __enter__(self):
         self._patches = [
-            patch.object(write_tools.config, "IS_HTTP", self.is_http),
             patch.object(write_tools, "GLOBAL_FOLDER_ID", None),
             patch.object(write_tools, "resolve_folder_id", return_value=UUID_F),
             patch.object(write_tools, "make_post_request", return_value=self.create),
-            patch.object(write_tools, "make_upload_request", return_value=self.upload),
+            patch.object(write_tools, "make_upload_request", side_effect=self._send),
             patch.object(
                 write_tools, "make_delete_request", return_value=_response(204)
             ),
+            patch.object(write_tools, "make_get_request", return_value=self.check),
         ]
         mocks = [p.__enter__() for p in self._patches]
-        self.resolve, self.post, self.up, self.delete = mocks[2:]
+        self.resolve, self.post, self.up, self.delete, self.get = mocks[1:]
         return self
 
     def __exit__(self, *exc):
@@ -80,11 +86,9 @@ class TestCreateEvidence:
             "/evidences/",
             {"name": "Alert", "folder": UUID_F, "description": "SIEM alert"},
         )
-        assert m.up.call_args.args == (
-            f"/evidences/{UUID_A}/upload/",
-            "alert.pdf",
-            path.read_bytes(),
-        )
+        assert m.up.call_args.args[:2] == (f"/evidences/{UUID_A}/upload/", "alert.pdf")
+        assert m.sent == [path.read_bytes()]
+        m.get.assert_called_once_with(f"/evidences/{UUID_A}/")
         m.delete.assert_not_called()
         assert out == (
             f"Created evidence: Alert (ID: {UUID_A}) with attachment alert.pdf (2.0 KB)"
@@ -104,7 +108,8 @@ class TestCreateEvidence:
         with _Mocks() as m:
             out = run(write_tools.create_evidence(file_path="~/Pictures/a.png"))
         assert out.startswith("Created evidence:")
-        assert m.up.call_args.args[1:] == ("a.png", PNG_BYTES)
+        assert m.up.call_args.args[1] == "a.png"
+        assert m.sent == [PNG_BYTES]
 
     def test_non_ascii_name_is_passed_through(self, tmp_path):
         path = _file(tmp_path, "alerte-été.png")
@@ -119,85 +124,30 @@ class TestCreateEvidence:
         assert out == f"Error: file not found: {missing}"
         m.assert_no_request()
 
+    def test_hidden_paths_are_refused(self, tmp_path):
+        (tmp_path / ".docker").mkdir()
+        for name in (".docker/config.json", ".env.json"):
+            path = _file(tmp_path, name)
+            with _Mocks() as m:
+                out = run(write_tools.create_evidence(file_path=str(path)))
+            assert out == f"Error: refusing a hidden file or directory: {path}"
+            m.assert_no_request()
+
+    def test_symlink_to_hidden_file_is_refused(self, tmp_path):
+        (tmp_path / ".ssh").mkdir()
+        link = tmp_path / "key.txt"
+        link.symlink_to(_file(tmp_path, ".ssh/id_rsa.txt"))
+        with _Mocks() as m:
+            out = run(write_tools.create_evidence(file_path=str(link)))
+        assert out.startswith("Error: refusing a hidden file or directory:")
+        m.assert_no_request()
+
     def test_directory_is_not_a_file(self, tmp_path):
         folder = tmp_path / "shots.png"
         folder.mkdir()
         with _Mocks() as m:
             out = run(write_tools.create_evidence(file_path=str(folder)))
         assert out == f"Error: file not found: {folder}"
-        m.assert_no_request()
-
-    def test_extension_is_case_insensitive(self, tmp_path):
-        path = _file(tmp_path, "ALERT.JPG")
-        with _Mocks() as m:
-            out = run(write_tools.create_evidence(file_path=str(path)))
-        assert out.startswith("Created evidence:")
-        m.up.assert_called_once()
-
-    def test_unsupported_types(self, tmp_path):
-        for name, ext in (("tool.exe", ".exe"), ("README", "")):
-            path = _file(tmp_path, name)
-            with _Mocks() as m:
-                out = run(write_tools.create_evidence(file_path=str(path)))
-            assert out.startswith(f"Error: unsupported file type '{ext}' (allowed: ")
-            m.assert_no_request()
-
-    def test_backend_types_are_accepted(self, tmp_path):
-        for name in ("logo.svg", "report.docx", "export.csv", "mail.eml", "logs.zip"):
-            path = _file(tmp_path, name)
-            with _Mocks() as m:
-                out = run(write_tools.create_evidence(file_path=str(path)))
-            assert out.startswith("Created evidence:"), name
-            m.up.assert_called_once()
-
-    def test_matches_backend_allowlist(self):
-        validators = Path(__file__).parents[3] / "backend/core/validators.py"
-        source = validators.read_text(encoding="utf-8")
-        block = source.split("ALLOWED_UPLOAD_EXTENSIONS = [", 1)[1].split("]", 1)[0]
-        backend = {f".{e.strip().strip('"')}" for e in block.split(",") if e.strip()}
-        assert set(write_tools.EVIDENCE_ALLOWED_EXTENSIONS) == backend
-
-    def test_too_large_is_refused_before_reading(self, tmp_path):
-        path = _file(tmp_path, "big.pdf", b"x" * 2_000_001)
-        with (
-            _Mocks() as m,
-            patch.object(write_tools.config, "MAX_UPLOAD_MB", 2),
-            patch.object(Path, "open") as read,
-        ):
-            out = run(write_tools.create_evidence(file_path=str(path)))
-        assert out == "Error: file too large: 2.0 MB (max 2 MB)"
-        read.assert_not_called()
-        m.assert_no_request()
-
-    def test_file_grown_after_size_check_is_refused(self, tmp_path):
-        path = _file(tmp_path, "growing.log", b"x" * 10)
-        real_open = Path.open
-
-        def grow_then_open(self, *args, **kwargs):
-            with open(self, "wb") as grown:  # builtin open: Path.open is patched
-                grown.write(b"x" * 2_000_001)
-            return real_open(self, *args, **kwargs)
-
-        with (
-            _Mocks() as m,
-            patch.object(write_tools.config, "MAX_UPLOAD_MB", 2),
-            patch.object(Path, "open", grow_then_open),
-        ):
-            out = run(write_tools.create_evidence(file_path=str(path)))
-        assert out == "Error: file too large: over 2.0 MB (max 2 MB)"
-        m.assert_no_request()
-
-    def test_refused_over_http(self, tmp_path):
-        path = _file(tmp_path, "alert.png")
-        with (
-            _Mocks(is_http=True) as m,
-            patch.object(Path, "open") as read_bytes,
-        ):
-            out = run(write_tools.create_evidence(file_path=str(path)))
-        assert out == (
-            "Error: create_evidence is only available with the local stdio transport"
-        )
-        read_bytes.assert_not_called()
         m.assert_no_request()
 
     def test_create_rejected(self, tmp_path):
@@ -217,7 +167,21 @@ class TestCreateEvidence:
         assert out == 'Error uploading attachment: 400 - {"detail":"too large"}'
         m.delete.assert_called_once_with(f"/evidences/{UUID_A}/")
 
-    def _upload_raises(self, tmp_path, check, delete=None):
+    def test_upload_ok_but_nothing_stored_deletes_evidence(self, tmp_path):
+        path = _file(tmp_path, "alert.png")
+        with _Mocks(check=_response(200, {"attachment": None})) as m:
+            out = run(write_tools.create_evidence(file_path=str(path)))
+        assert out == "Error uploading attachment: the server stored no file"
+        m.delete.assert_called_once_with(f"/evidences/{UUID_A}/")
+
+    def test_upload_ok_but_unverifiable_is_success(self, tmp_path):
+        path = _file(tmp_path, "alert.png")
+        with _Mocks(check=_response(500)) as m:
+            out = run(write_tools.create_evidence(file_path=str(path)))
+        assert out.startswith("Created evidence:")
+        m.delete.assert_not_called()
+
+    def _upload_raises(self, tmp_path, check):
         """Upload raises; `check` is the GET /evidences/<id>/ outcome."""
         path = _file(tmp_path, "alert.png")
         get = (
@@ -230,8 +194,6 @@ class TestCreateEvidence:
             patch.object(write_tools, "make_get_request", **get) as g,
         ):
             m.up.side_effect = TimeoutError("read timed out")
-            if delete is not None:
-                m.delete.side_effect = delete
             out = run(write_tools.create_evidence(file_path=str(path)))
         g.assert_called_once_with(f"/evidences/{UUID_A}/")
         return out, m
@@ -242,20 +204,17 @@ class TestCreateEvidence:
         assert out.startswith(f"Created evidence: Alert (ID: {UUID_A})")
         m.delete.assert_not_called()
 
-    def test_upload_exception_without_file_deletes_evidence(self, tmp_path):
-        out, m = self._upload_raises(
-            tmp_path, _response(200, {"id": UUID_A, "attachment": None})
-        )
-        assert out == "Error in create_evidence: read timed out"
-        m.delete.assert_called_once_with(f"/evidences/{UUID_A}/")
-
-    def test_upload_exception_unverifiable_keeps_evidence(self, tmp_path):
-        out, m = self._upload_raises(tmp_path, ConnectionError("unreachable"))
-        assert out == (
-            "Error uploading attachment, outcome unknown: read timed out "
-            f"(evidence {UUID_A} kept: check it before retrying)"
-        )
-        m.delete.assert_not_called()
+    def test_upload_exception_without_file_keeps_evidence(self, tmp_path):
+        for check in (
+            _response(200, {"id": UUID_A, "attachment": None}),
+            ConnectionError("unreachable"),
+        ):
+            out, m = self._upload_raises(tmp_path, check)
+            assert out == (
+                "Error uploading attachment, outcome unknown: read timed out "
+                f"(evidence {UUID_A} kept: check it before retrying)"
+            )
+            m.delete.assert_not_called()
 
     def test_empty_file_is_refused(self, tmp_path):
         path = _file(tmp_path, "blank.png", b"")
@@ -272,17 +231,6 @@ class TestCreateEvidence:
             out = run(write_tools.create_evidence(file_path=str(path)))
         assert out == (
             "Error uploading attachment: 400 - too large"
-            f" (could not delete empty evidence {UUID_A}, remove it manually)"
-        )
-
-    def test_raising_rollback_keeps_the_upload_error(self, tmp_path):
-        out, _ = self._upload_raises(
-            tmp_path,
-            _response(200, {"id": UUID_A, "attachment": None}),
-            delete=ConnectionError("connection reset"),
-        )
-        assert out == (
-            "Error in create_evidence: read timed out"
             f" (could not delete empty evidence {UUID_A}, remove it manually)"
         )
 
@@ -332,3 +280,20 @@ class TestContentDispositionHeader:
 def test_create_evidence_is_a_write_tool():
     assert write_tools.create_evidence in server.WRITE_TOOLS
     assert write_tools.create_evidence not in server.READ_TOOLS
+
+
+def test_create_evidence_is_not_registered_over_http():
+    from mcp.server.mcpserver import MCPServer
+
+    def names(is_http):
+        fresh = MCPServer("test")
+        with (
+            patch.object(server, "mcp", fresh),
+            patch.object(server, "_registered", False),
+            patch.object(server.config, "IS_HTTP", is_http),
+        ):
+            server.register_tools(read_only=False)
+            return {t.name for t in asyncio.run(fresh.list_tools())}
+
+    assert "create_evidence" in names(False)
+    assert "create_evidence" not in names(True)
