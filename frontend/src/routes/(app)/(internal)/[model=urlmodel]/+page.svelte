@@ -5,6 +5,7 @@
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ChoiceCardsModal from '$lib/components/Modals/ChoiceCardsModal.svelte';
 	import ImportWorkflowModal from '$lib/components/Modals/ImportWorkflowModal.svelte';
+	import ComposeMetricModal from '$lib/components/Modals/ComposeMetricModal.svelte';
 	import ExportModal, {
 		type ExportGroup,
 		type ExportOption
@@ -274,6 +275,13 @@
 		modalCreateForm();
 	}
 
+	function modalComposeMetric(): void {
+		modalStore.trigger({
+			type: 'component',
+			component: { ref: ComposeMetricModal, props: {} }
+		});
+	}
+
 	function modalWorkflowImportForm(): void {
 		let modalComponent: ModalComponent = {
 			ref: ImportWorkflowModal,
@@ -437,6 +445,17 @@
 										onclick={modalExport}
 									>
 										<i class="fa-solid fa-download"></i>
+									</button>
+								{/if}
+								{#if URLModel === 'metric-instances'}
+									<button
+										class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+										title={m.newComputedMetric()}
+										aria-label={m.newComputedMetric()}
+										data-testid="new-computed-metric-button"
+										onclick={modalComposeMetric}
+									>
+										<i class="fa-solid fa-calculator"></i>
 									</button>
 								{/if}
 								{#if URLModel === 'workflows'}
