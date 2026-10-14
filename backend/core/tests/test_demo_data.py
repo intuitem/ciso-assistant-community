@@ -5,7 +5,7 @@ it to a builder's ``covers`` (see ``core/demo_builders.py``) or list it in
 ``core/demo/coverage.py`` with a reason.
 """
 
-from datetime import date, timedelta
+from datetime import UTC, date, datetime, timedelta
 
 import pytest
 from django.urls import URLResolver, get_resolver
@@ -15,7 +15,13 @@ from rest_framework.test import APIClient
 from core import demo
 from core.apps import startup
 from core.demo.coverage import MAX_PENDING, PENDING, classification
-from core.models import AppliedControl, ComplianceAssessment, DemoManifest
+from core.models import (
+    AppliedControl,
+    ComplianceAssessment,
+    DemoManifest,
+    Framework,
+    RiskMatrix,
+)
 from iam.models import Folder, User, UserGroup
 
 DOMAIN = "Demo coverage test"
@@ -147,6 +153,25 @@ def test_dates_follow_the_anchor(frozen, anchor):
     audit = ComplianceAssessment.objects.get(folder=ctx.domain, ref_id="AUD.2026.01")
     assert audit.due_date == anchor + timedelta(days=45)
     assert control.created_at.date() <= date.today()
+
+
+@pytest.mark.django_db
+def test_live_seed_leaves_shared_library_timestamps_alone():
+    options = {
+        "domain_name": DOMAIN,
+        "modules": ["compliance", "risk"],
+        "out": lambda _: None,
+        "err": pytest.fail,
+    }
+    demo.seed(**options)
+    long_ago = datetime(2020, 1, 1, tzinfo=UTC)
+    for model in (Framework, RiskMatrix):
+        model.objects.update(created_at=long_ago, updated_at=long_ago)
+    demo.seed(**options)
+    for model in (Framework, RiskMatrix):
+        assert model.objects.exists()
+        assert not model.objects.exclude(created_at=long_ago).exists()
+        assert not model.objects.exclude(updated_at=long_ago).exists()
 
 
 @pytest.mark.django_db

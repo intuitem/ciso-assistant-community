@@ -776,18 +776,20 @@ class ComplianceBuilder(DemoBuilder):
         # on the same framework repeats the whole requirement tree, so each
         # order_id is shared by one row per audit and the sort would fall back
         # to the UUID again. The (audit, requirement) pair identifies a row.
-        return [
+        stamps = [
             (ComplianceAssessment, {"folder__in": ctx.folders()}, ("name",)),
             (
                 RequirementAssessment,
                 {"compliance_assessment__folder__in": ctx.folders()},
                 ("compliance_assessment__ref_id", "requirement__order_id"),
             ),
-            # Library-loaded referentials are stamped at import time, so they
-            # drift whenever the database is rebuilt. They live in the root
-            # folder and are shared, so only this builder's library is touched.
-            (Framework, {"library__urn__in": self.libraries}, ("name",)),
         ]
+        # Library-loaded referentials are stamped at import time, so they
+        # drift whenever the database is rebuilt. They live in the root folder
+        # and are shared with user data, so only screenshot runs touch them.
+        if ctx.frozen:
+            stamps.append((Framework, {"library__urn__in": self.libraries}, ("name",)))
+        return stamps
 
     def build(self, ctx):
         perimeters = {p.ref_id: p for p in ctx.refs["perimeters"]}
@@ -870,7 +872,7 @@ class RiskBuilder(DemoBuilder):
     }
 
     def stamps(self, ctx):
-        return [
+        stamps = [
             (RiskAssessment, {"folder__in": ctx.folders()}, ("name",)),
             (
                 RiskScenario,
@@ -878,8 +880,11 @@ class RiskBuilder(DemoBuilder):
                 ("risk_assessment__ref_id", "ref_id"),
             ),
             (Threat, {"folder": ctx.domain}, ("name",)),
-            (RiskMatrix, {"library__urn__in": self.libraries}, ("name",)),
         ]
+        # Shared root-folder library content: screenshot runs only.
+        if ctx.frozen:
+            stamps.append((RiskMatrix, {"library__urn__in": self.libraries}, ("name",)))
+        return stamps
 
     def build(self, ctx):
         matrix = RiskMatrix.objects.filter(urn__icontains="5x5-iso27005").first()
