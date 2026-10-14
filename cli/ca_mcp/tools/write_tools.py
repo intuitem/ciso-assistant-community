@@ -1,6 +1,13 @@
 """Write/Create MCP tools for CISO Assistant"""
 
-from ..client import make_post_request, make_get_request
+from pathlib import Path
+
+from ..client import (
+    make_post_request,
+    make_get_request,
+    make_upload_request,
+    make_delete_request,
+)
 from ..resolvers import (
     resolve_ebios_rm_study_id,
     resolve_folder_id,
@@ -1589,6 +1596,130 @@ async def create_vulnerability(
             return f"Error creating vulnerability: {res.status_code} - {res.text}"
     except Exception as e:
         return f"Error in create_vulnerability: {str(e)}"
+
+
+def _human_size(num_bytes: int) -> str:
+    """Decimal units, matching the backend's ATTACHMENT_MAX_SIZE_MB check."""
+    if num_bytes < 1000:
+        return f"{num_bytes} B"
+    if num_bytes < 1000**2:
+        return f"{num_bytes / 1000:.1f} KB"
+    return f"{num_bytes / 1000**2:.1f} MB"
+
+
+def _delete_evidence_quietly(evidence_id) -> bool:
+    """Roll back a just-created evidence; never raises, True on a 2xx."""
+    try:
+        res = make_delete_request(f"/evidences/{evidence_id}/")
+        return 200 <= res.status_code < 300
+    except Exception:
+        return False
+
+
+def _attachment_stored(evidence_id):
+    """True/False if the server says whether the file was stored, None when
+    that cannot be checked."""
+    try:
+        res = make_get_request(f"/evidences/{evidence_id}/")
+        if res.status_code != 200:
+            return None
+        return bool(res.json().get("attachment"))
+    except Exception:
+        return None
+
+
+def _rollback_note(evidence_id) -> str:
+    if _delete_evidence_quietly(evidence_id):
+        return ""
+    return f" (could not delete empty evidence {evidence_id}, remove it manually)"
+
+
+async def create_evidence(
+    file_path: str,
+    name: str = None,
+    description: str = None,
+    folder_id: str = None,
+) -> str:
+    """Create a new evidence with one attachment read from a local file
+
+    One file per call: call again to attach several files (one evidence each).
+    Only available with the local stdio transport.
+    The returned evidence ID can then be linked through the `evidences`
+    parameter of other tools (e.g. task templates).
+
+    The file must exist on the user's disk. Screenshots pasted into the chat
+    work only when the client saved them locally and shows their path (Claude
+    Code does, e.g. "[Image: source: <path>]"): pass that path. Clients that
+    keep pasted images only in the conversation (e.g. Claude Desktop) give no
+    path: ask the user to save the file and give its path.
+
+    Args:
+        file_path: Local path to the file (~ is expanded); not inside a
+            hidden directory. The server checks the file type and size
+        name: Evidence name (defaults to the file name)
+        description: Description
+        folder_id: Folder ID/name
+    """
+    try:
+        path = Path(file_path).expanduser().resolve()
+        if any(part.startswith(".") for part in path.parts):
+            return f"Error: refusing a hidden file or directory: {file_path}"
+        if not path.is_file():
+            return f"Error: file not found: {file_path}"
+        size = path.stat().st_size
+        if not size:
+            return f"Error: file is empty: {file_path}"
+        filename = path.name
+
+        # Opened before creating the evidence: an unreadable file leaves no record.
+        with path.open("rb") as f:
+            if not folder_id and GLOBAL_FOLDER_ID:
+                folder_id = GLOBAL_FOLDER_ID
+
+            payload = {"name": name or filename}
+            if folder_id:
+                payload["folder"] = resolve_folder_id(folder_id)
+            if description is not None:
+                payload["description"] = description
+
+            res = make_post_request("/evidences/", payload)
+            if res.status_code != 201:
+                return f"Error creating evidence: {res.status_code} - {res.text}"
+
+            evidence = res.json()
+            evidence_id = evidence.get("id")
+
+            created = (
+                f"Created evidence: {evidence.get('name')} (ID: {evidence_id}) "
+                f"with attachment {filename} ({_human_size(size)})"
+            )
+
+            try:
+                upload = make_upload_request(
+                    f"/evidences/{evidence_id}/upload/", filename, f
+                )
+            except Exception as e:
+                if _attachment_stored(evidence_id):
+                    return created
+                return (
+                    f"Error uploading attachment, outcome unknown: {e} "
+                    f"(evidence {evidence_id} kept: check it before retrying)"
+                )
+
+            if upload.status_code != 200:
+                return (
+                    f"Error uploading attachment: {upload.status_code} - {upload.text}"
+                    f"{_rollback_note(evidence_id)}"
+                )
+            if _attachment_stored(evidence_id) is False:
+                return (
+                    "Error uploading attachment: the server stored no file"
+                    f"{_rollback_note(evidence_id)}"
+                )
+
+            return created
+    except Exception as e:
+        return f"Error in create_evidence: {str(e)}"
 
 
 async def create_incident(

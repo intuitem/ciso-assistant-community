@@ -112,6 +112,11 @@ HARD = [
     ("Add a threat named Supply chain compromise", {"create_threat"}, {"supply chain"}),
     ("Create a new domain called Legal", {"create_folder"}, {"legal"}),
     (
+        "Attach C:/tmp/firewall-review.pdf as a new evidence named Firewall review",
+        {"create_evidence"},
+        {"firewall-review.pdf"},
+    ),
+    (
         "Record a new incident called Ransomware on file server",
         {"create_incident"},
         {"ransomware"},
