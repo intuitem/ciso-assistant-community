@@ -659,16 +659,16 @@ export const URL_MODEL_MAP: ModelMap = {
 			},
 			{
 				field: 'applied_controls',
-				urlModel: 'metric-instances',
+				urlModel: 'task-templates',
 				addExisting: {
-					parentField: 'metric_instances'
+					parentField: 'task_templates'
 				}
 			},
 			{
 				field: 'applied_controls',
-				urlModel: 'task-templates',
+				urlModel: 'metric-instances',
 				addExisting: {
-					parentField: 'task_templates'
+					parentField: 'metric_instances'
 				}
 			},
 			{
