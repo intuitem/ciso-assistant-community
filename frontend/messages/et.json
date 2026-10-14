@@ -2996,6 +2996,7 @@
 	"internalProcesses": "Sisemised protsessid",
 	"financialCapacity": "Finantsvõimekus",
 	"companyCulture": "Ettevõtte kultuur / kommunikatsioon",
+	"companyCultureCommunication": "Ettevõtte kultuur / kommunikatsioon",
 	"weeksOfMonthErrorMessage": "Valitud päeva(de) jaoks pead määrama vähemalt ühe nädala",
 	"associatedQuantitativeRiskHypotheses": "Seotud hüpoteesid",
 	"associatedQuantitativeRiskScenarios": "Seotud stsenaariumid",

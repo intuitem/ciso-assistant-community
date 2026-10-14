@@ -2067,6 +2067,9 @@ export const MetricDefinitionSchema = z.object({
 	provider: z.string().optional().nullable(),
 	higher_is_better: z.boolean().default(true),
 	default_target: z.number().optional().nullable(),
+	datasets: jsonSchema.optional().nullable(),
+	inputs: jsonSchema.optional().nullable(),
+	expression: z.string().optional(),
 	filtering_labels: z.string().optional().array().optional()
 });
 
@@ -2081,7 +2084,8 @@ export const MetricInstanceSchema = z.object({
 	collection_frequency: z.string().optional().nullable(),
 	organisation_objectives: z.string().uuid().optional().array().optional(),
 	filtering_labels: z.string().optional().array().optional(),
-	evidences: z.string().uuid().optional().nullable()
+	evidences: z.string().uuid().optional().nullable(),
+	input_choices: jsonSchema.optional().nullable()
 });
 
 export const CustomMetricSampleSchema = z.object({
