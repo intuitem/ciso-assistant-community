@@ -3380,13 +3380,15 @@ class ProcessingRecordConsumer(RecordConsumer):
         else:
             status_value = "privacy_draft"
 
-        record_role_value = record.get("role", "")
-        if record_role_value in self._ROLE_KEYS:
+        record_role_value = str(record.get("role") or "").strip()
+        if not record_role_value:
+            role_value = "privacy_controller"
+        elif record_role_value in self._ROLE_KEYS:
             role_value = record_role_value
+        elif record_role_value.lower() in self._ROLE_BY_DISPLAY:
+            role_value = self._ROLE_BY_DISPLAY[record_role_value.lower()]
         else:
-            role_value = self._ROLE_BY_DISPLAY.get(
-                str(record_role_value).lower(), "privacy_controller"
-            )
+            return {}, Error(record=record, error=f"Unknown role: {record_role_value}")
 
         data = {
             "name": name,

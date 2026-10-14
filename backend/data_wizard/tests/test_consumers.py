@@ -976,6 +976,18 @@ class TestProcessingConsumer:
         assert record_data["role"] == "privacy_data_processor"
         assert record_data["controllers"] == [client.id]
 
+    def test_role_is_trimmed_and_unknown_role_rejected(self, base_context):
+        consumer = ProcessingRecordConsumer(base_context)
+        record_data, error = consumer.prepare_create(
+            {"name": "Hosting", "role": "Data Processor "}, None
+        )
+        assert error is None
+        assert record_data["role"] == "privacy_data_processor"
+        _, error = consumer.prepare_create(
+            {"name": "Hosting", "role": "Processor"}, None
+        )
+        assert "Processor" in error.error
+
     def test_controllers_with_commas_and_unknown_names(
         self, base_context, domain_folder
     ):
