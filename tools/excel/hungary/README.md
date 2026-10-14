@@ -5,8 +5,10 @@
 | fájl / file | tartalom / content |
 |---|---|
 | `hu-1-2025-sztfh-rendelet-elemi-kovetelmenyek.xlsx` | az elemi követelmények könyvtárának forrása v2 Excel formátumban / the source of the elementary-requirements library in the v2 Excel format |
+| `hu-7-2024-mk-rendelet.xlsx` | a védelmi intézkedések katalógusának forrása v2 Excel formátumban / the source of the protective-measures catalogue in the v2 Excel format |
 | `hu-7-2024-mk-rendelet-fenyegetesek.xlsx` | a fenyegetéskatalógus forrása v2 Excel formátumban / the source of the threat catalogue in the v2 Excel format |
 | `../../../backend/library/libraries/hu-1-2025-sztfh-rendelet-elemi-kovetelmenyek.yaml` | a konvertált könyvtár (`convert_library_v2.py`) / the converted library |
+| `../../../backend/library/libraries/hu-7-2024-mk-rendelet.yaml` | a konvertált védelmiintézkedés-katalógus / the converted protective-measures catalogue |
 | `../../../backend/library/libraries/hu-7-2024-mk-rendelet-fenyegetesek.yaml` | a konvertált fenyegetéskatalógus / the converted threat catalogue |
 
 ---
@@ -24,7 +26,7 @@ védelmi intézkedések katalógusa, 3. melléklet: fenyegetéskatalógus) és a
 |---|---|---|---|
 | `hu-1-2025-sztfh-rendelet-elemi-kovetelmenyek` | kész | az SZTFH rendelet 7. melléklete szerinti 2 148 elemi követelmény a 7/2024. MK rendelet 2. mellékletének szerkezetében (19 követelménycsalád, 914 követelménycsoport), a 6. melléklet audit-jellemzőivel | az SZTFH-audit nézete: auditfelkészülés; az értékelés egysége az elemi követelmény |
 | `hu-7-2024-mk-rendelet-fenyegetesek` | kész | a 7/2024. MK rendelet 3. mellékletének 47 fenyegetése | fenyegetéskatalógus a kockázatértékeléshez, mindkét keretrendszer mellé |
-| `hu-7-2024-mk-rendelet` | tervezett | ugyanaz a 914 követelménycsoport elemi szint nélkül, értékelhető követelménycsoportokkal, ugyanazzal a 7 megvalósítási csoporttal | a jogszabályi kötelezettség követelménycsoport-szinten: kontrollkezelés |
+| `hu-7-2024-mk-rendelet` | kész | ugyanaz a 914 követelménycsoport elemi szint nélkül, értékelhető követelménycsoportokkal, ugyanazzal a 7 megvalósítási csoporttal | a jogszabályi kötelezettség követelménycsoport-szinten: kontrollkezelés |
 | `mapping-hu-7-2024-mk-rendelet-and-hu-1-2025-sztfh-rendelet-elemi-kovetelmenyek` | tervezett | minden elemi követelmény a szülő követelménycsoportjához rendelve (`superset`; a fordított irány generált) | átjárhatóság a két keretrendszer között, például a másik keretrendszer auditját baseline-ként használó audit előtöltése |
 
 A két keretrendszer csomópontjainak `ref_id`-ja azonos (`1.1`, `K01.001_P1` …), csak az URN-előtag
@@ -116,6 +118,41 @@ Betöltési teszt (CISO Assistant 4.1.1, dátum: …): a könyvtár betölthető
 fenti számokat adják, a szervezeti auditot baseline-ként használó EIR-audit megkapja az ott rögzített
 eredményt.
 
+### `hu-7-2024-mk-rendelet` – védelmi intézkedések katalógusa
+
+A 7/2024. (VI. 24.) MK rendelet 2. mellékletének 914 követelménycsoportja (védelmi intézkedés) a 19
+követelménycsalád alatt, elemi követelmények nélkül: minden követelménycsoport értékelhető. A csomópontok
+`ref_id`-ja, neve, leírása, megjegyzése és megvalósítási csoportjai megegyeznek az elemi követelmények
+könyvtárának 1–2. szintű csomópontjaival, csak az URN-előtag más
+(`urn:aafeher:risk:req_node:hu-7-2024-mk-rendelet`). Rendeltetése a jogszabályi kötelezettség
+követelménycsoport-szintű kezelése (kontrollok, megfelelés), az SZTFH-auditra való felkészüléshez az elemi
+követelmények könyvtára szolgál.
+
+| szint | csomópont | ref_id | name | description | megvalósítási csoportok |
+|---|---|---|---|---|---|
+| 1 | követelménycsalád (19) | `1` … `19` | a család neve | – | – |
+| 2 | követelménycsoport / védelmi intézkedés (914, értékelhető) | `1.1` | a rendeletben szereplő megnevezés | a követelmény szövege, pontonként külön sorban | `A-SZ`, `A-EIR`, `J-SZ`, `J-EIR`, `M-SZ`, `M-EIR`, `KIEG`, mint fent |
+
+A megvalósítási csoportok meghatározása, a 6. melléklet szerinti jelleg és a csoportok kiválasztása egy
+audithoz ugyanaz, mint az elemi követelmények könyvtáránál; az értékelhető követelmény itt maga a
+követelménycsoport:
+
+| csoport | értékelhető követelménycsoport |
+|---|---|
+| `A-SZ` / `A-EIR` | 82 / 82 |
+| `J-SZ` / `J-EIR` | 108 / 194 |
+| `M-SZ` / `M-EIR` | 132 / 253 |
+| `KIEG` | 529 |
+
+A megjegyzések (annotation) azonosak az elemi követelmények könyvtárának követelménycsoportjaival (6.
+melléklet szerinti audit-jellemzők, elírások, eltérő névírás, a 18/2024. (XII. 30.) MK rendelet szerinti
+módosítás).
+
+Ellenőrzés: a YAML 933 követelménycsomópontot (19 család + 914 követelménycsoport) és 7 megvalósítási
+csoportot tartalmaz. Az értékelhető csomópontok száma kiválasztásonként: `A-SZ` 82, `A-EIR` 82, `J-SZ` 108,
+`J-EIR` 194, `M-SZ` 132, `M-EIR` 253, `KIEG` 529, `M-SZ`+`M-EIR` 385, `A-EIR`+`M-SZ` 214, kiválasztás nélkül
+914. Betöltési teszt (CISO Assistant 4.1.1, dátum: …).
+
 ### `hu-7-2024-mk-rendelet-fenyegetesek` – fenyegetéskatalógus
 
 A 7/2024. (VI. 24.) MK rendelet 3. mellékletének 47 fenyegetése `threats` objektumként (`ref_id` 1–47;
@@ -124,7 +161,7 @@ a megjegyzés a melléklet hivatkozása). A rendelet a védelmi intézkedéseket
 
 A katalógus azért önálló könyvtár, mert a CISO Assistantban a fenyegetés URN-je egyedi, így ugyanaz a
 fenyegetés nem szerepelhet két keretrendszer-könyvtárban; a katalógus az elemi követelmények könyvtárához
-és a tervezett `hu-7-2024-mk-rendelet` keretrendszerhez egyaránt tartozik. A fenyegetések URN-előtagja
+és a `hu-7-2024-mk-rendelet` keretrendszerhez egyaránt tartozik. A fenyegetések URN-előtagja
 `urn:aafeher:risk:threat:hu-7-2024-mk-rendelet`.
 
 Ellenőrzés: a YAML 47 fenyegetést tartalmaz. Betöltési teszt (CISO Assistant 4.1.1, dátum: …).
@@ -162,7 +199,7 @@ packager `aafeher`.
 |---|---|---|---|
 | `hu-1-2025-sztfh-rendelet-elemi-kovetelmenyek` | done | the 2,148 elemi követelmény (elementary requirements) of SZTFH annex 7 in the structure of annex 2 of 7/2024. MK rendelet (19 families, 914 protective measures), with the annex 6 audit metadata | the view of the SZTFH audit: audit preparation; the unit of assessment is the elementary requirement |
 | `hu-7-2024-mk-rendelet-fenyegetesek` | done | the 47 threats of annex 3 of 7/2024. MK rendelet | threat catalogue for risk assessments, alongside both frameworks |
-| `hu-7-2024-mk-rendelet` | planned | the same 914 measures without the elementary level, with assessable measures and the same 7 implementation groups | the legal obligation at measure level: control management |
+| `hu-7-2024-mk-rendelet` | done | the same 914 measures without the elementary level, with assessable measures and the same 7 implementation groups | the legal obligation at measure level: control management |
 | `mapping-hu-7-2024-mk-rendelet-and-hu-1-2025-sztfh-rendelet-elemi-kovetelmenyek` | planned | every elementary requirement mapped to its parent measure (`superset`; the reverse direction is generated) | interoperability between the two frameworks, for example pre-filling an audit created with an audit of the other framework as its baseline |
 
 The nodes of the two frameworks share their `ref_id` (`1.1`, `K01.001_P1` …); only the URN prefix differs.
@@ -252,6 +289,39 @@ Load test (CISO Assistant 4.1.1, date: …): the library loads, audits give the 
 and a system audit created with the organisational audit as its baseline receives the results recorded
 there.
 
+### `hu-7-2024-mk-rendelet` – protective-measures catalogue
+
+The 914 követelménycsoport (protective measures) of annex 2 of 7/2024. (VI. 24.) MK rendelet under the 19
+families, without the elementary requirements: every measure is assessable. The `ref_id`, name,
+description, annotation and implementation groups of the nodes are those of the depth 1–2 nodes of the
+elementary-requirements library; only the URN prefix differs
+(`urn:aafeher:risk:req_node:hu-7-2024-mk-rendelet`). It serves the legal obligation at measure level
+(controls, compliance); preparing for the SZTFH audit is what the elementary-requirements library is for.
+
+| depth | node | ref_id | name | description | implementation groups |
+|---|---|---|---|---|---|
+| 1 | követelménycsalád / family (19) | `1` … `19` | family name | – | – |
+| 2 | követelménycsoport / protective measure (914, assessable) | `1.1` | the name as printed in the decree | the requirement text, one numbered point per line | `A-SZ`, `A-EIR`, `J-SZ`, `J-EIR`, `M-SZ`, `M-EIR`, `KIEG`, as above |
+
+The definition of the implementation groups, the annex 6 nature and the selection of groups for an audit
+are the same as for the elementary-requirements library; here the assessable requirement is the measure
+itself:
+
+| group | assessable measures |
+|---|---|
+| `A-SZ` / `A-EIR` | 82 / 82 |
+| `J-SZ` / `J-EIR` | 108 / 194 |
+| `M-SZ` / `M-EIR` | 132 / 253 |
+| `KIEG` | 529 |
+
+The annotations are those of the measures of the elementary-requirements library (annex 6 audit metadata,
+typos, different spellings, the amendment by 18/2024. (XII. 30.) MK rendelet).
+
+Verification: the YAML holds 933 requirement nodes (19 families + 914 measures) and 7 implementation
+groups. Assessable nodes per selection: `A-SZ` 82, `A-EIR` 82, `J-SZ` 108, `J-EIR` 194, `M-SZ` 132,
+`M-EIR` 253, `KIEG` 529, `M-SZ`+`M-EIR` 385, `A-EIR`+`M-SZ` 214, and 914 without a selection. Load test
+(CISO Assistant 4.1.1, date: …).
+
 ### `hu-7-2024-mk-rendelet-fenyegetesek` – threat catalogue
 
 The 47 threats of annex 3 of 7/2024. (VI. 24.) MK rendelet as a `threats` object (`ref_id` 1–47; the
@@ -260,7 +330,7 @@ annotation is the reference to the annex). The decree does not map measures to t
 
 The catalogue is a library of its own because a threat URN is unique in CISO Assistant, so the same threat
 cannot be part of two framework libraries; the catalogue belongs to the elementary-requirements library and
-to the planned `hu-7-2024-mk-rendelet` framework alike. The URN prefix of the threats is
+to the `hu-7-2024-mk-rendelet` framework alike. The URN prefix of the threats is
 `urn:aafeher:risk:threat:hu-7-2024-mk-rendelet`.
 
 Verification: the YAML holds 47 threats. Load test (CISO Assistant 4.1.1, date: …).
