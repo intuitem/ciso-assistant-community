@@ -21,6 +21,10 @@ from ..resolvers import (
     resolve_reference_control_id,
     resolve_qualification_ids,
     resolve_risk_level_index,
+    resolve_threat_id,
+    resolve_entity_id,
+    resolve_incident_id,
+    resolve_in_folder_or_global,
     parse_duration,
 )
 from ..config import GLOBAL_FOLDER_ID
@@ -756,7 +760,6 @@ async def create_risk_scenario(
     description: str = "",
     risk_assessment_id: str = None,
     folder_id: str = None,
-    existing_controls: str = "",
     current_proba: int = None,
     current_impact: int = None,
     assets: list = None,
@@ -781,7 +784,6 @@ async def create_risk_scenario(
         description: Description
         risk_assessment_id: Risk assessment ID/name
         folder_id: Folder ID/name
-        existing_controls: Existing controls description
         current_proba: Probability 0-4 (0=very low, 4=very high)
         current_impact: Impact 0-4 (0=very low, 4=very high)
         assets: List of asset IDs/names
@@ -824,9 +826,6 @@ async def create_risk_scenario(
 
         if risk_assessment_id:
             payload["risk_assessment"] = risk_assessment_id
-
-        if existing_controls:
-            payload["existing_controls"] = existing_controls
 
         if current_proba is not None:
             payload["current_proba"] = current_proba
@@ -1720,3 +1719,181 @@ async def create_evidence(
         return created
     except Exception as e:
         return f"Error in create_evidence: {str(e)}"
+
+
+async def create_incident(
+    name: str,
+    description: str = None,
+    ref_id: str = None,
+    status: str = None,
+    severity: int = None,
+    detection: str = None,
+    reported_at: str = None,
+    occurred_at: str = None,
+    resolved_at: str = None,
+    resolution: str = None,
+    is_bcp_activated: bool = None,
+    link: str = None,
+    folder_id: str = None,
+    threats: list = None,
+    owners: list = None,
+    assets: list = None,
+    qualifications: list = None,
+    entities: list = None,
+    applied_controls: list = None,
+    filtering_labels: list = None,
+) -> str:
+    """Create a new incident
+
+    Args:
+        name: Incident name (required)
+        description: Description
+        ref_id: Reference ID
+        status: new | ongoing | resolved | closed | dismissed (default: new)
+        severity: 1 (critical) | 2 (major) | 3 (moderate) | 4 (minor) | 5 (low) | 6 (unknown) (default: 3)
+        detection: internally_detected | externally_detected
+        reported_at: Reported date/time (ISO 8601, defaults to now)
+        occurred_at: Occurrence date/time (ISO 8601, must not be after reported_at)
+        resolved_at: Resolution date/time (ISO 8601, must not be before occurred_at or reported_at)
+        resolution: Resolution notes
+        is_bcp_activated: Whether the business continuity plan was activated
+        link: External link (e.g. ticket URL)
+        folder_id: Folder ID/name (default: Global)
+        threats: List of threat IDs/names (resolved within the incident's folder, then Global)
+        owners: List of owners as actor UUIDs, emails or names
+        assets: List of asset IDs/names (resolved within the incident's folder, then Global)
+        qualifications: List of qualifications: letters C/I/A/T, names or UUIDs
+        entities: List of third-party entity IDs/names
+        applied_controls: List of applied control IDs/names (resolved within the incident's folder, then Global)
+        filtering_labels: List of label UUIDs
+    """
+    try:
+        scope_folder = resolve_folder_id(folder_id) if folder_id else None
+        folder = scope_folder or GLOBAL_FOLDER_ID
+
+        payload = {"name": name}
+        if folder:
+            payload["folder"] = folder
+
+        scalars = {
+            "description": description,
+            "ref_id": ref_id,
+            "status": status,
+            "severity": severity,
+            "detection": detection,
+            "reported_at": reported_at,
+            "occurred_at": occurred_at,
+            "resolved_at": resolved_at,
+            "resolution": resolution,
+            "is_bcp_activated": is_bcp_activated,
+            "link": link,
+        }
+        payload.update({k: v for k, v in scalars.items() if v is not None})
+
+        if threats:
+            payload["threats"] = [
+                resolve_in_folder_or_global(resolve_threat_id, t, scope_folder)
+                for t in threats
+            ]
+        if owners:
+            payload["owners"] = resolve_actor_ids(owners)
+        if assets:
+            payload["assets"] = [
+                resolve_in_folder_or_global(resolve_asset_id, a, scope_folder)
+                for a in assets
+            ]
+        if qualifications:
+            payload["qualifications"] = resolve_qualification_ids(qualifications)
+        if entities:
+            payload["entities"] = [resolve_entity_id(e) for e in entities]
+        if applied_controls:
+            payload["applied_controls"] = [
+                resolve_in_folder_or_global(resolve_applied_control_id, c, scope_folder)
+                for c in applied_controls
+            ]
+        if filtering_labels:
+            payload["filtering_labels"] = filtering_labels
+
+        res = make_post_request("/incidents/", payload)
+
+        if res.status_code == 201:
+            incident = res.json()
+            return (
+                f"Created incident: {incident.get('name')} (ID: {incident.get('id')})"
+            )
+        else:
+            return f"Error creating incident: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in create_incident: {str(e)}"
+
+
+# Backend TimelineEntry.EntryType.get_manual_entry_types(); severity_changed and
+# status_changed are system-generated history and never accepted as input.
+MANUAL_TIMELINE_ENTRY_TYPES = ("detection", "mitigation", "observation")
+INVALID_TIMELINE_ENTRY_TYPE_ERROR = (
+    f"Error: entry_type must be one of {', '.join(MANUAL_TIMELINE_ENTRY_TYPES)}"
+)
+
+
+async def create_timeline_entry(
+    incident_id: str,
+    entry: str,
+    entry_type: str = None,
+    timestamp: str = None,
+    observation: str = None,
+    evidences: list = None,
+) -> str:
+    """Add an entry to an incident's timeline (detection, mitigation or observation)
+
+    The author is the API user and the folder is the incident's folder.
+
+    Args:
+        incident_id: Incident UUID or name (required)
+        entry: Short entry text, max 200 characters (required)
+        entry_type: detection | mitigation | observation (default: observation)
+        timestamp: Date/time of the event (ISO 8601 with timezone, e.g. 2026-01-01T10:00:00Z; defaults to now, must not be in the future)
+        observation: Detailed observation notes
+        evidences: List of evidence UUIDs
+    """
+    if entry_type is not None and entry_type not in MANUAL_TIMELINE_ENTRY_TYPES:
+        return INVALID_TIMELINE_ENTRY_TYPE_ERROR
+    try:
+        resolved_incident = resolve_incident_id(incident_id)
+
+        # Send the incident's folder so the backend RBAC add check is scoped to
+        # the incident's domain (it falls back to the root folder otherwise).
+        incident_res = make_get_request(f"/incidents/{resolved_incident}/")
+        if incident_res.status_code != 200:
+            return (
+                f"Error creating timeline entry: {incident_res.status_code} - "
+                f"{incident_res.text}"
+            )
+        folder = incident_res.json().get("folder")
+        if isinstance(folder, dict):
+            folder = folder.get("id")
+
+        payload = {"incident": resolved_incident, "entry": entry}
+        if folder:
+            payload["folder"] = folder
+
+        scalars = {
+            "entry_type": entry_type,
+            "timestamp": timestamp,
+            "observation": observation,
+        }
+        payload.update({k: v for k, v in scalars.items() if v is not None})
+        if evidences is not None:
+            payload["evidences"] = evidences
+
+        res = make_post_request("/timeline-entries/", payload)
+
+        if res.status_code == 201:
+            created = res.json()
+            return (
+                f"Created timeline entry: {created.get('entry')} "
+                f"(ID: {created.get('id')})"
+            )
+        else:
+            return f"Error creating timeline entry: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in create_timeline_entry: {str(e)}"
