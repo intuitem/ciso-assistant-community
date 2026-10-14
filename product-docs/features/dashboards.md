@@ -13,7 +13,7 @@ A dashboard is useful on its own — open it from **Metrology → Dashboards** a
 In the sidebar, under **Metrology**, alongside **Metric definitions** and **Metric instances**:
 
 - **Metric definitions** — the templates (what a metric measures, its unit, how it's computed).
-- **Metric instances** — instantiated metrics tied to a domain and updated over time.
+- **Metric instances** — instantiated metrics tied to a domain and updated over time, by hand, by an integration, or [computed from other metrics](metrics/README.md).
 - **Dashboards** — visualisations composed over those metrics (and over built-in metrics the platform computes for you).
 
 Dashboards are the visualisation layer of Metrology. They don't carry data themselves — they read it from metric instances and built-in object metrics.

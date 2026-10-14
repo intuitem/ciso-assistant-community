@@ -1,5 +1,6 @@
 <script lang="ts">
 	import TierBadge from '$lib/components/ModelTable/field/TierBadge.svelte';
+	import { m } from '$paraglide/messages';
 	// State to track if the card is flipped
 	let isFlipped = $state(false);
 
@@ -270,7 +271,7 @@
 			</div>
 
 			<div class="mt-2">
-				<span class="block text-sm text-surface-600-400 mb-2">Observation</span>
+				<span class="block text-sm text-surface-600-400 mb-2">{m.observation()}</span>
 				<p class="text-surface-600-400 leading-relaxed text-xs" data-testid="observation">
 					{entity_assessment.observation}
 				</p>

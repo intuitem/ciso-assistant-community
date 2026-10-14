@@ -30,8 +30,9 @@ export type Scope = {
 	}[];
 };
 
-// CEL's own plus the helpers the compute action registers (see
-// backend/automation/workflows/expressions.py). Signatures are for display.
+// CEL's own plus the helpers the shared evaluator registers (see
+// backend/core/expressions.py, used by workflows and derived metrics).
+// Signatures are for display.
 export const FUNCTIONS: { name: string; signature: string }[] = [
 	{ name: 'sum', signature: 'sum(list)' },
 	{ name: 'avg', signature: 'avg(list)' },
