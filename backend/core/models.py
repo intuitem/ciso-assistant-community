@@ -1863,6 +1863,11 @@ class LibraryUpdater:
                     rn.urn.lower(): rn
                     for rn in RequirementNode.objects.filter(framework=new_framework)
                 }
+                question_urns_by_node_id = defaultdict(set)
+                for node_id, question_urn in Question.objects.filter(
+                    requirement_node__framework=new_framework
+                ).values_list("requirement_node_id", "urn"):
+                    question_urns_by_node_id[node_id].add(question_urn)
                 existing_requirement_assessment_objects = defaultdict(list)
                 for ra in RequirementAssessment.objects.filter(
                     requirement__framework=new_framework
@@ -2077,6 +2082,17 @@ class LibraryUpdater:
                                 )
                             )
 
+                    # A node that lost all its questions omits the key.
+                    if (
+                        questions is None
+                        and requirement_node_object.pk in question_urns_by_node_id
+                    ):
+                        questions = {}
+
+                    previous_question_urns = question_urns_by_node_id.get(
+                        requirement_node_object.pk, set()
+                    )
+
                     # Sync questions for both new and existing nodes
                     if questions is not None:
                         _sync_questions_from_data(requirement_node_object, questions)
@@ -2090,6 +2106,10 @@ class LibraryUpdater:
                         )
                         if questions is not None
                         else []
+                    )
+                    # Pruned questions cascade-delete their answers before the RA loop.
+                    questions_removed = bool(
+                        previous_question_urns - {q.urn for q in _cached_new_questions}
                     )
 
                     # update answers or score for each ra for the current requirement_node, when relevant
@@ -2207,7 +2227,9 @@ class LibraryUpdater:
                         }
                         new_questions = _cached_new_questions
 
-                        ra_changed = False
+                        ra_changed = questions_removed
+                        if questions_removed:
+                            answers_changed_ca_ids.add(ra.compliance_assessment_id)
                         for q in new_questions:
                             if q.urn not in existing_answers:
                                 # New question: create empty answer
@@ -13746,6 +13768,26 @@ class CustomDocHtmlTemplate(AbstractBaseModel, FolderMixin):
 
     def __str__(self):
         return f"{self.template_key} ({self.language})"
+
+
+class DemoManifest(models.Model):
+    """What the demo seeder created in a domain, so it can be told apart from
+    user data. Deleted with its domain."""
+
+    domain = models.OneToOneField(
+        Folder, on_delete=models.CASCADE, related_name="demo_manifest"
+    )
+    version = models.PositiveIntegerField()
+    anchor = models.DateField()
+    contents = models.JSONField(default=list, help_text="[model label, pk] pairs")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    # Internal bookkeeping with no API: never resolved through IAM.
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
+
+    def __str__(self):
+        return f"demo v{self.version} in {self.domain}"
 
 
 # actions - 0: create, 1: update, 2: delete

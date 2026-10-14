@@ -184,12 +184,32 @@ def _build_context_dict(
     return ctx
 
 
+def _with_descendants(framework, urns: set[str]) -> set[str]:
+    """`urns` plus every requirement node below one of them."""
+    from core.models import RequirementNode
+
+    children: dict[str, list[str]] = {}
+    for urn, parent_urn in RequirementNode.objects.filter(
+        framework=framework, parent_urn__isnull=False
+    ).values_list("urn", "parent_urn"):
+        children.setdefault(parent_urn, []).append(urn)
+    result, pending = set(urns), list(urns)
+    while pending:
+        for child in children.get(pending.pop(), ()):
+            if child not in result:
+                result.add(child)
+                pending.append(child)
+    return result
+
+
 def build_cel_context(compliance_assessment) -> tuple[dict, set[str]]:
     """Build the evaluation context dict from a ComplianceAssessment.
 
     Returns (context_dict, hidden_urns) where hidden_urns contains URNs of
-    requirements whose visibility_expression evaluated to false.
-    Hidden URNs may include both assessable and non-assessable (splash screen) nodes.
+    requirements whose visibility_expression evaluated to false, and of every
+    node below one of them: a hidden section hides its whole subtree.
+    Hidden URNs may include both assessable and non-assessable (section, splash
+    screen) nodes.
     """
     from core.models import RequirementAssessment, RequirementNode
     from core.utils import extract_node_id
@@ -299,26 +319,23 @@ def build_cel_context(compliance_assessment) -> tuple[dict, set[str]]:
                 )
                 # Fail-open: keep requirement visible on error
 
+    # A hidden node hides its descendants, whatever their own expressions say
+    if hidden_urns:
+        hidden_urns = _with_descendants(framework, hidden_urns)
+
     # Phase 3: rebuild context excluding hidden assessable requirements
     hidden_assessable = hidden_urns & {n["urn"] for n in in_scope}
     if hidden_assessable:
         visible_scope = [n for n in in_scope if n["urn"] not in hidden_assessable]
         visible_urns = {n["urn"] for n in visible_scope}
-        visible_answer_data = {
-            k: v
-            for k, v in answer_data.items()
-            if k in {extract_node_id(u) for u in visible_urns if extract_node_id(u)}
-        }
+        visible_answer_data = _build_answer_data(ca, [n["id"] for n in visible_scope])
         visible_ra_rows = {k: v for k, v in ra_rows.items() if k in visible_urns}
-        visible_outcomes = (
-            {k: v for k, v in computed_outcomes.items()} if computed_outcomes else {}
-        )
         final_context = _build_context_dict(
             visible_scope,
             visible_ra_rows,
             visible_answer_data,
             max_score,
-            visible_outcomes,
+            computed_outcomes,
             **scale,
         )
         final_context["hidden_requirements"] = [
@@ -1512,6 +1529,7 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
         ],
     )
     context["ratings"] = cel_ratings(ratings)
+    context["hidden_pages"] = sorted(u for u in hidden if u)
     computed, values = _evaluate_rules(
         env,
         quick_form.get("outcomes_definition"),

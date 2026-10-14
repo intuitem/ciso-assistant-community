@@ -57,6 +57,15 @@ importers:
       bits-ui:
         specifier: ^2.19.0
         version: 2.19.3(@internationalized/date@3.12.3)(@sveltejs/kit@2.70.3(@sveltejs/vite-plugin-svelte@7.3.1(svelte@5.57.1(@typescript-eslint/types@8.71.0))(vite@8.3.1(@types/node@24.19.0)(jiti@2.7.0)(yaml@1.10.3)))(svelte@5.57.1(@typescript-eslint/types@8.71.0))(typescript@5.9.3)(vite@8.3.1(@types/node@24.19.0)(jiti@2.7.0)(yaml@1.10.3)))(svelte@5.57.1(@typescript-eslint/types@8.71.0))
+      d3-hierarchy:
+        specifier: ^3.1.2
+        version: 3.1.2
+      d3-selection:
+        specifier: ^3.0.0
+        version: 3.0.0
+      d3-zoom:
+        specifier: ^3.0.0
+        version: 3.0.0
       docx-preview:
         specifier: ^0.4.0
         version: 0.4.1
@@ -148,6 +157,15 @@ importers:
       '@testing-library/svelte':
         specifier: ^5.4.2
         version: 5.4.2(svelte@5.57.1(@typescript-eslint/types@8.71.0))(vite@8.3.1(@types/node@24.19.0)(jiti@2.7.0)(yaml@1.10.3))(vitest@4.1.11)
+      '@types/d3-hierarchy':
+        specifier: ^3.1.7
+        version: 3.1.7
+      '@types/d3-selection':
+        specifier: ^3.0.12
+        version: 3.0.12
+      '@types/d3-zoom':
+        specifier: ^3.0.9
+        version: 3.0.9
       '@types/node':
         specifier: ^24.13.3
         version: 24.19.0

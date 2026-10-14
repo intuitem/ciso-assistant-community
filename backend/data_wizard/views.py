@@ -7,6 +7,7 @@ import math
 import structlog
 import re
 from abc import ABC, abstractmethod
+from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import date, datetime
 from functools import cached_property
@@ -58,6 +59,7 @@ from core.models import (
     TaskNode,
     TaskTemplate,
     Terminology,
+    Threat,
     Vulnerability,
 )
 from core.serializers import (
@@ -544,6 +546,8 @@ class SideObjects:
     ids: list[UUID] = field(default_factory=list)
     failed: list[str] = field(default_factory=list)
     created: list[str] = field(default_factory=list)
+    # Tokens matching several objects with none a better fit; left unlinked.
+    ambiguous: list[str] = field(default_factory=list)
 
 
 def _resolve_named_objects(
@@ -620,6 +624,64 @@ def _resolve_applied_controls(value: Any, folder: "Folder", request) -> SideObje
         AppliedControlWriteSerializer,
         extra_create_data={"status": "to_do"},
     )
+
+
+@dataclass(frozen=True)
+class ThreatLookup:
+    """The threats a risk import may link, keyed by ref_id and by lowered name.
+
+    Candidates are the threats the user may view in the assessment's folder or
+    one of its ancestors, the root folder holding the library ones; a sibling
+    domain's threat is never a candidate. Each key maps to (distance, id)
+    pairs, distance 0 being the assessment's folder itself.
+    """
+
+    by_ref_id: Mapping[str, list[tuple[int, UUID]]]
+    by_name: Mapping[str, list[tuple[int, UUID]]]
+
+    @classmethod
+    def build(cls, user, folder: "Folder") -> "ThreatLookup":
+        distances = {
+            f.id: distance
+            for distance, f in enumerate(folder.get_parent_folders(include_self=True))
+        }
+        by_ref_id: dict[str, list[tuple[int, UUID]]] = defaultdict(list)
+        by_name: dict[str, list[tuple[int, UUID]]] = defaultdict(list)
+        rows = Threat.objects.filter(
+            folder_id__in=distances.keys(),
+            id__in=RoleAssignment.get_viewable_object_ids(user, Threat),
+        ).values_list("id", "ref_id", "name", "folder_id")
+        for threat_id, ref_id, name, folder_id in rows:
+            entry = (distances[folder_id], threat_id)
+            if ref_id:
+                by_ref_id[ref_id].append(entry)
+            if name:
+                by_name[name.casefold()].append(entry)
+        return cls(by_ref_id=dict(by_ref_id), by_name=dict(by_name))
+
+
+def _resolve_threats(value: Any, lookup: ThreatLookup) -> SideObjects:
+    """Link threats by ref_id, then by name; never creates one.
+
+    The match in the nearest folder wins, so a domain's own threat shadows an
+    inherited one; a tie there is reported as ambiguous instead of linking
+    one of them arbitrarily.
+    """
+    resolved = SideObjects()
+    for token in _split_multi_separator(value):
+        matches = lookup.by_ref_id.get(token) or lookup.by_name.get(token.casefold())
+        if not matches:
+            resolved.failed.append(token)
+            continue
+        nearest = min(distance for distance, _ in matches)
+        candidates = {
+            threat_id for distance, threat_id in matches if distance == nearest
+        }
+        if len(candidates) > 1:
+            resolved.ambiguous.append(token)
+        else:
+            resolved.ids.append(candidates.pop())
+    return resolved
 
 
 def _resolve_owners(value: Any) -> list[UUID]:
@@ -2062,6 +2124,8 @@ class RiskAssessmentContext:
     risk_assessment: RiskAssessment
     folder: Folder
     matrix_mappings: dict
+    # Candidates for the `threats` column, see ThreatLookup.
+    threats: ThreatLookup
 
 
 class RiskAssessmentRecordConsumer(RecordConsumer[RiskAssessmentContext]):
@@ -2081,6 +2145,7 @@ class RiskAssessmentRecordConsumer(RecordConsumer[RiskAssessmentContext]):
             ],
             "applied_controls": ["applied_controls", "additional_controls"],
             "assets": ["assets", "asset"],
+            "threats": ["threats", "threat"],
             "filtering_labels": ["filtering_labels", "labels", "label"],
         }
     )
@@ -2158,6 +2223,7 @@ class RiskAssessmentRecordConsumer(RecordConsumer[RiskAssessmentContext]):
                 risk_assessment=risk_assessment,
                 folder=risk_assessment.folder,
                 matrix_mappings=build_matrix_mappings(risk_assessment.risk_matrix),
+                threats=ThreatLookup.build(self.request.user, risk_assessment.folder),
             ), None
 
         except Perimeter.DoesNotExist:
@@ -2217,6 +2283,9 @@ class RiskAssessmentRecordConsumer(RecordConsumer[RiskAssessmentContext]):
         assets = _resolve_assets(
             record.get("assets") or record.get("asset"), context.folder, self.request
         )
+        threats = _resolve_threats(
+            record.get("threats") or record.get("threat"), context.threats
+        )
         self._record_side_effects("assets_created", assets)
         self._record_side_effects("applied_controls_created", existing_controls)
         self._record_side_effects("applied_controls_created", additional_controls)
@@ -2238,6 +2307,10 @@ class RiskAssessmentRecordConsumer(RecordConsumer[RiskAssessmentContext]):
                 record.get("filtering_labels") or record.get("labels")
             ),
         }
+        # Only set when something resolved, so that on update a cell of
+        # unknown or ambiguous threats warns instead of wiping the links.
+        if threats.ids:
+            scenario_data["threats"] = threats.ids
 
         # A level is only written when its cell holds a matrix label or the
         # explicit "--" (unrated). Blank cells and unknown labels leave the
@@ -2270,6 +2343,13 @@ class RiskAssessmentRecordConsumer(RecordConsumer[RiskAssessmentContext]):
             messages.append(f"Could not resolve controls: {', '.join(unresolved)}")
         if assets.failed:
             messages.append(f"Could not resolve assets: {', '.join(assets.failed)}")
+        if threats.failed:
+            messages.append(f"Could not resolve threats: {', '.join(threats.failed)}")
+        if threats.ambiguous:
+            messages.append(
+                "Ambiguous threats, several match in the same domain: "
+                f"{', '.join(threats.ambiguous)}"
+            )
         if messages:
             return scenario_data, Error(
                 record=record, error="; ".join(messages), is_warning=True

@@ -700,7 +700,7 @@
 											type="text"
 											value={$frameworkStore.urn_namespace ?? 'custom'}
 											placeholder="custom"
-											pattern="[a-zA-Z0-9_-]+"
+											pattern="[a-zA-Z0-9_\-]+"
 											class="mt-1 w-48 text-sm font-mono border border-surface-200-800 rounded bg-surface-100-900 px-2 py-1 text-surface-950-50 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 {lockUrnEdits
 												? 'text-surface-500 cursor-not-allowed'
 												: ''}"
@@ -721,7 +721,7 @@
 											type="text"
 											value={$frameworkStore.ref_id ?? ''}
 											placeholder="my-framework"
-											pattern="[a-zA-Z0-9_-]+"
+											pattern="[a-zA-Z0-9_\-]+"
 											class="mt-1 w-48 text-sm font-mono border border-surface-200-800 rounded bg-surface-100-900 px-2 py-1 text-surface-950-50 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 {lockUrnEdits
 												? 'text-surface-500 cursor-not-allowed'
 												: ''}"
