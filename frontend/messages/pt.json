@@ -269,8 +269,8 @@
 				"countPlural"
 			],
 			"match": {
-				"countPlural=one": "{count} item needs changes",
-				"countPlural=other": "{count} items need changes"
+				"countPlural=one": "{count} item precisa de alterações",
+				"countPlural=other": "{count} itens precisam de alterações"
 			}
 		}
 	],
@@ -1503,8 +1503,8 @@
 				"countPlural"
 			],
 			"match": {
-				"countPlural=one": "{count} unread notification",
-				"countPlural=other": "{count} unread notifications"
+				"countPlural=one": "{count} notificação não lida",
+				"countPlural=other": "{count} notificações não lidas"
 			}
 		}
 	],
@@ -2866,8 +2866,8 @@
 				"countPlural"
 			],
 			"match": {
-				"countPlural=one": "Every day",
-				"countPlural=other": "Every {count} days"
+				"countPlural=one": "Todos os dias",
+				"countPlural=other": "A cada {count} dias"
 			}
 		}
 	],
@@ -2881,8 +2881,8 @@
 				"countPlural"
 			],
 			"match": {
-				"countPlural=one": "Every week",
-				"countPlural=other": "Every {count} weeks"
+				"countPlural=one": "Toda semana",
+				"countPlural=other": "A cada {count} semanas"
 			}
 		}
 	],
@@ -2896,8 +2896,8 @@
 				"countPlural"
 			],
 			"match": {
-				"countPlural=one": "Every month",
-				"countPlural=other": "Every {count} months"
+				"countPlural=one": "Todo mês",
+				"countPlural=other": "A cada {count} meses"
 			}
 		}
 	],
@@ -2911,8 +2911,8 @@
 				"countPlural"
 			],
 			"match": {
-				"countPlural=one": "Every year",
-				"countPlural=other": "Every {count} years"
+				"countPlural=one": "Todo ano",
+				"countPlural=other": "A cada {count} anos"
 			}
 		}
 	],
@@ -2926,8 +2926,8 @@
 				"countPlural"
 			],
 			"match": {
-				"countPlural=one": "in {count} day",
-				"countPlural=other": "in {count} days"
+				"countPlural=one": "em {count} dia",
+				"countPlural=other": "em {count} dias"
 			}
 		}
 	],
@@ -6492,8 +6492,8 @@
 				"countPlural"
 			],
 			"match": {
-				"countPlural=one": "{count} threat",
-				"countPlural=other": "{count} threats"
+				"countPlural=one": "{count} ameaça",
+				"countPlural=other": "{count} ameaças"
 			}
 		}
 	],
@@ -6507,8 +6507,8 @@
 				"countPlural"
 			],
 			"match": {
-				"countPlural=one": "{count} reference control",
-				"countPlural=other": "{count} reference controls"
+				"countPlural=one": "{count} controle de referência",
+				"countPlural=other": "{count} controles de referência"
 			}
 		}
 	],
@@ -6522,8 +6522,8 @@
 				"countPlural"
 			],
 			"match": {
-				"countPlural=one": "{count} risk matrix",
-				"countPlural=other": "{count} risk matrices"
+				"countPlural=one": "{count} matriz de risco",
+				"countPlural=other": "{count} matrizes de risco"
 			}
 		}
 	],
@@ -6537,8 +6537,8 @@
 				"countPlural"
 			],
 			"match": {
-				"countPlural=one": "{count} mapping",
-				"countPlural=other": "{count} mappings"
+				"countPlural=one": "{count} mapeamento",
+				"countPlural=other": "{count} mapeamentos"
 			}
 		}
 	],
@@ -6552,8 +6552,8 @@
 				"countPlural"
 			],
 			"match": {
-				"countPlural=one": "{count} preset",
-				"countPlural=other": "{count} presets"
+				"countPlural=one": "{count} predefinição",
+				"countPlural=other": "{count} predefinições"
 			}
 		}
 	],
@@ -6567,8 +6567,8 @@
 				"countPlural"
 			],
 			"match": {
-				"countPlural=one": "{count} metric definition",
-				"countPlural=other": "{count} metric definitions"
+				"countPlural=one": "{count} definição de métrica",
+				"countPlural=other": "{count} definições de métrica"
 			}
 		}
 	],
@@ -6960,8 +6960,8 @@
 				"countPlural"
 			],
 			"match": {
-				"countPlural=one": "outcome met",
-				"countPlural=other": "outcomes met"
+				"countPlural=one": "resultado atendido",
+				"countPlural=other": "resultados atendidos"
 			}
 		}
 	],
@@ -6985,8 +6985,8 @@
 				"countPlural"
 			],
 			"match": {
-				"countPlural=one": "{count} quick form",
-				"countPlural=other": "{count} quick forms"
+				"countPlural=one": "{count} formulário rápido",
+				"countPlural=other": "{count} formulários rápidos"
 			}
 		}
 	],
@@ -7000,8 +7000,8 @@
 				"countPlural"
 			],
 			"match": {
-				"countPlural=one": "Page · {count} question",
-				"countPlural=other": "Page · {count} questions"
+				"countPlural=one": "Página · {count} pergunta",
+				"countPlural=other": "Página · {count} perguntas"
 			}
 		}
 	],
@@ -7081,8 +7081,8 @@
 				"countPlural"
 			],
 			"match": {
-				"countPlural=one": "{count} other person was notified",
-				"countPlural=other": "{count} other people were notified"
+				"countPlural=one": "{count} outra pessoa foi notificada",
+				"countPlural=other": "{count} outras pessoas foram notificadas"
 			}
 		}
 	],
