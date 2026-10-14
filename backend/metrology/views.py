@@ -313,6 +313,7 @@ METRIC_INSTANCE_FILTER_FIELDS = [
     "filtering_labels",
     "organisation_objectives",
     "evidences",
+    "applied_controls",
 ]
 
 
@@ -341,7 +342,11 @@ class MetricInstanceViewSet(BaseModelViewSet):
             .get_queryset()
             .select_related("folder", "metric_definition__unit", "evidences")
             .prefetch_related(
-                "owner", "organisation_objectives", "filtering_labels", "samples"
+                "owner",
+                "organisation_objectives",
+                "applied_controls",
+                "filtering_labels",
+                "samples",
             )
         )
 
