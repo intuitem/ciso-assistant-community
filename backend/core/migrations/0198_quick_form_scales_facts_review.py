@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0196_demo_manifest"),
+        ("core", "0197_appliedcontrol_metric_instances"),
     ]
 
     operations = [
