@@ -1,28 +1,49 @@
-# `hu-7-2024-mk-rendelet` – 7/2024. (VI. 24.) MK rendelet (NIS2) · Hungarian NIS2 protective measures
+# `hungary/` – Magyar NIS2 könyvtárak · Hungarian NIS2 libraries (7/2024. (VI. 24.) MK rendelet, 1/2025. (I. 31.) SZTFH rendelet)
 
 [Magyar](#magyar) · [English](#english)
 
 | fájl / file | tartalom / content |
 |---|---|
-| `hu-7-2024-mk-rendelet.xlsx` | a könyvtár forrása v2 Excel formátumban / the library source in the v2 Excel format |
-| `../../../backend/library/libraries/hu-7-2024-mk-rendelet.yaml` | a konvertált könyvtár (`convert_library_v2.py`) / the converted library |
+| `hu-1-2025-sztfh-rendelet-elemi-kovetelmenyek.xlsx` | az elemi követelmények könyvtárának forrása v2 Excel formátumban / the source of the elementary-requirements library in the v2 Excel format |
+| `hu-7-2024-mk-rendelet-fenyegetesek.xlsx` | a fenyegetéskatalógus forrása v2 Excel formátumban / the source of the threat catalogue in the v2 Excel format |
+| `../../../backend/library/libraries/hu-1-2025-sztfh-rendelet-elemi-kovetelmenyek.yaml` | a konvertált könyvtár (`convert_library_v2.py`) / the converted library |
+| `../../../backend/library/libraries/hu-7-2024-mk-rendelet-fenyegetesek.yaml` | a konvertált fenyegetéskatalógus / the converted threat catalogue |
 
 ---
 
 ## Magyar
 
-CISO Assistant keretrendszer-könyvtár a magyar NIS2 védelmi intézkedésekhez: a **7/2024. (VI. 24.) MK
-rendelet** 2. melléklete (19 követelménycsalád, 914 követelménycsoport = védelmi intézkedés, Alap /
-Jelentős / Magas biztonsági osztályok) és 3. melléklete (47 fenyegetés), kiegészítve az **1/2025. (I. 31.)
-SZTFH rendelet** audit-mellékleteivel (6. melléklet: a 385 Magas osztályú követelménycsoport
-audit-jellemzői; 7. melléklet: 2 148 elemi követelmény). Nyelv: `hu`, csomagoló (packager): `aafeher`.
+CISO Assistant könyvtárak a magyar NIS2 szabályozáshoz: a **7/2024. (VI. 24.) MK rendelet** (2. melléklet:
+védelmi intézkedések katalógusa, 3. melléklet: fenyegetéskatalógus) és az **1/2025. (I. 31.) SZTFH rendelet**
+(6. melléklet: audit-jellemzők, 7. melléklet: elemi követelmények) mellékleteiből. Nyelv: `hu`, csomagoló
+(packager): `aafeher`.
 
-### Felépítés
+### A könyvtárcsalád
+
+| könyvtár | állapot | tartalom | rendeltetés |
+|---|---|---|---|
+| `hu-1-2025-sztfh-rendelet-elemi-kovetelmenyek` | kész | az SZTFH rendelet 7. melléklete szerinti 2 148 elemi követelmény a 7/2024. MK rendelet 2. mellékletének szerkezetében (19 követelménycsalád, 914 követelménycsoport), a 6. melléklet audit-jellemzőivel | az SZTFH-audit nézete: auditfelkészülés; az értékelés egysége az elemi követelmény |
+| `hu-7-2024-mk-rendelet-fenyegetesek` | kész | a 7/2024. MK rendelet 3. mellékletének 47 fenyegetése | fenyegetéskatalógus a kockázatértékeléshez, mindkét keretrendszer mellé |
+| `hu-7-2024-mk-rendelet` | tervezett | ugyanaz a 914 követelménycsoport elemi szint nélkül, értékelhető követelménycsoportokkal, ugyanazzal a 7 megvalósítási csoporttal | a jogszabályi kötelezettség követelménycsoport-szinten: kontrollkezelés |
+| `mapping-hu-7-2024-mk-rendelet-and-hu-1-2025-sztfh-rendelet-elemi-kovetelmenyek` | tervezett | minden elemi követelmény a szülő követelménycsoportjához rendelve (`superset`; a fordított irány generált) | átjárhatóság a két keretrendszer között, például a másik keretrendszer auditját baseline-ként használó audit előtöltése |
+
+A két keretrendszer csomópontjainak `ref_id`-ja azonos (`1.1`, `K01.001_P1` …), csak az URN-előtag
+különbözik.
+
+### `hu-1-2025-sztfh-rendelet-elemi-kovetelmenyek` – elemi követelmények (NIS2 audit)
+
+Az 1/2025. (I. 31.) SZTFH rendelet 7. melléklete szerinti 2 148 elemi követelmény a 7/2024. (VI. 24.) MK
+rendelet 2. mellékletének szerkezetében: 19 követelménycsalád, 914 követelménycsoport (védelmi intézkedés) az
+Alap / Jelentős / Magas biztonsági osztályok jelölésével, a 6. melléklet szerinti audit-jellemzőkkel a
+megjegyzésekben. Az értékelés egysége az elemi követelmény: az a 384 követelménycsoport, amelyhez elemi
+követelmény tartozik, csak címsor, a többi 530 maga értékelhető.
+
+#### Felépítés
 
 | szint | csomópont | ref_id | name | description | megvalósítási csoportok |
 |---|---|---|---|---|---|
 | 1 | követelménycsalád (19) | `1` … `19` | a család neve | – | – |
-| 2 | követelménycsoport / védelmi intézkedés (914; értékelhető az a 530, amelyhez nem tartozik elemi követelmény) | `1.1` | a rendeletben szereplő megnevezés (a kiterjesztések „Alap – Kiterjesztés” alakban) | a követelmény szövege, pontonként külön sorban | `A-SZ`, `A-EIR`, `J-SZ`, `J-EIR`, `M-SZ`, `M-EIR` = az osztály, amelyben elvárt × a 6. melléklet szerinti jelleg; `KIEG` = egyik osztálynál sem elvárt |
+| 2 | követelménycsoport / védelmi intézkedés (914; értékelhető az az 530, amelyhez nem tartozik elemi követelmény) | `1.1` | a rendeletben szereplő megnevezés (a kiterjesztések „Alap – Kiterjesztés” alakban) | a követelmény szövege, pontonként külön sorban | `A-SZ`, `A-EIR`, `J-SZ`, `J-EIR`, `M-SZ`, `M-EIR` = az osztály, amelyben elvárt × a 6. melléklet szerinti jelleg; `KIEG` = egyik osztálynál sem elvárt |
 | 3 | elemi követelmény (2 148, értékelhető) | `K01.001_P1`, `K01.001_O.1.1.1.1.a` | a hivatalos hivatkozási kód (`K01.001_P[1]`, `K01.001_O.1.1.1.1.(a)`) | az SZTFH 7. melléklet szövege | a szülő követelménycsoport csoportjai |
 
 Az elemi követelmény `ref_id`-ja a kód szögletes zárójelek nélküli alakja (a kód maga a `name`
@@ -30,14 +51,14 @@ mezőben van). A 2. melléklet 20.6. pontja szerint a követelmények szövege a
 megnevezésével együtt értelmezendő. A 6.27. követelménycsoporthoz a 7. melléklet nem tartalmaz elemi
 követelményt.
 
-### Megvalósítási csoportok
+#### Megvalósítási csoportok
 
 A csoport a biztonsági osztályt és a követelménycsoport SZTFH 6. melléklet B oszlopa szerinti jellegét
 együtt jelöli: `SZ` = szervezeti szintű, `EIR` = EIR-szintű. Az osztályok egymásra épülnek
 (A 164 ⊂ J 302 ⊂ M 385 követelménycsoport), ezért például az `M-SZ` a Magas osztályban elvárt összes
 szervezeti szintű csoportot tartalmazza, az alacsonyabb osztályokét is. Az egyik osztálynál sem elvárt
 529 kiegészítő védelmi intézkedés (2. melléklet 20.4. pont; a 6. melléklet nem ad hozzájuk jelleget)
-az `KIEG` csoport. Az elemi követelmények a szülő követelménycsoport csoportjaiba tartoznak, és helyette
+a `KIEG` csoport. Az elemi követelmények a szülő követelménycsoport csoportjaiba tartoznak, és helyette
 értékelendők: ahol a követelménycsoporthoz elemi követelmények tartoznak, ott a követelménycsoport csak
 címsor, így egy csoport kiválasztása a teljes elemi szintű értékelést adja, és egyetlen követelmény sem
 számít kétszer a pontszámba.
@@ -55,7 +76,7 @@ ezért maga értékelendő.
 A 19 családból 16 egynemű (szervezeti szintű: 1., 3., 9–12., 14., 19.; EIR-szintű: 2., 4–8., 17., 18.);
 a 13., 15. és 16. család vegyes.
 
-### Használat: csoportok kiválasztása egy audithoz
+#### Használat: csoportok kiválasztása egy audithoz
 
 Az SZTFH rendelet 5. melléklete szerint a szervezeti szintű követelménycsoportok egyszer, valamennyi
 EIR-re egységesen, a szervezet legmagasabb biztonsági osztályú EIR-je szerint vizsgálandók (2.2.1.1.,
@@ -75,7 +96,7 @@ szervezeti audit *baseline*-jával hozható létre: a CISO Assistant azonos kere
 közös követelmények eredményeit és válaszait. Az alkalmazás két audit eredményét nem vonja össze egy
 pontszámba, így a szervezeti és az EIR-auditot átfogó VMI-t az alkalmazáson kívül kell számolni.
 
-### Megjegyzések (annotation)
+#### Megjegyzések (annotation)
 
 A követelménycsoport megjegyzése tartalmazza az SZTFH 6. melléklet szerinti audit-jellemzőket
 (szervezeti / EIR-szintű, kötelező dokumentumvizsgálat / interjú / teszt, Biztosító / Támogató típus,
@@ -85,18 +106,35 @@ követelménycsoportnál a 18/2024. (XII. 30.) MK rendelet szerinti módosítás
 követelmények megjegyzése rögzíti a Magyar Közlönyben hibásan szedett kódot (`K013.003_P[1]`,
 `K01.016_ O.1.16`) és a négy nem létező kódra mutató hivatkozást a nyilvánvalóan értendő kóddal.
 
-### Fenyegetések
+#### Ellenőrzés
 
-A 3. melléklet 47 fenyegetése `threats` objektumként (`ref_id` 1–47; a leírás a potenciálisan érintett
-alapelvek: bizalmasság (B), sértetlenség (S), rendelkezésre állás (R)). A rendelet a védelmi
-intézkedéseket nem rendeli fenyegetésekhez.
+A YAML 3 081 követelménycsomópontot és 7 megvalósítási csoportot tartalmaz. Az értékelhető csomópontok
+száma kiválasztásonként: `A-SZ` 717, `A-EIR` 683, `J-SZ` 815, `J-EIR` 1 065, `M-SZ` 896, `M-EIR` 1 253,
+`KIEG` 529, `M-SZ`+`M-EIR` 2 149, `A-EIR`+`M-SZ` 1 579, kiválasztás nélkül 2 678.
+
+Betöltési teszt (CISO Assistant 4.1.1, dátum: …): a könyvtár betölthető, az auditok kiválasztásonként a
+fenti számokat adják, a szervezeti auditot baseline-ként használó EIR-audit megkapja az ott rögzített
+eredményt.
+
+### `hu-7-2024-mk-rendelet-fenyegetesek` – fenyegetéskatalógus
+
+A 7/2024. (VI. 24.) MK rendelet 3. mellékletének 47 fenyegetése `threats` objektumként (`ref_id` 1–47;
+a leírás a potenciálisan érintett alapelvek: bizalmasság (B), sértetlenség (S), rendelkezésre állás (R);
+a megjegyzés a melléklet hivatkozása). A rendelet a védelmi intézkedéseket nem rendeli fenyegetésekhez.
+
+A katalógus azért önálló könyvtár, mert a CISO Assistantban a fenyegetés URN-je egyedi, így ugyanaz a
+fenyegetés nem szerepelhet két keretrendszer-könyvtárban; a katalógus az elemi követelmények könyvtárához
+és a tervezett `hu-7-2024-mk-rendelet` keretrendszerhez egyaránt tartozik. A fenyegetések URN-előtagja
+`urn:aafeher:risk:threat:hu-7-2024-mk-rendelet`.
+
+Ellenőrzés: a YAML 47 fenyegetést tartalmaz. Betöltési teszt (CISO Assistant 4.1.1, dátum: …).
 
 ### Források és szövegállapot
 
 * 7/2024. (VI. 24.) MK rendelet: az njt.hu szerinti egységes szerkezet 2025. 01. 02-i állapota
   (a 18/2024. (XII. 30.) MK rendelet az 5.3. és 5.4. követelménycsoportot és az 1. melléklet 1. pontját
-  cserélte), a Magyar Közlöny 2024/68. és 2024/137. számával és az NKI „Védelmi intézkedések
-  katalógusa” táblázatával (1.0, 2024. december) egybevetve.
+  cserélte; a 3. mellékletet nem érintette), a Magyar Közlöny 2024/68. és 2024/137. számával és az NKI
+  „Védelmi intézkedések katalógusa” táblázatával (1.0, 2024. december) egybevetve.
 * 1/2025. (I. 31.) SZTFH rendelet: a Magyar Közlöny 2025/8. számában kihirdetett szöveg (a
   6/2026. (VI. 8.) SZTFH rendelet a 6–7. mellékletet nem érinti).
 * A kihirdetett szöveg elírásai változatlanul szerepelnek, a megjegyzésekben jelölve.
@@ -109,26 +147,36 @@ kötelezettségeit, az NKI táblázat hivatkozásait (41/2015. BM r., ISO 27001,
 SZTFH 5. melléklet szerinti VMI / SZEKI pontozást (nincs pontszám-definíció, a CISO Assistant
 alapértelmezett skálája érvényes).
 
-### Ellenőrzés
-
-A YAML 3 081 követelménycsomópontot, 7 megvalósítási csoportot és 47 fenyegetést tartalmaz. Az
-értékelhető csomópontok száma kiválasztásonként: `A-SZ` 717, `A-EIR` 683, `J-SZ` 815, `J-EIR` 1 065,
-`M-SZ` 896, `M-EIR` 1 253, `KIEG` 529, `M-SZ`+`M-EIR` 2 149, `A-EIR`+`M-SZ` 1 579, kiválasztás nélkül
-2 678. A szervezeti auditot baseline-ként használó EIR-audit
-megkapta az ott rögzített eredményt.
-
 ---
 
 ## English
 
-CISO Assistant framework library of the Hungarian NIS2 protective-measures catalogue:
-**7/2024. (VI. 24.) MK rendelet**, annex 2 (19 követelménycsalád = families, 914 követelménycsoport =
-protective measures, security classes Alap / Jelentős / Magas = basic / significant / high) and annex 3
-(47 threats), extended with the audit annexes of **1/2025. (I. 31.) SZTFH rendelet** (annex 6: audit
-metadata of the 385 Magas measures; annex 7: 2,148 elemi követelmény = elementary requirements).
-Locale `hu`, packager `aafeher`.
+CISO Assistant libraries for the Hungarian NIS2 regulation, built from the annexes of
+**7/2024. (VI. 24.) MK rendelet** (annex 2: catalogue of protective measures, annex 3: threat catalogue) and
+**1/2025. (I. 31.) SZTFH rendelet** (annex 6: audit metadata, annex 7: elementary requirements). Locale `hu`,
+packager `aafeher`.
 
-### Structure
+### The library family
+
+| library | status | content | purpose |
+|---|---|---|---|
+| `hu-1-2025-sztfh-rendelet-elemi-kovetelmenyek` | done | the 2,148 elemi követelmény (elementary requirements) of SZTFH annex 7 in the structure of annex 2 of 7/2024. MK rendelet (19 families, 914 protective measures), with the annex 6 audit metadata | the view of the SZTFH audit: audit preparation; the unit of assessment is the elementary requirement |
+| `hu-7-2024-mk-rendelet-fenyegetesek` | done | the 47 threats of annex 3 of 7/2024. MK rendelet | threat catalogue for risk assessments, alongside both frameworks |
+| `hu-7-2024-mk-rendelet` | planned | the same 914 measures without the elementary level, with assessable measures and the same 7 implementation groups | the legal obligation at measure level: control management |
+| `mapping-hu-7-2024-mk-rendelet-and-hu-1-2025-sztfh-rendelet-elemi-kovetelmenyek` | planned | every elementary requirement mapped to its parent measure (`superset`; the reverse direction is generated) | interoperability between the two frameworks, for example pre-filling an audit created with an audit of the other framework as its baseline |
+
+The nodes of the two frameworks share their `ref_id` (`1.1`, `K01.001_P1` …); only the URN prefix differs.
+
+### `hu-1-2025-sztfh-rendelet-elemi-kovetelmenyek` – elementary requirements (NIS2 audit)
+
+The 2,148 elemi követelmény (elementary requirements) of annex 7 of 1/2025. (I. 31.) SZTFH rendelet in the
+structure of annex 2 of 7/2024. (VI. 24.) MK rendelet: 19 követelménycsalád (families), 914
+követelménycsoport (protective measures) with the security classes Alap / Jelentős / Magas (basic /
+significant / high), and the annex 6 audit metadata in the annotations. The unit of assessment is the
+elementary requirement: the 384 measures that have elementary requirements are headings only, the other
+530 are assessable themselves.
+
+#### Structure
 
 | depth | node | ref_id | name | description | implementation groups |
 |---|---|---|---|---|---|
@@ -140,7 +188,7 @@ The `ref_id` of an elementary requirement is its code without the square bracket
 the `name`). Annex 2 point 20.6 says the requirement texts are to be read together with the name of
 the measure. Measure 6.27 has no elementary requirement in annex 7.
 
-### Implementation groups
+#### Implementation groups
 
 A group combines the security class with the nature of the measure given in SZTFH annex 6 column B:
 `SZ` = szervezeti szintű (organisational level), `EIR` = EIR-szintű (per system; EIR = elektronikus
@@ -165,7 +213,7 @@ therefore assessed itself.
 16 of the 19 families are of one nature (organisational: 1, 3, 9–12, 14, 19; system level: 2, 4–8,
 17, 18); families 13, 15 and 16 are mixed.
 
-### Usage: selecting groups for an audit
+#### Usage: selecting groups for an audit
 
 SZTFH annex 5 audits organisational-level groups once, for all systems, at the class of the
 organisation's highest-class system (points 2.2.1.1., 2.2.3.1., 2.2.3.2.), system-level groups per
@@ -184,7 +232,7 @@ requirements the two audits share (same framework). The application does not mer
 audits into one score, so a VMI that spans an organisational and a system audit has to be computed
 outside it.
 
-### Annotations
+#### Annotations
 
 The annotation of a measure holds the SZTFH annex 6 audit metadata (organisational / system level,
 mandatory document review / interview / test, "Biztosító" / "Támogató" type, "cannot be excluded from
@@ -194,17 +242,35 @@ the amendment by 18/2024. (XII. 30.) MK rendelet. The annotation of an elementar
 the code as misprinted in the gazette (`K013.003_P[1]`, `K01.016_ O.1.16`) and the four
 cross-references to non-existent codes with the code evidently meant.
 
-### Threats
+#### Verification
 
-The 47 threats of annex 3 as a `threats` object (`ref_id` 1–47; the description lists the affected
-principles: confidentiality (B), integrity (S), availability (R)). The decree does not map measures to
-threats.
+The YAML holds 3,081 requirement nodes and 7 implementation groups. Assessable nodes per selection:
+`A-SZ` 717, `A-EIR` 683, `J-SZ` 815, `J-EIR` 1,065, `M-SZ` 896, `M-EIR` 1,253, `KIEG` 529,
+`M-SZ`+`M-EIR` 2,149, `A-EIR`+`M-SZ` 1,579, and 2,678 without a selection.
+
+Load test (CISO Assistant 4.1.1, date: …): the library loads, audits give the counts above per selection,
+and a system audit created with the organisational audit as its baseline receives the results recorded
+there.
+
+### `hu-7-2024-mk-rendelet-fenyegetesek` – threat catalogue
+
+The 47 threats of annex 3 of 7/2024. (VI. 24.) MK rendelet as a `threats` object (`ref_id` 1–47; the
+description lists the affected principles: confidentiality (B), integrity (S), availability (R); the
+annotation is the reference to the annex). The decree does not map measures to threats.
+
+The catalogue is a library of its own because a threat URN is unique in CISO Assistant, so the same threat
+cannot be part of two framework libraries; the catalogue belongs to the elementary-requirements library and
+to the planned `hu-7-2024-mk-rendelet` framework alike. The URN prefix of the threats is
+`urn:aafeher:risk:threat:hu-7-2024-mk-rendelet`.
+
+Verification: the YAML holds 47 threats. Load test (CISO Assistant 4.1.1, date: …).
 
 ### Sources and text state
 
 * 7/2024. (VI. 24.) MK rendelet: the consolidated text on njt.hu as of 2025-01-02 (18/2024. (XII. 30.)
-  MK rendelet replaced measures 5.3 and 5.4 and annex 1 point 1), cross-checked against Magyar Közlöny
-  2024/68 and 2024/137 and the NKI "Védelmi intézkedések katalógusa" table (1.0, December 2024).
+  MK rendelet replaced measures 5.3 and 5.4 and annex 1 point 1; it did not touch annex 3), cross-checked
+  against Magyar Közlöny 2024/68 and 2024/137 and the NKI "Védelmi intézkedések katalógusa" table (1.0,
+  December 2024).
 * 1/2025. (I. 31.) SZTFH rendelet: the text promulgated in Magyar Közlöny 2025/8 (6/2026. (VI. 8.)
   SZTFH rendelet does not touch annexes 6–7).
 * The typos of the published text are kept as published and flagged in the annotations.
@@ -216,10 +282,3 @@ Annex 1 (classification method), the organisational obligations of the Kibertv. 
 (XII. 23.) Korm. rendelet, the NKI cross-references (41/2015. BM r., ISO 27001, NIST SP 800-53) and
 the VMI / SZEKI audit scoring of SZTFH annex 5 (no scores definition; CISO Assistant's default scale
 applies).
-
-### Verification
-
-The YAML holds 3,081 requirement nodes, 7 implementation groups and 47 threats. Assessable nodes per
-selection: `A-SZ` 717, `A-EIR` 683, `J-SZ` 815, `J-EIR` 1,065, `M-SZ` 896, `M-EIR` 1,253, `KIEG` 529,
-`M-SZ`+`M-EIR` 2,149, `A-EIR`+`M-SZ` 1,579, and 2,678 without a selection. A system audit created with the organisational audit as baseline received the result
-recorded there.
