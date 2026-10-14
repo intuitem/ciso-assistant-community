@@ -723,7 +723,8 @@ export const GeneralSettingsSchema = z.object({
 	default_date_format: z.string().default('auto').optional(),
 	default_packager: z
 		.string()
-		.regex(/^[a-z0-9_-]+$/)
+		// eslint-disable-next-line no-useless-escape
+		.regex(/^[a-z0-9_\-]+$/)
 		.default('custom')
 		.optional(),
 	llm_provider: z.string().default('ollama').optional(),
@@ -2083,6 +2084,7 @@ export const MetricInstanceSchema = z.object({
 	target_value: z.coerce.number().optional().nullable(),
 	collection_frequency: z.string().optional().nullable(),
 	organisation_objectives: z.string().uuid().optional().array().optional(),
+	applied_controls: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	filtering_labels: z.string().optional().array().optional(),
 	evidences: z.string().uuid().optional().nullable(),
 	input_choices: jsonSchema.optional().nullable()
