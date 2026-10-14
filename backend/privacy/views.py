@@ -380,7 +380,7 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
             "controllers": {
                 "source": "controllers",
                 "label": "controllers",
-                "format": lambda qs: ",".join(
+                "format": lambda qs: "\n".join(
                     escape_excel_formula(e.name) for e in qs.all()
                 ),
             },

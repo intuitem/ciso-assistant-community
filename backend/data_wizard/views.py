@@ -3351,8 +3351,9 @@ class ProcessingRecordConsumer(RecordConsumer):
 
     def _build_update_data(self, record: dict, record_data: dict) -> dict:
         update_data = super()._build_update_data(record, record_data)
-        if "assigned_to" not in update_data and "assigned_to" in record:
-            update_data["assigned_to"] = record_data.get("assigned_to", [])
+        for field in ("assigned_to", "controllers"):
+            if field not in update_data and field in record:
+                update_data[field] = record_data.get(field, [])
         return update_data
 
     def create_context(self):
@@ -3415,14 +3416,28 @@ class ProcessingRecordConsumer(RecordConsumer):
             )
 
         # Resolve M2M: controllers (by entity name)
-        record_controllers = record.get("controllers")
-        if record_controllers:
-            entity_names = [n.strip() for n in str(record_controllers).split(",")]
-            data["controllers"] = list(
-                Entity.objects.filter(name__in=entity_names).values_list(
-                    "id", flat=True
-                )
+        lines = [
+            line.strip()
+            for line in str(record.get("controllers") or "").splitlines()
+            if line.strip()
+        ]
+        known = set(
+            Entity.objects.filter(name__in=lines).values_list("name", flat=True)
+        )
+        entity_names = set()
+        for line in lines:
+            if line in known:
+                entity_names.add(line)
+            else:
+                entity_names |= {n.strip() for n in line.split(",") if n.strip()}
+        entities = Entity.objects.filter(name__in=entity_names)
+        missing = entity_names - {e.name for e in entities}
+        if missing:
+            return {}, Error(
+                record=record,
+                error=f"Unknown controllers: {', '.join(sorted(missing))}",
             )
+        data["controllers"] = [e.id for e in entities]
 
         # Resolve M2M: assigned_to (by user email → Actor)
         record_assigned_to = record.get("assigned_to")
