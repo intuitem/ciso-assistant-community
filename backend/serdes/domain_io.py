@@ -1,8 +1,7 @@
 """Domain export / import helpers extracted from FolderViewSet.
 
-Exposes the logic used by the three DRF actions on FolderViewSet
-(`export`, `import_domain`, `import_dummy_domain`) as module-level
-functions so the ViewSet stays thin.
+Exposes the logic used by the DRF actions on FolderViewSet (`export`,
+`import_domain`) as module-level functions so the ViewSet stays thin.
 """
 
 from __future__ import annotations

@@ -1789,6 +1789,9 @@ def _handle_requirement_mapping_set(obj, library, wb, sheets, compat_mode, verbo
         if "rationale" in data and data["rationale"]:
             entry["rationale"] = data.get("rationale").strip()
             entry_revert["rationale"] = data.get("rationale").strip()
+        if "annotation" in data and data["annotation"]:
+            entry["annotation"] = data.get("annotation").strip()
+            entry_revert["annotation"] = data.get("annotation").strip()
         if "strength_of_relationship" in data and data["strength_of_relationship"]:
             entry["strength_of_relationship"] = int(
                 data.get("strength_of_relationship")
