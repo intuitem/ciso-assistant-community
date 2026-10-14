@@ -13,7 +13,7 @@ from django.utils.html import escape as html_escape
 from django.utils.translation import get_language, override
 from core.utils import yaml_safe_load
 from global_settings.models import GlobalSettings
-from iam.models import User, is_supported_language
+from iam.models import User, default_date_format, default_language
 import structlog
 
 logger = structlog.getLogger(__name__)
@@ -137,15 +137,7 @@ def get_email_preferences(email: str) -> tuple[str, str]:
         logger.warning("Failed to resolve user preferences for email lookup: %s", e)
 
     try:
-        general = GlobalSettings.objects.filter(name="general").first()
-        if general and isinstance(general.value, dict):
-            locale = general.value.get("default_language", "en")
-            date_format = general.value.get("default_date_format", "auto")
-            if not is_supported_language(locale):
-                locale = "en"
-            if not isinstance(date_format, str) or date_format not in User.DATE_FORMATS:
-                date_format = "auto"
-            return locale, date_format
+        return default_language(), default_date_format()
     except Exception as e:
         logger.warning("Failed to resolve defaults from global settings: %s", e)
 
@@ -170,11 +162,8 @@ def format_email_date(value, locale: Optional[str], preference: str = "auto") ->
     if preference == "mmddyyyy":
         return value.strftime("%m/%d/%Y")
 
-    language = (locale or "en").split("-")[0].lower()
-    configured_languages = {code for code, _ in settings.LANGUAGES}
-    if language not in configured_languages:
-        language = "en"
-    with override(language):
+    # Same de/en/fr fallback as labels and templates, so an email never mixes languages.
+    with override(_language_code(locale)):
         if preference == "long_dmy":
             return django_date_format(value, "j F Y")
         if preference == "long_mdy":
