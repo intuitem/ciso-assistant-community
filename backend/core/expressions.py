@@ -36,6 +36,12 @@ class ExpressionError(Exception):
     """A CEL expression that cannot be compiled or evaluated. The message is
     author-facing and already mentions the expression key when known."""
 
+    def __init__(self, message):
+        super().__init__(message)
+        # What an API response may carry: the curated text, never the
+        # exception object itself.
+        self.message = message
+
 
 # celpy reports a missing overload with the grammar rule name; translate the
 # ones an author will actually hit into the operator they wrote.
@@ -175,6 +181,21 @@ def _promoting(op):
     return apply
 
 
+def _null_aware(op, when_one_is_null):
+    """Equality against null never fails: CEL answers false (or true for !=)
+    when exactly one side is null, whatever the other side holds. celpy
+    raises on the type mix, which turned `x == null` into an error for every
+    number and list, and `x == null ? a : b` with it."""
+    promoted = _promoting(op)
+
+    def apply(left, right):
+        if (left is None) != (right is None):
+            return celtypes.BoolType(when_one_is_null)
+        return promoted(left, right)
+
+    return apply
+
+
 def _int_only_mod(left, right):
     """`%` is int-only in CEL and celpy has no double overload, so a mixed or
     double modulo gets a message that says what to do rather than a generic
@@ -196,8 +217,8 @@ OPERATORS = {
     "_<=_": _promoting(bool_le),
     "_>_": _promoting(bool_gt),
     "_>=_": _promoting(bool_ge),
-    "_==_": _promoting(bool_eq),
-    "_!=_": _promoting(bool_ne),
+    "_==_": _null_aware(bool_eq, False),
+    "_!=_": _null_aware(bool_ne, True),
 }
 
 
@@ -399,6 +420,11 @@ def _describe(error):
 # 500-item lists is 125M evaluations, from a 2000-character expression.
 MACROS = {"map", "filter", "all", "exists", "exists_one"}
 MAX_MACRO_DEPTH = 2
+# How deep a parsed expression may nest. Evaluation recurses along the tree
+# and runs out of stack somewhere past 600 levels; a real formula sits well
+# under 100 (about ten levels per parenthesis, two per chained operator).
+MAX_TREE_DEPTH = 300
+TOO_DEEP = "the expression is nested too deeply; split it or simplify it"
 
 
 def compile_expression(expression):
@@ -409,11 +435,26 @@ def compile_expression(expression):
         ast = _environment().compile(expression)
     except celpy.CELParseError as e:
         raise ExpressionError(f"syntax error: {_describe(e)}")
+    except RecursionError:
+        raise ExpressionError(TOO_DEEP)
+    # Measured without recursion, and before anything that recurses.
+    if _tree_depth(ast) > MAX_TREE_DEPTH:
+        raise ExpressionError(TOO_DEEP)
     if _macro_depth(ast) > MAX_MACRO_DEPTH:
         raise ExpressionError(
             f"map/filter/all/exists can be nested at most {MAX_MACRO_DEPTH} deep"
         )
     return ast
+
+
+def _tree_depth(tree):
+    deepest, stack = 0, [(tree, 1)]
+    while stack:
+        node, depth = stack.pop()
+        deepest = max(deepest, depth)
+        if isinstance(node, Tree):
+            stack.extend((child, depth + 1) for child in node.children)
+    return deepest
 
 
 def _macro_depth(tree):
@@ -442,6 +483,8 @@ def evaluate(expression, context):
         raise ExpressionError(_describe(e))
     except (ArithmeticError, ValueError, TypeError, KeyError, IndexError) as e:
         raise ExpressionError(_describe(e))
+    except RecursionError:
+        raise ExpressionError(TOO_DEEP)
     if isinstance(result, celpy.CELEvalError):
         raise ExpressionError(_describe(result))
     return _finite(from_cel(result))
