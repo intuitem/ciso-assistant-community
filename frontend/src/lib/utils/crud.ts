@@ -630,6 +630,7 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlParams: 'content_type=DO&content_type=GL&content_type=EN'
 			},
 			{ field: 'evidences', urlModel: 'evidences' },
+			{ field: 'metric_instances', urlModel: 'metric-instances' },
 			{ field: 'objectives', urlModel: 'organisation-objectives' },
 			{ field: 'owner', urlModel: 'actors' },
 			{ field: 'security_exceptions', urlModel: 'security-exceptions' },
@@ -661,6 +662,13 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'task-templates',
 				addExisting: {
 					parentField: 'task_templates'
+				}
+			},
+			{
+				field: 'applied_controls',
+				urlModel: 'metric-instances',
+				addExisting: {
+					parentField: 'metric_instances'
 				}
 			},
 			{
