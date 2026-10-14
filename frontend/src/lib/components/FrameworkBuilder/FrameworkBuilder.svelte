@@ -11,8 +11,12 @@
 		type Framework,
 		type BuilderNode,
 		type RequirementNode,
-		type Question
+		type Question,
+		remapGrid,
+		type OutcomeRule,
+		type Scale
 	} from './builder-state';
+	import ScalesEditor from './ScalesEditor.svelte';
 	import type { DraftJSON } from './builder-api';
 	import {
 		localeLabel,
@@ -199,6 +203,32 @@
 				scores_definition: { ...current, aggregation: value }
 			});
 		}
+	}
+
+	// Scales questions or ratings use: deleting one would break them.
+	let measuredScales = $derived(
+		$rootNodesStore
+			.flatMap((bn) =>
+				bn.questions.map((bq) => (bq.question.config as { scale?: string } | null)?.scale ?? '')
+			)
+			.filter(Boolean)
+	);
+	let usedScales = $derived(
+		[
+			...measuredScales,
+			...($frameworkStore.outcomes_definition ?? []).flatMap((r) =>
+				r.kind === 'rating' ? (r.dimensions ?? []) : []
+			)
+		].filter(Boolean)
+	);
+
+	// A scale that gains or loses levels resizes the grids that cross it.
+	function updateScales(scales: Scale[]) {
+		const before = ($frameworkStore.scales_definition ?? []) as Scale[];
+		const outcomes = ($frameworkStore.outcomes_definition ?? []).map((r: OutcomeRule) =>
+			r.kind === 'rating' && r.grid ? { ...r, grid: remapGrid(r, before, scales) } : r
+		);
+		builder.updateFramework({ scales_definition: scales, outcomes_definition: outcomes });
 	}
 
 	// Single-object reference questions that can name what a response is about.
@@ -1035,6 +1065,16 @@
 									{/if}
 								</div>
 							{/if}
+							{#if mode === 'quick_form'}
+								<div class={SECTION_CARD}>
+									<ScalesEditor
+										scales={$frameworkStore.scales_definition ?? []}
+										used={usedScales}
+										activeLanguage={$activeLanguageStore}
+										onupdate={updateScales}
+									/>
+								</div>
+							{/if}
 							<!-- Outcome rules -->
 							<div class={SECTION_CARD}>
 								<OutcomesEditor
@@ -1045,6 +1085,13 @@
 									pages={rulePages}
 									catalog={celCatalog}
 									groups={ruleGroups}
+									scales={$frameworkStore.scales_definition ?? []}
+									measured={measuredScales}
+									onaddscales={(added) =>
+										updateScales([
+											...(($frameworkStore.scales_definition ?? []) as Scale[]),
+											...added
+										])}
 								/>
 							</div>
 
