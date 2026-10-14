@@ -753,7 +753,6 @@ async def create_risk_scenario(
     description: str = "",
     risk_assessment_id: str = None,
     folder_id: str = None,
-    existing_controls: str = "",
     current_proba: int = None,
     current_impact: int = None,
     assets: list = None,
@@ -778,7 +777,6 @@ async def create_risk_scenario(
         description: Description
         risk_assessment_id: Risk assessment ID/name
         folder_id: Folder ID/name
-        existing_controls: Existing controls description
         current_proba: Probability 0-4 (0=very low, 4=very high)
         current_impact: Impact 0-4 (0=very low, 4=very high)
         assets: List of asset IDs/names
@@ -821,9 +819,6 @@ async def create_risk_scenario(
 
         if risk_assessment_id:
             payload["risk_assessment"] = risk_assessment_id
-
-        if existing_controls:
-            payload["existing_controls"] = existing_controls
 
         if current_proba is not None:
             payload["current_proba"] = current_proba

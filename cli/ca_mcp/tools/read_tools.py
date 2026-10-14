@@ -114,7 +114,17 @@ async def get_risk_scenario(scenario_id: str):
         result += f"**Description:** {rs.get('description') or '-'}\n"
         result += f"**Justification:** {rs.get('justification') or '-'}\n"
         result += f"**Treatment:** {rs.get('treatment') or '-'}\n"
-        result += f"**Existing Controls:** {rs.get('existing_controls') or '-'}\n\n"
+        existing_applied_controls = rs.get("existing_applied_controls", [])
+        existing_controls_str = (
+            ", ".join(
+                f"{c.get('str', c)} ({c.get('id')})" if isinstance(c, dict) else str(c)
+                for c in existing_applied_controls
+            )
+            if existing_applied_controls
+            else "-"
+        )
+        result += f"**Existing Controls:** {existing_controls_str}\n"
+        result += "\n"
 
         result += "### Inherent Risk\n"
         result += f"**Proba:** {(rs.get('inherent_proba') or {}).get('name', '--')}\n"

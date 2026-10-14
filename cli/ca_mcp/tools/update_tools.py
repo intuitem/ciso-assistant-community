@@ -326,7 +326,6 @@ async def update_risk_scenario(
     name: str = None,
     description: str = None,
     risk_assessment_id: str = None,
-    existing_controls: str = None,
     inherent_proba: int = None,
     inherent_impact: int = None,
     current_proba: int = None,
@@ -352,7 +351,6 @@ async def update_risk_scenario(
         name: New name
         description: New description
         risk_assessment_id: Risk assessment ID/name
-        existing_controls: Existing controls description
         inherent_proba: Inherent probability index (from risk matrix)
         inherent_impact: Inherent impact index (from risk matrix)
         current_proba: Current probability index (from risk matrix)
@@ -385,8 +383,6 @@ async def update_risk_scenario(
             payload["name"] = name
         if description is not None:
             payload["description"] = description
-        if existing_controls is not None:
-            payload["existing_controls"] = existing_controls
         if inherent_proba is not None:
             payload["inherent_proba"] = inherent_proba
         if inherent_impact is not None:
