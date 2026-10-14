@@ -4,22 +4,49 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models import Count
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
-from rest_framework import status
+import django_filters as df
+from rest_framework import status, serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from core.views import BaseModelViewSet, LONG_CACHE_TTL
-from iam.models import RoleAssignment
+from core.views import BaseModelViewSet, GenericFilterSet, LONG_CACHE_TTL
+from iam.models import Folder, RoleAssignment
+from django.contrib.auth.models import Permission
 from metrology.models import (
+    FREQUENCY_ALIASES,
     MetricDefinition,
     MetricInstance,
     CustomMetricSample,
     BuiltinMetricSample,
     Dashboard,
     DashboardWidget,
+    normalize_frequency,
 )
 from metrology.builtin_metrics import BUILTIN_METRICS, METRIC_TYPE_CHART_TYPES
-from metrology.serializers import BuiltinMetricSampleReadSerializer
+from metrology.serializers import (
+    DERIVED_SAMPLE_READ_ONLY,
+    BuiltinMetricSampleReadSerializer,
+)
+
+
+def _as_uuid(value):
+    try:
+        return uuid.UUID(str(value))
+    except ValueError, TypeError:
+        return None
+
+
+def _composable(instance):
+    """A metric instance as the "new computed metric" modal lists it."""
+    definition = instance.metric_definition
+    return {
+        "id": str(instance.id),
+        "name": instance.name,
+        "folder": {"id": str(instance.folder_id), "str": str(instance.folder)},
+        "frequency": instance.collection_frequency,
+        "current_value": instance.current_value(),
+        "definition": {"id": str(definition.id), "name": definition.name},
+    }
 
 
 def _user_can_read_target(user, content_type, object_id):
@@ -61,6 +88,188 @@ class MetricDefinitionViewSet(BaseModelViewSet):
         )
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get readable models", url_path="readable-models")
+    def readable_models(self, request):
+        """The models a dataset may read, with their fields and the aggregate
+        functions: the same registry the workflow builder uses, served here
+        so the metric form does not depend on the workflows feature flag."""
+        from core.reads.registry import registry_payload
+
+        return Response(registry_payload())
+
+    @action(detail=False, methods=["post"], url_path="preview-formula")
+    def preview_formula(self, request):
+        """Evaluate a derived metric's formula against a folder, writing
+        nothing. The datasets' aggregates and the result come back so an author
+        sees what the expression reads; an evaluation failure is a 200 with
+        ok: false. Needs the right to add metric instances in that folder, the
+        same right that would make the number visible."""
+        from metrology.derived import (
+            DerivedMetricError,
+            evaluate_formula,
+            validate_formula,
+        )
+
+        data = request.data if isinstance(request.data, dict) else {}
+        folder = Folder.objects.filter(id=_as_uuid(data.get("folder"))).first()
+        if folder is None:
+            return Response(
+                {"error": "folderNotFound"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        permission = Permission.objects.filter(codename="add_metricinstance").first()
+        if permission is None or not RoleAssignment.is_access_allowed(
+            user=request.user, perm=permission, folder=folder
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        datasets = data.get("datasets")
+        expression = data.get("expression") or ""
+        inputs = data.get("inputs")
+        definition = MetricDefinition.objects.filter(
+            id=_as_uuid(data.get("definition"))
+        ).first()
+        errors = validate_formula(datasets, expression, inputs, definition)
+        if errors:
+            return Response(
+                {"ok": False, "errors": [{"code": c, "message": m} for c, m in errors]}
+            )
+        if inputs:
+            return self._preview_series(data, inputs, expression, folder)
+        try:
+            evaluation = evaluate_formula(datasets, expression, folder)
+        except DerivedMetricError as e:
+            return Response(
+                {
+                    "ok": False,
+                    "errors": [
+                        {"code": "derived_evaluation_failed", "message": e.message}
+                    ],
+                }
+            )
+        return Response(
+            {"ok": True, "value": evaluation.value, "datasets": evaluation.datasets}
+        )
+
+    PREVIEW_PERIODS = 24
+
+    def _preview_series(self, data, inputs, expression, folder):
+        """A metric formula's last periods at the frequency the author picks,
+        and what each input resolved to in the folder."""
+        from types import SimpleNamespace
+
+        from metrology.compose import readable_instances, unreadable_picks
+        from metrology.derived import DerivedMetricError
+        from metrology.series import evaluate_series, period_start, shift_period
+        from django.utils import timezone
+
+        frequency = data.get("frequency")
+        if frequency not in MetricInstance.Frequency.values:
+            frequency = MetricInstance.Frequency.MONTHLY
+        category = data.get("category")
+        if category not in MetricDefinition.Category.values:
+            category = MetricDefinition.Category.QUANTITATIVE
+        levels = data.get("choices_definition")
+        shape = SimpleNamespace(
+            category=category,
+            choices_definition=[level for level in levels if isinstance(level, dict)]
+            if isinstance(levels, list)
+            else [],
+        )
+        since = shift_period(
+            period_start(timezone.now(), frequency),
+            frequency,
+            -(self.PREVIEW_PERIODS - 1),
+        )
+        choices = data.get("input_choices")
+        if choices is not None and not isinstance(choices, dict):
+            choices = None
+        if unreadable_picks(self.request.user, choices):
+            # A pick the author may not read would show them its values.
+            return Response(
+                {
+                    "ok": False,
+                    "errors": [
+                        {
+                            "code": "derived_input_invalid",
+                            "message": "A picked metric instance does not exist",
+                        }
+                    ],
+                }
+            )
+        try:
+            evaluation = evaluate_series(
+                inputs,
+                expression,
+                folder,
+                frequency,
+                shape,
+                since=since,
+                choices=choices,
+            )
+        except DerivedMetricError as e:
+            return Response(
+                {
+                    "ok": False,
+                    "errors": [
+                        {"code": "derived_evaluation_failed", "message": e.message}
+                    ],
+                }
+            )
+        if evaluation.errors and all(period.skipped for period in evaluation.periods):
+            # Every period failed the same way, most likely: the formula is
+            # wrong, and the first failure says how.
+            return Response(
+                {
+                    "ok": False,
+                    "errors": [
+                        {
+                            "code": "derived_evaluation_failed",
+                            "message": evaluation.errors[0],
+                        }
+                    ],
+                }
+            )
+        # The value reads the whole subtree, as the metric would; which
+        # instances it read is only named where the author may read them.
+        resolved_ids = [
+            instance.id for item in evaluation.resolved for instance in item.instances
+        ]
+        readable = readable_instances(self.request.user, resolved_ids)
+        return Response(
+            {
+                "ok": True,
+                "value": evaluation.value,
+                "periods": [
+                    {
+                        "start": period.start.isoformat(),
+                        "value": period.value,
+                        "skipped": period.skipped,
+                        "error": period.error,
+                        "inputs": period.inputs,
+                    }
+                    for period in evaluation.periods
+                ],
+                "inputs": {
+                    item.key: [
+                        {
+                            "id": str(instance.id),
+                            "name": instance.name,
+                            "folder": instance.folder.name,
+                        }
+                        for instance in item.instances
+                        if instance.id in readable
+                    ]
+                    for item in evaluation.resolved
+                },
+                "hidden_inputs": {
+                    item.key: sum(
+                        1 for instance in item.instances if instance.id not in readable
+                    )
+                    for item in evaluation.resolved
+                },
+            }
+        )
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get category choices")
     def category(self, request):
         return Response(dict(MetricDefinition.Category.choices))
@@ -77,19 +286,49 @@ class MetricDefinitionViewSet(BaseModelViewSet):
         return Response({p: p for p in providers})
 
 
+class FrequencyFilter(df.ChoiceFilter):
+    """A collection frequency, a deprecated name of one included
+    (models.FREQUENCY_ALIASES)."""
+
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault(
+            "choices",
+            [
+                *MetricInstance.Frequency.choices,
+                *((alias, alias) for alias in FREQUENCY_ALIASES),
+            ],
+        )
+        super().__init__(*args, **kwargs)
+
+    def filter(self, qs, value):
+        return super().filter(qs, normalize_frequency(value))
+
+
+METRIC_INSTANCE_FILTER_FIELDS = [
+    "folder",
+    "metric_definition",
+    "status",
+    "collection_frequency",
+    "owner",
+    "filtering_labels",
+    "organisation_objectives",
+    "evidences",
+]
+
+
+class MetricInstanceFilter(GenericFilterSet):
+    collection_frequency = FrequencyFilter()
+
+    class Meta:
+        model = MetricInstance
+        fields = METRIC_INSTANCE_FILTER_FIELDS
+
+
 class MetricInstanceViewSet(BaseModelViewSet):
     model = MetricInstance
     serializers_module = "metrology.serializers"
-    filterset_fields = [
-        "folder",
-        "metric_definition",
-        "status",
-        "collection_frequency",
-        "owner",
-        "filtering_labels",
-        "organisation_objectives",
-        "evidences",
-    ]
+    filterset_class = MetricInstanceFilter
+    filterset_fields = METRIC_INSTANCE_FILTER_FIELDS
     search_fields = ["name", "description", "ref_id"]
 
     def get_queryset(self):
@@ -105,6 +344,309 @@ class MetricInstanceViewSet(BaseModelViewSet):
                 "owner", "organisation_objectives", "filtering_labels", "samples"
             )
         )
+
+    @action(detail=False, methods=["get"], url_path="input-candidates")
+    def input_candidates(self, request):
+        """For the instance form: each input of a metric formula and the
+        instances it could read from a domain, so the author can pick one or
+        leave some out. Needs the right to add or change metric instances
+        there, as creating or editing the instance would."""
+        from metrology.series import input_candidates, resolve_definition
+
+        definition = MetricDefinition.objects.filter(
+            id=_as_uuid(request.query_params.get("definition"))
+        ).first()
+        folder = Folder.objects.filter(
+            id=_as_uuid(request.query_params.get("folder"))
+        ).first()
+        if definition is None or folder is None:
+            return Response(
+                {"error": "definitionOrFolderNotFound"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        allowed = any(
+            RoleAssignment.is_access_allowed(
+                user=request.user, perm=permission, folder=folder
+            )
+            for permission in Permission.objects.filter(
+                codename__in=["add_metricinstance", "change_metricinstance"]
+            )
+        )
+        if not allowed:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        if not definition.reads_metrics:
+            return Response({"inputs": []})
+        from metrology.compose import readable_instances
+
+        inputs = []
+        for spec in definition.inputs or []:
+            if not isinstance(spec, dict):
+                continue
+            target = resolve_definition(spec.get("definition"))
+            # The subtree may hold instances the author may not read: a
+            # candidate they cannot see is not theirs to pick, as the other
+            # endpoints have it (compose.readable_instances).
+            candidates = input_candidates(target, folder) if target else []
+            readable = readable_instances(
+                request.user, [instance.id for instance in candidates]
+            )
+            inputs.append(
+                {
+                    "key": spec.get("key"),
+                    "combine": spec.get("combine") or "one",
+                    "definition": (
+                        {"id": str(target.id), "name": target.name} if target else None
+                    ),
+                    "candidates": [
+                        {
+                            "id": str(instance.id),
+                            "name": instance.name,
+                            "folder": instance.folder.name,
+                        }
+                        for instance in candidates
+                        if instance.id in readable
+                    ],
+                }
+            )
+        return Response({"inputs": inputs})
+
+    COMPOSE_CANDIDATES = 20
+
+    @action(detail=False, methods=["get"], url_path="compose-candidates")
+    def compose_candidates(self, request):
+        """For the "new computed metric" modal: the instances a formula may
+        read, each word of the search matching their name, their metric or
+        their domain, or the ones named by ``instance``. Quantitative, not
+        deprecated, and readable by the user."""
+        from django.db.models import Q
+
+        search = (request.query_params.get("search") or "").strip()
+        found = (
+            self.get_queryset()
+            .filter(metric_definition__category=MetricDefinition.Category.QUANTITATIVE)
+            .exclude(status=MetricInstance.Status.DEPRECATED)
+        )
+        ids = [_as_uuid(i) for i in request.query_params.getlist("instance")]
+        if ids:
+            # The rows a list selection opens the modal with.
+            found = found.filter(id__in=[i for i in ids if i is not None])
+        # Every word somewhere: "clicks france" finds "Phishing clicks"
+        # in ACME France.
+        for word in search.split():
+            found = found.filter(
+                Q(name__icontains=word)
+                | Q(metric_definition__name__icontains=word)
+                | Q(folder__name__icontains=word)
+            )
+        return Response(
+            [
+                _composable(instance)
+                for instance in found.order_by("name", "id")[: self.COMPOSE_CANDIDATES]
+            ]
+        )
+
+    @action(detail=False, methods=["get"], url_path="compose-context")
+    def compose_context(self, request):
+        """For the "new computed metric" modal: where the metric may live
+        and how often it computes, given the picked instances. The domains
+        run from the lowest holding every pick up to the root, keeping those
+        the user may create metrics in; the frequency is the least frequent
+        pick's. Instances the user may not read are left out, as if they did
+        not exist."""
+        from metrology.compose import (
+            common_domain,
+            creatable_in,
+            least_frequent,
+            readable_instances,
+        )
+
+        ids = [_as_uuid(i) for i in request.query_params.getlist("instance")]
+        found = readable_instances(request.user, [i for i in ids if i is not None])
+        picked = [found[i] for i in ids if i in found]
+        lowest = common_domain([instance.folder for instance in picked])
+        domains = (
+            [
+                folder
+                for folder in lowest.get_parent_folders(include_self=True)
+                if creatable_in(request.user, folder)
+            ]
+            if lowest
+            else []
+        )
+        return Response(
+            {
+                "domains": [
+                    {"id": str(folder.id), "str": str(folder)} for folder in domains
+                ],
+                "frequency": least_frequent(
+                    [instance.collection_frequency for instance in picked]
+                ),
+            }
+        )
+
+    @action(detail=False, methods=["post"], url_path="compose")
+    def compose(self, request):
+        """Create a computed metric from instances: the instance and its
+        definition (an identical one is reused), in one go."""
+        from metrology.compose import CompositionError, compose
+
+        try:
+            instance, outcome = compose(request.user, request.data)
+        except PermissionError:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        except CompositionError as e:
+            return Response(e.errors, status=status.HTTP_400_BAD_REQUEST)
+        definition = instance.metric_definition
+        return Response(
+            {
+                "id": str(instance.id),
+                "definition": {"name": definition.name, "reused": outcome == "reused"},
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+    @action(
+        detail=True,
+        methods=["get", "put"],
+        url_path="composition",
+        url_name="composition",
+    )
+    def composition(self, request, pk=None):
+        """A computed metric as the modal edits it, and the edit. Only for a
+        formula made of picked instances (compose.is_composable): the answer
+        says so, and the page sends the author to the definition otherwise.
+        The definition's other users tell the modal that an edit of the
+        formula will give this metric a definition of its own."""
+        from metrology.compose import (
+            CompositionError,
+            compose,
+            is_composable,
+            permitted,
+            readable_instances,
+        )
+
+        instance = self.get_object()
+        definition = instance.metric_definition
+        if request.method == "PUT":
+            if not is_composable(instance):
+                return Response(
+                    {"error": "metricNotComposable"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            try:
+                instance, outcome = compose(request.user, request.data, instance)
+            except PermissionError:
+                return Response(status=status.HTTP_403_FORBIDDEN)
+            except CompositionError as e:
+                return Response(e.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "id": str(instance.id),
+                    "outcome": outcome,
+                    "definition": {"name": instance.metric_definition.name},
+                    # What the instance's edit form holds and would write
+                    # back: a form left open adopts them, or undoes the edit.
+                    "metric_definition": str(instance.metric_definition_id),
+                    "input_choices": instance.input_choices,
+                    # Before the recomputation the save queued: a page can
+                    # follow it until this stamp moves.
+                    "last_computed_at": instance.last_computed_at,
+                }
+            )
+        about = {
+            "id": str(definition.id),
+            "name": definition.name,
+            "shared_with": definition.metricinstance_set.exclude(
+                id=instance.id
+            ).count(),
+        }
+        if not is_composable(instance):
+            # Edited on the definition itself, which every metric using it
+            # follows: the drawer previews it where this metric lives, at its
+            # frequency, and follows its recomputation after a save.
+            return Response(
+                {
+                    "composable": False,
+                    "definition": about,
+                    "expression": definition.expression,
+                    "folder": {
+                        "id": str(instance.folder_id),
+                        "str": str(instance.folder),
+                    },
+                    "collection_frequency": instance.collection_frequency,
+                    "last_computed_at": instance.last_computed_at,
+                    "can_change_definition": permitted(
+                        request.user, ["change_metricdefinition"], definition.folder
+                    ),
+                }
+            )
+        picks = {
+            key: _as_uuid(choice.get("pick"))
+            for key, choice in instance.input_choices.items()
+            if isinstance(choice, dict)
+        }
+        found = readable_instances(request.user, [i for i in picks.values() if i])
+        return Response(
+            {
+                "composable": True,
+                "definition": about,
+                "name": instance.name,
+                "description": instance.description,
+                "folder": {"id": str(instance.folder_id), "str": str(instance.folder)},
+                "collection_frequency": instance.collection_frequency,
+                "target_value": instance.target_value,
+                "category": definition.category,
+                "choices_definition": [
+                    {"ref_id": choice.get("ref_id"), "name": choice.get("name")}
+                    for choice in definition.choices_definition or []
+                    if isinstance(choice, dict)
+                ],
+                "unit": str(definition.unit_id) if definition.unit_id else None,
+                "higher_is_better": definition.higher_is_better,
+                "expression": definition.expression,
+                # An input whose instance is gone or not the user's to read
+                # comes back without one, for the author to pick again.
+                "inputs": [
+                    {
+                        "key": spec.get("key"),
+                        "instance": (
+                            _composable(found[picks[spec.get("key")]])
+                            if picks.get(spec.get("key")) in found
+                            else None
+                        ),
+                    }
+                    for spec in definition.inputs or []
+                    if isinstance(spec, dict)
+                ],
+            }
+        )
+
+    @action(detail=True, methods=["post"], url_path="refresh")
+    def refresh(self, request, pk=None):
+        """Recompute a derived metric now. The task is enqueued, never run
+        inline, so a refresh and a scheduled run share one code path and a
+        slow worker-side aggregate never sits on a request."""
+        from metrology.recompute import recompute_soon
+        from metrology.series import FULL
+        from metrology.tasks import compute_derived_metric_task
+
+        instance = self.get_object()
+        if not instance.is_derived:
+            return Response(
+                {"error": "metricNotDerived"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        permission = Permission.objects.filter(codename="change_metricinstance").first()
+        if permission is None or not RoleAssignment.is_access_allowed(
+            user=request.user, perm=permission, folder=instance.folder
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        if instance.metric_definition.reads_metrics:
+            # A refresh recomputes a metric formula's whole series, in the
+            # recompute job like every metric formula computation.
+            recompute_soon([instance.id], FULL)
+        else:
+            compute_derived_metric_task(str(instance.id))
+        return Response({"queued": True}, status=status.HTTP_202_ACCEPTED)
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -123,6 +665,16 @@ class CustomMetricSampleViewSet(BaseModelViewSet):
     filterset_fields = ["folder", "metric_instance", "evidence_revision"]
     search_fields = ["observation"]
     ordering = ["-timestamp"]  # Most recent first
+
+    def perform_destroy(self, instance):
+        # Same refusal as the write serializer: a derived series is its
+        # formula's. A period deleted by hand would never be recomputed, and a
+        # deleted latest sample would change the next computation's `previous`.
+        if instance.metric_instance.is_derived:
+            raise serializers.ValidationError(
+                {"metric_instance": DERIVED_SAMPLE_READ_ONLY}
+            )
+        super().perform_destroy(instance)
 
     def get_queryset(self):
         # raw_value()/display_value() walk metric_instance -> metric_definition to
