@@ -7,7 +7,7 @@ description: |
   (3) A UI change made existing screenshots stale ("refresh the screenshots", "the docs images are out of date")
   (4) User asks for annotated / step-by-step images for a guide page
 
-  Covers: the deterministic demo fixture (seed_docs_demo), the Playwright capture harness, annotated callout shots, figure placement and caption grounding.
+  Covers: the deterministic demo fixture (seed_demo --docs), the Playwright capture harness, annotated callout shots, figure placement and caption grounding.
 ---
 
 # Product-docs screenshots
@@ -74,18 +74,20 @@ running stack — that is where the feature's data already exists. Ask which URL
 and which records to shoot; do not guess a port.
 
 Use **fixture mode** when the page is one of the core pages already backed by
-`seed_docs_demo` (domains, perimeters, assets, applied controls, audits, risk
-assessments), or when refreshing a stale screenshot.
+`seed_demo --docs` (domains, perimeters, assets, applied controls, audits, risk
+assessments), or when refreshing a stale screenshot. `seed_demo --list` shows
+which modules the fixture covers.
 
-Only extend `backend/core/management/commands/seed_docs_demo.py` if the user
-asks for a screenshot that must stay regenerable. It is not a prerequisite for
-documenting a new feature. If extending it, follow the conventions in the file:
+The fixture is the same dataset as the product demo, assembled from per-app
+builders (`backend/core/demo/`, `<app>/demo_builders.py`). Only extend it if the
+user asks for a screenshot that must stay regenerable. It is not a prerequisite
+for documenting a new feature. If extending a builder, follow its conventions:
 
-- seed the RNG (`random.seed(SEED)`) and use a fixed vocabulary
-- derive dates from `TODAY`, never `date.today()`
-- add the new model to `freeze_timestamps` with both a scope filter (this is a
-  management command; it must never rewrite timestamps outside the fixture) and
-  an explicit natural sort key
+- draw randomness from `ctx.rng` only, and use a fixed vocabulary
+- derive dates from `ctx.day(offset)`, never a literal or `date.today()`
+- add the new model to the builder's `stamps()` with both a scope filter (it
+  must never rewrite timestamps outside the fixture) and an explicit natural
+  sort key, and to its `covers`
 
 There are `populate_*` management commands for several modules, but they do
 **not** seed the RNG, so their output is different on every run. Do not call
