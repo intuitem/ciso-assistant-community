@@ -314,7 +314,7 @@ export const AppliedControlSchema = z.object({
 	control_impact: z.number().optional().nullable(),
 	cost: z
 		.object({
-			currency: z.enum(CURRENCY_SYMBOLS).default('€'),
+			currency: z.enum(CURRENCY_SYMBOLS).optional(),
 			amortization_period: z.number().min(1).max(50).default(1),
 			build: z
 				.object({

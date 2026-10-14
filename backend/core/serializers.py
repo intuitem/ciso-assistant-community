@@ -18,7 +18,7 @@ from core.serializer_fields import (
     PathField,
 )
 from core.constants import LEGACY_TTP_LIBRARIES
-from core.utils import time_state
+from core.utils import get_global_currency, time_state
 from ebios_rm.models import EbiosRMStudy, Stakeholder
 from tprm.models import Contract, Solution
 from threat_modeling.models import ThreatModel
@@ -1604,6 +1604,14 @@ class AppliedControlWriteSerializer(
     create_remote_object = serializers.BooleanField(
         required=False, default=False, write_only=True
     )
+
+    def validate_cost(self, value):
+        if isinstance(value, dict) and not value.get("currency"):
+            existing = getattr(self.instance, "cost", None)
+            value["currency"] = (
+                existing.get("currency") if isinstance(existing, dict) else None
+            ) or get_global_currency()
+        return value
 
     def validate(self, attrs):
         return self.validate_commitment(super().validate(attrs))

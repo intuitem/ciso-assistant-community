@@ -421,3 +421,55 @@ class TestAppliedControlFullEndpoint:
         assert item["assets"] == [{}], (
             f"cross-folder asset must be masked in /full/; got {item['assets']!r}"
         )
+
+
+@pytest.mark.django_db
+class TestAppliedControlCostCurrency:
+    """Costs created without an explicit currency follow the global setting."""
+
+    @pytest.fixture
+    def cad_currency(self):
+        from global_settings.models import GlobalSettings
+
+        settings, _ = GlobalSettings.objects.get_or_create(name="general")
+        settings.value = {**(settings.value or {}), "currency": "C$"}
+        settings.save()
+
+    def test_model_default_cost_uses_global_currency(self, cad_currency):
+        ac = AppliedControl.objects.create(
+            folder=Folder.get_root_folder(), name="default cost"
+        )
+        assert ac.cost["currency"] == "C$"
+
+    def test_api_create_without_currency_uses_global_currency(
+        self, authenticated_client, cad_currency
+    ):
+        cost = {k: v for k, v in APPLIED_CONTROL_COST.items() if k != "currency"}
+        response = authenticated_client.post(
+            "/api/applied-controls/",
+            {
+                "name": "no currency",
+                "folder": str(Folder.get_root_folder().id),
+                "cost": cost,
+            },
+            format="json",
+        )
+        assert response.status_code == status.HTTP_201_CREATED, response.content
+        ac = AppliedControl.objects.get(id=response.json()["id"])
+        assert ac.cost["currency"] == "C$"
+
+    def test_api_update_without_currency_keeps_stored_currency(
+        self, authenticated_client, cad_currency
+    ):
+        ac = AppliedControl.objects.create(
+            folder=Folder.get_root_folder(),
+            name="stored currency",
+            cost=APPLIED_CONTROL_COST2,
+        )
+        cost = {k: v for k, v in APPLIED_CONTROL_COST2.items() if k != "currency"}
+        response = authenticated_client.patch(
+            f"/api/applied-controls/{ac.id}/", {"cost": cost}, format="json"
+        )
+        assert response.status_code == status.HTTP_200_OK, response.content
+        ac.refresh_from_db()
+        assert ac.cost["currency"] == "$"
