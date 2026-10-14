@@ -1645,7 +1645,6 @@
 	"expirationDate": "到期日期",
 	"expirationDateIsInThePastWarning": "输入的到期日期已是过去时间",
 	"filterBy": "筛选条件",
-	"demoDataAlreadyImported": "演示数据已导入。请删除或重命名现有的DEMO域。",
 	"finding": "发现",
 	"findings": "发现",
 	"findingsExplorer": "发现综合审查",
