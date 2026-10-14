@@ -25,23 +25,12 @@ translations:
       Kleinstunternehmen sowie kleine und mittlere Unternehmen (Tool v1.1). Diese Selbstbewertung
       hilft Organisationen, ihren aktuellen Reifegrad im Hinblick auf den Cyber Resilience
       Act (CRA) in fünf Bereichen zu prüfen: Governance und Dokumentation; Risikomanagement
-      und Security by Design und by Default; Schwachstellen- und Patchmanagement; Management
-      des Produktlebenszyklus; sowie Sensibilisierung, Kompetenz und Fähigkeiten. Jede Frage
+      und Security by Design und sichere Standardkonfiguration; Schwachstellen- und Patchmanagement; Management
+      des Produktlebenszyklus; sowie Sensibilisierung, Kompetenz und Fachkenntnisse. Jede Frage
       wird durch Auswahl der Beschreibung beantwortet, die der aktuellen Praxis entspricht.
       Dadurch wird der Reifegradwert automatisch festgelegt (1 Initial bis 5 Optimiert). Reifegradbereiche:
-      Basis (1,0–2,5), Mittel (2,6–3,9), Fortgeschritten (4,0–5,0). Das Modell dient als Hilfsmittel
-      zur Selbstbewertung und ersetzt keine formelle Rechts- oder Konformitätsberatung.
-
-
-      Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung der englischen Bibliotheksinhalte
-      mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten; keine
-      offizielle oder von ENISA autorisierte deutsche Übersetzung. Quelle: [ENISA, SME Cyber
-      Resilience Maturity Assessment Model (Tool v1.1)](https://www.enisa.europa.eu/publications/sme-cyber-resilience-maturity-assessment-model).
-      Das Original wurde für diese deutsche Fassung übersetzt; Reifegradwerte und Bewertungslogik
-      wurden nicht verändert.'
-    copyright: '© European Union Agency for Cybersecurity (ENISA), 2026. Ausgangsveröffentlichung
-      unter [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Deutsche Übersetzung:
-      KI-gestützt erstellt und durch den KI-Assistenten geprüft; nicht von ENISA autorisiert.'
+      Grundlegend (1,0–2,5), Mittel (2,6–3,9), Fortgeschritten (4,0–5,0). Das Modell dient als Hilfsmittel
+      zur Selbstbewertung und ersetzt keine formelle Rechts- oder Konformitätsberatung.'
 objects:
   framework:
     urn: urn:intuitem:risk:framework:enisa-sme-cra-maturity
@@ -63,20 +52,12 @@ objects:
           Kleinstunternehmen sowie kleine und mittlere Unternehmen (Tool v1.1). Diese Selbstbewertung
           hilft Organisationen, ihren aktuellen Reifegrad im Hinblick auf den Cyber Resilience
           Act (CRA) in fünf Bereichen zu prüfen: Governance und Dokumentation; Risikomanagement
-          und Security by Design und by Default; Schwachstellen- und Patchmanagement; Management
-          des Produktlebenszyklus; sowie Sensibilisierung, Kompetenz und Fähigkeiten. Jede Frage
+          und Security by Design und sichere Standardkonfiguration; Schwachstellen- und Patchmanagement; Management
+          des Produktlebenszyklus; sowie Sensibilisierung, Kompetenz und Fachkenntnisse. Jede Frage
           wird durch Auswahl der Beschreibung beantwortet, die der aktuellen Praxis entspricht.
           Dadurch wird der Reifegradwert automatisch festgelegt (1 Initial bis 5 Optimiert). Reifegradbereiche:
-          Basis (1,0–2,5), Mittel (2,6–3,9), Fortgeschritten (4,0–5,0). Das Modell dient als Hilfsmittel
-          zur Selbstbewertung und ersetzt keine formelle Rechts- oder Konformitätsberatung.
-
-
-          Hinweis zur Übersetzung: KI-gestützte maschinelle Übersetzung der englischen Bibliotheksinhalte
-          mit anschließender sprachlicher und fachlicher Prüfung durch den KI-Assistenten; keine
-          offizielle oder von ENISA autorisierte deutsche Übersetzung. Quelle: [ENISA, SME Cyber
-          Resilience Maturity Assessment Model (Tool v1.1)](https://www.enisa.europa.eu/publications/sme-cyber-resilience-maturity-assessment-model).
-          Das Original wurde für diese deutsche Fassung übersetzt; Reifegradwerte und Bewertungslogik
-          wurden nicht verändert.'
+          Grundlegend (1,0–2,5), Mittel (2,6–3,9), Fortgeschritten (4,0–5,0). Das Modell dient als Hilfsmittel
+          zur Selbstbewertung und ersetzt keine formelle Rechts- oder Konformitätsberatung.'
     min_score: 1
     max_score: 5
     field_visibility:
@@ -206,7 +187,7 @@ objects:
           translations:
             de:
               text: Sind Rollen und Verantwortlichkeiten für Tätigkeiten zur Produktsicherheit klar
-                definiert (z. B. Entwicklung, Schwachstellenmanagement, Updates)?
+                definiert (z. B. Entwicklung, Schwachstellenmanagement, Aktualisierungen)?
           text: Are roles and responsibilities clearly defined for product security
             activities (e.g. development, vulnerability management, updates)?
           choices:
@@ -265,7 +246,7 @@ objects:
           translations:
             de:
               text: Pflegen Sie eine technische Dokumentation auf Produktebene, die implementierte Sicherheitsfunktionen,
-                Risikobeurteilungen, Entwurfsentscheidungen und Updateverfahren beschreibt?
+                Risikobewertungen, Konzeptionsentscheidungen und Aktualisierungsverfahren beschreibt?
           text: Do you maintain product-level technical documentation describing implemented
             security features, risk assessments, design decisions and update procedures?
           choices:
@@ -426,7 +407,7 @@ objects:
       ref_id: '2'
       translations:
         de:
-          name: Risikomanagement und Security by Design und by Default
+          name: Risikomanagement und Security by Design und sichere Standardkonfiguration
       name: Risk Management and Security by Design and by Default
     - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.1
       assessable: true
@@ -435,15 +416,15 @@ objects:
       ref_id: '2.1'
       translations:
         de:
-          name: Beurteilung von Cybersicherheitsrisiken
+          name: Bewertung der Cybersicherheitsrisiken
       name: Cybersecurity risk assessments
       questions:
         urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.1:question:1:
           type: unique_choice
           translations:
             de:
-              text: Führen Sie Beurteilungen von Cybersicherheitsrisiken durch und nutzen Sie die Ergebnisse
-                als Grundlage für Entscheidungen über Produktentwurf, Entwicklung, Konfiguration und
+              text: Führen Sie Bewertungen der Cybersicherheitsrisiken durch und nutzen Sie die Ergebnisse
+                als Grundlage für Entscheidungen über Produktkonzeption, Entwicklung, Konfiguration und
                 Komponentenmanagement?
           text: Do you perform cybersecurity risk assessments and use the results
             to guide product design, development, configuration and component management
@@ -452,31 +433,31 @@ objects:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.1:question:1:choice:1
             translations:
               de:
-                value: 1 Es werden keine Risikobeurteilungen durchgeführt
+                value: 1 Es werden keine Risikobewertungen durchgeführt
             value: 1 No risk assessments are performed
             add_score: 1
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.1:question:1:choice:2
             translations:
               de:
-                value: 2 Risikobeurteilungen erfolgen informell und beeinflussen Entscheidungen nur selten
+                value: 2 Risikobewertungen erfolgen informell und beeinflussen Entscheidungen nur selten
             value: 2 Risk assessments are informal and rarely influence decisions
             add_score: 2
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.1:question:1:choice:3
             translations:
               de:
-                value: 3 Risikobeurteilungen sind dokumentiert, werden aber nicht durchgängig genutzt
+                value: 3 Risikobewertungen sind dokumentiert, werden aber nicht durchgängig genutzt
             value: 3 Risk assessments are documented but not consistently used
             add_score: 3
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.1:question:1:choice:4
             translations:
               de:
-                value: 4 Risikobeurteilungen werden systematisch durchgeführt und dienen als Entscheidungsgrundlage
+                value: 4 Risikobewertungen werden systematisch durchgeführt und dienen als Entscheidungsgrundlage
             value: 4 Risk assessments are systematically performed and guide decisions
             add_score: 4
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.1:question:1:choice:5
             translations:
               de:
-                value: 5 Risikobeurteilungen erfolgen nach einem formell festgelegten Verfahren, sind
+                value: 5 Risikobewertungen erfolgen nach einem formell festgelegten Verfahren, sind
                   in die Prozesse integriert und werden kontinuierlich verbessert
             value: 5 Risk assessments are formal, integrated into processes and continuously
               improved
@@ -498,7 +479,7 @@ objects:
           type: unique_choice
           translations:
             de:
-              text: Werden Produkte von Anfang an nach den Grundsätzen von Security by Design entworfen?
+              text: Werden Produkte von Anfang an nach den Grundsätzen von Security by Design konzipiert?
           text: Are products designed using security-by-design principles from the
             outset?
           choices:
@@ -517,7 +498,7 @@ objects:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.2:question:1:choice:3
             translations:
               de:
-                value: 3 Security by Design wird beim Entwurf angewendet, aber nicht durchgängig
+                value: 3 Security by Design wird bei der Konzeption angewendet, aber nicht durchgängig
             value: 3 Applied during design but not consistently
             add_score: 3
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.2:question:1:choice:4
@@ -544,20 +525,20 @@ objects:
       ref_id: '2.3'
       translations:
         de:
-          name: Sichere Voreinstellungen
+          name: Sichere Standardkonfigurationen
       name: Secure by default
       questions:
         urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.3:question:1:
           type: unique_choice
           translations:
             de:
-              text: Werden Produkte mit standardmäßig sicheren Konfigurationen und Einstellungen ausgeliefert?
+              text: Werden Produkte mit sicheren Standardkonfigurationen und Einstellungen ausgeliefert?
           text: Are products delivered with secure-by-default configurations and settings?
           choices:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.3:question:1:choice:1
             translations:
               de:
-                value: 1 Es sind keine sicheren Voreinstellungen definiert
+                value: 1 Es sind keine sicheren Standardkonfigurationen definiert
             value: 1 No secure defaults are defined
             add_score: 1
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.3:question:1:choice:2
@@ -569,19 +550,19 @@ objects:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.3:question:1:choice:3
             translations:
               de:
-                value: 3 Sichere Voreinstellungen sind definiert, werden aber nicht durchgängig angewendet
+                value: 3 Sichere Standardkonfigurationen sind definiert, werden aber nicht durchgängig angewendet
             value: 3 Secure defaults are defined but not consistently applied
             add_score: 3
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.3:question:1:choice:4
             translations:
               de:
-                value: 4 Sichere Voreinstellungen werden durchgängig angewendet und überprüft
+                value: 4 Sichere Standardkonfigurationen werden durchgängig angewendet und überprüft
             value: 4 Secure defaults are consistently applied and reviewed
             add_score: 4
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:2.3:question:1:choice:5
             translations:
               de:
-                value: 5 Sichere Voreinstellungen werden durchgesetzt, getestet und kontinuierlich verbessert
+                value: 5 Sichere Standardkonfigurationen werden durchgesetzt, getestet und kontinuierlich verbessert
             value: 5 Secure defaults are enforced, tested and continuously improved
             add_score: 5
       reference_controls:
@@ -656,7 +637,7 @@ objects:
           type: unique_choice
           translations:
             de:
-              text: Werden Risikobeurteilungen, Konfigurationen und Komponenten von Drittanbietern überprüft
+              text: Werden Risikobewertungen, Konfigurationen und Komponenten von Drittanbietern überprüft
                 und aktualisiert, wenn sich Risiken ändern oder neue Bedrohungen entstehen?
           text: When risks change or new threats emerge, are risk assessments, configurations
             and third-party components reviewed and updated?
@@ -766,14 +747,14 @@ objects:
       ref_id: '3.2'
       translations:
         de:
-          name: Prozess für Sicherheitsupdates
+          name: Prozess für Sicherheitsaktualisierungen
       name: Security update process
       questions:
         urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.2:question:1:
           type: unique_choice
           translations:
             de:
-              text: Gibt es einen festgelegten Prozess, um Sicherheitsupdates für unterstützte Produkte
+              text: Gibt es einen festgelegten Prozess, um Sicherheitsaktualisierungen für unterstützte Produkte
                 zu erstellen, zu testen, bereitzustellen und die Kunden darüber zu informieren?
           text: Do you have a defined process for creating, testing, delivering and
             communicating security updates to customers for supported products?
@@ -781,13 +762,13 @@ objects:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.2:question:1:choice:1
             translations:
               de:
-                value: 1 Es gibt keinen Updateprozess
+                value: 1 Es gibt keinen Aktualisierungsprozess
             value: 1 No update process exists
             add_score: 1
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.2:question:1:choice:2
             translations:
               de:
-                value: 2 Updates werden informell gehandhabt
+                value: 2 Aktualisierungen werden informell gehandhabt
             value: 2 Updates are handled informally
             add_score: 2
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.2:question:1:choice:3
@@ -799,7 +780,7 @@ objects:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.2:question:1:choice:4
             translations:
               de:
-                value: 4 Updates werden durchgängig verwaltet, getestet und bereitgestellt
+                value: 4 Aktualisierungen werden durchgängig verwaltet, getestet und bereitgestellt
             value: 4 Updates are consistently managed, tested and delivered
             add_score: 4
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.2:question:1:choice:5
@@ -880,7 +861,7 @@ objects:
           type: unique_choice
           translations:
             de:
-              text: Werden Schwachstellen und Updates anhand des Risikos und der möglichen Auswirkungen
+              text: Werden Schwachstellen und Aktualisierungen anhand des Risikos und der möglichen Auswirkungen
                 priorisiert?
           text: Are vulnerabilities and updates prioritised based on risk and potential
             impact?
@@ -934,7 +915,7 @@ objects:
           type: unique_choice
           translations:
             de:
-              text: Überprüfen Sie, ob Sicherheitsupdates die gemeldeten Schwachstellen wirksam beheben,
+              text: Überprüfen Sie, ob Sicherheitsaktualisierungen die gemeldeten Schwachstellen wirksam beheben,
                 und bewahren Sie Nachweise dieser Überprüfung auf?
           text: Do you verify that security updates effectively resolve reported vulnerabilities
             and maintain evidence of this verification?
@@ -966,7 +947,7 @@ objects:
           - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:3.5:question:1:choice:5
             translations:
               de:
-                value: 5 Das Prüfverfahren wird anhand von Kennzahlen bewertet, überprüft und kontinuierlich
+                value: 5 Die Überprüfung wird anhand von Kennzahlen bewertet, überprüft und kontinuierlich
                   verbessert
             value: 5 Verification is measured, reviewed and continuously improved
             add_score: 5
@@ -1050,7 +1031,7 @@ objects:
           translations:
             de:
               text: Wird der Produktlebenszyklus aktiv gesteuert, einschließlich festgelegter Unterstützungszeiträume,
-                Verantwortlichkeiten für Updates, Regelungen zum Lebenszyklusende und Kommunikation
+                Verantwortlichkeiten für Aktualisierungen, Regelungen zum Lebenszyklusende und Kommunikation
                 mit den Kunden?
           text: Is the product lifecycle management actively managed, including defined
             support periods, update responsibilities, end-of-life arrangements and
@@ -1258,7 +1239,7 @@ objects:
       ref_id: '5'
       translations:
         de:
-          name: Sensibilisierung, Kompetenz und Fähigkeiten
+          name: Sensibilisierung, Kompetenz und Fachkenntnisse
       name: Awareness, Competence and Skills
     - urn: urn:intuitem:risk:req_node:enisa-sme-cra-maturity:5.1
       assessable: true
@@ -1274,7 +1255,7 @@ objects:
           type: unique_choice
           translations:
             de:
-              text: Stehen ausreichende Fachkenntnisse zur Verfügung, um Produkte sicher zu entwerfen,
+              text: Stehen ausreichende Fachkenntnisse zur Verfügung, um Produkte sicher zu konzipieren,
                 zu entwickeln und zu warten, bei begrenzten internen Kapazitäten auch durch externe
                 Expertise?
           text: Are sufficient skills available to design, develop and maintain products
@@ -1485,8 +1466,7 @@ objects:
           type: unique_choice
           translations:
             de:
-              text: Beurteilen und überprüfen Sie, ob Ihr Team über die erforderlichen Fähigkeiten und
-                Kompetenzen verfügt, um die Sicherheit der Produkte aufrechtzuerhalten?
+              text: Beurteilen und überprüfen Sie, ob Ihr Team über die erforderlichen Fachkenntnisse und Kompetenzen verfügt, um die Sicherheit der Produkte aufrechtzuerhalten?
           text: Do you assess and validate that your team has the required skills
             and competence to maintain secure products?
           choices:
