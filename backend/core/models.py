@@ -7150,6 +7150,12 @@ class AppliedControl(
         verbose_name=_("Evidences"),
         related_name="applied_controls",
     )
+    metric_instances = models.ManyToManyField(
+        "metrology.MetricInstance",
+        blank=True,
+        verbose_name=_("Metric instances"),
+        related_name="applied_controls",
+    )
 
     assets = models.ManyToManyField(
         Asset,
