@@ -467,6 +467,23 @@ def test_the_form_rating_rates_each_risk(admin_client, processing, dpia_form):
     assert "residual_risk_unacceptable" in content["computed_outcome"]
 
 
+@pytest.mark.django_db
+def test_the_published_preview_rates_each_risk(admin_client, dpia_form):
+    page = f"{DPIA}:illegitimate_access:question"
+    res = admin_client.post(
+        f"/api/quick-forms/{dpia_form.id}/preview/",
+        {
+            "answers": {
+                f"{page}:severity": f"{page}:severity:choice:maximum",
+                f"{page}:likelihood": f"{page}:likelihood:choice:negligible",
+            }
+        },
+        format="json",
+    )
+    assert res.status_code == 200, res.content[:300]
+    assert res.json()["computed_values"]["privacy_risk"] == 3.0
+
+
 def test_the_dpia_target_previews_without_a_response():
     from core.quick_form_apply import project
 

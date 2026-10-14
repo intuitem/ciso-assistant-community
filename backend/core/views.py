@@ -20742,6 +20742,7 @@ class QuickFormViewSet(BaseModelViewSet):
             "pages": pages,
             "outcomes_definition": quick_form.outcomes_definition or [],
             "scores_definition": quick_form.scores_definition,
+            "scales_definition": quick_form.scales_definition,
         }
         answers = request.data.get("answers")
         evaluation = evaluate_quick_form_document(

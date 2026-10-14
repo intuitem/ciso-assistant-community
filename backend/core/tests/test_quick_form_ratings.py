@@ -229,3 +229,27 @@ def test_preview_survives_a_broken_draft():
         ],
     }
     assert "hidden_pages" in evaluate_quick_form_document(form, {})
+
+
+def test_a_hidden_question_does_not_rate():
+    form = _form()
+    questions = form["pages"][0]["questions"]
+    gate = f"{PAGE}:question:gate"
+    questions[gate] = {
+        "type": "unique_choice",
+        "choices": [{"urn": f"{gate}:choice:yes"}, {"urn": f"{gate}:choice:no"}],
+    }
+    impact = f"{PAGE}:question:impact"
+    questions[impact]["depends_on"] = {
+        "question": gate,
+        "answers": [f"{gate}:choice:yes"],
+    }
+    answers = {
+        impact: f"{impact}:choice:high",
+        f"{PAGE}:question:effort": f"{PAGE}:question:effort:choice:low",
+    }
+
+    shown = evaluate_quick_form_document(form, {**answers, gate: f"{gate}:choice:yes"})
+    hidden = evaluate_quick_form_document(form, {**answers, gate: f"{gate}:choice:no"})
+    assert shown["computed_values"]["priority"] == 2.0
+    assert hidden["computed_values"].get("priority") != 2.0

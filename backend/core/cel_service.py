@@ -1525,6 +1525,7 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
                 "answers": [
                     (entry.get("config") or {}, (selected_of(entry) or [None])[0])
                     for entry in page["_questions"]
+                    if _is_question_visible(entry, answers, questions_by_urn)
                 ],
             }
             for page in pages
@@ -1632,7 +1633,7 @@ def evaluate_quick_form(response, persist: bool = True) -> dict:
                         entry["selected"][0].urn if entry["selected"] else None,
                     )
                     for entry in snapshot["per_question"].values()
-                    if entry["page_id"] == page["id"]
+                    if entry["page_id"] == page["id"] and entry["visible"]
                 ],
             }
             for page in snapshot["pages"]
