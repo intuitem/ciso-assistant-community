@@ -22,8 +22,8 @@ audit-jellemzői; 7. melléklet: 2 148 elemi követelmény). Nyelv: `hu`, csomag
 | szint | csomópont | ref_id | name | description | megvalósítási csoportok |
 |---|---|---|---|---|---|
 | 1 | követelménycsalád (19) | `1` … `19` | a család neve | – | – |
-| 2 | követelménycsoport / védelmi intézkedés (914, értékelhető) | `1.1` | a rendeletben szereplő megnevezés (a kiterjesztések „Alap – Kiterjesztés” alakban) | a követelmény szövege, pontonként külön sorban | `A-SZ`, `A-EIR`, `J-SZ`, `J-EIR`, `M-SZ`, `M-EIR` = az osztály, amelyben elvárt × a 6. melléklet szerinti jelleg; `O` = egyik osztálynál sem elvárt |
-| 3 | elemi követelmény (2 148, értékelhető) | `K01.001_P1`, `K01.001_O.1.1.1.1.a` | a hivatalos hivatkozási kód (`K01.001_P[1]`, `K01.001_O.1.1.1.1.(a)`) | az SZTFH 7. melléklet szövege | `AE-SZ` … `ME-EIR` = a szülő követelménycsoport csoportjai |
+| 2 | követelménycsoport / védelmi intézkedés (914; értékelhető az a 530, amelyhez nem tartozik elemi követelmény) | `1.1` | a rendeletben szereplő megnevezés (a kiterjesztések „Alap – Kiterjesztés” alakban) | a követelmény szövege, pontonként külön sorban | `A-SZ`, `A-EIR`, `J-SZ`, `J-EIR`, `M-SZ`, `M-EIR` = az osztály, amelyben elvárt × a 6. melléklet szerinti jelleg; `KIEG` = egyik osztálynál sem elvárt |
+| 3 | elemi követelmény (2 148, értékelhető) | `K01.001_P1`, `K01.001_O.1.1.1.1.a` | a hivatalos hivatkozási kód (`K01.001_P[1]`, `K01.001_O.1.1.1.1.(a)`) | az SZTFH 7. melléklet szövege | a szülő követelménycsoport csoportjai |
 
 Az elemi követelmény `ref_id`-ja a kód szögletes zárójelek nélküli alakja (a kód maga a `name`
 mezőben van). A 2. melléklet 20.6. pontja szerint a követelmények szövege a követelménycsoport
@@ -37,16 +37,20 @@ együtt jelöli: `SZ` = szervezeti szintű, `EIR` = EIR-szintű. Az osztályok e
 (A 164 ⊂ J 302 ⊂ M 385 követelménycsoport), ezért például az `M-SZ` a Magas osztályban elvárt összes
 szervezeti szintű csoportot tartalmazza, az alacsonyabb osztályokét is. Az egyik osztálynál sem elvárt
 529 kiegészítő védelmi intézkedés (2. melléklet 20.4. pont; a 6. melléklet nem ad hozzájuk jelleget)
-az `O` csoport. Az elemi szint külön kapcsolható be: az `ME-EIR` az `M-EIR` mellé, a `JE-SZ` a `J-SZ`
-mellé választandó, és így tovább. Elemi csoport nélkül az értékelés a követelménycsoportoknál megáll;
-elemi csoport önmagában a szülő csoportokat csak a fa szerkezete miatt tartja meg.
+az `KIEG` csoport. Az elemi követelmények a szülő követelménycsoport csoportjaiba tartoznak, és helyette
+értékelendők: ahol a követelménycsoporthoz elemi követelmények tartoznak, ott a követelménycsoport csak
+címsor, így egy csoport kiválasztása a teljes elemi szintű értékelést adja, és egyetlen követelmény sem
+számít kétszer a pontszámba.
 
-| csoport | követelménycsoport | csoport | elemi követelmény |
-|---|---|---|---|
-| `A-SZ` / `A-EIR` | 82 / 82 | `AE-SZ` / `AE-EIR` | 717 / 683 |
-| `J-SZ` / `J-EIR` | 108 / 194 | `JE-SZ` / `JE-EIR` | 815 / 1 064 |
-| `M-SZ` / `M-EIR` | 132 / 253 | `ME-SZ` / `ME-EIR` | 896 / 1 252 |
-| `O` | 529 | | |
+| csoport | követelménycsoport | értékelhető követelmény |
+|---|---|---|
+| `A-SZ` / `A-EIR` | 82 / 82 | 717 / 683 |
+| `J-SZ` / `J-EIR` | 108 / 194 | 815 / 1 065 |
+| `M-SZ` / `M-EIR` | 132 / 253 | 896 / 1 253 |
+| `KIEG` | 529 | 529 |
+
+A `J-EIR` és az `M-EIR` egy-egy többlete a 6.27. követelménycsoport, amelyhez nincs elemi követelmény,
+ezért maga értékelendő.
 
 A 19 családból 16 egynemű (szervezeti szintű: 1., 3., 9–12., 14., 19.; EIR-szintű: 2., 4–8., 17., 18.);
 a 13., 15. és 16. család vegyes.
@@ -59,9 +63,8 @@ EIR-re egységesen, a szervezet legmagasabb biztonsági osztályú EIR-je szerin
 indexébe (VMI) a szervezeti szintű csoportok is beszámítanak (2.2.5.7. pont). A CISO Assistant a
 kiválasztott csoportok uniójával szűri a követelményfát, ezért:
 
-* **Szervezeti audit**: a szervezet legmagasabb osztályának `SZ` csoportja, például `M-SZ`
-  (elemi szinttel: + `ME-SZ`).
-* **EIR-audit**: az EIR osztályának `EIR` csoportja, például `A-EIR` (+ `AE-EIR`). Ha az auditnak a
+* **Szervezeti audit**: a szervezet legmagasabb osztályának `SZ` csoportja, például `M-SZ`.
+* **EIR-audit**: az EIR osztályának `EIR` csoportja, például `A-EIR`. Ha az auditnak a
   VMI miatt a szervezeti szintű csoportokat is tartalmaznia kell, a legmagasabb osztály `SZ` csoportja
   hozzávehető (`A-EIR` + `M-SZ`).
 * **Egyetlen EIR-rel rendelkező szervezet**: az osztály `SZ` és `EIR` csoportja együtt, például
@@ -108,12 +111,10 @@ alapértelmezett skálája érvényes).
 
 ### Ellenőrzés
 
-A könyvtár a CISO Assistant 4.1.1 verziójába betöltve (2026. 10. 11.): az Excel forrás átmegy az
-alkalmazáson belüli konverzión, a YAML betöltődik (3 081 követelménycsomópont, 13 megvalósítási csoport,
-47 fenyegetés). A különböző csoportokkal létrehozott auditok a várt fát adják (értékelhető
-csomópontok): `A-SZ` 82, `A-EIR` 82, `J-SZ` 108, `J-EIR` 194, `M-SZ` 132, `M-EIR` 253, `O` 529,
-`M-SZ`+`M-EIR` 385, `M-SZ`+`ME-SZ` 1 028, `M-EIR`+`ME-EIR` 1 505, mind a négy Magas csoport 2 533,
-`A-EIR`+`M-SZ` 214, kiválasztás nélkül 3 062. A szervezeti auditot baseline-ként használó EIR-audit
+A YAML 3 081 követelménycsomópontot, 7 megvalósítási csoportot és 47 fenyegetést tartalmaz. Az
+értékelhető csomópontok száma kiválasztásonként: `A-SZ` 717, `A-EIR` 683, `J-SZ` 815, `J-EIR` 1 065,
+`M-SZ` 896, `M-EIR` 1 253, `KIEG` 529, `M-SZ`+`M-EIR` 2 149, `A-EIR`+`M-SZ` 1 579, kiválasztás nélkül
+2 678. A szervezeti auditot baseline-ként használó EIR-audit
 megkapta az ott rögzített eredményt.
 
 ---
@@ -132,8 +133,8 @@ Locale `hu`, packager `aafeher`.
 | depth | node | ref_id | name | description | implementation groups |
 |---|---|---|---|---|---|
 | 1 | követelménycsalád / family (19) | `1` … `19` | family name | – | – |
-| 2 | követelménycsoport / protective measure (914, assessable) | `1.1` | the name as printed in the decree (enhancements as "Base – Enhancement") | the requirement text, one numbered point per line | `A-SZ`, `A-EIR`, `J-SZ`, `J-EIR`, `M-SZ`, `M-EIR` = class in which it is required × annex 6 nature; `O` = required in no class |
-| 3 | elemi követelmény / elementary requirement (2,148, assessable) | `K01.001_P1`, `K01.001_O.1.1.1.1.a` | the official code (`K01.001_P[1]`, `K01.001_O.1.1.1.1.(a)`) | the requirement text of SZTFH annex 7 | `AE-SZ` … `ME-EIR` = the groups of the parent measure |
+| 2 | követelménycsoport / protective measure (914; the 530 without elementary requirements are assessable) | `1.1` | the name as printed in the decree (enhancements as "Base – Enhancement") | the requirement text, one numbered point per line | `A-SZ`, `A-EIR`, `J-SZ`, `J-EIR`, `M-SZ`, `M-EIR` = class in which it is required × annex 6 nature; `KIEG` = required in no class |
+| 3 | elemi követelmény / elementary requirement (2,148, assessable) | `K01.001_P1`, `K01.001_O.1.1.1.1.a` | the official code (`K01.001_P[1]`, `K01.001_O.1.1.1.1.(a)`) | the requirement text of SZTFH annex 7 | the groups of the parent measure |
 
 The `ref_id` of an elementary requirement is its code without the square brackets (the code itself is
 the `name`). Annex 2 point 20.6 says the requirement texts are to be read together with the name of
@@ -146,17 +147,20 @@ A group combines the security class with the nature of the measure given in SZTF
 információs rendszer, electronic information system). The classes are nested (A 164 ⊂ J 302 ⊂ M 385
 measures), so `M-SZ` holds every organisational measure required at Magas, including those of the
 lower classes. The 529 measures required in no class ("kiegészítő védelmi intézkedések", annex 2
-point 20.4; annex 6 gives them no nature) form the group `O`. The elementary level is opt-in: select
-`ME-EIR` together with `M-EIR`, `JE-SZ` with `J-SZ`, and so on. Without an elementary group the
-assessment stops at the measures; with an elementary group alone the parent measures stay only as
-ancestors.
+point 20.4; annex 6 gives them no nature) form the group `KIEG`. Elementary requirements carry the groups
+of their parent measure and are assessed in its place: a measure that has elementary requirements is a
+heading only, so selecting a group gives the full elementary-level assessment and nothing is counted
+twice in the score.
 
-| group | measures | group | elementary requirements |
-|---|---|---|---|
-| `A-SZ` / `A-EIR` | 82 / 82 | `AE-SZ` / `AE-EIR` | 717 / 683 |
-| `J-SZ` / `J-EIR` | 108 / 194 | `JE-SZ` / `JE-EIR` | 815 / 1,064 |
-| `M-SZ` / `M-EIR` | 132 / 253 | `ME-SZ` / `ME-EIR` | 896 / 1,252 |
-| `O` | 529 | | |
+| group | measures | assessable requirements |
+|---|---|---|
+| `A-SZ` / `A-EIR` | 82 / 82 | 717 / 683 |
+| `J-SZ` / `J-EIR` | 108 / 194 | 815 / 1,065 |
+| `M-SZ` / `M-EIR` | 132 / 253 | 896 / 1,253 |
+| `KIEG` | 529 | 529 |
+
+The extra one in `J-EIR` and `M-EIR` is measure 6.27, which has no elementary requirement and is
+therefore assessed itself.
 
 16 of the 19 families are of one nature (organisational: 1, 3, 9–12, 14, 19; system level: 2, 4–8,
 17, 18); families 13, 15 and 16 are mixed.
@@ -168,9 +172,8 @@ organisation's highest-class system (points 2.2.1.1., 2.2.3.1., 2.2.3.2.), syste
 system (2.2.1.2.), and counts the organisational groups in the compliance index (VMI) of every system
 (2.2.5.7.). CISO Assistant filters the requirement tree by the union of the selected groups, hence:
 
-* **Organisational audit**: the `SZ` group of the organisation's highest class, e.g. `M-SZ`
-  (+ `ME-SZ` for the elementary level).
-* **System audit**: the `EIR` group of the system's class, e.g. `A-EIR` (+ `AE-EIR`). Add the `SZ`
+* **Organisational audit**: the `SZ` group of the organisation's highest class, e.g. `M-SZ`.
+* **System audit**: the `EIR` group of the system's class, e.g. `A-EIR`. Add the `SZ`
   group of the highest class (`A-EIR` + `M-SZ`) when the audit must also carry the organisational
   groups for the VMI of that system.
 * **Organisation with a single system**: `SZ` + `EIR` of its class, e.g. `J-SZ` + `J-EIR`.
@@ -216,10 +219,7 @@ applies).
 
 ### Verification
 
-Loaded into CISO Assistant 4.1.1 on 2026-10-11: the Excel source passes the in-app conversion, the
-YAML loads (3,081 requirement nodes, 13 implementation groups, 47 threats). Audits created with
-different groups show the expected requirement trees (assessable nodes): `A-SZ` 82, `A-EIR` 82,
-`J-SZ` 108, `J-EIR` 194, `M-SZ` 132, `M-EIR` 253, `O` 529, `M-SZ`+`M-EIR` 385, `M-SZ`+`ME-SZ` 1,028,
-`M-EIR`+`ME-EIR` 1,505, all four Magas groups 2,533, `A-EIR`+`M-SZ` 214, and 3,062 without a
-selection. A system audit created with the organisational audit as baseline received the result
+The YAML holds 3,081 requirement nodes, 7 implementation groups and 47 threats. Assessable nodes per
+selection: `A-SZ` 717, `A-EIR` 683, `J-SZ` 815, `J-EIR` 1,065, `M-SZ` 896, `M-EIR` 1,253, `KIEG` 529,
+`M-SZ`+`M-EIR` 2,149, `A-EIR`+`M-SZ` 1,579, and 2,678 without a selection. A system audit created with the organisational audit as baseline received the result
 recorded there.
