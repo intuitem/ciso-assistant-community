@@ -1074,6 +1074,10 @@ class DataBreachViewSet(BaseModelViewSet):
         folder_id = request.data.get("folder")
         if not folder_id and self.kwargs.get("pk"):
             folder_id = self.get_object().folder_id
+        try:
+            folder_id = uuid.UUID(str(folder_id))
+        except ValueError:
+            return
         folder = Folder.objects.filter(id=folder_id).first()
         if folder is None:
             return

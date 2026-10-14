@@ -14,6 +14,7 @@ from core.quick_form_ratings import (
     evaluate_ratings,
     expand_scales,
     probe_ratings,
+    scales_error,
     value_names,
 )
 
@@ -1346,7 +1347,9 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
 
     answers = answers or {}
     # A draft names its scales; the choices they stand for exist only once imported.
-    quick_form = expand_scales(copy.deepcopy(quick_form))
+    quick_form = copy.deepcopy(quick_form)
+    if scales_error(quick_form) is None:
+        expand_scales(quick_form)
     pages = []
     questions_by_urn = {}
     for page in quick_form.get("pages") or []:

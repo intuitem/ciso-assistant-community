@@ -2,6 +2,7 @@
 lifecycle, CEL outcomes and page visibility, XOR parent constraints."""
 
 import pytest
+from django.contrib.auth.models import Permission
 from django.db import IntegrityError, transaction
 from knox.models import AuthToken
 from rest_framework.test import APIClient
@@ -20,7 +21,7 @@ from core.models import (
     RequirementNode,
     StoredLibrary,
 )
-from iam.models import Folder, RoleAssignment, User, UserGroup
+from iam.models import Folder, Role, RoleAssignment, User, UserGroup
 from tprm.models import Entity
 
 FORM_URN = "urn:test:risk:quick_form:dpia-screening"
@@ -254,6 +255,30 @@ class TestQuickFormImport:
         _load(reviewed.replace("version: 1", "version: 2"))
         form.refresh_from_db()
         assert form.always_review is False
+
+    def test_always_review_needs_only_the_change_right(self, app_config):
+        form = _load(LIBRARY_V1)
+        user = User.objects.create_user(email="qf-editor@test.local", is_published=True)
+        role = Role.objects.create(name="QuickFormEditor", folder=form.folder)
+        role.permissions.set(
+            Permission.objects.filter(
+                codename__in=["view_quickform", "change_quickform"]
+            )
+        )
+        group = UserGroup.objects.create(name="QuickFormEditors", folder=form.folder)
+        group.user_set.add(user)
+        assignment = RoleAssignment.objects.create(
+            user_group=group, role=role, folder=form.folder, is_recursive=True
+        )
+        assignment.perimeter_folders.add(form.folder)
+        client = APIClient()
+        client.force_authenticate(user=user)
+        url = f"/api/quick-forms/{form.id}/always-review/"
+        assert (
+            client.post(url, {"always_review": True}, format="json").status_code == 200
+        )
+        form.refresh_from_db()
+        assert form.always_review is True
 
     def test_answered_questions_and_choices_cannot_be_deleted(self, app_config):
         _user, client = _admin_client()

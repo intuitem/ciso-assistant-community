@@ -99,3 +99,14 @@ def test_no_incident_without_the_right_to_add_one(domain):
     assert res.status_code == 403, res.content
     assert not Incident.objects.exists()
     assert not DataBreach.objects.exists()
+
+
+@pytest.mark.django_db
+def test_malformed_folder_is_a_validation_error(admin_client, domain):
+    res = admin_client.post(
+        URL,
+        {**_breach(domain, incident="Laptop theft"), "folder": "abc"},
+        format="json",
+    )
+    assert res.status_code == 400, res.content
+    assert not Incident.objects.exists()

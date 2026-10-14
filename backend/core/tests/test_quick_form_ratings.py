@@ -1,6 +1,6 @@
 import pytest
 
-
+from core.cel_service import evaluate_quick_form_document
 from core.quick_form_ratings import evaluate_ratings, expand_scales, scales_error
 
 LEVELS = [{"ref_id": "low", "label": "Low"}, {"ref_id": "high", "label": "High"}]
@@ -203,3 +203,29 @@ def test_a_rating_scoped_to_a_malformed_page_list_is_refused():
         ],
     }
     assert "pages must be a list" in scales_error(form)
+
+
+def test_preview_survives_a_broken_draft():
+    form = {
+        "scales_definition": [{"ref_id": "severity", "levels": [{"label": "Low"}]}],
+        "outcomes_definition": [
+            {
+                "ref_id": "risk",
+                "kind": "rating",
+                "dimensions": ["severity"],
+                "levels": [{"label": "Low"}],
+            }
+        ],
+        "pages": [
+            {
+                "urn": "urn:test:qf_page:p",
+                "questions": {
+                    "urn:test:qf_page:p:question:q": {
+                        "type": "unique_choice",
+                        "config": {"scale": "severity"},
+                    }
+                },
+            }
+        ],
+    }
+    assert "hidden_pages" in evaluate_quick_form_document(form, {})

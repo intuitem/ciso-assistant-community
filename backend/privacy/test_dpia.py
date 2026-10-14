@@ -685,6 +685,13 @@ def test_measures_from_another_domain_are_not_added(
     proposal = ProcessingControlsTarget().resolve(response, {})
     assert proposal.value == [str(here.id)]
 
+    answer.value = str(here.id)
+    answer.save()
+    assert ProcessingControlsTarget().resolve(response, {}).value == [str(here.id)]
+    answer.value = ["not-a-uuid", str(here.id)]
+    answer.save()
+    assert ProcessingControlsTarget().resolve(response, {}).value == [str(here.id)]
+
 
 @pytest.mark.django_db
 def test_requirement_history_moves_with_the_processing(admin_client, processing):

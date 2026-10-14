@@ -1,6 +1,8 @@
 """`processing.dpia`: an accepted DPIA, a quick form response on the processing,
 becomes the processing's DPIA of record. No config: the form is the DPIA."""
 
+import uuid
+
 from django.utils.translation import gettext as _
 
 from core.quick_form_targets import Proposal, Target, register
@@ -58,7 +60,12 @@ class ProcessingControlsTarget(Target):
             question__type=Question.Type.OBJECT_REFERENCE,
             question__config__model="applied_control",
         ).exclude(question__page__urn__in=hidden):
-            ids.update(answer.value or [])
+            value = answer.value
+            for item in value if isinstance(value, list) else [value]:
+                try:
+                    ids.add(uuid.UUID(str(item)))
+                except ValueError:
+                    pass
         # Only controls the processing could hold: its domain or one above it. A
         # response filed elsewhere could offer another domain's controls.
         folder = response.subject.folder

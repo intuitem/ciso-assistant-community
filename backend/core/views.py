@@ -20574,6 +20574,8 @@ class QuickFormViewSet(BaseModelViewSet):
     filterset_fields = ["folder", "library"]
     search_fields = ["name", "description", "ref_id"]
 
+    permission_overrides = {"always_review": "change_quickform"}
+
     def get_queryset(self):
         return super().get_queryset().select_related("folder", "library")
 
@@ -20585,12 +20587,6 @@ class QuickFormViewSet(BaseModelViewSet):
         """The one setting an instance owns on a library form: whether accepting
         always takes a review, even when the submitter could apply it."""
         quick_form = self.get_object()
-        if not RoleAssignment.is_access_allowed(
-            user=request.user,
-            perm=Permission.objects.get(codename="change_quickform"),
-            folder=quick_form.folder,
-        ):
-            return Response(status=status.HTTP_403_FORBIDDEN)
         value = request.data.get("always_review")
         if not isinstance(value, bool):
             return Response(

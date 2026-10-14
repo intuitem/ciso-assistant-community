@@ -276,7 +276,7 @@ def evaluate_ratings(quick_form, pages: list[dict]) -> tuple[dict, list[dict]]:
         names = rating.get("dimensions") or []
         if not names or any(name not in scales for name in names):
             continue
-        level_refs = [lvl["ref_id"] for lvl in rating.get("levels") or []]
+        level_refs = [lvl.get("ref_id") for lvl in rating.get("levels") or []]
         programs = _compile_rules(rating) if rating.get("grid") is None else []
         scope = set(rating.get("pages") or [])
         points = []
