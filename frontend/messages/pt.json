@@ -629,6 +629,7 @@
 	"libraryLoadingError": "Ocorreu um erro durante a importação da sua biblioteca",
 	"processingError": "Erro de processamento",
 	"libraryAlreadyLoadedError": "Esta biblioteca já foi carregada",
+	"libraryOutdatedError": "Uma versão mais recente desta biblioteca já está armazenada. Defina uma \"version\" mais alta no seu arquivo para importá-lo.",
 	"invalidLibraryFileError": "Arquivo de biblioteca inválido. Certifique-se de que o formato está correto.",
 	"taintedFormMessage": "Você deseja sair desta página? As alterações que você fez podem não ser salvas.",
 	"riskScenariosStatus": "Status dos cenários de risco",
@@ -639,7 +640,6 @@
 	"attemptToDeleteOnlyAdminAccountError": "Você não pode excluir a única conta de administrador do seu aplicativo.",
 	"attemptToRemoveOnlyAdminUserGroup": "Você não pode remover o único usuário administrador do aplicativo do grupo de usuários administradores.",
 	"attemptToRemoveSelfFromDomainAdminGroup": "Não pode remover-se a si próprio de um grupo de administradores de domínio. Peça a outro administrador para o fazer.",
-	"scoringHelpText": "Marque para habilitar a pontuação",
 	"overrideScore": "Substituir a pontuação",
 	"overrideScoreHelpText": "Fixar manualmente a pontuação e parar de recalculá-la a partir das respostas",
 	"automaticScore": "Pontuação automática",
@@ -1635,5 +1635,7 @@
 	"attributeMappingGroups": "Mapeamento de atributo de grupos",
 	"attributeMappingGroupsHelpText": "Nome(s) da claim que carrega as associações de grupos de IdP do usuário. Os grupos encontrados aqui são sincronizados com os grupos de IdP a cada login e concedem os grupos de usuários do CISO Assistant que um administrador mapeou para eles.",
 	"jitProvisioning": "Aprovisionamento automático de SSO (JIT)",
-	"jitProvisioningDescription": "Ativa a criação automática de contas no primeiro login via SSO e a sincronização de suas associações de grupos de IdP, sem exigir SCIM."
+	"jitProvisioningDescription": "Ativa a criação automática de contas no primeiro login via SSO e a sincronização de suas associações de grupos de IdP, sem exigir SCIM.",
+	"includeNotApplicableRequirements": "Incluir requisitos não aplicáveis",
+	"excludeNotApplicableRequirements": "Excluir requisitos não aplicáveis"
 }

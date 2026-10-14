@@ -1073,6 +1073,7 @@
 	"libraryLoadingError": "Wystąpił błąd podczas ładowania biblioteki",
 	"processingError": "Błąd przetwarzania",
 	"libraryAlreadyLoadedError": "Ta biblioteka już została załadowana",
+	"libraryOutdatedError": "Nowsza wersja tej biblioteki jest już zapisana. Aby ją zaimportować, ustaw w pliku wyższą wartość \"version\".",
 	"invalidLibraryFileError": "Nieprawidłowy plik biblioteki. Upewnij się, że format jest poprawny.",
 	"fileTooLarge": "Plik jest zbyt duży",
 	"invalidFileFormat": "Nieprawidłowy format pliku",
@@ -1104,7 +1105,6 @@
 	"emailChangeRequiresUserGroupManagementRights": "Zmiana adresu e-mail użytkownika należącego do grup wymaga uprawnień do zarządzania wszystkimi jego grupami użytkowników.",
 	"isScimManaged": "Zarządzane przez SCIM",
 	"isJitProvisioned": "Utworzone w trybie just-in-time",
-	"scoringHelpText": "Zaznacz, aby włączyć punktację",
 	"overrideScore": "Zastąp wynik",
 	"overrideScoreHelpText": "Ręcznie ustal wynik i wyłącz jego przeliczanie na podstawie odpowiedzi",
 	"automaticScore": "Wynik automatyczny",
@@ -6992,5 +6992,7 @@
 	"quotationMethodChangeTitle": "Zmienić metodę szacowania prawdopodobieństwa?",
 	"quotationMethodChangeBody": "Prawdopodobieństwa wprowadzone w scenariuszach operacyjnych zostaną zastąpione wartościami obliczonymi na podstawie ich sposobów działania. Powrót do bezpośredniego oszacowania ich nie przywróci. Wymuszone prawdopodobieństwa zostaną zachowane.",
 	"elementaryActionTechniqueHelp": "Opcjonalnie: zacznij od techniki z dowolnego katalogu TTP, np. typowej sekwencji ataku EBIOS RM (karty metodyczne 7 i 8). Uzupełnia nazwę i opis, jeśli są puste, i przenosi swoje czynniki oceny do edytora kroku.",
-	"ratingHelp": "Pomoc w ocenie (karta metodyczna 8)"
+	"ratingHelp": "Pomoc w ocenie (karta metodyczna 8)",
+	"includeNotApplicableRequirements": "Uwzględnij wymagania niemające zastosowania",
+	"excludeNotApplicableRequirements": "Wyklucz wymagania niemające zastosowania"
 }

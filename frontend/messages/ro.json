@@ -628,6 +628,7 @@
 	"libraryLoadingError": "A apărut o eroare în timpul încărcării bibliotecii",
 	"processingError": "Eroare de procesare",
 	"libraryAlreadyLoadedError": "Această bibliotecă a fost deja încărcată",
+	"libraryOutdatedError": "O versiune mai nouă a acestei biblioteci este deja stocată. Setați o valoare \"version\" mai mare în fișier pentru a-l importa.",
 	"invalidLibraryFileError": "Fișier de bibliotecă invalid. Vă rugăm să vă asigurați că formatul este corect.",
 	"taintedFormMessage": "Doriți să părăsiți această pagină? Modificările pe care le-ați făcut este posibil să nu fie salvate.",
 	"riskScenariosStatus": "Starea scenariilor de risc",
@@ -638,7 +639,6 @@
 	"attemptToDeleteOnlyAdminAccountError": "Nu puteți șterge singurul cont de administrator al aplicației dvs.",
 	"attemptToRemoveOnlyAdminUserGroup": "Nu puteți elimina singurul administrator al aplicației din grupul de utilizatori administratori.",
 	"attemptToRemoveSelfFromDomainAdminGroup": "Nu vă puteți elimina singur dintr-un grup de administratori de domeniu. Cereți altui administrator să o facă.",
-	"scoringHelpText": "Bifați pentru a activa scorarea",
 	"overrideScore": "Suprascrie scorul",
 	"overrideScoreHelpText": "Fixează manual scorul și oprește recalcularea acestuia din răspunsuri",
 	"automaticScore": "Scor automat",
@@ -1632,5 +1632,7 @@
 	"attributeMappingGroups": "Maparea atributului de grupuri",
 	"attributeMappingGroupsHelpText": "Numele (numele) revendicării (claim) care conține apartenențele la grupuri IdP ale utilizatorului. Grupurile găsite aici sunt sincronizate cu grupurile IdP la fiecare autentificare și acordă grupurile de utilizatori CISO Assistant la care un administrator le-a mapat.",
 	"jitProvisioning": "Provizionare automată SSO (JIT)",
-	"jitProvisioningDescription": "Activează crearea automată a conturilor la prima autentificare SSO și sincronizarea apartenențelor lor la grupuri IdP, fără a necesita SCIM."
+	"jitProvisioningDescription": "Activează crearea automată a conturilor la prima autentificare SSO și sincronizarea apartenențelor lor la grupuri IdP, fără a necesita SCIM.",
+	"includeNotApplicableRequirements": "Includeți cerințele neaplicabile",
+	"excludeNotApplicableRequirements": "Excludeți cerințele neaplicabile"
 }
