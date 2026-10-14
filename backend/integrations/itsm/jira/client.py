@@ -14,8 +14,10 @@ from .mapper import JiraFieldMapper
 logger = get_logger(__name__)
 
 # Separator used in the composite ``table_name`` setting that encodes a
-# Jira project key and issue type name together (e.g. ``"PROJ:Task"``).
+# Jira project key and issue type id together (e.g. ``"PROJ:10001"``).
 # Project keys are uppercase alphanumeric so ``":"`` cannot appear in them.
+# Configs saved before ids were used hold the issue type name instead
+# (``"PROJ:Task"``); see ``_resolve_issue_type_id``.
 TABLE_NAME_SEPARATOR = ":"
 
 # Fields that depend on workflow / instance config rather than createmeta and
@@ -64,11 +66,13 @@ class JiraClient(BaseIntegrationClient):
         )
         self.jira._session.max_redirects = 0
         self.mapper = JiraFieldMapper(configuration, model_key)
+        # {(project_key, issue type name): issue type id} for legacy configs.
+        self._issue_type_ids: dict[tuple[str, str], str] = {}
 
     # Settings helpers
 
     def _resolve_target(self) -> tuple[str, str]:
-        """Return ``(project_key, issue_type_name)`` from settings.
+        """Return ``(project_key, issue_type_id)`` from settings.
 
         Prefer the composite ``table_name`` (set by the FieldMapper UI); fall
         back to the legacy split ``project_key`` / ``issue_type`` settings.
@@ -80,7 +84,36 @@ class JiraClient(BaseIntegrationClient):
             project_key = self.model_settings.get("project_key", "")
         if not issue_type:
             issue_type = self.model_settings.get("issue_type", "Task")
-        return project_key, issue_type
+        return project_key, self._resolve_issue_type_id(project_key, issue_type)
+
+    def _resolve_issue_type_id(self, project_key: str, issue_type: str) -> str:
+        """Return the id of the configured issue type ("" when none is pinned).
+
+        Issue types are referenced by id because Jira translates their names
+        into the API user's language ("Task" -> "Tâche") while its filters
+        (createmeta ``issuetypeNames``) only accept the untranslated name.
+        Configs saved before that hold the name: look it up among the
+        project's issue types, which carry the same translation as the name
+        the picker saved.
+        """
+        if not project_key or not issue_type:
+            return ""
+        if issue_type.isascii() and issue_type.isdigit():
+            return issue_type
+
+        cache_key = (project_key, issue_type)
+        if cache_key not in self._issue_type_ids:
+            project = self.jira.project(project_key)
+            for it in getattr(project, "issueTypes", []) or []:
+                name = getattr(it, "name", None)
+                if name and name.casefold() == issue_type.casefold():
+                    self._issue_type_ids[cache_key] = str(it.id)
+                    break
+            else:
+                raise ValueError(
+                    f"Jira issue type '{issue_type}' not found in project {project_key}"
+                )
+        return self._issue_type_ids[cache_key]
 
     @staticmethod
     def _parse_table_name(table_name: str | None) -> tuple[str, str]:
@@ -94,13 +127,13 @@ class JiraClient(BaseIntegrationClient):
     # CRUD
 
     def create_remote_object(self, local_object: AppliedControl):
-        project_key, issue_type = self._resolve_target()
+        project_key, issue_type_id = self._resolve_target()
         if not project_key:
             raise ValueError("Jira project_key/table_name is not configured")
 
         issue_dict = self.mapper.to_remote(local_object)
         issue_dict["project"] = {"key": project_key}
-        issue_dict["issuetype"] = {"name": issue_type or "Task"}
+        issue_dict["issuetype"] = {"id": issue_type_id}
 
         target_status_name = issue_dict.pop("status", None)
 
@@ -217,7 +250,7 @@ class JiraClient(BaseIntegrationClient):
         return cls._escape_jql_string(" ".join(words.split()))
 
     def _build_list_jql(
-        self, project_key: str, issue_type: str, search: str = ""
+        self, project_key: str, issue_type_id: str, search: str = ""
     ) -> tuple[str | None, str | None]:
         """Return ``(jql, key_jql)`` for the remote object picker.
 
@@ -229,11 +262,11 @@ class JiraClient(BaseIntegrationClient):
         has no searchable content and cannot match anything.
         """
         prefix = f"project = {project_key}"
-        if issue_type:
+        if issue_type_id:
             # Scope to the configured issue type so the link picker doesn't
             # surface issues of other types (e.g. Epics when Task is the
-            # target). Quote the name as it may contain spaces ("User Story").
-            prefix += f' AND issuetype = "{self._escape_jql_string(issue_type)}"'
+            # target). Ids are numeric, so no quoting is needed.
+            prefix += f" AND issuetype = {issue_type_id}"
 
         if not search:
             return prefix, None
@@ -267,7 +300,7 @@ class JiraClient(BaseIntegrationClient):
         if query_params is None:
             query_params = {}
 
-        project_key, issue_type = self._resolve_target()
+        project_key, issue_type_id = self._resolve_target()
         if not project_key:
             raise ValueError("Jira project_key/table_name is not configured")
 
@@ -304,8 +337,8 @@ class JiraClient(BaseIntegrationClient):
                     if fields["project"]["key"].upper() != project_key.upper():
                         continue
                     if (
-                        issue_type
-                        and fields["issuetype"]["name"].lower() != issue_type.lower()
+                        issue_type_id
+                        and str(fields["issuetype"]["id"]) != issue_type_id
                     ):
                         continue
                     entry = {
@@ -321,7 +354,7 @@ class JiraClient(BaseIntegrationClient):
 
         search = str(query_params.get("search", "") or "")
         limit = query_params.get("limit", 50)
-        summary_jql, key_jql = self._build_list_jql(project_key, issue_type, search)
+        summary_jql, key_jql = self._build_list_jql(project_key, issue_type_id, search)
         if summary_jql is None:
             # The term sanitized down to nothing (pure punctuation): nothing
             # can match it, and an empty ~ clause would match everything.
@@ -433,8 +466,9 @@ class JiraClient(BaseIntegrationClient):
     def get_available_tables(self) -> list[dict]:
         """Return every ``(project, issue type)`` pair as a flat table list.
 
-        Each entry's ``name`` is the composite ``"<PROJECT_KEY>:<Issue Type>"``
-        string the FieldMapper UI will write back to ``settings.table_name``.
+        Each entry's ``name`` is the composite ``"<PROJECT_KEY>:<issue type id>"``
+        string the FieldMapper UI will write back to ``settings.table_name``;
+        the (translated) issue type name only appears in the ``label``.
         """
         tables: list[dict] = []
         try:
@@ -449,24 +483,25 @@ class JiraClient(BaseIntegrationClient):
             if not project_key:
                 continue
             issue_types = self._get_project_issue_types(project_key)
-            for issue_type in issue_types:
+            for it_id, it_name in issue_types:
                 tables.append(
                     {
-                        "name": f"{project_key}{TABLE_NAME_SEPARATOR}{issue_type}",
-                        "label": f"{project_name} - {issue_type}",
+                        "name": f"{project_key}{TABLE_NAME_SEPARATOR}{it_id}",
+                        "label": f"{project_name} - {it_name}",
                     }
                 )
 
         tables.sort(key=lambda entry: entry["label"])
         return tables
 
-    def _get_project_issue_types(self, project_key: str) -> list[str]:
+    def _get_project_issue_types(self, project_key: str) -> list[tuple[str, str]]:
+        """Return ``[(issue_type_id, issue_type_name), ...]`` for a project."""
         try:
             project = self.jira.project(project_key)
             return [
-                it.name
+                (str(it.id), it.name)
                 for it in getattr(project, "issueTypes", [])
-                if getattr(it, "name", None)
+                if getattr(it, "id", None) and getattr(it, "name", None)
             ]
         except Exception:
             logger.warning(
@@ -487,7 +522,9 @@ class JiraClient(BaseIntegrationClient):
             return True
         return getattr(self.jira, "_version", (0, 0, 0)) < (9, 0, 0)
 
-    def _fetch_field_meta(self, project_key: str, issue_type: str) -> dict[str, dict]:
+    def _fetch_field_meta(
+        self, project_key: str, issue_type_id: str
+    ) -> dict[str, dict]:
         """Return ``{field_id: field_def}`` for a project (+ optional issue type).
 
         Normalizes both createmeta APIs to the legacy field-definition shape
@@ -495,40 +532,45 @@ class JiraClient(BaseIntegrationClient):
         stay agnostic to the Jira deployment version.
         """
         if self._legacy_createmeta_supported():
-            return self._fetch_field_meta_legacy(project_key, issue_type)
-        return self._fetch_field_meta_v2(project_key, issue_type)
+            return self._fetch_field_meta_legacy(project_key, issue_type_id)
+        return self._fetch_field_meta_v2(project_key, issue_type_id)
 
     def _fetch_field_meta_legacy(
-        self, project_key: str, issue_type: str
+        self, project_key: str, issue_type_id: str
     ) -> dict[str, dict]:
+        # Filter by id: ``issuetypeNames`` only matches the untranslated name,
+        # so a translated one ("Tâche") returns no issue type at all.
         meta = self.jira.createmeta(
             projectKeys=project_key,
-            issuetypeNames=issue_type or None,
+            issuetypeIds=[issue_type_id] if issue_type_id else None,
             expand="projects.issuetypes.fields",
         )
         fields: dict[str, dict] = {}
         for project in meta.get("projects", []) or []:
             for it in project.get("issuetypes", []) or []:
-                if issue_type and it.get("name") != issue_type:
+                if issue_type_id and str(it.get("id")) != issue_type_id:
                     continue
                 fields.update(it.get("fields") or {})
         return fields
 
     def _fetch_field_meta_v2(
-        self, project_key: str, issue_type: str
+        self, project_key: str, issue_type_id: str
     ) -> dict[str, dict]:
-        # Jira Server/DC >= 9.0: resolve the issue type name to its id, then
-        # pull that issue type's fields from the per-issue-type createmeta
-        # endpoints (createmeta/{project}/issuetypes[/{id}]). ``maxResults=False``
+        # Jira Server/DC >= 9.0: pull the issue type's fields from the
+        # per-issue-type createmeta endpoint (createmeta/{project}/issuetypes/{id}),
+        # listing every issue type first when none is pinned. ``maxResults=False``
         # tells the client to page through every result rather than the first 50.
         fields: dict[str, dict] = {}
-        issue_types = self.jira.project_issue_types(project_key, maxResults=False)
-        for it in issue_types or []:
-            it_id = getattr(it, "id", None)
-            if not it_id:
-                continue
-            if issue_type and getattr(it, "name", None) != issue_type:
-                continue
+        if issue_type_id:
+            it_ids = [issue_type_id]
+        else:
+            it_ids = [
+                it.id
+                for it in self.jira.project_issue_types(project_key, maxResults=False)
+                or []
+                if getattr(it, "id", None)
+            ]
+        for it_id in it_ids:
             for field in (
                 self.jira.project_issue_fields(project_key, it_id, maxResults=False)
                 or []
@@ -552,7 +594,8 @@ class JiraClient(BaseIntegrationClient):
             return []
 
         try:
-            field_meta = self._fetch_field_meta(project_key, issue_type)
+            issue_type_id = self._resolve_issue_type_id(project_key, issue_type)
+            field_meta = self._fetch_field_meta(project_key, issue_type_id)
         except Exception:
             # Let the orchestrator's RPC view surface this as a real error
             # (502 with detail) instead of silently returning only the
@@ -590,17 +633,18 @@ class JiraClient(BaseIntegrationClient):
         project_key, issue_type = self._parse_table_name(table_name)
         if not project_key or not field_name:
             return []
+        issue_type_id = self._resolve_issue_type_id(project_key, issue_type)
 
         if field_name == "status":
-            return self._get_status_choices(project_key, issue_type)
+            return self._get_status_choices(project_key, issue_type_id)
         if field_name == "priority":
-            return self._get_priority_choices(project_key, issue_type)
+            return self._get_priority_choices(project_key, issue_type_id)
 
         return self._get_allowed_values_from_createmeta(
-            project_key, issue_type, field_name
+            project_key, issue_type_id, field_name
         )
 
-    def _get_status_choices(self, project_key: str, issue_type: str) -> list[dict]:
+    def _get_status_choices(self, project_key: str, issue_type_id: str) -> list[dict]:
         # Scope to the selected project (and issue type) instead of the
         # instance-wide ``statuses()`` endpoint, which leaks every workflow's
         # statuses across all projects. ``issue_types_for_project`` hits
@@ -613,7 +657,7 @@ class JiraClient(BaseIntegrationClient):
             logger.warning(
                 "Failed to fetch Jira statuses for project",
                 project_key=project_key,
-                issue_type=issue_type,
+                issue_type_id=issue_type_id,
                 exc_info=True,
             )
             raise
@@ -622,7 +666,7 @@ class JiraClient(BaseIntegrationClient):
         for it in issue_types or []:
             # When the table pins an issue type, only that issue type's
             # workflow statuses apply. Without one, union every issue type.
-            if issue_type and getattr(it, "name", None) != issue_type:
+            if issue_type_id and str(getattr(it, "id", "")) != issue_type_id:
                 continue
             for status in getattr(it, "statuses", []) or []:
                 name = getattr(status, "name", None)
@@ -634,12 +678,12 @@ class JiraClient(BaseIntegrationClient):
             for value, label in sorted(statuses.items(), key=lambda kv: kv[1].lower())
         ]
 
-    def _get_priority_choices(self, project_key: str, issue_type: str) -> list[dict]:
+    def _get_priority_choices(self, project_key: str, issue_type_id: str) -> list[dict]:
         # Prefer the project-scoped allowed values from createmeta so we honor
         # the project's priority scheme rather than the instance-wide
         # ``priorities()`` list.
         scoped = self._get_allowed_values_from_createmeta(
-            project_key, issue_type, "priority"
+            project_key, issue_type_id, "priority"
         )
         if scoped:
             return scoped
@@ -659,15 +703,15 @@ class JiraClient(BaseIntegrationClient):
         return result
 
     def _get_allowed_values_from_createmeta(
-        self, project_key: str, issue_type: str, field_name: str
+        self, project_key: str, issue_type_id: str, field_name: str
     ) -> list[dict]:
         try:
-            field_meta = self._fetch_field_meta(project_key, issue_type)
+            field_meta = self._fetch_field_meta(project_key, issue_type_id)
         except Exception:
             logger.warning(
                 "Failed to fetch field metadata for choices",
                 project_key=project_key,
-                issue_type=issue_type,
+                issue_type_id=issue_type_id,
                 field_name=field_name,
                 exc_info=True,
             )

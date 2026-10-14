@@ -16,7 +16,7 @@ def configuration():
         "email": "user@example.com",
         "api_token": "your-api-token",
     }
-    mock_config.settings = {"project_key": "PROJ", "issue_type": "Task"}
+    mock_config.settings = {"table_name": "PROJ:10001"}
     return mock_config
 
 
@@ -68,6 +68,8 @@ def test_create_jira_issue(mock_jira, configuration):
 
     assert issue_key == "PROJ-123"
     mock_jira.return_value.create_issue.assert_called_once()
+    fields = mock_jira.return_value.create_issue.call_args.kwargs["fields"]
+    assert fields["issuetype"] == {"id": "10001"}
     mock_jira.return_value.transition_issue.assert_called_with("PROJ-123", "2")
 
 
@@ -188,7 +190,7 @@ def dynamic_configuration():
         "api_token": "your-api-token",
     }
     mock_config.settings = {
-        "table_name": "PROJ:Task",
+        "table_name": "PROJ:10001",
         "field_map": {
             "name": "summary",
             "description": "customfield_10100",
@@ -338,7 +340,7 @@ def test_list_remote_objects_filters_by_issue_type(mock_jira, mock_sync, configu
 
     jql = mock_jira.return_value.search_issues.call_args[0][0]
     assert "project = PROJ" in jql
-    assert 'issuetype = "Task"' in jql
+    assert "issuetype = 10001" in jql
 
 
 def test_degraded_status_round_trips(configuration):
@@ -380,6 +382,7 @@ def test_status_choices_scoped_to_project_issue_type(mock_jira, configuration):
     """Status choices come from the selected project + issue type, not the whole instance."""
     mock_jira.return_value.issue_types_for_project.return_value = [
         SimpleNamespace(
+            id="10001",
             name="Task",
             statuses=[
                 SimpleNamespace(name="To Do"),
@@ -387,13 +390,14 @@ def test_status_choices_scoped_to_project_issue_type(mock_jira, configuration):
             ],
         ),
         SimpleNamespace(
+            id="10004",
             name="Bug",
             statuses=[SimpleNamespace(name="Triage")],
         ),
     ]
 
     client = JiraClient(configuration)
-    choices = client.get_field_choices("PROJ:Task", "status")
+    choices = client.get_field_choices("PROJ:10001", "status")
 
     assert [c["value"] for c in choices] == ["In Progress", "To Do"]
     mock_jira.return_value.issue_types_for_project.assert_called_once_with("PROJ")
@@ -407,8 +411,11 @@ def test_status_choices_union_across_issue_types_when_unspecified(
 ):
     """With no issue type pinned, statuses from every issue type are returned (deduped)."""
     mock_jira.return_value.issue_types_for_project.return_value = [
-        SimpleNamespace(name="Task", statuses=[SimpleNamespace(name="To Do")]),
         SimpleNamespace(
+            id="10001", name="Task", statuses=[SimpleNamespace(name="To Do")]
+        ),
+        SimpleNamespace(
+            id="10004",
             name="Bug",
             statuses=[SimpleNamespace(name="To Do"), SimpleNamespace(name="Triage")],
         ),
@@ -428,6 +435,7 @@ def test_priority_choices_scoped_via_createmeta(mock_jira, configuration):
             {
                 "issuetypes": [
                     {
+                        "id": "10001",
                         "name": "Task",
                         "fields": {
                             "priority": {
@@ -444,7 +452,7 @@ def test_priority_choices_scoped_via_createmeta(mock_jira, configuration):
     }
 
     client = JiraClient(configuration)
-    choices = client.get_field_choices("PROJ:Task", "priority")
+    choices = client.get_field_choices("PROJ:10001", "priority")
 
     assert [c["value"] for c in choices] == ["High", "Low"]
     # Instance-wide priorities endpoint must NOT be used when the project scopes them.
@@ -463,7 +471,7 @@ def test_priority_choices_fall_back_to_instance_when_createmeta_empty(
     ]
 
     client = JiraClient(configuration)
-    choices = client.get_field_choices("PROJ:Task", "priority")
+    choices = client.get_field_choices("PROJ:10001", "priority")
 
     assert [c["value"] for c in choices] == ["Highest", "Medium"]
     mock_jira.return_value.priorities.assert_called_once()
@@ -654,7 +662,7 @@ def test_list_remote_objects_excludes_mapped_issues(
     assert [r["key"] for r in results] == ["PROJ-2"]
 
 
-def _fake_hydrated_issue(key, issue_id, summary, project="PROJ", issue_type="Task"):
+def _fake_hydrated_issue(key, issue_id, summary, project="PROJ", issue_type_id="10001"):
     issue = MagicMock()
     issue.key = key
     issue.id = issue_id
@@ -664,7 +672,7 @@ def _fake_hydrated_issue(key, issue_id, summary, project="PROJ", issue_type="Tas
         "fields": {
             "summary": summary,
             "project": {"key": project},
-            "issuetype": {"name": issue_type},
+            "issuetype": {"id": issue_type_id},
         },
     }
     return issue
@@ -695,7 +703,7 @@ def test_hydration_rejects_out_of_scope_issues(mock_jira, mock_sync, configurati
     """Hydration must not leak issues outside the configured project/type."""
     mock_jira.return_value.issue.side_effect = [
         _fake_hydrated_issue("OTHER-1", "1", "Other project", project="OTHER"),
-        _fake_hydrated_issue("PROJ-2", "2", "Wrong type", issue_type="Epic"),
+        _fake_hydrated_issue("PROJ-2", "2", "Wrong type", issue_type_id="10000"),
         _fake_hydrated_issue("PROJ-3", "3", "In scope"),
     ]
     mock_sync.objects.filter.return_value.values_list.return_value = []
@@ -857,3 +865,122 @@ def test_list_scan_budget_bounds_pagination(mock_jira, mock_sync, configuration)
 
     assert results == []
     assert mock_jira.return_value.search_issues.call_count == 5
+
+
+# Issue types are referenced by id: Jira translates their names to the API
+# user's language ("Task" -> "Tâche") while createmeta's ``issuetypeNames``
+# filter only matches the untranslated one.
+
+
+@patch("integrations.itsm.jira.client.JIRA")
+def test_tables_use_issue_type_id_and_show_translated_name(mock_jira, configuration):
+    mock_jira.return_value.projects.return_value = [
+        SimpleNamespace(key="KAN", name="Kanban")
+    ]
+    mock_jira.return_value.project.return_value = SimpleNamespace(
+        issueTypes=[SimpleNamespace(id="10001", name="Tâche")]
+    )
+
+    client = JiraClient(configuration)
+
+    assert client.get_available_tables() == [
+        {"name": "KAN:10001", "label": "Kanban - Tâche"}
+    ]
+
+
+@patch("integrations.itsm.jira.client.JIRA")
+def test_columns_fetched_by_issue_type_id(mock_jira, configuration):
+    mock_jira.return_value.createmeta.return_value = {
+        "projects": [
+            {
+                "issuetypes": [
+                    {
+                        "id": "10001",
+                        "name": "Tâche",
+                        "fields": {
+                            "summary": {
+                                "name": "Résumé",
+                                "schema": {"type": "string"},
+                                "operations": ["set"],
+                            }
+                        },
+                    }
+                ]
+            }
+        ]
+    }
+
+    client = JiraClient(configuration)
+    columns = client.get_table_columns("KAN:10001")
+
+    assert {c["name"] for c in columns} == {"summary", "status"}
+    kwargs = mock_jira.return_value.createmeta.call_args.kwargs
+    assert kwargs["issuetypeIds"] == ["10001"]
+    assert "issuetypeNames" not in kwargs
+
+
+@patch("integrations.itsm.jira.client.JIRA")
+def test_columns_fetched_by_issue_type_id_on_data_center_9(mock_jira, configuration):
+    mock_jira.return_value._is_cloud = False
+    mock_jira.return_value._version = (9, 12, 0)
+    mock_jira.return_value.project_issue_fields.return_value = [
+        SimpleNamespace(raw={"fieldId": "summary", "name": "Résumé"})
+    ]
+
+    client = JiraClient(configuration)
+    columns = client.get_table_columns("KAN:10001")
+
+    assert "summary" in {c["name"] for c in columns}
+    mock_jira.return_value.project_issue_fields.assert_called_once_with(
+        "KAN", "10001", maxResults=False
+    )
+    mock_jira.return_value.project_issue_types.assert_not_called()
+
+
+@patch("integrations.itsm.jira.client.JIRA")
+def test_legacy_table_name_with_issue_type_name_resolves_to_id(
+    mock_jira, configuration
+):
+    """Configs saved before ids hold the (translated) name: resolve it once."""
+    mock_jira.return_value.project.return_value = SimpleNamespace(
+        issueTypes=[
+            SimpleNamespace(id="10000", name="Epic"),
+            SimpleNamespace(id="10001", name="Tâche"),
+        ]
+    )
+    mock_jira.return_value.createmeta.return_value = {"projects": []}
+
+    client = JiraClient(configuration)
+    client.get_table_columns("KAN:Tâche")
+    client.get_table_columns("KAN:Tâche")
+
+    kwargs = mock_jira.return_value.createmeta.call_args.kwargs
+    assert kwargs["issuetypeIds"] == ["10001"]
+    mock_jira.return_value.project.assert_called_once_with("KAN")
+
+
+@patch("integrations.itsm.jira.client.JIRA")
+def test_legacy_issue_type_setting_creates_by_id(mock_jira, configuration):
+    configuration.settings = {"project_key": "PROJ", "issue_type": "Task"}
+    mock_jira.return_value.project.return_value = SimpleNamespace(
+        issueTypes=[SimpleNamespace(id="10001", name="Task")]
+    )
+    mock_jira.return_value.create_issue.return_value = MagicMock(key="PROJ-1")
+
+    client = JiraClient(configuration)
+    client.create_remote_object(AppliedControl(folder_id=None, name="Control"))
+
+    fields = mock_jira.return_value.create_issue.call_args.kwargs["fields"]
+    assert fields["issuetype"] == {"id": "10001"}
+
+
+@patch("integrations.itsm.jira.client.JIRA")
+def test_unknown_legacy_issue_type_raises(mock_jira, configuration):
+    mock_jira.return_value.project.return_value = SimpleNamespace(
+        issueTypes=[SimpleNamespace(id="10001", name="Tâche")]
+    )
+
+    client = JiraClient(configuration)
+
+    with pytest.raises(ValueError, match="not found"):
+        client.get_table_columns("KAN:Task")
