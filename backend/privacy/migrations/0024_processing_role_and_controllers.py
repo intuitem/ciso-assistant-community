@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("privacy", "0022_remove_databreach_is_published_and_more"),
+        ("privacy", "0023_dpia"),
         ("tprm", "0025_criticality_carry_over"),
     ]
 
