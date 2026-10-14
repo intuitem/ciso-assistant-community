@@ -101,7 +101,9 @@
 			event.preventDefault();
 			accept(suggestions[selected]);
 		} else if (event.key === 'Escape') {
+			// Closes the suggestions only: not the modal holding the field.
 			event.preventDefault();
+			event.stopPropagation();
 			close();
 		}
 	}

@@ -13712,6 +13712,26 @@ class CustomDocHtmlTemplate(AbstractBaseModel, FolderMixin):
         return f"{self.template_key} ({self.language})"
 
 
+class DemoManifest(models.Model):
+    """What the demo seeder created in a domain, so it can be told apart from
+    user data. Deleted with its domain."""
+
+    domain = models.OneToOneField(
+        Folder, on_delete=models.CASCADE, related_name="demo_manifest"
+    )
+    version = models.PositiveIntegerField()
+    anchor = models.DateField()
+    contents = models.JSONField(default=list, help_text="[model label, pk] pairs")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    # Internal bookkeeping with no API: never resolved through IAM.
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
+
+    def __str__(self):
+        return f"demo v{self.version} in {self.domain}"
+
+
 # actions - 0: create, 1: update, 2: delete
 
 auditlog.register(

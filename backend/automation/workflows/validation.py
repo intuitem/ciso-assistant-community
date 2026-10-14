@@ -24,7 +24,7 @@ from .actions import compute_rows as _compute_rows
 from .actions import validate_action_config as _validate_action_config
 from .actions import validate_read_config as _validate_read_config
 from .context import RESERVED_VARIABLE_KEYS
-from .expressions import referenced_paths
+from core.expressions import referenced_paths
 from .triggers import validate_trigger_config
 
 SECRET_NAME_RE = re.compile(r"\{\{\s*secrets\.(\w+)")
@@ -313,9 +313,9 @@ def validate_graph(version):
             # the target must sit within this workflow's folder subtree, so a
             # subprocess can never reach into an unrelated domain.
             if target is not None and target.id != version.workflow_id:
-                from .actions import _read_scope_folder_ids
+                from core.reads import subtree_folder_ids
 
-                if target.folder_id not in _read_scope_folder_ids(version.folder):
+                if target.folder_id not in subtree_folder_ids(version.folder):
                     errors.append(
                         _error(
                             "subprocess_out_of_scope",
@@ -358,6 +358,13 @@ def _validate_loop_read(node):
             (
                 "loop_source_ambiguous",
                 "A loop reads its own pages or iterates a collection, not both",
+            )
+        ]
+    if read_config.get("mode") == "aggregate":
+        return [
+            (
+                "loop_read_invalid",
+                "A loop pages rows; aggregate mode returns none",
             )
         ]
     probe = WorkflowNode(action_config={**read_config, "type": "read_objects"})
