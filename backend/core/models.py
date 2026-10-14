@@ -2089,6 +2089,17 @@ class LibraryUpdater:
                     ):
                         questions = {}
 
+                    previous_question_urns = (
+                        set(
+                            requirement_node_object.questions.values_list(
+                                "urn", flat=True
+                            )
+                        )
+                        if questions is not None
+                        and requirement_node_object.pk in node_ids_with_questions
+                        else set()
+                    )
+
                     # Sync questions for both new and existing nodes
                     if questions is not None:
                         _sync_questions_from_data(requirement_node_object, questions)
@@ -2102,6 +2113,10 @@ class LibraryUpdater:
                         )
                         if questions is not None
                         else []
+                    )
+                    # Pruned questions cascade-delete their answers before the RA loop.
+                    questions_removed = bool(
+                        previous_question_urns - {q.urn for q in _cached_new_questions}
                     )
 
                     # update answers or score for each ra for the current requirement_node, when relevant
@@ -2219,7 +2234,9 @@ class LibraryUpdater:
                         }
                         new_questions = _cached_new_questions
 
-                        ra_changed = False
+                        ra_changed = questions_removed
+                        if questions_removed:
+                            answers_changed_ca_ids.add(ra.compliance_assessment_id)
                         for q in new_questions:
                             if q.urn not in existing_answers:
                                 # New question: create empty answer
