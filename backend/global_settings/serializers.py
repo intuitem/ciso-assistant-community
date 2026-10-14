@@ -2,6 +2,7 @@ import copy
 import ipaddress
 import re
 import uuid
+from types import MappingProxyType
 
 from django.conf import settings as django_settings
 from django.core.exceptions import ValidationError as DjangoValidationError
@@ -612,6 +613,15 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
         }
     )
 
+    # Flags that only work with others on: turning one on turns those on too, and
+    # turning one of those off turns it off (see utils.apply_flag_requirements).
+    FLAG_REQUIRES = MappingProxyType(
+        {
+            # DPIAs are quick forms: screenings and assessments are responses.
+            "dpias": frozenset({"quick_forms"}),
+        }
+    )
+
     class Meta:
         model = GlobalSettings
         exclude = [
@@ -639,9 +649,16 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
         Custom update logic to handle saving changes to the nested 'value' field,
         iterating directly over the serializer's fields.
         """
+        # Local import: utils imports this module at load time.
+        from global_settings.utils import (
+            apply_flag_requirements,
+            clear_feature_flags_cache,
+        )
+
         current_value_dict = instance.value if isinstance(instance.value, dict) else {}
         value_changed = False
         idp_groups_changed = False
+        turned_off = set()
         new_value_dict = validated_data.get("value", {})
 
         for field_name, field_instance in self.fields.items():
@@ -661,19 +678,23 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
                 new_flag_value = new_value_dict[field_name]
 
                 if current_value_dict.get(source_key) != new_flag_value:
+                    if current_value_dict.get(source_key) and not new_flag_value:
+                        turned_off.add(source_key)
                     current_value_dict[source_key] = new_flag_value
                     value_changed = True
                     if source_key == "idp_groups":
                         idp_groups_changed = True
+
+        before_requirements = dict(current_value_dict)
+        apply_flag_requirements(current_value_dict, turned_off)
+        value_changed = value_changed or current_value_dict != before_requirements
 
         if value_changed:
             instance.value = current_value_dict
             instance.save(update_fields=["value"])
             # Every flags write must invalidate the read cache; the only other
             # write path is PresetExecutor._apply_feature_flags, which does
-            # the same. Local import: utils imports this module at load time.
-            from global_settings.utils import clear_feature_flags_cache
-
+            # the same.
             clear_feature_flags_cache()
 
         return instance

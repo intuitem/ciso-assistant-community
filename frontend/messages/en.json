@@ -7030,7 +7030,7 @@
 	"dpia": "DPIA",
 	"dpias": "DPIAs",
 	"addDpia": "Add DPIA",
-	"dpiasDescription": "DPIA screening and data protection impact assessments built from the processing register. Needs Forms and Requests.",
+	"dpiasDescription": "DPIA screening and data protection impact assessments built from the processing register. Turns on Forms and Requests, which it runs on.",
 	"reasons": "Reasons",
 	"dpiaReasonsHelpText": "Why this DPIA is carried out: the screening criteria met, a mandatory list, or a voluntary assessment",
 	"dpiaRiskMatrixHelpText": "Creates a design-risk and an incident-risk assessment with this matrix. The incident one is seeded with the three feared events",
