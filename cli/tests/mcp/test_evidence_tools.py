@@ -223,6 +223,16 @@ class TestCreateEvidence:
         assert out == f"Error: file is empty: {path}"
         m.assert_no_request()
 
+    def test_unreadable_file_creates_no_evidence(self, tmp_path):
+        path = _file(tmp_path, "alert.png")
+        with (
+            _Mocks() as m,
+            patch.object(Path, "open", side_effect=PermissionError("denied")),
+        ):
+            out = run(write_tools.create_evidence(file_path=str(path)))
+        assert out == "Error in create_evidence: denied"
+        m.assert_no_request()
+
     def test_failed_rollback_is_reported(self, tmp_path):
         path = _file(tmp_path, "alert.png")
         rejected = _response(400, text="too large")

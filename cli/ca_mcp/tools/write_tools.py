@@ -1671,52 +1671,53 @@ async def create_evidence(
             return f"Error: file is empty: {file_path}"
         filename = path.name
 
-        if not folder_id and GLOBAL_FOLDER_ID:
-            folder_id = GLOBAL_FOLDER_ID
+        # Opened before creating the evidence: an unreadable file leaves no record.
+        with path.open("rb") as f:
+            if not folder_id and GLOBAL_FOLDER_ID:
+                folder_id = GLOBAL_FOLDER_ID
 
-        payload = {"name": name or filename}
-        if folder_id:
-            payload["folder"] = resolve_folder_id(folder_id)
-        if description is not None:
-            payload["description"] = description
+            payload = {"name": name or filename}
+            if folder_id:
+                payload["folder"] = resolve_folder_id(folder_id)
+            if description is not None:
+                payload["description"] = description
 
-        res = make_post_request("/evidences/", payload)
-        if res.status_code != 201:
-            return f"Error creating evidence: {res.status_code} - {res.text}"
+            res = make_post_request("/evidences/", payload)
+            if res.status_code != 201:
+                return f"Error creating evidence: {res.status_code} - {res.text}"
 
-        evidence = res.json()
-        evidence_id = evidence.get("id")
+            evidence = res.json()
+            evidence_id = evidence.get("id")
 
-        created = (
-            f"Created evidence: {evidence.get('name')} (ID: {evidence_id}) "
-            f"with attachment {filename} ({_human_size(size)})"
-        )
+            created = (
+                f"Created evidence: {evidence.get('name')} (ID: {evidence_id}) "
+                f"with attachment {filename} ({_human_size(size)})"
+            )
 
-        try:
-            with path.open("rb") as f:
+            try:
                 upload = make_upload_request(
                     f"/evidences/{evidence_id}/upload/", filename, f
                 )
-        except Exception as e:
-            if _attachment_stored(evidence_id):
-                return created
-            return (
-                f"Error uploading attachment, outcome unknown: {e} "
-                f"(evidence {evidence_id} kept: check it before retrying)"
-            )
+            except Exception as e:
+                if _attachment_stored(evidence_id):
+                    return created
+                return (
+                    f"Error uploading attachment, outcome unknown: {e} "
+                    f"(evidence {evidence_id} kept: check it before retrying)"
+                )
 
-        if upload.status_code != 200:
-            return (
-                f"Error uploading attachment: {upload.status_code} - {upload.text}"
-                f"{_rollback_note(evidence_id)}"
-            )
-        if _attachment_stored(evidence_id) is False:
-            return (
-                "Error uploading attachment: the server stored no file"
-                f"{_rollback_note(evidence_id)}"
-            )
+            if upload.status_code != 200:
+                return (
+                    f"Error uploading attachment: {upload.status_code} - {upload.text}"
+                    f"{_rollback_note(evidence_id)}"
+                )
+            if _attachment_stored(evidence_id) is False:
+                return (
+                    "Error uploading attachment: the server stored no file"
+                    f"{_rollback_note(evidence_id)}"
+                )
 
-        return created
+            return created
     except Exception as e:
         return f"Error in create_evidence: {str(e)}"
 
