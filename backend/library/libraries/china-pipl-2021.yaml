@@ -1,0 +1,1388 @@
+urn: urn:intuitem:risk:library:china-pipl-2021
+locale: zh
+ref_id: china-pipl-2021
+name: 中华人民共和国个人信息保护法
+description: |-
+  《中华人民共和国个人信息保护法》（2021年8月20日第十三届全国人民代表大会常务委员会第三十次会议通过，自2021年11月1日起施行）。
+
+  对个人信息处理者、受托人及国家机关设定义务的条款为可评估项；其余条款（立法目的、定义、国家职责、法律责任等）仅作参考。
+
+  来源：http://www.npc.gov.cn/npc/c2/c30834/202108/t20210820_313088.html
+copyright: 全国人民代表大会常务委员会 / Standing Committee of the National People's Congress
+version: 1
+publication_date: '2026-10-09'
+provider: NPC
+packager: intuitem
+translations:
+  en:
+    name: China Personal Information Protection Law (PIPL)
+    description: |-
+      Personal Information Protection Law of the People's Republic of China, adopted on August 20, 2021 by the Standing Committee of the 13th National People's Congress, in force since November 1, 2021.
+
+      Articles placing obligations on personal information processors, entrusted parties and state organs are assessable; the others (purpose, definitions, state duties, legal liability) are kept for context.
+
+      The Chinese text is authoritative. The English text is the NPC's translation, published for reference only.
+
+      Sources: http://www.npc.gov.cn/npc/c2/c30834/202108/t20210820_313088.html ; http://en.npc.gov.cn.cdurl.cn/2021-12/29/c_694559.htm
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:china-pipl-2021
+    ref_id: PIPL
+    name: 中华人民共和国个人信息保护法
+    description: |-
+      《中华人民共和国个人信息保护法》（2021年8月20日第十三届全国人民代表大会常务委员会第三十次会议通过，自2021年11月1日起施行）。
+
+      对个人信息处理者、受托人及国家机关设定义务的条款为可评估项；其余条款（立法目的、定义、国家职责、法律责任等）仅作参考。
+
+      来源：http://www.npc.gov.cn/npc/c2/c30834/202108/t20210820_313088.html
+    translations:
+      en:
+        name: China Personal Information Protection Law (PIPL)
+        description: |-
+          Personal Information Protection Law of the People's Republic of China, adopted on August 20, 2021 by the Standing Committee of the 13th National People's Congress, in force since November 1, 2021.
+
+          Articles placing obligations on personal information processors, entrusted parties and state organs are assessable; the others (purpose, definitions, state duties, legal liability) are kept for context.
+
+          The Chinese text is authoritative. The English text is the NPC's translation, published for reference only.
+
+          Sources: http://www.npc.gov.cn/npc/c2/c30834/202108/t20210820_313088.html ; http://en.npc.gov.cn.cdurl.cn/2021-12/29/c_694559.htm
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-i
+      assessable: false
+      depth: 1
+      ref_id: I
+      name: 总则
+      translations:
+        en:
+          name: General Provisions
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-i
+      ref_id: Art. 1
+      description: 为了保护个人信息权益，规范个人信息处理活动，促进个人信息合理利用，根据宪法，制定本法。
+      translations:
+        en:
+          description: This Law is enacted in accordance with the Constitution for the purposes of protecting
+            the rights and interests on personal information, regulating personal information processing
+            activities, and promoting reasonable use of personal information.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-i
+      ref_id: Art. 2
+      description: 自然人的个人信息受法律保护，任何组织、个人不得侵害自然人的个人信息权益。
+      translations:
+        en:
+          description: The personal information of natural persons shall be protected by law. No organization
+            or individual may infringe upon natural persons' rights and interests on their personal information.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-i
+      ref_id: Art. 3
+      description: |-
+        在中华人民共和国境内处理自然人个人信息的活动，适用本法。
+
+        在中华人民共和国境外处理中华人民共和国境内自然人个人信息的活动，有下列情形之一的，也适用本法：
+
+        （一）以向境内自然人提供产品或者服务为目的；
+
+        （二）分析、评估境内自然人的行为；
+
+        （三）法律、行政法规规定的其他情形。
+      translations:
+        en:
+          description: |-
+            This Law shall apply to the processing of personal information of natural persons within the territory of the People's Republic of China.
+
+            This Law shall also apply to the processing outside the territory of the People's Republic of China of the personal information of natural persons within the territory of the People's Republic of China, under any of the following circumstances:
+
+            (1) for the purpose of providing products or services for natural persons inside the People's Republic of China;
+
+            (2) analyzing or evaluating the behaviors of natural persons within the territory of the People's Republic of China; and
+
+            (3) any other circumstance as provided by any law or administrative regulation.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-i
+      ref_id: Art. 4
+      description: |-
+        个人信息是以电子或者其他方式记录的与已识别或者可识别的自然人有关的各种信息，不包括匿名化处理后的信息。
+
+        个人信息的处理包括个人信息的收集、存储、使用、加工、传输、提供、公开、删除等。
+      translations:
+        en:
+          description: |-
+            "Personal information" refers to various information related to an identified or identifiable natural person recorded electronically or by other means, but does not include anonymized information.
+
+            Personal information processing includes personal information collection, storage, use, processing, transmission, provision, disclosure and deletion, among others.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-i
+      ref_id: Art. 5
+      description: 处理个人信息应当遵循合法、正当、必要和诚信原则，不得通过误导、欺诈、胁迫等方式处理个人信息。
+      translations:
+        en:
+          description: Personal information shall be processed according to law when it is necessary,
+            with justified reason, and in good faith, and the processing may not involve misguidance,
+            fraud, coercion, and the like.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-i
+      ref_id: Art. 6
+      description: |-
+        处理个人信息应当具有明确、合理的目的，并应当与处理目的直接相关，采取对个人权益影响最小的方式。
+
+        收集个人信息，应当限于实现处理目的的最小范围，不得过度收集个人信息。
+      translations:
+        en:
+          description: |-
+            Personal information processing shall be based on explicit and reasonable purposes and directly related to those purposes, and shall exert the minimum impacts on the rights and interests of individuals.
+
+            The collection of personal information shall be limited to the minimum scope required by the purpose of processing, and personal information may not be collected excessively.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-i
+      ref_id: Art. 7
+      description: 处理个人信息应当遵循公开、透明原则，公开个人信息处理规则，明示处理的目的、方式和范围。
+      translations:
+        en:
+          description: The principles of openness and transparency shall be observed in the processing
+            of personal information, the rules for processing personal information shall be disclosed,
+            and the purposes, means, and scope of processing shall be explicitly indicated.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-i
+      ref_id: Art. 8
+      description: 处理个人信息应当保证个人信息的质量，避免因个人信息不准确、不完整对个人权益造成不利影响。
+      translations:
+        en:
+          description: The quality of personal information shall be guaranteed in personal information
+            processing, to avoid adverse impacts on the rights and interests of individuals caused by
+            inaccurate and incomplete personal information.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-i
+      ref_id: Art. 9
+      description: 个人信息处理者应当对其个人信息处理活动负责，并采取必要措施保障所处理的个人信息的安全。
+      translations:
+        en:
+          description: Personal information processors shall be responsible for their personal information
+            processing activities and take necessary measures to ensure the security of the personal information
+            they process.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-i
+      ref_id: Art. 10
+      description: 任何组织、个人不得非法收集、使用、加工、传输他人个人信息，不得非法买卖、提供或者公开他人个人信息；不得从事危害国家安全、公共利益的个人信息处理活动。
+      translations:
+        en:
+          description: No organization or individual shall illegally collect, use, process, or transmit
+            the personal information of other persons, or illegally trade, provide or disclose the personal
+            information of other persons, or engage in personal information processing activities that
+            endanger national security or harm public interests.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-11
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-i
+      ref_id: Art. 11
+      description: 国家建立健全个人信息保护制度，预防和惩治侵害个人信息权益的行为，加强个人信息保护宣传教育，推动形成政府、企业、相关社会组织、公众共同参与个人信息保护的良好环境。
+      translations:
+        en:
+          description: The state shall establish and improve the personal information protection system
+            to prevent and punish infringements upon the rights and interests on personal information,
+            strengthen publicity and education on personal information protection, and promote a favorable
+            environment for the government, enterprises, relevant industry organizations, and the public
+            to jointly participate in personal information protection.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-12
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-i
+      ref_id: Art. 12
+      description: 国家积极参与个人信息保护国际规则的制定，促进个人信息保护方面的国际交流与合作，推动与其他国家、地区、国际组织之间的个人信息保护规则、标准等互认。
+      translations:
+        en:
+          description: The state will actively engage in the development of international rules on personal
+            information protection, promote the international exchanges and cooperation in personal information
+            protection, and encourage the mutual recognition of personal information protection rules
+            and standards, among others, with other countries, regions, and international organizations.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-ii
+      assessable: false
+      depth: 1
+      ref_id: II
+      name: 个人信息处理规则
+      translations:
+        en:
+          name: Personal Information Processing Rules
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-ii-section-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-ii
+      ref_id: II.1
+      name: 一般规定
+      translations:
+        en:
+          name: General Rules
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-13
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-ii-section-1
+      ref_id: Art. 13
+      description: |-
+        符合下列情形之一的，个人信息处理者方可处理个人信息：
+
+        （一）取得个人的同意；
+
+        （二）为订立、履行个人作为一方当事人的合同所必需，或者按照依法制定的劳动规章制度和依法签订的集体合同实施人力资源管理所必需；
+
+        （三）为履行法定职责或者法定义务所必需；
+
+        （四）为应对突发公共卫生事件，或者紧急情况下为保护自然人的生命健康和财产安全所必需；
+
+        （五）为公共利益实施新闻报道、舆论监督等行为，在合理的范围内处理个人信息；
+
+        （六）依照本法规定在合理的范围内处理个人自行公开或者其他已经合法公开的个人信息；
+
+        （七）法律、行政法规规定的其他情形。
+
+        依照本法其他有关规定，处理个人信息应当取得个人同意，但是有前款第二项至第七项规定情形的，不需取得个人同意。
+      translations:
+        en:
+          description: |-
+            A personal information processor can process personal information of an individual only if one of the following circumstances exists:
+
+            (1) the individual's consent has been obtained;
+
+            (2) the processing is necessary for the conclusion or performance of a contract in which the individual is a party, or necessary for human resources management in accordance with the labor rules and regulations established in accordance with the law and the collective contracts signed in accordance with the law;
+
+            (3) the processing is necessary for the performance of statutory duties or obligations;
+
+            (4) the processing is necessary for the response to public health emergencies, or for the protection of life, health, and property safety of natural persons in emergencies;
+
+            (5) the personal information is reasonably processed for news reporting, media supervision, and other activities conducted in the public interest;
+
+            (6) the personal information disclosed by the individual himself or other legally disclosed personal information of the individual is reasonably processed in accordance with this Law; and
+
+            (7) other circumstances as provided by laws or administrative regulations.
+
+            Individual consent shall be obtained for processing personal information if any other relevant provisions of this Law so provide, except under the circumstances specified in Subparagraphs (2) to (7) of the preceding paragraph.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-14
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-ii-section-1
+      ref_id: Art. 14
+      description: |-
+        基于个人同意处理个人信息的，该同意应当由个人在充分知情的前提下自愿、明确作出。法律、行政法规规定处理个人信息应当取得个人单独同意或者书面同意的，从其规定。
+
+        个人信息的处理目的、处理方式和处理的个人信息种类发生变更的，应当重新取得个人同意。
+      translations:
+        en:
+          description: |-
+            Where personal information processing is based on individual consent, the individual consent shall be voluntary, explicit, and fully informed. Where any other law or administrative regulation provides that an individual's separate consent or written consent must be obtained for processing personal information, such provisions shall apply.
+
+            In the case of any change of the purposes or means of personal information processing, or the category of processed personal information, a new consent shall be obtained from the individual.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-15
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-ii-section-1
+      ref_id: Art. 15
+      description: |-
+        基于个人同意处理个人信息的，个人有权撤回其同意。个人信息处理者应当提供便捷的撤回同意的方式。
+
+        个人撤回同意，不影响撤回前基于个人同意已进行的个人信息处理活动的效力。
+      translations:
+        en:
+          description: |-
+            Where personal information processing is based on individual consent, an individual shall have the right to withdraw his consent. Personal information processors shall provide convenient ways for individuals to withdraw their consents.
+
+            The withdrawal of consent shall not affect the validity of the processing activities conducted based on consent before it is withdrawn.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-16
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-ii-section-1
+      ref_id: Art. 16
+      description: 个人信息处理者不得以个人不同意处理其个人信息或者撤回同意为由，拒绝提供产品或者服务；处理个人信息属于提供产品或者服务所必需的除外。
+      translations:
+        en:
+          description: A personal information processor shall not refuse to provide products or services
+            for an individual on the grounds that the individual withholds his consent for the processing
+            of his personal information or has withdrawn his consent for the processing of personal information,
+            except where the processing of personal information is necessary for the provision of products
+            or services.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-17
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-ii-section-1
+      ref_id: Art. 17
+      description: |-
+        个人信息处理者在处理个人信息前，应当以显著方式、清晰易懂的语言真实、准确、完整地向个人告知下列事项：
+
+        （一）个人信息处理者的名称或者姓名和联系方式；
+
+        （二）个人信息的处理目的、处理方式，处理的个人信息种类、保存期限；
+
+        （三）个人行使本法规定权利的方式和程序；
+
+        （四）法律、行政法规规定应当告知的其他事项。
+
+        前款规定事项发生变更的，应当将变更部分告知个人。
+
+        个人信息处理者通过制定个人信息处理规则的方式告知第一款规定事项的，处理规则应当公开，并且便于查阅和保存。
+      translations:
+        en:
+          description: |-
+            A personal information processor shall, before processing personal information, truthfully, accurately and fully inform an individual of the following matters in a easy-to-notice manner and in clear and easy-to-understand language:
+
+            (1) the name and contact information of the personal information processor;
+
+            (2) the purposes and means of personal information processing, and the categories and storage periods of the personal information to be processed;
+
+            (3) the methods and procedures for the individual to exercise his rights as provided in this Law; and
+
+            (4) other matters that the individual should be notified of as provided by laws and administrative regulations.
+
+            Where any matter as set forth in the preceding paragraph changes, the individual shall be informed of the change.
+
+            Where the personal information processor informs an individual of the matters specified in the first paragraph by formulating personal information processing rules, the processing rules shall be made public and be easy to consult and save.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-18
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-ii-section-1
+      ref_id: Art. 18
+      description: |-
+        个人信息处理者处理个人信息，有法律、行政法规规定应当保密或者不需要告知的情形的，可以不向个人告知前条第一款规定的事项。
+
+        紧急情况下为保护自然人的生命健康和财产安全无法及时向个人告知的，个人信息处理者应当在紧急情况消除后及时告知。
+      translations:
+        en:
+          description: |-
+            When processing personal information, personal information processors are permitted not to inform individuals of the matters specified in the first paragraph of the preceding article where laws or administrative regulations require confidentiality or provide no requirement for such notification.
+
+            Where it is impossible to notify individuals in a timely manner in a bid to protect natural persons' life, health and property safety in case of emergency, the personal information processors shall notify them without delay after the emergency is removed.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-19
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-ii-section-1
+      ref_id: Art. 19
+      description: 除法律、行政法规另有规定外，个人信息的保存期限应当为实现处理目的所必要的最短时间。
+      translations:
+        en:
+          description: Except as otherwise provided by laws and administrative regulations, the storage
+            period of personal information shall be the minimum time necessary to achieve the purpose
+            of processing.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-20
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-ii-section-1
+      ref_id: Art. 20
+      description: |-
+        两个以上的个人信息处理者共同决定个人信息的处理目的和处理方式的，应当约定各自的权利和义务。但是，该约定不影响个人向其中任何一个个人信息处理者要求行使本法规定的权利。
+
+        个人信息处理者共同处理个人信息，侵害个人信息权益造成损害的，应当依法承担连带责任。
+      translations:
+        en:
+          description: |-
+            Where two or more personal information processors jointly determine the purposes and means of processing certain personal information, they shall reach an agreement on their respective rights and obligations in processing the personal information. However, this agreement shall not affect an individual's request to any one of them to exercise his rights as provided in this Law.
+
+            Where, in jointly processing certain personal information, a processor infringes the rights and interests on personal information and causes damages, other personal information processors shall bear joint and several liability in accordance with law.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-21
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-ii-section-1
+      ref_id: Art. 21
+      description: |-
+        个人信息处理者委托处理个人信息的，应当与受托人约定委托处理的目的、期限、处理方式、个人信息的种类、保护措施以及双方的权利和义务等，并对受托人的个人信息处理活动进行监督。
+
+        受托人应当按照约定处理个人信息，不得超出约定的处理目的、处理方式等处理个人信息；委托合同不生效、无效、被撤销或者终止的，受托人应当将个人信息返还个人信息处理者或者予以删除，不得保留。
+
+        未经个人信息处理者同意，受托人不得转委托他人处理个人信息。
+      translations:
+        en:
+          description: |-
+            A personal information processor entrusting the processing of certain personal information to a party shall reach an agreement with the entrusted party on the purposes, period and means of processing, the categories of personal information to be processed and the protection measures, as well as the rights and obligations of both parties, among others, and shall supervise the personal information processing activities of the entrusted party.
+
+            The entrusted party shall process personal information in accordance with the agreement and may not process personal information beyond the purposes, means and other conditions as agreed upon. Where the entrustment contract has not taken effect, or is invalid, or is revoked or terminated, the entrusted party shall return the personal information in question to the personal information processor or delete it and shall not retain the personal information.
+
+            Without the consent of the personal information processor, the entrusted party may not sub-contract the processing of personal information to any other party.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-22
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-ii-section-1
+      ref_id: Art. 22
+      description: 个人信息处理者因合并、分立、解散、被宣告破产等原因需要转移个人信息的，应当向个人告知接收方的名称或者姓名和联系方式。接收方应当继续履行个人信息处理者的义务。接收方变更原先的处理目的、处理方式的，应当依照本法规定重新取得个人同意。
+      translations:
+        en:
+          description: Where a personal information processor needs to transfer personal information due
+            to a merger, division, dissolution, or bankruptcy or for other reasons, the processor shall
+            inform the individuals of the name and contact information of the recipient of the transferred
+            personal information. The recipient shall continue to perform the obligations of the said
+            personal information processor. Any change of the original purposes or means of processing
+            by the recipient shall be subject to individual consent in accordance with this Law.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-23
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-ii-section-1
+      ref_id: Art. 23
+      description: 个人信息处理者向其他个人信息处理者提供其处理的个人信息的，应当向个人告知接收方的名称或者姓名、联系方式、处理目的、处理方式和个人信息的种类，并取得个人的单独同意。接收方应当在上述处理目的、处理方式和个人信息的种类等范围内处理个人信息。接收方变更原先的处理目的、处理方式的，应当依照本法规定重新取得个人同意。
+      translations:
+        en:
+          description: To provide personal information for any other processor, a personal information
+            processor shall inform the individuals of the recipient's name and contact information, the
+            purposes and means of processing and the categories of personal information to be processed,
+            and shall obtain the individuals' separate consent. The recipient shall process personal information
+            within the scope of the purposes, means, and categories of personal information mentioned
+            above. Any change of the purposes or means of processing by the recipient shall be subject
+            to individual consent in accordance with this Law.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-24
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-ii-section-1
+      ref_id: Art. 24
+      description: |-
+        个人信息处理者利用个人信息进行自动化决策，应当保证决策的透明度和结果公平、公正，不得对个人在交易价格等交易条件上实行不合理的差别待遇。
+
+        通过自动化决策方式向个人进行信息推送、商业营销，应当同时提供不针对其个人特征的选项，或者向个人提供便捷的拒绝方式。
+
+        通过自动化决策方式作出对个人权益有重大影响的决定，个人有权要求个人信息处理者予以说明，并有权拒绝个人信息处理者仅通过自动化决策的方式作出决定。
+      translations:
+        en:
+          description: |-
+            Personal information processors using personal information for automated decision making shall ensure the transparency of the decision making and the fairness and impartiality of the results, and may not apply unreasonable differential treatment to individuals in terms of transaction prices and other transaction conditions.
+
+            Information push and commercial marketing to individuals based on automated decision making shall be simultaneously accompanied by options not specific to their personal characteristics or with convenient means for individuals to refuse.
+
+            Where a decision that may have a significant impact on an individual's rights and interests is made through automated decision making, the individual shall have the right to request clarification from the personal information processor and the right to refuse the processor for making the decision only through automated decision making.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-25
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-ii-section-1
+      ref_id: Art. 25
+      description: 个人信息处理者不得公开其处理的个人信息，取得个人单独同意的除外。
+      translations:
+        en:
+          description: Personal information processors shall not disclose the personal information they
+            process, except where separate consents has been obtained from the individuals.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-26
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-ii-section-1
+      ref_id: Art. 26
+      description: 在公共场所安装图像采集、个人身份识别设备，应当为维护公共安全所必需，遵守国家有关规定，并设置显著的提示标识。所收集的个人图像、身份识别信息只能用于维护公共安全的目的，不得用于其他目的；取得个人单独同意的除外。
+      translations:
+        en:
+          description: Image collection and personal identification equipment in public places shall be
+            installed only when it is necessary for the purpose of maintaining public security, and shall
+            be installed in compliance with the relevant provisions of the state and with prominent reminders.
+            The personal images and identification information collected can only be used for the purpose
+            of maintaining public security and, unless the individuals' separate consents are obtained,
+            shall not be used for any other purpose.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-27
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-ii-section-1
+      ref_id: Art. 27
+      description: 个人信息处理者可以在合理的范围内处理个人自行公开或者其他已经合法公开的个人信息；个人明确拒绝的除外。个人信息处理者处理已公开的个人信息，对个人权益有重大影响的，应当依照本法规定取得个人同意。
+      translations:
+        en:
+          description: A personal information processor may reasonably process the personal information
+            disclosed by an individual himself or other legally disclosed personal information, except
+            where the individual expressly refuses. Where the processing of disclosed personal information
+            may have a significant impact on an individual's rights and interests, the personal information
+            processors shall first obtain the individual's consent in accordance with the provisions of
+            this Law.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-ii-section-2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-ii
+      ref_id: II.2
+      name: 敏感个人信息的处理规则
+      translations:
+        en:
+          name: Rules on Processing Sensitive Personal Information
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-28
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-ii-section-2
+      ref_id: Art. 28
+      description: |-
+        敏感个人信息是一旦泄露或者非法使用，容易导致自然人的人格尊严受到侵害或者人身、财产安全受到危害的个人信息，包括生物识别、宗教信仰、特定身份、医疗健康、金融账户、行踪轨迹等信息，以及不满十四周岁未成年人的个人信息。
+
+        只有在具有特定的目的和充分的必要性，并采取严格保护措施的情形下，个人信息处理者方可处理敏感个人信息。
+      translations:
+        en:
+          description: |-
+            "Sensitive personal information" is personal information that once leaked or illegally used, may easily lead to the infringement of the personal dignity of a natural person or may endanger his personal safety or property, including information such as biometrics, religious belief, specific identity, medical health status, financial accounts, and the person's whereabouts, as well as the personal information of a minor under the age of 14 years.
+
+            Personal information processors can process sensitive personal information only when there is a specific purpose and when it is of necessity, under the circumstance where strict protective measures are taken.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-29
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-ii-section-2
+      ref_id: Art. 29
+      description: 处理敏感个人信息应当取得个人的单独同意；法律、行政法规规定处理敏感个人信息应当取得书面同意的，从其规定。
+      translations:
+        en:
+          description: For the processing of sensitive personal information, individual's separate consent
+            shall be obtained. Where other laws or administrative regulations provide that written consent
+            shall be obtained for the processing of sensitive personal information, such provisions shall
+            prevail.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-30
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-ii-section-2
+      ref_id: Art. 30
+      description: 个人信息处理者处理敏感个人信息的，除本法第十七条第一款规定的事项外，还应当向个人告知处理敏感个人信息的必要性以及对个人权益的影响；依照本法规定可以不向个人告知的除外。
+      translations:
+        en:
+          description: In addition to the matters specified in the first paragraph of Article 17 of this
+            Law, a processor processing sensitive personal information shall notify an individual of the
+            necessity of processing his sensitive personal information and the impact it has on his rights
+            and interests, except where such notification is not required in accordance with the provisions
+            of this Law.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-31
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-ii-section-2
+      ref_id: Art. 31
+      description: |-
+        个人信息处理者处理不满十四周岁未成年人个人信息的，应当取得未成年人的父母或者其他监护人的同意。
+
+        个人信息处理者处理不满十四周岁未成年人个人信息的，应当制定专门的个人信息处理规则。
+      translations:
+        en:
+          description: |-
+            To process the personal information of minors under the age of 14, personal information processors shall obtain the consent of the parents or other guardians of the minors.
+
+            Personal information processors processing the personal information of minors under the age of 14 shall develop special rules for processing such personal information.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-32
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-ii-section-2
+      ref_id: Art. 32
+      description: 法律、行政法规对处理敏感个人信息规定应当取得相关行政许可或者作出其他限制的，从其规定。
+      translations:
+        en:
+          description: Where other laws or administrative regulations provide that relevant administrative
+            permit shall be obtained for the processing of sensitive personal information or impose other
+            restrictions, such provisions shall prevail.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-ii-section-3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-ii
+      ref_id: II.3
+      name: 国家机关处理个人信息的特别规定
+      translations:
+        en:
+          name: Special Provisions on the Processing of Personal Information by State Organs
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-33
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-ii-section-3
+      ref_id: Art. 33
+      description: 国家机关处理个人信息的活动，适用本法；本节有特别规定的，适用本节规定。
+      translations:
+        en:
+          description: This Law shall apply to the processing of personal information by state organs;
+            where there are special provisions in this Section, the provisions of this Section shall prevail.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-34
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-ii-section-3
+      ref_id: Art. 34
+      description: 国家机关为履行法定职责处理个人信息，应当依照法律、行政法规规定的权限、程序进行，不得超出履行法定职责所必需的范围和限度。
+      translations:
+        en:
+          description: When state organs process personal information in order to perform their statutory
+            duties, they shall act in accordance with the authority and procedures prescribed by laws
+            and administrative regulations, and shall not exceed the scope and limits necessary to perform
+            their statutory duties.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-35
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-ii-section-3
+      ref_id: Art. 35
+      description: 国家机关为履行法定职责处理个人信息，应当依照本法规定履行告知义务；有本法第十八条第一款规定的情形，或者告知将妨碍国家机关履行法定职责的除外。
+      translations:
+        en:
+          description: When state organs process personal information in order to perform their statutory
+            duties, they shall fulfill the obligation of notification in accordance with the provisions
+            of this Law, except under the circumstances specified in the first paragraph of Article 18
+            of this Law or where notification will hinder the state organs from performing their statutory
+            duties.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-36
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-ii-section-3
+      ref_id: Art. 36
+      description: 国家机关处理的个人信息应当在中华人民共和国境内存储；确需向境外提供的，应当进行安全评估。安全评估可以要求有关部门提供支持与协助。
+      translations:
+        en:
+          description: Personal information processed by state organs shall be stored within the territory
+            of the People's Republic of China. A security assessment shall be conducted where it is truly
+            necessary to provide such information for any party outside of the territory of the People's
+            Republic of China. In the security assessment the relevant departments shall provide support
+            and assistance if so requested.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-37
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-ii-section-3
+      ref_id: Art. 37
+      description: 法律、法规授权的具有管理公共事务职能的组织为履行法定职责处理个人信息，适用本法关于国家机关处理个人信息的规定。
+      translations:
+        en:
+          description: Where organizations authorized by laws or regulations with the function of administering
+            public affairs process personal information in order to fulfill their statutory duties, the
+            provisions herein on the processing of personal information by state organs shall apply.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-iii
+      assessable: false
+      depth: 1
+      ref_id: III
+      name: 个人信息跨境提供的规则
+      translations:
+        en:
+          name: Rules on Provision of Personal Information Across Border
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-38
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-iii
+      ref_id: Art. 38
+      description: |-
+        个人信息处理者因业务等需要，确需向中华人民共和国境外提供个人信息的，应当具备下列条件之一：
+
+        （一）依照本法第四十条的规定通过国家网信部门组织的安全评估；
+
+        （二）按照国家网信部门的规定经专业机构进行个人信息保护认证；
+
+        （三）按照国家网信部门制定的标准合同与境外接收方订立合同，约定双方的权利和义务；
+
+        （四）法律、行政法规或者国家网信部门规定的其他条件。
+
+        中华人民共和国缔结或者参加的国际条约、协定对向中华人民共和国境外提供个人信息的条件等有规定的，可以按照其规定执行。
+
+        个人信息处理者应当采取必要措施，保障境外接收方处理个人信息的活动达到本法规定的个人信息保护标准。
+      translations:
+        en:
+          description: |-
+            A personal information processor that truly needs to provide personal information for a party outside the territory of the People's Republic of China for business sake or other reasons, shall meet one of the following requirements:
+
+            (1) passing the security assessment organized by the national cyberspace department in accordance with Article 40 of this Law;
+
+            (2) obtaining personal information protection certification from the relevant specialized institution according to the provisions issued by the national cyberspace department;
+
+            (3) concluding a contract stipulating both parties' rights and obligations with the overseas recipient in accordance with the standard contract formulated by the national cyberspace department; and
+
+            (4) meeting other conditions set forth by laws and administrative regulations and by the national cyberspace department.
+
+            Where an international treaty or agreement that the People's Republic of China has concluded or acceded to stipulates conditions for providing personal information for a party outside the territory of the People's Republic of China, such stipulations may be followed.
+
+            The personal information processor shall take necessary measures to ensure that the personal information processing activities of the overseas recipient meet the personal information protection standards set forth in this Law.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-39
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-iii
+      ref_id: Art. 39
+      description: 个人信息处理者向中华人民共和国境外提供个人信息的，应当向个人告知境外接收方的名称或者姓名、联系方式、处理目的、处理方式、个人信息的种类以及个人向境外接收方行使本法规定权利的方式和程序等事项，并取得个人的单独同意。
+      translations:
+        en:
+          description: Where a personal information processor provides personal information for any party
+            outside the territory of the People's Republic of China, the processor shall inform the individuals
+            of the overseas recipient's name and contact information, the purposes and means of processing,
+            the categories of personal information to be processed, as well as the methods and procedures
+            for the individuals to exercise their rights as provided in this Law over the overseas recipient,
+            etc., and shall obtain individual's separate consent.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-40
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-iii
+      ref_id: Art. 40
+      description: 关键信息基础设施运营者和处理个人信息达到国家网信部门规定数量的个人信息处理者，应当将在中华人民共和国境内收集和产生的个人信息存储在境内。确需向境外提供的，应当通过国家网信部门组织的安全评估；法律、行政法规和国家网信部门规定可以不进行安全评估的，从其规定。
+      translations:
+        en:
+          description: Critical information infrastructure operators and the personal information processors
+            that process personal information up to the amount prescribed by the national cyberspace department
+            shall store domestically the personal information collected and generated within the territory
+            of the People's Republic of China. Where it is truly necessary to provide the information
+            for a party outside the territory of the People's Republic of China, the matter shall be subjected
+            to security assessment organized by the national cyberspace department. Where laws, administrative
+            regulations, or the provisions issued by the national cyberspace department provide that security
+            assessment is not necessary, such provisions shall prevail.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-41
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-iii
+      ref_id: Art. 41
+      description: 中华人民共和国主管机关根据有关法律和中华人民共和国缔结或者参加的国际条约、协定，或者按照平等互惠原则，处理外国司法或者执法机构关于提供存储于境内个人信息的请求。非经中华人民共和国主管机关批准，个人信息处理者不得向外国司法或者执法机构提供存储于中华人民共和国境内的个人信息。
+      translations:
+        en:
+          description: The competent authorities of the People's Republic of China shall handle foreign
+            judicial or law enforcement authorities' requests for personal information stored within China
+            in accordance with relevant laws and the international treaties and agreements concluded or
+            acceded to by the People's Republic of China, or under the principle of equality and reciprocity.
+            Without the approval of the competent authorities of the People's Republic of China, no organization
+            or individual shall provide data stored in the territory of the People's Republic of China
+            for any foreign judicial or law enforcement authority.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-42
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-iii
+      ref_id: Art. 42
+      description: 境外的组织、个人从事侵害中华人民共和国公民的个人信息权益，或者危害中华人民共和国国家安全、公共利益的个人信息处理活动的，国家网信部门可以将其列入限制或者禁止个人信息提供清单，予以公告，并采取限制或者禁止向其提供个人信息等措施。
+      translations:
+        en:
+          description: Where overseas organizations or individuals engage in personal information processing
+            activities, which infringe upon the rights and interests of citizens of the People's Republic
+            of China on personal information or endanger the national security or public interests of
+            the People's Republic of China, the national cyberspace department may include them in a list
+            of restricted or prohibited recipients of personal information, publicize the list, and take
+            measures such as restricting or prohibiting the provision of personal information for such
+            organizations and individuals.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-43
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-iii
+      ref_id: Art. 43
+      description: 任何国家或者地区在个人信息保护方面对中华人民共和国采取歧视性的禁止、限制或者其他类似措施的，中华人民共和国可以根据实际情况对该国家或者地区对等采取措施。
+      translations:
+        en:
+          description: Where any country or region adopts any prohibitive, restrictive or other similar
+            discriminatory measures against the People's Republic of China in terms of personal information
+            protection, the People's Republic of China may take countermeasures against the aforesaid
+            country or region based on actual situations.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-iv
+      assessable: false
+      depth: 1
+      ref_id: IV
+      name: 个人在个人信息处理活动中的权利
+      translations:
+        en:
+          name: Individuals' Rights in Personal Information Processing Activities
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-44
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-iv
+      ref_id: Art. 44
+      description: 个人对其个人信息的处理享有知情权、决定权，有权限制或者拒绝他人对其个人信息进行处理；法律、行政法规另有规定的除外。
+      translations:
+        en:
+          description: Individuals shall have the right to be informed, the right to make decisions on
+            the processing of their personal information, and the right to restrict or refuse the processing
+            of their personal information by others, except as otherwise provided by laws or administrative
+            regulations.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-45
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-iv
+      ref_id: Art. 45
+      description: |-
+        个人有权向个人信息处理者查阅、复制其个人信息；有本法第十八条第一款、第三十五条规定情形的除外。
+
+        个人请求查阅、复制其个人信息的，个人信息处理者应当及时提供。
+
+        个人请求将个人信息转移至其指定的个人信息处理者，符合国家网信部门规定条件的，个人信息处理者应当提供转移的途径。
+      translations:
+        en:
+          description: |-
+            Individuals shall have the right to consult and duplicate their personal information from personal information processors, except under circumstances as set out in the first paragraph of Article 18 and Article 35 of this Law.
+
+            Where an individual requests the consultation or duplication of his personal information, the requested personal information processor shall provide such information in a timely manner.
+
+            Where an individual requests the transfer of his personal information to a designated personal information processor, which meets the requirements of national cyberspace department for transferring personal information , the requested personal information processor shall provide means for the transfer.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-46
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-iv
+      ref_id: Art. 46
+      description: |-
+        个人发现其个人信息不准确或者不完整的，有权请求个人信息处理者更正、补充。
+
+        个人请求更正、补充其个人信息的，个人信息处理者应当对其个人信息予以核实，并及时更正、补充。
+      translations:
+        en:
+          description: |-
+            Where an individual discovers that his personal information is incorrect or incomplete, he shall have the right to request the personal information processors to rectify or supplement relevant information.
+
+            Where an individual requests the rectification or supplementation of his personal information, the personal information processors shall verify the information in question, and make rectification or supplementation in a timely manner.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-47
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-iv
+      ref_id: Art. 47
+      description: |-
+        有下列情形之一的，个人信息处理者应当主动删除个人信息；个人信息处理者未删除的，个人有权请求删除：
+
+        （一）处理目的已实现、无法实现或者为实现处理目的不再必要；
+
+        （二）个人信息处理者停止提供产品或者服务，或者保存期限已届满；
+
+        （三）个人撤回同意；
+
+        （四）个人信息处理者违反法律、行政法规或者违反约定处理个人信息；
+
+        （五）法律、行政法规规定的其他情形。
+
+        法律、行政法规规定的保存期限未届满，或者删除个人信息从技术上难以实现的，个人信息处理者应当停止除存储和采取必要的安全保护措施之外的处理。
+      translations:
+        en:
+          description: |-
+            In any of the following circumstances, a personal information processor shall take the initiative to erase personal information, and an individual has the right to request the deletion of his personal information if the personal information processor fails to erase the information:
+
+            (1) the purposes of processing have been achieved or cannot be achieved, or such information is no longer necessary for achieving the purposes of processing;
+
+            (2) the personal information processor ceases to provide products or services, or the storage period has expired;
+
+            (3) the individual withdraws his consent;
+
+            (4) the personal information processor processes personal information in violation of laws, administrative regulations, or agreements; or
+
+            (5) other circumstances as provided by laws and administrative regulations.
+
+            Where the storage period provided by any law or administrative regulation has not expired, or it is difficult to erase personal information technically, the personal information processor shall cease the processing of personal information other than storing and taking necessary security protection measures for such information.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-48
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-iv
+      ref_id: Art. 48
+      description: 个人有权要求个人信息处理者对其个人信息处理规则进行解释说明。
+      translations:
+        en:
+          description: An individuals has the right to request a personal information processor to interpret
+            the personal information processing rules developed by the latter.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-49
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-iv
+      ref_id: Art. 49
+      description: 自然人死亡的，其近亲属为了自身的合法、正当利益，可以对死者的相关个人信息行使本章规定的查阅、复制、更正、删除等权利；死者生前另有安排的除外。
+      translations:
+        en:
+          description: The close relatives of a deceased natural person may, for their own legal and legitimate
+            interests, exercise the rights to handle the personal information of the deceased, such as
+            consultation, duplication, rectification, and deletion, as provided in this Chapter, except
+            as otherwise arranged by the deceased before death.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-50
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-iv
+      ref_id: Art. 50
+      description: |-
+        个人信息处理者应当建立便捷的个人行使权利的申请受理和处理机制。拒绝个人行使权利的请求的，应当说明理由。
+
+        个人信息处理者拒绝个人行使权利的请求的，个人可以依法向人民法院提起诉讼。
+      translations:
+        en:
+          description: |-
+            A personal information processor shall establish the mechanism for receiving and handling individuals' requests for exercising their rights. Where an individual's request is rejected, the reasons therefor shall be given.
+
+            Where an individual's request to exercise his rights is rejected by a personal information processor, the individual may file a lawsuit with the people's court in accordance with the law.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-v
+      assessable: false
+      depth: 1
+      ref_id: V
+      name: 个人信息处理者的义务
+      translations:
+        en:
+          name: Obligations of Personal Information Processors
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-51
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-v
+      ref_id: Art. 51
+      description: |-
+        个人信息处理者应当根据个人信息的处理目的、处理方式、个人信息的种类以及对个人权益的影响、可能存在的安全风险等，采取下列措施确保个人信息处理活动符合法律、行政法规的规定，并防止未经授权的访问以及个人信息泄露、篡改、丢失：
+
+        （一）制定内部管理制度和操作规程；
+
+        （二）对个人信息实行分类管理；
+
+        （三）采取相应的加密、去标识化等安全技术措施；
+
+        （四）合理确定个人信息处理的操作权限，并定期对从业人员进行安全教育和培训；
+
+        （五）制定并组织实施个人信息安全事件应急预案；
+
+        （六）法律、行政法规规定的其他措施。
+      translations:
+        en:
+          description: |-
+            Personal information processors shall take the following measures to ensure that their personal information processing activities are in compliance with laws and administrative regulations based on the purpose and means of processing, the categories of personal information to be processed, the impact on personal rights and interests, and the potential security risks, among others, and shall prevent unauthorized access to, as well as breach, tampering or loss of any personal information:
+
+            (1) formulating internal management system and operational procedures;
+
+            (2) implementing classified management of personal information;
+
+            (3) adopting corresponding security technical measures such as encryption and de-identification;
+
+            (4) reasonably determining the operational authority of personal information processing, and regularly conducting safety education and training for practitioners;
+
+            (5) formulating contingent plans for personal information security emergencies and organizing the implementation of such plans; and
+
+            (6) other measures as provided by laws and administrative regulations.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-52
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-v
+      ref_id: Art. 52
+      description: |-
+        处理个人信息达到国家网信部门规定数量的个人信息处理者应当指定个人信息保护负责人，负责对个人信息处理活动以及采取的保护措施等进行监督。
+
+        个人信息处理者应当公开个人信息保护负责人的联系方式，并将个人信息保护负责人的姓名、联系方式等报送履行个人信息保护职责的部门。
+      translations:
+        en:
+          description: |-
+            A personal information processor that processes personal information up to the amount prescribed by the national cyberspace department shall designate a person in charge of personal information protection, who shall supervise the personal information processing activities of the processor as well as the protective measures taken thereby, among others.
+
+            The personal information processor shall disclose the contact information of the person in charge of personal information protection, and submit the said person's name, contact information, and other information to the departments with personal information protection duties.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-53
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-v
+      ref_id: Art. 53
+      description: 本法第三条第二款规定的中华人民共和国境外的个人信息处理者，应当在中华人民共和国境内设立专门机构或者指定代表，负责处理个人信息保护相关事务，并将有关机构的名称或者代表的姓名、联系方式等报送履行个人信息保护职责的部门。
+      translations:
+        en:
+          description: Personal information processors outside the territory of the People's Republic
+            of China as specified in the second paragraph of Article 3 of this Law shall set up specialized
+            agencies or designate representatives within the territory of the People's Republic of China
+            to be responsible for handling personal information protection related matters, and shall
+            submit the names, contact information, and other information of the agencies and representatives
+            to the departments with personal information protection duties.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-54
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-v
+      ref_id: Art. 54
+      description: 个人信息处理者应当定期对其处理个人信息遵守法律、行政法规的情况进行合规审计。
+      translations:
+        en:
+          description: Personal information processors shall regularly conduct compliance audits of their
+            personal information processing activities with laws and administrative regulations.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-55
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-v
+      ref_id: Art. 55
+      description: |-
+        有下列情形之一的，个人信息处理者应当事前进行个人信息保护影响评估，并对处理情况进行记录：
+
+        （一）处理敏感个人信息；
+
+        （二）利用个人信息进行自动化决策；
+
+        （三）委托处理个人信息、向其他个人信息处理者提供个人信息、公开个人信息；
+
+        （四）向境外提供个人信息；
+
+        （五）其他对个人权益有重大影响的个人信息处理活动。
+      translations:
+        en:
+          description: |-
+            In any of the following circumstances, a personal information processor shall assess in advance the impact on personal information protection and keep a record of the course of the processing:
+
+            (1) processing sensitive personal information;
+
+            (2) using personal information to conduct automated decision making;
+
+            (3) entrusting personal information processing to another party, providing personal information for another party, or publicizing personal information;
+
+            (4) providing personal information for any party outside the territory of the People's Republic of China; or
+
+            (5) conducting other personal information processing activities which may have significant impacts on individuals.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-56
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-v
+      ref_id: Art. 56
+      description: |-
+        个人信息保护影响评估应当包括下列内容：
+
+        （一）个人信息的处理目的、处理方式等是否合法、正当、必要；
+
+        （二）对个人权益的影响及安全风险；
+
+        （三）所采取的保护措施是否合法、有效并与风险程度相适应。
+
+        个人信息保护影响评估报告和处理情况记录应当至少保存三年。
+      translations:
+        en:
+          description: |-
+            The assessment of impact on personal information protection shall include the following contents:
+
+            (1) whether the purposes and means of personal information processing, are legitimate, justified and necessary;
+
+            (2) the impact on individuals' rights and interests, and security risks; and
+
+            (3) whether the protection measures taken are legitimate, effective, and compatible with the degree of risks.
+
+            The report of the impact assessment on personal information protection and the processing record shall be retained for at least three years.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-57
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-v
+      ref_id: Art. 57
+      description: |-
+        发生或者可能发生个人信息泄露、篡改、丢失的，个人信息处理者应当立即采取补救措施，并通知履行个人信息保护职责的部门和个人。通知应当包括下列事项：
+
+        （一）发生或者可能发生个人信息泄露、篡改、丢失的信息种类、原因和可能造成的危害；
+
+        （二）个人信息处理者采取的补救措施和个人可以采取的减轻危害的措施；
+
+        （三）个人信息处理者的联系方式。
+
+        个人信息处理者采取措施能够有效避免信息泄露、篡改、丢失造成危害的，个人信息处理者可以不通知个人；履行个人信息保护职责的部门认为可能造成危害的，有权要求个人信息处理者通知个人。
+      translations:
+        en:
+          description: |-
+            Where the breach, tampering, or loss of personal information occurs or may occur, a personal information processor shall immediately take remedial measures and notify the departments with personal information protection duties and the relevant individuals. The notice shall include the following items:
+
+            (1) the categories of personal information that has been or may be breached, tampered with or lost, and the reasons and possible harm of the breach, tampering and loss;
+
+            (2) the remedial measures adopted by the personal information processor and the measures the individuals may take to mitigate the harm; and
+
+            (3) the contact information of the personal information processor.
+
+            Where the measures taken by the personal information processor can effectively avoid the harm caused by breach, tampering, or loss of personal information, the personal information processor is not required to notify individuals; where the departments with personal information protection duties consider that harm may be caused, they have the authority to request the personal information processor to notify individuals.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-58
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-v
+      ref_id: Art. 58
+      description: |-
+        提供重要互联网平台服务、用户数量巨大、业务类型复杂的个人信息处理者，应当履行下列义务：
+
+        （一）按照国家规定建立健全个人信息保护合规制度体系，成立主要由外部成员组成的独立机构对个人信息保护情况进行监督；
+
+        （二）遵循公开、公平、公正的原则，制定平台规则，明确平台内产品或者服务提供者处理个人信息的规范和保护个人信息的义务；
+
+        （三）对严重违反法律、行政法规处理个人信息的平台内的产品或者服务提供者，停止提供服务；
+
+        （四）定期发布个人信息保护社会责任报告，接受社会监督。
+      translations:
+        en:
+          description: |-
+            A personal information processor that provides important internet platform services involving a huge number of users and complicated business types shall perform the following obligations:
+
+            (1) establishing and improving the personal information protection compliance system in accordance with the provisions of the state and establishing an independent organization mainly composed of external members to supervise the protection of personal information;
+
+            (2) following the principles of openness, fairness, and justice, formulating platform rules, and clarifying the norms and obligations that product or service providers within the platform should meet when processing personal information;
+
+            (3) stopping providing services for product or service providers within the platforms that process personal information in serious violation of laws and administrative regulations; and
+
+            (4) regularly publishing social responsibility reports on personal information protection for public supervision.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-59
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-v
+      ref_id: Art. 59
+      description: 接受委托处理个人信息的受托人，应当依照本法和有关法律、行政法规的规定，采取必要措施保障所处理的个人信息的安全，并协助个人信息处理者履行本法规定的义务。
+      translations:
+        en:
+          description: The party entrusted with the processing of personal information shall, in accordance
+            with this Law and relevant laws and administrative regulations, take the necessary measures
+            to ensure the security of the personal information entrusted for processing, and assist the
+            entrusting personal information processor in fulfilling the obligations provided by this Law.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-vi
+      assessable: false
+      depth: 1
+      ref_id: VI
+      name: 履行个人信息保护职责的部门
+      translations:
+        en:
+          name: Departments with Personal Information Protection Duties
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-60
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-vi
+      ref_id: Art. 60
+      description: |-
+        国家网信部门负责统筹协调个人信息保护工作和相关监督管理工作。国务院有关部门依照本法和有关法律、行政法规的规定，在各自职责范围内负责个人信息保护和监督管理工作。
+
+        县级以上地方人民政府有关部门的个人信息保护和监督管理职责，按照国家有关规定确定。
+
+        前两款规定的部门统称为履行个人信息保护职责的部门。
+      translations:
+        en:
+          description: |-
+            The national cyberspace department shall be responsible for the overall planning and coordination of personal information protection and related supervision and administration. The relevant departments of the State Council shall, in accordance with this Law and other relevant laws and administrative regulations, be responsible for personal information protection and related supervision and administration within the scope of their respective duties.
+
+            The duties of personal information protection and related supervision and administration of the relevant departments of the local people's governments at or above the county level shall be determined in accordance with the relevant provisions of the state.
+
+            The departments provided in the preceding two paragraphs are collectively referred to as the departments with personal information protection duties.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-61
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-vi
+      ref_id: Art. 61
+      description: |-
+        履行个人信息保护职责的部门履行下列个人信息保护职责：
+
+        （一）开展个人信息保护宣传教育，指导、监督个人信息处理者开展个人信息保护工作；
+
+        （二）接受、处理与个人信息保护有关的投诉、举报；
+
+        （三）组织对应用程序等个人信息保护情况进行测评，并公布测评结果；
+
+        （四）调查、处理违法个人信息处理活动；
+
+        （五）法律、行政法规规定的其他职责。
+      translations:
+        en:
+          description: |-
+            Departments with personal information protection duties shall perform the following personal information protection duties:
+
+            (1) conducting publicity and education on personal information protection, and guiding and supervising personal information processors in their protection of personal information;
+
+            (2) receiving and handling complaints and reports related to personal information protection;
+
+            (3) organizing evaluations on applications, etc. in terms of personal information protection and publish the results of such evaluations;
+
+            (4) investigating and handling illegal personal information processing activities; and
+
+            (5) other duties as provided by laws and administrative regulations.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-62
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-vi
+      ref_id: Art. 62
+      description: |-
+        国家网信部门统筹协调有关部门依据本法推进下列个人信息保护工作：
+
+        （一）制定个人信息保护具体规则、标准；
+
+        （二）针对小型个人信息处理者、处理敏感个人信息以及人脸识别、人工智能等新技术、新应用，制定专门的个人信息保护规则、标准；
+
+        （三）支持研究开发和推广应用安全、方便的电子身份认证技术，推进网络身份认证公共服务建设；
+
+        （四）推进个人信息保护社会化服务体系建设，支持有关机构开展个人信息保护评估、认证服务；
+
+        （五）完善个人信息保护投诉、举报工作机制。
+      translations:
+        en:
+          description: |-
+            The national cyberspace department shall coordinate relevant departments to promote personal information protection through the following efforts in accordance with this Law:
+
+            (1) formulating specific rules and standards for personal information protection;
+
+            (2) developing special personal information protection rules and standards for small personal information processors, the processing of sensitive personal information, and new technologies and applications such as face recognition and artificial intelligence;
+
+            (3) supporting the research and development, and promoting the application of secure and convenient electronic identity authentication technology, and advancing the public services for network identity authentication;
+
+            (4) promoting the development of a personal information protection service system with the participation of various social sectors, and supporting relevant institutions in providing personal information protection assessment and certification services; and
+
+            (5) improving the complaint and reporting mechanism related to personal information protection .
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-63
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-vi
+      ref_id: Art. 63
+      description: |-
+        履行个人信息保护职责的部门履行个人信息保护职责，可以采取下列措施：
+
+        （一）询问有关当事人，调查与个人信息处理活动有关的情况;
+
+        （二）查阅、复制当事人与个人信息处理活动有关的合同、记录、账簿以及其他有关资料;
+
+        （三）实施现场检查，对涉嫌违法的个人信息处理活动进行调查;
+
+        （四）检查与个人信息处理活动有关的设备、物品;对有证据证明是用于违法个人信息处理活动的设备、物品，向本部门主要负责人书面报告并经批准，可以查封或者扣押。
+
+        履行个人信息保护职责的部门依法履行职责，当事人应当予以协助、配合，不得拒绝、阻挠。
+      translations:
+        en:
+          description: |-
+            A department with personal information protection duties when fulfilling related duties may take the following measures:
+
+            (1) questioning relevant parties, and investigating circumstances related to personal information processing activities;
+
+            (2) consulting and duplicating the parties' contracts, records, account books and other relevant materials related to personal information processing activities;
+
+            (3) conducting on-site inspections, and investigating suspected illegal personal information processing activities; and
+
+            (4) inspecting equipment and articles related to personal information processing activities; and sealing up or seizing equipment and articles related to illegal personal information processing activities as proved by evidence after submitting written reports to and obtaining approval from the principal person in charge of the departments with personal information protection duties.
+
+            When departments with personal information protection duties carry out their duties in accordance with the law, the parties concerned shall cooperate and provide assistance, and shall not reject or obstruct them.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-64
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-vi
+      ref_id: Art. 64
+      description: |-
+        履行个人信息保护职责的部门在履行职责中，发现个人信息处理活动存在较大风险或者发生个人信息安全事件的，可以按照规定的权限和程序对该个人信息处理者的法定代表人或者主要负责人进行约谈，或者要求个人信息处理者委托专业机构对其个人信息处理活动进行合规审计。个人信息处理者应当按照要求采取措施，进行整改，消除隐患。
+
+        履行个人信息保护职责的部门在履行职责中，发现违法处理个人信息涉嫌犯罪的，应当及时移送公安机关依法处理。
+      translations:
+        en:
+          description: |-
+            Where a department with personal information protection duties finds, when performing its duties, relatively high risks in personal information processing activities or the occurrence of personal information security incidents, the department may hold an interview with the legal representative or the principal person in charge of the personal information processor according to the provided authority and procedures, or request the processor to entrust a professional institution to conduct compliance audits of the personal information processing activities. The personal information processor shall adopt measures to make rectification and eliminate potential risks as required.
+
+            Where a department with personal information protection duties, in performing its duties, finds an illegal personal information processing activity that may involve a crime, the department shall transfer the case to the public security organ in a timely manner in accordance with the law.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-65
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-vi
+      ref_id: Art. 65
+      description: |-
+        任何组织、个人有权对违法个人信息处理活动向履行个人信息保护职责的部门进行投诉、举报。收到投诉、举报的部门应当依法及时处理，并将处理结果告知投诉、举报人。
+
+        履行个人信息保护职责的部门应当公布接受投诉、举报的联系方式。
+      translations:
+        en:
+          description: |-
+            Any organization or individual has the right to complain and report to a department with personal information protection duties about illegal personal information processing. The department that receives such a complaint or report shall handle it in a timely manner in accordance with the law, and notify the complainant or informant of the results.
+
+            Departments with personal information protection duties shall publish their contact information for receiving complaints and reports.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-vii
+      assessable: false
+      depth: 1
+      ref_id: VII
+      name: 法律责任
+      translations:
+        en:
+          name: Legal Liability
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-66
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-vii
+      ref_id: Art. 66
+      description: |-
+        违反本法规定处理个人信息，或者处理个人信息未履行本法规定的个人信息保护义务的，由履行个人信息保护职责的部门责令改正，给予警告，没收违法所得，对违法处理个人信息的应用程序，责令暂停或者终止提供服务；拒不改正的，并处一百万元以下罚款；对直接负责的主管人员和其他直接责任人员处一万元以上十万元以下罚款。
+
+        有前款规定的违法行为，情节严重的，由省级以上履行个人信息保护职责的部门责令改正，没收违法所得，并处五千万元以下或者上一年度营业额百分之五以下罚款，并可以责令暂停相关业务或者停业整顿、通报有关主管部门吊销相关业务许可或者吊销营业执照；对直接负责的主管人员和其他直接责任人员处十万元以上一百万元以下罚款，并可以决定禁止其在一定期限内担任相关企业的董事、监事、高级管理人员和个人信息保护负责人。
+      translations:
+        en:
+          description: |-
+            Where personal information is processed in violation of the provisions of this Law or without fulfilling the personal information protection obligations provided in this Law, the departments with personal information protection duties shall order the violator to make corrections, give a warning, confiscate the illegal gains, and order the suspension or termination of provision of services by the applications that illegally process personal information; where the violator refuses to make corrections, a fine of not more than RMB one million yuan shall be imposed thereupon; and the directly liable persons in charge and other directly liable persons shall each be fined not less than RMB 10,000 yuan nor more than RMB 100,000 yuan.
+
+            In case of an illegal act as prescribed in the preceding paragraph and the circumstances are serious, the departments with personal information protection duties at or above the provincial level shall order the violator to make corrections, confiscate the illegal gains, impose a fine of not more than RMB 50 million yuan or not more than five percent of the previous year's turnover; may also order the suspension of relevant businesses, or order the suspension of all the business operations for an overhaul, and notify the competent authorities to revoke relevant business permits or license; shall impose a fine of not less than RMB 100,000 yuan but not more than RMB 1 million yuan upon each of the directly liable persons in charge and other directly liable persons, and may decide to prohibit the abovementioned persons from serving as directors, supervisors, senior managers, or the persons in charge of relevant companies within a specific period of time.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-67
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-vii
+      ref_id: Art. 67
+      description: 有本法规定的违法行为的，依照有关法律、行政法规的规定记入信用档案，并予以公示。
+      translations:
+        en:
+          description: Any violation of the provisions of this Law shall be entered in the relevant credit
+            record and be published in accordance with the provisions of the relevant laws and administrative
+            regulations.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-68
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-vii
+      ref_id: Art. 68
+      description: |-
+        国家机关不履行本法规定的个人信息保护义务的，由其上级机关或者履行个人信息保护职责的部门责令改正；对直接负责的主管人员和其他直接责任人员依法给予处分。
+
+        履行个人信息保护职责的部门的工作人员玩忽职守、滥用职权、徇私舞弊，尚不构成犯罪的，依法给予处分。
+      translations:
+        en:
+          description: |-
+            Where any state organ fails to fulfill the personal information protection obligations as provided in this Law, the organ at the higher level or the departments with personal information protection duties shall order it to make corrections, and discipline the directly liable person in charge and other directly liable persons in accordance with the law.
+
+            Where a staff member of a department with personal information protection duties neglects duties, abuses power, or practices favoritism, which does not constitute a crime, the staff member shall be subject to sanction in accordance with the law.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-69
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-vii
+      ref_id: Art. 69
+      description: |-
+        处理个人信息侵害个人信息权益造成损害，个人信息处理者不能证明自己没有过错的，应当承担损害赔偿等侵权责任。
+
+        前款规定的损害赔偿责任按照个人因此受到的损失或者个人信息处理者因此获得的利益确定;个人因此受到的损失和个人信息处理者因此获得的利益难以确定的，根据实际情况确定赔偿数额。
+      translations:
+        en:
+          description: |-
+            Where a personal information processor infringes the rights or interests on personal information due to any personal information processing activity and cannot prove that the processor is not at fault, the processor shall assume the liability for damages and other tort liability.
+
+            The liability for damages prescribed in the preceding paragraph shall be determined based on the losses of individuals incurred thereby and the benefits acquired by the infringing personal information processor; and where it is difficult to determine the aforementioned losses or the benefits, the amount of damages shall be determined based on the actual circumstances.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-70
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-vii
+      ref_id: Art. 70
+      description: 个人信息处理者违反本法规定处理个人信息，侵害众多个人的权益的，人民检察院、法律规定的消费者组织和由国家网信部门确定的组织可以依法向人民法院提起诉讼。
+      translations:
+        en:
+          description: Where a personal information processor processes personal information in violation
+            of the provisions of this Law and infringes the rights and interests of many individuals,
+            the people's procuratorate, the consumer organizations specified by law, and the organization
+            designated by the national cyberspace department may file a lawsuit with the people's court
+            in accordance with the law.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-71
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-vii
+      ref_id: Art. 71
+      description: 违反本法规定，构成违反治安管理行为的，依法给予治安管理处罚；构成犯罪的，依法追究刑事责任。
+      translations:
+        en:
+          description: Any violation of this Law which constitutes a violation of public security administration
+            shall be subject to public security administration penalty in accordance with the law. If
+            the violation constitutes a crime, the violator shall be held criminally liable in accordance
+            with the law.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-viii
+      assessable: false
+      depth: 1
+      ref_id: VIII
+      name: 附则
+      translations:
+        en:
+          name: Supplementary Provisions
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-72
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-viii
+      ref_id: Art. 72
+      description: |-
+        自然人因个人或者家庭事务处理个人信息的，不适用本法。
+
+        法律对各级人民政府及其有关部门组织实施的统计、档案管理活动中的个人信息处理有规定的，适用其规定。
+      translations:
+        en:
+          description: |-
+            This Law is not applicable where a natural person processes personal information for personal or household affairs.
+
+            Where other laws provide personal information processing in statistical or archives management activities organized and conducted by the people's governments at all levels and their relevant departments, the provisions of such laws shall prevail.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-73
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-viii
+      ref_id: Art. 73
+      description: |-
+        本法下列用语的含义：
+
+        （一）个人信息处理者，是指在个人信息处理活动中自主决定处理目的、处理方式的组织、个人。
+
+        （二）自动化决策，是指通过计算机程序自动分析、评估个人的行为习惯、兴趣爱好或者经济、健康、信用状况等，并进行决策的活动。
+
+        （三）去标识化，是指个人信息经过处理，使其在不借助额外信息的情况下无法识别特定自然人的过程。
+
+        （四）匿名化，是指个人信息经过处理无法识别特定自然人且不能复原的过程。
+      translations:
+        en:
+          description: |-
+            For purposes of this Law, the following terms shall have the following meanings:
+
+            (1) "A personal information processor" refers to an organization or individual that autonomously determines the purposes and means of personal information processing.
+
+            (2) "automated decision making" refers to the activities of automatically analyzing and evaluating personal behaviors, hobbies, or economic, health, and credit status, among others, through computer programs, and making decisions.
+
+            (3) "de-identification" refers to processing personal information to make it impossible to identify specific natural persons in the absence of the support of additional information.
+
+            (4) "anonymization" refers to the process of processing personal information to make it impossible to identify specific natural persons and impossible to restore.
+    - urn: urn:intuitem:risk:req_node:china-pipl-2021:art-74
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pipl-2021:chapter-viii
+      ref_id: Art. 74
+      description: 本法自2021年11月1日起施行。
+      translations:
+        en:
+          description: This Law shall come into force as of November 1st , 2021.
