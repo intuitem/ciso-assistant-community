@@ -512,10 +512,12 @@ def get_sso_info(request):
     API endpoint that returns the CSRF token.
     """
     sso_settings = SSOSettings.objects.get()
-    # OIDC settings have no SAML "sp" section. The login page posts this value
-    # as the provider to the redirect endpoint, so fall back to the provider id.
     sp_settings = (sso_settings.settings or {}).get("sp") or {}
-    sp_entity_id = sp_settings.get("entity_id") or sso_settings.provider_id
+    sp_entity_id = (
+        sp_settings.get("entity_id")
+        or sso_settings.provider_id
+        or sso_settings.provider
+    )
     callback_url = settings.CISO_ASSISTANT_URL + "/"
     return Response(
         {

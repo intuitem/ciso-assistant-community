@@ -46,3 +46,20 @@ class TestGetSsoInfo:
         assert response.status_code == 200
         assert response.json()["is_enabled"] is True
         assert response.json()["sp_entity_id"] == "openid_connect"
+
+    def test_oidc_settings_without_provider_id(self):
+        GlobalSettings.objects.update_or_create(
+            name=GlobalSettings.Names.SSO,
+            defaults={
+                "value": {
+                    "is_enabled": True,
+                    "provider": "openid_connect",
+                    "settings": {},
+                }
+            },
+        )
+
+        response = APIClient().get(SSO_INFO_URL)
+
+        assert response.status_code == 200
+        assert response.json()["sp_entity_id"] == "openid_connect"
