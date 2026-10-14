@@ -3921,7 +3921,8 @@ export interface BatchActionConfig {
 		| 'remove_m2m'
 		| 'change_folder'
 		| 'group'
-		| 'merge';
+		| 'merge'
+		| 'compose';
 	label: string;
 	icon: string;
 	field?: string;
@@ -4630,6 +4631,12 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
 	],
 	'metric-instances': [
+		{
+			type: 'compose',
+			label: 'computeFromSelection',
+			icon: 'fa-solid fa-calculator',
+			maxSelection: 20
+		},
 		{
 			type: 'change_field',
 			label: 'changeStatus',
