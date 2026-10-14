@@ -89,6 +89,7 @@ class MetricInstanceViewSet(BaseModelViewSet):
         "filtering_labels",
         "organisation_objectives",
         "evidences",
+        "applied_controls",
     ]
     search_fields = ["name", "description", "ref_id"]
 
@@ -102,7 +103,11 @@ class MetricInstanceViewSet(BaseModelViewSet):
             .get_queryset()
             .select_related("folder", "metric_definition__unit", "evidences")
             .prefetch_related(
-                "owner", "organisation_objectives", "filtering_labels", "samples"
+                "owner",
+                "organisation_objectives",
+                "applied_controls",
+                "filtering_labels",
+                "samples",
             )
         )
 

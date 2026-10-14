@@ -2080,6 +2080,7 @@ export const MetricInstanceSchema = z.object({
 	target_value: z.coerce.number().optional().nullable(),
 	collection_frequency: z.string().optional().nullable(),
 	organisation_objectives: z.string().uuid().optional().array().optional(),
+	applied_controls: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	filtering_labels: z.string().optional().array().optional(),
 	evidences: z.string().uuid().optional().nullable()
 });

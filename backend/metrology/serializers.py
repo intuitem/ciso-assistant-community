@@ -6,7 +6,7 @@ from django.utils.translation import gettext_lazy as _
 import structlog
 from rest_framework import serializers
 
-from core.models import OrganisationObjective
+from core.models import AppliedControl, OrganisationObjective
 from core.serializers import BaseModelSerializer, ReferentialSerializer
 from core.serializer_fields import FieldsRelatedField, PathField
 from metrology.models import (
@@ -108,6 +108,11 @@ class MetricInstanceWriteSerializer(BaseModelSerializer):
         many=True,
         required=False,
     )
+    applied_controls = serializers.PrimaryKeyRelatedField(
+        queryset=AppliedControl.objects.all(),
+        many=True,
+        required=False,
+    )
 
     def update(self, instance, validated_data):
         # Check if folder is being changed
@@ -139,6 +144,7 @@ class MetricInstanceReadSerializer(BaseModelSerializer):
     )
     owner = FieldsRelatedField(many=True)
     organisation_objectives = FieldsRelatedField(many=True)
+    applied_controls = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     evidences = FieldsRelatedField(["name", "id"])
     status = serializers.CharField(source="get_status_display", read_only=True)

@@ -1749,6 +1749,7 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
         source="get_csf_function_display"
     )  # type : get_type_display
     evidences = FieldsRelatedField(many=True)
+    metric_instances = FieldsRelatedField(many=True)
     objectives = FieldsRelatedField(many=True)
     effort = serializers.CharField(source="get_effort_display")
     control_impact = serializers.CharField(source="get_control_impact_display")

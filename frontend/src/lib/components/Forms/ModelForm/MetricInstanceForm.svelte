@@ -1,5 +1,6 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import HiddenInput from '../HiddenInput.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import Select from '../Select.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
@@ -28,6 +29,8 @@
 		debug = false
 	}: Props = $props();
 </script>
+
+<HiddenInput {form} field="applied_controls" />
 
 <AutocompleteSelect
 	{form}
