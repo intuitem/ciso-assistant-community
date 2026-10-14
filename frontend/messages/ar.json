@@ -3117,7 +3117,6 @@
 	"securityExceptions": "الاستثناءات",
 	"addSecurityException": "إضافة استثناء",
 	"filterBy": "التصفية حسب",
-	"demoDataAlreadyImported": "سبق استيراد البيانات التجريبية. احذف نطاق DEMO الحالي أو أعد تسميته.",
 	"findingsExplorer": "مراجعة الملاحظات المجمّعة",
 	"findingsAssessment": "سجل ملاحظات",
 	"findingsAssessments": "سجلات الملاحظات",

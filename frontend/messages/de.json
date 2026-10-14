@@ -1709,7 +1709,6 @@
 	"deleted": "Gelöscht",
 	"deletion": "Löschung",
 	"deletionPolicy": "Löschrichtlinie",
-	"demoDataAlreadyImported": "Demo-Daten wurden bereits importiert. Löschen oder benennen Sie Ihre bestehende DEMO-Domäne um.",
 	"dependencyHelpText": "Ist die Beziehung zu diesem Stakeholder für mein Geschäft von vitaler Bedeutung?",
 	"deselectAll": "Alle abwählen",
 	"detailedMetricsForEachRisk": "Detaillierte Metriken für jedes Risikoszenario – klicken Sie auf Spaltenüberschriften zum Sortieren; verwenden Sie die Filter in den Spalten Szenario und Stufe",

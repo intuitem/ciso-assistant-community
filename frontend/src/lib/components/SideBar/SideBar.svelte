@@ -262,8 +262,11 @@
 		$loading = true;
 		const response = await fetch('/folders/import-dummy/', { method: 'POST' });
 		if (!response.ok) {
-			if (response.status === 500) {
+			const { error } = await response.json().catch(() => ({}));
+			if (error === 'demoDataAlreadyLoaded') {
 				flash.set({ type: 'error', message: m.demoDataAlreadyImported() });
+			} else if (error === 'demoDomainNameTaken') {
+				flash.set({ type: 'error', message: m.demoDomainNameTaken() });
 			} else {
 				flash.set({ type: 'error', message: m.errorOccuredDuringImport() });
 			}

@@ -2648,7 +2648,6 @@
 	"expirationDate": "Data wygaśnięcia",
 	"expirationDateIsInThePastWarning": "Wprowadzona data wygaśnięcia jest w przeszłości",
 	"filterBy": "Filtruj według",
-	"demoDataAlreadyImported": "Dane demo zostały już zaimportowane. Usuń istniejącą domenę DEMO lub zmień jej nazwę.",
 	"finding": "Ustalenie",
 	"findings": "Ustalenia",
 	"findingsExplorer": "Zbiorczy przegląd ustaleń",
