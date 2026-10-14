@@ -117,17 +117,13 @@ async def get_risk_scenario(scenario_id: str):
         existing_applied_controls = rs.get("existing_applied_controls", [])
         existing_controls_str = (
             ", ".join(
-                c.get("str", str(c)) if isinstance(c, dict) else str(c)
+                f"{c.get('str', c)} ({c.get('id')})" if isinstance(c, dict) else str(c)
                 for c in existing_applied_controls
             )
             if existing_applied_controls
             else "-"
         )
         result += f"**Existing Controls:** {existing_controls_str}\n"
-        if rs.get("existing_controls"):
-            result += (
-                f"**Existing Controls (legacy notes):** {rs['existing_controls']}\n"
-            )
         result += "\n"
 
         result += "### Inherent Risk\n"

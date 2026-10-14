@@ -96,7 +96,6 @@ class TestMCPTools:
             json_data={
                 "id": UUID_A,
                 "name": "Test Risk 1",
-                "existing_controls": "",
                 "existing_applied_controls": [
                     {"id": "ac-1", "str": "MFA"},
                     {"id": "ac-2", "str": "Backups"},
@@ -106,24 +105,8 @@ class TestMCPTools:
 
         result = run(read_tools.get_risk_scenario(UUID_A))
 
-        assert "**Existing Controls:** MFA, Backups\n" in result
-        assert "legacy notes" not in result
+        assert "**Existing Controls:** MFA (ac-1), Backups (ac-2)\n" in result
         assert "[SUCCESS] get_risk_scenario" in result
-
-    def test_get_risk_scenario_keeps_legacy_existing_controls(self, api):
-        api.return_value = _response(
-            json_data={
-                "id": UUID_A,
-                "name": "Test Risk 1",
-                "existing_controls": "Firewall in place",
-                "existing_applied_controls": [],
-            }
-        )
-
-        result = run(read_tools.get_risk_scenario(UUID_A))
-
-        assert "**Existing Controls:** -\n" in result
-        assert "**Existing Controls (legacy notes):** Firewall in place" in result
 
     def test_get_applied_controls_success(self, api):
         api.return_value = _response(
