@@ -16,6 +16,8 @@ from metrology.models import (
     BuiltinMetricSample,
     Dashboard,
     DashboardWidget,
+    normalize_frequency,
+    whole_second,
 )
 from metrology.builtin_metrics import get_available_metrics_for_model
 
@@ -84,6 +86,53 @@ class MetricDefinitionWriteSerializer(BaseModelSerializer):
 
         return value
 
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        from metrology.derived import validate_formula
+
+        datasets = attrs.get(
+            "datasets",
+            getattr(self.instance, "datasets", None) if self.instance else None,
+        )
+        expression = attrs.get(
+            "expression",
+            getattr(self.instance, "expression", "") if self.instance else "",
+        )
+        inputs = attrs.get(
+            "inputs",
+            getattr(self.instance, "inputs", None) if self.instance else None,
+        )
+        errors = validate_formula(datasets, expression, inputs, self.instance)
+        if errors:
+            # One list under `expression`: the form shows the formula as one
+            # block, and the codes travel in the messages for the editor.
+            raise serializers.ValidationError(
+                {"expression": [message for _code, message in errors]}
+            )
+        if (
+            self.instance is not None
+            and "category" in attrs
+            and attrs["category"] != self.instance.category
+            and self.instance.category == MetricDefinition.Category.QUANTITATIVE
+        ):
+            # Formulas reading this metric read numbers: a level result would
+            # skip every one of their periods and drop their history. The
+            # same refusal the compose drawer makes.
+            from metrology.series import dependents_of
+
+            if dependents_of(self.instance):
+                raise serializers.ValidationError(
+                    {
+                        "category": [
+                            _(
+                                "Other formulas read this metric as a number: its "
+                                "result type cannot change while they do"
+                            )
+                        ]
+                    }
+                )
+        return attrs
+
     class Meta:
         model = MetricDefinition
         exclude = ["translations"]
@@ -95,6 +144,7 @@ class MetricDefinitionReadSerializer(ReferentialSerializer):
     library = FieldsRelatedField(["name", "id"])
     unit = FieldsRelatedField(["name", "id"])
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
+    is_derived = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = MetricDefinition
@@ -114,6 +164,15 @@ class MetricInstanceWriteSerializer(BaseModelSerializer):
         required=False,
     )
 
+    def to_internal_value(self, data):
+        # A deprecated frequency name stands for the value it was renamed to.
+        frequency = data.get("collection_frequency")
+        current = normalize_frequency(frequency)
+        if current != frequency:
+            data = data.copy()
+            data["collection_frequency"] = current
+        return super().to_internal_value(data)
+
     def update(self, instance, validated_data):
         # Check if folder is being changed
         new_folder = validated_data.get("folder")
@@ -123,13 +182,56 @@ class MetricInstanceWriteSerializer(BaseModelSerializer):
 
         return super().update(instance, validated_data)
 
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        from metrology.compose import unreadable_picks
+        from metrology.series import validate_input_choices
+
+        def current(name):
+            return attrs.get(name, getattr(self.instance, name, None))
+
+        # A pick names an instance whose values the formula will show: one
+        # the author may not read must not be theirs to pick.
+        request = self.context.get("request")
+        if "input_choices" in attrs and request is not None:
+            if unreadable_picks(
+                request.user,
+                attrs["input_choices"],
+                getattr(self.instance, "input_choices", None),
+            ):
+                raise serializers.ValidationError(
+                    {"input_choices": [_("A picked metric instance does not exist")]}
+                )
+
+        if (
+            "input_choices" in attrs
+            or "folder" in attrs
+            or "metric_definition" in attrs
+        ):
+            errors = validate_input_choices(
+                current("metric_definition"),
+                current("folder"),
+                current("input_choices"),
+            )
+            if errors:
+                raise serializers.ValidationError({"input_choices": errors})
+        return attrs
+
     class Meta:
         model = MetricInstance
         fields = "__all__"
+        # The sampler's own bookkeeping: a client stamping last_computed_at
+        # in the future would stop the instance from ever being computed.
+        read_only_fields = [
+            "last_computed_at",
+            "last_computation_error",
+            "recompute_from",
+        ]
 
 
 class MetricInstanceReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
+    is_derived = serializers.BooleanField(read_only=True)
     folder = FieldsRelatedField()
     metric_definition = FieldsRelatedField(
         [
@@ -179,12 +281,38 @@ class MetricInstanceReadSerializer(BaseModelSerializer):
 
 
 # CustomMetricSample serializers
+# Shared by the write serializer and the viewset's destroy: the samples of a
+# derived metric are the formula's, in every direction.
+DERIVED_SAMPLE_READ_ONLY = (
+    "This metric is computed from its formula; its samples cannot be written "
+    "or deleted by hand"
+)
+
+
 class CustomMetricSampleWriteSerializer(BaseModelSerializer):
     def create(self, validated_data):
-        # Set folder from metric_instance before the permission check in parent class
-        if "metric_instance" in validated_data and validated_data["metric_instance"]:
-            validated_data["folder"] = validated_data["metric_instance"].folder
-        return super().create(validated_data)
+        """One sample per instance and second (CustomMetricSample.record): a
+        sample for a second that already holds one replaces it, which takes
+        the right to change samples as well as to add them."""
+        metric_instance = validated_data.pop("metric_instance")
+        timestamp = whole_second(validated_data.pop("timestamp"))
+        folder = metric_instance.folder
+        self._check_object_perm(validated_data, "add", folder=folder)
+        if self._taken(metric_instance, timestamp):
+            self._check_object_perm(validated_data, "change", folder=folder)
+        sample, _created = CustomMetricSample.record(
+            metric_instance, timestamp, **validated_data
+        )
+        return sample
+
+    @staticmethod
+    def _taken(metric_instance, timestamp, other_than=None):
+        return (
+            CustomMetricSample.objects.exclude(source=CustomMetricSample.Source.DERIVED)
+            .exclude(pk=other_than)
+            .filter(metric_instance=metric_instance, timestamp=timestamp)
+            .exists()
+        )
 
     def validate_value(self, value):
         return coerce_sample_value(value)
@@ -201,6 +329,30 @@ class CustomMetricSampleWriteSerializer(BaseModelSerializer):
 
     def validate(self, attrs):
         attrs = super().validate(attrs)
+
+        target = attrs.get("metric_instance") or getattr(
+            self.instance, "metric_instance", None
+        )
+        if target is not None and target.is_derived:
+            # A derived series is its formula's: a typed-in point would
+            # become the next computation's `previous`.
+            raise serializers.ValidationError(
+                {"metric_instance": DERIVED_SAMPLE_READ_ONLY}
+            )
+        if (
+            self.instance is not None
+            and ("timestamp" in attrs or "metric_instance" in attrs)
+            and self._taken(
+                target,
+                whole_second(attrs.get("timestamp", self.instance.timestamp)),
+                other_than=self.instance.pk,
+            )
+        ):
+            # Creating replaces the sample of a taken second; moving one
+            # there would silently drop the other, so it is refused.
+            raise serializers.ValidationError(
+                {"timestamp": _("Another sample of this metric holds this second")}
+            )
 
         if "value" in attrs:
             value = attrs["value"]
@@ -239,6 +391,12 @@ class CustomMetricSampleWriteSerializer(BaseModelSerializer):
     class Meta:
         model = CustomMetricSample
         exclude = ["folder"]
+        # What wrote the sample is a fact the server records: through this
+        # serializer, always a person.
+        read_only_fields = ["source", "period_start"]
+        # The (instance, second) constraint is record()'s to apply: a sample
+        # for a taken second replaces it instead of being refused.
+        validators = []
 
 
 class CustomMetricSampleReadSerializer(BaseModelSerializer):
