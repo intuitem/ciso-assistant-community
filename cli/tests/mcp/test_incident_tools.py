@@ -132,6 +132,7 @@ class TestCreateIncident:
                 "resolve_asset_id",
                 side_effect=ValueError("Asset 'ERP' not found"),
             ),
+            patch.object(resolvers, "resolve_global_folder_id", return_value=GLOBAL),
         ):
             result = run(write_tools.create_incident(name="X", assets=["ERP"]))
         assert result == "Error in create_incident: Asset 'ERP' not found"
