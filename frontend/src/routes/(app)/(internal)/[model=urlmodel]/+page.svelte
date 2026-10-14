@@ -402,6 +402,7 @@
 				disableDelete={['user-groups', 'commitments'].includes(URLModel)}
 				disableView={['notifications'].includes(URLModel)}
 				disableBatchEdit={URLModel === 'notifications' ? false : undefined}
+				unsortableColumns={data.model.unsortableColumns}
 				numberRowsPerPage={URLModel === 'notifications' ? 50 : undefined}
 				loading={isSyncing}
 				onFilterChange={handleFilterChange}

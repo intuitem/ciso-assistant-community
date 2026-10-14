@@ -123,6 +123,10 @@
 		// inbox's read flag), so this is separable from `disableEdit` -- which it
 		// defaults to, leaving existing callers unaffected.
 		disableBatchEdit?: boolean;
+		/** Columns this model computes rather than stores: the backend cannot
+		 *  ORDER BY them, so the header must not offer a sort. From
+		 *  `ModelMapEntry.unsortableColumns`. */
+		unsortableColumns?: string[];
 		disableDelete?: boolean;
 		disableView?: boolean;
 		identifierField?: string;
@@ -188,6 +192,7 @@
 		disableCreate = false,
 		disableEdit = false,
 		disableBatchEdit = undefined,
+		unsortableColumns = [],
 		disableDelete = false,
 		disableView = false,
 		identifierField = 'id',
@@ -902,23 +907,10 @@
 		'user_groups'
 	];
 
-	// Computed in Python from related rows, so there is no column for the backend to
-	// ORDER BY: DRF drops the term and the click does nothing. Better not to offer it.
-	// Qualify with the model when the same name is a stored column elsewhere:
-	// `progress` is a serializer method on audits but a real field on projects.
-	const UNSORTABLE_COMPUTED_COLUMNS = [
-		'completion',
-		'review_progress',
-		'schedule',
-		'compliance-assessments.progress',
-		'document-containers.progress'
-	];
-
 	const isUnsortableColumn = (key: string): boolean => {
 		return (
 			MULTI_VALUE_COLUMNS.includes(key) ||
-			UNSORTABLE_COMPUTED_COLUMNS.includes(key) ||
-			UNSORTABLE_COMPUTED_COLUMNS.includes(`${URLModel}.${key}`) ||
+			unsortableColumns.includes(key) ||
 			(tableSource.body.length > 0 && Array.isArray(tableSource.body[0][key]))
 		);
 	};

@@ -264,6 +264,13 @@ export interface ModelMapEntry {
 	 * rendered as Markdown for this model.
 	 */
 	markdownFields?: string[];
+	/**
+	 * Columns this model computes in Python rather than storing, so there is no
+	 * column for the backend to ORDER BY: DRF drops the term and the header click
+	 * does nothing. Listed per model because the same name can be a stored column
+	 * elsewhere, as `progress` is on projects.
+	 */
+	unsortableColumns?: string[];
 }
 
 // A field can name one flag or several, and shows when any of them is on. Indexing
@@ -1400,6 +1407,7 @@ export const URL_MODEL_MAP: ModelMap = {
 	},
 	'document-containers': {
 		name: 'documentcontainer',
+		unsortableColumns: ['progress'],
 		localName: 'documentContainer',
 		localNamePlural: 'documentContainers',
 		verboseName: 'Document',
@@ -1503,6 +1511,7 @@ export const URL_MODEL_MAP: ModelMap = {
 	},
 	'compliance-assessments': {
 		name: 'complianceassessment',
+		unsortableColumns: ['progress'],
 		localName: 'complianceAssessment',
 		localNamePlural: 'complianceAssessments',
 		verboseName: 'Compliance assessment',
@@ -1668,6 +1677,7 @@ export const URL_MODEL_MAP: ModelMap = {
 	},
 	'entity-assessments': {
 		name: 'entityassessment',
+		unsortableColumns: ['completion', 'review_progress'],
 		localName: 'entityAssessment',
 		localNamePlural: 'entityAssessments',
 		verboseName: 'Entity assessment',
@@ -3077,6 +3087,7 @@ export const URL_MODEL_MAP: ModelMap = {
 	},
 	'task-templates': {
 		name: 'tasktemplate',
+		unsortableColumns: ['schedule'],
 		localName: 'taskTemplate',
 		localNamePlural: 'taskTemplates',
 		verboseName: 'Task template',
