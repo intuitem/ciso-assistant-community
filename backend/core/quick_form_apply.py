@@ -118,6 +118,12 @@ def plan(response, user, overrides: dict | None = None) -> list[dict]:
         item["current"] = target.current(subject)
         item["origin"] = target.origin(subject, response)
         item["readable"] = _readable(user, subject)
+        # The subject may have changed since the form was started (a processing
+        # that became a processor no longer takes a DPIA).
+        if not target.applies_to(subject):
+            item["proposal"] = Proposal.refuse("targetNotApplicable")
+            items.append(item)
+            continue
         if not _allowed(user, target, subject):
             item["proposal"] = Proposal.refuse("subjectPermissionRequired")
             items.append(item)

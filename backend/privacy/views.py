@@ -720,12 +720,14 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
     def dpia_overview(self, request):
         """Where the processings the caller can see stand on DPIAs: a count per
         state, and one page of processings (`state`, `search`, `offset`), each
-        with its DPIA and any screening awaiting review."""
+        with its DPIA and any screening awaiting review. Processor processings
+        are left out: their DPIA is the controller's."""
         from core.models import QuickFormResponse
         from core.quick_form_apply import forms_with_target
 
         viewable = Processing.objects.filter(
-            id__in=RoleAssignment.get_viewable_object_ids(request.user, Processing)
+            id__in=RoleAssignment.get_viewable_object_ids(request.user, Processing),
+            role__in=Processing.DPIA_ROLES,
         )
         open_statuses = [
             QuickFormResponse.Status.DRAFT,

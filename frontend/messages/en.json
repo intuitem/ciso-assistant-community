@@ -7216,6 +7216,7 @@
 	"appliedOnAccept": "Applied on accept",
 	"noSubject": "The response is not about an object of the right kind",
 	"subjectPermissionRequired": "You cannot edit this object, so nothing will be written",
+	"targetNotApplicable": "Does not apply to this object any more, so nothing will be written",
 	"targetError": "This could not be written",
 	"invalidOverride": "The override was refused",
 	"noteRequired": "A justification is required",

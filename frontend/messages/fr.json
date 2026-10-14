@@ -7216,6 +7216,7 @@
 	"appliedOnAccept": "Enregistré à l'acceptation",
 	"noSubject": "La réponse ne porte pas sur un objet du bon type",
 	"subjectPermissionRequired": "Vous ne pouvez pas modifier cet objet : rien ne sera enregistré",
+	"targetNotApplicable": "Ne s'applique plus à cet objet : rien ne sera enregistré",
 	"targetError": "L'enregistrement a échoué",
 	"invalidOverride": "La dérogation a été refusée",
 	"noteRequired": "Une justification est obligatoire",

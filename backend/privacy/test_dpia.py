@@ -756,3 +756,73 @@ def test_the_dpia_is_translated_in_french():
         assert page["translations"]["fr"]["name"], page["urn"]
         for urn, question in page["questions"].items():
             assert question["translations"]["fr"]["text"], urn
+
+
+@pytest.mark.django_db
+def test_a_processor_takes_no_dpia(admin_client, processing, screening_form, dpia_form):
+    """A DPIA is the controller's (Art. 35): a processing carried out as a
+    processor is offered no screening nor DPIA, leaves the overview, and loses a
+    requirement it had, with the reason in its history."""
+    url = f"/api/privacy/processings/{processing.id}/"
+    admin_client.patch(url, {"dpia_required": True}, format="json")
+    switched = admin_client.patch(
+        url, {"role": "privacy_data_processor"}, format="json"
+    )
+    assert switched.status_code == 200, switched.json()
+    processing.refresh_from_db()
+    assert processing.dpia_required is False
+    cleared = DpiaRequirementChange.objects.get(
+        processing=processing, dpia_required=False
+    )
+    assert cleared.note == "Data processor: the DPIA is the controller's"
+    # Nor can it be required by hand.
+    admin_client.patch(url, {"dpia_required": True}, format="json")
+    processing.refresh_from_db()
+    assert processing.dpia_required is False
+
+    for target in ("processing.dpia_required", "processing.dpia"):
+        options = admin_client.get(
+            "/api/quick-forms/assess-options/",
+            {"target": target, "subject": str(processing.id)},
+        )
+        assert options.json() == [], target
+    started = admin_client.post(
+        f"/api/quick-forms/{screening_form.id}/start/",
+        {"subject": str(processing.id)},
+        format="json",
+    )
+    assert started.status_code == 404
+    overview = admin_client.get("/api/privacy/processings/dpia-overview/").json()
+    assert str(processing.id) not in [r["id"] for r in overview["rows"]]
+
+
+@pytest.mark.django_db
+def test_a_screening_writes_nothing_once_the_processing_is_a_processor(
+    admin_client, reviewer_client, processing, screening_form
+):
+    _exemptions_go_to_review(screening_form)
+    response = _screen(
+        admin_client,
+        screening_form,
+        processing,
+        _answers(SCREENING, ["evaluation_scoring", "large_scale"], exemption="list"),
+    )
+    Processing.objects.filter(pk=processing.pk).update(role="privacy_data_processor")
+
+    (row,) = reviewer_client.get(
+        f"/api/quick-form-responses/{response.id}/accept-preview/"
+    ).json()
+    assert row["reason"] == "targetNotApplicable"
+    accepted = reviewer_client.post(
+        f"/api/quick-form-responses/{response.id}/set-status/",
+        {
+            "status": "closed",
+            "resolution": "accepted",
+            "overrides": {TARGET: {"value": True, "note": "Too late"}},
+        },
+        format="json",
+    )
+    assert accepted.status_code == 200, accepted.json()
+    processing.refresh_from_db()
+    assert processing.dpia_required is False
+    assert not DpiaRequirementChange.objects.filter(processing=processing).exists()

@@ -1,5 +1,6 @@
 from core.serializers import BaseModelSerializer
 from django.db import transaction
+from django.utils.translation import gettext as _
 from rest_framework import serializers
 from core.serializer_fields import FieldsRelatedField
 from .models import (
@@ -153,6 +154,15 @@ class ProcessingWriteSerializer(BaseModelSerializer):
         # Only joint controllers and processors act alongside or for other controllers
         if role == "privacy_controller":
             data["controllers"] = []
+        # A processor's DPIA is the controller's: a processing that is (or becomes)
+        # one is not required to have its own, and the history says why.
+        if role not in Processing.DPIA_ROLES and (
+            data.get("dpia_required") or getattr(self.instance, "dpia_required", False)
+        ):
+            data["dpia_required"] = False
+            data["dpia_required_note"] = data.get("dpia_required_note") or _(
+                "Data processor: the DPIA is the controller's"
+            )
         return data
 
     def update(self, instance, validated_data):
