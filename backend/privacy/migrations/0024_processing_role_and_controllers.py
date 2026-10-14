@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
             field=models.ManyToManyField(
                 blank=True,
                 help_text="Controllers on whose behalf this processing is carried out",
-                related_name="processings_as_processor",
+                related_name="processings_as_controller",
                 to="tprm.entity",
             ),
         ),
