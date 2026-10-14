@@ -17,6 +17,7 @@ from ..resolvers import (
     resolve_threat_id,
     resolve_entity_id,
     resolve_incident_id,
+    resolve_in_folder_or_global,
     parse_duration,
 )
 from ..config import GLOBAL_FOLDER_ID
@@ -1633,12 +1634,12 @@ async def create_incident(
         is_bcp_activated: Whether the business continuity plan was activated
         link: External link (e.g. ticket URL)
         folder_id: Folder ID/name (default: Global)
-        threats: List of threat IDs/names (resolved within folder_id when given)
+        threats: List of threat IDs/names (resolved within the incident's folder, then Global)
         owners: List of owners as actor UUIDs, emails or names
-        assets: List of asset IDs/names (resolved within folder_id when given)
+        assets: List of asset IDs/names (resolved within the incident's folder, then Global)
         qualifications: List of qualifications: letters C/I/A/T, names or UUIDs
         entities: List of third-party entity IDs/names
-        applied_controls: List of applied control IDs/names (resolved within folder_id when given)
+        applied_controls: List of applied control IDs/names (resolved within the incident's folder, then Global)
         filtering_labels: List of label UUIDs
     """
     try:
@@ -1666,13 +1667,15 @@ async def create_incident(
 
         if threats:
             payload["threats"] = [
-                resolve_threat_id(t, folder_id=scope_folder) for t in threats
+                resolve_in_folder_or_global(resolve_threat_id, t, scope_folder)
+                for t in threats
             ]
         if owners:
             payload["owners"] = resolve_actor_ids(owners)
         if assets:
             payload["assets"] = [
-                resolve_asset_id(a, folder_id=scope_folder) for a in assets
+                resolve_in_folder_or_global(resolve_asset_id, a, scope_folder)
+                for a in assets
             ]
         if qualifications:
             payload["qualifications"] = resolve_qualification_ids(qualifications)
@@ -1680,7 +1683,7 @@ async def create_incident(
             payload["entities"] = [resolve_entity_id(e) for e in entities]
         if applied_controls:
             payload["applied_controls"] = [
-                resolve_applied_control_id(c, folder_id=scope_folder)
+                resolve_in_folder_or_global(resolve_applied_control_id, c, scope_folder)
                 for c in applied_controls
             ]
         if filtering_labels:

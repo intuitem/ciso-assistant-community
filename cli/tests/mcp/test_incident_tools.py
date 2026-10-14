@@ -215,6 +215,11 @@ class TestUpdateIncident:
             patch.object(
                 update_tools, "resolve_applied_control_id", return_value=UUID_D
             ) as r_control,
+            patch.object(
+                update_tools,
+                "make_get_request",
+                return_value=_response(200, {"folder": {"id": UUID_F}}),
+            ),
         ):
             run(
                 update_tools.update_incident(
@@ -226,7 +231,7 @@ class TestUpdateIncident:
                     filtering_labels=[UUID_F],
                 )
             )
-        r_control.assert_called_once_with("MFA", folder_id=None)
+        r_control.assert_called_once_with("MFA", folder_id=UUID_F)
         assert patch_req.call_args.args[1] == {
             "owners": [UUID_A],
             "qualifications": [UUID_B],
@@ -288,15 +293,21 @@ class TestUpdateIncident:
             "threats": [UUID_D],
         }
 
-    def test_assets_unscoped_without_folder(self):
+    def test_assets_scoped_to_incident_folder_without_folder_id(self):
         with (
             self._patch_ok() as patch_req,
             patch.object(
                 update_tools, "resolve_asset_id", return_value=UUID_C
             ) as r_asset,
+            patch.object(
+                update_tools,
+                "make_get_request",
+                return_value=_response(200, {"folder": {"id": UUID_F}}),
+            ) as get,
         ):
             run(update_tools.update_incident(incident_id=UUID_A, assets=["ERP"]))
-        r_asset.assert_called_once_with("ERP", folder_id=None)
+        get.assert_called_once_with(f"/incidents/{UUID_A}/")
+        r_asset.assert_called_once_with("ERP", folder_id=UUID_F)
         assert patch_req.call_args.args[1] == {"assets": [UUID_C]}
 
     def test_backend_rejection_returned(self):
@@ -319,3 +330,40 @@ class TestRegistration:
         read_names = {t.__name__ for t in server.READ_TOOLS}
         assert {"create_incident", "update_incident"} <= write_names
         assert not {"create_incident", "update_incident"} & read_names
+
+
+class TestResolveInFolderOrGlobal:
+    def test_falls_back_to_global_when_not_found_in_folder(self):
+        def resolver(name, folder_id=None):
+            if folder_id == UUID_F:
+                raise ValueError(f"Threat '{name}' not found")
+            return UUID_C
+
+        with patch.object(resolvers, "resolve_global_folder_id", return_value=GLOBAL):
+            assert (
+                resolvers.resolve_in_folder_or_global(resolver, "Ransomware", UUID_F)
+                == UUID_C
+            )
+
+    def test_ambiguity_in_folder_is_not_masked(self):
+        def resolver(name, folder_id=None):
+            raise ValueError(f"Ambiguous asset name '{name}', found 2")
+
+        with patch.object(resolvers, "resolve_global_folder_id", return_value=GLOBAL):
+            try:
+                resolvers.resolve_in_folder_or_global(resolver, "DB01", UUID_F)
+            except ValueError as e:
+                assert "Ambiguous" in str(e)
+            else:
+                raise AssertionError("expected ValueError")
+
+    def test_no_folder_scopes_to_global(self):
+        calls = []
+
+        def resolver(name, folder_id=None):
+            calls.append(folder_id)
+            return UUID_C
+
+        with patch.object(resolvers, "resolve_global_folder_id", return_value=GLOBAL):
+            resolvers.resolve_in_folder_or_global(resolver, "DB01")
+        assert calls == [GLOBAL]

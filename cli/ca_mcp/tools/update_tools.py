@@ -28,6 +28,7 @@ from ..resolvers import (
     resolve_threat_id,
     resolve_entity_id,
     resolve_incident_id,
+    resolve_in_folder_or_global,
     _is_uuid,
 )
 from .write_tools import (
@@ -1550,12 +1551,12 @@ async def update_incident(
         is_bcp_activated: Whether the business continuity plan was activated
         link: External link (e.g. ticket URL)
         folder_id: Folder ID/name
-        threats: List of threat IDs/names (resolved within folder_id when given; replaces existing)
+        threats: List of threat IDs/names (resolved within the incident's folder, then Global; replaces existing)
         owners: List of owners as actor UUIDs, emails or names (replaces existing)
-        assets: List of asset IDs/names (resolved within folder_id when given; replaces existing)
+        assets: List of asset IDs/names (resolved within the incident's folder, then Global; replaces existing)
         qualifications: List of qualifications: letters C/I/A/T, names or UUIDs (replaces existing)
         entities: List of third-party entity IDs/names (replaces existing)
-        applied_controls: List of applied control IDs/names (resolved within folder_id when given; replaces existing)
+        applied_controls: List of applied control IDs/names (resolved within the incident's folder, then Global; replaces existing)
         filtering_labels: List of label UUIDs (replaces existing)
     """
     try:
@@ -1566,6 +1567,15 @@ async def update_incident(
         if folder_id is not None:
             scope_folder = resolve_folder_id(folder_id)
             payload["folder"] = scope_folder
+        elif threats or assets or applied_controls:
+            incident_res = make_get_request(f"/incidents/{resolved_id}/")
+            if incident_res.status_code != 200:
+                return (
+                    f"Error updating incident: {incident_res.status_code} - "
+                    f"{incident_res.text}"
+                )
+            folder = incident_res.json().get("folder")
+            scope_folder = folder.get("id") if isinstance(folder, dict) else folder
 
         scalars = {
             "name": name,
@@ -1585,13 +1595,15 @@ async def update_incident(
 
         if threats is not None:
             payload["threats"] = [
-                resolve_threat_id(t, folder_id=scope_folder) for t in threats
+                resolve_in_folder_or_global(resolve_threat_id, t, scope_folder)
+                for t in threats
             ]
         if owners is not None:
             payload["owners"] = resolve_actor_ids(owners)
         if assets is not None:
             payload["assets"] = [
-                resolve_asset_id(a, folder_id=scope_folder) for a in assets
+                resolve_in_folder_or_global(resolve_asset_id, a, scope_folder)
+                for a in assets
             ]
         if qualifications is not None:
             payload["qualifications"] = resolve_qualification_ids(qualifications)
@@ -1599,7 +1611,7 @@ async def update_incident(
             payload["entities"] = [resolve_entity_id(e) for e in entities]
         if applied_controls is not None:
             payload["applied_controls"] = [
-                resolve_applied_control_id(c, folder_id=scope_folder)
+                resolve_in_folder_or_global(resolve_applied_control_id, c, scope_folder)
                 for c in applied_controls
             ]
         if filtering_labels is not None:

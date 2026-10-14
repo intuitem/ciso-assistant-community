@@ -323,6 +323,30 @@ def resolve_compliance_assessment_id(assessment_name_or_id: str) -> str:
     return assessments[0]["id"]
 
 
+def resolve_global_folder_id() -> str:
+    """Return the UUID of the Global folder"""
+    folders, error = fetch_all_results("/folders/", params={"content_type": "GL"})
+
+    if error:
+        raise ValueError(f"Global folder API error: {error}")
+
+    if not folders:
+        raise ValueError("Global folder not found")
+
+    return str(folders[0]["id"])
+
+
+def resolve_in_folder_or_global(resolver, name_or_id: str, folder_id: str = None):
+    """Resolve a name within folder_id (Global when None), falling back to Global"""
+    global_id = None if folder_id else resolve_global_folder_id()
+    try:
+        return resolver(name_or_id, folder_id=folder_id or global_id)
+    except ValueError as e:
+        if global_id or "not found" not in str(e):
+            raise
+        return resolver(name_or_id, folder_id=resolve_global_folder_id())
+
+
 def resolve_id_or_name(name_or_id: str, endpoint: str) -> str:
     """Generic helper function to resolve name to UUID for any endpoint
     If already a UUID, returns it. If a name, looks it up via API.
