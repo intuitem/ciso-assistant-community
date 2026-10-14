@@ -516,14 +516,16 @@
 		});
 	}
 
-	onMount(() => {
+	function applySavedSort() {
 		const saved = $tableSortStates[filterStoreKey];
-		const initialSort = saved ? { identifier: saved.orderBy, direction: saved.direction } : orderBy;
-		if (initialSort) {
-			initialSort.direction === 'asc'
-				? handler.sortAsc(initialSort.identifier)
-				: handler.sortDesc(initialSort.identifier);
-		}
+		const sort = saved ? { identifier: saved.orderBy, direction: saved.direction } : orderBy;
+		if (!sort) handler.getSort().set({});
+		else if (sort.direction === 'asc') handler.sortAsc(sort.identifier);
+		else handler.sortDesc(sort.identifier);
+	}
+
+	onMount(() => {
+		applySavedSort();
 		const unsubscribeSort = handler.getSort().subscribe(({ orderBy: key, direction }) => {
 			if (!key || !direction) return;
 			const next = { ...$tableSortStates };
@@ -657,6 +659,7 @@
 	$effect(() => {
 		if (filterStoreKey !== previousFilterStoreKey) {
 			previousFilterStoreKey = filterStoreKey;
+			untrack(applySavedSort);
 			const fresh = seedFilterValues();
 			Object.assign(filterValues, fresh);
 			_form.form.update((data) => ({
@@ -887,13 +890,7 @@
 		const nextSort = { ...$tableSortStates };
 		delete nextSort[filterStoreKey];
 		$tableSortStates = nextSort;
-		if (orderBy) {
-			orderBy.direction === 'asc'
-				? handler.sortAsc(orderBy.identifier)
-				: handler.sortDesc(orderBy.identifier);
-		} else {
-			handler.getSort().set({});
-		}
+		applySavedSort();
 		handler.invalidate();
 	}
 
