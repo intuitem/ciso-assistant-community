@@ -1183,7 +1183,7 @@
 							<MarkdownField
 								{form}
 								field="observation"
-								label="Observation"
+								label={m.observation()}
 								disabled={!canEditObservation}
 							/>
 						</div>
