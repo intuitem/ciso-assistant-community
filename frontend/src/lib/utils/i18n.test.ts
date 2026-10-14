@@ -69,3 +69,25 @@ describe('translateChoiceLabel', () => {
 		);
 	});
 });
+
+describe('slash-separated choice labels', () => {
+	afterAll(() => {
+		overwriteGetLocale(() => baseLocale);
+	});
+
+	it('renders the same full label by label and by value', () => {
+		overwriteGetLocale(() => 'fr');
+		// Forms, tables and detail views translate the label; filters translate the value.
+		expect(safeTranslate('Company culture / communication')).toBe(
+			"Culture d'entreprise / communication"
+		);
+		expect(translateChoiceLabel('Company culture / communication', 'companyCulture')).toBe(
+			"Culture d'entreprise / communication"
+		);
+	});
+
+	it('prefers a whole-label message over translating each part', () => {
+		overwriteGetLocale(() => 'fr');
+		expect(safeTranslate('Observation / sensitive point')).toBe('Observation / point sensible');
+	});
+});
