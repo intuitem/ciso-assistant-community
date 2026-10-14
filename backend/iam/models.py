@@ -749,6 +749,22 @@ def default_language() -> str:
     return "en"
 
 
+def default_date_format() -> str:
+    """The instance-wide default date format, used when the user has no preference."""
+    try:
+        from global_settings.models import GlobalSettings
+
+        general = GlobalSettings.objects.filter(name="general").first()
+        if general and isinstance(general.value, dict):
+            candidate = general.value.get("default_date_format", "auto")
+            if isinstance(candidate, str) and candidate in User.DATE_FORMATS:
+                return candidate
+    except ImportError, OperationalError, ProgrammingError:
+        # Called during startup and from migrations, before the table exists.
+        pass
+    return "auto"
+
+
 def resolve_language(code) -> str:
     """An explicit, supported language, else the instance default."""
     return code if is_supported_language(code) else default_language()
@@ -799,6 +815,7 @@ class UserManager(BaseUserManager):
         # An explicit language wins over the instance default: a third-party
         # representative gets their invitation in their own language.
         user.preferences["lang"] = resolve_language(extra_fields.get("language"))
+        user.preferences["date_format"] = default_date_format()
 
         user.save(using=self._db)
         user.user_groups.set(extra_fields.get("user_groups", []))
@@ -1018,13 +1035,24 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
             self.preferences = prefs
         if not is_supported_language(prefs.get("lang")):
             prefs["lang"] = default_language()
-        if prefs.get("date_format") not in self.DATE_FORMATS:
-            prefs["date_format"] = "auto"
+        stored_format = prefs.get("date_format")
+        if not isinstance(stored_format, str) or stored_format not in self.DATE_FORMATS:
+            prefs["date_format"] = default_date_format()
         ui = prefs.get("ui") if isinstance(prefs.get("ui"), dict) else {}
         if ui.get("theme") not in ("light", "dark", "system"):
             ui["theme"] = "system"
         prefs["ui"] = ui
         return prefs
+
+    def language_code(self) -> str:
+        """Just the language, resolved against the instance default. Unlike
+        get_preferences() this normalizes nothing else, so a read path that
+        only needs the language doesn't pay for — or mutate — the rest of the
+        preferences dict. Matters on list endpoints, which call it per row.
+        """
+        prefs = self.preferences if isinstance(self.preferences, dict) else {}
+        code = prefs.get("lang")
+        return code if is_supported_language(code) else default_language()
 
     # Maps Django HTML template names to YAML template keys
     _TEMPLATE_KEY_MAP = {
@@ -1268,6 +1296,8 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         "add_chatsession",
         "change_chatsession",
         "delete_chatsession",
+        "change_notification",
+        "delete_notification",
     }
 
     @property
@@ -1532,7 +1562,11 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         model: type[models.Model],
         id: uuid.UUID,
     ) -> bool:
-        """Return `True` if the `user` has the (`perm_prefix`, `model`) permission on the specific object identified by `id`."""
+        """
+        Return `True` if the `user` has the (`perm_prefix`, `model`) permission on the specific object identified by `id`.
+
+        Return `False` otherwise.
+        """
         from core.models import Actor
 
         if not isinstance(user, User):
@@ -2101,51 +2135,44 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         """
         Return a `folder.id => permission.codename` listing all the permissions (identified by their codenames) granted for each `folder`.
 
-        If `is_recusive` is `True`: the indirectly allowed folders are included (meaning `RoleAssignment.is_recursive` isn't ignored).
+        If `is_recursive` is `True`: the indirectly allowed folders are included (meaning `RoleAssignment.is_recursive` isn't ignored).
         """
 
         if not isinstance(principal, (User, UserGroup)):
             return {}
 
-        directly_granted_permissions: list[tuple[uuid.UUID, str, bool]] = [
-            (folder_id, codename, is_recursive)
-            for folder_id, codename, _, is_recursive in (
-                RoleAssignment._get_directly_granted_permissions(principal)
-            )
-            if folder_id is not None and codename is not None
-        ]
+        directly_assigned_codenames: dict[uuid.UUID, set[str]] = defaultdict(set)
+        recursively_assigned_codenames: dict[uuid.UUID, set[str]] = defaultdict(set)
+
+        for (
+            folder_id,
+            codename,
+            _,
+            is_grant_recursive,
+        ) in RoleAssignment._get_directly_granted_permissions(principal):
+            if folder_id is None or codename is None:
+                continue
+
+            directly_assigned_codenames[folder_id].add(codename)
+            if is_recursive and is_grant_recursive:
+                recursively_assigned_codenames[folder_id].add(codename)
 
         folder_id_to_codenames: dict[str, set[str]] = defaultdict(set)
-        for folder_id, codename, _ in directly_granted_permissions:
-            folder_id_to_codenames[str(folder_id)].add(codename)
+        for folder_id, codenames in directly_assigned_codenames.items():
+            folder_id_to_codenames[str(folder_id)] |= codenames
 
-        if is_recursive:
-            recursive_directly_granted_permissions: list[
-                tuple[uuid.UUID, str, bool]
-            ] = [
-                (folder_id, codename, is_recursive)
-                for folder_id, codename, is_recursive in directly_granted_permissions
-                if is_recursive
-            ]
-
-            recursive_folder_ids = {
-                folder_id
-                for (folder_id, _, _) in recursive_directly_granted_permissions
-            }
-            descendants_map: dict = defaultdict(set)
-
-            for from_id, to_id in Folder.descendants.through.objects.filter(
-                from_folder_id__in=recursive_folder_ids
-            ).values_list("from_folder_id", "to_folder_id"):
-                descendants_map[from_id].add(to_id)
+        if len(recursively_assigned_codenames) > 0:
+            recursive_folder_ids = list(recursively_assigned_codenames.keys())
 
             for (
                 folder_id,
-                codename,
-                is_recursive,
-            ) in recursive_directly_granted_permissions:
-                for descendant_id in descendants_map.get(folder_id, ()):
-                    folder_id_to_codenames[str(descendant_id)].add(codename)
+                descendant_folder_id,
+            ) in Folder.descendants.through.objects.filter(
+                from_folder_id__in=recursive_folder_ids
+            ).values_list("from_folder_id", "to_folder_id"):
+                folder_id_to_codenames[str(descendant_folder_id)] |= (
+                    recursively_assigned_codenames[folder_id]
+                )
 
         return folder_id_to_codenames
 
@@ -2382,10 +2409,17 @@ class ServiceAccount(AbstractBaseModel):
 
 
 common_exclude = ["created_at", "updated_at"]
+# `preferences` is personal UI state (language, theme, date format, hidden
+# modules) with no security meaning, and every toggle would otherwise log the
+# whole blob, burying the User events that matter. `password` stays tracked so
+# the *change* is still auditable, but the hash itself is redacted rather than
+# half-masked as auditlog would do by default.
 auditlog.register(
     User,
     m2m_fields={"user_groups", "idp_groups"},
-    exclude_fields=common_exclude,
+    exclude_fields=common_exclude + ["preferences"],
+    mask_fields=["password"],
+    mask_callable="iam.utils.redact_audited_secret",
 )
 auditlog.register(
     Folder,

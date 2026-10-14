@@ -72,9 +72,12 @@ class GlobalSettings(AbstractBaseModel, FolderMixin):
         "allow_assignments_to_entities": False,
         "enforce_mfa": False,
         "default_language": "en",
+        "default_date_format": "auto",
         "default_custom_analytics_dashboard": None,
         "default_packager": "custom",
         "disable_partially_compliant_result": False,
+        # Score pairs show documentation before implementation (CyFun tools).
+        "documentation_score_first": False,
         "use_risk_category_label": False,
     }
     """Default `value` used when creating a new `GENERAL` GlobalSetting. """

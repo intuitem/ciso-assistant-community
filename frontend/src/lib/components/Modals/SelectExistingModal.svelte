@@ -13,7 +13,9 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	const cBase = 'card bg-surface-100-900 border border-surface-500 p-4 w-modal shadow-xl space-y-4';
+	// A lazy picker renders no options up front, so the card needs its own width.
+	const cBase =
+		'card bg-surface-100-900 border border-surface-500 p-4 w-[640px] max-w-[90vw] shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold whitespace-pre-line';
 
 	interface Props {
@@ -42,7 +44,7 @@
 			fields: [],
 			classes: 'text-surface-500'
 		},
-		lazy = false
+		lazy = true
 	}: Props = $props();
 
 	const schema = modelSchema(urlModel);

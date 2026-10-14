@@ -37,6 +37,8 @@ An audit assesses compliance against the chosen framework. The evaluation of a s
 
 A requirement assessment is not a single value — it captures _several dimensions_ at once, separating **the compliance result** from **how the work got done** and from **the depth of the implementation**. The point is that the same row tracks the auditor's view, the analyst's progress, and the maturity of the underlying implementation without conflating them.
 
+<figure><img src="../.gitbook/assets/audits-list.png" alt=""><figcaption><p>Audits listed with their framework, perimeter and Progress percentage</p></figcaption></figure>
+
 ### Progress column
 
 Every audit in the audit tables (and on dashboards and campaigns) shows a **Progress** percentage. It answers a single question: _how much of the audit has been assessed?_
@@ -89,6 +91,8 @@ Text type questions are not taken into account for the result computation: leavi
 
 If you maintain a tenant whose audits were produced under the older boolean-collapse logic, see [Special cases — Recompute assessment results](../installation/special-cases.md#recompute-assessment-results-after-the-semantic-compute_result-upgrade) for the realignment procedure.
 
+<figure><img src="../.gitbook/assets/audit-detail.png" alt=""><figcaption><p>The audit page — the compliance donut summarises the results across every assessable requirement</p></figcaption></figure>
+
 ### Analyst dimension (assignee + workflow status)
 
 Independently of the compliance result, each requirement assessment captures _who is working on it_ and _where they are in their process_:
@@ -112,12 +116,19 @@ This is the auditor's grading language, useful when the framework requires disti
 
 ### Scoring layers
 
-Beyond the binary compliance result, each requirement assessment can carry a **score** on the framework's scale. Scoring captures _how mature or deep_ an implementation is, not just whether it exists. There are two ways to score, depending on what the audit needs:
+Beyond the binary compliance result, each requirement assessment can carry a **score** on the audit's scale. Scoring captures _how mature or deep_ an implementation is, not just whether it exists. There are two ways to score, depending on what the audit needs:
 
 - **Maturity score** _(single layer)_ — one score per requirement, typically used for CMMI-style or NIST-CSF-style maturity assessments.
 - **Implementation + Documentation scores** _(two layers)_ — toggle on **documentation score** to split scoring into _is this implemented?_ and _is the implementation documented?_. The platform computes the maturity score as the average of the enabled layers.
 
-Each requirement assessment uses an **effective scoring scale**. At audit runtime the fallback is the audit's own scoring scale (`ComplianceAssessment`), which is usually initialised from the framework when the audit is created. A requirement can override that audit-level scale with its own `min_score`, `max_score`, and level labels. The scoring UI, documentation score, exports, and tree views use that effective scale for the requirement.
+Each requirement assessment uses an **effective scoring scale**, resolved in this order:
+
+1. **Requirement scale** — a requirement can carry its own `min_score`, `max_score`, and level labels, set by the framework author.
+2. **Audit scale** — otherwise, the audit's own scoring scale (`ComplianceAssessment`).
+
+The audit scale is chosen when the audit is created and stored on the audit. The form proposes the baseline audit's scale for a copy, otherwise the framework's scale when the framework declares one, otherwise the **organisation default** set in [general settings](../configuration/settings/general.md#audits) (0–5 out of the box); a preset can be picked instead. Changing the organisation default later leaves existing audits alone. The audit scale can also be changed after creation, with existing scores converted proportionally — unless the framework's questionnaire computes the scores or some requirements carry their own scale, in which case the framework's scale is fixed. See [Choosing the score scale](../guides/customize-audit.md#choosing-the-score-scale).
+
+The scoring UI, documentation score, exports, and tree views use that effective scale for the requirement.
 
 When an audit contains mixed scales, average-based roll-ups normalise each requirement against its effective range before aggregating, then display the result on the audit scale. Sum-based roll-ups stay raw: they add `score x weight`, and their maximum is the sum of each requirement's effective maximum times its weight.
 
@@ -143,7 +154,9 @@ Evidence justifies the status of a compliance requirement or proves that an appl
 
 ## Raising findings
 
-With the **findings_from_requirements** [feature flag](../configuration/settings/feature-flags.md) on, a requirement assessment gains a **Findings** tab and a **Raise a finding** action, so a non-compliance is recorded without leaving the requirement. The audit's findings collect in a [findings binder](findings-assessments.md#raising-a-finding-from-a-requirement) created on first use.
+With the **findings_from_requirements** [feature flag](../configuration/settings/feature-flags.md) on, a requirement assessment gains a **Findings** tab. **Raise a finding** records a non-compliance without leaving the requirement; the picker next to it binds an existing finding, so an issue raised elsewhere (a pentest binder, say) is tied to the requirement it violates. The audit's own findings collect in a [findings binder](findings-assessments.md#raising-a-finding-from-a-requirement) created on first use.
+
+A finding belongs to one requirement assessment at a time. The picker only offers findings not bound to another requirement; to move one, edit the finding itself. Binding and unbinding are refused while the finding's binder is locked, and a locked audit does not take new findings. Raising needs permission to add findings, picking needs permission to change them.
 
 ## Related
 

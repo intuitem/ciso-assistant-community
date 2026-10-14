@@ -83,6 +83,16 @@ test('field visibility effects: each flag toggles the corresponding donut', asyn
 	const token = await getAuthToken(page.context());
 
 	/**
+	 * Navigate and wait for SvelteKit to hydrate. `page.goto` resolves on
+	 * `load`, before Svelte attaches event handlers, so a click landing in that
+	 * window is silently dropped. The root layout flags hydration on `<body>`.
+	 */
+	async function gotoHydrated(url: string) {
+		await page.goto(url);
+		await page.locator('body[data-hydrated="true"]').waitFor();
+	}
+
+	/**
 	 * PATCH the audit's field_visibility for a single field, then reload the
 	 * detail page so the new state is reflected in the DOM. The backend merges
 	 * partial field_visibility maps, so sending only the changed field is safe.
@@ -102,7 +112,7 @@ test('field visibility effects: each flag toggles the corresponding donut', asyn
 			response.ok(),
 			`PATCH failed: ${response.status()} ${await response.text()}`
 		).toBeTruthy();
-		await page.goto(auditDetailUrl);
+		await gotoHydrated(auditDetailUrl);
 	}
 
 	// === Matrix: each donut-bearing field hidden then visible ==============
@@ -122,11 +132,13 @@ test('field visibility effects: each flag toggles the corresponding donut', asyn
 	}
 
 	await setVisibility('status', HIDDEN);
-	await page.goto(`${auditDetailUrl}/table-mode`);
+	await gotoHydrated(`${auditDetailUrl}/table-mode`);
 
 	const firstRequirementAssessment = page.locator('.table-mode-form').first();
 	await firstRequirementAssessment.getByTestId('evidence-accordion-trigger').click();
-	await firstRequirementAssessment.getByTestId('select-evidence-button').click();
+	const selectEvidenceButton = firstRequirementAssessment.getByTestId('select-evidence-button');
+	await expect(selectEvidenceButton).toBeVisible();
+	await selectEvidenceButton.click();
 
 	await expect(page.getByTestId('modal-title')).toBeVisible();
 	const evidenceField = page.getByTestId('form-input-evidences');
@@ -176,7 +188,7 @@ test('field visibility effects: each flag toggles the corresponding donut', asyn
 	expect(seedResponse.ok(), `seed PATCH failed: ${await seedResponse.text()}`).toBeTruthy();
 
 	await setVisibility('result', HIDDEN);
-	await page.goto(`/requirement-assessments/${raId}/edit`);
+	await gotoHydrated(`/requirement-assessments/${raId}/edit`);
 	await expect(page.getByTestId('result-field')).toHaveCount(0);
 	await page.getByTestId('save-no-continue-button').click();
 	await complianceAssessmentsPage.isToastVisible('successfully saved', 'i');

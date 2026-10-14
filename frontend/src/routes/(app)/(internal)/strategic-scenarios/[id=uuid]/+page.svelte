@@ -37,6 +37,15 @@
 						<i class="fa-solid fa-route mr-2"></i>
 						{m.attackPaths()}
 					</h3>
+					{#if data.data.gravity_forced !== null && data.data.gravity_forced !== undefined}
+						<span
+							class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary-500/10 text-primary-700-300"
+							title={m.forcedValueTooltip({ value: data.data.computed_gravity?.name ?? '--' })}
+						>
+							<i class="fa-solid fa-thumbtack mr-2"></i>
+							{m.forcedGravity()}: {data.data.gravity?.name}
+						</span>
+					{/if}
 					{#if focusedFearedEvent}
 						<span
 							class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800"

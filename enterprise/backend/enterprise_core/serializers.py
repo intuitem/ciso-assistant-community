@@ -43,10 +43,10 @@ class FolderWriteSerializer(CommunityFolderWriteSerializer):
         ]
 
     def validate_parent_folder(self, parent_folder):
+        """Nesting is allowed here, so this replaces the community policy outright
+        (hence `_resolve_parent_folder`, not `super()`); only cycles remain to reject.
         """
-        Check that the folders graph will not contain cycles
-        """
-        parent_folder = super().validate_parent_folder(parent_folder)
+        parent_folder = self._resolve_parent_folder(parent_folder)
         if not self.instance:
             return parent_folder
         if parent_folder:
@@ -319,6 +319,12 @@ class FeatureFlagsSerializer(CommunityFeatureFlagSerializer):
     service_accounts = serializers.BooleanField(
         source="value.service_accounts", required=False, default=False
     )
+
+    # The only enterprise flag that merely hides a navigation area; the rest
+    # change what the data means or are configuration.
+    USER_HIDEABLE_FLAGS = CommunityFeatureFlagSerializer.USER_HIDEABLE_FLAGS | {
+        "campaigns"
+    }
 
 
 class ServiceAccountWriteSerializer(CommunityServiceAccountWriteSerializer):

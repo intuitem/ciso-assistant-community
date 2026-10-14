@@ -1,8 +1,7 @@
 """Domain export / import helpers extracted from FolderViewSet.
 
-Exposes the logic used by the three DRF actions on FolderViewSet
-(`export`, `import_domain`, `import_dummy_domain`) as module-level
-functions so the ViewSet stays thin.
+Exposes the logic used by the DRF actions on FolderViewSet (`export`,
+`import_domain`) as module-level functions so the ViewSet stays thin.
 """
 
 from __future__ import annotations
@@ -71,12 +70,15 @@ from ebios_rm.models import (
     StrategicScenario,
 )
 from iam.models import Folder, RoleAssignment, User
+from sec_intel.models import Tactic, Technique, TTPCatalog
 from tprm.models import (
     Contract,
     Entity,
     EntityAssessment,
     Solution,
+    Tier,
 )
+from tprm.tiers import set_entity_tier
 
 from .serializers import ExportSerializer
 from .utils import (
@@ -372,6 +374,16 @@ def import_terminologies(
     if single_value:
         return result_qs.first()
     return result_qs
+
+
+def _imported_tier(ref: str, **context) -> Tier | None:
+    """The tier an export names: by key, or by name for exports made before
+    tiers had keys. A missing one is not created: a tier without a rank would
+    break the ordering of the scale."""
+    tier = Tier.objects.filter(key=ref).first() or Tier.objects.filter(name=ref).first()
+    if tier is None:
+        logger.warning("Import: tier not found on this instance", tier=ref, **context)
+    return tier
 
 
 def import_asset_class(
@@ -851,6 +863,22 @@ def create_batch(
             raise ValidationError(f"Error creating {model._meta.model_name}: {str(e)}")
 
 
+def adopt_framework_labels(fields: dict[str, Any]) -> None:
+    """Exports predating score_scale_preset relied on the framework's labels at
+    display time; give such audits a copy, as migration 0190 does."""
+    if "score_scale_preset" in fields:
+        return
+    framework = fields["framework"]
+    definition = fields.get("scores_definition")
+    own = definition.get("scale") if isinstance(definition, dict) else definition
+    if own or (fields.get("min_score"), fields.get("max_score")) != (
+        framework.min_score,
+        framework.max_score,
+    ):
+        return
+    fields["scores_definition"] = framework.scores_definition
+
+
 def process_model_relationships(
     model: type[models.Model],
     fields: dict[str, Any],
@@ -905,6 +933,7 @@ def process_model_relationships(
                 id=link_dump_database_ids.get(_fields["perimeter"])
             ).first()
             _fields["framework"] = Framework.objects.get(urn=_fields["framework"])
+            adopt_framework_labels(_fields)
             many_to_many_map_ids["evidence_ids"] = get_mapped_ids(
                 _fields.pop("evidences", []), link_dump_database_ids
             )
@@ -1028,6 +1057,10 @@ def process_model_relationships(
             # Create with no parent and wire it up in the post-pass
             # resolve_self_referencing_fks once every entity exists.
             _fields["parent_entity"] = None
+            if tier_ref := _fields.pop("tier", None):
+                many_to_many_map_ids["tier"] = _imported_tier(
+                    tier_ref, entity=_fields.get("name")
+                )
             many_to_many_map_ids["relationship_ids"] = import_terminologies(
                 _fields.pop("relationship", []),
                 Terminology.FieldPath.ENTITY_RELATIONSHIP,
@@ -1043,6 +1076,12 @@ def process_model_relationships(
             )
             many_to_many_map_ids["asset_ids"] = get_mapped_ids(
                 _fields.pop("assets", []), link_dump_database_ids
+            )
+            tier_ref = _fields.pop("tier", None)
+            _fields["tier"] = (
+                _imported_tier(tier_ref, solution=_fields.get("name"))
+                if tier_ref
+                else None
             )
 
         case "solutionsubcontractor":
@@ -1158,6 +1197,10 @@ def process_model_relationships(
                 _fields["risk_origin"],
                 Terminology.FieldPath.ROTO_RISK_ORIGIN,
             )
+            _fields["target_objective_category"] = import_terminologies(
+                _fields.get("target_objective_category"),
+                Terminology.FieldPath.ROTO_TARGET_OBJECTIVE_CATEGORY,
+            )
 
         case "stakeholder":
             _fields.update(
@@ -1205,6 +1248,26 @@ def process_model_relationships(
                 _fields.pop("stakeholders", []), link_dump_database_ids
             )
 
+        case "technique":
+            # Library techniques never reach here: create_batch maps them to
+            # their urn. A custom one still carries referential links as urns.
+            # urn is unique but nullable, so `urn=None` matches every custom
+            # row — never look one up for a missing link.
+            catalog_urn = _fields.get("catalog")
+            _fields["catalog"] = (
+                TTPCatalog.objects.filter(urn=catalog_urn).first()
+                if catalog_urn
+                else None
+            )
+            parent_urn = _fields.get("parent")
+            _fields["parent"] = (
+                Technique.objects.filter(urn=parent_urn).first() if parent_urn else None
+            )
+            many_to_many_map_ids["tactic_urns"] = _fields.pop("tactics", [])
+            many_to_many_map_ids["reference_control_urns"] = _fields.pop(
+                "reference_controls", []
+            )
+
         case "operationalscenario":
             _fields.update(
                 {
@@ -1218,6 +1281,9 @@ def process_model_relationships(
             )
             many_to_many_map_ids["threat_ids"] = get_mapped_ids(
                 _fields.pop("threats", []), link_dump_database_ids
+            )
+            many_to_many_map_ids["technique_ids"] = get_mapped_ids(
+                _fields.pop("techniques", []), link_dump_database_ids
             )
 
         case "findingsassessment":
@@ -1426,11 +1492,24 @@ def set_many_to_many_relations(
             if stakeholder_ids := many_to_many_map_ids.get("stakeholder_ids"):
                 obj.stakeholders.set(Stakeholder.objects.filter(id__in=stakeholder_ids))
 
+        case "technique":
+            if tactic_urns := many_to_many_map_ids.get("tactic_urns"):
+                obj.tactics.set(Tactic.objects.filter(urn__in=tactic_urns))
+            if ref_control_urns := many_to_many_map_ids.get("reference_control_urns"):
+                obj.reference_controls.set(
+                    ReferenceControl.objects.filter(urn__in=ref_control_urns)
+                )
+
         case "operationalscenario":
             if threat_ids := many_to_many_map_ids.get("threat_ids"):
                 uuids, urns = split_uuids_urns(threat_ids)
                 obj.threats.set(
                     Threat.objects.filter(Q(id__in=uuids) | Q(urn__in=urns))
+                )
+            if technique_ids := many_to_many_map_ids.get("technique_ids"):
+                uuids, urns = split_uuids_urns(technique_ids)
+                obj.techniques.set(
+                    Technique.objects.filter(Q(id__in=uuids) | Q(urn__in=urns))
                 )
 
         case "answer":
@@ -1474,6 +1553,8 @@ def set_many_to_many_relations(
         case "entity":
             if relationship_ids := many_to_many_map_ids.get("relationship_ids"):
                 obj.relationship.set(relationship_ids)
+            if tier := many_to_many_map_ids.get("tier"):
+                set_entity_tier(obj, tier)
 
         case "solution":
             if asset_ids := many_to_many_map_ids.get("asset_ids"):

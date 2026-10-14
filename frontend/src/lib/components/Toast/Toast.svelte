@@ -1,12 +1,10 @@
 <script lang="ts" module>
 	import { fly } from 'svelte/transition';
 	import {
+		dynamicTransition,
 		type Transition,
-		type TransitionParams,
-		type CssClasses
-	} from '@skeletonlabs/skeleton-svelte';
-
-	import { dynamicTransition } from '$lib/components/utils/transitions';
+		type TransitionParams
+	} from '$lib/components/utils/transitions';
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	type FlyTransition = typeof fly;
@@ -31,17 +29,17 @@
 		position?: 't' | 'b' | 'l' | 'r' | 'tl' | 'tr' | 'bl' | 'br';
 		max?: number;
 		// Props (styles)
-		background?: CssClasses;
-		width?: CssClasses;
-		color?: CssClasses;
-		padding?: CssClasses;
-		spacing?: CssClasses;
-		rounded?: CssClasses;
-		shadow?: CssClasses;
-		zIndex?: CssClasses;
+		background?: string;
+		width?: string;
+		color?: string;
+		padding?: string;
+		spacing?: string;
+		rounded?: string;
+		shadow?: string;
+		zIndex?: string;
 		// Props (buttons)
-		buttonAction?: CssClasses;
-		buttonDismiss?: CssClasses;
+		buttonAction?: string;
+		buttonDismiss?: string;
 		buttonDismissLabel?: string;
 		// Props (transition)
 		transitions?: any;

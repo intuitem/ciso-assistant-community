@@ -387,13 +387,14 @@ class TestRegistryIntegrity:
         """The field list doubles as the filter/order whitelist, so a
         non-column entry would explode at query time; the scope filter
         assumes a concrete folder FK."""
-        from automation.workflows.actions import READABLE_MODELS
+        from core.reads import READABLE_MODELS
 
         for key, entry in READABLE_MODELS.items():
             columns = {f.name for f in entry.model._meta.concrete_fields}
             assert "folder" in columns, key
             for field in entry.readable_fields():
-                assert field in columns, f"{key}.{field}"
+                # Annotations are the database's own values, declared as such.
+                assert field in columns or field in entry.annotations, f"{key}.{field}"
 
 
 @pytest.mark.django_db
@@ -831,6 +832,155 @@ class TestAssessmentScoping:
 
 
 @pytest.mark.django_db
+class TestRequirementBacking:
+    """Asked for it, a requirement assessment read carries what is claimed to
+    satisfy the requirement — enough to weigh a result against its support
+    without a second read per row. Opt-in, because it is also the heaviest
+    thing the read can carry: see test_read_quality_check."""
+
+    def make_audit(self, domain, rows=1, with_backing=True):
+        from core.models import (
+            AppliedControl,
+            ComplianceAssessment,
+            Evidence,
+            EvidenceRevision,
+            Framework,
+            Perimeter,
+            RequirementAssessment,
+            RequirementNode,
+        )
+
+        suffix = uuid.uuid4().hex[:8]
+        framework = Framework.objects.create(
+            name="FW", urn=f"urn:test:fw-{suffix}", folder=Folder.get_root_folder()
+        )
+        perimeter = Perimeter.objects.create(name=f"P {suffix}", folder=domain)
+        audit = ComplianceAssessment.objects.create(
+            name="Audit", framework=framework, perimeter=perimeter, folder=domain
+        )
+        for index in range(rows):
+            requirement = RequirementNode.objects.create(
+                name=f"Access control {index}",
+                description="Access to systems is restricted to authorised users.",
+                urn=f"urn:test:fw-{suffix}:req{index}",
+                framework=framework,
+                assessable=True,
+                folder=Folder.get_root_folder(),
+            )
+            assessment = RequirementAssessment.objects.create(
+                compliance_assessment=audit,
+                requirement=requirement,
+                folder=domain,
+                result="compliant",
+                observation="Reviewed with the platform team.",
+            )
+            if not with_backing:
+                continue
+            control = AppliedControl.objects.create(
+                name=f"SSO enforced {index}", ref_id="AC-1", folder=domain
+            )
+            # Attached to the control, not to the requirement: the indirect
+            # side of the question.
+            indirect = Evidence.objects.create(
+                name=f"SSO config {index}", folder=domain
+            )
+            EvidenceRevision.objects.create(
+                evidence=indirect, version=1, link="https://example.test/sso"
+            )
+            control.evidences.add(indirect)
+            # Attached to the requirement itself, and with nothing behind it.
+            direct = Evidence.objects.create(
+                name=f"Access review {index}", folder=domain
+            )
+            assessment.applied_controls.add(control)
+            assessment.evidences.add(direct)
+        return audit
+
+    def read(self, domain, mode="first"):
+        version = read_flow(
+            domain,
+            {
+                "model": "requirement_assessment",
+                "mode": mode,
+                "limit": 50,
+                "include": ["applied_controls", "evidences"],
+            },
+        )
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.COMPLETED, instance.variables
+        output = read_output(instance)
+        return output["object"] if mode == "first" else output["results"]
+
+    def test_the_row_carries_the_expectation_and_the_note(self):
+        domain = make_domain("Backing expectation")
+        self.make_audit(domain)
+        row = self.read(domain)
+        assert (
+            row["requirement"]["description"]
+            == "Access to systems is restricted to authorised users."
+        )
+        assert row["observation"] == "Reviewed with the platform team."
+
+    def test_evidence_reaches_the_row_directly_and_through_a_control(self):
+        domain = make_domain("Backing evidence")
+        self.make_audit(domain)
+        row = self.read(domain)
+        assert [e["name"] for e in row["evidences"]] == ["Access review 0"]
+        control = row["applied_controls"][0]
+        assert (control["ref_id"], control["name"]) == ("AC-1", "SSO enforced 0")
+        assert [e["name"] for e in control["evidences"]] == ["SSO config 0"]
+
+    def test_an_evidence_with_nothing_behind_it_says_so(self):
+        """An evidence row can exist with no file and no link — the difference
+        between a claim and its support."""
+        domain = make_domain("Backing empty")
+        self.make_audit(domain)
+        row = self.read(domain)
+        assert row["evidences"][0]["attached"] is False
+        assert row["applied_controls"][0]["evidences"][0]["attached"] is True
+
+    def test_a_requirement_with_no_backing_reads_as_empty_not_missing(self):
+        domain = make_domain("Backing none")
+        self.make_audit(domain, with_backing=False)
+        row = self.read(domain)
+        assert row["applied_controls"] == []
+        assert row["evidences"] == []
+
+    def test_the_relations_are_not_filterable(self):
+        """They are computed, so they never become a filter surface — the
+        field list is concrete columns only."""
+        from automation.workflows.actions import READABLE_MODELS
+
+        readable = READABLE_MODELS["requirement_assessment"].readable_fields()
+        assert "applied_controls" not in readable
+        assert "evidences" not in readable
+        assert "observation" in readable
+
+    def test_more_rows_do_not_cost_more_queries(self):
+        """Without the entry's prefetch every row walks its controls, their
+        evidences and each one's revisions on its own.
+
+        Measured as the delta between two sizes, not an absolute count: a run
+        is an engine, an authorization kernel and a log, and none of that is
+        what this is about.
+        """
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        def queries_for(rows):
+            domain = make_domain(f"Backing queries {rows}")
+            self.make_audit(domain, rows=rows)
+            with CaptureQueriesContext(connection) as captured:
+                assert len(self.read(domain, mode="list")) == rows
+            return len(captured)
+
+        small = queries_for(2)
+        large = queries_for(6)
+        # Four more rows, each with a control, two evidences and a revision.
+        assert large - small <= 2, f"{small} queries for 2 rows, {large} for 6"
+
+
+@pytest.mark.django_db
 class TestOperatorTypeGating:
     def _flow(self, op, value):
         domain = make_domain(f"Domain op gate {op}")
@@ -859,19 +1009,14 @@ class TestOperatorTypeGating:
     def test_boolean_contains_is_rejected_at_run_time(self):
         # Published configs predate the publish gate: the same check must
         # fail loud at execution instead of diverging across databases.
-        from automation.workflows.actions import (
-            READABLE_MODELS,
-            ActionError,
-            _read_condition_to_q,
-        )
+        from core.reads import READABLE_MODELS, ReadError, condition_to_q
 
         entry = READABLE_MODELS["requirement_assessment"]
-        with pytest.raises(ActionError, match="not valid for field"):
-            _read_condition_to_q(
+        with pytest.raises(ReadError, match="not valid for field"):
+            condition_to_q(
                 {"field": "is_scored", "op": "contains", "value": "tru"},
                 entry,
                 {"is_scored"},
-                {},
             )
 
 
@@ -1007,3 +1152,183 @@ class TestEntityReadSurface:
         )
         output = read_output(start_instance(version))
         assert [row["name"] for row in output["results"]] == ["Critical"]
+
+
+@pytest.mark.django_db
+class TestAggregateMode:
+    """Numbers about the matches instead of the matches: the action answers
+    one value per aggregate, keyed by alias, through the same scope,
+    identity and filters as a row read."""
+
+    def test_answers_numbers_keyed_by_alias(self):
+        domain = make_domain("Domain aggregate")
+        AppliedControl.objects.create(
+            name="a", folder=domain, status="active", priority=1
+        )
+        AppliedControl.objects.create(
+            name="b", folder=domain, status="to_do", priority=3
+        )
+        version = read_flow(
+            domain,
+            {
+                "model": "applied_control",
+                "mode": "aggregate",
+                "aggregates": [
+                    {"fn": "count"},
+                    {"fn": "avg", "field": "priority"},
+                    {"fn": "count", "group_by": "status"},
+                    {"fn": "max", "field": "priority", "as": "top"},
+                ],
+            },
+        )
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.COMPLETED, instance.variables
+        output = read_output(instance)
+        assert output["count"] == 2
+        assert output["avg_priority"] == 2.0
+        assert output["by_status"]["active"] == 1
+        assert output["by_status"]["to_do"] == 1
+        assert output["by_status"]["deprecated"] == 0
+        assert output["top"] == 3
+        assert "results" not in output
+
+    def test_scope_and_filters_apply(self):
+        parent = make_domain("Parent agg")
+        domain = make_domain("Mine agg", parent=parent)
+        sub = make_domain("Sub agg", parent=domain)
+        AppliedControl.objects.create(name="parent row", folder=parent, status="active")
+        AppliedControl.objects.create(name="my row", folder=domain, status="active")
+        AppliedControl.objects.create(name="sub row", folder=sub, status="active")
+        AppliedControl.objects.create(name="other", folder=domain, status="to_do")
+        version = read_flow(
+            domain,
+            {
+                "model": "applied_control",
+                "mode": "aggregate",
+                "filters": {
+                    "operator": "and",
+                    "conditions": [{"field": "status", "op": "eq", "value": "active"}],
+                },
+                "aggregates": [{"fn": "count"}],
+            },
+        )
+        assert read_output(start_instance(version)) == {"count": 2}
+
+    def test_a_computed_value_runs_in_the_worker(self):
+        from core.models import (
+            ComplianceAssessment,
+            Framework,
+            Perimeter,
+            RequirementAssessment,
+            RequirementNode,
+        )
+
+        domain = make_domain("Domain progress")
+        framework = Framework.objects.create(
+            name="FW",
+            urn=f"urn:test:fw-{uuid.uuid4().hex[:6]}",
+            folder=Folder.get_root_folder(),
+        )
+        perimeter = Perimeter.objects.create(name="P", folder=domain)
+        audit = ComplianceAssessment.objects.create(
+            name="Audit", framework=framework, perimeter=perimeter, folder=domain
+        )
+        for index, status in enumerate(["done", "to_do"]):
+            node_row = RequirementNode.objects.create(
+                name=f"Req {index}",
+                urn=f"{framework.urn}:req{index}",
+                framework=framework,
+                assessable=True,
+                folder=Folder.get_root_folder(),
+            )
+            RequirementAssessment.objects.create(
+                compliance_assessment=audit,
+                requirement=node_row,
+                folder=domain,
+                status=status,
+            )
+        version = read_flow(
+            domain,
+            {
+                "model": "compliance_assessment",
+                "mode": "aggregate",
+                "aggregates": [{"fn": "avg", "field": "progress"}],
+            },
+        )
+        assert read_output(start_instance(version)) == {"avg_progress": 50.0}
+
+    def test_the_row_ceiling_fails_the_node_without_retrying(self, settings):
+        settings.WORKFLOW_AGGREGATE_MAX_ROWS = 1
+        domain = make_domain("Domain ceiling")
+        AppliedControl.objects.create(name="a", folder=domain, priority=1)
+        AppliedControl.objects.create(name="b", folder=domain, priority=2)
+        version = read_flow(
+            domain,
+            {
+                "model": "applied_control",
+                "mode": "aggregate",
+                "aggregates": [{"fn": "median", "field": "priority"}],
+            },
+        )
+        instance = start_instance(version)
+        assert instance.status == WorkflowInstance.Status.FAILED
+        assert any(
+            "exceed the ceiling" in (log.message or "")
+            for log in instance.logs.filter(event_type="error")
+        )
+
+    def test_publish_refuses_row_keys_and_bad_aggregates(self):
+        from automation.workflows.actions import validate_read_config
+
+        domain = make_domain("Domain agg validation")
+        version = read_flow(
+            domain,
+            {
+                "model": "applied_control",
+                "mode": "aggregate",
+                "limit": 25,
+                "aggregates": [{"fn": "avg", "field": "status"}],
+            },
+        )
+        read_node = version.nodes.get(type=WorkflowNode.Type.ACTION)
+        codes = [code for code, _m in validate_read_config(read_node)]
+        assert codes == ["action_read_invalid_aggregate"] * 2
+        assert "action_read_invalid_aggregate" in [
+            e["code"] for e in validate_graph(version)
+        ]
+
+    def test_a_loop_cannot_page_an_aggregate_read(self):
+        from automation.workflows.validation import _validate_loop_read
+
+        node = WorkflowNode(
+            loop_config={
+                "read": {
+                    "model": "applied_control",
+                    "mode": "aggregate",
+                    "aggregates": [{"fn": "count"}],
+                }
+            }
+        )
+        assert [code for code, _m in _validate_loop_read(node)] == ["loop_read_invalid"]
+
+    def test_the_registry_endpoint_describes_kinds_annotations_and_functions(self):
+        from rest_framework.test import APIRequestFactory, force_authenticate
+
+        from automation.workflows.views import WorkflowViewSet
+
+        request = APIRequestFactory().get("/workflows/workflows/readable-models/")
+        force_authenticate(request, user=publisher_user())
+        response = WorkflowViewSet.as_view({"get": "readable_models"})(request)
+        assert response.status_code == 200
+        entries = {entry["key"]: entry for entry in response.data}
+        control = entries["applied_control"]
+        assert control["kinds"]["priority"] == "numeric"
+        assert control["kinds"]["eta"] == "date"
+        assert control["kinds"]["status"] == "text"
+        assert control["kinds"]["evidences_count"] == "numeric"
+        assert control["annotations"] == ["evidences_count"]
+        assert "evidences_count" in control["fields"]
+        names = {fn["name"] for fn in control["aggregates"]}
+        assert {"count", "avg", "median", "percentile"} <= names
+        assert entries["compliance_assessment"]["kinds"]["framework"] == "relation"
+        assert "progress" in entries["compliance_assessment"]["computed"]

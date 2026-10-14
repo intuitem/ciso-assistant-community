@@ -14,6 +14,12 @@ from core.serializers import SerializerFactory
 from django.conf import settings
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
+from .utils import (
+    get_instance_feature_flags,
+    get_user_hidden_feature_flags,
+    get_user_hideable_feature_flags,
+    resolve_feature_flags,
+)
 from .serializers import (
     GeneralSettingsSerializer,
     FeatureFlagsSerializer,
@@ -86,6 +92,29 @@ class FeatureFlagsViewSet(viewsets.ModelViewSet):
         obj, _ = self.model.objects.get_or_create(name="feature-flags")
         self.check_object_permissions(self.request, obj)
         return obj
+
+    @action(detail=True, methods=["get"], permission_classes=[IsAuthenticated])
+    def effective(self, request, pk=None):
+        """The instance flags narrowed by the caller's hides.
+
+        Separate from `retrieve`, which stays the raw row: the admin form reads
+        that one and PUTs the whole body back, so serving the narrowed view
+        there would save an admin's personal hides instance-wide.
+        """
+        hideable = get_user_hideable_feature_flags()
+        instance_flags = get_instance_feature_flags()
+        return Response(
+            {
+                "flags": resolve_feature_flags(request.user),
+                "hideable": sorted(hideable),
+                "hidden": sorted(get_user_hidden_feature_flags(request.user)),
+                # Un-narrowed, so the UI can tell "you hid this" from "your
+                # organisation disabled it" — false in `flags` either way.
+                "instance": {
+                    name: instance_flags.get(name, False) for name in hideable
+                },
+            }
+        )
 
     @action(detail=True, methods=["get"])
     def defaults(self, request, pk=None):
@@ -250,7 +279,7 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
             folder=Folder.get_root_folder(),
         ):
             return Response(
-                {"error": "You do not have permission to change user preferences."},
+                {"error": "userDoesNotHavePermissionToChangeUserPreferences"},
                 status=403,
             )
         general = GlobalSettings.objects.filter(
@@ -263,7 +292,7 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
         )
         if not lang or lang not in dict(settings.LANGUAGES):
             return Response(
-                {"error": "No valid default language configured in general settings."},
+                {"error": "noDefaultLanguageConfigured"},
                 status=400,
             )
         with transaction.atomic():
@@ -276,6 +305,42 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
                 user.save(update_fields=["preferences"])
                 updated += 1
         return Response({"updated": updated, "language": lang})
+
+    @action(detail=True, methods=["post"], name="Force date format for all users")
+    def force_date_format(self, request, pk=None):
+        perm = Permission.objects.get(codename="change_user")
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=perm,
+            folder=Folder.get_root_folder(),
+        ):
+            return Response(
+                {"error": "userDoesNotHavePermissionToChangeUserPreferences"},
+                status=403,
+            )
+        general = GlobalSettings.objects.filter(
+            name=GlobalSettings.Names.GENERAL
+        ).first()
+        date_format = (
+            general.value.get("default_date_format")
+            if general and isinstance(general.value, dict)
+            else None
+        )
+        if not isinstance(date_format, str) or date_format not in User.DATE_FORMATS:
+            return Response(
+                {"error": "noDefaultDateFormatConfigured"},
+                status=400,
+            )
+        with transaction.atomic():
+            users = User.objects.select_for_update().all()
+            updated = 0
+            for user in users:
+                if not isinstance(user.preferences, dict):
+                    user.preferences = {}
+                user.preferences["date_format"] = date_format
+                user.save(update_fields=["preferences"])
+                updated += 1
+        return Response({"updated": updated, "date_format": date_format})
 
     @action(detail=True, name="Get security objective scales")
     def security_objective_scale(self, request):
@@ -447,7 +512,12 @@ def get_sso_info(request):
     API endpoint that returns the CSRF token.
     """
     sso_settings = SSOSettings.objects.get()
-    sp_entity_id = sso_settings.settings["sp"].get("entity_id")
+    sp_settings = (sso_settings.settings or {}).get("sp") or {}
+    sp_entity_id = (
+        sp_settings.get("entity_id")
+        or sso_settings.provider_id
+        or sso_settings.provider
+    )
     callback_url = settings.CISO_ASSISTANT_URL + "/"
     return Response(
         {

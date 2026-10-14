@@ -418,6 +418,12 @@
 					class="btn preset-filled-primary-500"
 					><i class="fa-solid fa-chart-line mr-2"></i>{m.analytics()}</Anchor
 				>
+				<Anchor
+					label={m.riskTrajectory()}
+					href="/risk-assessments/{risk_assessment.id}/trajectory"
+					class="btn preset-filled-primary-500"
+					><i class="fa-solid fa-route mr-2"></i>{m.riskTrajectory()}</Anchor
+				>
 				<span class="pt-4 font-light text-sm">{m.powerUps()}</span>
 				<button
 					class="btn text-white bg-linear-to-l from-sky-500 to-green-600"

@@ -212,12 +212,13 @@
       )
       #set text(9pt)
       #v(3pt)
-      // Two rows: a wrapped owner list would collide in a shared row.
+      // One row each: a wrapped owner list would collide in a shared row.
       #grid(
         columns: (2.2cm, 1fr),
         column-gutter: 6pt,
         row-gutter: 2pt,
         text(fill: muted)[Owner], [#finding.owners],
+        text(fill: muted)[Priority], [#finding.priority],
         text(fill: muted)[ETA / Due], [#finding.eta — #finding.due_date],
       )
       #if finding.description != "" [
@@ -227,6 +228,10 @@
       #if finding.observation != "" [
         #v(2pt)
         *Observation:* #finding.observation
+      ]
+      #if finding.recommendation != "" [
+        #v(2pt)
+        *Recommendation:* #finding.recommendation
       ]
       #if finding.controls.len() > 0 [
         #v(2pt)

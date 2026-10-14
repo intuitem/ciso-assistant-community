@@ -114,6 +114,7 @@
 	/>
 	<TextField
 		type="number"
+		step="1"
 		{form}
 		field="duration_months"
 		cacheLock={cacheLocks['duration_months']}

@@ -96,14 +96,14 @@
 
 <div class="flex flex-col space-y-4">
 	<!-- Header -->
-	<div class="card p-4 bg-white shadow-lg">
+	<div class="card p-4 bg-surface-50-950 shadow-lg">
 		<div class="flex items-center justify-between mb-4">
 			<div class="flex flex-col">
 				<div class="h4 font-bold">
 					<i class="fa-solid fa-arrow-right-to-bracket mr-2"></i>
 					{m.mapFromPreview()}
 				</div>
-				<div class="text-sm text-gray-600 mt-1">
+				<div class="text-sm text-surface-600-400 mt-1">
 					<span class="font-medium">{m.source()}:</span>
 					{preview.source_audit.name} ({preview.source_audit.framework})
 					<span class="mx-2">→</span>
@@ -136,25 +136,25 @@
 		</div>
 
 		<!-- Summary -->
-		<div class="text-sm text-gray-700">
+		<div class="text-sm text-surface-700-300">
 			<span class="font-semibold">{preview.updated_count}</span>
 			{m.requirementsUpdated()}
 		</div>
 	</div>
 
 	<!-- Compliance Distribution Comparison -->
-	<div class="card bg-white shadow-lg">
-		<div class="px-6 py-4 border-b border-gray-200">
+	<div class="card bg-surface-50-950 shadow-lg">
+		<div class="px-6 py-4 border-b border-surface-200-800">
 			<h2 class="h4 font-bold">
 				<i class="fa-solid fa-chart-pie mr-2"></i>
 				{m.compliance()}
 			</h2>
 		</div>
-		<div class="grid grid-cols-2 divide-x divide-gray-200">
+		<div class="grid grid-cols-2 divide-x divide-surface-200-800">
 			<!-- Current State -->
 			<div class="p-6">
 				<h3 class="h5 font-bold text-primary-500 mb-4">{m.currentState()}</h3>
-				<div class="flex grow bg-gray-200 rounded-md overflow-hidden h-6">
+				<div class="flex grow bg-surface-200-800 rounded-md overflow-hidden h-6">
 					{#each RESULT_KEYS as key}
 						{@const pct = getPercentage(currentResults, key)}
 						{#if pct > 0}
@@ -188,7 +188,7 @@
 			<!-- Projected State -->
 			<div class="p-6">
 				<h3 class="h5 font-bold text-secondary-500 mb-4">{m.projectedState()}</h3>
-				<div class="flex grow bg-gray-200 rounded-md overflow-hidden h-6">
+				<div class="flex grow bg-surface-200-800 rounded-md overflow-hidden h-6">
 					{#each RESULT_KEYS as key}
 						{@const pct = getPercentage(projectedResults, key)}
 						{#if pct > 0}
@@ -223,13 +223,13 @@
 
 	<!-- Differences Table -->
 	{#if preview.differences && preview.differences.length > 0}
-		<div class="card bg-white shadow-lg">
-			<div class="px-6 py-4 border-b border-gray-200">
+		<div class="card bg-surface-50-950 shadow-lg">
+			<div class="px-6 py-4 border-b border-surface-200-800">
 				<h2 class="h4 font-bold">
 					<i class="fa-solid fa-code-compare mr-2"></i>
 					{m.requirementDifferences()}
 				</h2>
-				<p class="text-sm text-gray-600 mt-1">
+				<p class="text-sm text-surface-600-400 mt-1">
 					{preview.differences.length}
 					{preview.differences.length === 1 ? m.requirement() : m.requirements()}
 					{m.withDifferences()}
@@ -238,39 +238,39 @@
 			<div class="overflow-x-auto">
 				<table class="table-auto w-full">
 					<thead>
-						<tr class="bg-gray-50">
+						<tr class="bg-surface-100-900">
 							<th
-								class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider"
+								class="px-6 py-3 text-left text-xs font-medium text-surface-700-300 uppercase tracking-wider"
 							>
 								{m.requirement()}
 							</th>
 							<th
-								class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider"
+								class="px-6 py-3 text-left text-xs font-medium text-surface-700-300 uppercase tracking-wider"
 							>
 								{m.sourceRequirement()}
 							</th>
 							<th
-								class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider"
+								class="px-6 py-3 text-left text-xs font-medium text-surface-700-300 uppercase tracking-wider"
 							>
 								{m.currentState()}
 							</th>
 							<th
-								class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider"
+								class="px-6 py-3 text-left text-xs font-medium text-surface-700-300 uppercase tracking-wider"
 							>
 								{m.projectedState()}
 							</th>
 						</tr>
 					</thead>
-					<tbody class="divide-y divide-gray-200">
+					<tbody class="divide-y divide-surface-200-800">
 						{#each preview.differences as diff}
-							<tr class="hover:bg-gray-50">
+							<tr class="hover:bg-surface-100-900">
 								<td class="px-6 py-4">
 									<div class="flex flex-col">
 										{#if diff.requirement.ref_id}
 											<span class="font-semibold text-sm">{diff.requirement.ref_id}</span>
 										{/if}
 										{#if diff.requirement.name}
-											<span class="text-sm text-gray-900">{diff.requirement.name}</span>
+											<span class="text-sm text-surface-900-100">{diff.requirement.name}</span>
 										{/if}
 										<span
 											class="text-xs mt-1"
@@ -286,7 +286,7 @@
 										{#each groupSources(diff.sources) as group}
 											<div class="flex flex-col gap-1">
 												{#if group.framework}
-													<span class="text-xs text-gray-400">{group.framework}</span>
+													<span class="text-xs text-surface-400-600">{group.framework}</span>
 												{/if}
 												<div class="flex flex-wrap gap-1">
 													{#each group.items as source}
@@ -303,7 +303,7 @@
 									<div class="flex flex-col space-y-1">
 										{#if diff.base.result !== undefined}
 											<div class="flex items-center space-x-2">
-												<span class="text-xs text-gray-500">{m.result()}:</span>
+												<span class="text-xs text-surface-500">{m.result()}:</span>
 												<span
 													class="badge text-xs"
 													style="background-color: {resultColors[diff.base.result] ||
@@ -315,7 +315,7 @@
 										{/if}
 										{#if diff.base.score !== null && diff.base.score !== undefined}
 											<div class="flex items-center space-x-2">
-												<span class="text-xs text-gray-500">{m.score()}:</span>
+												<span class="text-xs text-surface-500">{m.score()}:</span>
 												<span class="text-xs font-medium">{diff.base.score}</span>
 											</div>
 										{/if}
@@ -325,7 +325,7 @@
 									<div class="flex flex-col space-y-1">
 										{#if diff.compare.result !== undefined}
 											<div class="flex items-center space-x-2">
-												<span class="text-xs text-gray-500">{m.result()}:</span>
+												<span class="text-xs text-surface-500">{m.result()}:</span>
 												<span
 													class="badge text-xs"
 													style="background-color: {resultColors[diff.compare.result] ||
@@ -337,14 +337,14 @@
 										{/if}
 										{#if diff.compare.score !== null && diff.compare.score !== undefined}
 											<div class="flex items-center space-x-2">
-												<span class="text-xs text-gray-500">{m.score()}:</span>
+												<span class="text-xs text-surface-500">{m.score()}:</span>
 												<span class="text-xs font-medium">{diff.compare.score}</span>
 											</div>
 										{/if}
 										{#if diff.compare.observation !== undefined}
 											<div class="flex items-center space-x-2">
-												<i class="fa-solid fa-pen-to-square text-xs text-gray-400"></i>
-												<span class="text-xs text-gray-500">{m.observation()}</span>
+												<i class="fa-solid fa-pen-to-square text-xs text-surface-400-600"></i>
+												<span class="text-xs text-surface-500">{m.observation()}</span>
 											</div>
 										{/if}
 										{#if diff.m2m_added?.applied_controls}
@@ -375,7 +375,7 @@
 		</div>
 	{:else}
 		<div
-			class="card bg-white shadow-lg p-6 text-center text-gray-500"
+			class="card bg-surface-50-950 shadow-lg p-6 text-center text-surface-500"
 			data-testid="map-from-no-changes"
 		>
 			<i class="fa-solid fa-circle-info text-2xl mb-2"></i>

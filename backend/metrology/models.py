@@ -1,6 +1,6 @@
 import json
 import structlog
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from django.core.exceptions import ValidationError
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -101,8 +101,46 @@ class MetricDefinition(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
             "Default target value for metric instances. Can be overridden at instance level."
         ),
     )
+    # A derived metric: datasets read in aggregate mode through core.reads,
+    # one CEL expression over their results. Empty for a manual metric.
+    datasets = models.JSONField(
+        blank=True,
+        null=True,
+        verbose_name=_("Datasets"),
+        help_text=_(
+            "For derived metrics: named read configurations, each answering "
+            "aggregates the expression can use"
+        ),
+    )
+    expression = models.TextField(
+        blank=True,
+        default="",
+        verbose_name=_("Expression"),
+        help_text=_("For derived metrics: the CEL expression computing the value"),
+    )
+    # A metric formula: other metric definitions, each resolved per instance
+    # to that definition's instances in the instance's folder subtree. A
+    # list, not a mapping: PostgreSQL's jsonb does not keep key order.
+    inputs = models.JSONField(
+        blank=True,
+        null=True,
+        verbose_name=_("Inputs"),
+        help_text=_(
+            "For metrics computed from other metrics: the metrics the "
+            "expression combines, period by period"
+        ),
+    )
 
     fields_to_check = ["ref_id", "name"]
+
+    @property
+    def is_derived(self) -> bool:
+        return bool((self.expression or "").strip())
+
+    @property
+    def reads_metrics(self) -> bool:
+        """A formula over other metrics (a series), not over objects."""
+        return self.is_derived and bool(self.inputs)
 
     class Meta:
         verbose_name = _("Metric definition")
@@ -124,7 +162,9 @@ class MetricInstance(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         DEPRECATED = "deprecated", _("Deprecated")
 
     class Frequency(models.TextChoices):
-        REALTIME = "realtime", _("Real-time (continuous)")
+        # Named by their period: a value never changes meaning, since it also
+        # sets when a metric turns stale (STALENESS_THRESHOLDS).
+        EVERY_15_MINUTES = "15min", _("Every 15 minutes")
         HOURLY = "hourly", _("Hourly")
         DAILY = "daily", _("Daily")
         WEEKLY = "weekly", _("Weekly")
@@ -175,8 +215,39 @@ class MetricInstance(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         blank=True,
         null=True,
     )
+    # Derived metrics: when the sampler last ran for this instance, and what
+    # went wrong if no sample came out of it.
+    last_computed_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("Last computed at")
+    )
+    last_computation_error = models.TextField(
+        blank=True, default="", verbose_name=_("Last computation error")
+    )
+    # Metric formulas: the earliest moment whose period must be recomputed,
+    # because an input changed. Null when the series is up to date.
+    recompute_from = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("Recompute from")
+    )
+    # Metric formulas: per input key, the instance a "one value" input reads
+    # ({"pick": id}) or the instances a combined input leaves out
+    # ({"exclude": [ids]}), when the domain holds more than the formula means.
+    input_choices = models.JSONField(
+        blank=True,
+        null=True,
+        verbose_name=_("Input choices"),
+        help_text=_(
+            "For metrics computed from other metrics: which instances an input "
+            "reads when the domain holds several"
+        ),
+    )
 
     fields_to_check = ["ref_id", "name"]
+
+    @property
+    def is_derived(self) -> bool:
+        return (
+            self.metric_definition_id is not None and self.metric_definition.is_derived
+        )
 
     class Meta:
         verbose_name = _("Metric instance")
@@ -193,7 +264,13 @@ class MetricInstance(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         super().save(*args, **kwargs)
 
     def get_latest_sample(self):
-        return self.samples.first()  # ordering is important
+        # last_refresh, current_value and raw_value each want the same row, so the
+        # lookup is memoised per instance. When the caller prefetched `samples`,
+        # first() reads the prefetch cache and costs nothing; ordering is the
+        # model's own ("-timestamp"), so first() really is the latest.
+        if "_latest_sample" not in self.__dict__:
+            self.__dict__["_latest_sample"] = self.samples.first()
+        return self.__dict__["_latest_sample"]
 
     def last_refresh(self):
         latest_sample = self.get_latest_sample()
@@ -231,21 +308,74 @@ class MetricInstance(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         now = timezone.now()
         time_since_last_sample = now - latest_sample.timestamp
 
-        thresholds = {
-            self.Frequency.REALTIME: timedelta(minutes=15),
-            self.Frequency.HOURLY: timedelta(hours=2),
-            self.Frequency.DAILY: timedelta(hours=36),  # 1.5 days
-            self.Frequency.WEEKLY: timedelta(days=8),
-            self.Frequency.MONTHLY: timedelta(days=32),
-            self.Frequency.QUARTERLY: timedelta(days=95),
-            self.Frequency.YEARLY: timedelta(days=370),
-        }
-
-        threshold = thresholds.get(self.collection_frequency)
+        threshold = STALENESS_THRESHOLDS.get(self.collection_frequency)
         if threshold:
             return time_since_last_sample > threshold
 
         return False
+
+
+# Strict thresholds suitable for alerting: collection frequency plus a grace
+# period. Also how old an input's value may be when a metric formula reads it.
+STALENESS_THRESHOLDS = {
+    MetricInstance.Frequency.EVERY_15_MINUTES: timedelta(minutes=15),
+    MetricInstance.Frequency.HOURLY: timedelta(hours=2),
+    MetricInstance.Frequency.DAILY: timedelta(hours=36),  # 1.5 days
+    MetricInstance.Frequency.WEEKLY: timedelta(days=8),
+    MetricInstance.Frequency.MONTHLY: timedelta(days=32),
+    MetricInstance.Frequency.QUARTERLY: timedelta(days=95),
+    MetricInstance.Frequency.YEARLY: timedelta(days=370),
+}
+
+
+# Names a frequency had before frequencies were named by their period,
+# accepted where a client writes or filters one, and logged as deprecated.
+# "realtime" always meant fifteen minutes. Refused no later than the release
+# that adds a period shorter than fifteen minutes.
+FREQUENCY_ALIASES = {"realtime": MetricInstance.Frequency.EVERY_15_MINUTES.value}
+
+
+def normalize_frequency(value):
+    """``value``, or the frequency a deprecated name of it now stands for."""
+    current = FREQUENCY_ALIASES.get(value) if isinstance(value, str) else None
+    if current is None:
+        return value
+    logger.warning(
+        "Deprecated collection frequency", received=value, replaced_by=current
+    )
+    return current
+
+
+def whole_second(moment):
+    """``moment`` without its fraction of a second: entered samples are kept
+    to the second (CustomMetricSample.record)."""
+    if isinstance(moment, datetime):
+        return moment.replace(microsecond=0)
+    return moment
+
+
+def parse_sample_value(value):
+    """A stored sample value as Python: a JSON string is parsed, anything
+    else is returned as is. None when the string is not JSON."""
+    if isinstance(value, str):
+        try:
+            return json.loads(value)
+        except json.JSONDecodeError, TypeError:
+            return None
+    return value
+
+
+def quantitative_result(value):
+    """The number a quantitative envelope carries, or None. The one decoder
+    for ``{"result": ...}``, whether the value comes from a model instance
+    or straight out of ``values_list``."""
+    envelope = parse_sample_value(value)
+    if not isinstance(envelope, dict):
+        return None
+    result = envelope.get("result")
+    if isinstance(result, bool) or not isinstance(result, (int, float)):
+        return None
+    return result
 
 
 class CustomMetricSample(AbstractBaseModel, FolderMixin):
@@ -275,25 +405,84 @@ class CustomMetricSample(AbstractBaseModel, FolderMixin):
         null=True,
     )
 
+    class Source(models.TextChoices):
+        MANUAL = "manual", _("Manual")
+        WORKFLOW = "workflow", _("Workflow")
+        DERIVED = "derived", _("Derived")
+
+    source = models.CharField(
+        max_length=20,
+        choices=Source.choices,
+        default=Source.MANUAL,
+        verbose_name=_("Source"),
+        help_text=_(
+            "What wrote the sample: a person, a workflow, or the metric's own formula"
+        ),
+    )
+
+    # Metric formulas: the calendar period this sample answers for. One
+    # sample per instance and period, replaced when the period is recomputed.
+    period_start = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("Period start")
+    )
+
     class Meta:
         verbose_name = _("Custom metric sample")
         verbose_name_plural = _("Custom metric samples")
         ordering = ["-timestamp"]  # Most recent first
+        constraints = [
+            models.UniqueConstraint(
+                fields=["metric_instance", "period_start"],
+                condition=models.Q(period_start__isnull=False),
+                name="unique_metric_sample_per_period",
+            ),
+            # One entered sample per instance and second (record()); a
+            # formula's samples keep their own rule, one per period.
+            models.UniqueConstraint(
+                fields=["metric_instance", "timestamp"],
+                condition=~models.Q(source="derived"),
+                name="unique_entered_sample_per_second",
+            ),
+        ]
+        indexes = [
+            # A formula reads an input period by period: the instance's last
+            # sample at or before a moment, one seek on this index.
+            models.Index(
+                fields=["metric_instance", "timestamp"],
+                name="metric_sample_instance_time",
+            )
+        ]
 
     def __str__(self):
         return f"{self.metric_instance} - {self.timestamp}"
+
+    @classmethod
+    def record(cls, metric_instance, timestamp, **fields):
+        """Write an entered sample, kept to the second: one per instance and
+        second, the last one written wins. A sample for a second that already
+        holds one replaces it entirely (value, observation, evidence and
+        source), so a source writing faster than once a second keeps one
+        sample a second. Safe under concurrent writes: the unique constraint
+        turns the second insert into an update. Returns (sample, created)."""
+        return cls.objects.exclude(source=cls.Source.DERIVED).update_or_create(
+            metric_instance=metric_instance,
+            timestamp=whole_second(timestamp),
+            defaults={
+                "folder": metric_instance.folder,
+                "observation": None,
+                "evidence_revision": None,
+                "source": cls.Source.MANUAL,
+                **fields,
+            },
+        )
 
     def raw_value(self):
         if not self.value:
             return None
 
-        if isinstance(self.value, str):
-            try:
-                value_dict = json.loads(self.value)
-            except json.JSONDecodeError, TypeError:
-                return None
-        else:
-            value_dict = self.value
+        value_dict = parse_sample_value(self.value)
+        if value_dict is None:
+            return None
 
         if not isinstance(value_dict, dict):
             logger.warning(
@@ -318,10 +507,7 @@ class CustomMetricSample(AbstractBaseModel, FolderMixin):
             return choice_index
 
         elif metric_definition.category == MetricDefinition.Category.QUANTITATIVE:
-            result = value_dict.get("result")
-            if isinstance(result, bool) or not isinstance(result, (int, float)):
-                return None
-            return result
+            return quantitative_result(value_dict)
 
         return None
 
@@ -403,6 +589,8 @@ class CustomMetricSample(AbstractBaseModel, FolderMixin):
         return "N/A"
 
     def save(self, *args, **kwargs):
+        if self.source != self.Source.DERIVED:
+            self.timestamp = whole_second(self.timestamp)
         super().save(*args, **kwargs)
         self.metric_instance.save(update_fields=["updated_at"])
 
@@ -984,7 +1172,10 @@ class Dashboard(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
 
     @property
     def widget_count(self):
-        return self.widgets.count()
+        # The list endpoint annotates this to avoid a COUNT per row; a lone
+        # object (detail view, admin) still counts on demand.
+        annotated = self.__dict__.get("_widget_count")
+        return annotated if annotated is not None else self.widgets.count()
 
 
 class DashboardWidget(AbstractBaseModel, FolderMixin):
@@ -1000,6 +1191,7 @@ class DashboardWidget(AbstractBaseModel, FolderMixin):
         AREA = "area", _("Area Chart")
         GAUGE = "gauge", _("Gauge")
         SPARKLINE = "sparkline", _("Sparkline")
+        SMALL_MULTIPLES = "small_multiples", _("Small Multiples")
         TABLE = "table", _("Table")
         TEXT = "text", _("Text")
 

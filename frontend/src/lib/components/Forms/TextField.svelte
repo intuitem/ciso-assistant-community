@@ -5,12 +5,14 @@
 	import { onMount } from 'svelte';
 	import type { CacheLock } from '$lib/utils/types';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import type { CssClasses } from '@skeletonlabs/skeleton-svelte';
 
 	interface Props {
 		class?: string;
 		type?: string;
-		classesContainer?: CssClasses;
+		step?: string | number;
+		// datetime-local: down to the second instead of the minute.
+		seconds?: boolean;
+		classesContainer?: string;
 		label?: string | undefined;
 		field: string;
 		valuePath?: any; // the place where the value is stored in the form. This is useful for nested objects
@@ -27,6 +29,8 @@
 	let {
 		class: _class = '',
 		type = 'text',
+		step = 'any',
+		seconds = false,
 		classesContainer = '',
 		label = $bindable(),
 		field,
@@ -77,7 +81,7 @@
 	function formatDateForInput(utcDateString: string): string {
 		if (!utcDateString) return '';
 		const date = new Date(utcDateString);
-		// Format as YYYY-MM-DDThh:mm (format required by datetime-local input)
+		// Format as YYYY-MM-DDThh:mm[:ss] (format required by datetime-local input)
 		return (
 			date.getFullYear() +
 			'-' +
@@ -87,7 +91,8 @@
 			'T' +
 			String(date.getHours()).padStart(2, '0') +
 			':' +
-			String(date.getMinutes()).padStart(2, '0')
+			String(date.getMinutes()).padStart(2, '0') +
+			(seconds ? ':' + String(date.getSeconds()).padStart(2, '0') : '')
 		);
 	}
 
@@ -144,6 +149,7 @@
 				placeholder=""
 				value={displayValue}
 				oninput={handleDateTimeChange}
+				step={seconds ? 1 : undefined}
 				{...$constraints}
 				{...rest}
 				{disabled}
@@ -161,6 +167,7 @@
 				bind:value={$value}
 				{...$constraints}
 				{...rest}
+				{...type === 'number' ? { step } : {}}
 				{disabled}
 				{required}
 			/>

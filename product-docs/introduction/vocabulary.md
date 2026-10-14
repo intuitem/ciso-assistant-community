@@ -145,7 +145,7 @@ A glossary of the terms used in CISO Assistant. Where a user-facing term differs
 ## S
 
 - **Security advisory** — A catalogued security warning published by a vendor or CERT (e.g. CVE entries). Linked to vulnerabilities and affected assets.
-- **Security exception** — A documented, time-bound deviation from a control or policy, approved through a workflow and tracked for review.
+- **Security exception** — A documented, time-bound deviation from a requirement, control or risk treatment, with owners and an expiration date. See [Security exceptions](../concepts/security-exceptions.md).
 - **Severity** — The shared ordinal scale used to qualify vulnerabilities, incidents, and findings: undefined / info / low / medium / high / critical. Drives SLA escalation and visual emphasis in dashboards.
 - **Solution** — A product or service provided by an entity.
 - **Stakeholder** — In EBIOS RM, an internal or external party with a relationship to the studied system. Evaluated for trust level and dependency.

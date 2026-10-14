@@ -2,7 +2,11 @@
 	import { m } from '$paraglide/messages';
 	import { invalidateAll, goto } from '$app/navigation';
 	import { LOCALE_MAP } from '$lib/utils/locales';
-	import { APPROVED_REVISION_STATUSES } from '$lib/utils/documentRevisions';
+	import {
+		APPROVED_REVISION_STATUSES,
+		pickInForceRevisionToShow
+	} from '$lib/utils/documentRevisions';
+	import { safeTranslate } from '$lib/utils/i18n';
 	import { page } from '$app/state';
 	import { canPerformActionOnObject } from '$lib/utils/access-control';
 	import { getToastStore } from '$lib/components/Toast/stores';
@@ -13,6 +17,7 @@
 		type ModalStore
 	} from '$lib/components/Modals/stores';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
+	import PdfPreview from '$lib/components/AttachmentPreview/PdfPreview.svelte';
 
 	interface Props {
 		parent: { id: string; name: string };
@@ -59,6 +64,7 @@
 	};
 
 	let status = $derived(currentRevision?.status as string | undefined);
+	let inForceRevision = $derived(pickInForceRevisionToShow(revisions, currentRevision?.id));
 	// RBACPermissions maps POST to add_<model>, hence add_documentrevision here.
 	let canTransition = $derived(
 		canPerformActionOnObject({
@@ -234,9 +240,16 @@
 					{parent?.name || m.untitled()}
 				</h1>
 				{#if currentRevision}
-					<span class="badge {statusStyles[status ?? 'draft']} mt-1 text-xs">
-						{status} · v{currentRevision.version_number}
-					</span>
+					<div class="mt-1 flex flex-wrap items-center gap-1.5">
+						{#if inForceRevision}
+							<span class="badge {statusStyles.published} text-xs">
+								{m.published()} · v{inForceRevision.version_number}
+							</span>
+						{/if}
+						<span class="badge {statusStyles[status ?? 'draft']} text-xs">
+							{safeTranslate(status ?? 'draft')} · v{currentRevision.version_number}
+						</span>
+					</div>
 				{/if}
 			</div>
 		</div>
@@ -312,11 +325,7 @@
 				<i class="fa-solid fa-download mr-2"></i>{m.download()}
 			</a>
 			{#if isPdf}
-				<iframe
-					src={currentFileUrl}
-					title={parent?.name}
-					class="h-[70vh] w-full rounded-xl border border-surface-200-800"
-				></iframe>
+				<PdfPreview src={currentFileUrl} title={parent?.name} />
 			{/if}
 		{:else}
 			<p class="text-sm text-surface-500">{m.noFileUploaded()}</p>

@@ -10,7 +10,9 @@
 		type ModalSettings
 	} from '$lib/components/Modals/stores';
 	import BatchActionModal from '$lib/components/Modals/BatchActionModal.svelte';
+	import { applyUnreadCount } from '$lib/utils/stores';
 	import MergeAppliedControlsModal from '$lib/components/Modals/MergeAppliedControlsModal.svelte';
+	import ComposeMetricModal from '$lib/components/Modals/ComposeMetricModal.svelte';
 	import type { BatchActionConfig, TableBatchAction } from '$lib/utils/table';
 	import type { urlModel } from '$lib/utils/types';
 	import type { DataHandler } from '@vincjo/datatables/remote';
@@ -90,6 +92,21 @@
 			return;
 		}
 
+		if (action.type === 'compose') {
+			if (action.maxSelection !== undefined && count > action.maxSelection) {
+				toastStore.trigger({
+					message: m.composeMaxSelection({ n: action.maxSelection }),
+					background: 'preset-filled-warning-500'
+				});
+				return;
+			}
+			modalStore.trigger({
+				type: 'component',
+				component: { ref: ComposeMetricModal, props: { instanceIds: ids } }
+			});
+			return;
+		}
+
 		if (action.type === 'merge') {
 			const minSel = action.minSelection ?? 2;
 			const maxSel = action.maxSelection;
@@ -132,7 +149,9 @@
 				optionsEndpoint: action.optionsEndpoint,
 				enableDoubleDash: action.enableDoubleDash ?? false,
 				multiSelect: action.multiSelect ?? false,
+				inputType: action.inputType,
 				confirmMessage: action.confirmMessage,
+				fixedValue: action.value,
 				onConfirm: async (value?: string | string[]) => {
 					try {
 						const res = await fetch(`/${URLModel}/batch-action`, {
@@ -155,6 +174,8 @@
 						}
 
 						const result = await res.json();
+						// Any endpoint reporting an unread count updates the badge.
+						applyUnreadCount(result);
 						const succeededCount = result.succeeded?.length ?? 0;
 						const failedCount = result.failed?.length ?? 0;
 

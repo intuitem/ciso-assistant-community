@@ -1,9 +1,11 @@
 <script lang="ts">
 	import LevelEditor from '$lib/components/RiskMatrixEditor/LevelEditor.svelte';
 	import GridEditor from '$lib/components/RiskMatrixEditor/GridEditor.svelte';
+	import EbiosRmSectionEditor from './EbiosRmSectionEditor.svelte';
 	import { pageTitle } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { page } from '$app/state';
 	import { LOCALE_MAP, language } from '$lib/utils/locales';
 	import { getToastStore } from '$lib/components/Toast/stores';
 
@@ -25,6 +27,10 @@
 	$pageTitle = m.lbMatrixPageTitle({ name: matrix.name || matrix.ref_id });
 
 	const baseLang = draft.locale ?? 'en';
+
+	let labelStandard = $derived(page.data.settings?.risk_matrix_labels ?? 'ISO');
+	let probabilityLabel = $derived(safeTranslate(`probability${labelStandard}`));
+	let impactLabel = $derived(safeTranslate(`impact${labelStandard}`));
 
 	// The document's level objects carry no numeric id; the editor components
 	// key on one. Assigned on load, stripped on save.
@@ -52,6 +58,7 @@
 	let impactLevels = $state(withIds(matrix.impact));
 	let riskLevels = $state(withIds(matrix.risk));
 	let grid = $state<number[][]>((matrix.grid ?? []).map((row: number[]) => [...row]));
+	let ebiosRm = $state<any>(matrix.ebios_rm ? structuredClone(matrix.ebios_rm) : null);
 	let unsaved = $state(false);
 	let saving = $state(false);
 
@@ -62,14 +69,25 @@
 	let activeLang = $state(baseLang);
 	let addedLanguages: string[] = $state([]);
 	let metaTranslations: Record<string, { name?: string; description?: string }> = $state({
-		...(matrix.translations ?? {})
+		...matrix.translations
 	});
 	let isTranslatingMeta = $derived(activeLang !== baseLang);
+
+	// Translatable levels of the optional EBIOS RM section.
+	function ebiosRmLevels(): { translations?: Record<string, unknown> }[] {
+		if (!ebiosRm) return [];
+		const roTo = ebiosRm.ro_to ?? {};
+		return [
+			...(ebiosRm.success_probability ?? []),
+			...(ebiosRm.technical_difficulty ?? []),
+			...['motivation', 'resources', 'activity', 'pertinence'].flatMap((scale) => roTo[scale] ?? [])
+		];
+	}
 
 	// Languages that already carry translations anywhere in the matrix.
 	let usedLanguages = $derived.by(() => {
 		const langs = new Set<string>();
-		for (const levels of [probabilityLevels, impactLevels, riskLevels]) {
+		for (const levels of [probabilityLevels, impactLevels, riskLevels, ebiosRmLevels()]) {
 			for (const level of levels) {
 				for (const lang of Object.keys(level.translations ?? {})) langs.add(lang);
 			}
@@ -97,11 +115,12 @@
 
 	function removeLanguage(code: string) {
 		if (code === baseLang) return;
-		for (const levels of [probabilityLevels, impactLevels, riskLevels]) {
+		for (const levels of [probabilityLevels, impactLevels, riskLevels, ebiosRmLevels()]) {
 			for (const level of levels) {
 				if (level.translations?.[code]) delete level.translations[code];
 			}
 		}
+		if (ebiosRm) ebiosRm = { ...ebiosRm };
 		probabilityLevels = [...probabilityLevels];
 		impactLevels = [...impactLevels];
 		riskLevels = [...riskLevels];
@@ -218,7 +237,8 @@
 						probability: withoutIds(probabilityLevels),
 						impact: withoutIds(impactLevels),
 						risk: withoutIds(riskLevels),
-						grid
+						grid,
+						ebios_rm: ebiosRm
 					}
 				})
 			});
@@ -380,7 +400,7 @@
 		<div class="card p-4">
 			<LevelEditor
 				bind:levels={probabilityLevels}
-				title={m.lbMatrixProbability()}
+				title={probabilityLabel}
 				onchange={onProbabilityChange}
 				{activeLang}
 				{baseLang}
@@ -389,7 +409,7 @@
 		<div class="card p-4">
 			<LevelEditor
 				bind:levels={impactLevels}
-				title={m.lbMatrixImpact()}
+				title={impactLabel}
 				onchange={onImpactChange}
 				{activeLang}
 				{baseLang}
@@ -420,4 +440,14 @@
 			{baseLang}
 		/>
 	</div>
+
+	{#if page.data.featureflags?.ebiosrm || ebiosRm}
+		<EbiosRmSectionEditor
+			bind:section={ebiosRm}
+			likelihoodLevels={probabilityLevels}
+			{activeLang}
+			{baseLang}
+			onchange={() => (unsaved = true)}
+		/>
+	{/if}
 </div>

@@ -1,7 +1,6 @@
 <script lang="ts">
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import { getModelInfo } from '$lib/utils/crud.js';
-	import type { ModalComponent, ModalSettings, ModalStore } from '@skeletonlabs/skeleton-svelte';
 	import type { PageData } from './$types';
 	import AttachmentPreview from '$lib/components/AttachmentPreview/AttachmentPreview.svelte';
 	import { page } from '$app/state';
@@ -12,7 +11,12 @@
 	import { z } from 'zod';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { canPerformAction } from '$lib/utils/access-control';
-	import { getModalStore } from '$lib/components/Modals/stores';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
+	} from '$lib/components/Modals/stores';
 
 	interface Props {
 		data: PageData;

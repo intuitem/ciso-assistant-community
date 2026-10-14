@@ -1,6 +1,7 @@
 <script lang="ts">
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import { consumeCreateIntent } from '$lib/utils/create-intent';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
 	import type { PageData, ActionData } from './$types';
@@ -37,6 +38,12 @@
 		};
 		modalStore.trigger(modal);
 	}
+
+	// `THIRD_PARTY_URL_MODEL` overlaps `URL_MODEL`, and for those models this route wins over
+	// `(internal)/[model=urlmodel]` — for internal users too. So the intent lands here.
+	$effect(() => {
+		consumeCreateIntent({ urlModel: URLModel, modelName: data.model.name, open: modalCreateForm });
+	});
 </script>
 
 {#if data.table}

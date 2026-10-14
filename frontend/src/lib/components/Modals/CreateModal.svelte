@@ -2,7 +2,6 @@
 	// Stores
 	import * as m from '$paraglide/messages';
 	import type { ModelInfo } from '$lib/utils/types';
-	import type { ModalStore } from '@skeletonlabs/skeleton-svelte';
 	const modalStore: ModalStore = getModalStore();
 
 	let closeModal = true;
@@ -15,7 +14,8 @@
 	import ModelForm from '$lib/components/Forms/ModelForm.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { FormDataShape } from '$lib/utils/schemas';
-	import { getModalStore } from './stores';
+	import { getModalStore, type ModalStore } from './stores';
+	import { ensureSelectOptions } from '$lib/utils/select-options';
 	import { onMount, tick } from 'svelte';
 	interface Props {
 		/** Exposes parent props to this component. */
@@ -56,8 +56,16 @@
 		...rest
 	}: Props = $props();
 
-	// Focus the first field when modal opens
+	// ModelForm reads model.selectOptions[...] expecting it to be there.
+	let optionsReady = $state(false);
+
 	onMount(async () => {
+		try {
+			await ensureSelectOptions(model, additionalInitialData);
+		} finally {
+			// Empty dropdowns beat no form.
+			optionsReady = true;
+		}
 		await tick(); // Wait for DOM to render
 		const firstField = document.querySelector('input[data-focusindex="0"]');
 		if (firstField instanceof HTMLElement) {
@@ -81,24 +89,26 @@
 				<i class="fa-solid fa-xmark"></i>
 			</button>
 		</div>
-		<ModelForm
-			{form}
-			{customNameDescription}
-			{importFolder}
-			{additionalInitialData}
-			{suggestions}
-			{parent}
-			{invalidateAll}
-			{model}
-			{closeModal}
-			{context}
-			{origin}
-			{duplicate}
-			{taintedMessage}
-			caching={true}
-			action={formAction}
-			{debug}
-			{...rest}
-		/>
+		{#if optionsReady}
+			<ModelForm
+				{form}
+				{customNameDescription}
+				{importFolder}
+				{additionalInitialData}
+				{suggestions}
+				{parent}
+				{invalidateAll}
+				{model}
+				{closeModal}
+				{context}
+				{origin}
+				{duplicate}
+				{taintedMessage}
+				caching={true}
+				action={formAction}
+				{debug}
+				{...rest}
+			/>
+		{/if}
 	</div>
 {/if}

@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from core.mappings.engine import engine
+from core.mappings.engine import MappingEngine
 from core.models import StoredLibrary, ComplianceAssessment
 import random
 import uuid
@@ -103,6 +103,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         test_mode = options.get("test")
         max_depth = options.get("depth")
+        engine = MappingEngine()
 
         if test_mode:
             print("🔧 Test mode enabled: generating simulated data...")

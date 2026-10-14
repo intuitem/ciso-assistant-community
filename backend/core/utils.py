@@ -198,6 +198,7 @@ class RoleCodename(Enum):
     THIRD_PARTY_RESPONDENT = "BI-RL-TPR"
     AUDITEE = "BI-RL-ADE"
     TECHNICAL_TESTER = "BI-RL-TST"
+    USER_CREATOR = "BI-RL-UCR"
 
     def __str__(self) -> str:
         return self.value
@@ -208,6 +209,7 @@ class UserGroupCodename(Enum):
     GLOBAL_READER = "BI-UG-GAD"
     GLOBAL_APPROVER = "BI-UG-GAP"
     GLOBAL_AUDITEE = "BI-UG-GAE"
+    GLOBAL_USER_CREATOR = "BI-UG-GUC"
     DOMAIN_MANAGER = "BI-UG-DMA"
     ANALYST = "BI-UG-ANA"
     APPROVER = "BI-UG-APP"
@@ -467,6 +469,33 @@ BUILTIN_ROLE_TRANSLATIONS = {
         "ur": {"name": "بنیادی ریڈر"},
         "zh": {"name": "基线阅读者"},
     },
+    "BI-RL-UCR": {
+        "en": {"name": "User creator"},
+        "ar": {"name": "منشئ المستخدمين"},
+        "cs": {"name": "Tvůrce uživatelů"},
+        "da": {"name": "Brugeropretter"},
+        "de": {"name": "Benutzerersteller"},
+        "el": {"name": "Δημιουργός χρηστών"},
+        "es": {"name": "Creador de usuarios"},
+        "et": {"name": "Kasutajate looja"},
+        "fr": {"name": "Créateur d'utilisateurs"},
+        "hi": {"name": "उपयोगकर्ता निर्माता"},
+        "hr": {"name": "Kreator korisnika"},
+        "hu": {"name": "Felhasználólétrehozó"},
+        "id": {"name": "Pembuat pengguna"},
+        "it": {"name": "Creatore di utenti"},
+        "ko": {"name": "사용자 생성자"},
+        "lt": {"name": "Naudotojų kūrėjas"},
+        "nl": {"name": "Gebruikersaanmaker"},
+        "pl": {"name": "Twórca użytkowników"},
+        "pt": {"name": "Criador de usuários"},
+        "ro": {"name": "Creator de utilizatori"},
+        "sv": {"name": "Användarskapare"},
+        "tr": {"name": "Kullanıcı oluşturucu"},
+        "uk": {"name": "Творець користувачів"},
+        "ur": {"name": "صارف تخلیق کار"},
+        "zh": {"name": "用户创建者"},
+    },
 }
 
 
@@ -493,6 +522,7 @@ BUILTIN_USERGROUP_CODENAMES = {
     str(UserGroupCodename.GLOBAL_READER): str(RoleCodename.READER),
     str(UserGroupCodename.GLOBAL_APPROVER): str(RoleCodename.APPROVER),
     str(UserGroupCodename.GLOBAL_AUDITEE): str(RoleCodename.AUDITEE),
+    str(UserGroupCodename.GLOBAL_USER_CREATOR): str(RoleCodename.USER_CREATOR),
     str(UserGroupCodename.DOMAIN_MANAGER): str(RoleCodename.DOMAIN_MANAGER),
     str(UserGroupCodename.ANALYST): str(RoleCodename.ANALYST),
     str(UserGroupCodename.APPROVER): str(RoleCodename.APPROVER),
@@ -1299,6 +1329,79 @@ def _build_answer_context(questions_qs, answers_qs):
     )
 
 
+def _trigger_assignment(groups, new_groups, ig_triggers, assignment_by_ra_id):
+    """The assignment owning an answer that selected one of the new groups."""
+    for group in groups or []:
+        if group not in new_groups:
+            continue
+        for trigger_ra_id in ig_triggers.get(group, []):
+            if trigger_ra_id in assignment_by_ra_id:
+                return assignment_by_ra_id[trigger_ra_id]
+    return None
+
+
+def sync_requirement_assignments(compliance_assessment, ig_triggers, previous_groups):
+    """Keep assignment scopes in step with the selected implementation groups.
+
+    Requirements already visible under the previous groups are left alone. Call
+    inside the transaction that saves the selection: previous_groups is the only
+    record of the old scope, so a partial write cannot be retried.
+    """
+    from core.models import RequirementAssessment, RequirementAssignment
+
+    selected = set(compliance_assessment.selected_implementation_groups or [])
+    if selected == previous_groups:
+        return
+
+    # A submitted or closed assignment keeps the scope it was judged on.
+    open_statuses = {
+        RequirementAssignment.Status.DRAFT,
+        RequirementAssignment.Status.IN_PROGRESS,
+        RequirementAssignment.Status.CHANGES_REQUESTED,
+    }
+    assigned_ra_ids: set = set()
+    assignment_by_ra_id: dict = {}
+    for assignment_id, assignment_status, ra_id in RequirementAssignment.objects.filter(
+        compliance_assessment=compliance_assessment
+    ).values_list("id", "status", "requirement_assessments__id"):
+        if not ra_id:
+            continue
+        assigned_ra_ids.add(ra_id)
+        if assignment_status in open_statuses:
+            assignment_by_ra_id[ra_id] = assignment_id
+    if not assignment_by_ra_id:
+        return
+
+    new_groups = selected - previous_groups
+    to_add: dict = {}
+    to_remove: dict = {}
+    for ra_id, assessable, groups in RequirementAssessment.objects.filter(
+        compliance_assessment=compliance_assessment
+    ).values_list(
+        "id", "requirement__assessable", "requirement__implementation_groups"
+    ):
+        owner = assignment_by_ra_id.get(ra_id)
+        if owner is not None:
+            if selected and not selected & set(groups or []):
+                to_remove.setdefault(owner, []).append(ra_id)
+            continue
+        if ra_id in assigned_ra_ids or not assessable:
+            continue
+        if not previous_groups or previous_groups & set(groups or []):
+            continue
+        target = _trigger_assignment(
+            groups, new_groups, ig_triggers, assignment_by_ra_id
+        )
+        if target is not None:
+            to_add.setdefault(target, []).append(ra_id)
+
+    assignments = RequirementAssignment.objects.in_bulk(set(to_add) | set(to_remove))
+    for assignment_id, ra_ids in to_add.items():
+        assignments[assignment_id].requirement_assessments.add(*ra_ids)
+    for assignment_id, ra_ids in to_remove.items():
+        assignments[assignment_id].requirement_assessments.remove(*ra_ids)
+
+
 def update_selected_implementation_groups(compliance_assessment):
     """Recalculate dynamic IGs from visible answers, preserving manually-picked ones.
 
@@ -1306,6 +1409,9 @@ def update_selected_implementation_groups(compliance_assessment):
     select_implementation_groups. Those get fully recomputed here. Any other IG already
     on the assessment is treated as a manual pick and left untouched.
     """
+    from django.db import transaction
+    from django.db.models import F
+
     from core.models import Answer, Question, QuestionChoice
 
     dynamic_eligible_igs: set[str] = set()
@@ -1317,11 +1423,14 @@ def update_selected_implementation_groups(compliance_assessment):
             dynamic_eligible_igs.update(select_list)
 
     igs_to_select: set[str] = set()
+    # ref_id -> the RAs whose answers selected that IG
+    ig_triggers: dict[str, list] = {}
 
     requirement_assessments = (
-        compliance_assessment.requirement_assessments.select_related(
-            "requirement", "requirement__framework"
+        compliance_assessment.requirement_assessments.order_by(
+            F("requirement__order_id").asc(nulls_last=True)
         )
+        .select_related("requirement", "requirement__framework")
         .prefetch_related(
             "answers",
             "answers__question",
@@ -1355,7 +1464,9 @@ def update_selected_implementation_groups(compliance_assessment):
             selected_pks = selected_choice_pks_by_qid.get(question.id, set())
             for choice in question.choices.all():
                 if choice.id in selected_pks:
-                    igs_to_select.update(choice.select_implementation_groups or [])
+                    for ig in choice.select_implementation_groups or []:
+                        igs_to_select.add(ig)
+                        ig_triggers.setdefault(ig, []).append(ra.id)
 
         if ra.requirement.framework.implementation_groups_definition:
             for ig in ra.requirement.framework.implementation_groups_definition:
@@ -1368,7 +1479,10 @@ def update_selected_implementation_groups(compliance_assessment):
     compliance_assessment.selected_implementation_groups = list(
         manual_only | igs_to_select
     )
-    compliance_assessment.save(update_fields=["selected_implementation_groups"])
+    # Answer.save() defers this to on_commit, so the outer transaction is gone.
+    with transaction.atomic():
+        compliance_assessment.save(update_fields=["selected_implementation_groups"])
+        sync_requirement_assignments(compliance_assessment, ig_triggers, current)
 
 
 def build_questions_dict(node):
@@ -1712,6 +1826,9 @@ DEFAULT_VISIBILITY = {
     # Off unless the audit opts in: existing audits track remediation through
     # applied controls or findings, and should not sprout a tasks tab.
     "task_templates": HIDDEN,
+    # Findings are the auditor's verdict; a missing key would resolve to
+    # EVERYONE_EDIT and show them to the auditee.
+    "findings": AUDITOR_ONLY,
 }
 
 
@@ -1727,6 +1844,7 @@ THIRD_PARTY_VISIBILITY = {
     "score": HIDDEN,
     "documentation_score": HIDDEN,
     "applied_controls": AUDITOR_ONLY,
+    "findings": AUDITOR_ONLY,
     "task_templates": EVERYONE_EDIT,
     "evidences": EVERYONE_EDIT,
     "observation": EVERYONE_EDIT,
@@ -1959,3 +2077,41 @@ def ensure_audit_assignment(audit):
     # add, not set: never remove an author the audit already had.
     audit.authors.add(*actors)
     return assign_audit_to(audit, actors)
+
+
+def escape_excel_formula(value):
+    """
+    Escape Excel formula injection by prefixing dangerous characters.
+    Prevents CSV/Formula injection (OWASP) when values start with =+-@
+    """
+    if value is None:
+        return ""
+    s = str(value)
+    if not s:
+        return ""
+    stripped = s.lstrip()
+    if stripped and stripped[0] in ("=", "+", "-", "@"):
+        return "'" + s
+    return s
+
+
+def unescape_excel_formula(value):
+    """Undo escape_excel_formula, so an exported value re-imports unchanged."""
+    if not isinstance(value, str) or not value.startswith("'"):
+        return value
+    stripped = value[1:].lstrip()
+    if stripped and stripped[0] in ("=", "+", "-", "@"):
+        return value[1:]
+    return value
+
+
+ILLEGAL_XLSX_CHARS_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
+XLSX_MAX_CELL_CHARS = 32_767
+
+
+def sanitize_xlsx_value(value):
+    """Strip ASCII control characters openpyxl refuses to write (tab/LF/CR are allowed)
+    and cap strings at Excel's per-cell limit."""
+    if isinstance(value, str):
+        return ILLEGAL_XLSX_CHARS_RE.sub("", value)[:XLSX_MAX_CELL_CHARS]
+    return value

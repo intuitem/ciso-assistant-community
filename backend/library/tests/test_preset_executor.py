@@ -444,6 +444,12 @@ class TestPresetExecutorExistingDomain:
             email="preset_ig@example.com", password="secret"
         )
         _create_test_libraries(root)
+        framework = Framework.objects.get(name="Framework A")
+        framework.implementation_groups_definition = [
+            {"ref_id": "IG1", "name": "IG1"},
+            {"ref_id": "IG2", "name": "IG2"},
+        ]
+        framework.save()
 
         preset_library = _create_preset_library(
             root,

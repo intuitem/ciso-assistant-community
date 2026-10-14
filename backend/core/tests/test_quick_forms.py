@@ -515,6 +515,11 @@ class TestBuilderBridge:
             f"{base}quick-form-editor/", {"editing_draft": doc}, format="json"
         )
         assert res.status_code == 200, res.json()
+        # What the editor needs to adopt the URNs the server minted.
+        urn_map = res.json()["urn_map"]
+        iso_urn = "urn:acme:risk:qf_page:vendor-intake:security:question:iso"
+        assert urn_map["tmp-q2"] == iso_urn
+        assert urn_map["tmp-c1"] == f"{iso_urn}:choice:1"
 
         draft = LibraryDraft.objects.get(id=draft_id)
         form = draft.content["quick_forms"][0]

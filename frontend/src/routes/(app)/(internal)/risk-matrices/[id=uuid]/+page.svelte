@@ -31,7 +31,7 @@
 												}/${val.id}`}
 												<Anchor href={itemHref} class="anchor">{val.str}</Anchor>
 											{:else}
-												{value}
+												{val}
 											{/if}
 										</li>
 									{/each}

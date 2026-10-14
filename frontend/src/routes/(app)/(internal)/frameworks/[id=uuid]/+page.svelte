@@ -3,7 +3,7 @@
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime';
 	import { formatDate } from '$lib/utils/datetime';
-	import type { TreeViewNode } from '@skeletonlabs/skeleton-svelte';
+	import type { TreeViewNode } from '$lib/components/TreeView/types';
 	import type { PageData } from './$types';
 	import TreeViewItemContent from './TreeViewItemContent.svelte';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
@@ -46,7 +46,7 @@
 	function assessableNodesCount(nodes: TreeViewNode[]): number {
 		let count = 0;
 		for (const node of nodes) {
-			if (node.contentProps.assessable) count++;
+			if (node.contentProps?.assessable) count++;
 			if (node.children) count += assessableNodesCount(node.children);
 		}
 		return count;
