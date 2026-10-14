@@ -1863,6 +1863,11 @@ class LibraryUpdater:
                     rn.urn.lower(): rn
                     for rn in RequirementNode.objects.filter(framework=new_framework)
                 }
+                node_ids_with_questions = set(
+                    Question.objects.filter(
+                        requirement_node__framework=new_framework
+                    ).values_list("requirement_node_id", flat=True)
+                )
                 existing_requirement_assessment_objects = defaultdict(list)
                 for ra in RequirementAssessment.objects.filter(
                     requirement__framework=new_framework
@@ -2076,6 +2081,13 @@ class LibraryUpdater:
                                     ),
                                 )
                             )
+
+                    # A node that lost all its questions omits the key.
+                    if (
+                        questions is None
+                        and requirement_node_object.pk in node_ids_with_questions
+                    ):
+                        questions = {}
 
                     # Sync questions for both new and existing nodes
                     if questions is not None:
