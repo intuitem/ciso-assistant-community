@@ -32,6 +32,7 @@ export interface DraftJSON {
 		subject_question_urn?: string | null;
 		on_accept?: Record<string, unknown>[];
 		field_visibility?: VisibilityMap;
+		scales_definition?: Record<string, unknown>[];
 		urn_namespace?: string;
 		ref_id?: string | null;
 	};

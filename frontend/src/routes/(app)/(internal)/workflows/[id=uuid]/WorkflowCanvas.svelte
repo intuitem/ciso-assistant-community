@@ -611,7 +611,7 @@
 	// Node selected → the data browser needs it; data panel open → it shows
 	// per-variable reference values.
 	$effect(() => {
-		if ((selectedNodeId || dataOpen) && !readonly) ensureReferenceRun();
+		if ((selectedNodeId || openPane === 'data') && !readonly) ensureReferenceRun();
 	});
 
 	// Upstream nodes only: data available TO the selected node.
@@ -1165,13 +1165,16 @@
 		if (lastSnapshot) lastSnapshot = remapDoc(lastSnapshot);
 	}
 
-	let runsOpen = $state(false);
 	let runsPanel = $state<RunsPanel | null>(null);
-	let triggersOpen = $state(false);
+
+	type BottomPane = 'triggers' | 'runs' | 'data' | 'versions';
+	// One at a time: independent toggles stacked, and enough of them buried the
+	// canvas with no way back except hunting down each button that opened one.
 	// Props are per-mount constants (the page remounts the canvas via {#key}),
 	// so capturing their initial values is correct.
 	// svelte-ignore state_referenced_locally
-	let versionsOpen = $state(versionPinned);
+	let openPane = $state<BottomPane | null>(versionPinned ? 'versions' : null);
+	const togglePane = (pane: BottomPane) => (openPane = openPane === pane ? null : pane);
 
 	// Master switch: gates automatic execution; manual runs keep
 	// working, so the builder stays fully usable while paused.
@@ -1262,7 +1265,6 @@
 			versionsError = String(error);
 		}
 	}
-	let dataOpen = $state(false);
 	let running = $state(false);
 	let runPickerOpen = $state(false);
 	// Run-with-variables: raw form values + touched tracking so
@@ -1298,7 +1300,7 @@
 				})
 			});
 			if (res.ok) {
-				runsOpen = true;
+				openPane = 'runs';
 				await runsPanel?.refresh();
 				return true;
 			}
@@ -2081,8 +2083,8 @@
 							<button
 								type="button"
 								class="btn preset-tonal text-sm"
-								class:preset-filled-secondary-500={triggersOpen}
-								onclick={() => (triggersOpen = !triggersOpen)}
+								class:preset-filled-secondary-500={openPane === 'triggers'}
+								onclick={() => togglePane('triggers')}
 								data-testid="toggle-triggers"
 							>
 								<i class="fa-solid fa-bolt mr-1"></i>
@@ -2091,8 +2093,8 @@
 							<button
 								type="button"
 								class="btn preset-tonal text-sm"
-								class:preset-filled-secondary-500={runsOpen}
-								onclick={() => (runsOpen = !runsOpen)}
+								class:preset-filled-secondary-500={openPane === 'runs'}
+								onclick={() => togglePane('runs')}
 								data-testid="toggle-runs"
 							>
 								<i class="fa-solid fa-list-check mr-1"></i>
@@ -2101,8 +2103,8 @@
 							<button
 								type="button"
 								class="btn preset-tonal text-sm"
-								class:preset-filled-secondary-500={dataOpen}
-								onclick={() => (dataOpen = !dataOpen)}
+								class:preset-filled-secondary-500={openPane === 'data'}
+								onclick={() => togglePane('data')}
 								data-testid="toggle-data"
 							>
 								<i class="fa-solid fa-cube mr-1"></i>
@@ -2111,8 +2113,8 @@
 							<button
 								type="button"
 								class="btn preset-tonal text-sm"
-								class:preset-filled-secondary-500={versionsOpen}
-								onclick={() => (versionsOpen = !versionsOpen)}
+								class:preset-filled-secondary-500={openPane === 'versions'}
+								onclick={() => togglePane('versions')}
 								data-testid="toggle-versions"
 							>
 								<i class="fa-solid fa-code-commit mr-1"></i>
@@ -2366,61 +2368,78 @@
 				</SvelteFlow>
 			</div>
 
-			{#if triggersOpen}
-				<TriggersPanel {registrations} {workflowId} onRefresh={refreshRegistrations} />
-			{/if}
-
-			{#if versionsOpen}
-				{#if versionsError}
-					<div
-						class="text-xs text-error-500 px-4 py-1 border-t border-surface-200-800"
-						data-testid="versions-error"
+			{#if openPane}
+				<!-- pt-6 reserves a strip for the collapse control: the panes are
+				     full-width and their own top-right controls would sit under it.
+				     Carries the panes' own surface so the strip reads as part of them. -->
+				<div class="relative border-t border-surface-200-800 bg-surface-100-900 pt-6">
+					<button
+						type="button"
+						class="btn-icon btn-icon-sm absolute right-2 top-1 z-10 text-surface-600-400 hover:text-surface-700-300"
+						onclick={() => (openPane = null)}
+						data-testid="collapse-pane"
+						aria-label={m.collapse()}
+						title={m.collapse()}
 					>
-						{versionsError}
-					</div>
-				{/if}
-				<VersionsPanel
-					{versions}
-					{activeVersionId}
-					onSelect={selectVersion}
-					onRestore={restoreVersion}
-				/>
-			{/if}
+						<i class="fa-solid fa-minus"></i>
+					</button>
+					{#if openPane === 'triggers'}
+						<TriggersPanel {registrations} {workflowId} onRefresh={refreshRegistrations} />
+					{/if}
 
-			{#if dataOpen}
-				<aside
-					class="h-60 shrink-0 border-t border-surface-200-800 bg-surface-100-900 overflow-y-auto"
-					data-testid="data-panel"
-				>
-					<div class="p-3 max-w-3xl">
-						<WorkflowDataPanel
-							{variables}
-							{secrets}
-							{referenceVariables}
-							{readonly}
-							columns
-							onAddVariable={addVariable}
-							onRemoveVariable={removeVariable}
-							onUpdateVariableDefault={updateVariableDefault}
-							bind:defaultDrafts={variableDefaultDrafts}
-							onAddSecret={addSecret}
-							onRemoveSecret={removeSecret}
+					{#if openPane === 'versions'}
+						{#if versionsError}
+							<div
+								class="text-xs text-error-500 px-4 py-1 border-t border-surface-200-800"
+								data-testid="versions-error"
+							>
+								{versionsError}
+							</div>
+						{/if}
+						<VersionsPanel
+							{versions}
+							{activeVersionId}
+							onSelect={selectVersion}
+							onRestore={restoreVersion}
 						/>
-					</div>
-				</aside>
-			{/if}
+					{/if}
 
-			{#if runsOpen}
-				<RunsPanel
-					bind:this={runsPanel}
-					{workflowId}
-					onShowRun={showRun}
-					onReplayRun={replayRun}
-					onPinReference={pinReference}
-					onRunsRefreshed={handleRunsRefreshed}
-					referenceRunId={referenceRun?.id ?? null}
-					filterVersionId={versionPinned ? activeVersionId : null}
-				/>
+					{#if openPane === 'data'}
+						<aside
+							class="h-60 shrink-0 bg-surface-100-900 overflow-y-auto"
+							data-testid="data-panel"
+						>
+							<div class="p-3 max-w-3xl">
+								<WorkflowDataPanel
+									{variables}
+									{secrets}
+									{referenceVariables}
+									{readonly}
+									columns
+									onAddVariable={addVariable}
+									onRemoveVariable={removeVariable}
+									onUpdateVariableDefault={updateVariableDefault}
+									bind:defaultDrafts={variableDefaultDrafts}
+									onAddSecret={addSecret}
+									onRemoveSecret={removeSecret}
+								/>
+							</div>
+						</aside>
+					{/if}
+
+					{#if openPane === 'runs'}
+						<RunsPanel
+							bind:this={runsPanel}
+							{workflowId}
+							onShowRun={showRun}
+							onReplayRun={replayRun}
+							onPinReference={pinReference}
+							onRunsRefreshed={handleRunsRefreshed}
+							referenceRunId={referenceRun?.id ?? null}
+							filterVersionId={versionPinned ? activeVersionId : null}
+						/>
+					{/if}
+				</div>
 			{/if}
 		</div>
 

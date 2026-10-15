@@ -223,6 +223,13 @@
 					field="incident"
 					optionsEndpoint="incidents"
 					optionsExtraFields={[['folder', 'str']]}
+					allowUserOptions
+					additionalMultiselectOptions={{
+						createOptionMsg: ({ searchText }: { searchText: string }) =>
+							m.createIncidentNamed({ name: searchText }),
+						liUserMsgClass: '!text-primary-700 font-semibold',
+						liActiveUserMsgClass: '!bg-primary-500/10'
+					}}
 					cacheLock={cacheLocks['incident']}
 					bind:cachedValue={formDataCache['incident']}
 					label={m.incident()}

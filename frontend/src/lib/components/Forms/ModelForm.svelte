@@ -741,7 +741,15 @@
 				{...rest}
 			/>
 		{:else if URLModel === 'processings'}
-			<ProcessingForm {form} {model} {cacheLocks} {formDataCache} {context} {...rest} />
+			<ProcessingForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				initialData={{ ...initialData, ...additionalInitialData }}
+				{context}
+				{...rest}
+			/>
 		{:else if URLModel === 'purposes'}
 			<PurposeForm {form} {model} {cacheLocks} {formDataCache} {context} {initialData} {...rest} />
 		{:else if URLModel === 'personal-data'}
@@ -1103,6 +1111,7 @@
 				{formDataCache}
 				{initialData}
 				{data}
+				{object}
 				{...rest}
 			/>
 		{:else if URLModel === 'metric-instances'}
@@ -1113,6 +1122,7 @@
 				{formDataCache}
 				initialData={{ ...initialData, ...additionalInitialData }}
 				{data}
+				{object}
 				{...rest}
 			/>
 		{:else if URLModel === 'custom-metric-samples'}
