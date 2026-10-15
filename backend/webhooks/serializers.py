@@ -147,10 +147,21 @@ class AuditSinkSerializer(BaseModelSerializer):
 
     def update(self, instance, validated_data):
         # oauth_config is sent whole like kafka_config; a blank client_secret
-        # means "keep the stored one".
+        # means "keep the stored one" — but only for the same authority, so an
+        # edit can't redirect the stored secret to another token endpoint.
         new_oauth = validated_data.get("oauth_config")
         if new_oauth is not None and not new_oauth.get("client_secret"):
-            old_secret = (instance.oauth_config or {}).get("client_secret")
+            old_oauth = instance.oauth_config or {}
+            old_secret = old_oauth.get("client_secret")
+            if old_secret and any(
+                new_oauth.get(k) != old_oauth.get(k) for k in ("token_url", "client_id")
+            ):
+                raise serializers.ValidationError(
+                    {
+                        "oauth_config": "Re-enter the client secret when changing "
+                        "the token URL or client ID."
+                    }
+                )
             if old_secret:
                 validated_data["oauth_config"] = {
                     **new_oauth,

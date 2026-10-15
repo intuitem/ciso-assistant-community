@@ -610,13 +610,80 @@ def test_update_preserves_client_secret_when_blank(root_folder):
             {
                 "oauth_config": {
                     "token_url": "https://login.microsoftonline.com/t/oauth2/v2.0/token",
-                    "client_id": "cid2",
+                    "client_id": "cid",
+                    "scope": "s2",
                 }
             },
         )
     ep.refresh_from_db()
-    assert ep.oauth_config["client_id"] == "cid2"
+    assert ep.oauth_config["scope"] == "s2"
     assert ep.oauth_config["client_secret"] == "csecret"
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "change",
+    [{"token_url": "https://attacker.example/token"}, {"client_id": "other"}],
+)
+def test_update_requires_secret_when_authority_changes(root_folder, change):
+    from rest_framework import serializers as drf
+    from webhooks.serializers import AuditSinkSerializer
+
+    # Otherwise an edit could post the stored secret to a different endpoint.
+    ep = _oauth_sink(root_folder)
+    with pytest.raises(drf.ValidationError):
+        AuditSinkSerializer().update(
+            ep, {"oauth_config": {**ep.oauth_config, "client_secret": "", **change}}
+        )
+    ep.refresh_from_db()
+    assert ep.oauth_config["token_url"].startswith("https://login.microsoftonline")
+
+
+@pytest.mark.django_db
+@override_settings(ALLOW_PRIVATE_NETWORK_REQUESTS=True)
+@pytest.mark.parametrize("body", [["tok"], "tok", None, {"access_token": 42}])
+def test_oauth_rejects_malformed_token_body(root_folder, body):
+    from webhooks import oauth
+
+    ep = _oauth_sink(root_folder)
+    response = MagicMock(status_code=200)
+    response.json.return_value = body
+    with patch("webhooks.oauth.requests.post", return_value=response):
+        with pytest.raises(oauth.OAuthError):
+            oauth.get_token(ep)
+
+
+@pytest.mark.django_db
+@override_settings(ALLOW_PRIVATE_NETWORK_REQUESTS=True)
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("url", "http://siem.example/collector"),
+        ("oauth_config", {"token_url": "http://idp.example/token", "client_id": "c"}),
+    ],
+)
+def test_oauth_requires_https_even_on_private_networks(root_folder, field, value):
+    from django.core.exceptions import ValidationError
+
+    ep = _oauth_sink(root_folder)
+    setattr(ep, field, value)
+    with pytest.raises(ValidationError) as exc:
+        ep.clean()
+    assert field in exc.value.message_dict
+
+
+@pytest.mark.django_db
+@override_settings(ALLOW_PRIVATE_NETWORK_REQUESTS=True)
+def test_send_refuses_bearer_over_http(root_folder):
+    ep = _oauth_sink(root_folder)
+    # Bypass clean() to simulate a row saved before the HTTPS rule.
+    WebhookEndpoint.objects.filter(pk=ep.pk).update(url="http://siem.example/c")
+    with patch("webhooks.oauth._fetch") as fetch:
+        with patch("webhooks.tasks.requests.post") as post:
+            result = tasks.send_audit_request.call_local(str(ep.id), {})
+    assert result.startswith("Blocked")
+    fetch.assert_not_called()
+    post.assert_not_called()
 
 
 def test_validate_oauth_requires_token_url_and_client_id():

@@ -6,6 +6,7 @@ fetches roughly one token per worker per token lifetime.
 
 import threading
 import time
+from urllib.parse import urlparse
 
 import requests
 import structlog
@@ -26,6 +27,15 @@ class OAuthError(Exception):
     """Token acquisition failed."""
 
 
+def is_tls_or_loopback(url: str | None) -> bool:
+    # Credentials and bearer tokens never travel over plaintext HTTP, even when
+    # private-network requests are allowed; loopback stays open for local dev.
+    parsed = urlparse(url or "")
+    return parsed.scheme == "https" or (
+        parsed.scheme == "http" and parsed.hostname in ("localhost", "127.0.0.1", "::1")
+    )
+
+
 def _key(endpoint) -> tuple:
     # Keyed on the credentials themselves so an edited sink can't be served a
     # token minted from the previous ones.
@@ -43,8 +53,9 @@ def _fetch(cfg: dict) -> tuple[str, float]:
     if not token_url or not cfg.get("client_id"):
         raise OAuthError("oauth_config is missing token_url or client_id")
 
-    # Same SSRF surface as the sink URL, and credentials must never travel over
-    # plaintext HTTP, so this stays HTTPS-only.
+    if not is_tls_or_loopback(token_url):
+        raise OAuthError("token_url must use HTTPS")
+    # Same SSRF surface as the sink URL.
     assert_public_url_unless_dev(token_url, allowed_schemes=("https",))
 
     data = {
@@ -65,8 +76,10 @@ def _fetch(cfg: dict) -> tuple[str, float]:
     except ValueError as exc:
         raise OAuthError("token endpoint returned a non-JSON body") from exc
 
+    if not isinstance(payload, dict):
+        raise OAuthError("token endpoint returned a non-object body")
     token = payload.get("access_token")
-    if not token:
+    if not token or not isinstance(token, str):
         raise OAuthError("token endpoint returned no access_token")
 
     try:

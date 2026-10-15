@@ -92,7 +92,7 @@ The stream declaration must match what CISO Assistant sends. The OCSF event has 
       {
         "streams": ["Custom-CISOAssistantAudit"],
         "destinations": ["LogAnalyticsDest"],
-        "transformKql": "source | extend TimeGenerated = unixtime_milliseconds_todatetime(tolong(['time'])) | extend Actor = tostring(actor.user.email_addr), Operation = tostring(api.operation), ObjectType = tostring(api.service.name), CorrelationId = tostring(metadata.correlation_uid)",
+        "transformKql": "source | extend TimeGenerated = datetime(1970-01-01) + 1ms * tolong(['time']) | extend Actor = tostring(actor.user.email_addr), Operation = tostring(api.operation), ObjectType = tostring(api.service.name), CorrelationId = tostring(metadata.correlation_uid) | project-away ['time']",
         "outputStream": "Custom-CISOAssistantAudit_CL"
       }
     ]
@@ -102,6 +102,8 @@ The stream declaration must match what CISO Assistant sends. The OCSF event has 
 
 {% hint style="danger" %}
 **`TimeGenerated` is mandatory and is not set for you.** CISO Assistant emits OCSF `time` as epoch milliseconds; the transformation above converts it. Without that `extend`, ingestion fails or every row lands with the wrong timestamp.
+
+`time` is a reserved column name in Log Analytics, so the table cannot have a `time` column: the stream declares it, and the transformation drops it with `project-away` once `TimeGenerated` is set. Transformations support only a subset of KQL; `unixtime_milliseconds_todatetime` is rejected when the DCR is saved, hence the date arithmetic.
 {% endhint %}
 
 The extra `extend` clauses are optional conveniences — they lift the most-queried values out of the nested objects into flat columns. Add matching columns to the custom table if you keep them.
@@ -175,7 +177,7 @@ Microsoft's own PowerShell sample requests this scope with a **double** slash �
 
 ### Generate an event
 
-Make any tracked change — create an applied control, rename a domain, deactivate a user. One change produces one audit entry, which is delivered asynchronously by the background worker.
+Make any tracked change — create an applied control, rename a domain, deactivate a user. A change produces one or more audit entries — a many-to-many change, such as editing an object's owners, is logged separately — each delivered asynchronously by the background worker. Entries from the same request share a `CorrelationId`.
 
 {% hint style="info" %}
 Ingestion is not instantaneous. Expect **up to 5 minutes** between the change and the row appearing, and rather longer the very first time a new custom table receives data.
@@ -217,7 +219,7 @@ Delivery is proven when the row matches the change you made. Check three things:
 
 The point of client credentials is that nothing expires silently. Entra access tokens last roughly an hour; CISO Assistant caches each token until a minute before expiry, then re-mints it.
 
-To prove renewal rather than assume it, leave the sink running and make a change **more than an hour** after the first one. A row from the second change confirms the token was renewed without intervention. Rotating the client secret in Entra and entering the new value on the sink exercises the same path faster: the next event is delivered with a freshly minted token.
+To prove renewal rather than assume it, leave the sink running and make a change **more than an hour** after the first one. A row from the second change confirms the token was renewed without intervention.
 
 ### Backfill anything missed
 
@@ -235,7 +237,8 @@ If events were generated before the sink was working, use **Replay events** on t
 | `invalid_scope` from the token endpoint | Try the single/double-slash variant of `https://monitor.azure.com/.default`. |
 | `404 Not Found` | The DCR immutable ID or the stream name in the URL is wrong. The stream name must match the `streamDeclarations` key exactly, including the `Custom-` prefix. |
 | Events accepted, nothing in the table | The DCR transformation dropped the rows, or `outputStream` names a table that does not exist. Verify `outputStream` is `Custom-<table>_CL`. |
-| Rows present, `TimeGenerated` wrong | The `transformKql` is missing the `unixtime_milliseconds_todatetime` conversion. |
+| Rows present, `TimeGenerated` wrong | The `transformKql` is missing the epoch-milliseconds conversion of `time`. |
+| Table creation fails: `Columns 'time' are invalid or reserved` | Leave `time` out of the table; the transformation drops it after deriving `TimeGenerated`. |
 | Nothing sent at all | The `audit_log_forwarding` feature flag is off, the sink is inactive, or **Target Domains** excludes the domain you changed. |
 
 {% hint style="info" %}

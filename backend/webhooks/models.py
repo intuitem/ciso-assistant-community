@@ -166,6 +166,13 @@ class WebhookEndpoint(NameDescriptionMixin, FolderMixin):
         super().clean()
         if self.transport != self.Transport.HTTP:
             return
+        if self.auth_type == self.AuthType.OAUTH2_CC:
+            from .oauth import is_tls_or_loopback
+
+            if not is_tls_or_loopback(self.url):
+                raise ValidationError({"url": "OAuth sinks require an HTTPS URL."})
+            if not is_tls_or_loopback((self.oauth_config or {}).get("token_url")):
+                raise ValidationError({"oauth_config": "Token URL must use HTTPS."})
         if getattr(settings, "ALLOW_PRIVATE_NETWORK_REQUESTS", False):
             return
         try:

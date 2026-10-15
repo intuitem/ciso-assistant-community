@@ -18,7 +18,12 @@ from global_settings.utils import ff_is_enabled
 from iam.models import Folder
 
 from .models import WebhookEndpoint
-from .oauth import OAuthError, get_token, invalidate as invalidate_token
+from .oauth import (
+    OAuthError,
+    get_token,
+    invalidate as invalidate_token,
+    is_tls_or_loopback,
+)
 from .ocsf import build_audit_body
 
 import structlog
@@ -210,6 +215,9 @@ def send_audit_request(endpoint_id, body):
 
     uses_oauth = endpoint.auth_type == WebhookEndpoint.AuthType.OAUTH2_CC
     if uses_oauth:
+        if not is_tls_or_loopback(endpoint.url):
+            logger.error("Audit sink bearer blocked over HTTP", endpoint_id=endpoint_id)
+            return f"Blocked: {endpoint_id} OAuth sink URL is not HTTPS"
         headers["Authorization"] = _bearer(endpoint)
 
     try:
