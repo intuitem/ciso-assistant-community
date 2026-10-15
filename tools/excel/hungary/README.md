@@ -159,9 +159,9 @@ A 7/2024. (VI. 24.) MK rendelet 3. mellékletének 47 fenyegetése `threats` obj
 a leírás a potenciálisan érintett alapelvek: bizalmasság (B), sértetlenség (S), rendelkezésre állás (R);
 a megjegyzés a melléklet hivatkozása). A rendelet a védelmi intézkedéseket nem rendeli fenyegetésekhez.
 
-A katalógus azért önálló könyvtár, mert a CISO Assistantban a fenyegetés URN-je egyedi, így ugyanaz a
-fenyegetés nem szerepelhet két keretrendszer-könyvtárban; a katalógus az elemi követelmények könyvtárához
-és a `hu-7-2024-mk-rendelet` keretrendszerhez egyaránt tartozik. A fenyegetések URN-előtagja
+A katalógus önálló könyvtár: a 3. melléklet fenyegetéseit tartalmazza, és bármelyik keretrendszerrel
+együtt használható, kockázatelemzésekben és forgatókönyvekben, vagy függőségként más könyvtárakból.
+Jelenleg egyik keretrendszer sem hivatkozik a fenyegetésekre. A fenyegetések URN-előtagja
 `urn:aafeher:risk:threat:hu-7-2024-mk-rendelet`.
 
 Ellenőrzés: a YAML 47 fenyegetést tartalmaz. Betöltési teszt (CISO Assistant 4.1.1, dátum: 2026. 10. 15.).
@@ -328,9 +328,9 @@ The 47 threats of annex 3 of 7/2024. (VI. 24.) MK rendelet as a `threats` object
 description lists the affected principles: confidentiality (B), integrity (S), availability (R); the
 annotation is the reference to the annex). The decree does not map measures to threats.
 
-The catalogue is a library of its own because a threat URN is unique in CISO Assistant, so the same threat
-cannot be part of two framework libraries; the catalogue belongs to the elementary-requirements library and
-to the `hu-7-2024-mk-rendelet` framework alike. The URN prefix of the threats is
+The catalogue is a standalone library: it holds the threats of annex 3 and can be used with either
+framework, in risk assessments and scenarios, or as a dependency of other libraries. Neither framework
+links to the threats at the moment. The URN prefix of the threats is
 `urn:aafeher:risk:threat:hu-7-2024-mk-rendelet`.
 
 Verification: the YAML holds 47 threats. Load test (CISO Assistant 4.1.1, date: 2026-10-15).
