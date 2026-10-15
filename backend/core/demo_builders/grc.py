@@ -25,6 +25,7 @@ from core.models import (
     RiskScenario,
     Threat,
 )
+from core.utils import get_global_currency
 from iam.models import Folder
 
 ISO27001_LIBRARY = "urn:intuitem:risk:library:iso27001-2022"
@@ -705,7 +706,7 @@ class CoreBuilder(DemoBuilder):
     def cost(ref_id):
         build_fixed, build_days, run_fixed, run_days = CONTROL_COSTS[ref_id]
         return {
-            "currency": "€",
+            "currency": get_global_currency(),
             "amortization_period": 3,
             "build": {"fixed_cost": build_fixed, "people_days": build_days},
             "run": {"fixed_cost": run_fixed, "people_days": run_days},

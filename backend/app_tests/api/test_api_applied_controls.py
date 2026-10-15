@@ -473,3 +473,27 @@ class TestAppliedControlCostCurrency:
         assert response.status_code == status.HTTP_200_OK, response.content
         ac.refresh_from_db()
         assert ac.cost["currency"] == "$"
+
+    def test_migration_realigns_hardcoded_euro_costs(self, cad_currency):
+        from importlib import import_module
+
+        from django.apps import apps
+
+        migration = import_module(
+            "core.migrations.0197_appliedcontrol_cost_global_currency"
+        )
+        folder = Folder.get_root_folder()
+        stuck = AppliedControl.objects.create(
+            folder=folder, name="stuck in euro", cost=APPLIED_CONTROL_COST
+        )
+        other = AppliedControl.objects.create(
+            folder=folder, name="explicit dollar", cost=APPLIED_CONTROL_COST2
+        )
+
+        migration.align_cost_currency(apps, None)
+
+        stuck.refresh_from_db()
+        other.refresh_from_db()
+        assert stuck.cost["currency"] == "C$"
+        assert stuck.cost["build"] == APPLIED_CONTROL_COST["build"]
+        assert other.cost["currency"] == "$"

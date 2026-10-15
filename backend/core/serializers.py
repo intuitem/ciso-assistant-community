@@ -1606,6 +1606,12 @@ class AppliedControlWriteSerializer(
     )
 
     def validate_cost(self, value):
+        """Fill in a missing cost currency.
+
+        Keeps the currency already stored on the control when editing, and
+        otherwise uses the global currency setting, so new controls no longer
+        fall back to a hardcoded €.
+        """
         if isinstance(value, dict) and not value.get("currency"):
             existing = getattr(self.instance, "cost", None)
             value["currency"] = (
