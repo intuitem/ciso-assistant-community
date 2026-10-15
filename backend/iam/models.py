@@ -112,10 +112,10 @@ _ENCLAVE_FOLDER_CONTENT_TYPE_STRING: Final[str] = "EN"
 _REF_ID_WHITESPACE: Final[str] = " \t\n\r\x0b\x0c"
 
 
-def _trimmed_ref_id() -> Func:
+def _trimmed_ref_id(expression=None) -> Func:
     # TRIM(string, characters) reads the same on SQLite and PostgreSQL.
     return Func(
-        F("ref_id"),
+        expression if expression is not None else F("ref_id"),
         Value(_REF_ID_WHITESPACE),
         function="TRIM",
         output_field=models.CharField(),
@@ -259,21 +259,32 @@ class Folder(NameDescriptionMixin):
         # Whitespace-only is blank, and blank is stored as NULL.
         if self.ref_id is not None:
             self.ref_id = self.ref_id.strip(_REF_ID_WHITESPACE) or None
-        if (
-            self.ref_id
-            and Folder.objects.filter(ref_id__iexact=self.ref_id)
-            .exclude(pk=self.pk)
-            .exists()
-        ):
-            raise self._ref_id_taken()
-        super().clean()
+        errors = {}
+        if self.ref_id and Folder.ref_id_in_use(self.ref_id, exclude_pk=self.pk):
+            errors["ref_id"] = [self._ref_id_taken_message()]
+        # Report a name clash alongside, so both can be fixed at once.
+        try:
+            super().clean()
+        except ValidationError as e:
+            errors = e.update_error_dict(errors)
+        if errors:
+            raise ValidationError(errors)
 
-    def _ref_id_taken(self) -> ValidationError:
+    @staticmethod
+    def ref_id_in_use(ref_id: str, exclude_pk=None) -> bool:
+        """Whether another folder holds *ref_id*, compared as the unique index does."""
+        normalized = Lower(_trimmed_ref_id(Value(ref_id)))
+        return (
+            Folder.objects.alias(normalized_ref_id=Lower(_trimmed_ref_id()))
+            .filter(normalized_ref_id=normalized)
+            .exclude(pk=exclude_pk)
+            .exists()
+        )
+
+    def _ref_id_taken_message(self) -> str:
         # Unique across all folders, so the message must not say where it is used:
         # the holder may be a folder the user cannot see.
-        return ValidationError(
-            {"ref_id": f"{self.ref_id} is already used. Please choose another value."}
-        )
+        return f"{self.ref_id} is already used. Please choose another value."
 
     @staticmethod
     def _lock_folder_tree() -> None:
@@ -373,7 +384,7 @@ class Folder(NameDescriptionMixin):
             # SQLite takes no tree lock, so a concurrent write can slip past clean().
             if "folder_ref_id_unique" not in str(e):
                 raise
-            raise self._ref_id_taken() from e
+            raise ValidationError({"ref_id": self._ref_id_taken_message()}) from e
 
     def _save_in_tree_lock(self, *args, **kwargs):
         """

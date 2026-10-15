@@ -949,6 +949,13 @@ class TestFolderRefId:
         with pytest.raises(ValidationError):
             Folder.objects.create(name="c", ref_id="\tdom.1\n", parent_folder=parent)
 
+    def test_ref_id_and_name_clashes_are_reported_together(self, parent: Folder):
+        Folder.objects.create(name="a", ref_id="DOM.1", parent_folder=parent)
+
+        with pytest.raises(ValidationError) as exc:
+            Folder.objects.create(name="a", ref_id="dom.1", parent_folder=parent)
+        assert {"ref_id", "name"} <= set(exc.value.message_dict)
+
     def test_saving_a_folder_keeps_its_own_ref_id(self, parent: Folder):
         folder = Folder.objects.create(name="a", ref_id="DOM.1", parent_folder=parent)
         folder.description = "edited"
