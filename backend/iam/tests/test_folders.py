@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from unittest import mock
 
 import pytest
 from django.contrib.auth.models import Permission
@@ -945,6 +946,8 @@ class TestFolderRefId:
         Folder.objects.create(name="a", ref_id="DOM.1", parent_folder=parent)
         with pytest.raises(ValidationError):
             Folder.objects.create(name="b", ref_id=" dom.1 ", parent_folder=parent)
+        with pytest.raises(ValidationError):
+            Folder.objects.create(name="c", ref_id="\tdom.1\n", parent_folder=parent)
 
     def test_saving_a_folder_keeps_its_own_ref_id(self, parent: Folder):
         folder = Folder.objects.create(name="a", ref_id="DOM.1", parent_folder=parent)
@@ -964,9 +967,21 @@ class TestFolderRefId:
 
         with pytest.raises(IntegrityError), transaction.atomic():
             Folder.objects.filter(pk=other.pk).update(ref_id=" dom.1 ")
+        with pytest.raises(IntegrityError), transaction.atomic():
+            Folder.objects.filter(pk=other.pk).update(ref_id="\tdom.1\n")
 
     def test_database_ignores_whitespace_only_ref_ids(self, parent: Folder):
         folders = [
             Folder.objects.create(name=f"f{i}", parent_folder=parent) for i in range(2)
         ]
         Folder.objects.filter(pk__in=[f.pk for f in folders]).update(ref_id="   ")
+        Folder.objects.filter(pk__in=[f.pk for f in folders]).update(ref_id="\t \n")
+
+    def test_write_that_slips_past_clean_is_a_validation_error(self, parent: Folder):
+        """Two concurrent writes can both pass clean() on SQLite (no tree lock)."""
+        Folder.objects.create(name="a", ref_id="DOM.1", parent_folder=parent)
+
+        with mock.patch.object(Folder, "clean", lambda self: None):
+            with pytest.raises(ValidationError) as exc:
+                Folder.objects.create(name="b", ref_id="dom.1", parent_folder=parent)
+        assert "ref_id" in exc.value.message_dict

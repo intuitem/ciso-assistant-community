@@ -11,15 +11,15 @@ import secrets
 import uuid
 from allauth.account.models import EmailAddress
 from django.utils import timezone
-from django.db import models, transaction
+from django.db import IntegrityError, models, transaction
 from django.db.utils import OperationalError, ProgrammingError
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AnonymousUser, Permission
 from django.utils.translation import gettext_lazy as _, override as translation_override
 from django.urls.base import reverse_lazy
-from django.db.models import Q, F, QuerySet, Case, When, Value, BooleanField
-from django.db.models.functions import Lower, Trim
+from django.db.models import Q, F, Func, QuerySet, Case, When, Value, BooleanField
+from django.db.models.functions import Lower
 from django.db.models.lookups import Exact
 from django.core.exceptions import ValidationError
 from knox.models import AuthToken
@@ -107,6 +107,19 @@ def _get_root_folder() -> Optional[Folder]:
 
 
 _ENCLAVE_FOLDER_CONTENT_TYPE_STRING: Final[str] = "EN"
+
+# ASCII whitespace, trimmed alike by Folder.clean() and the ref_id unique index.
+_REF_ID_WHITESPACE: Final[str] = " \t\n\r\x0b\x0c"
+
+
+def _trimmed_ref_id() -> Func:
+    # TRIM(string, characters) reads the same on SQLite and PostgreSQL.
+    return Func(
+        F("ref_id"),
+        Value(_REF_ID_WHITESPACE),
+        function="TRIM",
+        output_field=models.CharField(),
+    )
 
 
 class Folder(NameDescriptionMixin):
@@ -233,8 +246,8 @@ class Folder(NameDescriptionMixin):
             # Backstop for clean(): blank ref_ids are not identifiers.
             # TRIM(NULL) is NULL, so this also leaves NULLs out of the index.
             models.UniqueConstraint(
-                Lower(Trim("ref_id")),
-                condition=~Q(Exact(Trim("ref_id"), Value(""))),
+                Lower(_trimmed_ref_id()),
+                condition=~Q(Exact(_trimmed_ref_id(), Value(""))),
                 name="folder_ref_id_unique",
             ),
         ]
@@ -245,21 +258,22 @@ class Folder(NameDescriptionMixin):
     def clean(self) -> None:
         # Whitespace-only is blank, and blank is stored as NULL.
         if self.ref_id is not None:
-            self.ref_id = self.ref_id.strip() or None
-        # Unique across all folders, so the message must not say where it is used:
-        # the holder may be a folder the user cannot see.
+            self.ref_id = self.ref_id.strip(_REF_ID_WHITESPACE) or None
         if (
             self.ref_id
             and Folder.objects.filter(ref_id__iexact=self.ref_id)
             .exclude(pk=self.pk)
             .exists()
         ):
-            raise ValidationError(
-                {
-                    "ref_id": f"{self.ref_id} is already used. Please choose another value."
-                }
-            )
+            raise self._ref_id_taken()
         super().clean()
+
+    def _ref_id_taken(self) -> ValidationError:
+        # Unique across all folders, so the message must not say where it is used:
+        # the holder may be a folder the user cannot see.
+        return ValidationError(
+            {"ref_id": f"{self.ref_id} is already used. Please choose another value."}
+        )
 
     @staticmethod
     def _lock_folder_tree() -> None:
@@ -353,6 +367,15 @@ class Folder(NameDescriptionMixin):
         ).delete()
 
     def save(self, *args, **kwargs):
+        try:
+            self._save_in_tree_lock(*args, **kwargs)
+        except IntegrityError as e:
+            # SQLite takes no tree lock, so a concurrent write can slip past clean().
+            if "folder_ref_id_unique" not in str(e):
+                raise
+            raise self._ref_id_taken() from e
+
+    def _save_in_tree_lock(self, *args, **kwargs):
         """
         **WARNING:** This function can raise an `Folder.InconsistencyError` `Exception`.
 
