@@ -20,10 +20,9 @@ class Command(BaseCommand):
     def handle(self, *args, recipient, **options):
         if mailer.custom_configuration() is not None:
             for spec in mailer.active_mailers():
-                options = {k: v for k, v in spec.options.items() if k != "password"}
-                self.stdout.write(
-                    f"mailer {spec.alias} (custom): {spec.backend} {options}"
-                )
+                entry = {"BACKEND": spec.backend, "OPTIONS": spec.options}
+                for line in describe({f"{spec.alias} (custom)": entry}):
+                    self.stdout.write(line)
         else:
             for line in describe(getattr(settings, "MAILERS", {}) or {}):
                 self.stdout.write(line)
