@@ -1,5 +1,7 @@
 from django.db import migrations
 
+BATCH_SIZE = 500
+
 
 def align_cost_currency(apps, schema_editor):
     """Realign applied control costs saved with the hardcoded € default.
@@ -16,8 +18,10 @@ def align_cost_currency(apps, schema_editor):
     if not currency or currency == "€":
         return
 
+    # Flush in bounded batches so memory stays flat on large installations.
     to_update = []
-    for control in AppliedControl.objects.filter(cost__isnull=False).only("cost"):
+    controls = AppliedControl.objects.filter(cost__isnull=False).only("cost")
+    for control in controls.iterator(chunk_size=BATCH_SIZE):
         if isinstance(control.cost, dict) and control.cost.get("currency") in (
             None,
             "",
@@ -25,7 +29,11 @@ def align_cost_currency(apps, schema_editor):
         ):
             control.cost["currency"] = currency
             to_update.append(control)
-    AppliedControl.objects.bulk_update(to_update, ["cost"], batch_size=500)
+        if len(to_update) >= BATCH_SIZE:
+            AppliedControl.objects.bulk_update(to_update, ["cost"])
+            to_update = []
+    if to_update:
+        AppliedControl.objects.bulk_update(to_update, ["cost"])
 
 
 class Migration(migrations.Migration):
