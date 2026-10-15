@@ -1118,7 +1118,7 @@
 
 					{#if showObservation}
 						<div data-testid="observation-field">
-							<MarkdownField {form} field="observation" label="Observation" />
+							<MarkdownField {form} field="observation" label={m.observation()} />
 						</div>
 					{/if}
 				</div>

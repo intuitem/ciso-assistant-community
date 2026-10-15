@@ -2,7 +2,9 @@
 Regression test for CA-1797: deleting a Folder that (via cascade) contains an
 ElementaryAction still referenced by a KillChain (on_delete=PROTECT) used to
 raise an uncaught ProtectedError, surfacing as a 500. FolderViewSet.destroy
-now catches it and returns a structured 409 instead.
+now catches it and returns a structured 409 instead. Kill chains inside the
+deleted tree are cleared first (cascade_preclear), so only a reference from
+another domain still blocks.
 """
 
 import pytest
@@ -42,18 +44,10 @@ def admin_client():
     return client
 
 
-@pytest.mark.django_db
-def test_destroy_folder_blocked_by_kill_chain_returns_409(
-    admin_client,
-    ebios_rm_matrix_fixture,  # noqa: F811 -- pytest fixture, not a real redefinition
-):
-    domain = Folder.objects.create(
-        name="CA-1797 domain",
-        parent_folder=Folder.get_root_folder(),
-        content_type=Folder.ContentType.DOMAIN,
-    )
+def kill_chain_on(study_folder, action_folder, matrix):
+    """A kill chain in ``study_folder`` using an elementary action of ``action_folder``."""
     study = EbiosRMStudy.objects.create(
-        name="CA-1797 study", folder=domain, risk_matrix=ebios_rm_matrix_fixture
+        name="CA-1797 study", folder=study_folder, risk_matrix=matrix
     )
     FearedEvent.objects.create(name="CA-1797 feared event", ebios_rm_study=study)
     ro_to = RoTo.objects.create(
@@ -78,17 +72,50 @@ def test_destroy_folder_blocked_by_kill_chain_returns_409(
         name="CA-1797 operating mode", operational_scenario=operational_scenario
     )
     elementary_action = ElementaryAction.objects.create(
-        name="CA-1797 elementary action", folder=domain
+        name="CA-1797 elementary action", folder=action_folder
     )
-    KillChain.objects.create(
+    return KillChain.objects.create(
         operating_mode=operating_mode, elementary_action=elementary_action
     )
+
+
+def make_domain(name):
+    return Folder.objects.create(
+        name=name,
+        parent_folder=Folder.get_root_folder(),
+        content_type=Folder.ContentType.DOMAIN,
+    )
+
+
+@pytest.mark.django_db
+def test_destroy_folder_blocked_by_kill_chain_returns_409(
+    admin_client,
+    ebios_rm_matrix_fixture,  # noqa: F811 -- pytest fixture, not a real redefinition
+):
+    domain = make_domain("CA-1797 domain")
+    other = make_domain("CA-1797 other domain")
+    kill_chain_on(other, domain, ebios_rm_matrix_fixture)
 
     response = admin_client.delete(f"/api/folders/{domain.id}/")
 
     assert response.status_code == 409
     assert "detail" in response.data
     assert Folder.objects.filter(id=domain.id).exists()
+
+
+@pytest.mark.django_db
+def test_destroy_folder_clears_kill_chains_of_its_own_tree(
+    admin_client,
+    ebios_rm_matrix_fixture,  # noqa: F811 -- pytest fixture, not a real redefinition
+):
+    domain = make_domain("CA-1797 domain")
+    kill_chain = kill_chain_on(domain, domain, ebios_rm_matrix_fixture)
+
+    response = admin_client.delete(f"/api/folders/{domain.id}/")
+
+    assert response.status_code == 204
+    assert not Folder.objects.filter(id=domain.id).exists()
+    assert not KillChain.objects.filter(id=kill_chain.id).exists()
 
 
 @pytest.mark.django_db
