@@ -19,6 +19,8 @@ from django.contrib.auth.models import AnonymousUser, Permission
 from django.utils.translation import gettext_lazy as _, override as translation_override
 from django.urls.base import reverse_lazy
 from django.db.models import Q, F, QuerySet, Case, When, Value, BooleanField
+from django.db.models.functions import Lower
+from django.core.exceptions import ValidationError
 from knox.models import AuthToken
 
 from core.utils import (
@@ -172,6 +174,10 @@ class Folder(NameDescriptionMixin):
         max_length=2, choices=ContentType.choices, default=ContentType.DOMAIN
     )
 
+    ref_id = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name=_("reference id")
+    )
+
     parent_folder = models.ForeignKey(
         "self",
         null=True,
@@ -223,10 +229,33 @@ class Folder(NameDescriptionMixin):
                 ),
                 name="enclave_default_role_must_be_null",
             ),
+            # Backstop for clean(): blank ref_ids are not identifiers.
+            models.UniqueConstraint(
+                Lower("ref_id"),
+                F("parent_folder"),
+                condition=Q(ref_id__isnull=False) & ~Q(ref_id=""),
+                name="folder_ref_id_unique_per_parent",
+            ),
         ]
 
     def __str__(self) -> str:
         return self.name.__str__()
+
+    def clean(self) -> None:
+        if (
+            self.ref_id
+            and Folder.objects.filter(
+                parent_folder=self.parent_folder, ref_id__iexact=self.ref_id
+            )
+            .exclude(pk=self.pk)
+            .exists()
+        ):
+            raise ValidationError(
+                {
+                    "ref_id": f"{self.ref_id} is already used in this scope. Please choose another value."
+                }
+            )
+        super().clean()
 
     @staticmethod
     def _lock_folder_tree() -> None:

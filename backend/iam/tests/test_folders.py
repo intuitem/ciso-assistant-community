@@ -2,6 +2,8 @@ from dataclasses import dataclass
 
 import pytest
 from django.contrib.auth.models import Permission
+from django.core.exceptions import ValidationError
+from django.db import IntegrityError, transaction
 
 from core.models import AppliedControl
 from iam.models import Folder, RoleAssignment, User, UserGroup, Role
@@ -907,3 +909,39 @@ class TestVerdictQueryBudget:
                 RoleAssignment.get_allowed_folder_ids(user, permission)
             )
         assert domain.id in allowed_folder_ids
+
+
+@pytest.mark.django_db
+class TestFolderRefId:
+    """A ref_id identifies a folder among its siblings: unique per parent, ignoring case and blanks."""
+
+    @pytest.fixture
+    def parent(self) -> Folder:
+        return Folder.objects.create(name="parent")
+
+    def test_duplicate_under_same_parent_is_rejected(self, parent: Folder):
+        Folder.objects.create(name="a", ref_id="DOM.1", parent_folder=parent)
+
+        with pytest.raises(ValidationError) as exc:
+            Folder.objects.create(name="b", ref_id="dom.1", parent_folder=parent)
+        assert "ref_id" in exc.value.message_dict
+
+    def test_same_ref_id_under_another_parent_is_allowed(self, parent: Folder):
+        Folder.objects.create(name="a", ref_id="DOM.1", parent_folder=parent)
+        Folder.objects.create(name="b", ref_id="DOM.1")
+
+    def test_blank_ref_ids_do_not_collide(self, parent: Folder):
+        for i, ref_id in enumerate([None, None, "", ""]):
+            Folder.objects.create(name=f"f{i}", ref_id=ref_id, parent_folder=parent)
+
+    def test_saving_a_folder_keeps_its_own_ref_id(self, parent: Folder):
+        folder = Folder.objects.create(name="a", ref_id="DOM.1", parent_folder=parent)
+        folder.description = "edited"
+        folder.save()
+
+    def test_database_rejects_duplicates_that_skip_clean(self, parent: Folder):
+        Folder.objects.create(name="a", ref_id="DOM.1", parent_folder=parent)
+        other = Folder.objects.create(name="b", parent_folder=parent)
+
+        with pytest.raises(IntegrityError), transaction.atomic():
+            Folder.objects.filter(pk=other.pk).update(ref_id="dom.1")
