@@ -53,6 +53,9 @@ class ProcessingDpiaRequiredTarget(Target):
             errors.append("reviewOutcomeUnknown")
         return sorted(set(errors), key=errors.index)
 
+    def applies_to(self, subject) -> bool:
+        return subject.dpia_applies
+
     def current(self, subject):
         return subject.dpia_required, _display(subject.dpia_required)
 

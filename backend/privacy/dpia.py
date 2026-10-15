@@ -15,6 +15,9 @@ class ProcessingDpiaTarget(Target):
     permission = "change_processing"
     label = "dpia"
 
+    def applies_to(self, subject) -> bool:
+        return subject.dpia_applies
+
     def current(self, subject):
         dpia = subject.dpia
         return (str(dpia.pk), dpia.ref_id or dpia.name) if dpia else (None, "")
