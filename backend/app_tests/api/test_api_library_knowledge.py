@@ -280,6 +280,9 @@ def test_chat_requirement_mappings_not_hijacked_by_compare(
         user=admin,
     )
     assert "C.1" in out["text"] and "B.1" not in out["text"]
+    # one line per mapping, no identifiers for the answer model to wade through
+    assert "- C C.1: c C.1 strong auth (subset)" in out["text"]
+    assert "urn:" not in out["text"]
 
 
 @pytest.mark.django_db

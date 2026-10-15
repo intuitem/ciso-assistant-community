@@ -1320,6 +1320,57 @@ def _in_named_frameworks(data, arguments: dict) -> bool:
     )
 
 
+def _requirement_line(
+    r: dict, relationship: bool = False, limit: int | None = 200
+) -> str:
+    text = r.get("name") or (r.get("description") or "")[:limit]
+    line = (
+        f"- {r.get('framework_ref_id') or r.get('framework')} {r.get('ref_id')}: {text}"
+    )
+    return line + (f" ({r['relationship']})" if relationship else "")
+
+
+def _compact_knowledge(data: dict | None, arguments: dict) -> str:
+    """One line per requirement: small models report a short list in full but
+    drop rows or answer "none" from the generic key/value dump."""
+    if data is None:
+        return "Requirement not found in the knowledge base."
+    lines = [f"Note: {data['note']}"] if data.get("note") else []
+    if data.get("unknown_framework"):
+        lines.append(
+            f"No framework matches '{data['unknown_framework']}'. Known frameworks: "
+            + ", ".join(data["frameworks"])
+        )
+    elif "requirements" in data:
+        rows = data["requirements"]
+        lines.append(f"{data.get('total', len(rows))} requirement(s) found:")
+        for r in rows:
+            lines.append(_requirement_line(r, limit=None))
+            if r.get("name") and r.get("description"):
+                lines.append(f"  {r['description']}")
+    elif data.get("ambiguous"):
+        lines.append("This reference exists in several frameworks:")
+        lines += [_requirement_line(r) for r in data["ambiguous"]]
+    else:
+        src = data["source"]
+        lines.append("Requirement:" + _requirement_line(src)[1:])
+        target = arguments.get("framework_b")
+        if data["mappings"]:
+            lines.append(
+                f"It maps to these {len(data['mappings'])} requirement(s); "
+                "list every one of them in the answer:"
+            )
+            lines += [_requirement_line(r, True) for r in data["mappings"]]
+        elif data["elsewhere"]:
+            lines.append(
+                f"None of its mappings are in '{target}'. It maps to: "
+                + ", ".join(f"{fw} ({n})" for fw, n in data["elsewhere"].items())
+            )
+        else:
+            lines.append("It has no mappings in the knowledge base.")
+    return "\n".join(lines)
+
+
 def _dispatch_requirement_knowledge(
     action: str, arguments: dict, user, user_message: str = ""
 ) -> tuple[dict, bool]:
@@ -1330,8 +1381,6 @@ def _dispatch_requirement_knowledge(
     small models drop or garble them, and the chat cannot retry.
     """
     from django.core.exceptions import PermissionDenied
-
-    from .knowledge_graph import format_graph_result
 
     try:
         data = _requirement_knowledge(action, arguments, user)
@@ -1346,27 +1395,10 @@ def _dispatch_requirement_knowledge(
                 if _in_named_frameworks(retry, arguments):
                     data, found = retry, True
                     break
-        if action == "search_requirements":
-            if data.get("unknown_framework"):
-                data["hint"] = (
-                    "No framework matches; retry with one of the frameworks listed."
-                )
-        elif data is None:
-            data = "Requirement not found: check its framework and ref_id with search_requirements."
-        elif data.get("ambiguous"):
-            data["hint"] = (
-                "Several frameworks have this ref_id; retry with the one meant as framework."
-            )
-        elif data["elsewhere"]:
-            data["hint"] = (
-                f"Nothing maps in '{arguments.get('framework_b', '')}'. If the framework asked about is among "
-                "'elsewhere', retry with its name as framework_b; if not, there is no mapping."
-            )
-        elif data["mappings"]:
-            data["hint"] = "Report every mapped requirement listed, not a sample."
     except PermissionDenied:
         data, found = "You do not have access to framework content.", False
-    return {"type": "search_library", "text": format_graph_result(data)}, found
+    text = data if isinstance(data, str) else _compact_knowledge(data, arguments)
+    return {"type": "search_library", "text": text}, found
 
 
 def _detect_framework_names(text: str) -> list[str]:
