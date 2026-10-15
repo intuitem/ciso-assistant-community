@@ -114,7 +114,7 @@ A YAML 3 081 követelménycsomópontot és 7 megvalósítási csoportot tartalma
 száma kiválasztásonként: `A-SZ` 717, `A-EIR` 683, `J-SZ` 815, `J-EIR` 1 065, `M-SZ` 896, `M-EIR` 1 253,
 `KIEG` 529, `M-SZ`+`M-EIR` 2 149, `A-EIR`+`M-SZ` 1 579, kiválasztás nélkül 2 678.
 
-Betöltési teszt (CISO Assistant 4.1.1, dátum: …): a könyvtár betölthető, az auditok kiválasztásonként a
+Betöltési teszt (CISO Assistant 4.1.1, dátum: 2026. 10. 15.): a könyvtár betölthető, az auditok kiválasztásonként a
 fenti számokat adják, a szervezeti auditot baseline-ként használó EIR-audit megkapja az ott rögzített
 eredményt.
 
@@ -151,7 +151,7 @@ módosítás).
 Ellenőrzés: a YAML 933 követelménycsomópontot (19 család + 914 követelménycsoport) és 7 megvalósítási
 csoportot tartalmaz. Az értékelhető csomópontok száma kiválasztásonként: `A-SZ` 82, `A-EIR` 82, `J-SZ` 108,
 `J-EIR` 194, `M-SZ` 132, `M-EIR` 253, `KIEG` 529, `M-SZ`+`M-EIR` 385, `A-EIR`+`M-SZ` 214, kiválasztás nélkül
-914. Betöltési teszt (CISO Assistant 4.1.1, dátum: …).
+914. Betöltési teszt (CISO Assistant 4.1.1, dátum: 2026. 10. 15.).
 
 ### `hu-7-2024-mk-rendelet-fenyegetesek` – fenyegetéskatalógus
 
@@ -164,7 +164,7 @@ fenyegetés nem szerepelhet két keretrendszer-könyvtárban; a katalógus az el
 és a `hu-7-2024-mk-rendelet` keretrendszerhez egyaránt tartozik. A fenyegetések URN-előtagja
 `urn:aafeher:risk:threat:hu-7-2024-mk-rendelet`.
 
-Ellenőrzés: a YAML 47 fenyegetést tartalmaz. Betöltési teszt (CISO Assistant 4.1.1, dátum: …).
+Ellenőrzés: a YAML 47 fenyegetést tartalmaz. Betöltési teszt (CISO Assistant 4.1.1, dátum: 2026. 10. 15.).
 
 ### Források és szövegállapot
 
@@ -285,7 +285,7 @@ The YAML holds 3,081 requirement nodes and 7 implementation groups. Assessable n
 `A-SZ` 717, `A-EIR` 683, `J-SZ` 815, `J-EIR` 1,065, `M-SZ` 896, `M-EIR` 1,253, `KIEG` 529,
 `M-SZ`+`M-EIR` 2,149, `A-EIR`+`M-SZ` 1,579, and 2,678 without a selection.
 
-Load test (CISO Assistant 4.1.1, date: …): the library loads, audits give the counts above per selection,
+Load test (CISO Assistant 4.1.1, date: 2026-10-15): the library loads, audits give the counts above per selection,
 and a system audit created with the organisational audit as its baseline receives the results recorded
 there.
 
@@ -320,7 +320,7 @@ typos, different spellings, the amendment by 18/2024. (XII. 30.) MK rendelet).
 Verification: the YAML holds 933 requirement nodes (19 families + 914 measures) and 7 implementation
 groups. Assessable nodes per selection: `A-SZ` 82, `A-EIR` 82, `J-SZ` 108, `J-EIR` 194, `M-SZ` 132,
 `M-EIR` 253, `KIEG` 529, `M-SZ`+`M-EIR` 385, `A-EIR`+`M-SZ` 214, and 914 without a selection. Load test
-(CISO Assistant 4.1.1, date: …).
+(CISO Assistant 4.1.1, date: 2026-10-15).
 
 ### `hu-7-2024-mk-rendelet-fenyegetesek` – threat catalogue
 
@@ -333,7 +333,7 @@ cannot be part of two framework libraries; the catalogue belongs to the elementa
 to the `hu-7-2024-mk-rendelet` framework alike. The URN prefix of the threats is
 `urn:aafeher:risk:threat:hu-7-2024-mk-rendelet`.
 
-Verification: the YAML holds 47 threats. Load test (CISO Assistant 4.1.1, date: …).
+Verification: the YAML holds 47 threats. Load test (CISO Assistant 4.1.1, date: 2026-10-15).
 
 ### Sources and text state
 
