@@ -234,9 +234,8 @@ class Folder(NameDescriptionMixin):
             # TRIM(NULL) is NULL, so this also leaves NULLs out of the index.
             models.UniqueConstraint(
                 Lower(Trim("ref_id")),
-                F("parent_folder"),
                 condition=~Q(Exact(Trim("ref_id"), Value(""))),
-                name="folder_ref_id_unique_per_parent",
+                name="folder_ref_id_unique",
             ),
         ]
 
@@ -247,17 +246,17 @@ class Folder(NameDescriptionMixin):
         # Whitespace-only is blank, and blank is stored as NULL.
         if self.ref_id is not None:
             self.ref_id = self.ref_id.strip() or None
+        # Unique across all folders, so the message must not say where it is used:
+        # the holder may be a folder the user cannot see.
         if (
             self.ref_id
-            and Folder.objects.filter(
-                parent_folder=self.parent_folder, ref_id__iexact=self.ref_id
-            )
+            and Folder.objects.filter(ref_id__iexact=self.ref_id)
             .exclude(pk=self.pk)
             .exists()
         ):
             raise ValidationError(
                 {
-                    "ref_id": f"{self.ref_id} is already used in this scope. Please choose another value."
+                    "ref_id": f"{self.ref_id} is already used. Please choose another value."
                 }
             )
         super().clean()

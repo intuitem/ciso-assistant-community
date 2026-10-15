@@ -913,22 +913,26 @@ class TestVerdictQueryBudget:
 
 @pytest.mark.django_db
 class TestFolderRefId:
-    """A ref_id identifies a folder among its siblings: unique per parent, ignoring case and blanks."""
+    """A ref_id identifies a folder across the whole tree, ignoring case, padding and blanks."""
 
     @pytest.fixture
     def parent(self) -> Folder:
         return Folder.objects.create(name="parent")
 
-    def test_duplicate_under_same_parent_is_rejected(self, parent: Folder):
+    def test_duplicate_is_rejected(self, parent: Folder):
         Folder.objects.create(name="a", ref_id="DOM.1", parent_folder=parent)
 
         with pytest.raises(ValidationError) as exc:
             Folder.objects.create(name="b", ref_id="dom.1", parent_folder=parent)
         assert "ref_id" in exc.value.message_dict
 
-    def test_same_ref_id_under_another_parent_is_allowed(self, parent: Folder):
-        Folder.objects.create(name="a", ref_id="DOM.1", parent_folder=parent)
-        Folder.objects.create(name="b", ref_id="DOM.1")
+    def test_duplicate_elsewhere_in_the_tree_is_rejected(self, parent: Folder):
+        child = Folder.objects.create(name="child", parent_folder=parent)
+        Folder.objects.create(name="a", ref_id="DOM.1", parent_folder=child)
+
+        with pytest.raises(ValidationError) as exc:
+            Folder.objects.create(name="b", ref_id="dom.1")
+        assert "ref_id" in exc.value.message_dict
 
     def test_blank_ref_ids_do_not_collide(self, parent: Folder):
         for i, ref_id in enumerate([None, None, "", "", "   ", "   "]):
@@ -954,9 +958,9 @@ class TestFolderRefId:
         with pytest.raises(IntegrityError), transaction.atomic():
             Folder.objects.filter(pk=other.pk).update(ref_id="dom.1")
 
-    def test_database_rejects_padded_duplicates(self, parent: Folder):
+    def test_database_rejects_padded_duplicates_across_parents(self, parent: Folder):
         Folder.objects.create(name="a", ref_id="DOM.1", parent_folder=parent)
-        other = Folder.objects.create(name="b", parent_folder=parent)
+        other = Folder.objects.create(name="b")
 
         with pytest.raises(IntegrityError), transaction.atomic():
             Folder.objects.filter(pk=other.pk).update(ref_id=" dom.1 ")
