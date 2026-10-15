@@ -57,6 +57,7 @@ from library.helpers import (
 )
 
 from core.utils import format_currency as _fmt_currency
+from core.utils import get_global_currency
 from core.quick_form_scoring import (
     normalize_form_aggregation,
     normalize_page_aggregation,
@@ -7123,7 +7124,6 @@ class CommitmentMixin(models.Model):
 
 def _get_default_applied_control_cost():
     return {
-        "currency": "€",
         "amortization_period": 1,
         "build": {"fixed_cost": 0, "people_days": 0},
         "run": {"fixed_cost": 0, "people_days": 0},
@@ -7362,6 +7362,8 @@ class AppliedControl(
             self.csf_function = self.reference_control.csf_function
         if self.status == "active":
             self.progress_field = 100
+        if isinstance(self.cost, dict) and not self.cost.get("currency"):
+            self.cost["currency"] = get_global_currency()
 
         # Save first. _state.adding, not `pk is None`: the UUID pk is defaulted
         # at instantiation, so pk is never None even for unsaved rows.
