@@ -4,7 +4,7 @@ from auditlog.registry import auditlog
 from django.core.exceptions import ValidationError
 from django.db import models
 
-from iam.models import FolderMixin
+from iam.models import Folder, FolderMixin
 from core.base_models import AbstractBaseModel
 
 
@@ -232,6 +232,10 @@ class Mailer(AbstractBaseModel, FolderMixin):
 class MailerHealth(AbstractBaseModel):
     """Last delivery attempt per mailer, updated in place so it never grows.
     Written by ``core.mailer`` for environment and custom mailers alike."""
+
+    # Not a scoped object: read only through the mailer settings endpoint,
+    # which checks the permission on the root folder itself.
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
 
     class Outcome(models.TextChoices):
         OK = "ok", "Delivered"
