@@ -11,7 +11,7 @@
 		type ExportOption
 	} from '$lib/components/Modals/ExportModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { buildCustomFieldFilters, listViewFields } from '$lib/utils/table';
+	import { buildCustomFieldFilters, listViewFields, quickFilterPresets } from '$lib/utils/table';
 	import { NON_CREATABLE_URL_MODELS } from '$lib/utils/crud';
 	import { consumeCreateIntent } from '$lib/utils/create-intent';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -272,6 +272,12 @@
 			if (campaignKinds.length === 1) return modalCreateForm({ kind: campaignKinds[0] });
 			return modalCampaignKind();
 		}
+		if (URLModel === 'processings') {
+			// Opened from the processor register: new entries start as processor ones.
+			const roles = new URLSearchParams(currentFilterSearch.replace(/^\?/, '')).getAll('role');
+			if (roles.length && roles.every((r) => r === 'privacy_data_processor'))
+				return modalCreateForm({ role: 'privacy_data_processor' });
+		}
 		modalCreateForm();
 	}
 
@@ -415,6 +421,30 @@
 				onFilterChange={handleFilterChange}
 				onQueryChange={(query) => (currentSearch = new URLSearchParams(query).get('search') ?? '')}
 			>
+				{#snippet quickFilters(filterValues)}
+					{#if quickFilterPresets[URLModel]}
+						<div class="flex flex-wrap gap-2 px-3 pb-2">
+							{#each quickFilterPresets[URLModel] as preset}
+								{@const current = (filterValues[preset.field] ?? []).map((f) => f.value).sort()}
+								{@const selected = current.join() === [...preset.values].sort().join()}
+								<button
+									type="button"
+									class="btn btn-sm {selected
+										? 'preset-filled-primary-500'
+										: 'preset-tonal-surface'}"
+									aria-pressed={selected}
+									onclick={() =>
+										(filterValues[preset.field] = selected
+											? []
+											: preset.values.map((value) => ({ value })))}
+								>
+									<i class="fa-solid {preset.icon}"></i>
+									{safeTranslate(preset.label)}
+								</button>
+							{/each}
+						</div>
+					{/if}
+				{/snippet}
 				{#snippet addButton()}
 					<div class="relative">
 						<div class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs">
