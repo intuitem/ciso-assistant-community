@@ -19,7 +19,8 @@ from django.contrib.auth.models import AnonymousUser, Permission
 from django.utils.translation import gettext_lazy as _, override as translation_override
 from django.urls.base import reverse_lazy
 from django.db.models import Q, F, QuerySet, Case, When, Value, BooleanField
-from django.db.models.functions import Lower
+from django.db.models.functions import Lower, Trim
+from django.db.models.lookups import Exact
 from django.core.exceptions import ValidationError
 from knox.models import AuthToken
 
@@ -230,10 +231,11 @@ class Folder(NameDescriptionMixin):
                 name="enclave_default_role_must_be_null",
             ),
             # Backstop for clean(): blank ref_ids are not identifiers.
+            # TRIM(NULL) is NULL, so this also leaves NULLs out of the index.
             models.UniqueConstraint(
                 Lower("ref_id"),
                 F("parent_folder"),
-                condition=Q(ref_id__isnull=False) & ~Q(ref_id=""),
+                condition=~Q(Exact(Trim("ref_id"), Value(""))),
                 name="folder_ref_id_unique_per_parent",
             ),
         ]
@@ -242,6 +244,9 @@ class Folder(NameDescriptionMixin):
         return self.name.__str__()
 
     def clean(self) -> None:
+        # Whitespace-only is blank, and blank is stored as NULL.
+        if self.ref_id is not None:
+            self.ref_id = self.ref_id.strip() or None
         if (
             self.ref_id
             and Folder.objects.filter(

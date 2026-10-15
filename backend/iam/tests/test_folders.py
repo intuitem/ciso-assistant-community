@@ -931,8 +931,16 @@ class TestFolderRefId:
         Folder.objects.create(name="b", ref_id="DOM.1")
 
     def test_blank_ref_ids_do_not_collide(self, parent: Folder):
-        for i, ref_id in enumerate([None, None, "", ""]):
-            Folder.objects.create(name=f"f{i}", ref_id=ref_id, parent_folder=parent)
+        for i, ref_id in enumerate([None, None, "", "", "   ", "   "]):
+            folder = Folder.objects.create(
+                name=f"f{i}", ref_id=ref_id, parent_folder=parent
+            )
+            assert folder.ref_id is None
+
+    def test_ref_id_is_stripped(self, parent: Folder):
+        Folder.objects.create(name="a", ref_id="DOM.1", parent_folder=parent)
+        with pytest.raises(ValidationError):
+            Folder.objects.create(name="b", ref_id=" dom.1 ", parent_folder=parent)
 
     def test_saving_a_folder_keeps_its_own_ref_id(self, parent: Folder):
         folder = Folder.objects.create(name="a", ref_id="DOM.1", parent_folder=parent)
@@ -945,3 +953,9 @@ class TestFolderRefId:
 
         with pytest.raises(IntegrityError), transaction.atomic():
             Folder.objects.filter(pk=other.pk).update(ref_id="dom.1")
+
+    def test_database_ignores_whitespace_only_ref_ids(self, parent: Folder):
+        folders = [
+            Folder.objects.create(name=f"f{i}", parent_folder=parent) for i in range(2)
+        ]
+        Folder.objects.filter(pk__in=[f.pk for f in folders]).update(ref_id="   ")
