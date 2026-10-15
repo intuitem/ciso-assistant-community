@@ -52,6 +52,7 @@ There is **no notification model** in the database. Notifications are fire-and-f
 | `EMAIL_HOST_PASSWORD_RESCUE` | No | Fallback SMTP password |
 | `EMAIL_USE_TLS_RESCUE` | No | Fallback STARTTLS setting |
 | `EMAIL_USE_SSL_RESCUE` | No | Fallback implicit TLS setting |
+| `ENABLE_CUSTOM_MAILER` | No | `true` shows the Mailer settings tab and lets a stored configuration replace the environment mailers (`global_settings.MailerConfiguration`). Off by default; off also ignores any stored configuration |
 | `EMAIL_TRANSPORT` | No | `smtp` (password, default) or `smtp-oauth2` (bearer token). Also `_RESCUE` |
 | `EMAIL_OAUTH2_GRANT_TYPE`, `EMAIL_OAUTH2_TOKEN_URL`, `EMAIL_OAUTH2_SCOPE` | With `smtp-oauth2` | `client_credentials`, `refresh_token` (RFC 6749) or `jwt_bearer` (RFC 7523); the token URL must be https. Values per provider in the installation docs |
 | `EMAIL_OAUTH2_CLIENT_ID`, `EMAIL_OAUTH2_CLIENT_SECRET`, `EMAIL_OAUTH2_REFRESH_TOKEN` | Per grant | Client credentials and refresh token grants |
@@ -61,7 +62,7 @@ The variables are turned into Django's `MAILERS` setting by `backend/ciso_assist
 
 ### Testing the configuration
 
-`python manage.py send_test_email <address>` sends a test message through `core.mailer.send_test()`, which reports the mailer that delivered and the ones skipped on the way instead of raising. The same function is meant to back a test button in the UI later.
+`python manage.py send_test_email <address>` sends a test message through `core.mailer.send_test()`, which reports the mailer that delivered and the ones skipped on the way instead of raising, then prints the delivery health rows (`global_settings.MailerHealth`, one per mailer, updated by the service on every send). The Mailer settings tab calls the same function with the unsaved form values.
 
 ### Global Setting (UI toggle)
 

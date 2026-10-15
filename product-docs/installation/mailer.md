@@ -31,6 +31,19 @@ For a relay that requires a client certificate, set `EMAIL_SSL_CERTFILE` (and `E
 
 For local development you can run [Mailpit](https://github.com/axllent/mailpit) and point `EMAIL_HOST` at it with both flags set to `False`.
 
+### Configuring mailers in the application
+
+With `ENABLE_CUSTOM_MAILER=True` in the environment, administrators get a **Mailer** tab under Settings where they configure a primary mailer, an optional second mailer and the sender address themselves. When that configuration is active it replaces the environment mailers entirely; when it is parked ("Use these mailers" off) or empty, the environment applies. The switch is off by default and is meant for hosted instances; on-prem operators set it if they want the panel.
+
+Rules enforced by the panel:
+
+* A mailer must pass a test email to the administrator's own address before it can be saved. The test uses the values in the form, not the stored ones. An override exists for servers that only accept mail for their own domain.
+* Secrets are write-only. Leaving a secret field blank on an existing mailer keeps the stored value.
+* Every save notifies the other administrators by email, through the mailer that was active before the change, because whoever controls the mail server receives every password reset link.
+* The tab shows delivery health: per mailer, the last attempt, its outcome and whether failover reached it. The same rows are printed by `send_test_email`.
+
+The Microsoft 365 and Google Workspace buttons fill in the values from the sections above; the tenant-side steps are the same.
+
 ### Checking the configuration
 
 Send a test email through the configured mailers and see which one delivered:

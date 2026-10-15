@@ -40,6 +40,17 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		() => []
 	);
 
+	// Only present when ENABLE_CUSTOM_MAILER is set on the backend and the user
+	// may view it; the tab is hidden otherwise.
+	const mailerSettings = await fetch(`${BASE_API_URL}/settings/mailer/`)
+		.then((res) => (res.ok ? res.json() : null))
+		.catch(() => null);
+	const mailerHealth = mailerSettings
+		? await fetch(`${BASE_API_URL}/settings/mailer/health/`)
+				.then((res) => (res.ok ? res.json() : []))
+				.catch(() => [])
+		: [];
+
 	const selectOptions: Record<string, any> = {};
 
 	const ssoModel = getModelInfo('sso-settings');
@@ -151,6 +162,8 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		auditSinks,
 		auditSinkCreateForm,
 		scimTokens,
+		mailerSettings,
+		mailerHealth,
 		title: m.settings()
 	};
 };
