@@ -37,10 +37,10 @@ With `ENABLE_CUSTOM_MAILER=True` in the environment, administrators get a **Mail
 
 Rules enforced by the panel:
 
-* A mailer must pass a test email to the administrator's own address before it can be saved. The test uses the values in the form, not the stored ones. An override exists for servers that only accept mail for their own domain.
+* Every mailer must pass a test before the configuration can be saved: the test sends one message through each mailer, on its own, to the administrator's own address, and reports per mailer. The test uses the values in the form, not the stored ones. An override exists for servers that only accept mail for their own domain.
 * Secrets are write-only. Leaving a secret field blank on an existing mailer keeps the stored value.
 * Every save notifies the other administrators by email, through the mailer that was active before the change, because whoever controls the mail server receives every password reset link.
-* The tab shows delivery health: per mailer, the last attempt, its outcome and whether failover reached it. The same rows are printed by `send_test_email`.
+* The tab shows delivery health for every configured mailer: the last attempt, its outcome and whether failover reached it, or "never attempted". Testing the saved values refreshes it. The same rows are printed by `send_test_email`.
 
 The Microsoft 365 and Google Workspace buttons fill in the values from the sections above; the tenant-side steps are the same.
 

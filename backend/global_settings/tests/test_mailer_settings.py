@@ -214,7 +214,7 @@ def test_test_endpoint_sends_to_the_requester_and_issues_a_token(
     assert response.status_code == 200
     body = response.json()
     assert body["ok"] is True
-    assert body["mailer"] == "custom-1"
+    assert [(r["mailer"], r["ok"]) for r in body["results"]] == [("custom-1", True)]
     assert body["test_token"]
     assert mail.outbox[0].to == ["admin@tests.local"]
     assert mail.outbox[0].from_email == "hello@example.com"
@@ -231,7 +231,8 @@ def test_test_endpoint_reports_failure_without_a_token(switch_on, client, fake_s
     body = response.json()
     assert body["ok"] is False
     assert "test_token" not in body
-    assert body["skipped"][0]["mailer"] == "custom-1"
+    assert body["results"][0]["ok"] is False
+    assert "refused" in body["results"][0]["error"]
 
 
 def test_tested_values_save_and_notify_the_other_administrators(
@@ -333,6 +334,48 @@ def test_health_endpoint_lists_the_rows(switch_on, client):
     rows = response.json()
     assert rows[0]["alias"] == "default"
     assert rows[0]["last_outcome"] == "ok"
+
+
+def test_every_mailer_is_tested_and_a_failing_second_one_blocks_the_token(
+    switch_on, client, fake_smtp
+):
+    two = payload()
+    two["mailers"].append({**two["mailers"][0], "position": 2, "host": "refused.test"})
+    response = client.post(url("mailer-settings-test"), two, format="json")
+    body = response.json()
+    assert body["ok"] is False
+    assert "test_token" not in body
+    assert [(r["mailer"], r["ok"]) for r in body["results"]] == [
+        ("custom-1", True),
+        ("custom-2", False),
+    ]
+    # The first mailer really was exercised on its own.
+    assert [m.to for m in mail.outbox] == [["admin@tests.local"]]
+
+
+def test_health_lists_configured_mailers_never_attempted(switch_on, client, fake_smtp):
+    two = payload(override_untested=True)
+    two["mailers"].append({**two["mailers"][0], "position": 2, "host": "refused.test"})
+    assert client.put(url(), two, format="json").status_code == 200
+    rows = client.get(url("mailer-settings-health")).json()
+    assert [(r["alias"], r["last_outcome"], r["last_attempt_at"]) for r in rows] == [
+        ("custom-1", None, None),
+        ("custom-2", None, None),
+    ]
+
+
+def test_testing_the_saved_configuration_records_health_for_each_mailer(
+    switch_on, client, fake_smtp
+):
+    two = payload(override_untested=True)
+    two["mailers"].append({**two["mailers"][0], "position": 2, "host": "refused.test"})
+    assert client.put(url(), two, format="json").status_code == 200
+    two.pop("override_untested")
+    response = client.post(url("mailer-settings-test"), two, format="json")
+    assert response.json()["ok"] is False
+    health = {row.alias: row for row in MailerHealth.objects.all()}
+    assert health["custom-1"].last_outcome == "ok"
+    assert health["custom-2"].last_outcome == "unreachable"
 
 
 def test_draft_test_does_not_rewrite_live_health(switch_on, client, fake_smtp):

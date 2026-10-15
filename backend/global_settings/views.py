@@ -590,6 +590,10 @@ class MailerSettingsViewSet(viewsets.ViewSet):
 
     @action(detail=True, methods=["post"])
     def test(self, request, *args, **kwargs):
+        """Send one test message through each mailer in the form, to the
+        requesting administrator. The save token is issued only when every
+        mailer delivered. Health is recorded when the tested values are the
+        saved ones, so testing the live configuration refreshes the table."""
         from .mailer_settings import (
             configuration_digest,
             issue_test_token,
@@ -599,6 +603,12 @@ class MailerSettingsViewSet(viewsets.ViewSet):
 
         self._require(request, "change_mailerconfiguration")
         configuration = MailerConfiguration.get()
+        try:
+            stored_digest = configuration_digest(
+                configuration.from_email, specs_from_rows(configuration.mailers.all())
+            )
+        except ValueError:
+            stored_digest = None
         serializer = MailerConfigurationSerializer(configuration, data=request.data)
         serializer.is_valid(raise_exception=True)
         rows = serializer.build_rows(
@@ -608,33 +618,61 @@ class MailerSettingsViewSet(viewsets.ViewSet):
             serializer.validated_data.get("from_email") or configuration.from_email
         )
         specs = specs_from_rows(rows)
-        result = mail_service.send_test(
-            request.user.email, mailers=specs, from_email=from_email
-        )
+        digest = configuration_digest(from_email, specs)
+        results = [
+            mail_service.send_test(
+                request.user.email,
+                mailers=[spec],
+                from_email=from_email,
+                record_health=digest == stored_digest,
+            )
+            for spec in specs
+        ]
         payload = {
-            "ok": result.ok,
-            "recipient": result.recipient,
-            "mailer": result.mailer,
-            "backend": result.backend,
-            "error": result.error,
-            "skipped": [
-                {"mailer": alias, "error": error} for alias, error in result.skipped
+            "ok": all(result.ok for result in results),
+            "recipient": request.user.email,
+            "results": [
+                {
+                    "mailer": spec.alias,
+                    "ok": result.ok,
+                    "backend": result.backend,
+                    # A single mailer was tried, so the skip reason is the error.
+                    "error": result.skipped[0][1] if result.skipped else result.error,
+                }
+                for spec, result in zip(specs, results)
             ],
         }
-        if result.ok:
-            payload["test_token"] = issue_test_token(
-                configuration_digest(from_email, specs)
-            )
+        if payload["ok"]:
+            payload["test_token"] = issue_test_token(digest)
         return Response(payload)
 
     @action(detail=True, methods=["get"])
     def health(self, request, *args, **kwargs):
+        """One row per active mailer, attempted or not, plus rows of mailers
+        that are no longer configured but were attempted."""
         from .serializers import MailerHealthSerializer
 
         self._require(request, "view_mailerconfiguration")
-        return Response(
-            MailerHealthSerializer(MailerHealth.objects.all(), many=True).data
-        )
+        rows = {
+            row.alias: MailerHealthSerializer(row).data
+            for row in MailerHealth.objects.all()
+        }
+        listed = []
+        for spec in mail_service.active_mailers():
+            listed.append(
+                rows.pop(spec.alias, None)
+                or {
+                    "alias": spec.alias,
+                    "source": spec.source,
+                    "last_attempt_at": None,
+                    "last_outcome": None,
+                    "last_error": "",
+                    "via_failover": False,
+                    "last_success_at": None,
+                }
+            )
+        listed.extend(rows.values())
+        return Response(listed)
 
 
 def _notify_administrators_of_mailer_change(

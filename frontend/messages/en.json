@@ -7480,7 +7480,6 @@
 	"mailerSendTest": "Send test email",
 	"mailerTestSentTo": "Test email sent to {recipient} through {mailer}.",
 	"mailerTestFailed": "Test failed: {error}",
-	"mailerTestSkipped": "{mailer} skipped: {error}",
 	"mailerTestRequired": "Send a test email with these exact values before saving.",
 	"mailerOverrideUntested": "Save without a successful test (my server only accepts mail for its own domain)",
 	"mailerLastTested": "Last successful test",
@@ -7499,5 +7498,11 @@
 	"mailerOutcomeFailed": "Failed after handover",
 	"mailerSourceEnvironment": "environment",
 	"mailerSourceCustom": "custom",
-	"mailerNever": "never"
+	"mailerNever": "never",
+	"mailerTestMailerOk": "{mailer}: delivered to {recipient}",
+	"mailerTestMailerFailed": "{mailer}: failed, {error}",
+	"mailerTestAllOk": "Every mailer delivered. You can save.",
+	"mailerTestSomeFailed": "At least one mailer failed. Fix it or save with the override.",
+	"mailerOutcomeNever": "Never attempted",
+	"mailerSendTestHelp": "Sends one message through each mailer to your own address."
 }

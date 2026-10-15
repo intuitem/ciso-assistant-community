@@ -35,19 +35,24 @@
 		oauth2_audience: string;
 	};
 
+	type MailerTestResult = {
+		mailer: string;
+		ok: boolean;
+		backend?: string | null;
+		error?: string | null;
+	};
 	type TestResult = {
 		ok: boolean;
 		recipient?: string;
-		mailer?: string | null;
 		error?: string | null;
-		skipped?: { mailer: string; error: string }[];
+		results?: MailerTestResult[];
 		test_token?: string;
 	};
 	type HealthRow = {
 		alias: string;
 		source: string;
-		last_attempt_at: string;
-		last_outcome: string;
+		last_attempt_at: string | null;
+		last_outcome: string | null;
 		last_error: string;
 		via_failover: boolean;
 		last_success_at: string | null;
@@ -184,7 +189,7 @@
 			});
 			const body = await response.json();
 			if (!response.ok) {
-				testResult = { ok: false, error: describeError(body), skipped: [] };
+				testResult = { ok: false, error: describeError(body), results: [] };
 				testToken = null;
 				return;
 			}
@@ -192,7 +197,7 @@
 			testToken = body.ok ? (body.test_token ?? null) : null;
 			await invalidateAll();
 		} catch (error) {
-			testResult = { ok: false, error: String(error), skipped: [] };
+			testResult = { ok: false, error: String(error), results: [] };
 			testToken = null;
 		} finally {
 			testing = false;
@@ -269,7 +274,8 @@
 		invalidateTest();
 	}
 
-	function outcomeLabel(outcome: string): string {
+	function outcomeLabel(outcome: string | null): string {
+		if (!outcome) return m.mailerOutcomeNever();
 		if (outcome === 'ok') return m.mailerOutcomeOk();
 		if (outcome === 'unreachable') return m.mailerOutcomeUnreachable();
 		return m.mailerOutcomeFailed();
@@ -511,22 +517,29 @@
 				<span class="text-sm text-surface-600-400">{m.mailerTestRequired()}</span>
 			{/if}
 		</div>
+		<p class="text-xs text-surface-600-400">{m.mailerSendTestHelp()}</p>
 		{#if testResult}
 			<div
 				class="rounded p-3 text-sm {testResult.ok ? 'preset-tonal-success' : 'preset-tonal-error'}"
 				data-testid="mailer-test-result"
 			>
-				{#if testResult.ok}
-					{m.mailerTestSentTo({
-						recipient: testResult.recipient ?? '',
-						mailer: testResult.mailer ?? ''
-					})}
+				{#if testResult.error}
+					{m.mailerTestFailed({ error: testResult.error })}
 				{:else}
-					{m.mailerTestFailed({ error: testResult.error ?? '' })}
+					{testResult.ok ? m.mailerTestAllOk() : m.mailerTestSomeFailed()}
 				{/if}
-				{#each testResult.skipped ?? [] as skipped (skipped.mailer)}
+				{#each testResult.results ?? [] as result (result.mailer)}
 					<div class="text-xs mt-1">
-						{m.mailerTestSkipped({ mailer: skipped.mailer, error: skipped.error })}
+						{#if result.ok}
+							<i class="fa-solid fa-check mr-1"></i>
+							{m.mailerTestMailerOk({
+								mailer: result.mailer,
+								recipient: testResult.recipient ?? ''
+							})}
+						{:else}
+							<i class="fa-solid fa-xmark mr-1"></i>
+							{m.mailerTestMailerFailed({ mailer: result.mailer, error: result.error ?? '' })}
+						{/if}
 					</div>
 				{/each}
 			</div>
@@ -570,7 +583,9 @@
 								<span
 									class="badge {row.last_outcome === 'ok'
 										? 'preset-filled-success-500'
-										: 'preset-filled-error-500'}"
+										: row.last_outcome
+											? 'preset-filled-error-500'
+											: 'preset-tonal'}"
 								>
 									{outcomeLabel(row.last_outcome)}
 								</span>

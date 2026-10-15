@@ -289,13 +289,15 @@ def send_test(
     *,
     mailers: list[MailerSpec] | None = None,
     from_email: str | None = None,
+    record_health: bool | None = None,
 ) -> TestSendResult:
     """Send a test message and report what happened instead of raising.
 
     The service's other entry points raise; this one is for a person who is
     checking the configuration and wants the answer, including which mailer
     delivered and which ones were skipped on the way. ``mailers`` and
-    ``from_email`` test a configuration that is not saved yet."""
+    ``from_email`` test a configuration that is not saved yet; such draft
+    tests do not touch delivery health unless ``record_health`` says so."""
     if mailers is None:
         missing = missing_configuration()
         if missing:
@@ -312,8 +314,10 @@ def send_test(
     skipped: list[tuple[str, str]] = []
     now = timezone.now().strftime("%Y-%m-%d %H:%M:%S %Z")
     try:
+        if record_health is None:
+            record_health = mailers is None
         with open_connection(
-            attempts=skipped, mailers=mailers, record_health=mailers is None
+            attempts=skipped, mailers=mailers, record_health=record_health
         ) as backend:
             alias = getattr(backend, "alias", None)
             backend_name = type(backend).__name__
