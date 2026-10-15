@@ -237,9 +237,7 @@
 								label={m.clientSecret()}
 								type="password"
 								autocomplete="off"
-								helpText={initialData?.has_client_secret
-									? m.leaveBlankToKeepSecret()
-									: undefined}
+								helpText={initialData?.has_client_secret ? m.leaveBlankToKeepSecret() : undefined}
 							/>
 							<TextField
 								{form}

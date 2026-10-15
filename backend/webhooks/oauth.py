@@ -71,7 +71,7 @@ def _fetch(cfg: dict) -> tuple[str, float]:
 
     try:
         ttl = int(payload.get("expires_in") or _DEFAULT_TTL)
-    except (TypeError, ValueError):
+    except TypeError, ValueError:
         ttl = _DEFAULT_TTL
     return token, time.monotonic() + max(ttl - _EXPIRY_SKEW, 0)
 
