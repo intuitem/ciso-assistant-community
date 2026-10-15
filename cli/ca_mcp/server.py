@@ -60,6 +60,8 @@ from .tools.library_tools import (
     get_stored_libraries,
     get_loaded_libraries,
     import_stored_library,
+    find_requirements,
+    get_requirement_mappings,
 )
 
 from .tools.write_tools import (
@@ -158,6 +160,8 @@ from .tools.ebios_rm_tools import (
 )
 
 READ_TOOLS = [
+    find_requirements,
+    get_requirement_mappings,
     count_objects,
     list_objects,
     get_object,
