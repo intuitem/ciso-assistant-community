@@ -2790,11 +2790,41 @@ export const listViewFields = {
 		}
 	},
 	processings: {
-		head: ['refId', 'name', 'description', 'status', 'processingNature', 'labels', 'folder'],
-		body: ['ref_id', 'name', 'description', 'status', 'nature', 'filtering_labels', 'folder'],
+		head: [
+			'refId',
+			'name',
+			'description',
+			'status',
+			'processingRole',
+			'processingNature',
+			'labels',
+			'folder'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'description',
+			'status',
+			'role',
+			'nature',
+			'filtering_labels',
+			'folder'
+		],
 		optionalFields: {
-			head: ['personalDataCategories', 'dataSubjectCategories', 'dpiaRequired', 'updatedAt'],
-			body: ['personal_data_categories', 'data_subject_categories', 'dpia_required', 'updated_at']
+			head: [
+				'processingControllers',
+				'personalDataCategories',
+				'dataSubjectCategories',
+				'dpiaRequired',
+				'updatedAt'
+			],
+			body: [
+				'controllers',
+				'personal_data_categories',
+				'data_subject_categories',
+				'dpia_required',
+				'updated_at'
+			]
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -2808,6 +2838,25 @@ export const listViewFields = {
 				}
 			},
 			status: PROCESSING_STATUS_FILTER,
+			role: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'processings/role',
+					optionsLabelField: 'label',
+					optionsValueField: 'value',
+					label: 'processingRole',
+					browserCache: 'force-cache',
+					multiple: true
+				}
+			},
+			controllers: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'entities',
+					label: 'processingControllers',
+					multiple: true
+				}
+			},
 			nature: PROCESSING_NATURE_FILTER,
 			dpia_required: DPIA_REQUIRED_FILTER,
 			personal_data__category: PERSONAL_DATA_CATEGORY_FILTER,
@@ -4030,6 +4079,25 @@ export interface ParentActionConfig {
 }
 
 export type TableBatchAction = BatchActionConfig | ParentActionConfig;
+
+export const quickFilterPresets: Partial<
+	Record<urlModel, { label: string; icon: string; field: string; values: string[] }[]>
+> = {
+	processings: [
+		{
+			label: 'controllerRegister',
+			icon: 'fa-clipboard-list',
+			field: 'role',
+			values: ['privacy_controller', 'privacy_joint_controller']
+		},
+		{
+			label: 'processorRegister',
+			icon: 'fa-handshake',
+			field: 'role',
+			values: ['privacy_data_processor']
+		}
+	]
+};
 
 export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 	// The whole vocabulary: read stops the reminder, delete removes the message (§4).

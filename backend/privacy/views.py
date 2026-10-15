@@ -27,6 +27,7 @@ from collections import defaultdict
 
 from core.utils import camel_case
 from iam.models import Folder, RoleAssignment
+from tprm.models import Entity
 
 from .models import (
     Purpose,
@@ -340,6 +341,8 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
         "folder",
         "nature",
         "status",
+        "role",
+        "controllers",
         "filtering_labels",
         "assigned_to",
         "perimeters",
@@ -358,6 +361,7 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
                 "personal_data__category",
                 "data_subjects",
                 "nature",
+                "controllers",
                 "associated_controls",
                 actor_prefetch("assigned_to"),
                 "evidences",
@@ -381,6 +385,14 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
                 "escape": True,
             },
             "status": {"source": "get_status_display", "label": "status"},
+            "role": {"source": "get_role_display", "label": "role"},
+            "controllers": {
+                "source": "controllers",
+                "label": "controllers",
+                "format": lambda qs: "\n".join(
+                    escape_excel_formula(e.name) for e in qs.all()
+                ),
+            },
             "nature": {
                 "source": "nature",
                 "label": "processing_nature",
@@ -409,10 +421,23 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
                 "label": "dpia_reference",
                 "escape": True,
             },
+            "associated_controls": {
+                "source": "associated_controls",
+                "label": "security_measures",
+                "format": lambda qs: ",".join(
+                    escape_excel_formula(c.name) for c in qs.all()
+                ),
+            },
         },
         "filename": "processings_export",
         "select_related": ["folder"],
-        "prefetch_related": ["filtering_labels", "nature", "assigned_to"],
+        "prefetch_related": [
+            "filtering_labels",
+            "nature",
+            "assigned_to",
+            "controllers",
+            "associated_controls",
+        ],
     }
 
     @action(
@@ -434,6 +459,7 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
                 "description": txt(processing.description or ""),
                 "domain": txt(processing.folder.name),
                 "status": processing.status,
+                "role": processing.get_role_display(),
                 "processing_nature": ",".join(
                     txt(n.name) for n in processing.nature.all()
                 ),
@@ -451,8 +477,34 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
             }
         ]
 
+        # Contacts only for entities the reader can see; names come with the link
+        viewable_entities = {
+            str(pk)
+            for pk in RoleAssignment.get_viewable_object_ids(request.user, Entity)
+        }
+
+        def contacts(entity):
+            if str(entity.id) not in viewable_entities:
+                return ""
+            emails = {r.email.strip() for r in entity.representatives.all() if r.email}
+            return ",".join(txt(e) for e in sorted(emails))
+
         sheets = [
             ("Processing", list(processing_rows[0].keys()), processing_rows),
+            (
+                "Controllers",
+                ["name", "country", "contacts"],
+                [
+                    {
+                        "name": txt(entity.name),
+                        "country": entity.country or "",
+                        "contacts": contacts(entity),
+                    }
+                    for entity in processing.controllers.prefetch_related(
+                        "representatives"
+                    )
+                ],
+            ),
             (
                 "Purposes",
                 ["name", "description", "legal_basis", "article_9_condition"],
@@ -568,6 +620,19 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
                     for transfer in processing.data_transfers.select_related("entity")
                 ],
             ),
+            (
+                "Security measures",
+                ["name", "description", "category", "status"],
+                [
+                    {
+                        "name": txt(control.name),
+                        "description": txt(control.description or ""),
+                        "category": control.get_category_display() or "",
+                        "status": control.get_status_display() or "",
+                    }
+                    for control in processing.associated_controls.all()
+                ],
+            ),
         ]
 
         buffer = io.BytesIO()
@@ -593,6 +658,10 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(Processing.STATUS_CHOICES))
+
+    @action(detail=False, name="Get role choices")
+    def role(self, request):
+        return Response(dict(Processing.ROLE_CHOICES))
 
     @action(detail=False, name="Get all processing assigned_to actors")
     def assigned_to(self, request):
@@ -651,12 +720,14 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
     def dpia_overview(self, request):
         """Where the processings the caller can see stand on DPIAs: a count per
         state, and one page of processings (`state`, `search`, `offset`), each
-        with its DPIA and any screening awaiting review."""
+        with its DPIA and any screening awaiting review. Processor processings
+        are left out: their DPIA is the controller's."""
         from core.models import QuickFormResponse
         from core.quick_form_apply import forms_with_target
 
         viewable = Processing.objects.filter(
-            id__in=RoleAssignment.get_viewable_object_ids(request.user, Processing)
+            id__in=RoleAssignment.get_viewable_object_ids(request.user, Processing),
+            role__in=Processing.DPIA_ROLES,
         )
         open_statuses = [
             QuickFormResponse.Status.DRAFT,
