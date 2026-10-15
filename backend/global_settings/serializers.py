@@ -4,6 +4,8 @@ import re
 import uuid
 from types import MappingProxyType
 
+import structlog
+
 from django.conf import settings as django_settings
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import transaction
@@ -19,6 +21,8 @@ from core.net_safety import (
 from iam.models import User
 
 from .models import GlobalSettings, Mailer, MailerConfiguration, MailerHealth
+
+logger = structlog.get_logger(__name__)
 
 
 def canonical_ip_or_cidr(value: str) -> str:
@@ -328,10 +332,12 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
         from core.models import AppliedControl
         from decimal import Decimal
 
-        updated_count = 0
+        to_update = []
 
         # Get all AppliedControl records that have cost data
-        for control in AppliedControl.objects.filter(cost__isnull=False):
+        for control in AppliedControl.objects.filter(cost__isnull=False).only(
+            "id", "cost"
+        ):
             if isinstance(control.cost, dict):
                 current_currency = control.cost.get("currency")
 
@@ -367,12 +373,15 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                                     * Decimal(str(conversion_rate))
                                 )
 
-                    control.save(update_fields=["cost"], skip_sync=True)
-                    updated_count += 1
+                    to_update.append(control)
 
-        print(
-            f"Updated currency from '{old_currency}' to '{new_currency}' "
-            f"with conversion rate {conversion_rate} in {updated_count} AppliedControl records"
+        AppliedControl.objects.bulk_update(to_update, ["cost"], batch_size=500)
+        logger.info(
+            "Applied control currencies updated",
+            old_currency=old_currency,
+            new_currency=new_currency,
+            conversion_rate=conversion_rate,
+            count=len(to_update),
         )
 
     class Meta:
