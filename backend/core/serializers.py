@@ -1841,9 +1841,7 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
         return time_state(obj.eta.isoformat())
 
     def get_currency(self, obj):
-        if not obj.cost:
-            return "€"  # Default currency
-        return obj.cost.get("currency", "€")
+        return (obj.cost or {}).get("currency") or get_global_currency()
 
     def get_annual_cost_display(self, obj):
         annual_cost = obj.annual_cost
