@@ -1040,12 +1040,13 @@ class MailerConfigurationSerializer(serializers.ModelSerializer):
                 if name in Mailer.SECRET_FIELDS and value in ("", None):
                     continue
                 setattr(row, name, value if value is not None else "")
-            try:
-                row.mailer_entry()
-            except ValueError as error:
+            # Problems are reported as our own messages, never as exception
+            # text: nothing raised below the API may reach the caller.
+            problems = row.configuration_problems()
+            if problems:
                 raise serializers.ValidationError(
-                    {"mailers": f"mailer {item['position']}: {error}"}
-                ) from error
+                    {"mailers": f"mailer {item['position']}: {problems[0]}"}
+                )
             rows.append(row)
         return rows
 

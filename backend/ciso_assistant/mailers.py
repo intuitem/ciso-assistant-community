@@ -32,18 +32,26 @@ def _flag(env: Mapping[str, str], name: str) -> bool:
     return env.get(name, "False").lower() in ("true", "1", "yes")
 
 
-def validate_oauth2(config: dict) -> None:
-    """Fail loudly at startup on an unusable OAuth configuration."""
+def oauth2_problems(config: dict) -> list[str]:
+    """Every reason this OAuth configuration is unusable, as operator-facing
+    messages. Empty when it is usable. Never raises, so callers that answer
+    HTTP requests can report a problem without surfacing an exception."""
     grant = config.get("grant_type")
     if grant not in GRANTS:
-        raise ValueError(f"EMAIL_OAUTH2_GRANT_TYPE must be one of {', '.join(GRANTS)}")
+        return [f"EMAIL_OAUTH2_GRANT_TYPE must be one of {', '.join(GRANTS)}"]
+    problems = []
     token_url = config.get("token_url")
     if not token_url:
-        raise ValueError("EMAIL_OAUTH2_TOKEN_URL is required")
-    if urlsplit(token_url).scheme != "https":
-        raise ValueError("EMAIL_OAUTH2_TOKEN_URL must use https")
+        problems.append("EMAIL_OAUTH2_TOKEN_URL is required")
+    else:
+        try:
+            scheme = urlsplit(token_url).scheme
+        except ValueError:
+            scheme = None
+        if scheme != "https":
+            problems.append("EMAIL_OAUTH2_TOKEN_URL must use https")
     if not config.get("user"):
-        raise ValueError("EMAIL_HOST_USER (the mailbox to send as) is required")
+        problems.append("EMAIL_HOST_USER (the mailbox to send as) is required")
     required = {
         "client_credentials": ("client_id", "client_secret"),
         # RFC 6749 section 6: a public client refreshes without a secret.
@@ -53,15 +61,23 @@ def validate_oauth2(config: dict) -> None:
     missing = [name for name in required if not config.get(name)]
     if missing:
         names = ", ".join(f"EMAIL_OAUTH2_{name.upper()}" for name in missing)
-        raise ValueError(f"{names} required for the {grant} grant")
+        problems.append(f"{names} required for the {grant} grant")
     if grant == "jwt_bearer" and not (
         config.get("service_account_file")
         or (config.get("issuer") and config.get("private_key"))
     ):
-        raise ValueError(
+        problems.append(
             "EMAIL_OAUTH2_SERVICE_ACCOUNT_FILE, or EMAIL_OAUTH2_ISSUER and "
             "EMAIL_OAUTH2_PRIVATE_KEY, required for the jwt_bearer grant"
         )
+    return problems
+
+
+def validate_oauth2(config: dict) -> None:
+    """Fail loudly at startup on an unusable OAuth configuration."""
+    problems = oauth2_problems(config)
+    if problems:
+        raise ValueError(problems[0])
 
 
 def oauth2_config(env: Mapping[str, str], suffix: str, timeout: int) -> dict:

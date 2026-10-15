@@ -193,13 +193,44 @@ class Mailer(AbstractBaseModel, FolderMixin):
     def __str__(self):
         return f"{self.alias} ({self.transport} {self.host})"
 
-    def mailer_entry(self) -> dict:
-        """The ``MAILERS``-shaped entry for this row, validated like the
-        environment builder validates its variables. Raises ValueError."""
-        from ciso_assistant.mailers import SMTP_BACKEND, validate_oauth2
+    def oauth2_config(self) -> dict:
+        """The ``oauth2`` option for this row, unvalidated."""
+        return {
+            "user": self.username or None,
+            "grant_type": self.oauth2_grant_type or None,
+            "token_url": self.oauth2_token_url or None,
+            "scope": self.oauth2_scope or None,
+            "client_id": self.oauth2_client_id or None,
+            "client_secret": self.oauth2_client_secret or None,
+            "refresh_token": self.oauth2_refresh_token or None,
+            "service_account_file": None,
+            "issuer": self.oauth2_issuer or None,
+            "private_key": self.oauth2_private_key or None,
+            "audience": self.oauth2_audience or None,
+        }
 
+    def configuration_problems(self) -> list[str]:
+        """Why this row cannot be used, as operator-facing messages, checked
+        the way the environment builder validates its variables. Empty when
+        the row is usable. Never raises: the settings API reports these
+        messages to the caller, and no exception text must reach it."""
+        from ciso_assistant.mailers import oauth2_problems
+
+        problems = []
         if self.use_tls and self.use_ssl:
-            raise ValueError("TLS and SSL are mutually exclusive")
+            problems.append("TLS and SSL are mutually exclusive")
+        if self.transport == self.Transport.SMTP_OAUTH2:
+            problems.extend(oauth2_problems(self.oauth2_config()))
+        return problems
+
+    def mailer_entry(self) -> dict:
+        """The ``MAILERS``-shaped entry for this row. Raises ValueError with
+        the first configuration problem."""
+        from ciso_assistant.mailers import SMTP_BACKEND
+
+        problems = self.configuration_problems()
+        if problems:
+            raise ValueError(problems[0])
         options = {
             "host": self.host,
             "port": self.port,
@@ -210,22 +241,8 @@ class Mailer(AbstractBaseModel, FolderMixin):
             "timeout": 5,
         }
         if self.transport == self.Transport.SMTP_OAUTH2:
-            config = {
-                "user": self.username or None,
-                "grant_type": self.oauth2_grant_type or None,
-                "token_url": self.oauth2_token_url or None,
-                "scope": self.oauth2_scope or None,
-                "client_id": self.oauth2_client_id or None,
-                "client_secret": self.oauth2_client_secret or None,
-                "refresh_token": self.oauth2_refresh_token or None,
-                "service_account_file": None,
-                "issuer": self.oauth2_issuer or None,
-                "private_key": self.oauth2_private_key or None,
-                "audience": self.oauth2_audience or None,
-            }
-            validate_oauth2(config)
             options["password"] = None
-            options["oauth2"] = config
+            options["oauth2"] = self.oauth2_config()
         return {"BACKEND": SMTP_BACKEND, "OPTIONS": options}
 
 

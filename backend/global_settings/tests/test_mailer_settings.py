@@ -319,6 +319,33 @@ def test_unusable_oauth_row_is_refused(switch_on, client, fake_smtp):
     assert "https" in str(response.json()["mailers"])
 
 
+def test_malformed_oauth_token_url_is_reported_in_our_own_words(
+    switch_on, client, fake_smtp
+):
+    # urlsplit raises on this; the answer must carry our message, never the
+    # exception's text.
+    data = payload(override_untested=True)
+    data["mailers"][0]["transport"] = "smtp-oauth2"
+    data["mailers"][0]["oauth2_grant_type"] = "client_credentials"
+    data["mailers"][0]["oauth2_token_url"] = "https://[idp.example/token"
+    data["mailers"][0]["oauth2_client_id"] = "c"
+    data["mailers"][0]["oauth2_client_secret"] = "s"
+    response = client.put(url(), data, format="json")
+    assert response.status_code == 400
+    assert (
+        response.json()["mailers"] == "mailer 1: EMAIL_OAUTH2_TOKEN_URL must use https"
+    )
+
+
+def test_contradictory_tls_row_is_refused(switch_on, client, fake_smtp):
+    data = payload(override_untested=True)
+    data["mailers"][0]["use_tls"] = True
+    data["mailers"][0]["use_ssl"] = True
+    response = client.put(url(), data, format="json")
+    assert response.status_code == 400
+    assert response.json()["mailers"] == "mailer 1: TLS and SSL are mutually exclusive"
+
+
 def test_activating_requires_a_sender_address(switch_on, client, fake_smtp):
     response = client.put(
         url(), payload(override_untested=True, from_email=""), format="json"
