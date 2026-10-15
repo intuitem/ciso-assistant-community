@@ -233,7 +233,7 @@ class Folder(NameDescriptionMixin):
             # Backstop for clean(): blank ref_ids are not identifiers.
             # TRIM(NULL) is NULL, so this also leaves NULLs out of the index.
             models.UniqueConstraint(
-                Lower("ref_id"),
+                Lower(Trim("ref_id")),
                 F("parent_folder"),
                 condition=~Q(Exact(Trim("ref_id"), Value(""))),
                 name="folder_ref_id_unique_per_parent",

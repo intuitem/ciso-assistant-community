@@ -954,6 +954,13 @@ class TestFolderRefId:
         with pytest.raises(IntegrityError), transaction.atomic():
             Folder.objects.filter(pk=other.pk).update(ref_id="dom.1")
 
+    def test_database_rejects_padded_duplicates(self, parent: Folder):
+        Folder.objects.create(name="a", ref_id="DOM.1", parent_folder=parent)
+        other = Folder.objects.create(name="b", parent_folder=parent)
+
+        with pytest.raises(IntegrityError), transaction.atomic():
+            Folder.objects.filter(pk=other.pk).update(ref_id=" dom.1 ")
+
     def test_database_ignores_whitespace_only_ref_ids(self, parent: Folder):
         folders = [
             Folder.objects.create(name=f"f{i}", parent_folder=parent) for i in range(2)
