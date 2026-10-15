@@ -670,7 +670,9 @@ class ChatSessionViewSet(BaseModelViewSet):
                 # "this audit" / "this assessment" means the page's object
                 ctx_builder.add(
                     "enrichment",
-                    f"CURRENT PAGE (the object the user calls 'this'):\n{enrichment}",
+                    "CURRENT PAGE (the object the user calls 'this'). Items are "
+                    "markdown links: keep them as-is when you cite an item.\n"
+                    f"{enrichment}",
                     # the user's own page outranks generic framework knowledge
                     priority=10
                     if query_result and query_result.get("type") == "search_library"
@@ -2187,6 +2189,18 @@ def _build_context_prompt(page_context: dict, parsed_context) -> str:
     return "\n".join(parts) + "\n"
 
 
+def _page_link(label: str, model_key: str, object_id) -> str:
+    """A markdown link to the object's page, as query results give them."""
+    from django.conf import settings
+
+    from .tools import MODEL_MAP
+
+    base_url = getattr(settings, "CISO_ASSISTANT_URL", "").rstrip("/")
+    if not base_url:
+        return label
+    return f"[{label}]({base_url}/{MODEL_MAP[model_key][3]}/{object_id})"
+
+
 def _enrich_context(parsed_context, scope) -> str:
     """
     Enrich the LLM context with domain objects relevant to the current page.
@@ -2229,7 +2243,11 @@ def _enrich_context(parsed_context, scope) -> str:
         if scenarios:
             parts.append("\nEXISTING RISK SCENARIOS (already identified):")
             for s in scenarios:
-                line = f"  - [{s.ref_id}] {s.name}" if s.ref_id else f"  - {s.name}"
+                line = "  - " + _page_link(
+                    f"[{s.ref_id}] {s.name}" if s.ref_id else s.name,
+                    "risk_scenario",
+                    s.id,
+                )
                 extras = []
                 for level_scope, level_field in LEVEL_FIELDS.items():
                     level = getattr(s, level_field, None)
@@ -2246,7 +2264,11 @@ def _enrich_context(parsed_context, scope) -> str:
                         extras.append(
                             f"{label}: "
                             + "; ".join(
-                                f"{c.ref_id} {c.name}" if c.ref_id else c.name
+                                _page_link(
+                                    f"[{c.ref_id}] {c.name}" if c.ref_id else c.name,
+                                    "applied_control",
+                                    c.id,
+                                )
                                 for c in controls
                             )
                         )
@@ -2259,7 +2281,7 @@ def _enrich_context(parsed_context, scope) -> str:
         if assets:
             parts.append("\nASSETS IN THIS DOMAIN:")
             for asset in assets:
-                line = f"  - {asset.name}"
+                line = f"  - {_page_link(asset.name, 'asset', asset.id)}"
                 extras = []
                 if hasattr(asset, "type") and asset.type:
                     extras.append(
@@ -2322,7 +2344,9 @@ def _enrich_context(parsed_context, scope) -> str:
                 ref_id = getattr(ra.requirement, "ref_id", "") or ""
                 name = ra.requirement.name or ra.requirement.description or ""
                 label = f"[{ref_id}] {name}".strip() if ref_id else name
-                parts.append(f"  - {label[:160]}")
+                parts.append(
+                    f"  - {_page_link(label[:160], 'requirement_assessment', ra.id)}"
+                )
 
     elif parsed_context.model_key == "findings_assessment":
         from django.db.models import Count
@@ -2367,7 +2391,7 @@ def _enrich_context(parsed_context, scope) -> str:
                 )
             )
             for f in findings:
-                line = f"  - {f.name} (severity={f.get_severity_display()}, status={f.get_status_display()}"
+                line = f"  - {_page_link(f.name, 'finding', f.id)} (severity={f.get_severity_display()}, status={f.get_status_display()}"
                 if f.priority:
                     line += f", priority=P{f.priority}"
                 if f.eta:

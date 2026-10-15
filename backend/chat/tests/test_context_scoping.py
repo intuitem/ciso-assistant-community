@@ -172,16 +172,17 @@ class TestEnrichContextScoping:
         from chat.views import _enrich_context
 
         scenario = risk_assessment.risk_scenarios.get()
-        scenario.existing_applied_controls.add(
-            AppliedControl.objects.create(name="visible control", folder=domain)
-        )
+        visible = AppliedControl.objects.create(name="visible control", folder=domain)
+        scenario.existing_applied_controls.add(visible)
         scenario.applied_controls.add(
             AppliedControl.objects.create(name="hidden control", folder=other_domain)
         )
         enrichment = _enrich_context(
             context_for("risk-assessments", risk_assessment), scope_for(reader)
         )
-        assert "existing controls: visible control" in enrichment
+        # cited items link to their page, like query results
+        assert "existing controls: [visible control](" in enrichment
+        assert f"/applied-controls/{visible.id})" in enrichment
         assert "hidden control" not in enrichment
 
     def test_findings_enrichment_needs_access(
