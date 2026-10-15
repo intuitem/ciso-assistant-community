@@ -5336,7 +5336,7 @@
 	"lbListFrameworkNamePlaceholder": "Môj rámec SOC 2",
 	"lbListMatrixNamePlaceholder": "Moja matica 4 × 4",
 	"lbListCreateAndEdit": "Vytvoriť a upraviť",
-	"lbListPackagerPattern": "Tvorca balíka môže obsahovať iba znaky [a-z0-9_-].",
+	"lbListPackagerPattern": "Tvorca balíka môže obsahovať iba znaky [a-z0-9_-]{1,32}.",
 	"lbListQuickHelpFramework": "Názov a tvorca balíka určujú všetky identifikátory URN rámca. Tvorca balíka sa zapamätá aj pre ďalšie vytváranie knižníc. Knižnica kontajnera zostáva upraviteľná v úplnom zobrazení návrhu až do prvého publikovania.",
 	"lbListQuickHelpMatrix": "Názov a tvorca balíka určujú všetky identifikátory URN matice. Tvorca balíka sa zapamätá aj pre ďalšie vytváranie knižníc. Knižnica kontajnera zostáva upraviteľná v úplnom zobrazení návrhu až do prvého publikovania.",
 	"lbListReferenceId": "Referenčné ID",

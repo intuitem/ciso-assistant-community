@@ -5816,7 +5816,7 @@
 	"lbListNewLibraryDraft": "Nieuw bibliotheekconcept",
 	"lbListNewMatrix": "Nieuwe matrix",
 	"lbListNoDrafts": "Nog geen bibliotheekontwerpen. Maak er een helemaal zelf of gebruik een van je aangepaste bibliotheken.",
-	"lbListPackagerPattern": "Packager moet overeenkomen met [a-z0-9_-]+",
+	"lbListPackagerPattern": "Packager moet overeenkomen met [a-z0-9_-]{1,32}",
 	"lbListPublished": "Gepubliceerd",
 	"lbListPublishedModified": "Gepubliceerd · niet gepubliceerde wijzigingen",
 	"lbListQuickHelpFramework": "De naam en de pakkageerder bepalen elke URN van het kader. De pakkageerder wordt onthouden voor de volgende keer; de omhullende bibliotheek blijft op de achtergrond en blijft bewerkbaar in de volledige weergave van het concept tot de eerste publicatie.",

@@ -5316,7 +5316,7 @@
 	"lbListFrameworkNamePlaceholder": "Můj SOC 2 rámec",
 	"lbListMatrixNamePlaceholder": "Moje matice 4x4",
 	"lbListCreateAndEdit": "Vytvořit a upravit",
-	"lbListPackagerPattern": "Balíčkář (Packager) musí odpovídat výrazu [a-z0-9_-]+",
+	"lbListPackagerPattern": "Balíčkář (Packager) musí odpovídat výrazu [a-z0-9_-]{1,32}",
 	"lbListQuickHelpFramework": "Název a označení Packager určují všechna URN daného rámce. Packager se uloží pro příště. Knihovna sama zůstává na pozadí a až do prvního zveřejnění ji můžete plně upravovat.",
 	"lbListQuickHelpMatrix": "Název a označení Packager určují všechna URN matice. Packager se uloží pro příště a matici můžete plně upravovat z konceptu až do zveřejnění.",
 	"lbListReferenceId": "Referenční ID",
