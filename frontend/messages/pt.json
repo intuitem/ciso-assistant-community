@@ -261,13 +261,8 @@
 	"noFlaggedItemsHint": "Nenhum requisito está sinalizado. O respondente receberá apenas a nota abaixo — sinalize os itens a corrigir no questionário para indicar o que precisa de ajustes.",
 	"itemsNeedingChanges": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} item precisa de alterações",
 				"countPlural=other": "{count} itens precisam de alterações"
@@ -1495,13 +1490,8 @@
 	"notificationTitleValidationFlowUpdated": "A validação '{validation_ref_id}' agora está {new_status}",
 	"unreadNotifications": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} notificação não lida",
 				"countPlural=other": "{count} notificações não lidas"
@@ -2859,13 +2849,8 @@
 	"scheduleYearly": "Anual",
 	"scheduleEveryNDays": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "Todos os dias",
 				"countPlural=other": "A cada {count} dias"
@@ -2874,13 +2859,8 @@
 	],
 	"scheduleEveryNWeeks": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "Toda semana",
 				"countPlural=other": "A cada {count} semanas"
@@ -2889,13 +2869,8 @@
 	],
 	"scheduleEveryNMonths": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "Todo mês",
 				"countPlural=other": "A cada {count} meses"
@@ -2904,13 +2879,8 @@
 	],
 	"scheduleEveryNYears": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "Todo ano",
 				"countPlural=other": "A cada {count} anos"
@@ -2919,13 +2889,8 @@
 	],
 	"dueInDays": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "em {count} dia",
 				"countPlural=other": "em {count} dias"
@@ -3316,14 +3281,8 @@
 	"associatedFindingsAssessments": "Acompanhamentos associados",
 	"hourCount": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"count",
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
 			"match": {
 				"countPlural=one": "{count} Hora",
 				"countPlural=other": "{count} Horas"
@@ -3332,13 +3291,8 @@
 	],
 	"minuteCount": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} Minuto",
 				"countPlural=other": "{count} Minutos"
@@ -3347,13 +3301,8 @@
 	],
 	"dayCount": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} Dia",
 				"countPlural=other": "{count} Dias"
@@ -3362,13 +3311,8 @@
 	],
 	"objectsNotVisible": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} objeto está oculto. O vínculo pode ser perdido ao editar.",
 				"countPlural=other": "{count} objetos estão ocultos. Os vínculos podem ser perdidos ao editar."
@@ -5206,14 +5150,8 @@
 	"errorFetching": "Não foi possível carregar as informações de cascata. Por favor, tente novamente.",
 	"cascadeAffectedNotice": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"count",
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["count", "countPlural"],
 			"match": {
 				"count=0": "Nenhum outro objeto será impactado.",
 				"countPlural=one": "{count} objeto relacionado não será excluído, mas perderá um ou mais relacionamentos.",
@@ -5621,13 +5559,8 @@
 	"builderNoRulesOrGroupsConfigured": "Nenhuma regra ou grupo configurado",
 	"builderOutcomeRuleSummary": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} regra de resultado",
 				"countPlural=other": "{count} regras de resultado"
@@ -5636,13 +5569,8 @@
 	],
 	"builderImplementationGroupsSummaryShort": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} grupo",
 				"countPlural=other": "{count} grupos"
@@ -5655,13 +5583,8 @@
 	"builderScoreScale": "Escala de pontuação",
 	"builderScaleLevel": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} nível",
 				"countPlural=other": "{count} níveis"
@@ -5764,13 +5687,8 @@
 	"builderAssessableLeaf": "Folha avaliável",
 	"builderAssessableWithChildren": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "Avaliável · {count} filho",
 				"countPlural=other": "Avaliável · {count} filhos"
@@ -5779,13 +5697,8 @@
 	],
 	"builderGroupWithChildren": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "Grupo · {count} filho",
 				"countPlural=other": "Grupo · {count} filhos"
@@ -5824,13 +5737,8 @@
 	"builderAddQuestion": "Adicionar pergunta",
 	"builderChildrenHidden": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} filho oculto",
 				"countPlural=other": "{count} filhos ocultos"
@@ -5857,14 +5765,8 @@
 	"builderChangeTypeWarning": "Alterar o tipo excluirá as opções existentes. Continuar?",
 	"builderShownWhenAnswers": [
 		{
-			"declarations": [
-				"input count",
-				"input ref",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "input ref", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "Exibido quando {ref} = {count} resposta",
 				"countPlural=other": "Exibido quando {ref} = {count} respostas"
@@ -6555,13 +6457,8 @@
 	"lbListEmpty": "vazio",
 	"lbCountFrameworks": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} framework",
 				"countPlural=other": "{count} frameworks"
@@ -6570,13 +6467,8 @@
 	],
 	"lbCountThreats": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} ameaça",
 				"countPlural=other": "{count} ameaças"
@@ -6585,13 +6477,8 @@
 	],
 	"lbCountReferenceControls": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} controle de referência",
 				"countPlural=other": "{count} controles de referência"
@@ -6600,13 +6487,8 @@
 	],
 	"lbCountRiskMatrices": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} matriz de risco",
 				"countPlural=other": "{count} matrizes de risco"
@@ -6615,13 +6497,8 @@
 	],
 	"lbCountRequirementMappingSets": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} mapeamento",
 				"countPlural=other": "{count} mapeamentos"
@@ -6630,13 +6507,8 @@
 	],
 	"lbCountPreset": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} predefinição",
 				"countPlural=other": "{count} predefinições"
@@ -6645,13 +6517,8 @@
 	],
 	"lbCountMetricDefinitions": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} definição de métrica",
 				"countPlural=other": "{count} definições de métrica"
@@ -7038,13 +6905,8 @@
 	"outcomeNotMet": "não atendido",
 	"verdictsMet": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "resultado atendido",
 				"countPlural=other": "resultados atendidos"
@@ -7063,13 +6925,8 @@
 	"builderRequired": "Obrigatório",
 	"lbCountQuickForms": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} formulário rápido",
 				"countPlural=other": "{count} formulários rápidos"
@@ -7078,13 +6935,8 @@
 	],
 	"builderPageStatus": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "Página · {count} pergunta",
 				"countPlural=other": "Página · {count} perguntas"
@@ -7159,13 +7011,8 @@
 	"onlyYou": "Somente você",
 	"alsoNotified": [
 		{
-			"declarations": [
-				"input count",
-				"local countPlural = count: plural"
-			],
-			"selectors": [
-				"countPlural"
-			],
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
 			"match": {
 				"countPlural=one": "{count} outra pessoa foi notificada",
 				"countPlural=other": "{count} outras pessoas foram notificadas"
