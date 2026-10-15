@@ -7577,7 +7577,8 @@ class QuickFormResponseReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = QuickFormResponse
-        fields = "__all__"
+        # The content endpoint shows facts, to who may view the subject only.
+        exclude = ["facts_snapshot"]
 
 
 class QuickFormResponseWriteSerializer(BaseModelSerializer):
@@ -7596,6 +7597,8 @@ class QuickFormResponseWriteSerializer(BaseModelSerializer):
             "score",
             "started_at",
             "submitted_at",
+            # Frozen on submit: the record of what was assessed.
+            "facts_snapshot",
         ]
 
     def validate_respondents(self, value):
