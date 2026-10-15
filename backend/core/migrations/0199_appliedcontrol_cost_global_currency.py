@@ -30,7 +30,7 @@ def align_cost_currency(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0196_demo_manifest"),
+        ("core", "0198_quick_form_scales_facts_review"),
         ("global_settings", "0007_remove_globalsettings_is_published"),
     ]
 

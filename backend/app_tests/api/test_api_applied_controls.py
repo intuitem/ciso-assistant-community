@@ -480,7 +480,7 @@ class TestAppliedControlCostCurrency:
         from django.apps import apps
 
         migration = import_module(
-            "core.migrations.0197_appliedcontrol_cost_global_currency"
+            "core.migrations.0199_appliedcontrol_cost_global_currency"
         )
         folder = Folder.get_root_folder()
         stuck = AppliedControl.objects.create(
