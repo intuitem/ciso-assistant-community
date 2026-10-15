@@ -673,6 +673,11 @@ The multi-sheet workbook is the same format produced by the **Export XLSX** butt
 * processing\_nature - comma-separated processing nature names
 * information\_channel
 * usage\_channel
+* role - GDPR role, raw key (e.g. `privacy_data_processor`) or label; `Controller` when blank
+  * Controller
+  * Joint Controller
+  * Data Processor
+* controllers - names of existing third-party entities, one per line or comma-separated: the co-controllers of a joint controller processing, or the clients of a processor one
 * assigned\_to - comma-separated user emails
 * labels - comma-separated label names (created if missing)
 * dpia\_required
@@ -690,6 +695,8 @@ The multi-sheet workbook is the same format produced by the **Export XLSX** butt
 {% file src="../.gitbook/assets/sample_processing_workbook.xlsx" %}
 
 The workbook contains a **Processing** sheet (same columns as the flat list, one row) plus one optional sheet per sub-object type: **Purposes**, **Personal data**, **Data subjects**, **Data recipients**, **Contractors** and **Transfers**. Sheet names are matched case-insensitively; empty sheets are simply skipped.
+
+An export also carries a **Controllers** sheet (each client's name, country and contacts) and a **Security measures** sheet (the processing's applied controls). Both are there to be read, and the import ignores them.
 
 Every choice column accepts either the raw key (e.g. `privacy_contract`) or its English label (e.g. `Performance of a Contract`), case-insensitively.
 
