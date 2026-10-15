@@ -24,6 +24,7 @@ from ..resolvers import (
     resolve_threat_id,
     resolve_entity_id,
     resolve_incident_id,
+    resolve_task_template_id,
     resolve_in_folder_or_global,
     parse_duration,
 )
@@ -1742,6 +1743,7 @@ async def create_incident(
     qualifications: list = None,
     entities: list = None,
     applied_controls: list = None,
+    task_templates: list = None,
     filtering_labels: list = None,
 ) -> str:
     """Create a new incident
@@ -1766,6 +1768,7 @@ async def create_incident(
         qualifications: List of qualifications: letters C/I/A/T, names or UUIDs
         entities: List of third-party entity IDs/names
         applied_controls: List of applied control IDs/names (resolved within the incident's folder, then Global)
+        task_templates: List of tasks (task templates) to link, as IDs/names (resolved globally)
         filtering_labels: List of label UUIDs
     """
     try:
@@ -1811,6 +1814,10 @@ async def create_incident(
             payload["applied_controls"] = [
                 resolve_in_folder_or_global(resolve_applied_control_id, c, scope_folder)
                 for c in applied_controls
+            ]
+        if task_templates:
+            payload["task_templates"] = [
+                resolve_task_template_id(t) for t in task_templates
             ]
         if filtering_labels:
             payload["filtering_labels"] = filtering_labels

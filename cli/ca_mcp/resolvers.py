@@ -536,30 +536,32 @@ def resolve_team_id(team_name_or_id: str) -> str:
 
 
 def resolve_task_template_id(task_name_or_id: str) -> str:
-    """Helper function to resolve task template name to UUID
-    If already a UUID, returns it. If a name, looks it up via API.
+    """Resolve a task template name or UUID to its UUID.
+
+    The task templates endpoint has no `name` filter, so names are looked up
+    via `search` and then matched exactly (case-sensitive) on `name`.
     """
-    # Check if it's already a UUID
-    if "-" in task_name_or_id and len(task_name_or_id) == 36:
+    if _is_uuid(task_name_or_id):
         return task_name_or_id
 
-    # Otherwise, look up by name
+    # No item cap: search also matches ref_id, so the exact name may sit
+    # beyond the default limit.
     tasks, error = fetch_all_results(
-        "/task-templates/", params={"name": task_name_or_id}
+        "/task-templates/",
+        params={"search": task_name_or_id},
+        max_items=None,
     )
-
     if error:
         raise ValueError(f"Task template '{task_name_or_id}' API error: {error}")
 
-    if not tasks:
+    matches = [t for t in tasks if t.get("name") == task_name_or_id]
+    if not matches:
         raise ValueError(f"Task template '{task_name_or_id}' not found")
-
-    if len(tasks) > 1:
+    if len(matches) > 1:
         raise ValueError(
-            f"Ambiguous task template name '{task_name_or_id}', found {len(tasks)}"
+            f"Ambiguous task template name '{task_name_or_id}', found {len(matches)}"
         )
-
-    return tasks[0]["id"]
+    return matches[0]["id"]
 
 
 # ============================================================================
