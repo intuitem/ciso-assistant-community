@@ -131,7 +131,9 @@ def mailing_enabled() -> bool:
 
 @contextmanager
 def open_connection(
-    attempts: list | None = None, mailers: list[MailerSpec] | None = None
+    attempts: list | None = None,
+    mailers: list[MailerSpec] | None = None,
+    record_health: bool = True,
 ):
     """Yield the first mailer that accepts a connection, closed on exit.
 
@@ -139,6 +141,8 @@ def open_connection(
     that could not be opened, so a caller can report the failover path.
     ``mailers`` overrides the active list, for testing a configuration before
     it is saved and for notifying through the mailers a change replaced.
+    ``record_health`` is off for such draft attempts, so a test of unsaved
+    values never rewrites the health of the mailer that is actually in use.
 
     This is the only place failover happens. An exception raised by the
     caller while the connection is open propagates unchanged: the next
@@ -162,9 +166,10 @@ def open_connection(
             )
             if attempts is not None:
                 attempts.append((spec.alias, str(error)))
-            _record_health(
-                spec, "unreachable", error=str(error), via_failover=skipped > 0
-            )
+            if record_health:
+                _record_health(
+                    spec, "unreachable", error=str(error), via_failover=skipped > 0
+                )
             skipped += 1
             last_error = error
             # A failed login or STARTTLS leaves the socket half open on the
@@ -174,10 +179,14 @@ def open_connection(
         try:
             yield backend
         except Exception as error:
-            _record_health(spec, "failed", error=str(error), via_failover=skipped > 0)
+            if record_health:
+                _record_health(
+                    spec, "failed", error=str(error), via_failover=skipped > 0
+                )
             raise
         else:
-            _record_health(spec, "ok", via_failover=skipped > 0)
+            if record_health:
+                _record_health(spec, "ok", via_failover=skipped > 0)
         finally:
             _close(backend, spec.alias)
         return
@@ -303,7 +312,9 @@ def send_test(
     skipped: list[tuple[str, str]] = []
     now = timezone.now().strftime("%Y-%m-%d %H:%M:%S %Z")
     try:
-        with open_connection(attempts=skipped, mailers=mailers) as backend:
+        with open_connection(
+            attempts=skipped, mailers=mailers, record_health=mailers is None
+        ) as backend:
             alias = getattr(backend, "alias", None)
             backend_name = type(backend).__name__
             send(

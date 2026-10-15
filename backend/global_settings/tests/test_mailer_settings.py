@@ -333,3 +333,18 @@ def test_health_endpoint_lists_the_rows(switch_on, client):
     rows = response.json()
     assert rows[0]["alias"] == "default"
     assert rows[0]["last_outcome"] == "ok"
+
+
+def test_draft_test_does_not_rewrite_live_health(switch_on, client, fake_smtp):
+    # The live mailer delivered once; a failed test of a draft with the same
+    # position must not mark it unreachable.
+    client.put(url(), payload(override_untested=True), format="json")
+    mailer.send("S", "b", "a@tests.local")
+    assert MailerHealth.objects.get(alias="custom-1").last_outcome == "ok"
+
+    response = client.post(
+        url("mailer-settings-test"), payload(host="refused.test"), format="json"
+    )
+
+    assert response.json()["ok"] is False
+    assert MailerHealth.objects.get(alias="custom-1").last_outcome == "ok"
