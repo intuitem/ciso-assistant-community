@@ -8,6 +8,7 @@ it to a builder's ``covers`` (see ``core/demo_builders.py``) or list it in
 from datetime import UTC, date, datetime, timedelta
 
 import pytest
+from django.db import transaction
 from django.urls import URLResolver, get_resolver
 from knox.models import AuthToken
 from rest_framework.test import APIClient
@@ -110,33 +111,80 @@ def test_module_selection_pulls_dependencies():
         demo.builders(["no-such-module"])
 
 
-@pytest.mark.django_db
-def test_seed_populates_every_covered_model():
-    ctx = demo.seed(domain_name=DOMAIN, out=lambda _: None, err=pytest.fail)
-    folders = ctx.folders()
-    empty = [
-        model._meta.label
-        for builder in demo.builders()
-        for model, lookup in builder.covers.items()
-        if not model.objects.filter(**{f"{lookup}__in": folders}).exists()
-    ]
-    assert not empty, f"builders declare these but created none: {empty}"
+@pytest.fixture(scope="class")
+def seeded(django_db_setup, django_db_blocker):
+    with django_db_blocker.unblock(), transaction.atomic():
+        yield demo.seed(domain_name=DOMAIN, out=lambda _: None, err=pytest.fail)
+        transaction.set_rollback(True)
 
 
 @pytest.mark.django_db
-def test_seed_is_deterministic():
-    quiet = {"out": lambda _: None, "err": pytest.fail}
-    first = signature(demo.seed(domain_name=DOMAIN, **quiet))
-    second = signature(demo.seed(domain_name=DOMAIN, reset=True, **quiet))
-    assert first == second
+class TestFullSeed:
+    def test_seed_populates_every_covered_model(self, seeded):
+        folders = seeded.folders()
+        empty = [
+            model._meta.label
+            for builder in demo.builders()
+            for model, lookup in builder.covers.items()
+            if not model.objects.filter(**{f"{lookup}__in": folders}).exists()
+        ]
+        assert not empty, f"builders declare these but created none: {empty}"
 
+    def test_seed_is_deterministic(self, seeded):
+        quiet = {"out": lambda _: None, "err": pytest.fail}
+        first = signature(seeded)
+        second = signature(demo.seed(domain_name=DOMAIN, reset=True, **quiet))
+        assert first == second
 
-@pytest.mark.django_db
-def test_seed_is_idempotent():
-    quiet = {"out": lambda _: None, "err": pytest.fail}
-    first = signature(demo.seed(domain_name=DOMAIN, **quiet))
-    again = signature(demo.seed(domain_name=DOMAIN, **quiet))
-    assert first == again
+    def test_seed_is_idempotent(self, seeded):
+        quiet = {"out": lambda _: None, "err": pytest.fail}
+        first = signature(seeded)
+        again = signature(demo.seed(domain_name=DOMAIN, **quiet))
+        assert first == again
+
+    def test_seed_switches_on_the_modules_it_fills(self, seeded):
+        from global_settings.utils import ff_is_enabled
+
+        for flag in {f for b in demo.builders() for f in b.feature_flags}:
+            assert ff_is_enabled(flag), flag
+
+    def test_flush_only_touches_the_root_level_demo_domain(self, seeded):
+        unrelated = Folder.objects.create(
+            name="Unrelated parent",
+            content_type=Folder.ContentType.DOMAIN,
+            parent_folder=Folder.get_root_folder(),
+        )
+        namesake = Folder.objects.create(
+            name=DOMAIN, content_type=Folder.ContentType.DOMAIN, parent_folder=unrelated
+        )
+        demo.flush(DOMAIN)
+        assert Folder.objects.filter(pk=namesake.pk).exists()
+        assert not Folder.objects.filter(**demo.demo_domain_filter(DOMAIN)).exists()
+
+    def test_demo_domain_can_be_deleted_from_the_api(self, seeded):
+        client = api_client(admin=True)
+        response = client.delete(f"/api/folders/{seeded.domain.pk}/")
+        assert response.status_code == 204, response.content
+        assert not Folder.objects.filter(pk=seeded.domain.pk).exists()
+
+    def test_domain_delete_still_refuses_references_from_other_domains(self, seeded):
+        from metrology.models import MetricDefinition, MetricInstance
+
+        client = api_client(admin=True)
+        definition = MetricDefinition.objects.create(
+            name="Demo metric", ref_id="T-MET", folder=seeded.domain
+        )
+        customer = Folder.objects.create(
+            name="Customer domain",
+            content_type=Folder.ContentType.DOMAIN,
+            parent_folder=Folder.get_root_folder(),
+        )
+        MetricInstance.objects.create(
+            name="Their instance", metric_definition=definition, folder=customer
+        )
+        response = client.delete(f"/api/folders/{seeded.domain.pk}/")
+        assert response.status_code == 409
+        assert AppliedControl.objects.filter(folder=seeded.domain).exists()
 
 
 @pytest.mark.django_db
@@ -146,7 +194,11 @@ def test_seed_is_idempotent():
 )
 def test_dates_follow_the_anchor(frozen, anchor):
     ctx = demo.seed(
-        domain_name=DOMAIN, frozen=frozen, out=lambda _: None, err=pytest.fail
+        domain_name=DOMAIN,
+        modules=["compliance"],
+        frozen=frozen,
+        out=lambda _: None,
+        err=pytest.fail,
     )
     control = AppliedControl.objects.get(folder=ctx.domain, ref_id="AC.001")
     assert control.eta == anchor + timedelta(days=30)
@@ -216,22 +268,6 @@ def test_flush_refuses_when_user_data_depends_on_the_demo():
         demo.flush(DOMAIN)
     assert MetricInstance.objects.filter(pk=theirs.pk).exists()
     assert Folder.objects.filter(**demo.demo_domain_filter(DOMAIN)).exists()
-
-
-@pytest.mark.django_db
-def test_flush_only_touches_the_root_level_demo_domain():
-    unrelated = Folder.objects.create(
-        name="Unrelated parent",
-        content_type=Folder.ContentType.DOMAIN,
-        parent_folder=Folder.get_root_folder(),
-    )
-    namesake = Folder.objects.create(
-        name=DOMAIN, content_type=Folder.ContentType.DOMAIN, parent_folder=unrelated
-    )
-    demo.seed(domain_name=DOMAIN, out=lambda _: None, err=pytest.fail)
-    demo.flush(DOMAIN)
-    assert Folder.objects.filter(pk=namesake.pk).exists()
-    assert not Folder.objects.filter(**demo.demo_domain_filter(DOMAIN)).exists()
 
 
 @pytest.mark.django_db
@@ -307,37 +343,6 @@ def test_load_demo_endpoint_requires_domain_creation_rights():
     assert not Folder.objects.filter(name=demo.DEFAULT_DOMAIN).exists()
 
 
-@pytest.mark.django_db
-def test_demo_domain_can_be_deleted_from_the_api():
-    client = api_client(admin=True)
-    ctx = demo.seed(domain_name=DOMAIN, out=lambda _: None, err=pytest.fail)
-    response = client.delete(f"/api/folders/{ctx.domain.pk}/")
-    assert response.status_code == 204, response.content
-    assert not Folder.objects.filter(pk=ctx.domain.pk).exists()
-
-
-@pytest.mark.django_db
-def test_domain_delete_still_refuses_references_from_other_domains():
-    from metrology.models import MetricDefinition, MetricInstance
-
-    client = api_client(admin=True)
-    ctx = demo.seed(domain_name=DOMAIN, out=lambda _: None, err=pytest.fail)
-    definition = MetricDefinition.objects.create(
-        name="Demo metric", ref_id="T-MET", folder=ctx.domain
-    )
-    customer = Folder.objects.create(
-        name="Customer domain",
-        content_type=Folder.ContentType.DOMAIN,
-        parent_folder=Folder.get_root_folder(),
-    )
-    MetricInstance.objects.create(
-        name="Their instance", metric_definition=definition, folder=customer
-    )
-    response = client.delete(f"/api/folders/{ctx.domain.pk}/")
-    assert response.status_code == 409
-    assert AppliedControl.objects.filter(folder=ctx.domain).exists()
-
-
 def test_builder_feature_flags_exist():
     from global_settings.utils import get_supported_feature_flags
 
@@ -345,15 +350,6 @@ def test_builder_feature_flags_exist():
     assert declared <= get_supported_feature_flags(), sorted(
         declared - get_supported_feature_flags()
     )
-
-
-@pytest.mark.django_db
-def test_seed_switches_on_the_modules_it_fills():
-    from global_settings.utils import ff_is_enabled
-
-    demo.seed(domain_name=DOMAIN, out=lambda _: None, err=pytest.fail)
-    for flag in {f for b in demo.builders() for f in b.feature_flags}:
-        assert ff_is_enabled(flag), flag
 
 
 @pytest.mark.django_db
