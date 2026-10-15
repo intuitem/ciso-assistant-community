@@ -103,10 +103,7 @@
 	}
 </script>
 
-<div
-	class="h-60 shrink-0 border-t border-surface-200-800 bg-surface-100-900 overflow-y-auto"
-	data-testid="triggers-panel"
->
+<div class="h-60 shrink-0 bg-surface-100-900 overflow-y-auto" data-testid="triggers-panel">
 	{#if !registrations.length}
 		<p class="p-4 text-xs text-surface-500 text-center mt-6">
 			<i class="fa-solid fa-bolt block text-lg mb-2 opacity-40"></i>
