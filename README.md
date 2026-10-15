@@ -417,6 +417,7 @@ Read more here: [AI engine](backend/chat/README.md)
 36. NCA NCNICC-1:2025 🇸🇦
 37. NCA ECC-2:2024 🇸🇦
 38. NCA CCC-1:2020 🇸🇦
+39. Hungarian NIS2 protective measures catalogue (7/2024. (VI. 24.) MK rendelet) with the 1/2025. (I. 31.) SZTFH rendelet audit requirements 🇭🇺
 
 <br/>
 
