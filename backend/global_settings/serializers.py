@@ -1,6 +1,10 @@
+import copy
 import ipaddress
 import re
 import uuid
+from types import MappingProxyType
+
+import structlog
 
 from django.conf import settings as django_settings
 from django.core.exceptions import ValidationError as DjangoValidationError
@@ -17,6 +21,8 @@ from core.net_safety import (
 from iam.models import User
 
 from .models import GlobalSettings
+
+logger = structlog.get_logger(__name__)
 
 
 def canonical_ip_or_cidr(value: str) -> str:
@@ -67,6 +73,7 @@ def validate_default_dashboard_value(value):
 
 GENERAL_SETTINGS_KEYS = [
     "security_objective_scale",
+    "organisation_score_scale",
     "ebios_radar_max",
     "ebios_radar_green_zone_radius",
     "ebios_radar_yellow_zone_radius",
@@ -105,6 +112,7 @@ GENERAL_SETTINGS_KEYS = [
     "personal_folders",
     "personal_folders_parent",
     "disable_partially_compliant_result",
+    "documentation_score_first",
     "use_risk_category_label",
     "disabled_email_templates",
 ]
@@ -113,6 +121,48 @@ LLM_URL_DEFAULTS = {
     "ollama_base_url": "http://localhost:11434",
     "openai_api_base": "http://localhost:1234/v1",
 }
+
+
+# Proposed on the audit form for frameworks without a scale of their own.
+DEFAULT_ORGANISATION_SCORE_SCALE = {
+    "score_scale_preset": "0-5",
+    "min_score": 0,
+    "max_score": 5,
+    "scores_definition": [],
+}
+
+
+def _normalize_organisation_score_scale(value):
+    from core.models import normalize_score_scale
+
+    if not isinstance(value, dict):
+        raise serializers.ValidationError(
+            {"organisation_score_scale": "scoreScaleErrorInvalid"}
+        )
+    levels = value.get("scores_definition")
+    if levels is not None and not isinstance(levels, list):
+        raise serializers.ValidationError(
+            {"organisation_score_scale": "scoreScaleErrorInvalid"}
+        )
+    try:
+        preset, min_score, max_score = normalize_score_scale(
+            value.get("score_scale_preset"),
+            value.get("min_score"),
+            value.get("max_score"),
+            levels,
+        )
+    except DjangoValidationError as e:
+        raise serializers.ValidationError({"organisation_score_scale": e.messages})
+    if min_score is None:
+        raise serializers.ValidationError(
+            {"organisation_score_scale": "scoreScaleErrorRangeRequired"}
+        )
+    return {
+        "score_scale_preset": preset,
+        "min_score": min_score,
+        "max_score": max_score,
+        "scores_definition": levels or [],
+    }
 
 
 class GeneralSettingsSerializer(serializers.ModelSerializer):
@@ -125,6 +175,11 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
         ret = super().to_representation(instance)
         if "value" in ret and isinstance(ret["value"], dict):
             ret["value"].pop("openai_api_key", None)
+            # Always a value, so the audit form never re-implements the fallback.
+            if not ret["value"].get("organisation_score_scale"):
+                ret["value"]["organisation_score_scale"] = copy.deepcopy(
+                    DEFAULT_ORGANISATION_SCORE_SCALE
+                )
         return ret
 
     def update(self, instance, validated_data):
@@ -172,6 +227,10 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                             {key: "URL hostname could not be resolved."}
                         )
             # Validate builtin_metrics_retention_days minimum value
+            if key == "organisation_score_scale":
+                validated_data["value"][key] = _normalize_organisation_score_scale(
+                    value
+                )
             if key == "builtin_metrics_retention_days":
                 if not isinstance(value, int) or value < 1:
                     raise serializers.ValidationError(
@@ -273,10 +332,12 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
         from core.models import AppliedControl
         from decimal import Decimal
 
-        updated_count = 0
+        to_update = []
 
         # Get all AppliedControl records that have cost data
-        for control in AppliedControl.objects.filter(cost__isnull=False):
+        for control in AppliedControl.objects.filter(cost__isnull=False).only(
+            "id", "cost"
+        ):
             if isinstance(control.cost, dict):
                 current_currency = control.cost.get("currency")
 
@@ -312,12 +373,15 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                                     * Decimal(str(conversion_rate))
                                 )
 
-                    control.save(update_fields=["cost"], skip_sync=True)
-                    updated_count += 1
+                    to_update.append(control)
 
-        print(
-            f"Updated currency from '{old_currency}' to '{new_currency}' "
-            f"with conversion rate {conversion_rate} in {updated_count} AppliedControl records"
+        AppliedControl.objects.bulk_update(to_update, ["cost"], batch_size=500)
+        logger.info(
+            "Applied control currencies updated",
+            old_currency=old_currency,
+            new_currency=new_currency,
+            conversion_rate=conversion_rate,
+            count=len(to_update),
         )
 
     class Meta:
@@ -352,6 +416,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     )
     ebiosrm = serializers.BooleanField(
         source="value.ebiosrm", required=False, default=True
+    )
+    risk_management = serializers.BooleanField(
+        source="value.risk_management", required=False, default=True
     )
     scoring_assistant = serializers.BooleanField(
         source="value.scoring_assistant", required=False, default=True
@@ -395,6 +462,20 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     project_management = serializers.BooleanField(
         source="value.project_management", required=False, default=False
     )
+    # Per-entry switches inside the Project management menu, which
+    # `project_management` gates as a whole.
+    generic_collections = serializers.BooleanField(
+        source="value.generic_collections", required=False, default=True
+    )
+    accreditations = serializers.BooleanField(
+        source="value.accreditations", required=False, default=True
+    )
+    projects = serializers.BooleanField(
+        source="value.projects", required=False, default=True
+    )
+    responsibility_matrices = serializers.BooleanField(
+        source="value.responsibility_matrices", required=False, default=True
+    )
     contracts = serializers.BooleanField(
         source="value.contracts", required=False, default=False
     )
@@ -422,8 +503,16 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     right_requests = serializers.BooleanField(
         source="value.right_requests", required=False, default=True
     )
+    # Default on: the inbox is the channel that works out of the box, where
+    # notifications_enable_mailing defaults off and most installs get nothing.
+    notification_center = serializers.BooleanField(
+        source="value.notification_center", required=False, default=True
+    )
     data_breaches = serializers.BooleanField(
         source="value.data_breaches", required=False, default=True
+    )
+    dpias = serializers.BooleanField(
+        source="value.dpias", required=False, default=False
     )
     chat_mode = serializers.BooleanField(
         source="value.chat_mode", required=False, default=False
@@ -479,6 +568,69 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
         source="value.relations_graph", required=False, default=False
     )
 
+    # Flags a user may switch off for themselves. Opt-in, like batch actions: a
+    # new flag is not hideable until listed. Eligible means it hides a navigation
+    # area and nothing else — a flag that also gates data rendering, a write path,
+    # role behaviour or IAM config would make two users read different data.
+    USER_HIDEABLE_FLAGS = frozenset(
+        {
+            "accreditations",
+            "bia",
+            "commitment_management",
+            "compliance",
+            "contracts",
+            "control_plan",
+            "custom_portals",
+            "data_breaches",
+            "dpias",
+            "document_management",
+            "ebiosrm",
+            "exceptions",
+            "experimental",
+            "follow_up",
+            "generic_collections",
+            "incidents",
+            "journeys",
+            "metrology",
+            "notification_center",
+            "organisation_issues",
+            "organisation_objectives",
+            "personal_data",
+            "posture_assessments",
+            "privacy",
+            "project_management",
+            "projects",
+            "purposes",
+            "quantitative_risk_studies",
+            "quick_forms",
+            "reports",
+            "responsibility_matrices",
+            "right_requests",
+            "risk_acceptances",
+            "risk_management",
+            "scoring_assistant",
+            "security_advisories",
+            "cwes",
+            "tasks",
+            "threat_modeling",
+            "tprm",
+            "ttps",
+            "validation_flows",
+            "vulnerabilities",
+            "workflows",
+            "xrays",
+        }
+    )
+
+    # Flags that only work with others on: turning one on turns those on too, and
+    # turning one of those off turns it off (see utils.apply_flag_requirements).
+    FLAG_REQUIRES = MappingProxyType(
+        {
+            # DPIAs are quick forms: screenings and assessments are responses.
+            "dpias": frozenset({"quick_forms"}),
+        }
+    )
+
     class Meta:
         model = GlobalSettings
         exclude = [
@@ -506,9 +658,16 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
         Custom update logic to handle saving changes to the nested 'value' field,
         iterating directly over the serializer's fields.
         """
+        # Local import: utils imports this module at load time.
+        from global_settings.utils import (
+            apply_flag_requirements,
+            clear_feature_flags_cache,
+        )
+
         current_value_dict = instance.value if isinstance(instance.value, dict) else {}
         value_changed = False
         idp_groups_changed = False
+        turned_off = set()
         new_value_dict = validated_data.get("value", {})
 
         for field_name, field_instance in self.fields.items():
@@ -528,19 +687,23 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
                 new_flag_value = new_value_dict[field_name]
 
                 if current_value_dict.get(source_key) != new_flag_value:
+                    if current_value_dict.get(source_key) and not new_flag_value:
+                        turned_off.add(source_key)
                     current_value_dict[source_key] = new_flag_value
                     value_changed = True
                     if source_key == "idp_groups":
                         idp_groups_changed = True
+
+        before_requirements = dict(current_value_dict)
+        apply_flag_requirements(current_value_dict, turned_off)
+        value_changed = value_changed or current_value_dict != before_requirements
 
         if value_changed:
             instance.value = current_value_dict
             instance.save(update_fields=["value"])
             # Every flags write must invalidate the read cache; the only other
             # write path is PresetExecutor._apply_feature_flags, which does
-            # the same. Local import: utils imports this module at load time.
-            from global_settings.utils import clear_feature_flags_cache
-
+            # the same.
             clear_feature_flags_cache()
 
         return instance

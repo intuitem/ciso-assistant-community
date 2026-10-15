@@ -188,6 +188,7 @@
 	<!-- Backdrop -->
 	<div
 		class="fixed inset-0 z-[9999] flex items-start justify-center pt-[15vh] bg-black/50 backdrop-blur-sm"
+		data-testid="command-palette"
 		role="presentation"
 		onclick={(e) => {
 			if (e.target === e.currentTarget) opened = false;

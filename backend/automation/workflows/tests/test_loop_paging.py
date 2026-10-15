@@ -123,8 +123,10 @@ class TestPagingLoop:
         output = start_instance(version).node_outputs["each_row"]
         assert output["pages"] == 2
         assert output["count"] == 4
-        # Never silent: the run says where it stopped.
-        assert any("stopped after" in e["message"] for e in output["errors"])
+        # Never silent: the run says where it stopped. Not in `errors` —
+        # nothing about the items went wrong.
+        assert "stopped after" in output["stopped"]
+        assert output["errors"] == []
 
     def test_a_mutating_sweep_covers_the_whole_set(self):
         """The flagship sweep filters on the very field the body updates.
@@ -310,4 +312,59 @@ class TestItemCeiling:
         assert instance.status == WorkflowInstance.Status.COMPLETED
         output = instance.node_outputs["each_row"]
         assert output["count"] == 4
-        assert any("stopped after 4 items" in e["message"] for e in output["errors"])
+        assert output["stopped"] == "stopped after 4 items"
+        assert output["errors"] == []
+
+
+@pytest.mark.django_db
+class TestALoopThatCannotStoreWhatItCollected:
+    """The failure runs under the body token that closed the last iteration, so
+    it must not travel the ordinary node-failure path: that collects the
+    iteration again and comes back with a second raise, outside the run's
+    transaction, leaving the loop parked in silence."""
+
+    def _run(self, budget):
+        domain = make_domain(f"Sweep oversized {uuid.uuid4()}")
+        for index in range(6):
+            AppliedControl.objects.create(
+                name=f"AC {index:02d}", description="d" * 400, folder=domain
+            )
+        version = paging_flow(
+            domain,
+            {
+                "read": {"model": "applied_control", "order_by": "name", "limit": 2},
+                "collect": "{{item}}",
+            },
+        )
+        with override_settings(WORKFLOW_NODE_OUTPUT_BUDGET=budget):
+            return start_instance(version)
+
+    def test_it_stops_where_it_can_no_longer_keep_records(self):
+        """Before the next item's side effects, not after every one of them."""
+        instance = self._run(budget=3000)
+        assert instance.status == WorkflowInstance.Status.COMPLETED, list(
+            instance.logs.values_list("message", flat=True)
+        )
+        output = instance.node_outputs["each_row"]
+        assert output["count"] < 6
+        assert "would not fit" in output["stopped"]
+        assert output["errors"] == []
+        # What it did collect is still there, in full — no record of work done
+        # is dropped to make room.
+        assert output["results"]
+        assert "omitted" not in str(output["results"])
+
+    def test_a_loop_that_fits_is_untouched(self):
+        instance = self._run(budget=500_000)
+        assert instance.status == WorkflowInstance.Status.COMPLETED
+        assert instance.node_outputs["each_row"]["count"] == 6
+        assert instance.node_outputs["each_row"]["errors"] == []
+        assert instance.node_outputs["each_row"]["stopped"] is None
+
+    def test_an_output_that_still_cannot_be_stored_fails_the_loop(self):
+        """A first item over the whole budget has nothing to stop before."""
+        instance = self._run(budget=200)
+        assert instance.status == WorkflowInstance.Status.FAILED
+        assert not instance.tokens.filter(status="waiting").exists()
+        said = " ".join(log.message or "" for log in instance.logs.all())
+        assert "were dropped" in said

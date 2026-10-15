@@ -40,6 +40,69 @@ To deploy the release :
 helm install ciso-assistant-release oci://ghcr.io/intuitem/helm-charts/ce/ciso-assistant -f custom.yaml
 ```
 
+## Customizing the deployment
+
+Everything below is driven from `values.yaml`, no chart patching needed.
+
+### Container command and args
+
+`backend`, `backend.huey` and `frontend` each accept `command` and `args`. Left empty, the image
+entrypoint is used. The Huey worker carries its command in the values, so the number of workers or
+the scheduler interval can be changed without editing the chart :
+
+```yaml
+backend:
+  huey:
+    args: ["-c", "python manage.py run_huey -w 4 --scheduler-interval 30"]
+```
+
+### Qdrant (AI assistant / RAG)
+
+The `qdrant` section is passed through to the [official Qdrant chart](https://github.com/qdrant/qdrant-helm).
+Its image and pull secrets are its own, `global.image.*` and `global.imagePullSecrets` do not apply :
+
+```yaml
+qdrant:
+  enabled: true
+  image:
+    repository: registry.example.com/mirror/qdrant
+    tag: v1.18.2
+  imagePullSecrets:
+    - name: my-registry-creds
+```
+
+Any other key from the Qdrant chart values (`nodeSelector`, `securityContext`, `service`, `ingress`, ...)
+can be set under `qdrant` and is kept across `helm upgrade`.
+
+### OIDC signing key (service accounts)
+
+The backend signs the tokens issued to service accounts with an RSA key. The chart generates one on
+first install, stores it in the `<release>-backend-oidc` secret and injects it as
+`IDP_OIDC_PRIVATE_KEY` into the backend and Huey containers. Without it each container writes its own
+key to `IDP_OIDC_PRIVATE_KEY_FILE` inside its own filesystem, so the key changes on every restart and
+differs between replicas.
+
+To bring your own key :
+
+```yaml
+backend:
+  config:
+    oidcProvider:
+      # secret holding the PEM in an 'idp-oidc-private-key' entry
+      existingSecret: my-oidc-signing-key
+```
+
+Switching to an `existingSecret` deletes the chart-managed one, so coming back later issues a new
+key rather than the previous one.
+
+Changing `privateKey` rolls the backend pods on its own, and so does switching to or from an
+`existingSecret`. Rotating the content of an `existingSecret` in place does not, the pods have to be
+restarted by hand (same as `djangoExistingSecretKey` and the SMTP one). When manifests are rendered
+without cluster access (`helm template`, GitOps tooling), the chart cannot read the generated key back
+and writes a new one on every render. The pod template is unchanged, so nothing restarts : running pods
+keep signing with the key they started with, and the next pod to restart picks up a different one, which
+breaks verification between them. Always set `existingSecret` or `privateKey` in that case.
+
 
 
 {{ template "chart.valuesSection" . }}

@@ -9,7 +9,7 @@ from rest_framework.test import APIClient
 
 from allauth.idp.oidc.models import Client, Token
 
-from core.startup import startup
+from core.startup import ensure_user_creator_group, startup
 from django.contrib.auth.models import Permission
 from django.utils import timezone
 from global_settings import utils as ff_utils
@@ -693,6 +693,35 @@ class TestServiceAccountRoleLinked:
         detail = admin_client.get(f"{SA_ENDPOINT}{payload['id']}/").json()
         codenames = {p["codename"] for p in detail["permissions"]}
         assert "add_perimeter" in codenames
+
+    def test_user_creator_role_on_global_provisions_users(self, admin_client):
+        # Provisioned by startup() only under DELEGATED_USER_CREATION (enterprise).
+        ensure_user_creator_group()
+        role = Role.objects.get(name="BI-RL-UCR", builtin=True)
+        response = admin_client.post(
+            SA_ENDPOINT,
+            {
+                "name": "user-provisioner",
+                "role": str(role.id),
+                "folders": [str(Folder.get_root_folder().id)],
+                "is_recursive": False,
+            },
+            format="json",
+        )
+        assert response.status_code == 201, response.content
+        payload = response.json()
+        token = _fetch_token(payload["client_id"], payload["client_secret"])
+        assert token.status_code == 200, token.content
+        bearer = _bearer_client(token.json()["access_token"])
+
+        response = bearer.post(
+            "/api/users/", {"email": "provisioned@sa-tests.com"}, format="json"
+        )
+        assert response.status_code == 201, response.content
+        # view_user is part of the role itself: service accounts never get the
+        # root default role, so it cannot come from there.
+        listed = bearer.get("/api/users/", {"limit": 1000}).json()
+        assert "provisioned@sa-tests.com" in {row["email"] for row in listed["results"]}
 
     def test_create_rejects_role_and_permissions_together(
         self, admin_client, domain_folder

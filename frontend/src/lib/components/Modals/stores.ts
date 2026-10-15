@@ -57,7 +57,7 @@ export interface ModalSettings {
  * @example
  * ```svelte
  * <script>
- * 	import { getModalStore } from "@skeletonlabs/skeleton";
+ * 	import { getModalStore } from "$lib/components/Modals/stores";
  *
  * 	const modalStore = getModalStore();
  *

@@ -242,9 +242,18 @@
 			type: 'component',
 			component: modalComponent,
 			title: m.firstTimeLoginModalTitle(),
-			body: m.firstTimeLoginModalDescription()
+			body: m.firstTimeLoginModalDescription(),
+			response: dismissOnboarding
 		};
 		modalStore.trigger(modal);
+	}
+
+	function dismissOnboarding(): void {
+		if (user?.preferences?.ui?.onboarding_dismissed) return;
+		fetch('/fe-api/user-preferences', {
+			method: 'PATCH',
+			body: JSON.stringify({ ui: { onboarding_dismissed: true } })
+		});
 	}
 
 	const loading = writable(false);
@@ -253,8 +262,11 @@
 		$loading = true;
 		const response = await fetch('/folders/import-dummy/', { method: 'POST' });
 		if (!response.ok) {
-			if (response.status === 500) {
+			const { error } = await response.json().catch(() => ({}));
+			if (error === 'demoDataAlreadyLoaded') {
 				flash.set({ type: 'error', message: m.demoDataAlreadyImported() });
+			} else if (error === 'demoDomainNameTaken') {
+				flash.set({ type: 'error', message: m.demoDomainNameTaken() });
 			} else {
 				flash.set({ type: 'error', message: m.errorOccuredDuringImport() });
 			}
@@ -292,7 +304,9 @@
 
 	onMount(() => {
 		const showFirstLoginModal =
-			getCookie('show_first_login_modal') === 'true' && user.accessible_domains.length === 0;
+			getCookie('show_first_login_modal') === 'true' &&
+			!user.preferences?.ui?.onboarding_dismissed &&
+			user.accessible_domains.length === 0;
 		// NOTE: For now, there is only a single guided tour, which is targeted at an administrator.
 		// Later, we will have tours for domain managers, analysts etc.
 		if (showFirstLoginModal && user.is_admin) {

@@ -58,8 +58,8 @@ describe('translateChoiceLabel', () => {
 
 	it('translates privacy choices, whose keys follow the value and not the label', () => {
 		overwriteGetLocale(() => 'nl');
-		// SUP-1796: the English label from the choice endpoint has no message
-		// key, so a label-only lookup left these dropdowns untranslated.
+		// The English label from the choice endpoint has no message key, so a
+		// label-only lookup left these dropdowns untranslated.
 		expect(translateChoiceLabel('Unauthorized Disclosure', 'privacy_unauthorized_disclosure')).toBe(
 			'Ongeoorloofde openbaarmaking'
 		);
@@ -67,5 +67,27 @@ describe('translateChoiceLabel', () => {
 		expect(translateChoiceLabel('Authority Notified', 'privacy_authority_notified')).toBe(
 			'Autoriteit geïnformeerd'
 		);
+	});
+});
+
+describe('slash-separated choice labels', () => {
+	afterAll(() => {
+		overwriteGetLocale(() => baseLocale);
+	});
+
+	it('renders the same full label by label and by value', () => {
+		overwriteGetLocale(() => 'fr');
+		// Forms, tables and detail views translate the label; filters translate the value.
+		expect(safeTranslate('Company culture / communication')).toBe(
+			"Culture d'entreprise / communication"
+		);
+		expect(translateChoiceLabel('Company culture / communication', 'companyCulture')).toBe(
+			"Culture d'entreprise / communication"
+		);
+	});
+
+	it('prefers a whole-label message over translating each part', () => {
+		overwriteGetLocale(() => 'fr');
+		expect(safeTranslate('Observation / sensitive point')).toBe('Observation / point sensible');
 	});
 });

@@ -145,8 +145,10 @@
 	});
 
 	function handleTabChange(tabValue: string): void {
-		page.url.searchParams.set('tab', tabValue);
-		goto(page.url);
+		// A fresh URL: goto() on the mutated live object skips the load.
+		const next = new URL(page.url);
+		next.searchParams.set('tab', tabValue);
+		goto(next);
 	}
 
 	async function handleCustomDashboardChange(dashboardId: string): Promise<void> {

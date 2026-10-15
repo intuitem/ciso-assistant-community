@@ -1,0 +1,911 @@
+urn: urn:intuitem:risk:library:ebios-rm-attack-sequence
+locale: en
+ref_id: ebios-rm-attack-sequence
+name: EBIOS RM typical attack sequence and elementary actions
+description: 'Default base of elementary actions for EBIOS RM workshop 4: the four phases of the typical
+  attack sequence, the categories of elementary actions and the techniques commonly observed (fiche méthode
+  7, « Élaborer des graphes d''attaque »), with the elements that determine each category''s success probability
+  and technical difficulty (fiche méthode 8, « Évaluer la vraisemblance des scénarios opérationnels »).'
+copyright: ANSSI — EBIOS Risk Manager, Le Supplément (fiches méthode 7 et 8). Licence Ouverte / Open Licence
+  (Etalab).
+version: 1
+publication_date: '2026-10-02'
+provider: ANSSI
+packager: intuitem
+autoload: true
+translations:
+  fr:
+    name: Séquence d'attaque type et actions élémentaires EBIOS RM
+    description: 'Base par défaut d''actions élémentaires pour l''atelier 4 d''EBIOS RM : les quatre phases
+      de la séquence d''attaque type, les catégories d''actions élémentaires et les moyens et techniques
+      couramment observés (fiche méthode 7, « Élaborer des graphes d''attaque »), avec les éléments qui
+      déterminent la probabilité de succès et la difficulté technique de chaque catégorie (fiche méthode
+      8, « Évaluer la vraisemblance des scénarios opérationnels »).'
+objects:
+  ttp_catalogs:
+  - urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    name: EBIOS RM typical attack sequence
+    description: 'Typical attack sequence of EBIOS RM (fiche méthode 7): phases as tactics, categories
+      of elementary actions as techniques, observed means and techniques as sub-techniques. Each category''s
+      annotation holds its rating factors from fiche méthode 8.'
+    translations:
+      fr:
+        name: Séquence d'attaque type EBIOS RM
+        description: 'Séquence d''attaque type d''EBIOS RM (fiche méthode 7) : phases en tactiques, catégories
+          d''actions élémentaires en techniques, moyens et techniques observés en sous-techniques. L''annotation
+          de chaque catégorie reprend ses éléments d''aide à la cotation (fiche méthode 8).'
+  tactics:
+  - urn: urn:intuitem:risk:tactic:ebios-rm-attack-sequence:connaitre
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    order_id: 0
+    name: Know
+    description: 'Targeting, reconnaissance and external discovery activities carried out by the attacker
+      to prepare the attack and raise its chances of success (mapping the ecosystem, searching for information
+      on key people and systems, finding and assessing vulnerabilities, etc.). The information is collected
+      by any means available to the attacker''s determination and resources: intelligence, competitive
+      intelligence, professional social networks, direct approaches, cyber-mercenaries for information
+      that is not openly available, etc.'
+    translations:
+      fr:
+        name: Connaître
+        description: 'Ensemble des activités de ciblage, de reconnaissance et de découverte externes menées
+          par l''attaquant pour préparer son attaque et accroître ses chances de succès (cartographie
+          de l''écosystème, recherche d''information sur les personnes et les systèmes clés, recherche
+          et évaluation de vulnérabilités, etc.). Ces informations sont collectées par tous les moyens
+          possibles selon la détermination et les ressources de l''attaquant : renseignement, intelligence
+          économique, exploitation des réseaux socioprofessionnels, approches directes, cybermercenaires
+          pour obtenir de l''information inaccessible en source ouverte, etc.'
+  - urn: urn:intuitem:risk:tactic:ebios-rm-attack-sequence:rentrer
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    order_id: 1
+    name: Enter
+    description: 'Activities through which the attacker gets in, digitally or physically, either directly
+      into the target''s information system or into one of its ecosystem''s for a bounce attack. The intrusion
+      usually goes through perimeter supporting assets that serve as entry points because they are exposed.
+      Example: a user workstation connected to the Internet, a provider''s maintenance tablet, a remotely
+      maintained printer.'
+    translations:
+      fr:
+        name: Rentrer
+        description: 'Ensemble des activités menées par l''attaquant pour s''introduire numériquement
+          ou physiquement, soit directement et frontalement dans le système d''information de la cible,
+          soit dans celui de son écosystème en vue d''une attaque par rebond. L''intrusion se fait généralement
+          via des biens supports périmétriques qui servent de points d''entrée du fait de leur exposition.
+          Exemple : poste utilisateur connecté à Internet, tablette de maintenance d''un prestataire,
+          imprimante télé-maintenue, etc.'
+  - urn: urn:intuitem:risk:tactic:ebios-rm-attack-sequence:trouver
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    order_id: 2
+    name: Find
+    description: Internal reconnaissance of networks and systems, lateral movement, privilege escalation
+      and persistence that let the attacker locate the data and supporting assets it is after. The attacker
+      usually tries to stay discreet and leave no trace.
+    translations:
+      fr:
+        name: Trouver
+        description: Ensemble des activités de reconnaissance interne des réseaux et systèmes, de latéralisation,
+          d'élévation de privilèges et de persistance qui permettent à l'attaquant de localiser les données
+          et biens supports recherchés. L'attaquant cherche généralement à rester discret et à ne pas
+          laisser de traces.
+  - urn: urn:intuitem:risk:tactic:ebios-rm-attack-sequence:exploiter
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    order_id: 3
+    name: Exploit
+    description: 'Exploitation of the data and supporting assets found in the previous phase. For a sabotage
+      operation, this includes triggering the payload; for an espionage operation aimed at exfiltrating
+      e-mails, it may mean setting up and maintaining a discreet collection and exfiltration capability.
+      Example: ransomware.'
+    translations:
+      fr:
+        name: Exploiter
+        description: 'Ensemble des activités d''exploitation des données et biens supports trouvés dans
+          l''étape précédente. Par exemple, dans le cas d''une opération de sabotage, cette phase inclut
+          le déclenchement de la charge active, dans le cas d''une opération d''espionnage visant à exfiltrer
+          des mails, il peut s''agir de mettre en place et maintenir la capacité discrète de recueil et
+          d''exfiltration des données. Exemple : rançongiciel.'
+  techniques:
+  - urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:recrutement
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    order_id: 0
+    name: Recruiting a source, corrupting staff
+    description: Recruiting a source inside the organisation, or with access to it, can be long and complex,
+      but is very useful to plant a hardware trap or obtain information on the targeted system. The reasons
+      that lead a target to betray its organisation, possibly unknowingly, fall into four broad categories
+      known as MICE (Money, Ideology, Compromise, Ego). Specialised agencies exist for recruiting sources.
+    annotation: '- Number of potential targets with access to the information sought, the critical supporting
+      assets or their physical environment. The more targets, the easier it is for the attacker to find
+      one that can be corrupted.
+
+      - Staff, providers or suppliers likely to be driven by revenge. Example: a disgruntled employee
+      recently dismissed.
+
+      - Staff who went through a security clearance process and/or a background check, which gives some
+      assurance on their integrity.
+
+      - Targets'' satisfaction with their pay or with how they are regarded in the organisation.
+
+      - Potential targets'' adherence to the company''s values. Poorly regarded, poorly paid people are
+      naturally easier to corrupt.'
+    tactics:
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:connaitre
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:rentrer
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:trouver
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:exploiter
+    translations:
+      fr:
+        name: Recrutement d'une source, corruption de personnel
+        description: Une opération de « recrutement » d'une source à l'intérieur de l'organisation ou
+          y ayant accès peut être longue et complexe, mais très utile pour mettre en place un piège matériel
+          ou obtenir des informations sur le système ciblé. Les raisons poussant une cible à trahir son
+          entité d'origine – potentiellement à son insu – sont couvertes par quatre grandes catégories,
+          dites « MICE » (Money, Ideology, Compromission, Ego). Des officines spécialisées en matière
+          de recrutement de sources existent.
+        annotation: '- Nombre de cibles potentielles ayant accès aux informations visées, aux biens supports
+          critiques ou à leur environnement physique. Plus les cibles potentielles sont nombreuses, plus
+          il sera facile pour l''attaquant de trouver une cible corruptible.
+
+          - Personnels, prestataires, fournisseurs susceptibles d''être animés par un esprit de vengeance.
+          Exemple : salarié mécontent licencié récemment.
+
+          - Personnels ayant fait l''objet d''un processus d''habilitation de sécurité et/ou d''une enquête,
+          qui apporte un certain niveau d''assurance sur leur intégrité.
+
+          - Satisfaction des cibles à l''égard de leur salaire ou de leur considération au sein de l''organisation.
+
+          - Adhésion des cibles potentielles aux valeurs de l''entreprise. Des personnes mal considérées
+          et mal payées seront naturellement plus faciles à corrompre.'
+  - urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:reconnaissance-externe
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    order_id: 1
+    name: External reconnaissance of the target
+    description: During reconnaissance, the risk origin searches all its available sources for the information
+      needed to plan its attack. The data collected may be technical or concern the organisation of the
+      target and its ecosystem.
+    annotation: '- Information on the organisation and its ecosystem easily available on the Internet
+      (websites, online forums, professional social networks, etc.).
+
+      - Regular participation of the organisation, its partners or former employees in trade shows or
+      online forums. Much information is easily obtained through informal approaches; sensitive information
+      is often exchanged during sales approaches. Example: fake customer, answer to a call for tenders.
+
+      - Use of encryption in the organisation''s external relations and in the services it offers externally,
+      which limits the impact of data leaks, in particular against interception or traffic diversion.
+
+      - Specific skills needed to search for information given the organisation''s field. Attacks requiring
+      strong expertise in fields linked to the target''s activity (air traffic control, CBRN, railway
+      signalling) are costlier and harder than essentially technical ones.'
+    tactics:
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:connaitre
+    translations:
+      fr:
+        name: Reconnaissance externe de la cible
+        description: Lors de la phase de reconnaissance, la source de risque va rechercher dans l'ensemble
+          de ses bases disponibles les informations nécessaires à la planification de son attaque. Les
+          données collectées peuvent être de nature technique ou concerner l'organisation de la cible
+          et de son écosystème.
+        annotation: '- Informations sur l''entité et son écosystème facilement accessibles sur Internet
+          (sites web, forums de discussions en ligne, réseaux socioprofessionnels, etc.).
+
+          - Participation régulière de l''entité, de ses partenaires (fournisseurs, sous-traitants, clients)
+          ou d''anciens salariés à des salons professionnels ou forums en ligne. Beaucoup d''informations
+          sont aisément obtenues au travers d''approches informelles ; lors de démarches commerciales
+          notamment, de nombreuses informations sensibles sont souvent échangées. Exemple : faux client,
+          réponse à un appel d''offres.
+
+          - Usage du chiffrement dans les relations de l''entité avec l''extérieur, dans les services
+          offerts par l''entité à l''extérieur. Les protocoles de chiffrement permettent de limiter l''impact
+          des fuites de données, en particulier vis-à-vis des interceptions ou détournements de trafic.
+
+          - Compétences particulières nécessaires pour la recherche des informations, compte tenu du domaine
+          d''activité de l''entité. Des attaques nécessitant de fortes compétences en lien avec l''activité
+          de la cible (contrôle aérien, risque NRBC, signalisation ferroviaire) sont plus coûteuses et
+          difficiles que des attaques essentiellement techniques.'
+  - urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:reconnaissance-externe.reseaux-sociaux
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    parent_urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:reconnaissance-externe
+    order_id: 2
+    name: Social networks (social engineering)
+    tactics:
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:connaitre
+    translations:
+      fr:
+        name: Réseaux sociaux (social engineering)
+  - urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:reconnaissance-externe.internet
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    parent_urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:reconnaissance-externe
+    order_id: 3
+    name: Internet (digital dumpsters, websites)
+    tactics:
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:connaitre
+    translations:
+      fr:
+        name: Internet (poubelles numériques, sites)
+  - urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:reconnaissance-externe.forums
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    parent_urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:reconnaissance-externe
+    order_id: 4
+    name: Online discussion forums
+    tactics:
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:connaitre
+    translations:
+      fr:
+        name: Forums de discussion sur Internet
+  - urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:reconnaissance-externe.salons
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    parent_urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:reconnaissance-externe
+    order_id: 5
+    name: Trade forums and shows
+    tactics:
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:connaitre
+    translations:
+      fr:
+        name: Forums et salons professionnels
+  - urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:reconnaissance-externe.faux-client
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    parent_urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:reconnaissance-externe
+    order_id: 6
+    name: Fake customer, fake journalist, etc.
+    tactics:
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:connaitre
+    translations:
+      fr:
+        name: Faux client, faux journaliste, etc.
+  - urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:reconnaissance-externe.contact-direct
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    parent_urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:reconnaissance-externe
+    order_id: 7
+    name: Direct contact (former employees, etc.)
+    tactics:
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:connaitre
+    translations:
+      fr:
+        name: Prise de contact directe (anciens salariés, etc.)
+  - urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:reconnaissance-externe.officines
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    parent_urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:reconnaissance-externe
+    order_id: 8
+    name: Specialised agencies (non-open sources)
+    tactics:
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:connaitre
+    translations:
+      fr:
+        name: Officines ou agences spécialisées (sources non ouvertes)
+  - urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:reconnaissance-externe.roem
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    parent_urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:reconnaissance-externe
+    order_id: 9
+    name: Electromagnetic intelligence (interceptions)
+    tactics:
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:connaitre
+    translations:
+      fr:
+        name: Renseignement d'origine électromagnétique (interceptions)
+  - urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:intrusion-internet
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    order_id: 10
+    name: Intrusion from the Internet or third-party networks
+    description: The initial intrusion aims to plant a malicious tool in the targeted information system
+      or in one belonging to its ecosystem (for example the supply chain), usually on a particularly exposed
+      supporting asset. Ideally for the attacker, it is done from the Internet.
+    annotation: '- Frontal attack on services: number of services and/or applications exposed on the Internet;
+      exposed services that went through accreditation or a secure development process; filtering technology
+      in place (reverse proxy, WAF); certified or qualified border supporting assets.
+
+      - Phishing / watering hole: number of users likely to be targeted; users regularly trained to react
+      to phishing and watering-hole attacks; effective anti-spam filter; filtering of users'' web browsing
+      (proxy, IPS); browsing restricted to an allow-list.
+
+      - Wireless network: presence of Wi-Fi networks in the office or industrial environment; Wi-Fi access
+      secured, for example following ANSSI''s technical guide.
+
+      - Legitimate software or patch: a security policy for software, business application and firmware
+      updates (antivirus airlock, patch integrity checks); trusted, certified or qualified sources and
+      channels, with verification of the signers'' identity.'
+    tactics:
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:rentrer
+    translations:
+      fr:
+        name: Intrusion depuis Internet ou des réseaux informatiques tiers
+        description: L'intrusion initiale a pour objectif d'introduire un outil malveillant dans le système
+          d'information ciblé ou dans un autre appartenant à l'écosystème (par exemple la chaîne d'approvisionnement
+          – supply chain), en général au niveau d'un bien support plus particulièrement exposé. Idéalement
+          pour l'attaquant, l'intrusion initiale de l'outil malveillant est réalisée depuis Internet.
+        annotation: '- Attaque frontale de services : nombre de services et/ou d''applicatifs exposés
+          sur Internet ; services exposés ayant fait l''objet d''une homologation ou d''un processus de
+          développement intégrant la sécurité ; technologie de filtrage mise en place (reverse proxy,
+          WAF) ; utilisation de biens supports « de frontière » certifiés ou qualifiés.
+
+          - Hameçonnage / point d''eau : nombre d''utilisateurs susceptibles d''être visés ; utilisateurs
+          régulièrement sensibilisés et formés à réagir aux attaques par hameçonnage et point d''eau ;
+          filtre anti-spam performant ; capacité de filtrage de la navigation Internet des utilisateurs
+          (proxy, IPS) ; filtrage des sites Internet reposant sur une liste blanche.
+
+          - Réseau sans fil : existence de réseaux sans fil (Wi-Fi) dans l''environnement bureautique
+          ou industriel de l''entité ; accès Wi-Fi sécurisés, par exemple selon le guide technique de
+          l''ANSSI.
+
+          - Logiciel ou correctif légitime : existence d''une politique de sécurité relative aux mises
+          à jour des logiciels, applications métier et firmware (sas antivirus, contrôle d''intégrité
+          des correctifs) ; sources et canaux de confiance, voire certifiés ou qualifiés, vérification
+          de l''identité des signataires pour les mises à jour.'
+  - urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:intrusion-internet.attaque-frontale
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    parent_urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:intrusion-internet
+    order_id: 11
+    name: Direct attacks against services exposed on the Internet
+    tactics:
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:rentrer
+    translations:
+      fr:
+        name: Attaques directes à l'encontre des services exposés sur Internet
+  - urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:intrusion-internet.hameconnage
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    parent_urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:intrusion-internet
+    order_id: 12
+    name: Phishing or spear-phishing e-mails
+    tactics:
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:rentrer
+    translations:
+      fr:
+        name: Mails d'hameçonnage (phishing) ou de harponnage (spearfishing)
+  - urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:intrusion-internet.point-d-eau
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    parent_urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:intrusion-internet
+    order_id: 13
+    name: Attacks through servers administered or compromised for that purpose (watering hole)
+    tactics:
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:rentrer
+    translations:
+      fr:
+        name: Attaques via des serveurs spécifiquement administrés à cet effet ou compromis (point d'eau,
+          waterhole)
+  - urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:intrusion-internet.mise-a-jour
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    parent_urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:intrusion-internet
+    order_id: 14
+    name: Trapping an apparently legitimate update
+    tactics:
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:rentrer
+    translations:
+      fr:
+        name: Piège d'une mise à jour a priori légitime
+  - urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:intrusion-physique
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    order_id: 15
+    name: Physical intrusion or trap
+    description: 'Used to physically access information system resources in order to compromise it. It
+      can be carried out by an outsider, or eased by recruiting a source inside the targeted organisation.
+      It is especially useful to reach a system isolated from the Internet, which requires crossing one
+      or more air gaps. Example: theft and use of an employee''s professional mobile phone.'
+    annotation: '- Control of providers'' interventions: access to premises, supervision, logging. Interventions
+      outside business hours or without human presence ease illegitimate activity, as does a badge giving
+      free access to all areas.
+
+      - Security clearance process or preliminary check for providers working on site.
+
+      - Use of equipment managed by the organisation for providers'' interventions (maintenance kit, firmware
+      USB key).
+
+      - Number and ease of access of physical and logical connection points to the networks.
+
+      - Remote-maintenance links or connections with third-party networks.
+
+      - A security policy for the industrial supply chain (contractual requirements, supplier audits).
+
+      - Security measures for the maintenance of supporting assets (removing non-volatile storage, physical
+      sealing).
+
+      - Physical security measures and access-control technology (gate, badge, keypad, biometrics, video
+      surveillance).
+
+      - Supervision of physical security and responsiveness of response teams (on site, remote, 24/7,
+      business hours only).
+
+      - Number of barriers to cross to physically reach critical supporting assets (at least three are
+      recommended).
+
+      - Security staff trained to the risk of physically planted eavesdropping equipment.
+
+      - Users aware of, or trained against, physical intrusions; people with legitimate access know each
+      other.
+
+      - A security policy for business travel and staff awareness of risks during missions.'
+    tactics:
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:rentrer
+    translations:
+      fr:
+        name: Intrusion ou piège physique
+        description: 'Cette méthode d''intrusion est utilisée pour accéder physiquement à des ressources
+          du système d''information afin de le compromettre. Elle peut être réalisée par une personne
+          externe ou simplifiée par le recrutement d''une source interne à l''organisation ciblée. L''intrusion
+          physique est notamment utile à l''attaquant qui souhaite accéder à un système isolé d''Internet,
+          ce qui nécessite de franchir un ou plusieurs air gaps. Exemple : vol et utilisation du téléphone
+          portable professionnel d''un personnel.'
+        annotation: '- Maîtrise des interventions des prestataires : gestion des accès aux locaux, supervision,
+          journalisation. Des interventions réalisées en dehors des heures ouvrées ou en l''absence de
+          toute présence humaine facilitent une activité frauduleuse, de même qu''un badge permettant
+          de circuler librement dans toutes les zones.
+
+          - Processus d''habilitation de sécurité ou enquête préliminaire réalisés pour les prestataires
+          qui interviennent sur site.
+
+          - Utilisation de matériels informatiques gérés par l''organisation pour les interventions des
+          prestataires (valise de maintenance, clé USB de firmware).
+
+          - Nombre et facilité d''accès des points de connexion physique et logique aux réseaux informatiques
+          de l''entité.
+
+          - Existence de liens de télémaintenance ou de connexions avec des réseaux tiers.
+
+          - Existence d''une politique de sécurité pour la chaîne d''approvisionnement industrielle (exigences
+          contractuelles, audits de sécurité des fournisseurs).
+
+          - Existence de mesures de sécurité pour la maintenance des biens supports (retrait des supports
+          de stockage à mémoire non volatile, scellement physique).
+
+          - Existence de mesures de sécurité physique et type de technologie utilisée pour le contrôle
+          d''accès (portique, badge, digicode, biométrie, vidéo protection).
+
+          - Supervision de la sécurité physique et réactivité des équipes d''intervention en cas de détection
+          d''intrusion (sur place, à distance, 24/7, seulement heures ouvrées).
+
+          - Nombre de barrières à franchir pour accéder physiquement aux biens supports critiques (au
+          moins trois recommandées).
+
+          - Personnels de sécurité formés au risque d''introduction physique de matériels d''écoute.
+
+          - Utilisateurs sensibilisés, voire entraînés, à la vigilance vis-à-vis des intrusions physiques
+          ; connaissance mutuelle des personnes pouvant avoir un accès légitime.
+
+          - Existence d''une politique de sécurité pour les déplacements professionnels, sensibilisation
+          des salariés aux risques lors de leurs missions.'
+  - urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:intrusion-physique.identifiants
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    parent_urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:intrusion-physique
+    order_id: 16
+    name: Knowledge of login credentials
+    tactics:
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:rentrer
+    translations:
+      fr:
+        name: Connaissance des identifiants de connexion
+  - urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:intrusion-physique.machine
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    parent_urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:intrusion-physique
+    order_id: 17
+    name: Compromising the machine (e.g. trapped USB key)
+    tactics:
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:rentrer
+    translations:
+      fr:
+        name: 'Compromission de la machine (exemple : clé USB piégée)'
+  - urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:intrusion-physique.materiel-externe
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    parent_urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:intrusion-physique
+    order_id: 18
+    name: Connecting external hardware to the network
+    tactics:
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:rentrer
+    translations:
+      fr:
+        name: Connexion au réseau d'un matériel externe au système d'information
+  - urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:intrusion-physique.wifi
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    parent_urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:intrusion-physique
+    order_id: 19
+    name: Intrusion through a poorly secured wireless network
+    tactics:
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:rentrer
+    translations:
+      fr:
+        name: Intrusion via un réseau sans fil mal sécurisé
+  - urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:intrusion-physique.supply-chain
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    parent_urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:intrusion-physique
+    order_id: 20
+    name: Trapping hardware upstream in the supply chain
+    tactics:
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:rentrer
+    translations:
+      fr:
+        name: Piège d'un matériel en amont via la chaîne d'approvisionnement (supply chain)
+  - urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:intrusion-physique.acces-legitimes
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    parent_urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:intrusion-physique
+    order_id: 21
+    name: Abuse of legitimate means of access to the information system
+    tactics:
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:rentrer
+    translations:
+      fr:
+        name: Utilisation abusive de moyens d'accès légitimes au système d'information
+  - urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:reconnaissance-interne
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    order_id: 22
+    name: Internal reconnaissance
+    description: After the initial intrusion, the attacker is usually in local networks whose access may
+      be controlled by directory services (Active Directory, OpenLDAP). It maps the network architecture,
+      identifies protection and defence mechanisms, lists exploitable vulnerabilities and locates the
+      services, information and supporting assets it is after.
+    annotation: '- Users with administrator rights on their workstation, which greatly eases internal
+      reconnaissance, lateral movement and privilege escalation.
+
+      - A policy for managing user profiles and access rights, applying the least-privilege principle.
+
+      - Remote connections to systems restricted to dedicated administration machines without Internet
+      access.
+
+      - A security operations centre (SOC).
+
+      - An authentication policy on networks. From most to least secure: strong authentication, password
+      with a strict policy, password without policy, no authentication, smart card.
+
+      - Segmentation of the information system by trust or data-sensitivity domains (for example following
+      ANSSI guides).
+
+      - Secure administration of networks and services (for example following ANSSI guides).
+
+      - Heterogeneity of the IT estate: the more heterogeneous, the larger the attack surface and the
+      easier it is to find an exploitable vulnerability.
+
+      - Number and specificity of the services offered by the information system: the more numerous and
+      specific, the larger the attack surface.
+
+      - Ease of access to critical data. In increasing order of difficulty: data stored in clear in a
+      central, easily identified location; data stored in many places; encrypted data.'
+    tactics:
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:trouver
+    translations:
+      fr:
+        name: Reconnaissance interne
+        description: En général, à l'issue de l'intrusion initiale, l'attaquant se retrouve dans un environnement
+          de type réseaux locaux dont les accès peuvent être contrôlés par des mécanismes d'annuaires
+          (Active Directory, OpenLDAP, etc.). Il doit mener des activités de reconnaissance interne lui
+          permettant de cartographier l'architecture réseau, identifier les mécanismes de protection et
+          de défense mis en place, recenser les vulnérabilités exploitables, et localiser les services,
+          informations et biens supports objets de l'attaque.
+        annotation: '- Utilisateurs ayant des droits d''administrateur sur leur poste, car cela facilite
+          grandement les opérations de reconnaissance interne, latéralisation et élévation de privilèges.
+
+          - Existence d''une politique de gestion des profils d''utilisateurs et de leurs droits d''accès,
+          application du principe du moindre privilège.
+
+          - Connexions à distance sur les systèmes limitées à des machines dédiées à l''administration,
+          sans accès à Internet.
+
+          - Existence d''un centre de supervision de la sécurité (SOC).
+
+          - Existence d''une politique d''authentification sur les réseaux. Exemple de moyens d''authentification
+          du plus sécurisé au moins sécurisé : authentification forte, mot de passe avec politique contraignante,
+          mot de passe sans politique, pas d''authentification, carte à puce.
+
+          - Cloisonnement des réseaux informatiques de l''entité par domaines de confiance ou de sensibilité
+          des données (par exemple selon les guides de recommandations de l''ANSSI).
+
+          - Administration sécurisée des réseaux et services (par exemple selon les guides de recommandations
+          de l''ANSSI).
+
+          - Niveau d''hétérogénéité du parc informatique. Plus le niveau d''hétérogénéité est élevé, plus
+          la surface d''attaque est importante et plus il est facile de trouver une vulnérabilité exploitable.
+
+          - Nombre et spécificité des services offerts par le système d''information : plus ils sont nombreux
+          et spécifiques, plus la surface d''attaque est importante.
+
+          - Facilité d''accès des données critiques. Par ordre croissant de difficulté : données stockées
+          en clair dans une zone centralisée et facilement identifiable, données stockées à de multiples
+          endroits, données chiffrées.'
+  - urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:reconnaissance-interne.scan-reseau
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    parent_urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:reconnaissance-interne
+    order_id: 23
+    name: Mapping networks and systems to spread (network scan)
+    tactics:
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:trouver
+    translations:
+      fr:
+        name: Cartographie des réseaux et systèmes pour mener la propagation (scan réseau)
+  - urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:reconnaissance-interne.cartographie-avancee
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    parent_urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:reconnaissance-interne
+    order_id: 24
+    name: Advanced mapping (e.g. memory dump)
+    tactics:
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:trouver
+    translations:
+      fr:
+        name: 'Cartographie avancée (exemple : dump mémoire)'
+  - urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:reconnaissance-interne.vulnerabilites
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    parent_urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:reconnaissance-interne
+    order_id: 25
+    name: Searching for vulnerabilities (e.g. to ease spreading)
+    tactics:
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:trouver
+    translations:
+      fr:
+        name: Recherche de vulnérabilités (par exemple pour faciliter la propagation)
+  - urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:reconnaissance-interne.donnees-systeme
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    parent_urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:reconnaissance-interne
+    order_id: 26
+    name: Access to critical system data (addressing plan, vaults, passwords, etc.)
+    tactics:
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:trouver
+    translations:
+      fr:
+        name: Accès à des données système critiques (plan d'adressage, coffres forts, mots de passe, etc.)
+  - urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:reconnaissance-interne.cartographie-services
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    parent_urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:reconnaissance-interne
+    order_id: 27
+    name: Mapping services, databases and supporting assets of interest
+    tactics:
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:trouver
+    translations:
+      fr:
+        name: Cartographie des services, bases de données et biens supports d'intérêt pour l'attaque
+  - urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:reconnaissance-interne.dissimulation
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    parent_urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:reconnaissance-interne
+    order_id: 28
+    name: Covering tracks
+    tactics:
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:trouver
+    translations:
+      fr:
+        name: Dissimulation des traces
+  - urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:reconnaissance-interne.maliciel-reconnaissance
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    parent_urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:reconnaissance-interne
+    order_id: 29
+    name: Generic or custom malware automating internal reconnaissance
+    tactics:
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:trouver
+    translations:
+      fr:
+        name: Utilisation de maliciel générique ou à façon permettant d'automatiser la reconnaissance
+          interne
+  - urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:lateralisation
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    order_id: 30
+    name: Lateral movement and privilege escalation
+    description: From its initial access point, the attacker uses lateral movement and privilege escalation
+      to progress and persist in the information system, generally exploiting the system's internal structural
+      weaknesses (poor segmentation, insufficient access control, weak authentication policy, careless
+      administration and maintenance, lack of supervision). Internal reconnaissance and lateral movement
+      are iterative in practice.
+    annotation: '- Users with administrator rights on their workstation, which greatly eases internal
+      reconnaissance, lateral movement and privilege escalation.
+
+      - A policy for managing user profiles and access rights, applying the least-privilege principle.
+
+      - Remote connections to systems restricted to dedicated administration machines without Internet
+      access.
+
+      - A security operations centre (SOC).
+
+      - An authentication policy on networks. From most to least secure: strong authentication, password
+      with a strict policy, password without policy, no authentication, smart card.
+
+      - Segmentation of the information system by trust or data-sensitivity domains (for example following
+      ANSSI guides).
+
+      - Secure administration of networks and services (for example following ANSSI guides).
+
+      - Heterogeneity of the IT estate: the more heterogeneous, the larger the attack surface and the
+      easier it is to find an exploitable vulnerability.
+
+      - Number and specificity of the services offered by the information system: the more numerous and
+      specific, the larger the attack surface.
+
+      - Ease of access to critical data. In increasing order of difficulty: data stored in clear in a
+      central, easily identified location; data stored in many places; encrypted data.'
+    tactics:
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:trouver
+    translations:
+      fr:
+        name: Latéralisation et élévation de privilèges
+        description: À partir de son point d'accès initial, l'attaquant va mettre en œuvre des techniques
+          de latéralisation et d'élévation de privilèges afin de progresser et de se maintenir dans le
+          système d'information. Il s'agit généralement pour lui d'exploiter les vulnérabilités structurelles
+          internes du système (manque de cloisonnement des réseaux, contrôle d'accès insuffisant, politique
+          d'authentification peu robuste, négligences relatives à l'administration et à la maintenance
+          du système d'information, absence de supervision, etc.). Les phases de reconnaissance interne
+          et de latéralisation / élévation de privilèges sont en pratique itératives.
+        annotation: '- Utilisateurs ayant des droits d''administrateur sur leur poste, car cela facilite
+          grandement les opérations de reconnaissance interne, latéralisation et élévation de privilèges.
+
+          - Existence d''une politique de gestion des profils d''utilisateurs et de leurs droits d''accès,
+          application du principe du moindre privilège.
+
+          - Connexions à distance sur les systèmes limitées à des machines dédiées à l''administration,
+          sans accès à Internet.
+
+          - Existence d''un centre de supervision de la sécurité (SOC).
+
+          - Existence d''une politique d''authentification sur les réseaux. Exemple de moyens d''authentification
+          du plus sécurisé au moins sécurisé : authentification forte, mot de passe avec politique contraignante,
+          mot de passe sans politique, pas d''authentification, carte à puce.
+
+          - Cloisonnement des réseaux informatiques de l''entité par domaines de confiance ou de sensibilité
+          des données (par exemple selon les guides de recommandations de l''ANSSI).
+
+          - Administration sécurisée des réseaux et services (par exemple selon les guides de recommandations
+          de l''ANSSI).
+
+          - Niveau d''hétérogénéité du parc informatique. Plus le niveau d''hétérogénéité est élevé, plus
+          la surface d''attaque est importante et plus il est facile de trouver une vulnérabilité exploitable.
+
+          - Nombre et spécificité des services offerts par le système d''information : plus ils sont nombreux
+          et spécifiques, plus la surface d''attaque est importante.
+
+          - Facilité d''accès des données critiques. Par ordre croissant de difficulté : données stockées
+          en clair dans une zone centralisée et facilement identifiable, données stockées à de multiples
+          endroits, données chiffrées.'
+  - urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:lateralisation.exploitation-vulnerabilites
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    parent_urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:lateralisation
+    order_id: 31
+    name: Exploiting software or protocol vulnerabilities
+    tactics:
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:trouver
+    translations:
+      fr:
+        name: Exploitation de vulnérabilités logicielles ou protocolaires
+  - urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:lateralisation.abus-droits
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    parent_urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:lateralisation
+    order_id: 32
+    name: Modifying or abusing rights on key user, administrator or machine accounts
+    tactics:
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:trouver
+    translations:
+      fr:
+        name: Modification ou abus de droits sur des comptes clés utilisateurs, administrateurs, machines
+  - urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:lateralisation.techniques-specifiques
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    parent_urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:lateralisation
+    order_id: 33
+    name: 'Other specific techniques: brute force, memory dump, pass-the-hash'
+    tactics:
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:trouver
+    translations:
+      fr:
+        name: 'Autres techniques spécifiques : attaque par force brute, dump mémoire, attaque « pass-the-hash
+          »'
+  - urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:pilotage-exploitation
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    order_id: 34
+    name: Steering and exploitation of the attack
+    description: 'This final step achieves the risk origin''s target objective: triggering a destructive
+      payload, exfiltrating or modifying information, etc. The attack may be one-off (sabotage) or lasting
+      and discreet (espionage). If it lasts and must be steered, the attacker sets up a control channel,
+      synchronous or asynchronous, or even physical across an air gap.'
+    annotation: '- Nature of the channel needed to steer or exploit the attack: pre-existing channel (backdoor),
+      synchronous channel set up for the attack (direct, reverse TCP/HTTP), asynchronous channel (mail,
+      social networks), physical channel (removable media across an air gap).
+
+      - A security operations centre (SOC).
+
+      - An anti-DDoS capability.
+
+      - Consideration of the TEMPEST threat (compromising emanations), especially in dense urban areas.
+
+      - Presumed time constraints for exploiting the attack. In increasing order of difficulty: no constraint;
+      precise timing with long notice; precise timing with little notice; coordination across several
+      machines without Internet connection.'
+    tactics:
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:exploiter
+    translations:
+      fr:
+        name: Pilotage et exploitation de l'attaque
+        description: 'Cette ultime étape correspond à la réalisation de l''objectif visé par la source
+          de risque : déclencher la charge malveillante destructrice, exfiltrer ou modifier de l''information,
+          etc. L''attaque peut être ponctuelle (opération de sabotage) ou durable et se réaliser en toute
+          discrétion (opération d''espionnage). Dans le cas où celle-ci perdure dans le temps et nécessite
+          d''être orientée, l''attaquant devra mettre en place un canal de pilotage, qu''il soit synchrone
+          ou asynchrone, voire même physique dans le cas d''un air gap.'
+        annotation: '- Nature du canal qu''il faudrait mettre en place pour piloter ou exploiter une attaque
+          : canal préexistant (backdoor), canal synchrone mis en place pour l''attaque (direct, reverse
+          TCP/HTTP), canal asynchrone (mail, réseaux sociaux), canal physique (supports de stockage amovibles
+          via un air gap).
+
+          - Existence d''un centre de supervision de la sécurité (SOC).
+
+          - Existence d''un dispositif anti-DDoS.
+
+          - Prise en compte de la menace TEMPEST, liée à l''interception de signaux parasites compromettants,
+          notamment en zone urbaine de forte densité.
+
+          - Contraintes de temps présumées pour l''exploitation de l''attaque. Par ordre croissant de
+          difficulté : aucune contrainte ; timing précis mais préavis important ; timing précis et peu
+          de préavis ; attaque coordonnée sur plusieurs machines, sans connexion à Internet.'
+  - urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:pilotage-exploitation.espionnage
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    parent_urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:pilotage-exploitation
+    order_id: 35
+    name: 'Espionage: data exfiltration; remote observation or passive listening; interception of compromising
+      emanations (TEMPEST)'
+    tactics:
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:exploiter
+    translations:
+      fr:
+        name: 'Espionnage : exfiltration de données ; observation ou écoute passive à distance ; interception
+          et exploitation de signaux parasites compromettants (TEMPEST)'
+  - urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:pilotage-exploitation.entrave
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    parent_urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:pilotage-exploitation
+    order_id: 36
+    name: 'Operational disruption: DDoS; integrity attack on an asset or data (erasure, encryption, alteration);
+      jamming; decoy; risky commands on industrial systems; intentional electromagnetic attack'
+    tactics:
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:exploiter
+    translations:
+      fr:
+        name: 'Entrave au fonctionnement : déni de service distribué (DDoS) ; atteinte à l''intégrité
+          d''un bien support ou d''une donnée (effacement, chiffrement, altération) ; brouillage ; leurre
+          ; envoi de commandes à risque sur des systèmes industriels ; agression électromagnétique intentionnelle
+          (AGREMI)'
+  - urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:pilotage-exploitation.lucratif
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    parent_urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:pilotage-exploitation
+    order_id: 37
+    name: 'Lucrative: database modification; misuse of a business or support application; identity theft
+      for abuse of rights; diverting or extorting money (e.g. ransomware, crypto-miner)'
+    tactics:
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:exploiter
+    translations:
+      fr:
+        name: 'Lucratif : modification d''une base de données ; altération ou détournement d''usage d''une
+          application métier ou support ; usurpation d''identité (abus de droits) ; détournement ou extorsion
+          d''argent (exemple : rançongiciel, mineur de crypto monnaie)'
+  - urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:pilotage-exploitation.influence
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    parent_urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:pilotage-exploitation
+    order_id: 38
+    name: 'Influence: website defacement; spreading ideological messages by taking over an information
+      channel; identity theft to damage reputation'
+    tactics:
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:exploiter
+    translations:
+      fr:
+        name: 'Influence : défiguration de sites Internet ; diffusion de messages idéologiques via la
+          prise de contrôle d''un canal d''information ; usurpation d''identité (atteinte à la réputation)'
+  - urn: urn:intuitem:risk:technique:ebios-rm-attack-sequence:outils-malveillants
+    catalog_urn: urn:intuitem:risk:ttp_catalog:ebios-rm-attack-sequence
+    order_id: 39
+    name: Malicious tools
+    description: Most attacks require installing malware in the targeted systems, sometimes in several
+      stages. These factors complement the categories above for any elementary action that needs malware.
+    annotation: '- Type of technology of the targeted supporting assets.
+
+      - Delay in applying security patches after their release, and application of ANSSI''s recommendations
+      on security maintenance. An up-to-date asset forces the attacker to develop a 0-day exploit; otherwise
+      a public vulnerability is enough (no difficulty, near-certain success).
+
+      - Age of the technology of the targeted supporting assets. Very specific technology (avionics computer,
+      PLC) may force the attacker to adapt or rewrite malware, or even acquire the asset, which strongly
+      raises technical difficulty.'
+    tactics:
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:connaitre
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:rentrer
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:trouver
+    - urn:intuitem:risk:tactic:ebios-rm-attack-sequence:exploiter
+    translations:
+      fr:
+        name: Outils malveillants
+        description: La plupart des attaques demande l'installation de logiciels malveillants dans les
+          systèmes ciblés, parfois en plusieurs étapes. Ces éléments complètent les catégories précédentes
+          pour affiner l'estimation d'une action élémentaire qui nécessiterait l'installation d'un logiciel
+          malveillant.
+        annotation: '- Type de technologie des biens supports ciblés par l''outil malveillant.
+
+          - Délai d''application des correctifs de sécurité après leur publication, mise en œuvre des
+          recommandations de l''ANSSI relatives au MCS. Un bien support à jour oblige l''attaquant à développer
+          un exploit « 0-day » ; dans le cas contraire, il n''a qu''à exploiter une vulnérabilité publique
+          (difficulté nulle et probabilité de succès quasi certaine).
+
+          - Degré d''ancienneté de la technologie des biens supports ciblés. Une technologie très spécifique
+          (calculateur aéronautique, automate programmable industriel) peut obliger l''attaquant à adapter
+          ou redévelopper un logiciel malveillant, voire à acquérir le bien support, ce qui influe énormément
+          sur la difficulté technique.'

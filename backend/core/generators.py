@@ -489,6 +489,10 @@ def findings_assessment_context(assessment, findings, lang="en"):
                 "status_key": finding.status or "--",
                 "description": finding.description or "",
                 "observation": getattr(finding, "observation", "") or "",
+                "recommendation": finding.recommendation or "",
+                "priority": str(finding.get_priority_display())
+                if finding.priority
+                else "-",
                 "owners": ", ".join(str(a) for a in finding.owner.all()) or "-",
                 "eta": _date_str(finding.eta),
                 "due_date": _date_str(finding.due_date),

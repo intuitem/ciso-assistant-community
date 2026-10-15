@@ -78,7 +78,7 @@ export const loadTableData = async ({
 	});
 };
 
-const getParams = ({ offset, rowsPerPage, search, sort, filters }: State) => {
+export const getParams = ({ offset, rowsPerPage, search, sort, filters }: State) => {
 	const params = new URLSearchParams();
 	params.set('offset', offset.toString() ?? '0');
 	// rowsPerPage is 0 when a table opts out of pagination, and the backend rejects
@@ -87,7 +87,7 @@ const getParams = ({ offset, rowsPerPage, search, sort, filters }: State) => {
 	if (search) {
 		params.set('search', search);
 	}
-	if (sort) {
+	if (sort?.orderBy) {
 		params.set('ordering', `${sort.direction === 'desc' ? '-' : ''}${sort.orderBy}`);
 	}
 	if (filters) {

@@ -19,8 +19,6 @@
 	import { formatDate } from '$lib/utils/datetime';
 	import { getLocale } from '$paraglide/runtime';
 
-	let displayCurrency = $state(page.data?.settings?.currency ?? '€'); // Default to Euro
-
 	interface Props {
 		form: SuperValidated<any>;
 		model: ModelInfo;
@@ -54,16 +52,10 @@
 
 	let syncMappings: Record<string, any>[] = $state(page.data?.object?.sync_mappings ?? []);
 
-	// Update currency when form data changes
-	$effect(() => {
-		const costData = $formStore.cost;
-		if (costData?.currency) {
-			displayCurrency = costData.currency;
-		}
-	});
+	let displayCurrency = $derived($formStore.cost?.currency || page.data?.settings?.currency || '€');
 
 	onMount(async () => {
-		if (!model.selectOptions) {
+		if (!Object.keys(model.selectOptions ?? {}).length) {
 			const selectOptions = {
 				status: await fetch('/applied-controls/status').then((r) => r.json()),
 				priority: await fetch('/applied-controls/priority').then((r) => r.json()),
@@ -373,7 +365,6 @@
 						<AutocompleteSelect
 							{form}
 							lazy
-							minSearchLength={1}
 							optionsEndpoint="settings/integrations/configs/{$formStore.integration_config}/remote-objects"
 							optionsLabelField="summary"
 							optionsValueField="key"

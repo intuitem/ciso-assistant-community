@@ -13,7 +13,7 @@
 	import CustomFieldsDisplay from '$lib/components/Forms/CustomFieldsDisplay.svelte';
 	import { hasRelationGraph } from '$lib/components/RelationsGraph/relations';
 	import { booleanDisplay } from '$lib/utils/boolean-display';
-	import { ISO_8601_REGEX } from '$lib/utils/constants';
+	import { DATE_FIELDS_TO_FORMAT, ISO_8601_REGEX } from '$lib/utils/constants';
 	import { type ModelMapEntry, type ReverseForeignKeyField } from '$lib/utils/crud';
 	import { getModelInfo, getMarkdownFields, isFieldFlagEnabled } from '$lib/utils/crud';
 	import { formatDate, formatDateOrDateTime } from '$lib/utils/datetime';
@@ -31,7 +31,11 @@
 	import { goto, invalidateAll } from '$app/navigation';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import { getListViewFields } from '$lib/utils/table';
-	import { canPerformActionOnObject, resolveObjectDomain } from '$lib/utils/access-control';
+	import {
+		canPerformActionOnObject,
+		hasPermissionAnywhere,
+		resolveObjectDomain
+	} from '$lib/utils/access-control';
 	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
 	import {
 		getModalStore,
@@ -43,6 +47,24 @@
 
 	const modalStore: ModalStore = getModalStore();
 	const toastStore = getToastStore();
+
+	// The one setting an instance owns on a library form (see QuickForm.always_review).
+	async function setAlwaysReview(box: HTMLInputElement) {
+		const ok = await fetch(`/quick-forms/${data.data?.id}/always-review`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ always_review: box.checked })
+		})
+			.then((res) => res.ok)
+			.catch(() => false);
+		if (!ok) {
+			// The page data did not change, so the box would keep showing the refused value.
+			box.checked = !box.checked;
+			toastStore.trigger({ message: m.anErrorOccurred(), background: 'preset-filled-error-500' });
+			return;
+		}
+		await invalidateAll();
+	}
 
 	const defaultExcludes = ['id', 'str', 'path', 'sync_mappings'];
 
@@ -93,25 +115,7 @@
 		fields = [],
 		exclude = $bindable([]),
 		displayModelTable = true,
-		dateFieldsToFormat = [
-			'created_at',
-			'updated_at',
-			'expiry_date',
-			'accepted_at',
-			'rejected_at',
-			'revoked_at',
-			'eta',
-			'expiration_date',
-			'validation_deadline',
-			'timestamp',
-			'reported_at',
-			'occurred_at',
-			'resolved_at',
-			'due_date',
-			'start_date',
-			'closing_date',
-			'commission_date'
-		],
+		dateFieldsToFormat = DATE_FIELDS_TO_FORMAT,
 		widgets,
 		widgetsEnabled = true,
 		actions,
@@ -639,7 +643,7 @@
 										</Tooltip.Trigger>
 										<Tooltip.Positioner>
 											<Tooltip.Content
-												class="card bg-surface-950-50 text-white p-3 max-w-xs shadow-xl border border-surface-700-300"
+												class="card bg-surface-950-50 text-surface-50-950 p-3 max-w-xs shadow-xl border border-surface-700-300"
 											>
 												<p class="text-sm">{tooltipText}</p>
 											</Tooltip.Content>
@@ -998,6 +1002,20 @@
 				</button>
 			{/if}
 			{@render actions?.()}
+			{#if data.urlModel === 'quick-forms' && hasPermissionAnywhere(user, 'change_quickform')}
+				<label
+					class="flex h-fit items-center gap-2 text-sm"
+					title={m.alwaysReviewHelpText()}
+					data-testid="quick-form-always-review"
+				>
+					<input
+						type="checkbox"
+						class="checkbox"
+						checked={data.data?.always_review}
+						onchange={(e) => setAlwaysReview(e.currentTarget)}
+					/>{m.alwaysReview()}
+				</label>
+			{/if}
 			{#if data.urlModel === 'quick-forms'}
 				<!-- Answering a form is the only way to see what its conditions and outcomes
 				     actually do; the same preview serves drafts in the builder. -->
@@ -1007,6 +1025,15 @@
 				>
 					<i class="fa-solid fa-eye mr-2"></i>{m.preview()}
 				</a>
+				{#if data.relatedModels?.['quick-form-publications']?.createForm && hasPermissionAnywhere(user, 'add_quickformpublication')}
+					<button
+						class="btn preset-filled-primary-500 h-fit"
+						data-testid="publish-quick-form"
+						onclick={() => modalCreateForm(data.relatedModels['quick-form-publications'])}
+					>
+						<i class="fa-solid fa-paper-plane mr-2"></i>{m.publish()}
+					</button>
+				{/if}
 			{/if}
 			<AuditTrailButton model={data.urlModel} objectId={data.data?.id} folderId={objectDomain} />
 		</div>

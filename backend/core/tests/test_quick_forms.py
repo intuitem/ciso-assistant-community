@@ -2,6 +2,7 @@
 lifecycle, CEL outcomes and page visibility, XOR parent constraints."""
 
 import pytest
+from django.contrib.auth.models import Permission
 from django.db import IntegrityError, transaction
 from knox.models import AuthToken
 from rest_framework.test import APIClient
@@ -20,7 +21,7 @@ from core.models import (
     RequirementNode,
     StoredLibrary,
 )
-from iam.models import Folder, RoleAssignment, User, UserGroup
+from iam.models import Folder, Role, RoleAssignment, User, UserGroup
 from tprm.models import Entity
 
 FORM_URN = "urn:test:risk:quick_form:dpia-screening"
@@ -182,13 +183,123 @@ class TestQuickFormImport:
 
         _load(LIBRARY_V2)
         response.refresh_from_db()
-        # New question seeded, dropped choice deselected, nothing else lost.
+        # New question seeded; the dropped choice a draft picked is kept, picked.
         assert response.answers.count() == 5
         assert response.answers.filter(question__urn=f"{PAGE1}:question:dpo").exists()
-        assert response.answers.get(question__urn=Q_SCALE).selected_choices.count() == 0
+        assert list(
+            response.answers.get(question__urn=Q_SCALE).selected_choices.all()
+        ) == [large]
+        assert Question.objects.get(urn=Q_SCALE).choices.filter(urn=C_LARGE).exists()
+
+    def test_update_drops_choices_nobody_picked(self, app_config):
+        form = _load(LIBRARY_V1)
+        response = QuickFormResponse.objects.create(
+            name="Vendor Y", quick_form=form, folder=Folder.get_root_folder()
+        )
+        response.seed_answers()
+        _load(LIBRARY_V2)
         assert (
             not Question.objects.get(urn=Q_SCALE).choices.filter(urn=C_LARGE).exists()
         )
+
+    def test_update_keeps_what_drafts_wrote(self, app_config):
+        form = _load(LIBRARY_V1)
+        response = QuickFormResponse.objects.create(
+            name="DPIA", quick_form=form, folder=Folder.get_root_folder()
+        )
+        response.seed_answers()
+        written = response.answers.get(question__urn=Q_COMMENT)
+        written.value = "Weeks of writing"
+        written.save()
+
+        # v2 without the comment (answered) nor the headcount (left blank).
+        dropped = (
+            LIBRARY_V1.replace("version: 1", "version: 2")
+            .replace(
+                f"""            {Q_HEADCOUNT}:
+              type: number
+              text: How many data subjects?
+""",
+                "",
+            )
+            .replace(
+                f"""            {Q_COMMENT}:
+              type: text
+              text: Anything else?
+              required: false
+""",
+                "",
+            )
+        )
+        _load(dropped)
+        assert response.answers.get(question__urn=Q_COMMENT).value == "Weeks of writing"
+        assert not Question.objects.filter(urn=Q_HEADCOUNT).exists()
+
+    def test_always_review_comes_from_the_first_load_only(self, app_config):
+        reviewed = LIBRARY_V1.replace(
+            "      description: Is a DPIA required?\n",
+            "      description: Is a DPIA required?\n      always_review: true\n",
+        )
+        form = _load(reviewed)
+        assert form.always_review is True
+
+        _user, client = _admin_client()
+        url = f"/api/quick-forms/{form.id}/always-review/"
+        assert (
+            client.post(url, {"always_review": "no"}, format="json").status_code == 400
+        )
+        assert client.post(url, {"always_review": False}, format="json").json() == {
+            "always_review": False
+        }
+        # The library still says true: an update keeps the instance's choice.
+        _load(reviewed.replace("version: 1", "version: 2"))
+        form.refresh_from_db()
+        assert form.always_review is False
+
+    def test_always_review_needs_only_the_change_right(self, app_config):
+        form = _load(LIBRARY_V1)
+        user = User.objects.create_user(email="qf-editor@test.local", is_published=True)
+        role = Role.objects.create(name="QuickFormEditor", folder=form.folder)
+        role.permissions.set(
+            Permission.objects.filter(
+                codename__in=["view_quickform", "change_quickform"]
+            )
+        )
+        group = UserGroup.objects.create(name="QuickFormEditors", folder=form.folder)
+        group.user_set.add(user)
+        assignment = RoleAssignment.objects.create(
+            user_group=group, role=role, folder=form.folder, is_recursive=True
+        )
+        assignment.perimeter_folders.add(form.folder)
+        client = APIClient()
+        client.force_authenticate(user=user)
+        url = f"/api/quick-forms/{form.id}/always-review/"
+        assert (
+            client.post(url, {"always_review": True}, format="json").status_code == 200
+        )
+        form.refresh_from_db()
+        assert form.always_review is True
+
+    def test_answered_questions_and_choices_cannot_be_deleted(self, app_config):
+        _user, client = _admin_client()
+        form = _load(LIBRARY_V1)
+        response = QuickFormResponse.objects.create(
+            name="r", quick_form=form, folder=Folder.get_root_folder()
+        )
+        response.seed_answers()
+        scale = Question.objects.get(urn=Q_SCALE)
+        large = scale.choices.get(urn=C_LARGE)
+        response.answers.get(question=scale).selected_choices.set([large])
+
+        refused = client.delete(f"/api/questions/{scale.id}/")
+        assert refused.status_code == 400
+        assert refused.json()["error"] == "questionAnsweredInResponses"
+        refused = client.delete(f"/api/question-choices/{large.id}/")
+        assert refused.json()["error"] == "choiceSelectedInResponses"
+        small = scale.choices.get(urn=C_SMALL)
+        assert client.delete(f"/api/question-choices/{small.id}/").status_code == 204
+        blank = Question.objects.get(urn=Q_HEADCOUNT)
+        assert client.delete(f"/api/questions/{blank.id}/").status_code == 204
 
 
 @pytest.mark.django_db
@@ -515,6 +626,11 @@ class TestBuilderBridge:
             f"{base}quick-form-editor/", {"editing_draft": doc}, format="json"
         )
         assert res.status_code == 200, res.json()
+        # What the editor needs to adopt the URNs the server minted.
+        urn_map = res.json()["urn_map"]
+        iso_urn = "urn:acme:risk:qf_page:vendor-intake:security:question:iso"
+        assert urn_map["tmp-q2"] == iso_urn
+        assert urn_map["tmp-c1"] == f"{iso_urn}:choice:1"
 
         draft = LibraryDraft.objects.get(id=draft_id)
         form = draft.content["quick_forms"][0]
@@ -1318,3 +1434,54 @@ def test_respondent_may_start_a_request_but_sees_only_their_own(app_config):
         == 200
     )
     assert client.post(f"{base}submit/", {}, format="json").status_code == 200
+
+
+@pytest.mark.django_db
+def test_the_fill_preview_offers_scale_levels_and_ratings(app_config):
+    from pathlib import Path
+
+    import yaml
+
+    _user, client = _admin_client()
+    res = client.post(
+        "/api/library-drafts/",
+        {
+            "name": "DPIA draft",
+            "ref_id": "dpia-draft",
+            "packager": "acme",
+            "locale": "en",
+            "folder": str(Folder.get_root_folder().id),
+        },
+        format="json",
+    )
+    assert res.status_code == 201, res.json()
+    source = Path(__file__).resolve().parents[2] / (
+        "library/libraries/quick-form-dpia.yaml"
+    )
+    dpia = yaml.safe_load(source.read_text())["objects"]["quick_forms"][0]
+    LibraryDraft.objects.filter(id=res.json()["id"]).update(
+        content={"quick_forms": [dpia]}
+    )
+    page = "urn:intuitem:risk:qf_page:dpia:illegitimate_access"
+    preview = client.post(
+        f"/api/library-drafts/{res.json()['id']}/quick-form-fill-preview/",
+        {
+            "answers": {
+                f"{page}:question:severity": f"{page}:question:severity:choice:maximum",
+                f"{page}:question:likelihood": f"{page}:question:likelihood:choice:limited",
+            }
+        },
+        format="json",
+    )
+    assert preview.status_code == 200, preview.json()
+    body = preview.json()
+    (risk_page,) = [p for p in body["pages"] if p["urn"] == page]
+    severity = risk_page["questions"][f"{page}:question:severity"]
+    assert [c["urn"].rsplit(":", 1)[-1] for c in severity["choices"]] == [
+        "negligible",
+        "limited",
+        "significant",
+        "maximum",
+    ]
+    (rating,) = body["ratings"]
+    assert [p["level"] for p in rating["points"]] == ["unacceptable"]

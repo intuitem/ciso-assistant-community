@@ -29,6 +29,8 @@
 		type ModalStore
 	} from '$lib/components/Modals/stores';
 	import CreatePatModal from './pat/components/CreatePATModal.svelte';
+	import { getFeatureFlagGroups } from '$lib/utils/feature-flag-groups';
+	import FeatureFlagGroupList from '$lib/components/Forms/FeatureFlagGroupList.svelte';
 
 	interface Props {
 		data: PageData;
@@ -160,6 +162,98 @@
 		}
 	}
 
+	// Derived, not read once: every toggle ends in `invalidateAll()`.
+	const hideableFlags: string[] = $derived(data.moduleVisibility?.hideable ?? []);
+	const moduleGroups = $derived(getFeatureFlagGroups(hideableFlags));
+
+	// Un-narrowed, so "your organisation disabled it" can be told apart from "you
+	// hid it" — false in `flags` either way.
+	const instanceFlags: Record<string, boolean> = $derived(data.moduleVisibility?.instance ?? {});
+
+	// Seeded once, then owned locally so a toggle paints before the round-trip.
+	let moduleVisible = $state(
+		Object.fromEntries(
+			(data.moduleVisibility?.hideable ?? []).map((flag: string) => [
+				flag,
+				!(data.moduleVisibility?.hidden ?? []).includes(flag)
+			])
+		)
+	);
+	// A count, not a flag: a toggle and a reset can overlap, and the backend merges
+	// each sparse PATCH read-modify-save, so a write started mid-flight can lose
+	// the first. Blocking every control while any is pending orders them.
+	let modulePendingWrites = $state(0);
+	const moduleBusy = $derived(modulePendingWrites > 0);
+
+	function availableOnInstance(flag: string): boolean {
+		return instanceFlags[flag] === true;
+	}
+
+	// Absent means visible: the stored form is sparse, and a flag added to
+	// `hideable` by a later refresh has no local value yet.
+	function isModuleVisible(flag: string): boolean {
+		return moduleVisible[flag] !== false;
+	}
+
+	// Both sides of the ratio count only what this user can act on, so someone who
+	// has hidden nothing reads "9 of 9" rather than a total they cannot reach.
+	const availableModuleCount = $derived(hideableFlags.filter(availableOnInstance).length);
+	const visibleModuleCount = $derived(
+		hideableFlags.filter((flag) => availableOnInstance(flag) && isModuleVisible(flag)).length
+	);
+
+	// What the reset would undo, hence not `visibleModuleCount === hideableFlags
+	// .length`: an organisation-disabled module is nothing this user can reset.
+	const hiddenByUserCount = $derived(
+		hideableFlags.filter((flag) => moduleVisible[flag] === false).length
+	);
+
+	async function saveModulePreferences(patch: Record<string, boolean>, rollback: () => void) {
+		modulePendingWrites += 1;
+		try {
+			let response: Response;
+			try {
+				response = await fetch('/fe-api/user-preferences', {
+					method: 'PATCH',
+					body: JSON.stringify({ feature_flags: patch })
+				});
+			} catch {
+				rollback();
+				return;
+			}
+			if (!response.ok) {
+				rollback();
+				return;
+			}
+			// Past this point the write landed, so a failed reload leaves the rest
+			// of the tree stale — rolling the toggle back would make it wrong.
+			// Sidebar, palette and flagged tables are built server-side from the
+			// effective flags, hence the reload at all.
+			await invalidateAll().catch(() => {});
+		} finally {
+			modulePendingWrites -= 1;
+		}
+	}
+
+	async function handleModuleChange(flag: string, visible: boolean) {
+		const previous = moduleVisible[flag];
+		moduleVisible[flag] = visible;
+		await saveModulePreferences({ [flag]: visible }, () => {
+			moduleVisible[flag] = previous;
+		});
+	}
+
+	async function resetModulesToOrganization() {
+		const previous = { ...moduleVisible };
+		// Every hideable flag sent as visible: the backend drops a `true` instead of
+		// storing it, so each one goes back to following the organization.
+		const patch = Object.fromEntries(hideableFlags.map((flag) => [flag, true]));
+		moduleVisible = patch;
+		await saveModulePreferences(patch, () => {
+			moduleVisible = previous;
+		});
+	}
+
 	// setTheme applies the theme immediately and persists it to the backend (ui.theme).
 	function handleThemeChange(event: Event) {
 		theme = (event.target as HTMLSelectElement).value as ThemeMode;
@@ -261,6 +355,11 @@
 		<Tabs.Trigger value="preferences"
 			><i class="fa-solid fa-sliders mr-2"></i>{m.preferencesSettings()}</Tabs.Trigger
 		>
+		{#if moduleGroups.length > 0}
+			<Tabs.Trigger value="modules"
+				><i class="fa-solid fa-table-cells-large mr-2"></i>{m.moduleVisibility()}</Tabs.Trigger
+			>
+		{/if}
 		<Tabs.Indicator />
 	</Tabs.List>
 	<Tabs.Content value="security">
@@ -284,7 +383,7 @@
 										{/if}
 									</span>
 									<span class="flex flex-row space-x-2">
-										<h6 class="h6 base-font-color">{m.authenticatorApp()}</h6>
+										<h6 class="h6 text-typo-base-light">{m.authenticatorApp()}</h6>
 										<p class="badge h-fit preset-tonal-secondary">{m.recommended()}</p>
 									</span>
 									<p class="text-sm text-surface-800-200 max-w-[50ch]">
@@ -327,7 +426,7 @@
 										{/if}
 									</span>
 									<span class="flex flex-row space-x-2">
-										<h6 class="h6 base-font-color">{m.securityKeys()}</h6>
+										<h6 class="h6 text-typo-base-light">{m.securityKeys()}</h6>
 									</span>
 									<p class="text-sm text-surface-800-200 max-w-[50ch]">
 										{m.securityKeyDescription()}
@@ -502,4 +601,41 @@
 			</div>
 		</div>
 	</Tabs.Content>
+	{#if moduleGroups.length > 0}
+		<Tabs.Content value="modules">
+			<div class="p-4 flex flex-col space-y-4">
+				<div class="flex flex-col">
+					<h3 class="h3 font-medium">{m.moduleVisibility()}</h3>
+					<p class="text-sm text-surface-800-200">{m.moduleVisibilityDescription()}</p>
+				</div>
+				<hr />
+				<div class="flex flex-wrap items-center gap-3">
+					<span class="text-sm text-surface-600-400">
+						{m.modulesVisibleCount({
+							count: visibleModuleCount,
+							total: availableModuleCount
+						})}
+					</span>
+					<button
+						type="button"
+						class="btn btn-sm preset-tonal ml-auto"
+						data-testid="reset-module-visibility"
+						disabled={moduleBusy || hiddenByUserCount === 0}
+						onclick={resetModulesToOrganization}
+					>
+						<i class="fa-solid fa-rotate-left mr-1"></i>{m.resetToOrganizationSettings()}
+					</button>
+				</div>
+				<FeatureFlagGroupList
+					groups={moduleGroups}
+					accent="tertiary"
+					isEnabled={(field) => availableOnInstance(field) && isModuleVisible(field)}
+					isDisabled={(field) => !availableOnInstance(field) || moduleBusy}
+					tooltipFor={(field) =>
+						availableOnInstance(field) ? undefined : m.moduleDisabledByOrganization()}
+					onToggle={handleModuleChange}
+				/>
+			</div>
+		</Tabs.Content>
+	{/if}
 </Tabs>

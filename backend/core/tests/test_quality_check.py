@@ -11,8 +11,12 @@ from core.models import (
     Perimeter,
     RequirementAssessment,
     RequirementNode,
+    RiskAssessment,
+    RiskMatrix,
+    RiskScenario,
 )
 from core.views import ComplianceAssessmentViewSet, FolderViewSet
+from test_fixtures import RISK_MATRIX_JSON_DEFINITION
 from iam.models import Folder, User
 
 
@@ -139,6 +143,76 @@ def test_evidence_attached_directly_to_a_requirement_is_checked(
 
     reported = [f for f in findings["warnings"] if f["msgid"] == "evidenceNoFile"]
     assert [f["link"] for f in reported] == [f"evidences/{evidence.id}"]
+
+
+@pytest.mark.django_db
+def test_active_control_without_evidence_is_reported(audit_with_shared_control):
+    compliance_assessment, control = audit_with_shared_control
+    control.status = AppliedControl.Status.ACTIVE
+    control.save()
+
+    reported = [
+        f
+        for f in compliance_assessment.quality_check()["warnings"]
+        if f["msgid"] == "appliedControlActiveNoEvidence"
+    ]
+    assert [f["link"] for f in reported] == [f"applied-controls/{control.id}"]
+
+    control.evidences.add(
+        Evidence.objects.create(name="Proof", folder=compliance_assessment.folder)
+    )
+
+    assert not [
+        f
+        for f in compliance_assessment.quality_check()["warnings"]
+        if f["msgid"] == "appliedControlActiveNoEvidence"
+    ]
+
+
+@pytest.mark.django_db
+def test_existing_control_without_evidence_is_reported():
+    """Existing controls reach the assessment through `risk_scenarios_e`."""
+    root_folder = Folder.get_root_folder()
+    folder = Folder.objects.create(parent_folder=root_folder, name="existing control")
+    perimeter = Perimeter.objects.create(name="existing control", folder=folder)
+    matrix = RiskMatrix.objects.create(
+        name="quality check matrix",
+        json_definition=RISK_MATRIX_JSON_DEFINITION,
+        folder=root_folder,
+    )
+    risk_assessment = RiskAssessment.objects.create(
+        name="existing control",
+        perimeter=perimeter,
+        risk_matrix=matrix,
+        folder=folder,
+    )
+    scenario = RiskScenario.objects.create(
+        name="scenario", risk_assessment=risk_assessment, folder=folder
+    )
+    control = AppliedControl.objects.create(
+        name="Existing control", folder=folder, status=AppliedControl.Status.ACTIVE
+    )
+    scenario.existing_applied_controls.add(control)
+
+    reported = [
+        f
+        for f in risk_assessment.quality_check()["warnings"]
+        if f["msgid"] == "appliedControlActiveNoEvidence"
+    ]
+    assert [f["link"] for f in reported] == [f"applied-controls/{control.id}"]
+
+
+@pytest.mark.django_db
+def test_control_that_is_not_active_needs_no_evidence(audit_with_shared_control):
+    compliance_assessment, control = audit_with_shared_control
+    control.status = AppliedControl.Status.TO_DO
+    control.save()
+
+    assert not [
+        f
+        for f in compliance_assessment.quality_check()["warnings"]
+        if f["msgid"] == "appliedControlActiveNoEvidence"
+    ]
 
 
 @pytest.mark.django_db

@@ -79,6 +79,17 @@
 		bind:cachedValue={formDataCache['target_objective']}
 		helpText={m.targetObjectiveHelpText()}
 	/>
+	<AutocompleteSelect
+		{form}
+		optionsEndpoint="terminologies?field_path=ro_to.target_objective_category&is_visible=true"
+		optionsLabelField="translated_name"
+		field="target_objective_category"
+		nullable
+		label={m.targetObjectiveCategory()}
+		cacheLock={cacheLocks['target_objective_category']}
+		bind:cachedValue={formDataCache['target_objective_category']}
+		helpText={m.targetObjectiveCategoryHelpText()}
+	/>
 </div>
 <div
 	class="relative p-2 space-y-2 rounded-md {activeActivity === 'two'

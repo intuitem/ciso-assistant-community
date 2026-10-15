@@ -13,12 +13,11 @@ const FOLDER_A = '11111111-1111-1111-1111-111111111111';
 const FOLDER_B = '22222222-2222-2222-2222-222222222222';
 const ROOT = '00000000-0000-0000-0000-000000000000';
 
+// FOLDER_A points at index 0 on purpose: a falsy index must still resolve.
 const user = {
 	root_folder_id: ROOT,
-	domain_permissions: {
-		[FOLDER_A]: ['view_riskassessment', 'change_riskassessment'],
-		[FOLDER_B]: ['view_riskassessment']
-	}
+	permission_sets: [['view_riskassessment', 'change_riskassessment'], ['view_riskassessment']],
+	domain_permissions: { [FOLDER_A]: 0, [FOLDER_B]: 1 }
 } as unknown as User;
 
 describe('isAccessAllowed', () => {
@@ -47,7 +46,7 @@ describe('hasPermissionAnywhere', () => {
 		expect(hasPermissionAnywhere(user, 'delete_riskassessment')).toBe(false);
 	});
 
-	it('is false without a user or without domain_permissions', () => {
+	it('is false without a user or without permission_sets', () => {
 		expect(hasPermissionAnywhere(undefined as unknown as User, 'view_riskassessment')).toBe(false);
 		expect(hasPermissionAnywhere({} as User, 'view_riskassessment')).toBe(false);
 	});

@@ -6,7 +6,6 @@
 	import { defaults, type SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
-	import { type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton-svelte';
 	import { onMount } from 'svelte';
 	import { getModelInfo } from '$lib/utils/crud';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
@@ -15,7 +14,11 @@
 	import { AppliedControlSchema } from '$lib/utils/schemas';
 	import { page } from '$app/state';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import { getModalStore } from '$lib/components/Modals/stores';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings
+	} from '$lib/components/Modals/stores';
 	import MarkdownField from '../MarkdownField.svelte';
 	import CustomFieldsSection from '../CustomFieldsSection.svelte';
 	import { formFieldProxy } from 'sveltekit-superforms';

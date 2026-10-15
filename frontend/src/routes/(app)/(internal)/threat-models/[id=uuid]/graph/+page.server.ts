@@ -1,4 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { discardBody } from '$lib/utils/responses';
 import { error } from '@sveltejs/kit';
 
 import type { PageServerLoad } from './$types';
@@ -9,8 +10,11 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		fetch(`${BASE_API_URL}/threat-models/${params.id}/matrix/`),
 		fetch(`${BASE_API_URL}/threat-models/${params.id}/`)
 	]);
-	for (const res of [graphRes, matrixRes, modelRes]) {
-		if (!res.ok) error(res.status, await res.text());
+	const responses = [graphRes, matrixRes, modelRes];
+	const failed = responses.find((res) => !res.ok);
+	if (failed) {
+		await discardBody(...responses.filter((res) => res !== failed));
+		error(failed.status, await failed.text());
 	}
 
 	return {

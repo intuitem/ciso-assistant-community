@@ -26,6 +26,7 @@ Every template follows the same rules:
 | Non-compliant requirement, open and link a remediation control | Requirement assessment updated | Creates an applied control, links it to the requirement, notifies the owner. Never touches the result. |
 | Validation decided, route the outcome | Validation flow updated | Branches on the decision and sends a different email per outcome. The reference example for branches. |
 | Validation requested, notify the approver | Validation flow created | Emails the approver with the deadline. |
+| Audit, AI evidence challenge | Manual, or an audit moving to **in review** | Walks every requirement the audit calls compliant, partially compliant or not applicable — the three answers that assert something. The platform's own quality rules judge each one first, and only the ones they pass reach the configured AI provider, which is asked the single thing a rule cannot decide: whether what is written and attached answers what the requirement asks for. The findings and the answers are assembled into a Record document, and the audit's reviewers get a dated task to read it. Results and scores are never touched — no workflow can write them. `WORKFLOW_AI_MAX_CALLS_PER_RUN` (50 by default) is what bounds a run. Needs the `chat_mode` flag and a provider. Set `audit_id`, or enable the trigger. |
 
 ## Risk
 
@@ -51,6 +52,9 @@ Every template follows the same rules:
 | Third party added, start its assessment | Entity created | Creates an entity assessment for the new third party. |
 | Third party added, tiered due diligence | Entity created | Branches on dependency. Critical gets the full questionnaire and two weeks, the rest the core implementation group and six weeks. Uses Date offset. |
 | Evidence collection, pull an evidence file from a tool | Schedule | Every Monday, downloads the current file from a tool and files it as a new revision of one evidence. If a task expects that evidence, the file answers for the occurrence currently due, so the task shows its evidence as provided. Warns by email when the tool answers badly or not at all. Optionally records a number the same tool publishes. Set `evidence_uuid`, `tool_url` and `warn_to`, add the `tool_token` secret. |
+| Microsoft Entra ID, identity hygiene metrics | Schedule | Every Monday, records users without MFA registered, Global Administrator assignments and guest accounts as metric samples. Set `tenant_id`, `client_id` and the three metric ids, add the `entra_client_secret` secret. |
+| Microsoft Defender for Endpoint, device inventory | Schedule | Every night, pages through the active devices and keeps one supporting asset per device, matched on its name. Set `tenant_id` and `client_id`, add the `defender_client_secret` secret. |
+| SentinelOne, endpoint coverage metrics | Schedule | Every morning, records agents, out-of-date agents and unresolved threats as metric samples. Set `console_url` and the three metric ids, add the `s1_api_token` secret. |
 | External report, download it and file it as evidence | Webhook | Downloads a file from a base URL you control plus a caller-supplied path, attaches it to a new evidence. |
 | Personal access token created, notify security | Token created | Notice whenever a long-lived credential is minted. |
 | Read-only explorer | Manual | Reads a few applied controls and logs them. Touches nothing. The safest first Execute. |

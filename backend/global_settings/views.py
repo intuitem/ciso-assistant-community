@@ -14,6 +14,12 @@ from core.serializers import SerializerFactory
 from django.conf import settings
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
+from .utils import (
+    get_instance_feature_flags,
+    get_user_hidden_feature_flags,
+    get_user_hideable_feature_flags,
+    resolve_feature_flags,
+)
 from .serializers import (
     GeneralSettingsSerializer,
     FeatureFlagsSerializer,
@@ -86,6 +92,29 @@ class FeatureFlagsViewSet(viewsets.ModelViewSet):
         obj, _ = self.model.objects.get_or_create(name="feature-flags")
         self.check_object_permissions(self.request, obj)
         return obj
+
+    @action(detail=True, methods=["get"], permission_classes=[IsAuthenticated])
+    def effective(self, request, pk=None):
+        """The instance flags narrowed by the caller's hides.
+
+        Separate from `retrieve`, which stays the raw row: the admin form reads
+        that one and PUTs the whole body back, so serving the narrowed view
+        there would save an admin's personal hides instance-wide.
+        """
+        hideable = get_user_hideable_feature_flags()
+        instance_flags = get_instance_feature_flags()
+        return Response(
+            {
+                "flags": resolve_feature_flags(request.user),
+                "hideable": sorted(hideable),
+                "hidden": sorted(get_user_hidden_feature_flags(request.user)),
+                # Un-narrowed, so the UI can tell "you hid this" from "your
+                # organisation disabled it" — false in `flags` either way.
+                "instance": {
+                    name: instance_flags.get(name, False) for name in hideable
+                },
+            }
+        )
 
     @action(detail=True, methods=["get"])
     def defaults(self, request, pk=None):
@@ -483,7 +512,12 @@ def get_sso_info(request):
     API endpoint that returns the CSRF token.
     """
     sso_settings = SSOSettings.objects.get()
-    sp_entity_id = sso_settings.settings["sp"].get("entity_id")
+    sp_settings = (sso_settings.settings or {}).get("sp") or {}
+    sp_entity_id = (
+        sp_settings.get("entity_id")
+        or sso_settings.provider_id
+        or sso_settings.provider
+    )
     callback_url = settings.CISO_ASSISTANT_URL + "/"
     return Response(
         {
