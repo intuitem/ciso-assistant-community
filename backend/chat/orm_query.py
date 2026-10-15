@@ -164,6 +164,53 @@ def execute_tool_query(arguments: dict, scope, parsed_context=None) -> dict | No
             labels = [_choice_label(model_class, name, v) for v in values]
             filters_applied.append(f"{name} = {' or '.join(labels)}")
 
+    # Negation: "not active" excludes rather than listing every other status
+    excluded = arguments.get("exclude_status")
+    if excluded and _has_field(model_class, "status"):
+        values = [
+            v
+            for v in (
+                _resolve_choice_value(model_class, "status", c)
+                for c in _as_list(excluded)
+            )
+            if v is not None
+        ]
+        if not values:
+            return _unresolved_filter_result(
+                model_class,
+                "status",
+                excluded,
+                model_name,
+                display_name,
+                url_slug,
+                action,
+                filters_applied,
+                scope,
+            )
+        qs = qs.exclude(status__in=values)
+        labels = [_choice_label(model_class, "status", v) for v in values]
+        filters_applied.append(f"status is not {' or '.join(labels)}")
+
+    # Objects related to a named one, through any relation of the model
+    linked_to = arguments.get("linked_to")
+    if linked_to:
+        link_q = _linked_to_q(model_class, str(linked_to).strip(), scope)
+        if link_q is None:
+            return {
+                "model_name": model_name,
+                "display_name": display_name,
+                "url_slug": url_slug,
+                "query_type": action,
+                "filters_applied": filters_applied
+                + [f"linked to '{linked_to}' (unknown)"],
+                "total_count": 0,
+                "objects": [],
+                "note": f"No object named '{linked_to}' is related to {display_name}. "
+                "Valid values: the exact name or ref_id of a related object.",
+            }
+        qs = qs.filter(link_q).distinct()
+        filters_applied.append(f"linked to '{linked_to}'")
+
     # Risk level — resolved against the risk matrix wording
     risk_level = arguments.get("risk_level")
     if risk_level and model_name == "RiskScenario":
@@ -212,16 +259,39 @@ def execute_tool_query(arguments: dict, scope, parsed_context=None) -> dict | No
             qs = qs.filter(date_q["q"])
             filters_applied.append(date_q["label"])
 
-    # Generic relationship filters — derived from model metadata
-    for rel_name in arguments.get("has_related", []):
-        if _is_valid_relation(model_class, rel_name):
-            qs = qs.filter(**{f"{rel_name}__isnull": False}).distinct()
-            filters_applied.append(f"has {rel_name}")
-
-    for rel_name in arguments.get("has_no_related", []):
-        if _is_valid_relation(model_class, rel_name):
-            qs = qs.filter(**{f"{rel_name}__isnull": True})
-            filters_applied.append(f"no {rel_name}")
+    # Generic relationship filters — derived from model metadata. Small models
+    # also put an object's name here ("production_line_control"): that is a
+    # link to it. Anything else is reported, never silently dropped.
+    for key, negate in (("has_related", False), ("has_no_related", True)):
+        for rel_name in arguments.get(key, []):
+            if _is_valid_relation(model_class, rel_name):
+                qs = qs.filter(**{f"{rel_name}__isnull": negate})
+                if not negate:
+                    qs = qs.distinct()
+                filters_applied.append(f"{'no' if negate else 'has'} {rel_name}")
+                continue
+            name = str(rel_name).replace("_", " ").strip()
+            link_q = _linked_to_q(model_class, name, scope)
+            if link_q is None:
+                relations = sorted(
+                    f.name
+                    for f in model_class._meta.get_fields()
+                    if f.is_relation and not f.auto_created
+                )
+                return {
+                    "model_name": model_name,
+                    "display_name": display_name,
+                    "url_slug": url_slug,
+                    "query_type": action,
+                    "filters_applied": filters_applied
+                    + [f"{key} {rel_name} (unknown)"],
+                    "total_count": 0,
+                    "objects": [],
+                    "note": f"'{rel_name}' is neither a relation of {display_name} "
+                    f"nor the name of a related object. Valid values: {', '.join(relations)}.",
+                }
+            qs = (qs.exclude(link_q) if negate else qs.filter(link_q)).distinct()
+            filters_applied.append(f"{'not ' if negate else ''}linked to '{name}'")
 
     # Compound relation filter — filter on properties of related objects
     related_filter = arguments.get("related_filter")
@@ -244,8 +314,19 @@ def execute_tool_query(arguments: dict, scope, parsed_context=None) -> dict | No
         # Search through FK names for richer matching
         if hasattr(model_class, "framework"):
             search_q |= Q(framework__name__icontains=search)
+        # and the curated relations shown with each object ("critical" is a tier)
+        for field_name, _ in SERIALIZED_RELATIONS.get(model_name, ()):
+            target = model_class._meta.get_field(field_name).related_model
+            if _has_field(target, "name"):
+                search_q |= Q(
+                    **{
+                        f"{field_name}__in": scope.queryset(target).filter(
+                            name__icontains=search
+                        )
+                    }
+                )
         if search_q:
-            qs = qs.filter(search_q)
+            qs = qs.filter(search_q).distinct()
             filters_applied.append(f"search = '{search}'")
 
     total_count = qs.count()
@@ -516,6 +597,29 @@ def _resolve_choice_value(model_class, field_name: str, value):
         value,
     )
     return None
+
+
+def _linked_to_q(model_class, name: str, scope):
+    """Q matching objects related to a readable object named or ref'd `name`,
+    through any relation of the model; None when no such object exists."""
+    Folder = apps.get_model("iam", "Folder")
+    q, found = Q(), False
+    for rel in model_class._meta.get_fields():
+        target = getattr(rel, "related_model", None)
+        if not rel.is_relation or target is None or target is Folder:
+            continue
+        match = Q()
+        for field in ("name", "ref_id"):
+            if _has_field(target, field):
+                match |= Q(**{f"{field}__iexact": name})
+        if not match:
+            continue
+        # only objects the user can read may select results
+        targets = scope.queryset(target).filter(match)
+        if targets.exists():
+            q |= Q(**{f"{rel.name}__in": targets})
+            found = True
+    return q if found else None
 
 
 def _has_field(model_class, field_name: str) -> bool:

@@ -145,6 +145,7 @@ CREATABLE_MODELS = {
 MULTI_VALUE_FILTERS = frozenset(
     {
         "status",
+        "exclude_status",
         "treatment",
         "result",
         "priority",
@@ -367,7 +368,24 @@ def _build_tools() -> tuple[list[dict], dict]:
             "items": {"type": "string"},
             "description": (
                 "Filter by status (e.g. 'active', 'in_progress', 'to_do', 'done', "
-                "'draft', 'open', 'closed'). Pass several to match any of them."
+                "'draft'). Pass several to match any of them."
+            ),
+        },
+        "exclude_status": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": (
+                "Leave out objects with these statuses. Use it for negations: "
+                "'not active' → ['active']; 'not done', 'still open' → the finished "
+                "statuses (e.g. ['done', 'closed', 'resolved'])."
+            ),
+        },
+        "linked_to": {
+            "type": "string",
+            "description": (
+                "Name or ref_id of another object: keeps only objects related to it. "
+                "E.g. assets supporting 'Production line control', controls of risk "
+                "'RS.01', audits of entity 'Kestrava Cloud B.V.'."
             ),
         },
         "priority": {

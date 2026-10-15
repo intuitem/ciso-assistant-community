@@ -672,3 +672,51 @@ class TestQueryVocabulary:
         )
         assert [o["name"] for o in result["objects"]] == ["key vendor"]
         assert result["objects"][0]["tier"] == "critical"
+
+    def test_linked_to_follows_relations_of_readable_objects_only(self, assets, reader):
+        from chat.orm_query import execute_tool_query
+
+        linked = execute_tool_query(
+            {"model": "asset", "action": "list", "linked_to": "payments"},
+            scope_for(reader),
+        )
+        assert [o["name"] for o in linked["objects"]] == ["database"]
+        # an object the user cannot read neither matches nor is confirmed to exist
+        hidden = execute_tool_query(
+            {"model": "asset", "action": "list", "linked_to": "secret server"},
+            scope_for(reader),
+        )
+        assert (
+            hidden["total_count"] == 0 and "(unknown)" in hidden["filters_applied"][-1]
+        )
+
+    def test_exclude_status(self, domain, reader):
+        from core.models import AppliedControl
+
+        from chat.orm_query import execute_tool_query
+
+        AppliedControl.objects.create(name="done one", status="active", folder=domain)
+        AppliedControl.objects.create(name="open one", status="to_do", folder=domain)
+        result = execute_tool_query(
+            {
+                "model": "applied_control",
+                "action": "list",
+                "exclude_status": ["active"],
+            },
+            scope_for(reader),
+        )
+        assert [o["name"] for o in result["objects"]] == ["open one"]
+
+    def test_object_name_in_has_related_is_a_link(self, assets, reader):
+        from chat.orm_query import execute_tool_query
+
+        result = execute_tool_query(
+            {"model": "asset", "action": "list", "has_related": ["payments"]},
+            scope_for(reader),
+        )
+        assert [o["name"] for o in result["objects"]] == ["database"]
+        unknown = execute_tool_query(
+            {"model": "asset", "action": "list", "has_related": ["shiny"]},
+            scope_for(reader),
+        )
+        assert unknown["total_count"] == 0 and "Valid values" in unknown["note"]
