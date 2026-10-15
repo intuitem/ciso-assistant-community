@@ -82,6 +82,9 @@ from .tools.write_tools import (
     refresh_quantitative_risk_study_simulations,
     create_task_template,
     create_vulnerability,
+    create_evidence,
+    create_incident,
+    create_timeline_entry,
 )
 
 from .tools.update_tools import (
@@ -100,6 +103,8 @@ from .tools.update_tools import (
     delete_task_template,
     update_vulnerability,
     delete_vulnerability,
+    update_incident,
+    update_timeline_entry,
 )
 
 from .tools.tprm_tools import (
@@ -237,6 +242,11 @@ WRITE_TOOLS = [
     create_vulnerability,
     update_vulnerability,
     delete_vulnerability,
+    create_evidence,
+    create_incident,
+    update_incident,
+    create_timeline_entry,
+    update_timeline_entry,
     update_asset,
     update_risk_scenario,
     update_applied_control,
@@ -342,6 +352,8 @@ def register_tools(read_only: bool = False):
         mcp.tool(annotations=_annotations(tool, is_read=True))(_offload(tool))
     if not read_only:
         for tool in WRITE_TOOLS:
+            if config.IS_HTTP and tool is create_evidence:
+                continue
             mcp.tool(annotations=_annotations(tool, is_read=False))(_offload(tool))
     _registered = True
 

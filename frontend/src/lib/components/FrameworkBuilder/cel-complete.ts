@@ -130,6 +130,7 @@ function fieldDetails(mode: CelMode): Record<string, Record<string, string>> {
 				pages: m.builderCelGroupPages(),
 				answers: m.builderCelGroupAnswers(),
 				values: m.builderCelValues(),
+				ratings: m.builderCelGroupRatings(),
 				computed_outcomes: m.builderCelComputedOutcomes(),
 				hidden_pages: m.builderCelHiddenPages()
 			},

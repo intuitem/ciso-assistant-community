@@ -353,10 +353,14 @@ class PresetExecutor:
         for flag in flags_config.get("disable", []):
             value[flag] = False
 
+        from global_settings.utils import (
+            apply_flag_requirements,
+            clear_feature_flags_cache,
+        )
+
+        apply_flag_requirements(value, set(flags_config.get("disable", [])))
         settings_obj.value = value
         settings_obj.save()
-
-        from global_settings.utils import clear_feature_flags_cache
 
         clear_feature_flags_cache()
 

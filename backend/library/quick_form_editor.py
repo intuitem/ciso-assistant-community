@@ -66,6 +66,9 @@ def quick_form_to_editor_doc(quick_form: dict, *, locale: str = "en") -> dict:
         quick_form.get("subject_question_urn") or None
     )
     doc["framework_meta"]["on_accept"] = quick_form.get("on_accept") or []
+    doc["framework_meta"]["scales_definition"] = (
+        quick_form.get("scales_definition") or []
+    )
     for key in FRAMEWORK_ONLY_META_KEYS:
         doc["framework_meta"].pop(key, None)
     return doc
@@ -123,6 +126,11 @@ def editor_doc_to_quick_form_object(
             result["on_accept"] = meta["on_accept"]
         else:
             result.pop("on_accept", None)
+    if "scales_definition" in meta:
+        if meta.get("scales_definition"):
+            result["scales_definition"] = meta["scales_definition"]
+        else:
+            result.pop("scales_definition", None)
     # Rules and conditions were rebased onto the saved ids by the framework
     # conversion (pages are its requirement nodes).
     result["pages"] = pages
