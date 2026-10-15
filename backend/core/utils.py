@@ -132,7 +132,8 @@ def get_global_currency() -> str:
     from global_settings.models import GlobalSettings
 
     general_settings = GlobalSettings.objects.filter(name="general").first()
-    return general_settings.value.get("currency", "€") if general_settings else "€"
+    value = general_settings.value if general_settings else None
+    return (value or {}).get("currency") or "€"
 
 
 def format_currency(value, currency: str) -> str:
