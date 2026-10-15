@@ -10,6 +10,7 @@ import ipaddress
 import selectors
 import socket
 import fcntl
+import struct
 import time
 import json
 import enum
@@ -367,17 +368,89 @@ class RequestRefreshSettings(Request):
         return RequestRefreshSettings()
 
 
+"""
+def _handle_read(self, conn: socket.socket):
+    try:
+        if not (encoded_request := conn.recv(4096)):
+            self._selector.unregister(conn)
+            conn.close()
+            return
+
+        request = Request.decode(encoded_request)
+        if request is None:
+            conn.sendall(json.dumps({"error": True}).encode())
+            return
+
+        response = self._handle_request(request)
+        encoded_response = response.encode()
+        conn.sendall(encoded_response)
+    except Exception:
+        conn.sendall(json.dumps({"error": True}).encode())
+"""
+
+
+class RPCSocket:
+    """(Mandatory)Socket wrapper used to send/receive packet from the RPC-server."""
+
+    def __init__(self, socket: socket.socket):
+        self._socket = socket
+
+    def send(self, packet: bytes):
+        length = struct.pack("<I", len(packet))
+        self._socket.sendall(length + packet)
+
+    def send_error(self):
+        self.send(json.dumps({"error": True}).encode())
+
+    def _recv_until(self, length: int) -> tuple[bytes, bool]:
+        """Return `(data, close_socket)`"""
+        data = bytearray()
+        remaining_length = length
+
+        while remaining_length > 0:
+            chunck = self._socket.recv(remaining_length)
+            if chunck == b"":
+                return b"", True
+
+            data.extend(chunck)
+            remaining_length = length - len(data)
+
+        return bytes(data), False
+
+    def recv(self) -> tuple[bytes, bool]:
+        """Return `(packet, close_socket)`."""
+        encoded_length, close_socket = self._recv_until(4)
+
+        if close_socket:
+            return b"", True
+
+        length = struct.unpack("<I", encoded_length)[0]
+        packet, close_socket = self._recv_until(length)
+
+        if close_socket:
+            return b"", True
+
+        return packet, False
+
+    def close(self):
+        self._socket.close()
+
+
 class RPCServer:
     def __init__(self, ban_cache: _BanCache):
-        self._selector = selectors.DefaultSelector()
-        self._socket = socket.socket(socket.AF_UNIX, socket.SOCK_SEQPACKET)
+        server_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         if _BanCache.UNIX_SOCKET_FILE_PATH.exists():
             _BanCache.UNIX_SOCKET_FILE_PATH.unlink()
 
-        self._socket.bind(str(_BanCache.UNIX_SOCKET_FILE_PATH))
-        self._socket.listen()
-        self._socket.setblocking(False)
-        self._selector.register(self._socket, selectors.EVENT_READ, self._handle_accept)
+        server_socket.bind(str(_BanCache.UNIX_SOCKET_FILE_PATH))
+        server_socket.listen()
+        self._socket = RPCSocket(server_socket)
+
+        self._selector = selectors.DefaultSelector()
+        self._selector.register(
+            server_socket, selectors.EVENT_READ, self._handle_accept
+        )
+
         self._ban_cache = ban_cache
 
     def _method_is_banned(self, request: RequestIsBanned) -> ResponseIsBanned:
@@ -416,27 +489,35 @@ class RPCServer:
         else:
             raise NotImplementedError(f"Unsupported method {request.METHOD}.")
 
-    def _handle_read(self, conn: socket.socket):
+    def _handle_read(self, _conn: socket.socket):
+        conn = RPCSocket(_conn)
         try:
-            if not (encoded_request := conn.recv(4096)):
-                self._selector.unregister(conn)
-                conn.close()
+            encoded_request, close_socket = conn.recv()
+
+            if close_socket:
+                self._close_client(_conn)
                 return
 
             request = Request.decode(encoded_request)
             if request is None:
-                conn.sendall(json.dumps({"error": True}).encode())
+                conn.send_error()
                 return
 
             response = self._handle_request(request)
             encoded_response = response.encode()
-            conn.sendall(encoded_response)
+            conn.send(encoded_response)
+
         except Exception:
-            conn.sendall(json.dumps({"error": True}).encode())
+            self._close_client(_conn)
+            return
+
+    def _close_client(self, _conn: socket.socket):
+        self._selector.unregister(_conn)
+        _conn.close()
 
     def _handle_accept(self, server: socket.socket):
         client_conn, _ = server.accept()
-        client_conn.setblocking(False)
+        client_conn.settimeout(0.05)
         self._selector.register(client_conn, selectors.EVENT_READ, self._handle_read)
 
     def poll(self):
@@ -609,17 +690,19 @@ class _BanCache:
         """Return `True` if the `ip_address` of the request is banned, or `False` otherwise"""
         try:
             if self.conn is None:
-                self.conn = socket.socket(socket.AF_UNIX, socket.SOCK_SEQPACKET)
-                self.conn.settimeout(0.2)
-                self.conn.connect(str(_BanCache.UNIX_SOCKET_FILE_PATH))
+                conn_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+                conn_socket.settimeout(0.2)
+                conn_socket.connect(str(_BanCache.UNIX_SOCKET_FILE_PATH))
+                self.conn = RPCSocket(conn_socket)
 
             encoded_request = request.encode()
-            self.conn.sendall(encoded_request)
+            self.conn.send(encoded_request)
 
-            encoded_response = self.conn.recv(4096)
-            if not encoded_response:
+            encoded_response, close_socket = self.conn.recv()
+            if close_socket:
                 # Peer closed the connection: the leader (or its thread) is gone.
                 raise ConnectionResetError("rate limiting server closed the connection")
+
             response = Response.decode(encoded_response)
             return response
 
