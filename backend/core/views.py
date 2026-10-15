@@ -20602,7 +20602,8 @@ class QuickFormViewSet(BaseModelViewSet):
     def _assessable(request, target_key, subject_id):
         """(target, subject, may_start): the object a form would assess, and
         whether the caller may file a response in its domain. None when the
-        target is unknown or the subject is out of the caller's sight."""
+        target is unknown, does not apply to the subject, or the subject is out
+        of the caller's sight."""
         from core.quick_form_targets import get_target
 
         target = get_target(str(target_key or ""))
@@ -20616,6 +20617,8 @@ class QuickFormViewSet(BaseModelViewSet):
         if subject is None or not RoleAssignment.is_object_readable(
             request.user, model, subject.pk
         ):
+            return None
+        if not target.applies_to(subject):
             return None
         permission = Permission.objects.get(codename="add_quickformresponse")
         may_start = RoleAssignment.is_access_allowed(
@@ -22115,7 +22118,11 @@ class QuickFormResponseViewSet(BaseModelViewSet):
                 planned = plan(response, request.user, overrides)
                 for item in planned:
                     proposal = item["proposal"]
-                    if item["target"] in overrides and not proposal.ok:
+                    if (
+                        item["target"] in overrides
+                        and not proposal.ok
+                        and proposal.reason != "targetNotApplicable"
+                    ):
                         return Response(
                             {
                                 "error": "invalidOverride",
