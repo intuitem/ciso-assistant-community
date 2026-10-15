@@ -11,6 +11,7 @@ import structlog
 from datetime import timedelta
 
 from django.apps import apps
+from django.core.exceptions import FieldDoesNotExist
 from django.db.models import Q, Count
 from django.utils import timezone
 
@@ -126,17 +127,27 @@ def execute_tool_query(arguments: dict, scope, parsed_context=None) -> dict | No
         "severity",
     ):
         raw = arguments.get(field)
-        if raw is None or raw == "" or not hasattr(model_class, field):
+        if raw is None or raw == "":
             continue
-        values, labels = [], []
+        # a value the named field does not know may be one of another choice
+        # field's ("category: primary" is an asset's type); never drop a filter
+        # silently, which would answer with the unfiltered set
+        matched: dict[str, list] = {}
         for candidate in _as_list(raw):
-            resolved = _resolve_choice_value(model_class, field, candidate)
-            if resolved is None:
-                continue
-            if resolved not in values:
-                values.append(resolved)
-                labels.append(_choice_label(model_class, field, resolved))
-        if not values:
+            resolved = (
+                (field, _resolve_choice_value(model_class, field, candidate))
+                if _has_field(model_class, field)
+                else (field, None)
+            )
+            if resolved[1] is None:
+                resolved = _resolve_on_other_choice_field(
+                    model_class, field, candidate, scope
+                )
+            if resolved and resolved[1] is not None:
+                values = matched.setdefault(resolved[0], [])
+                if resolved[1] not in values:
+                    values.append(resolved[1])
+        if not matched:
             return _unresolved_filter_result(
                 model_class,
                 field,
@@ -146,9 +157,12 @@ def execute_tool_query(arguments: dict, scope, parsed_context=None) -> dict | No
                 url_slug,
                 action,
                 filters_applied,
+                scope,
             )
-        qs = qs.filter(**{f"{field}__in": values})
-        filters_applied.append(f"{field} = {' or '.join(labels)}")
+        for name, values in matched.items():
+            qs = qs.filter(**{f"{name}__in": values})
+            labels = [_choice_label(model_class, name, v) for v in values]
+            filters_applied.append(f"{name} = {' or '.join(labels)}")
 
     # Risk level — resolved against the risk matrix wording
     risk_level = arguments.get("risk_level")
@@ -252,6 +266,23 @@ def execute_tool_query(arguments: dict, scope, parsed_context=None) -> dict | No
         "has_more": offset + LIST_PAGE_SIZE < total_count,
     }
 
+    # A small count or summary also carries its items: models pick "count" or
+    # "summary" for "which X are Y?" and the answer then has no names to give.
+    if action in ("count", "summary") and 0 < total_count <= LIST_PAGE_SIZE:
+        result = _build_summary(
+            qs,
+            model_class,
+            model_name,
+            display_name,
+            url_slug,
+            filters_applied,
+            total_count,
+        )
+        result["objects"] = _serialize_objects(qs, model_class, model_name, scope)
+        result["query_type"] = "summary_with_list"
+        result.update(pagination)
+        return result
+
     # Execute based on action
     if action == "summary":
         result = _build_summary(
@@ -292,7 +323,7 @@ def execute_tool_query(arguments: dict, scope, parsed_context=None) -> dict | No
 
     # List query — always paginated, include summary on first page of large sets
     objects = _serialize_objects(
-        qs[offset : offset + LIST_PAGE_SIZE], model_class, model_name
+        qs[offset : offset + LIST_PAGE_SIZE], model_class, model_name, scope
     )
 
     if total_count > SUMMARY_THRESHOLD and page == 1:
@@ -403,18 +434,32 @@ def _unresolved_filter_result(
     url_slug: str,
     action: str,
     filters_applied: list[str],
+    scope,
 ) -> dict:
     """Empty result for an unrecognised filter value — never the unfiltered set."""
-    try:
+    if _has_field(model_class, field_name):
         labels = [
             str(label)
-            for _, label in (model_class._meta.get_field(field_name).choices or [])
+            for _, label in (model_class._meta.get_field(field_name).flatchoices or [])
         ]
-    except Exception:
-        labels = []
-    note = f"'{value}' is not a valid {field_name} for {display_name}."
-    if labels:
-        note += f" Valid values: {', '.join(labels)}."
+        note = f"'{value}' is not a valid {field_name} for {display_name}."
+        if labels:
+            note += f" Valid values: {', '.join(labels)}."
+    else:
+        fields = "; ".join(
+            [
+                f"{f.name}: {', '.join(str(label) for _, label in f.flatchoices)}"
+                for f in model_class._meta.concrete_fields
+                if f.choices
+            ]
+            + [
+                f"{lookup.removesuffix('__name')}: {', '.join(names)}"
+                for lookup, names in _named_values(model_class, scope).items()
+            ]
+        )
+        note = f"{display_name} have no {field_name}, and '{value}' is no value of their other fields."
+        if fields:
+            note += f" Valid values: {fields}."
     return {
         "model_name": model_name,
         "display_name": display_name,
@@ -471,6 +516,51 @@ def _resolve_choice_value(model_class, field_name: str, value):
         value,
     )
     return None
+
+
+def _has_field(model_class, field_name: str) -> bool:
+    try:
+        model_class._meta.get_field(field_name)
+        return True
+    except FieldDoesNotExist:
+        return False
+
+
+def _named_values(model_class, scope) -> dict[str, list[str]]:
+    """Names the curated relations can take ("tier": critical, important...),
+    readable ones only, when there are few enough to be a vocabulary."""
+    out = {}
+    for field_name, _ in SERIALIZED_RELATIONS.get(model_class.__name__, ()):
+        field = model_class._meta.get_field(field_name)
+        if not field.many_to_one or not _has_field(field.related_model, "name"):
+            continue
+        names = list(
+            scope.queryset(field.related_model).values_list("name", flat=True)[:21]
+        )
+        if 0 < len(names) <= 20:
+            out[f"{field_name}__name"] = names
+    return out
+
+
+def _resolve_on_other_choice_field(model_class, skip: str, value, scope):
+    """(field, stored value) when exactly one other choice field, or one curated
+    relation's name, has this value or label."""
+    wanted = str(value).strip().casefold()
+    hits = [
+        (lookup, name)
+        for lookup, names in _named_values(model_class, scope).items()
+        for name in names
+        if wanted == name.casefold()
+    ] + [
+        (f.name, stored)
+        for f in model_class._meta.concrete_fields
+        if f.choices and f.name != skip
+        for stored, label in f.flatchoices
+        # a bare number is ambiguous across scales (priority 1 is not severity 1)
+        if wanted == str(label).strip().casefold()
+        or (isinstance(stored, str) and wanted == stored.casefold())
+    ]
+    return hits[0] if len({name for name, _ in hits}) == 1 else None
 
 
 def _is_valid_relation(model_class, field_name: str) -> bool:
@@ -601,6 +691,23 @@ def _build_date_filter(date_filter: str, model_class) -> dict | None:
     return None
 
 
+_LINE_SKIP = {"id", "name", "ref_id", "description"}
+_FIELD_LABELS = {
+    "folder": "domain",
+    "inherent_risk_level": "inherent_risk",
+    "current_risk_level": "current_risk",
+    "residual_risk_level": "residual_risk",
+}
+
+# Relations shown with each object, where typical questions need them
+# ("supporting assets of X", "critical vendors"). model name -> (field, label).
+SERIALIZED_RELATIONS: dict[str, tuple[tuple[str, str], ...]] = {
+    "Asset": (("parent_assets", "supports"), ("child_assets", "supported_by")),
+    "Entity": (("tier", "tier"),),
+    "EntityAssessment": (("entity", "entity"),),
+}
+
+
 def _format_object_lines(objects: list[dict], url_slug: str = "") -> list[str]:
     """Format a list of serialized objects into display lines with markdown links."""
     from django.conf import settings
@@ -619,26 +726,12 @@ def _format_object_lines(objects: list[dict], url_slug: str = "") -> list[str]:
         else:
             name_part = f"[{ref_id}] {name}" if ref_id else name
 
-        extras = []
-        for key in (
-            "status",
-            "treatment",
-            "category",
-            "priority",
-            "severity",
-            "result",
-            "type",
-        ):
-            if obj.get(key):
-                extras.append(f"{key}={obj[key]}")
-        for scope in ("inherent", "current", "residual"):
-            level = obj.get(f"{scope}_risk_level")
-            if level is not None:
-                extras.append(f"{scope}_risk={level}")
-        if obj.get("eta"):
-            extras.append(f"eta={obj['eta']}")
-        if obj.get("folder"):
-            extras.append(f"domain={obj['folder']}")
+        # every field the serializer chose, so a new one needs no change here
+        extras = [
+            f"{_FIELD_LABELS.get(key, key)}={value}"
+            for key, value in obj.items()
+            if key not in _LINE_SKIP and value not in (None, "", [])
+        ]
 
         line = f"  - {name_part}"
         if extras:
@@ -649,8 +742,13 @@ def _format_object_lines(objects: list[dict], url_slug: str = "") -> list[str]:
     return lines
 
 
-def _serialize_objects(queryset, model_class, model_name: str) -> list[dict]:
+def _serialize_objects(queryset, model_class, model_name: str, scope) -> list[dict]:
     """Serialize queryset objects into dicts for the LLM context."""
+    choice_fields = [
+        f
+        for f in model_class._meta.concrete_fields
+        if f.choices and f.name != "priority"
+    ]
     objects = []
     for obj in queryset:
         data = {
@@ -665,45 +763,14 @@ def _serialize_objects(queryset, model_class, model_name: str) -> list[dict]:
             desc = obj.description
             data["description"] = desc[:200] + "..." if len(desc) > 200 else desc
 
-        # Status/treatment/result
-        if hasattr(obj, "status") and obj.status:
-            data["status"] = (
-                obj.get_status_display()
-                if hasattr(obj, "get_status_display")
-                else obj.status
-            )
-        if hasattr(obj, "treatment") and obj.treatment:
-            data["treatment"] = (
-                obj.get_treatment_display()
-                if hasattr(obj, "get_treatment_display")
-                else obj.treatment
-            )
-        if hasattr(obj, "result") and obj.result:
-            data["result"] = (
-                obj.get_result_display()
-                if hasattr(obj, "get_result_display")
-                else obj.result
-            )
-
-        # Categorization
-        if hasattr(obj, "category") and obj.category:
-            data["category"] = (
-                obj.get_category_display()
-                if hasattr(obj, "get_category_display")
-                else obj.category
-            )
+        # every choice field, from the model's own metadata (status, result,
+        # type, conclusion...), with its display label
+        for field in choice_fields:
+            value = getattr(obj, field.attname)
+            if value not in (None, ""):
+                data[field.name] = str(dict(field.flatchoices).get(value, value))
         if hasattr(obj, "priority") and obj.priority:
             data["priority"] = f"P{obj.priority}"
-        if hasattr(obj, "severity") and obj.severity:
-            data["severity"] = (
-                obj.get_severity_display()
-                if hasattr(obj, "get_severity_display")
-                else str(obj.severity)
-            )
-        if hasattr(obj, "type") and obj.type:
-            data["type"] = (
-                obj.get_type_display() if hasattr(obj, "get_type_display") else obj.type
-            )
 
         # Dates
         if hasattr(obj, "eta") and obj.eta:
@@ -714,10 +781,15 @@ def _serialize_objects(queryset, model_class, model_name: str) -> list[dict]:
         # Risk levels, labelled with the matrix wording rather than the index
         if model_name == "RiskScenario":
             matrix = getattr(getattr(obj, "risk_assessment", None), "risk_matrix", None)
-            for scope, level_field in LEVEL_FIELDS.items():
+            for level_scope, level_field in LEVEL_FIELDS.items():
                 level = getattr(obj, level_field, None)
                 if level is not None and level >= 0:
-                    data[f"{scope}_risk_level"] = level_label(matrix, level)
+                    data[f"{level_scope}_risk_level"] = level_label(matrix, level)
+
+        for field_name, label in SERIALIZED_RELATIONS.get(model_name, ()):
+            related = _readable_related(obj, field_name, scope)
+            if related:
+                data[label] = related
 
         # Folder
         if hasattr(obj, "folder") and obj.folder:
@@ -726,6 +798,20 @@ def _serialize_objects(queryset, model_class, model_name: str) -> list[dict]:
         objects.append(data)
 
     return objects
+
+
+def _readable_related(obj, field_name: str, scope) -> str:
+    """Names of the related objects the user can read; others are not named."""
+    value = getattr(obj, field_name, None)
+    if value is None:
+        return ""
+    if hasattr(value, "all"):  # many-to-many or reverse relation
+        rows = scope.queryset(value.model).filter(
+            pk__in=value.values_list("pk", flat=True)
+        )
+    else:
+        rows = scope.queryset(type(value)).filter(pk=value.pk)
+    return ", ".join(sorted(str(r) for r in rows))
 
 
 def _choice_breakdown(qs, model_class, field: str, order_by: str) -> dict:

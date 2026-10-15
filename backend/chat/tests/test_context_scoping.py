@@ -605,3 +605,70 @@ class TestSanitizeUserInput:
         ):
             assert _sanitize_user_input(text) == text
         assert _sanitize_user_input("  trailing\x00 ") == "trailing"
+
+
+class TestQueryVocabulary:
+    @pytest.fixture
+    def assets(self, domain, other_domain):
+        from core.models import Asset
+
+        primary = Asset.objects.create(name="payments", type="PR", folder=domain)
+        support = Asset.objects.create(name="database", type="SP", folder=domain)
+        hidden = Asset.objects.create(
+            name="secret server", type="SP", folder=other_domain
+        )
+        support.parent_assets.add(primary)
+        hidden.parent_assets.add(primary)
+        return primary
+
+    def test_value_of_another_choice_field_is_used(self, assets, reader):
+        from chat.orm_query import execute_tool_query
+
+        result = execute_tool_query(
+            {"model": "asset", "action": "list", "category": ["primary"]},
+            scope_for(reader),
+        )
+        assert [o["name"] for o in result["objects"]] == ["payments"]
+        assert "type = Primary" in result["filters_applied"]
+
+    def test_unknown_value_is_never_dropped_silently(self, assets, reader):
+        from chat.orm_query import execute_tool_query
+
+        result = execute_tool_query(
+            {"model": "asset", "action": "list", "category": ["shiny"]},
+            scope_for(reader),
+        )
+        assert result["total_count"] == 0 and "Valid values: " in result["note"]
+
+    def test_small_count_carries_items_with_readable_relations(self, assets, reader):
+        from chat.orm_query import execute_tool_query, format_query_result
+
+        result = execute_tool_query(
+            {"model": "asset", "action": "count", "search": "payments"},
+            scope_for(reader),
+        )
+        text = format_query_result(result)
+        assert "supported_by=database" in text
+        assert "secret server" not in text
+
+    def test_value_of_a_curated_relation_is_used(self, domain, reader):
+        from iam.models import Folder
+        from tprm.models import Entity, Tier
+
+        from chat.orm_query import execute_tool_query
+
+        tier = Tier.objects.filter(name="critical").first() or Tier.objects.create(
+            name="critical", rank=4, folder=Folder.get_root_folder()
+        )
+        # tiers are global (root folder): readable with a root perimeter only
+        reader.user_groups.get().roleassignment_set.get().perimeter_folders.add(
+            Folder.get_root_folder()
+        )
+        Entity.objects.create(name="key vendor", folder=domain, tier=tier)
+        Entity.objects.create(name="minor vendor", folder=domain)
+        result = execute_tool_query(
+            {"model": "entity", "action": "list", "severity": ["critical"]},
+            scope_for(reader),
+        )
+        assert [o["name"] for o in result["objects"]] == ["key vendor"]
+        assert result["objects"][0]["tier"] == "critical"

@@ -340,7 +340,7 @@ def _build_tools() -> tuple[list[dict], dict]:
                 "'entities'/'entités'/'third parties'/'tiers' → entity, "
                 "'solutions' → solution, "
                 "'contracts'/'contrats' → contract, "
-                "'entity assessments' → entity_assessment, "
+                "'entity assessments'/'vendor, supplier or third-party assessments' → entity_assessment, "
                 "'EBIOS RM studies'/'études EBIOS' → ebios_rm_study, "
                 "'feared events'/'événements redoutés' → feared_event, "
                 "'RoTo couples'/'couples SO/OV' → ro_to, "
