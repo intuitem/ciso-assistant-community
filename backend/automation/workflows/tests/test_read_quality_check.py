@@ -3,17 +3,11 @@ single requirement — but only when the node asks for it, since resolving one
 walks the whole audit."""
 
 import json
-from types import SimpleNamespace
 
 import pytest
 
-from automation.workflows.actions import (
-    ACTION_REGISTRY,
-    READABLE_MODELS,
-    ActionError,
-    _effective_computed,
-    _serialize_read_row,
-)
+from automation.workflows.actions import ACTION_REGISTRY
+from core.reads import READABLE_MODELS, ReadError, effective_computed, serialize_row
 from core.models import (
     AppliedControl,
     ComplianceAssessment,
@@ -69,10 +63,10 @@ def test_quality_check_is_opt_in(model):
     assert "quality_check" in entry.optional_computed
     assert "quality_check" not in entry.computed
 
-    without = _effective_computed(entry, {"model": model})
+    without = effective_computed(entry, {"model": model})
     assert "quality_check" not in without
 
-    with_it = _effective_computed(entry, {"model": model, "include": ["quality_check"]})
+    with_it = effective_computed(entry, {"model": model, "include": ["quality_check"]})
     assert "quality_check" in with_it
     # The always-on values are still there.
     assert set(entry.computed) <= set(with_it)
@@ -80,16 +74,16 @@ def test_quality_check_is_opt_in(model):
 
 def test_unknown_include_is_rejected():
     entry = READABLE_MODELS["compliance_assessment"]
-    with pytest.raises(ActionError) as excinfo:
-        _effective_computed(
+    with pytest.raises(ReadError) as excinfo:
+        effective_computed(
             entry, {"model": "compliance_assessment", "include": ["not_a_field"]}
         )
     assert "not_a_field" in str(excinfo.value)
 
 
 def test_a_model_without_optional_values_rejects_any_include():
-    with pytest.raises(ActionError):
-        _effective_computed(
+    with pytest.raises(ReadError):
+        effective_computed(
             READABLE_MODELS["applied_control"],
             {"model": "applied_control", "include": ["quality_check"]},
         )
@@ -104,10 +98,10 @@ def test_serialized_row_is_json_safe(audit, model):
     obj = compliance_assessment if model == "compliance_assessment" else ra
     entry = READABLE_MODELS[model]
 
-    row = _serialize_read_row(
+    row = serialize_row(
         obj,
         entry.readable_fields(),
-        _effective_computed(entry, {"model": model, "include": ["quality_check"]}),
+        effective_computed(entry, {"model": model, "include": ["quality_check"]}),
     )
 
     findings = row["quality_check"]
@@ -154,10 +148,10 @@ def test_a_requirements_own_name_is_dropped_from_its_findings(audit):
     compliance_assessment, ra = audit
     entry = READABLE_MODELS["requirement_assessment"]
 
-    row = _serialize_read_row(
+    row = serialize_row(
         ra,
         entry.readable_fields(),
-        _effective_computed(
+        effective_computed(
             entry, {"model": "requirement_assessment", "include": ["quality_check"]}
         ),
     )
@@ -166,10 +160,10 @@ def test_a_requirements_own_name_is_dropped_from_its_findings(audit):
     assert not any(message.startswith(str(ra)) for message in findings["messages"])
 
     audit_entry = READABLE_MODELS["compliance_assessment"]
-    audit_row = _serialize_read_row(
+    audit_row = serialize_row(
         compliance_assessment,
         audit_entry.readable_fields(),
-        _effective_computed(
+        effective_computed(
             audit_entry,
             {"model": "compliance_assessment", "include": ["quality_check"]},
         ),
@@ -191,10 +185,10 @@ def test_info_alone_does_not_flag(audit):
     ra.save()
 
     entry = READABLE_MODELS["requirement_assessment"]
-    row = _serialize_read_row(
+    row = serialize_row(
         ra,
         entry.readable_fields(),
-        _effective_computed(
+        effective_computed(
             entry, {"model": "requirement_assessment", "include": ["quality_check"]}
         ),
     )
@@ -210,18 +204,18 @@ def test_the_backing_is_opt_in_too(audit):
     compliance_assessment, ra = audit
     entry = READABLE_MODELS["requirement_assessment"]
 
-    plain = _serialize_read_row(
+    plain = serialize_row(
         ra,
         entry.readable_fields(),
-        _effective_computed(entry, {"model": "requirement_assessment"}),
+        effective_computed(entry, {"model": "requirement_assessment"}),
     )
     assert "applied_controls" not in plain
     assert "evidences" not in plain
 
-    asked = _serialize_read_row(
+    asked = serialize_row(
         ra,
         entry.readable_fields(),
-        _effective_computed(
+        effective_computed(
             entry,
             {
                 "model": "requirement_assessment",

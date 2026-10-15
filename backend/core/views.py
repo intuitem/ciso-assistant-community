@@ -180,6 +180,7 @@ from core.answer_attachments import serialize as serialize_attachment
 from core.answer_attachments import serve as serve_attachment
 from core.models import (
     Commitment,
+    DemoManifest,
     AppliedControl,
     ComplianceAssessment,
     RequirementMappingSet,
@@ -210,13 +211,14 @@ from dateutil import relativedelta as rd
 
 from ebios_rm.models import (
     EbiosRMStudy,
+    KillChain,
     RoTo,
     Stakeholder,
 )
 
-from tprm.models import Entity
+from tprm.models import Entity, SolutionSubcontractor
 from privacy.models import Processing, DataBreach
-from resilience.models import AssetAssessment
+from resilience.models import AssetAssessment, DoraIncidentReport
 
 from .models import *
 from .serializers import *
@@ -252,7 +254,8 @@ from core import commitment
 
 import structlog
 
-from core.quick_form_apply import project, targets_of
+from core.quick_form_apply import always_reviewed, project, targets_of
+from core.quick_form_facts import facts_for, freeze_facts
 from core.quick_form_targets import get_target
 
 logger = structlog.get_logger(__name__)
@@ -5571,6 +5574,7 @@ APPLIED_CONTROL_LINKED_FIELDS = [
     ("risk_scenarios", "Risk Scenarios"),
     ("risk_scenarios_e", "Risk Scenarios (existing)"),
     ("findings", "Findings"),
+    ("evidences", "Evidences"),
     ("vulnerabilities", "Vulnerabilities"),
     ("stakeholders", "Stakeholders"),
     ("processings", "Processings"),
@@ -9215,6 +9219,21 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
         "prefetch_related": ["filtering_labels"],
     }
 
+    def cascade_preclear(self, instance):
+        # Rows of the domain tree that PROTECT other rows of the same tree.
+        # References from outside the tree are not cleared and still block.
+        folders = instance.get_sub_folders(include_self=True)
+        return [
+            KillChain.objects.filter(folder__in=folders),
+            DoraIncidentReport.objects.filter(folder__in=folders),
+            ComplianceAssessment.objects.filter(
+                folder__in=folders, campaign__isnull=False
+            ),
+            SolutionSubcontractor.objects.filter(
+                solution__provider_entity__folder__in=folders
+            ),
+        ]
+
     def _get_export_queryset(self):
         # Only domains round-trip through the import: the root folder is implicit,
         # and enclaves or personal folders are not created there.
@@ -9874,37 +9893,47 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
         url_path="import-dummy",
     )
     def import_dummy_domain(self, request):
-        from serdes import domain_io
+        """Load the demo dataset (``core.demo``) into its own domain."""
+        from core import demo
 
-        domain_name = "DEMO"
-        try:
-            PROJECT_DIR = Path(__file__).resolve().parent.parent
-            dummy_fixture_path = PROJECT_DIR / "fixtures" / "dummy-domain.bak"
-            if not dummy_fixture_path.exists():
-                logger.error("Dummy domain fixture not found", path=dummy_fixture_path)
-                return Response(
-                    {"error": "dummyDomainFixtureNotFound"},
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                )
-            parsed_data = domain_io.process_uploaded_file(dummy_fixture_path)
-            result = domain_io.import_objects(
-                parsed_data, domain_name, load_missing_libraries=True, user=request.user
-            )
-            logger.info("Dummy domain imported successfully", domain_name=domain_name)
-            return Response(result, status=status.HTTP_200_OK)
-
-        except json.JSONDecodeError:
-            logger.error("Invalid JSON format in dummy fixture file")
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_folder"),
+            folder=Folder.get_root_folder(),
+        ):
             return Response(
-                {"errors": ["Invalid JSON format"]},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                {"error": "userDoesNotHavePermissionToImportDomain"},
+                status=status.HTTP_403_FORBIDDEN,
             )
-        except Exception:
-            logger.error("Error importing dummy domain")
+        existing = Folder.objects.filter(
+            **demo.demo_domain_filter(demo.DEFAULT_DOMAIN)
+        ).first()
+        if existing is not None:
+            # A same-named domain without a manifest is someone's own: never
+            # seed into it.
+            loaded = DemoManifest.objects.filter(domain=existing).exists()
+            return Response(
+                {"error": "demoDataAlreadyLoaded" if loaded else "demoDomainNameTaken"},
+                status=status.HTTP_409_CONFLICT,
+            )
+        # Flags are instance-wide: only switch them on for settings managers.
+        enable_flags = RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="change_globalsettings"),
+            folder=Folder.get_root_folder(),
+        )
+        try:
+            ctx = demo.seed(
+                enable_flags=enable_flags, out=logger.debug, err=logger.warning
+            )
+        except Exception as e:
+            logger.error("Error loading demo data", error=e, exc_info=True)
             return Response(
                 {"error": "failedToImportDummyDomain"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+        logger.info("Demo data loaded", domain=ctx.domain.name)
+        return Response({"id": str(ctx.domain.pk)}, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=["get"])
     def get_accessible_objects(self, request):
@@ -20407,6 +20436,28 @@ class QuestionViewSet(BaseModelViewSet):
             qs = qs.filter(requirement_node__framework_id=framework_id)
         return qs
 
+    def destroy(self, request, *args, **kwargs):
+        # Deleting cascades into the quick form responses' answers.
+        if _answered_in_responses(Answer.objects.filter(question=self.get_object())):
+            return Response(
+                {"error": "questionAnsweredInResponses"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return super().destroy(request, *args, **kwargs)
+
+
+def _answered_in_responses(answers) -> bool:
+    """Whether any quick form response holds an answer among `answers`."""
+    return (
+        answers.filter(response__isnull=False)
+        .filter(
+            Q(value__isnull=False)
+            | Q(selected_choices__isnull=False)
+            | Q(attachments__isnull=False)
+        )
+        .exists()
+    )
+
 
 class QuestionChoiceViewSet(BaseModelViewSet):
     """API endpoint for QuestionChoice CRUD."""
@@ -20420,6 +20471,17 @@ class QuestionChoiceViewSet(BaseModelViewSet):
 
     def get_queryset(self):
         return super().get_queryset().select_related("question", "folder")
+
+    def destroy(self, request, *args, **kwargs):
+        # Deleting silently empties the responses' selections.
+        if _answered_in_responses(
+            Answer.objects.filter(selected_choices=self.get_object())
+        ):
+            return Response(
+                {"error": "choiceSelectedInResponses"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return super().destroy(request, *args, **kwargs)
 
 
 class AnswerViewSet(BaseModelViewSet):
@@ -20513,17 +20575,35 @@ class QuickFormViewSet(BaseModelViewSet):
     filterset_fields = ["folder", "library"]
     search_fields = ["name", "description", "ref_id"]
 
+    permission_overrides = {"always_review": "change_quickform"}
+
     def get_queryset(self):
         return super().get_queryset().select_related("folder", "library")
 
     def create(self, request, *args, **kwargs):
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
+    @action(detail=True, methods=["post"], url_path="always-review")
+    def always_review(self, request, pk=None):
+        """The one setting an instance owns on a library form: whether accepting
+        always takes a review, even when the submitter could apply it."""
+        quick_form = self.get_object()
+        value = request.data.get("always_review")
+        if not isinstance(value, bool):
+            return Response(
+                {"error": "alwaysReviewMustBeBoolean"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        quick_form.always_review = value
+        quick_form.save(update_fields=["always_review", "updated_at"])
+        return Response({"always_review": value})
+
     @staticmethod
     def _assessable(request, target_key, subject_id):
         """(target, subject, may_start): the object a form would assess, and
         whether the caller may file a response in its domain. None when the
-        target is unknown or the subject is out of the caller's sight."""
+        target is unknown, does not apply to the subject, or the subject is out
+        of the caller's sight."""
         from core.quick_form_targets import get_target
 
         target = get_target(str(target_key or ""))
@@ -20537,6 +20617,8 @@ class QuickFormViewSet(BaseModelViewSet):
         if subject is None or not RoleAssignment.is_object_readable(
             request.user, model, subject.pk
         ):
+            return None
+        if not target.applies_to(subject):
             return None
         permission = Permission.objects.get(codename="add_quickformresponse")
         may_start = RoleAssignment.is_access_allowed(
@@ -20634,65 +20716,16 @@ class QuickFormViewSet(BaseModelViewSet):
     def preview(self, request, pk):
         """Answer a published form without creating a response.
 
-        Same evaluator as the draft preview — the live rows are turned back into the
+        The draft preview's pipeline — the live rows are turned back into the
         document shape it takes — so an author checking a published form and one
-        checking a draft are looking at the same rules.
+        checking a draft see the same thing.
         """
-        from core.cel_service import evaluate_quick_form_document
+        from core.quick_form_preview import fill_preview, loaded_form_document
 
-        quick_form = self.get_object()
-        pages = []
-        for page in (
-            QuickFormPage.objects.filter(quick_form=quick_form)
-            .prefetch_related("questions__choices")
-            .order_by("order")
-        ):
-            pages.append(
-                {
-                    "urn": page.urn,
-                    "ref_id": page.ref_id,
-                    "name": page.get_name_translated,
-                    "description": page.get_description_translated,
-                    "visibility_expression": page.visibility_expression,
-                    "aggregation": page.aggregation,
-                    "questions": page.get_questions_translated() or {},
-                }
-            )
-        document = {
-            "urn": quick_form.urn,
-            "pages": pages,
-            "outcomes_definition": quick_form.outcomes_definition or [],
-            "scores_definition": quick_form.scores_definition,
-        }
-        answers = request.data.get("answers")
-        evaluation = evaluate_quick_form_document(
-            document, answers if isinstance(answers, dict) else {}
-        )
-        hidden = set(evaluation["hidden_pages"])
         return Response(
-            {
-                "name": quick_form.get_name_translated,
-                "description": quick_form.get_description_translated,
-                "outcomes_definition": document["outcomes_definition"],
-                "pages": [{**page, "hidden": page["urn"] in hidden} for page in pages],
-                "hidden_pages": evaluation["hidden_pages"],
-                "missing_required": evaluation["missing_required"],
-                "progress": evaluation["progress"],
-                "score": evaluation["score"],
-                "computed_outcome": evaluation["computed_outcome"],
-                "computed_values": evaluation["computed_values"],
-                "scored_complete": evaluation["context"]["response"]["scored_complete"],
-                # Authors want to see where answers lead.
-                "projection": project(
-                    quick_form.on_accept,
-                    evaluation["computed_values"],
-                    evaluation["computed_outcome"],
-                    ready=evaluation["context"]["response"]["scored_complete"],
-                    score=evaluation["score"],
-                )
-                if quick_form.on_accept
-                else [],
-            }
+            fill_preview(
+                loaded_form_document(self.get_object()), request.data.get("answers")
+            )
         )
 
     @action(detail=True, methods=["get"], name="Quick form pages")
@@ -20829,10 +20862,7 @@ def _close_on_submit(response, user, evaluation=None) -> list[dict] | None:
     from core.cel_service import evaluate_quick_form
     from core.quick_form_apply import apply_on_accept
 
-    publication = response.publication
-    if not response.quick_form.on_accept or (
-        publication is not None and publication.always_review
-    ):
+    if not response.quick_form.on_accept or always_reviewed(response):
         return None
     if evaluation is None:
         evaluation = evaluate_quick_form(response, persist=True)
@@ -20911,6 +20941,7 @@ def quick_form_response_content(response, user=None):
     questions, the answers dict, hidden pages, progress, score and outcome. Shared by
     the reviewer surface and the requester's own, so the two cannot drift."""
     from core.cel_service import evaluate_quick_form
+    from core.quick_form_ratings import ratings_for_display
     from core.utils import build_answers_dict
 
     evaluation = evaluate_quick_form(response, persist=False)
@@ -20932,6 +20963,7 @@ def quick_form_response_content(response, user=None):
                 "description": page.get_description_translated,
                 "order": page.order,
                 "hidden": page.urn in hidden,
+                "facts": page.facts or [],
                 "questions": page.get_questions_translated() or {},
             }
         )
@@ -20957,6 +20989,10 @@ def quick_form_response_content(response, user=None):
             "answers": answers,
             "attachments": attachments,
             "references": references,
+            # Rating outcomes with their points, labels in the active language.
+            "ratings": ratings_for_display(
+                response.quick_form, evaluation.get("ratings") or []
+            ),
             "produced_objects": response.produced_objects or [],
             "hidden_pages": evaluation["hidden_pages"],
             "missing_required": evaluation["missing_required"],
@@ -20979,6 +21015,8 @@ def quick_form_response_content(response, user=None):
             and (response.publication is None or response.publication.show_projection)
             else [],
             "subject": subject,
+            # The subject's records the pages show: only to who may view it.
+            "facts": facts_for(response) if subject_readable else {},
             "applications": [
                 {
                     "target": a.target,
@@ -21251,6 +21289,7 @@ class MyRequestViewSet(viewsets.ViewSet):
             "observation",
             "updated_at",
         ]
+        update_fields += freeze_facts(response)
         sla_due = _outcome_sla_due_date(response)
         if sla_due is not None and (
             response.due_date is None or sla_due < response.due_date
@@ -21336,6 +21375,7 @@ class MyRequestViewSet(viewsets.ViewSet):
                     response.folder,
                     request.query_params.get("search", ""),
                     user=request.user,
+                    subject=response.subject,
                 )
             )
         except ReferenceError_ as e:
@@ -21638,6 +21678,12 @@ class QuickFormResponseViewSet(BaseModelViewSet):
         if self.request.query_params.get("mine") in ("true", "1"):
             user_actors = Actor.get_all_for_user(self.request.user)
             qs = qs.filter(respondents__in=user_actors).distinct()
+        # What the responses record, whatever form they came from: `processing.dpia`
+        # lists every DPIA, clones and custom templates included.
+        if target := self.request.query_params.get("target"):
+            from core.quick_form_apply import forms_with_target
+
+            qs = qs.filter(quick_form__in=forms_with_target(target))
         return qs
 
     def destroy(self, request, *args, **kwargs):
@@ -21746,6 +21792,7 @@ class QuickFormResponseViewSet(BaseModelViewSet):
                     response.folder,
                     request.query_params.get("search", ""),
                     user=request.user,
+                    subject=response.subject,
                 )
             )
         except ReferenceError_ as e:
@@ -22071,7 +22118,11 @@ class QuickFormResponseViewSet(BaseModelViewSet):
                 planned = plan(response, request.user, overrides)
                 for item in planned:
                     proposal = item["proposal"]
-                    if item["target"] in overrides and not proposal.ok:
+                    if (
+                        item["target"] in overrides
+                        and not proposal.ok
+                        and proposal.reason != "targetNotApplicable"
+                    ):
                         return Response(
                             {
                                 "error": "invalidOverride",
@@ -22126,6 +22177,7 @@ class QuickFormResponseViewSet(BaseModelViewSet):
             # response is reassigned, and the reviewer set is derived against it.
             response.submitted_by = request.user
             update_fields += ["submitted_at", "submitted_by"]
+            update_fields += freeze_facts(response)
             sla_due = _outcome_sla_due_date(response)
             # Most urgent wins, and an outcome never loosens a date a human set.
             if sla_due is not None and (
@@ -22133,6 +22185,10 @@ class QuickFormResponseViewSet(BaseModelViewSet):
             ):
                 response.due_date = sla_due
                 update_fields.append("due_date")
+        elif new_status == QuickFormResponse.Status.DRAFT:
+            # Sent back: the pages read the subject live again until resubmitted.
+            response.facts_snapshot = None
+            update_fields.append("facts_snapshot")
         response.save(update_fields=update_fields)
 
         on_accept = None

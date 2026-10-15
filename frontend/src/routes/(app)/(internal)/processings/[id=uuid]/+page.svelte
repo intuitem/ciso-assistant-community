@@ -11,6 +11,7 @@
 		type ModalStore
 	} from '$lib/components/Modals/stores';
 	import ValidationFlowsSection from '$lib/components/ValidationFlows/ValidationFlowsSection.svelte';
+	import ProcessingDpiaScreeningCard from '$lib/components/DetailView/ProcessingDpiaScreeningCard.svelte';
 	import { invalidateAll } from '$app/navigation';
 
 	interface Props {
@@ -72,6 +73,10 @@
 	{/snippet}
 
 	{#snippet widgets()}
+		<!-- A processor's DPIA is the controller's: no card for it. -->
+		{#if page.data?.featureflags?.dpias && page.data?.featureflags?.quick_forms && processing.role !== 'privacy_data_processor'}
+			<ProcessingDpiaScreeningCard {processing} />
+		{/if}
 		{#if page.data?.featureflags?.validation_flows && processing.validation_flows}
 			{#key processing.validation_flows}
 				<ValidationFlowsSection validationFlows={processing.validation_flows} />
