@@ -165,6 +165,25 @@ class TestEnrichContextScoping:
         assert "secret scenario" in _enrich_context(ctx, scope_for(reader))
         assert _enrich_context(ctx, scope_for(outsider)) == ""
 
+    def test_scenario_controls_listed_only_when_readable(
+        self, risk_assessment, reader, domain, other_domain
+    ):
+        from core.models import AppliedControl
+        from chat.views import _enrich_context
+
+        scenario = risk_assessment.risk_scenarios.get()
+        scenario.existing_applied_controls.add(
+            AppliedControl.objects.create(name="visible control", folder=domain)
+        )
+        scenario.applied_controls.add(
+            AppliedControl.objects.create(name="hidden control", folder=other_domain)
+        )
+        enrichment = _enrich_context(
+            context_for("risk-assessments", risk_assessment), scope_for(reader)
+        )
+        assert "existing controls: visible control" in enrichment
+        assert "hidden control" not in enrichment
+
     def test_findings_enrichment_needs_access(
         self, findings_assessment, reader, outsider
     ):
@@ -388,6 +407,7 @@ class TestComplianceAssessmentPage:
         )
         assert "scoping audit" in enrichment
         assert "Non-compliant=1" in enrichment
+        assert "requirements assessed" in enrichment
         assert "A real requirement" in enrichment
         assert "A heading" not in enrichment
 

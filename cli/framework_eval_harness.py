@@ -148,7 +148,10 @@ def answer_chat(q, url, log, trace):
     offset = Path(log).stat().st_size if log else 0
     r = requests.post(
         f"{url}/chat/sessions/{sid.json()['id']}/message/",
-        json={"content": q["question"]},
+        json={
+            "content": q["question"],
+            **({"page_context": q["page_context"]} if q.get("page_context") else {}),
+        },
         headers=h,
         stream=True,
         timeout=600,

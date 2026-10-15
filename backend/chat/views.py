@@ -631,7 +631,15 @@ class ChatSessionViewSet(BaseModelViewSet):
             if not enrichment:
                 enrichment = _enrich_context(parsed_context, scope)
             if enrichment:
-                ctx_builder.add("enrichment", enrichment, priority=5)
+                # "this audit" / "this assessment" means the page's object
+                ctx_builder.add(
+                    "enrichment",
+                    f"CURRENT PAGE (the object the user calls 'this'):\n{enrichment}",
+                    # the user's own page outranks generic framework knowledge
+                    priority=10
+                    if query_result and query_result.get("type") == "search_library"
+                    else 5,
+                )
 
         context = ctx_builder.build()
 
@@ -2168,14 +2176,24 @@ def _enrich_context(parsed_context, scope) -> str:
         if scale:
             parts.append(f"RISK MATRIX LEVELS (lowest to highest): {scale}")
 
+        from django.db.models import Prefetch
+
         RiskScenario = apps.get_model("core", "RiskScenario")
-        scenarios = scope.queryset(RiskScenario).filter(
-            risk_assessment_id=parent_obj.id
-        )[:20]
+        readable_controls = scope.queryset(apps.get_model("core", "AppliedControl"))
+        scenarios = (
+            scope.queryset(RiskScenario)
+            .filter(risk_assessment_id=parent_obj.id)
+            .prefetch_related(
+                *(
+                    Prefetch(field, queryset=readable_controls)
+                    for field in ("existing_applied_controls", "applied_controls")
+                )
+            )[:20]
+        )
         if scenarios:
             parts.append("\nEXISTING RISK SCENARIOS (already identified):")
             for s in scenarios:
-                line = f"  - {s.name}"
+                line = f"  - [{s.ref_id}] {s.name}" if s.ref_id else f"  - {s.name}"
                 extras = []
                 for level_scope, level_field in LEVEL_FIELDS.items():
                     level = getattr(s, level_field, None)
@@ -2183,6 +2201,19 @@ def _enrich_context(parsed_context, scope) -> str:
                         extras.append(f"{level_scope}={level_label(matrix, level)}")
                 if s.treatment:
                     extras.append(f"treatment={s.get_treatment_display()}")
+                # questions about a scenario's treatment need its controls
+                for label, controls in (
+                    ("existing controls", s.existing_applied_controls.all()),
+                    ("additional controls", s.applied_controls.all()),
+                ):
+                    if controls:
+                        extras.append(
+                            f"{label}: "
+                            + "; ".join(
+                                f"{c.ref_id} {c.name}" if c.ref_id else c.name
+                                for c in controls
+                            )
+                        )
                 if extras:
                     line += f" ({', '.join(extras)})"
                 parts.append(line)
@@ -2217,33 +2248,45 @@ def _enrich_context(parsed_context, scope) -> str:
         if framework:
             header += f" — framework: {framework.name}"
         parts.append(header)
-        parts.append(f"Progress: {parent_obj.progress}%")
-
         # The model's own accessor, so these agree with the figures on the page
         # (assessable requirements only, narrowed to the selected groups).
+        counts = parent_obj.get_requirements_result_count()
+        total = sum(count for count, _ in counts)
+        not_assessed = sum(
+            count for count, result in counts if result == Result.NOT_ASSESSED
+        )
+        parts.append(
+            f"Progress: {parent_obj.progress}% ({total - not_assessed} of {total} "
+            f"requirements assessed, {not_assessed} not assessed)"
+        )
         breakdown = ", ".join(
-            f"{Result(result).label}={count}"
-            for count, result in parent_obj.get_requirements_result_count()
+            f"{Result(result).label}={count}" for count, result in counts
         )
         if breakdown:
             parts.append(f"Requirement results: {breakdown}")
 
-        gaps = (
-            scope.queryset(RequirementAssessment)
-            .filter(
-                compliance_assessment=parent_obj,
-                requirement__assessable=True,
-                result__in=[Result.NON_COMPLIANT, Result.PARTIALLY_COMPLIANT],
+        # non-compliant first and complete: a cap shared with partial results cut
+        # non-compliant requirements out of "which requirements are non-compliant?"
+        for result, cap in (
+            (Result.NON_COMPLIANT, 40),
+            (Result.PARTIALLY_COMPLIANT, 25),
+        ):
+            gaps = (
+                scope.queryset(RequirementAssessment)
+                .filter(
+                    compliance_assessment=parent_obj,
+                    requirement__assessable=True,
+                    result=result,
+                )
+                .select_related("requirement")[:cap]
             )
-            .select_related("requirement")[:25]
-        )
-        if gaps:
-            parts.append("\nREQUIREMENTS NOT FULLY MET:")
+            if gaps:
+                parts.append(f"\n{Result(result).label.upper()} REQUIREMENTS:")
             for ra in gaps:
                 ref_id = getattr(ra.requirement, "ref_id", "") or ""
                 name = ra.requirement.name or ra.requirement.description or ""
                 label = f"[{ref_id}] {name}".strip() if ref_id else name
-                parts.append(f"  - {label[:160]} ({Result(ra.result).label})")
+                parts.append(f"  - {label[:160]}")
 
     elif parsed_context.model_key == "findings_assessment":
         from django.db.models import Count
