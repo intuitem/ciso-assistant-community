@@ -3343,11 +3343,18 @@ class ProcessingRecordConsumer(RecordConsumer):
     _STATUS_BY_DISPLAY: ClassVar[Mapping[str, str]] = MappingProxyType(
         {v.lower(): k for k, v in Processing.STATUS_CHOICES}
     )
+    _ROLE_KEYS: ClassVar[frozenset[str]] = frozenset(
+        k for k, _ in Processing.ROLE_CHOICES
+    )
+    _ROLE_BY_DISPLAY: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {v.lower(): k for k, v in Processing.ROLE_CHOICES}
+    )
 
     def _build_update_data(self, record: dict, record_data: dict) -> dict:
         update_data = super()._build_update_data(record, record_data)
-        if "assigned_to" not in update_data and "assigned_to" in record:
-            update_data["assigned_to"] = record_data.get("assigned_to", [])
+        for field in ("assigned_to", "controllers"):
+            if field not in update_data and field in record:
+                update_data[field] = record_data.get(field, [])
         return update_data
 
     def create_context(self):
@@ -3374,12 +3381,23 @@ class ProcessingRecordConsumer(RecordConsumer):
         else:
             status_value = "privacy_draft"
 
+        record_role_value = str(record.get("role") or "").strip()
+        if not record_role_value:
+            role_value = "privacy_controller"
+        elif record_role_value in self._ROLE_KEYS:
+            role_value = record_role_value
+        elif record_role_value.lower() in self._ROLE_BY_DISPLAY:
+            role_value = self._ROLE_BY_DISPLAY[record_role_value.lower()]
+        else:
+            return {}, Error(record=record, error=f"Unknown role: {record_role_value}")
+
         data = {
             "name": name,
             "description": record.get("description", ""),
             "ref_id": record.get("ref_id", ""),
             "folder": domain,
             "status": status_value,
+            "role": role_value,
             "information_channel": record.get("information_channel", ""),
             "usage_channel": record.get("usage_channel", ""),
             "dpia_required": record.get("dpia_required", False),
@@ -3399,6 +3417,30 @@ class ProcessingRecordConsumer(RecordConsumer):
                     name__in=nature_names,
                 ).values_list("id", flat=True)
             )
+
+        # Resolve M2M: controllers (by entity name)
+        lines = [
+            line.strip()
+            for line in str(record.get("controllers") or "").splitlines()
+            if line.strip()
+        ]
+        known = set(
+            Entity.objects.filter(name__in=lines).values_list("name", flat=True)
+        )
+        entity_names = set()
+        for line in lines:
+            if line in known:
+                entity_names.add(line)
+            else:
+                entity_names |= {n.strip() for n in line.split(",") if n.strip()}
+        entities = Entity.objects.filter(name__in=entity_names)
+        missing = entity_names - {e.name for e in entities}
+        if missing:
+            return {}, Error(
+                record=record,
+                error=f"Unknown controllers: {', '.join(sorted(missing))}",
+            )
+        data["controllers"] = [e.id for e in entities]
 
         # Resolve M2M: assigned_to (by user email → Actor)
         record_assigned_to = record.get("assigned_to")

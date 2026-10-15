@@ -73,7 +73,8 @@
 	{/snippet}
 
 	{#snippet widgets()}
-		{#if page.data?.featureflags?.dpias && page.data?.featureflags?.quick_forms}
+		<!-- A processor's DPIA is the controller's: no card for it. -->
+		{#if page.data?.featureflags?.dpias && page.data?.featureflags?.quick_forms && processing.role !== 'privacy_data_processor'}
 			<ProcessingDpiaScreeningCard {processing} />
 		{/if}
 		{#if page.data?.featureflags?.validation_flows && processing.validation_flows}
