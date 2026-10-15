@@ -369,6 +369,42 @@ class ChatSessionViewSet(BaseModelViewSet):
             )
             logger.info("tool_dispatch_complete", duration=round(time.time() - t1, 2))
 
+            # One correction round: the chat routes once, so a filter value that
+            # matches no stored value ("open", "inactive") would be answered as
+            # "none". The result's note lists the valid values for the model to map onto.
+            if (
+                not pre_routed_workflow
+                and isinstance(query_result, dict)
+                and query_result.get("note")
+                and any(
+                    f.endswith("(unknown)")
+                    for f in query_result.get("filters_applied", [])
+                )
+            ):
+                retry = llm.tool_call(
+                    f"{tool_prompt}\n\nYour previous call "
+                    f"{tool_response['name']}({json.dumps(tool_response.get('arguments', {}))}) "
+                    f"matched nothing: {query_result['note']} "
+                    "Call the tool again, choosing the valid values that mean what the user asked.",
+                    all_tools,
+                    history=history_for_tool,
+                )
+                if retry and retry.get("name") == tool_response["name"]:
+                    logger.info(
+                        "Tool call: %s(%s)",
+                        retry["name"],
+                        retry.get("arguments", {}),
+                    )
+                    retried = dispatch_tool_call(
+                        retry["name"],
+                        retry.get("arguments", {}),
+                        scope,
+                        parsed_context,
+                        user_message=user_content,
+                    )
+                    if retried:
+                        tool_response, query_result = retry, retried
+
             # Only query_objects/search_library have the right shape;
             # other tools fall through to build_replay_payload returning None
             if query_result:
