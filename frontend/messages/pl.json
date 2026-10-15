@@ -257,6 +257,7 @@
 	"dropNotes": "Uwagi do wycofania",
 	"resubmissionNotes": "Uwagi do ponownego przesłania",
 	"requestChanges": "Poproś o zmiany",
+	"flagForRework": "Do poprawy",
 	"reviewChangesRequested": "Poproszono o zmiany",
 	"noFlaggedItemsHint": "Nie oznaczono żadnego wymagania. Respondent otrzyma tylko poniższą notatkę — oznacz w kwestionariuszu elementy do poprawy, aby wskazać, co wymaga pracy.",
 	"itemsNeedingChanges": [

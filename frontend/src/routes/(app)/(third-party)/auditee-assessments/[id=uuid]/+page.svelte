@@ -1159,9 +1159,9 @@
 									: 'preset-tonal-surface'}"
 								onclick={() => setReviewState(requirementAssessment, 'changes_requested')}
 								disabled={reviewPending}
-								title={m.requestChanges()}
+								title={m.flagForRework()}
 							>
-								<i class="fa-solid fa-flag mr-1"></i>{m.requestChanges()}
+								<i class="fa-solid fa-flag mr-1"></i>{m.flagForRework()}
 							</button>
 							<button
 								type="button"

@@ -239,6 +239,7 @@
 	"dropNotes": "Opombe ob opustitvi",
 	"resubmissionNotes": "Opombe ob ponovni predložitvi",
 	"requestChanges": "Zahtevaj spremembe",
+	"flagForRework": "Za popravo",
 	"drop": "Opusti",
 	"resubmit": "Ponovno pošlji",
 	"onlyRequesterCanModify": "Samo vlagatelj zahteve lahko izvaja dejanja na tej validaciji",

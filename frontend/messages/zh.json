@@ -183,6 +183,7 @@
 	"dropNotes": "放弃备注",
 	"resubmissionNotes": "重新提交备注",
 	"requestChanges": "请求变更",
+	"flagForRework": "待修改",
 	"drop": "放弃",
 	"resubmit": "重新提交",
 	"onlyRequesterCanModify": "只有请求者才能对此验证执行操作",

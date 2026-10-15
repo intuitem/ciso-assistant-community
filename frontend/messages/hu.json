@@ -314,6 +314,7 @@
 	"dropNotes": "Elvetési megjegyzések",
 	"resubmissionNotes": "Újbóli beküldés megjegyzései",
 	"requestChanges": "Változtatások kérése",
+	"flagForRework": "Átdolgozandó",
 	"reviewChangesRequested": "Változtatás kérve",
 	"noFlaggedItemsHint": "Egy követelmény sincs megjelölve. A válaszadó csak az alábbi megjegyzést kapja meg. Jelölje meg a kérdőívben a javítandó tételeket, hogy a válaszadó lássa, min kell dolgoznia.",
 	"itemsNeedingChanges": [
