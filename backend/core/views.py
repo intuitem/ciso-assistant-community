@@ -22118,7 +22118,11 @@ class QuickFormResponseViewSet(BaseModelViewSet):
                 planned = plan(response, request.user, overrides)
                 for item in planned:
                     proposal = item["proposal"]
-                    if item["target"] in overrides and not proposal.ok:
+                    if (
+                        item["target"] in overrides
+                        and not proposal.ok
+                        and proposal.reason != "targetNotApplicable"
+                    ):
                         return Response(
                             {
                                 "error": "invalidOverride",
