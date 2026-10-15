@@ -22,6 +22,8 @@ import VulnerabilityChangeStatus from '$lib/components/ContextMenu/vulnerabiliti
 import VulnerabilityChangeSeverity from '$lib/components/ContextMenu/vulnerabilities/ChangeSeverity.svelte';
 import EntityAssessTier from '$lib/components/ContextMenu/entities/AssessTier.svelte';
 import EntityChangeTier from '$lib/components/ContextMenu/entities/ChangeTier.svelte';
+import ProcessingScreenDpia from '$lib/components/ContextMenu/processings/ScreenDpia.svelte';
+import ProcessingChangeDpiaRequired from '$lib/components/ContextMenu/processings/ChangeDpiaRequired.svelte';
 import ChangeChoiceField from '$lib/components/ContextMenu/ChangeChoiceField.svelte';
 import ToggleBooleanField from '$lib/components/ContextMenu/ToggleBooleanField.svelte';
 import ToggleRecoveryFlags from '$lib/components/ContextMenu/asset-assessments/ToggleRecoveryFlags.svelte';
@@ -252,6 +254,7 @@ export const COMMITMENT_OWNER_FILTER: ListViewFilterConfig = {
 export const DOMAIN_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
+		lazy: true,
 		optionsEndpoint: 'folders?content_type=DO&content_type=GL',
 		label: 'domain',
 		multiple: true
@@ -654,6 +657,47 @@ export const PROCESSING_STATUS_FILTER: ListViewFilterConfig = {
 		optionsValueField: 'value',
 		label: 'status',
 		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+export const DPIA_REQUIRED_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'processings/dpia_required',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'dpiaRequired',
+		browserCache: 'force-cache',
+		multiple: false
+	}
+};
+export const DPIA_REQUIREMENT_SOURCE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		// Labelled on purpose: the raw values translate as generic words
+		// ("assessment" reads "Audit" in French). Getters follow the current language.
+		options: [
+			{
+				get label() {
+					return m.dpiaSourceAssessment();
+				},
+				value: 'assessment'
+			},
+			{
+				get label() {
+					return m.dpiaSourceOverride();
+				},
+				value: 'override'
+			},
+			{
+				get label() {
+					return m.dpiaSourceManual();
+				},
+				value: 'manual'
+			}
+		],
+		translateOptions: false,
+		label: 'source',
 		multiple: true
 	}
 };
@@ -1627,6 +1671,18 @@ export const CONTRACT_STATUS_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const QUICK_FORM_RESPONSE_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'status',
+		optionsEndpoint: 'quick-form-responses/status',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
 export const EVIDENCE_OWNER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -2284,7 +2340,8 @@ export const listViewFields = {
 		body: ['ref_id', 'name', 'quick_form', 'status', 'respondents', 'due_date', 'folder'],
 		meta: ['id', 'status'],
 		filters: {
-			folder: DOMAIN_FILTER
+			folder: DOMAIN_FILTER,
+			status: QUICK_FORM_RESPONSE_STATUS_FILTER
 		}
 	},
 	'compliance-assessments': {
@@ -2630,6 +2687,21 @@ export const listViewFields = {
 			source: TIER_SOURCE_FILTER
 		}
 	},
+	'dpia-requirement-changes': {
+		head: ['createdAt', 'dpiaRequired', 'previously', 'source', 'changedBy', 'note', 'processing'],
+		body: [
+			'created_at',
+			'dpia_required',
+			'previous_dpia_required',
+			'source',
+			'changed_by',
+			'note',
+			'processing'
+		],
+		filters: {
+			source: DPIA_REQUIREMENT_SOURCE_FILTER
+		}
+	},
 	'entity-scores': {
 		head: ['provider', 'score', 'normalizedScore', 'grade', 'asOf', 'entity'],
 		body: ['provider', 'score', 'normalized_score', 'grade', 'as_of', 'entity'],
@@ -2720,8 +2792,8 @@ export const listViewFields = {
 		head: ['refId', 'name', 'description', 'status', 'processingNature', 'labels', 'folder'],
 		body: ['ref_id', 'name', 'description', 'status', 'nature', 'filtering_labels', 'folder'],
 		optionalFields: {
-			head: ['personalDataCategories', 'dataSubjectCategories', 'updatedAt'],
-			body: ['personal_data_categories', 'data_subject_categories', 'updated_at']
+			head: ['personalDataCategories', 'dataSubjectCategories', 'dpiaRequired', 'updatedAt'],
+			body: ['personal_data_categories', 'data_subject_categories', 'dpia_required', 'updated_at']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -2736,6 +2808,7 @@ export const listViewFields = {
 			},
 			status: PROCESSING_STATUS_FILTER,
 			nature: PROCESSING_NATURE_FILTER,
+			dpia_required: DPIA_REQUIRED_FILTER,
 			personal_data__category: PERSONAL_DATA_CATEGORY_FILTER,
 			data_subjects__category: DATA_SUBJECT_CATEGORY_FILTER,
 			filtering_labels: LABELS_FILTER,
@@ -3896,6 +3969,10 @@ export const contextMenuActions = {
 	entities: [
 		{ component: EntityAssessTier, props: {} },
 		{ component: EntityChangeTier, props: {} }
+	],
+	processings: [
+		{ component: ProcessingScreenDpia, props: {} },
+		{ component: ProcessingChangeDpiaRequired, props: {} }
 	]
 };
 
@@ -3920,7 +3997,8 @@ export interface BatchActionConfig {
 		| 'remove_m2m'
 		| 'change_folder'
 		| 'group'
-		| 'merge';
+		| 'merge'
+		| 'compose';
 	label: string;
 	icon: string;
 	field?: string;
@@ -4605,6 +4683,13 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			optionsEndpoint: 'processings/status'
 		},
 		{
+			type: 'change_field',
+			label: 'setDpiaRequirementManually',
+			icon: 'fa-solid fa-scale-balanced',
+			field: 'dpia_required',
+			optionsEndpoint: 'processings/dpia_required'
+		},
+		{
 			type: 'change_folder',
 			label: 'changeDomain',
 			icon: 'fa-solid fa-folder',
@@ -4629,6 +4714,12 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
 	],
 	'metric-instances': [
+		{
+			type: 'compose',
+			label: 'computeFromSelection',
+			icon: 'fa-solid fa-calculator',
+			maxSelection: 20
+		},
 		{
 			type: 'change_field',
 			label: 'changeStatus',

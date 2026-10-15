@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { roundScore } from '$lib/utils/helpers';
+	import { sampleMoment } from '$lib/utils/derived-metrics';
+	import { escapeHtml, roundScore } from '$lib/utils/helpers';
 	import { onMount } from 'svelte';
 
 	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
@@ -105,12 +106,12 @@
 				try {
 					const value = typeof sample.value === 'string' ? JSON.parse(sample.value) : sample.value;
 					if (isQualitative) {
-						return [sample.timestamp, value?.choice_index ?? null];
+						return [sampleMoment(sample), value?.choice_index ?? null];
 					} else {
-						return [sample.timestamp, value?.result ?? null];
+						return [sampleMoment(sample), value?.result ?? null];
 					}
 				} catch {
-					return [sample.timestamp, null];
+					return [sampleMoment(sample), null];
 				}
 			})
 			.filter((item) => item[1] !== null)
@@ -306,7 +307,9 @@
 					displayValue = formatValueWithUnit(value);
 				}
 
-				return `${date}<br/>${params[0].marker}${displayValue}`;
+				// Rendered as HTML by ECharts: level names and units are typed
+				// text (a formula's results, a definition's levels), escaped.
+				return `${escapeHtml(date)}<br/>${params[0].marker}${escapeHtml(displayValue)}`;
 			}
 		};
 
@@ -764,8 +767,8 @@
 					>
 				{/if}
 			</div>
-			<!-- Trend indicator -->
-			{#if chartData.length > 1}
+			<!-- Trend indicator: a percentage change between two levels means nothing -->
+			{#if chartData.length > 1 && !isQualitative}
 				{@const prevValue = rawChartData[rawChartData.length - 2]?.[1]}
 				{@const change = prevValue
 					? (((rawLatestValue - prevValue) / prevValue) * 100).toFixed(1)

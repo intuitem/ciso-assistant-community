@@ -13,7 +13,7 @@ production. It is the check that the action reference describes what happens.
 import json
 import threading
 import uuid
-from datetime import date
+from datetime import date, timedelta
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -238,6 +238,11 @@ class TestWeeklyEvidenceCollection:
         # reviewed file.
         evidence.refresh_from_db()
         assert evidence.status == Evidence.Status.IN_REVIEW
+
+        # Week one was a week ago: a metric keeps one sample per second, and
+        # both runs happen within this one.
+        sample.timestamp -= timedelta(days=7)
+        sample.save()
 
         second = start_instance(version)
         assert second.status == WorkflowInstance.Status.COMPLETED, second.variables
