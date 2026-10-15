@@ -70,9 +70,10 @@ class TestEvidenceAttachmentUpload:
         self, admin_client, evidence
     ):
         """The MCP client's call: raw bytes, no Content-Type, RFC 5987 filename*."""
-        response = admin_client.post(
+        response = admin_client.generic(
+            "POST",
             f"/api/evidences/{evidence.id}/upload/",
-            data=b"\x89PNG\r\n\x1a\n raw",
+            b"\x89PNG\r\n\x1a\n raw",
             content_type="",
             HTTP_CONTENT_DISPOSITION=(
                 'attachment; filename="alerte-t-.png"; '
