@@ -106,3 +106,157 @@ auditlog.register(
     mask_fields=["value"],
     mask_callable="global_settings.utils.mask_sensitive_settings",
 )
+
+
+class MailerConfiguration(AbstractBaseModel, FolderMixin):
+    """The outgoing-mail configuration an administrator stores in the app.
+
+    One row per instance. When ``ENABLE_CUSTOM_MAILER`` is set and
+    ``is_active`` is true, its mailers replace the environment ones entirely;
+    otherwise the environment applies. See the custom-mailer-settings ADR.
+    """
+
+    is_active = models.BooleanField(default=False)
+    from_email = models.CharField(max_length=254, blank=True)
+    last_tested_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = "Mailer configuration"
+
+    @classmethod
+    def get(cls) -> "MailerConfiguration":
+        instance = cls.objects.order_by("created_at").first()
+        return instance or cls.objects.create()
+
+    def __str__(self):
+        return "mailer configuration"
+
+
+class Mailer(AbstractBaseModel, FolderMixin):
+    """One SMTP mailer of the stored configuration. Position 1 is tried
+    first, position 2 only when 1 cannot be reached. The fields are what a
+    ``MAILERS`` entry holds; secrets are write-only through the API."""
+
+    class Transport(models.TextChoices):
+        SMTP = "smtp", "SMTP with a password"
+        SMTP_OAUTH2 = "smtp-oauth2", "SMTP with OAuth 2.0"
+
+    class Grant(models.TextChoices):
+        CLIENT_CREDENTIALS = "client_credentials", "Client credentials"
+        REFRESH_TOKEN = "refresh_token", "Refresh token"
+        JWT_BEARER = "jwt_bearer", "JWT bearer"
+
+    SECRET_FIELDS = (
+        "password",
+        "oauth2_client_secret",
+        "oauth2_refresh_token",
+        "oauth2_private_key",
+    )
+
+    configuration = models.ForeignKey(
+        MailerConfiguration, on_delete=models.CASCADE, related_name="mailers"
+    )
+    position = models.PositiveSmallIntegerField()
+    transport = models.CharField(
+        max_length=16, choices=Transport.choices, default=Transport.SMTP
+    )
+    host = models.CharField(max_length=253)
+    port = models.PositiveIntegerField(null=True, blank=True)
+    use_tls = models.BooleanField(default=False)
+    use_ssl = models.BooleanField(default=False)
+    username = models.CharField(max_length=254, blank=True)
+    password = models.TextField(blank=True)
+    oauth2_grant_type = models.CharField(
+        max_length=32, choices=Grant.choices, blank=True
+    )
+    oauth2_token_url = models.CharField(max_length=2048, blank=True)
+    oauth2_scope = models.CharField(max_length=1024, blank=True)
+    oauth2_client_id = models.CharField(max_length=512, blank=True)
+    oauth2_client_secret = models.TextField(blank=True)
+    oauth2_refresh_token = models.TextField(blank=True)
+    oauth2_issuer = models.CharField(max_length=512, blank=True)
+    oauth2_private_key = models.TextField(blank=True)
+    oauth2_audience = models.CharField(max_length=2048, blank=True)
+
+    class Meta:
+        ordering = ["position"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["configuration", "position"], name="unique_mailer_position"
+            )
+        ]
+
+    @property
+    def alias(self) -> str:
+        return f"custom-{self.position}"
+
+    def __str__(self):
+        return f"{self.alias} ({self.transport} {self.host})"
+
+    def mailer_entry(self) -> dict:
+        """The ``MAILERS``-shaped entry for this row, validated like the
+        environment builder validates its variables. Raises ValueError."""
+        from ciso_assistant.mailers import SMTP_BACKEND, validate_oauth2
+
+        if self.use_tls and self.use_ssl:
+            raise ValueError("TLS and SSL are mutually exclusive")
+        options = {
+            "host": self.host,
+            "port": self.port,
+            "username": self.username or None,
+            "password": self.password or None,
+            "use_tls": self.use_tls,
+            "use_ssl": self.use_ssl,
+            "timeout": 5,
+        }
+        if self.transport == self.Transport.SMTP_OAUTH2:
+            config = {
+                "user": self.username or None,
+                "grant_type": self.oauth2_grant_type or None,
+                "token_url": self.oauth2_token_url or None,
+                "scope": self.oauth2_scope or None,
+                "client_id": self.oauth2_client_id or None,
+                "client_secret": self.oauth2_client_secret or None,
+                "refresh_token": self.oauth2_refresh_token or None,
+                "service_account_file": None,
+                "issuer": self.oauth2_issuer or None,
+                "private_key": self.oauth2_private_key or None,
+                "audience": self.oauth2_audience or None,
+            }
+            validate_oauth2(config)
+            options["password"] = None
+            options["oauth2"] = config
+        return {"BACKEND": SMTP_BACKEND, "OPTIONS": options}
+
+
+class MailerHealth(AbstractBaseModel):
+    """Last delivery attempt per mailer, updated in place so it never grows.
+    Written by ``core.mailer`` for environment and custom mailers alike."""
+
+    class Outcome(models.TextChoices):
+        OK = "ok", "Delivered"
+        UNREACHABLE = "unreachable", "Unreachable"
+        FAILED = "failed", "Failed after handover"
+
+    alias = models.CharField(max_length=64, unique=True)
+    source = models.CharField(max_length=16)  # "environment" or "custom"
+    last_attempt_at = models.DateTimeField()
+    last_outcome = models.CharField(max_length=16, choices=Outcome.choices)
+    last_error = models.TextField(blank=True)
+    via_failover = models.BooleanField(default=False)
+    last_success_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["alias"]
+        verbose_name_plural = "Mailer health"
+
+
+auditlog.register(
+    MailerConfiguration, exclude_fields=["created_at", "updated_at", "last_tested_at"]
+)
+auditlog.register(
+    Mailer,
+    exclude_fields=["created_at", "updated_at"],
+    mask_fields=list(Mailer.SECRET_FIELDS),
+    mask_callable="global_settings.utils.redact_secret_value",
+)

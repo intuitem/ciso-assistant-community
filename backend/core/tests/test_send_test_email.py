@@ -9,6 +9,9 @@ from django.core.management import CommandError, call_command
 from core import mailer
 
 LOCMEM = "django.core.mail.backends.locmem.EmailBackend"
+
+# The command prints delivery health, which lives in the database.
+pytestmark = pytest.mark.django_db
 FAKES = "core.tests.test_mailer"
 
 

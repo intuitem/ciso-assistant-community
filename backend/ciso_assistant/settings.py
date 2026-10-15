@@ -573,6 +573,14 @@ EMAIL_FORCE_TLS_1_2 = os.environ.get("EMAIL_FORCE_TLS_1_2", "False").lower() in 
 )
 logger.info("EMAIL_FORCE_TLS_1_2: %s", EMAIL_FORCE_TLS_1_2)
 MAILERS = build_mailers(os.environ, mail_debug=MAIL_DEBUG)
+# Lets administrators configure the mailers in the app (custom-mailer-settings
+# ADR). Off by default; set per hosted instance at our discretion.
+ENABLE_CUSTOM_MAILER = os.environ.get("ENABLE_CUSTOM_MAILER", "False").lower() in (
+    "true",
+    "1",
+    "yes",
+)
+logger.info("ENABLE_CUSTOM_MAILER: %s", ENABLE_CUSTOM_MAILER)
 for _line in describe(MAILERS):
     logger.info(_line)
 if not MAILERS:

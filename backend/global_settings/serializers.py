@@ -18,7 +18,7 @@ from core.net_safety import (
 )
 from iam.models import User
 
-from .models import GlobalSettings
+from .models import GlobalSettings, Mailer, MailerConfiguration, MailerHealth
 
 
 def canonical_ip_or_cidr(value: str) -> str:
@@ -913,3 +913,179 @@ class SecIntelFeedsSerializer(serializers.ModelSerializer):
             instance.save(update_fields=["value"])
 
         return instance
+
+
+class MailerSerializer(serializers.ModelSerializer):
+    """One mailer row. Secrets are write-only; ``has_*`` says whether one is
+    stored. A blank secret on an existing position keeps the stored one."""
+
+    password = serializers.CharField(
+        write_only=True, required=False, allow_blank=True, trim_whitespace=False
+    )
+    oauth2_client_secret = serializers.CharField(
+        write_only=True, required=False, allow_blank=True, trim_whitespace=False
+    )
+    oauth2_refresh_token = serializers.CharField(
+        write_only=True, required=False, allow_blank=True, trim_whitespace=False
+    )
+    oauth2_private_key = serializers.CharField(
+        write_only=True, required=False, allow_blank=True, trim_whitespace=False
+    )
+    has_password = serializers.SerializerMethodField()
+    has_oauth2_client_secret = serializers.SerializerMethodField()
+    has_oauth2_refresh_token = serializers.SerializerMethodField()
+    has_oauth2_private_key = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Mailer
+        fields = [
+            "position",
+            "transport",
+            "host",
+            "port",
+            "use_tls",
+            "use_ssl",
+            "username",
+            "password",
+            "has_password",
+            "oauth2_grant_type",
+            "oauth2_token_url",
+            "oauth2_scope",
+            "oauth2_client_id",
+            "oauth2_client_secret",
+            "has_oauth2_client_secret",
+            "oauth2_refresh_token",
+            "has_oauth2_refresh_token",
+            "oauth2_issuer",
+            "oauth2_private_key",
+            "has_oauth2_private_key",
+            "oauth2_audience",
+        ]
+
+    def get_has_password(self, obj) -> bool:
+        return bool(obj.password)
+
+    def get_has_oauth2_client_secret(self, obj) -> bool:
+        return bool(obj.oauth2_client_secret)
+
+    def get_has_oauth2_refresh_token(self, obj) -> bool:
+        return bool(obj.oauth2_refresh_token)
+
+    def get_has_oauth2_private_key(self, obj) -> bool:
+        return bool(obj.oauth2_private_key)
+
+
+class MailerConfigurationSerializer(serializers.ModelSerializer):
+    """The stored configuration with its mailers. Saving requires a test token
+    issued by the test endpoint for these exact values, or an explicit
+    override (custom-mailer-settings ADR)."""
+
+    mailers = MailerSerializer(many=True)
+    test_token = serializers.CharField(
+        write_only=True, required=False, allow_blank=True
+    )
+    override_untested = serializers.BooleanField(
+        write_only=True, required=False, default=False
+    )
+
+    class Meta:
+        model = MailerConfiguration
+        fields = [
+            "is_active",
+            "from_email",
+            "last_tested_at",
+            "mailers",
+            "test_token",
+            "override_untested",
+        ]
+        read_only_fields = ["last_tested_at"]
+
+    def validate_mailers(self, mailers):
+        positions = [item.get("position") for item in mailers]
+        if not mailers or len(mailers) > 2:
+            raise serializers.ValidationError("Configure one or two mailers.")
+        if sorted(positions) != list(range(1, len(mailers) + 1)):
+            raise serializers.ValidationError("Mailer positions must be 1, then 2.")
+        return mailers
+
+    def validate(self, attrs):
+        if attrs.get("is_active") and not attrs.get("from_email"):
+            raise serializers.ValidationError(
+                {"from_email": "A sender address is required to activate the mailers."}
+            )
+        return attrs
+
+    def build_rows(self, instance, mailers_data) -> list[Mailer]:
+        """Unsaved rows for the payload: existing rows at the same position
+        are updated in place, blank secrets keep the stored value. Validates
+        each row the way the environment builder validates its variables."""
+        existing = {row.position: row for row in instance.mailers.all()}
+        rows = []
+        for item in mailers_data:
+            row = existing.get(item["position"]) or Mailer(
+                configuration=instance,
+                position=item["position"],
+                folder=instance.folder,
+            )
+            for name, value in item.items():
+                if name in Mailer.SECRET_FIELDS and value in ("", None):
+                    continue
+                setattr(row, name, value if value is not None else "")
+            try:
+                row.mailer_entry()
+            except ValueError as error:
+                raise serializers.ValidationError(
+                    {"mailers": f"mailer {item['position']}: {error}"}
+                ) from error
+            rows.append(row)
+        return rows
+
+    def update(self, instance, validated_data):
+        from django.utils import timezone
+
+        from .mailer_settings import (
+            configuration_digest,
+            specs_from_rows,
+            test_token_matches,
+        )
+
+        mailers_data = validated_data.pop("mailers")
+        token = validated_data.pop("test_token", "")
+        override = validated_data.pop("override_untested", False)
+        rows = self.build_rows(instance, mailers_data)
+        from_email = validated_data.get("from_email", instance.from_email)
+        tested = test_token_matches(
+            token, configuration_digest(from_email, specs_from_rows(rows))
+        )
+        if not tested and not override:
+            raise serializers.ValidationError(
+                {
+                    "test_token": "Send a test email with these exact values before saving, "
+                    "or set override_untested."
+                }
+            )
+        with transaction.atomic():
+            instance.is_active = validated_data.get("is_active", instance.is_active)
+            instance.from_email = from_email
+            if tested:
+                instance.last_tested_at = timezone.now()
+            instance.save()
+            keep = {row.position for row in rows}
+            instance.mailers.exclude(position__in=keep).delete()
+            for row in rows:
+                row.save()
+        return instance
+
+
+class MailerHealthSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MailerHealth
+        fields = [
+            "alias",
+            "source",
+            "last_attempt_at",
+            "last_outcome",
+            "last_error",
+            "via_failover",
+            "last_success_at",
+        ]
