@@ -3005,6 +3005,7 @@ class FolderRecordConsumer(RecordConsumer):
             return {}, error
 
         data = {
+            "ref_id": record.get("ref_id", ""),
             "name": name,
             "description": record.get("description", ""),
             "parent_folder": parent_folder_id,
