@@ -100,17 +100,25 @@ def ingest_posture_results(
         if node.ref_id
     }
 
-    def match(ref_id):
-        node = nodes.get(ref_id)
-        if node is None and ref_id:
-            node = nodes.get(re.sub(r"^[^0-9]+", "", str(ref_id)))
-        return node
+    def match(entry):
+        refs = [entry.get("ref_id")]
+        if isinstance(entry.get("fallback_ref_ids"), list):
+            refs += entry["fallback_ref_ids"]
+        refs = [str(ref) for ref in refs if ref]
+        for ref in refs:
+            if ref in nodes:
+                return nodes[ref]
+        for ref in refs[1:] + refs[:1]:
+            node = nodes.get(re.sub(r"^[^0-9]+", "", ref))
+            if node is not None:
+                return node
+        return None
 
-    unknown_refs = [e.get("ref_id") for e in entries if match(e.get("ref_id")) is None]
+    unknown_refs = [e.get("ref_id") for e in entries if match(e) is None]
 
     matched = {}
     for entry in entries:
-        node = match(entry.get("ref_id"))
+        node = match(entry)
         if node is not None:
             matched[node.id] = entry
 

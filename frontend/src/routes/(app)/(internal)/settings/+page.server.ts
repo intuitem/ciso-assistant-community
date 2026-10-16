@@ -168,8 +168,8 @@ function buildAuditSinkPayload(f: Record<string, any>): Record<string, any> {
 		url: '',
 		kafka_config: {}
 	};
-	// Secrets (headers, sasl password) are omitted when blank so the backend
-	// preserves/merges the stored value instead of wiping it on edit.
+	// Secrets (headers, sasl password, client secret) are omitted when blank so
+	// the backend preserves/merges the stored value instead of wiping it on edit.
 	if (f.transport === 'kafka') {
 		const config: Record<string, string> = {};
 		if (f.security_protocol) config.security_protocol = f.security_protocol;
@@ -179,8 +179,21 @@ function buildAuditSinkPayload(f: Record<string, any>): Record<string, any> {
 		payload.kafka_config = { bootstrap_servers: f.bootstrap_servers, topic: f.topic, config };
 	} else {
 		payload.url = f.url;
+		payload.body_wrapper = f.body_wrapper;
+		payload.auth_type = f.auth_type;
 		if (typeof f.headers === 'string' && f.headers.trim()) {
 			payload.headers = JSON.parse(f.headers);
+		}
+		if (f.auth_type === 'oauth2_client_credentials') {
+			const oauth: Record<string, string> = {
+				token_url: f.token_url,
+				client_id: f.client_id
+			};
+			if (f.scope) oauth.scope = f.scope;
+			if (f.client_secret) oauth.client_secret = f.client_secret;
+			payload.oauth_config = oauth;
+		} else {
+			payload.oauth_config = {};
 		}
 	}
 	return payload;
