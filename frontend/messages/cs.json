@@ -1638,6 +1638,8 @@
 	"dropNotes": "Poznámky ke zrušení",
 	"resubmissionNotes": "Poznámky k opětovnému odeslání",
 	"requestChanges": "Vyžádat změny",
+	"flagForChangeRequest": "Označit k úpravám",
+	"removeChangeRequestFlag": "Zrušit označení",
 	"drop": "Zrušit",
 	"resubmit": "Znovu odeslat",
 	"onlyRequesterCanModify": "Pouze žadatel může provádět akce u této validace",

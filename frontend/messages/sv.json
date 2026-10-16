@@ -1,4 +1,7 @@
 {
+	"flagForChangeRequest": "Markera för ändring",
+	"removeChangeRequestFlag": "Ta bort markering",
+	"itemsFlaggedForChanges": "markerade för ändring",
 	"manageMembers": "Hantera medlemmar",
 	"addMembers": "Lägg till medlemmar",
 	"removeFromGroup": "Ta bort från gruppen",
