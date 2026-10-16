@@ -9,7 +9,7 @@ import uuid
 
 import structlog
 from django.db import transaction
-from django.db.models import Count, Prefetch
+from django.db.models import BooleanField, Count, ExpressionWrapper, Prefetch, Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils.crypto import constant_time_compare
@@ -197,22 +197,9 @@ class WorkflowViewSet(WorkflowsFeatureGate, BaseModelViewSet):
     def readable_models(self, request):
         """The read_objects registry: field lists double as the
         filter/order whitelist the builder offers."""
-        from .actions import READABLE_MODELS
+        from core.reads.registry import registry_payload
 
-        return Response(
-            [
-                {
-                    "key": key,
-                    "fields": entry.readable_fields(),
-                    # Output-only aggregates; not filterable/orderable.
-                    "computed": sorted(entry.computed.keys()),
-                    # Same, but only resolved when a node names them in
-                    # `include` — they cost too much to return by default.
-                    "includable": sorted(entry.optional_computed.keys()),
-                }
-                for key, entry in READABLE_MODELS.items()
-            ]
-        )
+        return Response(registry_payload())
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get updatable models", url_path="updatable-models")
@@ -745,11 +732,18 @@ class WorkflowInstanceViewSet(WorkflowsFeatureGate, BaseModelViewSet):
         active_tokens = WorkflowToken.objects.filter(
             status__in=ACTIVE_TOKEN_STATUSES
         ).select_related("current_node")
-        return queryset.select_related(
+        queryset = queryset.select_related(
             "version__run_as", "initiated_by", "workflow", "folder"
         ).prefetch_related(
             Prefetch("tokens", queryset=active_tokens, to_attr="active_tokens")
         )
+        if self.action == "list":
+            queryset = queryset.defer("node_outputs", "variables").annotate(
+                has_outputs=ExpressionWrapper(
+                    ~Q(node_outputs={}), output_field=BooleanField()
+                )
+            )
+        return queryset
 
     def create(self, request, *args, **kwargs):
         """Launching a run: POST {version: uuid, entry_node_ref?: str}.

@@ -13,7 +13,7 @@ The distinction from an audit matters. An audit measures an organisation against
 {% hint style="info" %}
 Quick forms are gated by the **Forms and Requests** feature flag, off by default. Turn it on under **Settings → Feature flags**.
 
-You also need **Custom portals**. A portal tile is currently the only way a requester starts a request, so a published form with no portal behind it cannot be reached.
+You also need **Custom portals**. A portal tile is how a requester starts a request, so a published form with no portal behind it cannot be reached. The exception is a form about an object, such as a vendor tiering form or a DPIA: it is started from that object, for example with **Assess tier** on a vendor or **Run DPIA screening** on a processing (see [Writing back onto the subject](#writing-back-onto-the-subject)).
 {% endhint %}
 
 ## Mental model
@@ -25,12 +25,16 @@ graph LR
   PUB -->|scopes| AUD[Audience]
   PUB -->|surfaced on| POR[Portal tile]
   POR -->|filed as| REQ[Request]
+  SUBJ[Subject object] -.->|Assess tier| REQ
   REQ -->|classified by| OUT[Outcomes]
   REQ -->|decided by| REV[Reviewer]
   OUT -.->|may produce| OBJ[Security exception / applied control]
+  REQ -.->|on accept, may write to| SUBJ
 ```
 
 A **quick form** arrives from a **library**, like a framework or a risk matrix does. On its own it cannot be filled — it must first be **published**, which is what names the **audience** allowed to file it and the domain their requests land in. A publication is then surfaced to people through a **portal tile**, which is where they click to start. Someone in that audience files a **request**, answers it, and submits. The answers compute a **score** and fire **outcomes**, which classify the request. A **reviewer** decides. An accepted request can then produce a real governed object, with the link back to the request that caused it.
+
+A form about an object, such as a vendor tiering form, takes a shorter route: it is started from that object, with no publication or portal, and when the form has an **On accept** setting, an accepted request writes its result back onto it.
 
 | User-facing | Internal | Notes |
 |---|---|---|
@@ -121,13 +125,53 @@ Each question can carry a score, and each form can carry **outcome rules** — e
 Two ways to write a rule, both useful:
 
 - **On a specific answer** — "personal data was ticked", "no compensating control is in place". Precise, and reads like the question it depends on.
-- **On the total score** — "anything above 100 needs a full assessment". One threshold to tune, instead of an enumeration that grows each time a choice is added.
+- **On a score** — "anything above 100 needs a full assessment". One threshold to tune, instead of an enumeration that grows each time a choice is added. The score can be the form's, or a page's when each page measures something different (business impact on one, data exposure on another).
 
-Outcomes are what the rest of the platform reacts to. They drive which supervised actions a reviewer is offered, and they are the hook for turning an accepted request into a governed object.
+A rule can also compute a **number** instead of firing: an average, the higher of two page scores, a formula such as the EBIOS RM threat level. The value shows on the request, and later rules read it. That is how a form turns answers into one figure a decision can rest on.
+
+Outcomes are what the rest of the platform reacts to. They drive which supervised actions a reviewer is offered, and they are the hook for turning an accepted request into a governed object or a change to an existing one.
 
 {% hint style="warning" %}
-An outcome rule that references a question that does not exist — a typo, or a question removed later — does not raise an error. It simply never fires, and the form looks like it works. Fill a form in and check the outcomes before relying on them.
+Saving a form refuses a rule that names a question, a page or a rule the form does not have. A rule that only tests whether an answer exists, such as `"q1" in answers`, passes that check even with a typo, and then never fires. Fill a form in and check the outcomes before relying on them.
 {% endhint %}
+
+## Scales and ratings
+
+Some forms rate the same thing several times: a DPIA rates the severity and the likelihood of each of its three risks. A **scale** names those ordered levels once, for example _Negligible_, _Limited_, _Significant_, _Maximum_, each with an optional description and number. A choice question on a scale gets the scale's levels as its choices, so every question measuring severity uses the same ones.
+
+A **rating** is the third kind of outcome rule, next to **Yes / no** and **Number**. It classifies the answers to its scales, its **dimensions**, into named levels of its own:
+
+- With two dimensions, a **grid** crosses them: one cell per pair of levels, like a risk matrix.
+- With any number of dimensions, **rules** do: the first rule that holds gives the level, for example `dims.severity.value * dims.likelihood.value >= 8.0`.
+
+Each page that answers every dimension is a **point**, rated on its own: a DPIA rates each of its risk pages. A question can also belong to a second **stage**, such as `residual` for the level once planned measures are in place, which gives a second point on the same page. Other rules read the highest level among the current points as `values.RATING_ID`, and the residual one as `values.RATING_ID_residual`.
+
+In the library builder, scales are edited under **Scales**, and a question uses one by picking it in **Choices**. A rating is created by choosing **Rating** as an outcome rule's **Result**. It starts from the form's first two scales, which the builder adds when the form has fewer, and a grid of three levels, _Low_, _Medium_ and _High_, to repaint. A dimension no question measures yet is flagged.
+
+## Writing back onto the subject
+
+Some forms are _about_ an object: a vendor tiering form is about a vendor, a DPIA about a processing. The form names that object in a **subject** question, and the request is then linked to it.
+
+Such a form can say what an accepted request writes onto its subject, in its **On accept** setting:
+
+| Subject | What an accepted request writes |
+|---|---|
+| Vendor | Its [criticality tier](third-party-risk.md#tier): bands on a score or a number rule, and knock-out rules that force at least a given tier. When several apply, the highest tier wins |
+| Processing | Whether it needs a DPIA, from the outcomes that fired ([screening](dpia.md#screening)) |
+| Processing | The request itself, as the processing's DPIA of record ([DPIA](dpia.md#accepting-a-dpia)) |
+| Processing | The applied controls the form picked, added to the processing's own |
+
+A page of such a form can also show what the subject already records, read-only: a DPIA's data page shows the processing's personal data, data subjects and recipients. While the request is a draft, these reflect the object as it is; once submitted, as it stood then. The form then asks about what the record does not hold, instead of copying it.
+
+Three things follow:
+
+- **It starts from the object.** **Assess tier** on a vendor, or **Run DPIA screening** and **Start DPIA** on a processing, opens a request with the object filled in and locked. No publication or portal is needed.
+- **The reviewer sees the write before deciding.** The request shows **On accept, this will write** and the value. The reviewer can override it, with a justification. If the vendor's tier came from another form, the request warns that accepting replaces it.
+- **No review when there is nothing to grant.** When the submitter could make the change themselves and every scored question is answered, submitting applies the result at once and closes the request as accepted. A publication can require a review anyway, with **Always require review**.
+
+When the result cannot be written — no subject, a tier missing from the scale, a permission missing, an object the form no longer applies to — nothing is written and the request goes to review with the reason.
+
+[Tiering your vendors](../guides/vendor-tiering.md) and [Screening processings and running DPIAs](../guides/dpia.md) walk through the whole loop.
 
 ## From a request to a real object
 

@@ -56,6 +56,54 @@
 	let frameworkDefaults = $state<Record<string, any> | null>(null);
 
 	let frameworkScoring = $state<FrameworkScale | null>(null);
+
+	// Scoring settings the framework proposes for a new audit (Framework.default_scoring).
+	interface DefaultScoring {
+		score_calculation_method?: string;
+		anchor_na_to_target?: boolean;
+		target_score?: number;
+		target_score_by_group?: Record<string, number>;
+	}
+	let defaultScoring = $state<DefaultScoring | null>(null);
+	// The target last proposed; it follows the selected groups until the user edits it.
+	let proposedTarget: number | null = null;
+
+	// Same rule as Framework.default_scoring_for: the highest selected group target
+	// applies. Targets are on the framework scale: proposed on the audit's.
+	function defaultTarget(groups: string[] | undefined): number | null {
+		const target = defaultScoring?.target_score;
+		if (target === undefined || target === null) return null;
+		const byGroup = groups?.length
+			? Math.max(...groups.map((g) => defaultScoring?.target_score_by_group?.[g] ?? target))
+			: target;
+		return onAuditScale(byGroup);
+	}
+
+	// Same mapping as the backend's rescale_score (two decimals, halves up).
+	function onAuditScale(value: number): number {
+		const from = [frameworkScoring?.min_score ?? 0, frameworkScoring?.max_score ?? 100];
+		const option = scaleChoice?.options.find((o) => o.id === selectedScale);
+		if (!option || from[1] === from[0] || (option.min === from[0] && option.max === from[1]))
+			return value;
+		const ratio = Math.min(1, Math.max(0, (value - from[0]) / (from[1] - from[0])));
+		return Math.round((option.min + ratio * (option.max - option.min)) * 100) / 100;
+	}
+
+	// The proposed target follows the selected groups and scale until the user edits it.
+	$effect(() => {
+		const groups = $formData.selected_implementation_groups;
+		void selectedScale;
+		// A copy on the same framework keeps the baseline's settings (baselineScale is
+		// only set then); a copy from another framework follows the framework's defaults.
+		if (object?.id || baselineScale || defaultScoring?.target_score == null) return;
+		untrack(() => {
+			const next = defaultTarget(groups);
+			if ($formData.target_score !== proposedTarget || next === proposedTarget) return;
+			proposedTarget = next;
+			form.form.update((d) => ({ ...d, target_score: next }), { taint: false });
+		});
+	});
+
 	let baselineScale = $state<ScoreScaleValue | null>(null);
 	// The option the user picked; until then the proposed one applies.
 	let pickedScale = $state<string | null>(null);
@@ -182,19 +230,24 @@
 		untrack(() => writeScale(proposed?.value ?? null, false));
 	});
 
+	// Edit: the scale is resent as stored until the user picks another one. Left
+	// out, the form library would fill it with nulls, which the backend reads as
+	// "use the framework's scale".
 	$effect(() => {
 		if (!object?.id || scaleDirty) return;
-		untrack(() => {
-			if (SCALE_FIELDS.every((f) => $formData[f] === undefined)) return;
+		untrack(() =>
 			form.form.update(
-				(d) => {
-					const next = { ...d };
-					for (const f of SCALE_FIELDS) delete next[f];
-					return next;
-				},
+				(d) => ({
+					...d,
+					score_scale_preset: object.score_scale_preset ?? null,
+					min_score: object.min_score ?? null,
+					max_score: object.max_score ?? null,
+					scores_definition:
+						object.scores_definition == null ? null : scaleLevels(object.scores_definition)
+				}),
 				{ taint: false }
-			);
-		});
+			)
+		);
 	});
 
 	let scoringEnabled = $derived(
@@ -203,7 +256,8 @@
 
 	let frameworkRequest = 0;
 
-	// Copies propose the baseline audit's scale when it is on the same framework.
+	// Copies propose the baseline audit's scale and scoring settings when it is on
+	// the same framework; otherwise the framework's defaults apply.
 	async function loadBaselineScale(frameworkId: string, request: number) {
 		if (!initialData.baseline) return;
 		// The audit detail URL is a page (HTML); global-score is its JSON scale summary.
@@ -218,6 +272,15 @@
 			// A preset's labels come from the catalog.
 			scores_definition: baseline.score_scale_preset ? [] : scaleLevels(baseline.scores_definition)
 		};
+		form.form.update(
+			(d) => ({
+				...d,
+				score_calculation_method: baseline.score_calculation_method,
+				anchor_na_to_target: baseline.anchor_na_to_target,
+				target_score: baseline.target_score
+			}),
+			{ taint: false }
+		);
 	}
 
 	async function handleFrameworkChange(id: string) {
@@ -241,6 +304,7 @@
 					suggestions = r['reference_controls'].length > 0;
 
 					frameworkDefaults = r['effective_field_visibility'] ?? null;
+					defaultScoring = r['default_scoring'] ?? null;
 
 					frameworkScoring = {
 						min_score: r['min_score'],
@@ -255,9 +319,16 @@
 						.map((group) => group.ref_id);
 
 					if (!object.id) {
+						proposedTarget = defaultTarget(defaultImplementationGroups);
+						// A copy on the same framework then takes the baseline's settings
+						// (loadBaselineScale).
 						form.form.update((currentData) => ({
 							...currentData,
-							selected_implementation_groups: defaultImplementationGroups
+							selected_implementation_groups: defaultImplementationGroups,
+							score_calculation_method:
+								defaultScoring?.score_calculation_method ?? currentData.score_calculation_method,
+							anchor_na_to_target: defaultScoring?.anchor_na_to_target ?? false,
+							target_score: proposedTarget
 						}));
 					}
 				});
@@ -472,13 +543,15 @@
 		{/if}
 
 		{#if scoringEnabled}
+			<!-- On create (copies too) the method and target follow the framework or the
+			     baseline: restoring a value cached by an earlier modal would override them. -->
 			<Select
 				{form}
 				options={model.selectOptions['score_calculation_method']}
 				field="score_calculation_method"
 				label={m.scoreCalculationMethod()}
 				helpText={m.scoreCalculationMethodHelpText()}
-				cacheLock={cacheLocks['score_calculation_method']}
+				cacheLock={object?.id ? cacheLocks['score_calculation_method'] : undefined}
 				bind:cachedValue={formDataCache['score_calculation_method']}
 				disableDoubleDash
 			/>
@@ -489,7 +562,7 @@
 				field="target_score"
 				label={m.targetScore()}
 				helpText={m.targetScoreHelpText()}
-				cacheLock={cacheLocks['target_score']}
+				cacheLock={object?.id ? cacheLocks['target_score'] : undefined}
 				bind:cachedValue={formDataCache['target_score']}
 			/>
 			<Checkbox

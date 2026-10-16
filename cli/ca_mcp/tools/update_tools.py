@@ -22,8 +22,23 @@ from ..resolvers import (
     resolve_reference_control_id,
     resolve_qualification_ids,
     resolve_risk_level_index,
+    resolve_team_id,
+    resolve_user_id,
+    resolve_user_ids,
+    resolve_threat_id,
+    resolve_entity_id,
+    resolve_incident_id,
+    resolve_in_folder_or_global,
+    _is_uuid,
 )
-from .write_tools import _normalize_applied_control_status
+from .write_tools import (
+    _normalize_applied_control_status,
+    _collect_asset_objective_changes,
+    _build_asset_objectives,
+    _ignored_fields_warning,
+    MANUAL_TIMELINE_ENTRY_TYPES,
+    INVALID_TIMELINE_ENTRY_TYPE_ERROR,
+)
 
 
 async def update_asset(
@@ -53,12 +68,47 @@ async def update_asset(
     sec_integrity_enabled: bool = None,
     sec_availability: int = None,
     sec_availability_enabled: bool = None,
-    dro_rto: int = None,
-    dro_rpo: int = None,
-    dro_mtd: int = None,
+    dro_rto: int | str = None,
+    dro_rpo: int | str = None,
+    dro_mtd: int | str = None,
     asset_class: str = None,
+    sec_proof: int = None,
+    sec_proof_enabled: bool = None,
+    sec_authenticity: int = None,
+    sec_authenticity_enabled: bool = None,
+    sec_privacy: int = None,
+    sec_privacy_enabled: bool = None,
+    sec_safety: int = None,
+    sec_safety_enabled: bool = None,
+    cap_confidentiality: int = None,
+    cap_confidentiality_enabled: bool = None,
+    cap_integrity: int = None,
+    cap_integrity_enabled: bool = None,
+    cap_availability: int = None,
+    cap_availability_enabled: bool = None,
+    cap_proof: int = None,
+    cap_proof_enabled: bool = None,
+    cap_authenticity: int = None,
+    cap_authenticity_enabled: bool = None,
+    cap_privacy: int = None,
+    cap_privacy_enabled: bool = None,
+    cap_safety: int = None,
+    cap_safety_enabled: bool = None,
+    rcap_rto: int | str = None,
+    rcap_rpo: int | str = None,
+    rcap_mtd: int | str = None,
 ) -> str:
     """Update asset properties
+
+    Objectives (sec_*, dro_*) are effective on primary assets (supporting ones
+    inherit them); capabilities (cap_*, rcap_*) are effective on supporting
+    assets (primary ones aggregate them). Only the criteria you pass change:
+    every other stored criterion is kept. A value without its _enabled flag
+    means enabled; pass <param>_enabled=False to disable a criterion.
+    Values 0-4 are stored as the web form would under the configured scale
+    (e.g. under 1-4, 3 and 4 both display "4" and are stored as 3).
+    Not atomic: objectives/capabilities are read then written back, so a
+    concurrent edit between the two can be overwritten.
 
     Args:
         asset_id: Asset ID/name
@@ -81,19 +131,47 @@ async def update_asset(
         dora_criticality_assessment: DORA criticality assessment code
         dora_criticality_justification: DORA criticality justification text
         dora_discontinuing_impact: DORA discontinuing impact code
-        sec_confidentiality: Confidentiality value 0-4 (0=undefined,1=low,2=med,3=high,4=critical)
-        sec_confidentiality_enabled: Enable confidentiality objective
-        sec_integrity: Integrity value 0-4
-        sec_integrity_enabled: Enable integrity objective
-        sec_availability: Availability value 0-4
-        sec_availability_enabled: Enable availability objective
-        dro_rto: Recovery Time Objective in seconds
-        dro_rpo: Recovery Point Objective in seconds
-        dro_mtd: Maximum Tolerable Downtime in seconds
+        sec_confidentiality: Confidentiality objective 0-4 (0=undefined,1=low,2=med,3=high,4=critical)
+        sec_confidentiality_enabled: Enable/disable confidentiality objective
+        sec_integrity: Integrity objective 0-4
+        sec_integrity_enabled: Enable/disable integrity objective
+        sec_availability: Availability objective 0-4
+        sec_availability_enabled: Enable/disable availability objective
+        dro_rto: Recovery Time Objective: seconds or duration ("90s", "30m", "2h", "1d", "1h30m"); 0 = not set
+        dro_rpo: Recovery Point Objective: seconds or duration; 0 = not set
+        dro_mtd: Maximum Tolerable Downtime: seconds or duration; 0 = not set
         asset_class: Asset class ID/name
+        sec_proof: Proof (traceability) objective 0-4
+        sec_proof_enabled: Enable/disable proof objective
+        sec_authenticity: Authenticity objective 0-4
+        sec_authenticity_enabled: Enable/disable authenticity objective
+        sec_privacy: Privacy objective 0-4
+        sec_privacy_enabled: Enable/disable privacy objective
+        sec_safety: Safety objective 0-4
+        sec_safety_enabled: Enable/disable safety objective
+        cap_confidentiality: Actual confidentiality capability 0-4
+        cap_confidentiality_enabled: Enable/disable confidentiality capability
+        cap_integrity: Actual integrity capability 0-4
+        cap_integrity_enabled: Enable/disable integrity capability
+        cap_availability: Actual availability capability 0-4
+        cap_availability_enabled: Enable/disable availability capability
+        cap_proof: Actual proof capability 0-4
+        cap_proof_enabled: Enable/disable proof capability
+        cap_authenticity: Actual authenticity capability 0-4
+        cap_authenticity_enabled: Enable/disable authenticity capability
+        cap_privacy: Actual privacy capability 0-4
+        cap_privacy_enabled: Enable/disable privacy capability
+        cap_safety: Actual safety capability 0-4
+        cap_safety_enabled: Enable/disable safety capability
+        rcap_rto: Actual recovery time: seconds or duration; 0 = not set
+        rcap_rpo: Actual recovery point: seconds or duration; 0 = not set
+        rcap_mtd: Actual maximum downtime: seconds or duration; 0 = not set
     """
     try:
         from ..resolvers import resolve_vulnerability_id
+
+        # Validate objectives first: a bad value sends nothing
+        changes = _collect_asset_objective_changes(locals())
 
         # Resolve asset name to ID if needed
         resolved_asset_id = resolve_asset_id(asset_id)
@@ -155,89 +233,21 @@ async def update_asset(
                 resolved_vulns.append(resolve_vulnerability_id(vuln))
             payload["vulnerabilities"] = resolved_vulns
 
-        needs_objectives = any(
-            p is not None
-            for p in [
-                sec_confidentiality,
-                sec_confidentiality_enabled,
-                sec_integrity,
-                sec_integrity_enabled,
-                sec_availability,
-                sec_availability_enabled,
-                dro_rto,
-                dro_rpo,
-                dro_mtd,
-            ]
-        )
-        if needs_objectives:
-            fetch_res = make_get_request(f"/assets/{resolved_asset_id}/")
-            current_asset = fetch_res.json() if fetch_res.status_code == 200 else {}
-
-            raw_sec = current_asset.get("security_objectives") or {}
-            cur_sec = raw_sec.get("objectives", {}) if isinstance(raw_sec, dict) else {}
-
-            raw_dro = current_asset.get("disaster_recovery_objectives") or {}
-            cur_dro = raw_dro.get("objectives", {}) if isinstance(raw_dro, dict) else {}
-
-            if any(
-                p is not None
-                for p in [
-                    sec_confidentiality,
-                    sec_confidentiality_enabled,
-                    sec_integrity,
-                    sec_integrity_enabled,
-                    sec_availability,
-                    sec_availability_enabled,
-                ]
-            ):
-
-                def _merge_cia(key, new_val, new_enabled):
-                    existing = cur_sec.get(key) or {"value": 0, "is_enabled": False}
-                    return {
-                        "value": new_val
-                        if new_val is not None
-                        else existing.get("value", 0),
-                        "is_enabled": new_enabled
-                        if new_enabled is not None
-                        else existing.get("is_enabled", False),
-                    }
-
-                payload["security_objectives"] = {
-                    "objectives": {
-                        "confidentiality": _merge_cia(
-                            "confidentiality",
-                            sec_confidentiality,
-                            sec_confidentiality_enabled,
-                        ),
-                        "integrity": _merge_cia(
-                            "integrity", sec_integrity, sec_integrity_enabled
-                        ),
-                        "availability": _merge_cia(
-                            "availability", sec_availability, sec_availability_enabled
-                        ),
-                    }
-                }
-
-            if any(p is not None for p in [dro_rto, dro_rpo, dro_mtd]):
-                payload["disaster_recovery_objectives"] = {
-                    "objectives": {
-                        "rto": {
-                            "value": dro_rto
-                            if dro_rto is not None
-                            else (cur_dro.get("rto") or {}).get("value", 0)
-                        },
-                        "rpo": {
-                            "value": dro_rpo
-                            if dro_rpo is not None
-                            else (cur_dro.get("rpo") or {}).get("value", 0)
-                        },
-                        "mtd": {
-                            "value": dro_mtd
-                            if dro_mtd is not None
-                            else (cur_dro.get("mtd") or {}).get("value", 0)
-                        },
-                    }
-                }
+        warning = ""
+        if changes:
+            # /object/ returns the stored (write-format) objectives and type;
+            # the detail endpoint only returns display lists.
+            fetch_res = make_get_request(f"/assets/{resolved_asset_id}/object/")
+            if fetch_res.status_code != 200:
+                return (
+                    "Error updating asset: could not read the stored asset "
+                    f"({fetch_res.status_code} - {fetch_res.text}); nothing sent"
+                )
+            current_asset = fetch_res.json() or {}
+            payload.update(_build_asset_objectives(changes, current_asset))
+            warning = _ignored_fields_warning(
+                changes, asset_type or current_asset.get("type")
+            )
 
         if not payload:
             return "Error: No fields provided to update"
@@ -246,11 +256,69 @@ async def update_asset(
 
         if res.status_code == 200:
             asset = res.json()
-            return f"Updated Asset: {asset.get('name')} (ID: {asset.get('id')})"
+            return (
+                f"Updated Asset: {asset.get('name')} (ID: {asset.get('id')})" + warning
+            )
         else:
             return f"Error updating asset: {res.status_code} - {res.text}"
     except Exception as e:
         return f"Error in update_asset: {str(e)}"
+
+
+async def update_team(
+    team_id: str,
+    name: str = None,
+    description: str = None,
+    folder_id: str = None,
+    team_email: str = None,
+    leader: str = None,
+    deputies: list = None,
+    members: list = None,
+) -> str:
+    """Update team properties
+
+    Args:
+        team_id: Team ID/name
+        name: New name
+        description: New description
+        folder_id: Folder ID/name
+        team_email: Team contact email
+        leader: Leader as User UUID, email or name ("" to remove the leader)
+        deputies: List of deputies as User UUIDs, emails or names (replaces existing)
+        members: List of members as User UUIDs, emails or names (replaces existing)
+    """
+    try:
+        resolved_team_id = resolve_team_id(team_id)
+
+        payload = {}
+
+        if name is not None:
+            payload["name"] = name
+        if description is not None:
+            payload["description"] = description
+        if folder_id is not None:
+            payload["folder"] = resolve_folder_id(folder_id)
+        if team_email is not None:
+            payload["team_email"] = team_email
+        if leader is not None:
+            payload["leader"] = resolve_user_id(leader) if leader else None
+        if deputies is not None:
+            payload["deputies"] = resolve_user_ids(deputies)
+        if members is not None:
+            payload["members"] = resolve_user_ids(members)
+
+        if not payload:
+            return "Error: No fields provided to update"
+
+        res = make_patch_request(f"/teams/{resolved_team_id}/", payload)
+
+        if res.status_code == 200:
+            team = res.json()
+            return f"Updated team: {team.get('name')} (ID: {team.get('id')})"
+        else:
+            return f"Error updating team: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in update_team: {str(e)}"
 
 
 async def update_risk_scenario(
@@ -258,7 +326,6 @@ async def update_risk_scenario(
     name: str = None,
     description: str = None,
     risk_assessment_id: str = None,
-    existing_controls: str = None,
     inherent_proba: int = None,
     inherent_impact: int = None,
     current_proba: int = None,
@@ -284,7 +351,6 @@ async def update_risk_scenario(
         name: New name
         description: New description
         risk_assessment_id: Risk assessment ID/name
-        existing_controls: Existing controls description
         inherent_proba: Inherent probability index (from risk matrix)
         inherent_impact: Inherent impact index (from risk matrix)
         current_proba: Current probability index (from risk matrix)
@@ -302,7 +368,9 @@ async def update_risk_scenario(
         vulnerabilities: List of vulnerability IDs/names exploited by this scenario (replaces existing)
         qualifications: List of qualifications: letters C/I/A(D)/T(P)
             (confidentiality/integrity/availability/proof), names or UUIDs (replaces existing)
-        owner: List of owners as actor UUIDs, emails or names (replaces existing)
+        owner: List of owners (users or teams) as actor UUIDs, emails or names
+            (replaces existing). Use get_users/get_teams to find a name, or
+            list_objects("actors") for the exact Actor UUID
     """
     try:
         # Resolve risk scenario name to ID if needed
@@ -315,8 +383,6 @@ async def update_risk_scenario(
             payload["name"] = name
         if description is not None:
             payload["description"] = description
-        if existing_controls is not None:
-            payload["existing_controls"] = existing_controls
         if inherent_proba is not None:
             payload["inherent_proba"] = inherent_proba
         if inherent_impact is not None:
@@ -1241,7 +1307,7 @@ async def update_task_template(
         link: Link to evidence (e.g. Jira ticket)
         folder_id: Folder ID/name
         assigned_to: List of assignees as actor UUIDs, emails or names
-        assets: Array of asset UUIDs
+        assets: List of asset IDs/names (resolved within folder_id when given; replaces existing)
         applied_controls: List of applied control IDs/names to associate with this task template. Can be None to leave unchanged, or empty list to clear associations. Elements should be strings representing control identifiers.
         compliance_assessments: Array of compliance assessment UUIDs
         risk_assessments: Array of risk assessment UUIDs
@@ -1278,8 +1344,17 @@ async def update_task_template(
             payload["link"] = link
         if assigned_to is not None:
             payload["assigned_to"] = resolve_actor_ids(assigned_to)
+        # Resolve folder name to ID if provided
+        resolved_folder_id = None
+        if folder_id is not None:
+            resolved_folder_id = resolve_folder_id(folder_id)
+            payload["folder"] = resolved_folder_id
+
         if assets is not None:
-            payload["assets"] = assets
+            payload["assets"] = [
+                resolve_asset_id(asset, folder_id=resolved_folder_id)
+                for asset in assets
+            ]
         if applied_controls is not None:
             resolved_controls = []
             for control in applied_controls:
@@ -1292,11 +1367,6 @@ async def update_task_template(
             payload["risk_assessments"] = risk_assessments
         if findings_assessment is not None:
             payload["findings_assessment"] = findings_assessment
-
-        # Resolve folder name to ID if provided
-        if folder_id is not None:
-            resolved_folder_id = resolve_folder_id(folder_id)
-            payload["folder"] = resolved_folder_id
 
         if not payload:
             return "Error: No fields provided to update"
@@ -1433,3 +1503,191 @@ async def delete_vulnerability(vulnerability_id: str) -> str:
             return f"Error deleting vulnerability: {res.status_code} - {res.text}"
     except Exception as e:
         return f"Error in delete_vulnerability: {str(e)}"
+
+
+async def update_incident(
+    incident_id: str,
+    name: str = None,
+    description: str = None,
+    ref_id: str = None,
+    status: str = None,
+    severity: int = None,
+    detection: str = None,
+    reported_at: str = None,
+    occurred_at: str = None,
+    resolved_at: str = None,
+    resolution: str = None,
+    is_bcp_activated: bool = None,
+    link: str = None,
+    folder_id: str = None,
+    threats: list = None,
+    owners: list = None,
+    assets: list = None,
+    qualifications: list = None,
+    entities: list = None,
+    applied_controls: list = None,
+    filtering_labels: list = None,
+) -> str:
+    """Partially update an incident (only provided fields are updated)
+
+    Relation lists replace the existing set; pass an empty list to clear a relation.
+
+    Args:
+        incident_id: Incident UUID or name
+        name: New name
+        description: Description
+        ref_id: Reference ID
+        status: new | ongoing | resolved | closed | dismissed
+        severity: 1 (critical) | 2 (major) | 3 (moderate) | 4 (minor) | 5 (low) | 6 (unknown)
+        detection: internally_detected | externally_detected
+        reported_at: Reported date/time (ISO 8601)
+        occurred_at: Occurrence date/time (ISO 8601, must not be after reported_at)
+        resolved_at: Resolution date/time (ISO 8601, must not be before occurred_at or reported_at)
+        resolution: Resolution notes
+        is_bcp_activated: Whether the business continuity plan was activated
+        link: External link (e.g. ticket URL)
+        folder_id: Folder ID/name
+        threats: List of threat IDs/names (resolved within the incident's folder, then Global; replaces existing)
+        owners: List of owners as actor UUIDs, emails or names (replaces existing)
+        assets: List of asset IDs/names (resolved within the incident's folder, then Global; replaces existing)
+        qualifications: List of qualifications: letters C/I/A/T, names or UUIDs (replaces existing)
+        entities: List of third-party entity IDs/names (replaces existing)
+        applied_controls: List of applied control IDs/names (resolved within the incident's folder, then Global; replaces existing)
+        filtering_labels: List of label UUIDs (replaces existing)
+    """
+    try:
+        resolved_id = resolve_incident_id(incident_id)
+
+        payload = {}
+        scope_folder = None
+        if folder_id is not None:
+            scope_folder = resolve_folder_id(folder_id)
+            payload["folder"] = scope_folder
+        elif threats or assets or applied_controls:
+            incident_res = make_get_request(f"/incidents/{resolved_id}/")
+            if incident_res.status_code != 200:
+                return (
+                    f"Error updating incident: {incident_res.status_code} - "
+                    f"{incident_res.text}"
+                )
+            folder = incident_res.json().get("folder")
+            scope_folder = folder.get("id") if isinstance(folder, dict) else folder
+
+        scalars = {
+            "name": name,
+            "description": description,
+            "ref_id": ref_id,
+            "status": status,
+            "severity": severity,
+            "detection": detection,
+            "reported_at": reported_at,
+            "occurred_at": occurred_at,
+            "resolved_at": resolved_at,
+            "resolution": resolution,
+            "is_bcp_activated": is_bcp_activated,
+            "link": link,
+        }
+        payload.update({k: v for k, v in scalars.items() if v is not None})
+
+        if threats is not None:
+            payload["threats"] = [
+                resolve_in_folder_or_global(resolve_threat_id, t, scope_folder)
+                for t in threats
+            ]
+        if owners is not None:
+            payload["owners"] = resolve_actor_ids(owners)
+        if assets is not None:
+            payload["assets"] = [
+                resolve_in_folder_or_global(resolve_asset_id, a, scope_folder)
+                for a in assets
+            ]
+        if qualifications is not None:
+            payload["qualifications"] = resolve_qualification_ids(qualifications)
+        if entities is not None:
+            payload["entities"] = [resolve_entity_id(e) for e in entities]
+        if applied_controls is not None:
+            payload["applied_controls"] = [
+                resolve_in_folder_or_global(resolve_applied_control_id, c, scope_folder)
+                for c in applied_controls
+            ]
+        if filtering_labels is not None:
+            payload["filtering_labels"] = filtering_labels
+
+        if not payload:
+            return "Error: No fields provided to update"
+
+        res = make_patch_request(f"/incidents/{resolved_id}/", payload)
+
+        if res.status_code == 200:
+            incident = res.json()
+            return (
+                f"Updated incident: {incident.get('name')} (ID: {incident.get('id')})"
+            )
+        else:
+            return f"Error updating incident: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in update_incident: {str(e)}"
+
+
+async def update_timeline_entry(
+    timeline_entry_id: str,
+    entry: str = None,
+    entry_type: str = None,
+    timestamp: str = None,
+    observation: str = None,
+    evidences: list = None,
+) -> str:
+    """Partially update an incident timeline entry (only provided fields are updated)
+
+    Only manual entries (detection, mitigation, observation) can be modified;
+    automatic severity/status change entries are read-only history.
+
+    Args:
+        timeline_entry_id: Timeline entry UUID (see list_objects("timeline_entries"))
+        entry: Short entry text, max 200 characters
+        entry_type: detection | mitigation | observation
+        timestamp: Date/time of the event (ISO 8601 with timezone, e.g. 2026-01-01T10:00:00Z; must not be in the future)
+        observation: Detailed observation notes
+        evidences: List of evidence UUIDs (replaces existing; empty list clears)
+    """
+    payload = {
+        k: v
+        for k, v in {
+            "entry": entry,
+            "entry_type": entry_type,
+            "timestamp": timestamp,
+            "observation": observation,
+            "evidences": evidences,
+        }.items()
+        if v is not None
+    }
+    if not _is_uuid(timeline_entry_id):
+        return "Error: timeline_entry_id must be a UUID"
+    if not payload:
+        return "Error: No fields provided to update"
+    if entry_type is not None and entry_type not in MANUAL_TIMELINE_ENTRY_TYPES:
+        return INVALID_TIMELINE_ENTRY_TYPE_ERROR
+    try:
+        endpoint = f"/timeline-entries/{timeline_entry_id}/"
+
+        current = make_get_request(endpoint)
+        if current.status_code != 200:
+            return (
+                f"Error updating timeline entry: {current.status_code} - {current.text}"
+            )
+        current_type = current.json().get("entry_type")
+        if current_type not in MANUAL_TIMELINE_ENTRY_TYPES:
+            return f"Error: cannot modify automatic timeline entry ({current_type})"
+
+        res = make_patch_request(endpoint, payload)
+
+        if res.status_code == 200:
+            updated = res.json()
+            return (
+                f"Updated timeline entry: {updated.get('entry')} "
+                f"(ID: {updated.get('id')})"
+            )
+        else:
+            return f"Error updating timeline entry: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in update_timeline_entry: {str(e)}"

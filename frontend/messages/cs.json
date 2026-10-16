@@ -626,6 +626,7 @@
 	"libraryLoadingError": "Došlo k chybě během načítání vaší knihovny",
 	"processingError": "Chyba zpracování",
 	"libraryAlreadyLoadedError": "Tato knihovna již byla načtena",
+	"libraryOutdatedError": "Novější verze této knihovny je již uložena. Pro import zadejte v souboru vyšší hodnotu \"version\".",
 	"invalidLibraryFileError": "Neplatný soubor knihovny. Ujistěte se, že formát je správný.",
 	"taintedFormMessage": "Chcete opustit tuto stránku? Změny, které jste provedli, nemusí být uloženy.",
 	"riskScenariosStatus": "Stav rizikových scénářů",
@@ -636,7 +637,6 @@
 	"attemptToDeleteOnlyAdminAccountError": "Nemůžete smazat jediný admin účet vaší aplikace.",
 	"attemptToRemoveOnlyAdminUserGroup": "Nemůžete odstranit jediného admin uživatele aplikace z admin uživatelské skupiny.",
 	"attemptToRemoveSelfFromDomainAdminGroup": "Nemůžete se sami odebrat ze skupiny správců domény. Požádejte o to jiného správce.",
-	"scoringHelpText": "Zaškrtněte pro povolení skórování",
 	"overrideScore": "Přepsat skóre",
 	"overrideScoreHelpText": "Ručně zafixovat skóre a přestat ho přepočítávat z odpovědí",
 	"automaticScore": "Automatické skóre",
@@ -3178,7 +3178,6 @@
 	"securityException": "Výjimka",
 	"addSecurityException": "Přidat výjimku",
 	"filterBy": "Filtrovat podle",
-	"demoDataAlreadyImported": "Ukázková data již byla importována. Smažte nebo přejmenujte svou stávající DEMO doménu.",
 	"findingsExplorer": "Kombinovaný přehled zjištění",
 	"findingsAssessment": "Sledování (Follow-up)",
 	"findingsAssessments": "Sledování (Follow-ups)",
@@ -3722,6 +3721,7 @@
 	"internalProcesses": "Interní procesy",
 	"financialCapacity": "Finanční kapacita",
 	"companyCulture": "Firemní kultura / Komunikace",
+	"companyCultureCommunication": "Firemní kultura / Komunikace",
 	"weeksOfMonthErrorMessage": "Musíte specifikovat alespoň jeden týden pro vybraný(é) den(dny)",
 	"associatedQuantitativeRiskHypotheses": "Přidružené hypotézy",
 	"associatedQuantitativeRiskScenarios": "Přidružené scénáře",
@@ -6136,7 +6136,6 @@
 	"ebaTAS18": "Cloudové služby: PaaS",
 	"ebaTAS19": "Cloudové služby: SaaS",
 	"createExpectedEvidence": "✨ Vytvořit očekávaný důkazní materiál \"{name}\"",
-	"realTimeContinuous": "Reálný čas (kontinuálně)",
 	"hourly": "Hodinově",
 	"daily": "Denně",
 	"quarterly": "Čtvrtletně",
@@ -6758,5 +6757,7 @@
 	"teamLeader": "Vedoucí",
 	"teamDeputy": "Zástupce vedoucího",
 	"teamMember": "Člen",
-	"noTeams": "Nejste členem žádného týmu."
+	"noTeams": "Nejste členem žádného týmu.",
+	"includeNotApplicableRequirements": "Zahrnout nepoužitelné požadavky",
+	"excludeNotApplicableRequirements": "Vyloučit nepoužitelné požadavky"
 }

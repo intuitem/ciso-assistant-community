@@ -1,6 +1,13 @@
 """Write/Create MCP tools for CISO Assistant"""
 
-from ..client import make_post_request, make_get_request
+from pathlib import Path
+
+from ..client import (
+    make_post_request,
+    make_get_request,
+    make_upload_request,
+    make_delete_request,
+)
 from ..resolvers import (
     resolve_ebios_rm_study_id,
     resolve_folder_id,
@@ -14,6 +21,11 @@ from ..resolvers import (
     resolve_reference_control_id,
     resolve_qualification_ids,
     resolve_risk_level_index,
+    resolve_threat_id,
+    resolve_entity_id,
+    resolve_incident_id,
+    resolve_in_folder_or_global,
+    parse_duration,
 )
 from ..config import GLOBAL_FOLDER_ID
 from ..utils.response_formatter import (
@@ -21,6 +33,193 @@ from ..utils.response_formatter import (
     error_response,
     http_error_response,
 )
+
+
+# ---------------------------------------------------------------------------
+# Asset objectives / capabilities (shared by create_asset and update_asset)
+# ---------------------------------------------------------------------------
+
+# Backend Asset.DEFAULT_SECURITY_OBJECTIVES / DEFAULT_DISASTER_RECOVERY_OBJECTIVES
+SECURITY_CRITERIA = (
+    "confidentiality",
+    "integrity",
+    "availability",
+    "proof",
+    "authenticity",
+    "privacy",
+    "safety",
+)
+RECOVERY_KEYS = ("rto", "rpo", "mtd")
+# Backend Asset.SECURITY_OBJECTIVES_SCALES: displayed label per raw value 0-4
+SECURITY_OBJECTIVES_SCALES = {
+    "1-3": [1, 2, 3, 3, 3],
+    "1-4": [1, 2, 3, 4, 4],
+    "1-5": [1, 2, 3, 4, 5],
+    "0-3": [0, 1, 2, 3, 3],
+    "0-4": [0, 1, 2, 3, 4],
+    "FIPS-199": ["low", "moderate", "moderate", "high", "high"],
+}
+DEFAULT_OBJECTIVE_SCALE = "1-4"
+
+
+def _collect_criteria(prefix: str, params: dict) -> dict:
+    """Pick the touched criteria among <prefix>_<criterion>[_enabled] params.
+
+    Returns {criterion: (value, enabled)} for every criterion with a value or
+    a flag. Values must be integers 0-4 (raises ValueError otherwise).
+    """
+    touched = {}
+    for criterion in SECURITY_CRITERIA:
+        value = params.get(f"{prefix}_{criterion}")
+        enabled = params.get(f"{prefix}_{criterion}_enabled")
+        if value is None and enabled is None:
+            continue
+        if value is not None and (
+            isinstance(value, bool) or not isinstance(value, int) or not 0 <= value <= 4
+        ):
+            raise ValueError(
+                f"{prefix}_{criterion} must be an integer between 0 and 4, got {value!r}"
+            )
+        if enabled is not None and not isinstance(enabled, bool):
+            raise ValueError(
+                f"{prefix}_{criterion}_enabled must be a boolean, got {enabled!r}"
+            )
+        touched[criterion] = (value, enabled)
+    return touched
+
+
+def _collect_durations(prefix: str, params: dict) -> dict:
+    """Pick the touched <prefix>_<rto|rpo|mtd> params, parsed to seconds."""
+    return {
+        key: parse_duration(params[f"{prefix}_{key}"])
+        for key in RECOVERY_KEYS
+        if params.get(f"{prefix}_{key}") is not None
+    }
+
+
+def _merge_criteria(current: dict, touched: dict) -> dict:
+    """Merge touched criteria over the stored ones.
+
+    Every stored key that is not touched is kept as is. A touched value
+    without its flag means enabled; a flag alone keeps the stored value.
+    """
+    merged = {k: dict(v) for k, v in (current or {}).items() if isinstance(v, dict)}
+    for criterion, (value, enabled) in touched.items():
+        entry = dict(merged.get(criterion) or {"value": 0, "is_enabled": False})
+        if value is not None:
+            entry["value"] = value
+        entry.setdefault("value", 0)
+        if enabled is not None:
+            entry["is_enabled"] = enabled
+        elif value is not None:
+            entry["is_enabled"] = True
+        else:
+            entry.setdefault("is_enabled", False)
+        merged[criterion] = entry
+    return merged
+
+
+def _merge_durations(current: dict, touched: dict) -> dict:
+    merged = {k: dict(v) for k, v in (current or {}).items() if isinstance(v, dict)}
+    for key, seconds in touched.items():
+        entry = dict(merged.get(key) or {})
+        entry["value"] = seconds
+        merged[key] = entry
+    return merged
+
+
+def _collect_asset_objective_changes(params: dict) -> dict:
+    """Validate and group the flat objective/capability params of an asset tool.
+
+    Returns {"security_objectives": {...touched}, "security_capabilities": ...,
+    "disaster_recovery_objectives": ..., "recovery_capabilities": ...} with
+    only the fields that have at least one touched key.
+    """
+    changes = {
+        "security_objectives": _collect_criteria("sec", params),
+        "security_capabilities": _collect_criteria("cap", params),
+        "disaster_recovery_objectives": _collect_durations("dro", params),
+        "recovery_capabilities": _collect_durations("rcap", params),
+    }
+    return {field: touched for field, touched in changes.items() if touched}
+
+
+def _read_objective_scale() -> str:
+    """Security objective scale from the general settings (backend default 1-4)."""
+    res = make_get_request("/settings/general/object/")
+    if res.status_code != 200:
+        raise ValueError(
+            f"could not read the security objective scale ({res.status_code}); "
+            "nothing sent"
+        )
+    scale = (res.json() or {}).get("security_objective_scale")
+    return scale if scale in SECURITY_OBJECTIVES_SCALES else DEFAULT_OBJECTIVE_SCALE
+
+
+def _canonical_value(value: int, scale: str) -> int:
+    """Value the web form would store: the first raw value showing the same label.
+
+    Under 1-4, raw 3 and 4 both display "4" and the form stores 3; storing the
+    same keeps MCP and UI values comparable and stable through /object/.
+    """
+    labels = SECURITY_OBJECTIVES_SCALES[scale]
+    return labels.index(labels[value])
+
+
+def _build_asset_objectives(changes: dict, current_asset: dict = None) -> dict:
+    """Payload fragment for the touched objective/capability fields.
+
+    current_asset is the stored asset as returned by /assets/{id}/object/
+    (update); None on create, where only the touched keys are sent.
+    Security values are normalized to the current scale as the web form does.
+    """
+    scale = None
+    if "security_objectives" in changes or "security_capabilities" in changes:
+        scale = _read_objective_scale()
+    payload = {}
+    for field, touched in changes.items():
+        stored = (current_asset or {}).get(field) or {}
+        stored = stored.get("objectives") if isinstance(stored, dict) else {}
+        stored = stored if isinstance(stored, dict) else {}
+        if field in ("security_objectives", "security_capabilities"):
+            touched = {
+                criterion: (
+                    _canonical_value(value, scale) if value is not None else None,
+                    enabled,
+                )
+                for criterion, (value, enabled) in touched.items()
+            }
+            merged = _merge_criteria(stored, touched)
+        else:
+            merged = _merge_durations(stored, touched)
+        payload[field] = {"objectives": merged}
+    return payload
+
+
+def _ignored_fields_warning(changes: dict, asset_type: str) -> str:
+    """Warning for fields the backend computes (and ignores) for this asset type."""
+    if asset_type == "SP":
+        ignored = [
+            f
+            for f in ("security_objectives", "disaster_recovery_objectives")
+            if f in changes
+        ]
+        why = "supporting assets inherit their objectives from their primary parents"
+    elif asset_type == "PR":
+        ignored = [
+            f
+            for f in ("security_capabilities", "recovery_capabilities")
+            if f in changes
+        ]
+        why = "primary assets aggregate their capabilities from their supporting assets"
+    else:
+        return ""
+    if not ignored:
+        return ""
+    return (
+        f"\nWARNING: {', '.join(ignored)} stored as asked, but the backend computes "
+        f"this for a {asset_type} asset and ignores the stored value ({why})."
+    )
 
 
 async def create_folder(
@@ -54,6 +253,59 @@ async def create_folder(
             return f"Error creating folder: {res.status_code} - {res.text}"
     except Exception as e:
         return f"Error in create_folder: {str(e)}"
+
+
+async def create_team(
+    name: str,
+    description: str = "",
+    folder_id: str = None,
+    team_email: str = None,
+    leader: str = None,
+    deputies: list = None,
+    members: list = None,
+) -> str:
+    """Create a team
+
+    Args:
+        name: Team name
+        description: Description
+        folder_id: Folder ID/name
+        team_email: Team contact email
+        leader: Leader as User UUID, email or name
+        deputies: List of deputies as User UUIDs, emails or names
+        members: List of members as User UUIDs, emails or names
+    """
+    try:
+        from ..resolvers import resolve_user_id, resolve_user_ids
+
+        if not folder_id and GLOBAL_FOLDER_ID:
+            folder_id = GLOBAL_FOLDER_ID
+
+        payload = {
+            "name": name,
+            "description": description,
+        }
+
+        if folder_id:
+            payload["folder"] = resolve_folder_id(folder_id)
+        if team_email is not None:
+            payload["team_email"] = team_email
+        if leader is not None:
+            payload["leader"] = resolve_user_id(leader)
+        if deputies is not None:
+            payload["deputies"] = resolve_user_ids(deputies)
+        if members is not None:
+            payload["members"] = resolve_user_ids(members)
+
+        res = make_post_request("/teams/", payload)
+
+        if res.status_code == 201:
+            team = res.json()
+            return f"Created team: {team.get('name')} (ID: {team.get('id')})"
+        else:
+            return f"Error creating team: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in create_team: {str(e)}"
 
 
 async def create_perimeter(
@@ -99,34 +351,97 @@ async def create_asset(
     description: str = "",
     asset_type: str = "PR",
     folder_id: str = None,
+    owner: list = None,
+    parent_assets: list = None,
     sec_confidentiality: int = None,
     sec_confidentiality_enabled: bool = None,
     sec_integrity: int = None,
     sec_integrity_enabled: bool = None,
     sec_availability: int = None,
     sec_availability_enabled: bool = None,
-    dro_rto: int = None,
-    dro_rpo: int = None,
-    dro_mtd: int = None,
+    sec_proof: int = None,
+    sec_proof_enabled: bool = None,
+    sec_authenticity: int = None,
+    sec_authenticity_enabled: bool = None,
+    sec_privacy: int = None,
+    sec_privacy_enabled: bool = None,
+    sec_safety: int = None,
+    sec_safety_enabled: bool = None,
+    dro_rto: int | str = None,
+    dro_rpo: int | str = None,
+    dro_mtd: int | str = None,
+    cap_confidentiality: int = None,
+    cap_confidentiality_enabled: bool = None,
+    cap_integrity: int = None,
+    cap_integrity_enabled: bool = None,
+    cap_availability: int = None,
+    cap_availability_enabled: bool = None,
+    cap_proof: int = None,
+    cap_proof_enabled: bool = None,
+    cap_authenticity: int = None,
+    cap_authenticity_enabled: bool = None,
+    cap_privacy: int = None,
+    cap_privacy_enabled: bool = None,
+    cap_safety: int = None,
+    cap_safety_enabled: bool = None,
+    rcap_rto: int | str = None,
+    rcap_rpo: int | str = None,
+    rcap_mtd: int | str = None,
 ) -> str:
     """Create asset in folder
+
+    Objectives (sec_*, dro_*) are effective on primary assets (supporting ones
+    inherit them); capabilities (cap_*, rcap_*) are effective on supporting
+    assets (primary ones aggregate them). A value without its _enabled flag
+    means enabled. Values 0-4 are stored as the web form would under the
+    configured scale (e.g. under 1-4, 3 and 4 both display "4" and are stored as 3).
 
     Args:
         name: Asset name
         description: Description
         asset_type: PR (Primary) | SP (Supporting)
         folder_id: Folder ID/name
-        sec_confidentiality: Confidentiality value 0-4 (0=undefined,1=low,2=med,3=high,4=critical)
+        owner: List of owners as actor UUIDs, emails or names
+        parent_assets: List of parent asset IDs/names
+        sec_confidentiality: Confidentiality objective 0-4 (0=undefined,1=low,2=med,3=high,4=critical)
         sec_confidentiality_enabled: Enable confidentiality objective
-        sec_integrity: Integrity value 0-4
+        sec_integrity: Integrity objective 0-4
         sec_integrity_enabled: Enable integrity objective
-        sec_availability: Availability value 0-4
+        sec_availability: Availability objective 0-4
         sec_availability_enabled: Enable availability objective
-        dro_rto: Recovery Time Objective in seconds
-        dro_rpo: Recovery Point Objective in seconds
-        dro_mtd: Maximum Tolerable Downtime in seconds
+        sec_proof: Proof (traceability) objective 0-4
+        sec_proof_enabled: Enable proof objective
+        sec_authenticity: Authenticity objective 0-4
+        sec_authenticity_enabled: Enable authenticity objective
+        sec_privacy: Privacy objective 0-4
+        sec_privacy_enabled: Enable privacy objective
+        sec_safety: Safety objective 0-4
+        sec_safety_enabled: Enable safety objective
+        dro_rto: Recovery Time Objective: seconds or duration ("90s", "30m", "2h", "1d", "1h30m"); 0 = not set
+        dro_rpo: Recovery Point Objective: seconds or duration; 0 = not set
+        dro_mtd: Maximum Tolerable Downtime: seconds or duration; 0 = not set
+        cap_confidentiality: Actual confidentiality capability 0-4
+        cap_confidentiality_enabled: Enable confidentiality capability
+        cap_integrity: Actual integrity capability 0-4
+        cap_integrity_enabled: Enable integrity capability
+        cap_availability: Actual availability capability 0-4
+        cap_availability_enabled: Enable availability capability
+        cap_proof: Actual proof capability 0-4
+        cap_proof_enabled: Enable proof capability
+        cap_authenticity: Actual authenticity capability 0-4
+        cap_authenticity_enabled: Enable authenticity capability
+        cap_privacy: Actual privacy capability 0-4
+        cap_privacy_enabled: Enable privacy capability
+        cap_safety: Actual safety capability 0-4
+        cap_safety_enabled: Enable safety capability
+        rcap_rto: Actual recovery time: seconds or duration; 0 = not set
+        rcap_rpo: Actual recovery point: seconds or duration; 0 = not set
+        rcap_mtd: Actual maximum downtime: seconds or duration; 0 = not set
     """
     try:
+        # Validate objectives first: a bad value sends nothing
+        changes = _collect_asset_objective_changes(locals())
+
         # If no folder specified, try to get the default folder
         if not folder_id and GLOBAL_FOLDER_ID:
             folder_id = GLOBAL_FOLDER_ID
@@ -144,56 +459,20 @@ async def create_asset(
         if folder_id:
             payload["folder"] = folder_id
 
-        sec_params = [
-            sec_confidentiality,
-            sec_confidentiality_enabled,
-            sec_integrity,
-            sec_integrity_enabled,
-            sec_availability,
-            sec_availability_enabled,
-        ]
-        if any(p is not None for p in sec_params):
-            payload["security_objectives"] = {
-                "objectives": {
-                    "confidentiality": {
-                        "value": sec_confidentiality
-                        if sec_confidentiality is not None
-                        else 0,
-                        "is_enabled": sec_confidentiality_enabled
-                        if sec_confidentiality_enabled is not None
-                        else sec_confidentiality is not None,
-                    },
-                    "integrity": {
-                        "value": sec_integrity if sec_integrity is not None else 0,
-                        "is_enabled": sec_integrity_enabled
-                        if sec_integrity_enabled is not None
-                        else sec_integrity is not None,
-                    },
-                    "availability": {
-                        "value": sec_availability
-                        if sec_availability is not None
-                        else 0,
-                        "is_enabled": sec_availability_enabled
-                        if sec_availability_enabled is not None
-                        else sec_availability is not None,
-                    },
-                }
-            }
+        if owner is not None:
+            payload["owner"] = resolve_actor_ids(owner)
+        if parent_assets is not None:
+            payload["parent_assets"] = [resolve_asset_id(p) for p in parent_assets]
 
-        if any(p is not None for p in [dro_rto, dro_rpo, dro_mtd]):
-            payload["disaster_recovery_objectives"] = {
-                "objectives": {
-                    "rto": {"value": dro_rto if dro_rto is not None else 0},
-                    "rpo": {"value": dro_rpo if dro_rpo is not None else 0},
-                    "mtd": {"value": dro_mtd if dro_mtd is not None else 0},
-                }
-            }
+        payload.update(_build_asset_objectives(changes))
 
         res = make_post_request("/assets/", payload)
 
         if res.status_code == 201:
             asset = res.json()
-            return f"Created asset: {asset.get('name')} (ID: {asset.get('id')})"
+            return f"Created asset: {asset.get('name')} (ID: {asset.get('id')})" + (
+                _ignored_fields_warning(changes, asset_type)
+            )
         else:
             return f"Error creating asset: {res.status_code} - {res.text}"
     except Exception as e:
@@ -481,7 +760,6 @@ async def create_risk_scenario(
     description: str = "",
     risk_assessment_id: str = None,
     folder_id: str = None,
-    existing_controls: str = "",
     current_proba: int = None,
     current_impact: int = None,
     assets: list = None,
@@ -506,7 +784,6 @@ async def create_risk_scenario(
         description: Description
         risk_assessment_id: Risk assessment ID/name
         folder_id: Folder ID/name
-        existing_controls: Existing controls description
         current_proba: Probability 0-4 (0=very low, 4=very high)
         current_impact: Impact 0-4 (0=very low, 4=very high)
         assets: List of asset IDs/names
@@ -549,9 +826,6 @@ async def create_risk_scenario(
 
         if risk_assessment_id:
             payload["risk_assessment"] = risk_assessment_id
-
-        if existing_controls:
-            payload["existing_controls"] = existing_controls
 
         if current_proba is not None:
             payload["current_proba"] = current_proba
@@ -1322,3 +1596,305 @@ async def create_vulnerability(
             return f"Error creating vulnerability: {res.status_code} - {res.text}"
     except Exception as e:
         return f"Error in create_vulnerability: {str(e)}"
+
+
+def _human_size(num_bytes: int) -> str:
+    """Decimal units, matching the backend's ATTACHMENT_MAX_SIZE_MB check."""
+    if num_bytes < 1000:
+        return f"{num_bytes} B"
+    if num_bytes < 1000**2:
+        return f"{num_bytes / 1000:.1f} KB"
+    return f"{num_bytes / 1000**2:.1f} MB"
+
+
+def _delete_evidence_quietly(evidence_id) -> bool:
+    """Roll back a just-created evidence; never raises, True on a 2xx."""
+    try:
+        res = make_delete_request(f"/evidences/{evidence_id}/")
+        return 200 <= res.status_code < 300
+    except Exception:
+        return False
+
+
+def _attachment_stored(evidence_id):
+    """True/False if the server says whether the file was stored, None when
+    that cannot be checked."""
+    try:
+        res = make_get_request(f"/evidences/{evidence_id}/")
+        if res.status_code != 200:
+            return None
+        return bool(res.json().get("attachment"))
+    except Exception:
+        return None
+
+
+def _rollback_note(evidence_id) -> str:
+    if _delete_evidence_quietly(evidence_id):
+        return ""
+    return f" (could not delete empty evidence {evidence_id}, remove it manually)"
+
+
+async def create_evidence(
+    file_path: str,
+    name: str = None,
+    description: str = None,
+    folder_id: str = None,
+) -> str:
+    """Create a new evidence with one attachment read from a local file
+
+    One file per call: call again to attach several files (one evidence each).
+    Only available with the local stdio transport.
+    The returned evidence ID can then be linked through the `evidences`
+    parameter of other tools (e.g. task templates).
+
+    The file must exist on the user's disk. Screenshots pasted into the chat
+    work only when the client saved them locally and shows their path (Claude
+    Code does, e.g. "[Image: source: <path>]"): pass that path. Clients that
+    keep pasted images only in the conversation (e.g. Claude Desktop) give no
+    path: ask the user to save the file and give its path.
+
+    Args:
+        file_path: Local path to the file (~ is expanded); not inside a
+            hidden directory. The server checks the file type and size
+        name: Evidence name (defaults to the file name)
+        description: Description
+        folder_id: Folder ID/name
+    """
+    try:
+        path = Path(file_path).expanduser().resolve()
+        if any(part.startswith(".") for part in path.parts):
+            return f"Error: refusing a hidden file or directory: {file_path}"
+        if not path.is_file():
+            return f"Error: file not found: {file_path}"
+        size = path.stat().st_size
+        if not size:
+            return f"Error: file is empty: {file_path}"
+        filename = path.name
+
+        # Opened before creating the evidence: an unreadable file leaves no record.
+        with path.open("rb") as f:
+            if not folder_id and GLOBAL_FOLDER_ID:
+                folder_id = GLOBAL_FOLDER_ID
+
+            payload = {"name": name or filename}
+            if folder_id:
+                payload["folder"] = resolve_folder_id(folder_id)
+            if description is not None:
+                payload["description"] = description
+
+            res = make_post_request("/evidences/", payload)
+            if res.status_code != 201:
+                return f"Error creating evidence: {res.status_code} - {res.text}"
+
+            evidence = res.json()
+            evidence_id = evidence.get("id")
+
+            created = (
+                f"Created evidence: {evidence.get('name')} (ID: {evidence_id}) "
+                f"with attachment {filename} ({_human_size(size)})"
+            )
+
+            try:
+                upload = make_upload_request(
+                    f"/evidences/{evidence_id}/upload/", filename, f
+                )
+            except Exception as e:
+                if _attachment_stored(evidence_id):
+                    return created
+                return (
+                    f"Error uploading attachment, outcome unknown: {e} "
+                    f"(evidence {evidence_id} kept: check it before retrying)"
+                )
+
+            if upload.status_code != 200:
+                return (
+                    f"Error uploading attachment: {upload.status_code} - {upload.text}"
+                    f"{_rollback_note(evidence_id)}"
+                )
+            if _attachment_stored(evidence_id) is False:
+                return (
+                    "Error uploading attachment: the server stored no file"
+                    f"{_rollback_note(evidence_id)}"
+                )
+
+            return created
+    except Exception as e:
+        return f"Error in create_evidence: {str(e)}"
+
+
+async def create_incident(
+    name: str,
+    description: str = None,
+    ref_id: str = None,
+    status: str = None,
+    severity: int = None,
+    detection: str = None,
+    reported_at: str = None,
+    occurred_at: str = None,
+    resolved_at: str = None,
+    resolution: str = None,
+    is_bcp_activated: bool = None,
+    link: str = None,
+    folder_id: str = None,
+    threats: list = None,
+    owners: list = None,
+    assets: list = None,
+    qualifications: list = None,
+    entities: list = None,
+    applied_controls: list = None,
+    filtering_labels: list = None,
+) -> str:
+    """Create a new incident
+
+    Args:
+        name: Incident name (required)
+        description: Description
+        ref_id: Reference ID
+        status: new | ongoing | resolved | closed | dismissed (default: new)
+        severity: 1 (critical) | 2 (major) | 3 (moderate) | 4 (minor) | 5 (low) | 6 (unknown) (default: 3)
+        detection: internally_detected | externally_detected
+        reported_at: Reported date/time (ISO 8601, defaults to now)
+        occurred_at: Occurrence date/time (ISO 8601, must not be after reported_at)
+        resolved_at: Resolution date/time (ISO 8601, must not be before occurred_at or reported_at)
+        resolution: Resolution notes
+        is_bcp_activated: Whether the business continuity plan was activated
+        link: External link (e.g. ticket URL)
+        folder_id: Folder ID/name (default: Global)
+        threats: List of threat IDs/names (resolved within the incident's folder, then Global)
+        owners: List of owners as actor UUIDs, emails or names
+        assets: List of asset IDs/names (resolved within the incident's folder, then Global)
+        qualifications: List of qualifications: letters C/I/A/T, names or UUIDs
+        entities: List of third-party entity IDs/names
+        applied_controls: List of applied control IDs/names (resolved within the incident's folder, then Global)
+        filtering_labels: List of label UUIDs
+    """
+    try:
+        scope_folder = resolve_folder_id(folder_id) if folder_id else None
+        folder = scope_folder or GLOBAL_FOLDER_ID
+
+        payload = {"name": name}
+        if folder:
+            payload["folder"] = folder
+
+        scalars = {
+            "description": description,
+            "ref_id": ref_id,
+            "status": status,
+            "severity": severity,
+            "detection": detection,
+            "reported_at": reported_at,
+            "occurred_at": occurred_at,
+            "resolved_at": resolved_at,
+            "resolution": resolution,
+            "is_bcp_activated": is_bcp_activated,
+            "link": link,
+        }
+        payload.update({k: v for k, v in scalars.items() if v is not None})
+
+        if threats:
+            payload["threats"] = [
+                resolve_in_folder_or_global(resolve_threat_id, t, scope_folder)
+                for t in threats
+            ]
+        if owners:
+            payload["owners"] = resolve_actor_ids(owners)
+        if assets:
+            payload["assets"] = [
+                resolve_in_folder_or_global(resolve_asset_id, a, scope_folder)
+                for a in assets
+            ]
+        if qualifications:
+            payload["qualifications"] = resolve_qualification_ids(qualifications)
+        if entities:
+            payload["entities"] = [resolve_entity_id(e) for e in entities]
+        if applied_controls:
+            payload["applied_controls"] = [
+                resolve_in_folder_or_global(resolve_applied_control_id, c, scope_folder)
+                for c in applied_controls
+            ]
+        if filtering_labels:
+            payload["filtering_labels"] = filtering_labels
+
+        res = make_post_request("/incidents/", payload)
+
+        if res.status_code == 201:
+            incident = res.json()
+            return (
+                f"Created incident: {incident.get('name')} (ID: {incident.get('id')})"
+            )
+        else:
+            return f"Error creating incident: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in create_incident: {str(e)}"
+
+
+# Backend TimelineEntry.EntryType.get_manual_entry_types(); severity_changed and
+# status_changed are system-generated history and never accepted as input.
+MANUAL_TIMELINE_ENTRY_TYPES = ("detection", "mitigation", "observation")
+INVALID_TIMELINE_ENTRY_TYPE_ERROR = (
+    f"Error: entry_type must be one of {', '.join(MANUAL_TIMELINE_ENTRY_TYPES)}"
+)
+
+
+async def create_timeline_entry(
+    incident_id: str,
+    entry: str,
+    entry_type: str = None,
+    timestamp: str = None,
+    observation: str = None,
+    evidences: list = None,
+) -> str:
+    """Add an entry to an incident's timeline (detection, mitigation or observation)
+
+    The author is the API user and the folder is the incident's folder.
+
+    Args:
+        incident_id: Incident UUID or name (required)
+        entry: Short entry text, max 200 characters (required)
+        entry_type: detection | mitigation | observation (default: observation)
+        timestamp: Date/time of the event (ISO 8601 with timezone, e.g. 2026-01-01T10:00:00Z; defaults to now, must not be in the future)
+        observation: Detailed observation notes
+        evidences: List of evidence UUIDs
+    """
+    if entry_type is not None and entry_type not in MANUAL_TIMELINE_ENTRY_TYPES:
+        return INVALID_TIMELINE_ENTRY_TYPE_ERROR
+    try:
+        resolved_incident = resolve_incident_id(incident_id)
+
+        # Send the incident's folder so the backend RBAC add check is scoped to
+        # the incident's domain (it falls back to the root folder otherwise).
+        incident_res = make_get_request(f"/incidents/{resolved_incident}/")
+        if incident_res.status_code != 200:
+            return (
+                f"Error creating timeline entry: {incident_res.status_code} - "
+                f"{incident_res.text}"
+            )
+        folder = incident_res.json().get("folder")
+        if isinstance(folder, dict):
+            folder = folder.get("id")
+
+        payload = {"incident": resolved_incident, "entry": entry}
+        if folder:
+            payload["folder"] = folder
+
+        scalars = {
+            "entry_type": entry_type,
+            "timestamp": timestamp,
+            "observation": observation,
+        }
+        payload.update({k: v for k, v in scalars.items() if v is not None})
+        if evidences is not None:
+            payload["evidences"] = evidences
+
+        res = make_post_request("/timeline-entries/", payload)
+
+        if res.status_code == 201:
+            created = res.json()
+            return (
+                f"Created timeline entry: {created.get('entry')} "
+                f"(ID: {created.get('id')})"
+            )
+        else:
+            return f"Error creating timeline entry: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in create_timeline_entry: {str(e)}"

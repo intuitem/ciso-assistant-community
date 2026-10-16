@@ -19,6 +19,8 @@ READER_PERMISSIONS_LIST = [
     "view_complianceassessment",
     "view_entityscore",
     "view_entity",
+    "view_tier",
+    "view_entitytierchange",
     "view_entityassessment",
     "view_evidence",
     "view_evidencerevision",
@@ -105,6 +107,7 @@ READER_PERMISSIONS_LIST = [
     "view_datatransfer",
     "view_rightrequest",
     "view_databreach",
+    "view_dpiarequirementchange",
     # campaigns,
     "view_campaign",
     "view_organisationobjective",
@@ -219,6 +222,8 @@ BASELINE_READER_PERMISSIONS_LIST = [
     "view_assetcapability",
     "view_objectclassification",
     "view_entity",
+    "view_tier",
+    "view_entitytierchange",
     "view_documenttemplate",
     "view_customfielddefinition",
     "view_requirementmapping",
@@ -312,6 +317,7 @@ APPROVER_PERMISSIONS_LIST = [
     "view_organisationissue",
     # privacy,
     "view_processing",
+    "view_dpiarequirementchange",
     "view_purpose",
     "view_personaldata",
     "view_datasubject",
@@ -462,6 +468,8 @@ ANALYST_PERMISSIONS_LIST = [
     "change_entityscore",
     "delete_entityscore",
     "view_entity",
+    "view_tier",
+    "view_entitytierchange",
     "view_entityassessment",
     "view_evidence",
     "view_folder",
@@ -700,6 +708,7 @@ ANALYST_PERMISSIONS_LIST = [
     "change_databreach",
     "view_databreach",
     "delete_databreach",
+    "view_dpiarequirementchange",
     # workflows — view-only for v1 (analyst is a workflow consumer, not an
     # author/operator yet); expand when the analyst tier is fleshed out.
     "view_workflow",
@@ -928,6 +937,11 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_entityscore",
     "delete_entityscore",
     "view_entity",
+    "view_tier",
+    "view_entitytierchange",
+    "add_tier",
+    "change_tier",
+    "delete_tier",
     "view_entityassessment",
     "view_evidence",
     "view_folder",
@@ -1212,6 +1226,7 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_databreach",
     "view_databreach",
     "delete_databreach",
+    "view_dpiarequirementchange",
     # workflows
     "view_workflow",
     "add_workflow",
@@ -1610,6 +1625,11 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "change_entityscore",
     "delete_entityscore",
     "view_entity",
+    "view_tier",
+    "view_entitytierchange",
+    "add_tier",
+    "change_tier",
+    "delete_tier",
     "delete_entity",
     "add_representative",
     "change_representative",
@@ -1736,6 +1756,7 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "change_databreach",
     "view_databreach",
     "delete_databreach",
+    "view_dpiarequirementchange",
     # incidents,
     "add_incident",
     "view_incident",
@@ -2428,6 +2449,13 @@ def startup(sender=None, **kwargs):
         Terminology.create_default_entity_score_providers()
     except Exception as e:
         logger.error("Error creating default Entity Score Providers", exc_info=True)
+
+    try:
+        from tprm.models import Tier
+
+        Tier.create_default_tiers()
+    except Exception as e:
+        logger.error("Error creating default Tiers", exc_info=True)
 
     try:
         Terminology.create_default_metric_units()

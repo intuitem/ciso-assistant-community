@@ -18,7 +18,7 @@ from core.serializer_fields import (
     PathField,
 )
 from core.constants import LEGACY_TTP_LIBRARIES
-from core.utils import time_state
+from core.utils import get_global_currency, time_state
 from ebios_rm.models import EbiosRMStudy, Stakeholder
 from tprm.models import Contract, Solution
 from threat_modeling.models import ThreatModel
@@ -30,6 +30,7 @@ from core.commitment import COMMITMENT_LIST_FIELDS, CommitmentSerializerMixin
 from iam.models import *
 from django.contrib.auth.models import Permission
 
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework.exceptions import APIException, PermissionDenied
 from django.core.exceptions import FieldDoesNotExist
@@ -489,6 +490,37 @@ class RiskAcceptanceWriteSerializer(BaseModelSerializer):
             raise serializers.ValidationError(
                 {"approver": "An approver is required to submit for approval."}
             )
+        if self.instance and not {"approver", "folder", "risk_scenarios"} & set(data):
+            return super().validate(data)
+        approver = (
+            data["approver"]
+            if "approver" in data
+            else getattr(self.instance, "approver", None)
+        )
+        if not approver:
+            return super().validate(data)
+        folder = data.get("folder") or (
+            self.instance.folder if self.instance else Folder.get_root_folder()
+        )
+        scenarios = data.get("risk_scenarios")
+        if scenarios is None:
+            scenarios = self.instance.risk_scenarios.all() if self.instance else []
+        folders = {folder} | set(
+            Folder.objects.filter(
+                id__in=RiskScenario.objects.filter(
+                    id__in=[s.id for s in scenarios]
+                ).values("risk_assessment__folder")
+            )
+        )
+        perm = Permission.objects.get(codename="approve_riskacceptance")
+        if any(
+            not RoleAssignment.is_access_allowed(approver, perm, f) for f in folders
+        ):
+            raise serializers.ValidationError(
+                {
+                    "approver": "The approver is not allowed to approve risk acceptances in this domain."
+                }
+            )
         return super().validate(data)
 
     def create(self, validated_data):
@@ -828,6 +860,45 @@ class AssetWriteSerializer(
     class Meta:
         model = Asset
         exclude = ["business_value"]
+
+    def get_fields(self):
+        fields = super().get_fields()
+        # Document the stored dict shape: reads return a display list that can't be written back (#4526)
+        for name, jsonschema, example in (
+            (
+                "security_objectives",
+                Asset.SECURITY_OBJECTIVES_JSONSCHEMA,
+                {"confidentiality": {"value": 2, "is_enabled": True}},
+            ),
+            (
+                "security_capabilities",
+                Asset.SECURITY_OBJECTIVES_JSONSCHEMA,
+                {"confidentiality": {"value": 2, "is_enabled": True}},
+            ),
+            (
+                "disaster_recovery_objectives",
+                Asset.DISASTER_RECOVERY_OBJECTIVES_JSONSCHEMA,
+                {"rto": {"value": 3600}},
+            ),
+            (
+                "recovery_capabilities",
+                Asset.DISASTER_RECOVERY_OBJECTIVES_JSONSCHEMA,
+                {"rto": {"value": 3600}},
+            ),
+        ):
+            (item,) = jsonschema["properties"]["objectives"][
+                "patternProperties"
+            ].values()
+            # OpenAPI 3.0 has no patternProperties
+            schema = {
+                "type": "object",
+                "properties": {
+                    "objectives": {"type": "object", "additionalProperties": item}
+                },
+                "example": {"objectives": example},
+            }
+            extend_schema_field(schema)(fields[name])
+        return fields
 
     def validate(self, data):
         self._check_linked_assets_changeable(data)
@@ -1574,6 +1645,22 @@ class AppliedControlWriteSerializer(
         required=False, default=False, write_only=True
     )
 
+    def validate_cost(self, value):
+        """Keep the stored currency when an update sends a cost without one.
+
+        New controls are handled by ``AppliedControl.save()``, which fills a
+        missing currency from the global setting.
+        """
+        existing = getattr(self.instance, "cost", None)
+        if (
+            isinstance(value, dict)
+            and not value.get("currency")
+            and isinstance(existing, dict)
+            and existing.get("currency")
+        ):
+            value["currency"] = existing["currency"]
+        return value
+
     def validate(self, attrs):
         return self.validate_commitment(super().validate(attrs))
 
@@ -1718,6 +1805,7 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
         source="get_csf_function_display"
     )  # type : get_type_display
     evidences = FieldsRelatedField(many=True)
+    metric_instances = FieldsRelatedField(many=True)
     objectives = FieldsRelatedField(many=True)
     effort = serializers.CharField(source="get_effort_display")
     control_impact = serializers.CharField(source="get_control_impact_display")
@@ -1753,9 +1841,7 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
         return time_state(obj.eta.isoformat())
 
     def get_currency(self, obj):
-        if not obj.cost:
-            return "€"  # Default currency
-        return obj.cost.get("currency", "€")
+        return (obj.cost or {}).get("currency") or get_global_currency()
 
     def get_annual_cost_display(self, obj):
         annual_cost = obj.annual_cost
@@ -3106,6 +3192,7 @@ class FrameworkReadSerializer(ReferentialSerializer):
     third_party_field_visibility = serializers.SerializerMethodField()
 
     implementation_groups_definition = serializers.SerializerMethodField()
+    default_scoring = serializers.DictField(read_only=True)
 
     def get_implementation_groups_definition(self, obj):
         return obj.get_implementation_groups_definition_translated()
@@ -3158,6 +3245,34 @@ class FrameworkWriteSerializer(FrameworkReadSerializer):
     implementation_groups_definition = serializers.JSONField(
         required=False, allow_null=True
     )
+    score_calculation_method = serializers.ChoiceField(
+        choices=ComplianceAssessment.CalculationMethod.choices, required=False
+    )
+
+    SCORING_DEFAULT_FIELDS = (
+        "min_score",
+        "max_score",
+        "anchor_na_to_target",
+        "target_score",
+        "implementation_groups_definition",
+    )
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        if any(field in attrs for field in self.SCORING_DEFAULT_FIELDS):
+            current = {
+                field: attrs.get(
+                    field,
+                    getattr(self.instance, field, None)
+                    if self.instance
+                    else Framework._meta.get_field(field).get_default(),
+                )
+                for field in self.SCORING_DEFAULT_FIELDS
+            }
+            if problem := Framework.scoring_defaults_problem(**current):
+                error_key, _detail = problem
+                raise serializers.ValidationError({"target_score": error_key})
+        return attrs
 
     def create(self, validated_data):
         # Strip any non-model fields that leak through from the read serializer
@@ -3643,6 +3758,8 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     selected_implementation_groups = serializers.ReadOnlyField(
         source="get_selected_implementation_groups"
     )
+    framework_exports = serializers.ReadOnlyField()
+    outcome_rules = serializers.ReadOnlyField()
     progress = serializers.SerializerMethodField()
     answers_progress = serializers.SerializerMethodField()
     assets = FieldsRelatedField(many=True)
@@ -3747,6 +3864,7 @@ class ComplianceAssessmentListSerializer(BaseModelSerializer):
             "version",
             "framework",
             "computed_outcome",
+            "computed_values",
             "folder",
             "perimeter",
             "progress",
@@ -3837,6 +3955,7 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
                 )
 
         self._validate_score_scale(attrs, confirm=attrs.pop("confirm_rescale", False))
+        self._apply_default_scoring(attrs)
 
         target = attrs.get(
             "target_score",
@@ -3876,6 +3995,36 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
                     )
 
         return super().validate(attrs)
+
+    def _apply_default_scoring(self, attrs):
+        """New audit: the framework's scoring settings fill the fields the caller
+        left out, so the API, presets and imports match the form. A copy of an
+        audit on the same framework keeps the caller's settings."""
+        framework = attrs.get("framework")
+        baseline = attrs.get("baseline")
+        if (
+            self.instance
+            or not framework
+            or (baseline and baseline.framework_id == framework.id)
+        ):
+            return
+        defaults = framework.default_scoring_for(
+            attrs.get("selected_implementation_groups")
+        )
+        # The framework's target is on the framework scale: carry it over to the
+        # audit's (resolved by _validate_score_scale).
+        framework_range = (framework.min_score, framework.max_score)
+        audit_range = getattr(self, "_effective_score_range", None)
+        if (
+            defaults.get("target_score") is not None
+            and audit_range
+            and tuple(audit_range) != framework_range
+        ):
+            defaults["target_score"] = rescale_score(
+                defaults["target_score"], framework_range, audit_range, integer=False
+            )
+        for field, value in defaults.items():
+            attrs.setdefault(field, value)
 
     def _validate_score_scale(self, attrs, confirm=False):
         scale_fields = {
@@ -4049,13 +4198,13 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
         old_scoring_enabled = instance.scoring_enabled
 
         with transaction.atomic():
+            # Stored scores move to the new scale first, so that save()
+            # snapshots today's metrics after the move.
+            if rescale := getattr(self, "_score_rescale", None):
+                instance.rescale_requirement_scores(*rescale)
+
             # Perform the main update (fields + M2M)
             updated_instance = super().update(instance, validated_data)
-
-            if rescale := getattr(self, "_score_rescale", None):
-                updated_instance.rescale_requirement_scores(*rescale)
-                # save() snapshotted today's metrics before the scores moved.
-                updated_instance.upsert_daily_metrics()
 
             # For dynamic frameworks, recompute IGs from current answers so the
             # answer-driven calc always wins over any manual override submitted
@@ -4169,6 +4318,7 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
     class Meta:
         model = ComplianceAssessment
         fields = "__all__"
+        read_only_fields = ["computed_outcome", "computed_values"]
 
 
 class ComplianceAssessmentImportExportSerializer(BaseModelSerializer):
@@ -4199,6 +4349,7 @@ class ComplianceAssessmentImportExportSerializer(BaseModelSerializer):
             "framework",
             "selected_implementation_groups",
             "computed_outcome",
+            "computed_values",
             "min_score",
             "max_score",
             "scores_definition",
@@ -4834,6 +4985,12 @@ class AnswerWriteSerializer(BaseModelSerializer):
                 raise serializers.ValidationError(
                     "Answers can only be modified while the response is in progress."
                 )
+            if (
+                question
+                and "value" in attrs
+                and response.changes_locked_subject({question.urn: attrs["value"]})
+            ):
+                raise serializers.ValidationError({"value": "subjectLocked"})
             # Same rule as the `answers` dict on the response itself: folder-level rights
             # on Answer are not rights over someone else's request.
             request = self.context.get("request")
@@ -5261,6 +5418,7 @@ class QuickFormResponseImportExportSerializer(BaseModelSerializer):
             "eta",
             "due_date",
             "computed_outcome",
+            "computed_values",
             "score",
             "started_at",
             "submitted_at",
@@ -7215,11 +7373,12 @@ class ComplianceAssessmentEvidenceSerializer(BaseModelSerializer):
         pk = self.context.get("pk")
         if pk is None:
             return {"direct_links": [], "indirect_links": []}
+        indirect_evidence_links = self.context.get("indirect_evidence_links") or {}
 
         # Get requirement assessments for this compliance assessment
         requirement_assessments = RequirementAssessment.objects.filter(
             compliance_assessment=pk
-        ).prefetch_related("applied_controls")
+        ).prefetch_related("evidences")
 
         direct_links = []
         indirect_links = []
@@ -7236,20 +7395,20 @@ class ComplianceAssessmentEvidenceSerializer(BaseModelSerializer):
                     }
                 )
 
-        # Indirect links - evidence is linked through applied controls
+        # Indirect links - evidence is linked through an applied control or a
+        # task template attached to the requirement assessment (precomputed in the view)
         for req_assessment in requirement_assessments:
-            for applied_control in req_assessment.applied_controls.all():
-                if obj in applied_control.evidences.all():
-                    indirect_links.append(
-                        {
-                            "requirement_assessment_id": str(req_assessment.id),
-                            "requirement_assessment_name": str(
-                                req_assessment.requirement.safe_display_str
-                            ),
-                            "applied_control_id": str(applied_control.id),
-                            "applied_control_name": applied_control.name,
-                        }
-                    )
+            via_names = indirect_evidence_links.get((req_assessment.id, obj.id), [])
+            for via_name in via_names:
+                indirect_links.append(
+                    {
+                        "requirement_assessment_id": str(req_assessment.id),
+                        "requirement_assessment_name": str(
+                            req_assessment.requirement.safe_display_str
+                        ),
+                        "via_name": via_name,
+                    }
+                )
 
         # Return a simplified format similar to action-plan
         all_links = []
@@ -7267,7 +7426,7 @@ class ComplianceAssessmentEvidenceSerializer(BaseModelSerializer):
         for link in indirect_links:
             all_links.append(
                 {
-                    "str": f"{link['requirement_assessment_name']} (via {link['applied_control_name'][:15]}...)",
+                    "str": f"{link['requirement_assessment_name']} (via {link['via_name'][:15]}...)",
                     "id": link["requirement_assessment_id"],
                 }
             )
@@ -7300,6 +7459,7 @@ class QuickFormReadSerializer(BaseModelSerializer):
     pages_count = serializers.SerializerMethodField()
     responses_count = serializers.SerializerMethodField()
     is_deletable = serializers.SerializerMethodField()
+    on_accept_health = serializers.SerializerMethodField()
 
     def get_pages_count(self, obj):
         return obj.pages.count()
@@ -7310,6 +7470,13 @@ class QuickFormReadSerializer(BaseModelSerializer):
     def get_is_deletable(self, obj):
         return obj.is_deletable()
 
+    def get_on_accept_health(self, obj) -> list[dict]:
+        from core.quick_form_apply import on_accept_health
+
+        # One tier scale per request, not per listed form.
+        cache = self.context.setdefault("on_accept_health_cache", {})
+        return on_accept_health(obj, cache) if obj.on_accept else []
+
     class Meta:
         model = QuickForm
         fields = "__all__"
@@ -7319,6 +7486,8 @@ class QuickFormWriteSerializer(BaseModelSerializer):
     class Meta:
         model = QuickForm
         exclude = ["created_at", "updated_at"]
+        # Comes with the library, edited in the library builder.
+        read_only_fields = ["on_accept"]
 
 
 class QuickFormPageReadSerializer(BaseModelSerializer):
@@ -7387,6 +7556,19 @@ class QuickFormResponseReadSerializer(BaseModelSerializer):
     progress = serializers.SerializerMethodField()
     is_deletable = serializers.SerializerMethodField()
     awaiting_conversion = serializers.BooleanField(read_only=True)
+    subject = serializers.SerializerMethodField()
+
+    def get_subject(self, obj):
+        user = getattr(self.context.get("request"), "user", None)
+        # Listed: every subject on the page is labelled at once.
+        page = getattr(self.parent, "instance", None)
+        if page is None or isinstance(page, QuickFormResponse):
+            return obj.subject_summary(user)
+        if "_subject_labels" not in self.context:
+            self.context["_subject_labels"] = QuickFormResponse.subject_labels(
+                page, user
+            )
+        return obj.subject_summary(user, self.context["_subject_labels"])
 
     def get_is_deletable(self, obj) -> bool:
         # Answered per caller: a closed request is administrator-only.
@@ -7409,7 +7591,8 @@ class QuickFormResponseReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = QuickFormResponse
-        fields = "__all__"
+        # The content endpoint shows facts, to who may view the subject only.
+        exclude = ["facts_snapshot"]
 
 
 class QuickFormResponseWriteSerializer(BaseModelSerializer):
@@ -7422,9 +7605,14 @@ class QuickFormResponseWriteSerializer(BaseModelSerializer):
         read_only_fields = [
             "status",
             "computed_outcome",
+            "computed_values",
+            "subject_content_type",
+            "subject_object_id",
             "score",
             "started_at",
             "submitted_at",
+            # Frozen on submit: the record of what was assessed.
+            "facts_snapshot",
         ]
 
     def validate_respondents(self, value):
@@ -7458,6 +7646,8 @@ class QuickFormResponseWriteSerializer(BaseModelSerializer):
                 raise serializers.ValidationError(
                     {"answers": "Only the requester can change the answers."}
                 )
+            if self.instance.changes_locked_subject(attrs["answers"]):
+                raise serializers.ValidationError({"answers": "subjectLocked"})
         if self.instance and "quick_form" in attrs:
             if attrs["quick_form"] != self.instance.quick_form:
                 raise serializers.ValidationError(

@@ -62,6 +62,7 @@ To connect a hosted service such as OVHcloud AI Endpoints or OpenRouter, see [Ho
 ## Audits
 
 - **Score scale** — the organisation default scale, proposed on the audit form for frameworks without a scale of their own. Pick a preset (**0–100**, **0–5**, **1–5**, **1–4**, **0–3**) or **Custom** to set your own **Minimum score** and **Maximum score** (whole numbers). A custom scale of up to 11 levels can name each level, one column per language (**Add translation**); the first column is shown to anyone whose language has no label. Wider scales are continuous and carry no labels. Defaults to **0–5**. Changing it affects new audits only — existing audits keep their scale. See [Choosing the score scale](../../guides/customize-audit.md#choosing-the-score-scale).
+- **Show the documentation score first** — where an audit shows both scores (requirement tree, requirement page and form, table mode, auditee view, Advanced Analytics), shows the documentation score before the implementation score, as tools such as the CCB CyFun self-assessment do. Off by default: implementation first.
 
 ## Domain-tree audit inheritance
 

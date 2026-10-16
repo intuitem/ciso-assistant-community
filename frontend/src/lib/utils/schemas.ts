@@ -314,7 +314,7 @@ export const AppliedControlSchema = z.object({
 	control_impact: z.number().optional().nullable(),
 	cost: z
 		.object({
-			currency: z.enum(CURRENCY_SYMBOLS).default('€'),
+			currency: z.enum(CURRENCY_SYMBOLS).optional(),
 			amortization_period: z.number().min(1).max(50).default(1),
 			build: z
 				.object({
@@ -707,6 +707,7 @@ export const GeneralSettingsSchema = z.object({
 		.optional(),
 	default_landing: z.enum(['analytics', 'respondent', 'portal']).default('analytics').optional(),
 	disable_partially_compliant_result: z.boolean().default(false).optional(),
+	documentation_score_first: z.boolean().default(false).optional(),
 	use_risk_category_label: z.boolean().default(false).optional(),
 	personal_folders_parent: z.string().uuid().optional().nullable(),
 	currency: z.enum(CURRENCY_SYMBOLS).default('€'),
@@ -722,7 +723,8 @@ export const GeneralSettingsSchema = z.object({
 	default_date_format: z.string().default('auto').optional(),
 	default_packager: z
 		.string()
-		.regex(/^[a-z0-9_-]+$/)
+		// eslint-disable-next-line no-useless-escape
+		.regex(/^[a-z0-9_\-]+$/)
 		.default('custom')
 		.optional(),
 	llm_provider: z.string().default('ollama').optional(),
@@ -800,6 +802,7 @@ export const FeatureFlagsSchema = z.object({
 	purposes: z.boolean().optional(),
 	right_requests: z.boolean().optional(),
 	data_breaches: z.boolean().optional(),
+	dpias: z.boolean().optional(),
 	chat_mode: z.boolean().optional(),
 	auditee_mode: z.boolean().optional(),
 	quick_forms: z.boolean().optional(),
@@ -951,7 +954,15 @@ export const EntitiesSchema = z.object({
 	default_penetration: z.number().optional(),
 	default_maturity: z.number().optional(),
 	default_trust: z.number().optional(),
-	filtering_labels: z.array(z.string()).optional()
+	filtering_labels: z.array(z.string()).optional(),
+	tier: z.string().optional().nullable(),
+	tier_note: z.string().optional()
+});
+
+export const tierSchema = z.object({
+	...NameDescriptionMixin,
+	hexcolor: z.string().optional(),
+	is_visible: z.boolean().optional().default(true)
 });
 
 export const EntityAssessmentSchema = z.object({
@@ -983,7 +994,6 @@ export const EntityAssessmentSchema = z.object({
 	solutions: z.array(z.string().optional()).optional(),
 	compliance_assessment: z.string().optional(),
 	evidence: z.string().optional(),
-	criticality: z.number().optional().nullable(),
 	conclusion: z.string().optional().nullable(),
 	expiry_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	penetration: z.number().optional(),
@@ -1003,7 +1013,7 @@ export const solutionSchema = z.object({
 	...NameDescriptionMixin,
 	provider_entity: z.string(),
 	ref_id: z.string().optional(),
-	criticality: z.number().optional(),
+	tier: z.string().uuid().optional().nullable(),
 	owner: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
 	filtering_labels: z.string().optional().array().optional(),
@@ -1147,6 +1157,8 @@ export const processingSchema = z.object({
 	dpia_required: z.boolean().optional(),
 	dpia_reference: z.string().optional(),
 	has_sensitive_personal_data: z.boolean().optional(),
+	role: z.string().optional(),
+	controllers: z.string().uuid().optional().array().optional(),
 	nature: z.string().optional().array().optional(),
 	associated_controls: z.array(z.string().optional()).optional(),
 	evidences: z.string().optional().array().optional(),
@@ -1520,7 +1532,9 @@ export const QuickFormPublicationSchema = z.object({
 	default_reviewers: z.array(z.string().optional()).optional(),
 	allow_multiple_drafts: z.boolean().default(false).optional(),
 	icon: z.string().optional(),
-	order: z.number().default(0).optional()
+	order: z.number().default(0).optional(),
+	show_projection: z.boolean().default(false).optional(),
+	always_review: z.boolean().default(false).optional()
 });
 
 export const QuickFormResponseSchema = z.object({
@@ -2057,6 +2071,9 @@ export const MetricDefinitionSchema = z.object({
 	provider: z.string().optional().nullable(),
 	higher_is_better: z.boolean().default(true),
 	default_target: z.number().optional().nullable(),
+	datasets: jsonSchema.optional().nullable(),
+	inputs: jsonSchema.optional().nullable(),
+	expression: z.string().optional(),
 	filtering_labels: z.string().optional().array().optional()
 });
 
@@ -2070,8 +2087,10 @@ export const MetricInstanceSchema = z.object({
 	target_value: z.coerce.number().optional().nullable(),
 	collection_frequency: z.string().optional().nullable(),
 	organisation_objectives: z.string().uuid().optional().array().optional(),
+	applied_controls: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	filtering_labels: z.string().optional().array().optional(),
-	evidences: z.string().uuid().optional().nullable()
+	evidences: z.string().uuid().optional().nullable(),
+	input_choices: jsonSchema.optional().nullable()
 });
 
 export const CustomMetricSampleSchema = z.object({
@@ -2225,6 +2244,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'entity-assessments': EntityAssessmentSchema,
 	representatives: representativeSchema,
 	'entity-scores': entityScoreSchema,
+	tiers: tierSchema,
 	solutions: solutionSchema,
 	contracts: contractSchema,
 	vulnerabilities: vulnerabilitySchema,

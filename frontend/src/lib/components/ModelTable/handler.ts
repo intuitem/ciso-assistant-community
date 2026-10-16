@@ -87,7 +87,7 @@ export const getParams = ({ offset, rowsPerPage, search, sort, filters }: State)
 	if (search) {
 		params.set('search', search);
 	}
-	if (sort) {
+	if (sort?.orderBy) {
 		params.set('ordering', `${sort.direction === 'desc' ? '-' : ''}${sort.orderBy}`);
 	}
 	if (filters) {
