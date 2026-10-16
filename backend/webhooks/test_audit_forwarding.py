@@ -661,6 +661,8 @@ def test_oauth_rejects_malformed_token_body(root_folder, body):
     [
         ("url", "http://siem.example/collector"),
         ("oauth_config", {"token_url": "http://idp.example/token", "client_id": "c"}),
+        ("oauth_config", {"token_url": "https://", "client_id": "c"}),
+        ("oauth_config", {"token_url": "https://[::", "client_id": "c"}),
     ],
 )
 def test_oauth_requires_https_even_on_private_networks(root_folder, field, value):

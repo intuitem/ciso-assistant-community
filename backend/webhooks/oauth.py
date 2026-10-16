@@ -30,7 +30,12 @@ class OAuthError(Exception):
 def is_tls_or_loopback(url: str | None) -> bool:
     # Credentials and bearer tokens never travel over plaintext HTTP, even when
     # private-network requests are allowed; loopback stays open for local dev.
-    parsed = urlparse(url or "")
+    try:
+        parsed = urlparse(url or "")
+        if not parsed.hostname:
+            return False
+    except ValueError:
+        return False
     return parsed.scheme == "https" or (
         parsed.scheme == "http" and parsed.hostname in ("localhost", "127.0.0.1", "::1")
     )
