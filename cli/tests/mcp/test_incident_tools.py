@@ -381,6 +381,7 @@ class TestIncidentTaskTemplates:
             patch.object(
                 write_tools, "resolve_task_template_id", side_effect=[UUID_B, UUID_C]
             ) as r_task,
+            patch.object(resolvers, "resolve_global_folder_id", return_value=GLOBAL),
         ):
             result = run(
                 write_tools.create_incident(
@@ -408,10 +409,18 @@ class TestIncidentTaskTemplates:
                 "resolve_task_template_id",
                 side_effect=ValueError("Task template 'Nope' not found"),
             ),
+            patch.object(resolvers, "resolve_global_folder_id", return_value=GLOBAL),
         ):
             result = run(write_tools.create_incident(name="X", task_templates=["Nope"]))
         assert result == "Error in create_incident: Task template 'Nope' not found"
         post.assert_not_called()
+
+    def _patch_incident_folder(self):
+        return patch.object(
+            update_tools,
+            "make_get_request",
+            return_value=_response(200, {"folder": {"id": UUID_F}}),
+        )
 
     def _patch_update_ok(self):
         return patch.object(
@@ -426,13 +435,14 @@ class TestIncidentTaskTemplates:
             patch.object(
                 update_tools, "resolve_task_template_id", return_value=UUID_B
             ) as r_task,
+            self._patch_incident_folder(),
         ):
             run(
                 update_tools.update_incident(
                     incident_id=UUID_A, task_templates=["Notify CNIL"]
                 )
             )
-        r_task.assert_called_once_with("Notify CNIL")
+        r_task.assert_called_once_with("Notify CNIL", folder_id=UUID_F)
         assert patch_req.call_args.args == (
             f"/incidents/{UUID_A}/",
             {"task_templates": [UUID_B]},
@@ -454,6 +464,8 @@ class TestIncidentTaskTemplates:
                 "resolve_task_template_id",
                 side_effect=ValueError("Task template 'Nope' not found"),
             ),
+            self._patch_incident_folder(),
+            patch.object(resolvers, "resolve_global_folder_id", return_value=GLOBAL),
         ):
             result = run(
                 update_tools.update_incident(
@@ -483,6 +495,19 @@ class TestResolveTaskTemplateId:
             assert resolvers.resolve_task_template_id("Notify") == UUID_C
         assert fake.calls == [("/task-templates/", {"search": "Notify"})]
         assert fetch.call_args.kwargs["max_items"] is None
+
+    def test_match_ignores_case_and_whitespace(self):
+        fake = _router({"/task-templates/": [{"id": UUID_B, "name": "Notify CNIL"}]})
+        with patch.object(resolvers, "fetch_all_results", side_effect=fake):
+            assert resolvers.resolve_task_template_id(" notify cnil ") == UUID_B
+
+    def test_folder_scopes_search(self):
+        fake = _router({"/task-templates/": [{"id": UUID_B, "name": "Notify"}]})
+        with patch.object(resolvers, "fetch_all_results", side_effect=fake):
+            resolvers.resolve_task_template_id("Notify", folder_id=UUID_F)
+        assert fake.calls == [
+            ("/task-templates/", {"search": "Notify", "folder": UUID_F})
+        ]
 
     def test_no_exact_match_is_not_found(self):
         fake = _router({"/task-templates/": [{"id": UUID_B, "name": "Notify CNIL"}]})
