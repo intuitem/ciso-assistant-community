@@ -124,8 +124,9 @@
 		// defaults to, leaving existing callers unaffected.
 		disableBatchEdit?: boolean;
 		/** Columns this model computes rather than stores: the backend cannot
-		 *  ORDER BY them, so the header must not offer a sort. From
-		 *  `ModelMapEntry.unsortableColumns`. */
+		 *  ORDER BY them, so the header must not offer a sort. Defaults to the
+		 *  resolved model's `ModelMapEntry.unsortableColumns`, so every caller
+		 *  gets it; pass this only to override that per table. */
 		unsortableColumns?: string[];
 		disableDelete?: boolean;
 		disableView?: boolean;
@@ -192,7 +193,7 @@
 		disableCreate = false,
 		disableEdit = false,
 		disableBatchEdit = undefined,
-		unsortableColumns = [],
+		unsortableColumns = undefined,
 		disableDelete = false,
 		disableView = false,
 		identifierField = 'id',
@@ -910,7 +911,7 @@
 	const isUnsortableColumn = (key: string): boolean => {
 		return (
 			MULTI_VALUE_COLUMNS.includes(key) ||
-			unsortableColumns.includes(key) ||
+			(unsortableColumns ?? model?.unsortableColumns ?? []).includes(key) ||
 			(tableSource.body.length > 0 && Array.isArray(tableSource.body[0][key]))
 		);
 	};

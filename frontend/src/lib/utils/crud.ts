@@ -1407,7 +1407,6 @@ export const URL_MODEL_MAP: ModelMap = {
 	},
 	'document-containers': {
 		name: 'documentcontainer',
-		unsortableColumns: ['progress'],
 		localName: 'documentContainer',
 		localNamePlural: 'documentContainers',
 		verboseName: 'Document',
@@ -1437,7 +1436,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'processings' },
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' }
-		]
+		],
+		unsortableColumns: ['progress']
 	},
 	'document-templates': {
 		name: 'documenttemplate',
@@ -1511,7 +1511,6 @@ export const URL_MODEL_MAP: ModelMap = {
 	},
 	'compliance-assessments': {
 		name: 'complianceassessment',
-		unsortableColumns: ['progress'],
 		localName: 'complianceAssessment',
 		localNamePlural: 'complianceAssessments',
 		verboseName: 'Compliance assessment',
@@ -1535,7 +1534,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'compliance_assessment', urlModel: 'findings-assessments', disableCreate: true }
 		],
 		selectFields: [{ field: 'status' }, { field: 'score_calculation_method' }],
-		filters: [{ field: 'status' }]
+		filters: [{ field: 'status' }],
+		unsortableColumns: ['progress']
 	},
 	requirements: {
 		name: 'requirement',
@@ -1677,7 +1677,6 @@ export const URL_MODEL_MAP: ModelMap = {
 	},
 	'entity-assessments': {
 		name: 'entityassessment',
-		unsortableColumns: ['completion', 'review_progress'],
 		localName: 'entityAssessment',
 		localNamePlural: 'entityAssessments',
 		verboseName: 'Entity assessment',
@@ -1721,7 +1720,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' }
 		],
-		filters: [{ field: 'status' }]
+		filters: [{ field: 'status' }],
+		unsortableColumns: ['completion', 'review_progress']
 	},
 	solutions: {
 		name: 'solution',
@@ -3087,7 +3087,6 @@ export const URL_MODEL_MAP: ModelMap = {
 	},
 	'task-templates': {
 		name: 'tasktemplate',
-		unsortableColumns: ['schedule'],
 		localName: 'taskTemplate',
 		localNamePlural: 'taskTemplates',
 		verboseName: 'Task template',
@@ -3171,7 +3170,8 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableCreate: true,
 				disableDelete: true
 			}
-		]
+		],
+		unsortableColumns: ['schedule']
 	},
 	'task-nodes': {
 		name: 'tasknode',

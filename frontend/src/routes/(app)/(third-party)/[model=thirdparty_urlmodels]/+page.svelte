@@ -49,12 +49,7 @@
 {#if data.table}
 	<div class="shadow-lg">
 		{#key URLModel}
-			<ModelTable
-				source={data.table}
-				deleteForm={data.deleteForm}
-				{URLModel}
-				unsortableColumns={data.model.unsortableColumns}
-			>
+			<ModelTable source={data.table} deleteForm={data.deleteForm} {URLModel}>
 				{#snippet addButton()}
 					<div>
 						<span class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs">
