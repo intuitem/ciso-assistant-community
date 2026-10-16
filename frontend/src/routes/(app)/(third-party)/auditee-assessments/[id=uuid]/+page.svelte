@@ -1159,9 +1159,14 @@
 									: 'preset-tonal-surface'}"
 								onclick={() => setReviewState(requirementAssessment, 'changes_requested')}
 								disabled={reviewPending}
-								title={m.requestChanges()}
+								title={requirementAssessment.review_state === 'changes_requested'
+									? m.removeChangeRequestFlag()
+									: m.flagForChangeRequest()}
 							>
-								<i class="fa-solid fa-flag mr-1"></i>{m.requestChanges()}
+								<i class="fa-solid fa-flag mr-1"></i>{requirementAssessment.review_state ===
+								'changes_requested'
+									? m.removeChangeRequestFlag()
+									: m.flagForChangeRequest()}
 							</button>
 							<button
 								type="button"
@@ -1170,6 +1175,8 @@
 									: 'preset-tonal-surface'}"
 								onclick={() => setReviewState(requirementAssessment, 'accepted')}
 								disabled={reviewPending}
+								aria-label={m.markAsAccepted()}
+								aria-pressed={requirementAssessment.review_state === 'accepted'}
 								title={m.markAsAccepted()}
 							>
 								<i class="fa-solid fa-check"></i>
