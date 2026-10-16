@@ -48,8 +48,10 @@
 	$effect(() => {
 		const r = svg.getBoundingClientRect();
 		const k = Math.min(1.6, Math.max(layout.width / r.width, layout.height / r.height));
-		const ys = graph.roots.map((id) => layout.pos[id]?.y ?? 0);
-		const rootY = (Math.min(...ys) + Math.max(...ys)) / 2 + H / 2;
+		const ys = graph.roots.filter((id) => layout.pos[id]).map((id) => layout.pos[id].y);
+		const rootY = ys.length
+			? (Math.min(...ys) + Math.max(...ys)) / 2 + H / 2
+			: layout.height / 2 - PAD;
 		const h = r.height * k;
 		view = [-PAD, Math.max(-PAD, Math.min(rootY - h / 2, layout.height - PAD - h)), r.width * k, h];
 	});
