@@ -247,7 +247,10 @@ def main():
     )
     ap.add_argument("--results", help="write per-question results JSONL here")
     args = ap.parse_args()
-    if not TOKEN:
+    if args.mode == "chat":
+        if not os.environ.get("TOKEN") or not args.chat_url:
+            sys.exit("chat mode needs TOKEN and --chat-url")
+    elif not TOKEN:
         sys.exit("LM_API_TOKEN not set")
 
     kinds = set(args.kinds.split(","))

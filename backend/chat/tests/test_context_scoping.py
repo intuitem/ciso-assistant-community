@@ -745,3 +745,17 @@ class TestQueryVocabulary:
             scope_for(reader),
         )
         assert result["total_count"] == 1
+
+    def test_unknown_field_note_skips_large_catalogues(self, domain, reader):
+        from tprm.models import Entity
+
+        from chat.orm_query import execute_tool_query
+
+        Entity.objects.create(name="key vendor", folder=domain)
+        result = execute_tool_query(
+            {"model": "entity", "action": "list", "status": ["foo"]},
+            scope_for(reader),
+        )
+        assert result["total_count"] == 0
+        # countries and currencies would drown the values a small model needs
+        assert "country:" not in result["note"] and "currency:" not in result["note"]

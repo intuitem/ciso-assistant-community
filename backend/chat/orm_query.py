@@ -548,7 +548,8 @@ def _unresolved_filter_result(
             [
                 f"{f.name}: {', '.join(str(label) for _, label in f.flatchoices)}"
                 for f in model_class._meta.concrete_fields
-                if f.choices
+                # a vocabulary, not a catalogue (countries, currencies)
+                if f.choices and len(f.flatchoices) <= 20
             ]
             + [
                 f"{lookup.removesuffix('__name')}: {', '.join(names)}"

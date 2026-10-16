@@ -119,11 +119,16 @@ def run_one(q, args, headers):
             },
         }
         text, _ = answer_chat(q, args.chat_url, args.backend_log, trace)
-        verdict = judge(q, text, args.judge_model)
+        try:
+            verdict = judge(q, text, args.judge_model)
+        except Exception:
+            verdict = judge(q, text, args.judge_model)
         s = score(verdict)
     except Exception as e:
         # one failure must not abandon the rest of the run
-        s, err = 0.0, f"{type(e).__name__}: {e}"[:160]
+        # a failed judge says nothing about the model: unscored, not 0
+        s = None if text else 0.0
+        err = f"{type(e).__name__}: {e}"[:160]
     return {
         "label": args.label,
         "id": q["id"],
@@ -144,7 +149,8 @@ def run_one(q, args, headers):
 def summary(rows, key):
     groups = {}
     for r in rows:
-        groups.setdefault(r[key], []).append(r["score"])
+        if r["score"] is not None:
+            groups.setdefault(r[key], []).append(r["score"])
     for name, xs in sorted(groups.items()):
         print(f"  => {name:<24} {sum(xs) / len(xs):>5.0%}  ({sum(xs):.1f}/{len(xs)})")
 
@@ -178,17 +184,15 @@ def main():
         for r in pool.map(lambda q: run_one(q, args, headers), qs):
             rows.append(r)
             note = (r["verdict"] or {}).get("note") or r["error"] or ""
-            print(f"  {r['score']:4.2f} {r['id']:<40} {note}"[:200], flush=True)
+            shown = "  -- " if r["score"] is None else f"{r['score']:4.2f}"
+            print(f"  {shown} {r['id']:<40} {note}"[:200], flush=True)
             if out:
                 out.write(json.dumps(r, ensure_ascii=False) + "\n")
                 out.flush()
     summary(rows, "page")
     if len({r["variant"] for r in rows}) > 1:
         summary(rows, "variant")
-    print(
-        f"  => {'all':<24} {sum(r['score'] for r in rows) / len(rows):>5.0%}  "
-        f"({sum(r['score'] for r in rows):.1f}/{len(rows)})"
-    )
+    summary([{**r, "all": "all"} for r in rows], "all")
     if out:
         out.close()
 

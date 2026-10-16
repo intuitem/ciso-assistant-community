@@ -7,6 +7,7 @@ filtered per object; unloaded ones need view_storedlibrary.
 """
 
 import re
+import uuid
 
 from django.core.exceptions import PermissionDenied
 
@@ -200,13 +201,18 @@ def requirement_mappings(
             return {"ambiguous": _rows(G, access, hits[:20])}
         urn = hits[0] if hits else None
     elif requirement and requirement not in G:
+        try:
+            requirement_id = uuid.UUID(requirement)
+        except ValueError:
+            requirement_id = None
         urn = (
             RequirementNode.objects.filter(
-                id=requirement if re.fullmatch(r"[0-9a-f-]{36}", requirement) else None,
-                framework_id__in=access.loaded.values(),
+                id=requirement_id, framework_id__in=access.loaded.values()
             )
             .values_list("urn", flat=True)
             .first()
+            if requirement_id
+            else None
         )
         urn = next((u for u in (urn, (urn or "").lower()) if u in G), None)
     if not urn or G[urn].get("node_type") != "requirement_node":

@@ -187,6 +187,10 @@ def test_mappings_wrong_target_reports_elsewhere(authenticated_client, graph, lo
 
 @pytest.mark.django_db
 def test_mappings_unknown_requirement_404(authenticated_client, graph, loaded):
+    # 36 dashes look like a UUID to a pattern, not to the UUID field
+    assert (
+        get(authenticated_client, "mappings", requirement="-" * 36).status_code == 404
+    )
     assert (
         get(authenticated_client, "mappings", requirement="urn:nope").status_code == 404
     )

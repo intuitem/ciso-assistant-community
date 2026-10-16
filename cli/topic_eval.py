@@ -7,6 +7,9 @@ Retrieval stages, all over one framework's assessable requirements:
   rerank    cross-encoder over the hybrid top-N
 Then optionally an LLM filter (LM Studio) keeps the relevant candidates (--filter-models).
 
+Needs numpy and sentence-transformers: run it with the repo's backend venv
+(they are not CLI dependencies, which ship ca_mcp to users).
+
 Usage:
   python topic_eval.py                                   # retrieval metrics only
   python topic_eval.py --filter-models qwen/qwen3.5-9b   # + end-to-end filter
@@ -176,6 +179,8 @@ def main():
     )
     ap.add_argument("--results", help="per topic×framework JSONL")
     args = ap.parse_args()
+    if args.no_rerank and args.filter_models and args.filter_stage == "rerank":
+        ap.error("--no-rerank needs --filter-stage lexical, semantic or hybrid")
 
     from sentence_transformers import SentenceTransformer
 
@@ -209,7 +214,8 @@ def main():
         gold = json.loads((GOLD / f"{stem}.json").read_text())["labels"]
         rows = [
             json.loads(l)
-            for l in (GOLD / "src" / f"{stem}.jsonl").read_text().split("\n")[:-1]
+            for l in (GOLD / "src" / f"{stem}.jsonl").read_text().splitlines()
+            if l.strip()
         ]
         idx = {r["urn"]: i for i, r in enumerate(rows)}
         assert set(gold) <= set(idx), f"{stem}: gold urns missing from source"
@@ -229,7 +235,10 @@ def main():
             if reranker:
                 top = ranks["hybrid"][: args.rerank_top]
                 s = reranker.predict([(q, entry_text(stem, rows[i])) for i in top])
-                ranks["rerank"] = [top[j] for j in np.argsort(-s)]
+                # the tail keeps its hybrid order, so rerank@k stays comparable past rerank_top
+                ranks["rerank"] = [top[j] for j in np.argsort(-s)] + ranks["hybrid"][
+                    args.rerank_top :
+                ]
             rec = {
                 "framework": stem,
                 "topic": topic,
