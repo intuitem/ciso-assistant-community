@@ -3,11 +3,14 @@
 Pure functions shared by the live evaluator (`evaluate_quick_form`) and the
 builder preview (`evaluate_quick_form_document`), so the two cannot drift.
 
-Each scorable question is an item `{score, max_score, weight, answered}`;
-`score` and `max_score` already carry the question weight. Results are floats:
+Each scorable question is an item `{score, max_score, weight, answered, lo, hi}`;
+`score` and `max_score` already carry the question weight, `lo` and `hi` are its
+unweighted reachable range. Results are floats:
 CEL compares a double against an int literal (`score > 17`) but not an int
 against a double literal (`3 > 2.5`), so averages and sums share one type.
 """
+
+from core.utils import project_weighted_sum
 
 PAGE_AGGREGATIONS = ("sum", "max", "mean")
 FORM_AGGREGATIONS = ("sum", "mean", "pages_sum", "pages_mean")
@@ -19,6 +22,23 @@ def normalize_page_aggregation(value) -> str:
 
 def normalize_form_aggregation(value) -> str:
     return value if value in FORM_AGGREGATIONS else "sum"
+
+
+def project_sum(total, items: list[dict]):
+    """A weighted SUM over `items` projected onto their unweighted scale.
+
+    A question weight means the same thing here as in an audit: the range spans
+    every scorable question, a skipped optional one counting as 0. Every sum the
+    context exposes goes through it, so `score`, `score_sum` and `score_max` stay
+    comparable. Unweighted, the total comes back as is, type included.
+    """
+    weighted_lo = sum(i["lo"] * i["weight"] for i in items)
+    weighted_hi = sum(i["hi"] * i["weight"] for i in items)
+    lo = sum(i["lo"] for i in items)
+    hi = sum(i["hi"] for i in items)
+    if (weighted_lo, weighted_hi) == (lo, hi):
+        return total
+    return project_weighted_sum(total, weighted_lo, weighted_hi, lo, hi)
 
 
 def aggregate_page(items: list[dict], aggregation: str) -> dict | None:
@@ -42,8 +62,8 @@ def aggregate_page(items: list[dict], aggregation: str) -> dict | None:
             sum(i["weight"] for i in items) or 1
         )
     else:
-        score = sum(i["score"] for i in answered)
-        score_max = sum(i["max_score"] for i in items)
+        score = project_sum(sum(i["score"] for i in answered), items)
+        score_max = project_sum(sum(i["max_score"] for i in items), items)
     return {"score": float(score), "score_max": float(score_max)}
 
 
@@ -66,6 +86,8 @@ def aggregate_form(
     total = sum(i["score"] for i in answered)
     if aggregation == "mean":
         total /= sum(i["weight"] for i in answered) or 1
+    else:
+        total = project_sum(total, items)
     return float(total)
 
 
