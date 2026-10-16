@@ -66,7 +66,7 @@ SEARCHABLE_MODELS = [
     # ReferenceControl) get a tighter limit to avoid starving smaller models.
     # extra_search: additional fields to query via icontains for this model.
     # --- Organization ---
-    _search_entry(Folder, "folders"),
+    _search_entry(Folder, "folders", ref_id=True),
     _search_entry(Perimeter, "perimeters", ref_id=True),
     # --- Catalog ---
     _search_entry(Framework, "frameworks", ref_id=True),

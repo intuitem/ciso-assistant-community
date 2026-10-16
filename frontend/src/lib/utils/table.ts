@@ -1751,8 +1751,9 @@ export const CWE_FILTER: ListViewFilterConfig = {
 
 export const listViewFields = {
 	folders: {
-		head: ['name', 'description', 'contentType', 'parentDomain', 'iamGroups', 'labels'],
+		head: ['ref_id', 'name', 'description', 'contentType', 'parentDomain', 'iamGroups', 'labels'],
 		body: [
+			'ref_id',
 			'name',
 			'description',
 			'content_type',
