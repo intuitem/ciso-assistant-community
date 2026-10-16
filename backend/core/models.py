@@ -57,6 +57,7 @@ from library.helpers import (
 )
 
 from core.utils import format_currency as _fmt_currency
+from core.utils import get_global_currency
 from core.quick_form_scoring import (
     normalize_form_aggregation,
     normalize_page_aggregation,
@@ -1863,6 +1864,11 @@ class LibraryUpdater:
                     rn.urn.lower(): rn
                     for rn in RequirementNode.objects.filter(framework=new_framework)
                 }
+                question_urns_by_node_id = defaultdict(set)
+                for node_id, question_urn in Question.objects.filter(
+                    requirement_node__framework=new_framework
+                ).values_list("requirement_node_id", "urn"):
+                    question_urns_by_node_id[node_id].add(question_urn)
                 existing_requirement_assessment_objects = defaultdict(list)
                 for ra in RequirementAssessment.objects.filter(
                     requirement__framework=new_framework
@@ -2077,6 +2083,17 @@ class LibraryUpdater:
                                 )
                             )
 
+                    # A node that lost all its questions omits the key.
+                    if (
+                        questions is None
+                        and requirement_node_object.pk in question_urns_by_node_id
+                    ):
+                        questions = {}
+
+                    previous_question_urns = question_urns_by_node_id.get(
+                        requirement_node_object.pk, set()
+                    )
+
                     # Sync questions for both new and existing nodes
                     if questions is not None:
                         _sync_questions_from_data(requirement_node_object, questions)
@@ -2090,6 +2107,10 @@ class LibraryUpdater:
                         )
                         if questions is not None
                         else []
+                    )
+                    # Pruned questions cascade-delete their answers before the RA loop.
+                    questions_removed = bool(
+                        previous_question_urns - {q.urn for q in _cached_new_questions}
                     )
 
                     # update answers or score for each ra for the current requirement_node, when relevant
@@ -2207,7 +2228,9 @@ class LibraryUpdater:
                         }
                         new_questions = _cached_new_questions
 
-                        ra_changed = False
+                        ra_changed = questions_removed
+                        if questions_removed:
+                            answers_changed_ca_ids.add(ra.compliance_assessment_id)
                         for q in new_questions:
                             if q.urn not in existing_answers:
                                 # New question: create empty answer
@@ -2366,8 +2389,11 @@ class LibraryUpdater:
         """Upsert quick forms, pages and questions by URN, prune what the new
         version dropped, then reconcile every live response: seed answers for
         new questions, drop selections that no longer exist, re-evaluate."""
+        from core.quick_form_ratings import expand_scales
+
         for new_quick_form in self.new_quick_forms:
             with transaction.atomic():
+                new_quick_form = expand_scales(new_quick_form)
                 pages = new_quick_form.get("pages") or []
                 urn = new_quick_form["urn"].lower()
                 form_fields = {
@@ -2380,6 +2406,7 @@ class LibraryUpdater:
                     "outcomes_definition": new_quick_form.get("outcomes_definition")
                     or [],
                     "scores_definition": new_quick_form.get("scores_definition"),
+                    "scales_definition": new_quick_form.get("scales_definition") or [],
                     "ref_id_prefix": new_quick_form.get("ref_id_prefix") or "",
                     "title_question_urn": (
                         new_quick_form.get("title_question_urn") or ""
@@ -2400,6 +2427,7 @@ class LibraryUpdater:
                         **self.i18n_object_dict,
                         **form_fields,
                         "library": self.old_library,
+                        "always_review": bool(new_quick_form.get("always_review")),
                     },
                 )
 
@@ -2413,17 +2441,28 @@ class LibraryUpdater:
                     .exclude(response__status=QuickFormResponse.Status.DRAFT)
                     .values_list("question__urn", flat=True)
                 )
+                # Choices any response selected, drafts included: a renamed level
+                # must not empty a draft's answers.
                 decided_choice_urns = set(
                     QuestionChoice.objects.filter(
                         choice_answers__response__quick_form=quick_form
-                    )
-                    .exclude(
-                        choice_answers__response__status=(
-                            QuickFormResponse.Status.DRAFT
-                        )
-                    )
-                    .values_list("urn", flat=True)
+                    ).values_list("urn", flat=True)
                 )
+                # A draft is no record, but it can be weeks of writing (a DPIA):
+                # questions it answered are kept too, with their pages.
+                decided_question_urns |= {
+                    answer.question.urn
+                    for answer in Answer.objects.filter(
+                        response__quick_form=quick_form,
+                        question__page__quick_form=quick_form,
+                        response__status=QuickFormResponse.Status.DRAFT,
+                    )
+                    .select_related("question")
+                    .prefetch_related("selected_choices", "attachments")
+                    if answer.value not in (None, "", [])
+                    or answer.selected_choices.all()
+                    or answer.attachments.all()
+                }
 
                 incoming_page_urns = set()
                 for order, page in enumerate(pages):
@@ -2440,6 +2479,7 @@ class LibraryUpdater:
                         "aggregation": normalize_page_aggregation(
                             page.get("aggregation")
                         ),
+                        "facts": page.get("facts") or [],
                     }
                     page_object, _ = QuickFormPage.objects.update_or_create(
                         quick_form=quick_form,
@@ -2621,6 +2661,21 @@ class LibraryUpdater:
                     **requirement_mapping_dict,
                 )
 
+    def quick_forms_error(self) -> str | None:
+        """Why a new quick form's scales, ratings or page facts cannot work, before
+        anything is written: expanding malformed scales would raise mid-update."""
+        from core.quick_form_facts import facts_error
+        from core.quick_form_ratings import scales_error
+
+        for quick_form in self.new_quick_forms or []:
+            if not isinstance(quick_form, dict):
+                return "[QUICK_FORM_ERROR] a quick form must be an object"
+            if error := scales_error(quick_form) or facts_error(
+                quick_form.get("pages")
+            ):
+                return f"[QUICK_FORM_ERROR] {error}"
+        return None
+
     def framework_rules_error(self) -> str | None:
         """The checks library import runs on outcome rules and visibility
         expressions, so an update cannot bring in what a load refuses."""
@@ -2641,6 +2696,8 @@ class LibraryUpdater:
     # We should create a LibraryVerifier class in the future that check if the library is valid and use it for a better error handling.
     def update_library(self) -> Union[str, None]:
         if (error_msg := self.framework_rules_error()) is not None:
+            return error_msg
+        if (error_msg := self.quick_forms_error()) is not None:
             return error_msg
         if (error_msg := self.update_dependencies()) is not None:
             return error_msg
@@ -4328,6 +4385,10 @@ class QuickForm(ReferentialObjectMixin, I18nObjectMixin):
     scores_definition = models.JSONField(
         blank=True, null=True, verbose_name=_("Scores definition")
     )
+    # Ordered levels questions share (`config.scale`), see core.quick_form_ratings.
+    scales_definition = models.JSONField(
+        default=list, blank=True, verbose_name=_("Scales definition")
+    )
     title_question_urn = models.CharField(
         max_length=255,
         blank=True,
@@ -4354,6 +4415,16 @@ class QuickForm(ReferentialObjectMixin, I18nObjectMixin):
     # never by instance ids.
     on_accept = models.JSONField(
         default=list, blank=True, verbose_name=_("Apply on accept")
+    )
+    # Off: a submitter who could make every on-accept change by hand gets it applied
+    # on submit. The library sets it on first load only: an update keeps the choice.
+    always_review = models.BooleanField(
+        default=False,
+        verbose_name=_("Always require review"),
+        help_text=_(
+            "Even when the person submitting could make the change themselves, "
+            "an accepted review is needed before anything is written."
+        ),
     )
     ref_id_prefix = models.CharField(
         max_length=8,
@@ -4428,6 +4499,12 @@ class QuickFormPage(ReferentialObjectMixin, I18nObjectMixin):
         default=Aggregation.SUM,
         verbose_name=_("Aggregation"),
         help_text=_("How the page's question scores combine into the page score"),
+    )
+    facts = models.JSONField(
+        default=list,
+        blank=True,
+        verbose_name=_("Facts"),
+        help_text=_("The subject's records the page shows (see core.quick_form_facts)"),
     )
 
     fields_to_check = ["urn"]
@@ -7047,7 +7124,6 @@ class CommitmentMixin(models.Model):
 
 def _get_default_applied_control_cost():
     return {
-        "currency": "€",
         "amortization_period": 1,
         "build": {"fixed_cost": 0, "people_days": 0},
         "run": {"fixed_cost": 0, "people_days": 0},
@@ -7126,6 +7202,12 @@ class AppliedControl(
         Evidence,
         blank=True,
         verbose_name=_("Evidences"),
+        related_name="applied_controls",
+    )
+    metric_instances = models.ManyToManyField(
+        "metrology.MetricInstance",
+        blank=True,
+        verbose_name=_("Metric instances"),
         related_name="applied_controls",
     )
 
@@ -7280,6 +7362,8 @@ class AppliedControl(
             self.csf_function = self.reference_control.csf_function
         if self.status == "active":
             self.progress_field = 100
+        if isinstance(self.cost, dict) and not self.cost.get("currency"):
+            self.cost["currency"] = get_global_currency()
 
         # Save first. _state.adding, not `pk is None`: the UUID pk is defaulted
         # at instantiation, so pk is never None even for unsaved rows.
@@ -11662,6 +11746,10 @@ class QuickFormResponse(
     computed_values = models.JSONField(
         blank=True, null=True, verbose_name=_("Computed values")
     )
+    # The facts the pages showed, frozen on submit; null while live.
+    facts_snapshot = models.JSONField(
+        blank=True, null=True, verbose_name=_("Facts snapshot")
+    )
     # What the response is about, read from the form's subject question. Generic
     # because entity is the first subject type, not the only one.
     subject_content_type = models.ForeignKey(
@@ -13688,6 +13776,26 @@ class CustomDocHtmlTemplate(AbstractBaseModel, FolderMixin):
 
     def __str__(self):
         return f"{self.template_key} ({self.language})"
+
+
+class DemoManifest(models.Model):
+    """What the demo seeder created in a domain, so it can be told apart from
+    user data. Deleted with its domain."""
+
+    domain = models.OneToOneField(
+        Folder, on_delete=models.CASCADE, related_name="demo_manifest"
+    )
+    version = models.PositiveIntegerField()
+    anchor = models.DateField()
+    contents = models.JSONField(default=list, help_text="[model label, pk] pairs")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    # Internal bookkeeping with no API: never resolved through IAM.
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
+
+    def __str__(self):
+        return f"demo v{self.version} in {self.domain}"
 
 
 # actions - 0: create, 1: update, 2: delete

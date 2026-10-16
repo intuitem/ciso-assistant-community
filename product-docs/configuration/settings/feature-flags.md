@@ -67,6 +67,7 @@ The flags set here are the ceiling. Each user can hide modules they don't need f
 - **purposes** — purposes register.
 - **right_requests** — data-subject right requests.
 - **data_breaches** — data-breach tracking.
+- **dpias** — labelled **DPIAs**: [DPIA screening and data protection impact assessments](../../concepts/dpia.md) on the processing register, and the **DPIAs** page. Runs on quick forms, so turning it on also turns on **quick_forms**. _Default off._
 
 ## Catalog
 

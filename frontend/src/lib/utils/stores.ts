@@ -98,6 +98,10 @@ export const tableStates: Persisted<Record<string, { pageNumber: number; rowsPer
 export const tableFilterStates: Persisted<Record<string, Record<string, { value: string }[]>>> =
 	persisted('tableFilterStates', {});
 
+export const tableSortStates: Persisted<
+	Record<string, { orderBy: string; direction: 'asc' | 'desc' }>
+> = persisted('tableSortStates', {});
+
 // Persisted visible columns per URLModel, in display order (e.g. "applied-controls" -> ["ref_id", "name"]). Absent = defaults.
 export const tableColumnStates: Persisted<Record<string, string[]>> = persisted(
 	'tableColumnStates',

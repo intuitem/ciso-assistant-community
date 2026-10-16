@@ -18,7 +18,7 @@ from core.serializer_fields import (
     PathField,
 )
 from core.constants import LEGACY_TTP_LIBRARIES
-from core.utils import time_state
+from core.utils import get_global_currency, time_state
 from ebios_rm.models import EbiosRMStudy, Stakeholder
 from tprm.models import Contract, Solution
 from threat_modeling.models import ThreatModel
@@ -30,6 +30,7 @@ from core.commitment import COMMITMENT_LIST_FIELDS, CommitmentSerializerMixin
 from iam.models import *
 from django.contrib.auth.models import Permission
 
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework.exceptions import APIException, PermissionDenied
 from django.core.exceptions import FieldDoesNotExist
@@ -860,6 +861,45 @@ class AssetWriteSerializer(
         model = Asset
         exclude = ["business_value"]
 
+    def get_fields(self):
+        fields = super().get_fields()
+        # Document the stored dict shape: reads return a display list that can't be written back (#4526)
+        for name, jsonschema, example in (
+            (
+                "security_objectives",
+                Asset.SECURITY_OBJECTIVES_JSONSCHEMA,
+                {"confidentiality": {"value": 2, "is_enabled": True}},
+            ),
+            (
+                "security_capabilities",
+                Asset.SECURITY_OBJECTIVES_JSONSCHEMA,
+                {"confidentiality": {"value": 2, "is_enabled": True}},
+            ),
+            (
+                "disaster_recovery_objectives",
+                Asset.DISASTER_RECOVERY_OBJECTIVES_JSONSCHEMA,
+                {"rto": {"value": 3600}},
+            ),
+            (
+                "recovery_capabilities",
+                Asset.DISASTER_RECOVERY_OBJECTIVES_JSONSCHEMA,
+                {"rto": {"value": 3600}},
+            ),
+        ):
+            (item,) = jsonschema["properties"]["objectives"][
+                "patternProperties"
+            ].values()
+            # OpenAPI 3.0 has no patternProperties
+            schema = {
+                "type": "object",
+                "properties": {
+                    "objectives": {"type": "object", "additionalProperties": item}
+                },
+                "example": {"objectives": example},
+            }
+            extend_schema_field(schema)(fields[name])
+        return fields
+
     def validate(self, data):
         self._check_linked_assets_changeable(data)
         parent_assets = data.get("parent_assets", [])
@@ -1605,6 +1645,22 @@ class AppliedControlWriteSerializer(
         required=False, default=False, write_only=True
     )
 
+    def validate_cost(self, value):
+        """Keep the stored currency when an update sends a cost without one.
+
+        New controls are handled by ``AppliedControl.save()``, which fills a
+        missing currency from the global setting.
+        """
+        existing = getattr(self.instance, "cost", None)
+        if (
+            isinstance(value, dict)
+            and not value.get("currency")
+            and isinstance(existing, dict)
+            and existing.get("currency")
+        ):
+            value["currency"] = existing["currency"]
+        return value
+
     def validate(self, attrs):
         return self.validate_commitment(super().validate(attrs))
 
@@ -1749,6 +1805,7 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
         source="get_csf_function_display"
     )  # type : get_type_display
     evidences = FieldsRelatedField(many=True)
+    metric_instances = FieldsRelatedField(many=True)
     objectives = FieldsRelatedField(many=True)
     effort = serializers.CharField(source="get_effort_display")
     control_impact = serializers.CharField(source="get_control_impact_display")
@@ -1784,9 +1841,7 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
         return time_state(obj.eta.isoformat())
 
     def get_currency(self, obj):
-        if not obj.cost:
-            return "€"  # Default currency
-        return obj.cost.get("currency", "€")
+        return (obj.cost or {}).get("currency") or get_global_currency()
 
     def get_annual_cost_display(self, obj):
         annual_cost = obj.annual_cost
@@ -7536,7 +7591,8 @@ class QuickFormResponseReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = QuickFormResponse
-        fields = "__all__"
+        # The content endpoint shows facts, to who may view the subject only.
+        exclude = ["facts_snapshot"]
 
 
 class QuickFormResponseWriteSerializer(BaseModelSerializer):
@@ -7555,6 +7611,8 @@ class QuickFormResponseWriteSerializer(BaseModelSerializer):
             "score",
             "started_at",
             "submitted_at",
+            # Frozen on submit: the record of what was assessed.
+            "facts_snapshot",
         ]
 
     def validate_respondents(self, value):
