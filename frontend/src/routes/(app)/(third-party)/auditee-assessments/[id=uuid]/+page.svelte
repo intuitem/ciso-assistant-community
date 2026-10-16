@@ -1176,6 +1176,8 @@
 									: 'preset-tonal-surface'}"
 								onclick={() => setReviewState(requirementAssessment, 'accepted')}
 								disabled={reviewPending}
+								aria-label={m.markAsAccepted()}
+								aria-pressed={requirementAssessment.review_state === 'accepted'}
 								title={m.markAsAccepted()}
 							>
 								<i class="fa-solid fa-check"></i>
