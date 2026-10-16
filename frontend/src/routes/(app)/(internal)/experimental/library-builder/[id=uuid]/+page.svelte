@@ -7,6 +7,10 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { createCopyHandler } from '$lib/components/FrameworkBuilder/builder-utils.svelte';
 	import { getToastStore } from '$lib/components/Toast/stores';
+	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import { defaults, superForm } from 'sveltekit-superforms';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
+	import { z } from 'zod';
 
 	const toastStore = getToastStore();
 
@@ -193,6 +197,30 @@
 
 	// --- Import objects (clone / selective extraction) ----------------------
 	let importSource = $state('');
+	const importSchema = z.object({ source: z.string().optional() });
+	const importForm = superForm(defaults(zod(importSchema)), {
+		SPA: true,
+		validators: zod(importSchema),
+		dataType: 'json',
+		invalidateAll: false,
+		applyAction: false,
+		resetForm: false,
+		taintedMessage: false
+	});
+	const importOptions = [
+		...storedLibraries.map((library) => ({
+			label: `${library.name} (v${library.version})`,
+			value: library.id,
+			infoString: library.builtin
+				? { string: m.builtin(), position: 'suffix' as const, classes: 'text-surface-500' }
+				: undefined
+		})),
+		...otherDrafts.map((other) => ({
+			label: other.name,
+			value: 'draft:' + other.id,
+			infoString: { string: m.draft(), position: 'suffix' as const, classes: 'text-surface-500' }
+		}))
+	];
 	let importTypes: string[] = $state([]);
 	let importPolicy = $state('strip');
 	let importOverwrite = $state(false);
@@ -985,27 +1013,15 @@
 					<p class="text-xs text-surface-500">
 						{m.lbDraftImportObjectsHelp()}
 					</p>
-					<select class="select text-sm" bind:value={importSource}>
-						<option value="">{m.lbDraftSourceLibrary()}</option>
-						{#if storedLibraries.length > 0}
-							<optgroup label={m.lbDraftStoredLibraries()}>
-								{#each storedLibraries as library}
-									<option value={library.id}>
-										{library.name} (v{library.version}){library.builtin
-											? m.lbDraftBuiltinSuffix()
-											: ''}
-									</option>
-								{/each}
-							</optgroup>
-						{/if}
-						{#if otherDrafts.length > 0}
-							<optgroup label={m.lbDraftYourDrafts()}>
-								{#each otherDrafts as other}
-									<option value={'draft:' + other.id}>{other.name}</option>
-								{/each}
-							</optgroup>
-						{/if}
-					</select>
+					<AutocompleteSelect
+						form={importForm}
+						field="source"
+						options={importOptions}
+						translateOptions={false}
+						placeholder={m.lbDraftSourceLibrary()}
+						portalDropdown={true}
+						onChange={(value) => (importSource = value ?? '')}
+					/>
 					<div class="flex flex-wrap gap-3 text-sm">
 						{#each OBJECT_TYPES as type}
 							{@const atLimit = singleKindFull(type)}

@@ -5,7 +5,7 @@
 
 	export interface MatrixColumn {
 		id: string;
-		ref_id: string;
+		ref_id: string | null;
 		name: string;
 		description?: string;
 	}
@@ -18,7 +18,7 @@
 
 	export interface MatrixCell {
 		id: string;
-		ref_id: string;
+		ref_id: string | null;
 		name: string;
 		tactics: string[];
 		groups: string[];
@@ -75,7 +75,7 @@
 	// a parent stays when only its sub-techniques match
 	function matchesSelf(cell: MatrixCell): boolean {
 		const needle = query.trim().toLowerCase();
-		if (needle && !`${cell.ref_id} ${cell.name}`.toLowerCase().includes(needle)) return false;
+		if (needle && !`${cell.ref_id ?? ''} ${cell.name}`.toLowerCase().includes(needle)) return false;
 		for (const [dimension, group] of Object.entries(facetsByDimension)) {
 			const selected = group.filter((facet) => activeFacets.includes(facet.ref_id));
 			if (!selected.length) continue;
@@ -148,7 +148,7 @@
 
 	<div class="overflow-x-auto pb-2">
 		<div class="flex items-start gap-2 min-w-max">
-			{#each grid as { column, items } (column.ref_id)}
+			{#each grid as { column, items } (column.id)}
 				<div class="flex w-56 shrink-0 flex-col gap-1">
 					<!-- fixed height: a name that wraps to two lines (common in French)
 					     would otherwise push its column's cells out of alignment -->
@@ -162,7 +162,7 @@
 					{#each items as cell (cell.id)}
 						{@const children = cell.children ?? []}
 						<!-- keyed by column: a technique can sit in several tactics -->
-						{@const cellKey = `${column.ref_id}:${cell.id}`}
+						{@const cellKey = `${column.id}:${cell.id}`}
 						{@const isOpen = expanded[cellKey] ?? false}
 						<div
 							class="rounded border px-2 py-1 text-xs hover:border-primary-500 {selectable &&

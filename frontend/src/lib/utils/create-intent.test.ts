@@ -12,7 +12,11 @@ function at(url: string) {
 
 beforeEach(() => {
 	page.data = {
-		user: { root_folder_id: ROOT, domain_permissions: { [ROOT]: ['add_asset'] } }
+		user: {
+			root_folder_id: ROOT,
+			permission_sets: [['add_asset']],
+			domain_permissions: { [ROOT]: 0 }
+		}
 	};
 });
 

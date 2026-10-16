@@ -25,15 +25,32 @@ export const load: PageServerLoad = async (event) => {
 
 	const readOptional = (res: Response) => (res.ok ? res.json() : discardBody(res).then(() => null));
 
-	const [detail, object, elementaryActions, killChainSteps, attackStageData, iconData] =
-		await Promise.all([
-			loadDetail({ event, model: model, id: event.params.id }),
-			event.fetch(objectEndpoint).then((res) => res.json()),
-			fetchAllPages<any>(event.fetch, eaEndpoint),
-			fetchAllPages<any>(event.fetch, killChainEndpoint),
-			event.fetch(`${BASE_API_URL}/${eaModel.endpointUrl}/attack_stage/`).then(readOptional),
-			event.fetch(`${BASE_API_URL}/${eaModel.endpointUrl}/icon/`).then(readOptional)
-		]);
+	const [
+		detail,
+		object,
+		elementaryActions,
+		killChainSteps,
+		attackStageData,
+		iconData,
+		probabilityChoices
+	] = await Promise.all([
+		loadDetail({ event, model: model, id: event.params.id }),
+		event.fetch(objectEndpoint).then((res) => res.json()),
+		fetchAllPages<any>(event.fetch, eaEndpoint),
+		fetchAllPages<any>(event.fetch, killChainEndpoint),
+		event.fetch(`${BASE_API_URL}/${eaModel.endpointUrl}/attack_stage/`).then(readOptional),
+		event.fetch(`${BASE_API_URL}/${eaModel.endpointUrl}/icon/`).then(readOptional),
+		event
+			.fetch(`${BASE_API_URL}/${model.endpointUrl}/${event.params.id}/likelihood/`)
+			.then(readOptional)
+	]);
+
+	const studyId = detail.data?.ebios_rm_study?.id;
+	const ratingKit = studyId
+		? await event
+				.fetch(`${BASE_API_URL}/ebios-rm/studies/${studyId}/rating-kit/`)
+				.then(readOptional)
+		: null;
 
 	const eaInitialData: Record<string, any> = {};
 	if (object.folder) {
@@ -64,6 +81,8 @@ export const load: PageServerLoad = async (event) => {
 		object,
 		elementaryActions,
 		killChainSteps,
+		probabilityChoices: probabilityChoices ?? {},
+		ratingKit,
 		operatingModeId: event.params.id,
 		eaModel: {
 			urlModel: 'elementary-actions',

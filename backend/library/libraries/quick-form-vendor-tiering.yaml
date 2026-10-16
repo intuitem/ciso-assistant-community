@@ -1,0 +1,421 @@
+urn: urn:intuitem:risk:library:vendor-tiering
+locale: en
+ref_id: vendor-tiering
+name: Vendor tiering
+description: |
+  A short starter form to tier a vendor by its inherent risk: three questions on business and operations impact, three on data, privacy and security. Start it from a vendor with "Assess tier"; an accepted response writes the tier onto the vendor.
+copyright: © intuitem
+version: 1
+publication_date: 2026-10-04
+provider: intuitem
+packager: intuitem
+objects:
+  quick_forms:
+  - urn: urn:intuitem:risk:quick_form:vendor-tiering
+    ref_id: vendor-tiering
+    name: Vendor tiering
+    description: |-
+      Tiers a vendor by its inherent risk, before any review of its security posture.
+
+      Each scored answer runs from 1 (low) to 4 (critical). Business impact and data exposure are each the average of their three answers, and the inherent risk is the higher of the two: a vendor that runs a critical process matters even if it holds no data, and the reverse.
+
+      Some answers raise the tier on their own: a regulated critical function, a sole supplier behind a critical process, special-category data, or privileged access to your systems.
+    annotation: 'An accepted response sets the vendor''s tier on the default scale: Critical from an inherent
+      risk of 3.3, Important from 2.6, Standard from 2.0, Low impact below. A regulated critical function
+      or a single point of failure makes the vendor at least Critical; special-category data or privileged
+      access at least Important. The tier is the highest of these. Each dimension averages three answers,
+      so it moves in steps of a third: 3.3 is reached by 4-4-2 or 3-3-4, 2.6 by 3-3-2. The tiers are named
+      by key, so a renamed or reordered scale keeps working; a scale without these keys sends responses
+      to review.'
+    ref_id_prefix: VT
+    subject_question_urn: urn:intuitem:risk:qf_page:vendor-tiering:context:question:vendor
+    on_accept:
+    - target: entity.tier
+      config:
+        mapping:
+        - outcome: inherent
+          thresholds:
+          - tier: critical
+            min: 3.3
+          - tier: important
+            min: 2.6
+          - tier: standard
+            min: 2.0
+          - tier: low-impact
+        - outcome: regulated_function
+          tier: critical
+        - outcome: single_point_of_failure
+          tier: critical
+        - outcome: special_data
+          tier: important
+        - outcome: privileged_access
+          tier: important
+    scores_definition:
+      min: 0
+      max: 4
+      aggregation: pages_mean
+    outcomes_definition:
+    - ref_id: business
+      label: Business impact
+      kind: number
+      expression: pages["business"].score
+      translations:
+        fr:
+          label: Impact métier
+    - ref_id: data
+      label: Data exposure
+      kind: number
+      expression: pages["data"].score
+      translations:
+        fr:
+          label: Exposition des données
+    - ref_id: inherent
+      label: Inherent risk
+      kind: number
+      expression: 'values.business > values.data ? values.business : values.data'
+      translations:
+        fr:
+          label: Risque intrinsèque
+    - ref_id: regulated_function
+      label: Regulated critical function
+      color: '#dc2626'
+      expression: '"context:question:regulated:choice:yes" in answers["context:question:regulated"].selected_choices'
+      translations:
+        fr:
+          label: Fonction critique réglementée
+    - ref_id: single_point_of_failure
+      label: Single point of failure
+      color: '#dc2626'
+      expression: '"business:question:b1:choice:stops" in answers["business:question:b1"].selected_choices
+        && "business:question:b3:choice:sole" in answers["business:question:b3"].selected_choices'
+      translations:
+        fr:
+          label: Point de défaillance unique
+    - ref_id: special_data
+      label: Special-category data
+      color: '#ea580c'
+      expression: '"data:question:d1:choice:special" in answers["data:question:d1"].selected_choices'
+      translations:
+        fr:
+          label: Données sensibles
+    - ref_id: privileged_access
+      label: Privileged access
+      color: '#ea580c'
+      expression: '"data:question:d3:choice:privileged" in answers["data:question:d3"].selected_choices'
+      translations:
+        fr:
+          label: Accès à privilèges
+    - ref_id: regulated_unsure
+      label: Regulated function to confirm
+      color: '#ca8a04'
+      expression: '"context:question:regulated:choice:unsure" in answers["context:question:regulated"].selected_choices'
+      translations:
+        fr:
+          label: Fonction réglementée à confirmer
+    pages:
+    - urn: urn:intuitem:risk:qf_page:vendor-tiering:context
+      ref_id: context
+      name: Context
+      questions:
+        urn:intuitem:risk:qf_page:vendor-tiering:context:question:vendor:
+          type: object_reference
+          text: Vendor
+          config:
+            model: entity
+          translations:
+            fr:
+              text: Fournisseur
+        urn:intuitem:risk:qf_page:vendor-tiering:context:question:service:
+          type: text
+          text: What service does the vendor provide?
+          translations:
+            fr:
+              text: Quel service le fournisseur assure-t-il ?
+        urn:intuitem:risk:qf_page:vendor-tiering:context:question:service_type:
+          type: unique_choice
+          text: Type of service
+          choices:
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:context:question:service_type:choice:saas
+            value: SaaS or cloud service
+            translations:
+              fr:
+                value: Service SaaS ou cloud
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:context:question:service_type:choice:managed
+            value: Managed service or outsourcing
+            translations:
+              fr:
+                value: Service managé ou infogérance
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:context:question:service_type:choice:on_premise
+            value: Software or hardware installed on site
+            translations:
+              fr:
+                value: Logiciel ou matériel installé sur site
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:context:question:service_type:choice:professional
+            value: Professional services
+            translations:
+              fr:
+                value: Prestations intellectuelles
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:context:question:service_type:choice:goods
+            value: Goods or facilities
+            translations:
+              fr:
+                value: Fournitures ou locaux
+          translations:
+            fr:
+              text: Type de service
+        urn:intuitem:risk:qf_page:vendor-tiering:context:question:regulated:
+          type: unique_choice
+          text: Does the service support a regulated critical function, such as a DORA critical or important
+            function or a NIS2 essential service?
+          choices:
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:context:question:regulated:choice:yes
+            value: 'Yes'
+            translations:
+              fr:
+                value: Oui
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:context:question:regulated:choice:no
+            value: 'No'
+            translations:
+              fr:
+                value: Non
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:context:question:regulated:choice:unsure
+            value: Unsure
+            translations:
+              fr:
+                value: Je ne sais pas
+          translations:
+            fr:
+              text: Le service soutient-il une fonction critique réglementée, comme une fonction critique
+                ou importante au sens de DORA ou un service essentiel au sens de NIS2 ?
+      translations:
+        fr:
+          name: Contexte
+    - urn: urn:intuitem:risk:qf_page:vendor-tiering:business
+      ref_id: business
+      name: Business and operations impact
+      aggregation: mean
+      questions:
+        urn:intuitem:risk:qf_page:vendor-tiering:business:question:b1:
+          type: unique_choice
+          text: If the service stopped, what would the impact be?
+          choices:
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:business:question:b1:choice:negligible
+            value: Negligible
+            add_score: 1
+            translations:
+              fr:
+                value: Négligeable
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:business:question:b1:choice:workaround
+            value: An inconvenience, a workaround exists
+            add_score: 2
+            translations:
+              fr:
+                value: Une gêne, une solution de contournement existe
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:business:question:b1:choice:disruption
+            value: Significant disruption to a business process
+            add_score: 3
+            translations:
+              fr:
+                value: Une perturbation importante d'un processus métier
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:business:question:b1:choice:stops
+            value: A critical or customer-facing process stops
+            add_score: 4
+            translations:
+              fr:
+                value: Un processus critique ou au contact des clients s'arrête
+          translations:
+            fr:
+              text: Si le service s'arrêtait, quel en serait l'impact ?
+        urn:intuitem:risk:qf_page:vendor-tiering:business:question:b2:
+          type: unique_choice
+          text: How long could you operate without it?
+          choices:
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:business:question:b2:choice:month
+            value: More than a month
+            add_score: 1
+            translations:
+              fr:
+                value: Plus d'un mois
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:business:question:b2:choice:weeks
+            value: One week to one month
+            add_score: 2
+            translations:
+              fr:
+                value: D'une semaine à un mois
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:business:question:b2:choice:days
+            value: One day to one week
+            add_score: 3
+            translations:
+              fr:
+                value: D'un jour à une semaine
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:business:question:b2:choice:hours
+            value: Less than a day
+            add_score: 4
+            translations:
+              fr:
+                value: Moins d'un jour
+          translations:
+            fr:
+              text: Combien de temps pourriez-vous fonctionner sans lui ?
+        urn:intuitem:risk:qf_page:vendor-tiering:business:question:b3:
+          type: unique_choice
+          text: How hard would it be to replace the vendor?
+          choices:
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:business:question:b3:choice:easy
+            value: Many alternatives, a switch takes days
+            add_score: 1
+            translations:
+              fr:
+                value: Nombreuses alternatives, un changement prend quelques jours
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:business:question:b3:choice:weeks
+            value: A switch takes weeks
+            add_score: 2
+            translations:
+              fr:
+                value: Un changement prend quelques semaines
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:business:question:b3:choice:months
+            value: A switch takes months
+            add_score: 3
+            translations:
+              fr:
+                value: Un changement prend plusieurs mois
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:business:question:b3:choice:sole
+            value: Sole source, or more than six months to switch
+            add_score: 4
+            translations:
+              fr:
+                value: Fournisseur unique, ou plus de six mois pour en changer
+          translations:
+            fr:
+              text: Quelle serait la difficulté de remplacer ce fournisseur ?
+      translations:
+        fr:
+          name: Impact métier et opérationnel
+    - urn: urn:intuitem:risk:qf_page:vendor-tiering:data
+      ref_id: data
+      name: Data, privacy and security
+      aggregation: mean
+      questions:
+        urn:intuitem:risk:qf_page:vendor-tiering:data:question:d1:
+          type: unique_choice
+          text: What is the most sensitive data the vendor accesses, stores or processes?
+          choices:
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:data:question:d1:choice:public
+            value: None, or public data only
+            add_score: 1
+            translations:
+              fr:
+                value: Aucune, ou uniquement des données publiques
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:data:question:d1:choice:internal
+            value: Internal data
+            add_score: 2
+            translations:
+              fr:
+                value: Données internes
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:data:question:d1:choice:confidential
+            value: Confidential or personal data
+            add_score: 3
+            translations:
+              fr:
+                value: Données confidentielles ou personnelles
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:data:question:d1:choice:special
+            value: Special-category personal data, payment or health data, credentials or secrets
+            add_score: 4
+            translations:
+              fr:
+                value: Données personnelles sensibles, données de paiement ou de santé, identifiants ou
+                  secrets
+          translations:
+            fr:
+              text: Quelles sont les données les plus sensibles auxquelles le fournisseur accède, qu'il
+                stocke ou qu'il traite ?
+        urn:intuitem:risk:qf_page:vendor-tiering:data:question:d2:
+          type: unique_choice
+          text: How many people's personal data does the vendor handle?
+          choices:
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:data:question:d2:choice:none
+            value: None
+            add_score: 1
+            translations:
+              fr:
+                value: Aucune
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:data:question:d2:choice:small
+            value: Fewer than 1,000
+            add_score: 2
+            translations:
+              fr:
+                value: Moins de 1 000
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:data:question:d2:choice:medium
+            value: 1,000 to 100,000
+            add_score: 3
+            translations:
+              fr:
+                value: De 1 000 à 100 000
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:data:question:d2:choice:large
+            value: More than 100,000
+            add_score: 4
+            translations:
+              fr:
+                value: Plus de 100 000
+          translations:
+            fr:
+              text: Combien de personnes sont concernées par les données personnelles que traite le fournisseur
+                ?
+        urn:intuitem:risk:qf_page:vendor-tiering:data:question:d3:
+          type: unique_choice
+          text: What access does the vendor have to your systems or network?
+          choices:
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:data:question:d3:choice:none
+            value: None
+            add_score: 1
+            translations:
+              fr:
+                value: Aucun
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:data:question:d3:choice:portal
+            value: User accounts on the vendor's own platform
+            add_score: 2
+            translations:
+              fr:
+                value: Des comptes utilisateurs sur sa propre plateforme
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:data:question:d3:choice:integration
+            value: An integration (API) or remote access
+            add_score: 3
+            translations:
+              fr:
+                value: Une intégration (API) ou un accès à distance
+          - urn: urn:intuitem:risk:qf_page:vendor-tiering:data:question:d3:choice:privileged
+            value: Privileged or administrator access, or a presence on your network
+            add_score: 4
+            translations:
+              fr:
+                value: Un accès à privilèges ou administrateur, ou une présence sur votre réseau
+          translations:
+            fr:
+              text: De quel accès le fournisseur dispose-t-il à vos systèmes ou à votre réseau ?
+      translations:
+        fr:
+          name: Données, vie privée et sécurité
+    translations:
+      fr:
+        name: Criticité des fournisseurs
+        description: |-
+          Classe un fournisseur selon son risque intrinsèque, avant toute revue de sa posture de sécurité.
+
+          Chaque réponse notée va de 1 (faible) à 4 (critique). L'impact métier et l'exposition des données sont chacun la moyenne de leurs trois réponses, et le risque intrinsèque est le plus élevé des deux : un fournisseur qui fait tourner un processus critique compte même s'il ne détient aucune donnée, et inversement.
+
+          Certaines réponses relèvent le niveau à elles seules : une fonction critique réglementée, un fournisseur unique derrière un processus critique, des données sensibles, ou un accès à privilèges à vos systèmes.
+        annotation: 'Une réponse acceptée attribue le niveau du fournisseur sur l''échelle par défaut
+          : Critique à partir d''un risque intrinsèque de 3,3, Important à partir de 2,6, Standard à partir
+          de 2,0, Faible impact en dessous. Une fonction critique réglementée ou un point de défaillance
+          unique rend le fournisseur au moins Critique ; des données sensibles ou un accès à privilèges,
+          au moins Important. Le niveau retenu est le plus élevé de ces résultats. Chaque dimension fait
+          la moyenne de trois réponses et évolue donc par tiers : 3,3 est atteint avec 4-4-2 ou 3-3-4,
+          2,6 avec 3-3-2. Les niveaux sont désignés par leur clé : une échelle renommée ou réordonnée
+          continue de fonctionner, une échelle sans ces clés envoie les réponses en relecture.'
+translations:
+  fr:
+    name: Criticité des fournisseurs
+    description: 'Un formulaire de départ, court, pour classer un fournisseur selon son risque intrinsèque
+      : trois questions sur l''impact métier et opérationnel, trois sur les données, la vie privée et
+      la sécurité. Lancez-le depuis un fournisseur avec « Évaluer le niveau » ; une réponse acceptée attribue
+      le niveau au fournisseur.'

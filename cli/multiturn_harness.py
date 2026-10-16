@@ -54,10 +54,10 @@ SYSTEM = (
 def load_tools_and_fns():
     if CLI_DIR not in sys.path:
         sys.path.insert(0, CLI_DIR)
-    from mcp.server.fastmcp import FastMCP
+    from mcp.server.mcpserver import MCPServer
     from ca_mcp.server import READ_TOOLS
 
-    probe = FastMCP("probe")
+    probe = MCPServer("probe")
     for fn in READ_TOOLS:
         probe.tool()(fn)
     tools = asyncio.run(probe.list_tools())
@@ -67,7 +67,7 @@ def load_tools_and_fns():
             "function": {
                 "name": t.name,
                 "description": (t.description or "")[:1024],
-                "parameters": t.inputSchema or {"type": "object", "properties": {}},
+                "parameters": t.input_schema or {"type": "object", "properties": {}},
             },
         }
         for t in tools

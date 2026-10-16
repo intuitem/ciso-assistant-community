@@ -41,6 +41,8 @@ An EBIOS RM **study** lives in a **domain** (no perimeter — the study itself i
 | Operational scenario | `OperationalScenario` | Workshop 4 — composed of kill chains, operating modes, elementary actions |
 | Applied control | `AppliedControl` | Shared with the rest of the platform; used at workshop 5 |
 
+At workshop 4, an operational scenario can also reference the adversary **techniques** it relies on, picked from a loaded TTP catalog such as MITRE ATT&CK. See [TTP catalogs and threat models](ttps-and-threat-models.md).
+
 ## Mapping to qualitative risk
 
 EBIOS RM scenarios sit alongside qualitative risk scenarios in the same risk register: both contribute to the residual-risk picture for a perimeter, and both can be treated with the same applied controls.
@@ -49,5 +51,6 @@ EBIOS RM scenarios sit alongside qualitative risk scenarios in the same risk reg
 
 - [Risk assessments](risk-assessments.md)
 - [Quantitative risk studies](quantitative-risk-studies.md)
+- [TTP catalogs and threat models](ttps-and-threat-models.md)
 - [Guide → EBIOS RM study](../guides/ebios-rm.md)
 - [Vocabulary → EBIOS RM and related terms](../introduction/vocabulary.md)

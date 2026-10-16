@@ -17,6 +17,7 @@
 		formDataCache?: Record<string, any>;
 		initialData?: Record<string, any>;
 		data?: any;
+		object?: Record<string, unknown>;
 	}
 
 	let {
@@ -25,7 +26,8 @@
 		cacheLocks = {},
 		formDataCache = $bindable({}),
 		initialData = {},
-		data = {}
+		data = {},
+		object = {}
 	}: Props = $props();
 
 	const isQualitative = $derived.by(() => {
@@ -57,6 +59,42 @@
 
 	function handleChoicesChange(entries: Array<{ ref_id: string; name: string }>) {
 		$choicesDefinitionValue = entries;
+	}
+
+	// Derived metric: the formula block, shared with the formula drawer of a
+	// metric whose formula is its definition's.
+	import DefinitionFormulaEditor, {
+		type FormulaPreview
+	} from '$lib/components/Metrology/DefinitionFormulaEditor.svelte';
+	import { untrack } from 'svelte';
+
+	const { value: datasetsValue } = formFieldProxy(form, 'datasets');
+	const { value: inputsValue } = formFieldProxy(form, 'inputs');
+	const { value: expressionValue } = formFieldProxy(form, 'expression');
+	let formulaOpen = $state(false);
+	// v1 creates computed metrics from metric instances (the compose modal):
+	// the formula block only shows to edit a definition that already has one,
+	// such as a formula over objects or one shipped in a library.
+	const editsFormula = untrack(() => {
+		const datasets = $datasetsValue;
+		return (
+			Boolean(($expressionValue as string | undefined)?.trim()) ||
+			(Array.isArray($inputsValue) && $inputsValue.length > 0) ||
+			(!!datasets && typeof datasets === 'object' && Object.keys(datasets).length > 0)
+		);
+	});
+	$effect(() => {
+		if ($datasetsValue && typeof $datasetsValue === 'object' && Object.keys($datasetsValue).length)
+			formulaOpen = true;
+		if (Array.isArray($inputsValue) && $inputsValue.length) formulaOpen = true;
+		if ($expressionValue) formulaOpen = true;
+	});
+	let preview = $state<FormulaPreview | null>(null);
+	function clearFormula() {
+		$datasetsValue = null;
+		$inputsValue = null;
+		$expressionValue = '';
+		preview = null;
 	}
 </script>
 
@@ -119,3 +157,32 @@
 	bind:cachedValue={formDataCache['filtering_labels']}
 	label={m.labels()}
 />
+
+{#if editsFormula}
+	<div class="form-group rounded-base border border-surface-200-800 p-3 flex flex-col gap-2">
+		<label class="flex items-center gap-2 text-sm font-semibold cursor-pointer">
+			<input
+				type="checkbox"
+				class="checkbox"
+				checked={formulaOpen}
+				onchange={(e) => {
+					formulaOpen = e.currentTarget.checked;
+					if (!formulaOpen) clearFormula();
+				}}
+				data-testid="derived-metric-toggle"
+			/>
+			{m.derivedMetric()}
+		</label>
+		<p class="text-xs text-surface-500">{m.derivedMetricHelpText()}</p>
+		{#if formulaOpen}
+			<DefinitionFormulaEditor
+				{form}
+				definition={object}
+				category={data?.category}
+				choicesDefinition={data?.choices_definition}
+				active={formulaOpen}
+				bind:preview
+			/>
+		{/if}
+	</div>
+{/if}

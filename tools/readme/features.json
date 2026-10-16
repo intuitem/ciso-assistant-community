@@ -28,7 +28,7 @@
       "name": "Custom frameworks supported",
       "group": "Compliance & frameworks"
     },
-    { "name": "+200 frameworks included", "group": "Compliance & frameworks" },
+    { "name": "+220 frameworks included", "group": "Compliance & frameworks" },
     { "name": "Policies management", "group": "Compliance & frameworks" },
     { "name": "Document management", "group": "Compliance & frameworks" },
     { "name": "Evidence management", "group": "Compliance & frameworks" },
@@ -39,6 +39,7 @@
     { "name": "Risk acceptance workflows", "group": "Risk management" },
     { "name": "Business Impact Analysis", "group": "Risk management" },
     { "name": "Cyber Risk Quantification", "group": "Risk management" },
+    { "name": "Risk trajectory & projection", "group": "Risk management" },
     { "name": "Vulnerability management", "group": "Risk management" },
     {
       "name": "Vulnerability enrichment",
@@ -97,6 +98,7 @@
       "bento": false
     },
     { "name": "Custom metrics tracking", "group": "Reporting & analytics" },
+    { "name": "Power BI connector", "group": "Reporting & analytics" },
 
     {
       "name": "Assignments & respondent mode",
@@ -114,6 +116,11 @@
       "group": "Collaboration & productivity",
       "bento": false
     },
+    {
+      "name": "In-app notifications center",
+      "group": "Collaboration & productivity",
+      "bento": false
+    },
 
     { "name": "Workflow automation", "group": "Automation & integrations" },
     { "name": "Comprehensive REST API", "group": "Automation & integrations" },
@@ -121,6 +128,7 @@
     { "name": "Data import wizard", "group": "Automation & integrations" },
     { "name": "Kafka integration", "group": "Automation & integrations" },
     { "name": "MCP support", "group": "Automation & integrations" },
+    { "name": "AI assistant with RAG", "group": "Automation & integrations" },
     { "name": "Outgoing webhooks", "group": "Automation & integrations" },
     {
       "name": "Jira & ServiceNow integrations",
@@ -160,6 +168,6 @@
       "bento": false
     },
     { "name": "Open Source", "group": "Platform" },
-    { "name": "Available in +26 languages", "group": "Platform" }
+    { "name": "Available in +27 languages", "group": "Platform" }
   ]
 }

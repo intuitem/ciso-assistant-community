@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { sampleMoment } from '$lib/utils/derived-metrics';
+	import { escapeHtml, roundScore } from '$lib/utils/helpers';
 	import { onMount } from 'svelte';
 
 	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
@@ -104,12 +106,12 @@
 				try {
 					const value = typeof sample.value === 'string' ? JSON.parse(sample.value) : sample.value;
 					if (isQualitative) {
-						return [sample.timestamp, value?.choice_index ?? null];
+						return [sampleMoment(sample), value?.choice_index ?? null];
 					} else {
-						return [sample.timestamp, value?.result ?? null];
+						return [sampleMoment(sample), value?.result ?? null];
 					}
 				} catch {
-					return [sample.timestamp, null];
+					return [sampleMoment(sample), null];
 				}
 			})
 			.filter((item) => item[1] !== null)
@@ -134,8 +136,21 @@
 			.sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime())
 	);
 
-	// Combined chart data based on metric type
-	const chartData = $derived(isBuiltinMetric ? builtinChartData : customChartData);
+	// Combined chart data based on metric type. Audit scores are stored
+	// unrounded: thresholds and the trend read the raw values, what is shown is
+	// rounded like on the audit.
+	const rawChartData = $derived(isBuiltinMetric ? builtinChartData : customChartData);
+	const chartData = $derived(
+		isBuiltinMetric
+			? rawChartData.map(([date, value]) => [
+					date,
+					typeof value === 'number' ? roundScore(value) : value
+				])
+			: rawChartData
+	);
+	const rawLatestValue = $derived(
+		rawChartData.length > 0 ? rawChartData[rawChartData.length - 1][1] : null
+	);
 
 	// Get choice names for qualitative metrics
 	const choiceNames = $derived(
@@ -146,7 +161,7 @@
 	const latestValue = $derived(chartData.length > 0 ? chartData[chartData.length - 1][1] : null);
 
 	// Threshold-resolved color for the latest scalar value (null when no threshold matches)
-	const thresholdColor = $derived(resolveThresholdColor(latestValue));
+	const thresholdColor = $derived(resolveThresholdColor(rawLatestValue));
 
 	// For breakdown metrics, get the latest breakdown data
 	const latestBreakdown = $derived(
@@ -292,7 +307,9 @@
 					displayValue = formatValueWithUnit(value);
 				}
 
-				return `${date}<br/>${params[0].marker}${displayValue}`;
+				// Rendered as HTML by ECharts: level names and units are typed
+				// text (a formula's results, a definition's levels), escaped.
+				return `${escapeHtml(date)}<br/>${params[0].marker}${escapeHtml(displayValue)}`;
 			}
 		};
 
@@ -750,11 +767,11 @@
 					>
 				{/if}
 			</div>
-			<!-- Trend indicator -->
-			{#if chartData.length > 1}
-				{@const prevValue = chartData[chartData.length - 2]?.[1]}
+			<!-- Trend indicator: a percentage change between two levels means nothing -->
+			{#if chartData.length > 1 && !isQualitative}
+				{@const prevValue = rawChartData[rawChartData.length - 2]?.[1]}
 				{@const change = prevValue
-					? (((latestValue - prevValue) / prevValue) * 100).toFixed(1)
+					? (((rawLatestValue - prevValue) / prevValue) * 100).toFixed(1)
 					: null}
 				{@const isPositiveChange = Number(change) >= 0}
 				{@const isGood = higherIsBetter ? isPositiveChange : !isPositiveChange}

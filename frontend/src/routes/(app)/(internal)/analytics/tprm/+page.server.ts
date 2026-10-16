@@ -6,8 +6,12 @@ import { m } from '$paraglide/messages';
 export const load = (async ({ fetch }) => {
 	const endpoint = `${BASE_API_URL}/entity-assessments/metrics/`;
 
-	const res = await fetch(endpoint);
+	const [res, tiersRes] = await Promise.all([
+		fetch(endpoint),
+		fetch(`${BASE_API_URL}/tiers/?ordering=-rank`)
+	]);
 	const data = await res.json();
+	const tiers = tiersRes.ok ? ((await tiersRes.json()).results ?? []) : [];
 
-	return { data, title: m.tprmOverview() };
+	return { data, tiers, title: m.tprmOverview() };
 }) satisfies PageServerLoad;

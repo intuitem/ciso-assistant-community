@@ -491,6 +491,12 @@ export const navData = {
 					href: '/entities'
 				},
 				{
+					name: 'criticality',
+					fa_icon: 'fa-solid fa-layer-group',
+					href: '/entities/tiers',
+					permissions: ['view_tier']
+				},
+				{
 					name: 'representatives',
 					fa_icon: 'fa-solid fa-user-tie',
 					href: '/representatives'
@@ -556,6 +562,12 @@ export const navData = {
 					fa_icon: 'fa-solid fa-triangle-exclamation',
 					href: '/data-breaches',
 					permissions: ['view_databreach']
+				},
+				{
+					name: 'dpias',
+					fa_icon: 'fa-solid fa-scale-balanced',
+					href: '/dpias',
+					permissions: ['view_processing']
 				}
 			]
 		},

@@ -37,7 +37,8 @@ const admin = {
 	root_folder_id: ROOT,
 	is_admin: true,
 	roles: ['BI-RL-GLA'],
-	domain_permissions: { [ROOT]: ['view_folder', 'view_serviceaccount'] }
+	permission_sets: [['view_folder', 'view_serviceaccount']],
+	domain_permissions: { [ROOT]: 0 }
 } as unknown as User;
 
 const allFlags = new Proxy({}, { get: () => true }) as Record<string, boolean>;

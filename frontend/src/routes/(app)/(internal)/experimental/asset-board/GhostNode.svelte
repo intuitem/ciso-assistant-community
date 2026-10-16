@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Handle, Position } from '@xyflow/svelte';
 	import { getContext } from 'svelte';
+	import { goto } from '$app/navigation';
 
 	interface Props {
 		id: string;
@@ -20,7 +21,7 @@
 
 	const board = getContext<{
 		unpinGhost: (id: string) => void;
-	}>('assetBoard');
+	}>('assetGraph');
 
 	let hovered = $state(false);
 </script>
@@ -30,6 +31,9 @@
 		{data.hidden ? 'border-surface-400 bg-surface-100-900' : 'border-warning-400 bg-warning-50-950'}"
 	onmouseenter={() => (hovered = true)}
 	onmouseleave={() => (hovered = false)}
+	ondblclick={() => !data.hidden && goto(`/experimental/asset-map?focus=${id}`)}
+	role="button"
+	tabindex="-1"
 >
 	{#if data.hidden}
 		<div class="flex items-center gap-2 text-surface-500">

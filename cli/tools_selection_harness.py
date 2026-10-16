@@ -111,6 +111,26 @@ HARD = [
     ("Create a new asset called Web Server 01", {"create_asset"}, {"web server 01"}),
     ("Add a threat named Supply chain compromise", {"create_threat"}, {"supply chain"}),
     ("Create a new domain called Legal", {"create_folder"}, {"legal"}),
+    (
+        "Attach C:/tmp/firewall-review.pdf as a new evidence named Firewall review",
+        {"create_evidence"},
+        {"firewall-review.pdf"},
+    ),
+    (
+        "Record a new incident called Ransomware on file server",
+        {"create_incident"},
+        {"ransomware"},
+    ),
+    (
+        "Add a mitigation to the Ransomware incident timeline: isolated the file server",
+        {"create_timeline_entry"},
+        {"ransomware"},
+    ),
+    (
+        "Correct the observation of timeline entry 11111111-1111-1111-1111-111111111111",
+        {"update_timeline_entry"},
+        {"11111111-1111-1111-1111-111111111111"},
+    ),
     # -- French, harder phrasing
     (
         "Quels sont les risques les plus critiques pour nos actifs ?",
@@ -180,13 +200,13 @@ CLI_DIR = os.environ.get("CA_CLI_DIR", os.path.dirname(os.path.abspath(__file__)
 
 
 def load_tools(read_only: bool):
-    """Build a fresh FastMCP per surface — server.register_tools is idempotent."""
+    """Build a fresh MCPServer per surface — server.register_tools is idempotent."""
     if CLI_DIR not in sys.path:
         sys.path.insert(0, CLI_DIR)
-    from mcp.server.fastmcp import FastMCP
+    from mcp.server.mcpserver import MCPServer
     from ca_mcp.server import READ_TOOLS, WRITE_TOOLS
 
-    probe = FastMCP("probe")
+    probe = MCPServer("probe")
     for fn in READ_TOOLS:
         probe.tool()(fn)
     if not read_only:
@@ -201,7 +221,8 @@ def load_tools(read_only: bool):
                 "function": {
                     "name": t.name,
                     "description": (t.description or "")[:1024],
-                    "parameters": t.inputSchema or {"type": "object", "properties": {}},
+                    "parameters": t.input_schema
+                    or {"type": "object", "properties": {}},
                 },
             }
         )
