@@ -166,6 +166,57 @@ class TestEntityAssessmentCustomFields:
         assert ea.folder == domains["b"]
         assert ea.custom_fields == {"vendor_tier": "gold"}
 
+    def test_new_perimeter_moves_folder_even_with_folder_sent(
+        self, authenticated_client, domains
+    ):
+        ea_id = self._create_assessment(
+            authenticated_client,
+            domains,
+            folder=str(domains["b"].id),
+            perimeter=str(domains["perimeter_b"].id),
+        )
+
+        resp = authenticated_client.patch(
+            f"{EA_URL}{ea_id}/",
+            {
+                "folder": str(domains["b"].id),
+                "perimeter": str(domains["perimeter_a"].id),
+            },
+            format="json",
+        )
+        assert resp.status_code == status.HTTP_200_OK, resp.content
+        assert EntityAssessment.objects.get(pk=ea_id).folder == domains["a"]
+
+    def _analyst_in(self, folder, email):
+        user = User.objects.create_user(email)
+        group = UserGroup.objects.create(name=f"{email} group", folder=folder)
+        group.user_set.add(user)
+        ra = RoleAssignment.objects.create(
+            user_group=group,
+            role=Role.objects.get(name=str(RoleCodename.ANALYST)),
+            folder=folder,
+            is_recursive=True,
+        )
+        ra.perimeter_folders.add(folder)
+        return user
+
+    def test_partial_update_without_perimeter_keeps_folder(
+        self, authenticated_client, domains
+    ):
+        ea_id = self._create_assessment(
+            authenticated_client,
+            domains,
+            folder=str(domains["b"].id),
+            perimeter=str(domains["perimeter_a"].id),
+        )
+        user = self._analyst_in(domains["b"], "labeller-b@tests.com")
+
+        resp = _client_for(user).patch(
+            f"{EA_URL}{ea_id}/", {"filtering_labels": []}, format="json"
+        )
+        assert resp.status_code == status.HTTP_200_OK, resp.content
+        assert EntityAssessment.objects.get(pk=ea_id).folder == domains["b"]
+
     def test_perimeter_move_requires_add_permission_on_destination(
         self, authenticated_client, domains
     ):
@@ -176,16 +227,7 @@ class TestEntityAssessmentCustomFields:
             perimeter=str(domains["perimeter_b"].id),
         )
 
-        user = User.objects.create_user("analyst-b@tests.com")
-        group = UserGroup.objects.create(name="B analysts", folder=domains["b"])
-        group.user_set.add(user)
-        ra = RoleAssignment.objects.create(
-            user_group=group,
-            role=Role.objects.get(name=str(RoleCodename.ANALYST)),
-            folder=domains["b"],
-            is_recursive=True,
-        )
-        ra.perimeter_folders.add(domains["b"])
+        user = self._analyst_in(domains["b"], "analyst-b@tests.com")
 
         resp = _client_for(user).patch(
             f"{EA_URL}{ea_id}/",

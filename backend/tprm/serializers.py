@@ -488,22 +488,14 @@ class EntityAssessmentWriteSerializer(CustomFieldsSerializerMixin, BaseModelSeri
 
     def validate(self, attrs):
         # Before super(): custom fields are scoped against attrs["folder"].
-        instance = self.instance
-        perimeter = attrs.get("perimeter", getattr(instance, "perimeter", None))
-        folder = attrs.get("folder", getattr(instance, "folder", None))
-        # A perimeter change without an explicit folder moves the assessment.
-        perimeter_moved = (
-            instance is not None
-            and "folder" not in attrs
-            and "perimeter" in attrs
-            and perimeter != instance.perimeter
-        )
-        # Otherwise same rule as Assessment.save().
-        if (
-            perimeter
-            and perimeter.folder
-            and (perimeter_moved or folder in (None, Folder.get_root_folder()))
-        ):
+        perimeter = attrs.get("perimeter")
+        if self.instance is None:
+            # Same rule as Assessment.save().
+            follows = attrs.get("folder") in (None, Folder.get_root_folder())
+        else:
+            # Only a new perimeter moves the assessment.
+            follows = "perimeter" in attrs and perimeter != self.instance.perimeter
+        if perimeter and perimeter.folder and follows:
             attrs["folder"] = self.validate_folder(perimeter.folder)
         return super().validate(attrs)
 

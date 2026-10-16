@@ -58,6 +58,28 @@
 			console.error('Could not resolve the entity folder', e);
 		}
 	}
+
+	// Global plus a perimeter is saved in the perimeter's domain; show that domain's fields.
+	async function followPerimeterFolder(perimeterId: string, folder: string) {
+		try {
+			const [perimeter, current] = await Promise.all([
+				fetch(`/perimeters/${perimeterId}`).then((res) => res.json()),
+				fetch(`/folders/${folder}`).then((res) => res.json())
+			]);
+			if (current?.content_type !== 'GL') return;
+			if ($formData.perimeter !== perimeterId || $formData.folder !== folder) return;
+			const target = perimeter?.folder?.id ?? perimeter?.folder;
+			if (target) form.form.update((data) => ({ ...data, folder: target }), { taint: false });
+		} catch (e) {
+			console.error('Could not resolve the perimeter folder', e);
+		}
+	}
+
+	$effect(() => {
+		const perimeterId = $formData.perimeter;
+		const folder = $folderId;
+		if (perimeterId && folder) followPerimeterFolder(perimeterId, folder);
+	});
 	let implementationGroupsChoices = $state<{ label: string; value: string }[]>([]);
 	let frameworkDefaults = $state<Record<string, any> | null>(null);
 
