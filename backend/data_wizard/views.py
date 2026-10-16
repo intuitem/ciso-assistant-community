@@ -5266,11 +5266,15 @@ class LoadFileView(APIView):
 
                     if requirement_assessment:
                         compliance_result = record.get("compliance_result")
+                        extended_result = record.get("extended_result")
                         requirement_progress = record.get("requirement_progress")
                         observations = record.get("observations")
                         requirement_data = {}
+
                         if compliance_result not in (None, ""):
                             requirement_data["result"] = compliance_result
+                        if extended_result not in (None, ""):
+                            requirement_data["extended_result"] = extended_result
                         if requirement_progress not in (None, ""):
                             requirement_data["status"] = requirement_progress
                         if observations not in (None, ""):

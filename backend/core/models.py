@@ -75,8 +75,12 @@ from .base_models import (
 )
 from .utils import (
     aggregate_compute_results,
+    aggregate_tiered_results,
     camel_case,
+    project_weighted_sum,
+    question_score_bounds,
     resolve_compute_result,
+    resolve_result_tier,
     sha256,
     update_selected_implementation_groups,
     yaml_safe_load,
@@ -1779,6 +1783,13 @@ class LibraryUpdater:
                     framework_dict["outcomes_definition"] = []
                 # An omitted IG definition means that the framework no longer defines implementation groups.
                 framework_dict.setdefault("implementation_groups_definition", None)
+                # Same for the result rule: dropping the key reverts to the default.
+                framework_dict.setdefault(
+                    "result_aggregation", Framework.ResultAggregation.PER_ANSWER
+                )
+                Framework.validate_result_aggregation(
+                    framework_dict["result_aggregation"]
+                )
                 # Same for the scoring properties: omitted means back to the defaults.
                 framework_dict.setdefault("score_scale_locked", False)
                 framework_dict.setdefault("score_calculation_method", "average")
@@ -1801,6 +1812,7 @@ class LibraryUpdater:
                 prev_max = getattr(prev_fw, "max_score", None)
                 prev_def = getattr(prev_fw, "scores_definition", None)
                 had_outcomes = bool(getattr(prev_fw, "outcomes_definition", None))
+                prev_aggregation = getattr(prev_fw, "result_aggregation", None)
 
                 new_framework, _ = Framework.objects.update_or_create(
                     urn=framework_dict["urn"],
@@ -1811,6 +1823,11 @@ class LibraryUpdater:
                         **framework_dict,
                         "library": self.old_library,
                     },
+                )
+
+                aggregation_changed = (
+                    prev_fw is not None
+                    and prev_aggregation != new_framework.result_aggregation
                 )
 
                 # update requirement_nodes
@@ -1872,7 +1889,7 @@ class LibraryUpdater:
                 existing_requirement_assessment_objects = defaultdict(list)
                 for ra in RequirementAssessment.objects.filter(
                     requirement__framework=new_framework
-                ).select_related("compliance_assessment"):
+                ).select_related("compliance_assessment", "requirement__framework"):
                     existing_requirement_assessment_objects[
                         ra.requirement.urn.lower()
                     ].append(ra)
@@ -2228,7 +2245,7 @@ class LibraryUpdater:
                         }
                         new_questions = _cached_new_questions
 
-                        ra_changed = questions_removed
+                        ra_changed = questions_removed or aggregation_changed
                         if questions_removed:
                             answers_changed_ca_ids.add(ra.compliance_assessment_id)
                         for q in new_questions:
@@ -3837,8 +3854,24 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
 
 
 class Framework(ReferentialObjectMixin, I18nObjectMixin):
+    class ResultAggregation(models.TextChoices):
+        PER_ANSWER = "per_answer", _("Per answer")
+        TIERED_ALL = "tiered_all", _("Tiered, all statements of a tier must hold")
+
     min_score = models.IntegerField(default=0, verbose_name=_("Minimum score"))
     max_score = models.IntegerField(default=100, verbose_name=_("Maximum score"))
+    result_aggregation = models.CharField(
+        max_length=20,
+        choices=ResultAggregation.choices,
+        default=ResultAggregation.PER_ANSWER,
+        verbose_name=_("Result aggregation"),
+        help_text=_(
+            "How questionnaire answers combine into a requirement result. "
+            "'per_answer' lets each answer stand on its own, so answers that "
+            "disagree land on partially compliant; 'tiered_all' groups the "
+            "statements into tiers and awards a tier only when all of it holds."
+        ),
+    )
     scores_definition = models.JSONField(
         blank=True, null=True, verbose_name=_("Score definition")
     )
@@ -4006,6 +4039,14 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
         return self.score_scale_locked or any(
             qs.exists() for qs in self.scale_bound_querysets(self)
         )
+
+    @staticmethod
+    def validate_result_aggregation(value):
+        if value not in Framework.ResultAggregation.values:
+            raise ValueError(
+                f"invalid result_aggregation {value!r}: expected one of "
+                f"{', '.join(Framework.ResultAggregation.values)}"
+            )
 
     @staticmethod
     def validate_score_calculation_method(method):
@@ -11275,10 +11316,15 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
 
         total_score = 0
         total_weight = 0
+        # Reachable range of the visible scored questions, weighted and not: the
+        # weighted SUM is projected from the former onto the latter.
+        weighted_lo = weighted_hi = 0
+        unweighted_lo = unweighted_hi = 0
         scoring = self.get_resolved_scoring()
         min_score = scoring["min_score"] if scoring["min_score"] is not None else 0
         max_score = scoring["max_score"] if scoring["max_score"] is not None else 100
         results = []
+        question_results = []
         visible_questions = 0
         answered_visible_questions = 0
         is_score_computed = False
@@ -11304,10 +11350,11 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                 aggregation = "mean"
 
         for question in questions_qs:
+            choices = list(question.choices.all())
             # Detect result-driven capability across ALL choices (selection /
             # visibility agnostic). Short-circuits across questions once set.
             if not is_result_driven:
-                for choice in question.choices.all():
+                for choice in choices:
                     if choice.compute_result is None:
                         continue
                     if resolve_compute_result(choice.compute_result) is not None:
@@ -11324,23 +11371,48 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                 continue
 
             visible_questions += 1
+
+            # A negative weight has no defined meaning; treat it as 0.
+            weight = max(question.weight, 0)
+            scores = [c.add_score for c in choices if c.add_score is not None]
+            if scores:
+                lo, hi = question_score_bounds(
+                    [c.add_score or 0 for c in choices],
+                    question.type == Question.Type.MULTIPLE_CHOICE,
+                )
+                unweighted_lo += lo
+                unweighted_hi += hi
+                weighted_lo += lo * weight
+                weighted_hi += hi * weight
+
             if not has_answer_by_qid.get(question.id):
                 continue
 
             answered_visible_questions += 1
 
             selected_pks = selected_choice_pks_by_qid.get(question.id, set())
-            for choice in question.choices.all():
+            selected_results = []
+            choice_results = []
+            for choice in choices:
+                choice_results.append(choice.compute_result)
                 if choice.id in selected_pks:
                     if choice.add_score is not None:
                         is_score_computed = True
-                        total_score += choice.add_score * question.weight
-                        total_weight += question.weight
+                        total_score += choice.add_score * weight
+                        total_weight += weight
 
                     if choice.compute_result is not None:
                         resolved_cr = resolve_compute_result(choice.compute_result)
                         if resolved_cr is not None:
                             results.append(resolved_cr)
+                            selected_results.append(resolved_cr)
+
+            # Tiered aggregation needs to know which tier the question states,
+            # not just what was answered, so it can tell "every Achieved
+            # statement holds" from "some of them do".
+            question_results.append(
+                (resolve_result_tier(choice_results), selected_results)
+            )
 
         # A score is only committed once every visible question has an answer:
         # a committed score marks the RA as assessed in the progress cascade,
@@ -11351,6 +11423,10 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         if is_score_computed and questionnaire_complete:
             if aggregation == "mean" and total_weight > 0:
                 computed_score = total_score / total_weight
+            elif aggregation == "sum":
+                computed_score = project_weighted_sum(
+                    total_score, weighted_lo, weighted_hi, unweighted_lo, unweighted_hi
+                )
             else:
                 computed_score = total_score
             new_score = max(min(int(computed_score), max_score), min_score)
@@ -11365,14 +11441,21 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         # reset to NOT_ASSESSED on every recompute.
         new_result = self.result
         if is_result_driven:
+            tiered = (
+                self.requirement.framework.result_aggregation
+                == Framework.ResultAggregation.TIERED_ALL
+            )
             if visible_questions == 0:
                 new_result = self.Result.NOT_APPLICABLE
             elif answered_visible_questions < visible_questions:
                 new_result = self.Result.NOT_ASSESSED
-            elif not results:
+            elif not results and not tiered:
                 new_result = self.Result.NOT_ASSESSED
             else:
-                aggregated = aggregate_compute_results(results)
+                if tiered:
+                    aggregated = aggregate_tiered_results(question_results)
+                else:
+                    aggregated = aggregate_compute_results(results)
                 result_map = {
                     "compliant": self.Result.COMPLIANT,
                     "partially_compliant": self.Result.PARTIALLY_COMPLIANT,
