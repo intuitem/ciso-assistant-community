@@ -1079,6 +1079,26 @@ class StoredLibrary(LibraryMixin):
             value["hash_checksum"] for value in cls.objects.values("hash_checksum")
         )
 
+    @staticmethod
+    def framework_of(content: dict) -> Optional[dict]:
+        """First framework of a library content, singular or plural field."""
+        content = content or {}
+        framework = content.get("framework") or content.get("frameworks")
+        if isinstance(framework, list):
+            framework = framework[0] if framework else None
+        return framework or None
+
+    @classmethod
+    def framework_libraries(cls, urns) -> QuerySet:
+        """Framework (non-mapping) stored libraries whose framework URN is in urns."""
+        urns = list(urns)
+        return cls.objects.filter(
+            Q(content__framework__urn__in=urns)
+            | Q(content__frameworks__0__urn__in=urns),
+            content__requirement_mapping_set__isnull=True,
+            content__requirement_mapping_sets__isnull=True,
+        )
+
     @classmethod
     def store_library_content(
         cls, library_content: bytes, builtin: bool = False, dry_run: bool = False

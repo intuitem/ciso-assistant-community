@@ -16473,13 +16473,14 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
         if framework_urns:
             # Extract only the urn/name pair in the DB so the (potentially large)
             # framework content blob is never loaded into Python.
-            rows = StoredLibrary.objects.filter(
-                content__framework__urn__in=framework_urns,
-                content__framework__isnull=False,
-                content__requirement_mapping_set__isnull=True,
-                content__requirement_mapping_sets__isnull=True,
-            ).values_list("content__framework__urn", "content__framework__name")
-            for urn, name in rows:
+            rows = StoredLibrary.framework_libraries(framework_urns).values_list(
+                "content__framework__urn",
+                "content__framework__name",
+                "content__frameworks__0__urn",
+                "content__frameworks__0__name",
+            )
+            for urn, name, plural_urn, plural_name in rows:
+                urn, name = (urn, name) if urn else (plural_urn, plural_name)
                 if urn:
                     framework_map[urn] = name or urn
 
@@ -16512,16 +16513,11 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
 
         framework_details = {}
 
-        framework_libs_qs = StoredLibrary.objects.filter(
-            content__framework__urn__in=all_framework_urns,
-            content__framework__isnull=False,
-            content__requirement_mapping_set__isnull=True,
-            content__requirement_mapping_sets__isnull=True,
-        )
+        framework_libs_qs = StoredLibrary.framework_libraries(all_framework_urns)
 
         for lib in framework_libs_qs:
             try:
-                fw_content = lib.content["framework"]
+                fw_content = StoredLibrary.framework_of(lib.content) or {}
                 urn = fw_content.get("urn")
 
                 if not urn:
@@ -16631,15 +16627,10 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
 
     @staticmethod
     def _framework_content(urn, label):
-        lib = StoredLibrary.objects.filter(
-            content__framework__urn=urn,
-            content__framework__isnull=False,
-            content__requirement_mapping_set__isnull=True,
-            content__requirement_mapping_sets__isnull=True,
-        ).first()
+        lib = StoredLibrary.framework_libraries([urn]).first()
         if not lib:
             raise NotFound(f"{label} framework library not found")
-        return lib.content["framework"]
+        return StoredLibrary.framework_of(lib.content)
 
     def _mapping_context(self):
         """Resolve the mapping set and both framework contents.
