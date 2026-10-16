@@ -11,6 +11,7 @@ from .views import (
     VulnerabilitySlaViewSet,
     SecIntelFeedsViewSet,
     InfraConfigViewSet,
+    MailerSettingsViewSet,
 )
 from .routers import DefaultSettingsRouter
 
@@ -43,6 +44,13 @@ settings_router.register(
     SecIntelFeedsViewSet,
     basename="sec-intel-feeds",
 )
+
+if getattr(settings, "ENABLE_CUSTOM_MAILER", False):
+    settings_router.register(
+        r"mailer",
+        MailerSettingsViewSet,
+        basename="mailer-settings",
+    )
 
 if getattr(settings, "ENABLE_INFRA_CONFIG_MANAGEMENT", False):
     settings_router.register(
