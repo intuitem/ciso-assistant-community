@@ -5,14 +5,17 @@ Scoped with ``RoleAssignment.get_viewable_object_ids`` — the primitive
 """
 
 import re
+from collections import Counter
 
 from automation.models import PostureAssessment
 from crq.models import QuantitativeRiskScenario, QuantitativeRiskStudy
 from django.db.models import Q, TextField
 from django.db.models.functions import Cast
+from doc_management.models import DocumentContainer
 from ebios_rm.models import AttackPath, EbiosRMStudy, FearedEvent, StrategicScenario
 from iam.models import Folder, RoleAssignment
-from pmbok.models import Accreditation
+from metrology.models import MetricInstance
+from pmbok.models import Accreditation, Project
 from privacy.models import DataBreach, Processing, RightRequest
 from resilience.models import BusinessImpactAnalysis
 from rest_framework import permissions
@@ -32,6 +35,8 @@ from core.models import (
     FindingsAssessment,
     Framework,
     Incident,
+    OrganisationIssue,
+    OrganisationObjective,
     Perimeter,
     Policy,
     ReferenceControl,
@@ -85,10 +90,16 @@ SEARCHABLE_MODELS = [
     _search_entry(SecurityException, "security-exceptions", ref_id=True),
     _search_entry(TaskTemplate, "task-templates", ref_id=True, limit=100),
     _search_entry(Evidence, "evidences"),
+    # The container holds the document's name; its per-locale ManagedDocuments usually don't.
+    _search_entry(DocumentContainer, "document-containers", ref_id=True),
     # --- Governance ---
     _search_entry(RiskAcceptance, "risk-acceptances"),
     _search_entry(Campaign, "campaigns"),
     _search_entry(Accreditation, "accreditations", ref_id=True),
+    _search_entry(Project, "projects", ref_id=True),
+    _search_entry(OrganisationObjective, "organisation-objectives", ref_id=True),
+    _search_entry(OrganisationIssue, "organisation-issues", ref_id=True),
+    _search_entry(MetricInstance, "metric-instances", ref_id=True),
     # --- Risk ---
     _search_entry(RiskAssessment, "risk-assessments", ref_id=True),
     _search_entry(
@@ -325,14 +336,25 @@ def global_search(request):
         candidate["score"] = max(name_score, ref_score, desc_score, substring_bonus)
 
     # Sort by score descending, return top 50
-    candidates.sort(key=lambda c: c["score"], reverse=True)
-    top_results = candidates[:50]
+    # Ties (e.g. many substring hits) go to the shorter, closer name
+    candidates.sort(key=lambda c: (-c["score"], len(c["name"])))
+    # Up to 10 per type first, then the overflow, so one flooding type can't
+    # push the others out of the top 50
+    per_type = Counter()
+    head, overflow = [], []
+    for c in candidates:
+        per_type[c["type"]] += 1
+        (head if per_type[c["type"]] <= 10 else overflow).append(c)
+    top_results = (head + overflow)[:50]
 
     # Build final response: add URLs and truncate descriptions for the wire
     for r in top_results:
         if r["type"] == "requirement-nodes" and r.get("framework_id"):
             # Link to parent framework (no standalone requirement detail page yet)
             r["url"] = f"/frameworks/{r['framework_id']}"
+        elif r["type"] == "document-containers":
+            # Read mode picks the default-locale document when no ?doc= is given
+            r["url"] = f"/documents/{r['id']}/read"
         else:
             r["url"] = f"/{r['type']}/{r['id']}"
         r["description"] = r["description"][:200]
