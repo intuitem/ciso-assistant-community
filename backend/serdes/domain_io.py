@@ -904,6 +904,11 @@ def process_model_relationships(
         case "folder":
             # Only enclaves travel, and their domain parent stayed behind.
             _fields["parent_folder"] = link_dump_database_ids.get("base_folder")
+            # Folder ref_ids are unique instance-wide: re-importing or copying a
+            # domain keeps an enclave's ref_id only while it is free.
+            ref_id = _fields.get("ref_id")
+            if ref_id and Folder.ref_id_in_use(ref_id):
+                _fields["ref_id"] = None
 
         case "asset":
             many_to_many_map_ids["parent_ids"] = get_mapped_ids(

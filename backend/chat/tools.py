@@ -13,6 +13,8 @@ Architecture:
       adding a new relationship is a one-line addition.
 """
 
+import re
+
 import structlog
 
 from django.apps import apps
@@ -143,6 +145,7 @@ CREATABLE_MODELS = {
 MULTI_VALUE_FILTERS = frozenset(
     {
         "status",
+        "exclude_status",
         "treatment",
         "result",
         "priority",
@@ -338,7 +341,7 @@ def _build_tools() -> tuple[list[dict], dict]:
                 "'entities'/'entités'/'third parties'/'tiers' → entity, "
                 "'solutions' → solution, "
                 "'contracts'/'contrats' → contract, "
-                "'entity assessments' → entity_assessment, "
+                "'entity assessments'/'vendor, supplier or third-party assessments' → entity_assessment, "
                 "'EBIOS RM studies'/'études EBIOS' → ebios_rm_study, "
                 "'feared events'/'événements redoutés' → feared_event, "
                 "'RoTo couples'/'couples SO/OV' → ro_to, "
@@ -365,7 +368,24 @@ def _build_tools() -> tuple[list[dict], dict]:
             "items": {"type": "string"},
             "description": (
                 "Filter by status (e.g. 'active', 'in_progress', 'to_do', 'done', "
-                "'draft', 'open', 'closed'). Pass several to match any of them."
+                "'draft'). Pass several to match any of them."
+            ),
+        },
+        "exclude_status": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": (
+                "Leave out objects with these statuses. Use it for negations: "
+                "'not active' → ['active']; 'not done', 'still open' → the finished "
+                "statuses (e.g. ['done', 'closed', 'resolved'])."
+            ),
+        },
+        "linked_to": {
+            "type": "string",
+            "description": (
+                "Name or ref_id of another object: keeps only objects related to it. "
+                "E.g. assets supporting 'Production line control', controls of risk "
+                "'RS.01', audits of entity 'Kestrava Cloud B.V.'."
             ),
         },
         "priority": {
@@ -633,8 +653,11 @@ def _build_tools() -> tuple[list[dict], dict]:
                 "Use 'find_frameworks' to search/list frameworks by name or keyword.\n"
                 "Use 'get_framework_detail' to get the structure and metadata of a specific framework.\n"
                 "Use 'compare_frameworks' to compare two frameworks side by side.\n"
-                "Use 'search_requirements' to find specific requirements by keyword.\n"
-                "Use 'find_mappings' to find how requirements map between two frameworks.\n"
+                "Use 'search_requirements' to find requirements by reference (ref_id, e.g. 'A.5.1') "
+                "or by words, optionally within one framework.\n"
+                "Use 'requirement_mappings' for what ONE requirement maps to: pass its framework as "
+                "framework and its ref_id (or its urn as requirement), and the target framework as framework_b.\n"
+                "Use 'find_mappings' to find how requirements map between two whole frameworks.\n"
                 "Use 'find_controls_for_threat' to find what requirements/controls address a given threat.\n\n"
                 "DO NOT use this tool for questions about the user's own data (their controls, risk scenarios, "
                 "compliance assessments, etc.) — use query_objects for that."
@@ -649,6 +672,7 @@ def _build_tools() -> tuple[list[dict], dict]:
                             "get_framework_detail",
                             "compare_frameworks",
                             "search_requirements",
+                            "requirement_mappings",
                             "find_mappings",
                             "find_controls_for_threat",
                         ],
@@ -668,9 +692,17 @@ def _build_tools() -> tuple[list[dict], dict]:
                             "(for get_framework_detail, search_requirements, find_mappings source)."
                         ),
                     },
+                    "ref_id": {
+                        "type": "string",
+                        "description": "Exact requirement reference, e.g. 'A.5.1', 'GV.OC-01' (for search_requirements, requirement_mappings).",
+                    },
+                    "requirement": {
+                        "type": "string",
+                        "description": "Requirement urn (for requirement_mappings).",
+                    },
                     "framework_b": {
                         "type": "string",
-                        "description": "Second framework for compare_frameworks or find_mappings target.",
+                        "description": "Second framework for compare_frameworks, or target framework for find_mappings and requirement_mappings.",
                     },
                     "provider": {
                         "type": "string",
@@ -1129,7 +1161,9 @@ def dispatch_tool_call(
     """
     # search_library has its own parameter space — skip query_objects sanitization
     if tool_name == "search_library":
-        return _dispatch_search_library(arguments, user_message=user_message)
+        return _dispatch_search_library(
+            arguments, user_message=user_message, user=scope.user
+        )
 
     cleaned = _sanitize_arguments(arguments)
 
@@ -1175,13 +1209,14 @@ def _execute_multi_query(arguments: dict, scope, parsed_context=None) -> dict | 
     }
 
 
-def _dispatch_search_library(arguments: dict, user_message: str = "") -> dict | None:
+def _dispatch_search_library(
+    arguments: dict, user_message: str = "", user=None
+) -> dict | None:
     """Dispatch a search_library tool call to the knowledge graph."""
     from .knowledge_graph import (
         find_frameworks,
         get_framework_detail,
         compare_frameworks,
-        search_requirements,
         find_mappings,
         find_controls_for_threat,
         format_graph_result,
@@ -1194,11 +1229,32 @@ def _dispatch_search_library(arguments: dict, user_message: str = "") -> dict | 
     provider = arguments.get("provider", "")
     locale = arguments.get("locale", "")
 
+    # small models keep picking an overview action for a question about one
+    # requirement, with its ref_id in the arguments or only in the question;
+    # the chat routes once and cannot retry
+    explicit = arguments.get("ref_id") or arguments.get("requirement")
+    if explicit or (
+        framework
+        and action in ("get_framework_detail", "find_mappings")
+        and _ref_like(user_message)
+    ):
+        knowledge_action = action
+        if action != "requirement_mappings":
+            knowledge_action = (
+                "requirement_mappings" if framework_b else "search_requirements"
+            )
+        out, found = _dispatch_requirement_knowledge(
+            knowledge_action, arguments, user, user_message
+        )
+        if found or explicit:
+            return out
+
     # Auto-upgrade to compare_frameworks when 2+ frameworks are detected
     # in the user message, regardless of what action the LLM picked.
     # The LLM is unreliable at choosing compare_frameworks vs get_framework_detail
     # vs find_frameworks — the graph detection is deterministic.
-    if action != "compare_frameworks":
+    # only for overview actions: a mapping or requirement question names two frameworks too
+    if action in ("find_frameworks", "get_framework_detail"):
         detected = _detect_framework_names(user_message or query)
         if len(detected) >= 2:
             logger.info(
@@ -1224,8 +1280,8 @@ def _dispatch_search_library(arguments: dict, user_message: str = "") -> dict | 
                 "text": "Please specify two frameworks to compare.",
             }
         data = compare_frameworks(fw_a, fw_b)
-    elif action == "search_requirements":
-        data = search_requirements(query=query, framework=framework)
+    elif action in ("search_requirements", "requirement_mappings"):
+        return _dispatch_requirement_knowledge(action, arguments, user, user_message)[0]
     elif action == "find_mappings":
         if not framework:
             return {
@@ -1239,6 +1295,128 @@ def _dispatch_search_library(arguments: dict, user_message: str = "") -> dict | 
         return {"type": "search_library", "text": f"Unknown action: {action}"}
 
     return {"type": "search_library", "text": format_graph_result(data)}
+
+
+def _ref_like(text: str) -> list[str]:
+    """Words of a question that could be requirement references: they hold a digit."""
+    words = (w.strip("?!.,;:()'\"*") for w in (text or "").split())
+    return [w for w in words if re.search(r"\d", w)]
+
+
+def _requirement_knowledge(action: str, arguments: dict, user):
+    from library.knowledge import find_requirements, requirement_mappings
+
+    if action == "search_requirements":
+        return find_requirements(
+            user,
+            framework=arguments.get("framework", ""),
+            ref_id=arguments.get("ref_id"),
+            search=arguments.get("query"),
+        )
+    return requirement_mappings(
+        user,
+        arguments.get("requirement"),
+        arguments.get("framework_b", ""),
+        source_framework=arguments.get("framework", ""),
+        ref_id=arguments.get("ref_id"),
+    )
+
+
+def _in_named_frameworks(data, arguments: dict) -> bool:
+    """The answer is about a framework the question named, not a ref_id that also exists elsewhere."""
+    from library.knowledge import framework_matches
+
+    if not data:
+        return False
+    rows = data.get("requirements") or data.get("ambiguous") or [data.get("source")]
+    named = [arguments.get("framework"), arguments.get("framework_b")]
+    return any(
+        r and framework_matches(n, r["framework"], r["framework_ref_id"])
+        for r in rows
+        for n in named
+        if n
+    )
+
+
+def _requirement_line(
+    r: dict, relationship: bool = False, limit: int | None = 200
+) -> str:
+    text = r.get("name") or (r.get("description") or "")[:limit]
+    line = (
+        f"- {r.get('framework_ref_id') or r.get('framework')} {r.get('ref_id')}: {text}"
+    )
+    return line + (f" ({r['relationship']})" if relationship else "")
+
+
+def _compact_knowledge(data: dict | None, arguments: dict) -> str:
+    """One line per requirement: small models report a short list in full but
+    drop rows or answer "none" from the generic key/value dump."""
+    if data is None:
+        return "Requirement not found in the knowledge base."
+    lines = [f"Note: {data['note']}"] if data.get("note") else []
+    if data.get("unknown_framework"):
+        lines.append(
+            f"No framework matches '{data['unknown_framework']}'. Known frameworks: "
+            + ", ".join(data["frameworks"])
+        )
+    elif "requirements" in data:
+        rows = data["requirements"]
+        lines.append(f"{data.get('total', len(rows))} requirement(s) found:")
+        for r in rows:
+            lines.append(_requirement_line(r, limit=None))
+            if r.get("name") and r.get("description"):
+                lines.append(f"  {r['description']}")
+    elif data.get("ambiguous"):
+        lines.append("This reference exists in several frameworks:")
+        lines += [_requirement_line(r) for r in data["ambiguous"]]
+    else:
+        src = data["source"]
+        lines.append("Requirement:" + _requirement_line(src)[1:])
+        target = arguments.get("framework_b")
+        if data["mappings"]:
+            lines.append(
+                f"It maps to these {len(data['mappings'])} requirement(s); "
+                "list every one of them in the answer:"
+            )
+            lines += [_requirement_line(r, True) for r in data["mappings"]]
+        elif data["elsewhere"]:
+            lines.append(
+                f"None of its mappings are in '{target}'. It maps to: "
+                + ", ".join(f"{fw} ({n})" for fw, n in data["elsewhere"].items())
+            )
+        else:
+            lines.append("It has no mappings in the knowledge base.")
+    return "\n".join(lines)
+
+
+def _dispatch_requirement_knowledge(
+    action: str, arguments: dict, user, user_message: str = ""
+) -> tuple[dict, bool]:
+    """Requirement lookup and per-requirement mappings, shared with the REST API (MCP).
+
+    Returns (tool result, whether a requirement was found). When the model's
+    ref_id finds nothing, references written in the question are tried instead:
+    small models drop or garble them, and the chat cannot retry.
+    """
+    from django.core.exceptions import PermissionDenied
+
+    try:
+        data = _requirement_knowledge(action, arguments, user)
+        found = _in_named_frameworks(data, arguments)
+        if not found:
+            for ref in _ref_like(user_message):
+                if ref == arguments.get("ref_id"):
+                    continue
+                retry = _requirement_knowledge(
+                    action, {**arguments, "ref_id": ref, "requirement": None}, user
+                )
+                if _in_named_frameworks(retry, arguments):
+                    data, found = retry, True
+                    break
+    except PermissionDenied:
+        data, found = "You do not have access to framework content.", False
+    text = data if isinstance(data, str) else _compact_knowledge(data, arguments)
+    return {"type": "search_library", "text": text}, found
 
 
 def _detect_framework_names(text: str) -> list[str]:

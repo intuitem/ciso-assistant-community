@@ -1,6 +1,12 @@
 import { describe, it, test, expect } from 'vitest';
 
-import { normalizeSearchString, getSearchTarget, roundScore } from './helpers';
+import {
+	normalizeSearchString,
+	getSearchTarget,
+	roundScore,
+	resolveResultTier,
+	aggregateTieredResults
+} from './helpers';
 
 describe('normalizeSearchString', () => {
 	it('lowercases and strips punctuation from Cyrillic text without emptying it', () => {
@@ -28,6 +34,77 @@ describe('getSearchTarget', () => {
 		const term = normalizeSearchString('доступу');
 		const matches = options.filter((opt) => getSearchTarget(opt as any).includes(term));
 		expect(matches.map((o) => o.value)).toEqual([1]);
+	});
+});
+
+describe('resolveResultTier', () => {
+	it('reads the tier a question states from what its choices can set', () => {
+		expect(resolveResultTier(['compliant', 'non_compliant'])).toBe('compliant');
+		expect(resolveResultTier(['partially_compliant', null])).toBe('partially_compliant');
+		expect(resolveResultTier(['non_compliant', null])).toBe('blocking');
+		expect(resolveResultTier([null, undefined])).toBe(null);
+	});
+});
+
+describe('aggregateTieredResults', () => {
+	const tier = (t: string | null, ...selected: string[]) => ({ tier: t, selected });
+
+	it('awards a tier only when every statement of it holds', () => {
+		expect(
+			aggregateTieredResults([tier('compliant', 'compliant'), tier('compliant', 'compliant')])
+		).toBe('compliant');
+		expect(
+			aggregateTieredResults([tier('compliant', 'compliant'), tier('compliant', 'non_compliant')])
+		).toBe('non_compliant');
+	});
+
+	it('falls back to the partial tier when the top one breaks', () => {
+		expect(
+			aggregateTieredResults([
+				tier('compliant', 'non_compliant'),
+				tier('partially_compliant', 'partially_compliant')
+			])
+		).toBe('partially_compliant');
+	});
+
+	it('lets a triggered blocking statement deny every tier', () => {
+		expect(
+			aggregateTieredResults([tier('blocking', 'non_compliant'), tier('compliant', 'compliant')])
+		).toBe('non_compliant');
+		expect(aggregateTieredResults([tier('blocking'), tier('compliant', 'compliant')])).toBe(
+			'compliant'
+		);
+	});
+
+	it('treats an answer that affirms nothing as a failed tier', () => {
+		expect(aggregateTieredResults([tier('compliant')])).toBe('non_compliant');
+	});
+
+	it('keeps not_applicable neutral', () => {
+		expect(
+			aggregateTieredResults([tier('compliant', 'compliant'), tier('compliant', 'not_applicable')])
+		).toBe('compliant');
+		expect(aggregateTieredResults([tier('compliant', 'not_applicable')])).toBe('not_applicable');
+	});
+
+	it('ignores not_applicable inside a mixed multiple-choice selection', () => {
+		expect(
+			aggregateTieredResults([
+				tier('compliant', 'compliant', 'not_applicable'),
+				tier('compliant', 'compliant')
+			])
+		).toBe('compliant');
+		expect(
+			aggregateTieredResults([
+				tier('compliant', 'compliant', 'not_applicable'),
+				tier('partially_compliant', 'not_applicable', 'partially_compliant')
+			])
+		).toBe('compliant');
+	});
+
+	it('ignores questions that state no tier', () => {
+		expect(aggregateTieredResults([])).toBe(null);
+		expect(aggregateTieredResults([tier(null, 'compliant')])).toBe(null);
 	});
 });
 
@@ -152,5 +229,30 @@ describe('roundScore', () => {
 	test('percentages keep one decimal, the nothing-scored sentinel stays', () => {
 		expect(roundScore(66.66, 1)).toBe(66.7);
 		expect(roundScore(-1)).toBe(-1);
+	});
+});
+
+describe('computeRequirementScoreAndResult with tiered_all', () => {
+	it('scores a complete answer whose selections state no result', () => {
+		const statement = (key: string, onTrue: string) => ({
+			type: 'unique_choice',
+			choices: [
+				{ urn: `urn:${key}:true`, compute_result: onTrue },
+				{ urn: `urn:${key}:false`, compute_result: null }
+			]
+		});
+		const ra = {
+			requirement: {
+				questions: {
+					'urn:na': statement('na', 'non_compliant'),
+					'urn:pa': statement('pa', 'partially_compliant')
+				}
+			},
+			compliance_assessment: { framework: { result_aggregation: 'tiered_all' } }
+		};
+		expect(
+			computeRequirementScoreAndResult(ra, { 'urn:na': 'urn:na:false', 'urn:pa': 'urn:pa:false' })
+				.result
+		).toBe('non_compliant');
 	});
 });

@@ -1526,6 +1526,7 @@ async def update_incident(
     qualifications: list = None,
     entities: list = None,
     applied_controls: list = None,
+    task_templates: list = None,
     filtering_labels: list = None,
 ) -> str:
     """Partially update an incident (only provided fields are updated)
@@ -1553,6 +1554,7 @@ async def update_incident(
         qualifications: List of qualifications: letters C/I/A/T, names or UUIDs (replaces existing)
         entities: List of third-party entity IDs/names (replaces existing)
         applied_controls: List of applied control IDs/names (resolved within the incident's folder, then Global; replaces existing)
+        task_templates: List of tasks (task templates) to link, as IDs/names (resolved within the incident's folder, then Global; replaces existing)
         filtering_labels: List of label UUIDs (replaces existing)
     """
     try:
@@ -1563,7 +1565,7 @@ async def update_incident(
         if folder_id is not None:
             scope_folder = resolve_folder_id(folder_id)
             payload["folder"] = scope_folder
-        elif threats or assets or applied_controls:
+        elif threats or assets or applied_controls or task_templates:
             incident_res = make_get_request(f"/incidents/{resolved_id}/")
             if incident_res.status_code != 200:
                 return (
@@ -1609,6 +1611,11 @@ async def update_incident(
             payload["applied_controls"] = [
                 resolve_in_folder_or_global(resolve_applied_control_id, c, scope_folder)
                 for c in applied_controls
+            ]
+        if task_templates is not None:
+            payload["task_templates"] = [
+                resolve_in_folder_or_global(resolve_task_template_id, t, scope_folder)
+                for t in task_templates
             ]
         if filtering_labels is not None:
             payload["filtering_labels"] = filtering_labels
