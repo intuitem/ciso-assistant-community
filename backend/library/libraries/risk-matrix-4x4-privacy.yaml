@@ -1,0 +1,168 @@
+urn: urn:intuitem:risk:library:risk-matrix-4x4-privacy
+locale: en
+ref_id: risk-matrix-4x4-privacy
+name: 4x4 privacy risk matrix (DPIA)
+description: Risk to the rights and freedoms of data subjects, for data protection
+  impact assessments. Four levels of severity and likelihood; a maximum severity is
+  never acceptable, whatever its likelihood.
+copyright: intuitem
+version: 1
+publication_date: 2026-09-28
+provider: intuitem
+packager: intuitem
+translations:
+  fr:
+    name: Matrice 4x4 de risque vie privée (AIPD)
+    description: Risque pour les droits et libertés des personnes concernées, pour les
+      analyses d'impact relatives à la protection des données. Quatre niveaux de gravité
+      et de vraisemblance ; une gravité maximale n'est jamais acceptable, quelle que
+      soit sa vraisemblance.
+objects:
+  risk_matrix:
+  - urn: urn:intuitem:risk:matrix:risk-matrix-4x4-privacy
+    ref_id: risk-matrix-4x4-privacy
+    name: 4x4 privacy risk matrix (DPIA)
+    description: Risk to the rights and freedoms of data subjects.
+    probability:
+    - id: 0
+      abbreviation: L1
+      name: Negligible
+      description: The feared event does not seem possible given the properties of the
+        supporting assets.
+      translations:
+        fr:
+          name: Négligeable
+          description: L'événement redouté ne semble pas pouvoir se produire compte tenu
+            des propriétés des supports.
+      hexcolor: '#F0F4E8'
+    - id: 1
+      abbreviation: L2
+      name: Limited
+      description: The feared event seems difficult to bring about given the properties
+        of the supporting assets.
+      translations:
+        fr:
+          name: Limitée
+          description: L'événement redouté semble difficile à provoquer compte tenu des
+            propriétés des supports.
+      hexcolor: '#DDE8C8'
+    - id: 2
+      abbreviation: L3
+      name: Significant
+      description: The feared event seems possible given the properties of the
+        supporting assets.
+      translations:
+        fr:
+          name: Importante
+          description: L'événement redouté semble possible compte tenu des propriétés
+            des supports.
+      hexcolor: '#C3D69F'
+    - id: 3
+      abbreviation: L4
+      name: Maximum
+      description: The feared event seems easy to bring about given the properties of
+        the supporting assets.
+      translations:
+        fr:
+          name: Maximale
+          description: L'événement redouté semble facile à provoquer compte tenu des
+            propriétés des supports.
+      hexcolor: '#A4C170'
+    impact:
+    - id: 0
+      abbreviation: S1
+      name: Negligible
+      description: Data subjects are not affected, or face minor inconveniences they
+        overcome without difficulty.
+      translations:
+        fr:
+          name: Négligeable
+          description: Les personnes ne sont pas impactées ou subissent des désagréments
+            mineurs qu'elles surmontent sans difficulté.
+      hexcolor: '#E8F0F8'
+    - id: 1
+      abbreviation: S2
+      name: Limited
+      description: Data subjects face significant inconveniences they overcome despite
+        some difficulty.
+      translations:
+        fr:
+          name: Limitée
+          description: Les personnes subissent des désagréments significatifs qu'elles
+            surmontent malgré quelques difficultés.
+      hexcolor: '#C6DAEE'
+    - id: 2
+      abbreviation: S3
+      name: Significant
+      description: Data subjects face significant consequences they overcome only with
+        serious difficulty.
+      translations:
+        fr:
+          name: Importante
+          description: Les personnes subissent des conséquences significatives qu'elles
+            ne surmontent qu'avec de sérieuses difficultés.
+      hexcolor: '#94BBE0'
+    - id: 3
+      abbreviation: S4
+      name: Maximum
+      description: Data subjects face significant, possibly irreversible consequences
+        they may not overcome.
+      translations:
+        fr:
+          name: Maximale
+          description: Les personnes subissent des conséquences significatives, voire
+            irrémédiables, qu'elles pourraient ne pas surmonter.
+      hexcolor: '#5E97CF'
+    risk:
+    - id: 0
+      abbreviation: A
+      name: Acceptable
+      description: The risk can be accepted with the measures in place.
+      translations:
+        fr:
+          name: Acceptable
+          description: Le risque peut être accepté avec les mesures en place.
+      hexcolor: '#BBF7D0'
+    - id: 1
+      abbreviation: R
+      name: To reduce
+      description: Additional measures should reduce the risk before the processing
+        goes ahead.
+      translations:
+        fr:
+          name: À réduire
+          description: Des mesures complémentaires doivent réduire le risque avant la
+            mise en œuvre du traitement.
+      hexcolor: '#FEF08A'
+    - id: 2
+      abbreviation: U
+      name: Unacceptable
+      description: The risk is not acceptable. Reduce it or consult the supervisory
+        authority.
+      translations:
+        fr:
+          name: Inacceptable
+          description: Le risque n'est pas acceptable. Le réduire ou consulter l'autorité
+            de contrôle.
+      hexcolor: '#FCA5A5'
+    grid:
+    - - 0
+      - 0
+      - 1
+      - 2
+    - - 0
+      - 1
+      - 1
+      - 2
+    - - 0
+      - 1
+      - 2
+      - 2
+    - - 1
+      - 1
+      - 2
+      - 2
+    translations:
+      fr:
+        name: Matrice 4x4 de risque vie privée (AIPD)
+        description: Risque pour les droits et libertés des personnes concernées.

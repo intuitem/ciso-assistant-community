@@ -81,6 +81,7 @@ from .utils import LibraryImporter, preview_library
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from .serializers import (
     LibraryDraftReadSerializer,
     LibraryDraftWriteSerializer,
@@ -1754,10 +1755,10 @@ class LibraryDraftViewSet(BaseModelViewSet):
         live rows: this renders the pages and evaluates the real conditional
         visibility, scoring and outcome rules against trial answers, so an author can
         see what their logic actually does before publishing anything. Nothing is
-        stored — the answers live in the request body.
+        stored — the answers live in the request body. Same pipeline as a loaded
+        form's preview (`core.quick_form_preview`).
         """
-        from core.cel_service import evaluate_quick_form_document
-        from core.quick_form_apply import project
+        from core.quick_form_preview import fill_preview
 
         draft = self.get_object()
         content = builder.normalize_objects(draft.content or {})
@@ -1777,43 +1778,7 @@ class LibraryDraftViewSet(BaseModelViewSet):
                 logger.warning("Builder rejected the draft", error=e)
                 return Response({"error": str(e)}, status=HTTP_400_BAD_REQUEST)
 
-        answers = request.data.get("answers")
-        evaluation = evaluate_quick_form_document(
-            quick_form, answers if isinstance(answers, dict) else {}
-        )
-        hidden = set(evaluation["hidden_pages"])
-        return Response(
-            {
-                "name": quick_form.get("name") or "",
-                "description": quick_form.get("description") or "",
-                "outcomes_definition": quick_form.get("outcomes_definition") or [],
-                "pages": [
-                    {
-                        "urn": page.get("urn"),
-                        "ref_id": page.get("ref_id"),
-                        "name": page.get("name") or "",
-                        "description": page.get("description") or "",
-                        "hidden": page.get("urn") in hidden,
-                        "questions": page.get("questions") or {},
-                    }
-                    for page in quick_form.get("pages") or []
-                ],
-                "hidden_pages": evaluation["hidden_pages"],
-                "missing_required": evaluation["missing_required"],
-                "progress": evaluation["progress"],
-                "score": evaluation["score"],
-                "scored_complete": evaluation["context"]["response"]["scored_complete"],
-                "computed_outcome": evaluation["computed_outcome"],
-                "computed_values": evaluation["computed_values"],
-                "projection": project(
-                    quick_form.get("on_accept") or [],
-                    evaluation["computed_values"],
-                    evaluation["computed_outcome"],
-                    ready=evaluation["context"]["response"]["scored_complete"],
-                    score=evaluation["score"],
-                ),
-            }
-        )
+        return Response(fill_preview(quick_form, request.data.get("answers")))
 
     @action(detail=True, methods=["post"], url_path="quick-form-editor-preview")
     def quick_form_editor_preview(self, request, pk):
@@ -2853,3 +2818,38 @@ class LibraryDraftViewSet(BaseModelViewSet):
                 "loaded_library": str(loaded.id) if loaded else None,
             }
         )
+
+
+class RequirementKnowledgeView(APIView):
+    """Requirements of shipped frameworks, loaded or not: ?framework=&ref_id=&search="""
+
+    def get(self, request):
+        from library.knowledge import find_requirements
+
+        p = request.query_params
+        return Response(
+            find_requirements(
+                request.user, p.get("framework"), p.get("ref_id"), p.get("search")
+            )
+        )
+
+
+class RequirementMappingKnowledgeView(APIView):
+    """What one requirement maps to: ?requirement=<urn|id> or ?source_framework=&ref_id=, plus &framework=<target>"""
+
+    def get(self, request):
+        from library.knowledge import requirement_mappings
+
+        p = request.query_params
+        if not (p.get("requirement") or p.get("ref_id")):
+            return Response({"error": "requirement or ref_id is required"}, status=400)
+        data = requirement_mappings(
+            request.user,
+            p.get("requirement"),
+            p.get("framework"),
+            p.get("source_framework"),
+            p.get("ref_id"),
+        )
+        if data is None:
+            return Response({"error": "requirement not found"}, status=404)
+        return Response(data)

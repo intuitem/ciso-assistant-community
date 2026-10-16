@@ -60,6 +60,8 @@ from .tools.library_tools import (
     get_stored_libraries,
     get_loaded_libraries,
     import_stored_library,
+    find_requirements,
+    get_requirement_mappings,
 )
 
 from .tools.write_tools import (
@@ -80,6 +82,7 @@ from .tools.write_tools import (
     refresh_quantitative_risk_study_simulations,
     create_task_template,
     create_vulnerability,
+    create_evidence,
     create_incident,
     create_timeline_entry,
 )
@@ -162,6 +165,8 @@ from .tools.ebios_rm_tools import (
 )
 
 READ_TOOLS = [
+    find_requirements,
+    get_requirement_mappings,
     count_objects,
     list_objects,
     get_object,
@@ -237,6 +242,7 @@ WRITE_TOOLS = [
     create_vulnerability,
     update_vulnerability,
     delete_vulnerability,
+    create_evidence,
     create_incident,
     update_incident,
     create_timeline_entry,
@@ -346,6 +352,8 @@ def register_tools(read_only: bool = False):
         mcp.tool(annotations=_annotations(tool, is_read=True))(_offload(tool))
     if not read_only:
         for tool in WRITE_TOOLS:
+            if config.IS_HTTP and tool is create_evidence:
+                continue
             mcp.tool(annotations=_annotations(tool, is_read=False))(_offload(tool))
     _registered = True
 

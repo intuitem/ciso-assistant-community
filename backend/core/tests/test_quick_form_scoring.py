@@ -33,12 +33,14 @@ from library.quick_form_editor import (
 # ---------------------------------------------------------------------------
 
 
-def _item(score, max_score=4, weight=1, answered=True):
+def _item(score, max_score=4, weight=1, answered=True, lo=0, hi=None):
     return {
         "score": score,
         "max_score": max_score,
         "weight": weight,
         "answered": answered,
+        "lo": lo,
+        "hi": max_score if hi is None else hi,
     }
 
 
@@ -61,7 +63,7 @@ class TestAggregatePage:
 
     def test_mean_is_weighted(self):
         # Scores already carry the weight: 2*3 and 1*1 over a weight of 4.
-        items = [_item(6, max_score=12, weight=3), _item(1)]
+        items = [_item(6, max_score=12, weight=3, hi=4), _item(1)]
         assert aggregate_page(items, "mean")["score"] == 1.75
 
     def test_unknown_aggregation_falls_back_to_sum(self):
@@ -89,6 +91,18 @@ class TestAggregateForm:
         assert aggregate_form(items, self.pages, "sum") == 6.0
         assert aggregate_form(items, self.pages, "mean") == 3.0
         assert aggregate_form([_item(0, answered=False)], [], "sum") is None
+
+    def test_sum_projects_the_weighted_total(self):
+        """Weights 3 and 1 on two 0-50 questions: the heavy one alone reads 75."""
+        heavy = _item(150, max_score=150, weight=3, hi=50)
+        light = _item(0, max_score=50, weight=1, hi=50)
+        assert aggregate_form([heavy, light], [], "sum") == 75.0
+
+    def test_a_skipped_question_stays_in_the_range(self):
+        """An optional question left blank counts as 0, as it does unweighted."""
+        heavy = _item(150, max_score=150, weight=3, hi=50)
+        skipped = _item(0, max_score=50, weight=1, hi=50, answered=False)
+        assert aggregate_form([heavy, skipped], [], "sum") == 75.0
 
     def test_clamp(self):
         assert clamp(7.5, (0, 5)) == 5.0

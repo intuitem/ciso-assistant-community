@@ -55,6 +55,7 @@
 * Specialised modules
   * [Third-party risk](concepts/third-party-risk.md)
   * [Privacy register](concepts/privacy-register.md)
+    * [DPIA and screening](concepts/dpia.md)
   * [Project management](concepts/project-management.md)
   * [Terminology](concepts/terminology.md)
   * [Object classifications](concepts/object-classification.md)
@@ -172,6 +173,8 @@
   * [Third-Party Risk Management](guides/tprm.md)
   * [Tiering your vendors](guides/vendor-tiering.md)
   * [Common TPRM pitfalls](guides/tprm-challenges.md)
+* Privacy
+  * [Screening processings and running DPIAs](guides/dpia.md)
 
 ## Features
 

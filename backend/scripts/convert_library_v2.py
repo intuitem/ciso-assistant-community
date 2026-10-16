@@ -394,7 +394,7 @@ def inject_questions_into_node(
     Injects parsed questions and their metadata into a requirement node.
     Ensures that question type is valid and handles multiple questions/answers.
 
-    :param qa_data: Allows to retrieve the string from the following columns: "questions", "answer" and "depends_on"
+    :param qa_data: Allows to retrieve the string from the following columns: "questions", "answer", "depends_on" and "question_group"
     :param node: The requirement node (dict)
     :param answers_dict: Dictionary of all available answers (from answer sheet)
     """
@@ -403,6 +403,8 @@ def inject_questions_into_node(
     raw_answer_str = qa_data.get("answer")
     raw_depends_on_str = qa_data.get("depends_on")
     raw_condition_str = qa_data.get("condition")
+    raw_group_str = qa_data.get("question_group")
+    raw_group_color_str = qa_data.get("question_group_color")
 
     if not raw_question_str:
         return
@@ -468,6 +470,35 @@ def inject_questions_into_node(
             f"Mismatch between questions and 'condition' for node {node.get('urn')}"
         )
 
+    group_lines = (
+        [g.strip() for g in str(raw_group_str).split("\n") if g.strip()]
+        if raw_group_str
+        else None
+    )
+    if group_lines and len(group_lines) != len(question_lines):
+        raise ValueError(
+            f"Mismatch between questions and 'question_group' for node {node.get('urn')}"
+        )
+    group_color_lines = (
+        [c.strip() for c in str(raw_group_color_str).split("\n") if c.strip()]
+        if raw_group_color_str
+        else None
+    )
+    if group_color_lines:
+        if not group_lines or len(group_color_lines) != len(question_lines):
+            raise ValueError(
+                f"Mismatch between questions and 'question_group_color' for node {node.get('urn')}"
+            )
+        for color, group in zip(group_color_lines, group_lines):
+            if color != "/" and not re.fullmatch(r"#([0-9a-fA-F]{6})", color):
+                raise ValueError(
+                    f"Invalid 'question_group_color' value '{color}' for node {node.get('urn')}. Must match #RRGGBB or be '/'"
+                )
+            if color != "/" and group == "/":
+                raise ValueError(
+                    f"'question_group_color' '{color}' set on a question without a group for node {node.get('urn')}"
+                )
+
     question_block = {}
 
     for idx, question_text in enumerate(question_lines):
@@ -489,6 +520,10 @@ def inject_questions_into_node(
         }
 
         question_entry["text"] = question_text
+        if group_lines and group_lines[idx] != "/":
+            question_entry["config"] = {"group": group_lines[idx]}
+            if group_color_lines and group_color_lines[idx] != "/":
+                question_entry["config"]["group_color"] = group_color_lines[idx].upper()
         _attach_question_translations(
             question_entry,
             row_translations,
@@ -1210,6 +1245,15 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
         framework["min_score"] = int(meta["min_score"])
     if "max_score" in meta:
         framework["max_score"] = int(meta["max_score"])
+
+    if meta.get("result_aggregation"):
+        result_aggregation = str(meta["result_aggregation"]).strip().lower()
+        if result_aggregation not in ("per_answer", "tiered_all"):
+            raise ValueError(
+                f'(framework) Invalid result_aggregation "{result_aggregation}": '
+                "expected per_answer or tiered_all."
+            )
+        framework["result_aggregation"] = result_aggregation
 
     if meta.get("field_visibility"):
         try:

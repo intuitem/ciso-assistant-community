@@ -132,7 +132,8 @@ def _get_library_mtime() -> float:
     lib_dir = _get_library_dir()
     if not lib_dir.exists():
         return 0.0
-    mtime = lib_dir.stat().st_mtime
+    # this module's mtime too, so a cache built by older parsing code is rebuilt
+    mtime = max(lib_dir.stat().st_mtime, Path(__file__).stat().st_mtime)
     for f in lib_dir.glob("*.yaml"):
         mtime = max(mtime, f.stat().st_mtime)
     return mtime
@@ -315,8 +316,13 @@ def _process_library(G: DiGraph, data: dict):
         )
 
     # --- Cross-framework mappings ---
-    mapping_set = objects.get("requirement_mapping_set", {})
-    if isinstance(mapping_set, dict) and mapping_set:
+    # libraries use either one requirement_mapping_set or a requirement_mapping_sets list
+    mapping_sets = [objects.get("requirement_mapping_set")] + list(
+        objects.get("requirement_mapping_sets") or []
+    )
+    for mapping_set in mapping_sets:
+        if not isinstance(mapping_set, dict) or not mapping_set:
+            continue
         source_fw = mapping_set.get("source_framework_urn", "")
         target_fw = mapping_set.get("target_framework_urn", "")
 
