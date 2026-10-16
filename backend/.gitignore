@@ -20,3 +20,4 @@ pytest-report.html
 enterprise/
 *.log
 *.bak
+leader_election.lock

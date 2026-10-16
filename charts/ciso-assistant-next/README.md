@@ -177,6 +177,7 @@ breaks verification between them. Always set `existingSecret` or `privateKey` in
 | frontend.args | list | `[]` (image arguments) | Override the frontend container arguments |
 | frontend.command | list | `[]` (image entrypoint) | Override the frontend container entrypoint |
 | frontend.config.bodySizeLimit | string | `"50M"` | Configure body size limit for uploads in bytes (unit suffix like K/M/G can be used) |
+| frontend.config.xffDepth | int | `1` | How many proxies sit in front of the frontend, counted from the right of `X-Forwarded-For`, used to pick the real client address for login rate limiting. |
 | frontend.containerSecurityContext | object | `{}` | Toggle and define container-level security context |
 | frontend.env | list | `[]` | Environment variables to pass to frontend |
 | frontend.extraVolumeMounts | list | `[]` | Set extra volume mounts for frontend container |
