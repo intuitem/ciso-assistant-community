@@ -257,7 +257,7 @@
 	"dropNotes": "Drop notes",
 	"resubmissionNotes": "Resubmission notes",
 	"requestChanges": "Request changes",
-	"flagForRework": "Needs rework",
+	"flagForChangeRequest": "Flag for change request",
 	"reviewChangesRequested": "Changes requested",
 	"noFlaggedItemsHint": "No requirement is flagged. The respondent will only get the note below — flag the items to fix from the questionnaire to point them at what needs work.",
 	"itemsNeedingChanges": [

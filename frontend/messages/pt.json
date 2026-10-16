@@ -257,7 +257,7 @@
 	"dropNotes": "Descartar notas",
 	"resubmissionNotes": "Notas de reenvio",
 	"requestChanges": "Solicitar alterações",
-	"flagForRework": "Requer correção",
+	"flagForChangeRequest": "Marcar para alteração",
 	"reviewChangesRequested": "Alterações solicitadas",
 	"noFlaggedItemsHint": "Nenhum requisito está sinalizado. O respondente receberá apenas a nota abaixo — sinalize os itens a corrigir no questionário para indicar o que precisa de ajustes.",
 	"itemsNeedingChanges": [

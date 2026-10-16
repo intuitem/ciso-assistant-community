@@ -3336,7 +3336,7 @@
 	"reportsDescription": "Generiraj i upravljaj prilagođenim izvještajima na temelju vaših podataka",
 	"representativesDescription": "Predstavnici vendora",
 	"requestChanges": "Zatraži izmjene",
-	"flagForRework": "Za doradu",
+	"flagForChangeRequest": "Označi za izmjenu",
 	"requestNotes": "Bilješke zahtjeva",
 	"requestType": "Vrsta zahtjeva",
 	"requestValidation": "Validacija zahtjeva",

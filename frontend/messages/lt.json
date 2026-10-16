@@ -216,7 +216,7 @@
 	"dropNotes": "Atmetimo pastabos",
 	"resubmissionNotes": "Pakartotinio pateikimo pastabos",
 	"requestChanges": "Prašyti pakeitimų",
-	"flagForRework": "Reikia pataisyti",
+	"flagForChangeRequest": "Pažymėti keitimui",
 	"drop": "Atmesti",
 	"resubmit": "Pateikti iš naujo",
 	"onlyRequesterCanModify": "Tik prašytojas gali atlikti veiksmus su šiuo patvirtinimu",

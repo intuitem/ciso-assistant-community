@@ -2595,7 +2595,7 @@
 	"reportsDescription": "Generar y gestionar informes personalizados basados en sus datos",
 	"representativesDescription": "Representantes de proveedores",
 	"requestChanges": "Solicitar cambios",
-	"flagForRework": "Por corregir",
+	"flagForChangeRequest": "Marcar para cambios",
 	"requestNotes": "Notas de solicitud",
 	"requestType": "Tipo de solicitud",
 	"requestValidation": "Solicitar validación",

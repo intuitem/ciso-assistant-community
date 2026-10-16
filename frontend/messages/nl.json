@@ -2593,7 +2593,7 @@
 	"reportsDescription": "Genereer en beheer aangepaste rapporten op basis van uw gegevens",
 	"representativesDescription": "Vertegenwoordigers van leveranciers",
 	"requestChanges": "Wijzigingen verzoeken",
-	"flagForRework": "Te herzien",
+	"flagForChangeRequest": "Markeren voor wijziging",
 	"requestNotes": "Verzoeknotities",
 	"requestType": "Verzoektype",
 	"requestValidation": "Validatie aanvragen",

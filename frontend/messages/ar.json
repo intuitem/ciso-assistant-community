@@ -1762,7 +1762,7 @@
 	"dropNotes": "ملاحظات الإسقاط",
 	"resubmissionNotes": "ملاحظات إعادة التقديم",
 	"requestChanges": "طلب تغييرات",
-	"flagForRework": "يحتاج إلى تعديل",
+	"flagForChangeRequest": "وضع علامة لطلب تعديل",
 	"reviewChangesRequested": "التغييرات المطلوبة",
 	"noFlaggedItemsHint": "لم يُعلَّم أي متطلب. لن يتلقى المستجيب سوى الملاحظة أدناه — علّم العناصر التي تحتاج إلى تصحيح من الاستبيان لتوجيهه إلى ما يلزم العمل عليه.",
 	"reviewResubmitted": "أُعيد التقديم",

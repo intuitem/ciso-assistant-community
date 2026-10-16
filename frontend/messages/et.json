@@ -291,7 +291,7 @@
 	"dropNotes": "Katkestamise märkused",
 	"resubmissionNotes": "Uuesti esitamise märkused",
 	"requestChanges": "Taotle muudatusi",
-	"flagForRework": "Vajab parandamist",
+	"flagForChangeRequest": "Märgi muutmiseks",
 	"drop": "Katkesta",
 	"resubmit": "Esita uuesti",
 	"onlyRequesterCanModify": "Ainult taotluse esitaja saab selle kinnitusega toiminguid teha",

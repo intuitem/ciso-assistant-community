@@ -3396,7 +3396,7 @@
 	"reportedAtHelpText": "Timestamp della segnalazione effettiva",
 	"reports": "Report",
 	"requestChanges": "Richiedi modifiche",
-	"flagForRework": "Da rivedere",
+	"flagForChangeRequest": "Contrassegna per modifica",
 	"requestNotes": "Note di richiesta",
 	"requestValidation": "Richiedi validazione",
 	"requestedOn": "Richiesto il",
