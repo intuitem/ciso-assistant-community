@@ -304,10 +304,12 @@ SCAN_TOOL = "kube-bench 0.9.2"
 
 PLUMBER_PRODUCT = {"name": "Plumber", "version": "0.6.1"}
 PLUMBER_SKIPPED = {"workflowMustIncludeRequiredActions"}
+PLUMBER_SCANS = (-21, -14, -7, 0)
 
-# Repository asset, description, parent primary asset, then per weekly scan
-# (day offset) the controls that failed with their finding lines; every other
-# control passed.
+PERMISSIONS = "runs with no explicit `permissions:` block"
+PERSIST = 'runs "actions/checkout@v4" without `persist-credentials: false`'
+MUTABLE = "with a mutable ref"
+
 PIPELINES = [
     (
         "Keystone firmware repository",
@@ -318,96 +320,49 @@ PIPELINES = [
         "Device firmware and signing keys",
         [
             (
-                -21,
-                {
-                    "actionsMustBePinnedByCommitSha": [
-                        (
-                            'job "build/compile" references action '
-                            '"arduino/setup-protoc@v3" with a mutable ref'
-                        ),
-                        (
-                            'job "release/publish" references action '
-                            '"softprops/action-gh-release@v2" with a mutable ref'
-                        ),
-                        (
-                            'job "release/sign" references action '
-                            '"sigstore/cosign-installer@main" with a mutable ref'
-                        ),
-                    ],
-                    "githubActionMustComeFromAuthorizedSources": [
-                        (
-                            'job "release/sign" references action '
-                            '"sigstore/cosign-installer@main" from an unauthorized source'
-                        ),
-                    ],
-                    "workflowsMustDeclarePermissions": [
-                        'job "build/compile" runs with no explicit `permissions:` block',
-                        'job "release/publish" runs with no explicit `permissions:` block',
-                    ],
-                    "checkoutMustNotPersistCredentials": [
-                        (
-                            'job "build/compile" runs "actions/checkout@v4" without '
-                            "`persist-credentials: false`"
-                        ),
-                        (
-                            'job "release/publish" runs "actions/checkout@v4" without '
-                            "`persist-credentials: false`"
-                        ),
-                    ],
-                    "workflowMustNotInjectUserInputInScripts": [
-                        (
-                            'job "triage/label" interpolates '
-                            "${{ github.event.issue.title }} into a run script"
-                        ),
-                    ],
-                },
+                "actionsMustBePinnedByCommitSha",
+                f'job "build/compile" references action "arduino/setup-protoc@v3" {MUTABLE}',
+                (-21,),
             ),
             (
-                -14,
-                {
-                    "workflowsMustDeclarePermissions": [
-                        'job "build/compile" runs with no explicit `permissions:` block',
-                        'job "release/publish" runs with no explicit `permissions:` block',
-                    ],
-                    "checkoutMustNotPersistCredentials": [
-                        (
-                            'job "build/compile" runs "actions/checkout@v4" without '
-                            "`persist-credentials: false`"
-                        ),
-                        (
-                            'job "release/publish" runs "actions/checkout@v4" without '
-                            "`persist-credentials: false`"
-                        ),
-                    ],
-                    "workflowMustNotInjectUserInputInScripts": [
-                        (
-                            'job "triage/label" interpolates '
-                            "${{ github.event.issue.title }} into a run script"
-                        ),
-                    ],
-                },
+                "actionsMustBePinnedByCommitSha",
+                f'job "release/publish" references action "softprops/action-gh-release@v2" {MUTABLE}',
+                (-21,),
             ),
             (
-                -7,
-                {
-                    "checkoutMustNotPersistCredentials": [
-                        (
-                            'job "release/publish" runs "actions/checkout@v4" without '
-                            "`persist-credentials: false`"
-                        ),
-                    ],
-                },
+                "actionsMustBePinnedByCommitSha",
+                f'job "release/sign" references action "sigstore/cosign-installer@main" {MUTABLE}',
+                (-21,),
             ),
             (
-                0,
-                {
-                    "checkoutMustNotPersistCredentials": [
-                        (
-                            'job "release/publish" runs "actions/checkout@v4" without '
-                            "`persist-credentials: false`"
-                        ),
-                    ],
-                },
+                "githubActionMustComeFromAuthorizedSources",
+                'job "release/sign" references action "sigstore/cosign-installer@main" from an unauthorized source',
+                (-21,),
+            ),
+            (
+                "workflowsMustDeclarePermissions",
+                f'job "build/compile" {PERMISSIONS}',
+                (-21, -14),
+            ),
+            (
+                "workflowsMustDeclarePermissions",
+                f'job "release/publish" {PERMISSIONS}',
+                (-21, -14),
+            ),
+            (
+                "checkoutMustNotPersistCredentials",
+                f'job "build/compile" {PERSIST}',
+                (-21, -14),
+            ),
+            (
+                "checkoutMustNotPersistCredentials",
+                f'job "release/publish" {PERSIST}',
+                PLUMBER_SCANS,
+            ),
+            (
+                "workflowMustNotInjectUserInputInScripts",
+                'job "triage/label" interpolates ${{ github.event.issue.title }} into a run script',
+                (-21, -14),
             ),
         ],
     ),
@@ -420,48 +375,19 @@ PIPELINES = [
         "Product designs and source code",
         [
             (
-                -21,
-                {
-                    "workflowsMustDeclarePermissions": [
-                        'job "ci/test" runs with no explicit `permissions:` block',
-                    ],
-                    "pipelineMustNotEnableDebugTrace": [
-                        'workflow "release" sets ACTIONS_STEP_DEBUG to true',
-                    ],
-                },
+                "workflowsMustDeclarePermissions",
+                f'job "ci/test" {PERMISSIONS}',
+                (-21, -14, -7),
             ),
             (
-                -14,
-                {
-                    "workflowsMustDeclarePermissions": [
-                        'job "ci/test" runs with no explicit `permissions:` block',
-                    ],
-                },
+                "pipelineMustNotEnableDebugTrace",
+                'workflow "release" sets ACTIONS_STEP_DEBUG to true',
+                (-21,),
             ),
             (
-                -7,
-                {
-                    "workflowsMustDeclarePermissions": [
-                        'job "ci/test" runs with no explicit `permissions:` block',
-                    ],
-                    "releaseWorkflowsMustNotRestoreUntrustedCache": [
-                        (
-                            'job "release/bundle" restores a cache written by '
-                            "pull request workflows"
-                        ),
-                    ],
-                },
-            ),
-            (
-                0,
-                {
-                    "releaseWorkflowsMustNotRestoreUntrustedCache": [
-                        (
-                            'job "release/bundle" restores a cache written by '
-                            "pull request workflows"
-                        ),
-                    ],
-                },
+                "releaseWorkflowsMustNotRestoreUntrustedCache",
+                'job "release/bundle" restores a cache written by pull request workflows',
+                (-7, 0),
             ),
         ],
     ),
@@ -469,7 +395,6 @@ PIPELINES = [
 
 
 def plumber_event(control, findings):
-    """One OCSF Compliance Finding, shaped like `plumber analyze --ocsf`."""
     if control in PLUMBER_SKIPPED:
         status, status_id = "Skipped", 99
     elif findings:
@@ -962,7 +887,7 @@ class AutomationBuilder(DemoBuilder):
                 node.implementation_groups
             )
         ]
-        for index, (name, description, parent, scans) in enumerate(PIPELINES):
+        for index, (name, description, parent, findings) in enumerate(PIPELINES):
             asset, asset_created = Asset.objects.get_or_create(
                 name=name,
                 folder=ctx.domain,
@@ -972,8 +897,11 @@ class AutomationBuilder(DemoBuilder):
             if asset_created and primary:
                 asset.parent_assets.set([primary])
             assessment.assets.add(asset)
-            for offset, failing in scans:
-                # Go through the file import so the demo exercises the real path.
+            for offset in PLUMBER_SCANS:
+                failing = {}
+                for control, line, offsets in findings:
+                    if offset in offsets:
+                        failing.setdefault(control, []).append(line)
                 events = [plumber_event(c, failing.get(c)) for c in controls]
                 entries, extras = parse_ocsf(io.BytesIO(json.dumps(events).encode()))
                 summary = ingest_posture_results(

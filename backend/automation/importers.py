@@ -128,18 +128,23 @@ def parse_ocsf(file):
             tool = " ".join(
                 filter(None, [product.get("name"), product.get("version")])
             )[:100]
+        details = compliance.get("status_details")
         message = (
-            "\n".join(map(str, compliance.get("status_details") or []))
+            ("\n".join(map(str, details)) if isinstance(details, list) else details)
             or compliance.get("status_detail")
             or event.get("message")
             or ""
         )
-        # Plumber puts the evaluated control in `control` and its ISSUE codes in `requirements`.
-        control = compliance.get("control")
-        for ref in [control] if control else compliance.get("requirements") or []:
+        requirements = [
+            str(ref).strip() for ref in compliance.get("requirements") or []
+        ]
+        control = str(compliance.get("control") or "").strip()
+        refs = [(control, requirements)] if control else [(r, []) for r in requirements]
+        for ref_id, fallbacks in refs:
             entries.append(
                 {
-                    "ref_id": str(ref).strip(),
+                    "ref_id": ref_id,
+                    "fallback_ref_ids": fallbacks,
                     "result": result,
                     "actual": "",
                     "expected": "",

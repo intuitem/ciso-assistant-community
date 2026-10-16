@@ -884,7 +884,6 @@ class TestImportResults:
             == "not_checked"
         )
 
-        # A control absent from a later scan is not inferred: it keeps its last result.
         second = [event("1.1", "Fail", 3)]
         res = self.import_file(
             s, "plumber.ocsf.json", json.dumps(second).encode(), "application/json"
@@ -904,6 +903,30 @@ class TestImportResults:
             "1.3": "not_checked",
             "2.1": "pass",
         }
+
+    def test_ocsf_control_falls_back_to_requirements(self, setup):
+        s = setup
+        import json
+
+        events = [
+            {
+                "class_uid": 2003,
+                "compliance": {
+                    "control": "EC2.1",
+                    "requirements": ["CIS-1.1"],
+                    "status": "Fail",
+                    "status_details": "port 22 open",
+                },
+            }
+        ]
+        res = self.import_file(
+            s, "hub.json", json.dumps(events).encode(), "application/json"
+        )
+        assert res.status_code == 200
+        assert res.json()["created"] == 1
+        row = PostureResult.objects.get()
+        assert row.requirement == s["nodes"]["1.1"]
+        assert row.message == "port 22 open"
 
     def test_unsupported_extension(self, setup):
         s = setup
