@@ -894,15 +894,25 @@ def send_risk_scenario_assignment_notification(scenario_id, assigned_user_emails
 
 
 @task()
-def send_incident_assignment_notification(incident_id, assigned_user_emails):
-    """Send notification when an Incident is assigned to owners"""
-    if not assigned_user_emails:
+def send_incident_assignment_notification(incident_id, owner_ids):
+    """Send notification when an Incident is assigned to owners.
+
+    Takes owner IDs, not addresses: an owner removed before this task runs must not
+    be notified, so recipients are resolved here from the incident's current owners.
+    """
+    if not owner_ids:
         return
 
     try:
         incident = Incident.objects.get(id=incident_id)
     except Incident.DoesNotExist:
         logger.error(f"Incident with id {incident_id} not found")
+        return
+
+    assigned_user_emails = sorted(
+        _actor_emails(incident.owners.filter(id__in=owner_ids))
+    )
+    if not assigned_user_emails:
         return
 
     from .email_utils import render_email_template

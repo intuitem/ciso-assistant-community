@@ -105,6 +105,35 @@ def test_update_notifies_only_the_new_owner(
     assert send_email.call_args.args[2] == bob.email
 
 
+def test_an_owner_removed_before_the_task_runs_is_not_notified(
+    folder, alice, bob, django_capture_on_commit_callbacks
+):
+    """Recipients are resolved when the task runs, not when it is queued."""
+    from core import tasks
+
+    task = tasks.send_incident_assignment_notification
+    with (
+        patch(
+            "core.tasks.send_incident_assignment_notification",
+            side_effect=lambda *args: task.call_local(*args),
+        ),
+        patch("core.tasks.check_email_configuration", return_value=True),
+        patch("core.tasks.notify") as notify,
+        patch("core.tasks.send_notification_email") as send_email,
+    ):
+        # Queue the task, change the owners, and only then let it run.
+        with django_capture_on_commit_callbacks() as callbacks:
+            incident = _create(folder, [alice, bob])
+        incident.owners.remove(bob.actor)
+        for callback in callbacks:
+            callback()
+
+    notify.assert_called_once()
+    assert notify.call_args.args[1] == [alice.email]
+    send_email.assert_called_once()
+    assert send_email.call_args.args[2] == alice.email
+
+
 def test_update_with_unchanged_owners_sends_nothing(
     folder, alice, django_capture_on_commit_callbacks
 ):

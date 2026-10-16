@@ -6594,23 +6594,16 @@ class IncidentWriteSerializer(BaseModelSerializer):
             return
 
         try:
-            from core.models import Actor
             from .tasks import send_incident_assignment_notification
 
-            assigned_emails = []
-            for actor in Actor.objects.filter(id__in=owner_ids):
-                assigned_emails.extend(actor.get_emails())
-
-            # Dedupe (several actors can resolve to the same email) and defer until
-            # the transaction commits, so a rollback doesn't send spurious emails.
-            unique_emails = list(dict.fromkeys(filter(None, assigned_emails)))
-            if unique_emails:
-                incident_id = incident.id
-                transaction.on_commit(
-                    lambda: send_incident_assignment_notification(
-                        incident_id, unique_emails
-                    )
-                )
+            # Pass IDs, not addresses: the task resolves recipients from the owners
+            # the incident still has when it runs. Defer until the transaction
+            # commits, so a rollback doesn't send spurious notifications.
+            incident_id = incident.id
+            owner_ids = [str(owner_id) for owner_id in owner_ids]
+            transaction.on_commit(
+                lambda: send_incident_assignment_notification(incident_id, owner_ids)
+            )
         except Exception as e:
             logger.error(f"Failed to send Incident assignment notification: {str(e)}")
 
