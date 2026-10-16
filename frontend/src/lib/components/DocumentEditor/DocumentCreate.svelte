@@ -143,7 +143,7 @@
 	<AutocompleteSelect
 		form={_form}
 		field="classification"
-		optionsEndpoint="classification-levels"
+		optionsEndpoint="classification-levels?is_visible=true&object_classification__is_visible=true"
 		optionsLabelField="label"
 		label={m.classification()}
 		nullable
