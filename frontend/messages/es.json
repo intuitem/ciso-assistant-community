@@ -2596,6 +2596,7 @@
 	"representativesDescription": "Representantes de proveedores",
 	"requestChanges": "Solicitar cambios",
 	"flagForChangeRequest": "Marcar para cambios",
+	"removeChangeRequestFlag": "Quitar marca",
 	"requestNotes": "Notas de solicitud",
 	"requestType": "Tipo de solicitud",
 	"requestValidation": "Solicitar validación",

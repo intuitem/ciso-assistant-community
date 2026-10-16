@@ -2594,6 +2594,7 @@
 	"representativesDescription": "Vertegenwoordigers van leveranciers",
 	"requestChanges": "Wijzigingen verzoeken",
 	"flagForChangeRequest": "Markeren voor wijziging",
+	"removeChangeRequestFlag": "Markering verwijderen",
 	"requestNotes": "Verzoeknotities",
 	"requestType": "Verzoektype",
 	"requestValidation": "Validatie aanvragen",

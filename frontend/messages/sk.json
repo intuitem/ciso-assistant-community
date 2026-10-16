@@ -196,6 +196,7 @@
 	"resubmissionNotes": "Poznámky k opätovnému odoslaniu",
 	"requestChanges": "Požiadať o zmeny",
 	"flagForChangeRequest": "Označiť na úpravu",
+	"removeChangeRequestFlag": "Zrušiť označenie",
 	"drop": "Ukončiť",
 	"resubmit": "Znova odoslať",
 	"onlyRequesterCanModify": "Iba žiadateľ môže vykonávať akcie na tomto overení",

@@ -3397,6 +3397,7 @@
 	"reports": "Report",
 	"requestChanges": "Richiedi modifiche",
 	"flagForChangeRequest": "Contrassegna per modifica",
+	"removeChangeRequestFlag": "Rimuovi contrassegno",
 	"requestNotes": "Note di richiesta",
 	"requestValidation": "Richiedi validazione",
 	"requestedOn": "Richiesto il",

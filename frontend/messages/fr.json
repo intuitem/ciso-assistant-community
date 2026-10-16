@@ -242,6 +242,7 @@
 	"resubmissionNotes": "Notes de resoumission",
 	"requestChanges": "Demander des modifications",
 	"flagForChangeRequest": "Marquer pour modification",
+	"removeChangeRequestFlag": "Retirer le marquage",
 	"reviewChangesRequested": "Modifications demandées",
 	"noFlaggedItemsHint": "Aucune exigence n'est signalée. Le répondant ne recevra que la note ci-dessous — signalez les exigences à corriger depuis le questionnaire pour lui indiquer quoi reprendre.",
 	"itemsNeedingChanges": [

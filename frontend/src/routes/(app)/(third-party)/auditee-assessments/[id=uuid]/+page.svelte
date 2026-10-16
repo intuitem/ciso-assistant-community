@@ -1159,9 +1159,15 @@
 									: 'preset-tonal-surface'}"
 								onclick={() => setReviewState(requirementAssessment, 'changes_requested')}
 								disabled={reviewPending}
-								title={m.flagForChangeRequest()}
+								aria-pressed={requirementAssessment.review_state === 'changes_requested'}
+								title={requirementAssessment.review_state === 'changes_requested'
+									? m.removeChangeRequestFlag()
+									: m.flagForChangeRequest()}
 							>
-								<i class="fa-solid fa-flag mr-1"></i>{m.flagForChangeRequest()}
+								<i class="fa-solid fa-flag mr-1"></i>{requirementAssessment.review_state ===
+								'changes_requested'
+									? m.removeChangeRequestFlag()
+									: m.flagForChangeRequest()}
 							</button>
 							<button
 								type="button"

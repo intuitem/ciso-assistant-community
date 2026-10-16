@@ -3337,6 +3337,7 @@
 	"representativesDescription": "Predstavnici vendora",
 	"requestChanges": "Zatraži izmjene",
 	"flagForChangeRequest": "Označi za izmjenu",
+	"removeChangeRequestFlag": "Ukloni oznaku",
 	"requestNotes": "Bilješke zahtjeva",
 	"requestType": "Vrsta zahtjeva",
 	"requestValidation": "Validacija zahtjeva",

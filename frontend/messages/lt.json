@@ -217,6 +217,7 @@
 	"resubmissionNotes": "Pakartotinio pateikimo pastabos",
 	"requestChanges": "Prašyti pakeitimų",
 	"flagForChangeRequest": "Pažymėti keitimui",
+	"removeChangeRequestFlag": "Panaikinti žymėjimą",
 	"drop": "Atmesti",
 	"resubmit": "Pateikti iš naujo",
 	"onlyRequesterCanModify": "Tik prašytojas gali atlikti veiksmus su šiuo patvirtinimu",

@@ -240,6 +240,7 @@
 	"resubmissionNotes": "Opombe ob ponovni predložitvi",
 	"requestChanges": "Zahtevaj spremembe",
 	"flagForChangeRequest": "Označi za spremembo",
+	"removeChangeRequestFlag": "Odstrani oznako",
 	"drop": "Opusti",
 	"resubmit": "Ponovno pošlji",
 	"onlyRequesterCanModify": "Samo vlagatelj zahteve lahko izvaja dejanja na tej validaciji",
