@@ -117,6 +117,21 @@ class TestOverdueFilter:
             "series_missed",
         ]
 
+    def test_analytics_overdue_matches_filter(self, authenticated_client, tasks):
+        body = authenticated_client.get(f"{URL}analytics/").json()
+        buckets = {b["key"]: b["count"] for b in body["due_buckets"]}
+        assert buckets["overdue"] == len(_names(authenticated_client, "overdue=true"))
+        # past_completed, past_cancelled, future_completed, future_cancelled
+        assert buckets["closed"] == 4
+        assert sum(buckets.values()) == body["count"]
+
+    def test_analytics_old_start_date_is_not_overdue(self, authenticated_client, db):
+        _recurrent(Folder.get_root_folder(), "series_finished", [(-7, "completed")])
+        body = authenticated_client.get(f"{URL}analytics/").json()
+        buckets = {b["key"]: b["count"] for b in body["due_buckets"]}
+        assert buckets["overdue"] == 0
+        assert buckets["no_eta"] == 1
+
     def test_not_overdue(self, authenticated_client, tasks):
         assert _names(authenticated_client, "overdue=false") == [
             "future_cancelled",
