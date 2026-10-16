@@ -142,7 +142,11 @@ class EmptyAnswer(Exception):
 
 def answer_chat(q, url, log, trace):
     """Ask through the app's chat (one session per question); the model is the backend's setting."""
-    h = {"Authorization": f"Token {os.environ['TOKEN']}"}
+    h = {
+        "Authorization": f"Token {os.environ['TOKEN']}",
+        # the chat answers in the browser's language
+        "Accept-Language": q.get("lang", "en"),
+    }
     sid = requests.post(f"{url}/chat/sessions/", json={}, headers=h, timeout=30)
     sid.raise_for_status()
     offset = Path(log).stat().st_size if log else 0
@@ -170,7 +174,18 @@ def answer_chat(q, url, log, trace):
         with open(log, encoding="utf-8", errors="replace") as f:
             f.seek(offset)
             plain = re.sub(r"\x1b\[[0-9;]*m", "", f.read())
-            trace += re.findall(r"Tool call: (\w+)\((.*?)\) \[chat", plain)
+        # this message's request id, so concurrent questions keep their own trace
+        rid = re.search(
+            rf"request='POST /api/chat/sessions/{sid.json()['id']}/message/' request_id=(\S+)",
+            plain,
+        )
+        trace += [
+            (name, args)
+            for name, args, line_rid in re.findall(
+                r"Tool call: (\w+)\((.*?)\) \[chat.*?request_id=(\S+)", plain
+            )
+            if rid and line_rid == rid.group(1)
+        ]
     if not text.strip():
         raise EmptyAnswer("empty chat answer")
     return text.strip(), len(trace)
