@@ -2597,6 +2597,7 @@
 	"requestChanges": "Solicitar cambios",
 	"flagForChangeRequest": "Marcar para cambios",
 	"removeChangeRequestFlag": "Quitar marca",
+	"itemsFlaggedForChanges": "marcados para cambios",
 	"requestNotes": "Notas de solicitud",
 	"requestType": "Tipo de solicitud",
 	"requestValidation": "Solicitar validación",

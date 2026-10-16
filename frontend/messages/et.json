@@ -293,6 +293,7 @@
 	"requestChanges": "Taotle muudatusi",
 	"flagForChangeRequest": "Märgi muutmiseks",
 	"removeChangeRequestFlag": "Eemalda märge",
+	"itemsFlaggedForChanges": "märgitud muutmiseks",
 	"drop": "Katkesta",
 	"resubmit": "Esita uuesti",
 	"onlyRequesterCanModify": "Ainult taotluse esitaja saab selle kinnitusega toiminguid teha",

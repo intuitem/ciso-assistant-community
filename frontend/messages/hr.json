@@ -3338,6 +3338,7 @@
 	"requestChanges": "Zatraži izmjene",
 	"flagForChangeRequest": "Označi za izmjenu",
 	"removeChangeRequestFlag": "Ukloni oznaku",
+	"itemsFlaggedForChanges": "označeno za izmjenu",
 	"requestNotes": "Bilješke zahtjeva",
 	"requestType": "Vrsta zahtjeva",
 	"requestValidation": "Validacija zahtjeva",

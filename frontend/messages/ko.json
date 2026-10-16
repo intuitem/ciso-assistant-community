@@ -218,6 +218,7 @@
 	"requestChanges": "변경 요청",
 	"flagForChangeRequest": "변경 요청 표시",
 	"removeChangeRequestFlag": "표시 해제",
+	"itemsFlaggedForChanges": "변경 요청 표시됨",
 	"drop": "취소",
 	"resubmit": "재제출",
 	"onlyRequesterCanModify": "이 검증에서는 요청자만 작업을 수행할 수 있습니다",

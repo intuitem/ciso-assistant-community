@@ -2595,6 +2595,7 @@
 	"requestChanges": "Wijzigingen verzoeken",
 	"flagForChangeRequest": "Markeren voor wijziging",
 	"removeChangeRequestFlag": "Markering verwijderen",
+	"itemsFlaggedForChanges": "gemarkeerd voor wijziging",
 	"requestNotes": "Verzoeknotities",
 	"requestType": "Verzoektype",
 	"requestValidation": "Validatie aanvragen",

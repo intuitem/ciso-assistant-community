@@ -1,6 +1,7 @@
 {
 	"flagForChangeRequest": "Değişiklik için işaretle",
 	"removeChangeRequestFlag": "İşareti kaldır",
+	"itemsFlaggedForChanges": "değişiklik için işaretlendi",
 	"manageMembers": "Üyeleri yönet",
 	"addMembers": "Üye ekle",
 	"removeFromGroup": "Gruptan çıkar",

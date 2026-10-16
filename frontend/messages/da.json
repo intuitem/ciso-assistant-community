@@ -1,6 +1,7 @@
 {
 	"flagForChangeRequest": "Markér til ændring",
 	"removeChangeRequestFlag": "Fjern markering",
+	"itemsFlaggedForChanges": "markeret til ændring",
 	"manageMembers": "Administrer medlemmer",
 	"addMembers": "Tilføj medlemmer",
 	"removeFromGroup": "Fjern fra gruppen",

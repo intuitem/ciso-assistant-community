@@ -185,6 +185,7 @@
 	"requestChanges": "请求变更",
 	"flagForChangeRequest": "标记待修改",
 	"removeChangeRequestFlag": "取消标记",
+	"itemsFlaggedForChanges": "项已标记待修改",
 	"drop": "放弃",
 	"resubmit": "重新提交",
 	"onlyRequesterCanModify": "只有请求者才能对此验证执行操作",
