@@ -57,6 +57,7 @@ from library.helpers import (
 )
 
 from core.utils import format_currency as _fmt_currency
+from core.utils import get_global_currency
 from core.quick_form_scoring import (
     normalize_form_aggregation,
     normalize_page_aggregation,
@@ -75,6 +76,8 @@ from .base_models import (
 from .utils import (
     aggregate_compute_results,
     camel_case,
+    project_weighted_sum,
+    question_score_bounds,
     resolve_compute_result,
     sha256,
     update_selected_implementation_groups,
@@ -2388,8 +2391,11 @@ class LibraryUpdater:
         """Upsert quick forms, pages and questions by URN, prune what the new
         version dropped, then reconcile every live response: seed answers for
         new questions, drop selections that no longer exist, re-evaluate."""
+        from core.quick_form_ratings import expand_scales
+
         for new_quick_form in self.new_quick_forms:
             with transaction.atomic():
+                new_quick_form = expand_scales(new_quick_form)
                 pages = new_quick_form.get("pages") or []
                 urn = new_quick_form["urn"].lower()
                 form_fields = {
@@ -2402,6 +2408,7 @@ class LibraryUpdater:
                     "outcomes_definition": new_quick_form.get("outcomes_definition")
                     or [],
                     "scores_definition": new_quick_form.get("scores_definition"),
+                    "scales_definition": new_quick_form.get("scales_definition") or [],
                     "ref_id_prefix": new_quick_form.get("ref_id_prefix") or "",
                     "title_question_urn": (
                         new_quick_form.get("title_question_urn") or ""
@@ -2422,6 +2429,7 @@ class LibraryUpdater:
                         **self.i18n_object_dict,
                         **form_fields,
                         "library": self.old_library,
+                        "always_review": bool(new_quick_form.get("always_review")),
                     },
                 )
 
@@ -2435,17 +2443,28 @@ class LibraryUpdater:
                     .exclude(response__status=QuickFormResponse.Status.DRAFT)
                     .values_list("question__urn", flat=True)
                 )
+                # Choices any response selected, drafts included: a renamed level
+                # must not empty a draft's answers.
                 decided_choice_urns = set(
                     QuestionChoice.objects.filter(
                         choice_answers__response__quick_form=quick_form
-                    )
-                    .exclude(
-                        choice_answers__response__status=(
-                            QuickFormResponse.Status.DRAFT
-                        )
-                    )
-                    .values_list("urn", flat=True)
+                    ).values_list("urn", flat=True)
                 )
+                # A draft is no record, but it can be weeks of writing (a DPIA):
+                # questions it answered are kept too, with their pages.
+                decided_question_urns |= {
+                    answer.question.urn
+                    for answer in Answer.objects.filter(
+                        response__quick_form=quick_form,
+                        question__page__quick_form=quick_form,
+                        response__status=QuickFormResponse.Status.DRAFT,
+                    )
+                    .select_related("question")
+                    .prefetch_related("selected_choices", "attachments")
+                    if answer.value not in (None, "", [])
+                    or answer.selected_choices.all()
+                    or answer.attachments.all()
+                }
 
                 incoming_page_urns = set()
                 for order, page in enumerate(pages):
@@ -2462,6 +2481,7 @@ class LibraryUpdater:
                         "aggregation": normalize_page_aggregation(
                             page.get("aggregation")
                         ),
+                        "facts": page.get("facts") or [],
                     }
                     page_object, _ = QuickFormPage.objects.update_or_create(
                         quick_form=quick_form,
@@ -2643,6 +2663,21 @@ class LibraryUpdater:
                     **requirement_mapping_dict,
                 )
 
+    def quick_forms_error(self) -> str | None:
+        """Why a new quick form's scales, ratings or page facts cannot work, before
+        anything is written: expanding malformed scales would raise mid-update."""
+        from core.quick_form_facts import facts_error
+        from core.quick_form_ratings import scales_error
+
+        for quick_form in self.new_quick_forms or []:
+            if not isinstance(quick_form, dict):
+                return "[QUICK_FORM_ERROR] a quick form must be an object"
+            if error := scales_error(quick_form) or facts_error(
+                quick_form.get("pages")
+            ):
+                return f"[QUICK_FORM_ERROR] {error}"
+        return None
+
     def framework_rules_error(self) -> str | None:
         """The checks library import runs on outcome rules and visibility
         expressions, so an update cannot bring in what a load refuses."""
@@ -2663,6 +2698,8 @@ class LibraryUpdater:
     # We should create a LibraryVerifier class in the future that check if the library is valid and use it for a better error handling.
     def update_library(self) -> Union[str, None]:
         if (error_msg := self.framework_rules_error()) is not None:
+            return error_msg
+        if (error_msg := self.quick_forms_error()) is not None:
             return error_msg
         if (error_msg := self.update_dependencies()) is not None:
             return error_msg
@@ -4350,6 +4387,10 @@ class QuickForm(ReferentialObjectMixin, I18nObjectMixin):
     scores_definition = models.JSONField(
         blank=True, null=True, verbose_name=_("Scores definition")
     )
+    # Ordered levels questions share (`config.scale`), see core.quick_form_ratings.
+    scales_definition = models.JSONField(
+        default=list, blank=True, verbose_name=_("Scales definition")
+    )
     title_question_urn = models.CharField(
         max_length=255,
         blank=True,
@@ -4376,6 +4417,16 @@ class QuickForm(ReferentialObjectMixin, I18nObjectMixin):
     # never by instance ids.
     on_accept = models.JSONField(
         default=list, blank=True, verbose_name=_("Apply on accept")
+    )
+    # Off: a submitter who could make every on-accept change by hand gets it applied
+    # on submit. The library sets it on first load only: an update keeps the choice.
+    always_review = models.BooleanField(
+        default=False,
+        verbose_name=_("Always require review"),
+        help_text=_(
+            "Even when the person submitting could make the change themselves, "
+            "an accepted review is needed before anything is written."
+        ),
     )
     ref_id_prefix = models.CharField(
         max_length=8,
@@ -4450,6 +4501,12 @@ class QuickFormPage(ReferentialObjectMixin, I18nObjectMixin):
         default=Aggregation.SUM,
         verbose_name=_("Aggregation"),
         help_text=_("How the page's question scores combine into the page score"),
+    )
+    facts = models.JSONField(
+        default=list,
+        blank=True,
+        verbose_name=_("Facts"),
+        help_text=_("The subject's records the page shows (see core.quick_form_facts)"),
     )
 
     fields_to_check = ["urn"]
@@ -7069,7 +7126,6 @@ class CommitmentMixin(models.Model):
 
 def _get_default_applied_control_cost():
     return {
-        "currency": "€",
         "amortization_period": 1,
         "build": {"fixed_cost": 0, "people_days": 0},
         "run": {"fixed_cost": 0, "people_days": 0},
@@ -7308,6 +7364,8 @@ class AppliedControl(
             self.csf_function = self.reference_control.csf_function
         if self.status == "active":
             self.progress_field = 100
+        if isinstance(self.cost, dict) and not self.cost.get("currency"):
+            self.cost["currency"] = get_global_currency()
 
         # Save first. _state.adding, not `pk is None`: the UUID pk is defaulted
         # at instantiation, so pk is never None even for unsaved rows.
@@ -11219,6 +11277,10 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
 
         total_score = 0
         total_weight = 0
+        # Reachable range of the visible scored questions, weighted and not: the
+        # weighted SUM is projected from the former onto the latter.
+        weighted_lo = weighted_hi = 0
+        unweighted_lo = unweighted_hi = 0
         scoring = self.get_resolved_scoring()
         min_score = scoring["min_score"] if scoring["min_score"] is not None else 0
         max_score = scoring["max_score"] if scoring["max_score"] is not None else 100
@@ -11248,10 +11310,11 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                 aggregation = "mean"
 
         for question in questions_qs:
+            choices = list(question.choices.all())
             # Detect result-driven capability across ALL choices (selection /
             # visibility agnostic). Short-circuits across questions once set.
             if not is_result_driven:
-                for choice in question.choices.all():
+                for choice in choices:
                     if choice.compute_result is None:
                         continue
                     if resolve_compute_result(choice.compute_result) is not None:
@@ -11268,18 +11331,32 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                 continue
 
             visible_questions += 1
+
+            # A negative weight has no defined meaning; treat it as 0.
+            weight = max(question.weight, 0)
+            scores = [c.add_score for c in choices if c.add_score is not None]
+            if scores:
+                lo, hi = question_score_bounds(
+                    [c.add_score or 0 for c in choices],
+                    question.type == Question.Type.MULTIPLE_CHOICE,
+                )
+                unweighted_lo += lo
+                unweighted_hi += hi
+                weighted_lo += lo * weight
+                weighted_hi += hi * weight
+
             if not has_answer_by_qid.get(question.id):
                 continue
 
             answered_visible_questions += 1
 
             selected_pks = selected_choice_pks_by_qid.get(question.id, set())
-            for choice in question.choices.all():
+            for choice in choices:
                 if choice.id in selected_pks:
                     if choice.add_score is not None:
                         is_score_computed = True
-                        total_score += choice.add_score * question.weight
-                        total_weight += question.weight
+                        total_score += choice.add_score * weight
+                        total_weight += weight
 
                     if choice.compute_result is not None:
                         resolved_cr = resolve_compute_result(choice.compute_result)
@@ -11295,6 +11372,10 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         if is_score_computed and questionnaire_complete:
             if aggregation == "mean" and total_weight > 0:
                 computed_score = total_score / total_weight
+            elif aggregation == "sum":
+                computed_score = project_weighted_sum(
+                    total_score, weighted_lo, weighted_hi, unweighted_lo, unweighted_hi
+                )
             else:
                 computed_score = total_score
             new_score = max(min(int(computed_score), max_score), min_score)
@@ -11689,6 +11770,10 @@ class QuickFormResponse(
     # `computed_outcome`, whose every key reads as a classification that fired.
     computed_values = models.JSONField(
         blank=True, null=True, verbose_name=_("Computed values")
+    )
+    # The facts the pages showed, frozen on submit; null while live.
+    facts_snapshot = models.JSONField(
+        blank=True, null=True, verbose_name=_("Facts snapshot")
     )
     # What the response is about, read from the form's subject question. Generic
     # because entity is the first subject type, not the only one.

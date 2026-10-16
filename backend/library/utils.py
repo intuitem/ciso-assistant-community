@@ -534,7 +534,9 @@ class QuickFormPageImporter:
         aggregation = self.page_data.get("aggregation")
         if aggregation is not None and aggregation not in PAGE_AGGREGATIONS:
             return "aggregation must be one of {}".format(", ".join(PAGE_AGGREGATIONS))
-        return None
+        from core.quick_form_facts import facts_error
+
+        return facts_error([self.page_data])
 
     def import_page(self, quick_form: QuickForm):
         # update_or_create scoped to the form: create on fresh loads, in-place
@@ -554,6 +556,7 @@ class QuickFormPageImporter:
                 aggregation=normalize_page_aggregation(
                     self.page_data.get("aggregation")
                 ),
+                facts=self.page_data.get("facts") or [],
                 locale=quick_form.locale,
                 default_locale=quick_form.default_locale,
                 translations=self.page_data.get("translations", {}),
@@ -569,10 +572,19 @@ class QuickFormImporter:
     REQUIRED_FIELDS = {"ref_id", "urn"}
 
     def __init__(self, quick_form_data: dict):
-        self.quick_form_data = quick_form_data
+        from core.quick_form_ratings import expand_scales, scales_error
+
+        # Checked first: expanding malformed scales would raise instead of answering.
+        self._scales_error = scales_error(quick_form_data)
+        # Questions on a scale get its levels as choices before any page is read.
+        self.quick_form_data = (
+            quick_form_data if self._scales_error else expand_scales(quick_form_data)
+        )
         self._pages: List[QuickFormPageImporter] = []
 
     def init(self) -> Union[str, None]:
+        if self._scales_error:
+            return f"[QUICK_FORM_ERROR] {self._scales_error}"
         if missing_fields := self.REQUIRED_FIELDS - set(self.quick_form_data.keys()):
             return "Missing the following fields : {}".format(", ".join(missing_fields))
         pages = self.quick_form_data.get("pages")
@@ -638,6 +650,7 @@ class QuickFormImporter:
                 outcomes_definition=self.quick_form_data.get("outcomes_definition")
                 or [],
                 scores_definition=self.quick_form_data.get("scores_definition"),
+                scales_definition=self.quick_form_data.get("scales_definition") or [],
                 urn_namespace=urn.split(":")[1] if urn.startswith("urn:") else "custom",
                 provider=library_object.provider,
                 locale=library_object.locale,
@@ -645,6 +658,10 @@ class QuickFormImporter:
                 translations=self.quick_form_data.get("translations", {}),
             ),
         )
+        if created and self.quick_form_data.get("always_review"):
+            # First load only: re-imports keep what the instance chose.
+            quick_form.always_review = True
+            quick_form.save(update_fields=["always_review"])
         for page in self._pages:
             page.import_page(quick_form)
         if not created:

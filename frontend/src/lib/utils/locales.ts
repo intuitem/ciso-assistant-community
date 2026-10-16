@@ -145,7 +145,7 @@ export const defaultLangLabels = {
 	fr: 'Français',
 	en: 'English',
 	ar: 'العربية',
-	pt: 'Português',
+	pt: 'Português (Brasil)',
 	es: 'Español',
 	nl: 'Nederlands',
 	de: 'Deutsch',

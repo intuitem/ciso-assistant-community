@@ -102,81 +102,67 @@ class BusinessImpactAnalysis(Assessment):
         return progress
 
     def build_table(self):
-        table = list()
-        xAxis = set()
-        xAxis.add(0)
         asset_assessments = (
             AssetAssessment.objects.filter(bia=self)
+            .select_related("asset__folder")
             .prefetch_related(
                 models.Prefetch(
                     "escalationthreshold_set",
-                    queryset=EscalationThreshold.objects.order_by("point_in_time"),
+                    queryset=EscalationThreshold.objects.order_by(
+                        "point_in_time"
+                    ).prefetch_related("qualifications"),
                     to_attr="prefetched_thresholds",
                 )
             )
-            .order_by("asset__folder")
+            .order_by("asset__folder__name", "asset__name")
         )
+        empty = {"value": -1, "name": "--", "hexcolor": "#f9fafb"}
 
-        # First pass: collect all threshold points
+        xAxis = {0}
+        rows = []
         for aa in asset_assessments:
-            thresholds = EscalationThreshold.objects.filter(
-                asset_assessment=aa
-            ).order_by("point_in_time")
-            for th in thresholds:
+            by_qualification = {}
+            for th in aa.prefetched_thresholds:
                 xAxis.add(th.point_in_time)
-
-        # Sort the x-axis values for consistent timeline
+                for q in list(th.qualifications.all()) or [None]:
+                    by_qualification.setdefault(q.name if q else None, []).append(th)
+            for qualification in sorted(
+                by_qualification or {None: []}, key=lambda q: (q is None, q or "")
+            ):
+                rows.append(
+                    (aa, qualification, by_qualification.get(qualification, []))
+                )
         xAxis = sorted(xAxis)
 
-        # Second pass: build the table with proper padding
-        for aa in asset_assessments:
-            thresholds = list(
-                EscalationThreshold.objects.filter(asset_assessment=aa).order_by(
-                    "point_in_time"
+        folder_paths = {}
+        table = []
+        for aa, qualification, thresholds in rows:
+            if aa.asset.folder_id not in folder_paths:
+                folder_paths[aa.asset.folder_id] = (
+                    aa.asset.folder.get_folder_full_path_string()
                 )
-            )
-
             data_dict = {}
-
-            # Default for time 0 if no threshold exists
-            if not thresholds or thresholds[0].point_in_time > 0:
-                data_dict[0] = {"value": -1, "name": "--", "hexcolor": "#f9fafb"}
-
-            # For each threshold, extend its impact to the next threshold
-            for i, threshold in enumerate(thresholds):
-                current_impact = threshold.get_impact_compact_display
-                current_time = threshold.point_in_time
-
-                # Find the next time point for this asset
-                next_time = None
-                if i < len(thresholds) - 1:
-                    next_time = thresholds[i + 1].point_in_time
-
-                # Apply the current impact to all points between current and next
-                for point in xAxis:
-                    if point == current_time or (
-                        point > current_time
-                        and (next_time is None or point < next_time)
-                    ):
-                        data_dict[point] = current_impact
-
-            # Add entry to table
+            current = empty
+            i = 0
+            for point in xAxis:
+                while i < len(thresholds) and thresholds[i].point_in_time <= point:
+                    impact = EscalationThreshold.format_impact(
+                        thresholds[i].quali_impact, self.parsed_matrix
+                    )
+                    current = {
+                        k: impact[k]
+                        for k in ("value", "name", "description", "hexcolor")
+                    }
+                    i += 1
+                data_dict[point] = current
             table.append(
                 {
                     "asset": aa.asset.name,
-                    "folder": aa.asset.folder.name,
+                    "folder": folder_paths[aa.asset.folder_id],
+                    "qualification": qualification,
                     "data": data_dict,
                 }
             )
-
-        for entry in table:
-            for point in xAxis:
-                if point not in entry["data"]:
-                    entry["data"][point] = {
-                        "value": -1,
-                        "name": "--",
-                        "hexcolor": "#f9fafb",
-                    }
 
         return table
 
