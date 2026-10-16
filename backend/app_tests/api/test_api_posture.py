@@ -839,6 +839,72 @@ class TestImportResults:
             == "not_checked"
         )
 
+    def test_plumber_ocsf_import(self, setup):
+        s = setup
+        import json
+
+        def event(control, status, status_id, details=None):
+            compliance = {
+                "control": control,
+                "standards": ["Plumber"],
+                "requirements": ["ISSUE-701", "ISSUE-702"],
+                "status": status,
+                "status_id": status_id,
+            }
+            if details:
+                compliance["status_details"] = details
+            return {
+                "class_uid": 2003,
+                "status_id": 1,
+                "message": f"Control {control} {status}.",
+                "metadata": {"product": {"name": "Plumber", "version": "0.6.1"}},
+                "compliance": compliance,
+            }
+
+        first = [
+            event("1.1", "Pass", 1),
+            event("1.2", "Fail", 3, ["job a uses @v1", "job b uses @v2"]),
+            event("1.3", "Skipped", 99),
+            event("2.1", "Pass", 1),
+        ]
+        res = self.import_file(
+            s, "plumber.ocsf.json", json.dumps(first).encode(), "application/json"
+        )
+        assert res.status_code == 200
+        body = res.json()
+        assert body["created"] == 4
+        assert body["unknown_ref_ids"] == []
+
+        failed = PostureResult.objects.get(requirement=s["nodes"]["1.2"])
+        assert failed.result == "fail"
+        assert failed.message == "job a uses @v1\njob b uses @v2"
+        assert failed.run.tool == "Plumber 0.6.1"
+        assert (
+            PostureResult.objects.get(requirement=s["nodes"]["1.3"]).result
+            == "not_checked"
+        )
+
+        # A control absent from a later scan is not inferred: it keeps its last result.
+        second = [event("1.1", "Fail", 3)]
+        res = self.import_file(
+            s, "plumber.ocsf.json", json.dumps(second).encode(), "application/json"
+        )
+        assert res.status_code == 200
+        second_run = PostureRun.objects.get(id=res.json()["run_id"])
+        assert list(
+            second_run.results.values_list("requirement__ref_id", flat=True)
+        ) == ["1.1"]
+        current = {
+            row["requirement__ref_id"]: row["result"]
+            for row in s["pa"].current_posture(asset_id=s["asset1"].id)
+        }
+        assert current == {
+            "1.1": "fail",
+            "1.2": "fail",
+            "1.3": "not_checked",
+            "2.1": "pass",
+        }
+
     def test_unsupported_extension(self, setup):
         s = setup
         res = self.import_file(s, "scan.pdf", b"whatever")

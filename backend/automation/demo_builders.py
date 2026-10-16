@@ -1,6 +1,7 @@
 """Automation demo builder: workflows from the shipped catalogue plus a few
-authored for the story, a short run history, and a Kubernetes CIS posture
-assessment with nightly scan results.
+authored for the story, a short run history, a Kubernetes CIS posture
+assessment with nightly scan results, and a CI/CD posture fed by weekly Plumber
+scans through the OCSF file import.
 
 Workflows are instantiated the way the library page does it
 (``import_workflow`` on a workflow document, into a demo folder), never by
@@ -17,6 +18,8 @@ Runs are historical records only: ``WorkflowInstance`` and its log rows are
 written directly, nothing is executed and no ``WorkflowToken`` is created.
 """
 
+import io
+import json
 import uuid
 from datetime import UTC, datetime, time, timedelta
 from pathlib import Path
@@ -25,6 +28,8 @@ from typing import ClassVar
 import yaml
 from django.conf import settings
 
+from automation.importers import parse_ocsf
+from automation.ingestion import ingest_posture_results
 from automation.models import PostureAssessment, PostureResult, PostureRun
 from automation.workflows.import_export import import_workflow
 from automation.workflows.models import (
@@ -39,6 +44,7 @@ from core.demo import DemoBuilder, register
 from core.models import Asset, Framework, RequirementNode
 
 K8S_LIBRARY = "urn:intuitem:risk:library:cis-benchmark-kubernetes"
+PLUMBER_LIBRARY = "urn:intuitem:risk:library:plumber-cicd-checks"
 
 # Library file stem, lifecycle, publish offset.
 # lifecycle: "draft" (never published), "published", "republished" (v1
@@ -296,6 +302,195 @@ SCAN_DAYS = 10
 SCAN_TOOL = "kube-bench 0.9.2"
 
 
+PLUMBER_PRODUCT = {"name": "Plumber", "version": "0.6.1"}
+PLUMBER_SKIPPED = {"workflowMustIncludeRequiredActions"}
+
+# Repository asset, description, parent primary asset, then per weekly scan
+# (day offset) the controls that failed with their finding lines; every other
+# control passed.
+PIPELINES = [
+    (
+        "Keystone firmware repository",
+        (
+            "GitHub repository of the Keystone hub firmware and its release "
+            "workflows: build, sign and publish the OTA images."
+        ),
+        "Device firmware and signing keys",
+        [
+            (
+                -21,
+                {
+                    "actionsMustBePinnedByCommitSha": [
+                        (
+                            'job "build/compile" references action '
+                            '"arduino/setup-protoc@v3" with a mutable ref'
+                        ),
+                        (
+                            'job "release/publish" references action '
+                            '"softprops/action-gh-release@v2" with a mutable ref'
+                        ),
+                        (
+                            'job "release/sign" references action '
+                            '"sigstore/cosign-installer@main" with a mutable ref'
+                        ),
+                    ],
+                    "githubActionMustComeFromAuthorizedSources": [
+                        (
+                            'job "release/sign" references action '
+                            '"sigstore/cosign-installer@main" from an unauthorized source'
+                        ),
+                    ],
+                    "workflowsMustDeclarePermissions": [
+                        'job "build/compile" runs with no explicit `permissions:` block',
+                        'job "release/publish" runs with no explicit `permissions:` block',
+                    ],
+                    "checkoutMustNotPersistCredentials": [
+                        (
+                            'job "build/compile" runs "actions/checkout@v4" without '
+                            "`persist-credentials: false`"
+                        ),
+                        (
+                            'job "release/publish" runs "actions/checkout@v4" without '
+                            "`persist-credentials: false`"
+                        ),
+                    ],
+                    "workflowMustNotInjectUserInputInScripts": [
+                        (
+                            'job "triage/label" interpolates '
+                            "${{ github.event.issue.title }} into a run script"
+                        ),
+                    ],
+                },
+            ),
+            (
+                -14,
+                {
+                    "workflowsMustDeclarePermissions": [
+                        'job "build/compile" runs with no explicit `permissions:` block',
+                        'job "release/publish" runs with no explicit `permissions:` block',
+                    ],
+                    "checkoutMustNotPersistCredentials": [
+                        (
+                            'job "build/compile" runs "actions/checkout@v4" without '
+                            "`persist-credentials: false`"
+                        ),
+                        (
+                            'job "release/publish" runs "actions/checkout@v4" without '
+                            "`persist-credentials: false`"
+                        ),
+                    ],
+                    "workflowMustNotInjectUserInputInScripts": [
+                        (
+                            'job "triage/label" interpolates '
+                            "${{ github.event.issue.title }} into a run script"
+                        ),
+                    ],
+                },
+            ),
+            (
+                -7,
+                {
+                    "checkoutMustNotPersistCredentials": [
+                        (
+                            'job "release/publish" runs "actions/checkout@v4" without '
+                            "`persist-credentials: false`"
+                        ),
+                    ],
+                },
+            ),
+            (
+                0,
+                {
+                    "checkoutMustNotPersistCredentials": [
+                        (
+                            'job "release/publish" runs "actions/checkout@v4" without '
+                            "`persist-credentials: false`"
+                        ),
+                    ],
+                },
+            ),
+        ],
+    ),
+    (
+        "Companion app repository",
+        (
+            "GitHub repository of the companion mobile app and its store release "
+            "workflows."
+        ),
+        "Product designs and source code",
+        [
+            (
+                -21,
+                {
+                    "workflowsMustDeclarePermissions": [
+                        'job "ci/test" runs with no explicit `permissions:` block',
+                    ],
+                    "pipelineMustNotEnableDebugTrace": [
+                        'workflow "release" sets ACTIONS_STEP_DEBUG to true',
+                    ],
+                },
+            ),
+            (
+                -14,
+                {
+                    "workflowsMustDeclarePermissions": [
+                        'job "ci/test" runs with no explicit `permissions:` block',
+                    ],
+                },
+            ),
+            (
+                -7,
+                {
+                    "workflowsMustDeclarePermissions": [
+                        'job "ci/test" runs with no explicit `permissions:` block',
+                    ],
+                    "releaseWorkflowsMustNotRestoreUntrustedCache": [
+                        (
+                            'job "release/bundle" restores a cache written by '
+                            "pull request workflows"
+                        ),
+                    ],
+                },
+            ),
+            (
+                0,
+                {
+                    "releaseWorkflowsMustNotRestoreUntrustedCache": [
+                        (
+                            'job "release/bundle" restores a cache written by '
+                            "pull request workflows"
+                        ),
+                    ],
+                },
+            ),
+        ],
+    ),
+]
+
+
+def plumber_event(control, findings):
+    """One OCSF Compliance Finding, shaped like `plumber analyze --ocsf`."""
+    if control in PLUMBER_SKIPPED:
+        status, status_id = "Skipped", 99
+    elif findings:
+        status, status_id = "Fail", 3
+    else:
+        status, status_id = "Pass", 1
+    compliance = {
+        "control": control,
+        "standards": ["Plumber"],
+        "status": status,
+        "status_id": status_id,
+    }
+    if findings:
+        compliance["status_details"] = findings
+    return {
+        "class_uid": 2003,
+        "metadata": {"product": PLUMBER_PRODUCT},
+        "compliance": compliance,
+    }
+
+
 def at(ctx, offset, hour=8, minute=0):
     return datetime.combine(ctx.day(offset), time(hour, minute), tzinfo=UTC)
 
@@ -315,7 +510,7 @@ class AutomationBuilder(DemoBuilder):
     name = "automation"
     feature_flags = ("workflows", "posture_assessments")
     depends = ("core", "compliance")
-    libraries = (K8S_LIBRARY,)
+    libraries = (K8S_LIBRARY, PLUMBER_LIBRARY)
     covers: ClassVar[dict] = {
         Workflow: "folder",
         WorkflowVersion: "folder",
@@ -359,6 +554,7 @@ class AutomationBuilder(DemoBuilder):
             if workflow is not None and entry is CRA_TRIAGE:
                 self.build_triage_runs(ctx, workflow)
         self.build_posture(ctx)
+        self.build_pipeline_posture(ctx)
 
     # Workflows
 
@@ -735,3 +931,63 @@ class AutomationBuilder(DemoBuilder):
         PostureRun.objects.bulk_create(runs, batch_size=1000)
         PostureResult.objects.bulk_create(results, batch_size=2000)
         ctx.out(f"posture seeded with {len(runs)} runs, {len(results)} results")
+
+    def build_pipeline_posture(self, ctx):
+        framework = Framework.objects.filter(library__urn=PLUMBER_LIBRARY).first()
+        if framework is None:
+            ctx.err("Plumber CI/CD checks not loaded, skipping pipeline posture")
+            return
+        assessment, created = PostureAssessment.objects.get_or_create(
+            name="CI/CD pipelines — Plumber scans",
+            folder=ctx.domain,
+            defaults={
+                "ref_id": "PA.CICD.01",
+                "framework": framework,
+                "selected_implementation_groups": ["github", "common"],
+                "status": "in_progress",
+                "due_date": ctx.day(60),
+                "description": "Weekly Plumber scans of the GitHub Actions "
+                "workflows that build and release the firmware and the "
+                "companion app, imported as OCSF.",
+            },
+        )
+        if not created:
+            return
+        controls = [
+            node.ref_id
+            for node in RequirementNode.objects.filter(
+                framework=framework, assessable=True
+            ).order_by("urn")
+            if assessment.requirement_matches_selected_groups(
+                node.implementation_groups
+            )
+        ]
+        for index, (name, description, parent, scans) in enumerate(PIPELINES):
+            asset, asset_created = Asset.objects.get_or_create(
+                name=name,
+                folder=ctx.domain,
+                defaults={"description": description, "type": Asset.Type.SUPPORT},
+            )
+            primary = Asset.objects.filter(folder=ctx.domain, name=parent).first()
+            if asset_created and primary:
+                asset.parent_assets.set([primary])
+            assessment.assets.add(asset)
+            for offset, failing in scans:
+                # Go through the file import so the demo exercises the real path.
+                events = [plumber_event(c, failing.get(c)) for c in controls]
+                entries, extras = parse_ocsf(io.BytesIO(json.dumps(events).encode()))
+                summary = ingest_posture_results(
+                    assessment,
+                    asset_id=asset.id,
+                    entries=entries,
+                    run_id=None,
+                    source=PostureResult.Source.IMPORT,
+                    tool=extras["tool"],
+                    user=None,
+                )
+                stamp = at(ctx, offset, 4, 15 * index)
+                PostureRun.objects.filter(id=summary["run_id"]).update(started_at=stamp)
+                PostureResult.objects.filter(run_id=summary["run_id"]).update(
+                    timestamp=stamp
+                )
+        ctx.out(f"pipeline posture seeded with {len(PIPELINES)} repositories")
