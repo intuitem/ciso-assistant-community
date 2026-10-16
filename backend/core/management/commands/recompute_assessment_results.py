@@ -220,7 +220,7 @@ class Command(BaseCommand):
             return
 
         queryset = RequirementAssessment.objects.select_related(
-            "compliance_assessment", "requirement"
+            "compliance_assessment", "requirement", "requirement__framework"
         ).filter(requirement_id__in=req_ids)
 
         if scoped_ca is not None:
