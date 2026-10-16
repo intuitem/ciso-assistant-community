@@ -96,6 +96,35 @@ def test_serializer_update_invalidates_cache(flags_row):
     assert ff_is_enabled("incidents") is False
 
 
+def _save_flags(row, **flags):
+    # Partial: a full update resets every flag left out to its default.
+    serializer = FeatureFlagsSerializer(row, data=flags, partial=True)
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+    row.refresh_from_db()
+    return row.value
+
+
+def test_turning_on_dpias_turns_on_quick_forms(flags_row):
+    value = _save_flags(flags_row, dpias=True, quick_forms=False)
+    assert (value["dpias"], value["quick_forms"]) == (True, True)
+    assert ff_is_enabled("quick_forms") is True
+
+
+def test_turning_off_quick_forms_turns_off_dpias(flags_row):
+    _save_flags(flags_row, dpias=True, quick_forms=True)
+    value = _save_flags(flags_row, quick_forms=False)
+    assert (value["dpias"], value["quick_forms"]) == (False, False)
+
+
+def test_any_save_repairs_dpias_without_quick_forms(flags_row):
+    # A row written before the rule existed: DPIAs on, the forms they run on off.
+    flags_row.value = {**flags_row.value, "dpias": True, "quick_forms": False}
+    flags_row.save(update_fields=["value"])
+    value = _save_flags(flags_row, incidents=False)
+    assert (value["dpias"], value["quick_forms"]) == (True, True)
+
+
 def test_unsupported_flags_short_circuit_on_ce(flags_row, django_assert_num_queries):
     # Enterprise-only flags are outside CE's SUPPORTED_FEATURE_FLAGS:
     # False without any settings query, even when the row carries them.

@@ -143,5 +143,49 @@ export const shots: Shot[] = [
 		slug: 'libraries-catalog',
 		url: '/libraries',
 		usedBy: ['concepts/libraries.md', 'guides/initial-setup.md']
+	},
+	{
+		slug: 'dpia-overview',
+		url: '/dpias',
+		usedBy: ['concepts/dpia.md', 'guides/dpia.md'],
+		act: async (page) => {
+			await page.getByRole('button', { name: 'Toggle sidebar' }).click();
+		},
+		fullPage: true
+	},
+	{
+		slug: 'dpia-screening-card',
+		url: '/processings',
+		usedBy: ['concepts/dpia.md', 'guides/dpia.md'],
+		act: openDetail('processings', 'ROPA-002'),
+		clip: (page) => page.getByTestId('dpia-screening-card')
+	},
+	{
+		slug: 'dpia-privacy-risk',
+		url: '/processings',
+		usedBy: ['concepts/dpia.md', 'guides/dpia.md'],
+		act: async (page) => {
+			await openDetail('processings', 'ROPA-002')(page);
+			await page.getByTestId('dpia-link').click();
+			await page.locator('body[data-hydrated="true"]').waitFor();
+			await page.getByRole('button', { name: 'Results' }).click();
+		},
+		clip: (page) =>
+			page
+				.getByText('Privacy risk', { exact: true })
+				.locator('xpath=ancestor::div[contains(@class,"card")][1]')
+	},
+	{
+		slug: 'processor-register',
+		url: '/processings',
+		usedBy: ['concepts/privacy-register.md'],
+		act: async (page) => {
+			await page.getByRole('button', { name: 'Processor register' }).click();
+			await page.locator('tr', { hasText: 'ROPA-012' }).waitFor();
+		},
+		clip: (page) =>
+			page
+				.getByRole('button', { name: 'Processor register' })
+				.locator('xpath=ancestor::div[contains(@class,"card")][1]')
 	}
 ];

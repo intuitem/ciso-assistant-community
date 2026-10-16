@@ -1306,7 +1306,6 @@
 	"expirationDate": "Udløbsdato",
 	"expirationDateIsInThePastWarning": "Den angivne udløbsdato ligger i fortiden",
 	"filterBy": "Filtrér efter",
-	"demoDataAlreadyImported": "Demodata er allerede importeret. Slet eller omdøb dit eksisterende DEMO-domæne.",
 	"finding": "Fund",
 	"findings": "Fund",
 	"associatedFindings": "Tilknyttede fund",
