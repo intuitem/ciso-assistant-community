@@ -631,12 +631,13 @@ def test_update_requires_secret_when_authority_changes(root_folder, change):
 
     # Otherwise an edit could post the stored secret to a different endpoint.
     ep = _oauth_sink(root_folder)
+    original = dict(ep.oauth_config)
     with pytest.raises(drf.ValidationError):
         AuditSinkSerializer().update(
             ep, {"oauth_config": {**ep.oauth_config, "client_secret": "", **change}}
         )
     ep.refresh_from_db()
-    assert ep.oauth_config["token_url"].startswith("https://login.microsoftonline")
+    assert ep.oauth_config == original
 
 
 @pytest.mark.django_db
