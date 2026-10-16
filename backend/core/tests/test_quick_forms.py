@@ -1527,7 +1527,7 @@ def test_weighted_sum_scores_like_an_audit(app_config, heavy, light, expected):
     questions = {q.urn: q for q in Question.objects.filter(page__quick_form=form)}
     apply_answers_dict("response", response, questions, answers)
 
-    live = evaluate_quick_form(response, persist=False)["score"]
+    live = evaluate_quick_form(response, persist=False)
     preview = evaluate_quick_form_document(
         {
             "urn": form.urn,
@@ -1544,9 +1544,15 @@ def test_weighted_sum_scores_like_an_audit(app_config, heavy, light, expected):
             ],
         },
         answers,
-    )["score"]
-    assert live == expected
-    assert preview == expected
+    )
+    for result in (live, preview):
+        assert result["score"] == expected
+        # Every sum the rules can read sits on the same scale as the score.
+        context = result["context"]
+        assert context["response"]["score_sum"] == expected
+        assert context["response"]["score_max"] == 100
+        assert context["pages"]["only"]["score"] == expected
+        assert context["pages"]["only"]["score_max"] == 100
 
 
 @pytest.mark.django_db
@@ -1651,6 +1657,46 @@ def test_preview_scores_a_form_whose_weights_are_all_zero():
     questions = {"first": {"weight": 0}, "second": {"weight": 0}}
     assert _preview_score(questions, {"first": "good", "second": "good"}) == 0
     assert _preview_score(questions, {"first": "good"}) is None
+
+
+def _preview(form, answers):
+    from core.cel_service import evaluate_quick_form_document
+
+    base = "urn:test:risk:qf_page:preview:only:question"
+    return evaluate_quick_form_document(
+        form,
+        {
+            f"{base}:{key}": f"{base}:{key}:choice:{value}"
+            for key, value in answers.items()
+        },
+    )
+
+
+def test_preview_page_sums_project_like_the_form_sum():
+    """A one-page form scores the same summing its questions or its pages: the
+    page sum is projected too, instead of saturating at the form maximum."""
+    questions = {"heavy": {"weight": 3}, "light": {"weight": 1}}
+    answers = {"heavy": "good", "light": "bad"}
+    form = _preview_form(questions)
+    form["scores_definition"]["aggregation"] = "pages_sum"
+    assert _preview_score(questions, answers) == 75
+    assert _preview(form, answers)["score"] == 75
+
+
+def test_preview_rule_compares_score_with_score_max():
+    """A rule reading `response.score` against `response.score_max` sees both on
+    the projected scale."""
+    form = _preview_form({"heavy": {"weight": 3}, "light": {"weight": 1}})
+    form["outcomes_definition"] = [
+        {
+            "ref_id": "three_quarters",
+            "expression": "response.score >= response.score_max * 0.75",
+        }
+    ]
+    fired = _preview(form, {"heavy": "good", "light": "bad"})
+    missed = _preview(form, {"heavy": "bad", "light": "good"})
+    assert "three_quarters" in fired["computed_outcome"]
+    assert "three_quarters" not in missed["computed_outcome"]
 
 
 def test_preview_counts_an_unanswered_optional_question_as_zero():

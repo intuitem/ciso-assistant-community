@@ -23,6 +23,7 @@ from core.quick_form_scoring import (
     aggregate_page,
     clamp,
     normalize_form_aggregation,
+    project_sum,
     score_bounds,
 )
 
@@ -738,8 +739,8 @@ def _quick_form_context(snapshot, hidden_page_ids, computed_outcomes) -> dict:
     return {
         "response": {
             "score": score,
-            "score_sum": score_sum,
-            "score_max": score_max,
+            "score_sum": project_sum(score_sum, items),
+            "score_max": project_sum(score_max, items),
             "answered_count": answered_count,
             "total_count": total_count,
             "complete": required_missing == 0,
@@ -1534,8 +1535,8 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
         return {
             "response": {
                 "score": score,
-                "score_sum": totals["sum"],
-                "score_max": totals["max"],
+                "score_sum": project_sum(totals["sum"], items),
+                "score_max": project_sum(totals["max"], items),
                 "score_weight": totals["weight"],
                 "answered_count": totals["answered"],
                 "total_count": totals["total"],

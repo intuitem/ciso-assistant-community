@@ -24,6 +24,23 @@ def normalize_form_aggregation(value) -> str:
     return value if value in FORM_AGGREGATIONS else "sum"
 
 
+def project_sum(total, items: list[dict]):
+    """A weighted SUM over `items` projected onto their unweighted scale.
+
+    A question weight means the same thing here as in an audit: the range spans
+    every scorable question, a skipped optional one counting as 0. Every sum the
+    context exposes goes through it, so `score`, `score_sum` and `score_max` stay
+    comparable. Unweighted, the total comes back as is, type included.
+    """
+    weighted_lo = sum(i["lo"] * i["weight"] for i in items)
+    weighted_hi = sum(i["hi"] * i["weight"] for i in items)
+    lo = sum(i["lo"] for i in items)
+    hi = sum(i["hi"] for i in items)
+    if (weighted_lo, weighted_hi) == (lo, hi):
+        return total
+    return project_weighted_sum(total, weighted_lo, weighted_hi, lo, hi)
+
+
 def aggregate_page(items: list[dict], aggregation: str) -> dict | None:
     """Score of one visible page from its visible scorable questions; None
     when it has none, so it stays out of a page mean."""
@@ -45,8 +62,8 @@ def aggregate_page(items: list[dict], aggregation: str) -> dict | None:
             sum(i["weight"] for i in items) or 1
         )
     else:
-        score = sum(i["score"] for i in answered)
-        score_max = sum(i["max_score"] for i in items)
+        score = project_sum(sum(i["score"] for i in answered), items)
+        score_max = project_sum(sum(i["max_score"] for i in items), items)
     return {"score": float(score), "score_max": float(score_max)}
 
 
@@ -70,15 +87,7 @@ def aggregate_form(
     if aggregation == "mean":
         total /= sum(i["weight"] for i in answered) or 1
     else:
-        # A question weight means the same thing here as in an audit: the range
-        # spans every scorable question, a skipped optional one counting as 0.
-        total = project_weighted_sum(
-            total,
-            sum(i["lo"] * i["weight"] for i in items),
-            sum(i["hi"] * i["weight"] for i in items),
-            sum(i["lo"] for i in items),
-            sum(i["hi"] for i in items),
-        )
+        total = project_sum(total, items)
     return float(total)
 
 
