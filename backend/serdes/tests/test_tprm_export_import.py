@@ -405,6 +405,7 @@ class TestEntityAssessmentAuditRoundTrip:
             content_type=Folder.ContentType.ENCLAVE,
             name=f"{provider.name}/{entity_assessment.name}",
             parent_folder=domain,
+            ref_id="ENC.1",
         )
         audit.folder = enclave
         audit.save()
@@ -454,6 +455,10 @@ class TestEntityAssessmentAuditRoundTrip:
 
         response = export_domain(domain, admin_user)
         json_dump = process_uploaded_file(io.BytesIO(response.content))
+        assert any(
+            obj["model"] == "iam.folder" and obj["fields"].get("ref_id") == "ENC.1"
+            for obj in json_dump["objects"]
+        )
         import_objects(
             json_dump,
             domain_name="Audit Imported",
@@ -474,6 +479,8 @@ class TestEntityAssessmentAuditRoundTrip:
         assert imported_audit.folder.parent_folder == imported
         assert imported_audit.folder.name == enclave.name
         assert imported_audit.folder != enclave
+        # The source enclave still holds its ref_id, unique instance-wide.
+        assert imported_audit.folder.ref_id is None
         assert imported_audit.framework == framework_fixture
         assert imported_audit.requirement_assessments.count() == source_ra_count
         assert set(
