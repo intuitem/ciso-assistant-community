@@ -16,11 +16,13 @@ from core.models import (
     Answer,
     ComplianceAssessment,
     Framework,
+    LoadedLibrary,
     Perimeter,
     Question,
     QuestionChoice,
     RequirementAssessment,
     RequirementNode,
+    StoredLibrary,
 )
 from core.utils import aggregate_tiered_results, resolve_result_tier
 from iam.models import Folder
@@ -297,3 +299,105 @@ class TestTieredAggregationThroughRecompute:
         setup["ra"].compute_score_and_result()
         # compliant + partially_compliant + non_compliant mixed together.
         assert setup["ra"].result == RequirementAssessment.Result.PARTIALLY_COMPLIANT
+
+    def test_selections_stating_no_result_still_decide_the_tier(self, tiered_setup):
+        setup = tiered_setup(Framework.ResultAggregation.TIERED_ALL)
+        for name in ("a1", "a2"):
+            setup["questions"].pop(name)[0].delete()
+        answer(setup, "na", False)
+        answer(setup, "pa", False)
+
+        setup["ra"].compute_score_and_result()
+        assert setup["ra"].result == RequirementAssessment.Result.NON_COMPLIANT
+
+
+def tiered_library_yaml(version, result_aggregation):
+    return f"""
+urn: urn:intuitem:test:library:tiered-update
+locale: en
+ref_id: TIERED-UPDATE
+name: Tiered update
+copyright: Test
+version: {version}
+publication_date: 2026-10-16
+provider: test-provider
+packager: test-packager
+objects:
+  framework:
+    urn: urn:intuitem:test:framework:tiered-update
+    ref_id: TIERED-UPDATE
+    name: Tiered update
+    result_aggregation: {result_aggregation}
+    requirement_nodes:
+    - urn: urn:intuitem:test:req_node:tiered-update:outcome
+      assessable: true
+      depth: 1
+      ref_id: OUTCOME
+      questions:
+        urn:intuitem:test:req_node:tiered-update:outcome:question:1:
+          type: unique_choice
+          text: A.1
+          choices:
+          - urn: urn:intuitem:test:req_node:tiered-update:outcome:question:1:choice:1
+            value: 'True'
+            compute_result: compliant
+          - urn: urn:intuitem:test:req_node:tiered-update:outcome:question:1:choice:2
+            value: 'False'
+            compute_result: non_compliant
+        urn:intuitem:test:req_node:tiered-update:outcome:question:2:
+          type: unique_choice
+          text: A.2
+          choices:
+          - urn: urn:intuitem:test:req_node:tiered-update:outcome:question:2:choice:1
+            value: 'True'
+            compute_result: compliant
+          - urn: urn:intuitem:test:req_node:tiered-update:outcome:question:2:choice:2
+            value: 'False'
+            compute_result: non_compliant
+""".lstrip().encode()
+
+
+@pytest.mark.django_db
+class TestResultAggregationInLibraries:
+    def test_an_unknown_rule_refuses_the_load(self):
+        stored, error = StoredLibrary.store_library_content(
+            tiered_library_yaml(1, "tiered")
+        )
+        assert error is None
+        with pytest.raises(ValueError, match="result_aggregation"):
+            stored.load()
+        assert not Framework.objects.filter(
+            urn="urn:intuitem:test:framework:tiered-update"
+        ).exists()
+
+    def test_changing_the_rule_rescores_existing_audits(self):
+        stored, _ = StoredLibrary.store_library_content(
+            tiered_library_yaml(1, "per_answer")
+        )
+        assert stored.load() is None
+        framework = Framework.objects.get(
+            urn="urn:intuitem:test:framework:tiered-update"
+        )
+        folder = Folder.get_root_folder()
+        ca = ComplianceAssessment.objects.create(
+            name="Tiered update CA", framework=framework, folder=folder
+        )
+        ca.create_requirement_assessments()
+        ra = RequirementAssessment.objects.get(compliance_assessment=ca)
+        for question, value in zip(
+            ra.requirement.questions.order_by("urn"), ("True", "False")
+        ):
+            row, _ = Answer.objects.get_or_create(
+                requirement_assessment=ra,
+                question=question,
+                defaults={"folder": folder},
+            )
+            row.selected_choices.set([question.choices.get(value=value)])
+        ra.compute_score_and_result()
+        assert ra.result == RequirementAssessment.Result.PARTIALLY_COMPLIANT
+
+        StoredLibrary.store_library_content(tiered_library_yaml(2, "tiered_all"))
+        assert LoadedLibrary.objects.get(urn=stored.urn).update() is None
+
+        ra.refresh_from_db()
+        assert ra.result == RequirementAssessment.Result.NON_COMPLIANT

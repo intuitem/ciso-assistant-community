@@ -479,18 +479,18 @@ export function computeRequirementScoreAndResult(requirementAssessment: any, ans
 	// result=null so the edit page falls back to the manual result select.
 	const isResultDriven = hasComputedResult(questions);
 
+	const tiered = ca.framework?.result_aggregation === 'tiered_all';
 	let result: string | null;
 	if (!isResultDriven) {
 		result = null;
 	} else if (visibleCount === 0) {
 		result = 'not_applicable';
-	} else if (answeredVisibleCount < visibleCount || results.length === 0) {
+	} else if (answeredVisibleCount < visibleCount || (results.length === 0 && !tiered)) {
 		result = 'not_assessed';
 	} else {
-		const aggregated =
-			ca.framework?.result_aggregation === 'tiered_all'
-				? aggregateTieredResults(questionResults)
-				: aggregateComputeResults(results);
+		const aggregated = tiered
+			? aggregateTieredResults(questionResults)
+			: aggregateComputeResults(results);
 		result = aggregated ?? 'not_assessed';
 	}
 

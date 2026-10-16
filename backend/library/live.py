@@ -331,6 +331,7 @@ def live_framework_to_object(framework) -> dict:
             "score_calculation_method": framework.score_calculation_method,
             "anchor_na_to_target": framework.anchor_na_to_target,
             "target_score": framework.target_score,
+            "result_aggregation": framework.result_aggregation,
             "translations": framework.translations or None,
             "requirement_nodes": requirement_nodes,
         }

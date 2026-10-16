@@ -1787,6 +1787,9 @@ class LibraryUpdater:
                 framework_dict.setdefault(
                     "result_aggregation", Framework.ResultAggregation.PER_ANSWER
                 )
+                Framework.validate_result_aggregation(
+                    framework_dict["result_aggregation"]
+                )
                 # Same for the scoring properties: omitted means back to the defaults.
                 framework_dict.setdefault("score_scale_locked", False)
                 framework_dict.setdefault("score_calculation_method", "average")
@@ -1809,6 +1812,7 @@ class LibraryUpdater:
                 prev_max = getattr(prev_fw, "max_score", None)
                 prev_def = getattr(prev_fw, "scores_definition", None)
                 had_outcomes = bool(getattr(prev_fw, "outcomes_definition", None))
+                prev_aggregation = getattr(prev_fw, "result_aggregation", None)
 
                 new_framework, _ = Framework.objects.update_or_create(
                     urn=framework_dict["urn"],
@@ -1819,6 +1823,11 @@ class LibraryUpdater:
                         **framework_dict,
                         "library": self.old_library,
                     },
+                )
+
+                aggregation_changed = (
+                    prev_fw is not None
+                    and prev_aggregation != new_framework.result_aggregation
                 )
 
                 # update requirement_nodes
@@ -2236,7 +2245,7 @@ class LibraryUpdater:
                         }
                         new_questions = _cached_new_questions
 
-                        ra_changed = questions_removed
+                        ra_changed = questions_removed or aggregation_changed
                         if questions_removed:
                             answers_changed_ca_ids.add(ra.compliance_assessment_id)
                         for q in new_questions:
@@ -4030,6 +4039,14 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
         return self.score_scale_locked or any(
             qs.exists() for qs in self.scale_bound_querysets(self)
         )
+
+    @staticmethod
+    def validate_result_aggregation(value):
+        if value not in Framework.ResultAggregation.values:
+            raise ValueError(
+                f"invalid result_aggregation {value!r}: expected one of "
+                f"{', '.join(Framework.ResultAggregation.values)}"
+            )
 
     @staticmethod
     def validate_score_calculation_method(method):
@@ -11424,17 +11441,18 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         # reset to NOT_ASSESSED on every recompute.
         new_result = self.result
         if is_result_driven:
+            tiered = (
+                self.requirement.framework.result_aggregation
+                == Framework.ResultAggregation.TIERED_ALL
+            )
             if visible_questions == 0:
                 new_result = self.Result.NOT_APPLICABLE
             elif answered_visible_questions < visible_questions:
                 new_result = self.Result.NOT_ASSESSED
-            elif not results:
+            elif not results and not tiered:
                 new_result = self.Result.NOT_ASSESSED
             else:
-                if (
-                    self.requirement.framework.result_aggregation
-                    == Framework.ResultAggregation.TIERED_ALL
-                ):
+                if tiered:
                     aggregated = aggregate_tiered_results(question_results)
                 else:
                     aggregated = aggregate_compute_results(results)

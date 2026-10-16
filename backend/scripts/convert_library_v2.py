@@ -489,10 +489,14 @@ def inject_questions_into_node(
             raise ValueError(
                 f"Mismatch between questions and 'question_group_color' for node {node.get('urn')}"
             )
-        for color in group_color_lines:
+        for color, group in zip(group_color_lines, group_lines):
             if color != "/" and not re.fullmatch(r"#([0-9a-fA-F]{6})", color):
                 raise ValueError(
                     f"Invalid 'question_group_color' value '{color}' for node {node.get('urn')}. Must match #RRGGBB or be '/'"
+                )
+            if color != "/" and group == "/":
+                raise ValueError(
+                    f"'question_group_color' '{color}' set on a question without a group for node {node.get('urn')}"
                 )
 
     question_block = {}

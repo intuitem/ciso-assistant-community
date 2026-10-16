@@ -231,3 +231,28 @@ describe('roundScore', () => {
 		expect(roundScore(-1)).toBe(-1);
 	});
 });
+
+describe('computeRequirementScoreAndResult with tiered_all', () => {
+	it('scores a complete answer whose selections state no result', () => {
+		const statement = (key: string, onTrue: string) => ({
+			type: 'unique_choice',
+			choices: [
+				{ urn: `urn:${key}:true`, compute_result: onTrue },
+				{ urn: `urn:${key}:false`, compute_result: null }
+			]
+		});
+		const ra = {
+			requirement: {
+				questions: {
+					'urn:na': statement('na', 'non_compliant'),
+					'urn:pa': statement('pa', 'partially_compliant')
+				}
+			},
+			compliance_assessment: { framework: { result_aggregation: 'tiered_all' } }
+		};
+		expect(
+			computeRequirementScoreAndResult(ra, { 'urn:na': 'urn:na:false', 'urn:pa': 'urn:pa:false' })
+				.result
+		).toBe('non_compliant');
+	});
+});
