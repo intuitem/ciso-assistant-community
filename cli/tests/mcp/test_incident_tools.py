@@ -368,3 +368,181 @@ class TestResolveInFolderOrGlobal:
         with patch.object(resolvers, "resolve_global_folder_id", return_value=GLOBAL):
             resolvers.resolve_in_folder_or_global(resolver, "DB01")
         assert calls == [GLOBAL]
+
+
+class TestIncidentTaskTemplates:
+    def test_create_resolves_task_templates(self):
+        with (
+            patch.object(
+                write_tools,
+                "make_post_request",
+                return_value=_response(201, {"id": UUID_A, "name": "X"}),
+            ) as post,
+            patch.object(
+                write_tools, "resolve_task_template_id", side_effect=[UUID_B, UUID_C]
+            ) as r_task,
+            patch.object(resolvers, "resolve_global_folder_id", return_value=GLOBAL),
+        ):
+            result = run(
+                write_tools.create_incident(
+                    name="X", task_templates=["Notify CNIL", UUID_C]
+                )
+            )
+        assert [c.args[0] for c in r_task.call_args_list] == ["Notify CNIL", UUID_C]
+        assert post.call_args.args[1]["task_templates"] == [UUID_B, UUID_C]
+        assert result.startswith("Created incident:")
+
+    def test_create_omits_empty_task_templates(self):
+        with patch.object(
+            write_tools,
+            "make_post_request",
+            return_value=_response(201, {"id": UUID_A, "name": "X"}),
+        ) as post:
+            run(write_tools.create_incident(name="X", task_templates=[]))
+        assert "task_templates" not in post.call_args.args[1]
+
+    def test_create_resolver_error_reported(self):
+        with (
+            patch.object(write_tools, "make_post_request") as post,
+            patch.object(
+                write_tools,
+                "resolve_task_template_id",
+                side_effect=ValueError("Task template 'Nope' not found"),
+            ),
+            patch.object(resolvers, "resolve_global_folder_id", return_value=GLOBAL),
+        ):
+            result = run(write_tools.create_incident(name="X", task_templates=["Nope"]))
+        assert result == "Error in create_incident: Task template 'Nope' not found"
+        post.assert_not_called()
+
+    def _patch_incident_folder(self):
+        return patch.object(
+            update_tools,
+            "make_get_request",
+            return_value=_response(200, {"folder": {"id": UUID_F}}),
+        )
+
+    def _patch_update_ok(self):
+        return patch.object(
+            update_tools,
+            "make_patch_request",
+            return_value=_response(200, {"id": UUID_A, "name": "X"}),
+        )
+
+    def test_update_replaces_task_templates(self):
+        with (
+            self._patch_update_ok() as patch_req,
+            patch.object(
+                update_tools, "resolve_task_template_id", return_value=UUID_B
+            ) as r_task,
+            self._patch_incident_folder(),
+        ):
+            run(
+                update_tools.update_incident(
+                    incident_id=UUID_A, task_templates=["Notify CNIL"]
+                )
+            )
+        r_task.assert_called_once_with("Notify CNIL", folder_id=UUID_F)
+        assert patch_req.call_args.args == (
+            f"/incidents/{UUID_A}/",
+            {"task_templates": [UUID_B]},
+        )
+
+    def test_update_empty_list_clears_task_templates(self):
+        with self._patch_update_ok() as patch_req:
+            run(update_tools.update_incident(incident_id=UUID_A, task_templates=[]))
+        assert patch_req.call_args.args == (
+            f"/incidents/{UUID_A}/",
+            {"task_templates": []},
+        )
+
+    def test_update_resolver_error_reported(self):
+        with (
+            self._patch_update_ok() as patch_req,
+            patch.object(
+                update_tools,
+                "resolve_task_template_id",
+                side_effect=ValueError("Task template 'Nope' not found"),
+            ),
+            self._patch_incident_folder(),
+            patch.object(resolvers, "resolve_global_folder_id", return_value=GLOBAL),
+        ):
+            result = run(
+                update_tools.update_incident(
+                    incident_id=UUID_A, task_templates=["Nope"]
+                )
+            )
+        assert result == "Error in update_incident: Task template 'Nope' not found"
+        patch_req.assert_not_called()
+
+
+class TestResolveTaskTemplateId:
+    def test_uuid_returned_without_lookup(self):
+        with patch.object(resolvers, "fetch_all_results") as fetch:
+            assert resolvers.resolve_task_template_id(UUID_A) == UUID_A
+        fetch.assert_not_called()
+
+    def test_name_lookup_uses_search_and_exact_match(self):
+        fake = _router(
+            {
+                "/task-templates/": [
+                    {"id": UUID_B, "name": "Notify CNIL"},
+                    {"id": UUID_C, "name": "Notify"},
+                ]
+            }
+        )
+        with patch.object(resolvers, "fetch_all_results", side_effect=fake) as fetch:
+            assert resolvers.resolve_task_template_id("Notify") == UUID_C
+        assert fake.calls == [("/task-templates/", {"search": "Notify"})]
+        assert fetch.call_args.kwargs["max_items"] is None
+
+    def test_match_ignores_case_and_whitespace(self):
+        fake = _router({"/task-templates/": [{"id": UUID_B, "name": "Notify CNIL"}]})
+        with patch.object(resolvers, "fetch_all_results", side_effect=fake):
+            assert resolvers.resolve_task_template_id(" notify cnil ") == UUID_B
+
+    def test_folder_scopes_search(self):
+        fake = _router({"/task-templates/": [{"id": UUID_B, "name": "Notify"}]})
+        with patch.object(resolvers, "fetch_all_results", side_effect=fake):
+            resolvers.resolve_task_template_id("Notify", folder_id=UUID_F)
+        assert fake.calls == [
+            ("/task-templates/", {"search": "Notify", "folder": UUID_F})
+        ]
+
+    def test_no_exact_match_is_not_found(self):
+        fake = _router({"/task-templates/": [{"id": UUID_B, "name": "Notify CNIL"}]})
+        with patch.object(resolvers, "fetch_all_results", side_effect=fake):
+            try:
+                resolvers.resolve_task_template_id("Notify")
+            except ValueError as e:
+                assert str(e) == "Task template 'Notify' not found"
+            else:
+                raise AssertionError("expected ValueError")
+
+    def test_duplicate_exact_names_are_ambiguous(self):
+        fake = _router(
+            {
+                "/task-templates/": [
+                    {"id": UUID_B, "name": "Notify"},
+                    {"id": UUID_C, "name": "Notify"},
+                ]
+            }
+        )
+        with patch.object(resolvers, "fetch_all_results", side_effect=fake):
+            try:
+                resolvers.resolve_task_template_id("Notify")
+            except ValueError as e:
+                assert str(e) == "Ambiguous task template name 'Notify', found 2"
+            else:
+                raise AssertionError("expected ValueError")
+
+    def test_api_error_reported(self):
+        with patch.object(
+            resolvers, "fetch_all_results", return_value=(None, "500 boom")
+        ):
+            try:
+                resolvers.resolve_task_template_id("Notify")
+            except ValueError as e:
+                assert str(e) == "Task template 'Notify' API error: 500 boom"
+            else:
+                raise AssertionError("expected ValueError")

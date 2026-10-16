@@ -51,6 +51,8 @@
 		lockedUrns = []
 	}: Props = $props();
 
+	const questionEntries = $derived(Object.entries(questions ?? {}));
+
 	// Object-reference pickers: one open dropdown at a time, results per question.
 	let refOpen = $state<string | null>(null);
 	let refSearch = $state<Record<string, string>>({});
@@ -173,7 +175,17 @@
 	{/if}
 
 	<ul class="control flex flex-col gap-4 whitespace-pre-line">
-		{#each Object.entries(questions) as [urn, question]}
+		{#each questionEntries as [urn, question], i}
+			{@const group = question.config?.group}
+			{#if group && group !== questionEntries[i - 1]?.[1].config?.group}
+				<li
+					class="mt-2 border-l-4 border-surface-300-700 pl-3 text-sm font-semibold"
+					style:border-color={question.config?.group_color}
+					style:color={question.config?.group_color}
+				>
+					{group}
+				</li>
+			{/if}
 			<!-- Only render if visible according to depends_on -->
 			{#if isQuestionVisible(question, internalAnswers, questions)}
 				<li

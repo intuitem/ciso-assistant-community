@@ -1,0 +1,255 @@
+{
+ "framework": "nist-csf-2.0",
+ "labels": {
+  "urn:intuitem:risk:req_node:nist-csf-2.0:gv.oc-05": {
+   "third_party": "related"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:gv.rm-05": {
+   "third_party": "related"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:gv.rr-04": {
+   "awareness_training": "related"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-01": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-02": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-03": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-04": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-05": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-06": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-07": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-08": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-09": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:gv.sc-10": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:id.am-01": {
+   "asset_inventory": "core"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:id.am-02": {
+   "asset_inventory": "core"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:id.am-03": {
+   "asset_inventory": "related"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:id.am-04": {
+   "asset_inventory": "core",
+   "third_party": "related"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:id.am-05": {
+   "asset_inventory": "core"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:id.am-07": {
+   "asset_inventory": "core"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:id.am-08": {
+   "asset_inventory": "related"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-01": {
+   "vuln_mgmt": "core"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-02": {
+   "vuln_mgmt": "related"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-07": {
+   "vuln_mgmt": "related"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-08": {
+   "vuln_mgmt": "core"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-09": {
+   "third_party": "related"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:id.ra-10": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:id.im-02": {
+   "vuln_mgmt": "related",
+   "incident_response": "related"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:id.im-04": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-01": {
+   "access_control": "core",
+   "mfa": "related"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-02": {
+   "access_control": "related"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-03": {
+   "mfa": "related",
+   "access_control": "related"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-04": {
+   "access_control": "related"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-05": {
+   "access_control": "core"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:pr.aa-06": {
+   "access_control": "related"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:pr.at-01": {
+   "awareness_training": "core"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:pr.at-02": {
+   "awareness_training": "core"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-01": {
+   "encryption": "related"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-02": {
+   "encryption": "related"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:pr.ds-11": {
+   "backup": "core"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-01": {
+   "vuln_mgmt": "related",
+   "asset_inventory": "related"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-02": {
+   "vuln_mgmt": "core"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-03": {
+   "vuln_mgmt": "related"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-04": {
+   "logging": "core"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:pr.ps-06": {
+   "vuln_mgmt": "related"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-01": {
+   "access_control": "related"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:pr.ir-03": {
+   "backup": "related"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-01": {
+   "logging": "core"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-02": {
+   "logging": "related"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-03": {
+   "logging": "core"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-06": {
+   "logging": "core",
+   "third_party": "related"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:de.cm-09": {
+   "logging": "core"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-02": {
+   "logging": "related",
+   "incident_response": "related"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-03": {
+   "logging": "core"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-04": {
+   "incident_response": "related"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-06": {
+   "logging": "related",
+   "incident_response": "related"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-07": {
+   "logging": "related"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:de.ae-08": {
+   "incident_response": "core",
+   "logging": "related"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-01": {
+   "incident_response": "core",
+   "third_party": "related"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-02": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-03": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-04": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:rs.ma-05": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:rs.an-03": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:rs.an-08": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:rs.co-02": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:rs.co-03": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:rs.mi-01": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:rs.mi-02": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:rc.rp-06": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:rs.an-06": {
+   "incident_response": "core",
+   "logging": "related"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:rs.an-07": {
+   "incident_response": "core",
+   "logging": "related"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:rc.rp-01": {
+   "incident_response": "core",
+   "backup": "related"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:rc.rp-02": {
+   "incident_response": "related",
+   "backup": "related"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:rc.rp-03": {
+   "backup": "core",
+   "incident_response": "related"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:rc.rp-04": {
+   "incident_response": "related"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:rc.rp-05": {
+   "backup": "related",
+   "incident_response": "related"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:rc.co-03": {
+   "incident_response": "related"
+  },
+  "urn:intuitem:risk:req_node:nist-csf-2.0:rc.co-04": {
+   "incident_response": "related"
+  }
+ }
+}
