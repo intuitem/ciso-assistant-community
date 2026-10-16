@@ -27,7 +27,7 @@ Event Trigger (serializer / periodic cron)
   - Primary server -> Rescue server (fallback)
 ```
 
-There is **no notification model** in the database. Notifications are fire-and-forget emails. Frontend toast notifications are independent and handled client-side only.
+This document covers the email path. Most notification tasks also write an **in-app** inbox row by calling `notify()` (`backend/notifications/service.py`) before sending their emails. Types, channels and title context are declared in `backend/notifications/registry.py`, and rows are stored in the `Notification` model. Frontend toast notifications are independent and handled client-side only.
 
 ---
 
@@ -184,6 +184,7 @@ These are triggered from serializer `create()` / `update()` methods when users a
 | ValidationFlow status changed | `ValidationFlowWriteSerializer.update` | `send_validation_flow_updated_notification` | `validation_flow_updated` |
 | SecurityException owner assigned | `SecurityExceptionWriteSerializer.create/update` | `send_security_exception_assignment_notification` | `security_exception_assignment` |
 | SecurityException status changed | `SecurityExceptionWriteSerializer.update` | `send_security_exception_status_notification` | `security_exception_status_changed` |
+| Incident owner assigned | `IncidentWriteSerializer.create/update` | `send_incident_assignment_notification` | `incident_assignment` |
 
 **Pattern for assignment notifications in serializers:**
 
@@ -289,6 +290,7 @@ This means assigning a Team as owner of a control can notify multiple people in 
 | `security_exception_status_changed.yaml` | `send_security_exception_status_notification` |
 | `security_exception_expiring_soon.yaml` | `send_security_exception_expiring_soon_notification` |
 | `expired_security_exceptions.yaml` | `send_notification_email_expired_security_exception` |
+| `incident_assignment.yaml` | `send_incident_assignment_notification` |
 | `assignment_activated.yaml` | `send_assignment_activated_notification` |
 | `assignment_submitted.yaml` | `send_assignment_submitted_notification` |
 | `assignment_reviewed.yaml` | `send_assignment_reviewed_notification` |
@@ -326,7 +328,7 @@ All English templates have a matching French translation. Both directories conta
        }
 
        for email in recipient_emails:
-           if email and check_email_configuration(email, [obj]):
+           if email and check_email_configuration(email):
                rendered = render_email_template("my_template_name", context)
                if rendered:
                    send_notification_email(rendered["subject"], rendered["body"], email)
@@ -400,7 +402,7 @@ All English templates have a matching French translation. Both directories conta
 
 1. **Requirement assessment status change**: Notify assigned actors when a requirement assessment result changes (e.g., from `non_compliant` to `partially_compliant`). Useful for audit workflows.
 
-2. **Incident notifications**: When a new incident is created or its severity changes, notify relevant stakeholders. The `Incident` model has owners who should be alerted.
+2. **Incident status/severity notifications**: Owners are already notified when assigned (`incident_assignment`). Notifying them when an incident's severity or status changes is still missing.
 
 3. **Compliance assessment status transitions**: Notify authors when an assessment moves to `in_review` or `done` status, especially when auto-locked by `lock_overdue_compliance_assessments`.
 

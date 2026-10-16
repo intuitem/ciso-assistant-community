@@ -106,6 +106,13 @@ NOTIFICATION_REGISTRY = {
         "email_template": "expired_security_exceptions",
         "context": ["exception_name"],
     },
+    "incident_assignment": {
+        "category": "assignments",
+        "mode": "event",
+        "channels": ["in_app", "email"],
+        "email_template": "incident_assignment",
+        "context": ["incident_name"],
+    },
     "password_reset": {
         "category": "account",
         "mode": "event",
