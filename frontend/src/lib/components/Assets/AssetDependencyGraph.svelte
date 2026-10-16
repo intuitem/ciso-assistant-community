@@ -1,268 +1,238 @@
 <script lang="ts">
-	import { VisSingleContainer, VisGraph } from '@unovis/svelte';
-	import { GraphLayoutType, GraphNodeShape, GraphLinkArrowStyle } from '@unovis/ts';
+	import { m } from '$paraglide/messages';
+	import DependencyFlow from './DependencyFlow.svelte';
+	import DependencyDomainMap from './DependencyDomainMap.svelte';
+	import DependencyGapRegister from './DependencyGapRegister.svelte';
+	import {
+		STATUS_CLASS,
+		STATUS_ORDER,
+		buildGraph,
+		formatValue,
+		type DependencyData,
+		type DependencyNode,
+		type Status
+	} from './dependency-graph';
 
-	// Track the app dark mode (`.dark` on <html>) so the SVG-rendered node fill and
-	// labels stay readable. Unovis only reacts to `body.theme-dark`, which this app never sets.
-	let isDark = $state(false);
-	$effect(() => {
-		const root = document.documentElement;
-		const update = () => (isDark = root.classList.contains('dark'));
-		update();
-		const observer = new MutationObserver(update);
-		observer.observe(root, { attributes: true, attributeFilter: ['class'] });
-		return () => observer.disconnect();
-	});
+	interface Props {
+		data: DependencyData;
+	}
 
-	type NodeDatum = {
-		id: string;
-		label: string;
-		folder: string;
-		verdict?: boolean | null;
+	let { data }: Props = $props();
+
+	const graph = $derived(buildGraph(data));
+
+	let view = $state<'flow' | 'domains' | 'register'>('flow');
+	let selected = $state<string | null>(null);
+	let cell = $state<DependencyNode[] | null>(null);
+	let prune = $derived(data.nodes.length > 150);
+
+	const views = [
+		{ id: 'flow', label: m.dependencyFlow },
+		{ id: 'domains', label: m.domainMap },
+		{ id: 'register', label: m.gapRegister }
+	] as const;
+
+	const statusLabel: Record<Status, () => string> = {
+		cause: m.dependencyCause,
+		impacted: m.dependencyImpacted,
+		ok: m.objectivesMet,
+		none: m.noData
 	};
 
-	type LinkDatum = {
-		source: string;
-		target: string;
-	};
+	const countOf = (status: Status) => graph.nodes.filter((n) => n.status === status).length;
+	const stats = $derived([
+		...(graph.roots.length > 1 ? [[m.assessedAssets(), graph.roots.length]] : []),
+		[m.assets(), graph.nodes.length],
+		[m.domains(), Object.keys(graph.domainColor).length],
+		[
+			m.crossDomainLinks(),
+			graph.links.filter((l) => graph.byId[l.source].domain !== graph.byId[l.target].domain).length
+		],
+		[m.dependencyCauses(), countOf('cause')],
+		[m.dependencyImpacted(), countOf('impacted')]
+	]);
 
-	type GroupData = {
-		id: string;
-		name: string;
-		nodes: string[];
-	};
-
-	type GraphData = {
-		nodes: NodeDatum[];
-		links: LinkDatum[];
-		groups: GroupData[];
-	};
-
-	// Status map for verdict styling - using colors from Unovis example
-	const StatusMap: Record<string, { color: string; text: string }> = {
-		true: { color: '#47e845', text: '✓' }, // bright green with checkmark (objectives met)
-		false: { color: '#ffc226', text: '⚠' }, // yellow with warning (objectives not met)
-		null: { color: '#dddddd', text: '' } // light gray, no icon
-	};
-
-	// Props
-	let {
-		data,
-		height = '70vh',
-		maxLineLength = 20,
-		disableZoom = false
-	}: {
-		data: GraphData;
-		height?: string;
-		maxLineLength?: number;
-		disableZoom?: boolean;
-	} = $props();
-
-	// Build panels from groups (folders)
-	const panels = $derived(
-		data.groups.map((group) => ({
-			label: group.name,
-			nodes: group.nodes,
-			padding: { top: 50, right: 60, bottom: 50, left: 60 },
-			dashedOutline: true,
-			borderColor: '#4D179A'
-		}))
+	const topCauses = $derived(
+		graph.nodes
+			.filter((n) => n.status === 'cause')
+			.sort((a, b) => (graph.impacts[b.id]?.length ?? 0) - (graph.impacts[a.id]?.length ?? 0))
+			.slice(0, 12)
 	);
 
-	// Configuration constants
-	const DEFAULT_NODE_SHAPE = GraphNodeShape.Hexagon;
-	const DEFAULT_NODE_SIZE = 55;
+	const node = $derived(selected ? graph.byId[selected] : null);
 
-	function wrapText(text: string, maxLength: number = maxLineLength): string[] {
-		if (!text) return [];
-
-		const paragraphs = text.split('\n');
-		const wrappedLines: string[] = [];
-
-		paragraphs.forEach((paragraph) => {
-			if (paragraph.length <= maxLength) {
-				wrappedLines.push(paragraph);
-				return;
-			}
-
-			const words = paragraph.split(' ');
-			let currentLine = '';
-
-			words.forEach((word) => {
-				if (currentLine.length + word.length + 1 > maxLength) {
-					if (currentLine.trim()) {
-						wrappedLines.push(currentLine.trim());
-					}
-					currentLine = word;
-				} else {
-					currentLine += (currentLine ? ' ' : '') + word;
-				}
-			});
-
-			if (currentLine.trim()) {
-				wrappedLines.push(currentLine.trim());
-			}
-		});
-
-		return wrappedLines;
+	function select(id: string | null) {
+		selected = id;
+		cell = null;
+		if (id && view !== 'flow') view = 'flow';
 	}
-
-	function processNodesWithWrapping(nodes: NodeDatum[]): NodeDatum[] {
-		return nodes.map((node) => ({
-			...node,
-			label: node.label ? wrapText(node.label, maxLineLength).join('\n') : node.label
-		}));
-	}
-
-	// Process the data with text wrapping
-	const processedData = $derived({
-		...data,
-		nodes: processNodesWithWrapping(data.nodes)
-	});
-
-	// Layout node group function to organize nodes by folder
-	const layoutNodeGroup = (node: NodeDatum) => {
-		return node.folder;
-	};
-
-	// Graph configuration
-	const nodeShape = () => DEFAULT_NODE_SHAPE;
-	const nodeSize = () => DEFAULT_NODE_SIZE;
-	const nodeStrokeWidth = 3;
-
-	// Color nodes based on verdict
-	const nodeStroke = (node: NodeDatum) => {
-		const status = String(node.verdict ?? 'null');
-		return StatusMap[status]?.color || StatusMap['null'].color;
-	};
-
-	const nodeFill = () => (isDark ? '#292b34' : '#ffffff');
-
-	// Add status badge to nodes
-	const nodeSideLabels = (node: NodeDatum) => {
-		if (node.verdict === null || node.verdict === undefined) {
-			return []; // No badge for nodes without verdict
-		}
-
-		const status = String(node.verdict);
-		const statusConfig = StatusMap[status];
-
-		if (!statusConfig) {
-			return [];
-		}
-
-		return [
-			{
-				radius: 16,
-				fontSize: 12,
-				text: statusConfig.text
-			}
-		];
-	};
-
-	const linkStroke = '#8FA1B9';
-	const linkArrow = GraphLinkArrowStyle.Single;
-	const linkArrowColor = '#4D179A';
-	const linkArrowSize = 8;
-	const linkFlow = true;
-	const linkBandWidth = 8;
-	const layoutType = GraphLayoutType.Parallel;
-	const layoutParallelGroupSpacing = 200;
-	const layoutParallelNodesPerColumn = 6;
-
-	// Custom function to add labels after default rendering
-	const onRenderComplete = (g, nodes, links, config) => {
-		g.selectAll('.custom-multiline-label').remove();
-
-		const nodeMap = new Map();
-		g.selectAll('g').each(function () {
-			const data = this.__data__;
-			if (data?.id) {
-				nodeMap.set(data.id, this);
-			}
-		});
-
-		nodes.forEach((node) => {
-			if (node.label) {
-				const groupElement = nodeMap.get(node.id);
-				const targetGroup = groupElement ? g.select(() => groupElement) : null;
-
-				if (targetGroup) {
-					const lines = node.label.split('\n').filter((line) => line.trim() !== '');
-
-					if (lines.length === 0 && node.label.trim()) {
-						lines.push(node.label.trim());
-					}
-
-					const lineHeight = 12;
-
-					lines.forEach((line, i) => {
-						targetGroup
-							.append('text')
-							.attr('class', 'custom-multiline-label')
-							.attr('text-anchor', 'middle')
-							.attr('x', 0)
-							.attr('y', i * lineHeight - (lines.length * lineHeight) / 2 + lineHeight / 2)
-							.attr('font-size', '11px')
-							.attr('font-weight', '500')
-							.attr('fill', isDark ? '#E6E9F3' : '#0F1E57')
-							.style('font-family', 'var(--vis-font-family)')
-							.text(line.trim());
-					});
-				}
-			}
-		});
-	};
-
-	const nodeLabel = () => ''; // Disable default labels to avoid overlap
 </script>
 
-<div class="chart bg-surface-50-950 rounded-lg shadow-sm">
-	<VisSingleContainer data={processedData} {height}>
-		<VisGraph
-			{nodeShape}
-			{nodeStroke}
-			{nodeSize}
-			{nodeFill}
-			{nodeStrokeWidth}
-			{nodeLabel}
-			{nodeSideLabels}
-			{onRenderComplete}
-			{layoutType}
-			{layoutNodeGroup}
-			{panels}
-			{disableZoom}
-			{layoutParallelGroupSpacing}
-			{layoutParallelNodesPerColumn}
-			{linkStroke}
-			{linkArrow}
-			{linkArrowSize}
-			{linkFlow}
-			{linkBandWidth}
-			{linkArrowColor}
-		/>
-	</VisSingleContainer>
+{#snippet assetList(ids: string[])}
+	<ul class="space-y-1">
+		{#each ids as id (id)}
+			{@const n = graph.byId[id]}
+			<li>
+				<button
+					class="flex w-full items-center gap-2 rounded px-1 py-0.5 text-left hover:bg-primary-500/10"
+					onclick={() => select(id)}
+				>
+					<span class="size-2.5 shrink-0 rounded-sm {STATUS_CLASS[n.status].bg}"></span>
+					<span class="flex-1 truncate">{n.label}</span>
+					<span class="size-2.5 shrink-0 rounded-sm" style:background={graph.domainColor[n.domain]}
+					></span>
+				</button>
+			</li>
+		{/each}
+	</ul>
+{/snippet}
+
+<div class="space-y-3">
+	<div class="flex flex-wrap items-center gap-4">
+		<div class="btn-group preset-outlined-surface-200-800 p-1">
+			{#each views as v (v.id)}
+				<button
+					class="btn btn-sm {view === v.id ? 'preset-filled-primary-500' : 'hover:preset-tonal'}"
+					onclick={() => (view = v.id)}>{v.label()}</button
+				>
+			{/each}
+		</div>
+		{#if view === 'flow'}
+			<label class="flex items-center gap-2 text-sm text-surface-600-400">
+				<input type="checkbox" class="checkbox" bind:checked={prune} />
+				{m.onlyPathsToGaps()}
+			</label>
+		{/if}
+		<div class="ml-auto flex flex-wrap gap-5">
+			{#each stats as [label, value] (label)}
+				<div>
+					<div class="text-xs uppercase tracking-wide text-surface-600-400">{label}</div>
+					<div class="text-lg font-semibold tabular-nums">{value}</div>
+				</div>
+			{/each}
+		</div>
+	</div>
+
+	<div class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
+		<div
+			class="card h-[68vh] min-h-[420px] overflow-hidden border border-surface-200-800 bg-surface-50-950"
+		>
+			{#if view === 'flow'}
+				<DependencyFlow {graph} {prune} {selected} onselect={select} />
+			{:else if view === 'domains'}
+				<DependencyDomainMap
+					{graph}
+					onselectcell={(nodes) => ((cell = nodes), (selected = null))}
+				/>
+			{:else}
+				<DependencyGapRegister {graph} onselect={select} />
+			{/if}
+		</div>
+
+		<aside
+			class="card h-[68vh] min-h-[420px] min-w-0 space-y-4 overflow-auto border border-surface-200-800 bg-surface-50-950 p-4 text-sm"
+		>
+			{#if node}
+				<div>
+					<div class="text-xs uppercase tracking-wide text-surface-600-400">
+						{node.type === 'PR' ? m.primary() : m.support()}
+					</div>
+					<h2 class="text-base font-semibold break-words">{node.label}</h2>
+					<div class="mt-2 flex flex-wrap gap-2">
+						<span class="badge text-xs text-white {STATUS_CLASS[node.status].bg}"
+							>{statusLabel[node.status]()}</span
+						>
+						{#if graph.roots.includes(node.id)}
+							<span class="badge preset-tonal-primary text-xs">{m.assessedAsset()}</span>
+						{/if}
+						<span class="badge preset-tonal text-xs" style:color={graph.domainColor[node.domain]}
+							>{node.domain_name}</span
+						>
+					</div>
+				</div>
+				{#if node.gaps.length}
+					<div class="grid grid-cols-[1fr_auto_auto] gap-x-3 gap-y-1 font-mono text-xs">
+						<span class="text-surface-600-400">{m.objective()}</span>
+						<span class="text-surface-600-400">{m.expected()}</span>
+						<span class="text-surface-600-400">{m.actual()}</span>
+						{#each node.gaps as gap (gap.objective)}
+							<span>{gap.objective}</span>
+							<span>{formatValue(gap.objective, gap.expected)}</span>
+							<span class="text-error-500">{formatValue(gap.objective, gap.actual)}</span>
+						{/each}
+					</div>
+				{/if}
+				{#if node.causes.length}
+					<div>
+						<div class="mb-1 text-xs uppercase tracking-wide text-surface-600-400">
+							{m.causedBy()} ({node.causes.length})
+						</div>
+						{@render assetList(node.causes)}
+					</div>
+				{/if}
+				{#if graph.impacts[node.id]?.length}
+					<div>
+						<div class="mb-1 text-xs uppercase tracking-wide text-surface-600-400">
+							{m.dragsDown()} ({graph.impacts[node.id].length})
+						</div>
+						{@render assetList(graph.impacts[node.id])}
+					</div>
+				{/if}
+				<button class="btn btn-sm preset-tonal" onclick={() => select(null)}
+					>{m.clearSelection()}</button
+				>
+			{:else if cell}
+				<div>
+					<div class="text-xs uppercase tracking-wide text-surface-600-400">
+						{cell[0].domain_name}
+					</div>
+					<h2 class="text-base font-semibold">{m.assets()} ({cell.length})</h2>
+				</div>
+				{@render assetList(
+					[...cell]
+						.sort((a, b) => STATUS_ORDER.indexOf(a.status) - STATUS_ORDER.indexOf(b.status))
+						.map((n) => n.id)
+				)}
+			{:else}
+				<div class="space-y-2">
+					<div class="text-xs uppercase tracking-wide text-surface-600-400">{m.legend()}</div>
+					<div class="flex flex-wrap gap-3 text-xs">
+						{#each STATUS_ORDER as status (status)}
+							<span class="flex items-center gap-1"
+								><span class="size-2.5 rounded-sm {STATUS_CLASS[status].bg}"></span>{statusLabel[
+									status
+								]()}</span
+							>
+						{/each}
+						<span class="flex items-center gap-1"
+							><span class="h-0.5 w-4 border-t-2 border-dashed border-primary-500"
+							></span>{m.crossDomainLink()}</span
+						>
+						<span class="flex items-center gap-1"
+							><span class="h-0.5 w-4 border-t-2 border-dotted border-tertiary-500"
+							></span>{m.extraDependency()}</span
+						>
+						<span class="flex items-center gap-1"
+							><span class="size-2 rounded-full bg-primary-500"></span>{m.assessedAsset()}</span
+						>
+					</div>
+					<div class="flex flex-wrap gap-3 text-xs">
+						{#each Object.entries(graph.domainColor) as [domain, color] (domain)}
+							<span class="flex items-center gap-1"
+								><span class="size-2.5 rounded-sm" style:background={color}></span>{graph
+									.domainName[domain]}</span
+							>
+						{/each}
+					</div>
+				</div>
+				<div>
+					<h2 class="text-base font-semibold">{m.biggestCauses()}</h2>
+					<p class="mb-2 text-surface-600-400">
+						{topCauses.length ? m.selectCauseToTrace() : m.noCapabilityGaps()}
+					</p>
+					{@render assetList(topCauses.map((n) => n.id))}
+				</div>
+			{/if}
+		</aside>
+	</div>
 </div>
-
-<style>
-	.chart {
-		--vis-graph-link-stroke-opacity: 0.8;
-		--vis-graph-link-band-opacity: 0.25;
-		--vis-graph-panel-label-font-weight: 800;
-		--vis-graph-link-stroke-color: #8fa1b9;
-	}
-
-	/* Mirror Unovis' dark palette under the app's `.dark` class (Unovis only swaps
-	   its dark vars on `body.theme-dark`, which this app never sets). */
-	:global(.dark) .chart {
-		--vis-graph-panel-label-color: #e6e9f3;
-		--vis-graph-panel-label-background: #292b34;
-		--vis-graph-panel-fill-color: #292b34;
-		--vis-graph-panel-side-icon-shape-fill-color: #6c778c;
-	}
-
-	:global(.custom-multiline-label) {
-		font-family: var(--vis-font-family);
-		pointer-events: none;
-	}
-</style>
