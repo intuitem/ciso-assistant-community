@@ -4,6 +4,7 @@ import structlog
 import time
 
 from django.apps import apps
+from django.conf import settings as django_settings
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 from django.http import StreamingHttpResponse
@@ -17,7 +18,7 @@ from rest_framework.throttling import UserRateThrottle
 
 
 class ChatMessageThrottle(UserRateThrottle):
-    rate = "120/hour"
+    rate = django_settings.CHAT_MESSAGE_THROTTLE_RATE
 
 
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet

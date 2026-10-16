@@ -325,9 +325,26 @@ def execute_tool_query(arguments: dict, scope, parsed_context=None) -> dict | No
                         )
                     }
                 )
+        # nameless objects are named by what they point to ("A.7.6" is a requirement)
+        if not _has_field(model_class, "name"):
+            for rel in model_class._meta.concrete_fields:
+                if not rel.many_to_one or rel.related_model._meta.label == "iam.Folder":
+                    continue
+                for field in ("name", "ref_id"):
+                    if _has_field(rel.related_model, field):
+                        search_q |= Q(**{f"{rel.name}__{field}__icontains": search})
         if search_q:
-            qs = qs.filter(search_q).distinct()
-            filters_applied.append(f"search = '{search}'")
+            matched = qs.filter(search_q).distinct()
+            # nothing carries the text: it may name a related object ("assessments of Acme")
+            link_q = (
+                None if matched.exists() else _linked_to_q(model_class, search, scope)
+            )
+            if link_q is not None:
+                qs = qs.filter(link_q).distinct()
+                filters_applied.append(f"linked to '{search}'")
+            else:
+                qs = matched
+                filters_applied.append(f"search = '{search}'")
 
     total_count = qs.count()
     try:

@@ -721,3 +721,27 @@ class TestQueryVocabulary:
             scope_for(reader),
         )
         assert unknown["total_count"] == 0 and "Valid values" in unknown["note"]
+
+    def test_search_naming_a_related_object_falls_back_to_link(self, assets, reader):
+        from core.models import AppliedControl
+
+        from chat.orm_query import execute_tool_query
+
+        mfa = AppliedControl.objects.create(name="mfa", folder=assets.folder)
+        mfa.assets.add(assets)
+        AppliedControl.objects.create(name="backups", folder=assets.folder)
+        result = execute_tool_query(
+            {"model": "applied_control", "action": "list", "search": "payments"},
+            scope_for(reader),
+        )
+        assert [o["name"] for o in result["objects"]] == ["mfa"]
+        assert "linked to 'payments'" in result["filters_applied"]
+
+    def test_requirement_assessment_is_searched_by_its_requirement(self, audit, reader):
+        from chat.orm_query import execute_tool_query
+
+        result = execute_tool_query(
+            {"model": "requirement_assessment", "action": "list", "search": "A.1"},
+            scope_for(reader),
+        )
+        assert result["total_count"] == 1
