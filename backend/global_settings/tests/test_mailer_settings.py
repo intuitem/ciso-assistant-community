@@ -60,6 +60,8 @@ def _reload_urls():
 @pytest.fixture
 def switch_on(settings):
     settings.ENABLE_CUSTOM_MAILER = True
+    # The test hosts do not resolve; the network policy has its own tests.
+    settings.ALLOW_PRIVATE_NETWORK_REQUESTS = True
     settings.MAILERS = {"default": {"BACKEND": LOCMEM}}
     settings.DEFAULT_FROM_EMAIL = "env@tests.local"
     _reload_urls()
@@ -378,6 +380,105 @@ def test_every_mailer_is_tested_and_a_failing_second_one_blocks_the_token(
     ]
     # The first mailer really was exercised on its own.
     assert [m.to for m in mail.outbox] == [["admin@tests.local"]]
+
+
+def test_blank_port_is_tested_and_saved(switch_on, client, fake_smtp):
+    data = payload()
+    data["mailers"][0]["port"] = None
+    response = client.post(url("mailer-settings-test"), data, format="json")
+    assert response.status_code == 200, response.json()
+    data["test_token"] = response.json()["test_token"]
+    response = client.put(url(), data, format="json")
+    assert response.status_code == 200, response.json()
+    row = Mailer.objects.get(position=1)
+    assert row.port is None
+    # The backend gets no port and lets smtplib pick the standard one.
+    assert row.mailer_entry()["OPTIONS"]["port"] is None
+    assert response.json()["mailers"][0]["port"] is None
+
+
+def _resolving_to(monkeypatch, address):
+    import socket
+
+    monkeypatch.setattr(
+        socket,
+        "getaddrinfo",
+        lambda host, *a, **k: [(socket.AF_INET, None, None, "", (address, 0))],
+    )
+
+
+def test_private_hosts_are_refused_unless_the_deployment_allows_them(
+    switch_on, settings, client, fake_smtp, monkeypatch
+):
+    settings.ALLOW_PRIVATE_NETWORK_REQUESTS = False
+    _resolving_to(monkeypatch, "10.0.0.5")
+    data = payload(host="relay.internal")
+    for method, target in (
+        (client.post, url("mailer-settings-test")),
+        (client.put, url()),
+    ):
+        response = method(target, {**data, "override_untested": True}, format="json")
+        assert response.status_code == 400
+        assert "mailer 1: the host must resolve to a public address" in str(
+            response.json()["mailers"]
+        )
+    assert Mailer.objects.count() == 0
+    assert mail.outbox == []
+
+    settings.ALLOW_PRIVATE_NETWORK_REQUESTS = True
+    response = client.post(url("mailer-settings-test"), payload(), format="json")
+    assert response.status_code == 200
+
+
+def test_oauth_token_url_follows_the_same_network_policy(
+    switch_on, settings, client, fake_smtp, monkeypatch
+):
+    settings.ALLOW_PRIVATE_NETWORK_REQUESTS = False
+    import socket
+
+    real = socket.getaddrinfo
+
+    def resolve(host, *a, **k):
+        if host == "idp.internal":
+            return [(socket.AF_INET, None, None, "", ("192.168.1.9", 0))]
+        return [(socket.AF_INET, None, None, "", ("8.8.8.8", 0))]
+
+    monkeypatch.setattr(socket, "getaddrinfo", resolve)
+    data = payload(host="smtp.example.com")
+    data["mailers"][0].update(
+        {
+            "transport": "smtp-oauth2",
+            "password": "",
+            "oauth2_grant_type": "client_credentials",
+            "oauth2_token_url": "https://idp.internal/token",
+            "oauth2_scope": "mail",
+            "oauth2_client_id": "id",
+            "oauth2_client_secret": "secret",
+        }
+    )
+    response = client.post(url("mailer-settings-test"), data, format="json")
+    assert response.status_code == 400
+    assert "the token URL must resolve to a public address" in str(
+        response.json()["mailers"]
+    )
+    del real
+
+
+def test_unresolvable_host_is_reported_in_our_words(
+    switch_on, settings, client, fake_smtp, monkeypatch
+):
+    settings.ALLOW_PRIVATE_NETWORK_REQUESTS = False
+    import socket
+
+    def resolve(host, *a, **k):
+        raise socket.gaierror(8, "nodename nor servname provided")
+
+    monkeypatch.setattr(socket, "getaddrinfo", resolve)
+    response = client.post(
+        url("mailer-settings-test"), payload(host="nope.example"), format="json"
+    )
+    assert response.status_code == 400
+    assert response.json()["mailers"] == "mailer 1: the host could not be resolved"
 
 
 def test_health_lists_configured_mailers_never_attempted(switch_on, client, fake_smtp):

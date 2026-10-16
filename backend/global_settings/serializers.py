@@ -8,7 +8,7 @@ import structlog
 
 from django.conf import settings as django_settings
 from django.core.exceptions import ValidationError as DjangoValidationError
-from django.db import transaction
+from django.db import models, transaction
 from rest_framework import serializers
 
 from urllib.parse import urlparse
@@ -1028,6 +1028,8 @@ class MailerConfigurationSerializer(serializers.ModelSerializer):
         """Unsaved rows for the payload: existing rows at the same position
         are updated in place, blank secrets keep the stored value. Validates
         each row the way the environment builder validates its variables."""
+        from .mailer_settings import check_network_policy
+
         existing = {row.position: row for row in instance.mailers.all()}
         rows = []
         for item in mailers_data:
@@ -1039,13 +1041,25 @@ class MailerConfigurationSerializer(serializers.ModelSerializer):
             for name, value in item.items():
                 if name in Mailer.SECRET_FIELDS and value in ("", None):
                     continue
-                setattr(row, name, value if value is not None else "")
+                if value is None and isinstance(
+                    Mailer._meta.get_field(name), (models.CharField, models.TextField)
+                ):
+                    # Text columns are NOT NULL; a cleared port stays NULL and
+                    # the backend picks the standard port for the TLS mode.
+                    value = ""
+                setattr(row, name, value)
             # Problems are reported as our own messages, never as exception
             # text: nothing raised below the API may reach the caller.
             problems = row.configuration_problems()
             if problems:
                 raise serializers.ValidationError(
                     {"mailers": f"mailer {item['position']}: {problems[0]}"}
+                )
+            try:
+                check_network_policy(row)
+            except ValueError as error:
+                raise serializers.ValidationError(
+                    {"mailers": f"mailer {item['position']}: {error}"}
                 )
             rows.append(row)
         return rows

@@ -382,7 +382,14 @@
 				</label>
 				<label class="label">
 					<span class="text-sm font-medium">{m.mailerPort()}</span>
-					<input class={inputClass} type="number" min="1" max="65535" bind:value={mailer.port} />
+					<input
+						class={inputClass}
+						type="number"
+						min="1"
+						max="65535"
+						placeholder={mailer.use_ssl ? '465' : '25'}
+						bind:value={mailer.port}
+					/>
 				</label>
 				<label class="label">
 					<span class="text-sm font-medium">

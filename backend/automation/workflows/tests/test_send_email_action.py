@@ -284,6 +284,29 @@ class TestSendEmail:
             for m in error_messages(instance)
         )
 
+    def test_delivery_failure_is_recorded_in_delivery_health(
+        self, settings, dispatch, monkeypatch, django_capture_on_commit_callbacks
+    ):
+        from global_settings.models import MailerHealth
+
+        configure_smtp(settings)
+
+        def broken_send(
+            subject, message, recipient, html_message=None, connection=None
+        ):
+            raise ConnectionRefusedError("connection refused")
+
+        monkeypatch.setattr("automation.workflows.tasks.send_email_now", broken_send)
+        version = email_flow({"recipients": "a@tests.local", "subject": "S"})
+        with django_capture_on_commit_callbacks(execute=True):
+            start_instance(version)
+        dispatch.run()
+        health = MailerHealth.objects.get(alias="default")
+        # The session was opened, then the send failed: not "ok".
+        assert health.last_outcome == "failed"
+        assert health.last_error == "connection refused"
+        assert health.last_success_at is None
+
     def test_one_dead_recipient_does_not_starve_the_rest(
         self, settings, dispatch, monkeypatch, django_capture_on_commit_callbacks
     ):

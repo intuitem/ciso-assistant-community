@@ -17,6 +17,37 @@ TEST_TOKEN_SALT = "custom-mailer-test"
 TEST_TOKEN_MAX_AGE_SECONDS = 30 * 60
 
 
+def check_network_policy(row) -> None:
+    """Apply the deployment's SSRF policy to a mailer an administrator typed
+    in: the SMTP host, and the token URL for OAuth, must resolve to public
+    addresses unless ALLOW_PRIVATE_NETWORK_REQUESTS is set, exactly like the
+    LLM, integration and audit-sink URLs. Raises ValueError with a message
+    meant for the administrator. Environment mailers are the operator's own
+    and are not checked."""
+    from core.net_safety import (
+        BlockedRequestError,
+        DnsLookupError,
+        assert_public_host_unless_dev,
+        assert_public_url_unless_dev,
+    )
+
+    targets = [("host", lambda: assert_public_host_unless_dev(row.host))]
+    if row.transport == row.Transport.SMTP_OAUTH2:
+        targets.append(
+            ("token URL", lambda: assert_public_url_unless_dev(row.oauth2_token_url))
+        )
+    for label, check in targets:
+        try:
+            check()
+        except BlockedRequestError:
+            raise ValueError(
+                f"the {label} must resolve to a public address "
+                "(set ALLOW_PRIVATE_NETWORK_REQUESTS=True to allow private networks)"
+            ) from None
+        except DnsLookupError:
+            raise ValueError(f"the {label} could not be resolved") from None
+
+
 def specs_from_rows(rows) -> list[MailerSpec]:
     """``MailerSpec`` for each row, validated. Raises ValueError."""
     specs = []

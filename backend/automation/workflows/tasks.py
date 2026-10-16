@@ -76,24 +76,33 @@ def send_email_task(
             # A failed send can leave the socket dead, so the rest of the
             # batch gets a new session. It goes through open_connection, so
             # a primary that died mid-batch hands them to the next mailer.
-            with mailer.open_connection() as connection:
-                while pending:
-                    email = pending.pop(0)
-                    try:
-                        send_email_now(subject, body, email, connection=connection)
-                        sent.append(email)
-                    except Exception as e:
-                        # Raw exception text stays out of the run log (it can
-                        # carry SMTP server internals); detail goes to the
-                        # server log.
-                        logger.error(
-                            "send_email action delivery failure",
-                            recipient=email,
-                            instance_id=str(token.instance_id),
-                            error=e,
-                        )
-                        failed.append(email)
-                        break
+            session_failed = False
+            try:
+                with mailer.open_connection() as connection:
+                    while pending:
+                        email = pending.pop(0)
+                        try:
+                            send_email_now(subject, body, email, connection=connection)
+                            sent.append(email)
+                        except Exception as e:
+                            # Raw exception text stays out of the run log (it
+                            # can carry SMTP server internals); detail goes to
+                            # the server log.
+                            logger.error(
+                                "send_email action delivery failure",
+                                recipient=email,
+                                instance_id=str(token.instance_id),
+                                error=e,
+                            )
+                            failed.append(email)
+                            # Leave the session through the exception so the
+                            # mailer records the failure in delivery health.
+                            session_failed = True
+                            raise
+            except Exception:
+                if not session_failed:
+                    raise
+                # The rest of the batch gets a new session.
     except Exception as e:
         # No mailer could be opened; recipients not already attempted never
         # got their mail.

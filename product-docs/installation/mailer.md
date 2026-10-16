@@ -37,6 +37,8 @@ With `ENABLE_CUSTOM_MAILER=True` in the environment, administrators get a **Mail
 
 Rules enforced by the panel:
 
+* A blank port means the standard port for the TLS mode: 465 with SSL, 25 otherwise. Enter 587 explicitly for submission over STARTTLS.
+* The mail server host, and the token URL for OAuth, must resolve to a public address, like the other URLs an administrator can configure (LLM, integrations, audit sinks). For a relay or identity provider on a private network, start the backend with `ALLOW_PRIVATE_NETWORK_REQUESTS=True`.
 * Every mailer must pass a test before the configuration can be saved: the test sends one message through each mailer, on its own, to the administrator's own address, and reports per mailer. The test uses the values in the form, not the stored ones. An override exists for servers that only accept mail for their own domain.
 * Secrets are write-only. Leaving a secret field blank on an existing mailer keeps the stored value.
 * Every save notifies the other administrators by email, through the mailer that was active before the change, because whoever controls the mail server receives every password reset link.

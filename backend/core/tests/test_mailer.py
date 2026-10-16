@@ -2,6 +2,8 @@
 environment-to-MAILERS builder behind it."""
 
 import smtplib
+import socket
+import ssl
 
 import pytest
 from django.core import mail
@@ -337,3 +339,46 @@ def test_open_connection_batches_on_one_mailer(settings):
         mailer.send("S", "body", "b@tests.local", connection=connection)
     assert RefusingBackend.opened == 1
     assert [m.to[0] for m in mail.outbox] == ["a@tests.local", "b@tests.local"]
+
+
+@pytest.mark.parametrize(
+    "error, expected",
+    [
+        (
+            smtplib.SMTPAuthenticationError(
+                535, b"5.7.8 Username and Password not accepted"
+            ),
+            "server replied 535 5.7.8 Username and Password not accepted",
+        ),
+        (
+            smtplib.SMTPRecipientsRefused({"a@tests.local": (550, b"no such user")}),
+            "server refused the recipient (550)",
+        ),
+        (
+            smtplib.SMTPServerDisconnected("Connection unexpectedly closed"),
+            "server closed the connection",
+        ),
+        (
+            ssl.SSLError(1, "[SSL: CERTIFICATE_VERIFY_FAILED] ..."),
+            "TLS handshake failed",
+        ),
+        (
+            socket.gaierror(8, "nodename nor servname provided"),
+            "host name could not be resolved",
+        ),
+        (TimeoutError("timed out"), "connection timed out"),
+        (ConnectionRefusedError(61, "Connection refused"), "connection refused"),
+        (OSError(65, "No route to host"), "No route to host"),
+        # Our own exceptions carry a message written for the reader.
+        (
+            mailer.NoMailerAvailable("no mailer reachable, tried default"),
+            "no mailer reachable, tried default",
+        ),
+        (
+            RuntimeError("email backend reported 0 of 1 messages sent"),
+            "email backend reported 0 of 1 messages sent",
+        ),
+    ],
+)
+def test_describe_error_speaks_for_the_network_and_the_server(error, expected):
+    assert mailer.describe_error(error) == expected

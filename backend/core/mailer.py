@@ -17,6 +17,9 @@ wrap it in a Huey task that reports the outcome (see the workflow ``send_email``
 action). Nothing here swallows errors.
 """
 
+import smtplib
+import socket
+import ssl
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 
@@ -35,6 +38,40 @@ SOURCE_CUSTOM = "custom"
 
 class NoMailerAvailable(Exception):
     """No mailer is configured, or none accepted a connection."""
+
+
+def describe_error(error: BaseException) -> str:
+    """One line for an administrator, in our words: what the network or the
+    SMTP server did, without the raw exception text. Server replies are kept
+    (the administrator is configuring that very server and needs its answer);
+    our own exceptions already carry a message meant to be shown."""
+    if isinstance(error, smtplib.SMTPRecipientsRefused):
+        codes = sorted({str(code) for code, _ in error.recipients.values()})
+        return f"server refused the recipient ({', '.join(codes)})"
+    if isinstance(error, smtplib.SMTPResponseException):
+        reply = error.smtp_error
+        if isinstance(reply, bytes):
+            reply = reply.decode("utf-8", "replace")
+        reply = str(reply).splitlines()[0] if reply else ""
+        return f"server replied {error.smtp_code} {reply}".strip()
+    if isinstance(error, smtplib.SMTPServerDisconnected):
+        return "server closed the connection"
+    if isinstance(error, smtplib.SMTPException):
+        return "SMTP protocol error"
+    if isinstance(error, ssl.SSLError):
+        return "TLS handshake failed"
+    if isinstance(error, socket.gaierror):
+        return "host name could not be resolved"
+    if isinstance(error, (TimeoutError, socket.timeout)):
+        return "connection timed out"
+    if isinstance(error, ConnectionRefusedError):
+        return "connection refused"
+    if isinstance(error, ConnectionError):
+        return "connection failed"
+    if isinstance(error, OSError):
+        return error.strerror or "network error"
+    text = str(error).splitlines()[0] if str(error) else type(error).__name__
+    return text[:300]
 
 
 @dataclass(frozen=True)
@@ -165,10 +202,13 @@ def open_connection(
                 error=str(error),
             )
             if attempts is not None:
-                attempts.append((spec.alias, str(error)))
+                attempts.append((spec.alias, describe_error(error)))
             if record_health:
                 _record_health(
-                    spec, "unreachable", error=str(error), via_failover=skipped > 0
+                    spec,
+                    "unreachable",
+                    error=describe_error(error),
+                    via_failover=skipped > 0,
                 )
             skipped += 1
             last_error = error
@@ -181,7 +221,10 @@ def open_connection(
         except Exception as error:
             if record_health:
                 _record_health(
-                    spec, "failed", error=str(error), via_failover=skipped > 0
+                    spec,
+                    "failed",
+                    error=describe_error(error),
+                    via_failover=skipped > 0,
                 )
             raise
         else:
@@ -332,7 +375,7 @@ def send_test(
             )
     except Exception as error:
         return TestSendResult(
-            ok=False, recipient=recipient, error=str(error), skipped=skipped
+            ok=False, recipient=recipient, error=describe_error(error), skipped=skipped
         )
     return TestSendResult(
         ok=True,
