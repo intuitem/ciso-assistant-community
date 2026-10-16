@@ -150,8 +150,24 @@ class AuditSinkSerializer(BaseModelSerializer):
         # means "keep the stored one" — but only for the same authority, so an
         # edit can't redirect the stored secret to another token endpoint.
         new_oauth = validated_data.get("oauth_config")
-        if new_oauth is not None and not new_oauth.get("client_secret"):
-            old_oauth = instance.oauth_config or {}
+        old_oauth = instance.oauth_config or {}
+        auth_type = validated_data.get("auth_type", instance.auth_type)
+        # extra_params (API-only) aren't in the edit form; keep them unless sent.
+        if (
+            new_oauth
+            and "extra_params" not in new_oauth
+            and "extra_params" in old_oauth
+        ):
+            new_oauth = validated_data["oauth_config"] = {
+                **new_oauth,
+                "extra_params": old_oauth["extra_params"],
+            }
+        # Switching to static auth sends {}: that clears the secret, nothing to keep.
+        if (
+            new_oauth
+            and auth_type == WebhookEndpoint.AuthType.OAUTH2_CC
+            and not new_oauth.get("client_secret")
+        ):
             old_secret = old_oauth.get("client_secret")
             if old_secret and any(
                 new_oauth.get(k) != old_oauth.get(k) for k in ("token_url", "client_id")

@@ -739,3 +739,109 @@ def test_oauth_token_url_must_be_public(root_folder):
         with pytest.raises(ValidationError) as exc:
             ep.clean()
     assert "oauth_config" in exc.value.message_dict
+
+
+@pytest.mark.django_db
+def test_update_can_switch_oauth_sink_back_to_static(root_folder):
+    from webhooks.serializers import AuditSinkSerializer
+
+    # The edit form sends oauth_config={} when static auth is picked.
+    ep = _oauth_sink(root_folder)
+    with override_settings(ALLOW_PRIVATE_NETWORK_REQUESTS=True):
+        AuditSinkSerializer().update(
+            ep,
+            {"auth_type": WebhookEndpoint.AuthType.STATIC, "oauth_config": {}},
+        )
+    ep.refresh_from_db()
+    assert ep.auth_type == WebhookEndpoint.AuthType.STATIC
+    assert ep.oauth_config == {}
+
+
+@pytest.mark.django_db
+def test_update_keeps_api_only_extra_params(root_folder):
+    from webhooks.serializers import AuditSinkSerializer
+
+    ep = _oauth_sink(root_folder)
+    ep.oauth_config = {**ep.oauth_config, "extra_params": {"audience": "api://x"}}
+    with override_settings(ALLOW_PRIVATE_NETWORK_REQUESTS=True):
+        ep.save()
+        AuditSinkSerializer().update(
+            ep,
+            {
+                "oauth_config": {
+                    "token_url": ep.oauth_config["token_url"],
+                    "client_id": "cid",
+                }
+            },
+        )
+    ep.refresh_from_db()
+    assert ep.oauth_config["extra_params"] == {"audience": "api://x"}
+    assert ep.oauth_config["client_secret"] == "csecret"
+
+
+@pytest.mark.django_db
+@override_settings(ALLOW_PRIVATE_NETWORK_REQUESTS=True)
+def test_extra_params_cannot_override_credentials(root_folder):
+    from webhooks import oauth
+
+    ep = _oauth_sink(root_folder)
+    ep.oauth_config["extra_params"] = {
+        "client_id": "other-app",
+        "client_secret": "x",
+        "grant_type": "password",
+        "audience": "api://x",
+    }
+    with patch("webhooks.oauth.requests.post", return_value=_token_response()) as post:
+        oauth.get_token(ep)
+    sent = post.call_args.kwargs["data"]
+    assert sent["client_id"] == "cid"
+    assert sent["client_secret"] == "csecret"
+    assert sent["grant_type"] == "client_credentials"
+    assert sent["audience"] == "api://x"
+
+
+@pytest.mark.django_db
+@override_settings(ALLOW_PRIVATE_NETWORK_REQUESTS=True)
+def test_zero_expires_in_is_not_cached(root_folder):
+    from webhooks import oauth
+
+    ep = _oauth_sink(root_folder)
+    with patch(
+        "webhooks.oauth.requests.post", return_value=_token_response(expires_in=0)
+    ) as post:
+        oauth.get_token(ep)
+        oauth.get_token(ep)
+    assert post.call_count == 2
+
+
+@pytest.mark.django_db
+@override_settings(ALLOW_PRIVATE_NETWORK_REQUESTS=True)
+def test_unreachable_token_endpoint_raises_oauth_error(root_folder):
+    import requests
+    from webhooks import oauth
+
+    ep = _oauth_sink(root_folder)
+    with patch(
+        "webhooks.oauth.requests.post",
+        side_effect=requests.exceptions.ConnectionError("down"),
+    ):
+        with pytest.raises(oauth.OAuthError):
+            oauth.get_token(ep)
+
+
+@pytest.mark.django_db
+@override_settings(ALLOW_PRIVATE_NETWORK_REQUESTS=True)
+def test_blocked_token_url_drops_event_without_retry(root_folder):
+    from core.net_safety import BlockedRequestError
+
+    # The token URL can start resolving to a private IP after the sink was saved.
+    ep = _oauth_sink(root_folder)
+    with patch(
+        "webhooks.oauth.assert_public_url_unless_dev",
+        side_effect=BlockedRequestError("private"),
+    ):
+        with patch("webhooks.tasks.assert_public_url_unless_dev"):
+            with patch("webhooks.tasks.requests.post") as post:
+                result = tasks.send_audit_request.call_local(str(ep.id), {})
+    assert result.startswith("Blocked")
+    post.assert_not_called()

@@ -11,7 +11,7 @@ from urllib.parse import urlparse
 import requests
 import structlog
 
-from core.net_safety import assert_public_url_unless_dev
+from core.net_safety import DnsLookupError, assert_public_url_unless_dev
 
 logger = structlog.get_logger(__name__)
 
@@ -60,19 +60,29 @@ def _fetch(cfg: dict) -> tuple[str, float]:
 
     if not is_tls_or_loopback(token_url):
         raise OAuthError("token_url must use HTTPS")
-    # Same SSRF surface as the sink URL.
-    assert_public_url_unless_dev(token_url, allowed_schemes=("https",))
+    # Same SSRF surface as the sink URL; BlockedRequestError propagates so the
+    # caller can drop the event instead of retrying it.
+    try:
+        assert_public_url_unless_dev(token_url, allowed_schemes=("https",))
+    except DnsLookupError as exc:
+        raise OAuthError("token_url DNS lookup failed") from exc
 
+    # extra_params go first so they can't override the credentials themselves.
     data = {
+        **(cfg.get("extra_params") or {}),
         "grant_type": "client_credentials",
         "client_id": cfg["client_id"],
         "client_secret": cfg.get("client_secret", ""),
     }
     if cfg.get("scope"):
         data["scope"] = cfg["scope"]
-    data.update(cfg.get("extra_params") or {})
 
-    response = requests.post(token_url, data=data, timeout=15, allow_redirects=False)
+    try:
+        response = requests.post(
+            token_url, data=data, timeout=15, allow_redirects=False
+        )
+    except requests.exceptions.RequestException as exc:
+        raise OAuthError(f"token endpoint unreachable: {type(exc).__name__}") from exc
     if response.status_code != 200:
         raise OAuthError(f"token endpoint returned status {response.status_code}")
 
@@ -87,8 +97,9 @@ def _fetch(cfg: dict) -> tuple[str, float]:
     if not token or not isinstance(token, str):
         raise OAuthError("token endpoint returned no access_token")
 
+    expires_in = payload.get("expires_in")
     try:
-        ttl = int(payload.get("expires_in") or _DEFAULT_TTL)
+        ttl = _DEFAULT_TTL if expires_in is None else int(expires_in)
     except TypeError, ValueError:
         ttl = _DEFAULT_TTL
     return token, time.monotonic() + max(ttl - _EXPIRY_SKEW, 0)

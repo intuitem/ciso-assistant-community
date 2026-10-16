@@ -4620,7 +4620,7 @@
 	"tokenUrl": "Point de terminaison du jeton",
 	"tokenUrlHelpText": "Point de terminaison HTTPS de délivrance des jetons du fournisseur d'identité. Pour Microsoft Entra : https://login.microsoftonline.com/<tenant-id>/oauth2/v2.0/token",
 	"oauthScope": "Portée",
-	"oauthScopeHelpText": "Portée demandée. Pour l'API Azure Monitor Logs Ingestion, utilisez https://monitor.azure.com//.default — la double barre oblique est obligatoire.",
+	"oauthScopeHelpText": "Portée demandée. Pour l'API Azure Monitor Logs Ingestion, utilisez https://monitor.azure.com/.default — si le jeton est refusé, essayez la forme avec double barre oblique https://monitor.azure.com//.default.",
 	"leaveBlankToKeepSecret": "Une valeur est déjà définie. Laissez vide pour la conserver, ou saisissez-en une nouvelle pour la remplacer.",
 	"auditSinkTargetDomainsHelpText": "Limiter le transfert à ces domaines. Laisser vide pour transférer les événements de tous les domaines.",
 	"replayAuditEvents": "Rejouer les événements",

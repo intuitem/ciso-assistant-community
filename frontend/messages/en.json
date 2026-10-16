@@ -4647,7 +4647,7 @@
 	"tokenUrl": "Token endpoint",
 	"tokenUrlHelpText": "HTTPS token endpoint of the identity provider. For Microsoft Entra: https://login.microsoftonline.com/<tenant-id>/oauth2/v2.0/token",
 	"oauthScope": "Scope",
-	"oauthScopeHelpText": "Requested scope. For the Azure Monitor Logs Ingestion API, use https://monitor.azure.com//.default — the double slash is required.",
+	"oauthScopeHelpText": "Requested scope. For the Azure Monitor Logs Ingestion API, use https://monitor.azure.com/.default — if the token is refused, try the double-slash form https://monitor.azure.com//.default.",
 	"leaveBlankToKeepSecret": "A value is already set. Leave blank to keep it, or enter a new one to replace it.",
 	"auditSinkTargetDomainsHelpText": "Limit forwarding to these domains. Leave empty to forward events from all domains.",
 	"replayAuditEvents": "Replay events",

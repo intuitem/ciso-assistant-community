@@ -218,7 +218,15 @@ def send_audit_request(endpoint_id, body):
         if not is_tls_or_loopback(endpoint.url):
             logger.error("Audit sink bearer blocked over HTTP", endpoint_id=endpoint_id)
             return f"Blocked: {endpoint_id} OAuth sink URL is not HTTPS"
-        headers["Authorization"] = _bearer(endpoint)
+        try:
+            headers["Authorization"] = _bearer(endpoint)
+        except BlockedRequestError:
+            logger.error(
+                "Audit sink token URL blocked by SSRF guard",
+                endpoint_id=endpoint_id,
+                exc_info=True,
+            )
+            return f"Blocked: {endpoint_id} token URL points to a non-public address"
 
     try:
         response = _post_audit(endpoint, json_payload, headers)
