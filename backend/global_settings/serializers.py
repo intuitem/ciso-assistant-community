@@ -1028,7 +1028,7 @@ class MailerConfigurationSerializer(serializers.ModelSerializer):
         """Unsaved rows for the payload: existing rows at the same position
         are updated in place, blank secrets keep the stored value. Validates
         each row the way the environment builder validates its variables."""
-        from .mailer_settings import check_network_policy
+        from .mailer_settings import network_problems
 
         existing = {row.position: row for row in instance.mailers.all()}
         rows = []
@@ -1050,16 +1050,10 @@ class MailerConfigurationSerializer(serializers.ModelSerializer):
                 setattr(row, name, value)
             # Problems are reported as our own messages, never as exception
             # text: nothing raised below the API may reach the caller.
-            problems = row.configuration_problems()
+            problems = row.configuration_problems() or network_problems(row)
             if problems:
                 raise serializers.ValidationError(
                     {"mailers": f"mailer {item['position']}: {problems[0]}"}
-                )
-            try:
-                check_network_policy(row)
-            except ValueError as error:
-                raise serializers.ValidationError(
-                    {"mailers": f"mailer {item['position']}: {error}"}
                 )
             rows.append(row)
         return rows
