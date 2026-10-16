@@ -187,6 +187,35 @@ class TestEntityAssessmentCustomFields:
         assert resp.status_code == status.HTTP_200_OK, resp.content
         assert EntityAssessment.objects.get(pk=ea_id).folder == domains["a"]
 
+    def test_global_folder_is_validated_as_perimeter_domain(
+        self, authenticated_client, domains
+    ):
+        self._make_text_def(
+            authenticated_client, domains["b"], "vendor_tier", required=True
+        )
+        ea_id = self._create_assessment(
+            authenticated_client,
+            domains,
+            folder=str(domains["b"].id),
+            perimeter=str(domains["perimeter_b"].id),
+            custom_fields={"vendor_tier": "gold"},
+        )
+
+        resp = authenticated_client.patch(
+            f"{EA_URL}{ea_id}/",
+            {
+                "folder": str(Folder.get_root_folder().id),
+                "custom_fields": {"vendor_tier": ""},
+            },
+            format="json",
+        )
+        assert resp.status_code == status.HTTP_400_BAD_REQUEST, resp.content
+        assert "vendor_tier" in resp.json()["custom_fields"]
+
+        ea = EntityAssessment.objects.get(pk=ea_id)
+        assert ea.folder == domains["b"]
+        assert ea.custom_fields == {"vendor_tier": "gold"}
+
     def _analyst_in(self, folder, email):
         user = User.objects.create_user(email)
         group = UserGroup.objects.create(name=f"{email} group", folder=folder)
