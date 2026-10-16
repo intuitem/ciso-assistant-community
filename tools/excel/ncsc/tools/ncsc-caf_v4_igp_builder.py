@@ -124,9 +124,10 @@ CONTENT_HEADERS = [
     "ref_id",
     "name",
     "description",
-    "annotation",
     "questions",
     "answer",
+    "question_group",
+    "question_group_color",
 ]
 CONTENT_COLUMN_WIDTHS = {
     "A": 10,
@@ -134,9 +135,10 @@ CONTENT_COLUMN_WIDTHS = {
     "C": 10,
     "D": 30,
     "E": 70,
-    "F": 60,
-    "G": 120,
-    "H": 12,
+    "F": 120,
+    "G": 12,
+    "H": 50,
+    "I": 12,
 }
 ANSWERS_HEADERS = ["id", "question_type", "question_choices", "compute_result"]
 ANSWERS_COLUMN_WIDTHS = {"A": 10, "B": 16, "C": 110, "D": 24}
@@ -153,21 +155,17 @@ ANSWER_IDS = {
     "PA": "TF-PA",
     "NA": "TF-NA",
 }
+# The CAF's RED / AMBER / GREEN columns.
+GROUPS = {
+    "NA": ("Not achieved: at least one of the following statements is true", "#DC2626"),
+    "PA": ("Partially achieved: all the following statements are true", "#D97706"),
+    "A": ("Achieved: all the following statements are true", "#16A34A"),
+}
 ANSWERS_ROWS = [
     (ANSWER_IDS["NA"], "unique_choice", "True\nFalse", "non_compliant\n/"),
     (ANSWER_IDS["PA"], "unique_choice", "True\nFalse", "partially_compliant\n/"),
     (ANSWER_IDS["A"], "unique_choice", "True\nFalse", "compliant\nnon_compliant"),
 ]
-
-ANNOTATION_THREE = (
-    "CAF rule for this contributing outcome: Achieved when all of the A statements "
-    "are true; Partially achieved when all of the PA statements are true; Not "
-    "achieved when at least one NA statement is true, or when neither set is fully met."
-)
-ANNOTATION_TWO = (
-    "CAF rule for this contributing outcome: Achieved when all of the A statements "
-    "are true, otherwise Not achieved. This outcome has no Partially achieved level."
-)
 
 # Column x0 thresholds. The published PDF lays every IGP table out on the same
 # grid: statements start at x0 ~50 (NA), ~220 (PA) and ~390 (A), except in
@@ -523,17 +521,26 @@ def verify_against_library(nodes: list[Node], library_path: Path) -> int:
     return unexpected
 
 
-def build_questions(outcome: Outcome) -> tuple[str, str]:
-    """Return the newline-joined question texts and their answer ids."""
+def build_questions(outcome: Outcome) -> tuple[str, str, str, str]:
+    """Return the newline-joined question texts, answer ids, groups and colours."""
     questions: list[str] = []
     answers: list[str] = []
+    groups: list[str] = []
+    colors: list[str] = []
 
     for column in ("NA", "PA", "A"):
         for index, statement in enumerate(outcome.statements[column], start=1):
             questions.append(f"[{outcome.ref_id}.{column}.{index}] {statement}")
             answers.append(ANSWER_IDS[column])
+            groups.append(GROUPS[column][0])
+            colors.append(GROUPS[column][1])
 
-    return "\n".join(questions), "\n".join(answers)
+    return (
+        "\n".join(questions),
+        "\n".join(answers),
+        "\n".join(groups),
+        "\n".join(colors),
+    )
 
 
 def write_meta_sheet(sheet: Worksheet, rows: list[tuple[str, str]]) -> None:
@@ -560,12 +567,12 @@ def write_content_sheet(sheet: Worksheet, nodes: list[Node]) -> None:
                     None,
                     None,
                     None,
+                    None,
                 ]
             )
             continue
 
-        questions, answers = build_questions(node.outcome)
-        annotation = ANNOTATION_THREE if node.outcome.columns == 3 else ANNOTATION_TWO
+        questions, answers, groups, colors = build_questions(node.outcome)
         sheet.append(
             [
                 "x",
@@ -573,9 +580,10 @@ def write_content_sheet(sheet: Worksheet, nodes: list[Node]) -> None:
                 node.ref_id,
                 node.name,
                 node.description,
-                annotation,
                 questions,
                 answers,
+                groups,
+                colors,
             ]
         )
 

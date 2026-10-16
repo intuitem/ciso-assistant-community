@@ -165,6 +165,25 @@ class TestLibraryShape:
 
         assert dict(counts) == EXPECTED_STATEMENTS
 
+    def test_indicators_are_grouped_by_column_in_table_order(self, framework):
+        headings = {
+            "NA": ("Not achieved", "#DC2626"),
+            "PA": ("Partially achieved", "#D97706"),
+            "A": ("Achieved", "#16A34A"),
+        }
+        for node in RequirementNode.objects.filter(
+            framework=framework, assessable=True
+        ).prefetch_related("questions"):
+            assert not node.annotation, node.ref_id
+            columns = []
+            for question in node.questions.order_by("order"):
+                column = column_of(question)
+                heading, color = headings[column]
+                assert question.config["group"].startswith(heading)
+                assert question.config["group_color"] == color
+                columns.append(column)
+            assert columns == sorted(columns, key=list(headings).index), node.ref_id
+
     def test_every_outcome_carries_its_own_indicators(self, framework):
         for node in RequirementNode.objects.filter(
             framework=framework, assessable=True
