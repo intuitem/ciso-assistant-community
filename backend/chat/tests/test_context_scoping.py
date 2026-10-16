@@ -165,6 +165,26 @@ class TestEnrichContextScoping:
         assert "secret scenario" in _enrich_context(ctx, scope_for(reader))
         assert _enrich_context(ctx, scope_for(outsider)) == ""
 
+    def test_scenario_controls_listed_only_when_readable(
+        self, risk_assessment, reader, domain, other_domain
+    ):
+        from core.models import AppliedControl
+        from chat.views import _enrich_context
+
+        scenario = risk_assessment.risk_scenarios.get()
+        visible = AppliedControl.objects.create(name="visible control", folder=domain)
+        scenario.existing_applied_controls.add(visible)
+        scenario.applied_controls.add(
+            AppliedControl.objects.create(name="hidden control", folder=other_domain)
+        )
+        enrichment = _enrich_context(
+            context_for("risk-assessments", risk_assessment), scope_for(reader)
+        )
+        # cited items link to their page, like query results
+        assert "existing controls: [visible control](" in enrichment
+        assert f"/applied-controls/{visible.id})" in enrichment
+        assert "hidden control" not in enrichment
+
     def test_findings_enrichment_needs_access(
         self, findings_assessment, reader, outsider
     ):
@@ -388,6 +408,7 @@ class TestComplianceAssessmentPage:
         )
         assert "scoping audit" in enrichment
         assert "Non-compliant=1" in enrichment
+        assert "requirements assessed" in enrichment
         assert "A real requirement" in enrichment
         assert "A heading" not in enrichment
 
@@ -585,3 +606,156 @@ class TestSanitizeUserInput:
         ):
             assert _sanitize_user_input(text) == text
         assert _sanitize_user_input("  trailing\x00 ") == "trailing"
+
+
+class TestQueryVocabulary:
+    @pytest.fixture
+    def assets(self, domain, other_domain):
+        from core.models import Asset
+
+        primary = Asset.objects.create(name="payments", type="PR", folder=domain)
+        support = Asset.objects.create(name="database", type="SP", folder=domain)
+        hidden = Asset.objects.create(
+            name="secret server", type="SP", folder=other_domain
+        )
+        support.parent_assets.add(primary)
+        hidden.parent_assets.add(primary)
+        return primary
+
+    def test_value_of_another_choice_field_is_used(self, assets, reader):
+        from chat.orm_query import execute_tool_query
+
+        result = execute_tool_query(
+            {"model": "asset", "action": "list", "category": ["primary"]},
+            scope_for(reader),
+        )
+        assert [o["name"] for o in result["objects"]] == ["payments"]
+        assert "type = Primary" in result["filters_applied"]
+
+    def test_unknown_value_is_never_dropped_silently(self, assets, reader):
+        from chat.orm_query import execute_tool_query
+
+        result = execute_tool_query(
+            {"model": "asset", "action": "list", "category": ["shiny"]},
+            scope_for(reader),
+        )
+        assert result["total_count"] == 0 and "Valid values: " in result["note"]
+
+    def test_small_count_carries_items_with_readable_relations(self, assets, reader):
+        from chat.orm_query import execute_tool_query, format_query_result
+
+        result = execute_tool_query(
+            {"model": "asset", "action": "count", "search": "payments"},
+            scope_for(reader),
+        )
+        text = format_query_result(result)
+        assert "supported_by=database" in text
+        assert "secret server" not in text
+
+    def test_value_of_a_curated_relation_is_used(self, domain, reader):
+        from iam.models import Folder
+        from tprm.models import Entity, Tier
+
+        from chat.orm_query import execute_tool_query
+
+        tier = Tier.objects.filter(name="critical").first() or Tier.objects.create(
+            name="critical", rank=4, folder=Folder.get_root_folder()
+        )
+        # tiers are global (root folder): readable with a root perimeter only
+        reader.user_groups.get().roleassignment_set.get().perimeter_folders.add(
+            Folder.get_root_folder()
+        )
+        Entity.objects.create(name="key vendor", folder=domain, tier=tier)
+        Entity.objects.create(name="minor vendor", folder=domain)
+        result = execute_tool_query(
+            {"model": "entity", "action": "list", "severity": ["critical"]},
+            scope_for(reader),
+        )
+        assert [o["name"] for o in result["objects"]] == ["key vendor"]
+        assert result["objects"][0]["tier"] == "critical"
+
+    def test_linked_to_follows_relations_of_readable_objects_only(self, assets, reader):
+        from chat.orm_query import execute_tool_query
+
+        linked = execute_tool_query(
+            {"model": "asset", "action": "list", "linked_to": "payments"},
+            scope_for(reader),
+        )
+        assert [o["name"] for o in linked["objects"]] == ["database"]
+        # an object the user cannot read neither matches nor is confirmed to exist
+        hidden = execute_tool_query(
+            {"model": "asset", "action": "list", "linked_to": "secret server"},
+            scope_for(reader),
+        )
+        assert (
+            hidden["total_count"] == 0 and "(unknown)" in hidden["filters_applied"][-1]
+        )
+
+    def test_exclude_status(self, domain, reader):
+        from core.models import AppliedControl
+
+        from chat.orm_query import execute_tool_query
+
+        AppliedControl.objects.create(name="done one", status="active", folder=domain)
+        AppliedControl.objects.create(name="open one", status="to_do", folder=domain)
+        result = execute_tool_query(
+            {
+                "model": "applied_control",
+                "action": "list",
+                "exclude_status": ["active"],
+            },
+            scope_for(reader),
+        )
+        assert [o["name"] for o in result["objects"]] == ["open one"]
+
+    def test_object_name_in_has_related_is_a_link(self, assets, reader):
+        from chat.orm_query import execute_tool_query
+
+        result = execute_tool_query(
+            {"model": "asset", "action": "list", "has_related": ["payments"]},
+            scope_for(reader),
+        )
+        assert [o["name"] for o in result["objects"]] == ["database"]
+        unknown = execute_tool_query(
+            {"model": "asset", "action": "list", "has_related": ["shiny"]},
+            scope_for(reader),
+        )
+        assert unknown["total_count"] == 0 and "Valid values" in unknown["note"]
+
+    def test_search_naming_a_related_object_falls_back_to_link(self, assets, reader):
+        from core.models import AppliedControl
+
+        from chat.orm_query import execute_tool_query
+
+        mfa = AppliedControl.objects.create(name="mfa", folder=assets.folder)
+        mfa.assets.add(assets)
+        AppliedControl.objects.create(name="backups", folder=assets.folder)
+        result = execute_tool_query(
+            {"model": "applied_control", "action": "list", "search": "payments"},
+            scope_for(reader),
+        )
+        assert [o["name"] for o in result["objects"]] == ["mfa"]
+        assert "linked to 'payments'" in result["filters_applied"]
+
+    def test_requirement_assessment_is_searched_by_its_requirement(self, audit, reader):
+        from chat.orm_query import execute_tool_query
+
+        result = execute_tool_query(
+            {"model": "requirement_assessment", "action": "list", "search": "A.1"},
+            scope_for(reader),
+        )
+        assert result["total_count"] == 1
+
+    def test_unknown_field_note_skips_large_catalogues(self, domain, reader):
+        from tprm.models import Entity
+
+        from chat.orm_query import execute_tool_query
+
+        Entity.objects.create(name="key vendor", folder=domain)
+        result = execute_tool_query(
+            {"model": "entity", "action": "list", "status": ["foo"]},
+            scope_for(reader),
+        )
+        assert result["total_count"] == 0
+        # countries and currencies would drown the values a small model needs
+        assert "country:" not in result["note"] and "currency:" not in result["note"]

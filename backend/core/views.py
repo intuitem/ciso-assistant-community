@@ -9188,12 +9188,13 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
 
     model = Folder
     filterset_class = FolderFilter
-    search_fields = ["name"]
+    search_fields = ["name", "ref_id"]
 
     # Columns mirror the domains import template, so an export can be re-imported.
     export_config = {
         "fields": {
             "internal_id": {"source": "id", "label": "internal_id"},
+            "ref_id": {"source": "ref_id", "label": "ref_id", "escape": True},
             "name": {"source": "name", "label": "name", "escape": True},
             "description": {
                 "source": "description",

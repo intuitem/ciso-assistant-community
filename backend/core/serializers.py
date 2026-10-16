@@ -3118,6 +3118,7 @@ class FolderImportExportSerializer(BaseModelSerializer):
         model = Folder
         fields = [
             "parent_folder",
+            "ref_id",
             "name",
             "description",
             "content_type",
