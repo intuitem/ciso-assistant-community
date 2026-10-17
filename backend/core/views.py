@@ -2683,9 +2683,10 @@ class AssetCapabilityViewSet(BaseModelViewSet):
 class IntegrationLinkViewSetMixin:
     """Viewset hooks to link a local object to a remote ITSM record.
 
-    Reads the write-only integration_config/remote_object_id/create_remote_object
-    fields and, after the local object is saved, either creates a remote object
-    (create_remote_object) or links to an existing one (remote_object_id). The
+    Reads the write-only integration_config/remote_object_id fields and, after
+    the local object is saved, either creates a remote object (on create, when
+    an integration_config is selected) or links to an existing one
+    (remote_object_id, on update). The
     push field list is derived from the model's syncable spec. Requires the
     model to define INTEGRATION_MODEL_KEY.
     """
@@ -2697,15 +2698,12 @@ class IntegrationLinkViewSetMixin:
         return list(mappable_field_keys(key)) if key else []
 
     def perform_create(self, serializer):
-        create_remote_object = serializer.validated_data.pop(
-            "create_remote_object", False
-        )
         integration_config = serializer.validated_data.pop("integration_config", None)
         serializer.validated_data.pop("remote_object_id", None)
 
         super().perform_create(serializer)
 
-        if create_remote_object and integration_config:
+        if integration_config:
             from django.contrib.contenttypes.models import ContentType
 
             try:
@@ -2728,7 +2726,6 @@ class IntegrationLinkViewSetMixin:
     def perform_update(self, serializer):
         integration_config = serializer.validated_data.pop("integration_config", None)
         remote_object_id = serializer.validated_data.pop("remote_object_id", None)
-        serializer.validated_data.pop("create_remote_object", None)
 
         super().perform_update(serializer)
 
@@ -6192,9 +6189,6 @@ class AppliedControlViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSe
         return Response(result)
 
     def perform_create(self, serializer):
-        create_remote_object = serializer.validated_data.pop(
-            "create_remote_object", False
-        )
         integration_config = serializer.validated_data.pop("integration_config", None)
         serializer.validated_data.pop("remote_object_id", None)  # Remove if present
 
@@ -6202,7 +6196,8 @@ class AppliedControlViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSe
         super().perform_create(serializer)
         instance = serializer.instance
 
-        if create_remote_object and integration_config:
+        # Selecting an integration provider on creation implies creating the remote object
+        if integration_config:
             try:
                 logger.info(
                     "Creating remote object for Applied Control",
@@ -6229,7 +6224,6 @@ class AppliedControlViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSe
     def perform_update(self, serializer):
         integration_config = serializer.validated_data.pop("integration_config", None)
         remote_object_id = serializer.validated_data.pop("remote_object_id", None)
-        serializer.validated_data.pop("create_remote_object", None)  # Remove if present
 
         super().perform_update(serializer)
         if not integration_config or not remote_object_id:
