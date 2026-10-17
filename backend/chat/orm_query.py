@@ -11,7 +11,7 @@ import structlog
 from datetime import timedelta
 
 from django.apps import apps
-from django.core.exceptions import FieldDoesNotExist
+from django.core.exceptions import FieldDoesNotExist, FieldError
 from django.db.models import Q, Count
 from django.utils import timezone
 
@@ -298,7 +298,23 @@ def execute_tool_query(arguments: dict, scope, parsed_context=None) -> dict | No
     if related_filter and isinstance(related_filter, dict):
         rf_q = _build_related_filter(related_filter, model_class)
         if rf_q:
-            qs = qs.filter(rf_q["q"]).distinct()
+            try:
+                qs = qs.filter(rf_q["q"]).distinct()
+            except FieldError:
+                relation = related_filter["relation"]
+                target = model_class._meta.get_field(relation).related_model
+                fields = [f.name for f in target._meta.concrete_fields if f.choices]
+                return {
+                    "model_name": model_name,
+                    "display_name": display_name,
+                    "url_slug": url_slug,
+                    "query_type": action,
+                    "filters_applied": filters_applied + [f"{rf_q['label']} (unknown)"],
+                    "total_count": 0,
+                    "objects": [],
+                    "note": f"'{related_filter['condition']}' does not apply to {relation}. "
+                    f"Their fields with values: {', '.join(fields) or 'none'}.",
+                }
             filters_applied.append(rf_q["label"])
 
     # Text search — also searches through related object names (e.g., framework name)
