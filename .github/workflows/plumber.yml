@@ -23,6 +23,10 @@ jobs:
         with:
           github-token: ${{ secrets.PLUMBER_TOKEN || github.token }}
           min-points: 100
+          # Without PLUMBER_TOKEN (fork and Dependabot PRs) the token cannot read
+          # review settings, so branch protection would be falsely flagged.
+          # Pushes to main still run this control with the admin-read token.
+          skip-controls: ${{ secrets.PLUMBER_TOKEN == '' && 'branchMustBeProtected' || '' }}
           # Publish this repo's Plumber Score to score.getplumber.io so the
           # README badge stays live. Only publishes on the default branch;
           # never fails the build. All published scores are public.
