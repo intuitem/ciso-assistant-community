@@ -67,6 +67,9 @@ class EntityReadSerializer(BaseModelSerializer):
         """Format legal identifiers as a readable string for display"""
         if not obj.legal_identifiers:
             return ""
+        # legacy rows may hold a non-dict value written before validation existed
+        if not isinstance(obj.legal_identifiers, dict):
+            return str(obj.legal_identifiers)
         return "\n".join(
             [f"{key}: {value}" for key, value in obj.legal_identifiers.items()]
         )
@@ -175,7 +178,9 @@ class EntityWriteSerializer(BaseModelSerializer):
         """
         Validate legal identifiers, ensuring LEI is exactly 20 characters if provided.
         """
-        if value and isinstance(value, dict):
+        if not isinstance(value, dict):
+            raise serializers.ValidationError(_("Legal identifiers must be an object"))
+        if value:
             lei = value.get("LEI", "")
             # Strip whitespace and check if LEI exists
             if lei:

@@ -13,6 +13,14 @@ from ..utils.response_formatter import (
     success_response,
 )
 
+# Library object types are plural; models may still send the legacy singular,
+# which the API only matches against libraries written with that spelling.
+PLURAL_OBJECT_TYPES = {
+    "framework": "frameworks",
+    "risk_matrix": "risk_matrices",
+    "requirement_mapping_set": "requirement_mapping_sets",
+}
+
 
 async def get_stored_libraries(
     object_type: str = None,
@@ -26,7 +34,7 @@ async def get_stored_libraries(
     Prefer `search` to find one by name; use `offset` to walk the whole catalogue.
 
     Args:
-        object_type: Object type (e.g. "framework", "risk_matrix")
+        object_type: Object type (e.g. "frameworks", "risk_matrices")
         provider: Provider name
         search: Free-text match on name, description, URN or ref_id
         offset: Row to start from, for paging past the first response
@@ -34,7 +42,7 @@ async def get_stored_libraries(
     try:
         params = {}
         if object_type:
-            params["object_type"] = object_type
+            params["object_type"] = PLURAL_OBJECT_TYPES.get(object_type, object_type)
         if provider:
             params["provider"] = provider
         if search:

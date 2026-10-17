@@ -654,7 +654,7 @@ class RiskAssessmentWriteSerializer(BaseModelSerializer):
 class RiskAssessmentDuplicateSerializer(BaseModelSerializer):
     class Meta:
         model = RiskAssessment
-        fields = ["name", "version", "perimeter", "description", "folder"]
+        fields = ["name", "ref_id", "version", "perimeter", "description", "folder"]
 
 
 class RiskAssessmentReadSerializer(AssessmentReadSerializer):
@@ -5278,15 +5278,10 @@ class RequirementMappingSetReadSerializer(BaseModelSerializer):
         Fallback used on the retrieve path, where no pre-built map is in
         context. Resolves regardless of whether the framework is imported.
         """
-        lib = StoredLibrary.objects.filter(
-            content__framework__urn=urn,
-            content__framework__isnull=False,
-            content__requirement_mapping_set__isnull=True,
-            content__requirement_mapping_sets__isnull=True,
-        ).first()
+        lib = StoredLibrary.framework_libraries([urn]).first()
         if lib is None:
             return None
-        framework = lib.content.get("framework") or {}
+        framework = StoredLibrary.framework_of(lib.content) or {}
         return framework.get("name", urn)
 
     def _framework_info(self, urn):
