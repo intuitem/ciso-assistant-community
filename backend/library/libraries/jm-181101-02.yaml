@@ -7,7 +7,7 @@ name: "JM 181101-02 \u2013 Reglamento de Seguridad Cibern\xE9tica y de la Inform
   n"
 description: "Reglamento de Seguridad Cibernética y de la Información, aprobado por la Junta Monetaria de la República Dominicana mediante su Segunda Resolución del 1 de noviembre de 2018 (JM 181101-02). Aplica a las entidades de intermediación financiera, a los administradores y participantes del Sistema de Pagos y Liquidación de Valores (SIPARD) y a las entidades de apoyo y servicios conexos. Texto literal estructurado por artículo, párrafo, numeral y literal. Fuente oficial: https://sb.gob.do/media/dtydqoiv/20181101_segunda-resolucion_reglamento_seguridad_cibernetica_de_la_informacion.pdf"
 copyright: "Texto oficial de la Junta Monetaria de la República Dominicana (Segunda Resolución del 1 de noviembre de 2018). Transcripción estructurada por Soluciones GE, SRL."
-version: 2
+version: 3
 publication_date: 2026-10-03
 provider: "Junta Monetaria de la Rep\xFAblica Dominicana"
 packager: soluciones-ge
@@ -21,7 +21,7 @@ objects:
       tica y de la Informaci\xF3n."
     requirement_nodes:
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:1
-      assessable: true
+      assessable: false
       depth: 1
       ref_id: '1'
       name: "Art. 1 \u2013 Objeto"
@@ -41,7 +41,7 @@ objects:
         \ 21 de noviembre del 2002 y sus modificaciones, y a los est\xE1ndares internacionales\
         \ en la materia."
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:2
-      assessable: true
+      assessable: false
       depth: 1
       ref_id: '2'
       name: "Art. 2 \u2013 Alcance"
@@ -52,63 +52,63 @@ objects:
         \ como la adopci\xF3n e implementaci\xF3n de pr\xE1cticas para la gesti\xF3\
         n de riesgos de la Seguridad Cibern\xE9tica y de la Informaci\xF3n."
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:3
-      assessable: true
+      assessable: false
       depth: 1
       ref_id: '3'
       name: "Art. 3 \u2013 \xC1mbito de Aplicaci\xF3n"
       description: "Las disposiciones establecidas en este Reglamento son de aplicaci\xF3\
         n para las entidades que se identifican a continuaci\xF3n:"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:3.a
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:3
       ref_id: 3.a
       name: lit. a)
       description: "Bancos M\xFAltiples;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:3.b
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:3
       ref_id: 3.b
       name: lit. b)
       description: "Bancos de Ahorro y Cr\xE9dito;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:3.c
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:3
       ref_id: 3.c
       name: lit. c)
       description: "Corporaciones de Cr\xE9dito;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:3.d
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:3
       ref_id: 3.d
       name: lit. d)
       description: "Asociaciones de Ahorros y Pr\xE9stamos;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:3.e
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:3
       ref_id: 3.e
       name: lit. e)
       description: "Entidades P\xFAblicas de Intermediaci\xF3n Financiera;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:3.f
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:3
       ref_id: 3.f
       name: lit. f)
       description: "Administradores de Sistemas de Pago y Liquidaci\xF3n de Valores;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:3.g
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:3
       ref_id: 3.g
       name: lit. g)
       description: Participantes del SIPARD autorizados por la Junta Monetaria; y,
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:3.h
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:3
       ref_id: 3.h
@@ -116,7 +116,7 @@ objects:
       description: Cualquier otro tipo de entidad del SIPARD, que la Junta Monetaria
         autorice en el futuro.
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:3.p
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:3
       ref_id: 3.P
@@ -152,14 +152,14 @@ objects:
         \ Cibern\xE9tica y de la Informaci\xF3n en los casos en que la amenaza tenga\
         \ incidencia en la Rep\xFAblica Dominicana."
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
-      assessable: true
+      assessable: false
       depth: 1
       ref_id: '5'
       name: "Art. 5 \u2013 Definiciones"
       description: "Para efectos de este Reglamento, los t\xE9rminos y conceptos que\
         \ se detallan a continuaci\xF3n, tendr\xE1n los significados siguientes:"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.a
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.a
@@ -169,7 +169,7 @@ objects:
         \ de la informaci\xF3n contenida en el sistema o controlar componentes y funciones\
         \ del mismo;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.b
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.b
@@ -177,7 +177,7 @@ objects:
       description: "Activo de Informaci\xF3n: Bien tangible o intangible, que almacena,\
         \ procesa y/o transmite informaci\xF3n;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.c
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.c
@@ -188,7 +188,7 @@ objects:
         \ autorizada a ofrecer servicios de registro, transferencia, compensaci\xF3\
         n y liquidaci\xF3n de valores en lo relativo al traspaso de los valores negociables;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.d
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.d
@@ -198,7 +198,7 @@ objects:
         \ y operaciones generales de las entidades, que han sido previamente aprobadas\
         \ por el Consejo;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.e
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.e
@@ -210,7 +210,7 @@ objects:
         \ la vez que existe una vulnerabilidad o debilidad de los sistemas o aprovechando\
         \ su existencia, puede derivar en un incidente de seguridad;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.f
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.f
@@ -219,7 +219,7 @@ objects:
         \ tipos de riesgos que el Consejo y la Alta Gerencia est\xE1n dispuestos a\
         \ asumir y gestionar para cumplir sus objetivos de negocios;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.g
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.g
@@ -229,7 +229,7 @@ objects:
         n con el entorno interno y externo, y la forma de operar para respaldar la\
         \ misi\xF3n y contribuir a la posici\xF3n de seguridad general de la misma;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.h
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.h
@@ -242,7 +242,7 @@ objects:
         \ su alineaci\xF3n a las pol\xEDticas definidas por la misma y sus planes\
         \ estrat\xE9gicos;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.i
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.i
@@ -255,15 +255,14 @@ objects:
         n de sus servicios, o el da\xF1o a la Infraestructura Tecnol\xF3gica que los\
         \ soporta;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.j
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.j
       name: lit. j)
-      description: "Ataque Cibern\xE9tico: a trav\xE9s del ciberespacio; Ataque a\
-        \ la Infraestructura Tecnol\xF3gica"
+      description: "Ataque Cibernético: Ataque a la Infraestructura Tecnológica a través del ciberespacio;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.k
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.k
@@ -271,7 +270,7 @@ objects:
       description: "Autenticaci\xF3n: Acto de validar la identidad de un usuario para\
         \ otorgarle acceso a recursos tecnol\xF3gicos;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.l
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.l
@@ -281,7 +280,7 @@ objects:
         gicas, el Internet, redes de telecomunicaciones, procesadores y controladores\
         \ integrados, sin menoscabo de otros componentes que puedan surgir en el futuro;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.m
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.m
@@ -291,7 +290,7 @@ objects:
         \ el objetivo de evitar que una persona no autorizada, al verlos o copiarlos\
         \ pueda interpretarlos;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.n
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.n
@@ -300,7 +299,7 @@ objects:
         \ permanente o temporal a una entidad, a cambio de una contraprestaci\xF3\
         n econ\xF3mica y que est\xE1 asociado a la misma por un contrato de trabajo;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.o
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.o
@@ -311,7 +310,7 @@ objects:
         \ para acceder a dicha informaci\xF3n. Incluye los medios para proteger la\
         \ privacidad personal y la Informaci\xF3n Esencial;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.p
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.p
@@ -322,7 +321,7 @@ objects:
         \ no pudiendo delegar su responsabilidad. Se refiere al consejo de directores,\
         \ consejo de administraci\xF3n o junta de directores, seg\xFAn corresponda;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.q
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.q
@@ -332,7 +331,7 @@ objects:
         \ de procesamiento de informaci\xF3n relacionados, o entrar en instalaciones\
         \ f\xEDsicas espec\xEDficas;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.r
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.r
@@ -340,7 +339,7 @@ objects:
       description: "Copias de Resguardo: Proceso de copiar informaci\xF3n para facilitar\
         \ la recuperaci\xF3n de las mismas, en caso de que sea necesario."
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.s
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.s
@@ -348,7 +347,7 @@ objects:
       description: "Data: Subconjunto de informaci\xF3n en formato electr\xF3nico\
         \ que permite ser recuperado o transmitido;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.t
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.t
@@ -357,7 +356,7 @@ objects:
         rica, alfab\xE9tica, gr\xE1fica, fotogr\xE1fica, ac\xFAstica o de cualquier\
         \ otro tipo, concerniente a personas f\xEDsicas identificadas o identificables;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.u
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.u
@@ -365,7 +364,7 @@ objects:
       description: "Disponibilidad: La propiedad de la informaci\xF3n, de ser accesible\
         \ y utilizable a pedido de un usuario, entidad o proceso autorizado;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.v
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.v
@@ -382,7 +381,7 @@ objects:
         genes, videos, datos biom\xE9tricos, ubicaci\xF3n, entre otros) y/o caracter\xED\
         sticas integradas para sincronizar datos locales con ubicaciones remotas;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.w
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.w
@@ -392,7 +391,7 @@ objects:
         n de actos, hechos o datos jur\xEDdicamente relevantes y a la cual se accede\
         \ utilizando m\xE9todos electr\xF3nicos, \xF3pticos o similares;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.x
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.x
@@ -402,7 +401,7 @@ objects:
         \ de tarjetas bancarias y el establecimiento donde se realiza una operaci\xF3\
         n de pago a trav\xE9s de dichas tarjetas;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.y
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.y
@@ -414,7 +413,7 @@ objects:
         \ equipos a participantes y administradores de un sistema de pago, interconectadas\
         \ con las entidades de intermediaci\xF3n financiera y con el SIPARD;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.z
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.z
@@ -426,7 +425,7 @@ objects:
         \ instrumento de captaci\xF3n o cesi\xF3n utilizado, as\xED como otras operaciones\
         \ y servicios previstos en la referida Ley;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.aa
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.aa
@@ -435,7 +434,7 @@ objects:
         \ una relaci\xF3n contractual, mantiene una conexi\xF3n electr\xF3nica y/o\
         \ intercambio de informaci\xF3n con una entidad de intermediaci\xF3n financiera;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.bb
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.bb
@@ -445,7 +444,7 @@ objects:
         \ servicio contratado por otra persona, para el uso, procesamiento, almacenamiento\
         \ o transmisi\xF3n de los mismos;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.cc
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.cc
@@ -458,7 +457,7 @@ objects:
         \ cibern\xE9tica, apoyado en Infraestructuras Tecnol\xF3gicas dise\xF1adas\
         \ para tales fines;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.dd
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.dd
@@ -466,7 +465,7 @@ objects:
       description: "Factores de Riesgo: Fuentes generadoras de posibles eventos de\
         \ p\xE9rdida por Ataques Cibern\xE9ticos;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.ee
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.ee
@@ -478,7 +477,7 @@ objects:
         \ texto del mensaje, y que el mensaje inicial no ha sido modificado despu\xE9\
         s de efectuada la transmisi\xF3n;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.ff
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.ff
@@ -488,7 +487,7 @@ objects:
         \ en dicho dispositivo, debiendo permanecer inalterado durante su ejecuci\xF3\
         n;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.gg
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.gg
@@ -500,7 +499,7 @@ objects:
         \ de cobertura para proteger los recursos propios y de terceros que se encuentran\
         \ bajo su control y administraci\xF3n;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.hh
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.hh
@@ -511,7 +510,7 @@ objects:
         \ una violaci\xF3n o amenaza inminente de violaci\xF3n de pol\xEDticas, o\
         \ procedimientos de seguridad o pol\xEDticas de uso aceptable;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.ii
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.ii
@@ -521,7 +520,7 @@ objects:
         ticas de servicios financieros, resultando en un riesgo sist\xE9mico para\
         \ el sector financiero o en p\xE9rdida de la confianza p\xFAblica."
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.jj
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.jj
@@ -530,7 +529,7 @@ objects:
         \ de las actividades fundamentales de la entidad, que sustenta la operatividad\
         \ de la Infraestructura Tecnol\xF3gica;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.kk
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.kk
@@ -538,7 +537,7 @@ objects:
       description: "Informaci\xF3n Esencial de Tipo Maestro: Conjunto de datos b\xE1\
         sicos, cuyos registros sufren poca o ninguna variaci\xF3n en el tiempo;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.ll
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.ll
@@ -547,7 +546,7 @@ objects:
         \ cuyos registros contienen informaci\xF3n sobre las transacciones realizadas\
         \ en un sistema de informaci\xF3n;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.mm
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.mm
@@ -556,7 +555,7 @@ objects:
         \ la entidad para procesar la informaci\xF3n, as\xED como las adecuaciones\
         \ del espacio f\xEDsico que los aloja;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.nn
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.nn
@@ -565,7 +564,7 @@ objects:
         \ mismos no han sido alterados de manera no autorizada o destruidos de manera\
         \ inadecuada, durante su creaci\xF3n, transmisi\xF3n o almacenamiento;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.oo
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.oo
@@ -574,7 +573,7 @@ objects:
         n: Control t\xE9cnico o estrat\xE9gico aplicable para el tratamiento de los\
         \ riesgos inherentes a la Seguridad Cibern\xE9tica y de la Informaci\xF3n;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.pp
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.pp
@@ -586,7 +585,7 @@ objects:
         \ y software, controles, procedimientos operativos y procedimientos de gesti\xF3\
         n;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.qq
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.qq
@@ -594,7 +593,7 @@ objects:
       description: "Mensaje de Datos: Informaci\xF3n generada, enviada, recibida,\
         \ almacenada o comunicada por medios electr\xF3nicos, \xF3pticos o similares;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.rr
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.rr
@@ -603,7 +602,7 @@ objects:
         \ transmisi\xF3n de texto, im\xE1genes, audio y video en tiempo real a trav\xE9\
         s de redes de comunicaci\xF3n;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.ss
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.ss
@@ -613,7 +612,7 @@ objects:
         \ de la informaci\xF3n y la Infraestructura Tecnol\xF3gica de los que depende\
         \ la operaci\xF3n de la entidad;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.tt
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.tt
@@ -621,7 +620,7 @@ objects:
       description: "Nivel de acceso a la Informaci\xF3n: Es el que se puede tener\
         \ seg\xFAn su contenido, la cual se clasifica en los niveles siguientes:"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.tt.i
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.tt
       ref_id: 5.tt.i
@@ -630,7 +629,7 @@ objects:
         \ como no confidencial y, en consecuencia, puede divulgarse sin ninguna responsabilidad\
         \ para la entidad;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.tt.ii
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.tt
       ref_id: 5.tt.ii
@@ -638,7 +637,7 @@ objects:
       description: "De Uso Interno: Informaci\xF3n perteneciente a la entidad cuyo\
         \ acceso est\xE1 disponible a los colaboradores;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.tt.iii
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.tt
       ref_id: 5.tt.iii
@@ -646,7 +645,7 @@ objects:
       description: "Confidencial del Cliente: Datos de car\xE1cter personal de los\
         \ clientes cuyo acceso es restringido; y,"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.tt.iv
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.tt
       ref_id: 5.tt.iv
@@ -655,7 +654,7 @@ objects:
         \ para el funcionamiento esencial de la misma, cuyo acceso est\xE1 restringido\
         \ seg\xFAn el grado de responsabilidad."
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.uu
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.uu
@@ -664,7 +663,7 @@ objects:
         n de una informaci\xF3n seg\xFAn su contenido, clasific\xE1ndose en los niveles\
         \ siguientes:"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.uu.i
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.uu
       ref_id: 5.uu.i
@@ -674,7 +673,7 @@ objects:
         \ de la informaci\xF3n, ni puede generar da\xF1o alguno, sea por p\xE9rdida,\
         \ robo, alteraci\xF3n, uso inadecuado o divulgaci\xF3n de la misma; y,"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.uu.ii
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.uu
       ref_id: 5.uu.ii
@@ -684,7 +683,7 @@ objects:
         n, y que la p\xE9rdida, robo, alteraci\xF3n, uso inadecuado o divulgaci\xF3\
         n de la misma puede perjudicar al due\xF1o o titular de la informaci\xF3n."
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.vv
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.vv
@@ -695,7 +694,7 @@ objects:
         dicas prestadoras de servicios que, a trav\xE9s de otro participante, forman\
         \ parte de un sistema de pagos y liquidaci\xF3n de valores;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.ww
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.ww
@@ -705,7 +704,7 @@ objects:
         sito de mantener informaci\xF3n hist\xF3rica para fines de control, supervisi\xF3\
         n y auditor\xEDa;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.xx
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.xx
@@ -715,7 +714,7 @@ objects:
         funcionamiento, buscando minimizar el impacto operativo y financiero que pueda
         ocasionar cualquier evento inesperado;'
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.yy
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.yy
@@ -725,7 +724,7 @@ objects:
         \ destinados a mitigar el impacto provocado por la concreci\xF3n de determinados\
         \ riesgos sobre la informaci\xF3n y los procesos de negocio de una sociedad;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.zz
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.zz
@@ -734,7 +733,7 @@ objects:
         \ de actividades y cursos de acci\xF3n, por medio de los cuales se asegura\
         \ el cumplimiento de una funci\xF3n operativa;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.aaa
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.aaa
@@ -743,7 +742,7 @@ objects:
         \ del negocio y las operaciones de la entidad, y cuya falta de identificaci\xF3\
         n o aplicaci\xF3n deficiente puede generar un impacto financiero negativo;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.bbb
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.bbb
@@ -753,7 +752,7 @@ objects:
         \ deben documentar, desarrollar e implementar, a fin de cumplir las disposiciones\
         \ y requerimientos establecidos en este Reglamento;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.ccc
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.ccc
@@ -763,7 +762,7 @@ objects:
         nicos para habilitar a un tarjetahabiente para realizar una transacci\xF3\
         n;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.ddd
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.ddd
@@ -774,7 +773,7 @@ objects:
         \ como internet, garantizando la seguridad de la misma mediante el cifrado\
         \ de la comunicaci\xF3n;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.eee
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.eee
@@ -783,7 +782,7 @@ objects:
         rdidas que afecte los resultados, el patrimonio, la solvencia y liquidez de\
         \ las entidades;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.fff
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.fff
@@ -793,7 +792,7 @@ objects:
         \ personas, o sistemas internos, o bien a causa de acontecimientos externos.\
         \ Incluye el riesgo legal, pero excluye el riesgo estrat\xE9gico y reputacional;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.ggg
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.ggg
@@ -802,7 +801,7 @@ objects:
         \ relacionado con la afectaci\xF3n de la confidencialidad, integridad o disponibilidad\
         \ de la informaci\xF3n o de la Infraestructura Tecnol\xF3gica;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.hhh
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.hhh
@@ -811,7 +810,7 @@ objects:
         \ todos sus formatos durante el almacenamiento, trasmisi\xF3n y procesamiento\
         \ de la misma a trav\xE9s del Ciberespacio;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.iii
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.iii
@@ -823,7 +822,7 @@ objects:
         \ a fin de proporcionar confidencialidad, integridad y disponibilidad de la\
         \ informaci\xF3n a lo interno de la entidad;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.jjj
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.jjj
@@ -836,7 +835,7 @@ objects:
         \ demanda, acceso universal a redes interconectadas, agrupaci\xF3n de recursos\
         \ independiente de la ubicaci\xF3n, flexibilidad y calidad del servicio;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.kkk
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.kkk
@@ -846,7 +845,7 @@ objects:
         \ transmitir y/o recibir datos, con el objetivo de satisfacer una necesidad\
         \ de informaci\xF3n;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.lll
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.lll
@@ -855,7 +854,7 @@ objects:
         \ de transferencia de fondos que aseguran la circulaci\xF3n del dinero. Posee\
         \ un administrador y participantes;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.mmm
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.mmm
@@ -866,7 +865,7 @@ objects:
         \ de valores reconocidos, al cual se encuentran adscritas las entidades de\
         \ intermediaci\xF3n financiera, as\xED como otras entidades debidamente autorizadas;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.nnn
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.nnn
@@ -879,7 +878,7 @@ objects:
         \ por s\xED mismo y por los Tarjetahabientes adicionales autorizados por \xE9\
         l;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.ooo
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.ooo
@@ -889,7 +888,7 @@ objects:
         \ otro tipo de tarjeta que se emita en el futuro), asociadas o no a una cuenta\
         \ bancaria;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.ppp
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.ppp
@@ -900,7 +899,7 @@ objects:
         \ de administraci\xF3n de bases de datos, etc.), redes, multimedia, servicios\
         \ asociados, entre otros; y,"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5.qqq
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:5
       ref_id: 5.qqq
@@ -2729,7 +2728,7 @@ objects:
         tica y de la Informaci\xF3n de sus entes regulados, as\xED como de la evaluaci\xF3\
         n independiente de la eficacia de dicha gesti\xF3n."
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49
-      assessable: true
+      assessable: false
       depth: 1
       ref_id: '49'
       name: "Art. 49 \u2013 Del Consejo Sectorial"
@@ -2737,7 +2736,7 @@ objects:
         \ Seguridad Cibern\xE9tica del sector financiero y estar\xE1 integrado de\
         \ la manera siguiente:"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.1
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49
       ref_id: '49.1'
@@ -2745,35 +2744,35 @@ objects:
       description: 'Miembros permanentes con Voz y Voto:'
       annotation: "Agrupación añadida para distinguir las dos listas del artículo (miembros e invitados), que usan las mismas letras. El texto es literal."
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.1.a
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.1
       ref_id: 49.1.a
       name: "n\xFAm. 1, lit. a)"
       description: "El Gobernador del Banco Central, quien lo Presidir\xE1;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.1.b
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.1
       ref_id: 49.1.b
       name: "n\xFAm. 1, lit. b)"
       description: El Superintendente de Bancos;
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.1.c
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.1
       ref_id: 49.1.c
       name: "n\xFAm. 1, lit. c)"
       description: El Superintendente del Mercado de Valores;
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.1.d
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.1
       ref_id: 49.1.d
       name: "n\xFAm. 1, lit. d)"
       description: El Contralor del Banco Central;
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.1.e
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.1
       ref_id: 49.1.e
@@ -2781,7 +2780,7 @@ objects:
       description: "El Subgerente de Sistemas e Innovaci\xF3n Tecnol\xF3gica del Banco\
         \ Central;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.1.f
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.1
       ref_id: 49.1.f
@@ -2789,7 +2788,7 @@ objects:
       description: "El Presidente de la Asociaci\xF3n de Bancos Comerciales de la\
         \ Rep\xFAblica Dominicana, Inc. (ABA);"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.1.g
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.1
       ref_id: 49.1.g
@@ -2797,7 +2796,7 @@ objects:
       description: "El Presidente de la Liga de Asociaciones de Ahorros y Pr\xE9stamos\
         \ Dominicana (LIDAAPI);"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.1.h
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.1
       ref_id: 49.1.h
@@ -2805,7 +2804,7 @@ objects:
       description: "El Presidente de la Asociaci\xF3n de Bancos de Ahorro y Cr\xE9\
         dito y Corporaciones de Cr\xE9dito, Inc. (ABANCORD); y,"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.1.i
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.1
       ref_id: 49.1.i
@@ -2815,7 +2814,7 @@ objects:
         \ habilitado de conformidad con este Reglamento, quien fungir\xE1 como Secretario,\
         \ pero s\xF3lo con voz."
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.2
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49
       ref_id: '49.2'
@@ -2823,14 +2822,14 @@ objects:
       description: 'Invitados permanentes con Voz:'
       annotation: Ver nota de 49.1.
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.2.a
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.2
       ref_id: 49.2.a
       name: "n\xFAm. 2, lit. a)"
       description: El Director de Seguridad Operativa del Banco Central;
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.2.b
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.2
       ref_id: 49.2.b
@@ -2838,21 +2837,21 @@ objects:
       description: "El Director del Departamento de Sistemas y Tecnolog\xEDa del Banco\
         \ Central;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.2.c
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.2
       ref_id: 49.2.c
       name: "n\xFAm. 2, lit. c)"
       description: El Director del Departamento del Sistema de Pagos del Banco Central;
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.2.d
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.2
       ref_id: 49.2.d
       name: "n\xFAm. 2, lit. d)"
       description: El Director del Departamento de Seguridad Interna del Banco Central;
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.2.e
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.2
       ref_id: 49.2.e
@@ -2860,7 +2859,7 @@ objects:
       description: "El Responsable de la Oficina de Gesti\xF3n de Riesgos y Continuidad\
         \ del Banco Central;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.2.f
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.2
       ref_id: 49.2.f
@@ -2868,14 +2867,14 @@ objects:
       description: "El Director del Departamento de Tecnolog\xEDa y Operaciones de\
         \ la Superintendencia de Bancos;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.2.g
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.2
       ref_id: 49.2.g
       name: "n\xFAm. 2, lit. g)"
       description: El Director de Riesgos y Estudios de la Superintendencia de Bancos;
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.2.h
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.2
       ref_id: 49.2.h
@@ -2883,7 +2882,7 @@ objects:
       description: "Un representante de alta jerarqu\xEDa de la Superintendencia del\
         \ Mercado de Valores; y,"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.2.i
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.2
       ref_id: 49.2.i
@@ -2891,7 +2890,7 @@ objects:
       description: "Un representante de alta jerarqu\xEDa de la Superintendencia de\
         \ Pensiones."
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.p1
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49
       ref_id: 49.P1
@@ -2899,7 +2898,7 @@ objects:
       description: "Los miembros permanentes de este Consejo Sectorial podr\xE1n delegar\
         \ su representaci\xF3n en un funcionario de alta jerarqu\xEDa."
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.p2
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49
       ref_id: 49.P2
@@ -2907,7 +2906,7 @@ objects:
       description: "Los invitados permanentes de este Consejo Sectorial no podr\xE1\
         n delegar su representaci\xF3n."
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49.p3
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:49
       ref_id: 49.P3
@@ -2916,14 +2915,14 @@ objects:
         \ al sector financiero a reuniones puntuales por requerimiento de 3 (tres)\
         \ o m\xE1s de sus miembros."
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:50
-      assessable: true
+      assessable: false
       depth: 1
       ref_id: '50'
       name: "Art. 50 \u2013 Facultades"
       description: "El Consejo Sectorial tendr\xE1 de manera enunciativa, pero no\
         \ limitativa, las facultades siguientes:"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:50.a
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:50
       ref_id: 50.a
@@ -2932,7 +2931,7 @@ objects:
         n del Equipo de Respuesta a Incidentes de Seguridad Cibern\xE9tica (CSIRT,\
         \ por sus siglas en ingl\xE9s;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:50.b
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:50
       ref_id: 50.b
@@ -2941,7 +2940,7 @@ objects:
         \ de Seguridad Cibern\xE9tica (CSIRT, por sus siglas en ingl\xE9s) y al funcionamiento\
         \ de sus programas;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:50.c
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:50
       ref_id: 50.c
@@ -2953,7 +2952,7 @@ objects:
         n, manejo y recopilaci\xF3n de informaci\xF3n sobre incidentes de seguridad\
         \ cibern\xE9tica;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:50.d
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:50
       ref_id: 50.d
@@ -2962,7 +2961,7 @@ objects:
         \ los objetivos estrat\xE9gicos del Equipo de Respuesta a Incidentes de Seguridad\
         \ Cibern\xE9tica (CSIRT, por sus siglas en ingl\xE9s);"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:50.e
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:50
       ref_id: 50.e
@@ -2974,7 +2973,7 @@ objects:
         \ del SIPARD, las entidades p\xFAblicas de intermediaci\xF3n financiera y\
         \ las entidades de apoyo y servicios conexos;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:50.f
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:50
       ref_id: 50.f
@@ -2982,7 +2981,7 @@ objects:
       description: "Definir el marco de cooperaci\xF3n y comunicaci\xF3n con otras\
         \ comisiones de similar naturaleza y con aquellas definidas por Ley;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:50.g
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:50
       ref_id: 50.g
@@ -2990,14 +2989,14 @@ objects:
       description: "Definir los protocolos de comunicaci\xF3n hacia los dem\xE1s sectores\
         \ econ\xF3micos y sociales de la Rep\xFAblica Dominicana; y,"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:50.h
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:50
       ref_id: 50.h
       name: lit. h)
       description: Cualquier otra facultad atribuida por la Junta Monetaria.
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:51
-      assessable: true
+      assessable: false
       depth: 1
       ref_id: '51'
       name: "Art. 51 \u2013 Funcionamiento"
@@ -3008,7 +3007,7 @@ objects:
         \ de por lo menos 1 (una) vez por trimestre. El Presidente, podr\xE1 convocar\
         \ extraordinariamente a tantas sesiones de trabajo como sean necesarias."
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:52
-      assessable: true
+      assessable: false
       depth: 1
       ref_id: '52'
       name: "Art. 52 \u2013 Creaci\xF3n del Mecanismo"
@@ -3020,7 +3019,7 @@ objects:
         \ incidentes de seguridad cibern\xE9tica que afecten las entidades definidas\
         \ en el objeto y \xE1mbito de este Reglamento;"
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:52.p
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:52
       ref_id: 52.P
@@ -3030,7 +3029,7 @@ objects:
         \ del Equipo de Respuesta a Incidentes de Seguridad Cibern\xE9tica (CSIRT,\
         \ por sus siglas en ingl\xE9s), ser\xE1 determinado por la Junta Monetaria."
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:53
-      assessable: true
+      assessable: false
       depth: 1
       ref_id: '53'
       name: "Art. 53 \u2013 Responsabilidades"
@@ -3038,7 +3037,7 @@ objects:
         \ (CSIRT, por sus siglas en ingl\xE9s) debe cumplir con los deberes y responsabilidades\
         \ que le sean otorgadas por el Consejo Sectorial."
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:54
-      assessable: true
+      assessable: false
       depth: 1
       ref_id: '54'
       name: "Art. 54 \u2013 Estructura"
@@ -3046,7 +3045,7 @@ objects:
         \ (CSIRT, por sus siglas en ingl\xE9s) debe contar con una estructura org\xE1\
         nica que facilite el cumplimiento de sus deberes y responsabilidades."
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:55
-      assessable: true
+      assessable: false
       depth: 1
       ref_id: '55'
       name: "Art. 55 \u2013 Direcci\xF3n"
@@ -3056,7 +3055,7 @@ objects:
         \ y capacidad requerida para la direcci\xF3n de equipos de respuesta de esta\
         \ naturaleza."
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:56
-      assessable: true
+      assessable: false
       depth: 1
       ref_id: '56'
       name: "Art. 56 \u2013 Instalaciones"
@@ -3068,7 +3067,7 @@ objects:
         \ deber\xE1 contar con controles de seguridad f\xEDsicos y l\xF3gicos de manera\
         \ permanente."
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:56.p1
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:56
       ref_id: 56.P1
@@ -3077,7 +3076,7 @@ objects:
         \ con el fin de evitar el acceso no autorizado a los recursos y a la informaci\xF3\
         n."
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:56.p2
-      assessable: true
+      assessable: false
       depth: 2
       parent_urn: urn:soluciones-ge:risk:req_node:jm-181101-02:56
       ref_id: 56.P2
@@ -3090,7 +3089,7 @@ objects:
         \ por un estricto control de acceso, seg\xFAn lo definido en las pol\xEDticas\
         \ de acceso a ser elaboradas para esos fines."
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:57
-      assessable: true
+      assessable: false
       depth: 1
       ref_id: '57'
       name: "Art. 57 \u2013 Definici\xF3n de Pol\xEDticas"
@@ -3100,7 +3099,7 @@ objects:
         \ a los lineamientos definidos por este Reglamento y por las disposiciones\
         \ del Consejo Sectorial."
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:58
-      assessable: true
+      assessable: false
       depth: 1
       ref_id: '58'
       name: "Art. 58 \u2013 Establecimiento de los Servicios"
@@ -3112,7 +3111,7 @@ objects:
         \ servicios conexos, en sus procesos de respuesta a incidentes de seguridad\
         \ cibern\xE9tica."
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:59
-      assessable: true
+      assessable: false
       depth: 1
       ref_id: '59'
       name: "Art. 59 \u2013 Sanciones"
@@ -3123,7 +3122,7 @@ objects:
         n de las sanciones establecidas en la Ley Monetaria y Financiera y en el Reglamento\
         \ de Sanciones."
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:60
-      assessable: true
+      assessable: false
       depth: 1
       ref_id: '60'
       name: "Art. 60 \u2013 Medidas Precautorias"
@@ -3139,7 +3138,7 @@ objects:
         \ el organismo regulador correspondiente, la exclusi\xF3n definitiva del Sistema\
         \ de Pagos y Liquidaci\xF3n de Valores."
     - urn: urn:soluciones-ge:risk:req_node:jm-181101-02:61
-      assessable: true
+      assessable: false
       depth: 1
       ref_id: '61'
       name: "Art. 61 \u2013 Elaboraci\xF3n de Instructivos y Circulares"
