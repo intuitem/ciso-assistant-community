@@ -123,10 +123,11 @@
 		// inbox's read flag), so this is separable from `disableEdit` -- which it
 		// defaults to, leaving existing callers unaffected.
 		disableBatchEdit?: boolean;
-		/** Columns this model computes rather than stores: the backend cannot
-		 *  ORDER BY them, so the header must not offer a sort. Defaults to the
-		 *  resolved model's `ModelMapEntry.unsortableColumns`, so every caller
-		 *  gets it; pass this only to override that per table. */
+		/** Columns the backend cannot meaningfully ORDER BY (computed, or stored
+		 *  in a shape whose order means nothing), so the header must not offer
+		 *  a sort. Defaults to the resolved model's
+		 *  `ModelMapEntry.unsortableColumns`, so every caller gets it; pass this
+		 *  only to override that per table. */
 		unsortableColumns?: string[];
 		disableDelete?: boolean;
 		disableView?: boolean;

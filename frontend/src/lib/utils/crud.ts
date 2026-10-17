@@ -265,10 +265,13 @@ export interface ModelMapEntry {
 	 */
 	markdownFields?: string[];
 	/**
-	 * Columns this model computes in Python rather than storing, so there is no
-	 * column for the backend to ORDER BY: DRF drops the term and the header click
-	 * does nothing. Listed per model because the same name can be a stored column
-	 * elsewhere, as `progress` is on projects.
+	 * Columns the list header must not offer to sort. Mostly values this model
+	 * computes in Python rather than storing, so there is no column for the
+	 * backend to ORDER BY: DRF drops the term and the header click does nothing.
+	 * Also stored values whose database order means nothing to the reader, like
+	 * the `schedule` JSON shown as a frequency on task templates. Listed per
+	 * model because the same name can be a stored column elsewhere, as
+	 * `progress` is on projects.
 	 */
 	unsortableColumns?: string[];
 }
@@ -1437,7 +1440,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' }
 		],
-		unsortableColumns: ['progress']
+		// Read off the default document's current revision, not the container.
+		unsortableColumns: ['progress', 'status', 'source']
 	},
 	'document-templates': {
 		name: 'documenttemplate',
