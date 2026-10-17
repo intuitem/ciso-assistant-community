@@ -670,7 +670,7 @@
 							<div class="mt-2 text-sm">
 								<span class="font-semibold text-surface-700-300">{m.appliedControls()}:</span>
 								<span class="ml-2 text-surface-600-400"
-									>{stakeholder.applied_controls.map((c) => c.str).join(', ')}</span
+									>{stakeholder.applied_controls.map((c) => c.name).join(', ')}</span
 								>
 							</div>
 						{/if}
@@ -1405,7 +1405,7 @@
 														href="/applied-controls/{control.id}"
 														class="text-primary-600 hover:text-primary-800-200 hover:underline"
 													>
-														{control.str}
+														{control.name}
 													</Anchor>
 												</td>
 												<td class="px-3 py-2 text-sm">
