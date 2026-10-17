@@ -468,12 +468,34 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 key=lambda a: (0 if a.get("type") == "PR" else 1, a.get("str", "")),
             )
 
+        # Full control details (priority, status, owner, eta) for the treatment plan
+        stakeholders_data = StakeholderReadSerializer(stakeholders, many=True).data
+        controls_by_id = {
+            str(c["id"]): c
+            for c in AppliedControlReadSerializer(
+                AppliedControl.objects.filter(stakeholders__in=stakeholders).distinct(),
+                many=True,
+            ).data
+        }
+        links = Stakeholder.applied_controls.through.objects.filter(
+            stakeholder__in=stakeholders
+        ).values_list("stakeholder_id", "appliedcontrol_id")
+        controls_by_stakeholder = {}
+        for sh_id, ac_id in links:
+            controls_by_stakeholder.setdefault(str(sh_id), []).append(
+                controls_by_id[str(ac_id)]
+            )
+        for sh_data in stakeholders_data:
+            sh_data["applied_controls"] = controls_by_stakeholder.get(
+                str(sh_data["id"]), []
+            )
+
         # Build comprehensive report data
         report_data = {
             "study": study_data,
             "feared_events": FearedEventReadSerializer(feared_events, many=True).data,
             "ro_to_couples": RoToReadSerializer(ro_to_couples, many=True).data,
-            "stakeholders": StakeholderReadSerializer(stakeholders, many=True).data,
+            "stakeholders": stakeholders_data,
             "strategic_scenarios": strategic_scenarios_data,
             "attack_paths": AttackPathReadSerializer(attack_paths, many=True).data,
             "operational_scenarios": operational_scenarios_data,
