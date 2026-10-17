@@ -13084,6 +13084,7 @@ class TaskNode(AbstractBaseModel, FolderMixin):
         ("completed", "Completed"),
         ("cancelled", "Cancelled"),
     ]
+    OPEN_STATUSES = ("pending", "in_progress")
 
     due_date = models.DateField(null=True, blank=True, verbose_name="Due date")
     scheduled_date = models.DateField(
