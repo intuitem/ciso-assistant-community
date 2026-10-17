@@ -2023,6 +2023,11 @@ class SolutionViewSet(ExportMixin, BaseModelViewSet):
     }
     filterset_class = SolutionFilterSet
     filterset_fields = SOLUTION_FILTERSET_FIELDS
+    ordering_remap = {
+        "provider_entity": "provider_entity__name",
+        "tier": "tier__rank",
+    }
+    ordering_nulls_last = ("tier__rank",)
 
     def get_autocomplete_serializer_class(self):
         from tprm.serializers import SolutionAutocompleteSerializer
