@@ -251,6 +251,7 @@ from global_settings.utils import (
 )
 
 from core import commitment
+from core import mailer
 
 import structlog
 
@@ -9187,12 +9188,13 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
 
     model = Folder
     filterset_class = FolderFilter
-    search_fields = ["name"]
+    search_fields = ["name", "ref_id"]
 
     # Columns mirror the domains import template, so an export can be re-imported.
     export_config = {
         "fields": {
             "internal_id": {"source": "id", "label": "internal_id"},
+            "ref_id": {"source": "ref_id", "label": "ref_id", "escape": True},
             "name": {"source": "name", "label": "name", "escape": True},
             "description": {
                 "source": "description",
@@ -12342,7 +12344,7 @@ class CampaignViewSet(BaseModelViewSet):
                 campaign.status = Campaign.Status.IN_PROGRESS
                 campaign.save(update_fields=["status"])
 
-        if settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE:
+        if mailer.mailing_enabled():
             from core.tasks import notify_campaign_assignees
 
             transaction.on_commit(lambda: notify_campaign_assignees(str(campaign.id)))
@@ -13697,7 +13699,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             )
             started += 1
 
-        if not (settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE):
+        if not mailer.mailing_enabled():
             return Response({"started": started, "warning": ["noMailerConfigured"]})
 
         from core.tasks import notify_audit_assignees
@@ -13760,9 +13762,15 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
 
             # Find the requirement assessment first so we can validate score
             # against the per-RA resolved scale (Node override > CA bounds).
-            requirement_assessment = RequirementAssessment.objects.filter(
-                compliance_assessment=compliance_assessment, requirement__urn=urn
-            ).first()
+            requirement_assessment = (
+                RequirementAssessment.objects.filter(
+                    compliance_assessment=compliance_assessment, requirement__urn=urn
+                )
+                # The requirement is read below, and its framework carries the
+                # result aggregation rule a recompute needs.
+                .select_related("requirement__framework")
+                .first()
+            )
 
             if not requirement_assessment:
                 return Response(

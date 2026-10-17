@@ -1,0 +1,629 @@
+{
+ "framework": "dora",
+ "labels": {
+  "urn:intuitem:risk:req_node:dora:9.4.d": {
+   "mfa": "core",
+   "encryption": "core",
+   "access_control": "related",
+   "asset_inventory": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:12.1": {
+   "backup": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:12.1.a": {
+   "backup": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:12.1.b": {
+   "backup": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:12.2": {
+   "backup": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:12.3": {
+   "backup": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:node294": {
+   "backup": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:node280": {
+   "backup": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:16.1.f": {
+   "backup": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:node293": {
+   "backup": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:12.4": {
+   "backup": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:12.6": {
+   "backup": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:12.7": {
+   "backup": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:9.3.b": {
+   "backup": "related",
+   "access_control": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:9.3.c": {
+   "backup": "related",
+   "encryption": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:11.3": {
+   "backup": "related",
+   "incident_response": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:11.6.a": {
+   "backup": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:node475": {
+   "backup": "related",
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:30.2.d": {
+   "backup": "related",
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:9.1": {
+   "logging": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:10.1": {
+   "logging": "core",
+   "incident_response": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:10.2": {
+   "logging": "core",
+   "incident_response": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:10.3": {
+   "logging": "core",
+   "incident_response": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:16.1.b": {
+   "logging": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:16.1.d": {
+   "logging": "core",
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:node262": {
+   "logging": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:6.8.e": {
+   "logging": "related",
+   "incident_response": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:17.1": {
+   "logging": "related",
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:17.2": {
+   "logging": "related",
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:17.3.a": {
+   "logging": "related",
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:11.8": {
+   "logging": "related",
+   "incident_response": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:13.2.a": {
+   "logging": "related",
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:13.2.b": {
+   "logging": "related",
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:9.4.f": {
+   "vuln_mgmt": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:8.2": {
+   "vuln_mgmt": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:13.1": {
+   "vuln_mgmt": "core",
+   "incident_response": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:25.1": {
+   "vuln_mgmt": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:25.2": {
+   "vuln_mgmt": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:26.1": {
+   "vuln_mgmt": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:26.2": {
+   "vuln_mgmt": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:26.6": {
+   "vuln_mgmt": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:24.5": {
+   "vuln_mgmt": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:node403": {
+   "vuln_mgmt": "related",
+   "third_party": "related",
+   "asset_inventory": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:node404": {
+   "vuln_mgmt": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:26.3": {
+   "vuln_mgmt": "related",
+   "third_party": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:26.4": {
+   "vuln_mgmt": "related",
+   "third_party": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:26.5": {
+   "vuln_mgmt": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:26.7": {
+   "vuln_mgmt": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:26.8": {
+   "vuln_mgmt": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:node414": {
+   "vuln_mgmt": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:27.1": {
+   "vuln_mgmt": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:27.1.b": {
+   "vuln_mgmt": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:27.3": {
+   "vuln_mgmt": "related",
+   "third_party": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:24.1": {
+   "vuln_mgmt": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:24.2": {
+   "vuln_mgmt": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:24.6": {
+   "vuln_mgmt": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:6.8.g": {
+   "vuln_mgmt": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:9.4.e": {
+   "vuln_mgmt": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:14.1": {
+   "vuln_mgmt": "related",
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:45.1.a": {
+   "vuln_mgmt": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:node230": {
+   "vuln_mgmt": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:16.1.c": {
+   "vuln_mgmt": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:9.3.a": {
+   "encryption": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:9.2": {
+   "encryption": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:17.3": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:17.3.b": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:17.3.c": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:17.3.d": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:17.3.e": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:17.3.f": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:18.1": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:18.1.a": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:18.1.b": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:18.1.c": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:18.1.d": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:18.1.e": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:18.1.f": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:19.1": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:node360": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:node361": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:node362": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:node363": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:19.3": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:19.4": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:19.4.a": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:19.4.b": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:19.4.c": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:19.5": {
+   "incident_response": "core",
+   "third_party": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:11.2.b": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:11.2.c": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:11.2.e": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:13.2": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:node306": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:node307": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:13.2.c": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:node310-1": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:14.3": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:18.2": {
+   "incident_response": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:19.2": {
+   "incident_response": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:node365": {
+   "incident_response": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:node366": {
+   "incident_response": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:node368": {
+   "incident_response": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:node387": {
+   "incident_response": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:11.2.d": {
+   "incident_response": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:13.3": {
+   "incident_response": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:13.4": {
+   "incident_response": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:14.2": {
+   "incident_response": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:6.8.h": {
+   "incident_response": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:5.2.i.iii": {
+   "incident_response": "related",
+   "third_party": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:11.7": {
+   "incident_response": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:11.6.b": {
+   "incident_response": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:11.10": {
+   "incident_response": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:30.2.f": {
+   "incident_response": "related",
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:9.4.b": {
+   "incident_response": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:node258": {
+   "incident_response": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:16.1.h": {
+   "incident_response": "related",
+   "awareness_training": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:13.6": {
+   "awareness_training": "core",
+   "third_party": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:5.4": {
+   "awareness_training": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:5.2.g": {
+   "awareness_training": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:30.2.i": {
+   "awareness_training": "related",
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:9.4.c": {
+   "access_control": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:6.2": {
+   "access_control": "related",
+   "asset_inventory": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:5.2.h": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:5.2.i.i": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:5.2.i.ii": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:5.3": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:6.9": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:8.5": {
+   "third_party": "core",
+   "asset_inventory": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:16.1.e": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:28.1": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:28.1.a": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:28.1.b": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:28.1.b.i": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:28.1.b.ii": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:28.2": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:28.3": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:node441": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:node442": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:node443": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:node444": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:28.4.a": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:28.4.b": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:28.4.c": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:28.4.d": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:28.4.e": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:28.5": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:28.6": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:node453": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:28.7.a": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:28.7.b": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:28.7.c": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:28.7.d": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:28.8": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:28.8.a": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:28.8.b": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:28.8.c": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:node464": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:node465": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:node466": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:29.1.a": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:29.1.b": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:node473": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:29.2": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:node476": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:node477": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:30.1": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:30.2.a": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:30.2.b": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:30.2.c": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:30.2.e": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:30.2.g": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:30.2.h": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:30.3.a": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:30.3.b": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:30.3.c": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:30.3.d": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:30.3.e": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:30.3.e.i": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:30.3.e.ii": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:30.3.e.iii": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:30.3.e.iv": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:30.3.f": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:30.3.f.i": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:30.3.f.ii": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:node503": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:30.4": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:5.2.i": {
+   "third_party": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:6.10": {
+   "third_party": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:8.6": {
+   "third_party": "related",
+   "asset_inventory": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:11.4": {
+   "third_party": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:11.5": {
+   "third_party": "related",
+   "asset_inventory": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:node407": {
+   "third_party": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:8.1": {
+   "asset_inventory": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:8.4": {
+   "asset_inventory": "core"
+  },
+  "urn:intuitem:risk:req_node:dora:8.7": {
+   "asset_inventory": "related"
+  },
+  "urn:intuitem:risk:req_node:dora:6.8.d": {
+   "asset_inventory": "related"
+  }
+ }
+}

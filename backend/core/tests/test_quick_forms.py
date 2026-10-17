@@ -1436,6 +1436,281 @@ def test_respondent_may_start_a_request_but_sees_only_their_own(app_config):
     assert client.post(f"{base}submit/", {}, format="json").status_code == 200
 
 
+WEIGHTED_SUM_LIBRARY = """
+urn: urn:test:risk:library:qf-weighted-sum
+locale: en
+ref_id: qf-weighted-sum
+name: Quick form weighted sum
+description: Weighted SUM scoring
+copyright: Test
+version: 1
+publication_date: 2026-09-18
+provider: test-provider
+packager: test
+objects:
+  quick_forms:
+    - urn: urn:test:risk:quick_form:weighted-sum
+      ref_id: weighted-sum
+      name: Weighted sum
+      description: Two 0/50 questions weighing 3 and 1
+      scores_definition:
+        min: 0
+        max: 100
+        aggregation: sum
+      pages:
+        - urn: urn:test:risk:qf_page:weighted-sum:only
+          ref_id: only
+          name: Only page
+          order: 1
+          questions:
+            urn:test:risk:qf_page:weighted-sum:only:question:heavy:
+              type: unique_choice
+              text: Heavy
+              order: 1
+              weight: 3
+              choices:
+                - urn: urn:test:risk:qf_page:weighted-sum:only:question:heavy:choice:good
+                  value: good
+                  add_score: 50
+                - urn: urn:test:risk:qf_page:weighted-sum:only:question:heavy:choice:bad
+                  value: bad
+                  add_score: 0
+            urn:test:risk:qf_page:weighted-sum:only:question:light:
+              type: unique_choice
+              text: Light
+              order: 2
+              weight: 1
+              choices:
+                - urn: urn:test:risk:qf_page:weighted-sum:only:question:light:choice:good
+                  value: good
+                  add_score: 50
+                - urn: urn:test:risk:qf_page:weighted-sum:only:question:light:choice:bad
+                  value: bad
+                  add_score: 0
+"""
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "heavy,light,expected",
+    [
+        ("good", "bad", 75),
+        ("bad", "good", 25),
+        ("good", "good", 100),
+        ("bad", "bad", 0),
+    ],
+)
+def test_weighted_sum_scores_like_an_audit(app_config, heavy, light, expected):
+    """Question weights mean the same thing in a quick form as in a requirement
+    assessment: the weighted total is projected onto the unweighted 0-100 scale,
+    on the live path and in the editor preview alike."""
+    from core.cel_service import evaluate_quick_form, evaluate_quick_form_document
+    from core.utils import apply_answers_dict
+
+    stored, error = StoredLibrary.store_library_content(
+        WEIGHTED_SUM_LIBRARY.encode("utf-8")
+    )
+    assert error is None, error
+    assert stored.load() is None
+    form = QuickForm.objects.get(urn="urn:test:risk:quick_form:weighted-sum")
+    folder = Folder.objects.create(
+        name="qf-wsum", parent_folder=Folder.get_root_folder()
+    )
+    response = QuickFormResponse.objects.create(
+        name="weighted", quick_form=form, folder=folder
+    )
+    base = "urn:test:risk:qf_page:weighted-sum:only:question"
+    answers = {
+        f"{base}:heavy": f"{base}:heavy:choice:{heavy}",
+        f"{base}:light": f"{base}:light:choice:{light}",
+    }
+    questions = {q.urn: q for q in Question.objects.filter(page__quick_form=form)}
+    apply_answers_dict("response", response, questions, answers)
+
+    live = evaluate_quick_form(response, persist=False)
+    preview = evaluate_quick_form_document(
+        {
+            "urn": form.urn,
+            "scores_definition": form.scores_definition,
+            "pages": [
+                {
+                    "urn": p.urn,
+                    "ref_id": p.ref_id,
+                    "name": p.name,
+                    "order": p.order,
+                    "questions": p.get_questions_translated() or {},
+                }
+                for p in form.pages.all().order_by("order")
+            ],
+        },
+        answers,
+    )
+    for result in (live, preview):
+        assert result["score"] == expected
+        # Every sum the rules can read sits on the same scale as the score.
+        context = result["context"]
+        assert context["response"]["score_sum"] == expected
+        assert context["response"]["score_max"] == 100
+        assert context["pages"]["only"]["score"] == expected
+        assert context["pages"]["only"]["score_max"] == 100
+
+
+@pytest.mark.django_db
+def test_weighted_sum_counts_a_skipped_optional_question_as_zero(app_config):
+    """On the live path too, skipping an optional heavy question scores like
+    answering its lowest choice instead of inflating the answered ones' share."""
+    from core.cel_service import evaluate_quick_form
+    from core.utils import apply_answers_dict
+
+    library = WEIGHTED_SUM_LIBRARY.replace(
+        "weight: 3\n", "weight: 3\n              required: false\n"
+    )
+    stored, error = StoredLibrary.store_library_content(library.encode("utf-8"))
+    assert error is None, error
+    assert stored.load() is None
+    form = QuickForm.objects.get(urn="urn:test:risk:quick_form:weighted-sum")
+    folder = Folder.objects.create(
+        name="qf-wsum-skip", parent_folder=Folder.get_root_folder()
+    )
+    response = QuickFormResponse.objects.create(
+        name="weighted", quick_form=form, folder=folder
+    )
+    base = "urn:test:risk:qf_page:weighted-sum:only:question"
+    questions = {q.urn: q for q in Question.objects.filter(page__quick_form=form)}
+    assert questions[f"{base}:heavy"].required is False
+    apply_answers_dict(
+        "response", response, questions, {f"{base}:light": f"{base}:light:choice:good"}
+    )
+
+    assert evaluate_quick_form(response, persist=False)["score"] == 25
+
+
+def _preview_form(questions):
+    """A one-page quick form document, scored 0-100 as a weighted sum."""
+    base = "urn:test:risk:qf_page:preview:only"
+    return {
+        "urn": "urn:test:risk:quick_form:preview",
+        "scores_definition": {"min": 0, "max": 100, "aggregation": "sum"},
+        "pages": [
+            {
+                "urn": base,
+                "ref_id": "only",
+                "name": "Only page",
+                "order": 1,
+                "questions": {
+                    f"{base}:question:{key}": {
+                        "type": "unique_choice",
+                        "text": key,
+                        "order": order,
+                        **{k: v for k, v in extra.items() if k != "scores"},
+                        "choices": [
+                            {
+                                "urn": f"{base}:question:{key}:choice:{value}",
+                                "value": value,
+                                "add_score": score,
+                            }
+                            for value, score in zip(
+                                ("good", "bad"), extra.get("scores", (50, 0))
+                            )
+                        ],
+                    }
+                    for order, (key, extra) in enumerate(questions.items(), start=1)
+                },
+            }
+        ],
+    }
+
+
+def _preview_score(questions, answers):
+    from core.cel_service import evaluate_quick_form_document
+
+    base = "urn:test:risk:qf_page:preview:only:question"
+    return evaluate_quick_form_document(
+        _preview_form(questions),
+        {
+            f"{base}:{key}": f"{base}:{key}:choice:{value}"
+            for key, value in answers.items()
+        },
+    )["score"]
+
+
+def test_preview_keeps_an_explicit_zero_weight():
+    """Weight 0 means the question does not count, and must not default to 1."""
+    questions = {"ignored": {"weight": 0}, "counted": {"weight": 1}}
+    assert _preview_score(questions, {"ignored": "good", "counted": "bad"}) == 0
+    assert _preview_score(questions, {"ignored": "bad", "counted": "good"}) == 100
+
+
+def test_preview_keeps_a_skipped_optional_question_neutral():
+    """An optional question can contribute 0, so 0 belongs to its reachable range
+    even when none of its choices scores it."""
+    questions = {
+        "counted": {"weight": 1},
+        "optional": {"weight": 3, "required": False, "scores": (-10, -20)},
+    }
+    assert _preview_score(questions, {"counted": "good"}) == 50
+
+
+def test_preview_scores_a_form_whose_weights_are_all_zero():
+    """Weights all at 0 leave score_max at 0, but the live response still stores
+    a score once complete: the preview must not fall back to None."""
+    questions = {"first": {"weight": 0}, "second": {"weight": 0}}
+    assert _preview_score(questions, {"first": "good", "second": "good"}) == 0
+    assert _preview_score(questions, {"first": "good"}) is None
+
+
+def _preview(form, answers):
+    from core.cel_service import evaluate_quick_form_document
+
+    base = "urn:test:risk:qf_page:preview:only:question"
+    return evaluate_quick_form_document(
+        form,
+        {
+            f"{base}:{key}": f"{base}:{key}:choice:{value}"
+            for key, value in answers.items()
+        },
+    )
+
+
+def test_preview_page_sums_project_like_the_form_sum():
+    """A one-page form scores the same summing its questions or its pages: the
+    page sum is projected too, instead of saturating at the form maximum."""
+    questions = {"heavy": {"weight": 3}, "light": {"weight": 1}}
+    answers = {"heavy": "good", "light": "bad"}
+    form = _preview_form(questions)
+    form["scores_definition"]["aggregation"] = "pages_sum"
+    assert _preview_score(questions, answers) == 75
+    assert _preview(form, answers)["score"] == 75
+
+
+def test_preview_rule_compares_score_with_score_max():
+    """A rule reading `response.score` against `response.score_max` sees both on
+    the projected scale."""
+    form = _preview_form({"heavy": {"weight": 3}, "light": {"weight": 1}})
+    form["outcomes_definition"] = [
+        {
+            "ref_id": "three_quarters",
+            "expression": "response.score >= response.score_max * 0.75",
+        }
+    ]
+    fired = _preview(form, {"heavy": "good", "light": "bad"})
+    missed = _preview(form, {"heavy": "bad", "light": "good"})
+    assert "three_quarters" in fired["computed_outcome"]
+    assert "three_quarters" not in missed["computed_outcome"]
+
+
+def test_preview_counts_an_unanswered_optional_question_as_zero():
+    """A skipped optional question scores like its lowest choice, as it does
+    unweighted: skipping a heavy question must not beat answering it."""
+    questions = {
+        "optional": {"weight": 3, "required": False},
+        "answered": {"weight": 1},
+    }
+    skipped = _preview_score(questions, {"answered": "good"})
+    assert skipped == _preview_score(questions, {"answered": "good", "optional": "bad"})
+    assert skipped == 25
+
+
 @pytest.mark.django_db
 def test_the_fill_preview_offers_scale_levels_and_ratings(app_config):
     from pathlib import Path
