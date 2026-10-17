@@ -2593,6 +2593,8 @@
 	"reportsDescription": "Erstellen und verwalten Sie benutzerdefinierte Berichte basierend auf Ihren Daten",
 	"representativesDescription": "Vertreter von Anbietern",
 	"requestChanges": "Änderungen anfordern",
+	"flagForChangeRequest": "Für Änderungen markieren",
+	"removeChangeRequestFlag": "Markierung entfernen",
 	"requestNotes": "Anfragenotizen",
 	"requestType": "Anfragetyp",
 	"requestValidation": "Freigabe anfordern",
