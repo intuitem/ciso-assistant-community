@@ -1,4 +1,7 @@
 {
+	"flagForChangeRequest": "Σήμανση για αλλαγή",
+	"removeChangeRequestFlag": "Αφαίρεση σήμανσης",
+	"itemsFlaggedForChanges": "με σήμανση για αλλαγή",
 	"manageMembers": "Διαχείριση μελών",
 	"addMembers": "Προσθήκη μελών",
 	"removeFromGroup": "Αφαίρεση από την ομάδα",

@@ -2458,6 +2458,8 @@
 	"dropNotes": "Примітки щодо скасування",
 	"resubmissionNotes": "Примітки щодо повторного подання",
 	"requestChanges": "Запросити зміни",
+	"flagForChangeRequest": "Позначити для змін",
+	"removeChangeRequestFlag": "Зняти позначку",
 	"reviewChangesRequested": "Запитано зміни",
 	"noFlaggedItemsHint": "Жодну вимогу не позначено. Респондент отримає лише примітку нижче. Щоб показати, що саме потребує доопрацювання, позначте в анкеті пункти, які треба виправити.",
 	"itemsNeedingChanges": [

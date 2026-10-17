@@ -50,6 +50,7 @@ dependencies = [
     "cel-python>=0.5.0,<0.6",
     "qdrant-client>=1.14.2,<2",
     "httpx>=0.28.1,<0.29",
+    "pyjwt[crypto]>=2.10,<3",
     "sentence-transformers>=5.5.1,<6",
     "torch>=2.12.0,<3",
     "PyMuPDF>=1.25.5,<2",
