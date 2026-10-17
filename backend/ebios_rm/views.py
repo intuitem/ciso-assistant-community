@@ -390,6 +390,12 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         # Get action plans from compliance assessments
         from core.serializers import AppliedControlReadSerializer
         from core.models import AppliedControl
+        from iam.models import RoleAssignment
+
+        # Study access doesn't imply access to every linked control
+        viewable_controls = AppliedControl.objects.filter(
+            id__in=RoleAssignment.get_viewable_object_ids(request.user, AppliedControl)
+        )
 
         compliance_action_plans = []
         for assessment in study.compliance_assessments.all():
@@ -397,7 +403,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 include_non_assessable=False
             )
             applied_controls = (
-                AppliedControl.objects.filter(
+                viewable_controls.filter(
                     requirement_assessments__in=requirement_assessments
                 )
                 .distinct()
@@ -422,7 +428,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         if study.last_risk_assessment:
             risk_scenarios = study.last_risk_assessment.risk_scenarios.all()
             risk_applied_controls = (
-                AppliedControl.objects.filter(risk_scenarios__in=risk_scenarios)
+                viewable_controls.filter(risk_scenarios__in=risk_scenarios)
                 .distinct()
                 .order_by("eta")
             )
@@ -473,7 +479,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         controls_by_id = {
             str(c["id"]): c
             for c in AppliedControlReadSerializer(
-                AppliedControl.objects.filter(stakeholders__in=stakeholders).distinct(),
+                viewable_controls.filter(stakeholders__in=stakeholders).distinct(),
                 many=True,
             ).data
         }
@@ -482,6 +488,8 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         ).values_list("stakeholder_id", "appliedcontrol_id")
         controls_by_stakeholder = {}
         for sh_id, ac_id in links:
+            if str(ac_id) not in controls_by_id:
+                continue
             controls_by_stakeholder.setdefault(str(sh_id), []).append(
                 controls_by_id[str(ac_id)]
             )
