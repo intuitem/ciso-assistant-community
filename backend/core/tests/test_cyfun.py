@@ -8,14 +8,20 @@ from openpyxl import load_workbook
 from core import cyfun
 from core.models import Framework
 from core.utils import EVERYONE_EDIT, HIDDEN, build_initial_field_visibility
+from library.builder import normalize_objects
 
 BACKEND = Path(__file__).resolve().parents[2]
 FUNCTION_SHEETS = ("GOVERN", "IDENTIFY", "PROTECT", "DETECT", "RESPOND", "RECOVER")
 
 
+def _library_framework(library):
+    text = (BACKEND / f"library/libraries/{library}.yaml").read_text()
+    # A singular "framework" counts as a one-element "frameworks" list.
+    return normalize_objects(yaml.safe_load(text)["objects"])["frameworks"][0]
+
+
 def _framework():
-    library = (BACKEND / "library/libraries/cyfun2025.yaml").read_text()
-    return yaml.safe_load(library)["objects"]["framework"]
+    return _library_framework("cyfun2025")
 
 
 def test_cyfun_frameworks_declare_their_scoring():
@@ -23,8 +29,7 @@ def test_cyfun_frameworks_declare_their_scoring():
     cyfun2025 = _framework()
     assert cyfun2025["score_scale_locked"] is True
     assert cyfun2025["score_calculation_method"] == "average_of_averages"
-    library = (BACKEND / "library/libraries/ccb-cff-2023-03-01.yaml").read_text()
-    cyfun2023 = yaml.safe_load(library)["objects"]["framework"]
+    cyfun2023 = _library_framework("ccb-cff-2023-03-01")
     assert cyfun2023["score_scale_locked"] is True
     assert cyfun2023["score_calculation_method"] == "average_of_averages"
 
@@ -58,8 +63,7 @@ def test_new_cyfun_2025_audits_count_na_as_their_level_target(groups, target):
 
 @pytest.mark.parametrize("library", ["cyfun2025", "ccb-cff-2023-03-01"])
 def test_new_audits_show_scores_to_auditors_and_respondents(library):
-    text = (BACKEND / f"library/libraries/{library}.yaml").read_text()
-    framework = yaml.safe_load(text)["objects"]["framework"]
+    framework = _library_framework(library)
     visibility = build_initial_field_visibility(
         SimpleNamespace(field_visibility=framework["field_visibility"])
     )
@@ -203,8 +207,7 @@ def test_ref_id_2023(text, level, ref_id):
 def test_cyfun_2023_tool_lists_exactly_its_level_requirements(level):
     """Each "<LEVEL> Details" sheet of the CyFun 2023 tool maps onto the library
     requirements of that level, so the export fills every row."""
-    library = (BACKEND / "library/libraries/ccb-cff-2023-03-01.yaml").read_text()
-    framework = yaml.safe_load(library)["objects"]["framework"]
+    framework = _library_framework("ccb-cff-2023-03-01")
     group = {"basic": "B", "important": "I", "essential": "E"}[level]
     expected = {
         node["ref_id"].upper()
