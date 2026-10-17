@@ -142,3 +142,20 @@ class TestOverdueFilter:
             "past_completed",
             "series_on_track",
         ]
+
+    def test_disabled_task_is_not_overdue(self, authenticated_client, tasks):
+        # The deadline emails skip a disabled task; the filter and the chart follow.
+        TaskTemplate.objects.filter(name__in=["past_pending", "future_pending"]).update(
+            enabled=False
+        )
+        assert _names(authenticated_client, "overdue=true") == [
+            "past_in_progress",
+            "series_missed",
+        ]
+        assert "past_pending" in _names(authenticated_client, "overdue=false")
+        body = authenticated_client.get(f"{URL}analytics/").json()
+        buckets = {b["key"]: b["count"] for b in body["due_buckets"]}
+        assert buckets["overdue"] == 2
+        # The four finished one-time tasks, plus both disabled ones.
+        assert buckets["closed"] == 6
+        assert sum(buckets.values()) == body["count"]

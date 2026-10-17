@@ -18661,8 +18661,8 @@ class TaskTemplateFilter(GenericFilterSet):
     last_occurrence_status = df.MultipleChoiceFilter(
         choices=TaskNode.TASK_STATUS_CHOICES, method="filter_last_occurrence_status"
     )
-    # An occurrence past its due date that nobody closed. The start date says nothing
-    # about this: a recurring series always started in the past.
+    # An occurrence of an enabled task past its due date that nobody closed. The start
+    # date says nothing about this: a recurring series always started in the past.
     overdue = df.BooleanFilter(method="filter_overdue", label="Overdue")
 
     class Meta:
@@ -18700,7 +18700,8 @@ class TaskTemplateFilter(GenericFilterSet):
     def filter_overdue(self, queryset, name, value):
         if value is None:
             return queryset
-        late = Exists(
+        # A disabled task is never late, as the overdue email skips it too.
+        late = Q(enabled=True) & Exists(
             TaskNode.objects.filter(
                 task_template=OuterRef("pk"),
                 due_date__lt=timezone.localdate(),
@@ -18726,7 +18727,10 @@ def _bucket_by_date(due, today):
 def _due_bucket(task, node, overdue, today):
     """A date alone does not make a task late: a finished one-time task is closed,
     and a past date with nothing open behind it (a series with no upcoming
-    occurrence, say) has no due date left to report."""
+    occurrence, say) has no due date left to report. A disabled task is closed
+    whatever its occurrences say: the deadline emails skip it too."""
+    if not task.enabled:
+        return "closed"
     if overdue:
         return "overdue"
     if not task.is_recurrent and node and node.status not in TaskNode.OPEN_STATUSES:

@@ -411,9 +411,11 @@ def check_task_nodes_due_soon():
 # @db_periodic_task(crontab(minute="*/1"))  # for testing
 @db_periodic_task(crontab(hour="7", minute="10"))
 def check_task_nodes_overdue():
-    """Check for TaskNodes that are past due and still pending."""
+    """Check for TaskNodes that are past due and still open."""
     overdue_nodes = (
-        TaskNode.objects.filter(due_date__lt=date.today(), status="pending")
+        TaskNode.objects.filter(
+            due_date__lt=date.today(), status__in=TaskNode.OPEN_STATUSES
+        )
         .select_related("task_template")
         .filter(task_template__enabled=True)
         .prefetch_related("task_template__assigned_to")
