@@ -10,7 +10,7 @@ Custom fields are a **PRO** capability, gated by the `custom_fields` feature fla
 
 The built-in models cover most needs, but every organisation has attributes of its own — an asset's data classification, a control's vendor, a project's business sponsor code. Custom fields let an administrator define typed, validated fields on selected objects, set values per object, and then filter, search, and report on them like any native field.
 
-Custom fields are available on **Projects**, **Assets**, and **Applied controls** (policies share the applied-control fields).
+Custom fields are available on **Projects**, **Assets**, **Applied controls** (policies share the applied-control fields), and **Entity assessments**.
 
 {% hint style="warning" %}
 **Use them sparingly.** CISO Assistant's built-in data model is already rich — reach for a custom field only when an attribute is genuinely specific to your organisation. Over-using them fragments your data and your reporting, and that complexity is yours to maintain.
@@ -36,7 +36,7 @@ If an attribute is generic enough to be useful to everyone, **tell us** rather t
 
 ## For implementers
 
-- **Surface area.** A dedicated `custom_fields` Django app with a typed Entity-Attribute-Value design: `CustomFieldDefinition`, `CustomFieldChoice`, and `CustomFieldValue` (one typed column per type; one row per selected choice for multiple-choice). Host models opt in through `CustomFieldsMixin` — currently `pmbok.Project`, `core.Asset`, and `core.AppliedControl` (`Policy` inherits it as an `AppliedControl` proxy). Definitions are managed at `/api/custom-fields/`; values are exposed and written as a nested `custom_fields` object on each host's serializer.
+- **Surface area.** A dedicated `custom_fields` Django app with a typed Entity-Attribute-Value design: `CustomFieldDefinition`, `CustomFieldChoice`, and `CustomFieldValue` (one typed column per type; one row per selected choice for multiple-choice). Host models opt in through `CustomFieldsMixin` — currently `pmbok.Project`, `core.Asset`, `core.AppliedControl` (`Policy` inherits it as an `AppliedControl` proxy), and `tprm.EntityAssessment`. Definitions are managed at `/api/custom-fields/`; values are exposed and written as a nested `custom_fields` object on each host's serializer.
 - **Key integration points.** Tables read it three ways — dynamic `cf__<key>` filters, opt-in columns flattened from the values, and search over searchable text values; the generic detail view renders a read-only panel; the object forms render the editable section. All of it resolves the field set for an object from its domain.
 - **Gotchas.**
   - **Folder scoping drives applicability** — a definition applies to an object only when its domain is the object's domain, an ancestor, or **Global**.
@@ -50,7 +50,7 @@ If an attribute is generic enough to be useful to everyone, **tell us** rather t
 
 - **Edition:** enterprise
 - **Feature flag:** `custom_fields` (default off)
-- **Hosts:** Projects, Assets, Applied controls (and Policies)
+- **Hosts:** Projects, Assets, Applied controls (and Policies), Entity assessments
 
 ## Related
 

@@ -19,6 +19,7 @@ from core.models import (
 )
 from core.serializer_fields import FieldsRelatedField, HashSlugRelatedField
 from core.serializers import BaseModelSerializer
+from custom_fields.serializers import CustomFieldsSerializerMixin
 from core.utils import RoleCodename, UserGroupCodename
 from iam.models import Folder, Role, RoleAssignment, UserGroup
 from pmbok.models import GenericCollection
@@ -389,7 +390,7 @@ class ContractImportExportSerializer(BaseModelSerializer):
         ]
 
 
-class EntityAssessmentReadSerializer(BaseModelSerializer):
+class EntityAssessmentReadSerializer(CustomFieldsSerializerMixin, BaseModelSerializer):
     # Bare, so the value carries `str` and the table can render it as a link to the
     # audit. Only `.id` is read elsewhere.
     compliance_assessment = FieldsRelatedField()
@@ -404,6 +405,7 @@ class EntityAssessmentReadSerializer(BaseModelSerializer):
     representatives = FieldsRelatedField(many=True)
     authors = FieldsRelatedField(many=True)
     reviewers = FieldsRelatedField(many=True)
+    filtering_labels = FieldsRelatedField(many=True)
     validation_flows = FieldsRelatedField(
         many=True,
         fields=[
@@ -464,7 +466,7 @@ class EntityAssessmentReadSerializer(BaseModelSerializer):
         exclude = ["penetration", "dependency", "maturity", "trust"]
 
 
-class EntityAssessmentWriteSerializer(BaseModelSerializer):
+class EntityAssessmentWriteSerializer(CustomFieldsSerializerMixin, BaseModelSerializer):
     genericcollection = serializers.PrimaryKeyRelatedField(
         source="genericcollection_set",
         many=True,
@@ -484,6 +486,31 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
     # Set on the audit the assessment creates, so the analyst configures respondent
     # visibility here instead of opening the audit afterwards.
     field_visibility = serializers.JSONField(required=False)
+
+    def validate(self, attrs):
+        # Before super(): custom fields are scoped against attrs["folder"].
+        instance = self.instance
+        perimeter = attrs.get("perimeter", getattr(instance, "perimeter", None))
+        folder = attrs.get("folder", getattr(instance, "folder", None))
+        new_perimeter = (
+            instance is not None
+            and "perimeter" in attrs
+            and perimeter != instance.perimeter
+        )
+        # Global or no folder follows the perimeter, as in Assessment.save().
+        if (
+            perimeter
+            and perimeter.folder
+            and (new_perimeter or folder in (None, Folder.get_root_folder()))
+        ):
+            # Permission is checked only for a move the request asked for.
+            requested = "folder" in attrs or "perimeter" in attrs
+            attrs["folder"] = (
+                self.validate_folder(perimeter.folder)
+                if requested
+                else perimeter.folder
+            )
+        return super().validate(attrs)
 
     def _extract_audit_data(self, validated_data):
         audit_data = {
@@ -643,12 +670,6 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
         old_representatives = set(instance.representatives.all()) - set(
             validated_data.get("representatives", [])
         )
-
-        # If perimeter is being changed, update folder to match the new perimeter's folder
-        if "perimeter" in validated_data:
-            new_perimeter = validated_data["perimeter"]
-            if new_perimeter and new_perimeter.folder:
-                validated_data["folder"] = new_perimeter.folder
 
         with transaction.atomic():
             instance = super().update(instance, validated_data)

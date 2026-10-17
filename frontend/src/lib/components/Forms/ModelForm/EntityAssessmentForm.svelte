@@ -10,7 +10,8 @@
 
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import VisibilityEditor from '$lib/components/ComplianceAssessment/VisibilityEditor.svelte';
-	import type { SuperForm } from 'sveltekit-superforms';
+	import CustomFieldsSection from '../CustomFieldsSection.svelte';
+	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 
 	interface Props {
 		form: SuperForm<any>;
@@ -33,6 +34,7 @@
 	}: Props = $props();
 
 	const { form: formData } = form;
+	const { value: folderId } = formFieldProxy(form, 'folder');
 
 	// Creating almost always means sending a questionnaire, so the audit is on by
 	// default; on edit it stays off. `??` would keep the schema's `false`.
@@ -56,6 +58,28 @@
 			console.error('Could not resolve the entity folder', e);
 		}
 	}
+
+	// Global plus a perimeter is saved in the perimeter's domain; show that domain's fields.
+	async function followPerimeterFolder(perimeterId: string, folder: string) {
+		try {
+			const [perimeter, current] = await Promise.all([
+				fetch(`/perimeters/${perimeterId}`).then((res) => res.json()),
+				fetch(`/folders/${folder}`).then((res) => res.json())
+			]);
+			if (current?.content_type !== 'GL') return;
+			if ($formData.perimeter !== perimeterId || $formData.folder !== folder) return;
+			const target = perimeter?.folder?.id ?? perimeter?.folder;
+			if (target) form.form.update((data) => ({ ...data, folder: target }), { taint: false });
+		} catch (e) {
+			console.error('Could not resolve the perimeter folder', e);
+		}
+	}
+
+	$effect(() => {
+		const perimeterId = $formData.perimeter;
+		const folder = $folderId;
+		if (perimeterId && folder) followPerimeterFolder(perimeterId, folder);
+	});
 	let implementationGroupsChoices = $state<{ label: string; value: string }[]>([]);
 	let frameworkDefaults = $state<Record<string, any> | null>(null);
 
@@ -231,6 +255,18 @@
 	cacheLock={cacheLocks['due_date']}
 	bind:cachedValue={formDataCache['due_date']}
 />
+<AutocompleteSelect
+	multiple
+	{form}
+	createFromSelection={true}
+	optionsEndpoint="filtering-labels"
+	optionsLabelField="label"
+	field="filtering_labels"
+	helpText={m.labelsHelpText()}
+	label={m.labels()}
+	translateOptions={false}
+	allowUserOptions="append"
+/>
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
 	<Select
 		{form}
@@ -327,3 +363,4 @@
 		bind:cachedValue={formDataCache['reference_link']}
 	/>
 </Dropdown>
+<CustomFieldsSection {form} model="tprm.entityassessment" folderId={$folderId} />
