@@ -4766,8 +4766,6 @@
 	"skip": "Preskočiť",
 	"fieldVisibility": "Viditeľnosť poľa",
 	"fieldVisibilityHelpText": "Ovládajte, ktoré polia hodnotenia môžu jednotlivé role diváka vidieť a upravovať.",
-	"visibilityAuditorRespondent": "Audítor + Respondent",
-	"visibilityAuditorOnly": "Iba audítor",
 	"visibilityHidden": "Skryté",
 	"answers": "Odpovede",
 	"respondentAlignment": "Zarovnanie respondentov",
