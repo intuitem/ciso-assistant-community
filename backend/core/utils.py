@@ -71,8 +71,87 @@ def resolve_compute_result(compute_result: str | None) -> str | None:
     return None
 
 
+def resolve_result_tier(compute_results) -> str | None:
+    """The tier a question states, read from the results its choices can set.
+
+    A question that can set `compliant` states the top tier; one that can only
+    set `partially_compliant` states the middle tier; one that can only set
+    `non_compliant` is a blocking statement (the "at least one of these is
+    true" column of a maturity table). A question whose choices set nothing is
+    captured for the record only and states no tier.
+    """
+    resolved = {resolve_compute_result(value) for value in compute_results}
+    if "compliant" in resolved:
+        return "compliant"
+    if "partially_compliant" in resolved:
+        return "partially_compliant"
+    if "non_compliant" in resolved:
+        return "blocking"
+    return None
+
+
+def aggregate_tiered_results(question_results: list[tuple]) -> str | None:
+    """Aggregate answers where a tier is earned only if all of it holds.
+
+    `question_results` is one `(tier, selected)` pair per answered question,
+    `selected` being the resolved results of the choices the respondent picked.
+    A tier is earned when every question stating it was answered with that
+    tier's result; a blocking statement answered `non_compliant` denies every
+    tier outright. `not_applicable` answers stay neutral, as in
+    `aggregate_compute_results`, and an all-`not_applicable` set is
+    `not_applicable`.
+
+    Unlike per-answer aggregation, this can express "all of these must hold",
+    which is how assessment tables built on indicator statements are read (the
+    NCSC CAF being the reference case).
+    """
+    # Every entry is an answered question (the caller only records those), so a
+    # question that states a tier but whose answer affirms nothing - the False
+    # side of "all the following are true" - means that tier does not hold.
+    # Questions stating no tier at all are captured for the record only.
+    answered = [(tier, selected) for tier, selected in question_results if tier]
+    if not answered:
+        return None
+
+    # `not_applicable` is neutral, as in `aggregate_compute_results`: on a
+    # multiple choice answer it drops out of the selection rather than failing
+    # the tier, and a question answered entirely `not_applicable` stops
+    # contributing at all.
+    contributing = []
+    for tier, selected in answered:
+        effective = [result for result in selected if result != "not_applicable"]
+        if selected and not effective:
+            continue
+        contributing.append((tier, effective))
+    if not contributing:
+        return "not_applicable"
+
+    holds_by_tier: dict[str, list[bool]] = {"compliant": [], "partially_compliant": []}
+    for tier, selected in contributing:
+        if tier == "blocking":
+            if any(result == "non_compliant" for result in selected):
+                return "non_compliant"
+            continue
+        holds_by_tier[tier].append(
+            bool(selected) and all(result == tier for result in selected)
+        )
+
+    for tier in ("compliant", "partially_compliant"):
+        if holds_by_tier[tier] and all(holds_by_tier[tier]):
+            return tier
+
+    # Nothing states a tier - only blocking statements, none of them triggered.
+    if not holds_by_tier["compliant"] and not holds_by_tier["partially_compliant"]:
+        return "compliant"
+    return "non_compliant"
+
+
 def aggregate_compute_results(resolved_results: list[str | None]) -> str | None:
-    """Aggregate resolved compute_result values: not_applicable is neutral, else worst-wins."""
+    """Aggregate resolved compute_result values, each answer standing on its own.
+
+    not_applicable is neutral; unanimous answers carry, and answers that
+    disagree land on partially_compliant.
+    """
     contributing = [r for r in resolved_results if r is not None]
     if not contributing:
         return None
