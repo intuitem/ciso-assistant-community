@@ -38,7 +38,12 @@ def assert_public_url(
     hostname = parsed.hostname
     if not hostname:
         raise BlockedRequestError(f"Blocked URL: no hostname in {url!r}")
+    assert_public_host(hostname)
 
+
+def assert_public_host(hostname: str) -> None:
+    """Same policy as assert_public_url for a bare host name (an SMTP server,
+    for instance): every address it resolves to must be public."""
     try:
         addrinfo = socket.getaddrinfo(hostname, None)
     except socket.gaierror as exc:
@@ -72,6 +77,15 @@ def assert_public_url_unless_dev(
     if getattr(settings, "ALLOW_PRIVATE_NETWORK_REQUESTS", False):
         return
     assert_public_url(url, allowed_schemes=allowed_schemes)
+
+
+def assert_public_host_unless_dev(hostname: str) -> None:
+    """assert_public_host, skipped when ALLOW_PRIVATE_NETWORK_REQUESTS is set."""
+    from django.conf import settings
+
+    if getattr(settings, "ALLOW_PRIVATE_NETWORK_REQUESTS", False):
+        return
+    assert_public_host(hostname)
 
 
 def check_integration_url(url: str, source: str) -> None:

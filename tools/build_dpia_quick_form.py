@@ -41,7 +41,8 @@ def text(t, required=True):
 
 
 # Severity and likelihood levels, and the risk they make, from the 4x4 privacy matrix.
-_matrix = yaml.safe_load(MATRIX.read_text())["objects"]["risk_matrix"][0]
+_objects = yaml.safe_load(MATRIX.read_text())["objects"]
+_matrix = (_objects.get("risk_matrices") or _objects["risk_matrix"])[0]
 SLUG = {
     "Acceptable": "acceptable",
     "To reduce": "to_reduce",

@@ -1653,7 +1653,7 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
                 f"from the implementation groups definition {sorted(defined_igs)}: {details}"
             )
 
-    library["objects"]["framework"] = framework
+    library["objects"].setdefault("frameworks", []).append(framework)
 
 
 def _handle_metric_definitions(obj, library, compat_mode, verbose):
@@ -1750,9 +1750,7 @@ def _handle_risk_matrix(obj, library, wb):
     """Process a risk_matrix object block into the library."""
     matrix = parse_risk_matrix(obj["meta"], obj["content_sheet"], wb)
     if matrix:
-        if "risk_matrix" not in library["objects"]:
-            library["objects"]["risk_matrix"] = []
-        library["objects"]["risk_matrix"].append(matrix)
+        library["objects"].setdefault("risk_matrices", []).append(matrix)
 
 
 def _handle_requirement_mapping_set(obj, library, wb, sheets, compat_mode, verbose):
@@ -1976,9 +1974,8 @@ def validate_name_lengths(library: dict) -> list:
 
     objects = library.get("objects", {})
 
-    # Check framework
-    framework = objects.get("framework")
-    if framework:
+    # Check frameworks
+    for framework in objects.get("frameworks", []):
         if framework.get("name") and len(framework["name"]) > NAME_MAX_LENGTH:
             violations.append(
                 ("framework", framework.get("urn", "?"), len(framework["name"]))
@@ -2000,7 +1997,7 @@ def validate_name_lengths(library: dict) -> list:
         "tactics",
         "techniques",
         "reference_controls",
-        "risk_matrix",
+        "risk_matrices",
         "metric_definitions",
         "requirement_mapping_sets",
     ):

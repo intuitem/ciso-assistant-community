@@ -309,28 +309,32 @@ def build(data: dict[str, list[dict]]) -> dict:
         "provider": "OWASP",
         "packager": "intuitem",
         "objects": {
-            "framework": {
-                "urn": framework_urn,
-                "ref_id": "OWASP-SAMM-2.2",
-                "name": "OWASP SAMM v2.2",
-                "description": DESCRIPTION,
-                "min_score": 0,
-                "max_score": 4,
-                "field_visibility": {k: dict(v) for k, v in FIELD_VISIBILITY.items()},
-                "scores_definition": SCORES_DEFINITION,
-                "implementation_groups_definition": [
-                    {
-                        "ref_id": str(n),
-                        "name": f"Target maturity level {n}",
-                        "description": maturity[n],
-                    }
-                    for n in sorted(maturity)
-                ],
-                "outcomes_definition": build_scorecard(
-                    scorecard, top_group=str(max(maturity))
-                ),
-                "requirement_nodes": nodes,
-            }
+            "frameworks": [
+                {
+                    "urn": framework_urn,
+                    "ref_id": "OWASP-SAMM-2.2",
+                    "name": "OWASP SAMM v2.2",
+                    "description": DESCRIPTION,
+                    "min_score": 0,
+                    "max_score": 4,
+                    "field_visibility": {
+                        k: dict(v) for k, v in FIELD_VISIBILITY.items()
+                    },
+                    "scores_definition": SCORES_DEFINITION,
+                    "implementation_groups_definition": [
+                        {
+                            "ref_id": str(n),
+                            "name": f"Target maturity level {n}",
+                            "description": maturity[n],
+                        }
+                        for n in sorted(maturity)
+                    ],
+                    "outcomes_definition": build_scorecard(
+                        scorecard, top_group=str(max(maturity))
+                    ),
+                    "requirement_nodes": nodes,
+                }
+            ]
         },
     }
 

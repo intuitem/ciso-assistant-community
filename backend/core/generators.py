@@ -1378,7 +1378,7 @@ def counterparty_context(audit):
     if entity_assessment is None or entity_assessment.entity is None:
         return None
     entity = entity_assessment.entity
-    identifiers = entity.legal_identifiers or {}
+    identifiers = entity.legal_identifiers_dict
     return {
         "entity": entity.name,
         "ref_id": entity.ref_id or "",
