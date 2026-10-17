@@ -136,3 +136,15 @@ class EntityDestroyConflictTestCase(TestCase):
             solution_names,
             ["Blocking Solution", "Second Blocking Solution"],
         )
+
+
+class EntityExportLegacyLegalIdentifiersTestCase(TestCase):
+    def test_csv_identifier_columns_tolerate_legacy_string(self):
+        folder = Folder.objects.create(name="Export Folder")
+        entity = Entity.objects.create(name="Legacy", folder=folder)
+        Entity.objects.filter(pk=entity.pk).update(legal_identifiers="LEI123")
+        entity.refresh_from_db()
+        view = EntityViewSet()
+        for key in ("lei", "euid", "duns", "vat"):
+            config = view.export_config["fields"][key]
+            self.assertEqual(view._resolve_field_value(entity, config), "")

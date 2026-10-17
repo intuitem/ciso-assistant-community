@@ -206,24 +206,24 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
             "maturity": {"source": "default_maturity", "label": "maturity"},
             "trust": {"source": "default_trust", "label": "trust"},
             "lei": {
-                "source": "legal_identifiers",
+                "source": "legal_identifiers_dict",
                 "label": "lei",
-                "format": lambda v: (v or {}).get("LEI", ""),
+                "format": lambda v: v.get("LEI", ""),
             },
             "euid": {
-                "source": "legal_identifiers",
+                "source": "legal_identifiers_dict",
                 "label": "euid",
-                "format": lambda v: (v or {}).get("EUID", ""),
+                "format": lambda v: v.get("EUID", ""),
             },
             "duns": {
-                "source": "legal_identifiers",
+                "source": "legal_identifiers_dict",
                 "label": "duns",
-                "format": lambda v: (v or {}).get("DUNS", ""),
+                "format": lambda v: v.get("DUNS", ""),
             },
             "vat": {
-                "source": "legal_identifiers",
+                "source": "legal_identifiers_dict",
                 "label": "vat",
-                "format": lambda v: (v or {}).get("VAT", ""),
+                "format": lambda v: v.get("VAT", ""),
             },
             "parent_entity_ref_id": {
                 "source": "parent_entity.ref_id",
@@ -849,7 +849,7 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
         # --- Entities sheet ---
         entities_rows = []
         for entity in entities:
-            legal = entity.legal_identifiers or {}
+            legal = entity.legal_identifiers_dict
             entities_rows.append(
                 {
                     "ref_id": esc(entity.ref_id),
