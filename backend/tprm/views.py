@@ -849,7 +849,7 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
         # --- Entities sheet ---
         entities_rows = []
         for entity in entities:
-            legal = entity.legal_identifiers or {}
+            legal = entity.legal_identifiers_dict
             entities_rows.append(
                 {
                     "ref_id": esc(entity.ref_id),
