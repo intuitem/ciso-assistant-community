@@ -1,4 +1,7 @@
 {
+	"flagForChangeRequest": "Σήμανση για αλλαγή",
+	"removeChangeRequestFlag": "Αφαίρεση σήμανσης",
+	"itemsFlaggedForChanges": "με σήμανση για αλλαγή",
 	"manageMembers": "Διαχείριση μελών",
 	"addMembers": "Προσθήκη μελών",
 	"removeFromGroup": "Αφαίρεση από την ομάδα",
@@ -1532,7 +1535,6 @@
 	"expirationDate": "Ημερομηνία λήξης",
 	"expirationDateIsInThePastWarning": "Η καταχωρημένη ημερομηνία λήξης είναι στο παρελθόν",
 	"filterBy": "Φίλτρο κατά",
-	"demoDataAlreadyImported": "Τα demo δεδομένα έχουν ήδη εισαχθεί. Διαγράψτε ή μετονομάστε τον υπάρχοντα τομέα DEMO.",
 	"finding": "Εύρημα",
 	"findings": "Ευρήματα",
 	"associatedFindings": "Συνδεδεμένα ευρήματα",

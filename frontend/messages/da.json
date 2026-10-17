@@ -1,4 +1,7 @@
 {
+	"flagForChangeRequest": "Markér til ændring",
+	"removeChangeRequestFlag": "Fjern markering",
+	"itemsFlaggedForChanges": "markeret til ændring",
 	"manageMembers": "Administrer medlemmer",
 	"addMembers": "Tilføj medlemmer",
 	"removeFromGroup": "Fjern fra gruppen",
@@ -1306,7 +1309,6 @@
 	"expirationDate": "Udløbsdato",
 	"expirationDateIsInThePastWarning": "Den angivne udløbsdato ligger i fortiden",
 	"filterBy": "Filtrér efter",
-	"demoDataAlreadyImported": "Demodata er allerede importeret. Slet eller omdøb dit eksisterende DEMO-domæne.",
 	"finding": "Fund",
 	"findings": "Fund",
 	"associatedFindings": "Tilknyttede fund",

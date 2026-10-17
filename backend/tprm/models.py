@@ -304,6 +304,12 @@ class Entity(
             .first()
         )
 
+    @property
+    def legal_identifiers_dict(self) -> dict:
+        # legacy rows may hold a non-dict value written before validation existed
+        v = self.legal_identifiers
+        return v if isinstance(v, dict) else {}
+
     def get_emails(self) -> list[str]:
         emails = self.representatives.exclude(email="").values_list("email", flat=True)
         return sorted({e.strip() for e in emails if e and e.strip()})

@@ -12,6 +12,8 @@ import LecChartPreview from '$lib/components/ModelTable/field/LecChartPreview.sv
 import TriggerTypesDisplay from '$lib/components/ModelTable/field/TriggerTypesDisplay.svelte';
 import TierBadge from '$lib/components/ModelTable/field/TierBadge.svelte';
 import TierSource from '$lib/components/ModelTable/field/TierSource.svelte';
+import DpiaRequirementSource from '$lib/components/ModelTable/field/DpiaRequirementSource.svelte';
+import DpiaRequiredBadge from '$lib/components/ModelTable/field/DpiaRequiredBadge.svelte';
 import { listViewFields } from './table';
 import type { TableBatchAction } from './table';
 import type { urlModel } from './types';
@@ -640,6 +642,7 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlParams: 'content_type=DO&content_type=GL&content_type=EN'
 			},
 			{ field: 'evidences', urlModel: 'evidences' },
+			{ field: 'metric_instances', urlModel: 'metric-instances' },
 			{ field: 'objectives', urlModel: 'organisation-objectives' },
 			{ field: 'owner', urlModel: 'actors' },
 			{ field: 'security_exceptions', urlModel: 'security-exceptions' },
@@ -671,6 +674,13 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'task-templates',
 				addExisting: {
 					parentField: 'task_templates'
+				}
+			},
+			{
+				field: 'applied_controls',
+				urlModel: 'metric-instances',
+				addExisting: {
+					parentField: 'metric_instances'
 				}
 			},
 			{
@@ -1249,7 +1259,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder' },
 			{ field: 'library' },
 			{ field: 'pages_count' },
-			{ field: 'responses_count' }
+			{ field: 'responses_count' },
+			{ field: 'always_review' }
 		],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
@@ -2087,11 +2098,12 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'processings',
 		verboseName: 'processing',
 		verboseNamePlural: 'processings',
-		selectFields: [{ field: 'status' }],
+		selectFields: [{ field: 'status' }, { field: 'role' }],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'purposes', urlModel: 'purposes' },
 			{ field: 'nature', urlModel: 'terminologies' },
+			{ field: 'controllers', urlModel: 'entities' },
 			{ field: 'assigned_to', urlModel: 'actors', urlParams: 'is_third_party=false' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
 			{ field: 'perimeters', urlModel: 'perimeters' },
@@ -2106,6 +2118,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'description' },
 			{ field: 'nature' },
 			{ field: 'status' },
+			{ field: 'role' },
+			{ field: 'controllers' },
 			{ field: 'purposes' },
 			{ field: 'assigned_to' },
 			{ field: 'dpia_required' },
@@ -2134,6 +2148,12 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'processing', urlModel: 'data-recipients' },
 			{ field: 'processing', urlModel: 'data-contractors' },
 			{ field: 'processing', urlModel: 'data-transfers' },
+			{
+				field: 'processing',
+				urlModel: 'dpia-requirement-changes',
+				disableCreate: true,
+				disableDelete: true
+			},
 			{
 				field: 'processings',
 				urlModel: 'right-requests',
@@ -2247,6 +2267,19 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' }
 		]
+	},
+	'dpia-requirement-changes': {
+		endpointUrl: 'privacy/dpia-requirement-changes',
+		name: 'dpiarequirementchange',
+		localName: 'dpiaRequirementChange',
+		localNamePlural: 'dpiaRequirementChanges',
+		verboseName: 'DPIA requirement change',
+		verboseNamePlural: 'DPIA requirement changes',
+		foreignKeyFields: [
+			{ field: 'processing', urlModel: 'processings' },
+			{ field: 'response', urlModel: 'quick-form-responses' }
+		],
+		selectFields: [{ field: 'source' }]
 	},
 	purposes: {
 		endpointUrl: 'privacy/purposes',
@@ -3966,6 +3999,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'collection_frequency' },
 			{ field: 'target_value' },
 			{ field: 'current_value' },
+			{ field: 'last_computed_at', type: 'datetime' },
 			{ field: 'evidences' },
 			{ field: 'filtering_labels' },
 			{ field: 'created_at', type: 'datetime' },
@@ -4151,6 +4185,14 @@ const FIELD_COMPONENT_MAP = {
 		tier: TierBadge,
 		previous_tier: TierBadge,
 		source: TierSource
+	},
+	processings: {
+		dpia_required: DpiaRequiredBadge
+	},
+	'dpia-requirement-changes': {
+		dpia_required: DpiaRequiredBadge,
+		previous_dpia_required: DpiaRequiredBadge,
+		source: DpiaRequirementSource
 	}
 };
 

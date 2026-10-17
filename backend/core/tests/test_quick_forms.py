@@ -2,6 +2,7 @@
 lifecycle, CEL outcomes and page visibility, XOR parent constraints."""
 
 import pytest
+from django.contrib.auth.models import Permission
 from django.db import IntegrityError, transaction
 from knox.models import AuthToken
 from rest_framework.test import APIClient
@@ -20,7 +21,7 @@ from core.models import (
     RequirementNode,
     StoredLibrary,
 )
-from iam.models import Folder, RoleAssignment, User, UserGroup
+from iam.models import Folder, Role, RoleAssignment, User, UserGroup
 from tprm.models import Entity
 
 FORM_URN = "urn:test:risk:quick_form:dpia-screening"
@@ -182,13 +183,123 @@ class TestQuickFormImport:
 
         _load(LIBRARY_V2)
         response.refresh_from_db()
-        # New question seeded, dropped choice deselected, nothing else lost.
+        # New question seeded; the dropped choice a draft picked is kept, picked.
         assert response.answers.count() == 5
         assert response.answers.filter(question__urn=f"{PAGE1}:question:dpo").exists()
-        assert response.answers.get(question__urn=Q_SCALE).selected_choices.count() == 0
+        assert list(
+            response.answers.get(question__urn=Q_SCALE).selected_choices.all()
+        ) == [large]
+        assert Question.objects.get(urn=Q_SCALE).choices.filter(urn=C_LARGE).exists()
+
+    def test_update_drops_choices_nobody_picked(self, app_config):
+        form = _load(LIBRARY_V1)
+        response = QuickFormResponse.objects.create(
+            name="Vendor Y", quick_form=form, folder=Folder.get_root_folder()
+        )
+        response.seed_answers()
+        _load(LIBRARY_V2)
         assert (
             not Question.objects.get(urn=Q_SCALE).choices.filter(urn=C_LARGE).exists()
         )
+
+    def test_update_keeps_what_drafts_wrote(self, app_config):
+        form = _load(LIBRARY_V1)
+        response = QuickFormResponse.objects.create(
+            name="DPIA", quick_form=form, folder=Folder.get_root_folder()
+        )
+        response.seed_answers()
+        written = response.answers.get(question__urn=Q_COMMENT)
+        written.value = "Weeks of writing"
+        written.save()
+
+        # v2 without the comment (answered) nor the headcount (left blank).
+        dropped = (
+            LIBRARY_V1.replace("version: 1", "version: 2")
+            .replace(
+                f"""            {Q_HEADCOUNT}:
+              type: number
+              text: How many data subjects?
+""",
+                "",
+            )
+            .replace(
+                f"""            {Q_COMMENT}:
+              type: text
+              text: Anything else?
+              required: false
+""",
+                "",
+            )
+        )
+        _load(dropped)
+        assert response.answers.get(question__urn=Q_COMMENT).value == "Weeks of writing"
+        assert not Question.objects.filter(urn=Q_HEADCOUNT).exists()
+
+    def test_always_review_comes_from_the_first_load_only(self, app_config):
+        reviewed = LIBRARY_V1.replace(
+            "      description: Is a DPIA required?\n",
+            "      description: Is a DPIA required?\n      always_review: true\n",
+        )
+        form = _load(reviewed)
+        assert form.always_review is True
+
+        _user, client = _admin_client()
+        url = f"/api/quick-forms/{form.id}/always-review/"
+        assert (
+            client.post(url, {"always_review": "no"}, format="json").status_code == 400
+        )
+        assert client.post(url, {"always_review": False}, format="json").json() == {
+            "always_review": False
+        }
+        # The library still says true: an update keeps the instance's choice.
+        _load(reviewed.replace("version: 1", "version: 2"))
+        form.refresh_from_db()
+        assert form.always_review is False
+
+    def test_always_review_needs_only_the_change_right(self, app_config):
+        form = _load(LIBRARY_V1)
+        user = User.objects.create_user(email="qf-editor@test.local", is_published=True)
+        role = Role.objects.create(name="QuickFormEditor", folder=form.folder)
+        role.permissions.set(
+            Permission.objects.filter(
+                codename__in=["view_quickform", "change_quickform"]
+            )
+        )
+        group = UserGroup.objects.create(name="QuickFormEditors", folder=form.folder)
+        group.user_set.add(user)
+        assignment = RoleAssignment.objects.create(
+            user_group=group, role=role, folder=form.folder, is_recursive=True
+        )
+        assignment.perimeter_folders.add(form.folder)
+        client = APIClient()
+        client.force_authenticate(user=user)
+        url = f"/api/quick-forms/{form.id}/always-review/"
+        assert (
+            client.post(url, {"always_review": True}, format="json").status_code == 200
+        )
+        form.refresh_from_db()
+        assert form.always_review is True
+
+    def test_answered_questions_and_choices_cannot_be_deleted(self, app_config):
+        _user, client = _admin_client()
+        form = _load(LIBRARY_V1)
+        response = QuickFormResponse.objects.create(
+            name="r", quick_form=form, folder=Folder.get_root_folder()
+        )
+        response.seed_answers()
+        scale = Question.objects.get(urn=Q_SCALE)
+        large = scale.choices.get(urn=C_LARGE)
+        response.answers.get(question=scale).selected_choices.set([large])
+
+        refused = client.delete(f"/api/questions/{scale.id}/")
+        assert refused.status_code == 400
+        assert refused.json()["error"] == "questionAnsweredInResponses"
+        refused = client.delete(f"/api/question-choices/{large.id}/")
+        assert refused.json()["error"] == "choiceSelectedInResponses"
+        small = scale.choices.get(urn=C_SMALL)
+        assert client.delete(f"/api/question-choices/{small.id}/").status_code == 204
+        blank = Question.objects.get(urn=Q_HEADCOUNT)
+        assert client.delete(f"/api/questions/{blank.id}/").status_code == 204
 
 
 @pytest.mark.django_db
@@ -1323,3 +1434,329 @@ def test_respondent_may_start_a_request_but_sees_only_their_own(app_config):
         == 200
     )
     assert client.post(f"{base}submit/", {}, format="json").status_code == 200
+
+
+WEIGHTED_SUM_LIBRARY = """
+urn: urn:test:risk:library:qf-weighted-sum
+locale: en
+ref_id: qf-weighted-sum
+name: Quick form weighted sum
+description: Weighted SUM scoring
+copyright: Test
+version: 1
+publication_date: 2026-09-18
+provider: test-provider
+packager: test
+objects:
+  quick_forms:
+    - urn: urn:test:risk:quick_form:weighted-sum
+      ref_id: weighted-sum
+      name: Weighted sum
+      description: Two 0/50 questions weighing 3 and 1
+      scores_definition:
+        min: 0
+        max: 100
+        aggregation: sum
+      pages:
+        - urn: urn:test:risk:qf_page:weighted-sum:only
+          ref_id: only
+          name: Only page
+          order: 1
+          questions:
+            urn:test:risk:qf_page:weighted-sum:only:question:heavy:
+              type: unique_choice
+              text: Heavy
+              order: 1
+              weight: 3
+              choices:
+                - urn: urn:test:risk:qf_page:weighted-sum:only:question:heavy:choice:good
+                  value: good
+                  add_score: 50
+                - urn: urn:test:risk:qf_page:weighted-sum:only:question:heavy:choice:bad
+                  value: bad
+                  add_score: 0
+            urn:test:risk:qf_page:weighted-sum:only:question:light:
+              type: unique_choice
+              text: Light
+              order: 2
+              weight: 1
+              choices:
+                - urn: urn:test:risk:qf_page:weighted-sum:only:question:light:choice:good
+                  value: good
+                  add_score: 50
+                - urn: urn:test:risk:qf_page:weighted-sum:only:question:light:choice:bad
+                  value: bad
+                  add_score: 0
+"""
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "heavy,light,expected",
+    [
+        ("good", "bad", 75),
+        ("bad", "good", 25),
+        ("good", "good", 100),
+        ("bad", "bad", 0),
+    ],
+)
+def test_weighted_sum_scores_like_an_audit(app_config, heavy, light, expected):
+    """Question weights mean the same thing in a quick form as in a requirement
+    assessment: the weighted total is projected onto the unweighted 0-100 scale,
+    on the live path and in the editor preview alike."""
+    from core.cel_service import evaluate_quick_form, evaluate_quick_form_document
+    from core.utils import apply_answers_dict
+
+    stored, error = StoredLibrary.store_library_content(
+        WEIGHTED_SUM_LIBRARY.encode("utf-8")
+    )
+    assert error is None, error
+    assert stored.load() is None
+    form = QuickForm.objects.get(urn="urn:test:risk:quick_form:weighted-sum")
+    folder = Folder.objects.create(
+        name="qf-wsum", parent_folder=Folder.get_root_folder()
+    )
+    response = QuickFormResponse.objects.create(
+        name="weighted", quick_form=form, folder=folder
+    )
+    base = "urn:test:risk:qf_page:weighted-sum:only:question"
+    answers = {
+        f"{base}:heavy": f"{base}:heavy:choice:{heavy}",
+        f"{base}:light": f"{base}:light:choice:{light}",
+    }
+    questions = {q.urn: q for q in Question.objects.filter(page__quick_form=form)}
+    apply_answers_dict("response", response, questions, answers)
+
+    live = evaluate_quick_form(response, persist=False)
+    preview = evaluate_quick_form_document(
+        {
+            "urn": form.urn,
+            "scores_definition": form.scores_definition,
+            "pages": [
+                {
+                    "urn": p.urn,
+                    "ref_id": p.ref_id,
+                    "name": p.name,
+                    "order": p.order,
+                    "questions": p.get_questions_translated() or {},
+                }
+                for p in form.pages.all().order_by("order")
+            ],
+        },
+        answers,
+    )
+    for result in (live, preview):
+        assert result["score"] == expected
+        # Every sum the rules can read sits on the same scale as the score.
+        context = result["context"]
+        assert context["response"]["score_sum"] == expected
+        assert context["response"]["score_max"] == 100
+        assert context["pages"]["only"]["score"] == expected
+        assert context["pages"]["only"]["score_max"] == 100
+
+
+@pytest.mark.django_db
+def test_weighted_sum_counts_a_skipped_optional_question_as_zero(app_config):
+    """On the live path too, skipping an optional heavy question scores like
+    answering its lowest choice instead of inflating the answered ones' share."""
+    from core.cel_service import evaluate_quick_form
+    from core.utils import apply_answers_dict
+
+    library = WEIGHTED_SUM_LIBRARY.replace(
+        "weight: 3\n", "weight: 3\n              required: false\n"
+    )
+    stored, error = StoredLibrary.store_library_content(library.encode("utf-8"))
+    assert error is None, error
+    assert stored.load() is None
+    form = QuickForm.objects.get(urn="urn:test:risk:quick_form:weighted-sum")
+    folder = Folder.objects.create(
+        name="qf-wsum-skip", parent_folder=Folder.get_root_folder()
+    )
+    response = QuickFormResponse.objects.create(
+        name="weighted", quick_form=form, folder=folder
+    )
+    base = "urn:test:risk:qf_page:weighted-sum:only:question"
+    questions = {q.urn: q for q in Question.objects.filter(page__quick_form=form)}
+    assert questions[f"{base}:heavy"].required is False
+    apply_answers_dict(
+        "response", response, questions, {f"{base}:light": f"{base}:light:choice:good"}
+    )
+
+    assert evaluate_quick_form(response, persist=False)["score"] == 25
+
+
+def _preview_form(questions):
+    """A one-page quick form document, scored 0-100 as a weighted sum."""
+    base = "urn:test:risk:qf_page:preview:only"
+    return {
+        "urn": "urn:test:risk:quick_form:preview",
+        "scores_definition": {"min": 0, "max": 100, "aggregation": "sum"},
+        "pages": [
+            {
+                "urn": base,
+                "ref_id": "only",
+                "name": "Only page",
+                "order": 1,
+                "questions": {
+                    f"{base}:question:{key}": {
+                        "type": "unique_choice",
+                        "text": key,
+                        "order": order,
+                        **{k: v for k, v in extra.items() if k != "scores"},
+                        "choices": [
+                            {
+                                "urn": f"{base}:question:{key}:choice:{value}",
+                                "value": value,
+                                "add_score": score,
+                            }
+                            for value, score in zip(
+                                ("good", "bad"), extra.get("scores", (50, 0))
+                            )
+                        ],
+                    }
+                    for order, (key, extra) in enumerate(questions.items(), start=1)
+                },
+            }
+        ],
+    }
+
+
+def _preview_score(questions, answers):
+    from core.cel_service import evaluate_quick_form_document
+
+    base = "urn:test:risk:qf_page:preview:only:question"
+    return evaluate_quick_form_document(
+        _preview_form(questions),
+        {
+            f"{base}:{key}": f"{base}:{key}:choice:{value}"
+            for key, value in answers.items()
+        },
+    )["score"]
+
+
+def test_preview_keeps_an_explicit_zero_weight():
+    """Weight 0 means the question does not count, and must not default to 1."""
+    questions = {"ignored": {"weight": 0}, "counted": {"weight": 1}}
+    assert _preview_score(questions, {"ignored": "good", "counted": "bad"}) == 0
+    assert _preview_score(questions, {"ignored": "bad", "counted": "good"}) == 100
+
+
+def test_preview_keeps_a_skipped_optional_question_neutral():
+    """An optional question can contribute 0, so 0 belongs to its reachable range
+    even when none of its choices scores it."""
+    questions = {
+        "counted": {"weight": 1},
+        "optional": {"weight": 3, "required": False, "scores": (-10, -20)},
+    }
+    assert _preview_score(questions, {"counted": "good"}) == 50
+
+
+def test_preview_scores_a_form_whose_weights_are_all_zero():
+    """Weights all at 0 leave score_max at 0, but the live response still stores
+    a score once complete: the preview must not fall back to None."""
+    questions = {"first": {"weight": 0}, "second": {"weight": 0}}
+    assert _preview_score(questions, {"first": "good", "second": "good"}) == 0
+    assert _preview_score(questions, {"first": "good"}) is None
+
+
+def _preview(form, answers):
+    from core.cel_service import evaluate_quick_form_document
+
+    base = "urn:test:risk:qf_page:preview:only:question"
+    return evaluate_quick_form_document(
+        form,
+        {
+            f"{base}:{key}": f"{base}:{key}:choice:{value}"
+            for key, value in answers.items()
+        },
+    )
+
+
+def test_preview_page_sums_project_like_the_form_sum():
+    """A one-page form scores the same summing its questions or its pages: the
+    page sum is projected too, instead of saturating at the form maximum."""
+    questions = {"heavy": {"weight": 3}, "light": {"weight": 1}}
+    answers = {"heavy": "good", "light": "bad"}
+    form = _preview_form(questions)
+    form["scores_definition"]["aggregation"] = "pages_sum"
+    assert _preview_score(questions, answers) == 75
+    assert _preview(form, answers)["score"] == 75
+
+
+def test_preview_rule_compares_score_with_score_max():
+    """A rule reading `response.score` against `response.score_max` sees both on
+    the projected scale."""
+    form = _preview_form({"heavy": {"weight": 3}, "light": {"weight": 1}})
+    form["outcomes_definition"] = [
+        {
+            "ref_id": "three_quarters",
+            "expression": "response.score >= response.score_max * 0.75",
+        }
+    ]
+    fired = _preview(form, {"heavy": "good", "light": "bad"})
+    missed = _preview(form, {"heavy": "bad", "light": "good"})
+    assert "three_quarters" in fired["computed_outcome"]
+    assert "three_quarters" not in missed["computed_outcome"]
+
+
+def test_preview_counts_an_unanswered_optional_question_as_zero():
+    """A skipped optional question scores like its lowest choice, as it does
+    unweighted: skipping a heavy question must not beat answering it."""
+    questions = {
+        "optional": {"weight": 3, "required": False},
+        "answered": {"weight": 1},
+    }
+    skipped = _preview_score(questions, {"answered": "good"})
+    assert skipped == _preview_score(questions, {"answered": "good", "optional": "bad"})
+    assert skipped == 25
+
+
+@pytest.mark.django_db
+def test_the_fill_preview_offers_scale_levels_and_ratings(app_config):
+    from pathlib import Path
+
+    import yaml
+
+    _user, client = _admin_client()
+    res = client.post(
+        "/api/library-drafts/",
+        {
+            "name": "DPIA draft",
+            "ref_id": "dpia-draft",
+            "packager": "acme",
+            "locale": "en",
+            "folder": str(Folder.get_root_folder().id),
+        },
+        format="json",
+    )
+    assert res.status_code == 201, res.json()
+    source = Path(__file__).resolve().parents[2] / (
+        "library/libraries/quick-form-dpia.yaml"
+    )
+    dpia = yaml.safe_load(source.read_text())["objects"]["quick_forms"][0]
+    LibraryDraft.objects.filter(id=res.json()["id"]).update(
+        content={"quick_forms": [dpia]}
+    )
+    page = "urn:intuitem:risk:qf_page:dpia:illegitimate_access"
+    preview = client.post(
+        f"/api/library-drafts/{res.json()['id']}/quick-form-fill-preview/",
+        {
+            "answers": {
+                f"{page}:question:severity": f"{page}:question:severity:choice:maximum",
+                f"{page}:question:likelihood": f"{page}:question:likelihood:choice:limited",
+            }
+        },
+        format="json",
+    )
+    assert preview.status_code == 200, preview.json()
+    body = preview.json()
+    (risk_page,) = [p for p in body["pages"] if p["urn"] == page]
+    severity = risk_page["questions"][f"{page}:question:severity"]
+    assert [c["urn"].rsplit(":", 1)[-1] for c in severity["choices"]] == [
+        "negligible",
+        "limited",
+        "significant",
+        "maximum",
+    ]
+    (rating,) = body["ratings"]
+    assert [p["level"] for p in rating["points"]] == ["unacceptable"]

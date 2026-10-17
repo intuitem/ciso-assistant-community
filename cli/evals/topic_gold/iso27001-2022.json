@@ -1,0 +1,187 @@
+{
+ "framework": "iso27001-2022",
+ "labels": {
+  "urn:intuitem:risk:req_node:iso27001-2022:4.3": {
+   "asset_inventory": "related"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:7.2": {
+   "awareness_training": "core"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:7.3": {
+   "awareness_training": "core"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.5.3": {
+   "access_control": "related"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.5.5": {
+   "incident_response": "related"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.5.7": {
+   "vuln_mgmt": "related"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.5.9": {
+   "asset_inventory": "core"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.5.10": {
+   "awareness_training": "related"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.5.11": {
+   "asset_inventory": "related"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.5.12": {
+   "asset_inventory": "related"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.5.14": {
+   "encryption": "related"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.5.15": {
+   "access_control": "core",
+   "mfa": "related"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.5.16": {
+   "access_control": "core"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.5.17": {
+   "mfa": "related",
+   "access_control": "related"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.5.18": {
+   "access_control": "core"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.5.19": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.5.20": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.5.21": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.5.22": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.5.23": {
+   "third_party": "related",
+   "encryption": "related"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.5.24": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.5.25": {
+   "incident_response": "core",
+   "logging": "related"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.5.26": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.5.27": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.5.28": {
+   "incident_response": "core"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.5.29": {
+   "backup": "related",
+   "incident_response": "related"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.5.30": {
+   "backup": "related",
+   "incident_response": "related"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.5.34": {
+   "encryption": "related"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.6.2": {
+   "awareness_training": "related"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.6.3": {
+   "awareness_training": "core"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.6.5": {
+   "access_control": "related"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.6.7": {
+   "mfa": "related",
+   "encryption": "related"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.6.8": {
+   "incident_response": "core",
+   "awareness_training": "related"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.7.9": {
+   "encryption": "related"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.7.10": {
+   "encryption": "related"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.8.1": {
+   "encryption": "related",
+   "vuln_mgmt": "related"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.8.2": {
+   "access_control": "core",
+   "mfa": "related",
+   "logging": "related"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.8.3": {
+   "access_control": "core",
+   "mfa": "related"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.8.4": {
+   "access_control": "related"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.8.5": {
+   "mfa": "core",
+   "access_control": "related"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.8.7": {
+   "vuln_mgmt": "related"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.8.8": {
+   "vuln_mgmt": "core"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.8.9": {
+   "vuln_mgmt": "related",
+   "asset_inventory": "related"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.8.13": {
+   "backup": "core"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.8.14": {
+   "backup": "related"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.8.15": {
+   "logging": "core",
+   "incident_response": "related"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.8.16": {
+   "logging": "core",
+   "incident_response": "related"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.8.17": {
+   "logging": "related"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.8.18": {
+   "access_control": "related",
+   "logging": "related"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.8.19": {
+   "vuln_mgmt": "related"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.8.20": {
+   "logging": "related"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.8.24": {
+   "encryption": "core"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.8.29": {
+   "vuln_mgmt": "related"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.8.30": {
+   "third_party": "core"
+  },
+  "urn:intuitem:risk:req_node:iso27001-2022:a.8.32": {
+   "vuln_mgmt": "related"
+  }
+ }
+}

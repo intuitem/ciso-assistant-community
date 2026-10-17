@@ -82,7 +82,8 @@
 		tableHandlers,
 		tableRefreshers,
 		tableStates,
-		tableColumnStates
+		tableColumnStates,
+		tableSortStates
 	} from '$lib/utils/stores';
 	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
@@ -522,13 +523,29 @@
 		});
 	}
 
+	function applySavedSort() {
+		const saved = $tableSortStates[filterStoreKey];
+		const sort = saved ? { identifier: saved.orderBy, direction: saved.direction } : orderBy;
+		if (!sort) handler.getSort().set({});
+		else if (sort.direction === 'asc') handler.sortAsc(sort.identifier);
+		else handler.sortDesc(sort.identifier);
+	}
+
 	onMount(() => {
-		if (orderBy) {
-			orderBy.direction === 'asc'
-				? handler.sortAsc(orderBy.identifier)
-				: handler.sortDesc(orderBy.identifier);
-		}
+		applySavedSort();
+		const unsubscribeSort = handler.getSort().subscribe(({ orderBy: key, direction }) => {
+			if (!key || !direction) return;
+			const next = { ...$tableSortStates };
+			if (key === orderBy?.identifier && direction === orderBy?.direction) {
+				if (!(filterStoreKey in next)) return;
+				delete next[filterStoreKey];
+			} else {
+				next[filterStoreKey] = { orderBy: String(key), direction };
+			}
+			$tableSortStates = next;
+		});
 		return () => {
+			unsubscribeSort();
 			if (hasRemoteSource)
 				tableRefreshers.update((r) => {
 					delete r[baseEndpoint];
@@ -649,6 +666,7 @@
 	$effect(() => {
 		if (filterStoreKey !== previousFilterStoreKey) {
 			previousFilterStoreKey = filterStoreKey;
+			untrack(applySavedSort);
 			const fresh = seedFilterValues();
 			Object.assign(filterValues, fresh);
 			_form.form.update((data) => ({
@@ -875,6 +893,12 @@
 		const next = { ...$tableFilterStates };
 		delete next[filterStoreKey];
 		$tableFilterStates = next;
+		if (!(filterStoreKey in $tableSortStates)) return;
+		const nextSort = { ...$tableSortStates };
+		delete nextSort[filterStoreKey];
+		$tableSortStates = nextSort;
+		applySavedSort();
+		handler.invalidate();
 	}
 
 	const APPLIED_CONTROL_STATUS_PRESETS: Record<string, string> = {
@@ -1089,7 +1113,7 @@
 												{/key}
 											{/if}
 										{/each}
-										{#if filterCount > 0}
+										{#if filterCount > 0 || filterStoreKey in $tableSortStates}
 											<div class="flex justify-end pt-1">
 												<button
 													type="button"

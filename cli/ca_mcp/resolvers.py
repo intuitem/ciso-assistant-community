@@ -240,11 +240,20 @@ def resolve_risk_scenario_id(scenario_name_or_id: str) -> str:
         raise ValueError(f"Risk scenario '{scenario_name_or_id}' API error: {error}")
 
     if not scenarios:
+        scenarios, error = fetch_all_results(
+            "/risk-scenarios/", params={"ref_id": scenario_name_or_id}
+        )
+        if error:
+            raise ValueError(
+                f"Risk scenario '{scenario_name_or_id}' API error: {error}"
+            )
+
+    if not scenarios:
         raise ValueError(f"Risk scenario '{scenario_name_or_id}' not found")
 
     if len(scenarios) > 1:
         raise ValueError(
-            f"Ambiguous risk scenario name '{scenario_name_or_id}', found {len(scenarios)}"
+            f"Ambiguous risk scenario '{scenario_name_or_id}', found {len(scenarios)}"
         )
 
     return scenarios[0]["id"]
@@ -321,6 +330,30 @@ def resolve_compliance_assessment_id(assessment_name_or_id: str) -> str:
         )
 
     return assessments[0]["id"]
+
+
+def resolve_global_folder_id() -> str:
+    """Return the UUID of the Global folder"""
+    folders, error = fetch_all_results("/folders/", params={"content_type": "GL"})
+
+    if error:
+        raise ValueError(f"Global folder API error: {error}")
+
+    if not folders:
+        raise ValueError("Global folder not found")
+
+    return str(folders[0]["id"])
+
+
+def resolve_in_folder_or_global(resolver, name_or_id: str, folder_id: str = None):
+    """Resolve a name within folder_id (Global when None), falling back to Global"""
+    global_id = None if folder_id else resolve_global_folder_id()
+    try:
+        return resolver(name_or_id, folder_id=folder_id or global_id)
+    except ValueError as e:
+        if global_id or "not found" not in str(e):
+            raise
+        return resolver(name_or_id, folder_id=resolve_global_folder_id())
 
 
 def resolve_id_or_name(name_or_id: str, endpoint: str) -> str:
@@ -458,6 +491,35 @@ def resolve_vulnerability_id(vulnerability_name_or_id: str) -> str:
     return str(vulnerabilities[0]["id"])
 
 
+def resolve_incident_id(incident_name_or_id: str) -> str:
+    """Resolve an incident name or UUID to its UUID.
+
+    The incidents endpoint has no `name` filter, so names are looked up via
+    `search` and then matched exactly (case-sensitive) on `name`.
+    """
+    if _is_uuid(incident_name_or_id):
+        return incident_name_or_id
+
+    # No item cap: search also matches description/ref_id, so the exact
+    # name may sit beyond the default limit.
+    results, error = fetch_all_results(
+        "/incidents/",
+        params={"search": incident_name_or_id},
+        max_items=None,
+    )
+    if error:
+        raise ValueError(f"Incident '{incident_name_or_id}' API error: {error}")
+
+    matches = [r for r in results if r.get("name") == incident_name_or_id]
+    if not matches:
+        raise ValueError(f"Incident '{incident_name_or_id}' not found")
+    if len(matches) > 1:
+        raise ValueError(
+            f"Ambiguous incident name '{incident_name_or_id}', found {len(matches)}"
+        )
+    return matches[0]["id"]
+
+
 def resolve_team_id(team_name_or_id: str) -> str:
     """Helper function to resolve team name to UUID
     If already a UUID, returns it. If a name, looks it up via API.
@@ -482,31 +544,38 @@ def resolve_team_id(team_name_or_id: str) -> str:
     return str(teams[0]["id"])
 
 
-def resolve_task_template_id(task_name_or_id: str) -> str:
-    """Helper function to resolve task template name to UUID
-    If already a UUID, returns it. If a name, looks it up via API.
+def resolve_task_template_id(task_name_or_id: str, folder_id: str = None) -> str:
+    """Resolve a task template name or UUID to its UUID.
+
+    The task templates endpoint has no `name` filter, so names are looked up
+    via `search` and then matched on `name`, ignoring case and surrounding
+    whitespace. `folder_id` optionally scopes the lookup.
     """
-    # Check if it's already a UUID
-    if "-" in task_name_or_id and len(task_name_or_id) == 36:
+    if _is_uuid(task_name_or_id):
         return task_name_or_id
 
-    # Otherwise, look up by name
+    params = {"search": task_name_or_id}
+    if folder_id:
+        params["folder"] = folder_id
+    # No item cap: search also matches ref_id, so the exact name may sit
+    # beyond the default limit.
     tasks, error = fetch_all_results(
-        "/task-templates/", params={"name": task_name_or_id}
+        "/task-templates/",
+        params=params,
+        max_items=None,
     )
-
     if error:
         raise ValueError(f"Task template '{task_name_or_id}' API error: {error}")
 
-    if not tasks:
+    wanted = task_name_or_id.strip().casefold()
+    matches = [t for t in tasks if (t.get("name") or "").strip().casefold() == wanted]
+    if not matches:
         raise ValueError(f"Task template '{task_name_or_id}' not found")
-
-    if len(tasks) > 1:
+    if len(matches) > 1:
         raise ValueError(
-            f"Ambiguous task template name '{task_name_or_id}', found {len(tasks)}"
+            f"Ambiguous task template name '{task_name_or_id}', found {len(matches)}"
         )
-
-    return tasks[0]["id"]
+    return matches[0]["id"]
 
 
 # ============================================================================

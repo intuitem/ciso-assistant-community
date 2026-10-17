@@ -2,10 +2,13 @@ import copy
 import ipaddress
 import re
 import uuid
+from types import MappingProxyType
+
+import structlog
 
 from django.conf import settings as django_settings
 from django.core.exceptions import ValidationError as DjangoValidationError
-from django.db import transaction
+from django.db import models, transaction
 from rest_framework import serializers
 
 from urllib.parse import urlparse
@@ -17,7 +20,9 @@ from core.net_safety import (
 )
 from iam.models import User
 
-from .models import GlobalSettings
+from .models import GlobalSettings, Mailer, MailerConfiguration, MailerHealth
+
+logger = structlog.get_logger(__name__)
 
 
 def canonical_ip_or_cidr(value: str) -> str:
@@ -327,10 +332,12 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
         from core.models import AppliedControl
         from decimal import Decimal
 
-        updated_count = 0
+        to_update = []
 
         # Get all AppliedControl records that have cost data
-        for control in AppliedControl.objects.filter(cost__isnull=False):
+        for control in AppliedControl.objects.filter(cost__isnull=False).only(
+            "id", "cost"
+        ):
             if isinstance(control.cost, dict):
                 current_currency = control.cost.get("currency")
 
@@ -366,12 +373,15 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                                     * Decimal(str(conversion_rate))
                                 )
 
-                    control.save(update_fields=["cost"], skip_sync=True)
-                    updated_count += 1
+                    to_update.append(control)
 
-        print(
-            f"Updated currency from '{old_currency}' to '{new_currency}' "
-            f"with conversion rate {conversion_rate} in {updated_count} AppliedControl records"
+        AppliedControl.objects.bulk_update(to_update, ["cost"], batch_size=500)
+        logger.info(
+            "Applied control currencies updated",
+            old_currency=old_currency,
+            new_currency=new_currency,
+            conversion_rate=conversion_rate,
+            count=len(to_update),
         )
 
     class Meta:
@@ -501,6 +511,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     data_breaches = serializers.BooleanField(
         source="value.data_breaches", required=False, default=True
     )
+    dpias = serializers.BooleanField(
+        source="value.dpias", required=False, default=False
+    )
     chat_mode = serializers.BooleanField(
         source="value.chat_mode", required=False, default=False
     )
@@ -569,6 +582,7 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
             "control_plan",
             "custom_portals",
             "data_breaches",
+            "dpias",
             "document_management",
             "ebiosrm",
             "exceptions",
@@ -608,6 +622,15 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
         }
     )
 
+    # Flags that only work with others on: turning one on turns those on too, and
+    # turning one of those off turns it off (see utils.apply_flag_requirements).
+    FLAG_REQUIRES = MappingProxyType(
+        {
+            # DPIAs are quick forms: screenings and assessments are responses.
+            "dpias": frozenset({"quick_forms"}),
+        }
+    )
+
     class Meta:
         model = GlobalSettings
         exclude = [
@@ -635,9 +658,16 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
         Custom update logic to handle saving changes to the nested 'value' field,
         iterating directly over the serializer's fields.
         """
+        # Local import: utils imports this module at load time.
+        from global_settings.utils import (
+            apply_flag_requirements,
+            clear_feature_flags_cache,
+        )
+
         current_value_dict = instance.value if isinstance(instance.value, dict) else {}
         value_changed = False
         idp_groups_changed = False
+        turned_off = set()
         new_value_dict = validated_data.get("value", {})
 
         for field_name, field_instance in self.fields.items():
@@ -657,19 +687,23 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
                 new_flag_value = new_value_dict[field_name]
 
                 if current_value_dict.get(source_key) != new_flag_value:
+                    if current_value_dict.get(source_key) and not new_flag_value:
+                        turned_off.add(source_key)
                     current_value_dict[source_key] = new_flag_value
                     value_changed = True
                     if source_key == "idp_groups":
                         idp_groups_changed = True
+
+        before_requirements = dict(current_value_dict)
+        apply_flag_requirements(current_value_dict, turned_off)
+        value_changed = value_changed or current_value_dict != before_requirements
 
         if value_changed:
             instance.value = current_value_dict
             instance.save(update_fields=["value"])
             # Every flags write must invalidate the read cache; the only other
             # write path is PresetExecutor._apply_feature_flags, which does
-            # the same. Local import: utils imports this module at load time.
-            from global_settings.utils import clear_feature_flags_cache
-
+            # the same.
             clear_feature_flags_cache()
 
         return instance
@@ -888,3 +922,188 @@ class SecIntelFeedsSerializer(serializers.ModelSerializer):
             instance.save(update_fields=["value"])
 
         return instance
+
+
+class MailerSerializer(serializers.ModelSerializer):
+    """One mailer row. Secrets are write-only; ``has_*`` says whether one is
+    stored. A blank secret on an existing position keeps the stored one."""
+
+    password = serializers.CharField(
+        write_only=True, required=False, allow_blank=True, trim_whitespace=False
+    )
+    oauth2_client_secret = serializers.CharField(
+        write_only=True, required=False, allow_blank=True, trim_whitespace=False
+    )
+    oauth2_refresh_token = serializers.CharField(
+        write_only=True, required=False, allow_blank=True, trim_whitespace=False
+    )
+    oauth2_private_key = serializers.CharField(
+        write_only=True, required=False, allow_blank=True, trim_whitespace=False
+    )
+    has_password = serializers.SerializerMethodField()
+    has_oauth2_client_secret = serializers.SerializerMethodField()
+    has_oauth2_refresh_token = serializers.SerializerMethodField()
+    has_oauth2_private_key = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Mailer
+        fields = [
+            "position",
+            "transport",
+            "host",
+            "port",
+            "use_tls",
+            "use_ssl",
+            "username",
+            "password",
+            "has_password",
+            "oauth2_grant_type",
+            "oauth2_token_url",
+            "oauth2_scope",
+            "oauth2_client_id",
+            "oauth2_client_secret",
+            "has_oauth2_client_secret",
+            "oauth2_refresh_token",
+            "has_oauth2_refresh_token",
+            "oauth2_issuer",
+            "oauth2_private_key",
+            "has_oauth2_private_key",
+            "oauth2_audience",
+        ]
+
+    def get_has_password(self, obj) -> bool:
+        return bool(obj.password)
+
+    def get_has_oauth2_client_secret(self, obj) -> bool:
+        return bool(obj.oauth2_client_secret)
+
+    def get_has_oauth2_refresh_token(self, obj) -> bool:
+        return bool(obj.oauth2_refresh_token)
+
+    def get_has_oauth2_private_key(self, obj) -> bool:
+        return bool(obj.oauth2_private_key)
+
+
+class MailerConfigurationSerializer(serializers.ModelSerializer):
+    """The stored configuration with its mailers. Saving requires a test token
+    issued by the test endpoint for these exact values, or an explicit
+    override (custom-mailer-settings ADR)."""
+
+    mailers = MailerSerializer(many=True)
+    test_token = serializers.CharField(
+        write_only=True, required=False, allow_blank=True
+    )
+    override_untested = serializers.BooleanField(
+        write_only=True, required=False, default=False
+    )
+
+    class Meta:
+        model = MailerConfiguration
+        fields = [
+            "is_active",
+            "from_email",
+            "last_tested_at",
+            "mailers",
+            "test_token",
+            "override_untested",
+        ]
+        read_only_fields = ["last_tested_at"]
+
+    def validate_mailers(self, mailers):
+        positions = [item.get("position") for item in mailers]
+        if not mailers or len(mailers) > 2:
+            raise serializers.ValidationError("Configure one or two mailers.")
+        if sorted(positions) != list(range(1, len(mailers) + 1)):
+            raise serializers.ValidationError("Mailer positions must be 1, then 2.")
+        return mailers
+
+    def validate(self, attrs):
+        if attrs.get("is_active") and not attrs.get("from_email"):
+            raise serializers.ValidationError(
+                {"from_email": "A sender address is required to activate the mailers."}
+            )
+        return attrs
+
+    def build_rows(self, instance, mailers_data) -> list[Mailer]:
+        """Unsaved rows for the payload: existing rows at the same position
+        are updated in place, blank secrets keep the stored value. Validates
+        each row the way the environment builder validates its variables."""
+        from .mailer_settings import network_problems
+
+        existing = {row.position: row for row in instance.mailers.all()}
+        rows = []
+        for item in mailers_data:
+            row = existing.get(item["position"]) or Mailer(
+                configuration=instance,
+                position=item["position"],
+                folder=instance.folder,
+            )
+            for name, value in item.items():
+                if name in Mailer.SECRET_FIELDS and value in ("", None):
+                    continue
+                if value is None and isinstance(
+                    Mailer._meta.get_field(name), (models.CharField, models.TextField)
+                ):
+                    # Text columns are NOT NULL; a cleared port stays NULL and
+                    # the backend picks the standard port for the TLS mode.
+                    value = ""
+                setattr(row, name, value)
+            # Problems are reported as our own messages, never as exception
+            # text: nothing raised below the API may reach the caller.
+            problems = row.configuration_problems() or network_problems(row)
+            if problems:
+                raise serializers.ValidationError(
+                    {"mailers": f"mailer {item['position']}: {problems[0]}"}
+                )
+            rows.append(row)
+        return rows
+
+    def update(self, instance, validated_data):
+        from django.utils import timezone
+
+        from .mailer_settings import (
+            configuration_digest,
+            specs_from_rows,
+            test_token_matches,
+        )
+
+        mailers_data = validated_data.pop("mailers")
+        token = validated_data.pop("test_token", "")
+        override = validated_data.pop("override_untested", False)
+        rows = self.build_rows(instance, mailers_data)
+        from_email = validated_data.get("from_email", instance.from_email)
+        tested = test_token_matches(
+            token, configuration_digest(from_email, specs_from_rows(rows))
+        )
+        if not tested and not override:
+            raise serializers.ValidationError(
+                {
+                    "test_token": "Send a test email with these exact values before saving, "
+                    "or set override_untested."
+                }
+            )
+        with transaction.atomic():
+            instance.is_active = validated_data.get("is_active", instance.is_active)
+            instance.from_email = from_email
+            if tested:
+                instance.last_tested_at = timezone.now()
+            instance.save()
+            keep = {row.position for row in rows}
+            instance.mailers.exclude(position__in=keep).delete()
+            for row in rows:
+                row.save()
+        return instance
+
+
+class MailerHealthSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MailerHealth
+        fields = [
+            "alias",
+            "source",
+            "last_attempt_at",
+            "last_outcome",
+            "last_error",
+            "via_failover",
+            "last_success_at",
+        ]

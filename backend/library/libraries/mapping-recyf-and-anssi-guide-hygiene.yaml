@@ -1,0 +1,2201 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:mapping-recyf-and-anssi-guide-hygiene
+locale: fr
+ref_id: mapping-recyf-and-anssi-guide-hygiene
+name: "ReCyF <-> ANSSI - Guide d'hygi\xE8ne informatique"
+description: "Mapping between RECYF : R\xC9F\xC9RENTIEL CYBER France - Version 2.5\
+  \ du 17/03/2026 and ANSSI - Guide d'hygi\xE8ne informatique. Community mapping produced\
+  \ by intuitem; ANSSI has not published a correspondence table between these two\
+  \ documents. Measure 42 (ANSSI-qualified products and services) has no ReCyF counterpart\
+  \ and is intentionally left unmapped."
+copyright: intuitem
+version: 1
+publication_date: 2026-10-14
+provider: intuitem
+packager: intuitem
+dependencies:
+- urn:intuitem:risk:library:recyf
+- urn:intuitem:risk:library:anssi-guide-hygiene
+objects:
+  requirement_mapping_sets:
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-recyf-and-anssi-guide-hygiene
+    ref_id: mapping-recyf-and-anssi-guide-hygiene
+    name: "ReCyF <-> ANSSI - Guide d'hygi\xE8ne informatique"
+    description: "Mapping between RECYF : R\xC9F\xC9RENTIEL CYBER France - Version\
+      \ 2.5 du 17/03/2026 and ANSSI - Guide d'hygi\xE8ne informatique. Community mapping\
+      \ produced by intuitem; ANSSI has not published a correspondence table between\
+      \ these two documents. Measure 42 (ANSSI-qualified products and services) has\
+      \ no ReCyF counterpart and is intentionally left unmapped."
+    source_framework_urn: urn:intuitem:risk:framework:recyf
+    target_framework_urn: urn:intuitem:risk:framework:anssi-guide-hygiene
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:4
+      relationship: intersect
+      rationale: semantic
+      annotation: "Inventaire des activit\xE9s et des SI qui les supportent vs identification\
+        \ des informations et serveurs sensibles"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:2.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:39
+      relationship: intersect
+      rationale: semantic
+      annotation: "Responsabilit\xE9 du dirigeant ex\xE9cutif vs r\xE9f\xE9rent SSI\
+        \ soutenu par la direction"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:2.a.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:39
+      relationship: intersect
+      rationale: semantic
+      annotation: "Personne d\xE9sign\xE9e pour conseiller le dirigeant, point de\
+        \ contact de l'ANSSI vs r\xE9f\xE9rent SSI, premier contact des utilisateurs"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:2.a.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:39
+      relationship: intersect
+      rationale: semantic
+      annotation: "Organisation de la s\xE9curit\xE9 num\xE9rique (dont la d\xE9signation\
+        \ d'un responsable, donn\xE9e en exemple) vs r\xE9f\xE9rent SSI soutenu par\
+        \ la direction"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:2.b.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:18
+      relationship: intersect
+      rationale: semantic
+      annotation: "Politique d'usage du chiffrement vs chiffrement des donn\xE9es\
+        \ sensibles transmises par Internet"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:2.c.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:38.r
+      relationship: intersect
+      rationale: semantic
+      annotation: "Plan d'action de correction des \xE9carts vs actions correctives\
+        \ planifi\xE9es et suivies"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:3.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:4
+      relationship: intersect
+      rationale: semantic
+      annotation: "Cartographie de l'\xE9cosyst\xE8me (prestataires, interconnexions)\
+        \ vs sch\xE9ma du r\xE9seau"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:3.a.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25.r
+      relationship: intersect
+      rationale: semantic
+      annotation: "Point de contact pour chaque entr\xE9e de l'\xE9cosyst\xE8me vs\
+        \ point de contact \xE0 jour chez le partenaire"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:3.b.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:3
+      relationship: intersect
+      rationale: semantic
+      annotation: "Assurances contractuelles de conformit\xE9 des prestataires (PAS)\
+        \ vs ma\xEEtrise des risques de l'infog\xE9rance"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:3.b.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:35
+      relationship: intersect
+      rationale: semantic
+      annotation: Exigences contractuelles envers les fournisseurs vs clauses garantissant
+        le suivi des correctifs
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:3.b.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:3
+      relationship: intersect
+      rationale: semantic
+      annotation: "V\xE9rification p\xE9riodique de la conformit\xE9 des prestations\
+        \ vs audits impos\xE9s au prestataire"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:2.r
+      relationship: equal
+      rationale: semantic
+      annotation: Charte d'usage des SI opposable aux utilisateurs
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:2
+      relationship: subset
+      rationale: semantic
+      annotation: "Programme de sensibilisation de l'ensemble des utilisateurs vs\
+        \ sensibilisation d\xE8s l'arriv\xE9e sur une liste minimale de sujets"
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:4.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:6
+      relationship: intersect
+      rationale: semantic
+      annotation: "Processus arriv\xE9es/d\xE9parts/changements de fonction couvrant\
+        \ acc\xE8s logiques et physiques et restitution du mat\xE9riel"
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:4.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:6.r
+      relationship: intersect
+      rationale: semantic
+      annotation: "Formalisation du processus arriv\xE9es/d\xE9parts"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:4.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:2
+      relationship: intersect
+      rationale: semantic
+      annotation: "Prise de connaissance des r\xE8gles de s\xE9curit\xE9 \xE0 l'arriv\xE9\
+        e vs information des utilisateurs d\xE8s leur arriv\xE9e"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:30
+      relationship: intersect
+      rationale: semantic
+      annotation: "Programme de sensibilisation vs sensibilisation \xE0 la vigilance\
+        \ lors des d\xE9placements"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:4.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:26
+      relationship: intersect
+      rationale: semantic
+      annotation: "D\xE9sactivation des acc\xE8s physiques au d\xE9part vs retrait\
+        \ des droits d'acc\xE8s aux locaux techniques"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:4.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:1
+      relationship: intersect
+      rationale: semantic
+      annotation: "Formation d\xE9di\xE9e des fonctions num\xE9riques vs formation\
+        \ des \xE9quipes op\xE9rationnelles \xE0 la prise de poste puis r\xE9guli\xE8\
+        rement"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:4.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:39
+      relationship: intersect
+      rationale: semantic
+      annotation: "Formation des fonctions num\xE9riques vs formation du r\xE9f\xE9\
+        rent SSI \xE0 la s\xE9curit\xE9 et \xE0 la gestion de crise"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:5.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:4
+      relationship: intersect
+      rationale: semantic
+      annotation: "Cartographie des SI vs sch\xE9ma du r\xE9seau maintenu \xE0 jour"
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:5.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:34
+      relationship: intersect
+      rationale: semantic
+      annotation: "Cartographie permettant d'identifier les ressources vuln\xE9rables\
+        \ vs inventaire des composants pour les mises \xE0 jour"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:5.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:35
+      relationship: intersect
+      rationale: semantic
+      annotation: "Cartographie pour le MCS vs inventaire des syst\xE8mes et applications"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:34
+      relationship: intersect
+      rationale: semantic
+      annotation: "Proc\xE9dure de MCO/MCS vs politique de mise \xE0 jour des composants"
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14
+      relationship: intersect
+      rationale: semantic
+      annotation: "Mise \xE0 jour des bases antivirales/EDR vs antivirus sur les postes"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:34
+      relationship: intersect
+      rationale: semantic
+      annotation: "Veille sur les vuln\xE9rabilit\xE9s et correctifs vs sources d'information\
+        \ sur les mises \xE0 jour"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:34
+      relationship: intersect
+      rationale: semantic
+      annotation: "D\xE9lais d'installation des correctifs vs politique de mise \xE0\
+        \ jour"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:34
+      relationship: intersect
+      rationale: semantic
+      annotation: Installation des correctifs sur l'ensemble des ressources
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:22.r
+      relationship: intersect
+      rationale: semantic
+      annotation: "Correctifs sur l'ensemble des ressources vs maintien en condition\
+        \ de s\xE9curit\xE9 des \xE9quipements de la passerelle"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.6
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:34
+      relationship: intersect
+      rationale: semantic
+      annotation: "Att\xE9nuation lorsque les correctifs ne peuvent \xEAtre install\xE9\
+        s vs isolement des composants obsol\xE8tes"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.6
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14
+      relationship: intersect
+      rationale: semantic
+      annotation: "Isolement des postes ne pouvant \xEAtre mis \xE0 jour"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.7
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:35
+      relationship: intersect
+      rationale: semantic
+      annotation: "Versions logicielles support\xE9es par le fournisseur vs anticipation\
+        \ de la fin de maintenance"
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.8
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:27.r
+      relationship: intersect
+      rationale: semantic
+      annotation: "T\xE9l\xE9chargement depuis les sources officielles vs mises \xE0\
+        \ jour r\xE9cup\xE9r\xE9es depuis une source s\xFBre"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.9
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:34
+      relationship: intersect
+      rationale: semantic
+      annotation: "R\xE9duction des risques des versions obsol\xE8tes vs isolement\
+        \ des composants non support\xE9s"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.9
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:35
+      relationship: intersect
+      rationale: semantic
+      annotation: Gestion de l'obsolescence et planification des migrations
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:6.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:26
+      relationship: intersect
+      rationale: semantic
+      annotation: "Limitation de l'acc\xE8s physique aux locaux, salles serveurs et\
+        \ locaux techniques"
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:6.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:26
+      relationship: intersect
+      rationale: semantic
+      annotation: Protection physique des locaux techniques
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:6.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:26
+      relationship: intersect
+      rationale: semantic
+      annotation: "Droits d'acc\xE8s physique au strict besoin vs revue et retrait\
+        \ des droits d'acc\xE8s"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:6.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:6
+      relationship: intersect
+      rationale: semantic
+      annotation: "Attribution des acc\xE8s physiques vs gestion des badges et cl\xE9\
+        s \xE0 l'arriv\xE9e et au d\xE9part"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:6.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:26
+      relationship: intersect
+      rationale: semantic
+      annotation: "Personnes externes accompagn\xE9es ou autoris\xE9es vs acc\xE8\
+        s non accompagn\xE9s proscrits sauf tra\xE7abilit\xE9 et plages horaires"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:19
+      relationship: intersect
+      rationale: semantic
+      annotation: "Cloisonnement des SI vs segmentation du r\xE9seau en zones"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:19
+      relationship: intersect
+      rationale: semantic
+      annotation: "Cloisonnement de chaque SI vs segmentation du r\xE9seau"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:19
+      relationship: intersect
+      rationale: semantic
+      annotation: "D\xE9finition de sous-syst\xE8mes de sensibilit\xE9 homog\xE8ne\
+        \ vs zones de sensibilit\xE9"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:19
+      relationship: intersect
+      rationale: semantic
+      annotation: "Cloisonnement des sous-syst\xE8mes vs cloisonnement des zones"
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:20
+      relationship: intersect
+      rationale: semantic
+      annotation: "Cloisonnement des sous-syst\xE8mes vs s\xE9paration des Wi-Fi visiteurs\
+        \ et entit\xE9"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:23
+      relationship: intersect
+      rationale: semantic
+      annotation: "Cloisonnement des sous-syst\xE8mes vs cloisonnement physique des\
+        \ services expos\xE9s sur Internet"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:22
+      relationship: intersect
+      rationale: semantic
+      annotation: "Passerelle sortante filtrant et tra\xE7ant les acc\xE8s vs passerelle\
+        \ d'acc\xE8s s\xE9curis\xE9 \xE0 Internet (pare-feu et mandataire)"
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:22.r
+      relationship: intersect
+      rationale: semantic
+      annotation: "M\xE9canismes compl\xE9mentaires de la passerelle sortante (filtrage\
+        \ d'URL, r\xE9solution DNS par le mandataire)"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.6
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:23
+      relationship: intersect
+      rationale: semantic
+      annotation: Passerelle entrante vs cloisonnement et filtrage des services visibles
+        depuis Internet
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.6
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:24.r
+      relationship: intersect
+      rationale: semantic
+      annotation: Passerelle entrante (relai) vs relai de messagerie en coupure d'Internet
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.7
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25
+      relationship: intersect
+      rationale: semantic
+      annotation: "Interconnexions strictement n\xE9cessaires vs interconnexions d\xE9\
+        di\xE9es avec les partenaires"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:7.b.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25
+      relationship: intersect
+      rationale: semantic
+      annotation: "Documentation des communications n\xE9cessaires vs matrice des\
+        \ flux partenaires"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:7.b.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:19
+      relationship: intersect
+      rationale: semantic
+      annotation: "Filtrage par d\xE9faut des interconnexions vs filtrage IP entre\
+        \ zones"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:7.b.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25
+      relationship: intersect
+      rationale: semantic
+      annotation: Filtrage selon la matrice des flux
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:7.b.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25
+      relationship: intersect
+      rationale: semantic
+      annotation: Filtrage par pare-feu des communications avec les SI tiers vs filtrage
+        IP des partenaires
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:7.b.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25.r
+      relationship: intersect
+      rationale: semantic
+      annotation: "Pare-feux d\xE9di\xE9s vs \xE9quipement de filtrage d\xE9di\xE9\
+        \ aux connexions partenaires"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:7.b.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:22
+      relationship: intersect
+      rationale: semantic
+      annotation: "Pare-feu d\xE9di\xE9 filtrant les communications avec les SI tiers\
+        \ vs pare-feu au plus pr\xE8s de l'acc\xE8s Internet"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:7.b.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25
+      relationship: intersect
+      rationale: semantic
+      annotation: "Revue annuelle des r\xE8gles de filtrage vs matrice des flux partenaires\
+        \ \xE0 maintenir"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:32
+      relationship: intersect
+      rationale: semantic
+      annotation: "Acc\xE8s distants prot\xE9g\xE9s par chiffrement (VPN) vs connexion\
+        \ s\xE9curis\xE9e des postes nomades"
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:18
+      relationship: intersect
+      rationale: semantic
+      annotation: "Chiffrement des acc\xE8s \xE0 travers un SI tiers vs chiffrement\
+        \ des donn\xE9es sensibles transmises par Internet"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:21
+      relationship: intersect
+      rationale: semantic
+      annotation: "Protocoles applicatifs chiffr\xE9s (TLS, SSH) vs protocoles r\xE9\
+        seau s\xE9curis\xE9s"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25
+      relationship: intersect
+      rationale: semantic
+      annotation: "Acc\xE8s \xE0 travers un SI tiers vs interconnexion partenaire\
+        \ chiffr\xE9e sur Internet"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:8.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:32.r
+      relationship: superset
+      rationale: semantic
+      annotation: "Authentification multifacteur avec facteur de connaissance pour\
+        \ les acc\xE8s distants vs authentification forte des postes nomades"
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:8.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:13
+      relationship: intersect
+      rationale: semantic
+      annotation: "Authentification multifacteur vs authentification forte \xE0 deux\
+        \ facteurs"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:8.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:13.r
+      relationship: intersect
+      rationale: semantic
+      annotation: "Facteur de possession avec code (carte \xE0 puce et PIN) vs cartes\
+        \ \xE0 puce privil\xE9gi\xE9es"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:32.r
+      relationship: intersect
+      rationale: semantic
+      annotation: "Authentification des acc\xE8s distants des personnels et prestataires\
+        \ vs authentification forte des postes nomades"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:8.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:31
+      relationship: intersect
+      rationale: semantic
+      annotation: Chiffrement des disques des postes nomades
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:8.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:30
+      relationship: intersect
+      rationale: semantic
+      annotation: "Protection des postes nomades acc\xE9dant \xE0 distance vs s\xE9\
+        curisation physique des terminaux nomades"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:8.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:30.r
+      relationship: intersect
+      rationale: semantic
+      annotation: "Authentification au d\xE9chiffrement des disques vs secrets de\
+        \ d\xE9chiffrement sur support externe"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:8.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14
+      relationship: intersect
+      rationale: semantic
+      annotation: "Chiffrement des m\xE9moires de masse vs chiffrement des partitions\
+        \ des donn\xE9es utilisateurs"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:9.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:7
+      relationship: intersect
+      rationale: semantic
+      annotation: "D\xE9finition des terminaux autoris\xE9s (BYOD possible) vs seuls\
+        \ \xE9quipements ma\xEEtris\xE9s"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:9.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:7
+      relationship: intersect
+      rationale: semantic
+      annotation: "Seules les ressources g\xE9r\xE9es par l'entit\xE9 se connectent\
+        \ (interdiction du BYOD)"
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:9.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:7
+      relationship: intersect
+      rationale: semantic
+      annotation: "Emp\xEAcher la connexion d'\xE9quipements non autoris\xE9s vs seuls\
+        \ terminaux ma\xEEtris\xE9s"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:9.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:7.r
+      relationship: intersect
+      rationale: semantic
+      annotation: "Mesures techniques emp\xEAchant la connexion d'\xE9quipements non\
+        \ autoris\xE9s (802.1X)"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:9.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:20
+      relationship: intersect
+      rationale: semantic
+      annotation: "S\xE9paration du Wi-Fi des terminaux personnels et visiteurs"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:9.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:26
+      relationship: intersect
+      rationale: semantic
+      annotation: "D\xE9sactivation des prises r\xE9seau dans les zones ouvertes au\
+        \ public"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:9.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:7
+      relationship: intersect
+      rationale: semantic
+      annotation: "Emp\xEAcher la connexion d'\xE9quipements non g\xE9r\xE9s vs seuls\
+        \ terminaux ma\xEEtris\xE9s"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:9.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:7.r
+      relationship: intersect
+      rationale: semantic
+      annotation: "Mesures techniques emp\xEAchant la connexion d'\xE9quipements non\
+        \ g\xE9r\xE9s (802.1X)"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:9.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:15
+      relationship: intersect
+      rationale: semantic
+      annotation: Restriction des supports amovibles
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:9.6
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14
+      relationship: intersect
+      rationale: semantic
+      annotation: Antivirus/EDR sur les postes et serveurs
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:9.6
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:15
+      relationship: intersect
+      rationale: semantic
+      annotation: Protection contre les codes malveillants provenant des supports
+        amovibles
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:9.7
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:24
+      relationship: intersect
+      rationale: semantic
+      annotation: "Analyse des donn\xE9es externes vs analyse antivirus en amont des\
+        \ bo\xEEtes aux lettres"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:9.7
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:22.r
+      relationship: intersect
+      rationale: semantic
+      annotation: Analyse antivirus du contenu sur le serveur mandataire
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:9.7
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:15
+      relationship: intersect
+      rationale: semantic
+      annotation: Analyse des supports amovibles
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:10.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:8
+      relationship: intersect
+      rationale: semantic
+      annotation: "Comptes individuels vs comptes nominatifs, comptes g\xE9n\xE9riques\
+        \ marginaux"
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:10.a.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:8
+      relationship: intersect
+      rationale: semantic
+      annotation: "Usage du compte r\xE9serv\xE9 \xE0 son titulaire vs comptes nominatifs"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:10.a.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:8
+      relationship: intersect
+      rationale: semantic
+      annotation: "Comptes partag\xE9s limit\xE9s et trac\xE9s vs comptes g\xE9n\xE9\
+        riques rattach\xE9s \xE0 des personnes"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:10.a.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:6
+      relationship: intersect
+      rationale: semantic
+      annotation: "D\xE9sactivation des comptes inutiles vs suppression des comptes\
+        \ au d\xE9part"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:10.a.6
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:5
+      relationship: intersect
+      rationale: semantic
+      annotation: "Revue des comptes vs revue p\xE9riodique des comptes privil\xE9\
+        gi\xE9s"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:10.b.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:10
+      relationship: intersect
+      rationale: semantic
+      annotation: "Authentification par \xE9l\xE9ment secret vs r\xE8gles de choix\
+        \ des mots de passe"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:10.b.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:12
+      relationship: intersect
+      rationale: semantic
+      annotation: "Changement des \xE9l\xE9ments d'authentification par d\xE9faut"
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:10.b.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:6
+      relationship: intersect
+      rationale: semantic
+      annotation: "Renouvellement du secret d'un compte partag\xE9 au retrait d'un\
+        \ utilisateur vs changement des mots de passe au d\xE9part"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:10.b.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:11
+      relationship: intersect
+      rationale: semantic
+      annotation: "Secrets connus des seuls utilisateurs autoris\xE9s vs coffre-fort\
+        \ de mots de passe"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:10.b.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:10
+      relationship: intersect
+      rationale: semantic
+      annotation: "Complexit\xE9 des facteurs d'authentification conforme aux recommandations\
+        \ de l'ANSSI"
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:10.b.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:12.r
+      relationship: intersect
+      rationale: semantic
+      annotation: "Fr\xE9quence de renouvellement des secrets"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:10.b.6
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:12
+      relationship: intersect
+      rationale: semantic
+      annotation: "Secret non modifiable : r\xE9duction du risque vs signalement au\
+        \ fournisseur"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:10.b.7
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:8.r
+      relationship: intersect
+      rationale: semantic
+      annotation: "Tra\xE7abilit\xE9 des acc\xE8s vs journalisation des connexions"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:10.c.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:9
+      relationship: intersect
+      rationale: semantic
+      annotation: "Droits attribu\xE9s aux seuls utilisateurs authentifi\xE9s"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:10.c.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:9
+      relationship: intersect
+      rationale: semantic
+      annotation: "Droits limit\xE9s au besoin vs bons droits sur les ressources sensibles"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:10.c.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:29
+      relationship: intersect
+      rationale: semantic
+      annotation: "Droits limit\xE9s au besoin vs droits d'administration des postes\
+        \ limit\xE9s au strict besoin"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:10.c.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:9
+      relationship: intersect
+      rationale: semantic
+      annotation: "Droits d'acc\xE8s par ressource au besoin vs population autoris\xE9\
+        e par ressource sensible"
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:10.c.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:9
+      relationship: intersect
+      rationale: semantic
+      annotation: "Revue au moins annuelle des droits d'acc\xE8s vs revue r\xE9guli\xE8\
+        re des droits sur les ressources sensibles"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:10.c.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:5
+      relationship: intersect
+      rationale: semantic
+      annotation: "Revue des droits d'acc\xE8s vs revue p\xE9riodique des comptes\
+        \ privil\xE9gi\xE9s"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:11.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:8
+      relationship: intersect
+      rationale: semantic
+      annotation: Comptes d'administration distincts des comptes utilisateurs
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:11.a.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:29
+      relationship: intersect
+      rationale: semantic
+      annotation: "Usage restreint des privil\xE8ges d'administration"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:11.a.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:29
+      relationship: intersect
+      rationale: semantic
+      annotation: "Comptes d'administration r\xE9serv\xE9s aux administrateurs vs\
+        \ limitation des droits d'administration des utilisateurs"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:11.a.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:8
+      relationship: intersect
+      rationale: semantic
+      annotation: "Comptes d'administration soumis aux r\xE8gles d'identification\
+        \ vs compte d'administration nominatif par administrateur"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:11.a.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:8
+      relationship: intersect
+      rationale: semantic
+      annotation: "Compte d'administration d\xE9di\xE9 aux actions d'administration\
+        \ vs compte d'administration distinct"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:11.a.6
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:5
+      relationship: intersect
+      rationale: semantic
+      annotation: "Liste \xE0 jour des comptes d'administration vs inventaire des\
+        \ comptes privil\xE9gi\xE9s"
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:11.a.7
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:29
+      relationship: intersect
+      rationale: semantic
+      annotation: Droits d'administration restreints au besoin
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:11.b.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:34
+      relationship: intersect
+      rationale: semantic
+      annotation: "Correctifs de s\xE9curit\xE9 des annuaires vs politique de mise\
+        \ \xE0 jour"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:12.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:40
+      relationship: intersect
+      rationale: semantic
+      annotation: "Proc\xE9dure de traitement des incidents de s\xE9curit\xE9"
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:12.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:40
+      relationship: intersect
+      rationale: semantic
+      annotation: Collecte des signalements vs signalement des comportements inhabituels
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:12.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:40
+      relationship: intersect
+      rationale: semantic
+      annotation: "Qualification des \xE9v\xE9nements vs constat de comportements\
+        \ inhabituels"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:12.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:40
+      relationship: intersect
+      rationale: semantic
+      annotation: "M\xE9canismes de r\xE9action aux incidents"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:12.6
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:40
+      relationship: intersect
+      rationale: semantic
+      annotation: "Conservation des relev\xE9s techniques vs investigation et registre\
+        \ des incidents"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:14.8
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:40
+      relationship: intersect
+      rationale: semantic
+      annotation: "Isolement, protection et reconstruction des SI vs d\xE9connexion\
+        \ de la machine et traitement de l'incident"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:13.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:37
+      relationship: subset
+      rationale: semantic
+      annotation: "Proc\xE9dures de sauvegarde et de restauration vs politique de\
+        \ sauvegarde au contenu d\xE9fini"
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:13.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14.r
+      relationship: intersect
+      rationale: semantic
+      annotation: "Sauvegardes r\xE9guli\xE8res des donn\xE9es vitales"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:13.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:37.r
+      relationship: equal
+      rationale: semantic
+      annotation: Test de restauration au moins annuel
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:13.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:37
+      relationship: intersect
+      rationale: semantic
+      annotation: "Tests annuels de sauvegarde et restauration vs proc\xE9dures de\
+        \ test de restauration de la politique de sauvegarde"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:13.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14.r
+      relationship: intersect
+      rationale: semantic
+      annotation: "V\xE9rification p\xE9riodique de la restauration"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:13.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14.r
+      relationship: intersect
+      rationale: semantic
+      annotation: "Sauvegardes prot\xE9g\xE9es et stock\xE9es hors ligne"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:13.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:37
+      relationship: intersect
+      rationale: semantic
+      annotation: "Sauvegardes prot\xE9g\xE9es et hors ligne vs sauvegardes en lieu\
+        \ s\xFBr, hors ligne et \xE0 acc\xE8s restreint"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:13.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:37
+      relationship: intersect
+      rationale: semantic
+      annotation: "Dimensionnement des sauvegardes vs fr\xE9quence et types de sauvegarde"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:16.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:41.r
+      relationship: intersect
+      rationale: semantic
+      annotation: "Gouvernance par les risques vs d\xE9cisions de s\xE9curit\xE9 \xE0\
+        \ la lumi\xE8re des risques pressentis par la direction"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:16.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:41.r
+      relationship: intersect
+      rationale: semantic
+      annotation: Analyse de risques de chaque SI vs analyse de risques formelle
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:16.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:41.r
+      relationship: intersect
+      rationale: semantic
+      annotation: Validation et plan de traitement des risques
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:16.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:41.r
+      relationship: intersect
+      rationale: semantic
+      annotation: "R\xE9examen de l'analyse de risques"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:17.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:38.r
+      relationship: intersect
+      rationale: semantic
+      annotation: "Programme d'audit r\xE9gulier des SI"
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:17.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:38.r
+      relationship: intersect
+      rationale: semantic
+      annotation: "Audit \xE9valuant l'efficacit\xE9 des mesures et le niveau de s\xE9\
+        curit\xE9"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:17.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:38.r
+      relationship: intersect
+      rationale: semantic
+      annotation: Types d'audits techniques et organisationnels
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:17.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:38.r
+      relationship: intersect
+      rationale: semantic
+      annotation: Plan d'action de correction suite aux audits
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:18.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14
+      relationship: intersect
+      rationale: semantic
+      annotation: "Seuls les logiciels n\xE9cessaires install\xE9s vs limiter les\
+        \ applications et modules install\xE9s"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:18.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:33.r
+      relationship: intersect
+      rationale: semantic
+      annotation: "D\xE9sactivation des fonctionnalit\xE9s inutiles vs d\xE9conseiller\
+        \ l'assistant vocal des terminaux mobiles"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:18.2
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14
+      relationship: intersect
+      rationale: semantic
+      annotation: "R\xE9duction du risque lorsqu'un logiciel ne peut \xEAtre d\xE9\
+        sactiv\xE9 vs isolement des postes en d\xE9rogation"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:18.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14
+      relationship: intersect
+      rationale: semantic
+      annotation: "Configuration s\xE9curis\xE9e des ressources vs niveau de s\xE9\
+        curit\xE9 minimal du parc"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:18.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:16
+      relationship: intersect
+      rationale: semantic
+      annotation: "Application homog\xE8ne des configurations de s\xE9curit\xE9"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:18.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:17
+      relationship: intersect
+      rationale: semantic
+      annotation: Configuration du pare-feu local
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:18.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:21
+      relationship: intersect
+      rationale: semantic
+      annotation: "Usage de protocoles s\xE9curis\xE9s"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:18.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:20
+      relationship: intersect
+      rationale: semantic
+      annotation: "Configuration s\xE9curis\xE9e des r\xE9seaux Wi-Fi"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:18.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:24.r
+      relationship: intersect
+      rationale: semantic
+      annotation: Configuration de la messagerie (anti-spam, SPF, DKIM, DMARC)
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:18.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:33
+      relationship: intersect
+      rationale: semantic
+      annotation: "S\xE9curisation des terminaux mobiles"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:18.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:38.r
+      relationship: intersect
+      rationale: semantic
+      annotation: "Revue annuelle de configuration vs audits techniques r\xE9guliers"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:19.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:28
+      relationship: subset
+      rationale: semantic
+      annotation: "R\xE9seau d'administration d\xE9di\xE9 vs r\xE9seau d'administration\
+        \ d\xE9di\xE9 et cloisonn\xE9"
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:19.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:28
+      relationship: intersect
+      rationale: semantic
+      annotation: "Ressources du r\xE9seau d'administration d\xE9di\xE9es"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:19.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:27
+      relationship: intersect
+      rationale: semantic
+      annotation: "Poste d'administration d\xE9di\xE9 vs poste d'administration sans\
+        \ acc\xE8s \xE0 Internet"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:19.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:27
+      relationship: intersect
+      rationale: semantic
+      annotation: "Connexion depuis un poste d\xE9di\xE9 \xE0 l'administration"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:19.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:8
+      relationship: intersect
+      rationale: semantic
+      annotation: "Poste d\xE9di\xE9 \xE0 l'administration vs compte d'administration\
+        \ utilis\xE9 sur des environnements d\xE9di\xE9s"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:19.6
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:27
+      relationship: intersect
+      rationale: semantic
+      annotation: "Durcissement et cloisonnement du poste \xE0 d\xE9faut de poste\
+        \ d\xE9di\xE9 vs poste distinct pour les usages Internet"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:19.7
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:28.r
+      relationship: intersect
+      rationale: semantic
+      annotation: "Liaison physique d\xE9di\xE9e vs cloisonnement physique privil\xE9\
+        gi\xE9"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:19.8
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:28
+      relationship: intersect
+      rationale: semantic
+      annotation: "Cloisonnement et filtrage du r\xE9seau d'administration"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:19.9
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:28
+      relationship: intersect
+      rationale: semantic
+      annotation: "Mesures logiques \xE0 d\xE9faut de liaison physique vs cloisonnement\
+        \ logique (IPsec, VLAN)"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:19.10
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:21
+      relationship: intersect
+      rationale: semantic
+      annotation: "Protocoles s\xE9curis\xE9s pour les flux d'administration"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:19.11
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:28
+      relationship: intersect
+      rationale: semantic
+      annotation: Cloisonnement cryptographique des flux d'administration (tunnels
+        IPsec)
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:20.1
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:36
+      relationship: intersect
+      rationale: semantic
+      annotation: "Prise en compte des journaux et \xE9v\xE9nements de s\xE9curit\xE9"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:20.3
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:36.r
+      relationship: intersect
+      rationale: semantic
+      annotation: "Ma\xEEtrise de l'infrastructure de supervision vs centralisation\
+        \ des journaux"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:20.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:36
+      relationship: intersect
+      rationale: semantic
+      annotation: "Collecte des journaux utiles \xE0 la d\xE9tection vs journaux des\
+        \ composants critiques"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:20.4
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:8.r
+      relationship: intersect
+      rationale: semantic
+      annotation: "Collecte des \xE9v\xE9nements d'authentification vs journalisation\
+        \ des connexions r\xE9ussies et \xE9chou\xE9es"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:20.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:36
+      relationship: intersect
+      rationale: semantic
+      annotation: "Dur\xE9e de conservation des journaux (3 mois vs 1 an)"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:20.5
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:8.r
+      relationship: intersect
+      rationale: semantic
+      annotation: "Conservation des \xE9v\xE9nements de s\xE9curit\xE9 vs journalisation\
+        \ des connexions r\xE9ussies et \xE9chou\xE9es"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:recyf:20.6
+      target_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:36.r
+      relationship: intersect
+      rationale: semantic
+      annotation: "Protection des journaux vs centralisation emp\xEAchant leur alt\xE9\
+        ration"
+      strength_of_relationship: 5
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-recyf-and-anssi-guide-hygiene-revert
+    ref_id: mapping-recyf-and-anssi-guide-hygiene-revert
+    name: "ReCyF <-> ANSSI - Guide d'hygi\xE8ne informatique"
+    description: "Mapping between RECYF : R\xC9F\xC9RENTIEL CYBER France - Version\
+      \ 2.5 du 17/03/2026 and ANSSI - Guide d'hygi\xE8ne informatique. Community mapping\
+      \ produced by intuitem; ANSSI has not published a correspondence table between\
+      \ these two documents. Measure 42 (ANSSI-qualified products and services) has\
+      \ no ReCyF counterpart and is intentionally left unmapped."
+    target_framework_urn: urn:intuitem:risk:framework:recyf
+    source_framework_urn: urn:intuitem:risk:framework:anssi-guide-hygiene
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:4
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:1.1
+      relationship: intersect
+      rationale: semantic
+      annotation: "Inventaire des activit\xE9s et des SI qui les supportent vs identification\
+        \ des informations et serveurs sensibles"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:39
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:2.a.1
+      relationship: intersect
+      rationale: semantic
+      annotation: "Responsabilit\xE9 du dirigeant ex\xE9cutif vs r\xE9f\xE9rent SSI\
+        \ soutenu par la direction"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:39
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:2.a.2
+      relationship: intersect
+      rationale: semantic
+      annotation: "Personne d\xE9sign\xE9e pour conseiller le dirigeant, point de\
+        \ contact de l'ANSSI vs r\xE9f\xE9rent SSI, premier contact des utilisateurs"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:39
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:2.a.3
+      relationship: intersect
+      rationale: semantic
+      annotation: "Organisation de la s\xE9curit\xE9 num\xE9rique (dont la d\xE9signation\
+        \ d'un responsable, donn\xE9e en exemple) vs r\xE9f\xE9rent SSI soutenu par\
+        \ la direction"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:18
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:2.b.5
+      relationship: intersect
+      rationale: semantic
+      annotation: "Politique d'usage du chiffrement vs chiffrement des donn\xE9es\
+        \ sensibles transmises par Internet"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:38.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:2.c.2
+      relationship: intersect
+      rationale: semantic
+      annotation: "Plan d'action de correction des \xE9carts vs actions correctives\
+        \ planifi\xE9es et suivies"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:4
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:3.a.1
+      relationship: intersect
+      rationale: semantic
+      annotation: "Cartographie de l'\xE9cosyst\xE8me (prestataires, interconnexions)\
+        \ vs sch\xE9ma du r\xE9seau"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:3.a.2
+      relationship: intersect
+      rationale: semantic
+      annotation: "Point de contact pour chaque entr\xE9e de l'\xE9cosyst\xE8me vs\
+        \ point de contact \xE0 jour chez le partenaire"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:3
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:3.b.1
+      relationship: intersect
+      rationale: semantic
+      annotation: "Assurances contractuelles de conformit\xE9 des prestataires (PAS)\
+        \ vs ma\xEEtrise des risques de l'infog\xE9rance"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:35
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:3.b.1
+      relationship: intersect
+      rationale: semantic
+      annotation: Exigences contractuelles envers les fournisseurs vs clauses garantissant
+        le suivi des correctifs
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:3
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:3.b.2
+      relationship: intersect
+      rationale: semantic
+      annotation: "V\xE9rification p\xE9riodique de la conformit\xE9 des prestations\
+        \ vs audits impos\xE9s au prestataire"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:2.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:4.1
+      relationship: equal
+      rationale: semantic
+      annotation: Charte d'usage des SI opposable aux utilisateurs
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:2
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:4.2
+      relationship: superset
+      rationale: semantic
+      annotation: "Programme de sensibilisation de l'ensemble des utilisateurs vs\
+        \ sensibilisation d\xE8s l'arriv\xE9e sur une liste minimale de sujets"
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:6
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:4.4
+      relationship: intersect
+      rationale: semantic
+      annotation: "Processus arriv\xE9es/d\xE9parts/changements de fonction couvrant\
+        \ acc\xE8s logiques et physiques et restitution du mat\xE9riel"
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:6.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:4.4
+      relationship: intersect
+      rationale: semantic
+      annotation: "Formalisation du processus arriv\xE9es/d\xE9parts"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:2
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:4.4
+      relationship: intersect
+      rationale: semantic
+      annotation: "Prise de connaissance des r\xE8gles de s\xE9curit\xE9 \xE0 l'arriv\xE9\
+        e vs information des utilisateurs d\xE8s leur arriv\xE9e"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:30
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:4.2
+      relationship: intersect
+      rationale: semantic
+      annotation: "Programme de sensibilisation vs sensibilisation \xE0 la vigilance\
+        \ lors des d\xE9placements"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:26
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:4.4
+      relationship: intersect
+      rationale: semantic
+      annotation: "D\xE9sactivation des acc\xE8s physiques au d\xE9part vs retrait\
+        \ des droits d'acc\xE8s aux locaux techniques"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:1
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:4.5
+      relationship: intersect
+      rationale: semantic
+      annotation: "Formation d\xE9di\xE9e des fonctions num\xE9riques vs formation\
+        \ des \xE9quipes op\xE9rationnelles \xE0 la prise de poste puis r\xE9guli\xE8\
+        rement"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:39
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:4.5
+      relationship: intersect
+      rationale: semantic
+      annotation: "Formation des fonctions num\xE9riques vs formation du r\xE9f\xE9\
+        rent SSI \xE0 la s\xE9curit\xE9 et \xE0 la gestion de crise"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:4
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:5.a.1
+      relationship: intersect
+      rationale: semantic
+      annotation: "Cartographie des SI vs sch\xE9ma du r\xE9seau maintenu \xE0 jour"
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:34
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:5.a.1
+      relationship: intersect
+      rationale: semantic
+      annotation: "Cartographie permettant d'identifier les ressources vuln\xE9rables\
+        \ vs inventaire des composants pour les mises \xE0 jour"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:35
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:5.a.1
+      relationship: intersect
+      rationale: semantic
+      annotation: "Cartographie pour le MCS vs inventaire des syst\xE8mes et applications"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:34
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.1
+      relationship: intersect
+      rationale: semantic
+      annotation: "Proc\xE9dure de MCO/MCS vs politique de mise \xE0 jour des composants"
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.2
+      relationship: intersect
+      rationale: semantic
+      annotation: "Mise \xE0 jour des bases antivirales/EDR vs antivirus sur les postes"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:34
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.3
+      relationship: intersect
+      rationale: semantic
+      annotation: "Veille sur les vuln\xE9rabilit\xE9s et correctifs vs sources d'information\
+        \ sur les mises \xE0 jour"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:34
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.4
+      relationship: intersect
+      rationale: semantic
+      annotation: "D\xE9lais d'installation des correctifs vs politique de mise \xE0\
+        \ jour"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:34
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.5
+      relationship: intersect
+      rationale: semantic
+      annotation: Installation des correctifs sur l'ensemble des ressources
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:22.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.5
+      relationship: intersect
+      rationale: semantic
+      annotation: "Correctifs sur l'ensemble des ressources vs maintien en condition\
+        \ de s\xE9curit\xE9 des \xE9quipements de la passerelle"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:34
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.6
+      relationship: intersect
+      rationale: semantic
+      annotation: "Att\xE9nuation lorsque les correctifs ne peuvent \xEAtre install\xE9\
+        s vs isolement des composants obsol\xE8tes"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.6
+      relationship: intersect
+      rationale: semantic
+      annotation: "Isolement des postes ne pouvant \xEAtre mis \xE0 jour"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:35
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.7
+      relationship: intersect
+      rationale: semantic
+      annotation: "Versions logicielles support\xE9es par le fournisseur vs anticipation\
+        \ de la fin de maintenance"
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:27.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.8
+      relationship: intersect
+      rationale: semantic
+      annotation: "T\xE9l\xE9chargement depuis les sources officielles vs mises \xE0\
+        \ jour r\xE9cup\xE9r\xE9es depuis une source s\xFBre"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:34
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.9
+      relationship: intersect
+      rationale: semantic
+      annotation: "R\xE9duction des risques des versions obsol\xE8tes vs isolement\
+        \ des composants non support\xE9s"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:35
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:5.b.9
+      relationship: intersect
+      rationale: semantic
+      annotation: Gestion de l'obsolescence et planification des migrations
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:26
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:6.1
+      relationship: intersect
+      rationale: semantic
+      annotation: "Limitation de l'acc\xE8s physique aux locaux, salles serveurs et\
+        \ locaux techniques"
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:26
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:6.2
+      relationship: intersect
+      rationale: semantic
+      annotation: Protection physique des locaux techniques
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:26
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:6.3
+      relationship: intersect
+      rationale: semantic
+      annotation: "Droits d'acc\xE8s physique au strict besoin vs revue et retrait\
+        \ des droits d'acc\xE8s"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:6
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:6.3
+      relationship: intersect
+      rationale: semantic
+      annotation: "Attribution des acc\xE8s physiques vs gestion des badges et cl\xE9\
+        s \xE0 l'arriv\xE9e et au d\xE9part"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:26
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:6.4
+      relationship: intersect
+      rationale: semantic
+      annotation: "Personnes externes accompagn\xE9es ou autoris\xE9es vs acc\xE8\
+        s non accompagn\xE9s proscrits sauf tra\xE7abilit\xE9 et plages horaires"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:19
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.1
+      relationship: intersect
+      rationale: semantic
+      annotation: "Cloisonnement des SI vs segmentation du r\xE9seau en zones"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:19
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.2
+      relationship: intersect
+      rationale: semantic
+      annotation: "Cloisonnement de chaque SI vs segmentation du r\xE9seau"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:19
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.3
+      relationship: intersect
+      rationale: semantic
+      annotation: "D\xE9finition de sous-syst\xE8mes de sensibilit\xE9 homog\xE8ne\
+        \ vs zones de sensibilit\xE9"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:19
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.4
+      relationship: intersect
+      rationale: semantic
+      annotation: "Cloisonnement des sous-syst\xE8mes vs cloisonnement des zones"
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:20
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.4
+      relationship: intersect
+      rationale: semantic
+      annotation: "Cloisonnement des sous-syst\xE8mes vs s\xE9paration des Wi-Fi visiteurs\
+        \ et entit\xE9"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:23
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.4
+      relationship: intersect
+      rationale: semantic
+      annotation: "Cloisonnement des sous-syst\xE8mes vs cloisonnement physique des\
+        \ services expos\xE9s sur Internet"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:22
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.5
+      relationship: intersect
+      rationale: semantic
+      annotation: "Passerelle sortante filtrant et tra\xE7ant les acc\xE8s vs passerelle\
+        \ d'acc\xE8s s\xE9curis\xE9 \xE0 Internet (pare-feu et mandataire)"
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:22.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.5
+      relationship: intersect
+      rationale: semantic
+      annotation: "M\xE9canismes compl\xE9mentaires de la passerelle sortante (filtrage\
+        \ d'URL, r\xE9solution DNS par le mandataire)"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:23
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.6
+      relationship: intersect
+      rationale: semantic
+      annotation: Passerelle entrante vs cloisonnement et filtrage des services visibles
+        depuis Internet
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:24.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.6
+      relationship: intersect
+      rationale: semantic
+      annotation: Passerelle entrante (relai) vs relai de messagerie en coupure d'Internet
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.a.7
+      relationship: intersect
+      rationale: semantic
+      annotation: "Interconnexions strictement n\xE9cessaires vs interconnexions d\xE9\
+        di\xE9es avec les partenaires"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.b.1
+      relationship: intersect
+      rationale: semantic
+      annotation: "Documentation des communications n\xE9cessaires vs matrice des\
+        \ flux partenaires"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:19
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.b.3
+      relationship: intersect
+      rationale: semantic
+      annotation: "Filtrage par d\xE9faut des interconnexions vs filtrage IP entre\
+        \ zones"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.b.3
+      relationship: intersect
+      rationale: semantic
+      annotation: Filtrage selon la matrice des flux
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.b.4
+      relationship: intersect
+      rationale: semantic
+      annotation: Filtrage par pare-feu des communications avec les SI tiers vs filtrage
+        IP des partenaires
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.b.4
+      relationship: intersect
+      rationale: semantic
+      annotation: "Pare-feux d\xE9di\xE9s vs \xE9quipement de filtrage d\xE9di\xE9\
+        \ aux connexions partenaires"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:22
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.b.4
+      relationship: intersect
+      rationale: semantic
+      annotation: "Pare-feu d\xE9di\xE9 filtrant les communications avec les SI tiers\
+        \ vs pare-feu au plus pr\xE8s de l'acc\xE8s Internet"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:7.b.5
+      relationship: intersect
+      rationale: semantic
+      annotation: "Revue annuelle des r\xE8gles de filtrage vs matrice des flux partenaires\
+        \ \xE0 maintenir"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:32
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:8.1
+      relationship: intersect
+      rationale: semantic
+      annotation: "Acc\xE8s distants prot\xE9g\xE9s par chiffrement (VPN) vs connexion\
+        \ s\xE9curis\xE9e des postes nomades"
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:18
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:8.1
+      relationship: intersect
+      rationale: semantic
+      annotation: "Chiffrement des acc\xE8s \xE0 travers un SI tiers vs chiffrement\
+        \ des donn\xE9es sensibles transmises par Internet"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:21
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:8.1
+      relationship: intersect
+      rationale: semantic
+      annotation: "Protocoles applicatifs chiffr\xE9s (TLS, SSH) vs protocoles r\xE9\
+        seau s\xE9curis\xE9s"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:25
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:8.1
+      relationship: intersect
+      rationale: semantic
+      annotation: "Acc\xE8s \xE0 travers un SI tiers vs interconnexion partenaire\
+        \ chiffr\xE9e sur Internet"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:32.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:8.3
+      relationship: subset
+      rationale: semantic
+      annotation: "Authentification multifacteur avec facteur de connaissance pour\
+        \ les acc\xE8s distants vs authentification forte des postes nomades"
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:13
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:8.3
+      relationship: intersect
+      rationale: semantic
+      annotation: "Authentification multifacteur vs authentification forte \xE0 deux\
+        \ facteurs"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:13.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:8.3
+      relationship: intersect
+      rationale: semantic
+      annotation: "Facteur de possession avec code (carte \xE0 puce et PIN) vs cartes\
+        \ \xE0 puce privil\xE9gi\xE9es"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:32.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:8.2
+      relationship: intersect
+      rationale: semantic
+      annotation: "Authentification des acc\xE8s distants des personnels et prestataires\
+        \ vs authentification forte des postes nomades"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:31
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:8.5
+      relationship: intersect
+      rationale: semantic
+      annotation: Chiffrement des disques des postes nomades
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:30
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:8.5
+      relationship: intersect
+      rationale: semantic
+      annotation: "Protection des postes nomades acc\xE9dant \xE0 distance vs s\xE9\
+        curisation physique des terminaux nomades"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:30.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:8.5
+      relationship: intersect
+      rationale: semantic
+      annotation: "Authentification au d\xE9chiffrement des disques vs secrets de\
+        \ d\xE9chiffrement sur support externe"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:8.5
+      relationship: intersect
+      rationale: semantic
+      annotation: "Chiffrement des m\xE9moires de masse vs chiffrement des partitions\
+        \ des donn\xE9es utilisateurs"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:7
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:9.1
+      relationship: intersect
+      rationale: semantic
+      annotation: "D\xE9finition des terminaux autoris\xE9s (BYOD possible) vs seuls\
+        \ \xE9quipements ma\xEEtris\xE9s"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:7
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:9.2
+      relationship: intersect
+      rationale: semantic
+      annotation: "Seules les ressources g\xE9r\xE9es par l'entit\xE9 se connectent\
+        \ (interdiction du BYOD)"
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:7
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:9.3
+      relationship: intersect
+      rationale: semantic
+      annotation: "Emp\xEAcher la connexion d'\xE9quipements non autoris\xE9s vs seuls\
+        \ terminaux ma\xEEtris\xE9s"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:7.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:9.3
+      relationship: intersect
+      rationale: semantic
+      annotation: "Mesures techniques emp\xEAchant la connexion d'\xE9quipements non\
+        \ autoris\xE9s (802.1X)"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:20
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:9.3
+      relationship: intersect
+      rationale: semantic
+      annotation: "S\xE9paration du Wi-Fi des terminaux personnels et visiteurs"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:26
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:9.3
+      relationship: intersect
+      rationale: semantic
+      annotation: "D\xE9sactivation des prises r\xE9seau dans les zones ouvertes au\
+        \ public"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:7
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:9.4
+      relationship: intersect
+      rationale: semantic
+      annotation: "Emp\xEAcher la connexion d'\xE9quipements non g\xE9r\xE9s vs seuls\
+        \ terminaux ma\xEEtris\xE9s"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:7.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:9.4
+      relationship: intersect
+      rationale: semantic
+      annotation: "Mesures techniques emp\xEAchant la connexion d'\xE9quipements non\
+        \ g\xE9r\xE9s (802.1X)"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:15
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:9.5
+      relationship: intersect
+      rationale: semantic
+      annotation: Restriction des supports amovibles
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:9.6
+      relationship: intersect
+      rationale: semantic
+      annotation: Antivirus/EDR sur les postes et serveurs
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:15
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:9.6
+      relationship: intersect
+      rationale: semantic
+      annotation: Protection contre les codes malveillants provenant des supports
+        amovibles
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:24
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:9.7
+      relationship: intersect
+      rationale: semantic
+      annotation: "Analyse des donn\xE9es externes vs analyse antivirus en amont des\
+        \ bo\xEEtes aux lettres"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:22.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:9.7
+      relationship: intersect
+      rationale: semantic
+      annotation: Analyse antivirus du contenu sur le serveur mandataire
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:15
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:9.7
+      relationship: intersect
+      rationale: semantic
+      annotation: Analyse des supports amovibles
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:8
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.a.1
+      relationship: intersect
+      rationale: semantic
+      annotation: "Comptes individuels vs comptes nominatifs, comptes g\xE9n\xE9riques\
+        \ marginaux"
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:8
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.a.2
+      relationship: intersect
+      rationale: semantic
+      annotation: "Usage du compte r\xE9serv\xE9 \xE0 son titulaire vs comptes nominatifs"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:8
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.a.3
+      relationship: intersect
+      rationale: semantic
+      annotation: "Comptes partag\xE9s limit\xE9s et trac\xE9s vs comptes g\xE9n\xE9\
+        riques rattach\xE9s \xE0 des personnes"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:6
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.a.5
+      relationship: intersect
+      rationale: semantic
+      annotation: "D\xE9sactivation des comptes inutiles vs suppression des comptes\
+        \ au d\xE9part"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:5
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.a.6
+      relationship: intersect
+      rationale: semantic
+      annotation: "Revue des comptes vs revue p\xE9riodique des comptes privil\xE9\
+        gi\xE9s"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:10
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.b.1
+      relationship: intersect
+      rationale: semantic
+      annotation: "Authentification par \xE9l\xE9ment secret vs r\xE8gles de choix\
+        \ des mots de passe"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:12
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.b.2
+      relationship: intersect
+      rationale: semantic
+      annotation: "Changement des \xE9l\xE9ments d'authentification par d\xE9faut"
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:6
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.b.3
+      relationship: intersect
+      rationale: semantic
+      annotation: "Renouvellement du secret d'un compte partag\xE9 au retrait d'un\
+        \ utilisateur vs changement des mots de passe au d\xE9part"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:11
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.b.4
+      relationship: intersect
+      rationale: semantic
+      annotation: "Secrets connus des seuls utilisateurs autoris\xE9s vs coffre-fort\
+        \ de mots de passe"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:10
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.b.5
+      relationship: intersect
+      rationale: semantic
+      annotation: "Complexit\xE9 des facteurs d'authentification conforme aux recommandations\
+        \ de l'ANSSI"
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:12.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.b.5
+      relationship: intersect
+      rationale: semantic
+      annotation: "Fr\xE9quence de renouvellement des secrets"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:12
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.b.6
+      relationship: intersect
+      rationale: semantic
+      annotation: "Secret non modifiable : r\xE9duction du risque vs signalement au\
+        \ fournisseur"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:8.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.b.7
+      relationship: intersect
+      rationale: semantic
+      annotation: "Tra\xE7abilit\xE9 des acc\xE8s vs journalisation des connexions"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:9
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.c.1
+      relationship: intersect
+      rationale: semantic
+      annotation: "Droits attribu\xE9s aux seuls utilisateurs authentifi\xE9s"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:9
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.c.2
+      relationship: intersect
+      rationale: semantic
+      annotation: "Droits limit\xE9s au besoin vs bons droits sur les ressources sensibles"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:29
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.c.2
+      relationship: intersect
+      rationale: semantic
+      annotation: "Droits limit\xE9s au besoin vs droits d'administration des postes\
+        \ limit\xE9s au strict besoin"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:9
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.c.3
+      relationship: intersect
+      rationale: semantic
+      annotation: "Droits d'acc\xE8s par ressource au besoin vs population autoris\xE9\
+        e par ressource sensible"
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:9
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.c.4
+      relationship: intersect
+      rationale: semantic
+      annotation: "Revue au moins annuelle des droits d'acc\xE8s vs revue r\xE9guli\xE8\
+        re des droits sur les ressources sensibles"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:5
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:10.c.4
+      relationship: intersect
+      rationale: semantic
+      annotation: "Revue des droits d'acc\xE8s vs revue p\xE9riodique des comptes\
+        \ privil\xE9gi\xE9s"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:8
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:11.a.1
+      relationship: intersect
+      rationale: semantic
+      annotation: Comptes d'administration distincts des comptes utilisateurs
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:29
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:11.a.1
+      relationship: intersect
+      rationale: semantic
+      annotation: "Usage restreint des privil\xE8ges d'administration"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:29
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:11.a.2
+      relationship: intersect
+      rationale: semantic
+      annotation: "Comptes d'administration r\xE9serv\xE9s aux administrateurs vs\
+        \ limitation des droits d'administration des utilisateurs"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:8
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:11.a.3
+      relationship: intersect
+      rationale: semantic
+      annotation: "Comptes d'administration soumis aux r\xE8gles d'identification\
+        \ vs compte d'administration nominatif par administrateur"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:8
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:11.a.4
+      relationship: intersect
+      rationale: semantic
+      annotation: "Compte d'administration d\xE9di\xE9 aux actions d'administration\
+        \ vs compte d'administration distinct"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:5
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:11.a.6
+      relationship: intersect
+      rationale: semantic
+      annotation: "Liste \xE0 jour des comptes d'administration vs inventaire des\
+        \ comptes privil\xE9gi\xE9s"
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:29
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:11.a.7
+      relationship: intersect
+      rationale: semantic
+      annotation: Droits d'administration restreints au besoin
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:34
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:11.b.1
+      relationship: intersect
+      rationale: semantic
+      annotation: "Correctifs de s\xE9curit\xE9 des annuaires vs politique de mise\
+        \ \xE0 jour"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:40
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:12.1
+      relationship: intersect
+      rationale: semantic
+      annotation: "Proc\xE9dure de traitement des incidents de s\xE9curit\xE9"
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:40
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:12.2
+      relationship: intersect
+      rationale: semantic
+      annotation: Collecte des signalements vs signalement des comportements inhabituels
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:40
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:12.3
+      relationship: intersect
+      rationale: semantic
+      annotation: "Qualification des \xE9v\xE9nements vs constat de comportements\
+        \ inhabituels"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:40
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:12.4
+      relationship: intersect
+      rationale: semantic
+      annotation: "M\xE9canismes de r\xE9action aux incidents"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:40
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:12.6
+      relationship: intersect
+      rationale: semantic
+      annotation: "Conservation des relev\xE9s techniques vs investigation et registre\
+        \ des incidents"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:40
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:14.8
+      relationship: intersect
+      rationale: semantic
+      annotation: "Isolement, protection et reconstruction des SI vs d\xE9connexion\
+        \ de la machine et traitement de l'incident"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:37
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:13.1
+      relationship: superset
+      rationale: semantic
+      annotation: "Proc\xE9dures de sauvegarde et de restauration vs politique de\
+        \ sauvegarde au contenu d\xE9fini"
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:13.1
+      relationship: intersect
+      rationale: semantic
+      annotation: "Sauvegardes r\xE9guli\xE8res des donn\xE9es vitales"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:37.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:13.2
+      relationship: equal
+      rationale: semantic
+      annotation: Test de restauration au moins annuel
+      strength_of_relationship: 9
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:37
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:13.2
+      relationship: intersect
+      rationale: semantic
+      annotation: "Tests annuels de sauvegarde et restauration vs proc\xE9dures de\
+        \ test de restauration de la politique de sauvegarde"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:13.2
+      relationship: intersect
+      rationale: semantic
+      annotation: "V\xE9rification p\xE9riodique de la restauration"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:13.3
+      relationship: intersect
+      rationale: semantic
+      annotation: "Sauvegardes prot\xE9g\xE9es et stock\xE9es hors ligne"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:37
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:13.3
+      relationship: intersect
+      rationale: semantic
+      annotation: "Sauvegardes prot\xE9g\xE9es et hors ligne vs sauvegardes en lieu\
+        \ s\xFBr, hors ligne et \xE0 acc\xE8s restreint"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:37
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:13.5
+      relationship: intersect
+      rationale: semantic
+      annotation: "Dimensionnement des sauvegardes vs fr\xE9quence et types de sauvegarde"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:41.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:16.1
+      relationship: intersect
+      rationale: semantic
+      annotation: "Gouvernance par les risques vs d\xE9cisions de s\xE9curit\xE9 \xE0\
+        \ la lumi\xE8re des risques pressentis par la direction"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:41.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:16.2
+      relationship: intersect
+      rationale: semantic
+      annotation: Analyse de risques de chaque SI vs analyse de risques formelle
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:41.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:16.3
+      relationship: intersect
+      rationale: semantic
+      annotation: Validation et plan de traitement des risques
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:41.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:16.4
+      relationship: intersect
+      rationale: semantic
+      annotation: "R\xE9examen de l'analyse de risques"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:38.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:17.1
+      relationship: intersect
+      rationale: semantic
+      annotation: "Programme d'audit r\xE9gulier des SI"
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:38.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:17.2
+      relationship: intersect
+      rationale: semantic
+      annotation: "Audit \xE9valuant l'efficacit\xE9 des mesures et le niveau de s\xE9\
+        curit\xE9"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:38.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:17.3
+      relationship: intersect
+      rationale: semantic
+      annotation: Types d'audits techniques et organisationnels
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:38.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:17.5
+      relationship: intersect
+      rationale: semantic
+      annotation: Plan d'action de correction suite aux audits
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:18.1
+      relationship: intersect
+      rationale: semantic
+      annotation: "Seuls les logiciels n\xE9cessaires install\xE9s vs limiter les\
+        \ applications et modules install\xE9s"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:33.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:18.1
+      relationship: intersect
+      rationale: semantic
+      annotation: "D\xE9sactivation des fonctionnalit\xE9s inutiles vs d\xE9conseiller\
+        \ l'assistant vocal des terminaux mobiles"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:18.2
+      relationship: intersect
+      rationale: semantic
+      annotation: "R\xE9duction du risque lorsqu'un logiciel ne peut \xEAtre d\xE9\
+        sactiv\xE9 vs isolement des postes en d\xE9rogation"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:14
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:18.3
+      relationship: intersect
+      rationale: semantic
+      annotation: "Configuration s\xE9curis\xE9e des ressources vs niveau de s\xE9\
+        curit\xE9 minimal du parc"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:16
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:18.3
+      relationship: intersect
+      rationale: semantic
+      annotation: "Application homog\xE8ne des configurations de s\xE9curit\xE9"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:17
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:18.3
+      relationship: intersect
+      rationale: semantic
+      annotation: Configuration du pare-feu local
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:21
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:18.3
+      relationship: intersect
+      rationale: semantic
+      annotation: "Usage de protocoles s\xE9curis\xE9s"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:20
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:18.3
+      relationship: intersect
+      rationale: semantic
+      annotation: "Configuration s\xE9curis\xE9e des r\xE9seaux Wi-Fi"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:24.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:18.3
+      relationship: intersect
+      rationale: semantic
+      annotation: Configuration de la messagerie (anti-spam, SPF, DKIM, DMARC)
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:33
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:18.3
+      relationship: intersect
+      rationale: semantic
+      annotation: "S\xE9curisation des terminaux mobiles"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:38.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:18.4
+      relationship: intersect
+      rationale: semantic
+      annotation: "Revue annuelle de configuration vs audits techniques r\xE9guliers"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:28
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:19.1
+      relationship: superset
+      rationale: semantic
+      annotation: "R\xE9seau d'administration d\xE9di\xE9 vs r\xE9seau d'administration\
+        \ d\xE9di\xE9 et cloisonn\xE9"
+      strength_of_relationship: 8
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:28
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:19.3
+      relationship: intersect
+      rationale: semantic
+      annotation: "Ressources du r\xE9seau d'administration d\xE9di\xE9es"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:27
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:19.4
+      relationship: intersect
+      rationale: semantic
+      annotation: "Poste d'administration d\xE9di\xE9 vs poste d'administration sans\
+        \ acc\xE8s \xE0 Internet"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:27
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:19.5
+      relationship: intersect
+      rationale: semantic
+      annotation: "Connexion depuis un poste d\xE9di\xE9 \xE0 l'administration"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:8
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:19.4
+      relationship: intersect
+      rationale: semantic
+      annotation: "Poste d\xE9di\xE9 \xE0 l'administration vs compte d'administration\
+        \ utilis\xE9 sur des environnements d\xE9di\xE9s"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:27
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:19.6
+      relationship: intersect
+      rationale: semantic
+      annotation: "Durcissement et cloisonnement du poste \xE0 d\xE9faut de poste\
+        \ d\xE9di\xE9 vs poste distinct pour les usages Internet"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:28.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:19.7
+      relationship: intersect
+      rationale: semantic
+      annotation: "Liaison physique d\xE9di\xE9e vs cloisonnement physique privil\xE9\
+        gi\xE9"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:28
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:19.8
+      relationship: intersect
+      rationale: semantic
+      annotation: "Cloisonnement et filtrage du r\xE9seau d'administration"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:28
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:19.9
+      relationship: intersect
+      rationale: semantic
+      annotation: "Mesures logiques \xE0 d\xE9faut de liaison physique vs cloisonnement\
+        \ logique (IPsec, VLAN)"
+      strength_of_relationship: 6
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:21
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:19.10
+      relationship: intersect
+      rationale: semantic
+      annotation: "Protocoles s\xE9curis\xE9s pour les flux d'administration"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:28
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:19.11
+      relationship: intersect
+      rationale: semantic
+      annotation: Cloisonnement cryptographique des flux d'administration (tunnels
+        IPsec)
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:36
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:20.1
+      relationship: intersect
+      rationale: semantic
+      annotation: "Prise en compte des journaux et \xE9v\xE9nements de s\xE9curit\xE9"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:36.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:20.3
+      relationship: intersect
+      rationale: semantic
+      annotation: "Ma\xEEtrise de l'infrastructure de supervision vs centralisation\
+        \ des journaux"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:36
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:20.4
+      relationship: intersect
+      rationale: semantic
+      annotation: "Collecte des journaux utiles \xE0 la d\xE9tection vs journaux des\
+        \ composants critiques"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:8.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:20.4
+      relationship: intersect
+      rationale: semantic
+      annotation: "Collecte des \xE9v\xE9nements d'authentification vs journalisation\
+        \ des connexions r\xE9ussies et \xE9chou\xE9es"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:36
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:20.5
+      relationship: intersect
+      rationale: semantic
+      annotation: "Dur\xE9e de conservation des journaux (3 mois vs 1 an)"
+      strength_of_relationship: 7
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:8.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:20.5
+      relationship: intersect
+      rationale: semantic
+      annotation: "Conservation des \xE9v\xE9nements de s\xE9curit\xE9 vs journalisation\
+        \ des connexions r\xE9ussies et \xE9chou\xE9es"
+      strength_of_relationship: 5
+    - source_requirement_urn: urn:intuitem:risk:req_node:anssi-guide-hygiene:36.r
+      target_requirement_urn: urn:intuitem:risk:req_node:recyf:20.6
+      relationship: intersect
+      rationale: semantic
+      annotation: "Protection des journaux vs centralisation emp\xEAchant leur alt\xE9\
+        ration"
+      strength_of_relationship: 5

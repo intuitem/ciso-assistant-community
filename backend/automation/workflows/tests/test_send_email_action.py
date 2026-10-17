@@ -16,7 +16,9 @@ import uuid
 from datetime import timedelta
 
 import pytest
+from contextlib import contextmanager
 from django.core import mail
+from django.core.mail.backends.locmem import EmailBackend as LocmemBackend
 from django.utils import timezone
 
 from global_settings.models import GlobalSettings
@@ -33,6 +35,35 @@ from automation.workflows.models import (
     WorkflowVersion,
 )
 from automation.workflows.tests.helpers import publisher_user
+
+
+HERE = "automation.workflows.tests.test_send_email_action"
+
+
+class DyingPrimaryBackend(LocmemBackend):
+    """Delivers until it sees gone@tests.local, then the server is down for
+    good: the dropped socket and every later open fail."""
+
+    alive = True
+
+    def open(self):
+        if not DyingPrimaryBackend.alive:
+            raise ConnectionRefusedError("primary is down")
+        return super().open()
+
+    def send_messages(self, messages):
+        if any("gone@tests.local" in message.to for message in messages):
+            DyingPrimaryBackend.alive = False
+            raise smtplib.SMTPServerDisconnected("connection dropped")
+        return super().send_messages(messages)
+
+
+class RescueBackend(LocmemBackend):
+    delivered: list = []
+
+    def send_messages(self, messages):
+        RescueBackend.delivered += [message.to[0] for message in messages]
+        return super().send_messages(messages)
 
 
 def node(type_, **kwargs):
@@ -72,9 +103,12 @@ def email_flow(config):
     return version
 
 
+LOCMEM = "django.core.mail.backends.locmem.EmailBackend"
+CONSOLE = "django.core.mail.backends.console.EmailBackend"
+
+
 def configure_smtp(settings):
-    settings.EMAIL_HOST = "smtp.tests.local"
-    settings.EMAIL_PORT = "25"
+    settings.MAILERS = {"default": {"BACKEND": LOCMEM}}
     settings.DEFAULT_FROM_EMAIL = "ciso@tests.local"
 
 
@@ -181,9 +215,7 @@ class TestSendEmail:
         # MAIL_DEBUG deployments swap in the console backend with no
         # EMAIL_HOST/EMAIL_PORT; the settings precheck must not fail the node
         # in exactly the environments meant for testing workflows.
-        settings.EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-        settings.EMAIL_HOST = None
-        settings.EMAIL_PORT = None
+        settings.MAILERS = {"default": {"BACKEND": CONSOLE}}
         settings.DEFAULT_FROM_EMAIL = "noreply@ciso.assistant"
         version = email_flow({"recipients": "a@tests.local", "subject": "S"})
         with django_capture_on_commit_callbacks(execute=True):
@@ -193,8 +225,7 @@ class TestSendEmail:
         assert instance.status == WorkflowInstance.Status.COMPLETED
 
     def test_missing_email_settings_fail_the_node(self, settings):
-        settings.EMAIL_HOST = None
-        settings.EMAIL_PORT = None
+        settings.MAILERS = {}
         settings.DEFAULT_FROM_EMAIL = None
         version = email_flow({"recipients": "a@tests.local", "subject": "S"})
         instance = start_instance(version)
@@ -252,6 +283,29 @@ class TestSendEmail:
             "delivery failed for a@tests.local" in m and "(0 of 1 sent)" in m
             for m in error_messages(instance)
         )
+
+    def test_delivery_failure_is_recorded_in_delivery_health(
+        self, settings, dispatch, monkeypatch, django_capture_on_commit_callbacks
+    ):
+        from global_settings.models import MailerHealth
+
+        configure_smtp(settings)
+
+        def broken_send(
+            subject, message, recipient, html_message=None, connection=None
+        ):
+            raise ConnectionRefusedError("connection refused")
+
+        monkeypatch.setattr("automation.workflows.tasks.send_email_now", broken_send)
+        version = email_flow({"recipients": "a@tests.local", "subject": "S"})
+        with django_capture_on_commit_callbacks(execute=True):
+            start_instance(version)
+        dispatch.run()
+        health = MailerHealth.objects.get(alias="default")
+        # The session was opened, then the send failed: not "ok".
+        assert health.last_outcome == "failed"
+        assert health.last_error == "connection refused"
+        assert health.last_success_at is None
 
     def test_one_dead_recipient_does_not_starve_the_rest(
         self, settings, dispatch, monkeypatch, django_capture_on_commit_callbacks
@@ -344,8 +398,10 @@ class TestSendEmail:
         self, settings, dispatch, monkeypatch, django_capture_on_commit_callbacks
     ):
         configure_smtp(settings)
+        # The backend accepts the message but reports nothing sent.
         monkeypatch.setattr(
-            "core.tasks.EmailMessage.send", lambda self, fail_silently=False: 0
+            "django.core.mail.backends.locmem.EmailBackend.send_messages",
+            lambda self, messages: 0,
         )
         version = email_flow({"recipients": "a@tests.local", "subject": "S"})
         with django_capture_on_commit_callbacks(execute=True):
@@ -390,7 +446,7 @@ class TestSendEmail:
     ):
         # Django's open() short-circuits on a non-None connection, so a
         # dropped socket stays dead for every later recipient unless the
-        # task recycles it. This stands in for that backend behaviour.
+        # task opens a new session. This stands in for that backend.
         configure_smtp(settings)
 
         class DroppingConnection:
@@ -408,6 +464,7 @@ class TestSendEmail:
                 self.alive = False
 
             def __enter__(self):
+                self.open()
                 return self
 
             def __exit__(self, *exc_info):
@@ -424,9 +481,14 @@ class TestSendEmail:
                 return len(messages)
 
         connection = DroppingConnection()
+
+        @contextmanager
+        def session():
+            with connection:
+                yield connection
+
         monkeypatch.setattr(
-            "automation.workflows.tasks.get_connection",
-            lambda **kwargs: connection,
+            "automation.workflows.tasks.mailer.open_connection", session
         )
         version = email_flow(
             {
@@ -438,8 +500,43 @@ class TestSendEmail:
             instance = start_instance(version)
         dispatch.run()
         instance.refresh_from_db()
-        assert connection.reopened == 1
+        # One session up to the drop, a second one for the rest.
+        assert connection.reopened == 2
         assert connection.delivered == ["a@tests.local", "c@tests.local"]
+        assert instance.status == WorkflowInstance.Status.FAILED
+        assert any(
+            "gone@tests.local" in m and "(2 of 3 sent)" in m
+            for m in error_messages(instance)
+        )
+
+    def test_primary_dying_mid_batch_fails_over_for_the_rest(
+        self, settings, dispatch, monkeypatch, django_capture_on_commit_callbacks
+    ):
+        # Recipients after the drop were never handed to any server, so the
+        # new session must go through failover instead of reopening the
+        # dead primary.
+        settings.MAILERS = {
+            "default": {"BACKEND": f"{HERE}.DyingPrimaryBackend"},
+            "rescue": {"BACKEND": f"{HERE}.RescueBackend"},
+        }
+        settings.DEFAULT_FROM_EMAIL = "ciso@tests.local"
+        monkeypatch.setattr(DyingPrimaryBackend, "alive", True)
+        monkeypatch.setattr(RescueBackend, "delivered", [])
+        version = email_flow(
+            {
+                "recipients": "a@tests.local, gone@tests.local, c@tests.local",
+                "subject": "S",
+            }
+        )
+        with django_capture_on_commit_callbacks(execute=True):
+            instance = start_instance(version)
+        dispatch.run()
+        instance.refresh_from_db()
+        assert sorted(message.to[0] for message in mail.outbox) == [
+            "a@tests.local",
+            "c@tests.local",
+        ]
+        assert RescueBackend.delivered == ["c@tests.local"]
         assert instance.status == WorkflowInstance.Status.FAILED
         assert any(
             "gone@tests.local" in m and "(2 of 3 sent)" in m
