@@ -31,9 +31,17 @@ from tprm.models import (
     Representative,
     Solution,
     SolutionSubcontractor,
+    SolutionTierChange,
     Tier,
 )
-from tprm.tiers import set_entity_tier
+from tprm.tiers import (
+    Propagation,
+    below_floor,
+    propagation_mode,
+    raise_to_floor,
+    set_entity_tier,
+    set_solution_tier,
+)
 
 logger = structlog.get_logger(__name__)
 
@@ -62,6 +70,27 @@ class EntityReadSerializer(BaseModelSerializer):
     subcontracts_usage = serializers.SerializerMethodField()
     tier = FieldsRelatedField(["id", "name", "rank", "hexcolor"])
     tier_response = FieldsRelatedField(["id", "ref_id"])
+    tier_floor = serializers.SerializerMethodField()
+
+    def get_tier_floor(self, obj):
+        """The tier the entity's solutions call for, when above its own."""
+        if self.context.get("action") == "list":
+            return None
+        mode = propagation_mode()
+        solution = below_floor(obj) if mode != Propagation.OFF else None
+        if solution is None:
+            return None
+        tier = solution.tier
+        return {
+            "mode": mode,
+            "tier": {
+                "id": str(tier.id),
+                "name": tier.name,
+                "rank": tier.rank,
+                "hexcolor": tier.hexcolor,
+            },
+            "solution": {"id": str(solution.id), "str": solution.name},
+        }
 
     def get_legal_identifiers(self, obj):
         """Format legal identifiers as a readable string for display"""
@@ -767,9 +796,12 @@ class TierReadSerializer(BaseModelSerializer):
         annotated = getattr(obj, "in_history", None)
         if annotated is not None:
             return annotated
-        return EntityTierChange.objects.filter(
-            Q(tier=obj) | Q(previous_tier=obj)
-        ).exists()
+        return (
+            EntityTierChange.objects.filter(Q(tier=obj) | Q(previous_tier=obj)).exists()
+            or SolutionTierChange.objects.filter(
+                Q(tier=obj) | Q(previous_tier=obj)
+            ).exists()
+        )
 
     class Meta:
         model = Tier
@@ -830,6 +862,18 @@ class EntityTierChangeReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = EntityTierChange
+        exclude = []
+
+
+class SolutionTierChangeReadSerializer(BaseModelSerializer):
+    solution = FieldsRelatedField()
+    tier = FieldsRelatedField(["id", "name", "rank", "hexcolor"])
+    previous_tier = FieldsRelatedField(["id", "name", "rank", "hexcolor"])
+    changed_by = FieldsRelatedField(["id", "email"])
+    folder = FieldsRelatedField()
+
+    class Meta:
+        model = SolutionTierChange
         exclude = []
 
 
@@ -1021,6 +1065,7 @@ class SolutionReadSerializer(BaseModelSerializer):
     owner = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(many=True)
     tier = FieldsRelatedField(["id", "key", "name", "rank", "hexcolor"])
+    tier_response = FieldsRelatedField(["id", "ref_id"])
     subcontracting_chain = SolutionSubcontractorReadSerializer(
         many=True, read_only=True
     )
@@ -1069,6 +1114,9 @@ class SolutionWriteSerializer(BaseModelSerializer):
     # inspect.
     subcontracting_chain = SolutionSubcontractorWriteSerializer(
         many=True, required=False
+    )
+    tier_note = serializers.CharField(
+        write_only=True, required=False, allow_blank=True, default=""
     )
 
     def validate_provider_entity(self, value):
@@ -1222,8 +1270,12 @@ class SolutionWriteSerializer(BaseModelSerializer):
 
     def create(self, validated_data):
         chain_data = validated_data.pop("subcontracting_chain", _CHAIN_UNSET)
+        tier = validated_data.pop("tier", None)
+        note = validated_data.pop("tier_note", "")
         with transaction.atomic():
             solution = super().create(validated_data)
+            if tier is not None:
+                set_solution_tier(solution, tier, user=self._user(), note=note)
             if chain_data is not _CHAIN_UNSET:
                 self._replace_chain(solution, chain_data, solution.provider_entity_id)
         self._log_chain_event(solution, chain_data, is_create=True)
@@ -1235,9 +1287,17 @@ class SolutionWriteSerializer(BaseModelSerializer):
         # even after validated_data.pop() mutations.
         chain_sent = "subcontracting_chain" in self.initial_data
         chain_data = validated_data.pop("subcontracting_chain", _CHAIN_UNSET)
+        note = validated_data.pop("tier_note", "")
+        has_tier = "tier" in validated_data
+        tier = validated_data.pop("tier", None)
+        was_active = instance.is_active
 
         with transaction.atomic():
             solution = super().update(instance, validated_data)
+            if has_tier:
+                set_solution_tier(solution, tier, user=self._user(), note=note)
+            if solution.is_active and not was_active:
+                raise_to_floor(solution.provider_entity, user=self._user())
             if chain_sent:
                 direct_provider_id = self._resolve_direct_provider(
                     validated_data, solution
@@ -1253,6 +1313,10 @@ class SolutionWriteSerializer(BaseModelSerializer):
                 chain_data if chain_data is not _CHAIN_UNSET else [],
             )
         return solution
+
+    def _user(self):
+        request = self.context.get("request")
+        return getattr(request, "user", None)
 
     def _log_chain_event(self, solution, chain_data, is_create=False):
         """Emit structured audit log for chain mutations (post-commit)."""
@@ -1272,6 +1336,12 @@ class SolutionWriteSerializer(BaseModelSerializer):
     class Meta:
         model = Solution
         exclude = ["recipient_entity"]
+        read_only_fields = [
+            "tier_source",
+            "tier_set_at",
+            "tier_value",
+            "tier_response",
+        ]
 
 
 class ContractReadSerializer(BaseModelSerializer):

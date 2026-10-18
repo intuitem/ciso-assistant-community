@@ -20,8 +20,8 @@ import ReplaceWith from '$lib/components/ContextMenu/applied-controls/ReplaceWit
 import ChangeAttackStage from '$lib/components/ContextMenu/elementary-actions/ChangeAttackStage.svelte';
 import VulnerabilityChangeStatus from '$lib/components/ContextMenu/vulnerabilities/ChangeStatus.svelte';
 import VulnerabilityChangeSeverity from '$lib/components/ContextMenu/vulnerabilities/ChangeSeverity.svelte';
-import EntityAssessTier from '$lib/components/ContextMenu/entities/AssessTier.svelte';
-import EntityChangeTier from '$lib/components/ContextMenu/entities/ChangeTier.svelte';
+import AssessTier from '$lib/components/ContextMenu/AssessTier.svelte';
+import ChangeTier from '$lib/components/ContextMenu/ChangeTier.svelte';
 import ProcessingScreenDpia from '$lib/components/ContextMenu/processings/ScreenDpia.svelte';
 import ProcessingChangeDpiaRequired from '$lib/components/ContextMenu/processings/ChangeDpiaRequired.svelte';
 import ChangeChoiceField from '$lib/components/ContextMenu/ChangeChoiceField.svelte';
@@ -1261,6 +1261,12 @@ export const TIER_SOURCE_FILTER: ListViewFilterConfig = {
 					return m.tierSourceManual();
 				},
 				value: 'manual'
+			},
+			{
+				get label() {
+					return m.tierSourceRollup();
+				},
+				value: 'rollup'
 			}
 		],
 		translateOptions: false,
@@ -2697,6 +2703,14 @@ export const listViewFields = {
 			source: TIER_SOURCE_FILTER
 		}
 	},
+	'solution-tier-changes': {
+		head: ['createdAt', 'tier', 'previousTier', 'source', 'changedBy', 'note', 'solution'],
+		body: ['created_at', 'tier', 'previous_tier', 'source', 'changed_by', 'note', 'solution'],
+		filters: {
+			tier: TIER_FILTER,
+			source: TIER_SOURCE_FILTER
+		}
+	},
 	'dpia-requirement-changes': {
 		head: ['createdAt', 'dpiaRequired', 'previously', 'source', 'changedBy', 'note', 'processing'],
 		body: [
@@ -4027,8 +4041,12 @@ export const contextMenuActions = {
 	'asset-assessments': [{ component: ToggleRecoveryFlags, props: {} }],
 	'metric-instances': [{ component: MetricInstanceEditValue, props: {} }],
 	entities: [
-		{ component: EntityAssessTier, props: {} },
-		{ component: EntityChangeTier, props: {} }
+		{ component: AssessTier, props: {} },
+		{ component: ChangeTier, props: {} }
+	],
+	solutions: [
+		{ component: AssessTier, props: {} },
+		{ component: ChangeTier, props: {} }
 	],
 	processings: [
 		{ component: ProcessingScreenDpia, props: {} },
@@ -4708,7 +4726,16 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
 	],
 	representatives: [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
-	solutions: [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
+	solutions: [
+		{
+			type: 'change_field',
+			label: 'changeTier',
+			icon: 'fa-solid fa-layer-group',
+			field: 'tier',
+			optionsEndpoint: 'tiers?is_visible=true'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
 	'entity-assessments': [
 		{
 			type: 'change_field',

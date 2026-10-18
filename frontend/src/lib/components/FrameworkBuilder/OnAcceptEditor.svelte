@@ -24,7 +24,15 @@
 
 	let { value, rules, subjectModel, onupdate, onaddvendorsubject, scored = true }: Props = $props();
 
-	const TIER_TARGET = 'entity.tier';
+	const TIER_TARGETS: Record<string, string> = {
+		entity: 'entity.tier',
+		solution: 'solution.tier'
+	};
+	const TIER_TARGET = $derived(
+		(value ?? []).find((e) => Object.values(TIER_TARGETS).includes(e?.target))?.target ??
+			TIER_TARGETS[subjectModel ?? ''] ??
+			TIER_TARGETS.entity
+	);
 
 	let tiers = $state<Tier[]>([]);
 	$effect(() => {
@@ -48,7 +56,7 @@
 	const numericRules = $derived(rules.filter((r) => r.kind === 'number'));
 	const yesNoRules = $derived(rules.filter((r) => r.kind !== 'number' && r.kind !== 'rating'));
 	const knownKeys = $derived(new Set(tiers.map((t) => t.key)));
-	const forVendors = $derived(subjectModel === 'entity');
+	const forVendors = $derived(TIER_TARGETS[subjectModel ?? ''] === TIER_TARGET);
 
 	const ruleLabel = (rule: OutcomeRule) =>
 		(rule as OutcomeRule & { label?: string }).label || rule.annotation || rule.ref_id;
@@ -185,7 +193,9 @@
 			onchange={(e) => enable(e.currentTarget.checked)}
 			data-testid="on-accept-tier-toggle"
 		/>
-		{m.onAcceptSetEntityTier()}
+		{TIER_TARGET === TIER_TARGETS.solution
+			? m.onAcceptSetSolutionTier()
+			: m.onAcceptSetEntityTier()}
 	</label>
 	{#if !forVendors}
 		<div class="flex flex-wrap items-center gap-2 pl-6">

@@ -13,6 +13,11 @@ REFERENCEABLE = {
     "vulnerability": {"model": "core.Vulnerability", "label": "name"},
     "perimeter": {"model": "core.Perimeter", "label": "name"},
     "entity": {"model": "tprm.Entity", "label": "name"},
+    "solution": {
+        "model": "tprm.Solution",
+        "label": "name",
+        "folder": "provider_entity__folder",
+    },
     "processing": {"model": "privacy.Processing", "label": "name"},
 }
 
@@ -42,12 +47,13 @@ def _queryset(entry, folder, user=None):
     from iam.models import RoleAssignment
 
     model = apps.get_model(entry["model"])
+    path = entry.get("folder", "folder")
     ancestors = [folder] + list(folder.get_parent_folders())
-    qs = model.objects.filter(folder__in=ancestors)
+    qs = model.objects.filter(**{f"{path}__in": ancestors})
     if user is None:
         return qs
     viewable = RoleAssignment.get_viewable_object_ids(user, model)
-    return qs.filter(Q(id__in=viewable) | Q(folder=folder))
+    return qs.filter(Q(id__in=viewable) | Q(**{path: folder}))
 
 
 def options_for(question, folder, search="", limit=50, user=None, subject=None):

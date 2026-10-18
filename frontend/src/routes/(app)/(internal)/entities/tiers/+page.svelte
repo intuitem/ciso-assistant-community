@@ -3,6 +3,7 @@
 	import { invalidateAll } from '$app/navigation';
 	import { page } from '$app/state';
 	import TierBadge from '$lib/components/ModelTable/field/TierBadge.svelte';
+	import { getModalStore, type ModalSettings } from '$lib/components/Modals/stores';
 	import { getToastStore } from '$lib/components/Toast/stores';
 	import { canPerformAction } from '$lib/utils/access-control';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -29,6 +30,7 @@
 	let { data }: Props = $props();
 
 	const toastStore = getToastStore();
+	const modalStore = getModalStore();
 
 	let tiers: Tier[] = $state([]);
 	$effect(() => {
@@ -130,6 +132,29 @@
 		if (await callAction('create', { name: newName.trim(), hexcolor: newColor })) {
 			newName = '';
 		}
+	}
+
+	const PROPAGATION_MODES = [
+		{ value: 'off', label: m.tierPropagationOff },
+		{ value: 'suggest', label: m.tierPropagationSuggest },
+		{ value: 'floor', label: m.tierPropagationFloor }
+	];
+
+	function setPropagation(mode: string) {
+		const count = data.propagation.below_floor;
+		if (mode !== 'floor' || data.propagation.mode === 'floor' || !count) {
+			callAction('propagation', { mode });
+			return;
+		}
+		const modal: ModalSettings = {
+			type: 'confirm',
+			title: m.tierPropagationFloorConfirmTitle(),
+			body: m.tierPropagationFloorConfirmBody({ count }),
+			response: (confirmed: boolean) => {
+				if (confirmed) callAction('propagation', { mode });
+			}
+		};
+		modalStore.trigger(modal);
 	}
 
 	function onDrop(index: number) {
@@ -366,6 +391,30 @@
 		</section>
 
 		<aside class="flex flex-col gap-5">
+			<section
+				class="card bg-surface-100-900/60 p-4 flex flex-col gap-3"
+				data-testid="tier-propagation"
+			>
+				<h2 class="text-xs font-semibold uppercase tracking-[0.14em] text-surface-500">
+					{m.tierPropagation()}
+				</h2>
+				<div class="flex rounded-base border border-surface-200-800 p-0.5" role="radiogroup">
+					{#each PROPAGATION_MODES as mode (mode.value)}
+						<button
+							type="button"
+							role="radio"
+							aria-checked={data.propagation.mode === mode.value}
+							class="btn btn-sm flex-1 {data.propagation.mode === mode.value
+								? 'preset-filled-primary-500'
+								: 'hover:preset-tonal'}"
+							disabled={busy || !canEdit}
+							onclick={() => setPropagation(mode.value)}>{mode.label()}</button
+						>
+					{/each}
+				</div>
+				<p class="text-xs text-surface-500">{m.tierPropagationHelp()}</p>
+			</section>
+
 			<!-- Where the vendors sit on the scale, as one strip of the scale's own colours. -->
 			<section class="card bg-surface-100-900/60 p-4 flex flex-col gap-3">
 				<h2 class="text-xs font-semibold uppercase tracking-[0.14em] text-surface-500">
