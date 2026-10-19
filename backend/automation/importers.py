@@ -128,11 +128,23 @@ def parse_ocsf(file):
             tool = " ".join(
                 filter(None, [product.get("name"), product.get("version")])
             )[:100]
-        message = compliance.get("status_detail") or event.get("message") or ""
-        for ref in compliance.get("requirements") or []:
+        details = compliance.get("status_details")
+        message = (
+            ("\n".join(map(str, details)) if isinstance(details, list) else details)
+            or compliance.get("status_detail")
+            or event.get("message")
+            or ""
+        )
+        requirements = [
+            str(ref).strip() for ref in compliance.get("requirements") or []
+        ]
+        control = str(compliance.get("control") or "").strip()
+        refs = [(control, requirements)] if control else [(r, []) for r in requirements]
+        for ref_id, fallbacks in refs:
             entries.append(
                 {
-                    "ref_id": str(ref).strip(),
+                    "ref_id": ref_id,
+                    "fallback_ref_ids": fallbacks,
                     "result": result,
                     "actual": "",
                     "expected": "",

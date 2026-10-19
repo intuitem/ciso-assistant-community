@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { setContext, untrack } from 'svelte';
+	import { setContext, tick, untrack } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
 	import {
 		SvelteFlow,
 		useSvelteFlow,
 		Controls,
+		ControlButton,
 		Background,
 		BackgroundVariant,
 		MiniMap,
@@ -17,12 +18,22 @@
 	import '@xyflow/svelte/dist/style.css';
 
 	import AssetNodeComponent from './AssetNode.svelte';
-	import AssetEdgeComponent from './AssetEdge.svelte';
+	import GhostNodeComponent from './GhostNode.svelte';
+	import { computeLayout } from '$lib/components/AssetGraph/layout';
+	import { createLinkWriter, idOf } from '$lib/components/AssetGraph/links';
+	import { createPickerForm } from '$lib/components/AssetGraph/picker';
+	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import { fetchAllByIds } from '$lib/utils/pagination';
+	import AssetEdgeComponent from '$lib/components/AssetGraph/AssetEdge.svelte';
 	import {
 		loadPositions,
 		savePositions,
 		loadViewport,
 		saveViewport as saveViewportLS,
+		loadPinned,
+		savePinned,
+		loadInstructionsOpen,
+		saveInstructionsOpen,
 		type XY
 	} from './positions';
 	import { getToastStore } from '$lib/components/Toast/stores';
@@ -50,27 +61,42 @@
 
 	interface Props {
 		assets: AssetItem[];
+		externalAssets: AssetItem[];
+		hiddenAssetIds: string[];
 		folderId: string;
 		assetModel: any;
 		deleteForm: any;
 	}
 
-	let { assets, folderId, assetModel, deleteForm }: Props = $props();
+	let { assets, externalAssets, hiddenAssetIds, folderId, assetModel, deleteForm }: Props =
+		$props();
 
 	const toastStore = getToastStore();
+	const { updateParents } = createLinkWriter((message) =>
+		toastStore.trigger({ message, background: 'preset-tonal-error' })
+	);
 	const modalStore = getModalStore();
 
-	const nodeTypes = { asset: AssetNodeComponent };
+	const nodeTypes = { asset: AssetNodeComponent, ghost: GhostNodeComponent };
 	const edgeTypes = { asset: AssetEdgeComponent };
 
 	let nodes = $state<Node[]>([]);
 	let edges = $state<Edge[]>([]);
 	let positions = $state<Record<string, XY>>({});
-	let instructionsOpen = $state(true);
+	let instructionsOpen = $state(loadInstructionsOpen());
 	// drop coordinates + optional parent for the next asset created via the canvas
 	let pendingPlacement = $state<XY | null>(null);
 	let pendingParentId = $state<string | null>(null);
 	let knownAssetIds = $state<Set<string>>(new Set());
+	let pinnedIds = $state<string[]>(loadPinned(folderId));
+	let pinnedAssets = $state<AssetItem[]>([]);
+	let searchOpen = $state(false);
+	const linkPicker = createPickerForm('asset');
+
+	const folderOf = (a: AssetItem) =>
+		typeof a.folder === 'object' && a.folder !== null
+			? { id: a.folder.id, name: a.folder.str ?? '' }
+			: { id: (a.folder as string) ?? '', name: '' };
 
 	const GRID_COLS = 4;
 	const GRID_X = 240;
@@ -83,30 +109,96 @@
 	}
 
 	function buildGraph() {
-		const inFolderIds = new Set(assets.map((a) => a.id));
+		const localIds = new Set(assets.map((a) => a.id));
+		const ghosts = new Map<string, AssetItem>();
+		for (const g of pinnedAssets) if (!localIds.has(g.id)) ghosts.set(g.id, g);
+		for (const g of externalAssets) if (!localIds.has(g.id)) ghosts.set(g.id, g);
+		const hidden = new Set(hiddenAssetIds.filter((id) => !ghosts.has(id)));
+		const onBoard = (id: string) => localIds.has(id) || ghosts.has(id) || hidden.has(id);
 
-		const externalParentCount: Record<string, number> = {};
-		for (const a of assets) {
-			let count = 0;
-			for (const p of a.parent_assets ?? []) {
-				const pid = typeof p === 'object' ? p.id : p;
-				if (!inFolderIds.has(pid)) count += 1;
+		const parentsById = new Map<string, string[]>(
+			[...assets, ...ghosts.values()].map((a) => [a.id, (a.parent_assets ?? []).map(idOf)])
+		);
+
+		const flowEdges: Edge[] = [];
+		const linked = new Set<string>();
+		for (const [childId, parentIds] of parentsById) {
+			for (const pid of parentIds) {
+				if (!onBoard(pid)) continue;
+				if (!localIds.has(pid) && !localIds.has(childId)) continue;
+				const cross = !localIds.has(pid) || !localIds.has(childId);
+				if (cross) {
+					linked.add(pid);
+					linked.add(childId);
+				}
+				flowEdges.push({
+					id: `e-${pid}-${childId}`,
+					source: pid,
+					target: childId,
+					type: 'asset',
+					data: { crossDomain: cross },
+					selectable: !hidden.has(pid),
+					deletable: !hidden.has(pid),
+					markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--color-surface-600)' }
+				});
 			}
-			externalParentCount[a.id] = count;
 		}
 
-		const flowNodes: Node[] = assets.map((a, i) => {
-			const saved = positions[a.id];
+		const localNodes: Node[] = assets.map((a, i) => ({
+			id: a.id,
+			type: 'asset',
+			position: positions[a.id] ?? defaultPositionFor(i),
+			data: {
+				label: a.name,
+				refId: a.ref_id ?? '',
+				type: a.is_primary ? 'PR' : 'SP'
+			},
+			draggable: true,
+			deletable: false,
+			connectable: true
+		}));
+
+		const localPos = new Map(localNodes.map((n) => [n.id, n.position]));
+		const xs = localNodes.map((n) => n.position.x);
+		const leftLane = Math.min(60, ...xs) - GRID_X - 60;
+		const rightLane = Math.max(60, ...xs) + GRID_X + 60;
+		const taken: XY[] = Object.entries(positions)
+			.filter(([id]) => !localIds.has(id))
+			.map(([, p]) => p);
+		const anchorY = (id: string, isParent: boolean): number => {
+			const neighbours = isParent
+				? [...parentsById].filter(([, ps]) => ps.includes(id)).map(([c]) => c)
+				: (parentsById.get(id) ?? []);
+			const ys = neighbours.map((n) => localPos.get(n)?.y).filter((y) => y !== undefined);
+			return ys.length ? Math.min(...ys) : 60;
+		};
+		const newSpots: Record<string, XY> = {};
+		const ghostPosition = (id: string): XY => {
+			if (positions[id]) return positions[id];
+			const isParent = assets.some((a) => (a.parent_assets ?? []).some((p) => idOf(p) === id));
+			const x = isParent ? leftLane : rightLane;
+			let y = anchorY(id, isParent);
+			while (taken.some((p) => p.x === x && Math.abs(p.y - y) < 70)) y += 70;
+			const spot = { x, y };
+			taken.push(spot);
+			newSpots[id] = spot;
+			return spot;
+		};
+
+		const ghostNodes: Node[] = [...ghosts.values()].map((g) => {
+			const folder = folderOf(g);
 			return {
-				id: a.id,
-				type: 'asset',
-				position: saved ?? defaultPositionFor(i),
+				id: g.id,
+				type: 'ghost',
+				position: ghostPosition(g.id),
 				data: {
-					label: a.name,
-					refId: a.ref_id ?? '',
-					// Always store the raw code on the node so locale never matters
-					type: a.is_primary ? 'PR' : 'SP',
-					externalLinkCount: externalParentCount[a.id] ?? 0
+					label: g.name,
+					refId: g.ref_id ?? '',
+					type: g.is_primary ? 'PR' : 'SP',
+					folderId: folder.id,
+					folderName: folder.name,
+					pinned: pinnedIds.includes(g.id),
+					linked: linked.has(g.id)
 				},
 				draggable: true,
 				deletable: false,
@@ -114,33 +206,112 @@
 			};
 		});
 
-		const flowEdges: Edge[] = [];
-		for (const a of assets) {
-			for (const p of a.parent_assets ?? []) {
-				const pid = typeof p === 'object' ? p.id : p;
-				if (!inFolderIds.has(pid)) continue;
-				flowEdges.push({
-					id: `e-${pid}-${a.id}`,
-					source: pid,
-					target: a.id,
-					type: 'asset',
-					markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--color-surface-600)' }
-				});
-			}
-		}
+		const hiddenNodes: Node[] = [...hidden].map((id) => ({
+			id,
+			type: 'ghost',
+			position: ghostPosition(id),
+			data: { label: '', type: '', hidden: true },
+			draggable: true,
+			deletable: false,
+			connectable: false
+		}));
 
-		nodes = flowNodes;
+		if (Object.keys(newSpots).length) positions = { ...positions, ...newSpots };
+		nodes = [...localNodes, ...ghostNodes, ...hiddenNodes];
 		edges = flowEdges;
-		knownAssetIds = inFolderIds;
+		knownAssetIds = localIds;
+	}
+
+	async function loadPinnedAssets() {
+		if (pinnedIds.length === 0) {
+			pinnedAssets = [];
+			return;
+		}
+		try {
+			pinnedAssets = await fetchAllByIds<AssetItem>(fetch, '/assets', pinnedIds);
+		} catch {
+			return;
+		}
+	}
+
+	function pinGhost(asset: AssetItem) {
+		if (!pinnedIds.includes(asset.id)) {
+			pinnedIds = [...pinnedIds, asset.id];
+			savePinned(folderId, pinnedIds);
+		}
+		const center = flowInstance?.screenToFlowPosition({
+			x: window.innerWidth / 2,
+			y: window.innerHeight / 2
+		}) ?? { x: 100, y: 100 };
+		const freeX = Math.max(60, ...nodes.map((n) => n.position.x)) + GRID_X + 40;
+		const spot = positions[asset.id] ?? { x: freeX, y: center.y };
+		positions = { ...positions, [asset.id]: spot };
+		savePositions(folderId, positions);
+		pinnedAssets = [...pinnedAssets.filter((a) => a.id !== asset.id), asset];
+		flowInstance?.setCenter(spot.x + 100, spot.y + 30, {
+			zoom: flowInstance.getZoom(),
+			duration: 300
+		});
+	}
+
+	function unpinGhost(id: string) {
+		pinnedIds = pinnedIds.filter((p) => p !== id);
+		savePinned(folderId, pinnedIds);
+		pinnedAssets = pinnedAssets.filter((a) => a.id !== id);
+	}
+
+	async function pickExternal(id: string | null) {
+		if (!id) return;
+		linkPicker.clear();
+		searchOpen = false;
+		const existing = nodes.find((n) => n.id === id);
+		if (existing) {
+			flowInstance?.setCenter(existing.position.x + 100, existing.position.y + 30, {
+				zoom: flowInstance.getZoom(),
+				duration: 300
+			});
+			return;
+		}
+		const [asset] = await fetchAllByIds<AssetItem>(fetch, '/assets', [id]).catch(() => []);
+		if (asset) pinGhost(asset);
 	}
 
 	// Initial load from localStorage and graph build
 	positions = loadPositions(folderId);
+	let pendingInitialLayout = $state(Object.keys(positions).length === 0);
 	buildGraph();
 
-	// When the assets prop changes (after invalidateAll), rebuild
+	void loadPinnedAssets();
+
+	function applyLayout() {
+		const laidOut = computeLayout(nodes, edges);
+		nodes = nodes.map((node) => {
+			const position = laidOut.get(node.id);
+			return position ? { ...node, position } : node;
+		});
+		positions = Object.fromEntries(nodes.map((n) => [n.id, { ...n.position }]));
+		savePositions(folderId, positions);
+		void tick().then(() =>
+			requestAnimationFrame(() =>
+				requestAnimationFrame(() =>
+					flowInstance?.fitView({ duration: 300, padding: 0.15, maxZoom: 1 })
+				)
+			)
+		);
+	}
+
+	$effect(() => {
+		if (!pendingInitialLayout || nodes.length === 0) return;
+		if (!nodes.every((n) => n.measured?.width)) return;
+		pendingInitialLayout = false;
+		untrack(applyLayout);
+	});
+
 	$effect(() => {
 		void assets;
+		void externalAssets;
+		void hiddenAssetIds;
+		void pinnedAssets;
 		untrack(() => {
 			const newIds = new Set(assets.map((a) => a.id));
 			const added = [...newIds].filter((id) => !knownAssetIds.has(id));
@@ -157,7 +328,9 @@
 				if (pendingParentId) {
 					const parentToWire = pendingParentId;
 					for (const newAssetId of added) {
-						void patchParentAssets(newAssetId, [parentToWire]).then((ok) => {
+						void updateParents(newAssetId, (parents) =>
+							Array.from(new Set([...parents, parentToWire]))
+						).then((ok) => {
 							if (ok) invalidateAll();
 						});
 					}
@@ -177,7 +350,7 @@
 		// xyflow context is only established once the flow has initialised. This is
 		// the documented pattern — see https://svelteflow.dev/api-reference/svelteflow#oninit
 		flowInstance = useSvelteFlow();
-		const saved = loadViewport(folderId);
+		const saved = pendingInitialLayout ? null : loadViewport(folderId);
 		if (saved) {
 			flowInstance?.setViewport(saved);
 		} else {
@@ -201,59 +374,24 @@
 		savePositions(folderId, updated);
 	}
 
-	function isValidConnection(connection: Connection): boolean {
+	function isValidConnection(connection: Connection | Edge): boolean {
 		if (!connection.source || !connection.target) return false;
 		if (connection.source === connection.target) return false;
+		if (!knownAssetIds.has(connection.source) && !knownAssetIds.has(connection.target)) {
+			return false;
+		}
 		if (edges.some((e) => e.source === connection.source && e.target === connection.target)) {
 			return false;
 		}
 		return true;
 	}
 
-	async function patchParentAssets(childId: string, parentIds: string[]): Promise<boolean> {
-		try {
-			const res = await fetch(`/assets/${childId}`, {
-				method: 'PATCH',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ parent_assets: parentIds })
-			});
-			if (!res.ok) {
-				const err = await res.json().catch(() => ({}));
-				const msg =
-					(err && (err.parent_assets || err.detail || err.non_field_errors)) ?? 'Update failed';
-				toastStore.trigger({
-					message: typeof msg === 'string' ? msg : JSON.stringify(msg),
-					background: 'preset-tonal-error'
-				});
-				return false;
-			}
-			return true;
-		} catch (e) {
-			toastStore.trigger({
-				message: 'Network error updating asset relationship',
-				background: 'preset-tonal-error'
-			});
-			return false;
-		}
-	}
-
-	function currentParentsOf(childId: string): string[] {
-		// Reconstruct from current edges (in-folder) plus any external parents we don't see
-		const inFolder = edges.filter((e) => e.target === childId).map((e) => e.source);
-		const child = assets.find((a) => a.id === childId);
-		const external =
-			child?.parent_assets
-				?.map((p) => (typeof p === 'object' ? p.id : p))
-				.filter((pid) => !knownAssetIds.has(pid)) ?? [];
-		return [...inFolder, ...external];
-	}
-
 	async function handleConnect(connection: Connection) {
 		if (!connection.source || !connection.target) return;
-		const newParents = Array.from(
-			new Set([...currentParentsOf(connection.target), connection.source])
+		const source = connection.source;
+		const ok = await updateParents(connection.target, (parents) =>
+			Array.from(new Set([...parents, source]))
 		);
-		const ok = await patchParentAssets(connection.target, newParents);
 		if (!ok) {
 			// Revert: drop this edge from local state
 			edges = edges.filter(
@@ -261,6 +399,7 @@
 			);
 		} else {
 			toastStore.trigger({ message: 'Link saved', background: 'preset-tonal-success' });
+			void invalidateAll();
 		}
 	}
 
@@ -272,8 +411,10 @@
 			byTarget.get(e.target)!.add(e.source);
 		}
 		for (const [childId, removedSources] of byTarget) {
-			const remaining = currentParentsOf(childId).filter((p) => !removedSources.has(p));
-			const ok = await patchParentAssets(childId, remaining);
+			const ok = await updateParents(childId, (parents) =>
+				parents.filter((p) => !removedSources.has(p))
+			);
+			if (ok) void invalidateAll();
 			if (!ok) {
 				// Re-add removed edges to local state. `type: 'asset'` is required —
 				// defaultEdgeOptions only applies to edges created via onConnect, not to
@@ -287,6 +428,7 @@
 							source: src,
 							target: childId,
 							type: 'asset',
+							data: { crossDomain: !knownAssetIds.has(src) || !knownAssetIds.has(childId) },
 							markerEnd: {
 								type: MarkerType.ArrowClosed,
 								color: 'var(--color-surface-600)'
@@ -455,29 +597,18 @@
 		modalStore.trigger(modal);
 	}
 
-	setContext('assetBoard', {
-		showExternalLinks: (id: string) => {
-			const child = assets.find((a) => a.id === id);
-			const external =
-				child?.parent_assets?.filter((p) => {
-					const pid = typeof p === 'object' ? p.id : p;
-					return !knownAssetIds.has(pid);
-				}) ?? [];
-			toastStore.trigger({
-				message: `External parent links: ${external.length} (cross-domain editor coming later)`,
-				background: 'preset-tonal-warning'
-			});
-		},
+	setContext('assetGraph', {
+		unpinGhost,
 		renameAsset,
 		toggleAssetType,
 		confirmDeleteAsset,
 		deleteEdge: async (source: string, target: string) => {
 			// Same logic as ondelete, but for one specific edge selected via the UI button.
-			const remaining = currentParentsOf(target).filter((p) => p !== source);
-			const ok = await patchParentAssets(target, remaining);
+			const ok = await updateParents(target, (parents) => parents.filter((p) => p !== source));
 			if (ok) {
 				edges = edges.filter((e) => !(e.source === source && e.target === target));
 				toastStore.trigger({ message: 'Link removed', background: 'preset-tonal-success' });
+				void invalidateAll();
 			}
 		}
 	});
@@ -510,16 +641,49 @@
 		}}
 	>
 		<Background variant={BackgroundVariant.Dots} gap={20} />
-		<Controls showLock={false} />
+		<Controls showLock={false}>
+			<ControlButton onclick={applyLayout} title={m.tidyUp()} aria-label={m.tidyUp()}>
+				<i class="fa-solid fa-wand-magic-sparkles"></i>
+			</ControlButton>
+		</Controls>
 		<MiniMap />
 		<Panel position="top-right">
-			<button
-				type="button"
-				class="btn preset-filled-primary-500 text-sm shadow"
-				onclick={handleCreateAtCenter}
-			>
-				<i class="fa-solid fa-plus mr-1"></i>Create asset
-			</button>
+			<div class="flex flex-col items-end gap-2">
+				<div class="flex gap-2">
+					<button
+						type="button"
+						class="btn preset-tonal-warning text-sm shadow"
+						onclick={() => (searchOpen = !searchOpen)}
+					>
+						<i class="fa-solid fa-link mr-1"></i>Link external asset
+					</button>
+					<button
+						type="button"
+						class="btn preset-filled-primary-500 text-sm shadow"
+						onclick={handleCreateAtCenter}
+					>
+						<i class="fa-solid fa-plus mr-1"></i>Create asset
+					</button>
+				</div>
+				{#if searchOpen}
+					<div
+						class="w-80 bg-surface-50-950 border border-surface-300-700 rounded-base shadow-lg p-2"
+					>
+						<AutocompleteSelect
+							form={linkPicker.form}
+							field="asset"
+							optionsEndpoint="assets"
+							optionsLabelField="auto"
+							optionsInfoFields={{ fields: [{ field: 'type' }], classes: 'text-blue-500' }}
+							optionsExtraFields={[['folder', 'str']]}
+							lazy
+							portalDropdown
+							placeholder="Search assets in other domains…"
+							onChange={pickExternal}
+						/>
+					</div>
+				{/if}
+			</div>
 		</Panel>
 		<Panel position="top-left">
 			<div
@@ -530,7 +694,10 @@
 					class="w-full flex items-center justify-between px-3 py-2 font-semibold cursor-pointer hover:bg-surface-200-800 rounded-base"
 					aria-expanded={instructionsOpen}
 					aria-controls="asset-board-instructions"
-					onclick={() => (instructionsOpen = !instructionsOpen)}
+					onclick={() => {
+						instructionsOpen = !instructionsOpen;
+						saveInstructionsOpen(instructionsOpen);
+					}}
 				>
 					<span>
 						<i class="fa-solid fa-info-circle mr-1"></i>Instructions
@@ -548,12 +715,16 @@
 							<li>Drag bottom handle of one asset onto another to link it as a parent</li>
 							<li>Drag bottom handle onto empty canvas to create a child asset</li>
 							<li>Double-click empty canvas to create a free-standing asset</li>
-							<li>Double-click a node's name to rename it</li>
+							<li>Double-click a node to open its dependency map; use the pencil to rename it</li>
 							<li>
 								Click the <span class="font-semibold">PR/SP</span> pill to toggle the asset type
 							</li>
 							<li>Hover a node and click the trash icon to delete it (with cascade preview)</li>
 							<li>Click a link to select it, then click the × at its midpoint to unlink</li>
+							<li>
+								Dashed nodes live in other domains; link to them like any asset, or use
+								<span class="font-semibold">Link external asset</span> to bring one in
+							</li>
 							<li>Positions are saved per-domain in this browser only</li>
 						</ul>
 					</div>

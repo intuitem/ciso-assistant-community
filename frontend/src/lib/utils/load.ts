@@ -1,5 +1,6 @@
 import { BASE_API_URL, UUID_REGEX } from '$lib/utils/constants';
 import { formatSelectFieldData } from '$lib/utils/select-field';
+import { discardBody } from '$lib/utils/responses';
 export { formatSelectFieldData };
 import {
 	getModelInfo,
@@ -72,6 +73,7 @@ export const loadValidationFlowFormData = async ({
 						selectField
 					);
 				} else {
+					await discardBody(response);
 					console.error(`Failed to fetch data for ${selectField.field}: ${response.statusText}`);
 				}
 			})
@@ -87,6 +89,7 @@ export const loadDetail = async ({ event, model, id }) => {
 
 	const res = await event.fetch(endpoint);
 	if (!res.ok) {
+		await discardBody(res);
 		if (res.status === 404) {
 			// Check if focus mode is active
 			const focusFolderId = event.cookies.get('focus_folder_id');
@@ -271,6 +274,8 @@ export const loadDetail = async ({ event, model, id }) => {
 							if (typeof countData.count === 'number') {
 								relatedModels[e.urlModel].count = countData.count;
 							}
+						} else {
+							await discardBody(countRes);
 						}
 					} catch {
 						// Graceful degradation — leave count as undefined
@@ -295,6 +300,8 @@ export const loadDetail = async ({ event, model, id }) => {
 			const parentObject = await objectResponse.json();
 			const parentSchema = modelSchema(model.urlModel);
 			updateForm = await superValidate(parentObject, zod(parentSchema), { errors: false });
+		} else {
+			await discardBody(objectResponse);
 		}
 	}
 

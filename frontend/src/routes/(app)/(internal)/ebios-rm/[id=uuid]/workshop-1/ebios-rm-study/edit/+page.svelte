@@ -16,6 +16,7 @@
 		model={data.model}
 		context="ebiosRmStudy"
 		customFolder
+		customNameDescription
 		scopeFolder={data.data.folder}
 	/>
 </div>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { roundScore } from '$lib/utils/helpers';
 	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
 	import StackedBarsNormalized from '$lib/components/Chart/StackedBarsNormalized.svelte';
@@ -8,6 +9,7 @@
 	import { complianceResultColorMap } from '$lib/utils/constants';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
+	import ScorePair from '$lib/components/ComplianceAssessment/ScorePair.svelte';
 	import type { PageData } from './$types';
 
 	interface Props {
@@ -148,7 +150,7 @@
 						lineStyle: { width: 2.5 },
 						emphasis: { focus: 'series' },
 						yAxisIndex: 1,
-						data: timeline.map((t: any) => (t.score >= 0 ? t.score : null)),
+						data: timeline.map((t: any) => (t.score >= 0 ? roundScore(t.score) : null)),
 						itemStyle: { color: '#6366f1' },
 						symbol: 'circle',
 						symbolSize: 5
@@ -202,6 +204,8 @@
 			}
 		};
 	}
+
+	const shown = (value: number | null) => (value == null ? value : roundScore(value));
 </script>
 
 <div class="flex flex-col gap-5 pb-8">
@@ -450,35 +454,43 @@
 							scoredSections.some((s: any) => s.documentation_score !== null)}
 						<div class="mt-5 border-t border-surface-100-900 pt-5">
 							<div class="grid {showDocRadar ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1'} gap-5">
-								<div class="h-[400px]">
-									<RadarChart
-										name="section_scores_radar"
-										title={m.implementationScore()}
-										labels={scoredSections.map((s: any) => ({
-											name: (s.ref_id ? s.ref_id + ' ' : '') + s.name,
-											max: isSum ? baseMax * (s.total_weight || 1) : baseMax
-										}))}
-										values={scoredSections.map((s: any) => s.implementation_score)}
-										height="h-full"
-									/>
-								</div>
-								{#if showDocRadar}
-									{@const docScoredSections = scoredSections.filter(
-										(s: any) => s.documentation_score !== null
-									)}
-									<div class="h-[400px]">
-										<RadarChart
-											name="section_doc_scores_radar"
-											title={m.documentationScore()}
-											labels={docScoredSections.map((s: any) => ({
-												name: (s.ref_id ? s.ref_id + ' ' : '') + s.name,
-												max: isSum ? baseMax * (s.total_weight || 1) : baseMax
-											}))}
-											values={docScoredSections.map((s: any) => s.documentation_score)}
-											height="h-full"
-										/>
-									</div>
-								{/if}
+								<ScorePair>
+									{#snippet implementation()}
+										<div class="h-[400px]">
+											<RadarChart
+												name="section_scores_radar"
+												title={m.implementationScore()}
+												labels={scoredSections.map((s: any) => ({
+													name: (s.ref_id ? s.ref_id + ' ' : '') + s.name,
+													max: isSum ? baseMax * (s.total_weight || 1) : baseMax
+												}))}
+												values={scoredSections.map((s: any) => roundScore(s.implementation_score))}
+												height="h-full"
+											/>
+										</div>
+									{/snippet}
+									{#snippet documentation()}
+										{#if showDocRadar}
+											{@const docScoredSections = scoredSections.filter(
+												(s: any) => s.documentation_score !== null
+											)}
+											<div class="h-[400px]">
+												<RadarChart
+													name="section_doc_scores_radar"
+													title={m.documentationScore()}
+													labels={docScoredSections.map((s: any) => ({
+														name: (s.ref_id ? s.ref_id + ' ' : '') + s.name,
+														max: isSum ? baseMax * (s.total_weight || 1) : baseMax
+													}))}
+													values={docScoredSections.map((s: any) =>
+														roundScore(s.documentation_score)
+													)}
+													height="h-full"
+												/>
+											</div>
+										{/if}
+									{/snippet}
+								</ScorePair>
 							</div>
 						</div>
 					{/if}
@@ -492,10 +504,16 @@
 										{#if data.compliance_assessment.show_documentation_score}
 											<th class="pb-2 pr-4 text-right font-medium">{m.maturity()}</th>
 										{/if}
-										<th class="pb-2 pr-4 text-right font-medium">{m.implementationScore()}</th>
-										{#if data.compliance_assessment.show_documentation_score}
-											<th class="pb-2 pr-4 text-right font-medium">{m.documentationScore()}</th>
-										{/if}
+										<ScorePair>
+											{#snippet implementation()}
+												<th class="pb-2 pr-4 text-right font-medium">{m.implementationScore()}</th>
+											{/snippet}
+											{#snippet documentation()}
+												{#if data.compliance_assessment.show_documentation_score}
+													<th class="pb-2 pr-4 text-right font-medium">{m.documentationScore()}</th>
+												{/if}
+											{/snippet}
+										</ScorePair>
 									</tr>
 								</thead>
 								<tbody>
@@ -516,35 +534,41 @@
 													{#if section.maturity_score !== null}
 														<span
 															class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full bg-violet-50 text-violet-700 text-xs font-medium px-2 py-0.5"
-															>{section.maturity_score}</span
+															>{shown(section.maturity_score)}</span
 														>
 													{:else}
 														<span class="text-surface-400">&mdash;</span>
 													{/if}
 												</td>
 											{/if}
-											<td class="py-2.5 pr-4 text-right">
-												{#if section.implementation_score !== null}
-													<span
-														class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full bg-indigo-50 text-indigo-700 text-xs font-medium px-2 py-0.5"
-														>{section.implementation_score}</span
-													>
-												{:else}
-													<span class="text-surface-400">&mdash;</span>
-												{/if}
-											</td>
-											{#if data.compliance_assessment.show_documentation_score}
-												<td class="py-2.5 pr-4 text-right">
-													{#if section.documentation_score !== null}
-														<span
-															class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium px-2 py-0.5"
-															>{section.documentation_score}</span
-														>
-													{:else}
-														<span class="text-surface-400">&mdash;</span>
+											<ScorePair>
+												{#snippet implementation()}
+													<td class="py-2.5 pr-4 text-right">
+														{#if section.implementation_score !== null}
+															<span
+																class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full bg-indigo-50 text-indigo-700 text-xs font-medium px-2 py-0.5"
+																>{shown(section.implementation_score)}</span
+															>
+														{:else}
+															<span class="text-surface-400">&mdash;</span>
+														{/if}
+													</td>
+												{/snippet}
+												{#snippet documentation()}
+													{#if data.compliance_assessment.show_documentation_score}
+														<td class="py-2.5 pr-4 text-right">
+															{#if section.documentation_score !== null}
+																<span
+																	class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium px-2 py-0.5"
+																	>{shown(section.documentation_score)}</span
+																>
+															{:else}
+																<span class="text-surface-400">&mdash;</span>
+															{/if}
+														</td>
 													{/if}
-												</td>
-											{/if}
+												{/snippet}
+											</ScorePair>
 										</tr>
 									{/each}
 								</tbody>
@@ -892,10 +916,16 @@
 									{#if data.compliance_assessment.show_documentation_score}
 										<th class="pb-2 pr-4 text-right font-medium">{m.maturity()}</th>
 									{/if}
-									<th class="pb-2 pr-4 text-right font-medium">{m.implementationScore()}</th>
-									{#if data.compliance_assessment.show_documentation_score}
-										<th class="pb-2 pr-4 text-right font-medium">{m.documentationScore()}</th>
-									{/if}
+									<ScorePair>
+										{#snippet implementation()}
+											<th class="pb-2 pr-4 text-right font-medium">{m.implementationScore()}</th>
+										{/snippet}
+										{#snippet documentation()}
+											{#if data.compliance_assessment.show_documentation_score}
+												<th class="pb-2 pr-4 text-right font-medium">{m.documentationScore()}</th>
+											{/if}
+										{/snippet}
+									</ScorePair>
 								</tr>
 							</thead>
 							<tbody>
@@ -925,35 +955,41 @@
 												{#if group.maturity_score !== null}
 													<span
 														class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full bg-violet-50 text-violet-700 text-xs font-medium px-2 py-0.5"
-														>{group.maturity_score}</span
+														>{shown(group.maturity_score)}</span
 													>
 												{:else}
 													<span class="text-surface-400">&mdash;</span>
 												{/if}
 											</td>
 										{/if}
-										<td class="py-2.5 pr-4 text-right">
-											{#if group.implementation_score !== null}
-												<span
-													class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full bg-indigo-50 text-indigo-700 text-xs font-medium px-2 py-0.5"
-													>{group.implementation_score}</span
-												>
-											{:else}
-												<span class="text-surface-400">&mdash;</span>
-											{/if}
-										</td>
-										{#if data.compliance_assessment.show_documentation_score}
-											<td class="py-2.5 pr-4 text-right">
-												{#if group.documentation_score !== null}
-													<span
-														class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium px-2 py-0.5"
-														>{group.documentation_score}</span
-													>
-												{:else}
-													<span class="text-surface-400">&mdash;</span>
+										<ScorePair>
+											{#snippet implementation()}
+												<td class="py-2.5 pr-4 text-right">
+													{#if group.implementation_score !== null}
+														<span
+															class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full bg-indigo-50 text-indigo-700 text-xs font-medium px-2 py-0.5"
+															>{shown(group.implementation_score)}</span
+														>
+													{:else}
+														<span class="text-surface-400">&mdash;</span>
+													{/if}
+												</td>
+											{/snippet}
+											{#snippet documentation()}
+												{#if data.compliance_assessment.show_documentation_score}
+													<td class="py-2.5 pr-4 text-right">
+														{#if group.documentation_score !== null}
+															<span
+																class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium px-2 py-0.5"
+																>{shown(group.documentation_score)}</span
+															>
+														{:else}
+															<span class="text-surface-400">&mdash;</span>
+														{/if}
+													</td>
 												{/if}
-											</td>
-										{/if}
+											{/snippet}
+										</ScorePair>
 									</tr>
 								{/each}
 							</tbody>

@@ -74,18 +74,29 @@ interface Destination {
 	icon?: string;
 	/** For destinations with no sidebar entry to inherit a flag from. */
 	flag?: string;
+	/** The sidebar menu holding the entry, whose own flag can hide it as a whole. */
+	section?: string;
 	/** Carries the permission rules. */
 	nav?: NavItem;
 }
 
 type FeatureFlags = Record<string, boolean>;
 
-const sidebarDestinations: Destination[] = ((navData.items ?? []) as { items?: NavItem[] }[])
-	.flatMap((section) => section.items ?? [])
-	.filter((item): item is NavItem & { name: string; href: string } =>
-		Boolean(item?.name && item?.href)
-	)
-	.map((item) => ({ name: item.name, href: item.href, icon: item.fa_icon, nav: item }));
+const sidebarDestinations: Destination[] = (
+	(navData.items ?? []) as { name?: string; items?: NavItem[] }[]
+).flatMap((section) =>
+	(section.items ?? [])
+		.filter((item): item is NavItem & { name: string; href: string } =>
+			Boolean(item?.name && item?.href)
+		)
+		.map((item) => ({
+			name: item.name,
+			href: item.href,
+			icon: item.fa_icon,
+			section: section.name,
+			nav: item
+		}))
+);
 
 // Pages with no sidebar entry, so no permission rules to inherit: whatever the target's API
 // enforces must be restated as a `nav` rule, or the palette offers a link that answers 403.
@@ -134,6 +145,7 @@ function isVisible(
 ): boolean {
 	if (destination.nav && !canSeeNavItem(destination.nav, user)) return false;
 	if (destination.flag) return featureFlags[destination.flag] === true;
+	if (destination.section && visible[destination.section] === false) return false;
 	return visible[destination.name] !== false;
 }
 

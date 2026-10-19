@@ -31,6 +31,7 @@ from rest_framework.status import (
 from django.conf import settings
 
 from global_settings.models import GlobalSettings
+from core import mailer
 from core.models import Actor
 from core.utils import RoleCodename
 from .models import (
@@ -242,12 +243,20 @@ class CurrentUserView(views.APIView):
             content_type=Folder.ContentType.DOMAIN,
         ).values_list("id", flat=True)
 
-        domain_permissions = RoleAssignment.get_permissions_per_folder(
+        # Most folders share the same codenames (a recursive grant covers a whole
+        # subtree), so each distinct set is sent once and folders point to it by
+        # index: sending the sets inline cost O(folders x codenames) bytes.
+        permission_sets: list[list[str]] = []
+        set_indexes: dict[frozenset[str], int] = {}
+        domain_permissions: dict[str, int] = {}
+        for folder_id, codenames in RoleAssignment.get_permissions_per_folder(
             principal=request.user, is_recursive=True
-        )
-        domain_permissions = {
-            k: list(v) for k, v in domain_permissions.items()
-        }  # this what matters
+        ).items():
+            key = frozenset(codenames)
+            if key not in set_indexes:
+                set_indexes[key] = len(permission_sets)
+                permission_sets.append(sorted(key))
+            domain_permissions[folder_id] = set_indexes[key]
 
         res_data = {
             "id": request.user.id,
@@ -266,6 +275,7 @@ class CurrentUserView(views.APIView):
             "is_local": request.user.is_local,
             "is_sso": request.user.is_sso,
             "accessible_domains": [str(f) for f in accessible_domains],
+            "permission_sets": permission_sets,
             "domain_permissions": domain_permissions,
             "root_folder_id": Folder.get_root_folder().id,
             "preferences": request.user.get_preferences(),
@@ -314,7 +324,7 @@ class PasswordResetView(views.APIView):
     def post(self, request):
         email = request.data["email"]  # type: ignore
         associated_user = User.objects.filter(email__iexact=email).first()
-        if settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE:
+        if mailer.mailing_enabled():
             if associated_user is not None and associated_user.is_local:
                 try:
                     logger.info(

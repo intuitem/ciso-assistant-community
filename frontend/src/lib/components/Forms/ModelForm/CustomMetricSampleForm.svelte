@@ -3,6 +3,7 @@
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import { formFieldProxy } from 'sveltekit-superforms';
+	import { onMount } from 'svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
@@ -29,6 +30,17 @@
 	}: Props = $props();
 
 	const { value: valueFieldProxy, errors: valueErrors } = formFieldProxy(form, 'value');
+	const { value: timestampProxy } = formFieldProxy(form, 'timestamp');
+
+	// A new sample is for now, to the second: a metric keeps one sample per
+	// second, so two entries made at different moments never replace each other.
+	onMount(() => {
+		if (!object?.id && !$timestampProxy) {
+			const now = new Date();
+			now.setMilliseconds(0);
+			$timestampProxy = now.toISOString();
+		}
+	});
 
 	// Get full metric instance data from autocomplete cache (includes nested fields like metric_definition, evidences)
 	const metricInstanceCache = $derived.by(() => {
@@ -118,7 +130,7 @@
 	const maxTimestamp = $derived(() => {
 		const now = new Date();
 		now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-		return now.toISOString().slice(0, 16);
+		return now.toISOString().slice(0, 19);
 	});
 </script>
 
@@ -147,6 +159,7 @@
 	cacheLock={cacheLocks['timestamp']}
 	bind:cachedValue={formDataCache['timestamp']}
 	disabled={object.id}
+	seconds
 	max={maxTimestamp()}
 />
 

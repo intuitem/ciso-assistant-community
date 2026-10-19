@@ -39,10 +39,22 @@
 		tags={['assets', 'graph', 'canvas', 'prototype']}
 	/>
 	<Article
+		title="Asset Dependency Map"
+		desc="Focus on one asset and see everything it depends on and everything depending on it, across domains. Link, unlink and create assets in place."
+		link="/experimental/asset-map"
+		tags={['assets', 'graph', 'dependencies', 'prototype']}
+	/>
+	<Article
 		title="Analytics Export"
 		desc="Export all analytics dashboard data as a multi-sheet Excel file (Summary, Risk Levels, Compliance, Controls, Incidents) — ready to use in Power BI or any reporting tool."
 		link="/experimental/analytics-export"
 		tags={['analytics', 'export', 'xlsx', 'reporting']}
+	/>
+	<Article
+		title="Domain compliance tree"
+		desc="One framework tracked across the domain tree: each domain shows its own audit and its branch average, filterable by implementation group and section. Pick a framework, or explore with generated data."
+		link="/experimental/domain-tree"
+		tags={['PRO', 'audit', 'domains', 'analytics', 'prototype']}
 	/>
 	{#each experimentalExtras as extra (extra.link)}
 		<Article title={extra.title} desc={extra.desc} link={extra.link} tags={extra.tags} />

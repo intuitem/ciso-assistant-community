@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { m } from '$paraglide/messages';
 	import { ISSUE_COLUMNS, formatCell, type Issue } from './utils';
@@ -14,6 +15,9 @@
 	let search = $state('');
 
 	const columns = $derived(ISSUE_COLUMNS[issue.objType] ?? []);
+
+	const next = $derived(encodeURIComponent(page.url.pathname + page.url.search));
+	const withNext = (link: string) => (link.endsWith('/edit') ? `${link}?next=${next}` : link);
 
 	// Matches the name and every metadata column, as the cells render them.
 	const matches = $derived(
@@ -63,7 +67,7 @@
 			<tr>
 				<td class="text-surface-400-600 font-mono">{offset + index + 1}</td>
 				<td>
-					<Anchor class="anchor" href={row.link}>{row.name || m.xRaysView()}</Anchor>
+					<Anchor class="anchor" href={withNext(row.link)}>{row.name || m.xRaysView()}</Anchor>
 				</td>
 				{#each columns as column (column.key)}
 					<td class="text-surface-600-400">{formatCell(row.object?.[column.key], column.kind)}</td>

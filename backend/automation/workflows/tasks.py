@@ -3,12 +3,12 @@ from datetime import timedelta
 import structlog
 from auditlog.models import LogEntry
 from django.conf import settings
-from django.core.mail import get_connection
 from django.db import transaction
 from django.utils import timezone
 from huey import crontab
 from huey.contrib.djhuey import db_periodic_task, db_task
 
+from core import mailer
 from core.tasks import send_email_now
 
 # .engine / .models / .scheduling / .events imports stay function-scoped:
@@ -68,42 +68,50 @@ def send_email_task(
         return
 
     sent, failed = [], []
-    ssl_context = getattr(settings, "EMAIL_SSL_CONTEXT", None)
+    pending = list(recipients)
     try:
-        # One connection for the whole batch (not one handshake per
-        # recipient); individual messages so recipients don't see each other.
-        with get_connection(ssl_context=ssl_context) as connection:
-            for email in recipients:
-                try:
-                    send_email_now(subject, body, email, connection=connection)
-                    sent.append(email)
-                except Exception as e:
-                    # Raw exception text stays out of the run log (it can
-                    # carry SMTP server internals); detail goes to the
-                    # server log.
-                    logger.error(
-                        "send_email action delivery failure",
-                        recipient=email,
-                        instance_id=str(token.instance_id),
-                        error=e,
-                    )
-                    failed.append(email)
-                    # A transport-level failure leaves the shared handle
-                    # dead, and Django's open() short-circuits on a non-None
-                    # connection — every later recipient would fail on the
-                    # same socket. Recycle it so one bad send cannot starve
-                    # the rest.
-                    connection.close()
-                    connection.open()
+        # One session for the batch (not one handshake per recipient);
+        # individual messages so recipients don't see each other.
+        while pending:
+            # A failed send can leave the socket dead, so the rest of the
+            # batch gets a new session. It goes through open_connection, so
+            # a primary that died mid-batch hands them to the next mailer.
+            session_failed = False
+            try:
+                with mailer.open_connection() as connection:
+                    while pending:
+                        email = pending.pop(0)
+                        try:
+                            send_email_now(subject, body, email, connection=connection)
+                            sent.append(email)
+                        except Exception as e:
+                            # Raw exception text stays out of the run log (it
+                            # can carry SMTP server internals); detail goes to
+                            # the server log.
+                            logger.error(
+                                "send_email action delivery failure",
+                                recipient=email,
+                                instance_id=str(token.instance_id),
+                                error=e,
+                            )
+                            failed.append(email)
+                            # Leave the session through the exception so the
+                            # mailer records the failure in delivery health.
+                            session_failed = True
+                            raise
+            except Exception:
+                if not session_failed:
+                    raise
+                # The rest of the batch gets a new session.
     except Exception as e:
-        # The connection itself failed to open, recycle or close; recipients
-        # not already attempted never got their mail.
+        # No mailer could be opened; recipients not already attempted never
+        # got their mail.
         logger.error(
             "send_email action connection failure",
             instance_id=str(token.instance_id),
             error=e,
         )
-        failed += [r for r in recipients if r not in sent and r not in failed]
+        failed += pending
 
     try:
         if failed:
@@ -180,7 +188,13 @@ def ai_call_task(
     """Run one AI step's inference and hand the token back to the engine, in a
     task so a call that takes minutes never holds the instance-tree locks.
     get_llm_strict, not get_llm: a run must not proceed on StubLLM output."""
-    from chat.providers import NoLLMAvailable, get_llm_strict
+    from chat.providers import (
+        NoLLMAvailable,
+        TruncatedCompletion,
+        get_llm_strict,
+        unattended_max_output_tokens,
+        words_to_output_tokens,
+    )
 
     from .actions import AI_SYSTEM_PROMPT, AI_TEXT_MAX_CHARS
     from .engine import (
@@ -207,6 +221,9 @@ def ai_call_task(
                     context=text,
                     schema=schema,
                     system_prompt=AI_SYSTEM_PROMPT,
+                    # Nobody is watching this one, and a reasoning model with an
+                    # unbounded field has no stopping condition of its own.
+                    max_output_tokens=unattended_max_output_tokens(),
                 )
                 try:
                     output = _parse_ai_object(completion, schema or {})
@@ -227,6 +244,9 @@ def ai_call_task(
                 prompt=f"{prompt}\n\nAnswer in at most {max_words} words.",
                 context=text,
                 system_prompt=AI_SYSTEM_PROMPT,
+                # The word budget is the author's control; the token ceiling
+                # must sit above it or a long draft is cut with nothing said.
+                max_output_tokens=words_to_output_tokens(max_words),
             )
             output = {"text": (completion or "").strip()[:AI_TEXT_MAX_CHARS]}
         if output is not None and truncated:
@@ -240,6 +260,16 @@ def ai_call_task(
             error=e,
         )
         failure = f"{label}: no AI provider is reachable"
+    except TruncatedCompletion as e:
+        # Our own ceiling and our own wording, so it is safe to show and says
+        # the one thing that matters: the model did not stop on its own.
+        logger.warning(
+            "AI action output hit the token ceiling",
+            instance_id=str(token.instance_id),
+            action=label,
+            error=e,
+        )
+        failure = f"{label}: {e}"
     except Exception as e:
         # Provider errors stringify with the endpoint URL, and a key can ride
         # in a header: controlled message to the run log, detail to the server.

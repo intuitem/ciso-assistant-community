@@ -13,6 +13,7 @@ REFERENCEABLE = {
     "vulnerability": {"model": "core.Vulnerability", "label": "name"},
     "perimeter": {"model": "core.Perimeter", "label": "name"},
     "entity": {"model": "tprm.Entity", "label": "name"},
+    "processing": {"model": "privacy.Processing", "label": "name"},
 }
 
 
@@ -49,14 +50,27 @@ def _queryset(entry, folder, user=None):
     return qs.filter(Q(id__in=viewable) | Q(folder=folder))
 
 
-def options_for(question, folder, search="", limit=50, user=None):
+def options_for(question, folder, search="", limit=50, user=None, subject=None):
+    """`config.subject_field` names the subject's relation holding objects of this
+    model (a processing's `associated_controls`): those come first, flagged."""
     key, entry, _multiple = config_for(question)
     qs = _queryset(entry, folder, user)
     label_field = entry["label"]
     if search:
         qs = qs.filter(**{f"{label_field}__icontains": search})
-    rows = qs.order_by(label_field)[:limit]
-    return {"model": key, "results": [_row(o, label_field) for o in rows]}
+    config = question.config if isinstance(question.config, dict) else {}
+    related = getattr(subject, config.get("subject_field") or "", None)
+    # Only a relation to this very model: the name comes from the library.
+    ours = (
+        qs.filter(pk__in=related.all())
+        if getattr(related, "model", None) is qs.model
+        else qs.none()
+    )
+    first = list(ours.order_by(label_field)[:limit])
+    rest = qs.exclude(pk__in=[o.pk for o in first]).order_by(label_field)
+    results = [{**_row(o, label_field), "on_subject": True} for o in first]
+    results += [_row(o, label_field) for o in rest[: limit - len(first)]]
+    return {"model": key, "results": results}
 
 
 def _row(obj, label_field):
@@ -118,3 +132,25 @@ def labels_for(question, folder, ids, user=None):
         else {"id": i, "label": i, "folder": None}
         for i in ids
     ]
+
+
+def subject_question_error(quick_form: dict) -> str | None:
+    """Why a form document's `subject_question_urn` cannot name a subject, or
+    None. It must point at a single-object reference question of the form."""
+    urn = str(quick_form.get("subject_question_urn") or "").lower()
+    if not urn:
+        return None
+    for page in quick_form.get("pages") or []:
+        for q_urn, question in (page.get("questions") or {}).items():
+            if str(q_urn).lower() != urn:
+                continue
+            question = question or {}
+            config = question.get("config") or {}
+            if question.get("type") != "object_reference":
+                return "subject_question_urn must point at an object reference question"
+            if config.get("multiple"):
+                return "subject_question_urn must point at a single-object question"
+            if config.get("model") not in REFERENCEABLE:
+                return "subject_question_urn points at an unknown reference model"
+            return None
+    return "subject_question_urn does not match any question of the form"

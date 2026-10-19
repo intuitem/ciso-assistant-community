@@ -24,6 +24,8 @@ A variable is a named value with a type and a default. Every run starts with the
 
 Type a **Key**, pick a type, click **+**. Keys are identifiers: letters, digits and underscores, starting with a letter or underscore. `now`, `today` and `payload` are reserved.
 
+Each variable has a **Default** field under its name. It is the value every run starts with, and what the Compute preview uses before any run exists. Leave it empty for no default. A default must fit the variable's type; publishing refuses one that does not.
+
 You can also create a variable where you need it: the variable select of a condition offers **New variable…**, an incoming-data mapping pointing at an unknown key shows a **Create** button.
 
 ### Where values come from
@@ -35,6 +37,7 @@ You can also create a variable where you need it: the variable select of a condi
 | **Save results to variables** on a step | After that step runs |
 | A **Set variables** step | When it runs |
 | A **Date offset** step with **Store the result in** | When it runs |
+| A **Compute** step | When it runs |
 | **Run with variables** | At run start, for one manual run |
 
 ### What variables are for

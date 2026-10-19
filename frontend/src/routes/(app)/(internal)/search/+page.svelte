@@ -40,6 +40,11 @@
 			icon: 'fa-solid fa-gears',
 			color: '#64748b'
 		},
+		'document-containers': {
+			label: 'documents',
+			icon: 'fa-solid fa-file-lines',
+			color: '#0891b2'
+		},
 		evidences: { label: 'evidences', icon: 'fa-solid fa-file-circle-check', color: '#22c55e' },
 		'risk-acceptances': {
 			label: 'riskAcceptances',
@@ -78,6 +83,22 @@
 		processings: { label: 'processings', icon: 'fa-solid fa-gavel', color: '#a855f7' },
 		'data-breaches': { label: 'dataBreaches', icon: 'fa-solid fa-unlock', color: '#dc2626' },
 		'right-requests': { label: 'rightRequests', icon: 'fa-solid fa-hand', color: '#f97316' },
+		projects: { label: 'projects', icon: 'fa-solid fa-diagram-project', color: '#0284c7' },
+		'organisation-objectives': {
+			label: 'organisationObjectives',
+			icon: 'fa-solid fa-bullseye',
+			color: '#16a34a'
+		},
+		'organisation-issues': {
+			label: 'organisationIssues',
+			icon: 'fa-solid fa-briefcase',
+			color: '#ca8a04'
+		},
+		'metric-instances': {
+			label: 'metricInstances',
+			icon: 'fa-solid fa-chart-line',
+			color: '#2563eb'
+		},
 		'business-impact-analysis': {
 			label: 'businessImpactAnalysis',
 			icon: 'fa-solid fa-arrows-to-eye',

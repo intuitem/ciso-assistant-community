@@ -1,4 +1,7 @@
 {
+	"flagForChangeRequest": "Değişiklik için işaretle",
+	"removeChangeRequestFlag": "İşareti kaldır",
+	"itemsFlaggedForChanges": "değişiklik için işaretlendi",
 	"manageMembers": "Üyeleri yönet",
 	"addMembers": "Üye ekle",
 	"removeFromGroup": "Gruptan çıkar",
@@ -668,6 +671,7 @@
 	"libraryLoadingError": "Kütüphanenizi yüklerken bir hata oluştu",
 	"processingError": "İşleme hatası",
 	"libraryAlreadyLoadedError": "Bu kütüphane zaten yüklü",
+	"libraryOutdatedError": "Bu kütüphanenin daha yeni bir sürümü zaten kayıtlı. İçe aktarmak için dosyanızda daha yüksek bir \"version\" belirtin.",
 	"invalidLibraryFileError": "Geçersiz kütüphane dosyası. Lütfen formatın doğru olduğundan emin olun.",
 	"taintedFormMessage": "Bu sayfadan ayrılmak istiyor musunuz? Yaptığınız değişiklikler kaydedilmemiş olabilir.",
 	"riskScenariosStatus": "Risk senaryoları durumu",
@@ -678,7 +682,6 @@
 	"attemptToDeleteOnlyAdminAccountError": "Uygulamanızın tek yönetici hesabını silemezsiniz.",
 	"attemptToRemoveOnlyAdminUserGroup": "Uygulamanın tek yönetici kullanıcısını yönetici kullanıcı grubundan kaldıramazsınız.",
 	"attemptToRemoveSelfFromDomainAdminGroup": "Kendinizi bir alan yöneticisi grubundan çıkaramazsınız. Başka bir yöneticiden bunu yapmasını isteyin.",
-	"scoringHelpText": "Puanlamayı etkinleştirmek için işaretleyin",
 	"overrideScore": "Puanı geçersiz kıl",
 	"overrideScoreHelpText": "Puanı elle sabitleyin ve yanıtlardan yeniden hesaplanmasını durdurun",
 	"automaticScore": "Otomatik puan",
@@ -1533,7 +1536,6 @@
 	"expirationDate": "Sona erme tarihi",
 	"expirationDateIsInThePastWarning": "Girilen sona erme tarihi geçmişte",
 	"filterBy": "Filtrele",
-	"demoDataAlreadyImported": "Demo verileri zaten içe aktarıldı. Mevcut DEMO etki alanınızı silin veya yeniden adlandırın.",
 	"finding": "Bulgular",
 	"findings": "Bulgular",
 	"associatedFindings": "İlişkili bulgular",
@@ -2365,5 +2367,7 @@
 	"attributeMappingGroups": "Grup özniteliği eşlemesi",
 	"attributeMappingGroupsHelpText": "Kullanıcının IdP grup üyeliklerini taşıyan hak talebi (claim) adı/adları. Burada bulunan gruplar her girişte IdP gruplarıyla senkronize edilir ve bir yöneticinin eşlediği CISO Assistant kullanıcı gruplarını verir.",
 	"jitProvisioning": "SSO otomatik sağlama (JIT)",
-	"jitProvisioningDescription": "İlk SSO girişinde hesapların otomatik olarak oluşturulmasını ve IdP grup üyeliklerinin senkronize edilmesini, SCIM gerektirmeden etkinleştirir."
+	"jitProvisioningDescription": "İlk SSO girişinde hesapların otomatik olarak oluşturulmasını ve IdP grup üyeliklerinin senkronize edilmesini, SCIM gerektirmeden etkinleştirir.",
+	"includeNotApplicableRequirements": "Uygulanamaz gereksinimleri dahil et",
+	"excludeNotApplicableRequirements": "Uygulanamaz gereksinimleri hariç tut"
 }

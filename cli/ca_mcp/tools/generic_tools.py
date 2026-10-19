@@ -34,6 +34,7 @@ OBJECTS = {
     "incidents": "incidents",
     "perimeters": "perimeters",
     "policies": "policies",
+    "reference_controls": "reference-controls",
     "public_documents": "public-documents",
     "requirement_assessments": "requirement-assessments",
     "requirement_nodes": "requirement-nodes",
@@ -43,6 +44,7 @@ OBJECTS = {
     "security_exceptions": "security-exceptions",
     "task_templates": "task-templates",
     "task_nodes": "task-nodes",
+    "terminologies": "terminologies",
     "threats": "threats",
     "timeline_entries": "timeline-entries",
     "vulnerabilities": "vulnerabilities",
@@ -51,6 +53,7 @@ OBJECTS = {
     "entities": "entities",
     "entity_assessments": "entity-assessments",
     "solutions": "solutions",
+    "representatives": "representatives",
     # questionnaires
     "answers": "answers",
     "questions": "questions",

@@ -115,7 +115,9 @@ def main() -> int:
             )
             return 2
 
-    nodes = data["objects"]["framework"]["requirement_nodes"]
+    objects = data["objects"]
+    framework = (objects.get("frameworks") or [None])[0] or objects["framework"]
+    nodes = framework["requirement_nodes"]
     by_urn = {n["urn"]: n for n in nodes}
 
     urns_added = 0

@@ -1,4 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { discardBody } from '$lib/utils/responses';
 import { error } from '@sveltejs/kit';
 import type { Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
@@ -15,6 +16,7 @@ const withFallback = async (
 ) => {
 	const res = await fetch(primary, init);
 	if (res.status !== 403 && res.status !== 404) return { res, ownSurface: false };
+	await discardBody(res);
 	return { res: await fetch(fallback, init), ownSurface: true };
 };
 
@@ -25,13 +27,28 @@ export const load = (async ({ fetch, params }) => {
 		withFallback(fetch, reviewer, own),
 		withFallback(fetch, `${reviewer}content/`, `${own}content/`)
 	]);
-	if (!responseRes.res.ok) error(responseRes.res.status === 404 ? 404 : 403, 'Request not found');
+	if (!responseRes.res.ok) {
+		await discardBody(responseRes.res, contentRes.res);
+		error(responseRes.res.status === 404 ? 404 : 403, 'Request not found');
+	}
 	const response = await responseRes.res.json();
 	// Supervised actions are a reviewer's affordance; a requester's call 403s and the
 	// list is simply empty for them.
 	const actionsRes = await fetch(`${reviewer}suggested-actions/`);
+	// What accepting would write; only meaningful while a decision is pending.
+	const deciding = response.status === 'submitted' || response.status === 'in_review';
+	const previewRes = deciding ? await fetch(`${reviewer}accept-preview/`) : null;
+	const acceptPreview =
+		previewRes && previewRes.ok
+			? await previewRes.json()
+			: previewRes
+				? await discardBody(previewRes).then(() => [])
+				: [];
 	return {
-		suggestedActions: actionsRes.ok ? await actionsRes.json() : [],
+		acceptPreview,
+		suggestedActions: actionsRes.ok
+			? await actionsRes.json()
+			: await discardBody(actionsRes).then(() => []),
 		URLModel: 'quick-form-responses',
 		response,
 		content: await contentRes.res.json(),
@@ -64,7 +81,7 @@ export const actions: Actions = {
 		return { status: res.status, body: await res.json() };
 	},
 	setStatus: async (event) => {
-		const { id, status, observation, resolution } = await event.request.json();
+		const { id, status, observation, resolution, overrides } = await event.request.json();
 		// The requester's only transition is submit; every other one is the reviewer's.
 		const fallback =
 			status === 'submitted'
@@ -74,7 +91,7 @@ export const actions: Actions = {
 			event.fetch,
 			`${BASE_API_URL}/quick-form-responses/${id}/set-status/`,
 			fallback,
-			json({ status, observation, resolution })
+			json({ status, observation, resolution, overrides })
 		);
 		return { status: res.status, body: await res.json() };
 	},

@@ -65,7 +65,7 @@
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
 	import type { FormDataShape } from '$lib/utils/schemas';
-	import { loadTableData } from './handler';
+	import { getParams, loadTableData } from './handler';
 	import Pagination from './Pagination.svelte';
 	import RowCount from './RowCount.svelte';
 	import RowsPerPage from './RowsPerPage.svelte';
@@ -82,7 +82,8 @@
 		tableHandlers,
 		tableRefreshers,
 		tableStates,
-		tableColumnStates
+		tableColumnStates,
+		tableSortStates
 	} from '$lib/utils/stores';
 	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
@@ -123,6 +124,12 @@
 		// inbox's read flag), so this is separable from `disableEdit` -- which it
 		// defaults to, leaving existing callers unaffected.
 		disableBatchEdit?: boolean;
+		/** Columns the backend cannot meaningfully ORDER BY (computed, or stored
+		 *  in a shape whose order means nothing), so the header must not offer
+		 *  a sort. Defaults to the resolved model's
+		 *  `ModelMapEntry.unsortableColumns`, so every caller gets it; pass this
+		 *  only to override that per table. */
+		unsortableColumns?: string[];
 		disableDelete?: boolean;
 		disableView?: boolean;
 		identifierField?: string;
@@ -144,6 +151,7 @@
 		expectedCount?: number;
 		loading?: boolean;
 		onFilterChange?: (filters: Record<string, any>) => void;
+		onQueryChange?: (query: string) => void;
 		quickFilters?: import('svelte').Snippet<[{ [key: string]: any }, typeof _form, () => void]>;
 		optButton?: import('svelte').Snippet;
 		selectButton?: import('svelte').Snippet;
@@ -187,6 +195,7 @@
 		disableCreate = false,
 		disableEdit = false,
 		disableBatchEdit = undefined,
+		unsortableColumns = undefined,
 		disableDelete = false,
 		disableView = false,
 		identifierField = 'id',
@@ -212,6 +221,7 @@
 		expectedCount = undefined,
 		loading = false,
 		onFilterChange = () => {},
+		onQueryChange = () => {},
 		quickFilters,
 		optButton,
 		selectButton,
@@ -328,7 +338,7 @@
 	 * Open the object a row points at, rather than the row itself. Returns true when it
 	 * handled the click. The PATCH is fire-and-forget so navigation never waits on it.
 	 */
-	function followRowNavigation(rowMetaData: Record<string, any>): boolean {
+	function followRowNavigation(rowMetaData: Record<string, any>, newTab: boolean): boolean {
 		const nav = listViewFields[URLModel]?.rowNavigation;
 		if (!nav) return false;
 
@@ -354,7 +364,10 @@
 			return true;
 		}
 
-		goto(`/${targetModel}/${targetId}`, { breadcrumbAction: 'push' });
+		if (newTab) {
+			window.open(`/${targetModel}/${targetId}`, '_blank', 'noopener');
+			marked.finally(() => handler.invalidate());
+		} else goto(`/${targetModel}/${targetId}`, { breadcrumbAction: 'push' });
 		return true;
 	}
 
@@ -365,7 +378,14 @@
 		const rowMetaData = $rows[rowIndex].meta;
 		if (!rowMetaData[identifierField] || !URLModel) return;
 
-		if (followRowNavigation(rowMetaData)) return;
+		const newTab = event.metaKey || event.ctrlKey;
+		if (followRowNavigation(rowMetaData, newTab)) return;
+
+		const detailURL = `/${URLModel}/${rowMetaData[identifierField]}${detailQueryParameter}`;
+		if (newTab) {
+			window.open(detailURL, '_blank', 'noopener');
+			return;
+		}
 
 		const preferredLabel =
 			URLModel === 'reference-controls' ? rowMetaData.name || rowMetaData.ref_id : undefined;
@@ -377,7 +397,7 @@
 			rowMetaData.label ||
 			rowMetaData[identifierField];
 
-		goto(`/${URLModel}/${rowMetaData[identifierField]}${detailQueryParameter}`, {
+		goto(detailURL, {
 			label,
 			breadcrumbAction: 'push'
 		});
@@ -463,6 +483,10 @@
 			return currentLoad;
 		};
 		handler.onChange((state: State) => {
+			const query = getParams(state);
+			query.delete('offset');
+			query.delete('limit');
+			onQueryChange(query.toString());
 			inFlight += 1;
 			// Per request, so a failure cannot mask a success that overlapped it.
 			let failed = false;
@@ -499,13 +523,29 @@
 		});
 	}
 
+	function applySavedSort() {
+		const saved = $tableSortStates[filterStoreKey];
+		const sort = saved ? { identifier: saved.orderBy, direction: saved.direction } : orderBy;
+		if (!sort) handler.getSort().set({});
+		else if (sort.direction === 'asc') handler.sortAsc(sort.identifier);
+		else handler.sortDesc(sort.identifier);
+	}
+
 	onMount(() => {
-		if (orderBy) {
-			orderBy.direction === 'asc'
-				? handler.sortAsc(orderBy.identifier)
-				: handler.sortDesc(orderBy.identifier);
-		}
+		applySavedSort();
+		const unsubscribeSort = handler.getSort().subscribe(({ orderBy: key, direction }) => {
+			if (!key || !direction) return;
+			const next = { ...$tableSortStates };
+			if (key === orderBy?.identifier && direction === orderBy?.direction) {
+				if (!(filterStoreKey in next)) return;
+				delete next[filterStoreKey];
+			} else {
+				next[filterStoreKey] = { orderBy: String(key), direction };
+			}
+			$tableSortStates = next;
+		});
 		return () => {
+			unsubscribeSort();
 			if (hasRemoteSource)
 				tableRefreshers.update((r) => {
 					delete r[baseEndpoint];
@@ -535,80 +575,66 @@
 	// A filter emits one query param per key by default; `params` lets one widget drive several
 	// (a date range emits both bounds).
 	const paramsOf = (field: string): string[] => filters[field]?.params ?? [field];
-	// Only persist filters on standalone list pages, not embedded sub-tables
-	const isStandaloneTable = hasRemoteSource && baseEndpoint === `/${URLModel}`;
-	const filterStoreKey = `${page.url.pathname}::${baseEndpoint}`;
-	const storedFilters = isStandaloneTable ? ($tableFilterStates[filterStoreKey] ?? {}) : {};
-	// Check if any filter-related URL params exist
-	const hasUrlFilterParams = filteredFields.some((field) =>
-		paramsOf(field).some((param: string) => page.url.searchParams.getAll(param).length > 0)
-	);
-	const filterValues: { [key: string]: any } = $state(
-		Object.fromEntries(
+	// Standalone list pages only: offer the column selector (embedded tables pass
+	// a curated `fields` prop) and sync filters with the URL.
+	const isStandaloneTable = $derived(hasRemoteSource && baseEndpoint === `/${URLModel}`);
+	// Embedded tables share the page URL with sibling tables (DetailView keeps
+	// visited tabs mounted) and their filter names overlap (status, owner, ...):
+	// syncing them would leak one table's filters into another. They persist
+	// through the filter store only.
+	const syncFiltersToUrl = $derived(isStandaloneTable);
+	// Unique per parent object + tab (baseEndpoint carries the parent id).
+	// $derived so it updates when this instance is reused for a different
+	// object (DetailView.svelte keys tabs by model name, not by parent id).
+	const filterStoreKey = $derived(`${page.url.pathname}::${baseEndpoint}`);
+	// Order-insensitive fingerprint of one field's selection. Values are
+	// `{ value, param? }` objects or bare strings (defaultFilters allows both).
+	const filterFingerprint = (field: string, values: any[] = []) =>
+		values
+			.map((v) =>
+				typeof v === 'object' && v !== null ? `${v.param ?? field}=${v.value}` : `${field}=${v}`
+			)
+			.sort()
+			.join('&');
+	const isDefaultFilterState = (state: Record<string, any[]>) =>
+		filteredFields.every(
+			(field) =>
+				filterFingerprint(field, state[field]) === filterFingerprint(field, defaultFilters[field])
+		);
+
+	function seedFilterValues() {
+		const stored = $tableFilterStates[filterStoreKey] ?? {};
+		const urlParams = syncFiltersToUrl ? page.url.searchParams : new URLSearchParams();
+		// Check if any filter-related URL params exist
+		const hasUrlFilterParams = filteredFields.some((field) =>
+			paramsOf(field).some((param: string) => urlParams.getAll(param).length > 0)
+		);
+		return Object.fromEntries(
 			filteredFields.map((field: string) => {
 				const urlValues = paramsOf(field).flatMap((param: string) =>
-					page.url.searchParams.getAll(param).map((value) => ({ value, param }))
+					urlParams.getAll(param).map((value) => ({ value, param }))
 				);
 				if (urlValues.length > 0) return [field, urlValues];
 				// Restore persisted filters only when no URL filter params exist at all
-				if (!hasUrlFilterParams && field in storedFilters) {
-					return [field, storedFilters[field] ?? []];
+				if (!hasUrlFilterParams && field in stored) {
+					return [field, stored[field] ?? []];
 				}
 				const defaultValue = defaultFilters[field] || [];
 				return [field, defaultValue];
 			})
-		)
-	);
+		);
+	}
+
+	const filterValues: { [key: string]: any } = $state(seedFilterValues());
 	$effect(() => onFilterChange(filterValues));
 
 	run(() => {
 		hideFilters = hideFilters || !Object.entries(filters).some(([_, filter]) => !filter?.hide);
 	});
 
-	$effect(() => {
-		for (const field of filteredFields) {
-			const finalFilterValue = overrideFilters[field] || filterValues[field] || [];
-
-			const buckets: Record<string, any> = Object.fromEntries(
-				paramsOf(field).map((param: string) => [param, []])
-			);
-			for (const v of finalFilterValue) {
-				(buckets[v.param ?? field] ??= []).push(v.value);
-			}
-			for (const [param, values] of Object.entries(buckets)) {
-				handler.filter(values, param);
-				page.url.searchParams.delete(param);
-				values.forEach((value: string) => page.url.searchParams.append(param, value));
-			}
-		}
-		history.replaceState(history.state, '', page.url.pathname + page.url.search);
-		// Sync the current crumb's href with the new filter query.
-		breadcrumbs.update((crumbs) => {
-			if (crumbs.length < 2) return crumbs;
-			const last = crumbs[crumbs.length - 1];
-			const lastPath = last.href?.split('?')[0];
-			if (lastPath !== page.url.pathname) return crumbs;
-			const newHref = page.url.pathname + page.url.search;
-			if (last.href === newHref) return crumbs;
-			const next = crumbs.slice();
-			next[next.length - 1] = { ...last, href: newHref };
-			return next;
-		});
-		// untracked so resetFilters can delete the entry without retriggering us
-		if (isStandaloneTable) {
-			untrack(() => {
-				$tableFilterStates[filterStoreKey] = { ...filterValues };
-			});
-		}
-		if (hasRemoteSource)
-			setTimeout(() => {
-				handler.invalidate();
-			}, 10);
-	});
-
 	const filterInitialData: Record<string, string[]> = {};
-	// convert URL search params and default filters to filter initial data
-	for (const [key, value] of page.url.searchParams) {
+	// convert URL search params (standalone only) and seeded filters to filter initial data
+	for (const [key, value] of syncFiltersToUrl ? page.url.searchParams : []) {
 		filterInitialData[key] ??= [];
 		filterInitialData[key].push(value);
 	}
@@ -631,6 +657,86 @@
 		resetForm: false,
 		taintedMessage: false,
 		validationMethod: 'auto'
+	});
+
+	// Reseed + sync/persist in one effect: a scope change (instance reused for
+	// a different object) must finish reseeding before anything is written
+	// under the new key -- two separate effects can't guarantee that order.
+	let previousFilterStoreKey = filterStoreKey;
+	$effect(() => {
+		if (filterStoreKey !== previousFilterStoreKey) {
+			previousFilterStoreKey = filterStoreKey;
+			untrack(applySavedSort);
+			const fresh = seedFilterValues();
+			Object.assign(filterValues, fresh);
+			_form.form.update((data) => ({
+				...data,
+				...Object.fromEntries(
+					Object.entries(fresh).map(([f, v]: [string, any]) => [
+						f,
+						(v ?? []).map((x: any) => x.value)
+					])
+				)
+			}));
+		}
+
+		for (const field of filteredFields) {
+			const finalFilterValue = overrideFilters[field] || filterValues[field] || [];
+
+			const buckets: Record<string, any> = Object.fromEntries(
+				paramsOf(field).map((param: string) => [param, []])
+			);
+			for (const v of finalFilterValue) {
+				(buckets[v.param ?? field] ??= []).push(v.value);
+			}
+			for (const [param, values] of Object.entries(buckets)) {
+				handler.filter(values, param);
+				if (!syncFiltersToUrl) continue;
+				page.url.searchParams.delete(param);
+				values.forEach((value: string) => page.url.searchParams.append(param, value));
+			}
+		}
+		if (syncFiltersToUrl) {
+			history.replaceState(history.state, '', page.url.pathname + page.url.search);
+			// Sync the current crumb's href with the new filter query.
+			breadcrumbs.update((crumbs) => {
+				if (crumbs.length < 2) return crumbs;
+				const last = crumbs[crumbs.length - 1];
+				const lastPath = last.href?.split('?')[0];
+				if (lastPath !== page.url.pathname) return crumbs;
+				const newHref = page.url.pathname + page.url.search;
+				if (last.href === newHref) return crumbs;
+				const next = crumbs.slice();
+				next[next.length - 1] = { ...last, href: newHref };
+				return next;
+			});
+		}
+		// untracked so resetFilters can delete the entry without retriggering us.
+		// A default selection isn't stored: seeding falls back to defaultFilters
+		// anyway, so untouched tables leave no entry behind in localStorage.
+		untrack(() => {
+			if (!isDefaultFilterState(filterValues)) {
+				$tableFilterStates[filterStoreKey] = { ...filterValues };
+			} else if (filterStoreKey in $tableFilterStates) {
+				const next = { ...$tableFilterStates };
+				delete next[filterStoreKey];
+				$tableFilterStates = next;
+			}
+		});
+		if (hasRemoteSource)
+			setTimeout(() => {
+				handler.invalidate();
+			}, 10);
+	});
+
+	// Refetch when the page reloads its data (invalidateAll() swaps page.url for a
+	// new URL object). Standalone tables get this from syncing filters with the
+	// URL above; embedded ones no longer touch it, so track it here.
+	let pageUrlSeen = false;
+	$effect(() => {
+		page.url;
+		if (!pageUrlSeen) return void (pageUrlSeen = true);
+		if (hasRemoteSource && !syncFiltersToUrl) untrack(() => handler.invalidate());
 	});
 
 	$effect(() => {
@@ -783,12 +889,26 @@
 			}
 			return data;
 		});
-		if (!isStandaloneTable) return;
 		await tick();
 		const next = { ...$tableFilterStates };
 		delete next[filterStoreKey];
 		$tableFilterStates = next;
+		if (!(filterStoreKey in $tableSortStates)) return;
+		const nextSort = { ...$tableSortStates };
+		delete nextSort[filterStoreKey];
+		$tableSortStates = nextSort;
+		applySavedSort();
+		handler.invalidate();
 	}
+
+	const APPLIED_CONTROL_STATUS_PRESETS: Record<string, string> = {
+		to_do: 'preset-tonal-primary',
+		in_progress: 'preset-tonal-warning',
+		on_hold: 'preset-tonal-secondary',
+		active: 'preset-tonal-success',
+		degraded: 'preset-tonal-error',
+		deprecated: 'preset-tonal-surface'
+	};
 
 	let classesHexBackgroundText = $derived((backgroundHexColor: string) => {
 		// The badge background is a fixed hex color, so the text must be a fixed color too
@@ -813,15 +933,10 @@
 		'user_groups'
 	];
 
-	// Computed in Python from related rows, so there is no column for the backend to
-	// ORDER BY: DRF drops the term and the click does nothing. Better not to offer it.
-	const UNSORTABLE_COMPUTED_COLUMNS = ['completion', 'review_progress', 'schedule'];
-
-	// Function to check if a column is multi-value and should not be sortable
-	const isMultiValueColumn = (key: string): boolean => {
+	const isUnsortableColumn = (key: string): boolean => {
 		return (
 			MULTI_VALUE_COLUMNS.includes(key) ||
-			UNSORTABLE_COMPUTED_COLUMNS.includes(key) ||
+			(unsortableColumns ?? model?.unsortableColumns ?? []).includes(key) ||
 			(tableSource.body.length > 0 && Array.isArray(tableSource.body[0][key]))
 		);
 	};
@@ -998,7 +1113,7 @@
 												{/key}
 											{/if}
 										{/each}
-										{#if filterCount > 0}
+										{#if filterCount > 0 || filterStoreKey in $tableSortStates}
 											<div class="flex justify-end pt-1">
 												<button
 													type="button"
@@ -1080,7 +1195,7 @@
 					</th>
 				{/if}
 				{#each renderColumnKeys as key (key)}
-					<Th {handler} orderBy={isMultiValueColumn(key) ? undefined : key} class={regionHeadCell}
+					<Th {handler} orderBy={isUnsortableColumn(key) ? undefined : key} class={regionHeadCell}
 						>{safeTranslate(tableSource.head[key])}</Th
 					>
 				{/each}
@@ -1178,6 +1293,14 @@
 																			{@const itemHref = getRelatedFieldHref(key, val.id, {
 																				fallbackToDashedField: true
 																			})}
+																			{#if key === 'applied_controls' && val.status && val.status !== '--'}
+																				<span
+																					class="badge text-xs {APPLIED_CONTROL_STATUS_PRESETS[
+																						val.status
+																					] ?? 'preset-tonal-surface'}"
+																					>{safeTranslate(val.status)}</span
+																				>
+																			{/if}
 																			{#if itemHref}
 																				<Anchor href={itemHref} class="anchor" stopPropagation
 																					>{safeTranslate(val.str)}</Anchor
@@ -1295,6 +1418,18 @@
 														{:else}
 															--
 														{/if}
+													{:else if URLModel == 'document-containers' && key === 'status' && row.meta?.pending_revision}
+														<div class="flex items-center space-x-2">
+															<span>{safeTranslate(value)}</span>
+															<span
+																class="badge preset-tonal-primary text-xs whitespace-nowrap"
+																data-testid="pending-revision-badge"
+															>
+																v{row.meta.pending_revision.version_number} · {safeTranslate(
+																	row.meta.pending_revision.status
+																)}
+															</span>
+														</div>
 													{:else if URLModel == 'risk-acceptances' && key === 'name' && row.meta?.state}
 														<div class="flex items-center space-x-2">
 															<span>{safeTranslate(value ?? '-')}</span>

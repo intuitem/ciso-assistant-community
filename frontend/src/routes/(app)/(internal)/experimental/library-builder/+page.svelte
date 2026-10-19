@@ -4,6 +4,10 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { defaultMatrixObject, identitySlug } from './builder-helpers';
 	import { getToastStore } from '$lib/components/Toast/stores';
+	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import { defaults, superForm } from 'sveltekit-superforms';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
+	import { z } from 'zod';
 
 	$pageTitle = m.lbListLibraryBuilder();
 
@@ -98,6 +102,31 @@
 
 	// --- Adopt -------------------------------------------------------------
 	let adoptSource = $state('');
+	const adoptSchema = z.object({ source: z.string().optional() });
+	const adoptForm = superForm(defaults(zod(adoptSchema)), {
+		SPA: true,
+		validators: zod(adoptSchema),
+		dataType: 'json',
+		invalidateAll: false,
+		applyAction: false,
+		resetForm: false,
+		taintedMessage: false
+	});
+	const adoptOptions = [
+		...customLibraries.map((library) => ({
+			label: `${library.name} (v${library.version})`,
+			value: 'library:' + library.id
+		})),
+		...orphanFrameworks.map((framework) => ({
+			label: framework.name,
+			value: 'framework:' + framework.id,
+			infoString: {
+				string: m.framework(),
+				position: 'suffix' as const,
+				classes: 'text-surface-500'
+			}
+		}))
+	];
 	let adopting = $state(false);
 
 	async function adoptLibrary() {
@@ -291,7 +320,8 @@
 		risk_matrices: m.lbCountRiskMatrices,
 		requirement_mapping_sets: m.lbCountRequirementMappingSets,
 		metric_definitions: m.lbCountMetricDefinitions,
-		preset: m.lbCountPreset
+		preset: m.lbCountPreset,
+		quick_forms: m.lbCountQuickForms
 	};
 
 	function objectsSummary(draft: any): string {
@@ -313,7 +343,7 @@
 			{m.lbListIntro()}
 		</p>
 		<div class="flex flex-wrap items-center justify-between gap-4">
-			<div class="flex items-center gap-2">
+			<div class="flex flex-wrap items-center gap-2">
 				<button
 					type="button"
 					class="btn btn-sm bg-primary-500 text-white hover:bg-primary-600 transition-colors"
@@ -369,25 +399,17 @@
 					/>
 				</label>
 				{#if customLibraries.length > 0 || orphanFrameworks.length > 0}
-					<select class="select w-64 text-sm" bind:value={adoptSource}>
-						<option value="">{m.lbListAdoptPlaceholder()}</option>
-						{#if customLibraries.length > 0}
-							<optgroup label={m.lbListCustomLibraries()}>
-								{#each customLibraries as library}
-									<option value={'library:' + library.id}>
-										{library.name} (v{library.version})
-									</option>
-								{/each}
-							</optgroup>
-						{/if}
-						{#if orphanFrameworks.length > 0}
-							<optgroup label={m.lbListCustomFrameworksNoLibrary()}>
-								{#each orphanFrameworks as framework}
-									<option value={'framework:' + framework.id}>{framework.name}</option>
-								{/each}
-							</optgroup>
-						{/if}
-					</select>
+					<div class="w-full sm:w-[28rem]">
+						<AutocompleteSelect
+							form={adoptForm}
+							field="source"
+							options={adoptOptions}
+							translateOptions={false}
+							placeholder={m.lbListAdoptPlaceholder()}
+							portalDropdown={true}
+							onChange={(value) => (adoptSource = value ?? '')}
+						/>
+					</div>
 					<button
 						type="button"
 						class="btn btn-sm preset-outlined-primary-500"
@@ -554,7 +576,7 @@
 							<th>{m.version()}</th>
 							<th>{m.lbListContents()}</th>
 							<th>{m.status()}</th>
-							<th class="w-40"></th>
+							<th></th>
 						</tr>
 					</thead>
 					<tbody>
@@ -585,22 +607,24 @@
 										</span>
 									{/if}
 								</td>
-								<td class="space-x-1">
-									<a
-										href="/experimental/library-builder/{draft.id}"
-										class="btn btn-sm preset-filled-primary-500"
-									>
-										<i class="fa-solid fa-pen-to-square mr-1"></i>
-										{m.edit()}
-									</a>
-									<button
-										type="button"
-										class="btn btn-sm preset-outlined-error-500"
-										onclick={() => deleteDraft(draft)}
-										aria-label={m.lbListDeleteDraft()}
-									>
-										<i class="fa-solid fa-trash"></i>
-									</button>
+								<td>
+									<div class="flex items-center justify-end gap-1 whitespace-nowrap">
+										<a
+											href="/experimental/library-builder/{draft.id}"
+											class="btn btn-sm preset-filled-primary-500"
+										>
+											<i class="fa-solid fa-pen-to-square mr-1"></i>
+											{m.edit()}
+										</a>
+										<button
+											type="button"
+											class="btn btn-sm preset-outlined-error-500 text-error-500 hover:preset-filled-error-500"
+											onclick={() => deleteDraft(draft)}
+											aria-label={m.lbListDeleteDraft()}
+										>
+											<i class="fa-solid fa-trash"></i>
+										</button>
+									</div>
 								</td>
 							</tr>
 						{/each}

@@ -1,5 +1,4 @@
 from collections import defaultdict
-from contextlib import nullcontext
 from datetime import date, timedelta
 from huey import crontab
 from huey.contrib.djhuey import periodic_task, task, db_periodic_task
@@ -18,7 +17,7 @@ from core.models import (
     ValidationFlow,
 )
 from iam.models import ServiceAccount, User
-from django.core.mail import get_connection, EmailMessage
+from core import mailer
 from django.conf import settings
 from django.db import models, transaction
 import logging
@@ -37,6 +36,20 @@ logger = structlog.getLogger(__name__)
 # Days before a deadline on which email escalates. Descending: the first is also the
 # width of the window the inbox tracks continuously (see check_evidences_expiring_soon).
 EXPIRY_NOTICE_DAYS = (30, 7, 1)
+
+
+def _localized_day_unit(email: str, days: int) -> tuple[str, str]:
+    from .email_utils import get_locale_for_email, localize_day_unit
+
+    locale = get_locale_for_email(email)
+    return locale, localize_day_unit(days, locale)
+
+
+def _localized_assignment_decision(email: str, decision: str) -> tuple[str, str]:
+    from .email_utils import get_locale_for_email, localize_assignment_decision
+
+    locale = get_locale_for_email(email)
+    return locale, localize_assignment_decision(decision, locale)
 
 
 def _sweep_deadline(
@@ -397,9 +410,11 @@ def check_task_nodes_due_soon():
 # @db_periodic_task(crontab(minute="*/1"))  # for testing
 @db_periodic_task(crontab(hour="7", minute="10"))
 def check_task_nodes_overdue():
-    """Check for TaskNodes that are past due and still pending."""
+    """Check for TaskNodes that are past due and still open."""
     overdue_nodes = (
-        TaskNode.objects.filter(due_date__lt=date.today(), status="pending")
+        TaskNode.objects.filter(
+            due_date__lt=date.today(), status__in=TaskNode.OPEN_STATUSES
+        )
         .select_related("task_template")
         .filter(task_template__enabled=True)
         .prefetch_related("task_template__assigned_to")
@@ -434,19 +449,33 @@ def send_task_node_due_soon_notification(actor_email, task_nodes, days):
     if not check_email_configuration(actor_email, task_nodes):
         return
 
-    from .email_utils import render_email_template, format_task_node_list
+    from .email_utils import (
+        format_task_node_list,
+        get_email_preferences,
+        localize_day_unit,
+        render_email_template,
+    )
+
+    locale, date_format = get_email_preferences(actor_email)
+    days_unit = localize_day_unit(days, locale)
 
     context = {
         "task_count": len(task_nodes),
-        "task_list": format_task_node_list(task_nodes),
+        "task_list": format_task_node_list(
+            task_nodes, locale=locale, date_format=date_format
+        ),
         "task_list_detailed": format_task_node_list(
-            task_nodes, include_description=True
+            task_nodes,
+            include_description=True,
+            locale=locale,
+            date_format=date_format,
         ),
         "days_remaining": days,
+        "days_remaining_unit": days_unit,
     }
 
     rendered = render_email_template(
-        "task_node_due_soon", context, recipient_email=actor_email
+        "task_node_due_soon", context, locale=locale, recipient_email=actor_email
     )
     if rendered:
         send_notification_email(
@@ -467,18 +496,32 @@ def send_task_node_overdue_notification(actor_email, task_nodes):
     if not check_email_configuration(actor_email, task_nodes):
         return
 
-    from .email_utils import render_email_template, format_task_node_list
+    from .email_utils import (
+        format_task_node_list,
+        get_email_preferences,
+        render_email_template,
+    )
+
+    locale, date_format = get_email_preferences(actor_email)
 
     context = {
         "task_count": len(task_nodes),
-        "task_list": format_task_node_list(task_nodes),
+        "task_list": format_task_node_list(
+            task_nodes, locale=locale, date_format=date_format
+        ),
         "task_list_detailed": format_task_node_list(
-            task_nodes, include_description=True
+            task_nodes,
+            include_description=True,
+            locale=locale,
+            date_format=date_format,
         ),
     }
 
     rendered = render_email_template(
-        "task_node_overdue", context, recipient_email=actor_email
+        "task_node_overdue",
+        context,
+        locale=locale,
+        recipient_email=actor_email,
     )
     if rendered:
         send_notification_email(
@@ -515,15 +558,26 @@ def send_notification_email_expired_eta(owner_email, controls):
     if not check_email_configuration(owner_email, controls):
         return
 
-    from .email_utils import render_email_template, format_control_list
+    from .email_utils import (
+        format_control_list,
+        get_email_preferences,
+        render_email_template,
+    )
+
+    locale, date_format = get_email_preferences(owner_email)
 
     context = {
         "control_count": len(controls),
-        "control_list": format_control_list(controls),
+        "control_list": format_control_list(
+            controls, locale=locale, date_format=date_format
+        ),
     }
 
     rendered = render_email_template(
-        "expired_controls", context, recipient_email=owner_email
+        "expired_controls",
+        context,
+        locale=locale,
+        recipient_email=owner_email,
     )
     if rendered:
         send_notification_email(
@@ -545,33 +599,12 @@ def send_email_now(
     html_message: str | None = None,
     connection=None,
 ) -> None:
-    """Synchronous send that propagates failures to the caller. Pass
-    `connection` to batch several sends over one SMTP session (the caller
-    owns its lifecycle).
-
-    Raises RuntimeError when the backend reports the message unsent;
-    connection/backend exceptions propagate as-is."""
-    if connection is None:
-        ssl_context = getattr(settings, "EMAIL_SSL_CONTEXT", None)
-        scope = get_connection(ssl_context=ssl_context)
-    else:
-        scope = nullcontext(connection)
-    with scope as conn:
-        msg = EmailMessage(
-            subject=subject,
-            body=message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            to=[recipient],
-            connection=conn,
-        )
-        if html_message:
-            msg.content_subtype = "html"
-            msg.body = html_message
-        sent = msg.send()
-    # Backends can report 0 sent without raising (fail_silently paths,
-    # filtered recipients); that is a delivery failure, not a success.
-    if sent != 1:
-        raise RuntimeError(f"email backend reported {sent} of 1 messages sent")
+    """Synchronous send through core.mailer; failures propagate to the caller.
+    Pass `connection` (from core.mailer.open_connection) to batch several
+    sends over one session; the caller owns its lifecycle."""
+    mailer.send(
+        subject, message, recipient, html_body=html_message, connection=connection
+    )
 
 
 @task()
@@ -597,19 +630,6 @@ def send_notification_email(subject, message, owner_email, html_message=None):
         )
 
 
-def get_missing_email_settings() -> list[str]:
-    """Names of the email settings that are required but unset; empty when
-    email can be sent. The console backend (MAIL_DEBUG) never opens an SMTP
-    connection, so EMAIL_HOST/EMAIL_PORT are only required for the other
-    backends."""
-    required_settings = ["EMAIL_HOST", "EMAIL_PORT", "DEFAULT_FROM_EMAIL"]
-    if getattr(settings, "EMAIL_BACKEND", "").endswith("console.EmailBackend"):
-        required_settings = ["DEFAULT_FROM_EMAIL"]
-    return [
-        setting for setting in required_settings if not getattr(settings, setting, None)
-    ]
-
-
 def check_email_configuration(owner_email, controls):
     notifications_enable_mailing = GlobalSettings.objects.get(name="general").value.get(
         "notifications_enable_mailing", False
@@ -620,7 +640,7 @@ def check_email_configuration(owner_email, controls):
         )
         return False
 
-    missing_settings = get_missing_email_settings()
+    missing_settings = mailer.missing_configuration()
 
     if missing_settings:
         error_msg = f"Cannot send email notification: Missing email settings: {', '.join(missing_settings)}"
@@ -842,17 +862,20 @@ def send_compliance_assessment_due_soon_notification(author_email, assessments, 
     if not check_email_configuration(author_email, assessments):
         return
 
-    from .email_utils import render_email_template, format_assessment_list
+    from .email_utils import format_assessment_list, render_email_template
+
+    locale, days_unit = _localized_day_unit(author_email, days)
 
     context = {
         "assessment_count": len(assessments),
         "assessment_list": format_assessment_list(assessments),
         "days_remaining": days,
+        "days_remaining_unit": days_unit,
     }
 
     template_name = "compliance_assessment_due_soon"
     rendered = render_email_template(
-        template_name, context, recipient_email=author_email
+        template_name, context, locale=locale, recipient_email=author_email
     )
     if rendered:
         send_notification_email(
@@ -873,17 +896,28 @@ def send_applied_control_expiring_soon_notification(owner_email, controls, days)
     if not check_email_configuration(owner_email, controls):
         return
 
-    from .email_utils import render_email_template, format_control_list
+    from .email_utils import (
+        format_control_list,
+        get_email_preferences,
+        localize_day_unit,
+        render_email_template,
+    )
+
+    locale, date_format = get_email_preferences(owner_email)
+    days_unit = localize_day_unit(days, locale)
 
     context = {
         "control_count": len(controls),
-        "control_list": format_control_list(controls),
+        "control_list": format_control_list(
+            controls, locale=locale, date_format=date_format
+        ),
         "days_remaining": days,
+        "days_remaining_unit": days_unit,
     }
 
     template_name = "applied_control_expiring_soon"
     rendered = render_email_template(
-        template_name, context, recipient_email=owner_email
+        template_name, context, locale=locale, recipient_email=owner_email
     )
     if rendered:
         send_notification_email(
@@ -903,16 +937,19 @@ def send_notification_email_expired_evidence(owner_email, evidences, days=0):
     if not check_email_configuration(owner_email, evidences):
         return
 
-    from .email_utils import render_email_template, format_evidence_list
+    from .email_utils import format_evidence_list, render_email_template
+
+    locale, days_unit = _localized_day_unit(owner_email, days)
 
     context = {
         "evidence_count": len(evidences),
         "evidence_list": format_evidence_list(evidences),
         "expired_since": days,
+        "expired_since_unit": days_unit,
     }
 
     rendered = render_email_template(
-        "expired_evidences", context, recipient_email=owner_email
+        "expired_evidences", context, locale=locale, recipient_email=owner_email
     )
     if rendered:
         send_notification_email(
@@ -933,17 +970,20 @@ def send_evidence_expiring_soon_notification(owner_email, evidences, days):
     if not check_email_configuration(owner_email, evidences):
         return
 
-    from .email_utils import render_email_template, format_evidence_list
+    from .email_utils import format_evidence_list, render_email_template
+
+    locale, days_unit = _localized_day_unit(owner_email, days)
 
     context = {
         "evidence_count": len(evidences),
         "evidence_list": format_evidence_list(evidences),
         "days_remaining": days,
+        "days_remaining_unit": days_unit,
     }
 
     template_name = "evidence_expiring_soon"
     rendered = render_email_template(
-        template_name, context, recipient_email=owner_email
+        template_name, context, locale=locale, recipient_email=owner_email
     )
     if rendered:
         send_notification_email(
@@ -966,17 +1006,20 @@ def send_security_exception_expiring_soon_notification(
     if not check_email_configuration(owner_email, security_exceptions):
         return
 
-    from .email_utils import render_email_template, format_security_exception_list
+    from .email_utils import format_security_exception_list, render_email_template
+
+    locale, days_unit = _localized_day_unit(owner_email, days)
 
     context = {
         "exception_count": len(security_exceptions),
         "exception_list": format_security_exception_list(security_exceptions),
         "days_remaining": days,
+        "days_remaining_unit": days_unit,
     }
 
     template_name = "security_exception_expiring_soon"
     rendered = render_email_template(
-        template_name, context, recipient_email=owner_email
+        template_name, context, locale=locale, recipient_email=owner_email
     )
     if rendered:
         send_notification_email(
@@ -999,17 +1042,20 @@ def send_notification_email_expired_security_exception(
     if not check_email_configuration(owner_email, security_exceptions):
         return
 
-    from .email_utils import render_email_template, format_security_exception_list
+    from .email_utils import format_security_exception_list, render_email_template
+
+    locale, days_unit = _localized_day_unit(owner_email, days)
 
     context = {
         "exception_count": len(security_exceptions),
         "exception_list": format_security_exception_list(security_exceptions),
         "expired_since": days,
+        "expired_since_unit": days_unit,
     }
 
     template_name = "expired_security_exceptions"
     rendered = render_email_template(
-        template_name, context, recipient_email=owner_email
+        template_name, context, locale=locale, recipient_email=owner_email
     )
     if rendered:
         send_notification_email(
@@ -1247,7 +1293,9 @@ def send_validation_deadline_notification(approver_email, validations, days):
     if not check_email_configuration(approver_email, validations):
         return
 
-    from .email_utils import render_email_template, format_validation_list
+    from .email_utils import format_validation_list, render_email_template
+
+    locale, days_unit = _localized_day_unit(approver_email, days)
 
     s = "s" if len(validations) > 1 else ""
     are = "are" if len(validations) > 1 else "is"
@@ -1257,13 +1305,17 @@ def send_validation_deadline_notification(approver_email, validations, days):
         "days": days,
         "validation_list": format_validation_list(validations),
         "validation_count": len(validations),
+        "days_unit": days_unit,
         "s": s,
         "are": are,
         "their": their,
     }
 
     rendered = render_email_template(
-        "validation_deadline", context, recipient_email=approver_email
+        "validation_deadline",
+        context,
+        locale=locale,
+        recipient_email=approver_email,
     )
     if rendered:
         send_notification_email(
@@ -1629,8 +1681,18 @@ def send_assignment_reviewed_notification(
     for actor in assignment.actor.all():
         for email in actor.get_emails():
             if email and check_email_configuration(email, [assignment]):
+                locale, localized_decision = _localized_assignment_decision(
+                    email, decision
+                )
+                email_context = {
+                    **context,
+                    "decision": localized_decision,
+                }
                 rendered = render_email_template(
-                    "assignment_reviewed", context, recipient_email=email
+                    "assignment_reviewed",
+                    email_context,
+                    locale=locale,
+                    recipient_email=email,
                 )
                 if rendered:
                     send_notification_email(

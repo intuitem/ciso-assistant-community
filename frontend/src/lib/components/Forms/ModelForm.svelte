@@ -32,6 +32,7 @@
 	import ContractsForm from './ModelForm/ContractForm.svelte';
 	import RepresentativesForm from './ModelForm/RepresentativeForm.svelte';
 	import EntityScoreForm from './ModelForm/EntityScoreForm.svelte';
+	import TierForm from './ModelForm/TierForm.svelte';
 	import FrameworksForm from './ModelForm/FrameworkForm.svelte';
 	import UsersForm from './ModelForm/UserForm.svelte';
 	import TeamForm from './ModelForm/TeamForm.svelte';
@@ -666,7 +667,7 @@
 				{...rest}
 			/>
 		{:else if URLModel === 'solutions'}
-			<SolutionsForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
+			<SolutionsForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} {...rest} />
 		{:else if URLModel === 'contracts'}
 			<ContractsForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
 		{:else if URLModel === 'entity-scores'}
@@ -679,6 +680,8 @@
 				{object}
 				{...rest}
 			/>
+		{:else if URLModel === 'tiers'}
+			<TierForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
 		{:else if URLModel === 'representatives'}
 			<RepresentativesForm
 				{form}
@@ -741,7 +744,15 @@
 				{...rest}
 			/>
 		{:else if URLModel === 'processings'}
-			<ProcessingForm {form} {model} {cacheLocks} {formDataCache} {context} {...rest} />
+			<ProcessingForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				initialData={{ ...initialData, ...additionalInitialData }}
+				{context}
+				{...rest}
+			/>
 		{:else if URLModel === 'purposes'}
 			<PurposeForm {form} {model} {cacheLocks} {formDataCache} {context} {initialData} {...rest} />
 		{:else if URLModel === 'personal-data'}
@@ -815,7 +826,7 @@
 				{...rest}
 			/>
 		{:else if URLModel === 'ebios-rm'}
-			<EbiosRmForm {form} {model} {cacheLocks} {formDataCache} {context} {...rest} />
+			<EbiosRmForm {form} {model} {cacheLocks} {formDataCache} {context} {object} {...rest} />
 		{:else if URLModel === 'feared-events'}
 			<FearedEventForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
 		{:else if URLModel === 'ro-to'}
@@ -860,6 +871,7 @@
 				{cacheLocks}
 				{formDataCache}
 				{initialData}
+				{context}
 				{...rest}
 			/>
 		{:else if URLModel === 'quick-form-responses'}
@@ -958,6 +970,7 @@
 				{formDataCache}
 				initialData={model.initialData}
 				{context}
+				{object}
 				{...rest}
 			/>
 		{:else if URLModel === 'kill-chains'}
@@ -1101,6 +1114,7 @@
 				{formDataCache}
 				{initialData}
 				{data}
+				{object}
 				{...rest}
 			/>
 		{:else if URLModel === 'metric-instances'}
@@ -1111,6 +1125,7 @@
 				{formDataCache}
 				initialData={{ ...initialData, ...additionalInitialData }}
 				{data}
+				{object}
 				{...rest}
 			/>
 		{:else if URLModel === 'custom-metric-samples'}
