@@ -1834,8 +1834,6 @@
 	"builderUnsavedChangesNavigation": "Du har ikke-gemte ændringer, der vil gå tabt. Forlad alligevel?",
 	"fieldVisibility": "Felternes synlighed",
 	"fieldVisibilityHelpText": "Bestem hvilke felter hver rolle kan se og redigere.",
-	"visibilityAuditorRespondent": "Revisor + Respondent",
-	"visibilityAuditorOnly": "Kun revisor",
 	"visibilityHidden": "Skjult",
 	"answers": "Svar",
 	"respondentAlignment": "Respondentens overensstemmelse",

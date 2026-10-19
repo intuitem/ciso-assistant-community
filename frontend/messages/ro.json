@@ -1552,8 +1552,6 @@
 	"builderUnsavedChangesNavigation": "Aveți modificări nesalvate care vor fi pierdute. Părăsiți oricum?",
 	"fieldVisibility": "Vizibilitatea câmpurilor",
 	"fieldVisibilityHelpText": "Controlați ce câmpuri poate vedea și edita fiecare rol.",
-	"visibilityAuditorRespondent": "Auditor + Respondent",
-	"visibilityAuditorOnly": "Doar auditor",
 	"visibilityHidden": "Ascuns",
 	"answers": "Răspunsuri",
 	"respondentAlignment": "Aliniere respondent",

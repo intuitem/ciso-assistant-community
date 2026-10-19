@@ -4799,8 +4799,6 @@
 	"skip": "Jäta vahele",
 	"fieldVisibility": "Väljade nähtavus",
 	"fieldVisibilityHelpText": "Määra, milliseid hinnangu välju saab iga vaatajaroll näha ja muuta.",
-	"visibilityAuditorRespondent": "Audiitor + vastaja",
-	"visibilityAuditorOnly": "Ainult audiitor",
 	"visibilityHidden": "Peidetud",
 	"answers": "Vastused",
 	"respondentAlignment": "Vastaja hinnang",

@@ -14,10 +14,12 @@
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import ScoreControl from '$lib/components/Forms/ScoreControl.svelte';
 	import {
 		getSecureRedirect,
 		getFieldVisibility,
 		isFieldVisible,
+		isFieldEditable,
 		alignmentColorMap
 	} from '$lib/utils/helpers';
 	import { Progress, Tabs } from '@skeletonlabs/skeleton-svelte';
@@ -403,6 +405,18 @@
 	const showEvidences = $derived(fieldVis.showEvidences);
 	const showRespondentAlignment = $derived(fieldVis.showRespondentAlignment);
 	const showComments = $derived(fieldVis.showComments);
+	// A field can be visible but read-only for the viewer's role.
+	const canEdit = (field: string) => isFieldEditable(complianceAssessment, field, viewerRole);
+	const canEditAnswers = $derived(canEdit('answers'));
+	const canEditStatus = $derived(canEdit('status'));
+	const canEditResult = $derived(canEdit('result'));
+	const canEditExtendedResult = $derived(canEdit('extended_result'));
+	const canEditScore = $derived(canEdit('score'));
+	const canEditDocumentationScore = $derived(canEdit('documentation_score'));
+	const canEditObservation = $derived(canEdit('observation'));
+	const canEditAppliedControls = $derived(canEdit('applied_controls'));
+	const canEditTaskTemplates = $derived(canEdit('task_templates'));
+	const canEditEvidences = $derived(canEdit('evidences'));
 
 	const isAuditor = $derived(viewerRole === 'auditor');
 	const canShowAppliedControls = $derived(showAppliedControls && !page.data.user.is_third_party);
@@ -711,69 +725,71 @@
 										<p>{m.requirementAppliedControlHelpText()}</p>
 									</div>
 									<div class="h-full flex flex-col space-y-2 rounded-container p-4">
-										<span class="flex flex-row justify-end items-center space-x-2">
-											{#if canPerformActionOnObject( { user: page.data.user, action: 'add', model: 'appliedcontrol', object: data.requirementAssessment } ) && reference_controls.length > 0}
-												{@const nothingToSuggest = actionableSuggestionsCount === 0}
-												<button
-													class="btn self-end shadow-sm
+										{#if canEditAppliedControls}
+											<span class="flex flex-row justify-end items-center space-x-2">
+												{#if canPerformActionOnObject( { user: page.data.user, action: 'add', model: 'appliedcontrol', object: data.requirementAssessment } ) && reference_controls.length > 0}
+													{@const nothingToSuggest = actionableSuggestionsCount === 0}
+													<button
+														class="btn self-end shadow-sm
 														{nothingToSuggest
-														? 'bg-emerald-50 border border-emerald-200 text-emerald-700 cursor-not-allowed pointer-events-none'
-														: 'bg-surface-50-950 border border-surface-200-800 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700'}"
+															? 'bg-emerald-50 border border-emerald-200 text-emerald-700 cursor-not-allowed pointer-events-none'
+															: 'bg-surface-50-950 border border-surface-200-800 text-surface-700-300 hover:bg-surface-100-900 hover:border-surface-300-700'}"
+														type="button"
+														disabled={nothingToSuggest || createAppliedControlsLoading}
+														aria-label={nothingToSuggest
+															? m.allSuggestionsApplied()
+															: m.suggestControls()}
+														onclick={() => {
+															modalConfirmCreateSuggestedControls(
+																page.data.requirementAssessment.id,
+																page.data.requirementAssessment.name,
+																'?/createSuggestedControls'
+															);
+														}}
+													>
+														{#if createAppliedControlsLoading}
+															<Progress value={null}>
+																<Progress.Circle class="[--size:--spacing(5)] mr-2">
+																	<Progress.CircleTrack />
+																	<Progress.CircleRange class="stroke-violet-500" />
+																</Progress.Circle>
+															</Progress>
+															{m.suggestControls()}
+														{:else if nothingToSuggest}
+															<i class="fa-solid fa-circle-check text-emerald-500 mr-2"></i>
+															{m.allSuggestionsApplied()}
+														{:else}
+															<i class="fa-solid fa-wand-magic-sparkles text-violet-500 mr-2"></i>
+															{m.suggestControls()}
+														{/if}
+													</button>
+												{/if}
+												<button
+													class="btn preset-filled-primary-500 self-end"
+													onclick={modalMeasureCreateForm}
 													type="button"
-													disabled={nothingToSuggest || createAppliedControlsLoading}
-													aria-label={nothingToSuggest
-														? m.allSuggestionsApplied()
-														: m.suggestControls()}
-													onclick={() => {
-														modalConfirmCreateSuggestedControls(
-															page.data.requirementAssessment.id,
-															page.data.requirementAssessment.name,
-															'?/createSuggestedControls'
-														);
-													}}
+													><i class="fa-solid fa-plus mr-2"></i>{m.addAppliedControl()}</button
 												>
-													{#if createAppliedControlsLoading}
-														<Progress value={null}>
-															<Progress.Circle class="[--size:--spacing(5)] mr-2">
-																<Progress.CircleTrack />
-																<Progress.CircleRange class="stroke-violet-500" />
-															</Progress.Circle>
-														</Progress>
-														{m.suggestControls()}
-													{:else if nothingToSuggest}
-														<i class="fa-solid fa-circle-check text-emerald-500 mr-2"></i>
-														{m.allSuggestionsApplied()}
-													{:else}
-														<i class="fa-solid fa-wand-magic-sparkles text-violet-500 mr-2"></i>
-														{m.suggestControls()}
-													{/if}
-												</button>
-											{/if}
-											<button
-												class="btn preset-filled-primary-500 self-end"
-												onclick={modalMeasureCreateForm}
-												type="button"
-												><i class="fa-solid fa-plus mr-2"></i>{m.addAppliedControl()}</button
-											>
-										</span>
-										{#key refreshKey}
-											<AutocompleteSelect
-												multiple
-												lazy
-												{form}
-												optionsEndpoint="applied-controls"
-												optionsDetailedUrlParameters={[
-													['scope_folder_id', page.data.requirementAssessment.folder.id]
-												]}
-												optionsExtraFields={[['folder', 'str']]}
-												optionsInfoFields={{
-													fields: [{ field: 'category', translate: true }],
-													position: 'prefix'
-												}}
-												field="applied_controls"
-												placeholder={m.appliedControlsPlaceholder()}
-											/>
-										{/key}
+											</span>
+											{#key refreshKey}
+												<AutocompleteSelect
+													multiple
+													lazy
+													{form}
+													optionsEndpoint="applied-controls"
+													optionsDetailedUrlParameters={[
+														['scope_folder_id', page.data.requirementAssessment.folder.id]
+													]}
+													optionsExtraFields={[['folder', 'str']]}
+													optionsInfoFields={{
+														fields: [{ field: 'category', translate: true }],
+														position: 'prefix'
+													}}
+													field="applied_controls"
+													placeholder={m.appliedControlsPlaceholder()}
+												/>
+											{/key}
+										{/if}
 										<ModelTable
 											baseEndpoint="/applied-controls?requirement_assessments={page.data
 												.requirementAssessment.id}"
@@ -792,28 +808,30 @@
 										<p>{m.requirementTaskTemplateHelpText()}</p>
 									</div>
 									<div class="h-full flex flex-col space-y-2 rounded-container p-4">
-										<span class="flex flex-row justify-end items-center">
-											<button
-												class="btn preset-filled-primary-500 self-end"
-												onclick={modalTaskTemplateCreateForm}
-												data-testid="add-task-template-button"
-												type="button"
-												><i class="fa-solid fa-plus mr-2"></i>{m.addTaskTemplate()}</button
-											>
-										</span>
-										{#key refreshKey}
-											<AutocompleteSelect
-												multiple
-												lazy
-												{form}
-												optionsEndpoint="task-templates"
-												optionsExtraFields={[['folder', 'str']]}
-												optionsDetailedUrlParameters={[
-													['scope_folder_id', page.data.requirementAssessment.folder.id]
-												]}
-												field="task_templates"
-											/>
-										{/key}
+										{#if canEditTaskTemplates}
+											<span class="flex flex-row justify-end items-center">
+												<button
+													class="btn preset-filled-primary-500 self-end"
+													onclick={modalTaskTemplateCreateForm}
+													data-testid="add-task-template-button"
+													type="button"
+													><i class="fa-solid fa-plus mr-2"></i>{m.addTaskTemplate()}</button
+												>
+											</span>
+											{#key refreshKey}
+												<AutocompleteSelect
+													multiple
+													lazy
+													{form}
+													optionsEndpoint="task-templates"
+													optionsExtraFields={[['folder', 'str']]}
+													optionsDetailedUrlParameters={[
+														['scope_folder_id', page.data.requirementAssessment.folder.id]
+													]}
+													field="task_templates"
+												/>
+											{/key}
+										{/if}
 										<ModelTable
 											source={page.data.tables['task-templates']}
 											hideFilters={true}
@@ -832,26 +850,29 @@
 										<p>{m.requirementEvidenceHelpText()}</p>
 									</div>
 									<div class="h-full flex flex-col space-y-2 rounded-container p-4">
-										<span class="flex flex-row justify-end items-center">
-											<button
-												class="btn preset-filled-primary-500 self-end"
-												onclick={modalEvidenceCreateForm}
-												type="button"><i class="fa-solid fa-plus mr-2"></i>{m.addEvidence()}</button
-											>
-										</span>
-										{#key refreshKey}
-											<AutocompleteSelect
-												multiple
-												lazy
-												{form}
-												optionsEndpoint="evidences"
-												optionsExtraFields={[['folder', 'str']]}
-												optionsDetailedUrlParameters={[
-													['scope_folder_id', page.data.requirementAssessment.folder.id]
-												]}
-												field="evidences"
-											/>
-										{/key}
+										{#if canEditEvidences}
+											<span class="flex flex-row justify-end items-center">
+												<button
+													class="btn preset-filled-primary-500 self-end"
+													onclick={modalEvidenceCreateForm}
+													type="button"
+													><i class="fa-solid fa-plus mr-2"></i>{m.addEvidence()}</button
+												>
+											</span>
+											{#key refreshKey}
+												<AutocompleteSelect
+													multiple
+													lazy
+													{form}
+													optionsEndpoint="evidences"
+													optionsExtraFields={[['folder', 'str']]}
+													optionsDetailedUrlParameters={[
+														['scope_folder_id', page.data.requirementAssessment.folder.id]
+													]}
+													field="evidences"
+												/>
+											{/key}
+										{/if}
 										<ModelTable
 											source={page.data.tables['evidences']}
 											hideFilters={true}
@@ -951,6 +972,7 @@
 							<Question
 								{form}
 								field="answers"
+								disabled={!canEditAnswers}
 								questions={page.data.requirementAssessment.requirement.questions}
 								label={m.questionSingular()}
 							/>
@@ -962,6 +984,7 @@
 								{form}
 								options={page.data.model.selectOptions['status']}
 								field="status"
+								disabled={!canEditStatus}
 								label={m.status()}
 								helpText={m.requirementAssessmentStatusHelpText()}
 							/>
@@ -1001,6 +1024,7 @@
 										data.result
 									)}
 									field="result"
+									disabled={!canEditResult}
 									label={m.result()}
 									helpText={m.requirementAssessmentResultHelpText()}
 								/>
@@ -1013,6 +1037,7 @@
 								{form}
 								options={page.data.model.selectOptions['extended_result']}
 								field="extended_result"
+								disabled={!canEditExtendedResult}
 								label={m.extendedResult()}
 								helpText={m.extendedResultHelpText()}
 							/>
@@ -1052,6 +1077,7 @@
 											<Checkbox
 												{form}
 												field="is_score_overridden"
+												disabled={!canEditScore}
 												label={m.overrideScore()}
 												helpText={m.overrideScoreHelpText()}
 												checkboxComponent="switch"
@@ -1059,14 +1085,25 @@
 										{/if}
 									</div>
 									{#if $formStore.is_score_overridden}
-										<Score
-											{form}
-											min_score={resolvedMin}
-											max_score={resolvedMax}
-											scores_definition={resolvedScoresDef}
-											field="score"
-											label={m.score()}
-										/>
+										{#if canEditScore}
+											<Score
+												{form}
+												min_score={resolvedMin}
+												max_score={resolvedMax}
+												scores_definition={resolvedScoresDef}
+												field="score"
+												label={m.score()}
+											/>
+										{:else}
+											<ScoreControl
+												editable={false}
+												value={$formStore.score}
+												min={resolvedMin}
+												max={resolvedMax}
+												scoresDefinition={resolvedScoresDef}
+												label={m.score()}
+											/>
+										{/if}
 										{#if computedScore !== null && $formStore.score !== computedScore}
 											<p class="text-warning-700-300 text-sm flex items-center gap-1">
 												<i class="fa-solid fa-triangle-exclamation"></i>
@@ -1084,32 +1121,57 @@
 								{#snippet implementation()}
 									{#if showScore}
 										<div class="flex flex-col" data-testid="score-field">
-											<Score
-												{form}
-												min_score={resolvedMin}
-												max_score={resolvedMax}
-												scores_definition={resolvedScoresDef}
-												field="score"
-												label={page.data.compliance_assessment_score.show_documentation_score
-													? m.implementationScore()
-													: m.score()}
-												onChange={markScored}
-											/>
+											{#if canEditScore}
+												<Score
+													{form}
+													min_score={resolvedMin}
+													max_score={resolvedMax}
+													scores_definition={resolvedScoresDef}
+													field="score"
+													label={page.data.compliance_assessment_score.show_documentation_score
+														? m.implementationScore()
+														: m.score()}
+													onChange={markScored}
+												/>
+											{:else}
+												<ScoreControl
+													editable={false}
+													value={$formStore.score}
+													min={resolvedMin}
+													max={resolvedMax}
+													scoresDefinition={resolvedScoresDef}
+													label={page.data.compliance_assessment_score.show_documentation_score
+														? m.implementationScore()
+														: m.score()}
+												/>
+											{/if}
 										</div>
 									{/if}
 								{/snippet}
 								{#snippet documentation()}
 									{#if docScoreShown}
-										<Score
-											{form}
-											min_score={resolvedMin}
-											max_score={resolvedMax}
-											scores_definition={resolvedScoresDef}
-											field="documentation_score"
-											label={m.documentationScore()}
-											isDoc={true}
-											onChange={markScored}
-										/>
+										{#if canEditDocumentationScore}
+											<Score
+												{form}
+												min_score={resolvedMin}
+												max_score={resolvedMax}
+												scores_definition={resolvedScoresDef}
+												field="documentation_score"
+												label={m.documentationScore()}
+												isDoc={true}
+												onChange={markScored}
+											/>
+										{:else}
+											<ScoreControl
+												editable={false}
+												value={$formStore.documentation_score}
+												min={resolvedMin}
+												max={resolvedMax}
+												scoresDefinition={resolvedScoresDef}
+												label={m.documentationScore()}
+												isDoc
+											/>
+										{/if}
 									{/if}
 								{/snippet}
 							</ScorePair>
@@ -1118,7 +1180,12 @@
 
 					{#if showObservation}
 						<div data-testid="observation-field">
-							<MarkdownField {form} field="observation" label={m.observation()} />
+							<MarkdownField
+								{form}
+								field="observation"
+								label={m.observation()}
+								disabled={!canEditObservation}
+							/>
 						</div>
 					{/if}
 				</div>

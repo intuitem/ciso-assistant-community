@@ -3443,8 +3443,6 @@
 	"builderUnsavedChangesNavigation": "Sie haben nicht gespeicherte Änderungen, die verloren gehen. Trotzdem verlassen?",
 	"fieldVisibility": "Feldsichtbarkeit",
 	"fieldVisibilityHelpText": "Steuern Sie, welche Felder jede Rolle sehen und bearbeiten kann.",
-	"visibilityAuditorRespondent": "Prüfer + Befragter",
-	"visibilityAuditorOnly": "Nur Prüfer",
 	"visibilityHidden": "Ausgeblendet",
 	"answers": "Antworten",
 	"respondentAlignment": "Abstimmung des Befragten",

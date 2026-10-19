@@ -490,6 +490,11 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
     # visibility here instead of opening the audit afterwards.
     field_visibility = serializers.JSONField(required=False)
 
+    def validate_field_visibility(self, value):
+        from core.utils import validate_field_visibility
+
+        return validate_field_visibility(value)
+
     def _extract_audit_data(self, validated_data):
         audit_data = {
             "create_audit": validated_data.pop("create_audit", False),

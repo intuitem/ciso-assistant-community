@@ -29,6 +29,7 @@
 	import { URL_MODEL_MAP } from '$lib/utils/crud';
 	import {
 		getFieldVisibility,
+		isFieldEditable,
 		hasComputedResult,
 		hasComputedScore,
 		shouldShowAutoQuestion,
@@ -126,10 +127,30 @@
 	const showResult = $derived(fieldVis.showResult);
 	const showExtendedResult = $derived(fieldVis.showExtendedResult);
 	const showScore = $derived(fieldVis.showScore);
+	const showStatus = $derived(fieldVis.showStatus);
+	const showDocumentationScore = $derived(fieldVis.showDocumentationScore);
 	const showObservation = $derived(fieldVis.showObservation);
 	const showAppliedControls = $derived(fieldVis.showAppliedControls);
 	const showEvidences = $derived(fieldVis.showEvidences);
 	const showRespondentAlignment = $derived(fieldVis.showRespondentAlignment);
+	// A field can be visible but read-only for the viewer's role.
+	const canEditAppliedControls = $derived(
+		isFieldEditable(complianceAssessment, 'applied_controls', viewerRole)
+	);
+	const canEditEvidences = $derived(isFieldEditable(complianceAssessment, 'evidences', viewerRole));
+	const canEditObservation = $derived(
+		isFieldEditable(complianceAssessment, 'observation', viewerRole)
+	);
+	const canEditResult = $derived(isFieldEditable(complianceAssessment, 'result', viewerRole));
+	const canEditStatus = $derived(isFieldEditable(complianceAssessment, 'status', viewerRole));
+	const canEditExtendedResult = $derived(
+		isFieldEditable(complianceAssessment, 'extended_result', viewerRole)
+	);
+	const canEditScore = $derived(isFieldEditable(complianceAssessment, 'score', viewerRole));
+	const canEditDocumentationScore = $derived(
+		isFieldEditable(complianceAssessment, 'documentation_score', viewerRole)
+	);
+	const canEditAnswers = $derived(isFieldEditable(complianceAssessment, 'answers', viewerRole));
 
 	const hasQuestions = $derived(
 		requirementAssessments.some(
@@ -649,24 +670,28 @@
 <!-- Related-object panel (controls / evidences): create/select + item list -->
 {#snippet detailPanel(cfg: Record<string, any>)}
 	<div class="card border border-surface-200-800 rounded-lg p-3 space-y-2">
-		{#if !shallow && !isReadOnly}
+		{#if !shallow && !isReadOnly && (cfg.canCreate !== false || cfg.canSelect !== false)}
 			<div class="flex flex-row gap-2 items-center">
-				<button
-					class="btn btn-sm preset-filled-primary-500"
-					onclick={cfg.onCreate}
-					type="button"
-					data-testid={cfg.createTestId}
-				>
-					<i class="fa-solid fa-plus mr-2"></i>{cfg.createLabel}
-				</button>
-				<button
-					class="btn btn-sm preset-filled-secondary-500"
-					onclick={cfg.onSelect}
-					type="button"
-					data-testid={cfg.selectTestId}
-				>
-					<i class="fa-solid fa-hand-pointer mr-2"></i>{cfg.selectLabel}
-				</button>
+				{#if cfg.canCreate !== false}
+					<button
+						class="btn btn-sm preset-filled-primary-500"
+						onclick={cfg.onCreate}
+						type="button"
+						data-testid={cfg.createTestId}
+					>
+						<i class="fa-solid fa-plus mr-2"></i>{cfg.createLabel}
+					</button>
+				{/if}
+				{#if cfg.canSelect !== false}
+					<button
+						class="btn btn-sm preset-filled-secondary-500"
+						onclick={cfg.onSelect}
+						type="button"
+						data-testid={cfg.selectTestId}
+					>
+						<i class="fa-solid fa-hand-pointer mr-2"></i>{cfg.selectLabel}
+					</button>
+				{/if}
 			</div>
 		{/if}
 		{#if cfg.items?.length}
@@ -721,7 +746,7 @@
 								min={raMin}
 								max={raMax}
 								scoresDefinition={raScoresDef}
-								disabled={isReadOnly}
+								disabled={isReadOnly || !canEditScore}
 								onChange={(v) => {
 									ra.score = v;
 									if (!ra.is_scored) {
@@ -734,7 +759,7 @@
 						</div>
 					{/snippet}
 					{#snippet documentation()}
-						{#if complianceAssessment.show_documentation_score}
+						{#if complianceAssessment.show_documentation_score && showDocumentationScore}
 							<div class="flex flex-col gap-1">
 								<span class="text-xs font-semibold text-surface-500 italic"
 									>{m.documentationScore()}</span
@@ -745,7 +770,7 @@
 									max={raMax}
 									scoresDefinition={raScoresDef}
 									isDoc
-									disabled={isReadOnly}
+									disabled={isReadOnly || !canEditDocumentationScore}
 									onChange={(v) => {
 										ra.documentation_score = v;
 										if (!ra.is_scored) {
@@ -761,7 +786,7 @@
 				</ScorePair>
 			</div>
 		{/if}
-	{:else if showScore && complianceAssessment.scoring_enabled && complianceAssessment.show_documentation_score && ra.is_scored}
+	{:else if showScore && showDocumentationScore && complianceAssessment.scoring_enabled && complianceAssessment.show_documentation_score && ra.is_scored}
 		{@const raMin = ra.effective_min_score ?? complianceAssessment.min_score}
 		{@const raMax = ra.effective_max_score ?? complianceAssessment.max_score}
 		<div class="flex items-center gap-4 flex-wrap">
@@ -949,7 +974,7 @@
 										</span>
 									{/snippet}
 									{#snippet documentation()}
-										{#if complianceAssessment.show_documentation_score}
+										{#if complianceAssessment.show_documentation_score && showDocumentationScore}
 											<span
 												class="inline-flex items-center gap-1 rounded-md bg-surface-100-900 px-2 py-1 text-surface-700-300"
 											>
@@ -1209,7 +1234,7 @@
 											{/if}
 
 											<!-- Row B: result / status / score -->
-											{#if !questionnaireMode && (showResult || (showExtendedResult && complianceAssessment.extended_result_enabled) || (!shallow && complianceAssessment.scoring_enabled))}
+											{#if !questionnaireMode && (showResult || (showStatus && complianceAssessment.progress_status_enabled) || (showExtendedResult && complianceAssessment.extended_result_enabled) || (!shallow && complianceAssessment.scoring_enabled))}
 												<div class="flex flex-wrap items-start gap-x-6 gap-y-3">
 													{#if !questionnaireMode && showResult}
 														<div class="flex flex-col gap-1">
@@ -1228,7 +1253,7 @@
 																	options={result_options}
 																	value={requirementAssessment.result}
 																	colorMap={complianceResultColorMap}
-																	disabled={isReadOnly}
+																	disabled={isReadOnly || !canEditResult}
 																	size="sm"
 																	ariaLabel={m.result()}
 																	onChange={async (newValue) => {
@@ -1245,29 +1270,27 @@
 																/>
 															{/if}
 														</div>
-														{#if complianceAssessment.progress_status_enabled}
-															<div class="flex flex-col gap-1">
-																<span class="text-xs font-semibold text-surface-500 italic"
-																	>{m.status()}</span
-																>
-																<SegmentedControl
-																	options={status_options}
-																	value={requirementAssessment.status}
-																	colorMap={complianceStatusColorMap}
-																	disabled={isReadOnly}
-																	size="sm"
-																	ariaLabel={m.status()}
-																	onChange={(newValue) => {
-																		const newStatus =
-																			requirementAssessment.status === newValue
-																				? 'to_do'
-																				: newValue;
-																		requirementAssessment.status = newStatus;
-																		update(requirementAssessment, 'status');
-																	}}
-																/>
-															</div>
-														{/if}
+													{/if}
+													{#if !questionnaireMode && showStatus && complianceAssessment.progress_status_enabled}
+														<div class="flex flex-col gap-1">
+															<span class="text-xs font-semibold text-surface-500 italic"
+																>{m.status()}</span
+															>
+															<SegmentedControl
+																options={status_options}
+																value={requirementAssessment.status}
+																colorMap={complianceStatusColorMap}
+																disabled={isReadOnly || !canEditStatus}
+																size="sm"
+																ariaLabel={m.status()}
+																onChange={(newValue) => {
+																	const newStatus =
+																		requirementAssessment.status === newValue ? 'to_do' : newValue;
+																	requirementAssessment.status = newStatus;
+																	update(requirementAssessment, 'status');
+																}}
+															/>
+														</div>
 													{/if}
 													{#if showExtendedResult && complianceAssessment.extended_result_enabled}
 														<div class="flex flex-col gap-1">
@@ -1278,7 +1301,7 @@
 																options={extended_result_options}
 																value={requirementAssessment.extended_result}
 																colorMap={extendedResultColorMap}
-																disabled={isReadOnly}
+																disabled={isReadOnly || !canEditExtendedResult}
 																size="sm"
 																ariaLabel={m.extendedResult()}
 																onChange={(newValue) => {
@@ -1419,7 +1442,7 @@
 														questions={requirementAssessment.requirement.questions}
 														initialValue={requirementAssessment.answers}
 														field="answers"
-														disabled={isReadOnly || !questionnaireMode}
+														disabled={isReadOnly || !questionnaireMode || !canEditAnswers}
 														shallow={shallow || !questionnaireMode}
 														onChange={async (urn, newAnswer) => {
 															requirementAssessment.answers[urn] = newAnswer;
@@ -1582,6 +1605,8 @@
 																emptyLabel: m.noAppliedControlYet(),
 																createLabel: m.addAppliedControl(),
 																selectLabel: m.selectAppliedControls(),
+																canCreate: canEditAppliedControls,
+																canSelect: canEditAppliedControls,
 																onCreate: () => modalMeasureCreateForm(requirementAssessment),
 																onSelect: () =>
 																	modalUpdateForm(requirementAssessment, 'selectAppliedControls')
@@ -1598,6 +1623,8 @@
 																createTestId: 'create-evidence-button',
 																selectTestId: 'select-evidence-button',
 																linkTestId: 'evidence-link',
+																canCreate: canEditEvidences,
+																canSelect: canEditEvidences,
 																onCreate: () => modalEvidenceCreateForm(requirementAssessment),
 																onSelect: () =>
 																	modalUpdateForm(requirementAssessment, 'selectEvidences')
@@ -1612,7 +1639,7 @@
 																<div class="card border border-surface-200-800 rounded-lg p-3">
 																	<TableMarkdownField
 																		value={requirementAssessment.observation}
-																		disabled={isReadOnly}
+																		disabled={isReadOnly || !canEditObservation}
 																		onSave={async (newValue) => {
 																			requirementAssessment.observation = newValue;
 																			await update(requirementAssessment, 'observation');
