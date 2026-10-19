@@ -101,6 +101,18 @@
 	});
 </script>
 
+{#snippet studyField(label: string, helpText: string, content: string | null)}
+	<div>
+		<h4 class="font-semibold text-lg text-surface-800-200">{label}</h4>
+		<p class="text-xs text-surface-500 mb-1">{helpText}</p>
+		{#if content}
+			<MarkdownRenderer {content} />
+		{:else}
+			<p class="italic text-surface-500">{m.notDefinedYet()}</p>
+		{/if}
+	</div>
+{/snippet}
+
 <div class="card p-4 bg-surface-50-950 shadow-lg">
 	<div class="flex flex-col space-y-4">
 		<div class="flex flex-row justify-between items-center w-full">
@@ -155,6 +167,33 @@
 					</span>
 					<ClassificationBadge classification={ebiosRmStudy.classification} />
 				</div>
+				<section
+					class="w-full space-y-4 rounded-md border-l-4 border-pink-600 bg-surface-100-900 p-4"
+				>
+					{#if !ebiosRmStudy.description}
+						<div class="alert preset-tonal-warning flex items-center gap-2">
+							<i class="fa-solid fa-triangle-exclamation"></i>
+							<span>{m.studyDescriptionMissing()}</span>
+						</div>
+					{/if}
+					{@render studyField(
+						m.studyDescription(),
+						m.studyDescriptionHelpText(),
+						ebiosRmStudy.description
+					)}
+					<div class="grid md:grid-cols-2 gap-4">
+						{@render studyField(
+							m.objectives(),
+							m.studyObjectivesHelpText(),
+							ebiosRmStudy.objectives
+						)}
+						{@render studyField(
+							m.constraintsHypotheses(),
+							m.constraintsHypothesesHelpText(),
+							ebiosRmStudy.constraints_hypotheses
+						)}
+					</div>
+				</section>
 				<div class="flex flex-wrap items-center gap-x-8 gap-y-1">
 					<span class="text-sm text-surface-600-400"
 						>{m.domainSemiColon()}
@@ -178,32 +217,6 @@
 						>{m.quotationMethodSemiColon()}
 						<span class="font-bold">{safeTranslate(ebiosRmStudy.quotation_method_display)}</span>
 					</span>
-				</div>
-				<div>
-					<h4 class="font-semibold text-surface-700-300">{m.description()}</h4>
-					{#if ebiosRmStudy.description}
-						<MarkdownRenderer content={ebiosRmStudy.description} />
-					{:else}
-						<p class="text-surface-500">--</p>
-					{/if}
-				</div>
-				<div class="grid md:grid-cols-2 gap-4">
-					<div>
-						<h4 class="font-semibold text-surface-700-300">{m.objectives()}</h4>
-						{#if ebiosRmStudy.objectives}
-							<MarkdownRenderer content={ebiosRmStudy.objectives} />
-						{:else}
-							<p class="text-surface-500">--</p>
-						{/if}
-					</div>
-					<div>
-						<h4 class="font-semibold text-surface-700-300">{m.constraintsHypotheses()}</h4>
-						{#if ebiosRmStudy.constraints_hypotheses}
-							<MarkdownRenderer content={ebiosRmStudy.constraints_hypotheses} />
-						{:else}
-							<p class="text-surface-500">--</p>
-						{/if}
-					</div>
 				</div>
 				<div class="flex flex-wrap gap-x-8 gap-y-1 text-sm text-surface-600-400">
 					<span
