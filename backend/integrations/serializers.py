@@ -23,6 +23,11 @@ class IntegrationProviderSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
+# Write-only credential keys that are kept from the stored row when a save
+# omits them (the edit form hides a secret once it is set).
+SECRET_CREDENTIAL_KEYS = ("api_token", "password")
+
+
 class ConnectionTestSerializer(serializers.Serializer):
     provider = serializers.CharField(write_only=True)
     configuration_id = serializers.PrimaryKeyRelatedField(
@@ -58,7 +63,9 @@ class ConnectionTestSerializer(serializers.Serializer):
                 raise serializers.ValidationError(
                     {"provider": "Provider does not match configuration."}
                 )
-            stored = config.credentials or {}
+            # Empty stored values (e.g. a stale ``password: null`` written by
+            # older saves) are not secrets to replay and must not pin the test.
+            stored = {k: v for k, v in (config.credentials or {}).items() if v}
             # a stored secret is only replayable to the connection it was stored for
             backfilled = {k for k in stored if not credentials.get(k)}
             if backfilled and any(
@@ -214,18 +221,24 @@ class IntegrationConfigurationSerializer(BaseModelSerializer):
             "provider", config.provider if config else None
         )
 
+        # Work on a copy: the request dict must not be mutated, and only secrets
+        # the stored row actually holds are carried over. Writing a key the
+        # provider never uses (``password: None`` on Jira) pollutes the stored
+        # credentials and breaks the connection-test secret pinning.
+        credentials = dict(data.get("credentials") or {})
+        if config:
+            stored = config.credentials or {}
+            for key in SECRET_CREDENTIAL_KEYS:
+                if not credentials.get(key) and stored.get(key):
+                    credentials[key] = stored[key]
+        if "credentials" in data:
+            data["credentials"] = credentials
+
         # The full configuration dictionary to be validated
         config_data = {
-            "credentials": data.get("credentials", {}),
+            "credentials": credentials,
             "settings": data.get("settings", {}),
         }
-
-        if not config_data["credentials"].get("api_token") and config:
-            config_data["credentials"]["api_token"] = config.credentials.get(
-                "api_token"
-            )
-        if not config_data["credentials"].get("password") and config:
-            config_data["credentials"]["password"] = config.credentials.get("password")
 
         is_valid, errors = IntegrationRegistry.validate_configuration(
             provider.name, config_data
