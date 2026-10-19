@@ -14,12 +14,10 @@ const superuser = {
 	root_folder_id: ROOT,
 	is_admin: true,
 	roles: ['BI-RL-GLA'],
-	domain_permissions: {
-		[ROOT]: Object.values(URL_MODEL_MAP).flatMap((model) => [
-			`add_${model.name}`,
-			`view_${model.name}`
-		])
-	}
+	permission_sets: [
+		Object.values(URL_MODEL_MAP).flatMap((model) => [`add_${model.name}`, `view_${model.name}`])
+	],
+	domain_permissions: { [ROOT]: 0 }
 } as unknown as User;
 
 const allFlags = new Proxy({}, { get: () => true }) as Record<string, boolean>;

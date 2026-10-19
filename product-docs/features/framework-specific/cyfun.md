@@ -4,7 +4,7 @@ description: Excel self-assessment import and export aligned with Belgium's Cent
 
 # CCB CyFun
 
-The [Centre for Cybersecurity Belgium](https://atwork.safeonweb.be/tools-resources/cyberfundamentals-framework) (CCB) publishes the **CyberFundamentals** framework as a self-assessment Excel workbook with a specific layout: one sheet per NIST CSF function (GOVERN, IDENTIFY, PROTECT, DETECT, RESPOND, RECOVER), rows pre-populated with controls, and answer cells where the responder records their documentation and implementation maturity scores.
+The [Centre for Cybersecurity Belgium](https://atwork.safeonweb.be/tools-resources/cyberfundamentals-framework) (CCB) publishes the **CyberFundamentals** framework as a self-assessment Excel workbook with a specific layout: rows pre-populated with controls, and answer cells where the responder records their documentation and implementation maturity scores. The CyFun 2025 tools come one per assurance level, with one sheet per NIST CSF function (GOVERN, IDENTIFY, PROTECT, DETECT, RESPOND, RECOVER); the CyFun 2023 tool covers the three levels in one workbook, with one **Details** sheet per level.
 
 CISO Assistant works with that workbook in both directions:
 
@@ -17,7 +17,7 @@ The import accepts the official **CyFun 2025** self-assessment tools, in any of 
 
 One import creates one new audit:
 
-1. The **CyFun 2025** framework library is loaded automatically if it isn't already.
+1. The **CyFun 2025** framework library is loaded automatically if it isn't already. If an older version is loaded, the import stops with `CyfunLibraryOutdated`: update the library first, since the import relies on its scoring settings.
 2. The assurance level is detected from the workbook content, and the audit's implementation group is set to match (basic, important, or essential), so the audit scopes to exactly the requirements of that edition.
 3. For every requirement row, the **Documentation Score** and **Implementation Score** land on the matching requirement assessment, and scoring — including the documentation score — is switched on for the audit automatically. Global and per-category maturity scores are then computed by the platform as usual.
 4. Rows marked `N/A` in the workbook become **Not applicable** results.
@@ -40,24 +40,51 @@ uv run clica.py import-cyfun-assessment \
 
 ## Exporting an audit to the workbook
 
-1. Load the **CCB CyFun 2025** framework library.
+1. Load the **CCB CyFun 2025** framework library (or **CCB CyFun 2023** for an audit on the previous version).
 2. Run an audit against that framework as usual — assess each requirement, attach evidence, link applied controls.
-3. From the audit's **Export** menu, choose **CyFun self-assessment**. The platform fills the official CCB template using the assessment data and downloads it.
+3. From the audit's **Export** menu, choose **CyFun self-assessment**. The platform fills the official CCB template using the assessment data and downloads it. It picks the template of the audit's assurance level from its implementation groups: **BASIC** when only BASIC groups are selected, **IMPORTANT** when the highest is an IMPORTANT group, **ESSENTIAL** otherwise (including when no group is selected). Each template lists only its level's requirements and applies its own N/A score and thresholds. A CyFun 2023 audit goes to the CCB's CyFun 2023 tool instead, where the export fills the sheet of the audit's level — **BASIC Details**, **IMPORTANT Details** or **ESSENTIAL Details** — picked the same way.
 
-The **CyFun self-assessment** option only appears when the audit is based on the **CyFun 2025** framework — for any other framework it isn't offered, so you can't accidentally produce a malformed workbook.
+The **CyFun self-assessment** option only appears when the audit is based on the **CyFun 2025** or **CyFun 2023** framework — for any other framework it isn't offered, so you can't accidentally produce a malformed workbook.
 
 ### Before you export
 
-The export writes each requirement's **score** into the official template, so two audit settings have to line up first — both on the audit's edit form under **More** (see [Customize your audit](../../guides/customize-audit.md)). Audits created by the CyFun import already have these set; this only matters for audits created manually:
+The export writes each requirement's **score** into the official template, so a few audit settings have to line up first — all on the audit's edit form under **More** (see [Customize your audit](../../guides/customize-audit.md)). Audits created by the CyFun import already have these set; this only matters for audits created manually:
 
-- **Make the score visible.** The **Score** field defaults to _Hidden_ in [field visibility](../../guides/customize-audit.md#field-visibility). Switch it on (and **Documentation score** if you use it) so the score is recorded and lands in the workbook.
-- **Use _Average of averages_ scoring.** Set the [score calculation method](../../guides/customize-audit.md#score-calculation-method) to **Average of averages** — that's the roll-up logic the CyFun framework expects, grouping requirements by category and averaging the category averages.
+- **Make the score visible.** New CyFun audits show the **Score** and **Documentation score** fields to auditors and respondents by default. New CyFun 2025 audits also hide the **Extended result** and the progress **Status**, which the CCB tools don't have: progress then follows the compliance field. On audits created before that, they may still be _Hidden_ in [field visibility](../../guides/customize-audit.md#field-visibility): switch them on so the scores are recorded and land in the workbook.
+- **Use _Average of averages_ scoring.** Set the [score calculation method](../../guides/customize-audit.md#score-calculation-method) to **Average of averages** — that's the roll-up logic the CyFun framework expects, grouping requirements by category and averaging the category averages. New CyFun audits are created with this method by default; audits created before that may still use **Average**. Scores are shown with two decimals, like the CCB workbook.
+- **Every requirement starts at the minimum.** In the CCB tools every control starts at 1 for documentation and implementation. CISO Assistant does the same: with scoring on, applicable requirements start at the bottom of the scale, and an unset documentation score counts as the minimum, so the maturity matches the tool's at every stage.
+- **Count N/A like the CCB tools.** The CyFun 2025 self-assessment tools count each N/A requirement as **2.5** at the BASIC level and **3** at IMPORTANT and ESSENTIAL. New CyFun 2025 audits do the same by default: [Anchor N/A to target score](../../guides/customize-audit.md#anchor-na-to-target-score) is on, with a **Target score** of 2.5 when only BASIC implementation groups are selected and 3 otherwise. The target is proposed when the audit is created: if you change its implementation groups later, adjust the **Target score** to the new level. Audits created before that leave N/A requirements out of the score until you set these two fields. The CyFun 2023 tool has no N/A score — its averages leave N/A requirements out — so CyFun 2023 audits keep this option off.
+- **Show the scores in the tool's order (optional).** The CCB tools list the documentation score before the implementation score. To do the same everywhere, turn on **Show the documentation score first** in the general settings, under **Audits** (see [General settings](../../configuration/settings/general.md#audits)). It applies to every audit of the instance.
 
 ### What lands in the workbook
 
-- Each requirement's **documentation score** and **implementation score** are written to the appropriate sheet and row; **Not applicable** results are written as `N/A`.
+- Each requirement's **documentation score** and **implementation score** are written to the appropriate sheet and row, as counted by the audit: a requirement that isn't scored, or a hidden documentation score, keeps the tool's own value. **Not applicable** results are written as `N/A`.
+- The export holds the whole audit, so respondents scoped to their part of it (auditees, third parties) cannot download it.
 - Observations from requirement assessments populate the comments column.
-- The official template scaffolding (cover page, formulas, summary sheet) is preserved untouched.
+- Only those cells change: the rest of the official tool (cover page, formulas, summary sheet, charts, score dropdowns) is preserved untouched, and the summary is recalculated when the file is opened.
+
+## Checking the CCB conformity criteria
+
+CyFun 2025 audits check, as you score, the conditions of the CCB's Conformity Assessment Scheme for their assurance level:
+
+|                                                                           | BASIC        | IMPORTANT    | ESSENTIAL                                                  |
+| ------------------------------------------------------------------------- | ------------ | ------------ | ---------------------------------------------------------- |
+| Total maturity                                                            | ≥ 2.5        | ≥ 3          | ≥ 3.5                                                      |
+| Each key measure, including those of the lower levels                     | ≥ 2.5        | ≥ 3          | ≥ 3                                                        |
+| Each category                                                             | –            | –            | ≥ 3                                                        |
+| Requirements marked **Not applicable** (measures excluded from the scope) | at most 1    | at most 3    | at most 5                                                  |
+| Never excluded                                                            | key measures | key measures | key measures and controls linked to the management aspects |
+
+On the audit page, a tile counts the criteria met (for instance _4 / 4 outcomes met_) and turns green when they all are; click it to see each criterion, met or not met, with one column per level and a **CCB conformity criteria met** line when all the criteria of that level hold.
+
+- **Which levels.** An audit shows the criteria of the levels it covers: BASIC when its BASIC implementation group is selected, IMPORTANT for IMPORTANT, ESSENTIAL for ESSENTIAL. An audit without implementation groups covers the whole framework and shows all three levels. An audit limited to key measures shows none: key measures alone are not a level.
+- **How it counts.** The total maturity is the maturity score of the level's requirements, computed like the audit's. A key measure's maturity is the average of its documentation and implementation scores; a key measure that is not applicable or not scored fails. A category is a second-level node such as GV.OC. Scores are compared unrounded, as in the CCB tools: a maturity of 2.497 shows as 2.50 but does not reach 2.5.
+- **When it updates.** The criteria are re-evaluated whenever a score, a documentation score or a compliance changes, and when the audit's scope or scoring settings change.
+- **Who sees it.** The criteria show to whoever sees the audit's **Compliance** field (see [field visibility](../../guides/customize-audit.md#field-visibility)).
+
+The check matches the CCB tool only with the CCB's scoring settings described [above](#before-you-export), which new CyFun 2025 audits get by default: **Average of averages**, **Anchor N/A to target score** with the level's target, and the documentation score shown. With other settings — for instance on audits created before these defaults — the verdict can differ from the tool's.
+
+This is a self-check: conformity is confirmed by the Conformity Assessment Body, from the official self-assessment tool's summary.
 
 ## Related
 

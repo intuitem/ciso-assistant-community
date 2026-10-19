@@ -1,3 +1,4 @@
+import { m } from '$paraglide/messages';
 import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 import DateFilter from '$lib/components/Forms/DateFilter.svelte';
 import type { ComponentType } from 'svelte';
@@ -20,6 +21,10 @@ import ReplaceWith from '$lib/components/ContextMenu/applied-controls/ReplaceWit
 import ChangeAttackStage from '$lib/components/ContextMenu/elementary-actions/ChangeAttackStage.svelte';
 import VulnerabilityChangeStatus from '$lib/components/ContextMenu/vulnerabilities/ChangeStatus.svelte';
 import VulnerabilityChangeSeverity from '$lib/components/ContextMenu/vulnerabilities/ChangeSeverity.svelte';
+import EntityAssessTier from '$lib/components/ContextMenu/entities/AssessTier.svelte';
+import EntityChangeTier from '$lib/components/ContextMenu/entities/ChangeTier.svelte';
+import ProcessingScreenDpia from '$lib/components/ContextMenu/processings/ScreenDpia.svelte';
+import ProcessingChangeDpiaRequired from '$lib/components/ContextMenu/processings/ChangeDpiaRequired.svelte';
 import ChangeChoiceField from '$lib/components/ContextMenu/ChangeChoiceField.svelte';
 import ToggleBooleanField from '$lib/components/ContextMenu/ToggleBooleanField.svelte';
 import ToggleRecoveryFlags from '$lib/components/ContextMenu/asset-assessments/ToggleRecoveryFlags.svelte';
@@ -82,20 +87,6 @@ const TRIGGER_TYPE_OPTIONS = [
 	{ label: 'triggerWebhook', value: 'webhook' },
 	{ label: 'triggerSchedule', value: 'schedule' },
 	{ label: 'triggerInternalEvent', value: 'internal_event' }
-];
-
-const SOLUTION_CRITICALITY_OPTIONS = [
-	{ label: '1', value: '1' },
-	{ label: '2', value: '2' },
-	{ label: '3', value: '3' },
-	{ label: '4', value: '4' }
-];
-
-const ENTITY_CRITICALITY_OPTIONS = [
-	{ label: '1', value: '1' },
-	{ label: '2', value: '2' },
-	{ label: '3', value: '3' },
-	{ label: '4', value: '4' }
 ];
 
 // Labels are the tokens the API serialises for `content_type`, so the column and this
@@ -264,6 +255,7 @@ export const COMMITMENT_OWNER_FILTER: ListViewFilterConfig = {
 export const DOMAIN_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
+		lazy: true,
 		optionsEndpoint: 'folders?content_type=DO&content_type=GL',
 		label: 'domain',
 		multiple: true
@@ -669,6 +661,47 @@ export const PROCESSING_STATUS_FILTER: ListViewFilterConfig = {
 		multiple: true
 	}
 };
+export const DPIA_REQUIRED_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'processings/dpia_required',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'dpiaRequired',
+		browserCache: 'force-cache',
+		multiple: false
+	}
+};
+export const DPIA_REQUIREMENT_SOURCE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		// Labelled on purpose: the raw values translate as generic words
+		// ("assessment" reads "Audit" in French). Getters follow the current language.
+		options: [
+			{
+				get label() {
+					return m.dpiaSourceAssessment();
+				},
+				value: 'assessment'
+			},
+			{
+				get label() {
+					return m.dpiaSourceOverride();
+				},
+				value: 'override'
+			},
+			{
+				get label() {
+					return m.dpiaSourceManual();
+				},
+				value: 'manual'
+			}
+		],
+		translateOptions: false,
+		label: 'source',
+		multiple: true
+	}
+};
 export const LEGAL_BASIS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -923,15 +956,6 @@ export const DATA_SUBJECT_CATEGORY_FILTER: ListViewFilterConfig = {
 	}
 };
 
-export const SOLUTION_CRITICALITY_FILTER: ListViewFilterConfig = {
-	component: AutocompleteSelect,
-	props: {
-		label: 'criticality',
-		options: SOLUTION_CRITICALITY_OPTIONS,
-		multiple: true
-	}
-};
-
 export const SOLUTION_OWNER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -943,14 +967,6 @@ export const SOLUTION_OWNER_FILTER: ListViewFilterConfig = {
 	}
 };
 
-export const ENTITY_CRITICALITY_FILTER: ListViewFilterConfig = {
-	component: AutocompleteSelect,
-	props: {
-		label: 'criticality',
-		options: ENTITY_CRITICALITY_OPTIONS,
-		multiple: true
-	}
-};
 export const RISK_IMPACT_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1034,6 +1050,15 @@ export const ENABLED_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'enabled',
+		options: YES_NO_OPTIONS,
+		multiple: false
+	}
+};
+
+export const TASK_OVERDUE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'overdue',
 		options: YES_NO_OPTIONS,
 		multiple: false
 	}
@@ -1186,6 +1211,61 @@ export const ENTITY_RELATIONSHIP_FILTER: ListViewFilterConfig = {
 		optionsLabelField: 'name',
 		label: 'relationship',
 		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
+export const TIER_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'tiers',
+		optionsLabelField: 'name',
+		optionsValueField: 'id',
+		label: 'tier',
+		multiple: true
+	}
+};
+
+// Entities only: their tier is optional, and "--" lists the untiered ones.
+export const ENTITY_TIER_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'tiers',
+		optionsLabelField: 'name',
+		optionsValueField: 'id',
+		label: 'tier',
+		multiple: true,
+		enableDoubleDash: true
+	}
+};
+
+export const TIER_SOURCE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		// Labelled on purpose: the raw values translate as generic words
+		// ("assessment" reads "Audit" in French). Getters follow the current language.
+		options: [
+			{
+				get label() {
+					return m.tierSourceAssessment();
+				},
+				value: 'assessment'
+			},
+			{
+				get label() {
+					return m.tierSourceOverride();
+				},
+				value: 'override'
+			},
+			{
+				get label() {
+					return m.tierSourceManual();
+				},
+				value: 'manual'
+			}
+		],
+		translateOptions: false,
+		label: 'source',
 		multiple: true
 	}
 };
@@ -1601,6 +1681,18 @@ export const CONTRACT_STATUS_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const QUICK_FORM_RESPONSE_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'status',
+		optionsEndpoint: 'quick-form-responses/status',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
 export const EVIDENCE_OWNER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1660,8 +1752,9 @@ export const CWE_FILTER: ListViewFilterConfig = {
 
 export const listViewFields = {
 	folders: {
-		head: ['name', 'description', 'contentType', 'parentDomain', 'iamGroups', 'labels'],
+		head: ['ref_id', 'name', 'description', 'contentType', 'parentDomain', 'iamGroups', 'labels'],
 		body: [
+			'ref_id',
 			'name',
 			'description',
 			'content_type',
@@ -2258,7 +2351,8 @@ export const listViewFields = {
 		body: ['ref_id', 'name', 'quick_form', 'status', 'respondents', 'due_date', 'folder'],
 		meta: ['id', 'status'],
 		filters: {
-			folder: DOMAIN_FILTER
+			folder: DOMAIN_FILTER,
+			status: QUICK_FORM_RESPONSE_STATUS_FILTER
 		}
 	},
 	'compliance-assessments': {
@@ -2340,7 +2434,6 @@ export const listViewFields = {
 		head: ['version', 'evidence', 'file', 'size', 'updatedAt'],
 		body: ['version', 'evidence', 'attachment', 'size', 'updated_at'],
 		filters: {
-			filtering_labels: LABELS_FILTER,
 			created_at: CREATED_AT_FILTER,
 			updated_at: UPDATED_AT_FILTER
 		}
@@ -2456,6 +2549,7 @@ export const listViewFields = {
 		head: [
 			'refId',
 			'name',
+			'tier',
 			'description',
 			'domain',
 			'parentEntity',
@@ -2466,6 +2560,7 @@ export const listViewFields = {
 		body: [
 			'ref_id',
 			'name',
+			'tier',
 			'description',
 			'folder',
 			'parent_entity',
@@ -2474,8 +2569,16 @@ export const listViewFields = {
 			'default_criticality'
 		],
 		optionalFields: {
-			head: ['lastAssessmentDate', 'filteringLabels', 'referenceLink', 'createdAt', 'updatedAt'],
+			head: [
+				'tierSetAt',
+				'lastAssessmentDate',
+				'filteringLabels',
+				'referenceLink',
+				'createdAt',
+				'updatedAt'
+			],
 			body: [
+				'tier_set_at',
 				'last_assessment_date',
 				'filtering_labels',
 				'reference_link',
@@ -2487,6 +2590,7 @@ export const listViewFields = {
 			folder: DOMAIN_FILTER,
 			parent_entity: PARENT_ENTITY_FILTER,
 			relationship: ENTITY_RELATIONSHIP_FILTER,
+			tier: ENTITY_TIER_FILTER,
 			last_assessment_status: LAST_ASSESSMENT_STATUS_FILTER,
 			filtering_labels: LABELS_FILTER,
 			created_at: CREATED_AT_FILTER,
@@ -2505,7 +2609,6 @@ export const listViewFields = {
 			// ambiguous next to Completion; the audits table keeps that wording.
 			'auditReviewProgress',
 			'dueDate',
-			'criticality',
 			'conclusion',
 			'folder'
 		],
@@ -2518,7 +2621,6 @@ export const listViewFields = {
 			'completion',
 			'review_progress',
 			'due_date',
-			'criticality',
 			'conclusion',
 			'folder'
 		],
@@ -2530,22 +2632,21 @@ export const listViewFields = {
 			perimeter: PERIMETER_FILTER,
 			entity: ENTITY_FILTER,
 			status: COMPLIANCE_ASSESSMENT_STATUS_FILTER,
-			criticality: ENTITY_CRITICALITY_FILTER,
 			conclusion: ENTITY_ASSESSMENT_CONCLUSION_FILTER,
 			due_date: dateFilter('due_date'),
 			expiry_date: dateFilter('expiry_date')
 		}
 	},
 	solutions: {
-		head: ['refId', 'name', 'description', 'providerEntity', 'criticality', 'labels'],
-		body: ['ref_id', 'name', 'description', 'provider_entity', 'criticality', 'filtering_labels'],
+		head: ['refId', 'name', 'description', 'providerEntity', 'tier', 'labels'],
+		body: ['ref_id', 'name', 'description', 'provider_entity', 'tier', 'filtering_labels'],
 		optionalFields: {
 			head: ['createdAt', 'updatedAt'],
 			body: ['created_at', 'updated_at']
 		},
 		filters: {
 			provider_entity: ENTITY_FILTER,
-			criticality: SOLUTION_CRITICALITY_FILTER,
+			tier: ENTITY_TIER_FILTER,
 			filtering_labels: LABELS_FILTER,
 			created_at: CREATED_AT_FILTER,
 			updated_at: UPDATED_AT_FILTER
@@ -2583,6 +2684,33 @@ export const listViewFields = {
 			solutions: SOLUTION_FILTER,
 			start_date: dateFilter('start_date'),
 			end_date: dateFilter('end_date')
+		}
+	},
+	tiers: {
+		head: ['name', 'rank', 'color', 'isVisible', 'entitiesCount'],
+		body: ['name', 'rank', 'hexcolor', 'is_visible', 'entities_count']
+	},
+	'entity-tier-changes': {
+		head: ['createdAt', 'tier', 'previousTier', 'source', 'changedBy', 'note', 'entity'],
+		body: ['created_at', 'tier', 'previous_tier', 'source', 'changed_by', 'note', 'entity'],
+		filters: {
+			tier: TIER_FILTER,
+			source: TIER_SOURCE_FILTER
+		}
+	},
+	'dpia-requirement-changes': {
+		head: ['createdAt', 'dpiaRequired', 'previously', 'source', 'changedBy', 'note', 'processing'],
+		body: [
+			'created_at',
+			'dpia_required',
+			'previous_dpia_required',
+			'source',
+			'changed_by',
+			'note',
+			'processing'
+		],
+		filters: {
+			source: DPIA_REQUIREMENT_SOURCE_FILTER
 		}
 	},
 	'entity-scores': {
@@ -2672,11 +2800,41 @@ export const listViewFields = {
 		}
 	},
 	processings: {
-		head: ['refId', 'name', 'description', 'status', 'processingNature', 'labels', 'folder'],
-		body: ['ref_id', 'name', 'description', 'status', 'nature', 'filtering_labels', 'folder'],
+		head: [
+			'refId',
+			'name',
+			'description',
+			'status',
+			'processingRole',
+			'processingNature',
+			'labels',
+			'folder'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'description',
+			'status',
+			'role',
+			'nature',
+			'filtering_labels',
+			'folder'
+		],
 		optionalFields: {
-			head: ['personalDataCategories', 'dataSubjectCategories', 'updatedAt'],
-			body: ['personal_data_categories', 'data_subject_categories', 'updated_at']
+			head: [
+				'processingControllers',
+				'personalDataCategories',
+				'dataSubjectCategories',
+				'dpiaRequired',
+				'updatedAt'
+			],
+			body: [
+				'controllers',
+				'personal_data_categories',
+				'data_subject_categories',
+				'dpia_required',
+				'updated_at'
+			]
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -2690,7 +2848,27 @@ export const listViewFields = {
 				}
 			},
 			status: PROCESSING_STATUS_FILTER,
+			role: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'processings/role',
+					optionsLabelField: 'label',
+					optionsValueField: 'value',
+					label: 'processingRole',
+					browserCache: 'force-cache',
+					multiple: true
+				}
+			},
+			controllers: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'entities',
+					label: 'processingControllers',
+					multiple: true
+				}
+			},
 			nature: PROCESSING_NATURE_FILTER,
+			dpia_required: DPIA_REQUIRED_FILTER,
 			personal_data__category: PERSONAL_DATA_CATEGORY_FILTER,
 			data_subjects__category: DATA_SUBJECT_CATEGORY_FILTER,
 			filtering_labels: LABELS_FILTER,
@@ -2887,12 +3065,17 @@ export const listViewFields = {
 			'description',
 			'folder',
 			'status',
-			'quotation_method',
+			'quotation_method_display',
 			'created_at',
 			'updated_at'
 		],
+		optionalFields: {
+			head: ['classification'],
+			body: ['classification']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
+			classification: CLASSIFICATION_FILTER,
 			category: ORGANISATION_ISSUE_CATEGORY_FILTER,
 			origin: ORGANISATION_ISSUE_ORIGIN_FILTER,
 			status: ORGANISATION_ISSUE_STATUS_FILTER,
@@ -3023,8 +3206,8 @@ export const listViewFields = {
 		}
 	},
 	'elementary-actions': {
-		head: ['ref_id', 'folder', '', 'name', 'attack_stage', 'threat'],
-		body: ['ref_id', 'folder', 'icon_fa_class', 'name', 'attack_stage', 'threat'],
+		head: ['ref_id', 'folder', '', 'name', 'attack_stage', 'technique', 'threat'],
+		body: ['ref_id', 'folder', 'icon_fa_class', 'name', 'attack_stage', 'technique', 'threat'],
 		filters: {
 			attack_stage: {
 				component: AutocompleteSelect,
@@ -3041,8 +3224,14 @@ export const listViewFields = {
 		body: ['ref_id', 'name', 'likelihood']
 	},
 	'kill-chains': {
-		head: ['elementary_action', 'attack_stage', 'antecedents', 'logic_operator'],
-		body: ['elementary_action', 'attack_stage', 'antecedents', 'logic_operator']
+		head: [
+			'elementary_action',
+			'attack_stage',
+			'antecedents',
+			'logic_operator',
+			'supportingAssets'
+		],
+		body: ['elementary_action', 'attack_stage', 'antecedents', 'logic_operator', 'assets']
 	},
 	notifications: {
 		head: ['read', 'category', 'title', 'created_at'],
@@ -3447,8 +3636,9 @@ export const listViewFields = {
 			enabled: ENABLED_FILTER,
 			last_occurrence_status: LAST_OCCURENCE_STATUS_FILTER,
 			next_occurrence_status: NEXT_OCCURENCE_STATUS_FILTER,
+			overdue: TASK_OVERDUE_FILTER,
 			filtering_labels: LABELS_FILTER,
-			task_date: dateFilter('task_date'),
+			task_date: dateFilter('task_date', { label: 'startDate' }),
 			created_at: CREATED_AT_FILTER,
 			updated_at: UPDATED_AT_FILTER
 		}
@@ -3836,7 +4026,15 @@ export const contextMenuActions = {
 		{ component: VulnerabilityChangeSeverity, props: {} }
 	],
 	'asset-assessments': [{ component: ToggleRecoveryFlags, props: {} }],
-	'metric-instances': [{ component: MetricInstanceEditValue, props: {} }]
+	'metric-instances': [{ component: MetricInstanceEditValue, props: {} }],
+	entities: [
+		{ component: EntityAssessTier, props: {} },
+		{ component: EntityChangeTier, props: {} }
+	],
+	processings: [
+		{ component: ProcessingScreenDpia, props: {} },
+		{ component: ProcessingChangeDpiaRequired, props: {} }
+	]
 };
 
 // Batch action configuration.
@@ -3860,7 +4058,8 @@ export interface BatchActionConfig {
 		| 'remove_m2m'
 		| 'change_folder'
 		| 'group'
-		| 'merge';
+		| 'merge'
+		| 'compose';
 	label: string;
 	icon: string;
 	field?: string;
@@ -3895,6 +4094,25 @@ export interface ParentActionConfig {
 }
 
 export type TableBatchAction = BatchActionConfig | ParentActionConfig;
+
+export const quickFilterPresets: Partial<
+	Record<urlModel, { label: string; icon: string; field: string; values: string[] }[]>
+> = {
+	processings: [
+		{
+			label: 'controllerRegister',
+			icon: 'fa-clipboard-list',
+			field: 'role',
+			values: ['privacy_controller', 'privacy_joint_controller']
+		},
+		{
+			label: 'processorRegister',
+			icon: 'fa-handshake',
+			field: 'role',
+			values: ['privacy_data_processor']
+		}
+	]
+};
 
 export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 	// The whole vocabulary: read stops the reminder, delete removes the message (§4).
@@ -4457,6 +4675,13 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 	],
 	entities: [
 		{
+			type: 'change_field',
+			label: 'changeTier',
+			icon: 'fa-solid fa-layer-group',
+			field: 'tier',
+			optionsEndpoint: 'tiers?is_visible=true'
+		},
+		{
 			type: 'group',
 			label: 'manageLabels',
 			icon: 'fa-solid fa-tags',
@@ -4542,6 +4767,13 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			optionsEndpoint: 'processings/status'
 		},
 		{
+			type: 'change_field',
+			label: 'setDpiaRequirementManually',
+			icon: 'fa-solid fa-scale-balanced',
+			field: 'dpia_required',
+			optionsEndpoint: 'processings/dpia_required'
+		},
+		{
 			type: 'change_folder',
 			label: 'changeDomain',
 			icon: 'fa-solid fa-folder',
@@ -4575,6 +4807,12 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 		}
 	],
 	'metric-instances': [
+		{
+			type: 'compose',
+			label: 'computeFromSelection',
+			icon: 'fa-solid fa-calculator',
+			maxSelection: 20
+		},
 		{
 			type: 'change_field',
 			label: 'changeStatus',

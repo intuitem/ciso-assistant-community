@@ -1,0 +1,312 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:octopus-habitat-security-standard
+locale: en
+ref_id: OHSS.v1
+name: Octopus Habitat Security Standard
+description: The Octopus Habitat Security Standard (OHSS) sets baseline safeguards
+  for an octopus-managed home that remains submerged beneath the reef. To qualify
+  for certification by the Mermaid Authority, the owner must show that access is controlled,
+  essential habitat systems remain safe, and incidents can be handled.
+copyright: "\xA9 2026 intuitem"
+version: 1
+publication_date: 2026-10-08
+provider: Mermaid Authority
+packager: intuitem
+translations:
+  fr:
+    name: "R\xE9f\xE9rentiel de S\xE9curit\xE9 de l'Habitat du Poulpe"
+    description: "Le R\xE9f\xE9rentiel de S\xE9curit\xE9 de l'Habitat du Poulpe (RSHP)\
+      \ fixe les protections de base d'une maison de poulpe immerg\xE9e en permanence\
+      \ sous le r\xE9cif. Pour \xEAtre certifi\xE9 par l'Autorit\xE9 des Sir\xE8nes,\
+      \ son propri\xE9taire doit d\xE9montrer que les acc\xE8s sont ma\xEEtris\xE9\
+      s, que les syst\xE8mes essentiels de l'habitat restent s\xFBrs et que les incidents\
+      \ peuvent \xEAtre trait\xE9s."
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:octopus-habitat-security-standard
+    ref_id: OHSS.v1
+    name: Octopus Habitat Security Standard
+    description: The Octopus Habitat Security Standard (OHSS) sets baseline safeguards
+      for an octopus-managed home that remains submerged beneath the reef. To qualify
+      for certification by the Mermaid Authority, the owner must show that access
+      is controlled, essential habitat systems remain safe, and incidents can be handled.
+    translations:
+      fr:
+        name: "R\xE9f\xE9rentiel de S\xE9curit\xE9 de l'Habitat du Poulpe"
+        description: "Le R\xE9f\xE9rentiel de S\xE9curit\xE9 de l'Habitat du Poulpe\
+          \ (RSHP) fixe les protections de base d'une maison de poulpe immerg\xE9\
+          e en permanence sous le r\xE9cif. Pour \xEAtre certifi\xE9 par l'Autorit\xE9\
+          \ des Sir\xE8nes, son propri\xE9taire doit d\xE9montrer que les acc\xE8\
+          s sont ma\xEEtris\xE9s, que les syst\xE8mes essentiels de l'habitat restent\
+          \ s\xFBrs et que les incidents peuvent \xEAtre trait\xE9s."
+    min_score: 0
+    max_score: 2
+    scores_definition:
+    - score: 0
+      name: Not met
+      description: No reliable evidence that the requirement is met.
+      translations:
+        fr:
+          name: Non atteint
+          description: Aucune preuve fiable ne montre que l'exigence est satisfaite.
+    - score: 1
+      name: Partly met
+      description: The safeguard exists but is incomplete, untested or inconsistently
+        applied.
+      translations:
+        fr:
+          name: Partiellement atteint
+          description: "La protection existe, mais elle est incompl\xE8te, non test\xE9\
+            e ou appliqu\xE9e de fa\xE7on irr\xE9guli\xE8re."
+    - score: 2
+      name: Met
+      description: The safeguard is in place and supported by current evidence.
+      translations:
+        fr:
+          name: Atteint
+          description: "La protection est en place et appuy\xE9e par des preuves r\xE9\
+            centes."
+    implementation_groups_definition:
+    - ref_id: access
+      name: Access
+      description: null
+      translations:
+        fr:
+          name: "Acc\xE8s"
+    - ref_id: operations
+      name: Operations
+      description: null
+      translations:
+        fr:
+          name: Exploitation
+    - ref_id: habitat
+      name: Habitat
+      description: null
+      translations:
+        fr:
+          name: Habitat
+    - ref_id: monitoring
+      name: Monitoring
+      description: null
+      translations:
+        fr:
+          name: Surveillance
+    - ref_id: response
+      name: Response
+      description: null
+      translations:
+        fr:
+          name: "R\xE9ponse"
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:octopus-habitat-security-standard:oh.1
+      assessable: false
+      depth: 1
+      ref_id: OH.1
+      name: Access and identity
+      translations:
+        fr:
+          name: "Acc\xE8s et Identit\xE9s"
+    - urn: urn:intuitem:risk:req_node:octopus-habitat-security-standard:oh.1.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:octopus-habitat-security-standard:oh.1
+      ref_id: OH.1.1
+      description: Maintain an inventory of permanent residents and authorized visitors,
+        including the areas each may enter.
+      implementation_groups:
+      - access
+      translations:
+        fr:
+          description: "Tenir un inventaire des r\xE9sidents permanents et des visiteurs\
+            \ autoris\xE9s, avec les zones auxquelles chacun peut acc\xE9der."
+    - urn: urn:intuitem:risk:req_node:octopus-habitat-security-standard:oh.1.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:octopus-habitat-security-standard:oh.1
+      ref_id: OH.1.2
+      description: Use a controlled entry procedure for visitors. Record the host,
+        entry and exit times, and review the log at least monthly.
+      implementation_groups:
+      - access
+      - operations
+      translations:
+        fr:
+          description: "Appliquer une proc\xE9dure d'entr\xE9e contr\xF4l\xE9e pour\
+            \ les visiteurs. Noter l'h\xF4te ainsi que les heures d'entr\xE9e et de\
+            \ sortie, puis v\xE9rifier le registre au moins chaque mois."
+    - urn: urn:intuitem:risk:req_node:octopus-habitat-security-standard:oh.1.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:octopus-habitat-security-standard:oh.1
+      ref_id: OH.1.3
+      description: Revoke access within one tide cycle when a resident or contractor
+        no longer needs it.
+      implementation_groups:
+      - access
+      translations:
+        fr:
+          description: "R\xE9voquer les acc\xE8s dans un d\xE9lai d'un cycle de mar\xE9\
+            e lorsqu'un r\xE9sident ou un prestataire n'en a plus besoin."
+    - urn: urn:intuitem:risk:req_node:octopus-habitat-security-standard:oh.2
+      assessable: false
+      depth: 1
+      ref_id: OH.2
+      name: Habitat and equipment
+      translations:
+        fr:
+          name: "Habitat et \xC9quipements"
+    - urn: urn:intuitem:risk:req_node:octopus-habitat-security-standard:oh.2.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:octopus-habitat-security-standard:oh.2
+      ref_id: OH.2.1
+      name: Inspect and maintain habitat structures and access points.
+      translations:
+        fr:
+          name: "Inspecter et entretenir la structure et les points d'acc\xE8s de\
+            \ l'habitat."
+    - urn: urn:intuitem:risk:req_node:octopus-habitat-security-standard:oh.2.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:octopus-habitat-security-standard:oh.2.1
+      ref_id: OH.2.1.1
+      description: Inspect structural supports, anchoring points and entry hatches
+        at least quarterly.
+      implementation_groups:
+      - habitat
+      translations:
+        fr:
+          description: Inspecter les supports de la structure, les points d'ancrage
+            et les sas au moins une fois par trimestre.
+    - urn: urn:intuitem:risk:req_node:octopus-habitat-security-standard:oh.2.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:octopus-habitat-security-standard:oh.2.1
+      ref_id: OH.2.1.2
+      description: Record and repair defects that could destabilize the habitat or
+        permit unauthorized entry.
+      implementation_groups:
+      - habitat
+      translations:
+        fr:
+          description: "Consigner et r\xE9parer les d\xE9fauts pouvant d\xE9stabiliser\
+            \ l'habitat ou permettre une intrusion."
+    - urn: urn:intuitem:risk:req_node:octopus-habitat-security-standard:oh.2.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:octopus-habitat-security-standard:oh.2
+      ref_id: OH.2.2
+      description: Equip the habitat with alerts for strong currents and unauthorized
+        entry, and test both alerts at least monthly.
+      implementation_groups:
+      - habitat
+      - monitoring
+      questions:
+        urn:intuitem:risk:req_node:octopus-habitat-security-standard:oh.2.2:question:1:
+          type: unique_choice
+          text: Are both alerts enabled?
+          translations:
+            fr:
+              text: Les deux alertes sont-elles actives ?
+          choices:
+          - urn: urn:intuitem:risk:req_node:octopus-habitat-security-standard:oh.2.2:question:1:choice:1
+            value: 'Yes'
+            translations:
+              fr:
+                value: Oui
+          - urn: urn:intuitem:risk:req_node:octopus-habitat-security-standard:oh.2.2:question:1:choice:2
+            value: 'No'
+            translations:
+              fr:
+                value: Non
+        urn:intuitem:risk:req_node:octopus-habitat-security-standard:oh.2.2:question:2:
+          type: multiple_choice
+          text: Which alerts were tested in the past month?
+          translations:
+            fr:
+              text: "Quelles alertes ont \xE9t\xE9 test\xE9es au cours du dernier\
+                \ mois ?"
+          choices:
+          - urn: urn:intuitem:risk:req_node:octopus-habitat-security-standard:oh.2.2:question:2:choice:1
+            value: Strong current
+            translations:
+              fr:
+                value: Forts courants
+          - urn: urn:intuitem:risk:req_node:octopus-habitat-security-standard:oh.2.2:question:2:choice:2
+            value: Intrusion
+            translations:
+              fr:
+                value: Intrusion
+      translations:
+        fr:
+          description: "\xC9quiper l'habitat d'alertes en cas de forts courants ou\
+            \ d'intrusion, puis tester les deux alertes au moins chaque mois."
+    - urn: urn:intuitem:risk:req_node:octopus-habitat-security-standard:oh.2.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:octopus-habitat-security-standard:oh.2
+      ref_id: OH.2.3
+      description: Keep a tested backup power source for critical lighting, alerts
+        and communication equipment.
+      translations:
+        fr:
+          description: "Disposer d'une alimentation de secours test\xE9e pour l'\xE9\
+            clairage, les alertes et les \xE9quipements de communication critiques."
+    - urn: urn:intuitem:risk:req_node:octopus-habitat-security-standard:oh.3
+      assessable: false
+      depth: 1
+      ref_id: OH.3
+      name: Monitoring and response
+      translations:
+        fr:
+          name: "Surveillance et R\xE9ponse"
+    - urn: urn:intuitem:risk:req_node:octopus-habitat-security-standard:oh.3.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:octopus-habitat-security-standard:oh.3
+      ref_id: OH.3.1
+      description: Maintain an emergency contact route and a safe evacuation path
+        from each occupied chamber.
+      implementation_groups:
+      - response
+      translations:
+        fr:
+          description: "Maintenir un moyen de contacter les secours et un chemin d'\xE9\
+            vacuation s\xFBr depuis chaque pi\xE8ce occup\xE9e."
+    - urn: urn:intuitem:risk:req_node:octopus-habitat-security-standard:oh.3.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:octopus-habitat-security-standard:oh.3
+      ref_id: OH.3.2
+      description: Record security and safety incidents, including the time, affected
+        area, actions taken and outcome.
+      implementation_groups:
+      - response
+      - monitoring
+      questions:
+        urn:intuitem:risk:req_node:octopus-habitat-security-standard:oh.3.2:question:1:
+          type: text
+          text: Where is the latest incident record stored, and how can it be retrieved?
+          translations:
+            fr:
+              text: "O\xF9 est conserv\xE9 le dernier compte rendu d'incident et comment\
+                \ peut-on le retrouver ?"
+      translations:
+        fr:
+          description: "Consigner les incidents de s\xE9curit\xE9 et de s\xFBret\xE9\
+            , avec l'heure, la zone touch\xE9e, les actions men\xE9es et le r\xE9\
+            sultat."
+    - urn: urn:intuitem:risk:req_node:octopus-habitat-security-standard:oh.3.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:octopus-habitat-security-standard:oh.3
+      ref_id: OH.3.3
+      description: Review every incident within seven days and track corrective actions
+        to closure.
+      implementation_groups:
+      - response
+      translations:
+        fr:
+          description: "Examiner chaque incident dans les sept jours et suivre les\
+            \ actions correctives jusqu'\xE0 leur cl\xF4ture."

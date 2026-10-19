@@ -24,7 +24,7 @@ DEFAULT_LOCALE = "en"
 MERMAID_MAX_SOURCE_CHARS = 20_000
 MERMAID_TEMPLATE = """#import "@preview/merman:0.3.0": mermaid
 #set page(width: auto, height: auto, margin: 0pt, fill: none)
-#mermaid(sys.inputs.source, error-mode: "panic")
+#mermaid(sys.inputs.source, error-mode: "panic", theme-name: "redux-color", site-config: (look: "neo", layout: "elk"))
 """
 
 

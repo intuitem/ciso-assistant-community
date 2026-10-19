@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Handle, Position } from '@xyflow/svelte';
 	import { getContext, tick } from 'svelte';
+	import { goto } from '$app/navigation';
 
 	interface Props {
 		id: string;
@@ -17,7 +18,7 @@
 		renameAsset: (id: string, name: string) => Promise<boolean>;
 		toggleAssetType: (id: string) => Promise<boolean>;
 		confirmDeleteAsset: (id: string, name: string) => void;
-	}>('assetBoard');
+	}>('assetGraph');
 
 	// `data.type` is always the raw code 'PR' or 'SP' (set by AssetBoard from `is_primary`).
 	const isPrimary = $derived(data.type === 'PR');
@@ -100,6 +101,10 @@
 	class="asset-node relative rounded-base border-[1.5px] bg-surface-50-950 px-3 py-2 min-w-[160px] max-w-[220px] select-none shadow-sm {borderClass}"
 	onmouseenter={() => (hovered = true)}
 	onmouseleave={() => (hovered = false)}
+	ondblclick={() => !editing && goto(`/experimental/asset-map?focus=${id}`)}
+	title="Double-click to open its dependency map"
+	role="button"
+	tabindex="-1"
 >
 	<div class="absolute left-0 top-0 bottom-0 w-1 rounded-l-base {accentClass}"></div>
 
@@ -138,13 +143,7 @@
 					class="nodrag nopan mt-1 w-full text-[12px] font-semibold leading-tight text-surface-900-100 bg-surface-50-950 border border-primary-400 rounded px-1 py-0.5 outline-none"
 				/>
 			{:else}
-				<div
-					role="button"
-					tabindex="0"
-					title="Double-click to rename"
-					class="text-[12px] font-semibold leading-tight text-surface-900-100 mt-1 break-words cursor-text"
-					ondblclick={startEdit}
-				>
+				<div class="text-[12px] font-semibold leading-tight text-surface-900-100 mt-1 break-words">
 					{data.label}
 				</div>
 			{/if}
@@ -163,7 +162,28 @@
 				onclick={(e) => e.stopPropagation()}
 				onmousedown={(e) => e.stopPropagation()}
 			>
+				<i class="fa-solid fa-up-right-from-square text-[8px]"></i>
+			</a>
+			<button
+				type="button"
+				aria-label="Rename asset"
+				title="Rename"
+				class="w-4 h-4 rounded-full bg-surface-200 hover:bg-surface-300 text-surface-700 flex items-center justify-center cursor-pointer shadow"
+				onclick={startEdit}
+				onmousedown={(e) => e.stopPropagation()}
+				ondblclick={(e) => e.stopPropagation()}
+			>
 				<i class="fa-solid fa-pen text-[8px]"></i>
+			</button>
+			<a
+				href="/experimental/asset-map?focus={id}"
+				aria-label="Open dependency map"
+				title="Open dependency map"
+				class="w-4 h-4 rounded-full bg-secondary-500 hover:bg-secondary-600 text-white flex items-center justify-center cursor-pointer shadow"
+				onclick={(e) => e.stopPropagation()}
+				onmousedown={(e) => e.stopPropagation()}
+			>
+				<i class="fa-solid fa-sitemap text-[8px]"></i>
 			</a>
 			<button
 				type="button"

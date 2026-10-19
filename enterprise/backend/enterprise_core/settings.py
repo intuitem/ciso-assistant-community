@@ -63,6 +63,15 @@ Otherwise `Folder.default_role` is immutable: the root folder carries the baseli
 reader role, re-pinned by `startup()` at every boot, and no other folder gets one.
 """
 
+DELEGATED_USER_CREATION = True
+"""
+If set to `True`, `startup()` provisions the builtin User creator role (`add_user`
+and `view_user` only) and its "Global - User creator" group, so that non-admins
+such as domain managers can create users.
+
+Otherwise neither the role nor the group is created.
+"""
+
 # --- License ---
 LICENSE_SEATS = int(os.environ.get("LICENSE_SEATS", 1))
 LICENSE_EXPIRATION = os.environ.get("LICENSE_EXPIRATION", "unset")

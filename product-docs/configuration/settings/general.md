@@ -36,7 +36,7 @@ Instance-wide settings that don't belong to a more specific category. Grouped he
 
 ## Notifications
 
-- **Enable email notifications** — master switch for outbound email notifications. See also [Setting up mailer](../../installation/mailer.md).
+- **Enable email notifications** — master switch for outbound email notifications. It doesn't affect the in-app [notification inbox](../../features/notifications.md). See also [Setting up mailer](../../installation/mailer.md).
 
 ## AI / LLM provider
 
@@ -59,8 +59,13 @@ To connect a hosted service such as OVHcloud AI Endpoints or OpenRouter, see [Ho
 
 - **Default custom analytics dashboard** — UUID of the dashboard shown by default on the analytics page.
 
+## Audits
+
+- **Score scale** — the organisation default scale, proposed on the audit form for frameworks without a scale of their own. Pick a preset (**0–100**, **0–5**, **1–5**, **1–4**, **0–3**) or **Custom** to set your own **Minimum score** and **Maximum score** (whole numbers). A custom scale of up to 11 levels can name each level, one column per language (**Add translation**); the first column is shown to anyone whose language has no label. Wider scales are continuous and carry no labels. Defaults to **0–5**. Changing it affects new audits only — existing audits keep their scale. See [Choosing the score scale](../../guides/customize-audit.md#choosing-the-score-scale).
+- **Show the documentation score first** — where an audit shows both scores (requirement tree, requirement page and form, table mode, auditee view, Advanced Analytics), shows the documentation score before the implementation score, as tools such as the CCB CyFun self-assessment do. Off by default: implementation first.
+
 ## Domain-tree audit inheritance
 
-Shown only when the **Domain-tree audit inheritance** feature flag is on (under the **Compliance assessments** group).
+Shown only when the **Domain-tree audit inheritance** feature flag is on (under the **Audits** group).
 
 - **Domain inheritance strategy** — when the same framework is audited at several levels of the domain tree, decides how a child audit combines results with its parent audits. Options: _No inheritance_ (default), _Parent always wins_, _Child always wins_, _Best case (optimistic)_, _Worst case (prudent)_. Scores from a different scale are normalised to the top parent's scale. This one org-wide setting drives the **Combined view** on the [Framework report](../../features/framework-report.md#combined-view-domain-tree-inheritance) and the inheritance panel in [Advanced Analytics](../../features/audit-analytics.md). Leaving it on _No inheritance_ keeps the feature dormant even with the flag enabled.

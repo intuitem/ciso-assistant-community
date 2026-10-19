@@ -1,13 +1,10 @@
 <script lang="ts">
 	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
 	import { Progress } from '@skeletonlabs/skeleton-svelte';
+	import { getLocale } from '$paraglide/runtime';
+	import { localizedLevelField, type ScoreLevel } from '$lib/utils/score-scales';
 
-	interface ScoreDefinition {
-		score: number;
-		name: string;
-		description?: string;
-		description_doc?: string;
-	}
+	type ScoreDefinition = ScoreLevel;
 
 	/**
 	 * Controlled score widget: slider + ring.
@@ -50,8 +47,15 @@
 	const definition = $derived(
 		value != null ? (scoresDefinition ?? []).find((d) => d.score === internal) : undefined
 	);
+	const language = getLocale().split('-')[0];
+	const definitionName = $derived(
+		definition ? localizedLevelField(definition, 'name', language) : undefined
+	);
 	const definitionText = $derived(
-		isDoc ? (definition?.description_doc ?? definition?.description) : definition?.description
+		definition
+			? ((isDoc ? localizedLevelField(definition, 'description_doc', language) : undefined) ??
+					localizedLevelField(definition, 'description', language))
+			: undefined
 	);
 </script>
 
@@ -74,7 +78,7 @@
 		/>
 	{/if}
 
-	<div class="relative shrink-0" title={definition?.name}>
+	<div class="relative shrink-0" title={definitionName}>
 		<Progress value={formatScoreValue(internal, max, false, min)} min={0} max={100}>
 			<Progress.Circle class="[--size:--spacing(9)]">
 				<Progress.CircleTrack />
@@ -86,9 +90,9 @@
 		</Progress>
 	</div>
 
-	{#if definition?.name}
+	{#if definitionName}
 		<span class="text-xs text-surface-500 truncate max-w-[12rem]" title={definitionText}
-			>{definition.name}</span
+			>{definitionName}</span
 		>
 	{/if}
 </div>

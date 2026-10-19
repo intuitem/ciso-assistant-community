@@ -87,6 +87,7 @@ def _reverse_m2m_through_tables() -> list[tuple[Any, str]]:
 
 DIRECT_M2M_FIELDS: tuple[str, ...] = (
     "evidences",
+    "metric_instances",
     "assets",
     "owner",
     "security_exceptions",

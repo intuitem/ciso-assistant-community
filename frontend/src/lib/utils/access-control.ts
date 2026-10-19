@@ -16,7 +16,10 @@ export function isAccessAllowed(
 	codename: string,
 	domain: string
 ): boolean {
-	return (user?.domain_permissions?.[domain] ?? []).includes(codename);
+	// `domain_permissions` maps a folder to its index in `permission_sets` (0 is a valid index).
+	const index = user?.domain_permissions?.[domain];
+	const codenames = index === undefined ? undefined : user?.permission_sets?.[index];
+	return (codenames ?? []).includes(codename);
 }
 
 /**
@@ -26,9 +29,8 @@ export function isAccessAllowed(
  * object can be modified — use isAccessAllowed/canPerformAction with the object's folder.
  */
 export function hasPermissionAnywhere(user: User | null | undefined, codename: string): boolean {
-	return Object.values(user?.domain_permissions ?? {}).some((codenames) =>
-		codenames.includes(codename)
-	);
+	// Every set is the permissions of at least one folder: the backend only emits referenced sets.
+	return (user?.permission_sets ?? []).some((codenames) => codenames.includes(codename));
 }
 
 export function canPerformAction({ user, action, model, domain }: CanPerformActionParams): boolean {

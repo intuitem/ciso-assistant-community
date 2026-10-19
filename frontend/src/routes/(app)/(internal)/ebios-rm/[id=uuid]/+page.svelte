@@ -1,4 +1,5 @@
 <script lang="ts">
+	import ClassificationBadge from '$lib/components/ClassificationBadge.svelte';
 	import { page } from '$app/state';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -247,8 +248,14 @@
 
 <div class="h-full w-full p-8">
 	<div
-		class="card bg-surface-50-950 shadow-lg w-full h-full grid xl:grid-cols-3 lg:grid-cols-2 md:grid-cols-1 gap-8 p-8"
+		class="card relative bg-surface-50-950 shadow-lg w-full h-full grid xl:grid-cols-3 lg:grid-cols-2 md:grid-cols-1 gap-8 p-8"
 	>
+		{#if data.data.classification}
+			<ClassificationBadge
+				classification={data.data.classification}
+				class="absolute top-0 right-8 -translate-y-1/2 bg-surface-50-950 text-xs shadow-sm"
+			/>
+		{/if}
 		<Tile
 			workshop={1}
 			title={m.ebiosWs1()}

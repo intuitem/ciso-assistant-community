@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 
 	import { isDarkTheme, mountThemeAwareChart } from '$lib/utils/echartsTheme';
+	import { roundScore } from '$lib/utils/helpers';
 
 	interface Props {
 		width?: string;
@@ -43,7 +44,7 @@
 		const range = max - min;
 		return range > 0 ? Math.min(100, Math.max(0, ((value - min) / range) * 100)) : 0;
 	});
-	const displayValue = $derived(Math.round(value * 10) / 10);
+	const displayValue = $derived(roundScore(value, isPercentage ? 1 : 2));
 
 	function buildOption() {
 		// Recomputed on every theme flip so the value and track stay readable on both surfaces.

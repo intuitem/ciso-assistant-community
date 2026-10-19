@@ -241,7 +241,17 @@ class DocumentContainerViewSet(BaseModelViewSet):
                 "assets",
                 models.Prefetch(
                     "documents",
-                    queryset=ManagedDocument.objects.select_related("current_revision"),
+                    # `revisions` feeds pending_revision in the serializer;
+                    # `catalog` reuses this queryset for five more fields, so
+                    # restricting it here turns each of those into its own query.
+                    queryset=ManagedDocument.objects.select_related(
+                        "current_revision"
+                    ).prefetch_related(
+                        models.Prefetch(
+                            "revisions",
+                            queryset=DocumentRevision.objects.defer("content"),
+                        )
+                    ),
                 ),
             )
         )

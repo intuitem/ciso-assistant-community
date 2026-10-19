@@ -298,7 +298,7 @@ def deep_tree_setup():
         S3 = 100
         C2 = 100
         C3 = 50
-        Global = avg(C1, C2, C3) = (55 + 100 + 50) / 3 = 68.3 (truncated from 68.33)
+        Global = avg(C1, C2, C3) = (55 + 100 + 50) / 3 = 68.33 (rounded)
     """
     root_folder = Folder.get_root_folder()
     folder = Folder.objects.create(
@@ -515,7 +515,7 @@ class TestDeepTreeAvgOfAvg:
         ca.save()
 
         scores = ca.get_global_score()
-        assert scores["implementation_score"] == 68.3
+        assert scores["implementation_score"] == pytest.approx(205 / 3)
 
     def test_flat_avg_differs_from_recursive(self, deep_tree_setup):
         """
@@ -535,7 +535,7 @@ class TestDeepTreeAvgOfAvg:
         avg_of_avg_score = ca.get_global_score()["implementation_score"]
 
         assert avg_score == 66.0
-        assert avg_of_avg_score == 68.3
+        assert avg_of_avg_score == pytest.approx(205 / 3)
         assert avg_score != avg_of_avg_score
 
 
@@ -557,7 +557,7 @@ class TestAnchorNaToTarget:
             # AVG_OF_AVG with target=3:
             #   Section A: (80+60)/2=70, Section B: (40×1+3×3)/4=12.25
             #   avg(70, 12.25) = 41.1
-            ("average_of_averages", True, 3, 41.1),
+            ("average_of_averages", True, 3, 41.125),
             # Anchor disabled: N/A excluded → (80+60+40)/(1+1+1) = 60.0
             ("average", False, 3, 60.0),
         ],
@@ -580,7 +580,7 @@ class TestAnchorNaToTarget:
         ca.target_score = target
         ca.save()
 
-        assert ca.get_global_score()["implementation_score"] == expected
+        assert ca.get_global_score()["implementation_score"] == pytest.approx(expected)
 
 
 @pytest.mark.django_db
@@ -692,9 +692,9 @@ class TestThreeLayerScoring:
 
         Documentation:
           Section A: (90+70)/2 = 80, Section B: (50+240)/4 = 72.5
-          Average: (80+72.5)/2 = 76.2  (truncated from 76.25)
+          Average: (80+72.5)/2 = 76.25
 
-        Maturity: (77.5 + 76.2) / 2 = 76.85 → truncated to 76.8
+        Maturity: (77.5 + 76.25) / 2 = 76.875 → rounded to 76.88
         """
         ca = scoring_setup["ca"]
         ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG_OF_AVG
@@ -704,13 +704,13 @@ class TestThreeLayerScoring:
 
         scores = ca.get_global_score()
         assert scores["implementation_score"] == 77.5
-        assert scores["documentation_score"] == 76.2
-        assert scores["maturity_score"] == 76.8
+        assert scores["documentation_score"] == 76.25
+        assert scores["maturity_score"] == 76.875
 
     def test_doc_score_null_treated_as_zero(self, scoring_setup):
         """
         When doc scoring is enabled but documentation_score is null on some RAs,
-        those null values should be treated as 0 in the computation.
+        those null values count as the scale minimum (0 here).
         """
         ca = scoring_setup["ca"]
         ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG
@@ -754,7 +754,7 @@ class TestAnnotateTreeAggregatedScores:
 
     Per-node aggregates are what the tree UI renders at each intermediate
     node. They match the per-node `computed[urn]` values in
-    ComplianceAssessment._compute_score_for_field (not the top-level global
+    ComplianceAssessment._compute_raw_score_for_field (not the top-level global
     score, which uses a flat-average-of-categories rule for structural roots).
     """
 
@@ -818,7 +818,7 @@ class TestAnnotateTreeAggregatedScores:
         one child has a single leaf (score 4) and the other has multiple
         leaves whose average is ~2.3. With the previous flat weighted-avg,
         the parent showed 2.7; with per-level aggregation it should show
-        (4 + 2.33…) / 2 = 3.17 (stored raw; UI truncates to 3.1).
+        (4 + 2.33…) / 2 = 3.17 (rounded like the global score).
         """
         ca = deep_tree_setup["ca"]
         ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG_OF_AVG
@@ -836,8 +836,9 @@ class TestAnnotateTreeAggregatedScores:
         # C1 collects R1,R2,R3 via S1(=avg(4,1)=2.5) and S2(=2), so
         # avg_of_avg C1 = avg(2.5, 2) = 2.25. Not the RC.CO shape — use F1
         # which collects C1(2.25) and C2(=S3=R4=4): F1 = avg(2.25, 4) = 3.125
-        f1 = self._find(tree, "F1")
-        assert round(f1["aggregated_score"], 3) == 3.125
+        # Display values are rounded half up, like the global score and the
+        # CCB workbooks (Python's round() would give 3.12).
+        assert self._find(tree, "F1")["aggregated_score"] == 3.125
 
     def test_avg_per_node_is_flat_weighted_over_subtree_leaves(self, deep_tree_setup):
         """
@@ -890,6 +891,36 @@ class TestAnnotateTreeAggregatedScores:
         assert self._find(tree, "S2")["aggregated_score"] == 40
         # C1 falls back to S2 only
         assert self._find(tree, "C1")["aggregated_score"] == 40
+
+    @pytest.mark.parametrize("target, anchored", [(30, 30), (None, 100)])
+    def test_na_anchored_to_target(self, deep_tree_setup, target, anchored):
+        """
+        With anchor_na_to_target, an N/A leaf counts as the target (or the max
+        when no target is set) in its parents, on both layers, like the global
+        score. S1 = avg(R1 anchored, R2=60).
+        """
+        ca = deep_tree_setup["ca"]
+        ca.score_calculation_method = ComplianceAssessment.CalculationMethod.AVG_OF_AVG
+        ca.anchor_na_to_target = True
+        ca.target_score = target
+        ca.show_documentation_score = True
+        ca.save()
+
+        RequirementAssessment.objects.filter(requirement__ref_id="R1").update(
+            result=RequirementAssessment.Result.NOT_APPLICABLE
+        )
+        RequirementAssessment.objects.filter(requirement__ref_id="R2").update(
+            documentation_score=60
+        )
+
+        tree = self._build_tree(ca)
+
+        r1 = self._find(tree, "R1")
+        assert r1["aggregated_score"] == anchored
+        assert r1["aggregated_documentation_score"] == anchored
+        s1 = self._find(tree, "S1")
+        assert s1["aggregated_score"] == (anchored + 60) / 2
+        assert s1["aggregated_documentation_score"] == (anchored + 60) / 2
 
     def test_weighted_avg_of_avg_respects_child_weights(self, scoring_setup):
         """

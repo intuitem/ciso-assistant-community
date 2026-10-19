@@ -1,0 +1,12 @@
+subject: "CISO Assistant: Das Schnellformular '${response_name}' wurde eingereicht"
+body: |
+  Hallo,
+
+  Eine von Ihnen zu prüfende Antwort auf ein Schnellformular wurde eingereicht:
+
+  - Antwort: ${response_name}
+  - Formular: ${quick_form_name}
+
+  Melden Sie sich in CISO Assistant an, um die Antwort zu prüfen: [Antwort öffnen](${ciso_assistant_url}/quick-form-responses/${response_id})
+
+  Vielen Dank.

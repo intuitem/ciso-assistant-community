@@ -12,6 +12,7 @@
 	import BatchActionModal from '$lib/components/Modals/BatchActionModal.svelte';
 	import { applyUnreadCount } from '$lib/utils/stores';
 	import MergeAppliedControlsModal from '$lib/components/Modals/MergeAppliedControlsModal.svelte';
+	import ComposeMetricModal from '$lib/components/Modals/ComposeMetricModal.svelte';
 	import type { BatchActionConfig, TableBatchAction } from '$lib/utils/table';
 	import type { urlModel } from '$lib/utils/types';
 	import type { DataHandler } from '@vincjo/datatables/remote';
@@ -87,6 +88,21 @@
 						});
 					}
 				}
+			});
+			return;
+		}
+
+		if (action.type === 'compose') {
+			if (action.maxSelection !== undefined && count > action.maxSelection) {
+				toastStore.trigger({
+					message: m.composeMaxSelection({ n: action.maxSelection }),
+					background: 'preset-filled-warning-500'
+				});
+				return;
+			}
+			modalStore.trigger({
+				type: 'component',
+				component: { ref: ComposeMetricModal, props: { instanceIds: ids } }
 			});
 			return;
 		}
