@@ -398,12 +398,15 @@
 				<h2 class="text-xs font-semibold uppercase tracking-[0.14em] text-surface-500">
 					{m.tierPropagation()}
 				</h2>
-				<div class="flex rounded-base border border-surface-200-800 p-0.5" role="radiogroup">
+				<div
+					class="flex rounded-base border border-surface-200-800 p-0.5"
+					role="group"
+					aria-label={m.tierPropagation()}
+				>
 					{#each PROPAGATION_MODES as mode (mode.value)}
 						<button
 							type="button"
-							role="radio"
-							aria-checked={data.propagation.mode === mode.value}
+							aria-pressed={data.propagation.mode === mode.value}
 							class="btn btn-sm flex-1 {data.propagation.mode === mode.value
 								? 'preset-filled-primary-500'
 								: 'hover:preset-tonal'}"
