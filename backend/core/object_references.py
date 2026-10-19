@@ -74,18 +74,21 @@ def options_for(question, folder, search="", limit=50, user=None, subject=None):
     )
     first = list(ours.order_by(label_field)[:limit])
     rest = qs.exclude(pk__in=[o.pk for o in first]).order_by(label_field)
-    results = [{**_row(o, label_field), "on_subject": True} for o in first]
-    results += [_row(o, label_field) for o in rest[: limit - len(first)]]
+    results = [{**_row(o, entry), "on_subject": True} for o in first]
+    results += [_row(o, entry) for o in rest[: limit - len(first)]]
     return {"model": key, "results": results}
 
 
-def _row(obj, label_field):
+def _row(obj, entry):
     ref_id = getattr(obj, "ref_id", None)
-    label = getattr(obj, label_field, "") or str(obj)
+    label = getattr(obj, entry["label"], "") or str(obj)
+    folder = obj
+    for part in entry.get("folder", "folder").split("__"):
+        folder = getattr(folder, part, None)
     return {
         "id": str(obj.id),
         "label": f"{ref_id} - {label}" if ref_id else label,
-        "folder": obj.folder.name if getattr(obj, "folder_id", None) else None,
+        "folder": folder.name if folder else None,
     }
 
 
@@ -130,12 +133,9 @@ def labels_for(question, folder, ids, user=None):
     if not ids:
         return []
     _key, entry, _multiple = config_for(question)
-    label_field = entry["label"]
     by_id = {str(o.id): o for o in _queryset(entry, folder, user).filter(id__in=ids)}
     return [
-        _row(by_id[i], label_field)
-        if i in by_id
-        else {"id": i, "label": i, "folder": None}
+        _row(by_id[i], entry) if i in by_id else {"id": i, "label": i, "folder": None}
         for i in ids
     ]
 
