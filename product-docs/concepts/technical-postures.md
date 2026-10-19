@@ -64,7 +64,22 @@ Every way of getting results in produces a run:
 - **API** — scanners push JSON to the assessment's `upload-results` endpoint; re-using the returned run identifier accumulates or patches the same run. The API tab shows a ready-to-copy example.
 - **File import** — the "Import results" button on the Runs tab accepts CSV and XLSX files as well as OCSF Compliance Finding JSON. A mapping dialog lets you bind arbitrary scanner CSV columns and result values, choose how colliding rows aggregate, and target one or several of the scoped assets.
 
+A run only records the checks present in what was sent. A check missing from a file or a push is never assumed to pass: it keeps its previous result.
+
 Runs are the ingestion log of the assessment: the Runs tab lists them with their tool, check counts, and pass/fail breakdown, and a run's detail page shows exactly what it recorded per asset. The trend chart on the Overview tab plots the pass rate across runs, which is how posture drift becomes visible.
+
+### Scanner recipes
+
+| Scanner | Framework | Produce the file | Import |
+|---|---|---|---|
+| [Prowler](https://github.com/prowler-cloud/prowler) | The matching cloud benchmark (for example a CIS Benchmark) | The compliance CSV Prowler writes for that framework | Pick the **Prowler compliance** preset in the mapping dialog |
+| [Plumber](https://github.com/getplumber/plumber) | Plumber CI/CD Security Checks | `plumber analyze --ocsf results.json` | Direct, no mapping |
+
+**Plumber** scans GitHub Actions and GitLab CI pipelines. Its OCSF output carries one finding per control, passes included, with the control key in the finding's `control` field. Each Plumber control is a check of the Plumber CI/CD Security Checks framework, matched on that key; the per-job findings land in the check's message. Controls disabled in your `.plumber.yaml` come in as **Not checked**.
+
+To set it up, create a technical posture on the Plumber CI/CD Security Checks framework, select the **GitHub Actions** or **GitLab CI** implementation group together with **Cross-provider**, and add one asset per repository. Then, after each scan, use **Import results** on the **Runs** tab, choose the file, and tick the repository under **Apply results to**.
+
+Prowler's own OCSF export is not used: it is made of detection findings, which only report what failed, so a passing check would be indistinguishable from one that was never evaluated. Its compliance CSV reports every requirement.
 
 ## Findings and remediation
 

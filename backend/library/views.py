@@ -81,6 +81,7 @@ from .utils import LibraryImporter, preview_library
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from .serializers import (
     LibraryDraftReadSerializer,
     LibraryDraftWriteSerializer,
@@ -328,7 +329,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
             return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
 
         library_objects = lib.content  # We may need caching for this
-        if not (framework := library_objects.get("framework")):
+        if not (framework := StoredLibrary.framework_of(library_objects)):
             return Response(
                 data="This library doesn't contain any framework.",
                 status=HTTP_400_BAD_REQUEST,
@@ -2817,3 +2818,38 @@ class LibraryDraftViewSet(BaseModelViewSet):
                 "loaded_library": str(loaded.id) if loaded else None,
             }
         )
+
+
+class RequirementKnowledgeView(APIView):
+    """Requirements of shipped frameworks, loaded or not: ?framework=&ref_id=&search="""
+
+    def get(self, request):
+        from library.knowledge import find_requirements
+
+        p = request.query_params
+        return Response(
+            find_requirements(
+                request.user, p.get("framework"), p.get("ref_id"), p.get("search")
+            )
+        )
+
+
+class RequirementMappingKnowledgeView(APIView):
+    """What one requirement maps to: ?requirement=<urn|id> or ?source_framework=&ref_id=, plus &framework=<target>"""
+
+    def get(self, request):
+        from library.knowledge import requirement_mappings
+
+        p = request.query_params
+        if not (p.get("requirement") or p.get("ref_id")):
+            return Response({"error": "requirement or ref_id is required"}, status=400)
+        data = requirement_mappings(
+            request.user,
+            p.get("requirement"),
+            p.get("framework"),
+            p.get("source_framework"),
+            p.get("ref_id"),
+        )
+        if data is None:
+            return Response({"error": "requirement not found"}, status=404)
+        return Response(data)

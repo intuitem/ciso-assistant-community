@@ -21,6 +21,8 @@ from tprm.views import (
 from library.views import (
     LibraryDraftViewSet,
     MappingLibrariesList,
+    RequirementKnowledgeView,
+    RequirementMappingKnowledgeView,
     StoredLibraryViewSet,
     LoadedLibraryViewSet,
 )
@@ -301,6 +303,8 @@ urlpatterns = [
         "mapping-libraries/",
         MappingLibrariesList.as_view(),
     ),
+    path("library-knowledge/requirements/", RequirementKnowledgeView.as_view()),
+    path("library-knowledge/mappings/", RequirementMappingKnowledgeView.as_view()),
     path(
         "folders/<uuid:pk>/users/",
         UserRolesOnFolderList.as_view(),

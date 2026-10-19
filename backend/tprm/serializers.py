@@ -2,6 +2,7 @@ import uuid
 
 import structlog
 from django.conf import settings
+from core import mailer
 from django.contrib.auth import get_user_model
 from django.db import IntegrityError, transaction
 from django.db.models import Q
@@ -67,6 +68,9 @@ class EntityReadSerializer(BaseModelSerializer):
         """Format legal identifiers as a readable string for display"""
         if not obj.legal_identifiers:
             return ""
+        # legacy rows may hold a non-dict value written before validation existed
+        if not isinstance(obj.legal_identifiers, dict):
+            return str(obj.legal_identifiers)
         return "\n".join(
             [f"{key}: {value}" for key, value in obj.legal_identifiers.items()]
         )
@@ -175,7 +179,9 @@ class EntityWriteSerializer(BaseModelSerializer):
         """
         Validate legal identifiers, ensuring LEI is exactly 20 characters if provided.
         """
-        if value and isinstance(value, dict):
+        if not isinstance(value, dict):
+            raise serializers.ValidationError(_("Legal identifiers must be an object"))
+        if value:
             lei = value.get("LEI", "")
             # Strip whitespace and check if LEI exists
             if lei:
@@ -919,7 +925,7 @@ class RepresentativeWriteSerializer(BaseModelSerializer):
             email=instance.email,
         ).first()
         if not user:
-            send_mail = settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE
+            send_mail = mailer.mailing_enabled()
             try:
                 user = User.objects.create_user(
                     email=instance.email,

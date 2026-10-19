@@ -12,6 +12,7 @@ from iam.sso.models import SSOSettings
 from integrations.models import IntegrationConfiguration, IntegrationProvider
 from core.serializers import SerializerFactory
 from django.conf import settings
+from django.utils import timezone
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 from .utils import (
@@ -28,7 +29,8 @@ from .serializers import (
     InfraConfigSerializer,
 )
 from django.db import transaction
-from .models import GlobalSettings
+from .models import GlobalSettings, MailerConfiguration, MailerHealth
+from core import mailer as mail_service
 import structlog
 
 logger = structlog.get_logger(__name__)
@@ -543,3 +545,180 @@ def get_default_language(request):
         default_language = "en"
 
     return Response({"default_language": default_language})
+
+
+class MailerSettingsViewSet(viewsets.ViewSet):
+    """GET/PUT of the custom mailer configuration, a test send of unsaved
+    values, and delivery health. Only registered when ENABLE_CUSTOM_MAILER is
+    set, so the switch is enforced by the absence of the route."""
+
+    permission_classes = [IsAuthenticated]
+
+    @staticmethod
+    def _require(request, codename: str) -> None:
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename=codename),
+            folder=Folder.get_root_folder(),
+        ):
+            raise PermissionDenied()
+
+    def retrieve(self, request, *args, **kwargs):
+        from .serializers import MailerConfigurationSerializer
+
+        self._require(request, "view_mailerconfiguration")
+        return Response(MailerConfigurationSerializer(MailerConfiguration.get()).data)
+
+    def update(self, request, *args, **kwargs):
+        from .serializers import MailerConfigurationSerializer
+
+        self._require(request, "change_mailerconfiguration")
+        configuration = MailerConfiguration.get()
+        # Captured before the change: the notification goes through the
+        # mailers the change replaces, which the new ones cannot suppress.
+        previous_mailers = mail_service.active_mailers()
+        previous_sender = mail_service.sender_address()
+        serializer = MailerConfigurationSerializer(configuration, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        _notify_administrators_of_mailer_change(
+            request.user, configuration, previous_mailers, previous_sender
+        )
+        return Response(MailerConfigurationSerializer(configuration).data)
+
+    partial_update = update
+
+    @action(detail=True, methods=["post"])
+    def test(self, request, *args, **kwargs):
+        """Send one test message through each mailer in the form, to the
+        requesting administrator. The save token is issued only when every
+        mailer delivered. Health is recorded when the tested values are the
+        saved ones, so testing the live configuration refreshes the table."""
+        from .mailer_settings import (
+            configuration_digest,
+            issue_test_token,
+            specs_from_rows,
+        )
+        from .serializers import MailerConfigurationSerializer
+
+        self._require(request, "change_mailerconfiguration")
+        configuration = MailerConfiguration.get()
+        try:
+            stored_digest = configuration_digest(
+                configuration.from_email, specs_from_rows(configuration.mailers.all())
+            )
+        except ValueError:
+            stored_digest = None
+        serializer = MailerConfigurationSerializer(configuration, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        rows = serializer.build_rows(
+            configuration, serializer.validated_data["mailers"]
+        )
+        from_email = (
+            serializer.validated_data.get("from_email") or configuration.from_email
+        )
+        specs = specs_from_rows(rows)
+        digest = configuration_digest(from_email, specs)
+        results = [
+            mail_service.send_test(
+                request.user.email,
+                mailers=[spec],
+                from_email=from_email,
+                record_health=digest == stored_digest,
+            )
+            for spec in specs
+        ]
+        payload = {
+            "ok": all(result.ok for result in results),
+            "recipient": request.user.email,
+            "results": [
+                {
+                    "mailer": spec.alias,
+                    "ok": result.ok,
+                    "backend": result.backend,
+                    # A single mailer was tried, so the skip reason is the error.
+                    "error": result.skipped[0][1] if result.skipped else result.error,
+                }
+                for spec, result in zip(specs, results)
+            ],
+        }
+        if payload["ok"]:
+            payload["test_token"] = issue_test_token(digest)
+        return Response(payload)
+
+    @action(detail=True, methods=["get"])
+    def health(self, request, *args, **kwargs):
+        """One row per active mailer, attempted or not, plus rows of mailers
+        that are no longer configured but were attempted."""
+        from .serializers import MailerHealthSerializer
+
+        self._require(request, "view_mailerconfiguration")
+        rows = {
+            row.alias: MailerHealthSerializer(row).data
+            for row in MailerHealth.objects.all()
+        }
+        listed = []
+        for spec in mail_service.active_mailers():
+            listed.append(
+                rows.pop(spec.alias, None)
+                or {
+                    "alias": spec.alias,
+                    "source": spec.source,
+                    "last_attempt_at": None,
+                    "last_outcome": None,
+                    "last_error": "",
+                    "via_failover": False,
+                    "last_success_at": None,
+                }
+            )
+        listed.extend(rows.values())
+        return Response(listed)
+
+
+def _notify_administrators_of_mailer_change(
+    actor, configuration, previous_mailers, previous_sender
+):
+    """Email the other administrators through the mailers that were active
+    before the change. Best effort: the change is already saved."""
+    recipients = list(
+        User.objects.filter(user_groups__name="BI-UG-ADM", is_active=True)
+        .exclude(pk=actor.pk)
+        .values_list("email", flat=True)
+        .distinct()
+    )
+    if not recipients or not previous_mailers or not previous_sender:
+        return
+    mailers = (
+        ", ".join(
+            f"{row.alias}: {row.transport} {row.host}"
+            for row in configuration.mailers.all()
+        )
+        or "none"
+    )
+    state = (
+        "active" if configuration.is_active else "parked (environment mailers apply)"
+    )
+    body = (
+        f"{actor.email} changed the outgoing mail configuration of "
+        f"{settings.CISO_ASSISTANT_URL} on {timezone.now():%Y-%m-%d %H:%M %Z}.\n"
+        f"Sender address: {configuration.from_email or '(unset)'}\n"
+        f"Mailers: {mailers}\n"
+        f"State: {state}\n\n"
+        "Password reset links and invitations now go through these mailers. "
+        "If you did not expect this change, review it in Settings > Mailer."
+    )
+    try:
+        mail_service.send(
+            "CISO Assistant: outgoing mail configuration changed",
+            body,
+            recipients,
+            from_email=previous_sender,
+            mailers=previous_mailers,
+        )
+    except Exception as error:
+        logger.error(
+            "mailer change notification not sent",
+            actor=actor.email,
+            recipients=len(recipients),
+            error=str(error),
+        )

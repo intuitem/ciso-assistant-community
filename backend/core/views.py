@@ -251,6 +251,7 @@ from global_settings.utils import (
 )
 
 from core import commitment
+from core import mailer
 
 import structlog
 
@@ -6062,6 +6063,7 @@ class AppliedControlViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSe
             "has_risk_scenarios": RiskScenario.applied_controls.through,
             "has_risk_scenarios_e": RiskScenario.existing_applied_controls.through,
             "has_findings": Finding.applied_controls.through,
+            "has_evidences": AppliedControl.evidences.through,
             "has_vulnerabilities": Vulnerability.applied_controls.through,
             "has_stakeholders": Stakeholder.applied_controls.through,
             "has_processings": Processing.associated_controls.through,
@@ -7765,6 +7767,7 @@ class RiskScenarioFilter(GenericFilterSet):
         # Only include actual model fields here
         fields = {
             "name": ["exact"],
+            "ref_id": ["exact"],
             "current_impact": ["exact"],
             "current_proba": ["exact"],
             "current_level": ["exact"],
@@ -9187,12 +9190,13 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
 
     model = Folder
     filterset_class = FolderFilter
-    search_fields = ["name"]
+    search_fields = ["name", "ref_id"]
 
     # Columns mirror the domains import template, so an export can be re-imported.
     export_config = {
         "fields": {
             "internal_id": {"source": "id", "label": "internal_id"},
+            "ref_id": {"source": "ref_id", "label": "ref_id", "escape": True},
             "name": {"source": "name", "label": "name", "escape": True},
             "description": {
                 "source": "description",
@@ -12342,7 +12346,7 @@ class CampaignViewSet(BaseModelViewSet):
                 campaign.status = Campaign.Status.IN_PROGRESS
                 campaign.save(update_fields=["status"])
 
-        if settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE:
+        if mailer.mailing_enabled():
             from core.tasks import notify_campaign_assignees
 
             transaction.on_commit(lambda: notify_campaign_assignees(str(campaign.id)))
@@ -13697,7 +13701,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             )
             started += 1
 
-        if not (settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE):
+        if not mailer.mailing_enabled():
             return Response({"started": started, "warning": ["noMailerConfigured"]})
 
         from core.tasks import notify_audit_assignees
@@ -13760,9 +13764,15 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
 
             # Find the requirement assessment first so we can validate score
             # against the per-RA resolved scale (Node override > CA bounds).
-            requirement_assessment = RequirementAssessment.objects.filter(
-                compliance_assessment=compliance_assessment, requirement__urn=urn
-            ).first()
+            requirement_assessment = (
+                RequirementAssessment.objects.filter(
+                    compliance_assessment=compliance_assessment, requirement__urn=urn
+                )
+                # The requirement is read below, and its framework carries the
+                # result aggregation rule a recompute needs.
+                .select_related("requirement__framework")
+                .first()
+            )
 
             if not requirement_assessment:
                 return Response(
@@ -16473,13 +16483,14 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
         if framework_urns:
             # Extract only the urn/name pair in the DB so the (potentially large)
             # framework content blob is never loaded into Python.
-            rows = StoredLibrary.objects.filter(
-                content__framework__urn__in=framework_urns,
-                content__framework__isnull=False,
-                content__requirement_mapping_set__isnull=True,
-                content__requirement_mapping_sets__isnull=True,
-            ).values_list("content__framework__urn", "content__framework__name")
-            for urn, name in rows:
+            rows = StoredLibrary.framework_libraries(framework_urns).values_list(
+                "content__framework__urn",
+                "content__framework__name",
+                "content__frameworks__0__urn",
+                "content__frameworks__0__name",
+            )
+            for urn, name, plural_urn, plural_name in rows:
+                urn, name = (urn, name) if urn else (plural_urn, plural_name)
                 if urn:
                     framework_map[urn] = name or urn
 
@@ -16490,8 +16501,9 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
     def provider(self, request):
         providers = set(
             StoredLibrary.objects.filter(
+                Q(objects_meta__requirement_mapping_sets__isnull=False)
+                | Q(objects_meta__requirement_mapping_set__isnull=False),
                 provider__isnull=False,
-                objects_meta__requirement_mapping_sets__isnull=False,
             ).values_list("provider", flat=True)
         )
         return Response({p: p for p in providers})
@@ -16512,16 +16524,11 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
 
         framework_details = {}
 
-        framework_libs_qs = StoredLibrary.objects.filter(
-            content__framework__urn__in=all_framework_urns,
-            content__framework__isnull=False,
-            content__requirement_mapping_set__isnull=True,
-            content__requirement_mapping_sets__isnull=True,
-        )
+        framework_libs_qs = StoredLibrary.framework_libraries(all_framework_urns)
 
         for lib in framework_libs_qs:
             try:
-                fw_content = lib.content["framework"]
+                fw_content = StoredLibrary.framework_of(lib.content) or {}
                 urn = fw_content.get("urn")
 
                 if not urn:
@@ -16631,15 +16638,10 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
 
     @staticmethod
     def _framework_content(urn, label):
-        lib = StoredLibrary.objects.filter(
-            content__framework__urn=urn,
-            content__framework__isnull=False,
-            content__requirement_mapping_set__isnull=True,
-            content__requirement_mapping_sets__isnull=True,
-        ).first()
+        lib = StoredLibrary.framework_libraries([urn]).first()
         if not lib:
             raise NotFound(f"{label} framework library not found")
-        return lib.content["framework"]
+        return StoredLibrary.framework_of(lib.content)
 
     def _mapping_context(self):
         """Resolve the mapping set and both framework contents.
@@ -18577,6 +18579,41 @@ class CommentViewSet(BaseModelViewSet):
         return super().perform_destroy(instance)
 
 
+def _next_occurrence_status(today):
+    """Status the next-occurrence column shows: a one-time task's only node whatever
+    its date, a recurring task's first node from today on."""
+    return Case(
+        When(
+            is_recurrent=False,
+            then=Subquery(
+                TaskNode.objects.filter(task_template=OuterRef("pk"))
+                .order_by("due_date")
+                .values("status")[:1]
+            ),
+        ),
+        When(
+            is_recurrent=True,
+            then=Subquery(
+                TaskNode.objects.filter(
+                    task_template=OuterRef("pk"), due_date__gte=today
+                )
+                .order_by("due_date")
+                .values("status")[:1]
+            ),
+        ),
+        default=Value(None),
+        output_field=models.CharField(),
+    )
+
+
+def _last_occurrence_status(today):
+    return Subquery(
+        TaskNode.objects.filter(task_template=OuterRef("pk"), due_date__lt=today)
+        .order_by("-due_date")
+        .values("status")[:1]
+    )
+
+
 class TaskTemplateFilter(GenericFilterSet):
     folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
 
@@ -18619,6 +18656,9 @@ class TaskTemplateFilter(GenericFilterSet):
     last_occurrence_status = df.MultipleChoiceFilter(
         choices=TaskNode.TASK_STATUS_CHOICES, method="filter_last_occurrence_status"
     )
+    # An occurrence of an enabled task past its due date that nobody closed. The start
+    # date says nothing about this: a recurring series always started in the past.
+    overdue = df.BooleanFilter(method="filter_overdue", label="Overdue")
 
     class Meta:
         model = TaskTemplate
@@ -18640,28 +18680,30 @@ class TaskTemplateFilter(GenericFilterSet):
         ]
 
     def filter_last_occurrence_status(self, queryset, name, values):
-        start = timezone.now().date()
-        status_subquery = (
-            TaskNode.objects.filter(task_template=OuterRef("pk"), due_date__lt=start)
-            .order_by("-due_date")
-            .values("status")[:1]
-        )
-
-        return queryset.annotate(last_status=Subquery(status_subquery)).filter(
-            last_status__in=values
+        # The column leaves one-time tasks blank, so the filter must not match them.
+        return (
+            queryset.filter(is_recurrent=True)
+            .alias(_last_status=_last_occurrence_status(timezone.localdate()))
+            .filter(_last_status__in=values)
         )
 
     def filter_next_occurrence_status(self, queryset, name, values):
-        start = timezone.now().date()
-        status_subquery = (
-            TaskNode.objects.filter(task_template=OuterRef("pk"), due_date__gte=start)
-            .order_by("due_date")
-            .values("status")[:1]
-        )
+        return queryset.alias(
+            _next_status=_next_occurrence_status(timezone.localdate())
+        ).filter(_next_status__in=values)
 
-        return queryset.annotate(next_status=Subquery(status_subquery)).filter(
-            next_status__in=values
+    def filter_overdue(self, queryset, name, value):
+        if value is None:
+            return queryset
+        # A disabled task is never late, as the overdue email skips it too.
+        late = Q(enabled=True) & Exists(
+            TaskNode.objects.filter(
+                task_template=OuterRef("pk"),
+                due_date__lt=timezone.localdate(),
+                status__in=TaskNode.OPEN_STATUSES,
+            )
         )
+        return queryset.filter(late if value else ~late)
 
 
 def _bucket_by_date(due, today):
@@ -18675,6 +18717,23 @@ def _bucket_by_date(due, today):
     if due <= today + timedelta(days=90):
         return "due_90d"
     return "later"
+
+
+def _due_bucket(task, node, overdue, today):
+    """A date alone does not make a task late: a finished one-time task is closed,
+    and a past date with nothing open behind it (a series with no upcoming
+    occurrence, say) has no due date left to report. A disabled task is closed
+    whatever its occurrences say: the deadline emails skip it too."""
+    if not task.enabled:
+        return "closed"
+    if overdue:
+        return "overdue"
+    if not task.is_recurrent and node and node.status not in TaskNode.OPEN_STATUSES:
+        return "closed"
+    due = node.due_date if node else task.task_date
+    if due is not None and due < today:
+        return "no_eta"
+    return _bucket_by_date(due, today)
 
 
 # Actions that serialize whole templates and so need the related columns resolved
@@ -18715,11 +18774,19 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
         # `get_next_occurrence_status`, so the chart and the column agree.
         recurrent_ids = {t.id for t in tasks if t.is_recurrent}
         next_node_by_template: dict = {}
+        # Same rule as the list's `overdue` filter: an open occurrence past due.
+        overdue_ids: set = set()
         for node in (
             TaskNode.objects.filter(task_template__in=[t.id for t in tasks])
             .order_by("due_date")
             .only("task_template_id", "status", "due_date")
         ):
+            if (
+                node.due_date is not None
+                and node.due_date < today
+                and node.status in TaskNode.OPEN_STATUSES
+            ):
+                overdue_ids.add(node.task_template_id)
             if node.task_template_id in recurrent_ids and (
                 node.due_date is None or node.due_date < today
             ):
@@ -18729,7 +18796,7 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
         by_status: dict = {}
         due_buckets = {
             key: {"key": key, "count": 0}
-            for key in ("overdue", "due_30d", "due_90d", "later", "no_eta")
+            for key in ("overdue", "due_30d", "due_90d", "later", "no_eta", "closed")
         }
         assignee_counts: dict = {}
         folder_counts: dict = {}
@@ -18746,8 +18813,8 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
             entry = by_status.setdefault(status, {"key": status, "count": 0})
             entry["count"] += 1
 
-            due = node.due_date if node else task.task_date
-            due_buckets[_bucket_by_date(due, today)]["count"] += 1
+            bucket_key = _due_bucket(task, node, task.id in overdue_ids, today)
+            due_buckets[bucket_key]["count"] += 1
 
             recurrence["recurrent" if task.is_recurrent else "one_time"] += 1
 
@@ -19133,36 +19200,8 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
                     default=Value(None),
                     output_field=models.DateField(),
                 ),
-                last_occurrence_status=Subquery(
-                    TaskNode.objects.filter(
-                        task_template=OuterRef("pk"), due_date__lt=today
-                    )
-                    .order_by("-due_date")
-                    .values("status")[:1]
-                ),
-                next_occurrence_status=Case(
-                    When(
-                        is_recurrent=False,
-                        then=Subquery(
-                            TaskNode.objects.filter(task_template=OuterRef("pk"))
-                            .order_by("due_date")
-                            .values("status")[:1]
-                        ),
-                    ),
-                    When(
-                        is_recurrent=True,
-                        then=Subquery(
-                            TaskNode.objects.filter(
-                                task_template=OuterRef("pk"),
-                                due_date__gte=today,
-                            )
-                            .order_by("due_date")
-                            .values("status")[:1]
-                        ),
-                    ),
-                    default=Value(None),
-                    output_field=models.CharField(),
-                ),
+                last_occurrence_status=_last_occurrence_status(today),
+                next_occurrence_status=_next_occurrence_status(today),
                 # The serializer exposes the single occurrence's status and
                 # observation directly; without these it fetches that node per row.
                 one_time_status=Subquery(

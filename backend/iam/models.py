@@ -11,14 +11,17 @@ import secrets
 import uuid
 from allauth.account.models import EmailAddress
 from django.utils import timezone
-from django.db import models, transaction
+from django.db import IntegrityError, models, transaction
 from django.db.utils import OperationalError, ProgrammingError
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AnonymousUser, Permission
 from django.utils.translation import gettext_lazy as _, override as translation_override
 from django.urls.base import reverse_lazy
-from django.db.models import Q, F, QuerySet, Case, When, Value, BooleanField
+from django.db.models import Q, F, Func, QuerySet, Case, When, Value, BooleanField
+from django.db.models.functions import Lower
+from django.db.models.lookups import Exact
+from django.core.exceptions import ValidationError
 from knox.models import AuthToken
 
 from core.utils import (
@@ -38,7 +41,7 @@ from django.utils.http import urlsafe_base64_encode
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes
 from django.template.loader import render_to_string
-from django.core.mail import get_connection, EmailMessage
+from core import mailer
 from django.core.validators import validate_email
 from django.conf import settings
 
@@ -104,6 +107,19 @@ def _get_root_folder() -> Optional[Folder]:
 
 
 _ENCLAVE_FOLDER_CONTENT_TYPE_STRING: Final[str] = "EN"
+
+# ASCII whitespace, trimmed alike by Folder.clean() and the ref_id unique index.
+_REF_ID_WHITESPACE: Final[str] = " \t\n\r\x0b\x0c"
+
+
+def _trimmed_ref_id(expression=None) -> Func:
+    # TRIM(string, characters) reads the same on SQLite and PostgreSQL.
+    return Func(
+        expression if expression is not None else F("ref_id"),
+        Value(_REF_ID_WHITESPACE),
+        function="TRIM",
+        output_field=models.CharField(),
+    )
 
 
 class Folder(NameDescriptionMixin):
@@ -172,6 +188,10 @@ class Folder(NameDescriptionMixin):
         max_length=2, choices=ContentType.choices, default=ContentType.DOMAIN
     )
 
+    ref_id = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name=_("reference id")
+    )
+
     parent_folder = models.ForeignKey(
         "self",
         null=True,
@@ -223,10 +243,48 @@ class Folder(NameDescriptionMixin):
                 ),
                 name="enclave_default_role_must_be_null",
             ),
+            # Backstop for clean(): blank ref_ids are not identifiers.
+            # TRIM(NULL) is NULL, so this also leaves NULLs out of the index.
+            models.UniqueConstraint(
+                Lower(_trimmed_ref_id()),
+                condition=~Q(Exact(_trimmed_ref_id(), Value(""))),
+                name="folder_ref_id_unique",
+            ),
         ]
 
     def __str__(self) -> str:
         return self.name.__str__()
+
+    def clean(self) -> None:
+        # Whitespace-only is blank, and blank is stored as NULL.
+        if self.ref_id is not None:
+            self.ref_id = self.ref_id.strip(_REF_ID_WHITESPACE) or None
+        errors = {}
+        if self.ref_id and Folder.ref_id_in_use(self.ref_id, exclude_pk=self.pk):
+            errors["ref_id"] = [self._ref_id_taken_message()]
+        # Report a name clash alongside, so both can be fixed at once.
+        try:
+            super().clean()
+        except ValidationError as e:
+            errors = e.update_error_dict(errors)
+        if errors:
+            raise ValidationError(errors)
+
+    @staticmethod
+    def ref_id_in_use(ref_id: str, exclude_pk=None) -> bool:
+        """Whether another folder holds *ref_id*, compared as the unique index does."""
+        normalized = Lower(_trimmed_ref_id(Value(ref_id)))
+        return (
+            Folder.objects.alias(normalized_ref_id=Lower(_trimmed_ref_id()))
+            .filter(normalized_ref_id=normalized)
+            .exclude(pk=exclude_pk)
+            .exists()
+        )
+
+    def _ref_id_taken_message(self) -> str:
+        # Unique across all folders, so the message must not say where it is used:
+        # the holder may be a folder the user cannot see.
+        return f"{self.ref_id} is already used. Please choose another value."
 
     @staticmethod
     def _lock_folder_tree() -> None:
@@ -320,6 +378,15 @@ class Folder(NameDescriptionMixin):
         ).delete()
 
     def save(self, *args, **kwargs):
+        try:
+            self._save_in_tree_lock(*args, **kwargs)
+        except IntegrityError as e:
+            # SQLite takes no tree lock, so a concurrent write can slip past clean().
+            if "folder_ref_id_unique" not in str(e):
+                raise
+            raise ValidationError({"ref_id": self._ref_id_taken_message()}) from e
+
+    def _save_in_tree_lock(self, *args, **kwargs):
         """
         **WARNING:** This function can raise an `Folder.InconsistencyError` `Exception`.
 
@@ -856,7 +923,7 @@ class UserManager(BaseUserManager):
         return self._create_user(
             email=email,
             password=password,
-            mailing=bool(settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE),
+            mailing=mailer.mailing_enabled(),
             initial_group=None,
             **extra_fields,
         )
@@ -870,9 +937,7 @@ class UserManager(BaseUserManager):
         superuser = self._create_user(
             email=email,
             password=password,
-            mailing=bool(
-                (not password) and (settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE)
-            ),
+            mailing=(not password) and mailer.mailing_enabled(),
             initial_group=UserGroup.objects.get(name="BI-UG-ADM"),
             keep_local_login=True,
             **extra_fields,
@@ -1142,76 +1207,18 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         self._send_email(subject, email, email)
 
     def _send_email(self, subject, body, html_body=None):
-        """Send an email with primary/rescue server fallback."""
+        """Send through the configured mailers; core.mailer handles failover."""
         try:
-            ssl_context = getattr(settings, "EMAIL_SSL_CONTEXT", None)
-            with get_connection(ssl_context=ssl_context) as connection:
-                msg = EmailMessage(
-                    subject=subject,
-                    body=body,
-                    from_email=None,
-                    to=[self.email],
-                    connection=connection,
-                )
-                if html_body:
-                    msg.content_subtype = "html"
-                    msg.body = html_body
-                msg.send()
-            logger.info(
-                "Email sent successfully", recipient=self.email, subject=subject
-            )
-        except Exception as primary_exception:
+            mailer.send(subject, body, self.email, html_body=html_body)
+        except Exception as error:
             logger.error(
-                "Primary mail server failure, trying rescue",
+                "Email delivery failed",
                 recipient=self.email,
                 subject=subject,
-                error=str(primary_exception),
-                email_host=settings.EMAIL_HOST,
-                email_port=settings.EMAIL_PORT,
-                email_host_user=settings.EMAIL_HOST_USER,
-                email_use_tls=settings.EMAIL_USE_TLS,
+                error=str(error),
             )
-            if settings.EMAIL_HOST_RESCUE:
-                try:
-                    with get_connection(
-                        host=settings.EMAIL_HOST_RESCUE,
-                        port=settings.EMAIL_PORT_RESCUE,
-                        username=settings.EMAIL_HOST_USER_RESCUE,
-                        password=settings.EMAIL_HOST_PASSWORD_RESCUE,
-                        use_tls=settings.EMAIL_USE_TLS_RESCUE,
-                        use_ssl=settings.EMAIL_USE_SSL_RESCUE,
-                        ssl_context=getattr(settings, "EMAIL_SSL_CONTEXT", None),
-                    ) as new_connection:
-                        msg = EmailMessage(
-                            subject=subject,
-                            body=body,
-                            from_email=None,
-                            to=[self.email],
-                            connection=new_connection,
-                        )
-                        if html_body:
-                            msg.content_subtype = "html"
-                            msg.body = html_body
-                        msg.send()
-                    logger.info(
-                        "Email sent via rescue server",
-                        recipient=self.email,
-                        subject=subject,
-                    )
-                except Exception as rescue_exception:
-                    logger.error(
-                        "Rescue mail server failure",
-                        recipient=self.email,
-                        subject=subject,
-                        error=str(rescue_exception),
-                        email_host=settings.EMAIL_HOST_RESCUE,
-                        email_port=settings.EMAIL_PORT_RESCUE,
-                        email_username=settings.EMAIL_HOST_USER_RESCUE,
-                        email_use_tls=settings.EMAIL_USE_TLS_RESCUE,
-                    )
-                    raise rescue_exception
-            else:
-                raise primary_exception
+            raise
+        logger.info("Email sent successfully", recipient=self.email, subject=subject)
 
     def get_user_groups(self):
         """get the list of user groups containing the user in the form (group_name, builtin)"""

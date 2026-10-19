@@ -240,11 +240,20 @@ def resolve_risk_scenario_id(scenario_name_or_id: str) -> str:
         raise ValueError(f"Risk scenario '{scenario_name_or_id}' API error: {error}")
 
     if not scenarios:
+        scenarios, error = fetch_all_results(
+            "/risk-scenarios/", params={"ref_id": scenario_name_or_id}
+        )
+        if error:
+            raise ValueError(
+                f"Risk scenario '{scenario_name_or_id}' API error: {error}"
+            )
+
+    if not scenarios:
         raise ValueError(f"Risk scenario '{scenario_name_or_id}' not found")
 
     if len(scenarios) > 1:
         raise ValueError(
-            f"Ambiguous risk scenario name '{scenario_name_or_id}', found {len(scenarios)}"
+            f"Ambiguous risk scenario '{scenario_name_or_id}', found {len(scenarios)}"
         )
 
     return scenarios[0]["id"]
@@ -535,31 +544,38 @@ def resolve_team_id(team_name_or_id: str) -> str:
     return str(teams[0]["id"])
 
 
-def resolve_task_template_id(task_name_or_id: str) -> str:
-    """Helper function to resolve task template name to UUID
-    If already a UUID, returns it. If a name, looks it up via API.
+def resolve_task_template_id(task_name_or_id: str, folder_id: str = None) -> str:
+    """Resolve a task template name or UUID to its UUID.
+
+    The task templates endpoint has no `name` filter, so names are looked up
+    via `search` and then matched on `name`, ignoring case and surrounding
+    whitespace. `folder_id` optionally scopes the lookup.
     """
-    # Check if it's already a UUID
-    if "-" in task_name_or_id and len(task_name_or_id) == 36:
+    if _is_uuid(task_name_or_id):
         return task_name_or_id
 
-    # Otherwise, look up by name
+    params = {"search": task_name_or_id}
+    if folder_id:
+        params["folder"] = folder_id
+    # No item cap: search also matches ref_id, so the exact name may sit
+    # beyond the default limit.
     tasks, error = fetch_all_results(
-        "/task-templates/", params={"name": task_name_or_id}
+        "/task-templates/",
+        params=params,
+        max_items=None,
     )
-
     if error:
         raise ValueError(f"Task template '{task_name_or_id}' API error: {error}")
 
-    if not tasks:
+    wanted = task_name_or_id.strip().casefold()
+    matches = [t for t in tasks if (t.get("name") or "").strip().casefold() == wanted]
+    if not matches:
         raise ValueError(f"Task template '{task_name_or_id}' not found")
-
-    if len(tasks) > 1:
+    if len(matches) > 1:
         raise ValueError(
-            f"Ambiguous task template name '{task_name_or_id}', found {len(tasks)}"
+            f"Ambiguous task template name '{task_name_or_id}', found {len(matches)}"
         )
-
-    return tasks[0]["id"]
+    return matches[0]["id"]
 
 
 # ============================================================================

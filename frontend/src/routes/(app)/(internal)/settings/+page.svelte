@@ -9,6 +9,7 @@
 	import WebhooksSettings from '$lib/components/Settings/WebhooksSettings.svelte';
 	import VulnerabilitySlaSettings from '$lib/components/Settings/VulnerabilitySlaSettings.svelte';
 	import SecIntelFeedsSettings from '$lib/components/Settings/SecIntelFeedsSettings.svelte';
+	import MailerSettings from '$lib/components/Settings/MailerSettings.svelte';
 
 	import { goto } from '$app/navigation';
 
@@ -40,6 +41,9 @@
 		<Tabs.Trigger value="secIntelFeeds"
 			><i class="fa-solid fa-satellite-dish"></i> {m.secIntelFeeds()}</Tabs.Trigger
 		>
+		{#if data.mailerSettings}
+			<Tabs.Trigger value="mailer"><i class="fa-solid fa-envelope"></i> {m.mailer()}</Tabs.Trigger>
+		{/if}
 		{#if page.data?.featureflags?.outgoing_webhooks}
 			<Tabs.Trigger value="webhooks"
 				><span class="flex flex-row gap-2 items-center ml-0"
@@ -83,6 +87,11 @@
 	<Tabs.Content value="vulnerabilitySla">
 		<VulnerabilitySlaSettings {data} />
 	</Tabs.Content>
+	{#if data.mailerSettings}
+		<Tabs.Content value="mailer">
+			<MailerSettings {data} />
+		</Tabs.Content>
+	{/if}
 	<Tabs.Content value="secIntelFeeds">
 		<SecIntelFeedsSettings {data} />
 	</Tabs.Content>
