@@ -4789,7 +4789,7 @@
 	"rightRequestsDescription": "Solicitações de direitos dos titulares de dados (LGPD/GDPR)",
 	"dataBreachesDescription": "Incidentes e notificações de violação de dados",
 	"gdpr": "LGPD / GDPR / Privacidade",
-	"gdprDescription": "Recursos de proteção de dados e gestão de privacidade (conformidade com a GDPR)",
+	"gdprDescription": "Recursos de proteção de dados e gestão de privacidade (conformidade com a LGPD/GDPR)",
 	"orderedEntryListAddNewEntry": "Adicionar nova entrada",
 	"orderedEntryListRefIdPlaceholder": "ID de ref.",
 	"orderedEntryListNamePlaceholder": "Nome",
@@ -7294,5 +7294,14 @@
 	"keepEditing": "Continuar editando",
 	"pickOutsideDomain": "{domain} não contém todas as métricas escolhidas: escolha métricas dentro dele ou mova esta métrica para um domínio superior primeiro.",
 	"instancesNotVisible": "{count} que você não pode ver;",
-	"useInFormula": "Usar em uma fórmula"
+	"useInFormula": "Usar em uma fórmula",
+	"dpias": "RIPDs",
+	"dpiaScreeningStart": "Iniciar triagem de RIPD",
+	"processingRole": "Papel na LGPD/GDPR",
+	"processingControllers": "Clientes (controladores ou operadores)",
+	"dpiaRequiredYes": "RIPD necessário",
+	"dpiaRequiredNo": "RIPD não necessário",
+	"dpiaRequirementChange": "Alteração da exigência de RIPD",
+	"dpiaRequirementChanges": "Histórico da exigência de RIPD",
+	"previously": "Anteriormente"
 }
