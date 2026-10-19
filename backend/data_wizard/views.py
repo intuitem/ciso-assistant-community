@@ -276,8 +276,13 @@ def read_csv_file(file: io.BytesIO) -> pd.DataFrame:
 
 def read_excel_sheet(file: io.BytesIO, sheet_name=0) -> pd.DataFrame:
     """Read a sheet keeping text cells as text (pandas would turn "1.10" into 1.1),
-    while numeric, boolean and date cells keep their inferred dtypes."""
-    return pd.read_excel(file, sheet_name=sheet_name, dtype=object).infer_objects()
+    while numeric, boolean and date cells keep their inferred dtypes.
+    ref_id columns are always text, even when typed as numbers in Excel."""
+    df = pd.read_excel(file, sheet_name=sheet_name, dtype=object)
+    for c in df.columns:
+        if str(c).strip().lower().endswith("ref_id"):
+            df[c] = df[c].map(lambda v: v if pd.isna(v) else str(v))
+    return df.infer_objects()
 
 
 def normalize_datetime_columns(df: pd.DataFrame) -> pd.DataFrame:

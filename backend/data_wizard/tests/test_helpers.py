@@ -287,3 +287,15 @@ class TestRefIdKeptAsText:
         assert df["ref_id"].tolist() == ["1.1", "1.10"]
         assert df["assessable"].tolist() == [True, False]
         assert df["score"].tolist() == [2, 3]
+
+    def test_excel_numeric_ref_id_cells_become_text(self):
+        wb = openpyxl.Workbook()
+        wb.active.append(["ref_id", "parent_entity_ref_id"])
+        wb.active.append([5, 1.5])
+        wb.active.append(["E-2", None])
+        buf = io.BytesIO()
+        wb.save(buf)
+        buf.seek(0)
+        df = read_excel_sheet(buf).fillna("")
+        assert df["ref_id"].tolist() == ["5", "E-2"]
+        assert df["parent_entity_ref_id"].tolist() == ["1.5", ""]
