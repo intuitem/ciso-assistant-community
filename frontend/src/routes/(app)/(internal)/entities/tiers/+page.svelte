@@ -469,43 +469,47 @@
 				<h2 class="text-xs font-semibold uppercase tracking-[0.14em] text-surface-500">
 					{m.tiersFedBy()}
 				</h2>
-				{#if (data.fedBy ?? []).length === 0}
-					<p class="text-sm text-surface-500">{m.tiersFedByNone()}</p>
-					<a class="anchor text-sm" href="/libraries?object_type=quick_forms">{m.libraries()}</a>
-				{:else}
-					<ul class="flex flex-col gap-2.5 text-sm">
-						{#each data.fedBy as quickForm (quickForm.id)}
-							<li class="flex items-start gap-2.5">
-								{#if quickForm.problems.length}
-									<i
-										class="fa-solid fa-triangle-exclamation mt-0.5 text-warning-600-400"
-										aria-hidden="true"
-									></i>
-								{:else}
-									<i class="fa-solid fa-circle-check mt-0.5 text-success-500" aria-hidden="true"
-									></i>
-								{/if}
-								<div class="flex min-w-0 flex-col">
-									<a class="anchor font-medium" href={`/quick-forms/${quickForm.id}`}
-										>{quickForm.name}</a
-									>
-									{#if quickForm.library}
-										<span class="truncate text-xs text-surface-500">{quickForm.library}</span>
-									{/if}
-									{#if quickForm.problems.length}
-										<span class="text-xs text-warning-700 dark:text-warning-400">
-											{quickForm.problems.map((p: string) => safeTranslate(p)).join(', ')}
-										</span>
-									{/if}
-								</div>
-							</li>
-						{/each}
-					</ul>
-				{/if}
+				<h3 class="text-sm font-semibold">{m.tiersFedByVendors()}</h3>
+				{@render fedByList(data.fedBy, m.tiersFedByNone())}
+				<h3 class="text-sm font-semibold">{m.tiersFedBySolutions()}</h3>
+				{@render fedByList(data.fedBySolutions, m.tiersFedBySolutionsNone())}
 			</section>
 		</aside>
 	</div>
 </div>
+
+{#snippet fedByList(forms: any[], none: string)}
+	{#if (forms ?? []).length === 0}
+		<p class="text-sm text-surface-500">{none}</p>
+		<a class="anchor text-sm" href="/libraries?object_type=quick_forms">{m.libraries()}</a>
+	{:else}
+		<ul class="flex flex-col gap-2.5 text-sm">
+			{#each forms as quickForm (quickForm.id)}
+				<li class="flex items-start gap-2.5">
+					{#if quickForm.problems.length}
+						<i
+							class="fa-solid fa-triangle-exclamation mt-0.5 text-warning-600-400"
+							aria-hidden="true"
+						></i>
+					{:else}
+						<i class="fa-solid fa-circle-check mt-0.5 text-success-500" aria-hidden="true"></i>
+					{/if}
+					<div class="flex min-w-0 flex-col">
+						<a class="anchor font-medium" href={`/quick-forms/${quickForm.id}`}>{quickForm.name}</a>
+						{#if quickForm.library}
+							<span class="truncate text-xs text-surface-500">{quickForm.library}</span>
+						{/if}
+						{#if quickForm.problems.length}
+							<span class="text-xs text-warning-700 dark:text-warning-400">
+								{quickForm.problems.map((p: string) => safeTranslate(p)).join(', ')}
+							</span>
+						{/if}
+					</div>
+				</li>
+			{/each}
+		</ul>
+	{/if}
+{/snippet}
 
 <style>
 	/* One staggered entrance for the ladder; nothing moves after that. */

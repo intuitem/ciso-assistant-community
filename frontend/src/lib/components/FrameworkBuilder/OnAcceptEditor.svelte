@@ -28,10 +28,10 @@
 		entity: 'entity.tier',
 		solution: 'solution.tier'
 	};
+	const isTierTarget = (target: string) => Object.values(TIER_TARGETS).includes(target);
+	const entry = $derived((value ?? []).find((e) => isTierTarget(e?.target)));
 	const TIER_TARGET = $derived(
-		(value ?? []).find((e) => Object.values(TIER_TARGETS).includes(e?.target))?.target ??
-			TIER_TARGETS[subjectModel ?? ''] ??
-			TIER_TARGETS.entity
+		TIER_TARGETS[subjectModel ?? ''] ?? entry?.target ?? TIER_TARGETS.entity
 	);
 
 	let tiers = $state<Tier[]>([]);
@@ -49,7 +49,6 @@
 		return () => controller.abort();
 	});
 
-	const entry = $derived((value ?? []).find((e) => e?.target === TIER_TARGET));
 	const config = $derived(entry?.config ?? {});
 	const scoreThresholds = $derived<Threshold[]>(config.bands?.thresholds ?? []);
 	const mapping = $derived<MappingRow[]>(config.mapping ?? []);
@@ -63,7 +62,7 @@
 
 	// The tier entry replaced, any other target's entry left as it is.
 	function write(next: Record<string, any> | null) {
-		const others = (value ?? []).filter((e) => e?.target !== TIER_TARGET);
+		const others = (value ?? []).filter((e) => !isTierTarget(e?.target));
 		onupdate(next === null ? others : [...others, { target: TIER_TARGET, config: next }]);
 	}
 

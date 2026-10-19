@@ -1900,7 +1900,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'entity', urlModel: 'entities' },
 			{ field: 'tier', urlModel: 'tiers' },
-			{ field: 'previous_tier', urlModel: 'tiers' }
+			{ field: 'previous_tier', urlModel: 'tiers' },
+			{ field: 'response', urlModel: 'quick-form-responses' }
 		],
 		selectFields: [{ field: 'source' }]
 	},
@@ -1913,7 +1914,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'solution', urlModel: 'solutions' },
 			{ field: 'tier', urlModel: 'tiers' },
-			{ field: 'previous_tier', urlModel: 'tiers' }
+			{ field: 'previous_tier', urlModel: 'tiers' },
+			{ field: 'response', urlModel: 'quick-form-responses' }
 		],
 		selectFields: [{ field: 'source' }]
 	},

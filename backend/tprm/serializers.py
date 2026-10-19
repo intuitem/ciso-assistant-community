@@ -33,6 +33,7 @@ from tprm.models import (
     SolutionSubcontractor,
     SolutionTierChange,
     Tier,
+    TierSource,
 )
 from tprm.tiers import (
     Propagation,
@@ -150,6 +151,8 @@ class EntityWriteSerializer(BaseModelSerializer):
     tier_note = serializers.CharField(
         write_only=True, required=False, allow_blank=True, default=""
     )
+    # Raises the tier to the solution floor shown on the tier card.
+    apply_tier_floor = serializers.BooleanField(write_only=True, required=False)
 
     class Meta:
         model = Entity
@@ -171,6 +174,7 @@ class EntityWriteSerializer(BaseModelSerializer):
     def create(self, validated_data):
         tier = validated_data.pop("tier", None)
         note = validated_data.pop("tier_note", "")
+        validated_data.pop("apply_tier_floor", None)
         instance = super().create(validated_data)
         if tier is not None:
             set_entity_tier(instance, tier, user=self._user(), note=note)
@@ -178,11 +182,20 @@ class EntityWriteSerializer(BaseModelSerializer):
 
     def update(self, instance, validated_data):
         note = validated_data.pop("tier_note", "")
+        apply_floor = validated_data.pop("apply_tier_floor", False)
         has_tier = "tier" in validated_data
         tier = validated_data.pop("tier", None)
         instance = super().update(instance, validated_data)
         if has_tier:
             set_entity_tier(instance, tier, user=self._user(), note=note)
+        if apply_floor and (solution := below_floor(instance)):
+            set_entity_tier(
+                instance,
+                solution.tier,
+                source=TierSource.ROLLUP,
+                user=self._user(),
+                note=solution.name,
+            )
         return instance
 
     def _user(self):

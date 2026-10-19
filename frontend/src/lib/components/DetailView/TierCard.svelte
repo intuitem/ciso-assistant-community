@@ -109,13 +109,13 @@
 		editing = true;
 	}
 
-	async function save(tier = selected, tierNote = note) {
+	async function save(body: Record<string, unknown> = { tier: selected || null, tier_note: note }) {
 		saving = true;
 		try {
 			const res = await fetch(`/${urlModel}/${object.id}`, {
 				method: 'PATCH',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ tier: tier || null, tier_note: tierNote })
+				body: JSON.stringify(body)
 			});
 			if (!res.ok) {
 				toastStore.trigger({
@@ -246,7 +246,7 @@
 					type="button"
 					class="btn btn-sm preset-tonal-primary ml-auto"
 					disabled={saving}
-					onclick={() => save(object.tier_floor.tier.id, object.tier_floor.solution.str)}
+					onclick={() => save({ apply_tier_floor: true })}
 					data-testid="apply-tier-floor">{m.apply()}</button
 				>
 			{/if}

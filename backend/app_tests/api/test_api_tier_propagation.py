@@ -165,3 +165,18 @@ class TestTierPropagation:
         set_solution_tier(payroll, _tier("critical"), propagate=False)
         acme.refresh_from_db()
         assert acme.tier == _tier("low")
+
+    def test_applying_the_suggested_floor_records_a_rollup(
+        self, authenticated_client, acme, payroll
+    ):
+        _mode(authenticated_client, "suggest")
+        set_solution_tier(payroll, _tier("high"))
+        response = authenticated_client.patch(
+            f"/api/entities/{acme.id}/", {"apply_tier_floor": True}, format="json"
+        )
+        assert response.status_code == status.HTTP_200_OK, response.json()
+        acme.refresh_from_db()
+        assert (acme.tier, acme.tier_source) == (_tier("high"), TierSource.ROLLUP)
+        change = EntityTierChange.objects.filter(entity=acme).first()
+        assert (change.source, change.note) == (TierSource.ROLLUP, "Payroll")
+        assert change.changed_by is not None
