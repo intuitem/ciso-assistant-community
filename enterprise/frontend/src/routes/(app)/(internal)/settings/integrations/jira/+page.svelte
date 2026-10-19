@@ -101,8 +101,9 @@
 			.find((v) => typeof v === 'string');
 		if (typeof fieldError === 'string') return safeTranslate(fieldError);
 		// status "failure" means the provider rejected the credentials, which the
-		// generic label already says; "error" carries an extra reason worth showing.
-		if (errors.status === 'error' && typeof errors.message === 'string') return errors.message;
+		// generic label already says; "error" means the request itself blew up
+		// (network, URL, SSRF guard) and is worth telling apart, in the UI locale.
+		if (errors.status === 'error') return m.anErrorOccurred();
 		return '';
 	}
 </script>
