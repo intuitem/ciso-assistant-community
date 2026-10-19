@@ -32,10 +32,11 @@ from tprm.models import (
     Representative,
     Solution,
     SolutionSubcontractor,
+    SolutionTierChange,
     Tier,
 )
 from tprm.services import create_enclave_audit
-from tprm.tiers import set_entity_tier
+from tprm.tiers import set_entity_tier, set_solution_tier
 
 VDD_LIBRARY = "urn:intuitem:risk:library:vendor-due-diligence"
 VDD_FRAMEWORK = "urn:intuitem:risk:framework:vendor-due-diligence"
@@ -1278,6 +1279,7 @@ class TprmBuilder(DemoBuilder):
         EntityAssessment: "folder",
         EntityScore: "folder",
         EntityTierChange: "folder",
+        SolutionTierChange: "folder",
     }
 
     def stamps(self, ctx):
@@ -1410,7 +1412,6 @@ class TprmBuilder(DemoBuilder):
                     "description": spec["description"],
                     "recipient_entity": main,
                     "is_active": spec.get("active", True),
-                    "tier": tiers.get(spec["tier"]) if spec["tier"] else None,
                     "dora_ict_service_type": spec["service"],
                     "storage_of_data": data is not None,
                     "data_location_storage": data[0] if data else "",
@@ -1433,6 +1434,10 @@ class TprmBuilder(DemoBuilder):
             solutions[spec["ref_id"]] = solution
             if created:
                 solution.assets.set([assets[name] for name in spec["assets"]])
+                if spec["tier"]:
+                    set_solution_tier(
+                        solution, tiers.get(spec["tier"]), propagate=False
+                    )
         return solutions
 
     def build_subcontractors(self, ctx, entities, solutions):
