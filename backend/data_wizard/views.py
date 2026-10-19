@@ -268,7 +268,16 @@ def read_csv_file(file: io.BytesIO) -> pd.DataFrame:
         sep = csv.Sniffer().sniff(sample, delimiters=",;\t|").delimiter
     except csv.Error:
         sep = ","
-    return pd.read_csv(file, sep=sep, encoding="utf-8-sig").fillna("")
+    # Keep ref_ids as text: parsed as floats, "X.10" collapses onto "X.1".
+    header = pd.read_csv(io.StringIO(sample), sep=sep, nrows=0).columns
+    dtype = {c: str for c in header if str(c).strip().lower().endswith("ref_id")}
+    return pd.read_csv(file, sep=sep, encoding="utf-8-sig", dtype=dtype).fillna("")
+
+
+def read_excel_sheet(file: io.BytesIO, sheet_name=0) -> pd.DataFrame:
+    """Read a sheet keeping text cells as text (pandas would turn "1.10" into 1.1),
+    while numeric, boolean and date cells keep their inferred dtypes."""
+    return pd.read_excel(file, sheet_name=sheet_name, dtype=object).infer_objects()
 
 
 def normalize_datetime_columns(df: pd.DataFrame) -> pd.DataFrame:
@@ -4519,7 +4528,7 @@ class LoadFileView(APIView):
                     is_excel = is_excel_file(record_file)
                     if is_excel:
                         df = normalize_datetime_columns(
-                            pd.read_excel(record_file)
+                            read_excel_sheet(record_file)
                         ).fillna("")
                     else:
                         file_type = RecordFileType.CSV
@@ -4937,7 +4946,7 @@ class LoadFileView(APIView):
 
             summary_df = normalize_df_columns(
                 normalize_datetime_columns(
-                    pd.read_excel(excel_data, sheet_name=summary_sheet)
+                    read_excel_sheet(excel_data, sheet_name=summary_sheet)
                 )
             ).fillna("")
             summary_records = summary_df.to_dict(orient="records")
@@ -5084,7 +5093,7 @@ class LoadFileView(APIView):
 
             sheet_df = normalize_df_columns(
                 normalize_datetime_columns(
-                    pd.read_excel(excel_data, sheet_name=sheet_name)
+                    read_excel_sheet(excel_data, sheet_name=sheet_name)
                 )
             ).fillna("")
 
@@ -5423,7 +5432,7 @@ class LoadFileView(APIView):
             if len(sheet_names) == 1:
                 # Single-sheet file: treat it as a Summary-only import.
                 df = normalize_datetime_columns(
-                    pd.read_excel(excel_file, sheet_name=sheet_names[0])
+                    read_excel_sheet(excel_file, sheet_name=sheet_names[0])
                 ).fillna("")
                 records = df.to_dict(orient="records")
                 base_context = BaseContext(
@@ -5456,7 +5465,7 @@ class LoadFileView(APIView):
             }
 
             summary_df = normalize_datetime_columns(
-                pd.read_excel(excel_file, sheet_name="Summary")
+                read_excel_sheet(excel_file, sheet_name="Summary")
             ).fillna("")
             summary_records = summary_df.to_dict(orient="records")
 
@@ -5497,7 +5506,7 @@ class LoadFileView(APIView):
                 )
 
                 sheet_df = normalize_datetime_columns(
-                    pd.read_excel(excel_file, sheet_name=sheet_name)
+                    read_excel_sheet(excel_file, sheet_name=sheet_name)
                 ).fillna("")
                 sheet_records = sheet_df.to_dict(orient="records")
 
@@ -5584,7 +5593,7 @@ class LoadFileView(APIView):
             if parent_sheet is None and not has_child_sheets:
                 # Flat list of processings (legacy single-sheet format)
                 df = normalize_df_columns(
-                    normalize_datetime_columns(pd.read_excel(excel_file)).fillna("")
+                    normalize_datetime_columns(read_excel_sheet(excel_file)).fillna("")
                 )
                 return (
                     ProcessingRecordConsumer(base_context)
@@ -5602,7 +5611,7 @@ class LoadFileView(APIView):
 
             parent_df = normalize_df_columns(
                 normalize_datetime_columns(
-                    pd.read_excel(excel_file, sheet_name=parent_sheet)
+                    read_excel_sheet(excel_file, sheet_name=parent_sheet)
                 ).fillna("")
             )
             parent_records = parent_df.to_dict(orient="records")
@@ -5654,7 +5663,7 @@ class LoadFileView(APIView):
                 result_key, consumer_class = PROCESSING_CHILD_SHEETS[key]
                 sheet_df = normalize_df_columns(
                     normalize_datetime_columns(
-                        pd.read_excel(excel_file, sheet_name=sheet_name)
+                        read_excel_sheet(excel_file, sheet_name=sheet_name)
                     ).fillna("")
                 )
                 sheet_records = sheet_df.to_dict(orient="records")
@@ -5713,7 +5722,7 @@ class LoadFileView(APIView):
             if "Entities" in excel_data.sheet_names:
                 logger.info("Processing Entities sheet")
                 entities_df = normalize_datetime_columns(
-                    pd.read_excel(excel_file, sheet_name="Entities")
+                    read_excel_sheet(excel_file, sheet_name="Entities")
                 ).fillna("")
                 entities_records = entities_df.to_dict(orient="records")
                 entities_result, entity_ref_map, entity_name_map = (
@@ -5731,7 +5740,7 @@ class LoadFileView(APIView):
             if "Solutions" in excel_data.sheet_names:
                 logger.info("Processing Solutions sheet")
                 solutions_df = normalize_datetime_columns(
-                    pd.read_excel(excel_file, sheet_name="Solutions")
+                    read_excel_sheet(excel_file, sheet_name="Solutions")
                 ).fillna("")
                 solutions_records = solutions_df.to_dict(orient="records")
                 solutions_result, solution_ref_map = self._process_solutions(
@@ -5751,7 +5760,7 @@ class LoadFileView(APIView):
             if "EntityAssessments" in excel_data.sheet_names:
                 logger.info("Processing EntityAssessments sheet")
                 entity_assessments_df = normalize_datetime_columns(
-                    pd.read_excel(excel_file, sheet_name="EntityAssessments")
+                    read_excel_sheet(excel_file, sheet_name="EntityAssessments")
                 ).fillna("")
                 entity_assessments_records = entity_assessments_df.to_dict(
                     orient="records"
@@ -5776,7 +5785,7 @@ class LoadFileView(APIView):
             if "Contracts" in excel_data.sheet_names:
                 logger.info("Processing Contracts sheet")
                 contracts_df = normalize_datetime_columns(
-                    pd.read_excel(excel_file, sheet_name="Contracts")
+                    read_excel_sheet(excel_file, sheet_name="Contracts")
                 ).fillna("")
                 contracts_records = contracts_df.to_dict(orient="records")
                 contracts_result = self._process_contracts(
@@ -5799,7 +5808,7 @@ class LoadFileView(APIView):
             if "Representatives" in excel_data.sheet_names:
                 logger.info("Processing Representatives sheet")
                 representatives_df = normalize_datetime_columns(
-                    pd.read_excel(excel_file, sheet_name="Representatives")
+                    read_excel_sheet(excel_file, sheet_name="Representatives")
                 ).fillna("")
                 representatives_records = representatives_df.to_dict(orient="records")
                 representatives_result = self._process_representatives(

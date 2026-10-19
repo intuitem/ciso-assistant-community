@@ -3,6 +3,9 @@ Unit tests for data_wizard top-level helper functions.
 No database access required.
 """
 
+import io
+
+import openpyxl
 import pytest
 from datetime import datetime
 from unittest.mock import MagicMock, patch
@@ -15,6 +18,8 @@ from data_wizard.views import (
     _parse_recovery_objectives,
     _reverse_scale_value,
     normalize_datetime_columns,
+    read_csv_file,
+    read_excel_sheet,
     resolve_container_name,
 )
 
@@ -260,3 +265,25 @@ class TestNormalizeDatetimeColumns:
         result = normalize_datetime_columns(df)
         assert list(result["name"]) == ["Alice"]
         assert list(result["age"]) == [30]
+
+
+class TestRefIdKeptAsText:
+    """SUP-1930: ref_id "1.10" must not be parsed as 1.1 and overwrite "1.1"."""
+
+    def test_csv(self):
+        df = read_csv_file(io.BytesIO(b"ref_id;score\n1.1;2\n1.10;3\n"))
+        assert df["ref_id"].tolist() == ["1.1", "1.10"]
+        assert df["score"].tolist() == [2, 3]
+
+    def test_excel(self):
+        wb = openpyxl.Workbook()
+        wb.active.append(["ref_id", "assessable", "score"])
+        wb.active.append(["1.1", True, 2])
+        wb.active.append(["1.10", False, 3])
+        buf = io.BytesIO()
+        wb.save(buf)
+        buf.seek(0)
+        df = read_excel_sheet(buf)
+        assert df["ref_id"].tolist() == ["1.1", "1.10"]
+        assert df["assessable"].tolist() == [True, False]
+        assert df["score"].tolist() == [2, 3]
