@@ -1862,10 +1862,13 @@ class TierViewSet(TierFedByMixin, BaseModelViewSet):
         )
 
         raised = 0
-        can_change = RoleAssignment.is_access_allowed(
-            user=request.user,
-            perm=Permission.objects.get(codename="change_tier"),
-            folder=Folder.get_root_folder(),
+        can_change = all(
+            RoleAssignment.is_access_allowed(
+                user=request.user,
+                perm=Permission.objects.get(codename=codename),
+                folder=Folder.get_root_folder(),
+            )
+            for codename in ("change_tier", "change_entity")
         )
         if request.method == "PUT":
             if not can_change:
@@ -1885,7 +1888,7 @@ class TierViewSet(TierFedByMixin, BaseModelViewSet):
                 row.save(update_fields=["value", "updated_at"])
                 # Switching the floor on raises the vendors already below it.
                 if mode == Propagation.FLOOR and previous != Propagation.FLOOR:
-                    raised = raise_all_to_floor(user=request.user)
+                    raised = raise_all_to_floor()
         # Counts every vendor: only for those who may switch the mode.
         return Response(
             {
@@ -1901,14 +1904,14 @@ class EntityTierChangeViewSet(BaseModelViewSet):
 
     model = EntityTierChange
     http_method_names = ["get", "head", "options"]
-    filterset_fields = ["entity", "tier", "source", "changed_by", "folder"]
+    filterset_fields = ["entity", "tier", "source", "changed_by"]
     ordering = ["-created_at"]
 
     def get_queryset(self):
         return (
             super()
             .get_queryset()
-            .select_related("entity", "tier", "previous_tier", "changed_by", "folder")
+            .select_related("entity", "tier", "previous_tier", "changed_by")
         )
 
     @action(detail=False, name="Get source choices")
@@ -1919,14 +1922,14 @@ class EntityTierChangeViewSet(BaseModelViewSet):
 class SolutionTierChangeViewSet(BaseModelViewSet):
     model = SolutionTierChange
     http_method_names = ["get", "head", "options"]
-    filterset_fields = ["solution", "tier", "source", "changed_by", "folder"]
+    filterset_fields = ["solution", "tier", "source", "changed_by"]
     ordering = ["-created_at"]
 
     def get_queryset(self):
         return (
             super()
             .get_queryset()
-            .select_related("solution", "tier", "previous_tier", "changed_by", "folder")
+            .select_related("solution", "tier", "previous_tier", "changed_by")
         )
 
     @action(detail=False, name="Get source choices")

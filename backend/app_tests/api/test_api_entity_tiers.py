@@ -2,7 +2,7 @@ import pytest
 from rest_framework import status
 
 from api.test_utils import EndpointTestsUtils
-from iam.models import Folder
+from iam.models import Folder, RoleAssignment
 from tprm.models import Entity, EntityTierChange, Tier, TierSource
 from tprm.testing import seed_four_level_scale
 from tprm.tiers import set_entity_tier
@@ -195,7 +195,7 @@ class TestEntityTier:
         assert change.source == TierSource.MANUAL
         assert change.note == "Hosts PII"
         assert change.changed_by.email == "admin@tests.com"
-        assert change.folder == entity.folder
+        assert RoleAssignment.get_iam_folder_id(change) == entity.folder_id
 
     def test_tier_is_returned_with_rank_and_colour(self, authenticated_client, entity):
         set_entity_tier(entity, _tier("critical"))

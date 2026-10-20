@@ -1,7 +1,7 @@
 import pytest
 from rest_framework import status
 
-from iam.models import Folder
+from iam.models import Folder, RoleAssignment
 from tprm.models import Entity, Solution, SolutionTierChange, Tier, TierSource
 from tprm.testing import seed_four_level_scale
 from tprm.tiers import set_solution_tier
@@ -50,7 +50,10 @@ class TestSolutionTier:
             None,
             "Payroll data",
         )
-        assert change.folder == solution.provider_entity.folder
+        assert (
+            RoleAssignment.get_iam_folder_id(change)
+            == solution.provider_entity.folder_id
+        )
 
     def test_same_tier_again_is_not_a_change(self, authenticated_client, solution):
         set_solution_tier(solution, _tier("high"))

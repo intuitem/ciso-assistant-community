@@ -357,7 +357,7 @@ class TestAccept:
         )
         assert change.changed_by == user
 
-    def test_accept_below_the_solution_floor_is_raised(self, setup):
+    def test_accept_below_the_solution_floor_stands(self, setup):
         GlobalSettings.objects.update_or_create(
             name="tprm",
             defaults={
@@ -372,12 +372,13 @@ class TestAccept:
         assert result.status_code == 200, result.json()
 
         acme = Entity.objects.get(pk=setup["acme"].pk)
-        assert (acme.tier, acme.tier_source) == (_tier("critical"), TierSource.ROLLUP)
+        assert acme.tier_source == TierSource.ASSESSMENT
+        assert acme.tier_response_id is not None
         assert list(
             EntityTierChange.objects.filter(entity=acme).values_list(
                 "source", flat=True
             )
-        ) == [TierSource.ROLLUP, TierSource.ASSESSMENT, TierSource.ROLLUP]
+        ) == [TierSource.ASSESSMENT, TierSource.ROLLUP]
 
     def test_override_with_a_note(self, setup):
         _user, client = _admin()

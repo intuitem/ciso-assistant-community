@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
 	import { SECTION_ICON, SECTION_TITLE } from './section-style';
@@ -16,13 +17,13 @@
 		/** Model of the form's subject question, e.g. "entity"; null without one. */
 		subjectModel: string | null;
 		onupdate: (value: Entry[]) => void;
-		/** Adds a vendor question and makes it the subject. */
-		onaddvendorsubject?: () => void;
+		/** Adds a vendor or solution question and makes it the subject. */
+		onaddsubject?: (model: string) => void;
 		/** Whether any question gives points: without, the form score is always 0. */
 		scored?: boolean;
 	}
 
-	let { value, rules, subjectModel, onupdate, onaddvendorsubject, scored = true }: Props = $props();
+	let { value, rules, subjectModel, onupdate, onaddsubject, scored = true }: Props = $props();
 
 	const TIER_TARGETS: Record<string, string> = {
 		entity: 'entity.tier',
@@ -56,8 +57,13 @@
 	const yesNoRules = $derived(rules.filter((r) => r.kind !== 'number' && r.kind !== 'rating'));
 	const knownKeys = $derived(new Set(tiers.map((t) => t.key)));
 	const forVendors = $derived(TIER_TARGETS[subjectModel ?? ''] === TIER_TARGET);
+	let lastSubjectModel = untrack(() => subjectModel);
 	$effect(() => {
-		if (entry && forVendors && entry.target !== TIER_TARGET) write(entry.config);
+		if (subjectModel === lastSubjectModel) return;
+		lastSubjectModel = subjectModel;
+		untrack(() => {
+			if (entry && forVendors && entry.target !== TIER_TARGET) write(entry.config);
+		});
 	});
 
 	const ruleLabel = (rule: OutcomeRule) =>
@@ -202,14 +208,22 @@
 	{#if !forVendors}
 		<div class="flex flex-wrap items-center gap-2 pl-6">
 			<p class="text-xs text-surface-500">{m.onAcceptNeedsVendorSubject()}</p>
-			{#if onaddvendorsubject}
+			{#if onaddsubject}
 				<button
 					type="button"
 					class="btn btn-sm preset-tonal-primary"
-					onclick={onaddvendorsubject}
+					onclick={() => onaddsubject('entity')}
 					data-testid="on-accept-add-vendor-subject"
 				>
 					<i class="fa-solid fa-plus mr-1"></i>{m.onAcceptAddVendorSubject()}
+				</button>
+				<button
+					type="button"
+					class="btn btn-sm preset-tonal-primary"
+					onclick={() => onaddsubject('solution')}
+					data-testid="on-accept-add-solution-subject"
+				>
+					<i class="fa-solid fa-plus mr-1"></i>{m.onAcceptAddSolutionSubject()}
 				</button>
 			{/if}
 		</div>

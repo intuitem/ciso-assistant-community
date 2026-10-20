@@ -266,36 +266,13 @@ class EntityTierTarget(Target):
                 proposal.extra["band"] = band[2]
         return proposal
 
-    def apply(self, subject, proposal, *, response, user) -> None:
-        from tprm.tiers import raise_to_floor, set_entity_tier
+    def set_tier(self, subject, tier, **kwargs):
+        from tprm.tiers import set_entity_tier
 
-        tier = Tier.objects.get(id=proposal.value["tier"])
-        set_entity_tier(
-            subject,
-            tier,
-            source=TierSource.OVERRIDE
-            if proposal.overridden
-            else TierSource.ASSESSMENT,
-            user=user,
-            note=proposal.note,
-            value=proposal.value.get("value"),
-            response=response,
-        )
-        # An override forces the tier, like a manual change: the floor waits.
-        if not proposal.overridden:
-            raise_to_floor(subject, user=user)
-
-
-@register
-class SolutionTierTarget(EntityTierTarget):
-    key = "solution.tier"
-    subject_model = "tprm.Solution"
-    permission = "change_solution"
+        set_entity_tier(subject, tier, **kwargs)
 
     def apply(self, subject, proposal, *, response, user) -> None:
-        from tprm.tiers import set_solution_tier
-
-        set_solution_tier(
+        self.set_tier(
             subject,
             Tier.objects.get(id=proposal.value["tier"]),
             source=TierSource.OVERRIDE
@@ -306,3 +283,15 @@ class SolutionTierTarget(EntityTierTarget):
             value=proposal.value.get("value"),
             response=response,
         )
+
+
+@register
+class SolutionTierTarget(EntityTierTarget):
+    key = "solution.tier"
+    subject_model = "tprm.Solution"
+    permission = "change_solution"
+
+    def set_tier(self, subject, tier, **kwargs):
+        from tprm.tiers import set_solution_tier
+
+        set_solution_tier(subject, tier, **kwargs)

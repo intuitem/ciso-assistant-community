@@ -889,9 +889,11 @@ class EntityScore(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
         super().save(*args, **kwargs)
 
 
-class EntityTierChange(AbstractBaseModel, FolderMixin):
+class EntityTierChange(AbstractBaseModel):
     """One change of an entity's tier, whatever the path (form, API, batch,
     accepted response). Append-only; `created_at` is when it happened."""
+
+    IAM_SCOPE_FIELD = "entity"
 
     entity = models.ForeignKey(
         Entity,
@@ -946,14 +948,10 @@ class EntityTierChange(AbstractBaseModel, FolderMixin):
     def __str__(self) -> str:
         return f"{self.entity}: {self.previous_tier} → {self.tier}"
 
-    def save(self, *args, **kwargs):
-        # As visible as the entity it is about.
-        if self.entity_id:
-            self.folder = self.entity.folder
-        super().save(*args, **kwargs)
 
+class SolutionTierChange(AbstractBaseModel):
+    IAM_SCOPE_FIELD = "solution"
 
-class SolutionTierChange(AbstractBaseModel, FolderMixin):
     solution = models.ForeignKey(
         Solution,
         on_delete=models.CASCADE,
@@ -1006,11 +1004,6 @@ class SolutionTierChange(AbstractBaseModel, FolderMixin):
 
     def __str__(self) -> str:
         return f"{self.solution}: {self.previous_tier} → {self.tier}"
-
-    def save(self, *args, **kwargs):
-        if self.solution_id:
-            self.folder = self.solution.provider_entity.folder
-        super().save(*args, **kwargs)
 
 
 common_exclude = ["created_at", "updated_at"]

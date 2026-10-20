@@ -1278,8 +1278,8 @@ class TprmBuilder(DemoBuilder):
         Contract: "folder",
         EntityAssessment: "folder",
         EntityScore: "folder",
-        EntityTierChange: "folder",
-        SolutionTierChange: "folder",
+        EntityTierChange: "entity__folder",
+        SolutionTierChange: "solution__provider_entity__folder",
     }
 
     def stamps(self, ctx):

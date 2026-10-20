@@ -877,7 +877,7 @@ class EntityTierChangeReadSerializer(BaseModelSerializer):
     tier = FieldsRelatedField(["id", "name", "rank", "hexcolor"])
     previous_tier = FieldsRelatedField(["id", "name", "rank", "hexcolor"])
     changed_by = FieldsRelatedField(["id", "email"])
-    folder = FieldsRelatedField()
+    folder = FieldsRelatedField(source="entity.folder")
 
     class Meta:
         model = EntityTierChange
@@ -889,7 +889,7 @@ class SolutionTierChangeReadSerializer(BaseModelSerializer):
     tier = FieldsRelatedField(["id", "name", "rank", "hexcolor"])
     previous_tier = FieldsRelatedField(["id", "name", "rank", "hexcolor"])
     changed_by = FieldsRelatedField(["id", "email"])
-    folder = FieldsRelatedField()
+    folder = FieldsRelatedField(source="solution.provider_entity.folder")
 
     class Meta:
         model = SolutionTierChange
@@ -1316,7 +1316,7 @@ class SolutionWriteSerializer(BaseModelSerializer):
             if has_tier:
                 set_solution_tier(solution, tier, user=self._user(), note=note)
             if solution.is_active and not was_active:
-                raise_to_floor(solution.provider_entity, user=self._user())
+                raise_to_floor(solution.provider_entity)
             if chain_sent:
                 direct_provider_id = self._resolve_direct_provider(
                     validated_data, solution

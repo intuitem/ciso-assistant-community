@@ -126,7 +126,7 @@ def set_solution_tier(
         response=response,
     )
     if change is not None and propagate:
-        raise_to_floor(solution.provider_entity, user=user)
+        raise_to_floor(solution.provider_entity)
     return change
 
 
@@ -177,7 +177,7 @@ def entities_below_floor():
 
 
 @transaction.atomic
-def raise_all_to_floor(*, user=None) -> int:
+def raise_all_to_floor() -> int:
     entities = list(entities_below_floor())
     solutions = Solution.objects.select_related("tier").in_bulk(
         [e.floor_solution_id for e in entities]
@@ -188,18 +188,17 @@ def raise_all_to_floor(*, user=None) -> int:
             entity,
             solution.tier,
             source=TierSource.ROLLUP,
-            user=user,
             note=solution.name,
         )
     return len(entities)
 
 
-def raise_to_floor(entity: Entity | None, *, user=None) -> EntityTierChange | None:
+def raise_to_floor(entity: Entity | None) -> EntityTierChange | None:
     if entity is None or propagation_mode() != Propagation.FLOOR:
         return None
     solution = below_floor(entity)
     if solution is None:
         return None
     return set_entity_tier(
-        entity, solution.tier, source=TierSource.ROLLUP, user=user, note=solution.name
+        entity, solution.tier, source=TierSource.ROLLUP, note=solution.name
     )
