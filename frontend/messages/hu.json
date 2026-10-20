@@ -7294,5 +7294,14 @@
 	"keepEditing": "Szerkesztés folytatása",
 	"pickOutsideDomain": "A(z) {domain} tartomány nem tartalmazza az összes kiválasztott metrikát: válasszon azon belüli metrikákat, vagy előbb helyezze át ezt a metrikát egy magasabb szintű tartományba.",
 	"instancesNotVisible": "{count} nem látható az Ön számára;",
-	"useInFormula": "Használat képletben"
+	"useInFormula": "Használat képletben",
+	"dpias": "Adatvédelmi hatásvizsgálatok",
+	"dpiaScreeningStart": "Hatásvizsgálati előszűrés indítása",
+	"processingRole": "GDPR-szerepkör",
+	"processingControllers": "Ügyfelek (adatkezelők vagy adatfeldolgozók)",
+	"dpiaRequiredYes": "Adatvédelmi hatásvizsgálat szükséges",
+	"dpiaRequiredNo": "Nem szükséges adatvédelmi hatásvizsgálat",
+	"dpiaRequirementChange": "Hatásvizsgálati kötelezettség változása",
+	"dpiaRequirementChanges": "Hatásvizsgálati kötelezettség előzményei",
+	"previously": "Korábban"
 }
