@@ -7,6 +7,8 @@ from pathlib import Path
 from abc import ABC, abstractmethod
 import threading
 import ipaddress
+import os
+import stat
 import selectors
 import socket
 import fcntl
@@ -18,7 +20,6 @@ import enum
 from global_settings.models import GlobalSettings
 from global_settings.serializers import InfraConfigSerializer
 
-from django.conf import settings
 
 TIME_WINDOW_UNIT: Final[int] = 60
 """Granularity of the time window (in seconds) (for now time windows have a 1-minute time granularity)."""
@@ -438,11 +439,12 @@ class RPCSocket:
 
 class RPCServer:
     def __init__(self, ban_cache: _BanCache):
+        self._socket_file_path = ban_cache._socket_file_path
         server_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        if _BanCache.UNIX_SOCKET_FILE_PATH.exists():
-            _BanCache.UNIX_SOCKET_FILE_PATH.unlink()
+        if self._socket_file_path.exists():
+            self._socket_file_path.unlink()
 
-        server_socket.bind(str(_BanCache.UNIX_SOCKET_FILE_PATH))
+        server_socket.bind(str(self._socket_file_path))
         server_socket.listen()
         self._socket = RPCSocket(server_socket)
 
@@ -532,33 +534,55 @@ class RPCServer:
         self._selector.close()
         self._socket.close()
         try:
-            _BanCache.UNIX_SOCKET_FILE_PATH.unlink()
+            self._socket_file_path.unlink()
         except FileNotFoundError:
             pass
+
+
+RUNTIME_DIR: Final[Path] = Path(
+    os.environ.get("CISO_ASSISTANT_RUNTIME_DIR", "/tmp/ciso-assistant")
+)
 
 
 class _BanCache:
     """**WARNING**: This cache is NOT thread-safe, so only the main thread of each gunicorn worker process SHALL use it."""
 
     ENTRY_LIMIT: Final[int] = 65536
-    LEADER_ELECTION_FILE_PATH: Final[Path] = settings.BASE_DIR / "leader_election.lock"
-    UNIX_SOCKET_FILE_PATH: Final[Path] = settings.BASE_DIR / "cache.socket"
     # TODO: Think about user changing (time_window_size, max_failed_login_attempts, ban_time)
     # The user SHALL NOT be able to change `time_window_size` (adjusting max_failed_login_attempts and ban_time is enough)
     # What impact would it have at runtime (the InfraSetting changes MUST be communicated via the unix socket to be sure the cache settings are updated accordingly).
 
     def __init__(self):
+        runtime_dir = _BanCache._ensure_runtime_dir()
+        self._lock_file_path = runtime_dir / "leader_election.lock"
+        self._socket_file_path = runtime_dir / "cache.socket"
+
         self.ip_to_ban_info: dict[str, BanInfo] = {}
         # self.ip_eviction_deque: deque[IPLookupEntry] = deque()
         self.eviction_cache: dict[int, set[str]] = defaultdict(set)
         """`hashmap(time_window => set[ip_address])`"""
 
-        self._lock_file = open(_BanCache.LEADER_ELECTION_FILE_PATH, "w")
+        self._lock_file = open(self._lock_file_path, "w")
 
         self.conn = None
         self.is_leader = False
         self._leader_thread_handle: Optional[threading.Thread] = None
         self._try_become_leader()
+
+    @staticmethod
+    def _ensure_runtime_dir() -> Path:
+        """Create the private runtime directory if missing (containing the lock file and unix socket)."""
+        RUNTIME_DIR.mkdir(mode=0o700, parents=True, exist_ok=True)
+        st = RUNTIME_DIR.lstat()
+        if (
+            not stat.S_ISDIR(st.st_mode)
+            or st.st_uid != os.getuid()
+            or st.st_mode & 0o022
+        ):
+            raise PermissionError(
+                f"Unsafe rate limiting runtime directory: {RUNTIME_DIR}"
+            )
+        return RUNTIME_DIR
 
     def _try_become_leader(self) -> bool:
         try:
@@ -677,7 +701,7 @@ class _BanCache:
         create_audit_log = (
             is_newly_banned
             and isinstance(request, RequestRegisterFailedLogin)
-            and Settings.AUDIT_LOG_LIMIT.try_acquire()
+            and not Settings.AUDIT_LOG_LIMIT.try_acquire()
         )
         return is_banned, create_audit_log
 
@@ -692,7 +716,7 @@ class _BanCache:
             if self.conn is None:
                 conn_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
                 conn_socket.settimeout(0.2)
-                conn_socket.connect(str(_BanCache.UNIX_SOCKET_FILE_PATH))
+                conn_socket.connect(str(self._socket_file_path))
                 self.conn = RPCSocket(conn_socket)
 
             encoded_request = request.encode()

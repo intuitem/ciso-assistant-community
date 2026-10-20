@@ -175,6 +175,7 @@ class AccountAdapter(DefaultAccountAdapter):
         infra_settings = infra_settings_obj.value if infra_settings_obj else {}
 
         is_rate_limit_activated = infra_settings.get("is_rate_limit_activated", False)
+
         proxy_ips = infra_settings.get(
             "proxy_ips", list(InfraConfigSerializer.DEFAULT_PROXY_IPS)
         )
@@ -187,7 +188,12 @@ class AccountAdapter(DefaultAccountAdapter):
             is_rate_limited = not is_in_networks(ip_address, not_rate_limited_ips)
 
             if is_rate_limited:
-                is_banned = get_ban_cache().is_banned(ip_address)
+                try:
+                    is_banned = get_ban_cache().is_banned(ip_address)
+                except Exception as e:
+                    logger.error("Failed to to check if an IP was banned", exc_info=e)
+                    is_banned = False
+
                 if is_banned:
                     raise ImmediateHttpResponse(RateLimitResponse(request))
 
@@ -212,13 +218,17 @@ class AccountAdapter(DefaultAccountAdapter):
         except Exception:
             # Failed login: bad credentials, invalid input or non-local user
             if is_rate_limit_activated and ip_address is not None:
-                create_audit_log = get_ban_cache().register_failed_login(
-                    ip_address, email
-                )
-
-                if create_audit_log:
-                    user = User.objects.filter(email=email).first() if email else None
-                    create_ip_ban_audit_log(ip_address, user)
+                try:
+                    create_audit_log = get_ban_cache().register_failed_login(
+                        ip_address, email
+                    )
+                    if create_audit_log:
+                        user = (
+                            User.objects.filter(email=email).first() if email else None
+                        )
+                        create_ip_ban_audit_log(ip_address, user)
+                except Exception as e:
+                    logger.error("Failed to log rate limited IP", exc_info=e)
 
             return None
 

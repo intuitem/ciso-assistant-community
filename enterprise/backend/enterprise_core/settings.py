@@ -54,9 +54,7 @@ MODULES["enterprise_core"] = {  # noqa: F405
 
 INSTALLED_APPS.append("enterprise_core")  # noqa: F405
 
-# The enterprise edition has its own login rate limiting system (`iam.rate_limiting`)
-# which would conflict with allauth's default rate limiting (that's why we remove it).
-ACCOUNT_RATE_LIMITS = False
+ALLAUTH_SETTING_GETTER = "iam.rate_limiting_allauth._get_allauth_setting"
 
 CONFIGURABLE_DEFAULT_ROLE = True
 """

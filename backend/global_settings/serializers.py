@@ -8,6 +8,7 @@ from django.conf import settings as django_settings
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import transaction
 from rest_framework import serializers
+import structlog
 
 from urllib.parse import urlparse
 
@@ -19,6 +20,8 @@ from core.net_safety import (
 from iam.models import User
 
 from .models import GlobalSettings
+
+logger = structlog.get_logger(__name__)
 
 
 def canonical_ip_or_cidr(value: str) -> str:
@@ -942,7 +945,10 @@ class InfraConfigSerializer(serializers.ModelSerializer):
             instance.value = current_value_dict
             instance.save(update_fields=["value"])
 
-        get_ban_cache().refresh_settings()
+        try:
+            get_ban_cache().refresh_settings()
+        except Exception as e:
+            logger.error("Failed to refresh cached settings", exc_info=e)
 
         return instance
 
