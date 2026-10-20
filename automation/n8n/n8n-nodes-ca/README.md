@@ -6,7 +6,9 @@ This is the official package, published from this repository with npm provenance
 
 ## Installation
 
-In n8n: **Settings → Community Nodes → Install**, then enter `@intuitem/n8n-nodes-ciso-assistant`.
+On self-hosted n8n: **Settings → Community Nodes → Install**, then enter `@intuitem/n8n-nodes-ciso-assistant`.
+
+n8n Cloud only offers community nodes that n8n has verified, from the nodes panel. This one isn't verified yet.
 
 For queue mode or manual installs, see the [n8n community nodes installation guide](https://docs.n8n.io/integrations/community-nodes/installation/).
 

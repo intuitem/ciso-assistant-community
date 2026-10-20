@@ -36,9 +36,13 @@ export async function makeRequest(
       requestOptions,
     );
   } catch (error) {
-    throw new NodeApiError(executeFunctions.getNode(), error as JsonObject, {
-      itemIndex,
-    });
+    // The helper usually throws a NodeApiError already; re-wrapping returns it as is.
+    const apiError = new NodeApiError(
+      executeFunctions.getNode(),
+      error as JsonObject,
+    );
+    if (itemIndex !== undefined) apiError.context.itemIndex = itemIndex;
+    throw apiError;
   }
 }
 

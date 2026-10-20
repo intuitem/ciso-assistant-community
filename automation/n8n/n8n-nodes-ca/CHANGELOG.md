@@ -12,5 +12,9 @@ First release on npm as `@intuitem/n8n-nodes-ciso-assistant`.
 - New **Get** operation (by ID) on every resource except System. "List" is labelled "Get Many".
 - Listing requirement assessments and evidence revisions now pages through all results instead of stopping at the server's page size.
 - Fixed Task Definition and Task Occurrence, which called endpoints that don't exist (`task-definitions`, `task-occurrences`) and always failed. They now use `task-templates` and `task-nodes`.
+- Update Requirement Assessment (version 2) defaults status, result and score to "No Change", so updating only the observation no longer resets them to To Do / Not Assessed / 0. Version 1 nodes keep the old defaults.
+- Update Requirement Assessment now looks the requirement up with a filter the API supports, and refuses to update unless exactly one matches. Before, it could overwrite a different requirement of the same audit.
+- Create Incident no longer fails when status, severity or detection is left on "No Change"; the API's defaults apply.
+- Evidence file uploads use the credential's authentication like every other request, report API errors with their status, and remove the empty revision if the upload fails.
 - Options in dropdowns are listed alphabetically. The Entity Assessment conclusion gains an explicit "Not Set" choice, which is its existing default.
 - License changed to MIT.

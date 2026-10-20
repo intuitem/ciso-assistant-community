@@ -52,13 +52,19 @@ export class IncidentHandler extends BaseResourceHandler {
         name: incidentName,
         folder: folderId,
         description: incidentDescription,
-        status: incidentStatus,
-        severity: incidentSeverity,
-        detection: incidentDetection,
       },
       {
         ref_id: incidentRefId,
       },
+    );
+    // "No Change" sentinels are shared with update; on create, omit them so the model defaults apply.
+    Object.assign(
+      body,
+      this.buildUpdateBody({
+        status: incidentStatus,
+        severity: incidentSeverity,
+        detection: incidentDetection,
+      }),
     );
 
     return this.createResource(body);

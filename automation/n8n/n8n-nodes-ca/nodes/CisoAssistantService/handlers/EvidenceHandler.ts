@@ -1,4 +1,5 @@
-import type { IDataObject } from "n8n-workflow";
+import { NodeApiError } from "n8n-workflow";
+import type { IDataObject, JsonObject } from "n8n-workflow";
 import type { IResourceContext } from "../types";
 import { BaseResourceHandler } from "./BaseResourceHandler";
 
@@ -147,17 +148,35 @@ export class EvidenceHandler extends BaseResourceHandler {
     const newRevisionId = revisionResponse.id;
 
     // Step 2: Upload the file to the new revision
-    await this.context.executeFunctions.helpers.httpRequest({
-      method: "POST",
-      url: `${this.context.credentials.baseUrl}/evidence-revisions/${newRevisionId}/upload/`,
-      headers: {
-        Authorization: `Token ${this.context.credentials.patKey}`,
-        "Content-Disposition": `attachment; filename=${encodeURIComponent(filename)}`,
-      },
-      body: dataBuffer,
-      json: false,
-      skipSslCertificateValidation: this.context.credentials.skipTLS,
-    });
+    const { executeFunctions, credentials, itemIndex } = this.context;
+    try {
+      await executeFunctions.helpers.httpRequestWithAuthentication.call(
+        executeFunctions,
+        "cisoAssistantApi",
+        {
+          method: "POST",
+          url: `${credentials.baseUrl}/evidence-revisions/${newRevisionId}/upload/`,
+          headers: {
+            "Content-Disposition": `attachment; filename=${encodeURIComponent(filename)}`,
+          },
+          body: dataBuffer,
+          json: false,
+          skipSslCertificateValidation: credentials.skipTLS === true,
+        },
+      );
+    } catch (error) {
+      // Don't leave an empty revision behind; the upload error is the one to report.
+      await this.request(
+        "DELETE",
+        `/evidence-revisions/${newRevisionId}/`,
+      ).catch(() => undefined);
+      const apiError = new NodeApiError(
+        executeFunctions.getNode(),
+        error as JsonObject,
+      );
+      apiError.context.itemIndex = itemIndex;
+      throw apiError;
+    }
 
     return revisionResponse;
   }

@@ -195,6 +195,7 @@ export const fields: INodeProperties[] = [
       show: {
         resource: ["audit"],
         operation: ["updateRequirementAssessment"],
+        "@version": [1],
       },
     },
     options: [
@@ -219,6 +220,48 @@ export const fields: INodeProperties[] = [
     description: "The status of the requirement assessment",
   },
   {
+    displayName: "Status",
+    name: "requirementAssessmentStatus",
+    type: "options",
+    displayOptions: {
+      show: {
+        resource: ["audit"],
+        operation: ["updateRequirementAssessment"],
+        "@version": [
+          {
+            _cnd: {
+              gte: 2,
+            },
+          },
+        ],
+      },
+    },
+    options: [
+      {
+        name: "Done",
+        value: "done",
+      },
+      {
+        name: "In Progress",
+        value: "in_progress",
+      },
+      {
+        name: "In Review",
+        value: "in_review",
+      },
+      {
+        name: "No Change",
+        value: "",
+      },
+      {
+        name: "To Do",
+        value: "to_do",
+      },
+    ],
+    default: "",
+    description: "The status of the requirement assessment",
+  },
+  {
     displayName: "Result",
     name: "requirementAssessmentResult",
     type: "options",
@@ -226,6 +269,7 @@ export const fields: INodeProperties[] = [
       show: {
         resource: ["audit"],
         operation: ["updateRequirementAssessment"],
+        "@version": [1],
       },
     },
     options: [
@@ -254,6 +298,52 @@ export const fields: INodeProperties[] = [
     description: "The compliance result",
   },
   {
+    displayName: "Result",
+    name: "requirementAssessmentResult",
+    type: "options",
+    displayOptions: {
+      show: {
+        resource: ["audit"],
+        operation: ["updateRequirementAssessment"],
+        "@version": [
+          {
+            _cnd: {
+              gte: 2,
+            },
+          },
+        ],
+      },
+    },
+    options: [
+      {
+        name: "Compliant",
+        value: "compliant",
+      },
+      {
+        name: "No Change",
+        value: "",
+      },
+      {
+        name: "Non-Compliant",
+        value: "non_compliant",
+      },
+      {
+        name: "Not Applicable",
+        value: "not_applicable",
+      },
+      {
+        name: "Not Assessed",
+        value: "not_assessed",
+      },
+      {
+        name: "Partially Compliant",
+        value: "partially_compliant",
+      },
+    ],
+    default: "",
+    description: "The compliance result",
+  },
+  {
     displayName: "Observation",
     name: "requirementAssessmentObservation",
     type: "string",
@@ -278,10 +368,33 @@ export const fields: INodeProperties[] = [
       show: {
         resource: ["audit"],
         operation: ["updateRequirementAssessment"],
+        "@version": [1],
       },
     },
     default: 0,
     placeholder: "0",
     description: "Score for the requirement assessment",
+  },
+  {
+    displayName: "Score",
+    name: "requirementAssessmentScore",
+    type: "number",
+    displayOptions: {
+      show: {
+        resource: ["audit"],
+        operation: ["updateRequirementAssessment"],
+        "@version": [
+          {
+            _cnd: {
+              gte: 2,
+            },
+          },
+        ],
+      },
+    },
+    default: -1,
+    placeholder: "0",
+    description:
+      "Score for the requirement assessment. Leave at -1 to keep the current score.",
   },
 ];

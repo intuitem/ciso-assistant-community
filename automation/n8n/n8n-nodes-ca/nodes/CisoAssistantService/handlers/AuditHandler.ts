@@ -135,6 +135,12 @@ export class AuditHandler extends BaseResourceHandler {
       );
     }
 
+    // Never PATCH on an ambiguous lookup: the wrong requirement would be silently overwritten.
+    if (results.length > 1) {
+      throw new Error(
+        `${results.length} requirement assessments match ref_id ${requirementRefId} in compliance assessment ${complianceAssessmentId}; expected exactly one`,
+      );
+    }
     const requirementAssessmentId = results[0].id;
 
     // Build update data
