@@ -1,5 +1,7 @@
 <script lang="ts">
 	import TierBadge from '$lib/components/ModelTable/field/TierBadge.svelte';
+	import ComplianceOverview from '$lib/components/DataViz/ComplianceOverview.svelte';
+	import type { ComplianceOverview as ComplianceOverviewData } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 	// State to track if the card is flipped
 	let isFlipped = $state(false);
@@ -27,6 +29,7 @@
 			eta_date: string;
 			observation: string;
 			reviewers: string;
+			compliance_overview: ComplianceOverviewData | null;
 		};
 	}
 
@@ -89,7 +92,7 @@
 {/snippet}
 
 <div
-	class="perspective-1000 w-full h-full min-h-[420px] relative w-full h-full transition-transform duration-800 {isFlipped
+	class="perspective-1000 w-full h-full min-h-[600px] relative w-full h-full transition-transform duration-800 {isFlipped
 		? 'rotate-x-180'
 		: ''}"
 	role="listitem"
@@ -195,6 +198,12 @@
 						auditHref
 					)}
 				</div>
+
+				<ComplianceOverview
+					overview={entity_assessment.compliance_overview}
+					name={`card_${entity_assessment.entity_assessment_id}`}
+					height="h-40"
+				/>
 
 				<!-- Dates -->
 				<div class="grid grid-cols-2 gap-2 text-sm text-surface-600-400">

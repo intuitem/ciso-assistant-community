@@ -27,11 +27,16 @@ from core.views import (
 from core.models import (
     Asset,
     ComplianceAssessment,
+    Question,
     RequirementAssessment,
     RequirementAssignment,
     Terminology,
 )
-from core.utils import compute_respondent_progress
+from core.utils import (
+    assessable_requirement_assessments,
+    compliance_overviews,
+    compute_respondent_progress,
+)
 from django.db.models import (
     Case,
     Count,
@@ -1346,26 +1351,6 @@ class EntityAssessmentViewSet(ExportMixin, BaseModelViewSet):
         )
         return qs.annotate(assignment_status_rank=Subquery(least_advanced))
 
-    @staticmethod
-    def _prefetched_requirement_assessments(audit):
-        """Same selection rules as `get_requirement_assessments`, read off what is in memory:
-
-        calling it would bypass the page-level prefetch and re-query per row.
-        """
-        rows = [
-            ra
-            for ra in audit.requirement_assessments.all()
-            if ra.requirement.assessable
-        ]
-        selected = set(audit.selected_implementation_groups or [])
-        if not selected:
-            return rows
-        return [
-            ra
-            for ra in rows
-            if selected & set(ra.requirement.implementation_groups or [])
-        ]
-
     def _get_optimized_object_data(self, queryset):
         """Answering progress and assignment state for the whole page at once: per row the walk is a query storm."""
         data = super()._get_optimized_object_data(queryset)
@@ -1398,7 +1383,7 @@ class EntityAssessmentViewSet(ExportMixin, BaseModelViewSet):
         )
         data["completion"] = {
             audit.id: compute_respondent_progress(
-                audit, self._prefetched_requirement_assessments(audit)
+                audit, assessable_requirement_assessments(audit)
             )
             for audit in audits
         }
@@ -1411,6 +1396,8 @@ class EntityAssessmentViewSet(ExportMixin, BaseModelViewSet):
             else 0
             for audit in audits
         }
+
+        data["compliance_overview"] = compliance_overviews(audits)
 
         statuses: dict = {}
         for audit_id, status_value in RequirementAssignment.objects.filter(
@@ -1634,9 +1621,30 @@ class EntityAssessmentViewSet(ExportMixin, BaseModelViewSet):
                 ),
             )
         }
+        # Same page-level pass as the completion figures: the rows are already
+        # in memory, and the framework trees are primed in one query.
+        overviews = compliance_overviews(audits_by_id.values())
 
-        for ea in EntityAssessment.objects.filter(id__in=viewable_items).select_related(
-            "folder", "entity", "entity__tier"
+        # `has_questions` and `progress` query per audit when read off the model.
+        frameworks_with_questions = set(
+            Question.objects.filter(
+                requirement_node__framework_id__in={
+                    audit.framework_id for audit in audits_by_id.values()
+                }
+            )
+            .values_list("requirement_node__framework_id", flat=True)
+            .distinct()
+        )
+        for audit in audits_by_id.values():
+            audit._has_questions = audit.framework_id in frameworks_with_questions
+        totals, assessed = ComplianceAssessmentViewSet.get_requirement_counts(
+            list(audits_by_id)
+        )
+
+        for ea in (
+            EntityAssessment.objects.filter(id__in=viewable_items)
+            .select_related("folder", "entity", "entity__tier")
+            .prefetch_related("solutions", "reviewers")
         ):
             audit = audits_by_id.get(ea.compliance_assessment_id)
             # Use entity assessment's folder for grouping
@@ -1686,15 +1694,22 @@ class EntityAssessmentViewSet(ExportMixin, BaseModelViewSet):
             # `answers_progress` counted questions only: a framework without any read 0%.
             completion = (
                 compute_respondent_progress(
-                    audit, self._prefetched_requirement_assessments(audit)
+                    audit, assessable_requirement_assessments(audit)
                 )
                 if audit
                 else 0
             )
             entry.update({"completion": completion})
 
-            review_progress = audit.progress if audit else 0
+            review_progress = (
+                int(assessed.get(audit.id, 0) / totals[audit.id] * 100)
+                if audit and totals.get(audit.id)
+                else 0
+            )
             entry.update({"review_progress": review_progress})
+
+            # None, not an empty donut: no questionnaire is not a result.
+            entry["compliance_overview"] = overviews.get(ea.compliance_assessment_id)
             assessments_data.append(entry)
 
         return Response(assessments_data)

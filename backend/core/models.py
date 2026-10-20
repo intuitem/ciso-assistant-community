@@ -9809,13 +9809,8 @@ class ComplianceAssessment(Assessment):
         avg_ratio = total_ratio_weighted / total_weight
         return ca_min + avg_ratio * ca_range
 
-    @cached_property
-    def framework_node_tree(self):
-        """(children, weights, roots) of the framework's nodes by URN, built
-        once per instance: the radar scores each section separately."""
-        all_nodes = RequirementNode.objects.filter(
-            framework=self.framework
-        ).values_list("urn", "parent_urn", "weight")
+    @staticmethod
+    def _node_tree(all_nodes):
         children_map = defaultdict(list)
         node_weights = {}
         roots = []
@@ -9830,6 +9825,30 @@ class ComplianceAssessment(Assessment):
                 # Orphan or root: keep reachable as a tree root.
                 roots.append(urn)
         return children_map, node_weights, roots
+
+    @cached_property
+    def framework_node_tree(self):
+        """(children, weights, roots) of the framework's nodes by URN, built
+        once per instance: the radar scores each section separately."""
+        return self._node_tree(
+            RequirementNode.objects.filter(framework=self.framework).values_list(
+                "urn", "parent_urn", "weight"
+            )
+        )
+
+    @classmethod
+    def framework_node_trees(cls, framework_ids) -> dict:
+        """`framework_node_tree` for several frameworks in one query, keyed by
+        framework id, so a page of audits primes it instead of querying per row."""
+        rows_by_framework = defaultdict(list)
+        for framework_id, urn, parent_urn, weight in RequirementNode.objects.filter(
+            framework_id__in=framework_ids
+        ).values_list("framework_id", "urn", "parent_urn", "weight"):
+            rows_by_framework[framework_id].append((urn, parent_urn, weight))
+        return {
+            framework_id: cls._node_tree(rows)
+            for framework_id, rows in rows_by_framework.items()
+        }
 
     def get_global_score(
         self, prefetched_requirements: Optional[list[RequirementAssessment]] = None
@@ -9965,7 +9984,9 @@ class ComplianceAssessment(Assessment):
             "total_weight": sum(ra.requirement.weight or 1 for ra in scored),
         }
 
-    def get_total_max_score(self):
+    def get_total_max_score(
+        self, prefetched_requirements: Optional[list[RequirementAssessment]] = None
+    ):
         """
         Calculate the theoretical total maximum score based on the score_calculation_method.
 
@@ -9974,6 +9995,8 @@ class ComplianceAssessment(Assessment):
         For SUM: Returns Σ(resolved_max × weight) so per-requirement scale
         overrides contribute their own ceiling — a binary requirement adds 1,
         not the CA's max — keeping 100% achievable when every RA is at its max.
+
+        **WARNING:** If provided `prefetched_requirements` **MUST** be a list of `RequirementAssessment` `req` WHERE `req.compliance_assessment == self` AND `req.requirement.assessable is True`.
         """
         if self.score_calculation_method == self.CalculationMethod.SUM:
             # Keep this set aligned with get_global_score's numerator: rows the
@@ -9982,20 +10005,34 @@ class ComplianceAssessment(Assessment):
             # is on, N/A items contribute on the numerator side (anchored to
             # target), so they stay in the max too, otherwise the displayed
             # ratio can exceed 100%.
-            qs = RequirementAssessment.objects.filter(
-                compliance_assessment=self,
-                requirement__assessable=True,
-            ).select_related("requirement")
-            if self.anchor_na_to_target:
-                qs = qs.filter(
-                    Q(result=RequirementAssessment.Result.NOT_APPLICABLE)
-                    | (Q(is_scored=True) & Q(score__isnull=False))
-                )
+            na = RequirementAssessment.Result.NOT_APPLICABLE
+            if prefetched_requirements is not None:
+                if self.anchor_na_to_target:
+                    requirement_assessments_scored = [
+                        ra
+                        for ra in prefetched_requirements
+                        if ra.result == na or (ra.is_scored and ra.score is not None)
+                    ]
+                else:
+                    requirement_assessments_scored = [
+                        ra
+                        for ra in prefetched_requirements
+                        if ra.is_scored and ra.score is not None and ra.result != na
+                    ]
             else:
-                qs = qs.filter(is_scored=True, score__isnull=False).exclude(
-                    result=RequirementAssessment.Result.NOT_APPLICABLE
-                )
-            requirement_assessments_scored = qs
+                qs = RequirementAssessment.objects.filter(
+                    compliance_assessment=self,
+                    requirement__assessable=True,
+                ).select_related("requirement")
+                if self.anchor_na_to_target:
+                    qs = qs.filter(
+                        Q(result=na) | (Q(is_scored=True) & Q(score__isnull=False))
+                    )
+                else:
+                    qs = qs.filter(is_scored=True, score__isnull=False).exclude(
+                        result=na
+                    )
+                requirement_assessments_scored = qs
             ig = (
                 set(self.selected_implementation_groups)
                 if self.selected_implementation_groups
