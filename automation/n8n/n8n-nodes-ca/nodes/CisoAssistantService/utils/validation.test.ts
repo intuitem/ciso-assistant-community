@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildUpdateBody } from "./validation";
+import { contentDispositionHeader } from "./http";
 
 describe("buildUpdateBody", () => {
   it("should filter out empty string sentinels", () => {
@@ -115,5 +116,13 @@ describe("buildUpdateBody", () => {
       tags: ["tag1", "tag2"],
       metadata: { key: "value" },
     });
+  });
+});
+
+describe("contentDispositionHeader", () => {
+  it("keeps the real name in filename* and sanitises the fallback", () => {
+    expect(contentDispositionHeader('audit report "v2"; été.pdf')).toBe(
+      "attachment; filename=\"audit report -v2-- -t-.pdf\"; filename*=utf-8''audit%20report%20%22v2%22%3B%20%C3%A9t%C3%A9.pdf",
+    );
   });
 });

@@ -2,6 +2,7 @@ import { NodeApiError } from "n8n-workflow";
 import type { IDataObject, JsonObject } from "n8n-workflow";
 import type { IResourceContext } from "../types";
 import { BaseResourceHandler } from "./BaseResourceHandler";
+import { contentDispositionHeader } from "../utils/http";
 
 /**
  * Handler for evidence operations
@@ -157,7 +158,7 @@ export class EvidenceHandler extends BaseResourceHandler {
           method: "POST",
           url: `${credentials.baseUrl}/evidence-revisions/${newRevisionId}/upload/`,
           headers: {
-            "Content-Disposition": `attachment; filename=${encodeURIComponent(filename)}`,
+            "Content-Disposition": contentDispositionHeader(filename),
           },
           body: dataBuffer,
           json: false,
