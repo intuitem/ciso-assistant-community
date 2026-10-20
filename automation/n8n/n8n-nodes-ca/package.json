@@ -1,6 +1,6 @@
 {
   "name": "@intuitem/n8n-nodes-ciso-assistant",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "n8n community node for the CISO Assistant GRC platform",
   "license": "MIT",
   "homepage": "https://github.com/intuitem/ciso-assistant-community/tree/main/automation/n8n/n8n-nodes-ca",
@@ -44,7 +44,7 @@
     ]
   },
   "devDependencies": {
-    "@n8n/node-cli": "^0.54.0",
+    "@n8n/node-cli": "0.54.0",
     "eslint": "9.39.4",
     "prettier": "3.9.10",
     "typescript": "5.9.3",
