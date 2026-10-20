@@ -290,21 +290,26 @@
 		headerRow = plans[index].headerRow
 	) {
 		const plan = plans[index];
+		const forFile = file;
+		const name = plan.analysed.name;
 		const schema = await loadSchema(modelType);
-		if (!schema) return false;
+		if (!schema || file !== forFile) return false;
 		const sheet = targetSheet ?? schema.sheets[0].name;
 		plan.busy = true;
 		outcome = null;
 		try {
 			const sheets = await analyse({
-				[plan.analysed.name]: {
+				[name]: {
 					model_type: modelType,
 					sheet,
 					header_row: headerRow
 				}
 			});
-			const fresh = sheets.find((s) => s.name === plan.analysed.name);
-			if (fresh) plans[index] = { ...planFrom(fresh, plan.open), include: true };
+			// Another file or a reset replaced the plans while this request ran.
+			if (file !== forFile) return false;
+			const at = plans.findIndex((p) => p.analysed.name === name);
+			const fresh = sheets.find((s) => s.name === name);
+			if (fresh && at !== -1) plans[at] = { ...planFrom(fresh, plan.open), include: true };
 			return true;
 		} catch (e) {
 			toastStore.trigger({ message: e instanceof Error ? e.message : String(e) });
