@@ -4,6 +4,8 @@ import { makeRequest, buildUrl, buildFilterParams } from "../utils/http";
 import { buildRequestBody, buildUpdateBody } from "../utils/validation";
 import { handleOperationError } from "../utils/errors";
 
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 /**
  * Base class for all resource handlers
  * Provides common CRUD operations and utility methods
@@ -65,14 +67,25 @@ export abstract class BaseResourceHandler implements IResourceHandler {
   }
 
   /**
+   * Path of one object. IDs often come from upstream data (webhooks), so anything but a
+   * UUID is rejected: `..` or `../other` would otherwise retarget the request.
+   */
+  protected objectPath(id: string): string {
+    const value = String(id ?? "").trim();
+    if (!UUID.test(value)) {
+      throw new Error(`Invalid ID "${value}": expected a UUID`);
+    }
+    return `/${this.getEndpoint()}/${value}/`;
+  }
+
+  /**
    * Get a resource by ID (the generic "get" operation)
    */
   public async get(context: IResourceContext): Promise<IDataObject> {
     this.context = context;
-    const id = this.getParameter<string>("id");
     return this.request(
       "GET",
-      `/${this.getEndpoint()}/${encodeURIComponent(id)}/`,
+      this.objectPath(this.getParameter<string>("id")),
     );
   }
 
@@ -198,14 +211,7 @@ export abstract class BaseResourceHandler implements IResourceHandler {
     id: string,
     body: IDataObject,
   ): Promise<IDataObject> {
-    return this.request("PATCH", `/${this.getEndpoint()}/${id}/`, body);
-  }
-
-  /**
-   * Delete a resource
-   */
-  protected async deleteResource(id: string): Promise<IDataObject> {
-    return this.request("DELETE", `/${this.getEndpoint()}/${id}/`);
+    return this.request("PATCH", this.objectPath(id), body);
   }
 
   /**

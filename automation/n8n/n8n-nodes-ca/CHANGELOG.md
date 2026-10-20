@@ -16,5 +16,6 @@ First release on npm as `@intuitem/n8n-nodes-ciso-assistant`.
 - Update Requirement Assessment now looks the requirement up with a filter the API supports, and refuses to update unless exactly one matches. Before, it could overwrite a different requirement of the same audit.
 - Create Incident no longer fails when status, severity or detection is left on "No Change"; the API's defaults apply.
 - Evidence file uploads use the credential's authentication like every other request, report API errors with their status, and remove the empty revision if the upload fails.
+- Object IDs used in Get and Update must be UUIDs. Values such as `..` or `../folders/<id>`, which could come from upstream data, are rejected before any request is sent instead of redirecting it to another endpoint.
 - Options in dropdowns are listed alphabetically. The Entity Assessment conclusion gains an explicit "Not Set" choice, which is its existing default.
 - License changed to MIT.

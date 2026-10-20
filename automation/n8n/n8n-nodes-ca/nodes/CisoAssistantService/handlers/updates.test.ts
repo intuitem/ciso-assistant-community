@@ -121,3 +121,39 @@ describe("create incident", () => {
     });
   });
 });
+
+describe("object IDs", () => {
+  const uuid = "6f1c2c4e-8b0a-4d6e-9a51-2f3b7c9d0e11";
+  it.each(["..", ".", `../folders/${uuid}`, `${uuid}?x=1`, ""])(
+    "rejects %j before any request is sent",
+    async (bad) => {
+      for (const params of [
+        { resource: "asset", operation: "get", id: bad },
+        {
+          resource: "asset",
+          operation: "update",
+          assetId: bad,
+          assetNameUpdate: "x",
+        },
+      ]) {
+        const calls: IHttpRequestOptions[] = [];
+        await expect(
+          run(2, params, (o) => {
+            calls.push(o);
+            return {};
+          }),
+        ).rejects.toThrow(/expected a UUID/);
+        expect(calls).toEqual([]);
+      }
+    },
+  );
+
+  it("accepts a UUID with surrounding whitespace", async () => {
+    const calls = await run(
+      2,
+      { resource: "asset", operation: "get", id: ` ${uuid} ` },
+      () => ({}),
+    );
+    expect(calls[0].url).toBe(`http://ca/api/assets/${uuid}/`);
+  });
+});

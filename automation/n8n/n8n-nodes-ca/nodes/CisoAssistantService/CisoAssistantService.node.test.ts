@@ -25,6 +25,8 @@ describe("CisoAssistantService description", () => {
   });
 });
 
+const ID = "6f1c2c4e-8b0a-4d6e-9a51-2f3b7c9d0e11";
+
 describe("output shape by node version", () => {
   const page = { count: 2, next: null, results: [{ id: "a" }, { id: "b" }] };
 
@@ -33,7 +35,7 @@ describe("output shape by node version", () => {
     const params: Record<string, unknown> = {
       resource: "domain",
       operation,
-      id: "a",
+      id: ID,
     };
     const ctx = {
       getInputData: () => [{ json: {} }],
@@ -52,7 +54,7 @@ describe("output shape by node version", () => {
           o: { url: string },
         ) => {
           urls.push(o.url);
-          return operation === "get" ? page.results[0] : page;
+          return operation === "get" ? { id: ID } : page;
         },
         returnJsonArray: (d: IDataObject | IDataObject[]) =>
           (Array.isArray(d) ? d : [d]).map((json) => ({ json })),
@@ -81,7 +83,7 @@ describe("output shape by node version", () => {
 
   it("get fetches one object by ID", async () => {
     const { out, urls } = await run(2, "get");
-    expect(urls).toEqual(["http://ca/api/folders/a/"]);
-    expect(out.map((o) => o.json)).toEqual([{ id: "a" }]);
+    expect(urls).toEqual([`http://ca/api/folders/${ID}/`]);
+    expect(out.map((o) => o.json)).toEqual([{ id: ID }]);
   });
 });

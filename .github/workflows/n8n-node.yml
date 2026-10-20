@@ -4,6 +4,11 @@ name: n8n node
 # merge, then push the tag `n8n-v<version>` on that commit. The publish job
 # authenticates to npm through OIDC trusted publishing (no NPM_TOKEN secret) and
 # attaches a provenance statement, which n8n requires for verified nodes.
+#
+# npm trusted publisher (package settings): repository intuitem/ciso-assistant-community,
+# workflow n8n-node.yml, no environment, and "Allowed actions" must include
+# `npm publish` (new configs only allow `npm stage publish` by default). A new config
+# must publish within 2 days, so create it right before pushing the release tag.
 
 on:
   pull_request:
