@@ -20157,17 +20157,20 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
     # Valid transitions: (from_status, to_status) → config
     # reviewer_only: respondents are forbidden
     # actor_only: only assigned actors can perform this transition
-    # check_completion: all assessable requirements must be assessed
+    # check_evidence: every visible requirement flagged `evidence_required` must
+    #                 carry at least one evidence
     # observation: "clear" removes it, "optional" keeps if provided, "required" must be provided
     TRANSITIONS = {
         ("draft", "in_progress"): {"reviewer_only": True},
         ("in_progress", "submitted"): {
             "actor_only": True,
             "observation": "clear",
+            "check_evidence": True,
         },
         ("changes_requested", "submitted"): {
             "actor_only": True,
             "observation": "clear",
+            "check_evidence": True,
         },
         ("submitted", "closed"): {
             "reviewer_only": True,
@@ -20245,6 +20248,17 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
                     status=status.HTTP_403_FORBIDDEN,
                 )
 
+        if config.get("check_evidence"):
+            missing_evidence = self._requirements_missing_evidence(assignment)
+            if missing_evidence:
+                return Response(
+                    {
+                        "error": "evidenceRequired",
+                        "missing_evidence": missing_evidence,
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
         # Handle reviewer_observation (stored as event_notes)
         obs_rule = config.get("observation")
         observation = request.data.get("reviewer_observation")
@@ -20280,6 +20294,49 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
             )
 
         return Response({"status": target})
+
+    @staticmethod
+    def _requirements_missing_evidence(assignment):
+        """Assigned requirements that ask for an evidence and carry none.
+
+        A requirement hidden by its visibility expression is not part of the
+        questionnaire, so it cannot hold the submission.
+        """
+        from core.cel_service import build_cel_context
+
+        candidates = list(
+            assignment.requirement_assessments.filter(
+                requirement__assessable=True,
+                requirement__evidence_required=True,
+            )
+            .select_related("requirement")
+            .annotate(evidence_count=Count("evidences"))
+            .filter(evidence_count=0)
+        )
+        if not candidates:
+            return []
+        ca = assignment.compliance_assessment
+        selected_igs = set(ca.selected_implementation_groups or [])
+        _ctx, hidden_urns = build_cel_context(ca)
+        missing = []
+        for ra in candidates:
+            if ra.requirement.urn in hidden_urns:
+                continue
+            # Same rule as ComplianceAssessment.get_requirement_assessments: a
+            # requirement outside the selected groups is not part of the audit.
+            if selected_igs and not (
+                selected_igs & set(ra.requirement.implementation_groups or [])
+            ):
+                continue
+            missing.append(
+                {
+                    "id": str(ra.id),
+                    "urn": ra.requirement.urn,
+                    "ref_id": ra.requirement.ref_id,
+                    "name": ra.requirement.safe_display_str,
+                }
+            )
+        return missing
 
     @action(detail=True, methods=["get"])
     def requirements_list(self, request, pk=None):

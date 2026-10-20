@@ -7544,5 +7544,13 @@
 	"mailerTestAllOk": "Tous les serveurs ont remis le message. Vous pouvez enregistrer.",
 	"mailerTestSomeFailed": "Au moins un serveur a échoué. Corrigez-le ou enregistrez en forçant.",
 	"mailerOutcomeNever": "Jamais tenté",
-	"mailerSendTestHelp": "Envoie un message via chaque serveur à votre propre adresse."
+	"mailerSendTestHelp": "Envoie un message via chaque serveur à votre propre adresse.",
+	"evidenceRequired": "Preuve obligatoire",
+	"evidenceRequiredHint": "Cette exigence requiert une preuve.",
+	"evidenceRequiredBlocksSubmission": "Joignez au moins une preuve : le questionnaire ne peut pas être soumis sans elle.",
+	"missingEvidenceWarning": "Une preuve manque encore pour : {requirements}.",
+	"submissionBlockedMissingEvidence": "Soumission refusée : une preuve manque pour {requirements}.",
+	"builderEvidenceRequiredLabel": "Preuve obligatoire",
+	"builderEvidenceRequiredHint": "Les répondants ne peuvent pas soumettre cette exigence sans joindre une preuve.",
+	"noQuestionnaireAttached": "Aucun questionnaire rattaché"
 }

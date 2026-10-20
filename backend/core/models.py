@@ -1939,6 +1939,7 @@ class LibraryUpdater:
                     "weight": 1,
                     "importance": RequirementNode.Importance.UNDEFINED,
                     "display_mode": RequirementNode.DisplayMode.DEFAULT,
+                    "evidence_required": False,
                 }
 
                 # Check if score boundaries changed (triggers warning + strategy prompt)
@@ -4195,6 +4196,14 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
     assessable = models.BooleanField(null=False, verbose_name=_("Assessable"))
     typical_evidence = models.TextField(
         null=True, blank=True, verbose_name=_("Typical evidence")
+    )
+    evidence_required = models.BooleanField(
+        default=False,
+        verbose_name=_("Evidence required"),
+        help_text=_(
+            "When set, the requirement cannot be submitted without at least "
+            "one evidence attached."
+        ),
     )
     weight = models.IntegerField(default=1, verbose_name=_("Weight"))
     importance = models.CharField(

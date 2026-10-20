@@ -59,6 +59,18 @@ Once an assignment leaves `draft`, its scope (assigned actors and requirements) 
 
 To change a locked assignment, a reviewer reopens it back to `draft` from any other state, which unlocks editing and reassignment. Respondents are notified by email of a reopening only when it comes from `in_progress` or `changes_requested`, the states where they were actively working; reopening a `submitted` or `closed` assignment stays silent.
 
+### Requirements that require an evidence
+
+Evidence attached to a requirement is optional by default. A framework can mark a requirement with `evidence_required`, and that requirement then cannot be handed back empty: submitting an assignment is refused while it carries no evidence, and the refusal names the requirements that are missing one.
+
+This is set per requirement by whoever authors the framework, in the [library builder](../configuration/authoring/library-builder.md#require-an-evidence) or in the [Excel source](../configuration/libraries/library-objects/framework.md). It is separate from `importance`, which states how much a requirement matters, and from `typical_evidence`, which describes what to attach without making it compulsory.
+
+Respondents see the obligation while they work, not only when they submit: the requirement carries an **Evidence required** badge, red until a document is attached, and the confirmation dialog lists what is still missing.
+
+The check only covers requirements that are actually part of the questionnaire. A requirement hidden by a visibility condition never blocks a submission. The rule is enforced by the API, so it applies the same way to an integration posting the transition directly.
+
+Existing frameworks are unaffected: nothing requires an evidence until a framework says so.
+
 ### Assignments on a dynamic framework
 
 Some frameworks are dynamic: a choice in a question selects an implementation group, which decides which requirements the audit actually covers. On those, answering a question can select a new implementation group and bring requirements into the audit that were not visible when the assignment was built. Those requirements are added automatically to the assignment holding the question that revealed them, so the respondent actually gets the follow-up questions their own answer triggered.

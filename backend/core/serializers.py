@@ -4378,6 +4378,7 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
                 "name",
                 "description",
                 "typical_evidence",
+                "evidence_required",
                 "ref_id",
                 "associated_reference_controls",
                 "associated_threats",

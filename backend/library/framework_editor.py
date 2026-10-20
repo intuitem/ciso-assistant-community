@@ -43,6 +43,7 @@ EDITOR_NODE_KEYS = {
     "visibility_expression",
     "aggregation",
     "typical_evidence",
+    "evidence_required",
     "weight",
     "importance",
     "display_mode",
@@ -181,6 +182,7 @@ def framework_to_editor_doc(framework: dict, *, locale: str = "en") -> dict:
                 "visibility_expression": node.get("visibility_expression"),
                 "aggregation": node.get("aggregation"),
                 "typical_evidence": node.get("typical_evidence"),
+                "evidence_required": bool(node.get("evidence_required")),
                 "weight": node.get("weight", 1),
                 "importance": node.get("importance"),
                 "display_mode": node.get("display_mode", "default"),
@@ -508,6 +510,8 @@ def editor_doc_to_framework_object(
                 "translations": node.get("translations"),
             }
         )
+        if node.get("evidence_required"):
+            node_dict["evidence_required"] = True
         weight = node.get("weight")
         if weight is not None and weight != 1:
             node_dict["weight"] = weight

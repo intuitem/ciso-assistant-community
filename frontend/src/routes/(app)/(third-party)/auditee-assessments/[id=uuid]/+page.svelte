@@ -159,12 +159,27 @@
 
 	const toastStore = getToastStore();
 
+	function submissionErrorMessage(body: Record<string, any> | undefined): string {
+		if (body?.error === 'evidenceRequired') {
+			const names = (body.missing_evidence ?? [])
+				.map((item: Record<string, any>) => item.name || item.ref_id || item.urn)
+				.join(', ');
+			return m.submissionBlockedMissingEvidence({ requirements: names });
+		}
+		return body?.error || m.submissionFailed();
+	}
+
 	let isSubmitting = $state(false);
 
 	async function handleSubmitForReview() {
 		if (!assignment || !canSubmit) return;
 
-		const body = m.submitForReviewConfirm();
+		const missing = missingEvidence
+			.map((requirementAssessment) => requirementLabel(requirementOf(requirementAssessment)))
+			.join(', ');
+		const body = missing
+			? `${m.submitForReviewConfirm()}\n\n${m.missingEvidenceWarning({ requirements: missing })}`
+			: m.submitForReviewConfirm();
 
 		const modal: ModalSettings = {
 			type: 'confirm',
@@ -189,9 +204,9 @@
 						});
 					} else {
 						toastStore.trigger({
-							message: result.data?.submitBody?.error || m.submissionFailed(),
+							message: submissionErrorMessage(result.data?.submitBody),
 							background: 'preset-filled-error-500',
-							timeout: 5000
+							timeout: 8000
 						});
 					}
 				} catch (error) {
@@ -282,6 +297,28 @@
 		Object.fromEntries(
 			data.requirements.map((requirement: Record<string, any>) => [requirement.id, requirement])
 		)
+	);
+
+	function requirementOf(requirementAssessment: Record<string, any>): Record<string, any> {
+		return (
+			requirementHashmap[
+				requirementAssessment.requirement?.id ?? requirementAssessment.requirement
+			] ?? requirementAssessment
+		);
+	}
+
+	function requirementLabel(requirement: Record<string, any>): string {
+		return requirement.display_short || requirement.ref_id || requirement.name || requirement.urn;
+	}
+
+	// Requirements the framework asks an evidence for, still empty. Hidden ones are
+	// already out of `requirementAssessments`: the API filters them.
+	let missingEvidence = $derived(
+		requirementAssessments.filter((requirementAssessment) => {
+			if (!requirementAssessment.assessable) return false;
+			if (!requirementOf(requirementAssessment).evidence_required) return false;
+			return (requirementAssessment.evidences ?? []).length === 0;
+		})
 	);
 
 	// --- Navigation items: assessable items + splash screen nodes + section headers ---
@@ -1220,7 +1257,7 @@
 				{/if}
 
 				<!-- Additional info (annotation, typical evidence) -->
-				{#if requirement.annotation || requirement.typical_evidence}
+				{#if requirement.annotation || requirement.typical_evidence || requirement.evidence_required}
 					<div class="card p-4 preset-tonal-secondary text-sm flex flex-col space-y-2 w-full">
 						<h4 class="font-semibold text-base">
 							<i class="fa-solid fa-circle-info mr-2"></i>{m.additionalInformation()}
@@ -1238,6 +1275,11 @@
 								</p>
 								<MarkdownRenderer content={requirement.typical_evidence} />
 							</div>
+						{/if}
+						{#if requirement.evidence_required}
+							<p class="font-medium" data-testid="evidence-required-notice">
+								<i class="fa-solid fa-paperclip mr-1"></i>{m.evidenceRequiredHint()}
+							</p>
 						{/if}
 					</div>
 				{/if}
@@ -1698,6 +1740,16 @@
 														>{requirementAssessment.evidences.length}</span
 													>
 												{/if}
+												{#if requirement.evidence_required}
+													<span
+														class="badge {(requirementAssessment.evidences ?? []).length === 0
+															? 'preset-tonal-error'
+															: 'preset-tonal-success'}"
+														data-testid="evidence-required-badge"
+													>
+														{m.evidenceRequired()}
+													</span>
+												{/if}
 											</p>
 
 											<Accordion.ItemIndicator
@@ -1714,6 +1766,12 @@
 											>
 										</Accordion.ItemTrigger>
 										<Accordion.ItemContent>
+											{#if requirement.evidence_required && (requirementAssessment.evidences ?? []).length === 0}
+												<div class="rounded-md px-3 py-2 mb-2 text-sm preset-tonal-error">
+													<i class="fa-solid fa-triangle-exclamation mr-2"
+													></i>{m.evidenceRequiredBlocksSubmission()}
+												</div>
+											{/if}
 											{#if canEditEvidences}
 												<div class="flex flex-row space-x-2 items-center">
 													<button
