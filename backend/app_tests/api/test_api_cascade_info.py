@@ -177,7 +177,7 @@ def _entity_assessment_with_audit(folder, enclave: bool):
     )
 
 
-def _bucket_names(bucket):
+def _bucket_names(bucket: dict) -> set[str]:
     return {o["name"] for o in bucket["related_objects"]}
 
 
@@ -217,6 +217,71 @@ def test_entity_assessment_preview_keeps_non_enclave_audit_as_affected(
     assert res.status_code == 200
     assert "VENDOR-AUDIT" in _bucket_names(res.json()["affected"])
     assert "VENDOR-AUDIT" not in _bucket_names(res.json()["deleted"])
+
+
+@pytest.fixture
+def domain_tree(target_folder: Folder) -> dict[str, Folder]:
+    sub = Folder.objects.create(
+        name="SUB-DOMAIN",
+        parent_folder=target_folder,
+        content_type=Folder.ContentType.DOMAIN,
+    )
+    sub_sub = Folder.objects.create(
+        name="SUB-SUB-DOMAIN", parent_folder=sub, content_type=Folder.ContentType.DOMAIN
+    )
+    Asset.objects.create(name="SUB-ASSET", folder=sub)
+    Asset.objects.create(name="SUB-SUB-ASSET", folder=sub_sub)
+    return {"target": target_folder, "sub": sub, "sub_sub": sub_sub}
+
+
+BATCH_URL = "/api/folders/batch-cascade-info/"
+
+
+def test_folder_preview_lists_its_sub_domains_as_deleted(
+    admin_client: APIClient, domain_tree: dict[str, Folder]
+) -> None:
+    res = admin_client.get(_url(domain_tree["target"]))
+
+    assert res.status_code == 200
+    deleted = _bucket_names(res.json()["deleted"])
+    assert {"SUB-DOMAIN", "SUB-SUB-DOMAIN"} <= deleted
+    assert "Target" not in deleted
+
+
+def test_batch_preview_lists_sub_domains_and_their_content_once(
+    admin_client: APIClient, domain_tree: dict[str, Folder]
+) -> None:
+    """Selecting a domain and one of its descendants must not count the shared
+    subtree twice, and the selected domains are the subject, not the cascade."""
+    res = admin_client.post(
+        BATCH_URL,
+        {"ids": [str(domain_tree["target"].id), str(domain_tree["sub"].id)]},
+        format="json",
+    )
+
+    assert res.status_code == 200, res.content
+    deleted = res.json()["deleted"]
+    names = [o["name"] for o in deleted["related_objects"]]
+    assert sorted(names) == sorted(set(names))
+    assert {"SUB-SUB-DOMAIN", "CANARY-ASSET", "SUB-ASSET", "SUB-SUB-ASSET"} <= set(
+        names
+    )
+    assert not {"Target", "SUB-DOMAIN"} & set(names)
+    assert deleted["count"] == len(names)
+
+
+def test_batch_preview_is_denied_to_a_view_only_role(
+    app_ready: Folder, domain_tree: dict[str, Folder]
+) -> None:
+    client = _scoped_client(
+        "aud-batch@cascade.test", "BI-RL-AUD", domain_tree["target"], app_ready
+    )
+    res = client.post(
+        BATCH_URL, {"ids": [str(domain_tree["target"].id)]}, format="json"
+    )
+
+    assert res.status_code == 403
+    assert "CANARY-ASSET" not in res.content.decode()
 
 
 def test_entity_assessment_batch_delete_removes_enclave_audit(

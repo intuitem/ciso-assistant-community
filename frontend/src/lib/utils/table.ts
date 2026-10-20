@@ -4074,10 +4074,13 @@ export interface BatchActionConfig {
 	minSelection?: number;
 	maxSelection?: number;
 	confirmMessage?: string; // i18n key for an extra confirm warning, receives {count}
-	// Drop the selected rows, and everything filed below them, from the target
-	// picker: reparenting a row into its own descendant is a cycle the API rejects.
-	// Reads each option's `parent_folder`, so it only fits models keyed on that.
+	/** Drop the selected rows, and everything filed below them, from the target
+	 * picker: reparenting a row into its own descendant is a cycle the API rejects.
+	 * Reads each option's `parent_folder`, so it only fits models keyed on that. */
 	excludeSelectedSubtree?: boolean;
+	/** On a delete, list what the cascade removes before the user confirms, as the
+	 * single-object delete does. */
+	cascadePreview?: boolean;
 }
 
 export interface ParentActionConfig {
@@ -4803,7 +4806,8 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			type: 'delete',
 			label: 'delete',
 			icon: 'fa-solid fa-trash',
-			confirmMessage: 'confirmDeleteDomains'
+			confirmMessage: 'confirmDeleteDomains',
+			cascadePreview: true
 		}
 	],
 	'metric-instances': [

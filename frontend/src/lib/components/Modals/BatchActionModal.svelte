@@ -4,6 +4,11 @@
 	import { safeTranslate, unsafeTranslate } from '$lib/utils/i18n';
 	import { fetchAllPages } from '$lib/utils/pagination';
 	import { subtreeIds } from '$lib/utils/tree';
+	import type { urlModel } from '$lib/utils/types';
+	import CascadePreview, {
+		isCascadeBlocked,
+		type CascadeInfo
+	} from '$lib/components/Modals/CascadePreview.svelte';
 	import { onMount } from 'svelte';
 
 	function translateOption(option: { label: string; value: string }): string {
@@ -21,8 +26,8 @@
 			'delete' | 'change_field' | 'change_m2m' | 'add_m2m' | 'remove_m2m' | 'change_folder';
 		count: number;
 		optionsEndpoint?: string;
-		// Rows the picker must not offer as a target, together with everything filed
-		// below them.
+		/** Rows the picker must not offer as a target, together with everything filed
+		 * below them. */
 		excludeIds?: string[];
 		enableDoubleDash?: boolean;
 		multiSelect?: boolean;
@@ -33,6 +38,11 @@
 		// Value fixed by config ("mark as read"): skips the picker, so the modal is a
 		// plain confirmation and this is what gets sent.
 		fixedValue?: string;
+		/** Model the selected rows belong to; needed to fetch the cascade preview. */
+		URLModel?: urlModel;
+		/** Rows whose deletion cascade is previewed before a delete is confirmed.
+		 * Empty means no preview. */
+		cascadePreviewIds?: string[];
 		onConfirm: (value?: string | string[]) => void;
 	}
 
@@ -47,8 +57,17 @@
 		inputType = undefined,
 		confirmMessage = undefined,
 		fixedValue = undefined,
+		URLModel = undefined,
+		cascadePreviewIds = [],
 		onConfirm
 	}: Props = $props();
+
+	const showsCascadePreview =
+		actionType === 'delete' && URLModel !== undefined && cascadePreviewIds.length > 0;
+	let cascadeInfo: CascadeInfo | null = $state(null);
+	let cascadeLoading = $state(false);
+	let cascadeError = $state(false);
+	const cascadeBlocked = $derived(isCascadeBlocked(cascadeInfo));
 
 	let options: { label: string; value: string }[] = $state([]);
 	let selectedValue: string = $state('');
@@ -98,6 +117,23 @@
 	}
 
 	onMount(async () => {
+		if (showsCascadePreview) {
+			cascadeLoading = true;
+			try {
+				const res = await fetch(`/fe-api/batch-cascade-info/${URLModel}`, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ ids: cascadePreviewIds })
+				});
+				if (!res.ok) throw new Error(`HTTP ${res.status}`);
+				cascadeInfo = await res.json();
+			} catch (e) {
+				cascadeError = true;
+				console.error('Failed to fetch the cascade preview', e);
+			} finally {
+				cascadeLoading = false;
+			}
+		}
 		if (needsSelection && optionsEndpoint) {
 			loading = true;
 			try {
@@ -147,7 +183,7 @@
 
 	const canConfirm = $derived(
 		actionType === 'delete'
-			? !!deleteConfirmInput && deleteConfirmInput.trim().toLowerCase() === yes
+			? !cascadeBlocked && !!deleteConfirmInput && deleteConfirmInput.trim().toLowerCase() === yes
 			: fixedValue !== undefined
 				? true
 				: multiSelect
@@ -174,17 +210,28 @@
 					{safeTranslate(confirmMessage, { count })}
 				</article>
 			{/if}
-			<div class="space-y-2">
-				<p class="text-sm font-medium text-red-600">{m.confirmYes({ word: m.yes() })}</p>
-				<input
-					type="text"
-					data-testid="batch-delete-confirm-textfield"
-					bind:value={deleteConfirmInput}
-					placeholder={m.confirmYesPlaceHolder({ word: m.yes() })}
-					class="input w-full"
-					aria-label={m.confirmYes({ word: m.yes() })}
-				/>
-			</div>
+			{#if cascadeLoading}
+				<div class="text-sm text-surface-600-400">Loading...</div>
+			{:else if cascadeError}
+				<div class="p-4 bg-error-50-950 text-error-900-100 text-sm">
+					{m.errorFetching()}
+				</div>
+			{:else if cascadeInfo}
+				<CascadePreview {cascadeInfo} />
+			{/if}
+			{#if !cascadeBlocked}
+				<div class="space-y-2">
+					<p class="text-sm font-medium text-red-600">{m.confirmYes({ word: m.yes() })}</p>
+					<input
+						type="text"
+						data-testid="batch-delete-confirm-textfield"
+						bind:value={deleteConfirmInput}
+						placeholder={m.confirmYesPlaceHolder({ word: m.yes() })}
+						class="input w-full"
+						aria-label={m.confirmYes({ word: m.yes() })}
+					/>
+				</div>
+			{/if}
 		{:else}
 			<article>{m.batchActionConfirmChange({ count })}</article>
 			{#if confirmMessage}

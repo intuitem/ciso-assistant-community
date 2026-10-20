@@ -153,6 +153,8 @@
 				inputType: action.inputType,
 				confirmMessage: action.confirmMessage,
 				fixedValue: action.value,
+				URLModel,
+				cascadePreviewIds: action.cascadePreview ? ids : [],
 				onConfirm: async (value?: string | string[]) => {
 					try {
 						const res = await fetch(`/${URLModel}/batch-action`, {

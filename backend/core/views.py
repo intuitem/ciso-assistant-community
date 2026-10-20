@@ -2049,27 +2049,73 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
         # as respondent or auditee hold view_folder without view_user/view_asset.
         if not RoleAssignment.is_access_allowed(
             user=request.user,
-            perm=Permission.objects.get(
-                codename=f"delete_{self.model._meta.model_name}"
-            ),
+            perm=self._delete_permission(),
             folder=Folder.get_folder(instance),
         ):
             return Response(status=status.HTTP_403_FORBIDDEN)
 
-        collector = NestedObjects(using=router.db_for_write(instance))
-        collector.collect([instance])
+        return Response(self._cascade_preview([instance], request.user))
 
-        scope_folder = (
-            instance if isinstance(instance, Folder) else Folder.get_folder(instance)
-        )
+    @action(detail=False, methods=["post"], url_path="batch-cascade-info")
+    def batch_cascade_info(self, request: Request) -> Response:
+        """Cascade preview of a batch delete, in the `cascade_info` format.
+
+        Covers the listed objects the caller may delete, collected in one pass so a
+        subtree shared by two of them is reported once. 403 if none is deletable.
+        """
+        ids = request.data.get("ids")
+        if not isinstance(ids, list) or not ids:
+            return Response(
+                {"error": "No ids provided"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        if len(ids) > BATCH_SIZE_LIMIT:
+            return Response(
+                {"error": "too many ids", "max": BATCH_SIZE_LIMIT},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        perm = self._delete_permission()
+        subjects = [
+            obj
+            for obj in self.get_queryset().filter(id__in=ids)
+            if RoleAssignment.is_access_allowed(
+                user=request.user, perm=perm, folder=Folder.get_folder(obj)
+            )
+        ]
+        if not subjects:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        return Response(self._cascade_preview(subjects, request.user))
+
+    def _delete_permission(self) -> Permission:
+        return Permission.objects.get(codename=f"delete_{self.model._meta.model_name}")
+
+    def _cascade_preview(self, subjects: list, user: User) -> dict:
+        """Deleted, affected and blocked buckets for deleting `subjects` together.
+
+        Callers check the delete permission on each subject beforehand.
+        """
+        using = router.db_for_write(subjects[0])
+        collector = NestedObjects(using=using)
+        collector.collect(subjects)
+
+        subject_keys = {(type(s), str(s.pk)) for s in subjects}
+        subject_types = tuple({type(s) for s in subjects})
+        # Hidden as collateral elsewhere, but a domain's sub-domains are what deleting
+        # it most destroys.
+        show_deleted_folders = any(isinstance(s, Folder) for s in subjects)
+
         in_scope_folder_ids = set()
-        if scope_folder is not None:
-            in_scope_folder_ids = {str(scope_folder.id)} | {
-                str(f.id) for f in scope_folder.get_sub_folders()
-            }
+        for subject in subjects:
+            scope_folder = (
+                subject if isinstance(subject, Folder) else Folder.get_folder(subject)
+            )
+            if scope_folder is not None:
+                in_scope_folder_ids |= {str(scope_folder.id)} | {
+                    str(f.id) for f in scope_folder.get_sub_folders()
+                }
         viewable_folder_ids = {
-            str(fid)
-            for fid in RoleAssignment.get_viewable_object_ids(request.user, Folder)
+            str(fid) for fid in RoleAssignment.get_viewable_object_ids(user, Folder)
         }
 
         def is_visible(obj):
@@ -2098,17 +2144,19 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
             )
 
         # Build index of concrete objects that will be deleted
-        # Excludes the previewed object only, not its whole model: a
+        # Excludes the previewed objects only, not their whole model: a
         # self-referential cascade would otherwise hide every descendant.
         def is_the_subject(model, obj):
-            return model is type(instance) and str(getattr(obj, "pk", "")) == str(
-                instance.pk
-            )
+            return (model, str(getattr(obj, "pk", ""))) in subject_keys
 
         # Roots a destroy override deletes explicitly cascade like the subject.
-        extra_roots = list(self.cascade_extra_deletions(instance))
+        extra_roots = [
+            root
+            for subject in subjects
+            for root in self.cascade_extra_deletions(subject)
+        ]
         if extra_roots:
-            extra_collector = NestedObjects(using=router.db_for_write(instance))
+            extra_collector = NestedObjects(using=using)
             extra_collector.collect(extra_roots)
             for model, objs in extra_collector.model_objs.items():
                 collector.model_objs.setdefault(model, set()).update(objs)
@@ -2127,7 +2175,9 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
 
         def add_grouped(bucket, obj):
             model = obj.__class__
-            if is_hidden_model(model):
+            if is_hidden_model(model) and not (
+                show_deleted_folders and model is Folder and bucket is deleted_bucket
+            ):
                 return
             if not is_visible(obj):
                 return
@@ -2177,12 +2227,15 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
         # Cleared before the cascade (see cascade_preclear), so gone by the
         # time the PROTECT would be evaluated.
         precleared_index = set()
-        for queryset in self.cascade_preclear(instance):
-            pre_collector = NestedObjects(using=router.db_for_write(instance))
-            pre_collector.collect(list(queryset))
-            for model, objs in pre_collector.model_objs.items():
-                for o in objs:
-                    precleared_index.add((model.__name__, str(getattr(o, "pk", ""))))
+        for subject in subjects:
+            for queryset in self.cascade_preclear(subject):
+                pre_collector = NestedObjects(using=using)
+                pre_collector.collect(list(queryset))
+                for model, objs in pre_collector.model_objs.items():
+                    for o in objs:
+                        precleared_index.add(
+                            (model.__name__, str(getattr(o, "pk", "")))
+                        )
 
         # 0) PROTECT/RESTRICT references: NestedObjects.collect() swallows the
         # ProtectedError and parks the blockers here.
@@ -2199,7 +2252,9 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
             if getattr(model._meta, "auto_created", False):
                 through_rows.append((model, list(instances)))
                 continue
-            if is_hidden_model(model):
+            if is_hidden_model(model) and not (
+                show_deleted_folders and model is Folder
+            ):
                 continue
             for obj in instances:
                 if is_the_subject(model, obj):
@@ -2226,7 +2281,7 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
                         rel_obj = None
                     if not rel_obj:
                         continue
-                    if isinstance(rel_obj, type(instance)):
+                    if isinstance(rel_obj, subject_types):
                         continue
                     if getattr(rel_obj._meta, "auto_created", False):
                         continue
@@ -2283,34 +2338,36 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
                 # Unknown shape; ignore safely
                 pass
 
-        # 2c) Outgoing links from the instance (FK/O2O/M2M)
-        for f in instance._meta.get_fields():
-            if getattr(f, "auto_created", False):
-                continue  # skip reverse relations
+        def add_affected_unless_deleted(rel_obj):
+            if is_the_subject(type(rel_obj), rel_obj):
+                return
+            key = rel_obj.__class__.__name__
+            pk = str(getattr(rel_obj, "pk", "")) or ""
+            if (key, pk) not in deleted_index:
+                add_grouped(affected_bucket, rel_obj)
 
-            # Local FK/O2O targets: will remain but lose the link to this instance.
-            if isinstance(f, (ForeignKey, OneToOneField)):
-                try:
-                    rel_obj = getattr(instance, f.name, None)
-                except Exception:
-                    rel_obj = None
-                if rel_obj:
-                    key = rel_obj.__class__.__name__
-                    pk = str(getattr(rel_obj, "pk", "")) or ""
-                    if (key, pk) not in deleted_index:
-                        add_grouped(affected_bucket, rel_obj)
+        # 2c) Outgoing links from the subjects (FK/O2O/M2M)
+        for subject in subjects:
+            for f in subject._meta.get_fields():
+                if getattr(f, "auto_created", False):
+                    continue  # skip reverse relations
 
-            # Local M2M targets: will remain; join rows are removed.
-            elif isinstance(f, ManyToManyField):
-                try:
-                    manager = getattr(instance, f.name)
-                    for rel_obj in manager.all():
-                        key = rel_obj.__class__.__name__
-                        pk = str(getattr(rel_obj, "pk", "")) or ""
-                        if (key, pk) not in deleted_index:
-                            add_grouped(affected_bucket, rel_obj)
-                except Exception:
-                    pass
+                # Local FK/O2O targets: will remain but lose the link to this subject.
+                if isinstance(f, (ForeignKey, OneToOneField)):
+                    try:
+                        rel_obj = getattr(subject, f.name, None)
+                    except Exception:
+                        rel_obj = None
+                    if rel_obj:
+                        add_affected_unless_deleted(rel_obj)
+
+                # Local M2M targets: will remain; join rows are removed.
+                elif isinstance(f, ManyToManyField):
+                    try:
+                        for rel_obj in getattr(subject, f.name).all():
+                            add_affected_unless_deleted(rel_obj)
+                    except Exception:
+                        pass
 
         # 3) Sort and respond
         deleted_groups, deleted_count = finalize(deleted_bucket)
@@ -2351,7 +2408,7 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
                 "level": "error",
             },
         }
-        return Response(payload)
+        return payload
 
     def _get_optimized_object_data(self, queryset):
         """
