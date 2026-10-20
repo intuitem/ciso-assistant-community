@@ -67,7 +67,7 @@ Releases are published by `.github/workflows/n8n-node.yml` with no npm token sto
    ```bash
    git tag n8n-v1.2.3 <merge-sha> && git push origin n8n-v1.2.3
    ```
-3. A maintainer approves the `npm-publish` environment deployment. The job checks that the tag matches `package.json`, then lints, builds and publishes.
+3. The job checks that the tag matches `package.json`, then lints, builds and publishes. Only organization admins can create `n8n-v*` tags (repository tag ruleset).
 
 `npm publish` from a workstation is blocked by the `prepublishOnly` guard. Don't work around it: a package published without provenance can't be verified by n8n.
 

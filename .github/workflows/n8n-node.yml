@@ -48,8 +48,6 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/n8n-v')
     needs: build
     runs-on: ubuntu-24.04
-    # Protect this environment (required reviewers, tag rule `n8n-v*`) in repo settings.
-    environment: npm-publish
     permissions:
       contents: read
       id-token: write
