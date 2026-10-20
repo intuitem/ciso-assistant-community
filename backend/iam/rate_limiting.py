@@ -369,27 +369,6 @@ class RequestRefreshSettings(Request):
         return RequestRefreshSettings()
 
 
-"""
-def _handle_read(self, conn: socket.socket):
-    try:
-        if not (encoded_request := conn.recv(4096)):
-            self._selector.unregister(conn)
-            conn.close()
-            return
-
-        request = Request.decode(encoded_request)
-        if request is None:
-            conn.sendall(json.dumps({"error": True}).encode())
-            return
-
-        response = self._handle_request(request)
-        encoded_response = response.encode()
-        conn.sendall(encoded_response)
-    except Exception:
-        conn.sendall(json.dumps({"error": True}).encode())
-"""
-
-
 class RPCSocket:
     """(Mandatory)Socket wrapper used to send/receive packet from the RPC-server."""
 
@@ -598,7 +577,6 @@ class _BanCache:
         self._socket_file_path = runtime_dir / "cache.socket"
 
         self.ip_to_ban_info: dict[str, BanInfo] = {}
-        # self.ip_eviction_deque: deque[IPLookupEntry] = deque()
         self.eviction_cache: dict[int, set[str]] = defaultdict(set)
         """`hashmap(time_window => set[ip_address])`"""
 
