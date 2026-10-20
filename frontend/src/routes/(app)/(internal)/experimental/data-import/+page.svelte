@@ -248,7 +248,12 @@
 		fd.append('use_saved', String(useSaved));
 		const res = await fetch(`${API}/analyze`, { method: 'POST', body: fd });
 		const body = await res.json();
-		if (!res.ok) throw new Error(body.error ?? 'Analysis failed');
+		if (!res.ok) {
+			const row = /^HeaderRowOutOfRange: (\d+)/.exec(body.detail ?? '')?.[1];
+			throw new Error(
+				row ? `Row ${row} is past the end of the sheet.` : 'Could not read this file.'
+			);
+		}
 		return body.sheets as Analysed[];
 	}
 
@@ -276,10 +281,16 @@
 
 	// The user changed what a sheet becomes or where its header is: ask the
 	// backend for fresh suggestions for that sheet only.
-	async function retarget(index: number, modelType: string, targetSheet?: string) {
+	// Returns whether the sheet was re-analysed; on failure the plan is unchanged.
+	async function retarget(
+		index: number,
+		modelType: string,
+		targetSheet?: string,
+		headerRow = plans[index].headerRow
+	) {
 		const plan = plans[index];
 		const schema = await loadSchema(modelType);
-		if (!schema) return;
+		if (!schema) return false;
 		const sheet = targetSheet ?? schema.sheets[0].name;
 		plan.busy = true;
 		outcome = null;
@@ -288,14 +299,16 @@
 				[plan.analysed.name]: {
 					model_type: modelType,
 					sheet,
-					header_row: plan.headerRow
+					header_row: headerRow
 				}
 			});
 			const fresh = sheets.find((s) => s.name === plan.analysed.name);
 			if (fresh) plans[index] = { ...planFrom(fresh, plan.open), include: true };
+			return true;
 		} catch (e) {
 			toastStore.trigger({ message: e instanceof Error ? e.message : String(e) });
 			plan.busy = false;
+			return false;
 		}
 	}
 
@@ -895,9 +908,11 @@
 									class="input w-20 text-sm"
 									value={plan.headerRow}
 									disabled={plan.busy || running}
-									onchange={(e) => {
-										plan.headerRow = Math.max(1, Number(e.currentTarget.value) || 1);
-										retarget(index, plan.modelType, plan.targetSheet);
+									onchange={async (e) => {
+										const input = e.currentTarget;
+										const row = Math.max(1, Number(input.value) || 1);
+										if (!(await retarget(index, plan.modelType, plan.targetSheet, row)))
+											input.value = String(plan.headerRow);
 									}}
 								/>
 							</label>

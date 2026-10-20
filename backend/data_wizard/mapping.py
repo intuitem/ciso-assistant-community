@@ -5,6 +5,7 @@ into the workbook the matching template describes; the regular importer then
 reads it, so validation, conflict modes and permissions stay in one place.
 """
 
+import csv
 import difflib
 import io
 import json
@@ -16,6 +17,7 @@ from datetime import date, datetime, time
 from functools import cache
 from pathlib import Path
 from typing import Any
+from uuid import UUID
 
 import openpyxl
 import pandas as pd
@@ -41,6 +43,7 @@ from .serializers import LoadFileSerializer
 from .views import (
     IMPORT_TEMPLATES,
     IMPORT_TEMPLATES_DIR,
+    SHEET_NAME_INVALID_CHARS,
     AppliedControlRecordConsumer,
     AssetRecordConsumer,
     ConflictMode,
@@ -49,10 +52,8 @@ from .views import (
     LoadFileView,
     ModelType,
     PerimeterRecordConsumer,
-    SHEET_NAME_INVALID_CHARS,
     get_accessible_folders_map,
     is_excel_file,
-    read_csv_file,
 )
 
 logger = structlog.get_logger(__name__)
@@ -305,6 +306,10 @@ class SourceSheet:
             out.append(text)
         return out
 
+    def check_header_row(self) -> None:
+        if not 0 <= self.header_row < len(self.raw):
+            raise ValueError(f"HeaderRowOutOfRange: {self.header_row + 1}")
+
     def frame(self) -> pd.DataFrame:
         """The data rows below the header, keyed by header, blank rows dropped."""
         data = self.raw.iloc[self.header_row + 1 :].copy()
@@ -317,8 +322,15 @@ def read_source(file: io.BytesIO) -> list[SourceSheet]:
     if is_excel_file(file):
         sheets = pd.read_excel(file, sheet_name=None, header=None, dtype=object)
         return [SourceSheet(str(name), df) for name, df in sheets.items()]
-    df = read_csv_file(file)
-    raw = pd.DataFrame([list(df.columns)] + df.astype(object).values.tolist())
+    # Every line as cells, header included: a title line above the table is
+    # found like on a sheet, and "007" or "1.10" stay text.
+    text = file.read().decode("utf-8-sig", errors="replace")
+    try:
+        sep = csv.Sniffer().sniff(text[:8192], delimiters=",;\t|").delimiter
+    except csv.Error:
+        sep = ","
+    rows = list(csv.reader(io.StringIO(text), delimiter=sep))
+    raw = pd.DataFrame(rows, dtype=object)
     return [SourceSheet("CSV", raw.replace("", None))]
 
 
@@ -730,6 +742,8 @@ def validate_saved_sheets(sheets: Any) -> None:
     if not isinstance(sheets, list) or not sheets:
         raise ValueError("InvalidSheets: expected a non-empty list")
     for entry in sheets:
+        if not isinstance(entry, dict):
+            raise TypeError("InvalidSheets: expected objects")
         headers = entry.get("headers")
         if not isinstance(headers, list) or not all(
             isinstance(h, str) for h in headers
@@ -823,6 +837,24 @@ def apply_saved(
     }
 
 
+def _saved_header_row(source: SourceSheet, saved: list[dict]) -> int:
+    """Where the header is, once a saved layout is known: the detected row
+    unless a saved mapping recognises the headers on the row it was saved with
+    (one set by hand under a busy banner)."""
+    if match_saved(source.headers, saved):
+        return source.header_row
+    for row in sorted({e.get("header_row", 1) for m in saved for e in m["sheets"]}):
+        if not isinstance(row, int) or not 1 <= row <= len(source.raw):
+            continue
+        at_row = [
+            {**m, "sheets": [e for e in m["sheets"] if e.get("header_row", 1) == row]}
+            for m in saved
+        ]
+        if match_saved(SourceSheet(source.name, source.raw, row - 1).headers, at_row):
+            return row - 1
+    return source.header_row
+
+
 def analyze(
     file: io.BytesIO,
     folder_names: set[str],
@@ -837,6 +869,10 @@ def analyze(
     saved mappings to try first, as {"id", "name", "sheets"}.
     """
     overrides = overrides or {}
+    if not isinstance(overrides, dict) or not all(
+        isinstance(v, dict) for v in overrides.values()
+    ):
+        raise TypeError("InvalidOverrides")
     out = []
     for source in read_source(file):
         chosen = overrides.get(source.name, {})
@@ -848,6 +884,9 @@ def analyze(
             if chosen.get("header_row")
             else detect_header_row(source.raw)
         )
+        source.check_header_row()
+        if saved and not chosen:
+            source.header_row = _saved_header_row(source, saved)
         frame = source.frame()
         profiles = profile_columns(frame)
         # A CSV has no sheet name: its file name says what it holds.
@@ -926,16 +965,33 @@ def parse_steps(payload: Any) -> list[ImportStep]:
         raise TypeError("InvalidMapping: steps")
     steps = []
     for raw_step in payload["steps"]:
+        if not isinstance(raw_step, dict) or not isinstance(
+            raw_step.get("sheets") or [], list
+        ):
+            raise TypeError("InvalidMapping: step")
+        if not isinstance(raw_step.get("options") or {}, dict):
+            raise TypeError("InvalidMapping: options")
         model_type = ModelType.from_string(raw_step.get("model_type"))
         if model_type not in TEMPLATE_ROW_MODELS:
             raise ValueError(f"UnmappableModelType: {raw_step.get('model_type')}")
         templates = _template_headers(model_type)
         sheets = []
         for raw_sheet in raw_step.get("sheets") or []:
+            if not isinstance(raw_sheet, dict):
+                raise TypeError("InvalidMapping: sheet")
+            columns = raw_sheet.get("columns") or {}
+            values = raw_sheet.get("values") or {}
+            if not isinstance(columns, dict) or not all(
+                isinstance(k, str) for k in columns.values()
+            ):
+                raise TypeError("InvalidMapping: columns")
+            if not isinstance(values, dict) or not all(
+                isinstance(v, dict) for v in values.values()
+            ):
+                raise TypeError("InvalidMapping: values")
             target = raw_sheet.get("target")
             if target not in templates:
                 raise ValueError(f"UnknownTargetSheet: {target}")
-            columns = raw_sheet.get("columns") or {}
             unknown = set(columns.values()) - set(templates[target])
             if unknown:
                 raise ValueError(f"UnknownColumns: {sorted(unknown)}")
@@ -961,7 +1017,7 @@ def parse_steps(payload: Any) -> list[ImportStep]:
                     target=target,
                     header_row=header_row,
                     columns=columns,
-                    values=raw_sheet.get("values") or {},
+                    values=values,
                     defaults=defaults,
                 )
             )
@@ -975,6 +1031,7 @@ def parse_steps(payload: Any) -> list[ImportStep]:
 
 def apply_sheet(source: SourceSheet, mapping: SheetMapping) -> pd.DataFrame:
     source.header_row = mapping.header_row - 1
+    source.check_header_row()
     frame = source.frame()
     missing = set(mapping.columns) - set(frame.columns)
     if missing:
@@ -1052,6 +1109,16 @@ def build_workbook(sources: list[SourceSheet], step: ImportStep) -> io.BytesIO:
     return buffer
 
 
+def _stopped(results) -> bool:
+    """Whether an importer stopped on a conflict; multi-sheet importers report
+    it per sheet ({"templates": {"stopped": true}, ...})."""
+    if not isinstance(results, dict):
+        return False
+    return bool(results.get("stopped")) or any(
+        isinstance(v, dict) and v.get("stopped") for v in results.values()
+    )
+
+
 def run_steps(
     request,
     steps: list[ImportStep],
@@ -1091,8 +1158,9 @@ def run_steps(
                     **(response.data or {"error": "notAllowed"}),
                 }
             )
-            stopped = ((response.data or {}).get("results") or {}).get("stopped")
-            if response.status_code != status.HTTP_200_OK or stopped:
+            if response.status_code != status.HTTP_200_OK or _stopped(
+                (response.data or {}).get("results")
+            ):
                 break
         if dry_run:
             transaction.set_rollback(True)
@@ -1113,7 +1181,10 @@ def _json_field(request, name: str, default):
     raw = request.data.get(name)
     if raw in (None, ""):
         return default
-    return json.loads(raw)
+    value = json.loads(raw)
+    if not isinstance(value, dict):
+        raise TypeError(f"Invalid {name}: expected an object")
+    return value
 
 
 class MappingSchemaView(APIView):
@@ -1153,7 +1224,8 @@ class AnalyzeFileView(APIView):
         except (ValueError, KeyError, TypeError) as e:
             logger.warning("file analysis failed", error=e)
             return Response(
-                {"error": "fileAnalysisFailed"}, status=status.HTTP_400_BAD_REQUEST
+                {"error": "fileAnalysisFailed", "detail": str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
 
@@ -1167,6 +1239,7 @@ class MappedImportView(APIView):
         try:
             steps = parse_steps(_json_field(request, "mapping", None))
             defaults = _json_field(request, "options", {})
+            used = [str(UUID(str(i))) for i in defaults.get("saved_mapping_ids") or []]
             sources = read_source(file)
             # Build every workbook upfront: a bad mapping fails before any write.
             workbooks = [build_workbook(sources, step) for step in steps]
@@ -1178,7 +1251,7 @@ class MappedImportView(APIView):
             )
         dry_run = str(request.data.get("dry_run", "")).lower() in ("1", "true")
         results = run_steps(request, steps, workbooks, defaults, dry_run)
-        if not dry_run and (used := defaults.get("saved_mapping_ids")):
+        if not dry_run and used:
             viewable_mappings(request.user).filter(id__in=used).update(
                 use_count=F("use_count") + 1, last_used_at=timezone.now()
             )

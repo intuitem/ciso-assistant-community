@@ -1865,6 +1865,25 @@ class ThreatRecordConsumer(RecordConsumer):
         }, None
 
 
+def _find_one(records, wanted: str, fields: tuple[str, ...], folder_id, label: str):
+    """The record a cell names, trying *fields* in order. Names repeat across
+    domains: several matches resolve to the one in the import's domain, or not
+    at all. Returns (record, error)."""
+    noun = label.replace("_", " ")
+    for name in fields:
+        matches = list(records.filter(**{f"{name}__iexact": wanted})[:50])
+        if len(matches) > 1:
+            matches = [m for m in matches if str(m.folder_id) == str(folder_id)]
+            if len(matches) != 1:
+                return None, (
+                    f"{label}: several {noun}s are named '{wanted}'; choose the"
+                    f" domain the right one is in"
+                )
+        if matches:
+            return matches[0], None
+    return None, f"{label}: no {noun} '{wanted}'"
+
+
 class MetricInstanceRecordConsumer(RecordConsumer):
     """Metric instances, each tied to a metric definition of the library or the
     instance, found by ref_id, urn or name."""
@@ -1886,19 +1905,14 @@ class MetricInstanceRecordConsumer(RecordConsumer):
             return {}, Error(
                 record=record, error="metric_definition: this field is mandatory"
             )
-        definition = (
-            definitions.filter(ref_id__iexact=wanted).first()
-            or definitions.filter(urn__iexact=wanted).first()
-            or definitions.filter(name__iexact=wanted).first()
-        )
-        if definition is None:
-            return {}, Error(
-                record=record,
-                error=f"metric_definition: no metric definition '{wanted}'",
-            )
         domain = self.folder_id
         if record.get("domain"):
             domain = self.folders_map.get(str(record["domain"]).lower(), domain)
+        definition, error = _find_one(
+            definitions, wanted, ("ref_id", "urn", "name"), domain, "metric_definition"
+        )
+        if definition is None:
+            return {}, Error(record=record, error=error)
         data = {
             "name": name,
             "ref_id": record.get("ref_id") or "",
@@ -1952,17 +1966,15 @@ class MetricSampleRecordConsumer(RecordConsumer):
 
     def prepare_create(self, record: dict, instances) -> tuple[dict, Optional[Error]]:
         wanted = str(record.get("metric_instance") or "").strip()
-        instance = (
-            instances.filter(ref_id__iexact=wanted).first()
-            or instances.filter(name__iexact=wanted).first()
-            if wanted
-            else None
+        if not wanted:
+            return {}, Error(
+                record=record, error="metric_instance: this field is mandatory"
+            )
+        instance, error = _find_one(
+            instances, wanted, ("ref_id", "name"), self.folder_id, "metric_instance"
         )
         if instance is None:
-            return {}, Error(
-                record=record,
-                error=f"metric_instance: no metric instance '{wanted}'",
-            )
+            return {}, Error(record=record, error=error)
         if record.get("value") in (None, ""):
             return {}, Error(record=record, error="value: this field is mandatory")
         value, error = self._value(record["value"], instance.metric_definition)
@@ -1971,6 +1983,10 @@ class MetricSampleRecordConsumer(RecordConsumer):
         timestamp = _parse_datetime(record.get("timestamp"))
         if not timestamp:
             return {}, Error(record=record, error="timestamp: this field is mandatory")
+        if not isinstance(timestamp, str):
+            return {}, Error(
+                record=record, error=f"timestamp: '{timestamp}' is not a date"
+            )
         if len(timestamp) == 10:
             # A date alone: the sample stands for that day.
             timestamp = f"{timestamp}T00:00:00"
