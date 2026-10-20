@@ -110,7 +110,7 @@ from ebios_rm.serializers import (
     EbiosRMStudyWriteSerializer,
     ElementaryActionWriteSerializer,
 )
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import APIException, PermissionDenied
 
 from core.views import check_folder_add_permission
 from iam.models import Permission, RoleAssignment, User
@@ -165,6 +165,12 @@ from .egerie_xml_helpers import (
 from .egerie_xml_helpers import (
     process_xml_file as process_egerie_xml,
 )
+from metrology.models import MetricDefinition, MetricInstance
+from metrology.serializers import (
+    CustomMetricSampleWriteSerializer,
+    MetricInstanceWriteSerializer,
+)
+
 from .serializers import LoadFileSerializer
 
 logger = structlog.get_logger(__name__)
@@ -482,11 +488,12 @@ def _resolve_filtering_labels(value: Any) -> list[UUID]:
     return label_ids
 
 
-def _resolve_actors(value: Any) -> list[UUID]:
+def _resolve_actors(value: Any, unresolved: list[str] | None = None) -> list[UUID]:
     """Resolve separated user emails or team names to Actor IDs.
 
     Each entry is matched as a user email first, then as a team name; entries that
     match neither are skipped, since a typo must not silently become a new actor.
+    Skipped entries are added to *unresolved* when given, to warn the importer.
     """
     if not isinstance(value, str):
         return []
@@ -503,6 +510,8 @@ def _resolve_actors(value: Any) -> list[UUID]:
         if actor is not None:
             actor_ids.append(actor.id)
         else:
+            if unresolved is not None:
+                unresolved.append(entry)
             # Masked: owner entries are emails, which have no place in the logs.
             logger.warning(
                 "Import: could not resolve owner entry (masked: %s***); skipping.",
@@ -698,32 +707,21 @@ def _resolve_threats(value: Any, lookup: ThreatLookup) -> SideObjects:
     return resolved
 
 
-def _resolve_owners(value: Any) -> list[UUID]:
-    """Resolve semicolon-separated user emails or team names to Actor IDs.
+def _resolve_owners(value: Any, unresolved: list[str] | None = None) -> list[UUID]:
+    """Owners: user emails or team names separated like any actor list, each
+    actor kept once."""
+    return list(dict.fromkeys(_resolve_actors(value, unresolved)))
 
-    Each entry is matched first as a user email, then as a team name.
-    Unresolvable entries are silently skipped.
-    """
-    if not isinstance(value, str):
-        return []
 
-    entries = set(entry.strip() for entry in value.split(";"))
-    actor_ids = []
-
-    for entry in entries:
-        # Try matching as user email first
-        actor = Actor.objects.filter(user__email__iexact=entry).first()
-        if actor is None:
-            # Try matching as team name
-            actor = Actor.objects.filter(team__name__iexact=entry).first()
-        if actor is not None:
-            actor_ids.append(actor.id)
-        else:
-            logger.warning(
-                "Could not resolve an owner reference to a user email or team name during import; skipping."
-            )
-
-    return actor_ids
+def _owner_warning(record: dict, unresolved: list[str]) -> Optional["Error"]:
+    """The row is still imported, without the owners nobody could be found for."""
+    if not unresolved:
+        return None
+    return Error(
+        record=record,
+        error=f"owner: no user or team found for {', '.join(sorted(unresolved))}",
+        is_warning=True,
+    )
 
 
 def build_matrix_mappings(risk_matrix: RiskMatrix) -> dict:
@@ -827,6 +825,8 @@ class ModelType(enum.StrEnum):
     TASK_TEMPLATE = "TaskTemplate"
     VULNERABILITY = "Vulnerability"
     BUSINESS_IMPACT_ANALYSIS = "BusinessImpactAnalysis"
+    METRIC_INSTANCE = "MetricInstance"
+    METRIC_SAMPLE = "CustomMetricSample"
 
     @staticmethod
     def from_string(model_type: str) -> Optional["ModelType"]:
@@ -871,6 +871,8 @@ IMPORT_TEMPLATES: dict[ModelType, str] = {
     ModelType.BUSINESS_IMPACT_ANALYSIS: "business_impact_analysis_template.xlsx",
     ModelType.TASK_TEMPLATE: "tasks_template.xlsx",
     ModelType.EVIDENCE: "evidences_template.xlsx",
+    ModelType.METRIC_INSTANCE: "metric_instances_template.xlsx",
+    ModelType.METRIC_SAMPLE: "metric_samples_template.xlsx",
 }
 
 
@@ -897,6 +899,28 @@ class Error:
 
     def to_dict(self) -> dict:
         return {"record": self.record, "error": self.error}
+
+
+def readable_error(error: Any) -> str:
+    """'field: message' text for a validation error, whatever its shape, instead
+    of the repr of DRF's ErrorDetail objects."""
+    if isinstance(error, APIException):
+        error = error.detail
+    elif isinstance(error, ValidationError):
+        error = getattr(error, "message_dict", None) or error.messages
+    if isinstance(error, dict):
+        # "a: x; b: y", without the ".;" a period-ending message would leave.
+        return "; ".join(
+            (
+                readable_error(v)
+                if k == "non_field_errors"
+                else f"{k}: {readable_error(v)}"
+            ).rstrip(".")
+            for k, v in error.items()
+        )
+    if isinstance(error, (list, tuple)):
+        return " ".join(readable_error(v) for v in error)
+    return str(error)
 
 
 class FolderScopeError(ValueError):
@@ -1234,12 +1258,12 @@ class RecordConsumer[Context = None](ABC):
                 )
                 if not serializer.is_valid():
                     transaction.set_rollback(True)
-                    return str(serializer.errors)
+                    return readable_error(serializer.errors)
                 saved = serializer.save()
                 self.after_write(saved, created=instance is None)
             except Exception as e:
                 transaction.set_rollback(True)
-                return str(e)
+                return readable_error(e)
         return None
 
     def _record_side_effects(self, key: str, resolved: SideObjects) -> None:
@@ -1599,10 +1623,11 @@ class AppliedControlRecordConsumer(RecordConsumer[AppliedControlContext]):
         # Resolve owner field (semicolon-separated user emails or team names).
         # Always set data["owner"] when the column is present, even if blank,
         # so that UPDATE mode can clear the M2M instead of silently preserving it.
+        unresolved: list[str] = []
         if "owner" in record:
-            data["owner"] = _resolve_owners(record.get("owner"))
+            data["owner"] = _resolve_owners(record.get("owner"), unresolved)
 
-        return data, None
+        return data, _owner_warning(record, unresolved)
 
 
 class EvidenceRecordConsumer(RecordConsumer):
@@ -1678,10 +1703,11 @@ class EvidenceRecordConsumer(RecordConsumer):
             data["filtering_labels"] = filtering_labels
 
         # Present-but-blank has to reach the serializer so UPDATE mode can clear it.
+        unresolved: list[str] = []
         if "owner" in record:
-            data["owner"] = _resolve_actors(record.get("owner"))
+            data["owner"] = _resolve_actors(record.get("owner"), unresolved)
 
-        return data, None
+        return data, _owner_warning(record, unresolved)
 
 
 class UserRecordConsumer(RecordConsumer):
@@ -1705,8 +1731,9 @@ class UserRecordConsumer(RecordConsumer):
 
         return {
             "email": email,
-            "first_name": record.get("first_name"),
-            "last_name": record.get("last_name"),
+            # Optional columns: absent ones must not reach the serializer as null.
+            "first_name": record.get("first_name") or "",
+            "last_name": record.get("last_name") or "",
         }, None
 
 
@@ -1835,6 +1862,123 @@ class ThreatRecordConsumer(RecordConsumer):
             "description": record.get("description", ""),
             "folder": domain,
             "ref_id": record.get("ref_id", ""),
+        }, None
+
+
+class MetricInstanceRecordConsumer(RecordConsumer):
+    """Metric instances, each tied to a metric definition of the library or the
+    instance, found by ref_id, urn or name."""
+
+    SERIALIZER_CLASS = MetricInstanceWriteSerializer
+
+    def create_context(self):
+        viewable = RoleAssignment.get_viewable_object_ids(
+            self.request.user, MetricDefinition
+        )
+        return MetricDefinition.objects.filter(id__in=viewable), None
+
+    def prepare_create(self, record: dict, definitions) -> tuple[dict, Optional[Error]]:
+        name = record.get("name")
+        if not name:
+            return {}, Error(record=record, error="name: this field is mandatory")
+        wanted = str(record.get("metric_definition") or "").strip()
+        if not wanted:
+            return {}, Error(
+                record=record, error="metric_definition: this field is mandatory"
+            )
+        definition = (
+            definitions.filter(ref_id__iexact=wanted).first()
+            or definitions.filter(urn__iexact=wanted).first()
+            or definitions.filter(name__iexact=wanted).first()
+        )
+        if definition is None:
+            return {}, Error(
+                record=record,
+                error=f"metric_definition: no metric definition '{wanted}'",
+            )
+        domain = self.folder_id
+        if record.get("domain"):
+            domain = self.folders_map.get(str(record["domain"]).lower(), domain)
+        data = {
+            "name": name,
+            "ref_id": record.get("ref_id") or "",
+            "description": record.get("description") or "",
+            "metric_definition": definition.id,
+            "folder": domain,
+        }
+        for key in ("status", "collection_frequency"):
+            if record.get(key) not in (None, ""):
+                data[key] = record[key]
+        if record.get("target_value") not in (None, ""):
+            data["target_value"] = record["target_value"]
+        unresolved: list[str] = []
+        if "owner" in record:
+            data["owner"] = _resolve_owners(record.get("owner"), unresolved)
+        return data, _owner_warning(record, unresolved)
+
+
+class MetricSampleRecordConsumer(RecordConsumer):
+    """Values of metric instances over time. A number for a quantitative metric;
+    for a qualitative one, a level's name or its 1-based position. A sample for
+    a metric and second that already holds one replaces it."""
+
+    SERIALIZER_CLASS = CustomMetricSampleWriteSerializer
+
+    def create_context(self):
+        viewable = RoleAssignment.get_viewable_object_ids(
+            self.request.user, MetricInstance
+        )
+        return MetricInstance.objects.filter(id__in=viewable).select_related(
+            "metric_definition"
+        ), None
+
+    @staticmethod
+    def _value(raw, definition) -> tuple[Optional[dict], Optional[str]]:
+        if definition.category == MetricDefinition.Category.QUALITATIVE:
+            levels = [
+                str(c.get("name", "")).strip().lower()
+                for c in definition.choices_definition or []
+            ]
+            text = str(raw).strip()
+            if text.lower() in levels:
+                return {"choice_index": levels.index(text.lower()) + 1}, None
+            if text.isdigit() and 1 <= int(text) <= len(levels):
+                return {"choice_index": int(text)}, None
+            return None, f"value: '{raw}' is none of {', '.join(levels)}"
+        try:
+            return {"result": float(str(raw).replace(",", ".").strip())}, None
+        except ValueError:
+            return None, f"value: '{raw}' is not a number"
+
+    def prepare_create(self, record: dict, instances) -> tuple[dict, Optional[Error]]:
+        wanted = str(record.get("metric_instance") or "").strip()
+        instance = (
+            instances.filter(ref_id__iexact=wanted).first()
+            or instances.filter(name__iexact=wanted).first()
+            if wanted
+            else None
+        )
+        if instance is None:
+            return {}, Error(
+                record=record,
+                error=f"metric_instance: no metric instance '{wanted}'",
+            )
+        if record.get("value") in (None, ""):
+            return {}, Error(record=record, error="value: this field is mandatory")
+        value, error = self._value(record["value"], instance.metric_definition)
+        if error:
+            return {}, Error(record=record, error=error)
+        timestamp = _parse_datetime(record.get("timestamp"))
+        if not timestamp:
+            return {}, Error(record=record, error="timestamp: this field is mandatory")
+        if len(timestamp) == 10:
+            # A date alone: the sample stands for that day.
+            timestamp = f"{timestamp}T00:00:00"
+        return {
+            "metric_instance": instance.id,
+            "timestamp": timestamp,
+            "value": value,
+            "observation": record.get("observation") or "",
         }, None
 
 
@@ -1985,7 +2129,9 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
                     findings_assessment=findings_assessment,
                     folder=folder,
                 ), None
-            return None, Error(record=assessment_data, error=str(serializer.errors))
+            return None, Error(
+                record=assessment_data, error=readable_error(serializer.errors)
+            )
 
         except Exception as e:
             return None, Error(record={}, error=str(e))
@@ -2105,10 +2251,15 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
         # Always set finding_data["owner"] when the column is present, even if
         # blank, so that UPDATE mode can clear the M2M instead of silently
         # preserving it.
+        unresolved_owners: list[str] = []
         if "owner" in record:
-            finding_data["owner"] = _resolve_owners(record.get("owner"))
+            finding_data["owner"] = _resolve_owners(
+                record.get("owner"), unresolved_owners
+            )
 
         unresolved = []
+        if warning := _owner_warning(record, unresolved_owners):
+            unresolved.append(warning.error)
         if failed_vulnerabilities:
             unresolved.append(
                 f"Could not resolve vulnerabilities: {', '.join(failed_vulnerabilities)}"
@@ -2223,7 +2374,8 @@ class RiskAssessmentRecordConsumer(RecordConsumer[RiskAssessmentContext]):
                 )
                 if not serializer.is_valid():
                     return None, Error(
-                        record=assessment_data, error=str(serializer.errors)
+                        record=assessment_data,
+                        error=readable_error(serializer.errors),
                     )
                 risk_assessment = serializer.save()
                 logger.info(
@@ -2420,7 +2572,12 @@ class PolicyRecordConsumer(RecordConsumer):
         if filtering_labels:
             data["filtering_labels"] = filtering_labels
 
-        return data, None
+        # Present-but-blank has to reach the serializer so UPDATE mode can clear it.
+        unresolved: list[str] = []
+        if "owner" in record:
+            data["owner"] = _resolve_owners(record.get("owner"), unresolved)
+
+        return data, _owner_warning(record, unresolved)
 
 
 class SecurityExceptionRecordConsumer(RecordConsumer):
@@ -4360,6 +4517,33 @@ def normalize_df_columns(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+@dataclass(frozen=True)
+class ImportOptions:
+    model_type: Optional[str]
+    folder_id: Optional[str] = None
+    perimeter_id: Optional[str] = None
+    framework_id: Optional[str] = None
+    matrix_id: Optional[str] = None
+    target_id: Optional[str] = None
+    on_conflict: str = ConflictMode.STOP
+    # Name of the container a single-container import creates (an audit, a
+    # risk assessment...); None falls back to the X-Name header, then a timestamp.
+    container_name: Optional[str] = None
+
+    @classmethod
+    def from_headers(cls, meta) -> "ImportOptions":
+        # Empty header -> None, so a blank optional selector never reaches get(id="").
+        return cls(
+            model_type=meta.get("HTTP_X_MODEL_TYPE"),
+            folder_id=meta.get("HTTP_X_FOLDER_ID") or None,
+            perimeter_id=meta.get("HTTP_X_PERIMETER_ID") or None,
+            framework_id=meta.get("HTTP_X_FRAMEWORK_ID") or None,
+            matrix_id=meta.get("HTTP_X_MATRIX_ID") or None,
+            target_id=meta.get("HTTP_X_TARGET_ID") or None,
+            on_conflict=meta.get("HTTP_X_ON_CONFLICT", ConflictMode.STOP),
+        )
+
+
 class LoadFileView(APIView):
     parser_classes = (FileUploadParser,)
     serializer_class = LoadFileSerializer
@@ -4371,18 +4555,23 @@ class LoadFileView(APIView):
             folder_id,
         )
 
-    def process_excel_file(self, request, record_file: io.BytesIO) -> Response:
-        model_type_string = request.META.get("HTTP_X_MODEL_TYPE")
+    def process_excel_file(
+        self,
+        request,
+        record_file: io.BytesIO,
+        options: Optional[ImportOptions] = None,
+    ) -> Response:
+        options = options or ImportOptions.from_headers(request.META)
+        model_type_string = options.model_type
         model_type = ModelType.from_string(model_type_string)
-        folder_id = request.META.get("HTTP_X_FOLDER_ID") or None
-        # Empty header -> None, so a blank optional selector never reaches get(id="").
-        perimeter_id = request.META.get("HTTP_X_PERIMETER_ID") or None
-        framework_id = request.META.get("HTTP_X_FRAMEWORK_ID") or None
-        matrix_id = request.META.get("HTTP_X_MATRIX_ID") or None
-        target_id = request.META.get("HTTP_X_TARGET_ID") or None
-        on_conflict_str = request.META.get("HTTP_X_ON_CONFLICT", "stop")
+        folder_id = options.folder_id
+        perimeter_id = options.perimeter_id
+        framework_id = options.framework_id
+        matrix_id = options.matrix_id
+        target_id = options.target_id
+        container_name = options.container_name
         try:
-            on_conflict = ConflictMode(on_conflict_str)
+            on_conflict = ConflictMode(options.on_conflict)
         except ValueError:
             on_conflict = ConflictMode.STOP
         logger.info(
@@ -4560,6 +4749,7 @@ class LoadFileView(APIView):
                         framework_id=framework_id,
                         on_conflict=on_conflict,
                         target_id=target_id,
+                        container_name=container_name,
                     )
                     records = df.to_dict(orient="records")
 
@@ -4660,6 +4850,18 @@ class LoadFileView(APIView):
                                 .process_records(records)
                                 .to_dict()
                             )
+                        case ModelType.METRIC_INSTANCE:
+                            res = (
+                                MetricInstanceRecordConsumer(base_context)
+                                .process_records(records)
+                                .to_dict()
+                            )
+                        case ModelType.METRIC_SAMPLE:
+                            res = (
+                                MetricSampleRecordConsumer(base_context)
+                                .process_records(records)
+                                .to_dict()
+                            )
                         case _:
                             res = self.process_data(
                                 request,
@@ -4671,6 +4873,7 @@ class LoadFileView(APIView):
                                 matrix_id,
                                 on_conflict,
                                 target_id,
+                                container_name,
                             )
 
         except Exception as e:
@@ -4696,6 +4899,7 @@ class LoadFileView(APIView):
         matrix_id=None,
         on_conflict=ConflictMode.STOP,
         target_id=None,
+        container_name=None,
     ):
         # Dispatch to appropriate handler
         match model_type:
@@ -4708,6 +4912,7 @@ class LoadFileView(APIView):
                     framework_id,
                     on_conflict,
                     target_id,
+                    container_name,
                 )
             case _:
                 return {
@@ -4725,6 +4930,7 @@ class LoadFileView(APIView):
         framework_id,
         on_conflict=ConflictMode.STOP,
         target_id=None,
+        container_name=None,
     ):
         results = {"successful": 0, "failed": 0, "errors": []}
         try:
@@ -4762,7 +4968,9 @@ class LoadFileView(APIView):
                 )
                 return results
 
-            assessment_name = resolve_container_name(request, "Assessment")
+            assessment_name = resolve_container_name(
+                request, "Assessment", container_name
+            )
 
             # Prepare data for serializer
             assessment_data = {
@@ -6070,7 +6278,7 @@ class LoadFileView(APIView):
 
             except Exception as e:
                 logger.warning(f"Error creating entity: {str(e)}")
-                self._add_tprm_record_error(results, record, str(e))
+                self._add_tprm_record_error(results, record, readable_error(e))
 
         # Second pass: handle parent_entity relationships
         for record in records:
@@ -6194,7 +6402,7 @@ class LoadFileView(APIView):
 
             except Exception as e:
                 logger.warning(f"Error creating solution: {str(e)}")
-                self._add_tprm_record_error(results, record, str(e))
+                self._add_tprm_record_error(results, record, readable_error(e))
 
         self._log_tprm_import_results("Solution", results)
         return results, ref_id_map
@@ -6380,7 +6588,7 @@ class LoadFileView(APIView):
 
             except Exception as e:
                 logger.warning(f"Error creating entity assessment: {str(e)}")
-                self._add_tprm_record_error(results, record, str(e))
+                self._add_tprm_record_error(results, record, readable_error(e))
 
         self._log_tprm_import_results("Entity assessment", results)
         return results
@@ -6536,7 +6744,7 @@ class LoadFileView(APIView):
 
             except Exception as e:
                 logger.warning(f"Error creating contract: {str(e)}")
-                self._add_tprm_record_error(results, record, str(e))
+                self._add_tprm_record_error(results, record, readable_error(e))
 
         self._log_tprm_import_results("Contract", results)
         return results
@@ -6622,7 +6830,7 @@ class LoadFileView(APIView):
 
             except Exception as e:
                 logger.warning(f"Error creating representative: {str(e)}")
-                self._add_tprm_record_error(results, record, str(e))
+                self._add_tprm_record_error(results, record, readable_error(e))
 
         self._log_tprm_import_results("Representative", results)
         return results

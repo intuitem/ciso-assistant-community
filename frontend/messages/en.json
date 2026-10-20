@@ -3345,6 +3345,7 @@
 	"fileAcceptOnly": "Accepted files: {extensions}",
 	"object": "Object",
 	"dataWizardSelectFallbackDomain": "Select a fallback Domain (if not set on the file)",
+	"dataWizardFallbackDomainHelp": "Rows without a domain go here, and existing records are looked up in it to spot conflicts.",
 	"dataWizardSelectPerimeter": "Select a Perimeter",
 	"dataWizardUpdateExisting": "Update existing assessment",
 	"dataWizardCreateNewAssessment": "Create new",
