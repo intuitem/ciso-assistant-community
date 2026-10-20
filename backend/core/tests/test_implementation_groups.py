@@ -1,6 +1,7 @@
 """Tests for implementation group recalculation and Framework.is_dynamic()."""
 
 import pytest
+from django.utils import translation
 from core.models import (
     Answer,
     ComplianceAssessment,
@@ -728,3 +729,94 @@ class TestSyncRequirementAssignments:
 
         assert _assigned_ids(d["alice"]) == {d["ra_base"].id}
         assert _assigned_ids(d["bob"]) == {d["ra_other"].id}
+
+
+@pytest.fixture
+def translated_groups_setup(db):
+    """Framework authored in French with English translations, as the library
+    builder produces them."""
+    folder = Folder.get_root_folder()
+    framework = Framework.objects.create(
+        name="Cadre",
+        folder=folder,
+        implementation_groups_definition=[
+            {
+                "ref_id": "G1",
+                "name": "Groupe essentiel",
+                "description": "Mesures de base",
+                "translations": {
+                    "en": {"name": "Essential group", "description": "Baseline"}
+                },
+            }
+        ],
+    )
+    requirement = RequirementNode.objects.create(
+        framework=framework,
+        urn="urn:test:ig-i18n:req:001",
+        ref_id="R1",
+        assessable=True,
+        implementation_groups=["G1"],
+        folder=folder,
+    )
+    perimeter = Perimeter.objects.create(name="IG i18n perimeter", folder=folder)
+    ca = ComplianceAssessment.objects.create(
+        name="IG i18n CA", framework=framework, perimeter=perimeter, folder=folder
+    )
+    ra = RequirementAssessment.objects.create(
+        compliance_assessment=ca, requirement=requirement, folder=folder
+    )
+    return ca, ra
+
+
+class TestImplementationGroupsTranslation:
+    """The audit and requirement assessment payloads nest the framework's
+    implementation groups: they must follow the request language like the
+    framework endpoint, not leak the base language."""
+
+    @pytest.mark.parametrize(
+        "lang,name,description",
+        [
+            ("en", "Essential group", "Baseline"),
+            ("fr", "Groupe essentiel", "Mesures de base"),
+        ],
+    )
+    def test_requirement_assessment_payload(
+        self, translated_groups_setup, lang, name, description
+    ):
+        from core.serializers import RequirementAssessmentReadSerializer
+
+        _, ra = translated_groups_setup
+        with translation.override(lang):
+            data = RequirementAssessmentReadSerializer(ra).data
+        (group,) = data["compliance_assessment"]["framework"][
+            "implementation_groups_definition"
+        ]
+        assert (group["ref_id"], group["name"], group["description"]) == (
+            "G1",
+            name,
+            description,
+        )
+
+    @pytest.mark.parametrize(
+        "lang,name", [("en", "Essential group"), ("fr", "Groupe essentiel")]
+    )
+    def test_compliance_assessment_payload(self, translated_groups_setup, lang, name):
+        from core.serializers import ComplianceAssessmentReadSerializer
+
+        ca, _ = translated_groups_setup
+        with translation.override(lang):
+            data = ComplianceAssessmentReadSerializer(ca).data
+        (group,) = data["framework"]["implementation_groups_definition"]
+        assert (group["ref_id"], group["name"]) == ("G1", name)
+
+    def test_framework_without_groups_is_left_as_is(self, db):
+        from core.serializers import ComplianceAssessmentReadSerializer
+
+        folder = Folder.get_root_folder()
+        framework = Framework.objects.create(name="No IG", folder=folder)
+        perimeter = Perimeter.objects.create(name="No IG perimeter", folder=folder)
+        ca = ComplianceAssessment.objects.create(
+            name="No IG CA", framework=framework, perimeter=perimeter, folder=folder
+        )
+        data = ComplianceAssessmentReadSerializer(ca).data
+        assert data["framework"]["implementation_groups_definition"] is None
