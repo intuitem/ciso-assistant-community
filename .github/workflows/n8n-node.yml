@@ -1,0 +1,86 @@
+name: n8n node
+
+# Releases: bump "version" in automation/n8n/n8n-nodes-ca/package.json via a PR,
+# merge, then push the tag `n8n-v<version>` on that commit. The publish job
+# authenticates to npm through OIDC trusted publishing (no NPM_TOKEN secret) and
+# attaches a provenance statement, which n8n requires for verified nodes.
+#
+# npm trusted publisher (package settings): repository intuitem/ciso-assistant-community,
+# workflow n8n-node.yml, no environment, and "Allowed actions" must include
+# `npm publish` (new configs only allow `npm stage publish` by default). A new config
+# must publish within 2 days, so create it right before pushing the release tag.
+
+on:
+  pull_request:
+    paths:
+      - "automation/n8n/**"
+      - ".github/workflows/n8n-node.yml"
+  push:
+    branches: [main]
+    paths:
+      - "automation/n8n/**"
+    tags:
+      - "n8n-v*"
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: automation/n8n/n8n-nodes-ca
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: "24"
+          package-manager-cache: false
+
+      - run: npm ci --ignore-scripts
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+      - name: List package contents
+        run: npm pack --dry-run
+
+  publish:
+    if: startsWith(github.ref, 'refs/tags/n8n-v')
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: "24"
+          package-manager-cache: false
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Check tag matches package version
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          version="$(node -p 'require("./package.json").version')"
+          if [ "n8n-v${version}" != "${TAG}" ]; then
+            echo "::error::tag ${TAG} does not match package.json version ${version}"
+            exit 1
+          fi
+
+      - run: npm ci --ignore-scripts
+      - run: npm run lint
+      - run: npm run build
+      # RELEASE_MODE satisfies the `n8n-node prerelease` guard that blocks manual publishes.
+      - run: npm publish --provenance --access public
+        env:
+          RELEASE_MODE: "true"

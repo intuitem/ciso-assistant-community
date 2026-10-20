@@ -16226,6 +16226,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
         "applied_controls": ["exact"],
         "security_exceptions": ["exact"],
         "requirement__urn": ["exact"],
+        "requirement__ref_id": ["exact"],
         "result": ["exact"],
         "extended_result": ["exact"],
         "compliance_assessment__ref_id": ["exact"],
@@ -19929,6 +19930,7 @@ class TaskNodeFilterSet(GenericFilterSet):
     class Meta:
         model = TaskNode
         fields = {
+            "folder": ["exact"],
             "status": ["exact"],
             "task_template": ["exact"],
             "due_date": ["exact", "lte", "gte", "lt", "gt", "month", "year"],
