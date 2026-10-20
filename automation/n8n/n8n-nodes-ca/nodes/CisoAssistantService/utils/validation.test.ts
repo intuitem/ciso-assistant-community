@@ -125,4 +125,10 @@ describe("contentDispositionHeader", () => {
       "attachment; filename=\"audit report -v2-- -t-.pdf\"; filename*=utf-8''audit%20report%20%22v2%22%3B%20%C3%A9t%C3%A9.pdf",
     );
   });
+
+  it("percent-encodes the characters RFC 5987 forbids", () => {
+    expect(contentDispositionHeader("O'Reilly (v2)*.pdf")).toBe(
+      "attachment; filename=\"O'Reilly (v2)*.pdf\"; filename*=utf-8''O%27Reilly%20%28v2%29%2A.pdf",
+    );
+  });
 });

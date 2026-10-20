@@ -51,11 +51,19 @@ export async function makeRequest(
  * ASCII-safe fallback (no CR/LF or quoting chars) plus an RFC 5987 filename*, which DRF's
  * FileUploadParser prefers and decodes. Keep filename* last: Django keeps the last `filename`.
  */
+// encodeURIComponent leaves ' ( ) * as is; RFC 5987 disallows them, and Django then
+// stores the raw `utf-8''...` text as the filename.
+const rfc5987 = (value: string) =>
+  encodeURIComponent(value).replace(
+    /['()*]/g,
+    (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`,
+  );
+
 export function contentDispositionHeader(fileName: string): string {
   const asciiFileName = fileName
     .replace(/[^\x20-\x7E]/g, "-")
     .replace(/[;"%\\]/g, "-");
-  return `attachment; filename="${asciiFileName}"; filename*=utf-8''${encodeURIComponent(fileName)}`;
+  return `attachment; filename="${asciiFileName}"; filename*=utf-8''${rfc5987(fileName)}`;
 }
 
 /**
