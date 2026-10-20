@@ -10,7 +10,10 @@ This guide details how to configure the bidirectional synchronization between **
 * Sync updates (Status, Priority, etc.) from CISO Assistant to ServiceNow.
 * Receive real-time updates from ServiceNow back into CISO Assistant via Webhooks.
 
-For now, you are only able to sync CISO Assistant's applied controls to a ServiceNow table.
+You can sync two kinds of objects, each to its own ServiceNow table:
+
+* **Applied controls**, for example to `grc_control` or `incident`.
+* **Assets**, for example to a CMDB table such as `cmdb_ci`. See [Syncing assets](#syncing-assets).
 
 ***
 
@@ -47,7 +50,12 @@ First, configure CISO Assistant to connect to your ServiceNow instance.
    *   **Value Mapping:** For "Choice" fields like **Status** and **Priority**, map your local values (e.g., `In Progress`) to the specific ServiceNow logic (e.g., `2 - Work in Progress`).<br>
 
        <figure><img src="../../.gitbook/assets/image (68).png" alt=""><figcaption></figcaption></figure>
-4. **Save**
+4. **Asset Mapping (optional):** Below the applied control mappings, the **Assets** section works the same way:
+   * **Target Table:** Select the table that holds your assets (e.g., `Configuration Item [cmdb_ci]`).
+   * **Field Mapping:** Map the asset fields you want to sync: Name, Description, ID, Type, Reference link and Observation.
+   * **Value Mapping:** Map **Type** (`Primary`, `Supporting`) to the matching ServiceNow values.
+   * Leave this section empty if you don't want to sync assets. Assets are only synced once a target table is set.
+5. **Save**
 
 ***
 
@@ -175,6 +183,26 @@ Click **Submit**.<br>
 
 <figure><img src="../../.gitbook/assets/image (75).png" alt=""><figcaption></figcaption></figure>
 
+#### Business Rule for assets
+
+If you sync assets, create a second Business Rule the same way, with these differences:
+
+* **Table:** Select the asset table you chose in Part 1 (e.g., `Configuration Item`).
+* **Script:** CISO Assistant reads each ServiceNow column you mapped in the **Assets** section, so the payload must contain those columns. Keep the `event` and `sys_id` entries and replace the other fields. For example, with Name mapped to `name`, Description to `short_description` and Type to `u_asset_type`:
+
+```js
+        var payload = {
+            "event": eventType,
+            "sys_id": current.getValue("sys_id"),
+            "name": current.getValue("name"),
+            "short_description": current.getValue("short_description"),
+            "u_asset_type": current.getValue("u_asset_type"),
+            "sys_updated_on": current.getValue("sys_updated_on")
+        };
+```
+
+Both Business Rules can use the same REST Message and the same secret.
+
 ***
 
 ### Usage
@@ -207,6 +235,16 @@ There are several ways to link an applied control to a ServiceNow record:
 
 <figure><img src="../../.gitbook/assets/image (77).png" alt=""><figcaption></figcaption></figure>
 
+#### Syncing assets
+
+Asset sync works differently from applied controls:
+
+* **Every new asset is pushed.** Once the **Assets** section has a target table, creating an asset in CISO Assistant creates a record in that table. There is no `Create remote object` checkbox.
+* **Existing assets are pushed when a synced field changes.** Assets created before you configured the table are not sent in bulk. Each one is created in ServiceNow the first time one of its Name, Description, ID, Type, Reference link or Observation fields is edited. Saving without changing these fields does not push it.
+* **Linking to an existing record is API-only.** To link an asset to a ServiceNow record that already exists, update the asset through the API (`PATCH /api/assets/<id>/`) with `integration_config` set to the integration's ID and `remote_object_id` set to the record's `sys_id`. Later edits then update that record instead of creating a new one.
+* **Incoming sync only updates linked assets.** Changes made in ServiceNow are applied to the asset that created the record. New records in the ServiceNow table do not create assets in CISO Assistant, so this is not a CMDB import.
+* **Only the mapped fields are synced.** Relations such as parent and child assets, owners, domain or security objectives are not.
+
 #### Notes:
 
 * The default sync period on SaaS is at 60 seconds.
@@ -219,6 +257,7 @@ There are several ways to link an applied control to a ServiceNow record:
 
 1. Create a new Control in CISO Assistant. Check ServiceNow to see if the record appears.
 2. Update the **State** of that record in ServiceNow. Refresh CISO Assistant to see the status change.
+3. If you sync assets, create an asset in CISO Assistant and check that a record appears in the asset table. Change one of its mapped columns in ServiceNow and refresh the asset in CISO Assistant.
 
 #### Common Errors
 
@@ -228,3 +267,5 @@ There are several ways to link an applied control to a ServiceNow record:
 | **"RESTMessageV2 is not defined"**  | Scope Issue     | Ensure the script uses the correct **API Name** for the REST Message (e.g., `x_scope_ciso_sync`).                                   |
 | **CISO Assistant doesn't update**   | Missing Filter  | Check the Business Rule filter conditions. Ensure the change you made (e.g., just changing a description) is covered by the filter. |
 | **Dropdowns empty in Setup**        | Permissions     | Ensure the service account has read access to `sys_db_object` and `sys_dictionary`.                                                 |
+| **Assets never appear in ServiceNow** | No asset table | Select a **Target Table** in the **Assets** section of the integration settings. Without one, assets are not synced.             |
+| **Asset changes in ServiceNow are ignored** | Payload columns | Ensure the asset Business Rule is on the asset table and its payload includes every column mapped in the **Assets** section. |
