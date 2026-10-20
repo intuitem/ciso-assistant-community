@@ -90,16 +90,19 @@
 		}
 		if (!body || typeof body !== 'object') return '';
 		const errors = body as Record<string, unknown>;
-		const fieldError = [
+		const firstString = (...values: unknown[]) =>
+			values.flat().find((v): v is string => typeof v === 'string');
+		// These carry frontend message keys.
+		const messageKey = firstString(
 			errors.credentials,
-			errors.provider_specific_errors,
 			errors.configuration_id,
 			errors.provider,
 			errors.detail
-		]
-			.flat()
-			.find((v) => typeof v === 'string');
-		if (typeof fieldError === 'string') return safeTranslate(fieldError);
+		);
+		if (messageKey) return safeTranslate(messageKey);
+		// Provider schema errors are plain text from the backend, shown as-is.
+		const providerError = firstString(errors.provider_specific_errors);
+		if (providerError) return providerError;
 		// status "failure" means the provider rejected the credentials, which the
 		// generic label already says; "error" means the request itself blew up
 		// (network, URL, SSRF guard) and is worth telling apart, in the UI locale.
