@@ -3,6 +3,7 @@ from django.db.models import F, OuterRef, Q, Subquery
 from django.utils import timezone
 
 from global_settings.models import GlobalSettings
+from iam.models import RoleAssignment
 
 from tprm.models import (
     Entity,
@@ -142,18 +143,20 @@ def propagation_mode() -> str:
     return mode if mode in Propagation.MODES else Propagation.OFF
 
 
-def floor_solution(entity: Entity) -> Solution | None:
+def floor_solution(entity: Entity, user=None) -> Solution | None:
     """The entity's active solution with the most critical visible tier."""
-    return (
-        entity.provided_solutions.filter(is_active=True, tier__is_visible=True)
-        .select_related("tier")
-        .order_by("-tier__rank", "name")
-        .first()
-    )
+    solutions = entity.provided_solutions.filter(is_active=True, tier__is_visible=True)
+    if user is not None:
+        solutions = solutions.filter(
+            id__in=RoleAssignment.get_viewable_object_ids(user, Solution)
+        )
+    return solutions.select_related("tier").order_by("-tier__rank", "name").first()
 
 
-def below_floor(entity: Entity) -> Solution | None:
-    solution = floor_solution(entity)
+def below_floor(entity: Entity, user=None) -> Solution | None:
+    if entity.builtin:
+        return None
+    solution = floor_solution(entity, user)
     if solution is None or (entity.tier and entity.tier.rank >= solution.tier.rank):
         return None
     return solution
@@ -168,7 +171,7 @@ def entities_below_floor():
             floor_rank=Subquery(floors.values("tier__rank")[:1]),
             floor_solution_id=Subquery(floors.values("id")[:1]),
         )
-        .filter(floor_rank__isnull=False)
+        .filter(floor_rank__isnull=False, builtin=False)
         .filter(Q(tier__isnull=True) | Q(tier__rank__lt=F("floor_rank")))
     )
 

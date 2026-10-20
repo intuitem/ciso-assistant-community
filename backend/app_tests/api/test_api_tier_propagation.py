@@ -180,3 +180,21 @@ class TestTierPropagation:
         change = EntityTierChange.objects.filter(entity=acme).first()
         assert (change.source, change.note) == (TierSource.ROLLUP, "Payroll")
         assert change.changed_by is not None
+
+    def test_apply_floor_is_ignored_when_off(self, authenticated_client, acme, payroll):
+        set_solution_tier(payroll, _tier("high"))
+        authenticated_client.patch(
+            f"/api/entities/{acme.id}/", {"apply_tier_floor": True}, format="json"
+        )
+        acme.refresh_from_db()
+        assert acme.tier is None
+
+    def test_builtin_entity_has_no_floor(self, authenticated_client, acme, payroll):
+        Entity.objects.filter(pk=acme.pk).update(builtin=True)
+        set_solution_tier(payroll, _tier("high"))
+        response = authenticated_client.put(
+            PROPAGATION_URL, {"mode": "floor"}, format="json"
+        )
+        assert response.json()["raised"] == 0
+        acme.refresh_from_db()
+        assert acme.tier is None

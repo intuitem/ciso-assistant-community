@@ -50,6 +50,8 @@ def _queryset(entry, folder, user=None):
     path = entry.get("folder", "folder")
     ancestors = [folder] + list(folder.get_parent_folders())
     qs = model.objects.filter(**{f"{path}__in": ancestors})
+    if path != "folder":
+        qs = qs.select_related(path)
     if user is None:
         return qs
     viewable = RoleAssignment.get_viewable_object_ids(user, model)

@@ -56,6 +56,9 @@
 	const yesNoRules = $derived(rules.filter((r) => r.kind !== 'number' && r.kind !== 'rating'));
 	const knownKeys = $derived(new Set(tiers.map((t) => t.key)));
 	const forVendors = $derived(TIER_TARGETS[subjectModel ?? ''] === TIER_TARGET);
+	$effect(() => {
+		if (entry && forVendors && entry.target !== TIER_TARGET) write(entry.config);
+	});
 
 	const ruleLabel = (rule: OutcomeRule) =>
 		(rule as OutcomeRule & { label?: string }).label || rule.annotation || rule.ref_id;

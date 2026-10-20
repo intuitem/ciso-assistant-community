@@ -78,7 +78,9 @@ class EntityReadSerializer(BaseModelSerializer):
         if self.context.get("action") == "list":
             return None
         mode = propagation_mode()
-        solution = below_floor(obj) if mode != Propagation.OFF else None
+        request = self.context.get("request")
+        user = getattr(request, "user", None)
+        solution = below_floor(obj, user) if mode != Propagation.OFF else None
         if solution is None:
             return None
         tier = solution.tier
@@ -188,7 +190,11 @@ class EntityWriteSerializer(BaseModelSerializer):
         instance = super().update(instance, validated_data)
         if has_tier:
             set_entity_tier(instance, tier, user=self._user(), note=note)
-        if apply_floor and (solution := below_floor(instance)):
+        if (
+            apply_floor
+            and propagation_mode() != Propagation.OFF
+            and (solution := below_floor(instance, self._user()))
+        ):
             set_entity_tier(
                 instance,
                 solution.tier,
