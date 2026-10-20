@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 from collections import defaultdict
-from typing import Final, Optional, ClassVar, cast
+from typing import Final, Optional, ClassVar, TextIO, cast
 from pathlib import Path
 from abc import ABC, abstractmethod
 import threading
@@ -438,22 +438,59 @@ class RPCSocket:
 
 
 class RPCServer:
+    POLL_TIMEOUT: Final[float] = 1.0
+    """Max time (in seconds) a `poll()` blocks, so the leader can periodically run its health checks."""
+
     def __init__(self, ban_cache: _BanCache):
         self._socket_file_path = ban_cache._socket_file_path
-        server_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        if self._socket_file_path.exists():
-            self._socket_file_path.unlink()
-
-        server_socket.bind(str(self._socket_file_path))
-        server_socket.listen()
-        self._socket = RPCSocket(server_socket)
-
         self._selector = selectors.DefaultSelector()
+        self._server_socket: Optional[socket.socket] = None
+        self._socket_file_identity: Optional[tuple[int, int, int]] = None
+        """`(st_dev, st_ino, st_ctime_ns)` of the socket file this server owns."""
+        self._bind_socket()
+
+        self._ban_cache = ban_cache
+
+    def _bind_socket(self):
+        _BanCache._ensure_runtime_dir()
+        server_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        try:
+            self._socket_file_path.unlink(missing_ok=True)
+            server_socket.bind(str(self._socket_file_path))
+            server_socket.listen()
+            st = os.stat(self._socket_file_path)
+        except Exception:
+            server_socket.close()
+            raise
+
+        self._server_socket = server_socket
+        self._socket_file_identity = (st.st_dev, st.st_ino, st.st_ctime_ns)
         self._selector.register(
             server_socket, selectors.EVENT_READ, self._handle_accept
         )
 
-        self._ban_cache = ban_cache
+    def _is_socket_file_owner(self) -> bool:
+        """Return `True` if the server owns this socket file (and if the socket wasn't deleted/replaced in the meantime)."""
+        try:
+            st = os.stat(self._socket_file_path)
+        except FileNotFoundError:
+            return True
+        return (st.st_dev, st.st_ino, st.st_ctime_ns) != self._socket_file_identity
+
+    def _ensure_socket_exists(self):
+        """
+        Re-create the socket file if it was deleted/replaced by an external process.
+
+        Already connected RPC clients are kept (they don't depend on the socket file).
+        """
+        if self._is_socket_file_owner():
+            if self._server_socket is not None:
+                self._selector.unregister(self._server_socket)
+                self._server_socket.close()
+                self._server_socket = None
+                self._socket_file_identity = None
+
+            self._bind_socket()
 
     def _method_is_banned(self, request: RequestIsBanned) -> ResponseIsBanned:
         is_banned, create_audit_log = self._ban_cache._check_is_banned(request)
@@ -468,7 +505,6 @@ class RPCServer:
     def _method_refresh_settings(
         self, request: RequestRefreshSettings
     ) -> ResponseRefreshSettings:
-        # TODO: The caller MUST provide the InfraSettings(or a subset of it) instead (via `RequestRefreshSettings`).
         infra_settings = GlobalSettings.objects.get(
             name=GlobalSettings.Names.INFRA_CONFIG
         )
@@ -524,19 +560,27 @@ class RPCServer:
 
     def poll(self):
         try:
-            for key, _ in self._selector.select():
+            for key, _ in self._selector.select(timeout=RPCServer.POLL_TIMEOUT):
                 callback = key.data
                 callback(key.fileobj)
         except Exception:
             pass
 
     def close(self):
+        is_socket_file_owner = self._is_socket_file_owner()
+
+        # Closing the client connections makes the followers notice the leader is gone (and re-run the election).
+        for key in list(self._selector.get_map().values()):
+            try:
+                key.fileobj.close()
+            except OSError:
+                pass
         self._selector.close()
-        self._socket.close()
-        try:
-            self._socket_file_path.unlink()
-        except FileNotFoundError:
-            pass
+        self._server_socket = None
+
+        # Never unlink the socket file of another leader.
+        if is_socket_file_owner:
+            self._socket_file_path.unlink(missing_ok=True)
 
 
 RUNTIME_DIR: Final[Path] = Path(
@@ -545,12 +589,8 @@ RUNTIME_DIR: Final[Path] = Path(
 
 
 class _BanCache:
-    """**WARNING**: This cache is NOT thread-safe, so only the main thread of each gunicorn worker process SHALL use it."""
-
     ENTRY_LIMIT: Final[int] = 65536
-    # TODO: Think about user changing (time_window_size, max_failed_login_attempts, ban_time)
-    # The user SHALL NOT be able to change `time_window_size` (adjusting max_failed_login_attempts and ban_time is enough)
-    # What impact would it have at runtime (the InfraSetting changes MUST be communicated via the unix socket to be sure the cache settings are updated accordingly).
+    HEALTH_CHECK_INTERVAL: Final[float] = 1.0
 
     def __init__(self):
         runtime_dir = _BanCache._ensure_runtime_dir()
@@ -562,12 +602,57 @@ class _BanCache:
         self.eviction_cache: dict[int, set[str]] = defaultdict(set)
         """`hashmap(time_window => set[ip_address])`"""
 
-        self._lock_file = open(self._lock_file_path, "w")
+        self._lock_file_mutex = threading.Lock()
+        """Mutex used to access `self._lock_file` (as we don't want the main/leader threads to have concurrent access to it)."""
+        self._lock_file: TextIO = self._open_lock_file()
 
         self.conn = None
         self.is_leader = False
         self._leader_thread_handle: Optional[threading.Thread] = None
         self._try_become_leader()
+
+    def _open_lock_file(self) -> TextIO:
+        _BanCache._ensure_runtime_dir()
+        return open(self._lock_file_path, "w")
+
+    def _is_lock_file_owner(self) -> bool:
+        """Return `True` if the lock file path still points to the lock file opened by this process, return `False` otherwise."""
+        try:
+            path_st = os.stat(self._lock_file_path)
+        except FileNotFoundError:
+            return False
+
+        fd_st = os.fstat(self._lock_file.fileno())
+
+        file_identity = (path_st.st_dev, path_st.st_ino, path_st.st_ctime_ns)
+        opened_file_identity = (fd_st.st_dev, fd_st.st_ino, fd_st.st_ctime_ns)
+
+        did_lock_file_changed = file_identity == opened_file_identity
+        return did_lock_file_changed
+
+    def _acquire_lock_file(self) -> bool:
+        """
+        Lock the lock file (re-creating it if needed), return `True` on success or `False` otherwise.
+
+        **WARNING**: The caller MUST hold `_lock_file_mutex`.
+        """
+        for _ in range(3):
+            if not self._is_lock_file_owner():
+                new_lock_file = self._open_lock_file()
+                # Closing the stale file releases any lock held on it (it's an orphan file anyway).
+                self._lock_file.close()
+                self._lock_file = new_lock_file
+
+            try:
+                fcntl.flock(self._lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError:
+                return False
+
+            # The lock file may have been deleted between `open` and `flock`.
+            if self._is_lock_file_owner():
+                return True
+
+        return False
 
     @staticmethod
     def _ensure_runtime_dir() -> Path:
@@ -585,21 +670,21 @@ class _BanCache:
         return RUNTIME_DIR
 
     def _try_become_leader(self) -> bool:
-        try:
-            fcntl.flock(self._lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except BlockingIOError:
-            self.is_leader = False
-            return False
+        with self._lock_file_mutex:
+            thread = self._leader_thread_handle
+            if thread is not None and thread.is_alive():
+                return self.is_leader
 
-        self.is_leader = True
-        thread = self._leader_thread_handle
-        if thread is None or not thread.is_alive():
-            self._leader_thread_handle = threading.Thread(
-                target=self._leader_thread, daemon=True
-            )
-            self._leader_thread_handle.start()
+            if not self._acquire_lock_file():
+                self.is_leader = False
+            else:
+                self.is_leader = True
+                self._leader_thread_handle = threading.Thread(
+                    target=self._leader_thread, daemon=True
+                )
+                self._leader_thread_handle.start()
 
-        return True
+        return self.is_leader
 
     def _leader_thread(self):
         try:
@@ -610,19 +695,43 @@ class _BanCache:
             raise
 
         try:
+            next_health_check = 0.0
             while True:
+                now = time.monotonic()
+                if now >= next_health_check:
+                    if not self._leader_health_check(rpc_server):
+                        break
+                    next_health_check = now + _BanCache.HEALTH_CHECK_INTERVAL
                 rpc_server.poll()
         finally:
             rpc_server.close()
             self._release_leader_lock()
 
-    def _release_leader_lock(self):
-        """Stop being the leader and releas the leader election lock."""
-        self.is_leader = False
+    def _leader_health_check(self, rpc_server: RPCServer) -> bool:
+        """
+        Return `False` if this thead lost the leadership.
+
+        **WARNING**: This function should only be used by the leader thread itself.
+        """
         try:
-            fcntl.flock(self._lock_file, fcntl.LOCK_UN)
-        except OSError:
+            with self._lock_file_mutex:
+                if not self._acquire_lock_file():
+                    # Another process locked the re-created lock file first.
+                    return False
+            rpc_server._ensure_socket_exists()
+        except Exception:
+            # e.g. the runtime directory is temporarily unsafe/unwritable.
             pass
+        return True
+
+    def _release_leader_lock(self):
+        """Stop being the leader and release the leader election lock."""
+        with self._lock_file_mutex:
+            self.is_leader = False
+            try:
+                fcntl.flock(self._lock_file, fcntl.LOCK_UN)
+            except (OSError, ValueError):
+                pass
 
     def _flush_all_entries(self):
         """Flush out all the cache data (reset the cache)."""
