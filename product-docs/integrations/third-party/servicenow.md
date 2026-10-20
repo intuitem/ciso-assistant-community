@@ -240,8 +240,8 @@ There are several ways to link an applied control to a ServiceNow record:
 Asset sync works differently from applied controls:
 
 * **Every new asset is pushed.** Once the **Assets** section has a target table, creating an asset in CISO Assistant creates a record in that table. There is no `Create remote object` checkbox.
-* **Existing assets are pushed on their next edit.** Assets created before you configured the table are not sent in bulk. Each one is created in ServiceNow the next time it is saved.
-* **You can't link an asset to an existing ServiceNow record.** The asset form has no `Integrations` menu, so each asset always gets a new record.
+* **Existing assets are pushed when a synced field changes.** Assets created before you configured the table are not sent in bulk. Each one is created in ServiceNow the first time one of its Name, Description, ID, Type, Reference link or Observation fields is edited. Saving without changing these fields does not push it.
+* **Linking to an existing record is API-only.** To link an asset to a ServiceNow record that already exists, update the asset through the API (`PATCH /api/assets/<id>/`) with `integration_config` set to the integration's ID and `remote_object_id` set to the record's `sys_id`. Later edits then update that record instead of creating a new one.
 * **Incoming sync only updates linked assets.** Changes made in ServiceNow are applied to the asset that created the record. New records in the ServiceNow table do not create assets in CISO Assistant, so this is not a CMDB import.
 * **Only the mapped fields are synced.** Relations such as parent and child assets, owners, domain or security objectives are not.
 
