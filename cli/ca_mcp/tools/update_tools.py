@@ -28,6 +28,7 @@ from ..resolvers import (
     resolve_threat_id,
     resolve_entity_id,
     resolve_incident_id,
+    resolve_evidence_id,
     resolve_in_folder_or_global,
     _is_uuid,
 )
@@ -319,6 +320,124 @@ async def update_team(
             return f"Error updating team: {res.status_code} - {res.text}"
     except Exception as e:
         return f"Error in update_team: {str(e)}"
+
+
+async def update_folder(
+    folder_id: str,
+    name: str = None,
+    description: str = None,
+) -> str:
+    """Update a domain (folder) - only provided fields are updated
+
+    Args:
+        folder_id: Folder ID/name
+        name: New name
+        description: New description
+    """
+    try:
+        resolved_id = resolve_folder_id(folder_id)
+
+        payload = {}
+
+        if name is not None:
+            payload["name"] = name
+        if description is not None:
+            payload["description"] = description
+
+        if not payload:
+            return "Error: No fields provided to update"
+
+        res = make_patch_request(f"/folders/{resolved_id}/", payload)
+
+        if res.status_code == 200:
+            folder = res.json()
+            return f"Updated folder: {folder.get('name')} (ID: {folder.get('id')})"
+        else:
+            return f"Error updating folder: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in update_folder: {str(e)}"
+
+
+async def update_user(
+    user_id: str,
+    first_name: str = None,
+    last_name: str = None,
+    email: str = None,
+) -> str:
+    """Update a user - only provided fields are updated
+
+    Args:
+        user_id: User UUID, email or name
+        first_name: New first name
+        last_name: New last name
+        email: New email (login identifier, also used for SSO matching)
+    """
+    try:
+        resolved_id = resolve_user_id(user_id)
+
+        payload = {}
+
+        if first_name is not None:
+            payload["first_name"] = first_name
+        if last_name is not None:
+            payload["last_name"] = last_name
+        if email is not None:
+            payload["email"] = email
+
+        if not payload:
+            return "Error: No fields provided to update"
+
+        res = make_patch_request(f"/users/{resolved_id}/", payload)
+
+        if res.status_code == 200:
+            user = res.json()
+            return f"Updated user: {user.get('email')} (ID: {user.get('id')})"
+        else:
+            return f"Error updating user: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in update_user: {str(e)}"
+
+
+async def update_evidence(
+    evidence_id: str,
+    name: str = None,
+    description: str = None,
+    folder_id: str = None,
+) -> str:
+    """Update an evidence - only provided fields are updated
+
+    Args:
+        evidence_id: Evidence UUID or name
+        name: New name
+        description: New description
+        folder_id: Folder ID/name to move the evidence to
+    """
+    try:
+        resolved_id = resolve_evidence_id(evidence_id)
+
+        payload = {}
+
+        if name is not None:
+            payload["name"] = name
+        if description is not None:
+            payload["description"] = description
+        if folder_id is not None:
+            payload["folder"] = resolve_folder_id(folder_id)
+
+        if not payload:
+            return "Error: No fields provided to update"
+
+        res = make_patch_request(f"/evidences/{resolved_id}/", payload)
+
+        if res.status_code == 200:
+            evidence = res.json()
+            return (
+                f"Updated evidence: {evidence.get('name')} (ID: {evidence.get('id')})"
+            )
+        else:
+            return f"Error updating evidence: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in update_evidence: {str(e)}"
 
 
 async def update_risk_scenario(

@@ -491,6 +491,37 @@ def resolve_vulnerability_id(vulnerability_name_or_id: str) -> str:
     return str(vulnerabilities[0]["id"])
 
 
+def resolve_evidence_id(evidence_name_or_id: str) -> str:
+    """Helper function to resolve evidence name to UUID
+    If already a UUID, returns it. If a name, looks it up via API.
+    """
+    if _is_uuid(evidence_name_or_id):
+        return evidence_name_or_id
+
+    ref = str(evidence_name_or_id or "").strip()
+    if not ref:
+        raise ValueError("Evidence reference is empty")
+
+    evidences, error = fetch_all_results("/evidences/", params={"name": ref})
+
+    if error:
+        raise ValueError(f"Evidence '{ref}' API error: {error}")
+
+    if not evidences:
+        raise ValueError(f"Evidence '{ref}' not found")
+
+    if len(evidences) > 1:
+        labels = [
+            f"{e.get('name')} ({(e.get('folder') or {}).get('str')}, {e.get('id')})"
+            for e in evidences[:5]
+        ]
+        raise ValueError(
+            f"Ambiguous evidence name '{ref}', found {len(evidences)}: {labels}"
+        )
+
+    return str(evidences[0]["id"])
+
+
 def resolve_incident_id(incident_name_or_id: str) -> str:
     """Resolve an incident name or UUID to its UUID.
 
