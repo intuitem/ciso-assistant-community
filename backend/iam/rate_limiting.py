@@ -474,8 +474,8 @@ class RPCServer:
         try:
             st = os.stat(self._socket_file_path)
         except FileNotFoundError:
-            return True
-        return (st.st_dev, st.st_ino, st.st_ctime_ns) != self._socket_file_identity
+            return False
+        return (st.st_dev, st.st_ino, st.st_ctime_ns) == self._socket_file_identity
 
     def _ensure_socket_exists(self):
         """
@@ -483,7 +483,7 @@ class RPCServer:
 
         Already connected RPC clients are kept (they don't depend on the socket file).
         """
-        if self._is_socket_file_owner():
+        if not self._is_socket_file_owner():
             if self._server_socket is not None:
                 self._selector.unregister(self._server_socket)
                 self._server_socket.close()
@@ -579,7 +579,7 @@ class RPCServer:
         self._server_socket = None
 
         # Never unlink the socket file of another leader.
-        if is_socket_file_owner:
+        if not is_socket_file_owner:
             self._socket_file_path.unlink(missing_ok=True)
 
 
@@ -627,8 +627,8 @@ class _BanCache:
         file_identity = (path_st.st_dev, path_st.st_ino, path_st.st_ctime_ns)
         opened_file_identity = (fd_st.st_dev, fd_st.st_ino, fd_st.st_ctime_ns)
 
-        did_lock_file_changed = file_identity == opened_file_identity
-        return did_lock_file_changed
+        is_lock_file_unchanged = file_identity == opened_file_identity
+        return is_lock_file_unchanged
 
     def _acquire_lock_file(self) -> bool:
         """
