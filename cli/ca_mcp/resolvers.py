@@ -240,11 +240,20 @@ def resolve_risk_scenario_id(scenario_name_or_id: str) -> str:
         raise ValueError(f"Risk scenario '{scenario_name_or_id}' API error: {error}")
 
     if not scenarios:
+        scenarios, error = fetch_all_results(
+            "/risk-scenarios/", params={"ref_id": scenario_name_or_id}
+        )
+        if error:
+            raise ValueError(
+                f"Risk scenario '{scenario_name_or_id}' API error: {error}"
+            )
+
+    if not scenarios:
         raise ValueError(f"Risk scenario '{scenario_name_or_id}' not found")
 
     if len(scenarios) > 1:
         raise ValueError(
-            f"Ambiguous risk scenario name '{scenario_name_or_id}', found {len(scenarios)}"
+            f"Ambiguous risk scenario '{scenario_name_or_id}', found {len(scenarios)}"
         )
 
     return scenarios[0]["id"]

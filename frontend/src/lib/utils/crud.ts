@@ -266,6 +266,16 @@ export interface ModelMapEntry {
 	 * rendered as Markdown for this model.
 	 */
 	markdownFields?: string[];
+	/**
+	 * Columns the list header must not offer to sort. Mostly values this model
+	 * computes in Python rather than storing, so there is no column for the
+	 * backend to ORDER BY: DRF drops the term and the header click does nothing.
+	 * Also stored values whose database order means nothing to the reader, like
+	 * the `schedule` JSON shown as a frequency on task templates. Listed per
+	 * model because the same name can be a stored column elsewhere, as
+	 * `progress` is on projects.
+	 */
+	unsortableColumns?: string[];
 }
 
 // A field can name one flag or several, and shows when any of them is on. Indexing
@@ -1440,7 +1450,9 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'processings' },
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' }
-		]
+		],
+		// Read off the default document's current revision, not the container.
+		unsortableColumns: ['progress', 'status', 'source']
 	},
 	'document-templates': {
 		name: 'documenttemplate',
@@ -1537,7 +1549,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'compliance_assessment', urlModel: 'findings-assessments', disableCreate: true }
 		],
 		selectFields: [{ field: 'status' }, { field: 'score_calculation_method' }],
-		filters: [{ field: 'status' }]
+		filters: [{ field: 'status' }],
+		unsortableColumns: ['progress']
 	},
 	requirements: {
 		name: 'requirement',
@@ -1722,7 +1735,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' }
 		],
-		filters: [{ field: 'status' }]
+		filters: [{ field: 'status' }],
+		unsortableColumns: ['completion', 'review_progress']
 	},
 	solutions: {
 		name: 'solution',
@@ -3193,7 +3207,8 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableCreate: true,
 				disableDelete: true
 			}
-		]
+		],
+		unsortableColumns: ['schedule']
 	},
 	'task-nodes': {
 		name: 'tasknode',

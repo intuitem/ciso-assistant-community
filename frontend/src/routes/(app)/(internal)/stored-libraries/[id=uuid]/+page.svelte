@@ -40,11 +40,13 @@
 	// Derived, not plain consts: previewing another library reuses the component, so
 	// a captured value would show the previous one.
 	const libraryObjects: LibraryObjects = $derived(data?.library?.objects ?? {});
-	const riskMatrices = $derived(libraryObjects['risk_matrix'] ?? []);
+	const riskMatrices = $derived(
+		libraryObjects['risk_matrix'] ?? libraryObjects['risk_matrices'] ?? []
+	);
 	const referenceControls = $derived(libraryObjects['reference_controls'] ?? []);
 	const threats = $derived(libraryObjects['threats'] ?? []);
 	const metricDefinitions = $derived(libraryObjects['metric_definitions'] ?? []);
-	const framework = $derived(libraryObjects['framework']);
+	const framework = $derived(libraryObjects['framework'] ?? libraryObjects['frameworks']?.[0]);
 
 	function transformToTreeView(nodes) {
 		return nodes.map(([id, node]) => {

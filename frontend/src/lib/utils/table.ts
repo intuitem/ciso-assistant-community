@@ -1054,6 +1054,15 @@ export const ENABLED_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const TASK_OVERDUE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'overdue',
+		options: YES_NO_OPTIONS,
+		multiple: false
+	}
+};
+
 export const TASK_TEMPLATE_ASSIGNED_TO_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -3626,8 +3635,9 @@ export const listViewFields = {
 			enabled: ENABLED_FILTER,
 			last_occurrence_status: LAST_OCCURENCE_STATUS_FILTER,
 			next_occurrence_status: NEXT_OCCURENCE_STATUS_FILTER,
+			overdue: TASK_OVERDUE_FILTER,
 			filtering_labels: LABELS_FILTER,
-			task_date: dateFilter('task_date'),
+			task_date: dateFilter('task_date', { label: 'startDate' }),
 			created_at: CREATED_AT_FILTER,
 			updated_at: UPDATED_AT_FILTER
 		}

@@ -105,7 +105,7 @@
 					field="framework"
 					label={m.framework()}
 					optionsEndpoint="stored-libraries"
-					optionsDetailedUrlParameters={[['object_type', 'framework']]}
+					optionsDetailedUrlParameters={[['object_type', 'frameworks']]}
 					optionsValueField="urn"
 				/>
 				<TextField {form} field="audit_name" label={m.auditName()} />
@@ -121,7 +121,7 @@
 					field="risk_matrix"
 					label={m.riskMatrix()}
 					optionsEndpoint="stored-libraries"
-					optionsDetailedUrlParameters={[['object_type', 'risk_matrix']]}
+					optionsDetailedUrlParameters={[['object_type', 'risk_matrices']]}
 					optionsValueField="urn"
 					disabled={!data.create_risk_assessment}
 				/>

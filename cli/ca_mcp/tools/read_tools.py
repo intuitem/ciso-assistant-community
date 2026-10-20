@@ -15,14 +15,16 @@ from ..utils.response_formatter import (
 async def get_risk_scenarios(
     folder: str = None,
     risk_assessment: str = None,
+    ref_id: str = None,
     limit: int = None,
     offset: int = None,
 ):
-    """List risk scenarios from Risk Registry; filter by folder or assessment
+    """List risk scenarios from Risk Registry; filter by folder, assessment or ref_id
 
     Args:
         folder: Folder ID/name
         risk_assessment: Risk assessment ID/name
+        ref_id: Exact scenario reference ID
         limit: Max rows to return (default 100)
         offset: Row to start from, for paging through large registers
     """
@@ -41,6 +43,10 @@ async def get_risk_scenarios(
         if risk_assessment:
             params["risk_assessment"] = resolve_risk_assessment_id(risk_assessment)
             filters["risk_assessment"] = risk_assessment
+
+        if ref_id:
+            params["ref_id"] = ref_id
+            filters["ref_id"] = ref_id
 
         if limit is not None:
             params["limit"] = limit
