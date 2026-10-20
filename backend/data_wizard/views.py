@@ -5015,17 +5015,25 @@ class LoadFileView(APIView):
                     request, records, compliance_assessment, framework_id, results
                 )
 
+        # Results, not a Response: the caller nests them in its own payload.
         except Perimeter.DoesNotExist:
             logger.error(f"Perimeter with ID {perimeter_id} does not exist")
-            return Response(
-                {"error": f"Perimeter with ID {perimeter_id} does not exist"},
-                status=status.HTTP_400_BAD_REQUEST,
+            results["failed"] += 1
+            results["errors"].append(
+                {"error": f"Perimeter with ID {perimeter_id} does not exist"}
+            )
+        except (APIException, ValidationError) as e:
+            results["failed"] += 1
+            results["errors"].append(
+                {
+                    "error": f"Failed to create compliance assessment: {readable_error(e)}"
+                }
             )
         except Exception as e:
-            logger.error(f"Error creating compliance assessment: {str(e)}")
-            return Response(
-                {"error": f"Failed to create compliance assessment: {str(e)}"},
-                status=status.HTTP_400_BAD_REQUEST,
+            logger.error("Error creating compliance assessment", error=e)
+            results["failed"] += 1
+            results["errors"].append(
+                {"error": "Failed to create compliance assessment"}
             )
 
         return results

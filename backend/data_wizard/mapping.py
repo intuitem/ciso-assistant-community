@@ -1177,13 +1177,40 @@ def _uploaded_file(request) -> tuple[io.BytesIO | None, Response | None]:
     return io.BytesIO(serializer.validated_data["file"].read()), None
 
 
+# What a client may learn of a refusal: the code its message starts with. The
+# message itself, which can quote the input, stays in the logs.
+ERROR_CODES = (
+    "HeaderRowOutOfRange",
+    "InvalidHeaderRow",
+    "InvalidHeaders",
+    "InvalidSheets",
+    "ColumnsOutsideHeaders",
+    "InvalidOverrides",
+    "InvalidField",
+    "InvalidMapping",
+    "InvalidDefaults",
+    "DefaultForMappedColumn",
+    "UnmappableModelType",
+    "UnknownTargetSheet",
+    "UnknownSourceSheet",
+    "UnknownColumns",
+    "DuplicateTargetColumns",
+    "MissingSourceColumns",
+)
+
+
+def error_code(error: Exception) -> str | None:
+    text = str(error)
+    return next((code for code in ERROR_CODES if text.startswith(code)), None)
+
+
 def _json_field(request, name: str, default):
     raw = request.data.get(name)
     if raw in (None, ""):
         return default
     value = json.loads(raw)
     if not isinstance(value, dict):
-        raise TypeError(f"Invalid {name}: expected an object")
+        raise TypeError(f"InvalidField: {name} is not an object")
     return value
 
 
@@ -1224,7 +1251,7 @@ class AnalyzeFileView(APIView):
         except (ValueError, KeyError, TypeError) as e:
             logger.warning("file analysis failed", error=e)
             return Response(
-                {"error": "fileAnalysisFailed", "detail": str(e)},
+                {"error": "fileAnalysisFailed", "detail": error_code(e)},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -1239,14 +1266,17 @@ class MappedImportView(APIView):
         try:
             steps = parse_steps(_json_field(request, "mapping", None))
             defaults = _json_field(request, "options", {})
-            used = [str(UUID(str(i))) for i in defaults.get("saved_mapping_ids") or []]
+            try:
+                used = [UUID(str(i)) for i in defaults.get("saved_mapping_ids") or []]
+            except ValueError as e:
+                raise ValueError("InvalidField: saved_mapping_ids") from e
             sources = read_source(file)
             # Build every workbook upfront: a bad mapping fails before any write.
             workbooks = [build_workbook(sources, step) for step in steps]
         except (ValueError, KeyError, TypeError) as e:
             logger.warning("invalid import mapping", error=e)
             return Response(
-                {"error": "invalidMapping", "detail": str(e)},
+                {"error": "invalidMapping", "detail": error_code(e)},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         dry_run = str(request.data.get("dry_run", "")).lower() in ("1", "true")

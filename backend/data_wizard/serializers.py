@@ -63,12 +63,12 @@ class ImportMappingWriteSerializer(BaseModelSerializer):
         exclude = ["created_by", "use_count", "last_used_at"]
 
     def validate_sheets(self, sheets):
-        from .mapping import validate_saved_sheets
+        from .mapping import error_code, validate_saved_sheets
 
         try:
             validate_saved_sheets(sheets)
         except (ValueError, TypeError, KeyError) as e:
-            raise serializers.ValidationError(str(e)) from e
+            raise serializers.ValidationError(error_code(e) or "InvalidSheets") from e
         return sheets
 
     def create(self, validated_data):

@@ -241,6 +241,12 @@
 		return plan;
 	}
 
+	function refusal(body: { detail?: string | null }, fallback: string) {
+		return body.detail === 'HeaderRowOutOfRange'
+			? 'That header row is past the end of the sheet.'
+			: fallback;
+	}
+
 	async function analyse(overrides: Record<string, unknown> = {}) {
 		const fd = new FormData();
 		fd.append('file', file as File);
@@ -248,12 +254,7 @@
 		fd.append('use_saved', String(useSaved));
 		const res = await fetch(`${API}/analyze`, { method: 'POST', body: fd });
 		const body = await res.json();
-		if (!res.ok) {
-			const row = /^HeaderRowOutOfRange: (\d+)/.exec(body.detail ?? '')?.[1];
-			throw new Error(
-				row ? `Row ${row} is past the end of the sheet.` : 'Could not read this file.'
-			);
-		}
+		if (!res.ok) throw new Error(refusal(body, 'Could not read this file.'));
 		return body.sheets as Analysed[];
 	}
 
@@ -415,7 +416,9 @@
 			const res = await fetch(`${API}/import`, { method: 'POST', body: fd });
 			const body = await res.json();
 			if (!res.ok) {
-				toastStore.trigger({ message: body.detail ?? body.error ?? 'Import failed' });
+				toastStore.trigger({
+					message: refusal(body, 'This mapping no longer fits the file: read it again.')
+				});
 				return;
 			}
 			outcome = { dryRun: body.dry_run, rows: (body.steps as StepResult[]).flatMap(resultRows) };
@@ -1144,7 +1147,10 @@
 					type="button"
 					class="btn preset-outlined"
 					onclick={() => run(true)}
-					disabled={running || !included.length || needsDomain}
+					disabled={running ||
+						!included.length ||
+						needsDomain ||
+						(needsAudit && !auditTargetId && !auditFrameworkId)}
 					title={needsDomain ? m.dataWizardFallbackDomainHelp() : ''}
 				>
 					{#if running}<i class="fa-solid fa-spinner fa-spin mr-2"></i>{/if}

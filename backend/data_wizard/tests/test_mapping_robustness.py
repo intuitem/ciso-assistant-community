@@ -326,3 +326,52 @@ class TestMetricSamples:
         errors = json.dumps(resp.json()["steps"][0]["results"]["errors"])
         assert "several metric instances are named 'Patch coverage'" in errors
         assert not CustomMetricSample.objects.exists()
+
+
+@pytest.mark.django_db
+def test_refusals_name_the_code_not_the_input(api_client, domain_folder):
+    step = {
+        "model_type": "Asset",
+        "sheets": [
+            {"source": "Assets", "target": "Sheet1", "columns": {"Name": "<secret>"}}
+        ],
+    }
+    resp = _post(
+        api_client,
+        IMPORT_URL,
+        "a.xlsx",
+        _xlsx({"Assets": [["Name"], ["NAS"]]}),
+        mapping={"steps": [step]},
+        options={"folder_id": str(domain_folder.id)},
+    )
+    assert resp.status_code == 400
+    assert resp.json() == {"error": "invalidMapping", "detail": "UnknownColumns"}
+
+
+@pytest.mark.django_db
+def test_a_new_audit_without_framework_is_a_row_error(
+    api_client, domain_folder, all_accessible
+):
+    step = {
+        "model_type": "ComplianceAssessment",
+        "options": {"container_name": "No framework"},
+        "sheets": [
+            {
+                "source": "Answers",
+                "target": "Requirements",
+                "columns": {"Ref": "ref_id", "Result": "compliance_result"},
+            }
+        ],
+    }
+    resp = _post(
+        api_client,
+        IMPORT_URL,
+        "audit.xlsx",
+        _xlsx({"Answers": [["Ref", "Result"], ["A.5.1", "compliant"]]}),
+        mapping={"steps": [step]},
+        options={"folder_id": str(domain_folder.id)},
+    )
+    assert resp.status_code == 200
+    results = resp.json()["steps"][0]["results"]
+    assert results["failed"] == 1
+    assert "Failed to create compliance assessment" in json.dumps(results["errors"])
