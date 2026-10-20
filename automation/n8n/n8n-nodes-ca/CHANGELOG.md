@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.1
+
+- README: example workflows and a link to the documentation.
+- Build tooling updated (`@n8n/node-cli` 0.54.0). The node itself is unchanged.
+
 ## 1.0.0
 
 First release on npm as `@intuitem/n8n-nodes-ciso-assistant`.
