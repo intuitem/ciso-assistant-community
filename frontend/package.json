@@ -42,7 +42,7 @@
 		"@tailwindcss/typography": "^0.5.20",
 		"@tailwindcss/vite": "^4.3.3",
 		"@testing-library/dom": "^10.4.1",
-		"@testing-library/jest-dom": "^6.10.0",
+		"@testing-library/jest-dom": "^7.0.1",
 		"@testing-library/svelte": "^5.4.2",
 		"@types/d3-hierarchy": "^3.1.7",
 		"@types/d3-selection": "^3.0.12",
@@ -82,6 +82,7 @@
 		"@floating-ui/dom": "^1.8.0",
 		"@fortawesome/fontawesome-free": "^7.3.1",
 		"@simplewebauthn/browser": "^13.3.0",
+		"@svar-ui/svelte-grid": "^2.7.5",
 		"@unovis/svelte": "1.6.7",
 		"@unovis/ts": "1.6.7",
 		"@xyflow/svelte": "^1.6.3",
@@ -99,8 +100,7 @@
 		"sanitize-html": "^2.18.0",
 		"ssf": "^0.11.2",
 		"svelte-multiselect": "^11.8.0",
-		"svelte-persisted-store": "^0.12.0",
-		"wx-svelte-grid": "^2.7.0"
+		"svelte-persisted-store": "^0.12.0"
 	},
 	"packageManager": "pnpm@11.24.0"
 }
