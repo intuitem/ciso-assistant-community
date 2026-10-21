@@ -10,34 +10,37 @@
 	import { m } from '$paraglide/messages';
 
 	interface Props {
-		entity: Record<string, any>;
+		object: Record<string, any>;
+		urlModel: string;
 	}
 
-	let { entity }: Props = $props();
+	let { object, urlModel }: Props = $props();
+
+	const model = $derived(urlModel === 'entities' ? 'entity' : 'solution');
 
 	const toastStore = getToastStore();
 
 	const canChange = $derived(
-		!entity.builtin &&
+		!object.builtin &&
 			canPerformActionOnObject({
 				user: page.data.user,
 				action: 'change',
-				model: 'entity',
-				object: entity
+				model,
+				object
 			})
 	);
 
 	// Forms the viewer may fill in-house, else publications they may file,
-	// that set this entity's tier.
+	// that set this object's tier.
 	type Option = { kind: 'form' | 'publication'; id: string; name: string };
 	let assessments: Option[] | null = $state(null);
 	let choosing = $state(false);
 	const canPublish = $derived(hasPermissionAnywhere(page.data.user, 'add_quickformpublication'));
 	$effect(() => {
-		if (entity.builtin) return;
-		// Aborted when the entity changes, so a late answer cannot land on another one.
+		if (object.builtin) return;
+		// Aborted when the object changes, so a late answer cannot land on another one.
 		const controller = new AbortController();
-		fetch(`/entities/${entity.id}/assess-tier`, { signal: controller.signal })
+		fetch(`/${urlModel}/${object.id}/assess-tier`, { signal: controller.signal })
 			.then((res) => (res.ok ? res.json() : []))
 			.then((rows) => (assessments = Array.isArray(rows) ? rows : []))
 			.catch(() => {
@@ -58,7 +61,7 @@
 		if (starting) return;
 		starting = true;
 		try {
-			const res = await fetch(`/entities/${entity.id}/assess-tier`, {
+			const res = await fetch(`/${urlModel}/${object.id}/assess-tier`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ kind: option.kind, id: option.id })
@@ -80,11 +83,12 @@
 	}
 
 	// One sentence per source: who or what set the tier, and when.
-	function tierOrigin(e: Record<string, any>): string {
-		const date = e.tier_set_at ? formatDate(new Date(e.tier_set_at), false, getLocale()) : '';
-		if (!date) return safeTranslate(e.tier_source);
-		if (e.tier_source === 'assessment') return m.tierAssessedOn({ date });
-		if (e.tier_source === 'override') return m.tierAdjustedOn({ date });
+	function tierOrigin(o: Record<string, any>): string {
+		const date = o.tier_set_at ? formatDate(new Date(o.tier_set_at), false, getLocale()) : '';
+		if (!date) return safeTranslate(o.tier_source);
+		if (o.tier_source === 'assessment') return m.tierAssessedOn({ date });
+		if (o.tier_source === 'override') return m.tierAdjustedOn({ date });
+		if (o.tier_source === 'rollup') return m.tierRaisedBySolutionOn({ date });
 		return m.tierSetManuallyOn({ date });
 	}
 
@@ -97,21 +101,21 @@
 	async function startEditing() {
 		// Visible tiers plus the current one even when hidden, so Save without a
 		// change keeps it.
-		const res = await fetch(`/tiers?selectable=${entity.tier?.id ?? ''}`);
+		const res = await fetch(`/tiers?selectable=${object.tier?.id ?? ''}`);
 		const data = res.ok ? await res.json() : {};
 		options = data.results ?? data ?? [];
-		selected = entity.tier?.id ?? '';
+		selected = object.tier?.id ?? '';
 		note = '';
 		editing = true;
 	}
 
-	async function save() {
+	async function save(body: Record<string, unknown> = { tier: selected || null, tier_note: note }) {
 		saving = true;
 		try {
-			const res = await fetch(`/entities/${entity.id}`, {
+			const res = await fetch(`/${urlModel}/${object.id}`, {
 				method: 'PATCH',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ tier: selected || null, tier_note: note })
+				body: JSON.stringify(body)
 			});
 			if (!res.ok) {
 				toastStore.trigger({
@@ -130,7 +134,7 @@
 
 <div
 	class="card p-4 bg-surface-50-950 border border-surface-200-800 flex flex-col gap-3"
-	data-testid="entity-tier-card"
+	data-testid="tier-card"
 >
 	<div class="flex items-center justify-between">
 		<h3 class="font-semibold text-surface-950-50">
@@ -207,24 +211,46 @@
 				type="button"
 				class="btn btn-sm preset-filled-primary-500"
 				disabled={saving}
-				onclick={save}
+				onclick={() => save()}
 				data-testid="save-tier-button">{m.save()}</button
 			>
 		</div>
-	{:else if entity.tier}
+	{:else if object.tier}
 		<div class="flex flex-wrap items-center gap-3">
-			<TierBadge cell={entity.tier} />
+			<TierBadge cell={object.tier} />
 			<span class="text-sm text-surface-600-400">
-				{tierOrigin(entity)}
-				{#if entity.tier_response?.id}
-					· <a class="anchor" href={`/quick-form-responses/${entity.tier_response.id}`}
-						>{entity.tier_response.ref_id ?? m.tierAssessment()}</a
+				{tierOrigin(object)}
+				{#if object.tier_response?.id}
+					· <a class="anchor" href={`/quick-form-responses/${object.tier_response.id}`}
+						>{object.tier_response.ref_id ?? m.tierAssessment()}</a
 					>
 				{/if}
 			</span>
 		</div>
 	{:else}
 		<p class="text-sm text-surface-600-400">{m.noTierYet()}</p>
+	{/if}
+
+	{#if !editing && object.tier_floor}
+		<div
+			class="flex flex-wrap items-center gap-2 border-t border-surface-200-800 pt-3 text-sm text-surface-600-400"
+			data-testid="tier-floor"
+		>
+			{m.tierFloorHint()}
+			<TierBadge cell={object.tier_floor.tier} />
+			<a class="anchor" href={`/solutions/${object.tier_floor.solution.id}`}
+				>{object.tier_floor.solution.str}</a
+			>
+			{#if canChange}
+				<button
+					type="button"
+					class="btn btn-sm preset-tonal-primary ml-auto"
+					disabled={saving}
+					onclick={() => save({ apply_tier_floor: true })}
+					data-testid="apply-tier-floor">{m.apply()}</button
+				>
+			{/if}
+		</div>
 	{/if}
 
 	{#if !editing && assessments?.length === 0}

@@ -3,7 +3,7 @@
 	import StakeholderCriticalityWidget from '$lib/components/EbiosRM/StakeholderCriticalityWidget.svelte';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
-	import EntityTierCard from '$lib/components/DetailView/EntityTierCard.svelte';
+	import TierCard from '$lib/components/DetailView/TierCard.svelte';
 	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
 	import { getToastStore } from '$lib/components/Toast/stores';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -113,10 +113,10 @@
 			<StakeholderCriticalityWidget stakeholder={data.data} />
 		{/snippet}
 	</DetailView>
-{:else if data.model.name === 'entity'}
+{:else if data.urlModel === 'entities' || data.urlModel === 'solutions'}
 	<DetailView {data}>
 		{#snippet widgets()}
-			<EntityTierCard entity={data.data} />
+			<TierCard object={data.data} urlModel={data.urlModel} />
 		{/snippet}
 	</DetailView>
 {:else}

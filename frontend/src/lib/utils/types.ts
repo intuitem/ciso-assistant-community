@@ -95,6 +95,7 @@ export const URL_MODEL = [
 	'entity-scores',
 	'tiers',
 	'entity-tier-changes',
+	'solution-tier-changes',
 	'representatives',
 	'vulnerabilities',
 	'security-advisories',

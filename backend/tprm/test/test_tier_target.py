@@ -22,10 +22,11 @@ from core.models import (
 from core.quick_form_apply import on_accept_health, plan, project
 from core.utils import apply_answers_dict
 from iam.models import Folder, Role, RoleAssignment, UserGroup
-from tprm.models import Entity, EntityTierChange, Tier, TierSource
+from global_settings.models import GlobalSettings
+from tprm.models import Entity, EntityTierChange, Solution, Tier, TierSource
 from tprm.testing import seed_four_level_scale
 from tprm.tier_target import EntityTierTarget
-from tprm.tiers import set_entity_tier
+from tprm.tiers import set_entity_tier, set_solution_tier
 
 FORM = "urn:test:risk:quick_form:tiering"
 PAGE = "urn:test:risk:qf_page:tiering:p"
@@ -355,6 +356,29 @@ class TestAccept:
             response.id,
         )
         assert change.changed_by == user
+
+    def test_accept_below_the_solution_floor_stands(self, setup):
+        GlobalSettings.objects.update_or_create(
+            name="tprm",
+            defaults={
+                "value": {"tier_propagation": "floor"},
+                "folder": Folder.get_root_folder(),
+            },
+        )
+        payroll = Solution.objects.create(name="Payroll", provider_entity=setup["acme"])
+        set_solution_tier(payroll, _tier("critical"))
+        _user, client = _admin()
+        result = _accept(client, _response(setup, risk="three"))
+        assert result.status_code == 200, result.json()
+
+        acme = Entity.objects.get(pk=setup["acme"].pk)
+        assert acme.tier_source == TierSource.ASSESSMENT
+        assert acme.tier_response_id is not None
+        assert list(
+            EntityTierChange.objects.filter(entity=acme).values_list(
+                "source", flat=True
+            )
+        ) == [TierSource.ASSESSMENT, TierSource.ROLLUP]
 
     def test_override_with_a_note(self, setup):
         _user, client = _admin()
