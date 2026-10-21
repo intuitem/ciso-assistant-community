@@ -1113,6 +1113,7 @@
 	"ruleOfThree": "Pravidlo tří",
 	"ruleOfThreeDescription": "Aplikovat pravidlo tří pro škálování skóre mezi novými mezemi",
 	"loginFailed": "Přihlášení se nezdařilo",
+	"ipBanned": "IP adresa zablokována (omezení počtu požadavků)",
 	"expectedEvidence": "Očekávaný důkaz",
 	"taskNodeLegacyEvidence": "Staré pole pro důkazy je zastaralé. Důkazy jsou nyní na úrovni úlohy a sdíleny mezi výskyty čekajícími na revize.\n Chcete-li je přesunout do očekávaných důkazů nebo je odstranit z výskytu, použijte tlačítka",
 	"taskNodeNewEvidence": "Důkazy globálně propojené s úlohou a šířící se na výskyty. Můžete přidat revizi v záložce 'Důkazy' níže",

@@ -140,12 +140,20 @@ def create_ip_ban_audit_log(ip_address: str, user: Optional[User]):
     AUDIT_LOG_COUNT = (current_time, count + 1)
 
     try:
+        from enterprise_core.models import LogEntryAction
+
+        action = LogEntryAction.IP_BANNED
+    except ImportError:
+        # Community edition (`enterprise_core` isn't installed).
+        action = LogEntry.Action.ACCESS
+
+    try:
         with set_actor(actor=None, remote_addr=ip_address):
             LogEntry.objects.create(
                 content_type=ContentType.objects.get_for_model(User),
                 object_pk=str(user.pk) if user else "",
                 object_repr=str(user) if user else "unknown user",
-                action=LogEntry.Action.ACCESS,
+                action=action,
                 changes={},
                 additional_data={"folder_id": None},
                 cid=get_cid(),

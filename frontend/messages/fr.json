@@ -4491,6 +4491,7 @@
 	"ruleOfThree": "Règle de trois",
 	"ruleOfThreeDescription": "Appliquer la règle de trois pour mettre à l'échelle les scores entre les nouvelles limites",
 	"loginFailed": "Connexion échouée",
+	"ipBanned": "IP bannie (limitation de débit)",
 	"storageOfData": "Stocke des données",
 	"dataLocationStorage": "Localisation des données au repos",
 	"dataLocationProcessing": "Localisation des données en traitement",

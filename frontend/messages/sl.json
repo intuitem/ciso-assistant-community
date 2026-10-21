@@ -4093,6 +4093,7 @@
 	"resetSecret": "Ponastavi skrivnost",
 	"createWebhookEndpoint": "Ustvari končno točko za Webhook",
 	"loginFailed": "Prijava ni uspela",
+	"ipBanned": "IP blokiran (omejevanje števila zahtev)",
 	"reports": "Poročila",
 	"reportsDescription": "Ustvarite in upravljajte poročila po meri na podlagi vaših podatkov",
 	"doraSpecific": "Posebnosti DORA",

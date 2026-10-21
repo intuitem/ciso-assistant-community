@@ -1126,6 +1126,7 @@
 	"ruleOfThree": "Trets regler",
 	"ruleOfThreeDescription": "Tillämpa trets regler för att skala poäng mellan nya gränser",
 	"loginFailed": "Inloggning misslyckades",
+	"ipBanned": "IP blockerad (hastighetsbegränsning)",
 	"expectedEvidence": "Förväntat bevis",
 	"taskNodeLegacyEvidence": "Det gamla bevisfältet är föråldrat. Bevis är nu uppgift-nivå och delas över förekomster som väntar på revisioner.\n För att flytta dem till förväntat bevis eller ta bort dem från förekomsten, använd knapparna",
 	"taskNodeNewEvidence": "Bevis globalt länkat till uppgiften och spridda till förekomster. Du kan lägga till en revision i fliken 'Bevis' nedan",

@@ -1140,6 +1140,7 @@
 	"ruleOfThree": "Háromszoros szabály",
 	"ruleOfThreeDescription": "A Háromszoros szabály alkalmazása a pontszámok átméretezése új határok között",
 	"loginFailed": "Sikertelen bejelentkezés",
+	"ipBanned": "IP letiltva (gyakoriságkorlátozás)",
 	"expectedEvidence": "Várt bizonyíték",
 	"taskNodeLegacyEvidence": "A régi bizonyíték mező elavult. A bizonyíték most feladat-szintű és megosztott az áttekintésre váró előfordulások között.\n A mozgatásuk a várható bizonyítékok közé vagy az eltávolításuk az előfordulásból a gombok segítségével történik.",
 	"taskNodeNewEvidence": "A feladathoz globálisan kapcsolódó bizonyítékok, amelyek elosztottak az előfordulások között. Áttekintést adhat hozzá a 'Bizonyítékok' fülön lent.",

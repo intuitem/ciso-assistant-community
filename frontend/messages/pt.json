@@ -1134,6 +1134,7 @@
 	"ruleOfThree": "Regra dos Três",
 	"ruleOfThreeDescription": "Aplicar a Regra dos Três para escalar pontuações entre novos limites",
 	"loginFailed": "Falha no login",
+	"ipBanned": "IP banido (limitação de taxa)",
 	"expectedEvidence": "Evidência esperada",
 	"taskNodeLegacyEvidence": "O campo de evidência antigo está obsoleto. A evidência agora é de nível de tarefa e compartilhada entre ocorrências aguardando revisões.\n Para movê-las para evidência esperada ou removê-las da ocorrência, use os botões",
 	"taskNodeNewEvidence": "Evidência vinculada globalmente à tarefa e distribuída para ocorrências. Você pode adicionar uma revisão na guia 'Evidências' abaixo",

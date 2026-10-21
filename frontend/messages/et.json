@@ -3732,6 +3732,7 @@
 	"resetSecret": "Lähtesta saladus",
 	"createWebhookEndpoint": "Loo webhooki lõpp-punkt",
 	"loginFailed": "Sisselogimine ebaõnnestus",
+	"ipBanned": "IP blokeeritud (päringute piiramine)",
 	"reports": "Aruanded",
 	"reportsDescription": "Genereeri ja halda kohandatud aruandeid oma andmete põhjal",
 	"doraSpecific": "DORA-spetsiifiline",

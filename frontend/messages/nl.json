@@ -1084,6 +1084,7 @@
 	"samlAuthnRequestSignedHelpText": "Wanneer ingeschakeld, wordt het SAML-authenticatieverzoek ondertekend met de privésleutel hieronder. Het bijbehorende openbare certificaat wordt naar de identiteitsprovider verzonden, zodat deze de handtekening kan verifiëren.",
 	"downloadCertificate": "Certificaat downloaden",
 	"loginFailed": "Login mislukt",
+	"ipBanned": "IP geblokkeerd (snelheidsbeperking)",
 	"viewMore": "Meer weergeven",
 	"viewLess": "Minder weergeven",
 	"isCustom": "Aangepast",

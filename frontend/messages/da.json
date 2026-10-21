@@ -1414,6 +1414,7 @@
 	"ruleOfThree": "Regel af Tre",
 	"ruleOfThreeDescription": "Anvend Regel af Tre for at skalere scores mellem nye grænser",
 	"loginFailed": "Login mislykkedes",
+	"ipBanned": "IP-adresse udelukket (hastighedsbegrænsning)",
 	"expectedEvidence": "Forventet bevis",
 	"taskNodeLegacyEvidence": "Det gamle bevisfelt er udfaset. Bevis er nu opgavebaseret og delt over forekomster, der venter på revisioner.\n For at flytte dem til forventet bevis eller fjerne dem fra forekomsten, skal du bruge knapperne",
 	"taskNodeNewEvidence": "Bevis globalt knyttet til opgaven og spredt over forekomster. Du kan tilføje en revision i fanen 'Beviser' nedenfor",

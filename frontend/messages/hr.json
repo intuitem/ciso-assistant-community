@@ -3093,6 +3093,7 @@
 	"logicAnd": "I",
 	"logicOr": "ILI",
 	"loginFailed": "Neuspješna prijava",
+	"ipBanned": "IP blokiran (ograničenje broja zahtjeva)",
 	"lossAmount": "Iznos gubitka",
 	"lossBreakdownByScenario": "Podjela gubitka po scenariju",
 	"lossExceedanceCurve": "Krivulja prekoračenja gubitka",

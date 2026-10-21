@@ -308,7 +308,8 @@
                             "type": "string"
                         },
                         "xffDepth": {
-                            "type": "integer"
+                            "type": "integer",
+                            "minimum": 1
                         }
                     },
                     "additionalProperties": false
