@@ -595,7 +595,7 @@ class RPCServer:
         self._server_socket = None
 
         # Never unlink the socket file of another leader.
-        if not is_socket_file_owner:
+        if is_socket_file_owner:
             self._socket_file_path.unlink(missing_ok=True)
 
 
