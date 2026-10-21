@@ -59,6 +59,34 @@ DEFAULT_SAML_ATTRIBUTE_MAPPING_EMAIL = SAMLProvider.default_attribute_mapping["e
 logger = structlog.get_logger(__name__)
 
 
+DEFAULT_RELAY_STATE = "/"
+
+
+def saml_redirect(
+    request: HttpRequest,
+    provider: SAMLProvider,
+    *,
+    process: str,
+    next_url: str | None = None,
+    **state_kwargs,
+) -> HttpResponseRedirect:
+    """Builds the AuthnRequest redirect mirroring `SAMLProvider.redirect`, but
+    with a non-empty RelayState. allauth sends `RelayState=` empty, and AD FS
+    rejects a signed request whose signed query carries an empty RelayState.
+    The post-login destination still comes from the stashed `next_url`."""
+    auth = build_auth(request, provider)
+    redirect_url = auth.login(return_to=DEFAULT_RELAY_STATE)
+    provider.stash_redirect_state(
+        request,
+        process,
+        next_url,
+        None,
+        state_id=auth.get_last_request_id(),
+        **state_kwargs,
+    )
+    return HttpResponseRedirect(redirect_url)
+
+
 @method_decorator(csrf_exempt, name="dispatch")
 class ACSView(SAMLViewMixin, View):
     def dispatch(self, request, organization_slug):
@@ -217,6 +245,11 @@ class FinishACSView(SAMLViewMixin, View):
             if request.user.is_authenticated:
                 get_account_adapter(request).logout(request)
             login._accept_login(request)  # complete_social_login not working
+            if login.account.pk is None:
+                # allauth only links the account when it matches an email through
+                # its own attribute mapping, which the settings form can store as
+                # one comma-joined name. The user is resolved above: link it.
+                login.connect(request, user)
             record_authentication(request, login)
             stash_saml_slo_state(request, auth, user)
         except User.DoesNotExist as e:

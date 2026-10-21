@@ -10,9 +10,12 @@
 	interface Props {
 		row: { meta?: { id: string; tier?: { id: string } | null } } | undefined;
 		handler: DataHandler;
+		URLModel: 'entities' | 'solutions';
 	}
 
-	let { row, handler }: Props = $props();
+	let { row, handler, URLModel }: Props = $props();
+
+	const objectName = $derived((URLModel === 'entities' ? m.entity() : m.solution()).toLowerCase());
 
 	const flash = getFlash(page);
 
@@ -28,7 +31,7 @@
 
 	async function changeTier(tierId: string | null) {
 		try {
-			const res = await fetch(`/entities/${row?.meta?.id}/tier`, {
+			const res = await fetch(`/${URLModel}/${row?.meta?.id}/tier`, {
 				method: 'PATCH',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ tier: tierId })
@@ -36,13 +39,13 @@
 			if (!res.ok) throw new Error(String(res.status));
 			flash.set({
 				type: 'success',
-				message: m.successfullyUpdatedObject({ object: m.entity().toLowerCase() })
+				message: m.successfullyUpdatedObject({ object: objectName })
 			});
 			handler.invalidate();
 		} catch (error) {
 			flash.set({
 				type: 'error',
-				message: m.errorUpdatingObject({ object: m.entity().toLowerCase() })
+				message: m.errorUpdatingObject({ object: objectName })
 			});
 			console.error('Error changing tier:', error);
 		}
