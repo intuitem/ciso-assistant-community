@@ -1105,7 +1105,7 @@ def resolve_user_id(user_ref: str) -> str:
     if not ref:
         raise ValueError("User reference is empty")
 
-    params = {"email": ref} if "@" in ref else {"search": ref}
+    params = {"email__icontains": ref} if "@" in ref else {"search": ref}
     # No item cap: the exact match (or a second one) may sit beyond the
     # default limit of a fuzzy search.
     users, error = fetch_all_results("/users/", params=params, max_items=None)

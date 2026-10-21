@@ -226,7 +226,18 @@ class TestResolveUser:
         fake = _router({"/users/": users})
         with patch.object(resolvers, "fetch_all_results", fake):
             assert resolvers.resolve_user_id("enzo@acme.io") == UUID_A
-        assert fake.calls == [("/users/", {"email": "enzo@acme.io"})]
+        assert fake.calls == [("/users/", {"email__icontains": "enzo@acme.io"})]
+
+    def test_email_match_ignores_case(self):
+        users = [{"id": UUID_A, "email": "enzo@acme.io"}]
+        with patch.object(resolvers, "fetch_all_results", _router({"/users/": users})):
+            assert resolvers.resolve_user_id("Enzo@Acme.io") == UUID_A
+
+    def test_partial_email_match_is_rejected(self):
+        users = [{"id": UUID_A, "email": "lorenzo@acme.io"}]
+        with patch.object(resolvers, "fetch_all_results", _router({"/users/": users})):
+            with pytest.raises(ValueError, match="exact"):
+                resolvers.resolve_user_id("enzo@acme.io")
 
     def test_by_name_uses_search_param(self):
         users = [{"id": UUID_A, "email": "enzo@acme.io", "first_name": "Enzo"}]
