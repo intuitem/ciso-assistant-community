@@ -48,31 +48,20 @@ function callWith(body: unknown) {
 const NEXT = encodeURIComponent('/my-profile/settings?tab=security');
 
 describe('handleFetch, 401 from an allauth account endpoint', () => {
-	it('asks for the password when the account has one, keeping the session', async () => {
+	it('asks for the second factor when the account has one, keeping the session', async () => {
 		const { response, jar } = callWith(reauthenticationRequired(PASSWORD, mfa('totp', 'webauthn')));
 
 		await expect(response).rejects.toMatchObject({
 			status: 302,
-			location: `/reauthenticate?method=password&next=${NEXT}`
+			location: `/reauthenticate?method=mfa&types=totp,webauthn&next=${NEXT}`
 		});
 		expect([...jar.keys()]).toEqual(SESSION_COOKIES);
 	});
 
-	it('asks for an MFA code when the account has no password', async () => {
-		await expect(
-			callWith(reauthenticationRequired(mfa('webauthn', 'totp'))).response
-		).rejects.toMatchObject({
+	it('asks for the password when the account has no second factor', async () => {
+		await expect(callWith(reauthenticationRequired(PASSWORD)).response).rejects.toMatchObject({
 			status: 302,
-			location: `/reauthenticate?method=code&next=${NEXT}`
-		});
-	});
-
-	it('asks for a security key when that is the only option', async () => {
-		await expect(
-			callWith(reauthenticationRequired(mfa('webauthn'))).response
-		).rejects.toMatchObject({
-			status: 302,
-			location: `/reauthenticate?method=webauthn&next=${NEXT}`
+			location: `/reauthenticate?method=password&next=${NEXT}`
 		});
 	});
 

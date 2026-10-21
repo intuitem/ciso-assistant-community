@@ -7,26 +7,22 @@ import { setError, superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import type { Actions, PageServerLoad } from './$types';
 
-const ENDPOINTS = {
-	password: 'auth/reauthenticate',
-	code: 'auth/2fa/reauthenticate',
-	webauthn: 'auth/webauthn/reauthenticate'
-};
-
-function getMethod(url: URL): keyof typeof ENDPOINTS {
-	const method = url.searchParams.get('method');
-	return method === 'code' || method === 'webauthn' ? method : 'password';
-}
+const MFA_TYPES = ['webauthn', 'totp', 'recovery_codes'];
 
 export const load: PageServerLoad = async ({ url, fetch }) => {
 	const form = await superValidate(zod(reauthenticateSchema));
-	const method = getMethod(url);
+	const mfaTypes =
+		url.searchParams.get('method') === 'mfa'
+			? MFA_TYPES.filter((type) => url.searchParams.get('types')?.split(',').includes(type))
+			: [];
 	let requestOptions = null;
-	if (method === 'webauthn') {
-		const res = await fetch(`${ALLAUTH_API_URL}/${ENDPOINTS.webauthn}`).then((res) => res.json());
+	if (mfaTypes.includes('webauthn')) {
+		const res = await fetch(`${ALLAUTH_API_URL}/auth/webauthn/reauthenticate`).then((res) =>
+			res.json()
+		);
 		requestOptions = res.data?.request_options ?? null;
 	}
-	return { form, method, requestOptions, title: m.password() };
+	return { form, mfaTypes, requestOptions, title: m.password() };
 };
 
 export const actions: Actions = {
@@ -34,11 +30,15 @@ export const actions: Actions = {
 		const form = await superValidate(event.request, zod(reauthenticateSchema));
 		if (!form.valid) return fail(400, { form });
 
-		const method = getMethod(event.url);
-		const field = method === 'webauthn' ? 'credential' : method;
+		const field = form.data.credential ? 'credential' : form.data.code ? 'code' : 'password';
+		const endpoint = {
+			credential: 'auth/webauthn/reauthenticate',
+			code: 'auth/2fa/reauthenticate',
+			password: 'auth/reauthenticate'
+		}[field];
 
 		let value: unknown = form.data[field];
-		if (method === 'webauthn') {
+		if (field === 'credential') {
 			try {
 				value = JSON.parse(form.data.credential ?? '');
 			} catch {
@@ -48,7 +48,7 @@ export const actions: Actions = {
 		}
 
 		const res = await event
-			.fetch(`${ALLAUTH_API_URL}/${ENDPOINTS[method]}`, {
+			.fetch(`${ALLAUTH_API_URL}/${endpoint}`, {
 				method: 'POST',
 				body: JSON.stringify({ [field]: value })
 			})

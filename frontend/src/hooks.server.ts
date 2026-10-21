@@ -369,20 +369,18 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 				const data = await clonedResponse.json();
 				const flows: Record<string, any>[] = data.data?.flows ?? [];
 				const mfaFlow = flows.find((flow) => flow.id === 'mfa_reauthenticate');
+				const next = encodeURIComponent(event.url.pathname + event.url.search);
 
 				if (!data.meta?.is_authenticated) {
 					// Allauth session has fully expired — force logout
 					logoutUser(event);
-				} else if (flows.some((flow) => flow.id === 'reauthenticate') || mfaFlow) {
-					const method = flows.some((flow) => flow.id === 'reauthenticate')
-						? 'password'
-						: mfaFlow?.types?.some((type: string) => type !== 'webauthn')
-							? 'code'
-							: 'webauthn';
+				} else if (mfaFlow) {
 					redirect(
 						302,
-						`/reauthenticate?method=${method}&next=${encodeURIComponent(event.url.pathname + event.url.search)}`
+						`/reauthenticate?method=mfa&types=${(mfaFlow.types ?? []).join(',')}&next=${next}`
 					);
+				} else if (flows.some((flow) => flow.id === 'reauthenticate')) {
+					redirect(302, `/reauthenticate?method=password&next=${next}`);
 				}
 			} catch (err) {
 				if (isRedirect(err)) throw err;

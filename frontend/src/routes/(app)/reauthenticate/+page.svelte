@@ -10,6 +10,9 @@
 
 	let { data } = $props();
 
+	type Mode = 'password' | 'webauthn' | 'totp' | 'recovery_codes';
+	let mode = $state((data.mfaTypes[0] ?? 'password') as Mode);
+
 	let credential = $state('');
 	let webAuthnError: string | null = $state(null);
 
@@ -27,6 +30,12 @@
 			webAuthnError = err.name === 'NotAllowedError' ? m.webAuthnCancelled() : m.webAuthnError();
 		}
 	}
+
+	const switchLabels: Record<string, () => string> = {
+		webauthn: m.useSecurityKey,
+		totp: m.loginUsingTOTP,
+		recovery_codes: m.loginUsingRecoveryCode
+	};
 </script>
 
 <div class="flex items-center justify-center min-h-screen bg-surface-100 p-4">
@@ -42,7 +51,7 @@
 			validationMethod="onsubmit"
 		>
 			{#snippet children({ form, errors })}
-				{#if data.method === 'webauthn'}
+				{#if mode === 'webauthn'}
 					<input type="hidden" name="credential" value={credential} />
 					{#each [webAuthnError, ...(errors.credential ?? [])].filter(Boolean) as error}
 						<p class="text-sm text-error-500">{error}</p>
@@ -57,8 +66,10 @@
 						<i class="fa-solid fa-fingerprint mr-2"></i>{m.useSecurityKey()}
 					</button>
 				{:else}
-					{#if data.method === 'code'}
+					{#if mode === 'totp'}
 						<OTPInput {form} field="code" />
+					{:else if mode === 'recovery_codes'}
+						<TextField {form} field="code" label={m.recoveryCode()} />
 					{:else}
 						<TextField type="password" {form} field="password" label={m.password()} />
 					{/if}
@@ -70,5 +81,18 @@
 				{/if}
 			{/snippet}
 		</SuperForm>
+		{#if data.mfaTypes.length > 1}
+			<div class="flex flex-wrap gap-2 justify-center">
+				{#each data.mfaTypes.filter((type) => type !== mode) as type}
+					<button
+						type="button"
+						class="btn hover:underline text-sm"
+						onclick={() => (mode = type as Mode)}
+					>
+						{switchLabels[type]()}
+					</button>
+				{/each}
+			</div>
+		{/if}
 	</div>
 </div>
