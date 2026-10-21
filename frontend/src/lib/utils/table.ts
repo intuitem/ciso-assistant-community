@@ -2287,6 +2287,8 @@ export const listViewFields = {
 			'is_third_party',
 			'has_mfa_enabled'
 		],
+		optionalFields: { head: ['observation'], body: ['observation'] },
+		hasDescription: false,
 		filters: {
 			is_active: USER_IS_ACTIVE_FILTER,
 			is_third_party: USER_IS_THIRD_PARTY_FILTER
