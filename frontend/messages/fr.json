@@ -1865,6 +1865,7 @@
 	"copy": "Copier",
 	"incorrectCode": "Code incorrect",
 	"tooManyLoginAttempts": "Trop de tentatives de connexion. Veuillez réessayer plus tard.",
+	"tooManyAttempts": "Trop de tentatives. Réessayez dans une minute.",
 	"step": "Étape {number}",
 	"critical": "Critique",
 	"isCritical": "Est critique",

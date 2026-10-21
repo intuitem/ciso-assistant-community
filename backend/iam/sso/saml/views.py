@@ -2,6 +2,7 @@
 import json
 from datetime import datetime, timedelta, timezone
 from django.conf import settings
+from django.core.exceptions import PermissionDenied
 from django.http import HttpRequest, HttpResponseRedirect, HttpResponse
 from django.http.response import Http404
 from django.urls import reverse
@@ -27,7 +28,7 @@ from allauth.socialaccount.internal.flows.login import (
     pre_social_login,
     record_authentication,
 )
-from allauth.socialaccount.models import PermissionDenied, SocialLogin
+from allauth.socialaccount.models import SocialLogin
 from allauth.socialaccount.providers.saml.provider import SAMLProvider
 from allauth.socialaccount.providers.saml.views import (
     AuthProcess,
