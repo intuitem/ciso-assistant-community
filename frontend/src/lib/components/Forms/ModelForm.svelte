@@ -517,7 +517,7 @@
 		{:else if URLModel === 'service-accounts'}
 			<ServiceAccountForm {form} {model} {cacheLocks} {formDataCache} {shape} {context} {object} />
 		{:else if URLModel === 'identity-providers'}
-			<IdentityProviderForm {form} {model} {cacheLocks} {formDataCache} {shape} {context} />
+			<IdentityProviderForm {form} {model} {cacheLocks} {formDataCache} {shape} />
 		{:else if URLModel === 'risk-assessments'}
 			<RiskAssessmentForm
 				{form}

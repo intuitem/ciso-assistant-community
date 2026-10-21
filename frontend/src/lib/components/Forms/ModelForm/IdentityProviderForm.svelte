@@ -10,22 +10,13 @@
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
 		shape?: any;
-		context?: string;
 	}
 
-	let {
-		form,
-		model,
-		cacheLocks = {},
-		formDataCache = $bindable({}),
-		shape = {},
-		context
-	}: Props = $props();
+	let { form, model, cacheLocks = {}, formDataCache = $bindable({}), shape = {} }: Props = $props();
 </script>
 
 <TextField
 	{form}
-	disabled={context === 'edit'}
 	field="provider_id"
 	label={m.providerId()}
 	helpText={m.providerIdHelpText()}

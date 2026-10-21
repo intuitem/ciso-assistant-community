@@ -162,8 +162,10 @@ def _switch_role(service_account: ServiceAccount, new_role: Role) -> None:
 def _detach_to_dedicated_role(
     service_account: ServiceAccount, permission_ids: list[int]
 ) -> None:
+    # Federated accounts have no client; name after the user, as provisioning does.
     new_role = Role.objects.create(
-        name=f"SA-{service_account.client_id}", folder=Folder.get_root_folder()
+        name=f"SA-{service_account.client_id or service_account.user_id}",
+        folder=Folder.get_root_folder(),
     )
     new_role.permissions.set(_validated_permissions(permission_ids))
     _switch_role(service_account, new_role)
@@ -248,7 +250,29 @@ def update_service_account(
     expiry_date=UNSET,
     social_app: SocialApp | None = UNSET,
     federated_subject: str | None = UNSET,
+    is_active: bool | None = None,
 ) -> ServiceAccount:
+    new_identity = None
+    if social_app is not UNSET or federated_subject is not UNSET:
+        new_social_app = (
+            social_app if social_app is not UNSET else service_account.social_app
+        )
+        new_subject = (
+            federated_subject
+            if federated_subject is not UNSET
+            else service_account.federated_subject
+        )
+        if (
+            new_social_app != service_account.social_app
+            or new_subject != service_account.federated_subject
+        ):
+            _ensure_federated_identity_available(
+                social_app=new_social_app,
+                federated_subject=new_subject,
+                exclude_pk=service_account.pk,
+            )
+            new_identity = (new_social_app, new_subject)
+
     try:
         with transaction.atomic():
             if name is not None:
@@ -263,28 +287,10 @@ def update_service_account(
                 service_account.description = description
             if expiry_date is not UNSET:
                 service_account.expiry_date = expiry_date
-            if social_app is not UNSET or federated_subject is not UNSET:
-                new_social_app = (
-                    social_app
-                    if social_app is not UNSET
-                    else service_account.social_app
+            if new_identity is not None:
+                service_account.social_app, service_account.federated_subject = (
+                    new_identity
                 )
-                new_subject = (
-                    federated_subject
-                    if federated_subject is not UNSET
-                    else service_account.federated_subject
-                )
-                if (
-                    new_social_app != service_account.social_app
-                    or new_subject != service_account.federated_subject
-                ):
-                    _ensure_federated_identity_available(
-                        social_app=new_social_app,
-                        federated_subject=new_subject,
-                        exclude_pk=service_account.pk,
-                    )
-                    service_account.social_app = new_social_app
-                    service_account.federated_subject = new_subject
             service_account.save()
             if role_id is not None:
                 new_role = get_selectable_builtin_role(role_id)
@@ -311,6 +317,11 @@ def update_service_account(
                 if is_recursive is not None:
                     role_assignment.is_recursive = is_recursive
                 role_assignment.save()
+            if is_active is not None and is_active != service_account.is_active:
+                if is_active:
+                    service_account.activate()
+                else:
+                    service_account.deactivate()
     except IntegrityError as e:
         # Same double-check as provisioning: concurrent re-points can race
         # past _ensure_federated_identity_available's exists() pre-check, and

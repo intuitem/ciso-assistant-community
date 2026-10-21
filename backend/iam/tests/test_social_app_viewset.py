@@ -1,10 +1,14 @@
 import socket
+from unittest.mock import patch
 
 import pytest
 
 from allauth.socialaccount.models import SocialApp
+from auditlog.models import LogEntry
+from django.contrib.contenttypes.models import ContentType
 
 from core.net_safety import assert_public_url
+from iam.utils import mask_social_app_settings
 
 from .test_federated_service_accounts import (
     CLIENT_ID,
@@ -109,6 +113,72 @@ class TestSocialAppViewSet:
         assert response.json()["name"] == "Renamed IdP"
         social_app.refresh_from_db()
         assert social_app.name == "Renamed IdP"
+
+    def test_provider_id_can_be_changed(self, admin_client, mocked_idp, social_app):
+        response = admin_client.patch(
+            f"{SOCIAL_APPS_ENDPOINT}{social_app.id}/",
+            {"provider_id": "renamed-idp"},
+        )
+        assert response.status_code == 200, response.content
+        social_app.refresh_from_db()
+        assert social_app.provider_id == "renamed-idp"
+
+    def test_provider_id_change_to_duplicate_rejected(
+        self, admin_client, mocked_idp, social_app
+    ):
+        SocialApp.objects.create(
+            provider="openid_connect",
+            provider_id="taken-idp",
+            name="Other IdP",
+            client_id="other-client-id",
+            settings={"server_url": SERVER_URL},
+        )
+        response = admin_client.patch(
+            f"{SOCIAL_APPS_ENDPOINT}{social_app.id}/",
+            {"provider_id": "taken-idp"},
+        )
+        assert response.status_code == 400, response.content
+        social_app.refresh_from_db()
+        assert social_app.provider_id == "test-idp"
+
+    def test_changes_are_audited_without_credentials(
+        self, admin_client, mocked_idp, social_app
+    ):
+        social_app.secret = "s3cret-value-never-logged"
+        social_app.key = "k3y-value-never-logged"
+        social_app.settings = {
+            **social_app.settings,
+            "certificate_key": "cert-key-value-never-logged",
+        }
+        social_app.save()
+        new_server_url = "https://test-idp.example.com/realms/new"
+        with patch(
+            "iam.oidc_federation.check_social_app_live"
+        ):  # the mocked IdP only answers the original URL
+            response = admin_client.patch(
+                f"{SOCIAL_APPS_ENDPOINT}{social_app.id}/",
+                {"name": "Renamed IdP", "server_url": new_server_url},
+            )
+        assert response.status_code == 200, response.content
+
+        entries = LogEntry.objects.filter(
+            content_type=ContentType.objects.get_for_model(SocialApp),
+            object_pk=str(social_app.pk),
+        )
+        assert any("name" in (entry.changes or {}) for entry in entries)
+        logged = " ".join(
+            f"{entry.changes} {entry.serialized_data} {entry.additional_data}"
+            for entry in entries
+        )
+        assert new_server_url in logged
+        assert "certificate_key" not in logged
+        assert "cert-key-value-never-logged" not in logged
+        assert "s3cret-value-never-logged" not in logged
+        assert "k3y-value-never-logged" not in logged
+
+
+def test_settings_mask_fails_closed_on_unparseable_value():
+    assert mask_social_app_settings("not json {certificate_key: x}") == "**********"
 
     def test_destroy_blocked_while_referenced_by_service_account(
         self, admin_client, domain_folder, social_app

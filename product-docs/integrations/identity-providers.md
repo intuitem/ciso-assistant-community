@@ -17,7 +17,7 @@ This is a **PRO** feature, part of [service accounts](service-accounts.md). It s
 Identity providers live under **Organization > Identity providers** in the sidebar, next to Service accounts. Registering one asks for:
 
 * **Name**, a display label.
-* **Provider ID**, a unique lowercase slug (e.g. `keycloak-prod`), fixed once set.
+* **Provider ID**, a unique lowercase slug (e.g. `keycloak-prod`).
 * **Client ID**, the identifier your federated service accounts will present as their token's audience.
 * **Server URL**, the provider's issuer URL or its `/.well-known/openid-configuration` discovery URL directly.
 
@@ -29,7 +29,7 @@ On save, CISO Assistant resolves the discovery document and fetches the provider
 
 ### Managing a provider
 
-* **Edit** updates any of the four fields, subject to the same live check as registration.
+* **Edit** updates any of the four fields. A changed client ID or server URL goes through the same live check as registration.
 * **Delete** removes the entry, unless a federated service account still references it: delete or repoint those first.
 
 A provider you register here says nothing about permissions or domain access on its own, it only tells CISO Assistant which external client and signing keys to trust. What a federated service account can actually do is still entirely controlled by its own role and domain assignment, exactly as for a local one.

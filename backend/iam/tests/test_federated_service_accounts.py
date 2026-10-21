@@ -15,6 +15,7 @@ from allauth.socialaccount.models import SocialApp
 from core.startup import startup
 from django.contrib.auth.models import Permission
 from django.core.exceptions import ValidationError
+from django.db import connection
 from global_settings.models import GlobalSettings
 from iam.models import Folder, Role, ServiceAccount, User, UserGroup
 from iam.service_accounts import (
@@ -326,6 +327,28 @@ class TestFederatedProvisioning:
         sa = ServiceAccount.objects.get(id=second["id"])
         assert sa.federated_subject == "worker-2"
 
+    def test_repoint_live_check_runs_outside_transaction(
+        self, admin_client, domain_folder, social_app, mocked_idp
+    ):
+        """The live IdP check does network I/O: it must not hold a write txn."""
+        payload = _create_federated_sa(admin_client, domain_folder, social_app).json()
+        baseline_depth = len(connection.atomic_blocks)
+        depths_during_check = []
+
+        with patch(
+            "iam.service_accounts.check_social_app_live",
+            side_effect=lambda _app: depths_during_check.append(
+                len(connection.atomic_blocks)
+            ),
+        ):
+            response = admin_client.patch(
+                f"{SA_ENDPOINT}{payload['id']}/",
+                {"federated_subject": "worker-2"},
+                format="json",
+            )
+        assert response.status_code == 200, response.content
+        assert depths_during_check == [baseline_depth]
+
     def test_local_account_forbids_federation_field_updates(
         self, admin_client, domain_folder
     ):
@@ -635,6 +658,36 @@ class TestFederatedRoleLinked:
         sa = ServiceAccount.objects.get(id=payload["id"])
         assert sa.role_id == role.id
 
+    def test_switch_from_role_to_custom_on_update(
+        self, admin_client, domain_folder, social_app
+    ):
+        role = self._reader_role()
+        payload = admin_client.post(
+            SA_ENDPOINT,
+            {
+                "name": "federated-role-to-custom",
+                "identity_source": "federated",
+                "social_app": str(social_app.id),
+                "federated_subject": "worker-1",
+                "role": str(role.id),
+                "folders": [str(domain_folder.id)],
+            },
+            format="json",
+        ).json()
+
+        response = admin_client.patch(
+            f"{SA_ENDPOINT}{payload['id']}/",
+            {"permissions": _view_folder_permission_ids()},
+            format="json",
+        )
+        assert response.status_code == 200, response.content
+        assert response.json()["is_role_linked"] is False
+
+        sa = ServiceAccount.objects.get(id=payload["id"])
+        assert not sa.role.builtin
+        # No local client: the dedicated role is named after the user.
+        assert sa.role.name == f"SA-{sa.user_id}"
+
 
 @pytest.mark.django_db
 class TestFederatedAuthenticationHardening:
@@ -649,6 +702,22 @@ class TestFederatedAuthenticationHardening:
         token = _mint_jwt(private_key, aud=[CLIENT_ID, "some-other-service"])
         response = _bearer_client(token).get("/api/folders/")
         assert response.status_code == 200, response.content
+
+    def test_audience_entries_beyond_cap_are_ignored(
+        self, admin_client, domain_folder, social_app, rsa_keypair, mocked_idp
+    ):
+        private_key, _ = rsa_keypair
+        _create_federated_sa(admin_client, domain_folder, social_app)
+        padding = [f"other-{i}" for i in range(10)]
+        token = _mint_jwt(private_key, aud=padding + [CLIENT_ID])
+        response = _bearer_client(token).get("/api/folders/")
+        assert response.status_code == 401, response.content
+
+    def test_non_utf8_bearer_token_rejected_not_500(self, app_config):
+        client = APIClient()
+        client.credentials(HTTP_AUTHORIZATION="Bearer \xff\xfe")
+        response = client.get("/api/folders/")
+        assert response.status_code == 401, response.content
 
     def test_aud_array_without_client_id_rejected(
         self, admin_client, domain_folder, social_app, rsa_keypair, mocked_idp

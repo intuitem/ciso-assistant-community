@@ -121,7 +121,7 @@ def verify_and_decode_cached(
         )
         return data
     except jwt.PyJWTError as e:
-        raise OAuth2Error("Invalid id_token") from e
+        raise OAuth2Error("Invalid token") from e
 
 
 def check_social_app_live(social_app: SocialApp) -> None:

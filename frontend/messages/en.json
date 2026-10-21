@@ -1234,7 +1234,7 @@
 	"identityProvidersDescription": "Register the external OIDC identity providers that federated service accounts authenticate against.",
 	"addIdentityProvider": "Add identity provider",
 	"providerId": "Provider ID",
-	"providerIdHelpText": "Unique lowercase slug identifying this provider (e.g. \"keycloak-prod\"). Cannot be changed after creation.",
+	"providerIdHelpText": "Unique lowercase slug identifying this provider (e.g. \"keycloak-prod\").",
 	"serverUrlHelpText": "The issuer's base URL or its /.well-known/openid-configuration discovery URL. Verified live on save.",
 	"identitySource": "Identity source",
 	"identitySourceHelpText": "Local: a secret is generated and stored here. Federated: an external identity provider issues the token, verified against its own signing keys, no secret is stored locally.",

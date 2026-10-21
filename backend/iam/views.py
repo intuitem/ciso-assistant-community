@@ -757,32 +757,25 @@ class ServiceAccountViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
         try:
-            with transaction.atomic():
-                update_service_account(
-                    service_account,
-                    name=data.get("name"),
-                    description=data["description"]
-                    if "description" in data
-                    else UNSET_FIELD,
-                    permission_ids=data.get("permissions"),
-                    role_id=data["role"].id if data.get("role") else None,
-                    folder_ids=data.get("folders"),
-                    is_recursive=data.get("is_recursive"),
-                    expiry_date=data["expiry_date"]
-                    if "expiry_date" in data
-                    else UNSET_FIELD,
-                    social_app=data["social_app"]
-                    if "social_app" in data
-                    else UNSET_FIELD,
-                    federated_subject=data["federated_subject"]
-                    if "federated_subject" in data
-                    else UNSET_FIELD,
-                )
-                if "is_active" in data:
-                    if data["is_active"] and not service_account.is_active:
-                        service_account.activate()
-                    elif not data["is_active"] and service_account.is_active:
-                        service_account.deactivate()
+            update_service_account(
+                service_account,
+                name=data.get("name"),
+                description=data["description"]
+                if "description" in data
+                else UNSET_FIELD,
+                permission_ids=data.get("permissions"),
+                role_id=data["role"].id if data.get("role") else None,
+                folder_ids=data.get("folders"),
+                is_recursive=data.get("is_recursive"),
+                expiry_date=data["expiry_date"]
+                if "expiry_date" in data
+                else UNSET_FIELD,
+                social_app=data["social_app"] if "social_app" in data else UNSET_FIELD,
+                federated_subject=data["federated_subject"]
+                if "federated_subject" in data
+                else UNSET_FIELD,
+                is_active=data.get("is_active"),
+            )
         except DjangoValidationError as e:
             return Response({"error": e.messages}, status=status.HTTP_400_BAD_REQUEST)
         service_account.refresh_from_db()

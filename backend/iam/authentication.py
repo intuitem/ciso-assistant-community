@@ -18,6 +18,8 @@ from iam.oidc_federation import (
     verify_and_decode_cached,
 )
 
+MAX_AUDIENCE_CANDIDATES = 10
+
 
 class OIDCServiceAccountAuthentication(OIDCTokenAuthentication):
     def authenticate(self, request):
@@ -51,7 +53,10 @@ class FederatedServiceAccountAuthentication(BaseAuthentication):
             return None
         if len(auth) != 2:
             return None
-        token = auth[1].decode()
+        try:
+            token = auth[1].decode()
+        except UnicodeError as error:
+            raise exceptions.AuthenticationFailed("Invalid token.") from error
 
         try:
             unverified = jwt.decode(token, options={"verify_signature": False})
@@ -59,6 +64,10 @@ class FederatedServiceAccountAuthentication(BaseAuthentication):
             return None
         aud = unverified.get("aud")
         aud_candidates = aud if isinstance(aud, list) else [aud] if aud else []
+        # Unverified and caller-supplied: keep it small before it reaches the DB.
+        aud_candidates = [a for a in aud_candidates if isinstance(a, str)][
+            :MAX_AUDIENCE_CANDIDATES
+        ]
         if not aud_candidates:
             return None
         unverified_subject = unverified.get("sub")

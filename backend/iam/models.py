@@ -2473,6 +2473,12 @@ auditlog.register(UserGroup, exclude_fields=common_exclude)
 auditlog.register(PersonalAccessToken)
 auditlog.register(SCIMToken)
 auditlog.register(ServiceAccount, exclude_fields=common_exclude)
+auditlog.register(
+    SocialApp,
+    exclude_fields=["secret", "key"],
+    mask_fields=["settings"],
+    mask_callable="iam.utils.mask_social_app_settings",
+)
 
 
 def _skip_builtin_rbac(sender, instance, **kwargs):
