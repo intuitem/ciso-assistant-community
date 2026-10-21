@@ -368,6 +368,7 @@ class TestEntityTier:
             return len(context)
 
         add(2)
+        queries()
         few = queries()
         add(8)
         assert queries() == few

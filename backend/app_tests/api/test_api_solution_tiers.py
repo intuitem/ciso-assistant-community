@@ -167,6 +167,7 @@ class TestSolutionTier:
             return len(context)
 
         add(2)
+        queries()
         few = queries()
         add(8)
         assert queries() == few
@@ -185,7 +186,7 @@ class TestSolutionTier:
 @pytest.mark.django_db
 def test_carried_over_tier_history_matches_the_tier_date(solution):
     carry_over = importlib.import_module(
-        "tprm.migrations.0026_solution_tier"
+        "tprm.migrations.0027_solution_tier_carry_over"
     ).carry_over
     Solution.objects.filter(pk=solution.pk).update(tier=_tier("high"), tier_source="")
     carry_over(apps, None)
