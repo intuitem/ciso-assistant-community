@@ -3674,5 +3674,11 @@
 	"scoreRange": "评分范围",
 	"lifecycle": "生命周期",
 	"downloadExcelTemplate": "下载 Excel 模板",
-	"frameworkActionsHelp": "Excel 模板供第三方或外部实体离线填写，填写完成后可通过{dataWizard}重新导入结果。"
+	"frameworkActionsHelp": "Excel 模板供第三方或外部实体离线填写，填写完成后可通过{dataWizard}重新导入结果。",
+	"notDefinedYet": "尚未定义",
+	"describeStudy": "描述研究",
+	"studyDescriptionMissing": "该研究尚未描述。界定其范围是工作坊1的第一步。",
+	"studyDescriptionHelpText": "研究目的、业务与技术范围、利益相关方及时间框架",
+	"studyObjectivesHelpText": "研究的预期成果（如认证、安全策略、风险处置计划）",
+	"constraintsHypothesesHelpText": "界定研究的假设与约束（预算、期限、排除范围等）"
 }

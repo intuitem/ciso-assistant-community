@@ -1919,5 +1919,11 @@
 	"jitProvisioning": "SSO-automatisk provisionering (JIT)",
 	"jitProvisioningDescription": "Aktivér automatisk oprettelse af konti ved første SSO-login og synkronisering af deres IdP-gruppemedlemskaber, uden krav om SCIM.",
 	"includeNotApplicableRequirements": "Inkluder ikke relevante krav",
-	"excludeNotApplicableRequirements": "Ekskluder ikke relevante krav"
+	"excludeNotApplicableRequirements": "Ekskluder ikke relevante krav",
+	"notDefinedYet": "Endnu ikke defineret",
+	"describeStudy": "Beskriv studiet",
+	"studyDescriptionMissing": "Dette studie er endnu ikke beskrevet. Afgrænsning af omfanget er det første trin i workshop 1.",
+	"studyDescriptionHelpText": "Studiets formål, forretningsmæssigt og teknisk omfang, interessenter og tidsramme",
+	"studyObjectivesHelpText": "Forventede resultater af studiet (f.eks. akkreditering, sikkerhedsstrategi, risikohåndteringsplan)",
+	"constraintsHypothesesHelpText": "Antagelser og begrænsninger, der rammesætter studiet (budget, deadlines, udeladt omfang osv.)"
 }

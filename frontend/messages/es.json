@@ -3651,5 +3651,11 @@
 	"jitProvisioning": "Aprovisionamiento automático de SSO (JIT)",
 	"jitProvisioningDescription": "Habilita la creación automática de cuentas en el primer inicio de sesión mediante SSO y la sincronización de sus pertenencias a grupos de IdP, sin necesidad de SCIM.",
 	"includeNotApplicableRequirements": "Incluir requisitos no aplicables",
-	"excludeNotApplicableRequirements": "Excluir requisitos no aplicables"
+	"excludeNotApplicableRequirements": "Excluir requisitos no aplicables",
+	"notDefinedYet": "Aún no definido",
+	"describeStudy": "Describir el estudio",
+	"studyDescriptionMissing": "Este estudio aún no se ha descrito. Delimitar su alcance es el primer paso del taller 1.",
+	"studyDescriptionHelpText": "Finalidad del estudio, alcance de negocio y técnico, partes interesadas y horizonte temporal",
+	"studyObjectivesHelpText": "Resultados esperados del estudio (p. ej., acreditación, estrategia de seguridad, plan de tratamiento de riesgos)",
+	"constraintsHypothesesHelpText": "Hipótesis y restricciones que enmarcan el estudio (presupuesto, plazos, perímetro excluido, etc.)"
 }

@@ -1637,5 +1637,11 @@
 	"jitProvisioning": "Provizionare automată SSO (JIT)",
 	"jitProvisioningDescription": "Activează crearea automată a conturilor la prima autentificare SSO și sincronizarea apartenențelor lor la grupuri IdP, fără a necesita SCIM.",
 	"includeNotApplicableRequirements": "Includeți cerințele neaplicabile",
-	"excludeNotApplicableRequirements": "Excludeți cerințele neaplicabile"
+	"excludeNotApplicableRequirements": "Excludeți cerințele neaplicabile",
+	"notDefinedYet": "Încă nedefinit",
+	"describeStudy": "Descrieți studiul",
+	"studyDescriptionMissing": "Acest studiu nu a fost încă descris. Delimitarea perimetrului său este primul pas al atelierului 1.",
+	"studyDescriptionHelpText": "Scopul studiului, perimetrul de business și tehnic, părțile interesate și orizontul de timp",
+	"studyObjectivesHelpText": "Rezultatele așteptate ale studiului (ex. acreditare, strategie de securitate, plan de tratare a riscurilor)",
+	"constraintsHypothesesHelpText": "Ipoteze și constrângeri care încadrează studiul (buget, termene, perimetru exclus etc.)"
 }

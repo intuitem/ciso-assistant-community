@@ -1807,5 +1807,11 @@
 	"jitProvisioning": "Penyediaan otomatis SSO (JIT)",
 	"jitProvisioningDescription": "Aktifkan pembuatan akun otomatis saat login SSO pertama kali, dan sinkronisasi keanggotaan grup IdP mereka, tanpa memerlukan SCIM.",
 	"includeNotApplicableRequirements": "Sertakan persyaratan yang tidak berlaku",
-	"excludeNotApplicableRequirements": "Kecualikan persyaratan yang tidak berlaku"
+	"excludeNotApplicableRequirements": "Kecualikan persyaratan yang tidak berlaku",
+	"notDefinedYet": "Belum ditentukan",
+	"describeStudy": "Jelaskan studi",
+	"studyDescriptionMissing": "Studi ini belum dijelaskan. Menetapkan cakupannya adalah langkah pertama lokakarya 1.",
+	"studyDescriptionHelpText": "Tujuan studi, cakupan bisnis dan teknis, pemangku kepentingan, serta kerangka waktu",
+	"studyObjectivesHelpText": "Hasil yang diharapkan dari studi (mis. akreditasi, strategi keamanan, rencana penanganan risiko)",
+	"constraintsHypothesesHelpText": "Asumsi dan batasan yang membingkai studi (anggaran, tenggat waktu, cakupan yang dikecualikan, dll.)"
 }

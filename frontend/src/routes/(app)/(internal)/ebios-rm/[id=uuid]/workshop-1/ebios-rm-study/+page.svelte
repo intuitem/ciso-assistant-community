@@ -152,20 +152,26 @@
 					<i class="fa-solid fa-bullseye text-purple-500"></i>
 					<span>{safeTranslate(m.ebiosWs1_1())}</span>
 				</h3>
-				<div class="flex items-center space-x-2">
+				<div class="w-full space-y-1">
 					{#if ebiosRmStudy.ref_id}
-						<span class="badge bg-pink-200 text-pink-800 font-medium">
+						<span
+							class="inline-block rounded-full bg-pink-200 text-pink-800 px-3 py-0.5 text-xs font-medium"
+						>
 							{m.refIdSemiColon()}
 							{ebiosRmStudy.ref_id}
 						</span>
 					{/if}
-					<span class="text-2xl font-bold">
-						{ebiosRmStudy.name} - v{ebiosRmStudy.version}
-					</span>
-					<span class="badge text-xs {statusMap[ebiosRmStudy.status]}">
-						{safeTranslate(ebiosRmStudy.status)}
-					</span>
-					<ClassificationBadge classification={ebiosRmStudy.classification} />
+					<div class="flex items-start justify-between gap-4">
+						<h2 class="flex-1 min-w-0 text-left text-2xl font-bold wrap-break-word">
+							{ebiosRmStudy.name} - v{ebiosRmStudy.version}
+						</h2>
+						<div class="flex shrink-0 items-center gap-2">
+							<span class="badge text-xs {statusMap[ebiosRmStudy.status]}">
+								{safeTranslate(ebiosRmStudy.status)}
+							</span>
+							<ClassificationBadge classification={ebiosRmStudy.classification} />
+						</div>
+					</div>
 				</div>
 				<section
 					class="w-full space-y-4 rounded-md border-l-4 border-pink-600 bg-surface-100-900 p-4"

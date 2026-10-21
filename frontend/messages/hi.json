@@ -1593,5 +1593,11 @@
 	"jitProvisioning": "SSO स्वतः-प्रावधान (JIT)",
 	"jitProvisioningDescription": "पहली SSO लॉगिन पर खातों का स्वतः निर्माण और उनकी IdP समूह सदस्यता का समन्वयन सक्षम करें, बिना SCIM की आवश्यकता के।",
 	"includeNotApplicableRequirements": "लागू नहीं होने वाली आवश्यकताएँ शामिल करें",
-	"excludeNotApplicableRequirements": "लागू नहीं होने वाली आवश्यकताएँ बाहर रखें"
+	"excludeNotApplicableRequirements": "लागू नहीं होने वाली आवश्यकताएँ बाहर रखें",
+	"notDefinedYet": "अभी परिभाषित नहीं",
+	"describeStudy": "अध्ययन का वर्णन करें",
+	"studyDescriptionMissing": "इस अध्ययन का अभी तक वर्णन नहीं किया गया है। इसके दायरे को निर्धारित करना कार्यशाला 1 का पहला चरण है।",
+	"studyDescriptionHelpText": "अध्ययन का उद्देश्य, व्यावसायिक और तकनीकी दायरा, हितधारक और समय-सीमा",
+	"studyObjectivesHelpText": "अध्ययन के अपेक्षित परिणाम (जैसे मान्यता, सुरक्षा रणनीति, जोखिम उपचार योजना)",
+	"constraintsHypothesesHelpText": "अध्ययन को परिभाषित करने वाली धारणाएँ और बाधाएँ (बजट, समय-सीमा, बाहर रखा गया दायरा आदि)"
 }
