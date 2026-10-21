@@ -1024,6 +1024,7 @@ export const solutionSchema = z.object({
 	provider_entity: z.string(),
 	ref_id: z.string().optional(),
 	tier: z.string().uuid().optional().nullable(),
+	tier_note: z.string().optional(),
 	owner: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
 	filtering_labels: z.string().optional().array().optional(),

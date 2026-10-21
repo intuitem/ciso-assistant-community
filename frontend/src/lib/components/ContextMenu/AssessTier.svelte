@@ -9,21 +9,22 @@
 
 	interface Props {
 		row: { meta?: { id: string; builtin?: boolean } } | undefined;
+		URLModel: 'entities' | 'solutions';
 	}
 
-	let { row }: Props = $props();
+	let { row, URLModel }: Props = $props();
 
 	const flash = getFlash(page);
 
 	// Forms the viewer may fill in-house, else publications they may file,
-	// that set an entity's tier.
+	// that set this object's tier.
 	type Option = { kind: 'form' | 'publication'; id: string; name: string };
 	let options: Option[] = $state([]);
 
 	onMount(async () => {
 		if (!row?.meta?.id || row.meta.builtin) return;
 		try {
-			const res = await fetch(`/entities/${row.meta.id}/assess-tier`);
+			const res = await fetch(`/${URLModel}/${row.meta.id}/assess-tier`);
 			const rows = res.ok ? await res.json() : [];
 			options = Array.isArray(rows) ? rows : [];
 		} catch {
@@ -38,7 +39,7 @@
 		if (starting) return;
 		starting = true;
 		try {
-			const res = await fetch(`/entities/${row?.meta?.id}/assess-tier`, {
+			const res = await fetch(`/${URLModel}/${row?.meta?.id}/assess-tier`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ kind: option.kind, id: option.id })
