@@ -22,8 +22,7 @@ def resolve_folder_id(folder_name_or_id: str) -> str:
     If already a UUID, returns it. If a name, looks it up via API.
     Returns the UUID string or raises ValueError with a clear message.
     """
-    # Check if it's already a UUID (contains hyphens in UUID format)
-    if "-" in folder_name_or_id and len(folder_name_or_id) == 36:
+    if _is_uuid(folder_name_or_id):
         return folder_name_or_id
 
     # Otherwise, look up by name - return exactly one result
@@ -1107,24 +1106,30 @@ def resolve_user_id(user_ref: str) -> str:
     if not users:
         raise ValueError(f"User '{ref}' not found")
 
-    if len(users) > 1:
-        needle = ref.lower()
-        exact = [
-            u
-            for u in users
-            if needle
-            in {
-                (u.get("first_name") or "").lower(),
-                (u.get("last_name") or "").lower(),
-                f"{u.get('first_name') or ''} {u.get('last_name') or ''}".strip().lower(),
-            }
-        ]
-        if len(exact) == 1:
-            return str(exact[0]["id"])
-        labels = [u.get("email") for u in users[:5]]
-        raise ValueError(f"Ambiguous user '{ref}', found {len(users)}: {labels}")
+    # ?search= is a partial match: require an exact email or name match even
+    # for a single result, so "Ann" never silently resolves to "Joanna Smith".
+    needle = ref.lower()
+    exact = [
+        u
+        for u in users
+        if needle
+        in {
+            (u.get("email") or "").lower(),
+            (u.get("first_name") or "").lower(),
+            (u.get("last_name") or "").lower(),
+            f"{u.get('first_name') or ''} {u.get('last_name') or ''}".strip().lower(),
+        }
+    ]
+    if len(exact) == 1:
+        return str(exact[0]["id"])
 
-    return str(users[0]["id"])
+    if not exact:
+        labels = [u.get("email") for u in users[:5]]
+        raise ValueError(
+            f"User '{ref}' not found as an exact email or name. Candidates: {labels}"
+        )
+    labels = [u.get("email") for u in exact[:5]]
+    raise ValueError(f"Ambiguous user '{ref}', found {len(exact)}: {labels}")
 
 
 def resolve_user_ids(user_refs) -> list:

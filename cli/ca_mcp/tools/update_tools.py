@@ -367,7 +367,7 @@ async def update_user(
     """Update a user - only provided fields are updated
 
     Args:
-        user_id: User UUID, email or name
+        user_id: User UUID, exact email or exact full/first/last name
         first_name: New first name
         last_name: New last name
         email: New email (login identifier, also used for SSO matching)

@@ -229,16 +229,48 @@ class TestResolveUser:
         assert fake.calls == [("/users/", {"email": "enzo@acme.io"})]
 
     def test_by_name_uses_search_param(self):
-        users = [{"id": UUID_A, "email": "enzo@acme.io"}]
+        users = [{"id": UUID_A, "email": "enzo@acme.io", "first_name": "Enzo"}]
         fake = _router({"/users/": users})
         with patch.object(resolvers, "fetch_all_results", fake):
             assert resolvers.resolve_user_id("Enzo") == UUID_A
         assert fake.calls == [("/users/", {"search": "Enzo"})]
 
+    def test_single_partial_match_is_rejected(self):
+        # ?search= is fuzzy: "Ann" must not silently resolve to "Joanna Smith".
+        users = [
+            {
+                "id": UUID_A,
+                "email": "joanna@acme.io",
+                "first_name": "Joanna",
+                "last_name": "Smith",
+            }
+        ]
+        with patch.object(resolvers, "fetch_all_results", _router({"/users/": users})):
+            with pytest.raises(ValueError, match="not found as an exact"):
+                resolvers.resolve_user_id("Ann")
+
+    def test_exact_full_name_among_several(self):
+        users = [
+            {
+                "id": UUID_A,
+                "email": "a@acme.io",
+                "first_name": "Ann",
+                "last_name": "Lee",
+            },
+            {
+                "id": UUID_B,
+                "email": "b@acme.io",
+                "first_name": "Joanna",
+                "last_name": "Ann",
+            },
+        ]
+        with patch.object(resolvers, "fetch_all_results", _router({"/users/": users})):
+            assert resolvers.resolve_user_id("ann lee") == UUID_A
+
     def test_ambiguous(self):
         users = [
-            {"id": UUID_A, "email": "a@acme.io"},
-            {"id": UUID_B, "email": "b@acme.io"},
+            {"id": UUID_A, "email": "a@acme.io", "first_name": "Enzo"},
+            {"id": UUID_B, "email": "b@acme.io", "first_name": "Enzo"},
         ]
         with patch.object(resolvers, "fetch_all_results", _router({"/users/": users})):
             with pytest.raises(ValueError, match="Ambiguous"):

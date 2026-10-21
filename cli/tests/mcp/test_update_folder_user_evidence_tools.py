@@ -115,6 +115,25 @@ class TestResolveEvidenceId:
             resolvers.resolve_evidence_id("Policy.pdf")
 
 
+class TestResolveFolderId:
+    def test_uuid_passthrough(self):
+        with patch.object(resolvers, "fetch_all_results") as fetch:
+            assert resolvers.resolve_folder_id(UUID_A) == UUID_A
+        fetch.assert_not_called()
+
+    def test_uuid_shaped_name_is_looked_up(self):
+        # 36 chars with hyphens, but not a valid UUID: must resolve by name.
+        name = "my-folder-name-that-is-36-chars-long"
+        assert len(name) == 36
+        with patch.object(
+            resolvers,
+            "fetch_all_results",
+            return_value=([{"id": UUID_B, "name": name}], None),
+        ) as fetch:
+            assert resolvers.resolve_folder_id(name) == UUID_B
+        fetch.assert_called_once_with("/folders/", params={"name": name})
+
+
 # ---------------------------------------------------------------------------
 # update_folder
 # ---------------------------------------------------------------------------
