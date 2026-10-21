@@ -60,7 +60,6 @@ def carry_over(apps, schema_editor):
             entity=entity,
             tier=tier,
             source="manual",
-            folder_id=entity.folder_id,
             note=f"Set from the highest previous criticality ({criticality})",
         )
 

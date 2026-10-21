@@ -7,7 +7,7 @@ import pytest
 from django.apps import apps
 from rest_framework import status
 
-from iam.models import Folder
+from iam.models import Folder, RoleAssignment
 from tprm.models import Entity, EntityAssessment, EntityTierChange, Solution, Tier
 from tprm.tiers import set_entity_tier, tier_for_criticality
 
@@ -57,7 +57,7 @@ class TestCarryOver:
         assert (acme.tier, acme.tier_source) == (_tier("critical"), "manual")
         change = EntityTierChange.objects.get(entity=acme)
         assert change.note == "Set from the highest previous criticality (4)"
-        assert change.folder == domain
+        assert RoleAssignment.get_iam_folder_id(change) == domain.id
 
     def test_an_existing_tier_is_kept(self, domain):
         acme = Entity.objects.create(name="Acme", folder=domain)
