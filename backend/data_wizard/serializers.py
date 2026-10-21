@@ -61,6 +61,7 @@ class ImportMappingWriteSerializer(BaseModelSerializer):
     class Meta:
         model = ImportMapping
         exclude = ["created_by", "use_count", "last_used_at"]
+        extra_kwargs = {"sheets": {"required": True}}
 
     def validate_sheets(self, sheets):
         from .mapping import error_code, validate_saved_sheets

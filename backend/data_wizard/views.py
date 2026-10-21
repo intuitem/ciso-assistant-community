@@ -908,6 +908,10 @@ def readable_error(error: Any) -> str:
         error = error.detail
     elif isinstance(error, ValidationError):
         error = getattr(error, "message_dict", None) or error.messages
+    elif isinstance(error, Exception):
+        # Any other exception may carry database or code internals.
+        logger.error("Unexpected import error", error=error)
+        return "Unexpected error, see the server logs"
     if isinstance(error, dict):
         # "a: x; b: y", without the ".;" a period-ending message would leave.
         return "; ".join(
@@ -1960,9 +1964,12 @@ class MetricSampleRecordConsumer(RecordConsumer):
                 return {"choice_index": int(text)}, None
             return None, f"value: '{raw}' is none of {', '.join(levels)}"
         try:
-            return {"result": float(str(raw).replace(",", ".").strip())}, None
+            number = float(str(raw).replace(",", ".").strip())
         except ValueError:
+            number = math.nan
+        if not math.isfinite(number):
             return None, f"value: '{raw}' is not a number"
+        return {"result": number}, None
 
     def prepare_create(self, record: dict, instances) -> tuple[dict, Optional[Error]]:
         wanted = str(record.get("metric_instance") or "").strip()

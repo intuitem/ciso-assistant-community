@@ -13,6 +13,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from core.models import Asset, TaskTemplate
 from data_wizard.mapping import _stopped
 from data_wizard.models import ImportMapping
+from data_wizard.views import readable_error
 from iam.models import Folder
 from metrology.models import CustomMetricSample, MetricDefinition, MetricInstance
 
@@ -226,6 +227,15 @@ class TestBadInputIsA400:
         )
         assert resp.status_code == 400
 
+    def test_saved_mapping_without_sheets(self, api_client, root_folder):
+        resp = api_client.post(
+            MAPPINGS_URL,
+            {"name": "Empty", "folder": str(root_folder.id)},
+            format="json",
+        )
+        assert resp.status_code == 400
+        assert not ImportMapping.objects.exists()
+
     def test_bad_saved_mapping_ids_fail_before_any_write(
         self, api_client, domain_folder, all_accessible
     ):
@@ -311,6 +321,22 @@ class TestMetricSamples:
         assert results["created"] == 1
         assert "'45000' is not a date" in json.dumps(results["errors"])
 
+    def test_nan_and_infinity_are_not_numbers(
+        self, api_client, two_domains, all_accessible
+    ):
+        resp = _samples(
+            api_client,
+            two_domains[0],
+            [
+                ["Patch coverage", date(2026, 9, 29), "nan"],
+                ["Patch coverage", date(2026, 9, 30), "inf"],
+            ],
+        )
+        assert resp.status_code == 200, resp.json()
+        results = resp.json()["steps"][0]["results"]
+        assert results["created"] == 0
+        assert "'inf' is not a number" in json.dumps(results["errors"])
+
     def test_same_name_in_two_domains_resolves_in_the_import_domain(
         self, api_client, two_domains, all_accessible
     ):
@@ -375,3 +401,8 @@ def test_a_new_audit_without_framework_is_a_row_error(
     results = resp.json()["steps"][0]["results"]
     assert results["failed"] == 1
     assert "Failed to create compliance assessment" in json.dumps(results["errors"])
+
+
+def test_unexpected_errors_stay_on_the_server():
+    error = RuntimeError('duplicate key violates "core_asset_pkey"')
+    assert "core_asset" not in readable_error(error)
