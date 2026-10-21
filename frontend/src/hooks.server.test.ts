@@ -12,9 +12,11 @@ const { ALLAUTH_API_URL } = await import('$lib/utils/constants');
 
 const SESSION_COOKIES = ['token', 'allauth_session_token'];
 
-const reauthenticationRequired = (...ids: string[]) => ({
+const PASSWORD = { id: 'reauthenticate' };
+const mfa = (...types: string[]) => ({ id: 'mfa_reauthenticate', types });
+const reauthenticationRequired = (...flows: Record<string, unknown>[]) => ({
 	status: 401,
-	data: { flows: ids.map((id) => ({ id })) },
+	data: { flows },
 	meta: { is_authenticated: true }
 });
 const SESSION_GONE = { status: 401, meta: { is_authenticated: false } };
@@ -31,7 +33,7 @@ function callWith(body: unknown) {
 				})
 		),
 		event: {
-			url: new URL('http://localhost:5173/my-profile/settings'),
+			url: new URL('http://localhost:5173/my-profile/settings?tab=security'),
 			cookies: {
 				get: (name: string) => jar.get(name),
 				set: (name: string, value: string) => jar.set(name, value),
@@ -43,13 +45,11 @@ function callWith(body: unknown) {
 	return { response, jar };
 }
 
-const NEXT = encodeURIComponent('/my-profile/settings');
+const NEXT = encodeURIComponent('/my-profile/settings?tab=security');
 
 describe('handleFetch, 401 from an allauth account endpoint', () => {
 	it('asks for the password when the account has one, keeping the session', async () => {
-		const { response, jar } = callWith(
-			reauthenticationRequired('reauthenticate', 'mfa_reauthenticate')
-		);
+		const { response, jar } = callWith(reauthenticationRequired(PASSWORD, mfa('totp', 'webauthn')));
 
 		await expect(response).rejects.toMatchObject({
 			status: 302,
@@ -60,10 +60,19 @@ describe('handleFetch, 401 from an allauth account endpoint', () => {
 
 	it('asks for an MFA code when the account has no password', async () => {
 		await expect(
-			callWith(reauthenticationRequired('mfa_reauthenticate')).response
+			callWith(reauthenticationRequired(mfa('webauthn', 'totp'))).response
 		).rejects.toMatchObject({
 			status: 302,
 			location: `/reauthenticate?method=code&next=${NEXT}`
+		});
+	});
+
+	it('asks for a security key when that is the only option', async () => {
+		await expect(
+			callWith(reauthenticationRequired(mfa('webauthn'))).response
+		).rejects.toMatchObject({
+			status: 302,
+			location: `/reauthenticate?method=webauthn&next=${NEXT}`
 		});
 	});
 

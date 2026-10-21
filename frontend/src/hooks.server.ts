@@ -367,18 +367,21 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 		if (clonedResponse.status === 401 && request.method !== 'DELETE' && !isAuthEndpoint) {
 			try {
 				const data = await clonedResponse.json();
-				const flowIds: string[] = (data.data?.flows ?? []).map(
-					(flow: Record<string, any>) => flow.id
-				);
+				const flows: Record<string, any>[] = data.data?.flows ?? [];
+				const mfaFlow = flows.find((flow) => flow.id === 'mfa_reauthenticate');
 
 				if (!data.meta?.is_authenticated) {
 					// Allauth session has fully expired — force logout
 					logoutUser(event);
-				} else if (flowIds.includes('reauthenticate') || flowIds.includes('mfa_reauthenticate')) {
-					const method = flowIds.includes('reauthenticate') ? 'password' : 'code';
+				} else if (flows.some((flow) => flow.id === 'reauthenticate') || mfaFlow) {
+					const method = flows.some((flow) => flow.id === 'reauthenticate')
+						? 'password'
+						: mfaFlow?.types?.some((type: string) => type !== 'webauthn')
+							? 'code'
+							: 'webauthn';
 					redirect(
 						302,
-						`/reauthenticate?method=${method}&next=${encodeURIComponent(event.url.pathname)}`
+						`/reauthenticate?method=${method}&next=${encodeURIComponent(event.url.pathname + event.url.search)}`
 					);
 				}
 			} catch (err) {

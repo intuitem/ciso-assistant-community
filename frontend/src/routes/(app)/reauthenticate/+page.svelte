@@ -5,8 +5,28 @@
 	import OTPInput from '$lib/components/Forms/OTP/OTPInput.svelte';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { reauthenticateSchema } from '$lib/utils/schemas';
+	import { startAuthentication } from '@simplewebauthn/browser';
+	import { tick } from 'svelte';
 
 	let { data } = $props();
+
+	let credential = $state('');
+	let webAuthnError: string | null = $state(null);
+
+	async function useSecurityKey(event: MouseEvent) {
+		const formElement = (event.currentTarget as HTMLButtonElement).form;
+		webAuthnError = null;
+		try {
+			const assertion = await startAuthentication({
+				optionsJSON: data.requestOptions.publicKey
+			});
+			credential = JSON.stringify(assertion);
+			await tick();
+			formElement?.requestSubmit();
+		} catch (err: any) {
+			webAuthnError = err.name === 'NotAllowedError' ? m.webAuthnCancelled() : m.webAuthnError();
+		}
+	}
 </script>
 
 <div class="flex items-center justify-center min-h-screen bg-surface-100 p-4">
@@ -21,17 +41,33 @@
 			class="space-y-4"
 			validationMethod="onsubmit"
 		>
-			{#snippet children({ form })}
-				{#if data.method === 'code'}
-					<OTPInput {form} field="code" />
+			{#snippet children({ form, errors })}
+				{#if data.method === 'webauthn'}
+					<input type="hidden" name="credential" value={credential} />
+					{#each [webAuthnError, ...(errors.credential ?? [])].filter(Boolean) as error}
+						<p class="text-sm text-error-500">{error}</p>
+					{/each}
+					<button
+						class="btn preset-filled-primary-500 w-full"
+						data-testid="reauthenticate-button"
+						type="button"
+						disabled={!data.requestOptions}
+						onclick={useSecurityKey}
+					>
+						<i class="fa-solid fa-fingerprint mr-2"></i>{m.useSecurityKey()}
+					</button>
 				{:else}
-					<TextField type="password" {form} field="password" label={m.password()} />
+					{#if data.method === 'code'}
+						<OTPInput {form} field="code" />
+					{:else}
+						<TextField type="password" {form} field="password" label={m.password()} />
+					{/if}
+					<button
+						class="btn preset-filled-primary-500 w-full"
+						data-testid="reauthenticate-button"
+						type="submit">{m.confirm()}</button
+					>
 				{/if}
-				<button
-					class="btn preset-filled-primary-500 w-full"
-					data-testid="reauthenticate-button"
-					type="submit">{m.confirm()}</button
-				>
 			{/snippet}
 		</SuperForm>
 	</div>

@@ -7,10 +7,26 @@ import { setError, superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import type { Actions, PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ url }) => {
+const ENDPOINTS = {
+	password: 'auth/reauthenticate',
+	code: 'auth/2fa/reauthenticate',
+	webauthn: 'auth/webauthn/reauthenticate'
+};
+
+function getMethod(url: URL): keyof typeof ENDPOINTS {
+	const method = url.searchParams.get('method');
+	return method === 'code' || method === 'webauthn' ? method : 'password';
+}
+
+export const load: PageServerLoad = async ({ url, fetch }) => {
 	const form = await superValidate(zod(reauthenticateSchema));
-	const method = url.searchParams.get('method') === 'code' ? 'code' : 'password';
-	return { form, method, title: m.password() };
+	const method = getMethod(url);
+	let requestOptions = null;
+	if (method === 'webauthn') {
+		const res = await fetch(`${ALLAUTH_API_URL}/${ENDPOINTS.webauthn}`).then((res) => res.json());
+		requestOptions = res.data?.request_options ?? null;
+	}
+	return { form, method, requestOptions, title: m.password() };
 };
 
 export const actions: Actions = {
@@ -18,20 +34,32 @@ export const actions: Actions = {
 		const form = await superValidate(event.request, zod(reauthenticateSchema));
 		if (!form.valid) return fail(400, { form });
 
-		const field = event.url.searchParams.get('method') === 'code' ? 'code' : 'password';
-		const endpoint = field === 'code' ? 'auth/2fa/reauthenticate' : 'auth/reauthenticate';
+		const method = getMethod(event.url);
+		const field = method === 'webauthn' ? 'credential' : method;
+
+		let value: unknown = form.data[field];
+		if (method === 'webauthn') {
+			try {
+				value = JSON.parse(form.data.credential ?? '');
+			} catch {
+				setError(form, field, m.webAuthnError());
+				return fail(400, { form });
+			}
+		}
 
 		const res = await event
-			.fetch(`${ALLAUTH_API_URL}/${endpoint}`, {
+			.fetch(`${ALLAUTH_API_URL}/${ENDPOINTS[method]}`, {
 				method: 'POST',
-				body: JSON.stringify({ [field]: form.data[field] })
+				body: JSON.stringify({ [field]: value })
 			})
 			.then((res) => res.json());
 
 		if (res.status !== 200) {
-			res.errors?.forEach((error: { message: string }) => {
-				setError(form, field, error.message);
-			});
+			const messages = res.errors?.map((error: { message: string }) => error.message) ?? [];
+			if (messages.length === 0) {
+				messages.push(res.status === 429 ? m.tooManyAttempts() : m.error());
+			}
+			setError(form, field, messages);
 			return fail(res.status, { form });
 		}
 

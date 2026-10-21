@@ -89,7 +89,8 @@ export const reauthenticateSchema = z.object({
 	code: z
 		.string()
 		.regex(/^\d{6,8}$/)
-		.optional()
+		.optional(),
+	credential: z.string().optional()
 });
 
 export const emailSchema = z
