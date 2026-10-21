@@ -17,9 +17,12 @@ import time
 import json
 import enum
 
+import structlog
+
 from global_settings.models import GlobalSettings
 from global_settings.serializers import InfraConfigSerializer
 
+logger = structlog.get_logger(__name__)
 
 TIME_WINDOW_UNIT: Final[int] = 60
 """Granularity of the time window (in seconds) (for now time windows have a 1-minute time granularity)."""
@@ -419,10 +422,14 @@ class RPCSocket:
 class RPCServer:
     POLL_TIMEOUT: Final[float] = 1.0
     """Max time (in seconds) a `poll()` blocks, so the leader can periodically run its health checks."""
+    ACCEPT_BACKOFF: Final[float] = 0.1
+    """Time (in seconds) the server socket stops being polled after a failed `accept()`."""
 
     def __init__(self, ban_cache: _BanCache):
         self._socket_file_path = ban_cache._socket_file_path
         self._selector = selectors.DefaultSelector()
+        self._accept_resume_at: Optional[float] = None
+        """When set, the listening socket is unregistered until this `time.monotonic()` deadline."""
         self._server_socket: Optional[socket.socket] = None
         self._socket_file_identity: Optional[tuple[int, int, int]] = None
         """`(st_dev, st_ino, st_ctime_ns)` of the socket file this server owns."""
@@ -464,11 +471,14 @@ class RPCServer:
         """
         if not self._is_socket_file_owner():
             if self._server_socket is not None:
-                self._selector.unregister(self._server_socket)
+                # A paused listening socket is already unregistered.
+                if self._accept_resume_at is None:
+                    self._selector.unregister(self._server_socket)
                 self._server_socket.close()
                 self._server_socket = None
                 self._socket_file_identity = None
 
+            self._accept_resume_at = None
             self._bind_socket()
 
     def _method_is_banned(self, request: RequestIsBanned) -> ResponseIsBanned:
@@ -533,20 +543,47 @@ class RPCServer:
         _conn.close()
 
     def _handle_accept(self, server: socket.socket):
-        client_conn, _ = server.accept()
+        try:
+            client_conn, _ = server.accept()
+        except OSError as e:
+            logger.error("Rate limiting RPC server accept failed", exc_info=e)
+            self._selector.unregister(server)
+            self._accept_resume_at = time.monotonic() + RPCServer.ACCEPT_BACKOFF
+            return
+
         client_conn.settimeout(0.05)
         self._selector.register(client_conn, selectors.EVENT_READ, self._handle_read)
 
     def poll(self):
-        try:
-            for key, _ in self._selector.select(timeout=RPCServer.POLL_TIMEOUT):
-                callback = key.data
-                callback(key.fileobj)
-        except Exception:
-            pass
+        """
+        Poll the server socket to `accept` new connection AND the (connected)client sockets `read` to handle their requests.
+
+        **WARNING**: If this function raises an `Exception`, the caller(the leader thread) MUST give up its leadership (to let another worker take it back).
+        """
+        timeout = RPCServer.POLL_TIMEOUT
+        if self._accept_resume_at is not None:
+            remaining = self._accept_resume_at - time.monotonic()
+            if remaining <= 0:
+                self._accept_resume_at = None
+                if self._server_socket is not None:
+                    self._selector.register(
+                        self._server_socket, selectors.EVENT_READ, self._handle_accept
+                    )
+            else:
+                timeout = min(timeout, remaining)
+
+        for key, _ in self._selector.select(timeout=timeout):
+            try:
+                key.data(key.fileobj)
+            except Exception as e:
+                logger.error("Rate limiting RPC server callback failed", exc_info=e)
 
     def close(self):
         is_socket_file_owner = self._is_socket_file_owner()
+
+        # A paused (`self._accepted_resume_at is None`) listening socket isn't registered in the selector.
+        if self._accept_resume_at is not None and self._server_socket is not None:
+            self._server_socket.close()
 
         # Closing the client connections makes the followers notice the leader is gone (and re-run the election).
         for key in list(self._selector.get_map().values()):
