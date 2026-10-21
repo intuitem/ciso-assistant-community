@@ -4,7 +4,7 @@
 	import { m } from '$paraglide/messages';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { Grid, Willow, WillowDark } from 'wx-svelte-grid';
+	import { Grid, Willow, WillowDark } from '@svar-ui/svelte-grid';
 	import ALETimelineRaceChart from '$lib/components/Chart/ALETimelineRaceChart.svelte';
 
 	// Track the dark-mode class on <html> so the grid theme matches the app theme
@@ -509,8 +509,7 @@
 							<Grid
 								data={prepareGridData(keyMetricsData)}
 								columns={visibleColumns}
-								headerHeight={40}
-								rowHeight={45}
+								sizes={{ headerHeight: 40, rowHeight: 45 }}
 							/>
 						{/snippet}
 						{#if isDark}

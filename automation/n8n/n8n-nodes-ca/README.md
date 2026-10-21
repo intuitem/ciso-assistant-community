@@ -4,6 +4,8 @@ n8n community node for [CISO Assistant](https://github.com/intuitem/ciso-assista
 
 This is the official package, published from this repository with npm provenance. The unscoped `n8n-nodes-ciso-assistant` package on npm is not maintained by intuitem.
 
+Full guide: [n8n node in the CISO Assistant documentation](https://intuitem.gitbook.io/ciso-assistant/ai-and-integrations/n8n).
+
 ## Installation
 
 On self-hosted n8n: **Settings → Community Nodes → Install**, then enter `@intuitem/n8n-nodes-ciso-assistant`.
@@ -43,6 +45,13 @@ Names are case-sensitive for "Get by Name" operations, and dates use ISO 8601.
 ### Node versions
 
 New nodes use version 2: Get Many and lookups return one item per record, so downstream nodes run once per object. Nodes added before version 2 stay on version 1, which returns a single item with `count` and `results`. To switch a version 1 node, delete it, add it again and replace any `results` expressions downstream.
+
+## Examples
+
+- **Evidence collection**: a Schedule Trigger exports a report from another tool, then **Evidence → Submit Revision** with Revision Type **File Upload** attaches it to an evidence. Set Binary Property to the field holding the file (`data` by default).
+- **Audit from a scanner**: map each scanner check to a requirement ref ID, then **Audit → Update Requirement Assessment** sets its result and observation. On version 2, fields left on "No Change" keep their current value.
+- **Incident intake**: a Webhook node receives an alert from your ticketing or monitoring tool, then **Incident → Create** records it.
+- **AI agent**: attach the node to an AI Agent as a tool so the agent can look up audits, risks or controls when answering questions.
 
 ## Development
 
