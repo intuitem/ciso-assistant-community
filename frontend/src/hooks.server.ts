@@ -367,38 +367,22 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 		if (clonedResponse.status === 401 && request.method !== 'DELETE' && !isAuthEndpoint) {
 			try {
 				const data = await clonedResponse.json();
-				const reauthenticationFlows = ['reauthenticate', 'mfa_reauthenticate'];
+				const flowIds: string[] = (data.data?.flows ?? []).map(
+					(flow: Record<string, any>) => flow.id
+				);
 
 				if (!data.meta?.is_authenticated) {
 					// Allauth session has fully expired — force logout
 					logoutUser(event);
-				} else if (
-					data.data?.flows?.some((flow: Record<string, any>) =>
-						reauthenticationFlows.includes(flow.id)
-					)
-				) {
-					// locals.user is unset here: a form action runs before any load.
-					// Only a positively identified local account is signed out, so
-					// that they can re-enter their password; a lookup that fails
-					// says nothing, and an SSO logout costs a full IdP round-trip.
-					let user: User | null = null;
-					try {
-						user = await event.locals.getUser();
-					} catch (lookupError) {
-						if (isRedirect(lookupError)) throw lookupError;
-						logger.error('Could not resolve the current user on a 401', {
-							error: lookupError
-						});
-					}
-					if (user && !user.is_sso) {
-						setFlash(
-							{ type: 'warning', message: safeTranslate('reauthenticateForSensitiveAction') },
-							event
-						);
-						logoutUser(event);
-					}
+				} else if (flowIds.includes('reauthenticate') || flowIds.includes('mfa_reauthenticate')) {
+					const method = flowIds.includes('reauthenticate') ? 'password' : 'code';
+					redirect(
+						302,
+						`/reauthenticate?method=${method}&next=${encodeURIComponent(event.url.pathname)}`
+					);
 				}
-			} catch {
+			} catch (err) {
+				if (isRedirect(err)) throw err;
 				// Malformed response — force logout to be safe
 				logoutUser(event);
 			}
