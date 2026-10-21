@@ -18,6 +18,7 @@ import json
 import enum
 
 import structlog
+from django.db import close_old_connections
 
 from global_settings.models import GlobalSettings
 from global_settings.serializers import InfraConfigSerializer
@@ -96,6 +97,10 @@ class Settings:
 
     @staticmethod
     def create() -> Settings:
+        # We have to call `close_old_connections` to clean the DB connection ourselves.
+        # (this is usually handled by django during the HTTP request handling process, but this code isn't handled within the context of handling a request).
+        # Without this we may keep a broken connection to the DB after a DB failure.
+        close_old_connections()
         try:
             infra_settings = GlobalSettings.objects.filter(
                 name=GlobalSettings.Names.INFRA_CONFIG
@@ -103,6 +108,8 @@ class Settings:
         except Exception:
             # The table may not exist yet.
             infra_settings = None
+        finally:
+            close_old_connections()
         return Settings.from_infra_settings(infra_settings)
 
 
@@ -364,12 +371,39 @@ class RequestRegisterFailedLogin(Request):
 class RequestRefreshSettings(Request):
     METHOD = RequestMethod.REFRESH_SETTINGS
 
+    max_failed_login_attempts: int
+    time_window_size: int
+    ban_time: int
+
+    @staticmethod
+    def from_settings(settings: Settings) -> RequestRefreshSettings:
+        return RequestRefreshSettings(
+            settings.max_failed_login_attempts,
+            settings.time_window_size,
+            settings.ban_time,
+        )
+
+    def to_settings(self) -> Settings:
+        return Settings(
+            self.max_failed_login_attempts, self.time_window_size, self.ban_time
+        )
+
     def _to_json_params(self) -> dict:
-        return {}
+        return {
+            "max_failed_login_attempts": self.max_failed_login_attempts,
+            "time_window_size": self.time_window_size,
+            "ban_time": self.ban_time,
+        }
 
     @staticmethod
     def _from_json_params(params: dict) -> Optional[RequestRefreshSettings]:
-        return RequestRefreshSettings()
+        values: list[Optional[int]] = [params.get(name) for name in ["max_failed_login_attempts", "time_window_size", "ban_time"]]
+
+        if not all(isinstance(value, int) for value in values):
+            # If any parameter isn't an int, the settings dict is invalid.
+            return
+
+        return RequestRefreshSettings(*cast(list[int], values))
 
 
 class RPCSocket:
@@ -494,12 +528,7 @@ class RPCServer:
     def _method_refresh_settings(
         self, request: RequestRefreshSettings
     ) -> ResponseRefreshSettings:
-        infra_settings = GlobalSettings.objects.get(
-            name=GlobalSettings.Names.INFRA_CONFIG
-        )
-        new_settings = Settings.from_infra_settings(infra_settings)
-
-        has_changed = SETTINGS.replace_with(new_settings)
+        has_changed = SETTINGS.replace_with(request.to_settings())
         if has_changed:
             # Ban cache entries with different settings are incompatible, so it's better to just flush them (when updating the settings).
             self._ban_cache._flush_all_entries()
@@ -881,8 +910,8 @@ class _BanCache:
             return False
         return cast(ResponseRegisterFailedLogin, response).create_audit_log
 
-    def refresh_settings(self):
-        request = RequestRefreshSettings()
+    def refresh_settings(self, new_settings: Settings):
+        request = RequestRefreshSettings.from_settings(new_settings)
         self._send_request(request)
 
 

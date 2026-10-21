@@ -921,7 +921,7 @@ class InfraConfigSerializer(serializers.ModelSerializer):
         return attrs
 
     def update(self, instance, validated_data):
-        from iam.rate_limiting import get_ban_cache
+        from iam.rate_limiting import Settings as RateLimitSettings, get_ban_cache
 
         current_value_dict = instance.value if isinstance(instance.value, dict) else {}
         new_value_dict = validated_data.get("value", {})
@@ -946,7 +946,9 @@ class InfraConfigSerializer(serializers.ModelSerializer):
             instance.save(update_fields=["value"])
 
         try:
-            get_ban_cache().refresh_settings()
+            get_ban_cache().refresh_settings(
+                RateLimitSettings.from_infra_settings(instance)
+            )
         except Exception as e:
             logger.error("Failed to refresh cached settings", exc_info=e)
 
