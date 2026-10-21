@@ -1901,7 +1901,9 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'entity', urlModel: 'entities' },
 			{ field: 'tier', urlModel: 'tiers' },
 			{ field: 'previous_tier', urlModel: 'tiers' },
-			{ field: 'response', urlModel: 'quick-form-responses' }
+			{ field: 'response', urlModel: 'quick-form-responses' },
+			{ field: 'changed_by', urlModel: 'users' },
+			{ field: 'folder', urlModel: 'folders' }
 		],
 		selectFields: [{ field: 'source' }]
 	},
@@ -1915,7 +1917,9 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'solution', urlModel: 'solutions' },
 			{ field: 'tier', urlModel: 'tiers' },
 			{ field: 'previous_tier', urlModel: 'tiers' },
-			{ field: 'response', urlModel: 'quick-form-responses' }
+			{ field: 'response', urlModel: 'quick-form-responses' },
+			{ field: 'changed_by', urlModel: 'users' },
+			{ field: 'folder', urlModel: 'folders' }
 		],
 		selectFields: [{ field: 'source' }]
 	},

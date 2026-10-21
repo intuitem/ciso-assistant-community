@@ -878,6 +878,7 @@ class EntityTierChangeReadSerializer(BaseModelSerializer):
     previous_tier = FieldsRelatedField(["id", "name", "rank", "hexcolor"])
     changed_by = FieldsRelatedField(["id", "email"])
     folder = FieldsRelatedField(source="entity.folder")
+    response = FieldsRelatedField(["id", "ref_id"])
 
     class Meta:
         model = EntityTierChange
@@ -890,6 +891,7 @@ class SolutionTierChangeReadSerializer(BaseModelSerializer):
     previous_tier = FieldsRelatedField(["id", "name", "rank", "hexcolor"])
     changed_by = FieldsRelatedField(["id", "email"])
     folder = FieldsRelatedField(source="solution.provider_entity.folder")
+    response = FieldsRelatedField(["id", "ref_id"])
 
     class Meta:
         model = SolutionTierChange
