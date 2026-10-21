@@ -91,7 +91,7 @@
 			multiple
 			lazy
 			optionsEndpoint="techniques"
-			optionsLabelField="str"
+			optionsLabelField="auto"
 			field="techniques"
 			cacheLock={cacheLocks['techniques']}
 			bind:cachedValue={formDataCache['techniques']}
