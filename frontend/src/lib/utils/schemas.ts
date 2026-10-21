@@ -84,6 +84,15 @@ export const loginSchema = z
 	})
 	.required();
 
+export const reauthenticateSchema = z.object({
+	password: z.string().optional(),
+	code: z
+		.string()
+		.regex(/^\d{6,8}$/)
+		.optional(),
+	credential: z.string().optional()
+});
+
 export const emailSchema = z
 	.object({
 		email: z.string({
