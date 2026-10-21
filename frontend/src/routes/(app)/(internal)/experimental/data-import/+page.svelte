@@ -1122,8 +1122,8 @@
 				{/if}
 				{#if needsMatrix}
 					<label class="space-y-1 text-sm">
-						<span class="block font-medium">Risk matrix</span>
-						<select class="select text-sm" bind:value={matrixId} disabled={running}>
+						<span class="block font-medium">Risk matrix <span class="text-error-500">*</span></span>
+						<select class="select text-sm" bind:value={matrixId} disabled={running} required>
 							<option value="">Choose a matrix…</option>
 							{#each data.matrices as matrix (matrix.id)}
 								<option value={matrix.id}>{matrix.str || matrix.name}</option>
@@ -1161,6 +1161,7 @@
 					disabled={running ||
 						!included.length ||
 						needsDomain ||
+						(needsMatrix && !matrixId) ||
 						(needsAudit && !auditTargetId && !auditFrameworkId)}
 					title={needsDomain ? m.dataWizardFallbackDomainHelp() : ''}
 				>
@@ -1262,7 +1263,9 @@
 										<i class="fa-solid fa-circle-xmark text-error-600-400" title="Not imported"></i>
 										<span class="sr-only">Error:</span>
 									{/if}
-									<span class="font-medium">{recordLabel(err.record)}:</span>
+									{#if recordLabel(err.record)}
+										<span class="font-medium">{recordLabel(err.record)}:</span>
+									{/if}
 									<span class="text-surface-600-400">{explain(err, r.modelType)}</span>
 								</li>
 							{/each}

@@ -580,11 +580,14 @@ def _resolve_named_objects(
     model_class,
     serializer_class,
     extra_create_data: Optional[dict] = None,
+    linked=None,
 ) -> SideObjects:
     """Resolve object names on a row to ids in *folder*, by ref_id then name.
 
-    Misses are created through the write serializer, and only when the user may
-    add that model there; otherwise the token comes back in `failed`.
+    The *linked* objects (already on the record, wherever they live) are
+    matched first, so re-importing an export does not duplicate them. Misses
+    are created through the write serializer, and only when the user may add
+    that model there; otherwise the token comes back in `failed`.
     """
     resolved = SideObjects()
     tokens = _split_multi_separator(value)
@@ -593,10 +596,20 @@ def _resolve_named_objects(
 
     may_create: Optional[bool] = None
     model_name = model_class._meta.model_name
+    scopes = [model_class.objects.filter(folder=folder)]
+    if linked is not None:
+        scopes.insert(0, linked)
     for token in tokens:
-        obj = (
-            model_class.objects.filter(ref_id=token, folder=folder).first()
-            or model_class.objects.filter(name__iexact=token, folder=folder).first()
+        obj = next(
+            (
+                found
+                for scope in scopes
+                if (
+                    found := scope.filter(ref_id=token).first()
+                    or scope.filter(name__iexact=token).first()
+                )
+            ),
+            None,
         )
         if obj is None:
             if may_create is None:
@@ -638,7 +651,9 @@ def _resolve_assets(value: Any, folder: "Folder", request) -> SideObjects:
     )
 
 
-def _resolve_applied_controls(value: Any, folder: "Folder", request) -> SideObjects:
+def _resolve_applied_controls(
+    value: Any, folder: "Folder", request, linked=None
+) -> SideObjects:
     return _resolve_named_objects(
         value,
         folder,
@@ -646,6 +661,7 @@ def _resolve_applied_controls(value: Any, folder: "Folder", request) -> SideObje
         AppliedControl,
         AppliedControlWriteSerializer,
         extra_create_data={"status": "to_do"},
+        linked=linked,
     )
 
 
@@ -5537,7 +5553,10 @@ class LoadFileView(APIView):
                         )
                         if controls_cell not in (None, ""):
                             controls = _resolve_applied_controls(
-                                controls_cell, compliance_assessment.folder, request
+                                controls_cell,
+                                compliance_assessment.folder,
+                                request,
+                                linked=requirement_assessment.applied_controls.all(),
                             )
                             row_controls.extend(controls.created)
                             requirement_data["applied_controls"] = controls.ids
@@ -5631,14 +5650,18 @@ class LoadFileView(APIView):
                         else:
                             results["failed"] += 1
                             results["errors"].append(
-                                {"record": record, "errors": req_serializer.errors}
+                                {
+                                    "record": record,
+                                    "error": readable_error(req_serializer.errors),
+                                }
                             )
                     else:
                         results["failed"] += 1
                         results["errors"].append(
                             {
                                 "record": record,
-                                "error": f"No matching requirement found with ref_id '{ref_id}' or urn '{urn}'",
+                                "error": f"No matching requirement found with ref_id '{ref_id}'"
+                                + (f" or urn '{urn}'" if urn else ""),
                             }
                         )
             except Exception as e:
@@ -6188,7 +6211,7 @@ class LoadFileView(APIView):
                 if not serializer.is_valid():
                     results["failed"] += 1
                     results["errors"].append(
-                        {"record": record, "errors": serializer.errors}
+                        {"record": record, "error": readable_error(serializer.errors)}
                     )
                     return "failed"
                 updated_instance = serializer.save()

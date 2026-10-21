@@ -157,6 +157,35 @@ class TestInternalAudit:
         )
         assert ra.result == "compliant"
 
+    def test_reimport_keeps_controls_linked_from_another_domain(
+        self, api_client, root_folder, domain_folder, framework, all_accessible
+    ):
+        audit = ComplianceAssessment.objects.create(
+            name="Existing", framework=framework, folder=domain_folder
+        )
+        audit.create_requirement_assessments()
+        ra = RequirementAssessment.objects.get(
+            compliance_assessment=audit, requirement__ref_id="A.5.15"
+        )
+        linked = AppliedControl.objects.create(
+            name="Quarterly access review", folder=root_folder
+        )
+        ra.applied_controls.add(linked)
+        self._run(api_client, domain_folder, framework, target_id=str(audit.id))
+        assert (
+            AppliedControl.objects.filter(name="Quarterly access review").count() == 1
+        )
+        assert linked in ra.applied_controls.all()
+
+
+def test_audit_rows_carry_answers_and_score_override():
+    from data_wizard.mapping import template_schema
+    from data_wizard.views import ModelType
+
+    (sheet,) = template_schema(ModelType.COMPLIANCE_ASSESSMENT)["sheets"]
+    keys = {c["key"] for c in sheet["columns"]}
+    assert {"answers", "is_score_overridden"} <= keys
+
 
 @pytest.mark.django_db
 def test_vendor_assessment_links_the_audit_created_in_the_same_run(

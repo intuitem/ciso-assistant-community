@@ -136,8 +136,10 @@ VIRTUAL_TEMPLATES: dict[ModelType, dict[str, list[str]]] = {
             "score",
             "implementation_score",
             "documentation_score",
+            "is_score_overridden",
             "observations",
             "applied_controls",
+            "answers",
             "assessable",
         ]
     },
@@ -454,6 +456,9 @@ def suggest_value(value: Any, choices: dict[str, Any]) -> dict | None:
 def _fits(profile: "ColumnProfile", target: "TargetColumn") -> bool:
     """Whether a column's values can go into the field: for a choice field, at
     least half of them must match a choice."""
+    if target.key == "answers":
+        # Exported questionnaire cells: "question >> answer" (parse_answers_cell).
+        return any(">>" in str(v) for v in profile.distinct or [])
     if not target.choices or not profile.distinct:
         return True
     values = [v for v in profile.distinct if normalize(v)]
