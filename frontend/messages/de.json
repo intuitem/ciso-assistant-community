@@ -1605,8 +1605,8 @@
 	"dataBreaches": "Datenpannen",
 	"dataBreachesByType": "Datenschutzverletzungen nach Typ",
 	"dataBreachesDescription": "Vorfallmanagement & Meldungen zu Datenschutzverletzungen",
-	"gdpr": "GDPR / Datenschutz",
-	"gdprDescription": "Datenschutz- und Privacy-Management-Funktionen (GDPR-Konformität)",
+	"gdpr": "DSGVO / Datenschutz",
+	"gdprDescription": "Funktionen für Datenschutzmanagement (DSGVO-Konformität)",
 	"dataContractor": "Datenverarbeiter",
 	"dataContractors": "Datenverarbeiter",
 	"dataFlowOverview": "Datenflussübersicht",
@@ -7159,5 +7159,15 @@
 	"httpOauthTokenUrl": "Token-URL",
 	"httpOauthClientId": "Client-ID",
 	"httpOauthClientSecret": "Client-Secret",
-	"httpOauthScope": "Scope"
+	"httpOauthScope": "Scope",
+	"datasetNameInvalid": "Mit einem Buchstaben oder _ beginnen und previous, metrics, now und today vermeiden",
+	"dpias": "DSFAs",
+	"dpiaScreeningStart": "DSFA-Vorprüfung starten",
+	"processingRole": "DSGVO-Rolle",
+	"processingControllers": "Kunden (Verantwortliche oder Auftragsverarbeiter)",
+	"dpiaRequiredYes": "DSFA erforderlich",
+	"dpiaRequiredNo": "Keine DSFA erforderlich",
+	"dpiaRequirementChange": "Änderung der DSFA-Pflicht",
+	"dpiaRequirementChanges": "Verlauf der DSFA-Pflicht",
+	"previously": "Zuvor"
 }

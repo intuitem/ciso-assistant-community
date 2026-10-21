@@ -1460,6 +1460,7 @@
 														{@const displayValue = [
 															'name',
 															'description',
+															'observation',
 															'ref_id',
 															'key'
 														].includes(key)
