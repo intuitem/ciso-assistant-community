@@ -509,8 +509,7 @@
 							<Grid
 								data={prepareGridData(keyMetricsData)}
 								columns={visibleColumns}
-								headerHeight={40}
-								rowHeight={45}
+								sizes={{ headerHeight: 40, rowHeight: 45 }}
 							/>
 						{/snippet}
 						{#if isDark}
