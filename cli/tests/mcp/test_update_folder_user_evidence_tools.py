@@ -58,7 +58,9 @@ class TestResolveEvidenceId:
             return_value=([{"id": UUID_A, "name": "Policy.pdf"}], None),
         ) as fetch:
             assert resolvers.resolve_evidence_id("Policy.pdf") == UUID_A
-        fetch.assert_called_once_with("/evidences/", params={"name": "Policy.pdf"})
+        fetch.assert_called_once_with(
+            "/evidences/", params={"name": "Policy.pdf"}, max_items=None
+        )
 
     def test_not_found(self):
         with (
@@ -105,7 +107,9 @@ class TestResolveEvidenceId:
             return_value=([{"id": UUID_A, "name": "Policy.pdf"}], None),
         ) as fetch:
             assert resolvers.resolve_evidence_id("  Policy.pdf ") == UUID_A
-        fetch.assert_called_once_with("/evidences/", params={"name": "Policy.pdf"})
+        fetch.assert_called_once_with(
+            "/evidences/", params={"name": "Policy.pdf"}, max_items=None
+        )
 
     def test_api_error(self):
         with (

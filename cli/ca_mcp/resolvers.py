@@ -501,7 +501,11 @@ def resolve_evidence_id(evidence_name_or_id: str) -> str:
     if not ref:
         raise ValueError("Evidence reference is empty")
 
-    evidences, error = fetch_all_results("/evidences/", params={"name": ref})
+    # No item cap: a truncated list could hide a duplicate name and make an
+    # ambiguous reference look unique.
+    evidences, error = fetch_all_results(
+        "/evidences/", params={"name": ref}, max_items=None
+    )
 
     if error:
         raise ValueError(f"Evidence '{ref}' API error: {error}")
@@ -1099,7 +1103,9 @@ def resolve_user_id(user_ref: str) -> str:
         raise ValueError("User reference is empty")
 
     params = {"email": ref} if "@" in ref else {"search": ref}
-    users, error = fetch_all_results("/users/", params=params)
+    # No item cap: the exact match (or a second one) may sit beyond the
+    # default limit of a fuzzy search.
+    users, error = fetch_all_results("/users/", params=params, max_items=None)
     if error:
         raise ValueError(f"User '{ref}' API error: {error}")
 

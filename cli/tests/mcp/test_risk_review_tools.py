@@ -235,6 +235,16 @@ class TestResolveUser:
             assert resolvers.resolve_user_id("Enzo") == UUID_A
         assert fake.calls == [("/users/", {"search": "Enzo"})]
 
+    def test_lookup_is_not_capped(self):
+        users = [{"id": UUID_A, "email": "enzo@acme.io", "first_name": "Enzo"}]
+        with patch.object(
+            resolvers, "fetch_all_results", return_value=(users, None)
+        ) as fetch:
+            resolvers.resolve_user_id("Enzo")
+        fetch.assert_called_once_with(
+            "/users/", params={"search": "Enzo"}, max_items=None
+        )
+
     def test_single_partial_match_is_rejected(self):
         # ?search= is fuzzy: "Ann" must not silently resolve to "Joanna Smith".
         users = [
