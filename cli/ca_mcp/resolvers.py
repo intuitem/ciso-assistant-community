@@ -25,8 +25,11 @@ def resolve_folder_id(folder_name_or_id: str) -> str:
     if _is_uuid(folder_name_or_id):
         return folder_name_or_id
 
-    # Otherwise, look up by name - return exactly one result
-    folders, error = fetch_all_results("/folders/", params={"name": folder_name_or_id})
+    # Otherwise, look up by name - return exactly one result. No item cap: a
+    # truncated list could hide a duplicate name and look unambiguous.
+    folders, error = fetch_all_results(
+        "/folders/", params={"name": folder_name_or_id}, max_items=None
+    )
 
     if error:
         raise ValueError(f"Folder '{folder_name_or_id}' API error: {error}")

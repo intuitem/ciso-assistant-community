@@ -135,7 +135,9 @@ class TestResolveFolderId:
             return_value=([{"id": UUID_B, "name": name}], None),
         ) as fetch:
             assert resolvers.resolve_folder_id(name) == UUID_B
-        fetch.assert_called_once_with("/folders/", params={"name": name})
+        fetch.assert_called_once_with(
+            "/folders/", params={"name": name}, max_items=None
+        )
 
 
 # ---------------------------------------------------------------------------
