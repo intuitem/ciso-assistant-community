@@ -1888,7 +1888,7 @@ class TierViewSet(TierFedByMixin, BaseModelViewSet):
                 row.save(update_fields=["value", "updated_at"])
                 # Switching the floor on raises the vendors already below it.
                 if mode == Propagation.FLOOR and previous != Propagation.FLOOR:
-                    raised = raise_all_to_floor()
+                    raised = raise_all_to_floor(request.user)
         # Counts every vendor: only for those who may switch the mode.
         return Response(
             {
@@ -1911,7 +1911,9 @@ class EntityTierChangeViewSet(BaseModelViewSet):
         return (
             super()
             .get_queryset()
-            .select_related("entity", "tier", "previous_tier", "changed_by")
+            .select_related(
+                "entity__folder", "tier", "previous_tier", "changed_by", "response"
+            )
         )
 
     @action(detail=False, name="Get source choices")
@@ -1929,7 +1931,13 @@ class SolutionTierChangeViewSet(BaseModelViewSet):
         return (
             super()
             .get_queryset()
-            .select_related("solution", "tier", "previous_tier", "changed_by")
+            .select_related(
+                "solution__provider_entity__folder",
+                "tier",
+                "previous_tier",
+                "changed_by",
+                "response",
+            )
         )
 
     @action(detail=False, name="Get source choices")

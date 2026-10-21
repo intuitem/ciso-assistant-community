@@ -1,4 +1,9 @@
+import importlib
+
 import pytest
+from django.apps import apps
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from rest_framework import status
 
 from iam.models import Folder, RoleAssignment
@@ -142,6 +147,30 @@ class TestSolutionTier:
             == status.HTTP_405_METHOD_NOT_ALLOWED
         )
 
+    def test_history_queries_do_not_grow_with_rows(
+        self, authenticated_client, solution
+    ):
+        def add(count):
+            for i in range(count):
+                vendor = Entity.objects.create(
+                    name=f"Vendor {Entity.objects.count()}",
+                    folder=solution.provider_entity.folder,
+                )
+                other = Solution.objects.create(
+                    name=f"Solution {Solution.objects.count()}", provider_entity=vendor
+                )
+                set_solution_tier(other, _tier("high"))
+
+        def queries():
+            with CaptureQueriesContext(connection) as context:
+                assert authenticated_client.get(HISTORY_URL).status_code == 200
+            return len(context)
+
+        add(2)
+        few = queries()
+        add(8)
+        assert queries() == few
+
     def test_tier_in_the_solution_history_cannot_be_deleted(
         self, authenticated_client, solution
     ):
@@ -151,3 +180,16 @@ class TestSolutionTier:
         response = authenticated_client.delete(f"{TIERS_URL}{custom.id}/")
         assert response.status_code == status.HTTP_409_CONFLICT
         assert response.json()["error"] == "tierInHistoryCannotDelete"
+
+
+@pytest.mark.django_db
+def test_carried_over_tier_history_matches_the_tier_date(solution):
+    carry_over = importlib.import_module(
+        "tprm.migrations.0026_solution_tier"
+    ).carry_over
+    Solution.objects.filter(pk=solution.pk).update(tier=_tier("high"), tier_source="")
+    carry_over(apps, None)
+    solution.refresh_from_db()
+    change = SolutionTierChange.objects.get(solution=solution)
+    assert solution.tier_source == "manual"
+    assert change.created_at == solution.tier_set_at == solution.updated_at

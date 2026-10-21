@@ -151,6 +151,7 @@ class TestTierPropagation:
         acme.refresh_from_db()
         above.refresh_from_db()
         assert (acme.tier, acme.tier_source) == (_tier("high"), TierSource.ROLLUP)
+        assert acme.tier_changes.latest("created_at").changed_by is not None
         assert above.tier == _tier("critical")
 
         set_entity_tier(acme, _tier("low"))

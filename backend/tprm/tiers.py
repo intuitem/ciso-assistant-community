@@ -177,7 +177,7 @@ def entities_below_floor():
 
 
 @transaction.atomic
-def raise_all_to_floor() -> int:
+def raise_all_to_floor(user=None) -> int:
     entities = list(entities_below_floor())
     solutions = Solution.objects.select_related("tier").in_bulk(
         [e.floor_solution_id for e in entities]
@@ -188,6 +188,7 @@ def raise_all_to_floor() -> int:
             entity,
             solution.tier,
             source=TierSource.ROLLUP,
+            user=user,
             note=solution.name,
         )
     return len(entities)

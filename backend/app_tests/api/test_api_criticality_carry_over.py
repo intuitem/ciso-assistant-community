@@ -5,6 +5,8 @@ import importlib
 
 import pytest
 from django.apps import apps
+from django.db import connection
+from django.db.migrations.executor import MigrationExecutor
 from rest_framework import status
 
 from iam.models import Folder, RoleAssignment
@@ -48,11 +50,25 @@ def _tier(key):
 
 @pytest.mark.django_db
 class TestCarryOver:
-    def test_the_highest_assessment_criticality_becomes_the_tier(self, domain):
+    def test_the_highest_assessment_criticality_becomes_the_tier(
+        self, transactional_db, domain
+    ):
         acme = Entity.objects.create(name="Acme", folder=domain)
         for criticality in (2, 4, 1):
             _assess(acme, criticality)
-        carry_over(apps, None)
+        executor = MigrationExecutor(connection)
+        target = ("tprm", "0025_criticality_carry_over")
+        executor.migrate([target])
+        try:
+            state = executor.loader.project_state(target).apps
+            carry_over(state, None)
+            old_change = state.get_model("tprm", "EntityTierChange").objects.get(
+                entity_id=acme.id
+            )
+            assert old_change.folder_id == domain.id
+        finally:
+            executor = MigrationExecutor(connection)
+            executor.migrate(executor.loader.graph.leaf_nodes())
         acme.refresh_from_db()
         assert (acme.tier, acme.tier_source) == (_tier("critical"), "manual")
         change = EntityTierChange.objects.get(entity=acme)

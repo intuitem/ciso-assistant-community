@@ -1,4 +1,6 @@
 import pytest
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from rest_framework import status
 
 from api.test_utils import EndpointTestsUtils
@@ -350,6 +352,25 @@ class TestEntityTier:
             f"{base}&tier=--&tier={_tier('high').id}"
         ).json()["results"]
         assert sorted(e["name"] for e in both) == ["Acme", "Untiered"]
+
+    def test_history_queries_do_not_grow_with_rows(self, authenticated_client, entity):
+        def add(count):
+            for i in range(count):
+                other = Entity.objects.create(
+                    name=f"Vendor {Entity.objects.count()}", folder=entity.folder
+                )
+                set_entity_tier(other, _tier("high"))
+
+        def queries():
+            with CaptureQueriesContext(connection) as context:
+                response = authenticated_client.get("/api/entity-tier-changes/")
+                assert response.status_code == 200
+            return len(context)
+
+        add(2)
+        few = queries()
+        add(8)
+        assert queries() == few
 
     def test_history_is_read_only(self, authenticated_client, entity):
         set_entity_tier(entity, _tier("high"))
