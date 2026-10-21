@@ -57,3 +57,36 @@ def test_password_is_enough_in_an_sso_session(user):
     enable_totp(user)
 
     assert reauthenticate(user, authentication_method="socialaccount") is True
+
+
+def reauthentication_flows(user, authentication_method="socialaccount"):
+    from allauth.account.internal.flows.reauthentication import (
+        get_reauthentication_flows,
+    )
+
+    request = RequestFactory().get("/")
+    request.session = SessionStore()
+    request.session["account_authentication_methods"] = [
+        {"method": authentication_method, "at": 0}
+    ]
+    with context.request_context(request):
+        return get_reauthentication_flows(user)
+
+
+def test_scim_adopted_account_is_not_offered_a_password_it_cannot_use(user):
+    user.is_scim_managed = True
+    user.save()
+
+    user.refresh_from_db()
+    assert not user.has_usable_password()
+    assert reauthentication_flows(user) == []
+
+
+def test_scim_account_keeping_local_login_keeps_its_password_when_deactivated(user):
+    user.is_scim_managed = True
+    user.keep_local_login = True
+    user.is_active = False
+    user.save()
+
+    user.refresh_from_db()
+    assert user.check_password(PASSWORD)
