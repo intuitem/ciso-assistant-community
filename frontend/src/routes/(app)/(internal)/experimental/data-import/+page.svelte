@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount, tick } from 'svelte';
 	import { getToastStore } from '$lib/components/Toast/stores';
-	import { pageTitle } from '$lib/utils/stores';
+	import { translateChoiceLabel } from '$lib/utils/i18n';
 	import * as m from '$paraglide/messages';
 	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
 	import { defaults, superForm } from 'sveltekit-superforms';
@@ -14,8 +14,6 @@
 	}
 
 	let { data }: Props = $props();
-
-	$pageTitle = 'Data import';
 
 	const API = '/experimental/data-import/api';
 	// A value the user chose to send unchanged, as opposed to one not reviewed yet ('').
@@ -331,6 +329,10 @@
 			// A period with no unit ("every 90") reads as days, the schedule's finest;
 			// without the flag a task never schedules its occurrences.
 			plan.defaults.schedule_frequency = 'DAILY';
+			if (free('is_recurrent')) plan.defaults.is_recurrent = 'true';
+		} else if (mapped.has('schedule_frequency') && free('schedule_interval')) {
+			// "Monthly" alone means every month.
+			plan.defaults.schedule_interval = '1';
 			if (free('is_recurrent')) plan.defaults.is_recurrent = 'true';
 		}
 	}
@@ -987,7 +989,9 @@
 																		<option value="" disabled>Not matched: choose a value</option>
 																		<option value={KEEP}>Keep as is (sent unchanged)</option>
 																		{#each field.choices as choice (choice.value)}
-																			<option value={String(choice.value)}>{choice.label}</option>
+																			<option value={String(choice.value)}
+																				>{translateChoiceLabel(choice.label, choice.value)}</option
+																			>
 																		{/each}
 																	</select>
 																</label>
@@ -1022,7 +1026,9 @@
 													<option value="false">No</option>
 												{:else}
 													{#each column.choices ?? [] as choice (choice.value)}
-														<option value={String(choice.value)}>{choice.label}</option>
+														<option value={String(choice.value)}
+															>{translateChoiceLabel(choice.label, choice.value)}</option
+														>
 													{/each}
 												{/if}
 											</select>

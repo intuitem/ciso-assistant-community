@@ -116,6 +116,14 @@ class TestDetection:
         )
         assert mapping.suggest_value("Nope", status.choices) is None
 
+    def test_value_suggestion_reads_a_longer_spelling(self):
+        targets = mapping._target_columns(ModelType.FINDINGS_ASSESSMENT, "Sheet1")
+        severity = next(t for t in targets if t.key == "severity")
+        assert mapping.suggest_value("Informational", severity.choices) == {
+            "value": 0,
+            "reason": "close",
+        }
+
 
 @pytest.mark.django_db
 class TestSchemaEndpoint:

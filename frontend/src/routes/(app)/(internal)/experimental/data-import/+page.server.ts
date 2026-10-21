@@ -15,6 +15,7 @@ export const load = (async ({ fetch }) => {
 			.catch(() => ({ model_types: [] }))
 	]);
 	return {
+		title: 'dataWizard',
 		folders,
 		matrices,
 		frameworks,

@@ -112,9 +112,38 @@ class TestCalendar:
             "DAILY",
             3,
         )
-        # Same value for every row: a row without a period is told so.
-        errors = json.dumps(resp.json()["steps"][0]["results"])
-        assert "Renew TLS certificates" in errors
+        # A row without a period stays a one-off task.
+        assert not TaskTemplate.objects.get(ref_id="CAL-05").schedule
+
+    def test_a_frequency_without_period_counts_one(
+        self, api_client, domain_folder, all_accessible
+    ):
+        columns = {
+            k: v for k, v in STEP["sheets"][0]["columns"].items() if k != "Every"
+        }
+        sheet = {
+            **STEP["sheets"][0],
+            "columns": columns,
+            "defaults": {"schedule_interval": 1},
+        }
+        resp = api_client.post(
+            IMPORT_URL,
+            {
+                "file": SimpleUploadedFile(CALENDAR, (SAMPLES / CALENDAR).read_bytes()),
+                "mapping": json.dumps({"steps": [{**STEP, "sheets": [sheet]}]}),
+                "options": json.dumps(
+                    {"folder_id": str(domain_folder.id), "on_conflict": "skip"}
+                ),
+            },
+            format="multipart",
+        )
+        assert resp.status_code == 200, resp.json()
+        phishing = TaskTemplate.objects.get(ref_id="CAL-04")
+        assert (phishing.schedule["frequency"], phishing.schedule["interval"]) == (
+            "WEEKLY",
+            1,
+        )
+        assert not TaskTemplate.objects.get(ref_id="CAL-05").schedule
 
     def test_default_cannot_override_a_mapped_column(
         self, api_client, domain_folder, all_accessible

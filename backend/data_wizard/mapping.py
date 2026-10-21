@@ -149,6 +149,11 @@ DEFAULT_VALUES: dict[ModelType, dict[str, Any]] = {
     ModelType.COMPLIANCE_ASSESSMENT: {"assessable": True},
 }
 
+SCHEDULE_PAIR = {
+    "schedule_frequency": "schedule_interval",
+    "schedule_interval": "schedule_frequency",
+}
+
 # Template columns named after the user-facing concept rather than the field.
 COLUMN_FIELDS = {
     "domain": "folder",
@@ -439,6 +444,10 @@ def suggest_value(value: Any, choices: dict[str, Any]) -> dict | None:
     close = difflib.get_close_matches(name, choices.keys(), n=1, cutoff=0.8)
     if close:
         return {"value": choices[close[0]], "reason": "close"}
+    # A longer spelling of one choice ("informational" for "info").
+    stems = {choices[k] for k in choices if len(k) >= 3 and name.startswith(k)}
+    if len(stems) == 1:
+        return {"value": stems.pop(), "reason": "close"}
     return None
 
 
@@ -1092,6 +1101,14 @@ def build_workbook(sources: list[SourceSheet], step: ImportStep) -> io.BytesIO:
         }.items():
             if column not in frame.columns:
                 frame[column] = value
+                # Half a schedule completes rows carrying the other half; a row
+                # with neither is a one-off task.
+                other = SCHEDULE_PAIR.get(column)
+                if step.model_type == ModelType.TASK_TEMPLATE and other in frame:
+                    blank = frame[other].isna() | (
+                        frame[other].astype(str).str.strip() == ""
+                    )
+                    frame.loc[blank, column] = None
         frames.setdefault(sheet.target, []).append(frame)
     buffer = io.BytesIO()
     with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
