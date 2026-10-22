@@ -14,6 +14,7 @@ from allauth.socialaccount.adapter import (
     warnings,
 )
 from allauth.socialaccount.models import app_settings
+from allauth.headless.internal.restkit.response import APIResponse
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
@@ -23,7 +24,7 @@ from django.http import HttpRequest
 from django.utils.translation import gettext_lazy as _
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.response import Response
-from rest_framework.status import HTTP_401_UNAUTHORIZED
+from rest_framework.status import HTTP_401_UNAUTHORIZED, HTTP_429_TOO_MANY_REQUESTS
 from django.contrib.contenttypes.models import ContentType
 from auditlog.models import LogEntry
 from auditlog.cid import get_cid
@@ -165,6 +166,20 @@ def create_ip_ban_audit_log(ip_address: str, user: Optional[User]):
 
 
 class AccountAdapter(DefaultAccountAdapter):
+    @staticmethod
+    def _make_rate_limit_response(request: HttpRequest):
+        return APIResponse(
+            request,
+            status=HTTP_429_TOO_MANY_REQUESTS,
+            errors=[
+                {
+                    "message": "Too many failed login attempts. Please try again later.",
+                    "code": "too_many_login_attempts",
+                    "param": "password",
+                }
+            ],
+        )
+
     def is_safe_url(self, url):
         allowed_hosts = {urlparse(settings.CISO_ASSISTANT_URL).hostname} | set(
             settings.ALLOWED_HOSTS
@@ -205,7 +220,7 @@ class AccountAdapter(DefaultAccountAdapter):
                     is_banned = False
 
                 if is_banned:
-                    raise ImmediateHttpResponse(RateLimitResponse(request))
+                    raise ImmediateHttpResponse(self._make_rate_limit_response(request))
 
         email = credentials.get("email")
 
