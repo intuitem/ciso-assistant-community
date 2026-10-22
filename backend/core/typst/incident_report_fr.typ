@@ -150,7 +150,7 @@
 = Chronologie
 
 #text(fill: muted)[
-  #d.counts.total entrées par ordre chronologique, heures en UTC.
+  #d.counts.total entrées par ordre chronologique, heures en #(d.timezone).
   #d.counts.detection détection, #d.counts.mitigation atténuation.
 ]
 #v(0.8em)

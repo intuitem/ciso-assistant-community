@@ -150,7 +150,7 @@
 = Timeline
 
 #text(fill: muted)[
-  #d.counts.total entries in chronological order, times in UTC.
+  #d.counts.total entries in chronological order, times in #(d.timezone).
   #d.counts.detection detection, #d.counts.mitigation mitigation.
 ]
 #v(0.8em)

@@ -199,6 +199,8 @@ from core.utils import (
     sanitize_xlsx_value,
     bulk_update_with_log,
     compare_schema_versions,
+    format_timestamp,
+    get_requested_timezone,
     get_respondent_scoped_folder_ids,
     is_field_visible_to,
     render_answers_cell,
@@ -18186,7 +18188,9 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
         )
 
         lang = request.user.preferences.get("lang") or "en"
-        payload = incident_context(incident, timeline_entries, lang)
+        payload = incident_context(
+            incident, timeline_entries, lang, get_requested_timezone(request)
+        )
         response = HttpResponse(
             render_pdf(localized_template("incident_report", lang), payload),
             content_type="application/pdf",
@@ -18219,6 +18223,8 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
             .order_by("timestamp")
         )
 
+        tz = get_requested_timezone(request)
+
         # Generate Markdown content
         md_content = f"# {incident.name}\n\n"
 
@@ -18240,15 +18246,26 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
         if incident.entities.exists():
             md_content += f"- **Related Entities**: {', '.join([entity.name for entity in incident.entities.all()])}\n"
 
-        md_content += f"- **Reported At**: {incident.reported_at.strftime('%Y-%m-%d %H:%M:%S') if incident.reported_at else 'N/A'}\n"
-        md_content += f"- **Occurred At**: {incident.occurred_at.strftime('%Y-%m-%d %H:%M:%S') if incident.occurred_at else 'N/A'}\n"
-        md_content += f"- **Resolved At**: {incident.resolved_at.strftime('%Y-%m-%d %H:%M:%S') if incident.resolved_at else 'N/A'}\n"
+        md_content += (
+            f"- **Reported At**: {format_timestamp(incident.reported_at, tz, 'N/A')}\n"
+        )
+        md_content += (
+            f"- **Occurred At**: {format_timestamp(incident.occurred_at, tz, 'N/A')}\n"
+        )
+        md_content += (
+            f"- **Resolved At**: {format_timestamp(incident.resolved_at, tz, 'N/A')}\n"
+        )
         if incident.is_bcp_activated is not None:
             md_content += (
                 f"- **BCP Activated**: {'Yes' if incident.is_bcp_activated else 'No'}\n"
             )
-        md_content += f"- **Created**: {incident.created_at.strftime('%Y-%m-%d %H:%M:%S') if incident.created_at else 'N/A'}\n"
-        md_content += f"- **Last Updated**: {incident.updated_at.strftime('%Y-%m-%d %H:%M:%S') if incident.updated_at else 'N/A'}\n"
+        md_content += (
+            f"- **Created**: {format_timestamp(incident.created_at, tz, 'N/A')}\n"
+        )
+        md_content += (
+            f"- **Last Updated**: {format_timestamp(incident.updated_at, tz, 'N/A')}\n"
+        )
+        md_content += f"- **Timezone**: {tz}\n"
         if incident.resolution:
             md_content += f"\n### Resolution\n\n{incident.resolution}\n"
         md_content += "\n"
@@ -18277,7 +18294,9 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
             md_content += "*Events are listed in chronological order*\n\n"
 
             for entry in timeline_entries:
-                md_content += f"### {entry.timestamp.strftime('%Y-%m-%d %H:%M:%S')} - {entry.entry}\n\n"
+                md_content += (
+                    f"### {format_timestamp(entry.timestamp, tz)} - {entry.entry}\n\n"
+                )
                 md_content += f"**Type**: {entry.get_entry_type_display()}\n\n"
 
                 if entry.author:

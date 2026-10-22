@@ -6,6 +6,7 @@ import pymupdf
 import pytest
 from django.urls import reverse
 from rest_framework import status as http
+from rest_framework.test import APIClient
 
 from core.generators import incident_context
 from core.models import Incident, Terminology, TimelineEntry
@@ -167,3 +168,71 @@ def test_incident_enums_are_localised(incident, lang, severity, status, detectio
 
     text = "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
     assert severity in text and status in text and detection in text
+
+
+SUMMER_MORNING_UTC = datetime(2026, 7, 1, 8, 0, tzinfo=timezone.utc)
+
+
+def _summer_incident(incident_obj: Incident) -> Incident:
+    incident_obj.occurred_at = SUMMER_MORNING_UTC
+    incident_obj.save()
+    TimelineEntry.objects.create(
+        incident=incident_obj,
+        folder=incident_obj.folder,
+        entry="Encryption detected",
+        entry_type="detection",
+        timestamp=SUMMER_MORNING_UTC,
+    )
+    return incident_obj
+
+
+def _pdf_text(content: bytes) -> str:
+    return "".join(
+        page.get_text() for page in pymupdf.open(stream=content, filetype="pdf")
+    )
+
+
+@pytest.mark.django_db
+def test_pdf_shows_dates_in_the_requested_timezone(
+    admin_client: APIClient,  # noqa: F811
+    incident: Incident,
+) -> None:
+    _summer_incident(incident)
+    url = reverse("incidents-pdf", kwargs={"pk": str(incident.pk)})
+
+    text = _pdf_text(admin_client.get(url, {"tz": "Europe/Paris"}).content)
+
+    assert "2026-07-01 10:00:00" in text
+    assert "2026-07-01 08:00:00" not in text
+    assert "Europe/Paris" in text
+
+
+@pytest.mark.django_db
+def test_pdf_falls_back_to_utc_on_an_unknown_timezone(
+    admin_client: APIClient,  # noqa: F811
+    incident: Incident,
+) -> None:
+    _summer_incident(incident)
+    url = reverse("incidents-pdf", kwargs={"pk": str(incident.pk)})
+
+    response = admin_client.get(url, {"tz": "Mars/Olympus_Mons"})
+
+    assert response.status_code == http.HTTP_200_OK
+    text = _pdf_text(response.content)
+    assert "2026-07-01 08:00:00" in text
+    assert "UTC" in text
+
+
+@pytest.mark.django_db
+def test_markdown_shows_dates_in_the_requested_timezone(
+    admin_client: APIClient,  # noqa: F811
+    incident: Incident,
+) -> None:
+    _summer_incident(incident)
+    url = reverse("incidents-md", kwargs={"pk": str(incident.pk)})
+
+    content = admin_client.get(url, {"tz": "Europe/Paris"}).content.decode()
+
+    assert "2026-07-01 10:00:00" in content
+    assert "2026-07-01 08:00:00" not in content
+    assert "Europe/Paris" in content

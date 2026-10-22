@@ -6,12 +6,14 @@ import json
 import re
 from re import sub
 from typing import Literal
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta, date, timezone, tzinfo
+from zoneinfo import ZoneInfo
 
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 
 from rest_framework.exceptions import ValidationError
+from rest_framework.request import Request
 import structlog
 import calendar
 from dateutil import relativedelta as rd
@@ -2236,3 +2238,21 @@ def sanitize_xlsx_value(value):
     if isinstance(value, str):
         return ILLEGAL_XLSX_CHARS_RE.sub("", value)[:XLSX_MAX_CELL_CHARS]
     return value
+
+
+def get_requested_timezone(request: Request) -> tzinfo:
+    """Return the timezone named by the request's `tz` query parameter, or UTC.
+
+    Exports are rendered server-side, so the browser sends its own timezone to
+    get the same times as on screen. An unknown or malformed name falls back to
+    UTC rather than failing the export.
+    """
+    try:
+        return ZoneInfo(request.query_params.get("tz", ""))
+    except (ValueError, KeyError, OSError):
+        return timezone.utc
+
+
+def format_timestamp(value: datetime | None, tz: tzinfo, empty: str = "-") -> str:
+    """Return `value` as `YYYY-MM-DD HH:MM:SS` in `tz`, or `empty` when unset."""
+    return value.astimezone(tz).strftime("%Y-%m-%d %H:%M:%S") if value else empty
