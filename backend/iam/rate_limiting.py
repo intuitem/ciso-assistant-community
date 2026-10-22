@@ -777,7 +777,7 @@ class _BanCache:
             self.is_leader = False
             try:
                 fcntl.flock(self._lock_file, fcntl.LOCK_UN)
-            except (OSError, ValueError):
+            except OSError, ValueError:
                 pass
 
     def _flush_all_entries(self):
