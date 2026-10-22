@@ -449,6 +449,7 @@ class EntityAssessmentReadSerializer(BaseModelSerializer):
     completion = serializers.SerializerMethodField()
     review_progress = serializers.SerializerMethodField()
     assignment_status = serializers.SerializerMethodField()
+    compliance_overview = serializers.SerializerMethodField()
     evidence = FieldsRelatedField()
     perimeter = FieldsRelatedField()
     entity = FieldsRelatedField()
@@ -493,6 +494,32 @@ class EntityAssessmentReadSerializer(BaseModelSerializer):
         if cached is not None and audit_id in cached:
             return cached[audit_id]
         return obj.compliance_assessment.progress
+
+    def get_compliance_overview(self, obj):
+        """The questionnaire's compliance split and global score, so the third-party
+        record shows what the audit page shows. None when there is no questionnaire,
+        or when the questionnaire's own folder is out of the reader's reach."""
+        audit_id = obj.compliance_assessment_id
+        if not audit_id:
+            return None
+        from core.models import ComplianceAssessment
+        from core.utils import compliance_overview
+        from iam.models import RoleAssignment
+
+        optimized = self.context.get("optimized_data") or {}
+        viewable = optimized.get("viewable_audits")
+        if viewable is None:
+            request = self.context.get("request")
+            if not RoleAssignment.is_object_accessible(
+                getattr(request, "user", None), "view", ComplianceAssessment, audit_id
+            ):
+                return None
+        elif audit_id not in viewable:
+            return None
+        cached = optimized.get("compliance_overview")
+        if cached is not None:
+            return cached.get(audit_id)
+        return compliance_overview(obj.compliance_assessment)
 
     def get_assignment_status(self, obj):
         """Where the questionnaire stands with its respondent: the least advanced assignment."""

@@ -7582,5 +7582,6 @@
 	"mergeLabelsSummary": "Chaque objet étiqueté {labels} recevra {target} à la place, puis ces étiquettes seront supprimées.",
 	"mergeInto": "Fusionner dans {label}",
 	"mergeLabelsSuccess": "Étiquettes fusionnées dans {label}",
-	"mergeLabelsError": "Impossible de fusionner les étiquettes"
+	"mergeLabelsError": "Impossible de fusionner les étiquettes",
+	"noQuestionnaireAttached": "Aucun questionnaire rattaché"
 }
