@@ -1,0 +1,65 @@
+name: Publish OpenAPI to GitBook
+
+# Regenerates the API schema on every release and pushes it to GitBook, which
+# rebuilds the API reference pages (one page per tag, see
+# backend/ciso_assistant/openapi_hooks.py).
+#
+# Setup: repository secret GITBOOK_TOKEN, repository variables
+# GITBOOK_ORGANIZATION_ID and GITBOOK_SPEC_NAME. Without the token the schema
+# is still generated and uploaded as a workflow artifact.
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    env:
+      GITBOOK_TOKEN: ${{ secrets.GITBOOK_TOKEN }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Install uv and set up python
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          python-version: "3.14"
+          enable-cache: false
+
+      - name: Install dependencies
+        working-directory: backend
+        run: uv sync --locked
+
+      - name: Generate schema
+        working-directory: backend
+        env:
+          CISO_ASSISTANT_VERSION: ${{ github.ref_name }}
+        run: uv run python manage.py spectacular --file "$RUNNER_TEMP/openapi.yaml"
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: openapi-schema
+          path: ${{ runner.temp }}/openapi.yaml
+          retention-days: 30
+
+      - name: Publish to GitBook
+        if: env.GITBOOK_TOKEN != ''
+        env:
+          GITBOOK_ORGANIZATION_ID: ${{ vars.GITBOOK_ORGANIZATION_ID }}
+          GITBOOK_SPEC_NAME: ${{ vars.GITBOOK_SPEC_NAME }}
+        run: |
+          npx -y @gitbook/cli@0.32.9 openapi publish \
+            --spec "$GITBOOK_SPEC_NAME" \
+            --organization "$GITBOOK_ORGANIZATION_ID" \
+            "$RUNNER_TEMP/openapi.yaml"
