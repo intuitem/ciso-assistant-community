@@ -164,6 +164,22 @@ def test_saved_mapping_finds_its_hand_set_header_row(api_client, root_folder):
 class TestBadInputIsA400:
     DATA = _xlsx({"Assets": [["Name"], ["NAS"]]})
 
+    def test_too_many_sheets(self, api_client):
+        data = _xlsx({f"S{i}": [["Name"], ["x"]] for i in range(31)})
+        resp = _post(api_client, ANALYZE_URL, "a.xlsx", data)
+        assert resp.status_code == 400
+        assert resp.json()["detail"] == "TooManySheets"
+
+    def test_too_many_columns(self, api_client):
+        data = _xlsx({"Wide": [[f"C{i}" for i in range(101)], ["x"] * 101]})
+        resp = _post(api_client, ANALYZE_URL, "a.xlsx", data)
+        assert resp.status_code == 400
+        assert resp.json()["detail"] == "TooManyColumns"
+
+    def test_analysis_needs_a_right_to_import(self, knox_restricted_client):
+        resp = _post(knox_restricted_client, ANALYZE_URL, "a.xlsx", self.DATA)
+        assert resp.status_code == 403
+
     def test_header_row_past_the_end(self, api_client, domain_folder):
         resp = _post(
             api_client,

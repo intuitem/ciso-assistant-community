@@ -167,6 +167,9 @@ COLUMN_FIELDS = {
 HEADER_SCAN_ROWS = 20
 MAX_DISTINCT_VALUES = 50
 SAMPLE_SIZE = 5
+MAX_ANALYZED_SHEETS = 30
+MAX_ANALYZED_COLUMNS = 100
+MAX_PROFILED_ROWS = 5000
 MIN_TARGET_SCORE = 0.2
 
 
@@ -888,7 +891,10 @@ def analyze(
     ):
         raise TypeError("InvalidOverrides")
     out = []
-    for source in read_source(file):
+    sources = read_source(file)
+    if len(sources) > MAX_ANALYZED_SHEETS:
+        raise ValueError(f"TooManySheets: {MAX_ANALYZED_SHEETS}")
+    for source in sources:
         chosen = overrides.get(source.name, {})
         if source.raw.empty:
             out.append({"name": source.name, "empty": True})
@@ -902,7 +908,9 @@ def analyze(
         if saved and not chosen:
             source.header_row = _saved_header_row(source, saved)
         frame = source.frame()
-        profiles = profile_columns(frame)
+        if len(frame.columns) > MAX_ANALYZED_COLUMNS:
+            raise ValueError(f"TooManyColumns: {MAX_ANALYZED_COLUMNS}")
+        profiles = profile_columns(frame.head(MAX_PROFILED_ROWS))
         # A CSV has no sheet name: its file name says what it holds.
         hint = Path(filename).stem if source.name == "CSV" else source.name
         candidates = rank_targets(profiles, folder_names, hint)
@@ -1218,6 +1226,8 @@ ERROR_CODES = (
     "UnknownColumns",
     "DuplicateTargetColumns",
     "MissingSourceColumns",
+    "TooManySheets",
+    "TooManyColumns",
 )
 
 
@@ -1248,10 +1258,24 @@ class MappingSchemaView(APIView):
         return Response(template_schema(parsed))
 
 
+def may_import_something(user) -> bool:
+    return any(
+        RoleAssignment.has_permission_anywhere(
+            user, f"add_{label.split('.')[1].lower()}"
+        )
+        for rows in TEMPLATE_ROW_MODELS.values()
+        for label in rows.values()
+    )
+
+
 class AnalyzeFileView(APIView):
     parser_classes = (MultiPartParser, FormParser)
 
     def post(self, request):
+        if not may_import_something(request.user):
+            return Response(
+                {"error": "permissionDenied"}, status=status.HTTP_403_FORBIDDEN
+            )
         file, error = _uploaded_file(request)
         if error:
             return error

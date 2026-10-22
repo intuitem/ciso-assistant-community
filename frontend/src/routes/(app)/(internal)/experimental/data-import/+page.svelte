@@ -2,6 +2,8 @@
 	import { onMount, tick } from 'svelte';
 	import { getToastStore } from '$lib/components/Toast/stores';
 	import { translateChoiceLabel } from '$lib/utils/i18n';
+	import { canPerformAction, canPerformActionOnObject } from '$lib/utils/access-control';
+	import { page } from '$app/state';
 	import * as m from '$paraglide/messages';
 	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
 	import { defaults, superForm } from 'sveltekit-superforms';
@@ -104,6 +106,7 @@
 		id: string;
 		name: string;
 		sheets: { source: string; model_type: string; target: string }[];
+		folder: { id: string } | string | null;
 		use_count: number;
 		last_used_at: string | null;
 		created_by: { email: string } | null;
@@ -186,8 +189,22 @@
 	let confirmDelete = $state('');
 
 	const globalFolderId = $derived(
-		data.folders.find((f: { content_type?: string }) => f.content_type === 'GL')?.id
+		data.folders.find((f: { content_type?: string }) => f.content_type === 'GLOBAL')?.id
 	);
+	const mayMap = (action: 'add' | 'change') =>
+		canPerformAction({
+			user: page.data.user,
+			action,
+			model: 'importmapping',
+			domain: globalFolderId
+		});
+	const mayDelete = (saved: SavedMapping) =>
+		canPerformActionOnObject({
+			user: page.data.user,
+			action: 'delete',
+			model: 'importmapping',
+			object: saved
+		});
 
 	async function loadSavedMappings() {
 		const res = await fetch(`${API}/mappings`);
@@ -239,10 +256,28 @@
 		return plan;
 	}
 
+	const REFUSALS: Record<string, string> = {
+		HeaderRowOutOfRange: 'That header row is past the end of the sheet.',
+		TooManySheets: 'This file has too many sheets to analyse (30 at most).',
+		TooManyColumns: 'A sheet has too many columns to analyse (100 at most).'
+	};
+
 	function refusal(body: { detail?: string | null }, fallback: string) {
-		return body.detail === 'HeaderRowOutOfRange'
-			? 'That header row is past the end of the sheet.'
-			: fallback;
+		return (body.detail && REFUSALS[body.detail]) || fallback;
+	}
+
+	function remapValues(plan: Plan, header: string) {
+		const field = schemaSheet(plan)?.columns.find((c) => c.key === plan.columns[header]);
+		const distinct = plan.analysed.columns?.find((c) => c.header === header)?.distinct ?? [];
+		const match = (raw: string) =>
+			field?.choices?.find((c) =>
+				[String(c.value), c.label, translateChoiceLabel(c.label, c.value)].some(
+					(name) => name.toLowerCase() === raw.trim().toLowerCase()
+				)
+			)?.value;
+		plan.values[header] = Object.fromEntries(
+			distinct.map((raw) => [raw, String(match(raw) ?? '')])
+		);
 	}
 
 	async function analyse(overrides: Record<string, unknown> = {}) {
@@ -473,6 +508,12 @@
 		});
 	}
 
+	function mergedSheets(updateId?: string) {
+		const current = savedSheets();
+		const previous = savedMappings.find((s) => s.id === updateId)?.sheets ?? [];
+		return [...previous.filter((s) => !current.some((c) => c.source === s.source)), ...current];
+	}
+
 	async function saveMapping(updateId?: string) {
 		const name = saveName.trim();
 		if (!name) {
@@ -484,7 +525,7 @@
 			const res = await fetch(updateId ? `${API}/mappings/${updateId}` : `${API}/mappings`, {
 				method: updateId ? 'PATCH' : 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ name, folder: globalFolderId, sheets: savedSheets() })
+				body: JSON.stringify({ name, folder: globalFolderId, sheets: mergedSheets(updateId) })
 			});
 			if (!res.ok) {
 				const body = await res.json().catch(() => ({}));
@@ -756,7 +797,7 @@
 								<button type="button" class="btn btn-sm" onclick={() => (confirmDelete = '')}
 									>Cancel</button
 								>
-							{:else}
+							{:else if mayDelete(saved)}
 								<button
 									type="button"
 									class="btn btn-sm preset-outlined"
@@ -957,7 +998,10 @@
 													<select
 														class="select text-sm"
 														bind:value={plan.columns[col.header]}
-														onchange={() => suggestDefaults(plan)}
+														onchange={() => {
+															remapValues(plan, col.header);
+															suggestDefaults(plan);
+														}}
 														disabled={running}
 														aria-label="Field for {col.header}"
 													>
@@ -1272,13 +1316,13 @@
 						</ul>
 					</div>
 				{/each}
-				{#if outcome.dryRun && canImport}
+				{#if outcome.dryRun && canImport && (mayMap('add') || (appliedSaved.length && mayMap('change')))}
 					<div class="flex flex-wrap items-end gap-3 pt-3 border-t border-surface-200-800">
 						<label class="space-y-1 text-sm grow max-w-md">
 							<span class="block font-medium">Save this mapping for next time</span>
 							<input class="input text-sm" bind:value={saveName} disabled={saving} />
 						</label>
-						{#if appliedSaved.length === 1}
+						{#if appliedSaved.length === 1 && mayMap('change')}
 							<button
 								type="button"
 								class="btn preset-outlined"
@@ -1288,14 +1332,16 @@
 								Update “{appliedSaved[0].name}”
 							</button>
 						{/if}
-						<button
-							type="button"
-							class="btn preset-tonal-primary"
-							disabled={saving}
-							onclick={() => saveMapping()}
-						>
-							<i class="fa-solid fa-bookmark mr-1"></i>Save as new mapping
-						</button>
+						{#if mayMap('add')}
+							<button
+								type="button"
+								class="btn preset-tonal-primary"
+								disabled={saving}
+								onclick={() => saveMapping()}
+							>
+								<i class="fa-solid fa-bookmark mr-1"></i>Save as new mapping
+							</button>
+						{/if}
 					</div>
 				{/if}
 			</section>
