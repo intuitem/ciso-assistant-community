@@ -37,6 +37,7 @@
 	$effect(() => {
 		// Aborted when the processing changes, so a late answer cannot land on another one.
 		const controller = new AbortController();
+		screenings = null;
 		loadFailed = false;
 		fetch(`/processings/${processing.id}/dpia-screening`, { signal: controller.signal })
 			.then((res) => {
@@ -59,6 +60,8 @@
 	$effect(() => {
 		const controller = new AbortController();
 		const { signal } = controller;
+		dpiaForms = null;
+		dpia = undefined;
 		fetch(`/processings/${processing.id}/dpia-screening?target=processing.dpia`, { signal })
 			.then((res) => (res.ok ? res.json() : []))
 			.then((rows) => (dpiaForms = Array.isArray(rows) ? rows : []))
