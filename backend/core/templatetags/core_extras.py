@@ -6,8 +6,14 @@ from django.conf import settings
 from core.utils import COUNTRY_FLAGS, LANGUAGES
 from core.models import RequirementAssessment
 from core.helpers import color_css_class
+from core.markdown_utils import render_safe_markdown
 
 register = template.Library()
+
+
+@register.filter(name="render_markdown")
+def render_markdown(text: str | None) -> str:
+    return mark_safe(render_safe_markdown(text))
 
 
 @register.simple_tag()

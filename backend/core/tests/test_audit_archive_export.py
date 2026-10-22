@@ -13,6 +13,7 @@ from rest_framework.test import APIClient
 
 from core.apps import startup
 from core.models import (
+    AppliedControl,
     ComplianceAssessment,
     Evidence,
     EvidenceRevision,
@@ -198,3 +199,189 @@ class TestAuditArchiveExport:
 
         with _archive(admin_client, audit) as archive:
             assert archive.namelist() == ["index.html"]
+
+
+def _index(admin_client: APIClient, audit: ComplianceAssessment) -> str:
+    with _archive(admin_client, audit) as archive:
+        return archive.read("index.html").decode("utf-8")
+
+
+def _control_blocks(index: str) -> dict[str, str]:
+    """Map each applied control name to the HTML from its block up to the next
+    control's; the last one runs to the end of the document."""
+    chunks = index.split("data-applied-control=")[1:]
+    return {chunk.split('"')[1]: chunk for chunk in chunks}
+
+
+def _first_requirement(audit: ComplianceAssessment) -> RequirementAssessment:
+    return RequirementAssessment.objects.filter(
+        compliance_assessment=audit, requirement__assessable=True
+    ).first()
+
+
+@pytest.mark.django_db
+class TestAuditArchiveReportReadability:
+    def test_each_evidence_is_listed_under_its_own_applied_control(
+        self, admin_client: APIClient, audit: ComplianceAssessment
+    ) -> None:
+        policy = AppliedControl.objects.create(
+            name="Password policy", folder=audit.folder, status="active"
+        )
+        policy.evidences.add(
+            _attach(audit.folder, "Policy v3", "policy-v3.pdf"),
+            Evidence.objects.create(name="Oral approval", folder=audit.folder),
+        )
+        review = AppliedControl.objects.create(
+            name="Account review", folder=audit.folder, status="in_progress"
+        )
+        review.evidences.add(_attach(audit.folder, "Q3 review", "q3-review.pdf"))
+        training = AppliedControl.objects.create(
+            name="Awareness training", folder=audit.folder, status="to_do"
+        )
+        _first_requirement(audit).applied_controls.add(policy, review, training)
+
+        blocks = _control_blocks(_index(admin_client, audit))
+
+        assert "Policy v3" in blocks["Password policy"]
+        assert "Oral approval" in blocks["Password policy"]
+        assert "Q3 review" not in blocks["Password policy"]
+        assert "Q3 review" in blocks["Account review"]
+        assert "Policy v3" not in blocks["Account review"]
+        assert "No evidence" in blocks["Awareness training"]
+
+    def test_applied_control_shows_its_status(
+        self, admin_client: APIClient, audit: ComplianceAssessment
+    ) -> None:
+        control = AppliedControl.objects.create(
+            name="Account review", folder=audit.folder, status="in_progress"
+        )
+        _first_requirement(audit).applied_controls.add(control)
+
+        blocks = _control_blocks(_index(admin_client, audit))
+
+        assert "In progress" in blocks["Account review"]
+
+    def test_evidence_without_a_file_is_flagged_as_such(
+        self, admin_client: APIClient, audit: ComplianceAssessment
+    ) -> None:
+        ra = _first_requirement(audit)
+        ra.evidences.add(Evidence.objects.create(name="Interview", folder=audit.folder))
+        control = AppliedControl.objects.create(name="Policy", folder=audit.folder)
+        control.evidences.add(
+            Evidence.objects.create(name="Oral approval", folder=audit.folder)
+        )
+        ra.applied_controls.add(control)
+
+        index = _index(admin_client, audit)
+
+        assert index.count("No file attached") == 2
+
+    def test_evidences_of_a_control_are_listed_by_name(
+        self, admin_client: APIClient, audit: ComplianceAssessment
+    ) -> None:
+        control = AppliedControl.objects.create(name="Policy", folder=audit.folder)
+        for name in ["Charlie", "Alpha", "Bravo"]:
+            control.evidences.add(
+                Evidence.objects.create(name=name, folder=audit.folder)
+            )
+        _first_requirement(audit).applied_controls.add(control)
+
+        block = _control_blocks(_index(admin_client, audit))["Policy"]
+
+        assert block.index("Alpha") < block.index("Bravo") < block.index("Charlie")
+
+    def test_observation_and_control_description_are_rendered_as_markdown(
+        self, admin_client: APIClient, audit: ComplianceAssessment
+    ) -> None:
+        ra = _first_requirement(audit)
+        ra.observation = "## Finding\n\nPolicy is **formalised**:\n\n- GPO enforced"
+        ra.save()
+        control = AppliedControl.objects.create(
+            name="Policy", folder=audit.folder, description="Reviewed *yearly*"
+        )
+        ra.applied_controls.add(control)
+
+        index = _index(admin_client, audit)
+
+        assert "<h2>Finding</h2>" in index
+        assert "<strong>formalised</strong>" in index
+        assert "<li>GPO enforced</li>" in index
+        assert "<em>yearly</em>" in index
+        assert "**formalised**" not in index
+
+    def test_requirement_description_is_rendered_as_markdown(
+        self, admin_client: APIClient, audit: ComplianceAssessment
+    ) -> None:
+        requirement = _first_requirement(audit).requirement
+        requirement.description = "1. Risk analysis\n2. Security objectives"
+        requirement.save()
+
+        index = _index(admin_client, audit)
+
+        assert (
+            "<ol>\n<li>Risk analysis</li>\n<li>Security objectives</li>\n</ol>" in index
+        )
+
+    def test_markdown_cannot_inject_html_scripts_or_remote_content(
+        self, admin_client: APIClient, audit: ComplianceAssessment
+    ) -> None:
+        ra = _first_requirement(audit)
+        ra.observation = (
+            "<script>alert(1)</script>\n\n"
+            "[click](javascript:alert(2)) [docs](https://example.com/guide)\n\n"
+            "![pixel](https://tracker.example/p.png)"
+        )
+        ra.save()
+
+        index = _index(admin_client, audit)
+
+        assert "<script>alert(1)</script>" not in index
+        assert "&lt;script&gt;alert(1)&lt;/script&gt;" in index
+        assert "javascript:alert(2)" not in index
+        assert (
+            '<a href="https://example.com/guide" rel="noopener noreferrer" '
+            'target="_blank">docs</a>'
+        ) in index
+        assert "tracker.example" not in index
+        assert "pixel" in index
+
+    def test_a_malformed_link_does_not_break_the_export(
+        self, admin_client: APIClient, audit: ComplianceAssessment
+    ) -> None:
+        ra = _first_requirement(audit)
+        ra.observation = "Exposed: <http://[IP]/admin>, see [admin](http://[IP]/admin)"
+        ra.save()
+
+        index = _index(admin_client, audit)
+
+        assert "admin" in index
+
+    def test_an_image_nested_in_a_rejected_link_is_not_loaded(
+        self, admin_client: APIClient, audit: ComplianceAssessment
+    ) -> None:
+        ra = _first_requirement(audit)
+        ra.observation = "[![pixel](https://tracker.example/p.png) more](javascript:x)"
+        ra.save()
+
+        index = _index(admin_client, audit)
+
+        assert "tracker.example" not in index
+        assert "javascript:x" not in index
+
+    def test_markdown_follows_commonmark_like_the_app(
+        self, admin_client: APIClient, audit: ComplianceAssessment
+    ) -> None:
+        ra = _first_requirement(audit)
+        ra.observation = (
+            "#CONFIG_DEBUG is not set\n\n"
+            "Findings:\n- first\n- second\n\n"
+            "| Host | Port |\n|---|---|\n| srv | 22 |"
+        )
+        ra.save()
+
+        index = _index(admin_client, audit)
+
+        assert "<h1>CONFIG_DEBUG" not in index
+        assert "#CONFIG_DEBUG is not set" in index
+        assert "<li>first</li>" in index
+        assert "<td>srv</td>" in index

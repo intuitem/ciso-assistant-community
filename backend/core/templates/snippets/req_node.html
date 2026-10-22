@@ -31,8 +31,8 @@
         </div>
       </div>
       {% if node.assessments.requirement.description %}
-        <div class="text-left w-full">
-          {{ node.assessments.requirement.get_description_translated }}
+        <div class="markdown text-left w-full">
+          {{ node.assessments.requirement.get_description_translated|render_markdown }}
         </div>
       {% endif %}
 
@@ -61,7 +61,7 @@
       {% if node.assessments.observation %}
           <div class="text-left w-full">
             <p class="font-semibold">{% trans "Observation:" %}</p>
-            <p>{{ node.assessments.observation|linebreaksbr }}</p>
+            <div class="markdown">{{ node.assessments.observation|render_markdown }}</div>
           </div>
       {% endif %}
     </div>
@@ -69,63 +69,34 @@
       {% bar_graph assessments ancestors node.requirement_node %}
     {% endif %}
     {% if node.direct_evidences %}
-      <div
-        class="flex flex-col px-4 py-2 m-2 ml-0 rounded-lg bg-indigo-200 direct_evidences_block"
-      >
-        <div class="grid grid-cols-2 justify-items-left font-semibold">
-          <div>{% trans "Associated evidence:" %}</div>
-        </div>
-        {% for evidence in node.direct_evidences %}
-          {% if evidence.last_revision and evidence.last_revision.attachment %}
-            <li>
-              <a
-                class="text-indigo-700 hover:text-indigo-500"
-                target="_blank"
-                href="evidences/{{ archive_names|get_item:evidence.id|urlencode }}"
-                >{{ evidence.name }}</a
-              >
-            </li>
-          {% else %}
-            <li>{{ evidence.name }}</li>
-          {% endif %}
-        {% endfor %}
+      <div class="evidence-panel">
+        <div class="font-semibold">{% trans "Associated evidence:" %}</div>
+        {% include "snippets/evidence_list.html" with evidences=node.direct_evidences %}
       </div>
     {% endif %}
     {% if node.applied_controls %}
-      <div
-        class="flex flex-col px-4 py-2 m-2 ml-0 rounded-lg bg-indigo-200 applied_controls_block"
-      >
-        <div class="grid grid-cols-2 justify-items-left font-semibold">
-          <div>{% trans "Applied controls:" %}</div>
-          <div>{% trans "Evidence of applied controls:" %}</div>
-        </div>
-        <div class="flex flex-row">
-          <div class="flex flex-col items-left w-1/2">
-            {% for control in node.applied_controls %}
-              <li>
-                {{ control.measure.name }}: {{ control.measure.get_result_display }}
-              </li>
-            {% endfor %}
+      <div class="evidence-panel">
+        <div class="font-semibold">{% trans "Applied controls:" %}</div>
+        {% for control in node.applied_controls %}
+          <div class="control" data-applied-control="{{ control.measure.name }}">
+            <div class="control-header">
+              <span class="control-name">{{ control.measure.name }}</span>
+              <span class="control-status control-status--{{ control.measure.status }}">
+                {{ control.measure.get_status_display }}
+              </span>
+            </div>
+            {% if control.measure.description %}
+              <div class="markdown control-description">
+                {{ control.measure.description|render_markdown }}
+              </div>
+            {% endif %}
+            {% if control.evidences %}
+              {% include "snippets/evidence_list.html" with evidences=control.evidences %}
+            {% else %}
+              <p class="no-evidence">{% trans "No evidence" %}</p>
+            {% endif %}
           </div>
-          <div class="flex flex-col items-left w-1/2">
-            {% for control in node.applied_controls %}
-              {% for evidence in control.evidences %}
-                {% if evidence.last_revision and evidence.last_revision.attachment %}
-                <li>
-                  <a
-                    class="text-indigo-700 hover:text-indigo-500"
-                    target="_blank"
-                    href="evidences/{{ archive_names|get_item:evidence.id|urlencode }}"
-                    >{{ control.measure.name }}/{{ evidence.name }}</a
-                  >
-                </li>
-                {% else %}
-                  <li>{{ evidence.name }}</li>
-                {% endif %}
-              {% endfor %}
-            {% endfor %}
-          </div>
-        </div>
+        {% endfor %}
       </div>
     {% endif %}
   {% endif %}

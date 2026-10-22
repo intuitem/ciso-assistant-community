@@ -18,7 +18,7 @@ import zipfile
 import tempfile
 from datetime import date, datetime, timedelta, timezone
 from types import MappingProxyType
-from collections.abc import Sequence
+from collections.abc import Iterable, Sequence
 from typing import Dict, Any, List, Tuple, Final, Optional
 import time
 from django.db.models import (
@@ -17021,6 +17021,13 @@ def generate_html(
         if qd:
             questions_dict_by_urn[node.urn] = qd
 
+    def sorted_by_name[T: NameDescriptionMixin](objects: Iterable[T]) -> list[T]:
+        """Return `objects` sorted by name, so two exports of the same audit match.
+
+        Sorted in Python rather than with `order_by` to keep the prefetch.
+        """
+        return sorted(objects, key=lambda obj: obj.name.casefold())
+
     def generate_data_rec(requirement_node: RequirementNode):
         selected_evidences = []
         children_nodes = [
@@ -17056,16 +17063,16 @@ def generate_html(
                 node_data["status"] = assessment.get_status_display()
                 node_data["result_color_class"] = color_css_class(assessment.result)
                 node_data["status_color_class"] = color_css_class(assessment.status)
-                direct_evidences = assessment.evidences.all()
+                direct_evidences = sorted_by_name(assessment.evidences.all())
                 if direct_evidences:
                     selected_evidences += direct_evidences
                     node_data["direct_evidences"] = direct_evidences
 
-                measures = assessment.applied_controls.all()
+                measures = sorted_by_name(assessment.applied_controls.all())
                 if measures:
                     applied_controls = []
                     for measure in measures:
-                        evidences = measure.evidences.all()
+                        evidences = sorted_by_name(measure.evidences.all())
                         applied_controls.append(
                             {
                                 "measure": measure,

@@ -1650,17 +1650,21 @@ msgstr "Aucun réponse"
 msgid "Observation:"
 msgstr "Observation"
 
-#: core/templates/snippets/req_node.html:71
+#: core/templates/snippets/req_node.html:73
 msgid "Associated evidence:"
 msgstr "Preuves associées :"
 
-#: core/templates/snippets/req_node.html:94
+#: core/templates/snippets/req_node.html:79
 msgid "Applied controls:"
 msgstr "Mesures appliquées :"
 
-#: core/templates/snippets/req_node.html:95
-msgid "Evidence of applied controls:"
-msgstr "Preuves des mesures appliquées :"
+#: core/templates/snippets/req_node.html:96
+msgid "No evidence"
+msgstr "Aucune preuve"
+
+#: core/templates/snippets/evidence_list.html:13
+msgid "No file attached"
+msgstr "Aucun fichier joint"
 
 #: core/templates/snippets/ri_list_nested.html:43
 msgid "ID"
