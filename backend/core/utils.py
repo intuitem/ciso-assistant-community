@@ -2110,6 +2110,28 @@ def assessable_requirement_assessments(audit):
     ]
 
 
+def viewable_audit_ids(user, audit_ids) -> set:
+    """Which of `audit_ids` the user may read.
+
+    Seeing a third-party assessment does not carry the right to read its
+    questionnaire: the audit sits in an enclave folder of its own, and a role
+    assignment only reaches sub-folders when it is recursive.
+    """
+    from core.models import ComplianceAssessment
+    from iam.models import RoleAssignment
+
+    audit_ids = list(audit_ids)
+    if not audit_ids or user is None:
+        return set()
+    return set(
+        ComplianceAssessment.objects.filter(id__in=audit_ids)
+        .filter(
+            id__in=RoleAssignment.get_viewable_object_ids(user, ComplianceAssessment)
+        )
+        .values_list("id", flat=True)
+    )
+
+
 def compliance_overview(audit, requirement_assessments=None) -> dict:
     """The questionnaire's compliance split and global score, as its own page shows them.
 

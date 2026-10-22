@@ -36,6 +36,7 @@ from core.utils import (
     assessable_requirement_assessments,
     compliance_overviews,
     compute_respondent_progress,
+    viewable_audit_ids,
 )
 from django.db.models import (
     Case,
@@ -1398,6 +1399,7 @@ class EntityAssessmentViewSet(ExportMixin, BaseModelViewSet):
         }
 
         data["compliance_overview"] = compliance_overviews(audits)
+        data["viewable_audits"] = viewable_audit_ids(self.request.user, audit_ids)
 
         statuses: dict = {}
         for audit_id, status_value in RequirementAssignment.objects.filter(
@@ -1624,6 +1626,7 @@ class EntityAssessmentViewSet(ExportMixin, BaseModelViewSet):
         # Same page-level pass as the completion figures: the rows are already
         # in memory, and the framework trees are primed in one query.
         overviews = compliance_overviews(audits_by_id.values())
+        viewable_audits = viewable_audit_ids(request.user, audits_by_id)
 
         # `has_questions` and `progress` query per audit when read off the model.
         frameworks_with_questions = set(
@@ -1708,8 +1711,13 @@ class EntityAssessmentViewSet(ExportMixin, BaseModelViewSet):
             )
             entry.update({"review_progress": review_progress})
 
-            # None, not an empty donut: no questionnaire is not a result.
-            entry["compliance_overview"] = overviews.get(ea.compliance_assessment_id)
+            # None, not an empty donut: no questionnaire, or one out of reach,
+            # is not a result.
+            entry["compliance_overview"] = (
+                overviews.get(ea.compliance_assessment_id)
+                if ea.compliance_assessment_id in viewable_audits
+                else None
+            )
             assessments_data.append(entry)
 
         return Response(assessments_data)

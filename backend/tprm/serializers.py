@@ -448,15 +448,23 @@ class EntityAssessmentReadSerializer(BaseModelSerializer):
 
     def get_compliance_overview(self, obj):
         """The questionnaire's compliance split and global score, so the third-party
-        record shows what the audit page shows. None when there is no questionnaire."""
+        record shows what the audit page shows. None when there is no questionnaire,
+        or when the questionnaire's own folder is out of the reader's reach."""
         audit_id = obj.compliance_assessment_id
         if not audit_id:
             return None
-        cached = (self.context.get("optimized_data") or {}).get("compliance_overview")
+        from core.utils import compliance_overview, viewable_audit_ids
+
+        optimized = self.context.get("optimized_data") or {}
+        viewable = optimized.get("viewable_audits")
+        if viewable is None:
+            request = self.context.get("request")
+            viewable = viewable_audit_ids(getattr(request, "user", None), [audit_id])
+        if audit_id not in viewable:
+            return None
+        cached = optimized.get("compliance_overview")
         if cached is not None:
             return cached.get(audit_id)
-        from core.utils import compliance_overview
-
         return compliance_overview(obj.compliance_assessment)
 
     def get_assignment_status(self, obj):
