@@ -180,3 +180,70 @@ class TestOperationalScenarioSync:
         assert sources["attack_paths"] == [other_attack_path]
         assert sources["strategic_scenarios"] == []
         assert sources["feared_events"] == []
+
+    def _build_duplicate_attack_path_ref_ids(self, study):
+        """GH-4927: attack path ref_ids restart at AP.01 per strategic
+        scenario, so two operational scenarios can share one. The second
+        strategic scenario sorts first by ref_id despite being created last."""
+        first = _build_scenario_chain(
+            study, attack_path_selected=True, operational_scenario_selected=True
+        )
+        other_strategic_scenario = StrategicScenario.objects.create(
+            name="other strategic scenario",
+            ebios_rm_study=study,
+            ro_to_couple=first.ro_to,
+        )
+        other_attack_path = AttackPath.objects.create(
+            name="other attack path",
+            strategic_scenario=other_strategic_scenario,
+            is_selected=True,
+        )
+        OperationalScenario.objects.create(
+            ebios_rm_study=study,
+            attack_path=other_attack_path,
+            likelihood=1,
+            is_selected=True,
+        )
+        AttackPath.objects.update(ref_id="AP.01")
+        first.attack_path.strategic_scenario.ref_id = "SS.02"
+        first.attack_path.strategic_scenario.save()
+        other_strategic_scenario.ref_id = "SS.01"
+        other_strategic_scenario.save()
+
+    def _assert_unique_ref_ids(self, risk_assessment):
+        assert [
+            (rs.ref_id, rs.name.split(" - ")[0])
+            for rs in risk_assessment.risk_scenarios.order_by("ref_id")
+        ] == [
+            ("R.01", "other strategic scenario"),
+            ("R.02", "test strategic scenario"),
+        ]
+
+    def test_synced_risk_scenarios_get_unique_ref_ids(self):
+        study = EbiosRMStudy.objects.get(name="test study")
+        self._build_duplicate_attack_path_ref_ids(study)
+        risk_assessment = RiskAssessment.objects.create(
+            name="test risk assessment",
+            risk_matrix=study.risk_matrix,
+            ebios_rm_study=study,
+        )
+        sync_risk_assessment(risk_assessment, detect_sync_sources(study))
+        self._assert_unique_ref_ids(risk_assessment)
+
+    def test_risk_assessment_created_from_study_gets_unique_ref_ids(self, admin_client):
+        study = EbiosRMStudy.objects.get(name="test study")
+        self._build_duplicate_attack_path_ref_ids(study)
+        response = admin_client.post(
+            "/api/risk-assessments/",
+            {
+                "name": "test risk assessment",
+                "folder": str(study.folder_id),
+                "risk_matrix": str(study.risk_matrix_id),
+                "ebios_rm_study": str(study.id),
+            },
+            format="json",
+        )
+        assert response.status_code == 201, response.json()
+        self._assert_unique_ref_ids(
+            RiskAssessment.objects.get(id=response.json()["id"])
+        )
