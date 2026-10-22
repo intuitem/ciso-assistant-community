@@ -1354,7 +1354,7 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
             queryset = queryset.select_related(*joinable)
 
         if "filtering_labels" in model_fields:
-            queryset = queryset.prefetch_related("filtering_labels")
+            queryset = queryset.prefetch_related("filtering_labels__folder")
 
         return queryset
 
@@ -4329,7 +4329,8 @@ class FilteringLabelViewSet(BaseModelViewSet):
         queryset = super().get_queryset().select_related("folder")
         params = self.request.query_params
         if (
-            "offset" in params
+            self.action == "retrieve"
+            or "offset" in params
             or params.get("usage") in ("unused", "rare")
             or "usage_count" in params.get("ordering", "")
         ):
@@ -4351,9 +4352,12 @@ class FilteringLabelViewSet(BaseModelViewSet):
     @action(detail=False, methods=["post"], url_path="merge")
     def merge(self, request):
         target_id = request.data.get("target")
-        source_ids = {str(i) for i in request.data.get("sources") or []} - {
-            str(target_id)
-        }
+        raw_sources = request.data.get("sources") or []
+        if not isinstance(raw_sources, list):
+            return Response(
+                {"error": "invalidMergeSelection"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        source_ids = {str(i) for i in raw_sources} - {str(target_id)}
         queryset = self.get_queryset()
         target = queryset.filter(id=target_id).first() if target_id else None
         sources = list(queryset.filter(id__in=source_ids)) if source_ids else []

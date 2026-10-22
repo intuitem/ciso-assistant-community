@@ -117,6 +117,18 @@
 		cacheLock={cacheLocks['classification']}
 		bind:cachedValue={formDataCache['classification']}
 	/>
+	<AutocompleteSelect
+		multiple
+		{form}
+		createFromSelection={true}
+		optionsEndpoint="filtering-labels"
+		optionsLabelField="label"
+		translateOptions={false}
+		field="filtering_labels"
+		helpText={m.labelsHelpText()}
+		label={m.labels()}
+		allowUserOptions="append"
+	/>
 	{#if hasEntities}
 		<AutocompleteSelect
 			{form}

@@ -933,7 +933,12 @@ export const URL_MODEL_MAP: ModelMap = {
 				'cwes',
 				'folders'
 			] as urlModel[]
-		).map((urlModel) => ({ field: 'filtering_labels', urlModel }))
+		).map((urlModel) => ({
+			field: 'filtering_labels',
+			urlModel,
+			disableCreate: true,
+			disableDelete: true
+		}))
 	},
 	'risk-acceptances': {
 		name: 'riskacceptance',

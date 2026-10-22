@@ -14,8 +14,8 @@ from crq.models import (
     QuantitativeRiskScenario,
     QuantitativeRiskStudy,
 )
-from django.db.models import Q, TextField, Value
-from django.db.models.functions import Cast, Concat
+from django.db.models import CharField, Q, TextField, Value
+from django.db.models.functions import Cast, Coalesce, Concat, NullIf, Trim
 from doc_management.models import DocumentContainer
 from ebios_rm.models import AttackPath, EbiosRMStudy, FearedEvent, StrategicScenario
 from iam.models import Folder, RoleAssignment
@@ -159,7 +159,11 @@ SEARCHABLE_MODELS = [
         "representatives",
         ref_id=True,
         extra_search=["email", "entity__name"],
-        name=Concat("first_name", Value(" "), "last_name"),
+        name=Coalesce(
+            NullIf(Trim(Concat("first_name", Value(" "), "last_name")), Value("")),
+            "email",
+            output_field=CharField(),
+        ),
     ),
     _search_entry(
         EntityAssessment, "entity-assessments", extra_search=["entity__name"]

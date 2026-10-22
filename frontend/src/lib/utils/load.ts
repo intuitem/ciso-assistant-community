@@ -254,11 +254,12 @@ export const loadDetail = async ({ event, model, id }) => {
 	}
 	// Fetch counts for each reverse FK tab in parallel
 	if (model.reverseForeignKeyFields && model.reverseCountsEndpoint) {
-		const countsRes = await event.fetch(
-			`${BASE_API_URL}/${model.endpointUrl ?? model.urlModel}/${id}/${model.reverseCountsEndpoint}/`
-		);
-		const counts = countsRes.ok ? await countsRes.json() : {};
-		if (!countsRes.ok) await discardBody(countsRes);
+		const counts = await event
+			.fetch(
+				`${BASE_API_URL}/${model.endpointUrl ?? model.urlModel}/${id}/${model.reverseCountsEndpoint}/`
+			)
+			.then(async (res) => (res.ok ? res.json() : discardBody(res).then(() => ({}))))
+			.catch(() => ({}));
 		for (const e of model.reverseForeignKeyFields) {
 			const count = counts[getModelInfo(e.urlModel).name];
 			if (relatedModels[e.urlModel] && typeof count === 'number') {

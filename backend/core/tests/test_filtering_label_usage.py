@@ -110,3 +110,19 @@ def test_assessment_level_objects_take_labels(admin_client, labels):
     )
     assert [r["name"] for r in res.json()["results"]] == ["Card fraud"]
     assert res.json()["results"][0]["filtering_labels"][0]["str"] == "legacy"
+
+
+@pytest.mark.django_db
+def test_merge_rejects_non_list_sources(admin_client, labels):
+    res = admin_client.post(
+        "/api/filtering-labels/merge/",
+        {"target": str(labels["pci"].id), "sources": 5},
+        format="json",
+    )
+    assert res.status_code == 400
+
+
+@pytest.mark.django_db
+def test_retrieve_includes_usage_count(admin_client, labels):
+    res = admin_client.get(f"/api/filtering-labels/{labels['alias'].id}/")
+    assert res.json()["usage_count"] == 2

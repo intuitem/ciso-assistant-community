@@ -22,6 +22,7 @@
 	let labels: LabelSummary[] = $state([]);
 	let targetId = $state('');
 	let submitting = $state(false);
+	let loadFailed = $state(false);
 
 	const target = $derived(labels.find((l) => l.id === targetId));
 	const others = $derived(labels.filter((l) => l.id !== targetId));
@@ -34,8 +35,11 @@
 					.catch(() => null)
 			)
 		);
+		if (rows.some((r) => !r)) {
+			loadFailed = true;
+			return;
+		}
 		labels = rows
-			.filter(Boolean)
 			.map((r: any) => ({
 				id: r.id,
 				label: r.label,
@@ -84,6 +88,9 @@
 			{m.mergeLabels()}
 		</header>
 		<p class="text-sm text-surface-600-400">{m.mergeLabelsHelp()}</p>
+		{#if loadFailed}
+			<p class="text-sm text-error-500">{m.mergeLabelsError()}</p>
+		{/if}
 
 		<fieldset class="space-y-2">
 			<legend class="text-sm font-semibold text-surface-700-300 mb-2">{m.labelToKeep()}</legend>
