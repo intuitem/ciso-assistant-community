@@ -7390,6 +7390,7 @@
 	"dpiaDraftExists": "Un brouillon d'AIPD est déjà en cours pour ce traitement",
 	"unmatchedMeasures": "mesures citées dans un risque mais absentes de la liste des mesures",
 	"evaluationComments": "commentaires d'évaluation",
+	"unmappedAnswers": "réponses sans question correspondante dans le formulaire",
 	"piaComments": "commentaires",
 	"questionAnsweredInResponses": "Des réponses portent sur cette question : elle ne peut pas être supprimée",
 	"choiceSelectedInResponses": "Des réponses ont retenu ce choix : il ne peut pas être supprimé",

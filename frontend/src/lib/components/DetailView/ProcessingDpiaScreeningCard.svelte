@@ -366,7 +366,7 @@
 					</button>
 					{#if importForm}
 						<label
-							class="btn btn-sm preset-tonal-surface cursor-pointer"
+							class="btn btn-sm preset-tonal-surface cursor-pointer focus-within:ring-2"
 							class:pointer-events-none={starting}
 							data-testid="import-pia-button"
 						>
@@ -374,7 +374,8 @@
 							<input
 								type="file"
 								accept=".json,.pia,application/json"
-								class="hidden"
+								class="sr-only"
+								disabled={starting}
 								onchange={importPia}
 							/>
 						</label>

@@ -155,8 +155,12 @@ def import_pia(response, processing, data, user) -> dict:
     values = {}
 
     def put(leaf, value):
-        if value not in (None, "", []) and leaf in questions:
+        if value in (None, "", []):
+            return
+        if leaf in questions:
             values[questions[leaf].urn] = value
+        else:
+            skipped.add("unmappedAnswers")
 
     def text_of(qid):
         return html_to_text(answers.get(qid, {}).get("text"))
@@ -199,9 +203,7 @@ def import_pia(response, processing, data, user) -> dict:
                     html_to_text(evaluation.get("action_plan_comment")),
                 )
                 or None,
-                eta=parse_date(
-                    str(evaluation.get("estimated_implementation_date") or "")[:10]
-                ),
+                eta=_date(evaluation.get("estimated_implementation_date")),
             )
             created += 1
         else:
@@ -306,6 +308,13 @@ def import_pia(response, processing, data, user) -> dict:
         "controls_reused": reused,
         "skipped": sorted(skipped),
     }
+
+
+def _date(value):
+    try:
+        return parse_date(str(value or "")[:10])
+    except ValueError:
+        return None
 
 
 def _int(value):

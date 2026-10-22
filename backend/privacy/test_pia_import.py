@@ -134,12 +134,27 @@ def test_import_pia_rejects_bad_files(admin_client, processing, dpia_form):
 def test_import_pia_needs_a_cnil_shaped_form(admin_client, processing, dpia_form):
     url = f"/api/privacy/processings/{processing.id}/import-pia/"
     payload = {"quick_form": str(dpia_form.id), "pia": EXPORT}
-    dpia_form.pages.filter(urn=f"{P}:overview").update(urn=None)
-    dpia_form.pages.filter(urn=f"{P}:measures").update(urn=None)
+    measures = dpia_form.pages.get(urn=f"{P}:measures")
+    dpia_form.pages.filter(pk=measures.pk).update(urn=None)
     res = admin_client.post(url, payload, format="json")
     assert res.status_code == 400 and res.json()["error"] == "piaFormMismatch"
     assert not QuickFormResponse.objects.filter(quick_form=dpia_form).exists()
     assert not AppliedControl.objects.filter(name="Encryption").exists()
+
+    dpia_form.pages.filter(pk=measures.pk).update(urn=f"{P}:measures")
+    dpia_form.pages.filter(urn=f"{P}:overview").update(urn=None)
+    bad_date = {
+        **EXPORT,
+        "evaluations": [
+            {"reference_to": "3.1.7", "estimated_implementation_date": "2027-02-30"}
+        ],
+    }
+    res = admin_client.post(
+        url, {"quick_form": str(dpia_form.id), "pia": bad_date}, format="json"
+    )
+    assert res.status_code == 201, res.json()
+    assert "unmappedAnswers" in res.json()["skipped"]
+    assert AppliedControl.objects.get(name="Encryption").eta is None
 
 
 def _domain_user(domain, codenames):
