@@ -604,7 +604,7 @@ REST_FRAMEWORK = {
     "DEFAULT_FILTER_CLASSES": ["django_filters.rest_framework.DjangoFilterBackend"],
     "DEFAULT_PAGINATION_CLASS": "core.pagination.CustomLimitOffsetPagination",
     "PAGE_SIZE": PAGINATE_BY,
-    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_SCHEMA_CLASS": "ciso_assistant.openapi.AutoSchema",
     "EXCEPTION_HANDLER": "core.helpers.handle",
 }
 
@@ -801,10 +801,24 @@ PASSWORD_HASHERS = [
 ]
 
 SPECTACULAR_SETTINGS = {
-    "TITLE": "CISO Assistant API - Experimental",
-    "DESCRIPTION": "CISO Assistant - API Documentation for automating all your GRC needs",
-    "VERSION": "0.7.0",
+    "TITLE": "CISO Assistant API",
+    "DESCRIPTION": (
+        "Automate your GRC work with the CISO Assistant REST API.\n\n"
+        "- **Authentication**: send a personal access token, created from your "
+        "user profile, as `Authorization: Token <PAT>`.\n"
+        "- **Pagination**: list endpoints take `limit` and `offset`.\n"
+        "- **Filters**: date and number filters take the suffixes `__gt`, `__gte`, "
+        "`__lt`, `__lte` and `__isnull` (e.g. `created_at__date__gte=2026-01-01`).\n"
+        "- **Sparse fields**: `?fields=a,b,c` trims a GET response to those fields."
+    ),
+    "VERSION": VERSION,
     "SERVE_INCLUDE_SCHEMA": False,
+    # serdes routes live outside /api/, which would collapse every tag to "api"
+    "SCHEMA_PATH_PREFIX": r"/api/",
+    "POSTPROCESSING_HOOKS": [
+        "drf_spectacular.hooks.postprocess_schema_enums",
+        "ciso_assistant.openapi.split_namespace_tags",
+    ],
     # OTHER SETTINGS
 }
 
