@@ -24,6 +24,11 @@
 	const compliantShare = $derived(
 		share(slices.find((slice) => slice.name === 'compliant')?.value ?? 0)
 	);
+	// The tooltip's content, for readers that never see it.
+	const breakdownLabel = $derived(
+		`${m.compliance()}: ` +
+			slices.map((slice) => `${safeTranslate(slice.localName)} ${share(slice.value)}%`).join(', ')
+	);
 </script>
 
 {#if !overview}
@@ -65,16 +70,21 @@
 		{#if showResult}
 			<div class="group relative">
 				<!-- Segments grow by count, so rounding never leaves the bar short. -->
+				<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+				<!-- A tab stop on purpose: it is what opens the breakdown without a mouse. -->
 				<div
-					class="flex h-3 w-full gap-px overflow-hidden rounded-full bg-surface-300-700"
+					class="flex h-3 w-full gap-px overflow-hidden rounded-full bg-surface-300-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
 					data-testid="compliance-bar"
+					tabindex="0"
+					role="img"
+					aria-label={breakdownLabel}
 				>
 					{#each slices as slice (slice.name)}
 						<div style="flex: {slice.value} 1 0%; background-color: {slice.itemStyle.color}"></div>
 					{/each}
 				</div>
 				<div
-					class="absolute bottom-full left-1/2 z-10 mb-1 w-max max-w-full -translate-x-1/2 rounded bg-gray-900 px-2 py-1 text-xs text-white opacity-0 shadow transition-opacity pointer-events-none group-hover:opacity-100"
+					class="absolute bottom-full left-1/2 z-10 mb-1 w-max max-w-full -translate-x-1/2 rounded bg-gray-900 px-2 py-1 text-xs text-white opacity-0 shadow transition-opacity pointer-events-none group-hover:opacity-100 group-focus-within:opacity-100"
 					role="tooltip"
 				>
 					{#each slices as slice (slice.name)}
