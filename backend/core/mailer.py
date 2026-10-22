@@ -23,6 +23,7 @@ import ssl
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 
+import httpx
 import structlog
 from django.conf import settings
 from django.core.mail import EmailMessage
@@ -58,6 +59,14 @@ def describe_error(error: BaseException) -> str:
         return "server closed the connection"
     if isinstance(error, smtplib.SMTPException):
         return "SMTP protocol error"
+    if isinstance(error, httpx.ProxyError):
+        return "the HTTP proxy refused the connection"
+    if isinstance(error, httpx.TimeoutException):
+        return "connection timed out"
+    if isinstance(error, httpx.ConnectError):
+        return "connection failed"
+    if isinstance(error, httpx.HTTPError):
+        return "HTTP transport error"
     if isinstance(error, ssl.SSLError):
         return "TLS handshake failed"
     if isinstance(error, socket.gaierror):

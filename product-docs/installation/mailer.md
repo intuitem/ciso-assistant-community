@@ -44,7 +44,7 @@ Rules enforced by the panel:
 * Every save notifies the other administrators by email, through the mailer that was active before the change, because whoever controls the mail server receives every password reset link.
 * The tab shows delivery health for every configured mailer: the last attempt, its outcome and whether failover reached it, or "never attempted". Testing the saved values refreshes it. The same rows are printed by `send_test_email`.
 
-The Microsoft 365 and Google Workspace buttons fill in the values from the sections above; the tenant-side steps are the same.
+The Microsoft 365 and Google Workspace buttons fill in the values from the sections above; the tenant-side steps are the same. Microsoft Graph is the third transport in the list: tenant ID, client ID, client secret and mailbox, no host.
 
 ### Checking the configuration
 
@@ -222,3 +222,26 @@ SMTP with OAuth on Google requires the full mail scope, and domain-wide delegati
 Use the same variables with the values from the provider's documentation. `refresh_token` additionally needs `EMAIL_OAUTH2_REFRESH_TOKEN`; `EMAIL_OAUTH2_CLIENT_SECRET` is optional for it, so public clients work. The application keeps using the refresh token from the environment. That works with providers that hand out a new refresh token on each refresh while the old one stays valid (Microsoft, Keycloak by default), but not when the provider revokes a refresh token once it has been used (Keycloak "Revoke Refresh Token", rotation with reuse detection in Okta or Auth0): turn that off for this client. When the token is refused, the error says so. `jwt_bearer` needs either `EMAIL_OAUTH2_SERVICE_ACCOUNT_FILE` or `EMAIL_OAUTH2_ISSUER` plus `EMAIL_OAUTH2_PRIVATE_KEY`, and optionally `EMAIL_OAUTH2_AUDIENCE` when it differs from the token URL. The token URL must use https. It may point at a private identity provider.
 
 Tokens are cached until shortly before they expire. A token the server rejects is dropped from the cache and the login is retried once with a new token, on a new connection when the server took longer than `EMAIL_TIMEOUT` to answer the failed login. A second rejection counts as an unreachable mailer and the next configured mailer, if any, is tried.
+
+### Microsoft Graph (mail over HTTPS)
+
+Two situations rule out SMTP, with or without OAuth: a tenant whose policy disables SMTP AUTH for every mailbox, and a network whose only way out is an HTTP proxy, which SMTP cannot cross. Microsoft Graph sends mail over HTTPS and covers both. Set `EMAIL_TRANSPORT=graph`; there is no host, port or TLS setting.
+
+```bash
+EMAIL_TRANSPORT=graph
+EMAIL_GRAPH_TENANT_ID=<tenant id or verified domain>
+EMAIL_HOST_USER=noreply@example.com
+DEFAULT_FROM_EMAIL=noreply@example.com
+EMAIL_OAUTH2_CLIENT_ID=<application (client) id>
+EMAIL_OAUTH2_CLIENT_SECRET=<client secret>
+```
+
+`EMAIL_HOST_USER` is the mailbox mail is sent as. The same variables exist with a `_RESCUE` suffix, so Graph can also be the second mailer behind an SMTP relay. `EMAIL_TIMEOUT` bounds each request.
+
+On the tenant side:
+
+1. Register an application in Entra ID and create a client secret.
+2. Grant it the `Mail.Send` **application** permission and give admin consent. That permission is tenant-wide by default: a leaked secret could send as any mailbox.
+3. Limit it to the sending mailbox with an Exchange application access policy, for example `New-ApplicationAccessPolicy -AppId <client id> -PolicyScopeGroupId <mail-enabled group holding the mailbox> -AccessRight RestrictAccess`, and check it with `Test-ApplicationAccessPolicy`. SMTP AUTH can stay disabled.
+
+Outbound HTTPS follows the standard proxy variables, `HTTPS_PROXY` and `NO_PROXY`, like every other HTTPS call the backend makes; an intercepting proxy's CA goes in `SSL_CERT_FILE` as described above. Token endpoint failures count as an unreachable mailer and the next configured mailer, if any, is tried. A rejected send is final and the error shows Graph's own answer, for example `Graph replied 403 ErrorAccessDenied` when the access policy excludes the mailbox. Attachments are not supported by this transport; the application does not send any.

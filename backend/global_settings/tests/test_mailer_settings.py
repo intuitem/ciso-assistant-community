@@ -309,6 +309,87 @@ def test_second_mailer_can_be_removed(switch_on, client, fake_smtp):
     ) == [1]
 
 
+def graph_payload(**overrides):
+    data = payload()
+    data["mailers"] = [
+        {
+            "position": 1,
+            "transport": "graph",
+            "graph_tenant_id": "contoso.onmicrosoft.com",
+            "username": "noreply@example.com",
+            "oauth2_client_id": "client-1",
+            "oauth2_client_secret": "s3cret",
+        }
+    ]
+    data.update(overrides)
+    return data
+
+
+@pytest.fixture
+def fake_graph(monkeypatch):
+    """Microsoft's token and sendMail endpoints behind one mock transport."""
+    import httpx
+
+    from core import graph_backend, mail_oauth2
+
+    sends = []
+
+    def handler(request):
+        if request.url.host == "login.microsoftonline.com":
+            return httpx.Response(200, json={"access_token": "tok", "expires_in": 3600})
+        sends.append(str(request.url))
+        return httpx.Response(202)
+
+    transport = httpx.MockTransport(handler)
+    monkeypatch.setattr(graph_backend, "TRANSPORT", transport)
+    monkeypatch.setattr(mail_oauth2, "TRANSPORT", transport)
+    mail_oauth2.clear_cache()
+    yield sends
+    mail_oauth2.clear_cache()
+
+
+def test_graph_row_is_tested_saved_and_read_back(
+    switch_on, settings, client, fake_graph
+):
+    # No operator-supplied endpoint, so the network policy has nothing to
+    # check even where private networks are refused.
+    settings.ALLOW_PRIVATE_NETWORK_REQUESTS = False
+    data = graph_payload()
+    response = client.post(url("mailer-settings-test"), data, format="json")
+    assert response.status_code == 200, response.json()
+    assert fake_graph == [
+        "https://graph.microsoft.com/v1.0/users/noreply@example.com/sendMail"
+    ]
+    data["test_token"] = response.json()["test_token"]
+    response = client.put(url(), data, format="json")
+    assert response.status_code == 200, response.json()
+    row = Mailer.objects.get(position=1)
+    assert (row.transport, row.host, row.graph_tenant_id) == (
+        "graph",
+        "",
+        "contoso.onmicrosoft.com",
+    )
+    read = response.json()["mailers"][0]
+    assert read["graph_tenant_id"] == "contoso.onmicrosoft.com"
+    assert read["has_oauth2_client_secret"] is True
+    assert "oauth2_client_secret" not in read
+
+
+def test_unusable_graph_row_is_refused(switch_on, client):
+    data = graph_payload()
+    data["mailers"][0]["graph_tenant_id"] = ""
+    response = client.post(url("mailer-settings-test"), data, format="json")
+    assert response.status_code == 400
+    assert response.json()["mailers"] == "mailer 1: EMAIL_GRAPH_TENANT_ID is required"
+
+
+def test_smtp_row_without_a_host_is_refused(switch_on, client, fake_smtp):
+    data = payload(host="")
+    response = client.post(url("mailer-settings-test"), data, format="json")
+    assert response.status_code == 400
+    assert "mailer 1: a host is required" in str(response.json()["mailers"])
+
+
 def test_unusable_oauth_row_is_refused(switch_on, client, fake_smtp):
     data = payload(override_untested=True)
     data["mailers"][0]["transport"] = "smtp-oauth2"

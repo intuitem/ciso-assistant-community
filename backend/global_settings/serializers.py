@@ -969,6 +969,7 @@ class MailerSerializer(serializers.ModelSerializer):
             "oauth2_private_key",
             "has_oauth2_private_key",
             "oauth2_audience",
+            "graph_tenant_id",
         ]
 
     def get_has_password(self, obj) -> bool:
