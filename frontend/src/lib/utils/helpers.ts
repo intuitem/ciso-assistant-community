@@ -91,6 +91,38 @@ export function getScoreHexColor(
 }
 
 /**
+ * `getScoreHexColor`'s bands as text classes. Its hexes are chart fills: on a
+ * light surface, yellow-300 on white is barely legible as a figure.
+ */
+export function getScoreTextClass(
+	value: number | null,
+	max_score: number,
+	inversedColors = false,
+	min_score = 0
+) {
+	value ??= min_score;
+	const range = max_score - min_score;
+	const percentage = range > 0 ? ((value - min_score) * 100) / range : 0;
+	const classes = {
+		red: 'text-red-600 dark:text-red-400',
+		orange: 'text-orange-600 dark:text-orange-400',
+		yellow: 'text-yellow-600 dark:text-yellow-300',
+		green: 'text-green-600 dark:text-green-400'
+	};
+	if (inversedColors) {
+		if (percentage < 25) return classes.green;
+		if (percentage < 50) return classes.yellow;
+		if (percentage < 75) return classes.orange;
+		return classes.red;
+	} else {
+		if (percentage < 25) return classes.red;
+		if (percentage < 50) return classes.orange;
+		if (percentage < 75) return classes.yellow;
+		return classes.green;
+	}
+}
+
+/**
  * A score as displayed: two decimals, half up, like the CCB CyFun tools' 0.00
  * format and the backend's `round_score`. Scores are computed unrounded; only
  * their display rounds. As the backend, float noise is cleared at nine

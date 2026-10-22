@@ -155,17 +155,10 @@
 							</span>
 						{/if}
 					</div>
-					<div class="w-full">
-						<ComplianceOverview
-							overview={data.data.compliance_overview}
-							name="ea_compliance"
-							height="h-52"
-							showPercentage
-						/>
-					</div>
+					<ComplianceOverview overview={data.data.compliance_overview} name="ea_compliance" />
 				</div>
 			{:else}
-				<ComplianceOverview overview={null} name="ea_compliance" height="h-full" />
+				<ComplianceOverview overview={null} name="ea_compliance" />
 			{/if}
 		{/snippet}
 		{#snippet actions()}

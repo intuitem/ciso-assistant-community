@@ -8,11 +8,9 @@
 	interface Props {
 		overview: ComplianceOverview | null | undefined;
 		name: string;
-		height?: string;
-		showPercentage?: boolean;
 	}
 
-	let { overview, name, height = 'h-44', showPercentage = false }: Props = $props();
+	let { overview, name }: Props = $props();
 
 	const score = $derived(overview?.global_score);
 	const scoreFloor = $derived(
@@ -24,52 +22,54 @@
 	const showResult = $derived(
 		Boolean(overview?.show_result) && (overview?.donut.values ?? []).some((s) => s.value > 0)
 	);
+	const columns = $derived(Number(showScore) + Number(showResult));
 </script>
 
 {#if !overview}
 	<div
-		class="flex items-center justify-center gap-2 {height} text-sm text-surface-600-400"
+		class="flex h-full items-center justify-center gap-2 p-2 text-sm text-surface-600-400"
 		data-testid="no-questionnaire"
 	>
 		<i class="fa-solid fa-circle-info"></i>
 		<span>{m.noQuestionnaireAttached()}</span>
 	</div>
-{:else if showResult || showScore}
-	<div class="flex flex-col">
-		<span class="block text-xs text-surface-600-400 text-center">{m.compliance()}</span>
-		<div class="flex flex-row items-center justify-center gap-2 {height}">
-			{#if showResult}
-				<div class="flex-1 min-w-0 h-full" data-testid="compliance-donut">
-					<DonutChart
-						name={`${name}_compliance`}
-						s_label="Result"
-						orientation="horizontal"
-						height="h-full"
-						values={overview.donut.values}
-						colors={overview.donut.values.map((slice) => slice.itemStyle.color)}
-						{showPercentage}
-					/>
-				</div>
-			{/if}
-			{#if showScore}
-				<div class="shrink-0 w-28 h-full" data-testid="compliance-score">
-					<RingProgress
-						name={`${name}_maturity`}
-						value={overview.global_score.maturity_score}
-						max={overview.global_score.total_max_score ?? 100}
-						min={scoreFloor}
-						color={getScoreHexColor(
-							overview.global_score.maturity_score,
-							overview.global_score.total_max_score ?? 100,
-							false,
-							scoreFloor
-						)}
-						strokeWidth={30}
-						fontSize={28}
-						title={m.maturity()}
-					/>
-				</div>
-			{/if}
-		</div>
+{:else if columns > 0}
+	<div
+		class="grid w-full gap-2"
+		style="grid-template-columns: repeat({columns}, minmax(0, 1fr)); grid-auto-rows: minmax(14rem, auto);"
+	>
+		{#if showScore}
+			<div class="min-w-0 min-h-56" data-testid="compliance-score">
+				<RingProgress
+					name={`${name}_maturity`}
+					value={overview.global_score.maturity_score}
+					max={overview.global_score.total_max_score ?? 100}
+					min={scoreFloor}
+					color={getScoreHexColor(
+						overview.global_score.maturity_score,
+						overview.global_score.total_max_score ?? 100,
+						false,
+						scoreFloor
+					)}
+					strokeWidth={16}
+					fontSize={32}
+					radius="55%"
+					title={m.maturity()}
+				/>
+			</div>
+		{/if}
+		{#if showResult}
+			<div class="min-w-0 min-h-56" data-testid="compliance-donut">
+				<DonutChart
+					name={`${name}_compliance`}
+					s_label="Result"
+					title={m.compliance()}
+					orientation="horizontal"
+					values={overview.donut.values}
+					colors={overview.donut.values.map((slice) => slice.itemStyle.color)}
+					showPercentage={true}
+				/>
+			</div>
+		{/if}
 	</div>
 {/if}

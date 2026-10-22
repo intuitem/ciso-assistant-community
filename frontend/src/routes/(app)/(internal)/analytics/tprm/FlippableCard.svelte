@@ -1,6 +1,6 @@
 <script lang="ts">
 	import TierBadge from '$lib/components/ModelTable/field/TierBadge.svelte';
-	import ComplianceOverview from '$lib/components/DataViz/ComplianceOverview.svelte';
+	import ComplianceSummary from '$lib/components/DataViz/ComplianceSummary.svelte';
 	import type { ComplianceOverview as ComplianceOverviewData } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 	// State to track if the card is flipped
@@ -64,7 +64,14 @@
 		<span class="block text-xs text-surface-600-400 mb-1 text-center">{label}</span>
 		<div class="text-surface-950-50">
 			<svg viewBox="0 0 100 100" width="72" height="72">
-				<circle cx="50" cy="50" r="45" fill="none" stroke="#e5e7eb" stroke-width="8" />
+				<circle
+					cx="50"
+					cy="50"
+					r="45"
+					fill="none"
+					class="stroke-surface-200-800"
+					stroke-width="8"
+				/>
 				<circle
 					cx="50"
 					cy="50"
@@ -76,15 +83,9 @@
 					stroke-dashoffset={283 - (283 * (value ?? 0)) / 100}
 					transform="rotate(-90 50 50)"
 				/>
-				<text
-					x="50"
-					y="55"
-					text-anchor="middle"
-					font-size="20"
-					font-weight="bold"
-					fill="currentColor"
-				>
-					<a data-testid={testid} {href}>{value ?? 0}%</a>
+				<!-- On the anchor: currentColor there resolves to the link colour. -->
+				<text x="50" y="55" text-anchor="middle" font-size="20" font-weight="bold">
+					<a data-testid={testid} {href} class="fill-surface-950-50">{value ?? 0}%</a>
 				</text>
 			</svg>
 		</div>
@@ -92,15 +93,15 @@
 {/snippet}
 
 <div
-	class="perspective-1000 w-full h-full min-h-[600px] relative w-full h-full transition-transform duration-800 {isFlipped
+	class="perspective-1000 relative w-full h-full transition-transform duration-800 {isFlipped
 		? 'rotate-x-180'
 		: ''}"
 	role="listitem"
 	style="transform-style: preserve-3d;"
 >
-	<!-- Front face of the card -->
+	<!-- Front face of the card. In flow, so the card is as tall as its content. -->
 	<div
-		class="absolute w-full h-full rounded-lg shadow-lg bg-surface-50-950 overflow-hidden"
+		class="relative w-full h-full rounded-lg border border-surface-200-800 shadow-lg bg-surface-50-950 overflow-hidden"
 		style="backface-visibility: hidden;"
 	>
 		<!-- Flip button for front face -->
@@ -199,11 +200,7 @@
 					)}
 				</div>
 
-				<ComplianceOverview
-					overview={entity_assessment.compliance_overview}
-					name={`card_${entity_assessment.entity_assessment_id}`}
-					height="h-40"
-				/>
+				<ComplianceSummary overview={entity_assessment.compliance_overview} />
 
 				<!-- Dates -->
 				<div class="grid grid-cols-2 gap-2 text-sm text-surface-600-400">
@@ -222,7 +219,7 @@
 
 	<!-- Back face of the card -->
 	<div
-		class="absolute w-full h-full rounded-lg shadow-md bg-surface-50-950 overflow-hidden"
+		class="absolute inset-0 rounded-lg border border-surface-200-800 shadow-md bg-surface-50-950 overflow-hidden"
 		style="backface-visibility: hidden; transform: rotateX(180deg);"
 	>
 		<!-- Flip button for back face -->
