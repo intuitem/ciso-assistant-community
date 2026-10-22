@@ -240,9 +240,6 @@
 ## AI and Integrations
 
 * [Overview](integrations/README.md)
-* [API reference](integrations/api.md)
-* [Generating a PAT](integrations/pat.md)
-* [Service accounts](integrations/service-accounts.md)
 * [Outgoing webhooks](integrations/webhooks.md)
 * [Audit log forwarding](integrations/audit-log-forwarding.md)
 * [Microsoft Sentinel](integrations/sentinel.md)
@@ -253,6 +250,25 @@
 * [Third-party integrations](integrations/third-party/README.md)
   * [Jira](integrations/third-party/jira.md)
   * [ServiceNow](integrations/third-party/servicenow.md)
+
+## API documentation
+
+* [Overview](integrations/api.md)
+* [Generating a PAT](integrations/pat.md)
+* [Service accounts](integrations/service-accounts.md)
+* [API reference](api-reference/README.md)
+  * ```yaml
+    props:
+      models: false
+      downloadLink: true
+      grouping: by-tag
+    type: builtin:openapi
+    dependencies:
+      spec:
+        ref:
+          kind: openapi
+          spec: ciso-assistant
+    ```
 
 ## Contributing
 

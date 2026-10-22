@@ -223,6 +223,7 @@ BASELINE_READER_PERMISSIONS_LIST = [
     "view_assetclass",
     "view_assetcapability",
     "view_objectclassification",
+    "view_classificationlevel",
     "view_entity",
     "view_tier",
     "view_entitytierchange",
