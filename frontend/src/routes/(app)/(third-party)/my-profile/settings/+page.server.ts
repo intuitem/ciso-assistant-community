@@ -1,5 +1,5 @@
 import { ALLAUTH_API_URL, BASE_API_URL } from '$lib/utils/constants';
-import { error, fail } from '@sveltejs/kit';
+import { error, fail, isRedirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { activateTOTPSchema, registerWebAuthnSchema } from '$lib/utils/schemas';
 import { message, setError, superValidate } from 'sveltekit-superforms';
@@ -53,7 +53,8 @@ export const load: PageServerLoad = async (event) => {
 			const webauthnData = await webauthnRes.json();
 			webauthnCreationOptions = webauthnData.data?.creation_options ?? null;
 		}
-	} catch {
+	} catch (err) {
+		if (isRedirect(err)) throw err;
 		console.error('Could not fetch WebAuthn creation options');
 	}
 

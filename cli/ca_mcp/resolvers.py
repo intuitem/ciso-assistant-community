@@ -22,12 +22,14 @@ def resolve_folder_id(folder_name_or_id: str) -> str:
     If already a UUID, returns it. If a name, looks it up via API.
     Returns the UUID string or raises ValueError with a clear message.
     """
-    # Check if it's already a UUID (contains hyphens in UUID format)
-    if "-" in folder_name_or_id and len(folder_name_or_id) == 36:
+    if _is_uuid(folder_name_or_id):
         return folder_name_or_id
 
-    # Otherwise, look up by name - return exactly one result
-    folders, error = fetch_all_results("/folders/", params={"name": folder_name_or_id})
+    # Otherwise, look up by name - return exactly one result. No item cap: a
+    # truncated list could hide a duplicate name and look unambiguous.
+    folders, error = fetch_all_results(
+        "/folders/", params={"name": folder_name_or_id}, max_items=None
+    )
 
     if error:
         raise ValueError(f"Folder '{folder_name_or_id}' API error: {error}")
@@ -489,6 +491,41 @@ def resolve_vulnerability_id(vulnerability_name_or_id: str) -> str:
         )
 
     return str(vulnerabilities[0]["id"])
+
+
+def resolve_evidence_id(evidence_name_or_id: str) -> str:
+    """Helper function to resolve evidence name to UUID
+    If already a UUID, returns it. If a name, looks it up via API.
+    """
+    if _is_uuid(evidence_name_or_id):
+        return evidence_name_or_id
+
+    ref = str(evidence_name_or_id or "").strip()
+    if not ref:
+        raise ValueError("Evidence reference is empty")
+
+    # No item cap: a truncated list could hide a duplicate name and make an
+    # ambiguous reference look unique.
+    evidences, error = fetch_all_results(
+        "/evidences/", params={"name": ref}, max_items=None
+    )
+
+    if error:
+        raise ValueError(f"Evidence '{ref}' API error: {error}")
+
+    if not evidences:
+        raise ValueError(f"Evidence '{ref}' not found")
+
+    if len(evidences) > 1:
+        labels = [
+            f"{e.get('name')} ({(e.get('folder') or {}).get('str')}, {e.get('id')})"
+            for e in evidences[:5]
+        ]
+        raise ValueError(
+            f"Ambiguous evidence name '{ref}', found {len(evidences)}: {labels}"
+        )
+
+    return str(evidences[0]["id"])
 
 
 def resolve_incident_id(incident_name_or_id: str) -> str:
@@ -1068,32 +1105,40 @@ def resolve_user_id(user_ref: str) -> str:
     if not ref:
         raise ValueError("User reference is empty")
 
-    params = {"email": ref} if "@" in ref else {"search": ref}
-    users, error = fetch_all_results("/users/", params=params)
+    params = {"email__icontains": ref} if "@" in ref else {"search": ref}
+    # No item cap: the exact match (or a second one) may sit beyond the
+    # default limit of a fuzzy search.
+    users, error = fetch_all_results("/users/", params=params, max_items=None)
     if error:
         raise ValueError(f"User '{ref}' API error: {error}")
 
     if not users:
         raise ValueError(f"User '{ref}' not found")
 
-    if len(users) > 1:
-        needle = ref.lower()
-        exact = [
-            u
-            for u in users
-            if needle
-            in {
-                (u.get("first_name") or "").lower(),
-                (u.get("last_name") or "").lower(),
-                f"{u.get('first_name') or ''} {u.get('last_name') or ''}".strip().lower(),
-            }
-        ]
-        if len(exact) == 1:
-            return str(exact[0]["id"])
-        labels = [u.get("email") for u in users[:5]]
-        raise ValueError(f"Ambiguous user '{ref}', found {len(users)}: {labels}")
+    # ?search= is a partial match: require an exact email or name match even
+    # for a single result, so "Ann" never silently resolves to "Joanna Smith".
+    needle = ref.lower()
+    exact = [
+        u
+        for u in users
+        if needle
+        in {
+            (u.get("email") or "").lower(),
+            (u.get("first_name") or "").lower(),
+            (u.get("last_name") or "").lower(),
+            f"{u.get('first_name') or ''} {u.get('last_name') or ''}".strip().lower(),
+        }
+    ]
+    if len(exact) == 1:
+        return str(exact[0]["id"])
 
-    return str(users[0]["id"])
+    if not exact:
+        labels = [u.get("email") for u in users[:5]]
+        raise ValueError(
+            f"User '{ref}' not found as an exact email or name. Candidates: {labels}"
+        )
+    labels = [u.get("email") for u in exact[:5]]
+    raise ValueError(f"Ambiguous user '{ref}', found {len(exact)}: {labels}")
 
 
 def resolve_user_ids(user_refs) -> list:
