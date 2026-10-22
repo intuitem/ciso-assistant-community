@@ -1320,6 +1320,7 @@ class EntityAssessmentViewSet(ExportMixin, BaseModelViewSet):
         "compliance_assessment__campaign",
         "due_date",
         "expiry_date",
+        "filtering_labels",
     ]
 
     # Ordering the raw string would be alphabetical; the annotation ranks it by
@@ -2260,6 +2261,7 @@ class ContractViewSet(ExportMixin, BaseModelViewSet):
         "notice_period_provider",
         "end_date",
         "start_date",
+        "filtering_labels",
     ]
 
     @action(detail=False, name="Get status choices")

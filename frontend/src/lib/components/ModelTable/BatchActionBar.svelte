@@ -12,6 +12,7 @@
 	import BatchActionModal from '$lib/components/Modals/BatchActionModal.svelte';
 	import { applyUnreadCount } from '$lib/utils/stores';
 	import MergeAppliedControlsModal from '$lib/components/Modals/MergeAppliedControlsModal.svelte';
+	import MergeLabelsModal from '$lib/components/Modals/MergeLabelsModal.svelte';
 	import ComposeMetricModal from '$lib/components/Modals/ComposeMetricModal.svelte';
 	import type { BatchActionConfig, TableBatchAction } from '$lib/utils/table';
 	import type { urlModel } from '$lib/utils/types';
@@ -121,6 +122,16 @@
 				toastStore.trigger({
 					message: m.mergeMaxSelection({ n: maxSel }),
 					background: 'preset-filled-warning-500'
+				});
+				return;
+			}
+			if (URLModel === 'filtering-labels') {
+				modalStore.trigger({
+					type: 'component',
+					component: {
+						ref: MergeLabelsModal,
+						props: { sourceIds: ids, handler, onClearSelection }
+					}
 				});
 				return;
 			}

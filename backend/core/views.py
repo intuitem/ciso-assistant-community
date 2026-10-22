@@ -4265,18 +4265,143 @@ class VulnerabilityViewSet(BaseModelViewSet):
         return Response(treemap_data, status=status.HTTP_200_OK)
 
 
+def _filtering_label_relations():
+    for rel in FilteringLabel._meta.related_objects:
+        if rel.many_to_many:
+            yield (
+                rel.through,
+                rel.field.m2m_reverse_field_name(),
+                rel.field.m2m_field_name(),
+            )
+
+
+def _label_usage_count():
+    total = Value(0)
+    for through, label_col, _ in _filtering_label_relations():
+        total = total + Coalesce(
+            Subquery(
+                through.objects.filter(**{label_col: OuterRef("pk")})
+                .order_by()
+                .values(label_col)
+                .annotate(c=Count("*"))
+                .values("c"),
+                output_field=IntegerField(),
+            ),
+            0,
+        )
+    return ExpressionWrapper(total, output_field=IntegerField())
+
+
+class FilteringLabelFilterSet(GenericFilterSet):
+    usage = df.ChoiceFilter(
+        choices=[("unused", "unused"), ("rare", "rare"), ("lookalike", "lookalike")],
+        method="filter_usage",
+    )
+
+    class Meta:
+        model = FilteringLabel
+        fields = ["folder"]
+
+    def filter_usage(self, queryset, name, value):
+        if value == "unused":
+            return queryset.filter(usage_count=0)
+        if value == "rare":
+            return queryset.filter(usage_count__in=[1, 2])
+        groups = defaultdict(list)
+        for pk, label in queryset.values_list("pk", "label"):
+            groups[label.lower().replace("-", "").replace("_", "")].append(pk)
+        return queryset.filter(
+            pk__in=[pk for pks in groups.values() if len(pks) > 1 for pk in pks]
+        )
+
+
 class FilteringLabelViewSet(BaseModelViewSet):
     """
     API endpoint that allows labels to be viewed or edited.
     """
 
     model = FilteringLabel
-    filterset_fields = ["folder"]
+    filterset_class = FilteringLabelFilterSet
     search_fields = ["label"]
     ordering = ["label"]
 
     def get_queryset(self):
-        return super().get_queryset().select_related("folder")
+        queryset = super().get_queryset().select_related("folder")
+        params = self.request.query_params
+        if (
+            "offset" in params
+            or params.get("usage") in ("unused", "rare")
+            or "usage_count" in params.get("ordering", "")
+        ):
+            queryset = queryset.annotate(usage_count=_label_usage_count())
+        return queryset
+
+    @action(detail=True, methods=["get"], url_path="usage")
+    def usage(self, request, pk=None):
+        label = self.get_object()
+        counts = {}
+        for through, label_col, obj_col in _filtering_label_relations():
+            model = through._meta.get_field(obj_col).related_model
+            viewable = RoleAssignment.get_viewable_object_ids(request.user, model)
+            counts[model._meta.model_name] = through.objects.filter(
+                **{label_col: label, f"{obj_col}_id__in": viewable}
+            ).count()
+        return Response(counts)
+
+    @action(detail=False, methods=["post"], url_path="merge")
+    def merge(self, request):
+        target_id = request.data.get("target")
+        source_ids = {str(i) for i in request.data.get("sources") or []} - {
+            str(target_id)
+        }
+        queryset = self.get_queryset()
+        target = queryset.filter(id=target_id).first() if target_id else None
+        sources = list(queryset.filter(id__in=source_ids)) if source_ids else []
+        if target is None or not sources or len(sources) != len(source_ids):
+            return Response(
+                {"error": "invalidMergeSelection"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        change_perm = Permission.objects.get(codename="change_filteringlabel")
+        delete_perm = Permission.objects.get(codename="delete_filteringlabel")
+        if not RoleAssignment.is_access_allowed(
+            user=request.user, perm=change_perm, folder=Folder.get_folder(target)
+        ) or not all(
+            RoleAssignment.is_access_allowed(
+                user=request.user, perm=delete_perm, folder=Folder.get_folder(s)
+            )
+            for s in sources
+        ):
+            return Response(
+                {"error": "permissionDenied"}, status=status.HTTP_403_FORBIDDEN
+            )
+
+        relabelled = 0
+        with transaction.atomic():
+            for through, label_col, obj_col in _filtering_label_relations():
+                obj_ids = set(
+                    through.objects.filter(**{f"{label_col}__in": sources}).values_list(
+                        f"{obj_col}_id", flat=True
+                    )
+                )
+                if not obj_ids:
+                    continue
+                already = set(
+                    through.objects.filter(
+                        **{label_col: target, f"{obj_col}_id__in": obj_ids}
+                    ).values_list(f"{obj_col}_id", flat=True)
+                )
+                missing = obj_ids - already
+                through.objects.bulk_create(
+                    through(**{f"{obj_col}_id": oid, f"{label_col}_id": target.id})
+                    for oid in missing
+                )
+                relabelled += len(missing)
+            FilteringLabel.objects.filter(id__in=[s.id for s in sources]).delete()
+
+        return Response(
+            {"target": str(target.id), "merged": len(sources), "relabelled": relabelled}
+        )
 
 
 class LibraryFilteringLabelViewSet(BaseModelViewSet):
@@ -4313,6 +4438,7 @@ class RiskAssessmentFilterSet(GenericFilterSet):
             "genericcollection": ["exact"],
             "due_date": ["exact", "year", "month"],
             "eta": ["exact"],
+            "filtering_labels": ["exact"],
         }
 
     def filter_status(self, queryset, name, value):
@@ -12673,6 +12799,7 @@ class ComplianceAssessmentFilterSet(GenericFilterSet):
             "authors",
             "reviewers",
             "genericcollection",
+            "filtering_labels",
             "due_date",
             "eta",
         ]

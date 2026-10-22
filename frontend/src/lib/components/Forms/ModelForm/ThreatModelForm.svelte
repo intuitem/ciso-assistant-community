@@ -33,3 +33,15 @@
 	disabled={Boolean(object?.id)}
 	helpText={object?.id ? m.threatModelCatalogLocked() : undefined}
 />
+<AutocompleteSelect
+	multiple
+	{form}
+	createFromSelection={true}
+	optionsEndpoint="filtering-labels"
+	optionsLabelField="label"
+	translateOptions={false}
+	field="filtering_labels"
+	helpText={m.labelsHelpText()}
+	label={m.labels()}
+	allowUserOptions="append"
+/>

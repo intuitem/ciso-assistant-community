@@ -255,6 +255,8 @@ export interface ModelMapEntry {
 	detailViewFields?: Field[];
 	foreignKeyFields?: ForeignKeyField[];
 	reverseForeignKeyFields?: ReverseForeignKeyField[];
+	hideEmptyReverseTabs?: boolean;
+	reverseCountsEndpoint?: string;
 	selectFields?: SelectField[];
 	selectOptions?: Record<string, SelectFieldData[]>;
 	fileFields?: string[];
@@ -886,7 +888,52 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'labels',
 		verboseName: 'Label',
 		verboseNamePlural: 'Labels',
-		foreignKeyFields: [{ field: 'folder', urlModel: 'folders' }]
+		foreignKeyFields: [{ field: 'folder', urlModel: 'folders' }],
+		detailViewFields: [{ field: 'label' }, { field: 'created_at' }, { field: 'updated_at' }],
+		hideEmptyReverseTabs: true,
+		reverseCountsEndpoint: 'usage',
+		reverseForeignKeyFields: (
+			[
+				'applied-controls',
+				'risk-scenarios',
+				'assets',
+				'compliance-assessments',
+				'risk-assessments',
+				'ebios-rm',
+				'quantitative-risk-studies',
+				'business-impact-analysis',
+				'entity-assessments',
+				'threat-models',
+				'evidences',
+				'findings',
+				'findings-assessments',
+				'incidents',
+				'vulnerabilities',
+				'threats',
+				'reference-controls',
+				'task-templates',
+				'validation-flows',
+				'document-containers',
+				'entities',
+				'solutions',
+				'contracts',
+				'representatives',
+				'entity-scores',
+				'processings',
+				'projects',
+				'accreditations',
+				'generic-collections',
+				'responsibility-matrices',
+				'metric-definitions',
+				'metric-instances',
+				'dashboards',
+				'workflows',
+				'quantitative-risk-hypotheses',
+				'security-advisories',
+				'cwes',
+				'folders'
+			] as urlModel[]
+		).map((urlModel) => ({ field: 'filtering_labels', urlModel }))
 	},
 	'risk-acceptances': {
 		name: 'riskacceptance',

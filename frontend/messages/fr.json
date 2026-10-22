@@ -7570,5 +7570,18 @@
 	"mailerTestAllOk": "Tous les serveurs ont remis le message. Vous pouvez enregistrer.",
 	"mailerTestSomeFailed": "Au moins un serveur a échoué. Corrigez-le ou enregistrez en forçant.",
 	"mailerOutcomeNever": "Jamais tenté",
-	"mailerSendTestHelp": "Envoie un message via chaque serveur à votre propre adresse."
+	"mailerSendTestHelp": "Envoie un message via chaque serveur à votre propre adresse.",
+	"usage": "Utilisation",
+	"unused": "Inutilisés",
+	"usedOnceOrTwice": "Utilisés une ou deux fois",
+	"lookAlikes": "Doublons probables",
+	"mergeLabels": "Fusionner les étiquettes",
+	"mergeLabelsHelp": "Choisissez l'étiquette à conserver. Tous les objets portant les autres la reçoivent à la place, puis les autres sont supprimées.",
+	"labelToKeep": "Étiquette à conserver",
+	"objectsCount": "{count} objets",
+	"mergeLabelsSummary": "Chaque objet étiqueté {labels} recevra {target} à la place, puis ces étiquettes seront supprimées.",
+	"mergeInto": "Fusionner dans {label}",
+	"mergeLabelsSuccess": "Étiquettes fusionnées dans {label}",
+	"mergeLabelsError": "Impossible de fusionner les étiquettes",
+	"usageCount": "Utilisation"
 }
