@@ -2142,20 +2142,10 @@ def compliance_overview(audit, requirement_assessments=None) -> dict:
     if requirement_assessments is None:
         from core.models import RequirementAssessment
 
-        rows = list(
+        requirement_assessments = list(
             RequirementAssessment.objects.filter(
                 compliance_assessment=audit, requirement__assessable=True
             ).select_related("requirement", "compliance_assessment")
-        )
-        selected = set(audit.selected_implementation_groups or [])
-        requirement_assessments = (
-            [
-                ra
-                for ra in rows
-                if selected & set(ra.requirement.implementation_groups or [])
-            ]
-            if selected
-            else rows
         )
     return {
         "donut": audit.get_donut_data(requirement_assessments)["result"],
@@ -2198,7 +2188,12 @@ def compliance_overviews(audits) -> dict:
         if tree is not None:
             audit.__dict__["framework_node_tree"] = tree
         overviews[audit.id] = compliance_overview(
-            audit, assessable_requirement_assessments(audit)
+            audit,
+            [
+                ra
+                for ra in audit.requirement_assessments.all()
+                if ra.requirement.assessable
+            ],
         )
     return overviews
 

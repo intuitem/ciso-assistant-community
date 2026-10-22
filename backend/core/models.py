@@ -9850,41 +9850,20 @@ class ComplianceAssessment(Assessment):
             for framework_id, rows in rows_by_framework.items()
         }
 
-    def get_global_score(
+    def _scored_requirement_assessments(
         self, prefetched_requirements: Optional[list[RequirementAssessment]] = None
-    ) -> dict:
-        """
-        Calculate scores as three independent layers:
-        - implementation_score: computed from the 'score' field
-        - documentation_score: computed from the 'documentation_score' field
-          (only when show_documentation_score is enabled)
-        - maturity_score: average of the enabled layers
-
-        Each layer uses the same score_calculation_method (AVG, SUM, AVG_OF_AVG)
-        and is computed independently over the SAME row set: an RA must have an
-        actual implementation score to participate. `is_scored=True` with
-        `score is None` is a data inconsistency (the answer-driven path never
-        produces it) and is treated as fully unscored, so it is dropped from
-        both layers, not just the implementation one. A standalone
-        documentation_score on such a row is therefore not aggregated.
-
-        When anchor_na_to_target is True, N/A requirements are included with
-        their scores replaced by the effective target (target_score or max_score).
-        Returns a dict with all three values.
-
-        **WARNING:** If provided `prefetched_requirements` **MUST** be a list of `RequirementAssessment` `req` WHERE `req.compliance_assessment == self` AND `req.requirement.assessable is True`.
-        """
+    ) -> list[RequirementAssessment]:
         if prefetched_requirements is not None:
             # Caller supplied an in-memory list (e.g. the /recap action) — filter in Python.
             if self.anchor_na_to_target:
-                requirement_assessments_scored = [
+                return [
                     requirement
                     for requirement in prefetched_requirements
                     if requirement.result == RequirementAssessment.Result.NOT_APPLICABLE
                     or (requirement.is_scored and requirement.score is not None)
                 ]
             else:
-                requirement_assessments_scored = [
+                return [
                     requirement
                     for requirement in prefetched_requirements
                     if requirement.is_scored
@@ -9909,7 +9888,35 @@ class ComplianceAssessment(Assessment):
                 qs = qs.filter(is_scored=True, score__isnull=False).exclude(
                     result=RequirementAssessment.Result.NOT_APPLICABLE
                 )
-            requirement_assessments_scored = list(qs)
+            return list(qs)
+
+    def get_global_score(
+        self, prefetched_requirements: Optional[list[RequirementAssessment]] = None
+    ) -> dict:
+        """
+        Calculate scores as three independent layers:
+        - implementation_score: computed from the 'score' field
+        - documentation_score: computed from the 'documentation_score' field
+          (only when show_documentation_score is enabled)
+        - maturity_score: average of the enabled layers
+
+        Each layer uses the same score_calculation_method (AVG, SUM, AVG_OF_AVG)
+        and is computed independently over the SAME row set: an RA must have an
+        actual implementation score to participate. `is_scored=True` with
+        `score is None` is a data inconsistency (the answer-driven path never
+        produces it) and is treated as fully unscored, so it is dropped from
+        both layers, not just the implementation one. A standalone
+        documentation_score on such a row is therefore not aggregated.
+
+        When anchor_na_to_target is True, N/A requirements are included with
+        their scores replaced by the effective target (target_score or max_score).
+        Returns a dict with all three values.
+
+        **WARNING:** If provided `prefetched_requirements` **MUST** be a list of `RequirementAssessment` `req` WHERE `req.compliance_assessment == self` AND `req.requirement.assessable is True`.
+        """
+        requirement_assessments_scored = self._scored_requirement_assessments(
+            prefetched_requirements
+        )
 
         ig = (
             set(self.selected_implementation_groups)
@@ -10005,34 +10012,9 @@ class ComplianceAssessment(Assessment):
             # is on, N/A items contribute on the numerator side (anchored to
             # target), so they stay in the max too, otherwise the displayed
             # ratio can exceed 100%.
-            na = RequirementAssessment.Result.NOT_APPLICABLE
-            if prefetched_requirements is not None:
-                if self.anchor_na_to_target:
-                    requirement_assessments_scored = [
-                        ra
-                        for ra in prefetched_requirements
-                        if ra.result == na or (ra.is_scored and ra.score is not None)
-                    ]
-                else:
-                    requirement_assessments_scored = [
-                        ra
-                        for ra in prefetched_requirements
-                        if ra.is_scored and ra.score is not None and ra.result != na
-                    ]
-            else:
-                qs = RequirementAssessment.objects.filter(
-                    compliance_assessment=self,
-                    requirement__assessable=True,
-                ).select_related("requirement")
-                if self.anchor_na_to_target:
-                    qs = qs.filter(
-                        Q(result=na) | (Q(is_scored=True) & Q(score__isnull=False))
-                    )
-                else:
-                    qs = qs.filter(is_scored=True, score__isnull=False).exclude(
-                        result=na
-                    )
-                requirement_assessments_scored = qs
+            requirement_assessments_scored = self._scored_requirement_assessments(
+                prefetched_requirements
+            )
             ig = (
                 set(self.selected_implementation_groups)
                 if self.selected_implementation_groups

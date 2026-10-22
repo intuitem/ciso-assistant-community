@@ -1352,7 +1352,7 @@ class EntityAssessmentViewSet(ExportMixin, BaseModelViewSet):
         )
         return qs.annotate(assignment_status_rank=Subquery(least_advanced))
 
-    def _get_optimized_object_data(self, queryset):
+    def _get_optimized_object_data(self, queryset, with_compliance=True):
         """Answering progress and assignment state for the whole page at once: per row the walk is a query storm."""
         data = super()._get_optimized_object_data(queryset)
 
@@ -1398,8 +1398,11 @@ class EntityAssessmentViewSet(ExportMixin, BaseModelViewSet):
             for audit in audits
         }
 
-        data["compliance_overview"] = compliance_overviews(audits)
-        data["viewable_audits"] = viewable_audit_ids(self.request.user, audit_ids)
+        if with_compliance:
+            data["viewable_audits"] = viewable_audit_ids(self.request.user, audit_ids)
+            data["compliance_overview"] = compliance_overviews(
+                audit for audit in audits if audit.id in data["viewable_audits"]
+            )
 
         statuses: dict = {}
         for audit_id, status_value in RequirementAssignment.objects.filter(
@@ -1442,7 +1445,11 @@ class EntityAssessmentViewSet(ExportMixin, BaseModelViewSet):
             by_id = {ea.pk: ea for ea in queryset.filter(pk__in=batch)}
             rows = [by_id[pk] for pk in batch if pk in by_id]
             serializer = EntityAssessmentReadSerializer(
-                context={"optimized_data": self._get_optimized_object_data(rows)}
+                context={
+                    "optimized_data": self._get_optimized_object_data(
+                        rows, with_compliance=False
+                    )
+                }
             )
             for ea in rows:
                 ea._export_completion = serializer.get_completion(ea)
@@ -1625,8 +1632,10 @@ class EntityAssessmentViewSet(ExportMixin, BaseModelViewSet):
         }
         # Same page-level pass as the completion figures: the rows are already
         # in memory, and the framework trees are primed in one query.
-        overviews = compliance_overviews(audits_by_id.values())
         viewable_audits = viewable_audit_ids(request.user, audits_by_id)
+        overviews = compliance_overviews(
+            audit for audit in audits_by_id.values() if audit.id in viewable_audits
+        )
 
         # `has_questions` and `progress` query per audit when read off the model.
         frameworks_with_questions = set(

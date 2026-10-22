@@ -453,14 +453,19 @@ class EntityAssessmentReadSerializer(BaseModelSerializer):
         audit_id = obj.compliance_assessment_id
         if not audit_id:
             return None
-        from core.utils import compliance_overview, viewable_audit_ids
+        from core.models import ComplianceAssessment
+        from core.utils import compliance_overview
+        from iam.models import RoleAssignment
 
         optimized = self.context.get("optimized_data") or {}
         viewable = optimized.get("viewable_audits")
         if viewable is None:
             request = self.context.get("request")
-            viewable = viewable_audit_ids(getattr(request, "user", None), [audit_id])
-        if audit_id not in viewable:
+            if not RoleAssignment.is_object_accessible(
+                getattr(request, "user", None), "view", ComplianceAssessment, audit_id
+            ):
+                return None
+        elif audit_id not in viewable:
             return None
         cached = optimized.get("compliance_overview")
         if cached is not None:

@@ -155,7 +155,9 @@
 							</span>
 						{/if}
 					</div>
-					<ComplianceOverview overview={data.data.compliance_overview} name="ea_compliance" />
+					{#if data.data.compliance_overview}
+						<ComplianceOverview overview={data.data.compliance_overview} name="ea_compliance" />
+					{/if}
 				</div>
 			{:else}
 				<ComplianceOverview overview={null} name="ea_compliance" />

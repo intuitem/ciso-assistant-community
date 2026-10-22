@@ -94,32 +94,20 @@ export function getScoreHexColor(
  * `getScoreHexColor`'s bands as text classes. Its hexes are chart fills: on a
  * light surface, yellow-300 on white is barely legible as a figure.
  */
+const SCORE_TEXT_CLASSES: Record<string, string> = {
+	'#f87171': 'text-red-600 dark:text-red-400',
+	'#fb923c': 'text-orange-600 dark:text-orange-400',
+	'#fde047': 'text-yellow-600 dark:text-yellow-300',
+	'#86efac': 'text-green-600 dark:text-green-400'
+};
+
 export function getScoreTextClass(
 	value: number | null,
 	max_score: number,
 	inversedColors = false,
 	min_score = 0
 ) {
-	value ??= min_score;
-	const range = max_score - min_score;
-	const percentage = range > 0 ? ((value - min_score) * 100) / range : 0;
-	const classes = {
-		red: 'text-red-600 dark:text-red-400',
-		orange: 'text-orange-600 dark:text-orange-400',
-		yellow: 'text-yellow-600 dark:text-yellow-300',
-		green: 'text-green-600 dark:text-green-400'
-	};
-	if (inversedColors) {
-		if (percentage < 25) return classes.green;
-		if (percentage < 50) return classes.yellow;
-		if (percentage < 75) return classes.orange;
-		return classes.red;
-	} else {
-		if (percentage < 25) return classes.red;
-		if (percentage < 50) return classes.orange;
-		if (percentage < 75) return classes.yellow;
-		return classes.green;
-	}
+	return SCORE_TEXT_CLASSES[getScoreHexColor(value, max_score, inversedColors, min_score)];
 }
 
 /**

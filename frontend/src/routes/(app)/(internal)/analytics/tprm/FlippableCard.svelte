@@ -200,7 +200,9 @@
 					)}
 				</div>
 
-				<ComplianceSummary overview={entity_assessment.compliance_overview} />
+				{#if entity_assessment.compliance_overview || entity_assessment.compliance_assessment_id === '#'}
+					<ComplianceSummary overview={entity_assessment.compliance_overview} />
+				{/if}
 
 				<!-- Dates -->
 				<div class="grid grid-cols-2 gap-2 text-sm text-surface-600-400">
@@ -219,7 +221,7 @@
 
 	<!-- Back face of the card -->
 	<div
-		class="absolute inset-0 rounded-lg border border-surface-200-800 shadow-md bg-surface-50-950 overflow-hidden"
+		class="absolute inset-0 rounded-lg border border-surface-200-800 shadow-md bg-surface-50-950 overflow-y-auto"
 		style="backface-visibility: hidden; transform: rotateX(180deg);"
 	>
 		<!-- Flip button for back face -->

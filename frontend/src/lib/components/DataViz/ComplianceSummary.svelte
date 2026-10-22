@@ -20,9 +20,15 @@
 	const showScore = $derived(Boolean(overview?.show_score && score && score.maturity_score >= 0));
 	const showResult = $derived(Boolean(overview?.show_result) && assessed > 0);
 	const share = (value: number) => Math.round((value / assessed) * 100);
-	// The headline figure: compliant over everything in scope, as the bar reads.
+	const applicable = $derived(
+		assessed - (slices.find((slice) => slice.name === 'not_applicable')?.value ?? 0)
+	);
 	const compliantShare = $derived(
-		share(slices.find((slice) => slice.name === 'compliant')?.value ?? 0)
+		applicable > 0
+			? Math.round(
+					((slices.find((slice) => slice.name === 'compliant')?.value ?? 0) / applicable) * 100
+				)
+			: 0
 	);
 	// The tooltip's content, for readers that never see it.
 	const breakdownLabel = $derived(
