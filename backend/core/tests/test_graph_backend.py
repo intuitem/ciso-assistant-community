@@ -126,7 +126,8 @@ def test_startup_log_redacts_the_client_secret():
     lines = describe(build_mailers(GRAPH_ENV))
     assert len(lines) == 1
     assert "s3cret" not in lines[0]
-    assert "client-1" in lines[0] and "contoso.onmicrosoft.com" in lines[0]
+    assert "'client_secret': '***'" in lines[0]
+    assert "'client_id': 'client-1'" in lines[0]
 
 
 @pytest.mark.parametrize(
@@ -154,8 +155,8 @@ def test_graph_rescue_behind_an_smtp_primary():
     mailers = build_mailers(env)
     assert mailers["default"]["BACKEND"] == "core.email_backend.EmailBackend"
     assert mailers["rescue"]["BACKEND"] == "core.graph_backend.EmailBackend"
-    assert mailers["rescue"]["OPTIONS"]["oauth2"]["token_url"].startswith(
-        "https://login.microsoftonline.com/contoso.onmicrosoft.com/"
+    assert mailers["rescue"]["OPTIONS"]["oauth2"]["token_url"] == (
+        "https://login.microsoftonline.com/contoso.onmicrosoft.com/oauth2/v2.0/token"
     )
 
 
