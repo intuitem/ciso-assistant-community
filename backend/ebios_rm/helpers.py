@@ -24,6 +24,7 @@ OPERATIONAL_SCENARIO_ORDER = (
     "attack_path__strategic_scenario__created_at",
     "attack_path__ref_id",
     "attack_path__created_at",
+    "id",
 )
 
 
@@ -587,6 +588,7 @@ def detect_sync_sources(ebios_rm_study):
             "strategic_scenario__created_at",
             "ref_id",
             "created_at",
+            "id",
         )
     )
     uncovered_ap = [ap for ap in selected_ap if ap.id not in covered_ap_ids]
@@ -597,7 +599,9 @@ def detect_sync_sources(ebios_rm_study):
             covered_ss_ids.add(ap.strategic_scenario_id)
 
     # Level 3: strategic scenarios not covered by attack paths or op scenarios
-    all_ss = list(ebios_rm_study.strategic_scenarios.order_by("ref_id", "created_at"))
+    all_ss = list(
+        ebios_rm_study.strategic_scenarios.order_by("ref_id", "created_at", "id")
+    )
     uncovered_ss = [ss for ss in all_ss if ss.id not in covered_ss_ids]
     if uncovered_ss:
         result["strategic_scenarios"] = uncovered_ss
@@ -607,7 +611,7 @@ def detect_sync_sources(ebios_rm_study):
     # Level 4: selected feared events not already covered
     selected_fe = list(
         ebios_rm_study.feared_events.filter(is_selected=True).order_by(
-            "ref_id", "created_at"
+            "ref_id", "created_at", "id"
         )
     )
     uncovered_fe = [fe for fe in selected_fe if fe.id not in covered_fe_ids]

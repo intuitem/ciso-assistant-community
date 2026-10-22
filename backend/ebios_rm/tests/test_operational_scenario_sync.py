@@ -247,3 +247,18 @@ class TestOperationalScenarioSync:
         self._assert_unique_ref_ids(
             RiskAssessment.objects.get(id=response.json()["id"])
         )
+
+    def test_sync_endpoint_gets_unique_ref_ids(self, admin_client):
+        study = EbiosRMStudy.objects.get(name="test study")
+        self._build_duplicate_attack_path_ref_ids(study)
+        risk_assessment = RiskAssessment.objects.create(
+            name="test risk assessment",
+            folder=study.folder,
+            risk_matrix=study.risk_matrix,
+            ebios_rm_study=study,
+        )
+        response = admin_client.post(
+            f"/api/risk-assessments/{risk_assessment.id}/sync_from_ebios_rm/"
+        )
+        assert response.status_code == 200, response.json()
+        self._assert_unique_ref_ids(risk_assessment)
