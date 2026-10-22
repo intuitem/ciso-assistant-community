@@ -4275,12 +4275,16 @@ def _filtering_label_relations():
             )
 
 
-def _label_usage_count():
+def _label_usage_count(user):
     total = Value(0)
-    for through, label_col, _ in _filtering_label_relations():
+    for through, label_col, obj_col in _filtering_label_relations():
+        model = through._meta.get_field(obj_col).related_model
+        viewable = RoleAssignment.get_viewable_object_ids(user, model)
         total = total + Coalesce(
             Subquery(
-                through.objects.filter(**{label_col: OuterRef("pk")})
+                through.objects.filter(
+                    **{label_col: OuterRef("pk"), f"{obj_col}_id__in": viewable}
+                )
                 .order_by()
                 .values(label_col)
                 .annotate(c=Count("*"))
@@ -4327,12 +4331,8 @@ class FilteringLabelViewSet(BaseModelViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset().select_related("folder")
-        if self.action in ("list", "retrieve") and RoleAssignment.is_access_allowed(
-            user=self.request.user,
-            perm=Permission.objects.get(codename="delete_filteringlabel"),
-            folder=Folder.get_root_folder(),
-        ):
-            return queryset.annotate(usage_count=_label_usage_count())
+        if self.action in ("list", "retrieve"):
+            return queryset.annotate(usage_count=_label_usage_count(self.request.user))
         return queryset.annotate(usage_count=Value(None, output_field=IntegerField()))
 
     @action(detail=True, methods=["get"], url_path="usage")

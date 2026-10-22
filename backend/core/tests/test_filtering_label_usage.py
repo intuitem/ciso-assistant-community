@@ -129,21 +129,30 @@ def test_retrieve_includes_usage_count(admin_client, labels):
 
 
 @pytest.mark.django_db
-def test_usage_count_hidden_from_readers(admin_client, labels):
+def test_usage_count_scoped_to_viewer(admin_client, labels):
     root = Folder.get_root_folder()
+    stores, acquiring = (
+        Folder.objects.create(
+            name=name, parent_folder=root, content_type=Folder.ContentType.DOMAIN
+        )
+        for name in ("Stores", "Acquiring")
+    )
+    labels["asset"].folder = stores
+    labels["asset"].save()
+    for obj in (*AppliedControl.objects.all(), *Entity.objects.all()):
+        obj.folder = acquiring
+        obj.save()
     reader = User.objects.create_user("reader@label-usage-tests.com")
-    group = UserGroup.objects.create(name="LabelReaders", folder=root)
+    group = UserGroup.objects.create(name="LabelReaders", folder=stores)
     group.user_set.add(reader)
-    RoleAssignment.objects.create(
-        user_group=group,
-        role=Role.objects.get(name="BI-RL-AUD"),
-        folder=root,
-        is_recursive=True,
-    ).perimeter_folders.add(root)
+    auditor = Role.objects.get(name="BI-RL-AUD")
+    for folder, recursive in ((root, False), (stores, True)):
+        RoleAssignment.objects.create(
+            user_group=group, role=auditor, folder=folder, is_recursive=recursive
+        ).perimeter_folders.add(folder)
     client = APIClient()
     client.force_authenticate(user=reader)
-    res = client.get("/api/filtering-labels/", {"usage": "unused"})
-    assert res.status_code == 200
-    assert res.json()["results"] == []
-    res = client.get("/api/filtering-labels/", {"ordering": "-usage_count"})
-    assert {r["usage_count"] for r in res.json()["results"]} == {None}
+    assert _labels(client) == {"PCI_DSS": 1, "legacy": 0, "pci-dss": 0}
+    assert set(_labels(client, usage="unused")) == {"legacy", "pci-dss"}
+    res = client.get(f"/api/filtering-labels/{labels['alias'].id}/")
+    assert res.json()["usage_count"] == 1
