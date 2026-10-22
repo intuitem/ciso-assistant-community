@@ -189,6 +189,7 @@
 			{form}
 			field="description"
 			label={m.description()}
+			helpText={m.studyDescriptionHelpText()}
 			cacheLock={cacheLocks['description']}
 			bind:cachedValue={formDataCache['description']}
 			data-focusindex="1"
@@ -307,6 +308,7 @@
 			{form}
 			field="objectives"
 			label={m.objectives()}
+			helpText={m.studyObjectivesHelpText()}
 			cacheLock={cacheLocks['objectives']}
 			bind:cachedValue={formDataCache['objectives']}
 		/>
@@ -314,6 +316,7 @@
 			{form}
 			field="constraints_hypotheses"
 			label={m.constraintsHypotheses()}
+			helpText={m.constraintsHypothesesHelpText()}
 			cacheLock={cacheLocks['constraints_hypotheses']}
 			bind:cachedValue={formDataCache['constraints_hypotheses']}
 		/>

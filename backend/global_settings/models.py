@@ -37,6 +37,7 @@ class GlobalSettings(AbstractBaseModel, FolderMixin):
         VULNERABILITY_SLA = "vulnerability-sla", "Vulnerability SLA"
         SEC_INTEL_FEEDS = "sec-intel-feeds", "Vulnerability Feeds"
         INFRA_CONFIG = "infra-config", "Infra config"
+        TPRM = "tprm", "TPRM"
 
     # Name of the setting category.
     name = models.CharField(

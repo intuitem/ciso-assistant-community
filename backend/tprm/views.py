@@ -58,6 +58,7 @@ from tprm.models import (
     Representative,
     Solution,
     SolutionSubcontractor,
+    SolutionTierChange,
     EntityAssessment,
     Contract,
 )
@@ -1735,12 +1736,14 @@ class EntityAssessmentViewSet(ExportMixin, BaseModelViewSet):
 class TierFedByMixin:
     @action(detail=False, url_path="fed-by", name="Forms that set tiers")
     def fed_by(self, request):
-        """Forms the caller can see whose accepted responses set an entity's
-        tier, with what keeps them from applying on this scale."""
+        """Forms the caller can see whose accepted responses set a tier
+        (`?target=`, entity.tier by default), with what keeps them from
+        applying on this scale."""
         from core.models import QuickForm
         from core.quick_form_apply import on_accept_health
         from iam.models import RoleAssignment
 
+        target = request.query_params.get("target") or "entity.tier"
         viewable = RoleAssignment.get_viewable_object_ids(request.user, QuickForm)
         rows = []
         cache: dict = {}
@@ -1754,7 +1757,7 @@ class TierFedByMixin:
                 (
                     h
                     for h in on_accept_health(quick_form, cache)
-                    if h["target"] == "entity.tier"
+                    if h["target"] == target
                 ),
                 None,
             )
@@ -1799,6 +1802,11 @@ class TierViewSet(TierFedByMixin, BaseModelViewSet):
                 # tier can be hidden, never deleted.
                 in_history=Exists(
                     EntityTierChange.objects.filter(
+                        Q(tier=OuterRef("pk")) | Q(previous_tier=OuterRef("pk"))
+                    )
+                )
+                | Exists(
+                    SolutionTierChange.objects.filter(
                         Q(tier=OuterRef("pk")) | Q(previous_tier=OuterRef("pk"))
                     )
                 ),
@@ -1874,20 +1882,94 @@ class TierViewSet(TierFedByMixin, BaseModelViewSet):
             ).data
         )
 
+    @action(detail=False, methods=["get", "put"], name="Tier propagation")
+    def propagation(self, request):
+        """How solution tiers reach their provider: off, suggest or floor."""
+        from global_settings.models import GlobalSettings
+        from tprm.tiers import (
+            Propagation,
+            entities_below_floor,
+            propagation_mode,
+            raise_all_to_floor,
+        )
+
+        raised = 0
+        can_change = all(
+            RoleAssignment.is_access_allowed(
+                user=request.user,
+                perm=Permission.objects.get(codename=codename),
+                folder=Folder.get_root_folder(),
+            )
+            for codename in ("change_tier", "change_entity")
+        )
+        if request.method == "PUT":
+            if not can_change:
+                raise PermissionDenied()
+            mode = request.data.get("mode")
+            if mode not in Propagation.MODES:
+                return Response(
+                    {"error": "invalidPropagationMode"}, status=HTTP_400_BAD_REQUEST
+                )
+            row, _ = GlobalSettings.objects.get_or_create(
+                name=GlobalSettings.Names.TPRM,
+                defaults={"folder": Folder.get_root_folder()},
+            )
+            previous = propagation_mode()
+            with transaction.atomic():
+                row.value = {**(row.value or {}), "tier_propagation": mode}
+                row.save(update_fields=["value", "updated_at"])
+                # Switching the floor on raises the vendors already below it.
+                if mode == Propagation.FLOOR and previous != Propagation.FLOOR:
+                    raised = raise_all_to_floor(request.user)
+        # Counts every vendor: only for those who may switch the mode.
+        return Response(
+            {
+                "mode": propagation_mode(),
+                "below_floor": entities_below_floor().count() if can_change else None,
+                "raised": raised,
+            }
+        )
+
 
 class EntityTierChangeViewSet(BaseModelViewSet):
     """History of tier changes. Written only by `set_entity_tier`."""
 
     model = EntityTierChange
     http_method_names = ["get", "head", "options"]
-    filterset_fields = ["entity", "tier", "source", "changed_by", "folder"]
+    filterset_fields = ["entity", "tier", "source", "changed_by"]
     ordering = ["-created_at"]
 
     def get_queryset(self):
         return (
             super()
             .get_queryset()
-            .select_related("entity", "tier", "previous_tier", "changed_by", "folder")
+            .select_related(
+                "entity__folder", "tier", "previous_tier", "changed_by", "response"
+            )
+        )
+
+    @action(detail=False, name="Get source choices")
+    def source(self, request):
+        return Response(dict(TierSource.choices))
+
+
+class SolutionTierChangeViewSet(BaseModelViewSet):
+    model = SolutionTierChange
+    http_method_names = ["get", "head", "options"]
+    filterset_fields = ["solution", "tier", "source", "changed_by"]
+    ordering = ["-created_at"]
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                "solution__provider_entity__folder",
+                "tier",
+                "previous_tier",
+                "changed_by",
+                "response",
+            )
         )
 
     @action(detail=False, name="Get source choices")
@@ -1994,6 +2076,7 @@ SOLUTION_FILTERSET_FIELDS = [
     "assets",
     "criticality",
     "tier",
+    "tier_source",
     "contracts",
     "owner",
     "dora_ict_service_type",
@@ -2073,7 +2156,9 @@ class SolutionViewSet(ExportMixin, BaseModelViewSet):
         return (
             super()
             .get_queryset()
-            .select_related("provider_entity__folder", "recipient_entity")
+            .select_related(
+                "provider_entity__folder", "recipient_entity", "tier", "tier_response"
+            )
             .prefetch_related(
                 "assets",
                 "contracts",
