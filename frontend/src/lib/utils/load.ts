@@ -126,6 +126,15 @@ export const loadDetail = async ({ event, model, id }) => {
 
 	const relatedModels = {} as RelatedModels;
 
+	const reverseCounts: Record<string, number> | undefined = model.reverseCountsEndpoint
+		? await event
+				.fetch(
+					`${BASE_API_URL}/${model.endpointUrl ?? model.urlModel}/${id}/${model.reverseCountsEndpoint}/`
+				)
+				.then(async (res) => (res.ok ? res.json() : discardBody(res).then(() => ({}))))
+				.catch(() => ({}))
+		: undefined;
+
 	if (model.reverseForeignKeyFields) {
 		const initialData = {};
 		// Hoisted: the filters below are synchronous.
@@ -155,6 +164,12 @@ export const loadDetail = async ({ event, model, id }) => {
 									? data.id
 									: (data.folder?.id ?? data.folder ?? user.root_folder_id)
 						})
+				)
+				.filter(
+					(m) =>
+						!reverseCounts ||
+						!model.hideEmptyReverseTabs ||
+						reverseCounts[getModelInfo(m.urlModel).name] > 0
 				)
 				.map(async (e) => {
 					const tableFieldsRef = listViewFields[e.urlModel];
@@ -253,15 +268,9 @@ export const loadDetail = async ({ event, model, id }) => {
 		);
 	}
 	// Fetch counts for each reverse FK tab in parallel
-	if (model.reverseForeignKeyFields && model.reverseCountsEndpoint) {
-		const counts = await event
-			.fetch(
-				`${BASE_API_URL}/${model.endpointUrl ?? model.urlModel}/${id}/${model.reverseCountsEndpoint}/`
-			)
-			.then(async (res) => (res.ok ? res.json() : discardBody(res).then(() => ({}))))
-			.catch(() => ({}));
+	if (model.reverseForeignKeyFields && reverseCounts) {
 		for (const e of model.reverseForeignKeyFields) {
-			const count = counts[getModelInfo(e.urlModel).name];
+			const count = reverseCounts[getModelInfo(e.urlModel).name];
 			if (relatedModels[e.urlModel] && typeof count === 'number') {
 				relatedModels[e.urlModel].count = count;
 			}

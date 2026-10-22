@@ -2515,6 +2515,10 @@ export const listViewFields = {
 			builtin: BUILTIN_FILTER
 		}
 	},
+	techniques: {
+		head: ['ref_id', 'name', 'description'],
+		body: ['ref_id', 'name', 'description']
+	},
 	'managed-documents': {
 		head: ['name', 'documentType', 'locale', 'domain'],
 		body: ['name', 'document_type', 'locale', 'folder']

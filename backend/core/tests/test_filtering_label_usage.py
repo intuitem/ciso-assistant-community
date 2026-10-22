@@ -1,5 +1,5 @@
 import pytest
-from iam.models import Folder, User, UserGroup
+from iam.models import Folder, Role, RoleAssignment, User, UserGroup
 from knox.models import AuthToken
 from rest_framework.test import APIClient
 from crq.models import QuantitativeRiskStudy
@@ -126,3 +126,24 @@ def test_merge_rejects_non_list_sources(admin_client, labels):
 def test_retrieve_includes_usage_count(admin_client, labels):
     res = admin_client.get(f"/api/filtering-labels/{labels['alias'].id}/")
     assert res.json()["usage_count"] == 2
+
+
+@pytest.mark.django_db
+def test_usage_count_hidden_from_readers(admin_client, labels):
+    root = Folder.get_root_folder()
+    reader = User.objects.create_user("reader@label-usage-tests.com")
+    group = UserGroup.objects.create(name="LabelReaders", folder=root)
+    group.user_set.add(reader)
+    RoleAssignment.objects.create(
+        user_group=group,
+        role=Role.objects.get(name="BI-RL-AUD"),
+        folder=root,
+        is_recursive=True,
+    ).perimeter_folders.add(root)
+    client = APIClient()
+    client.force_authenticate(user=reader)
+    res = client.get("/api/filtering-labels/", {"usage": "unused"})
+    assert res.status_code == 200
+    assert res.json()["results"] == []
+    res = client.get("/api/filtering-labels/", {"ordering": "-usage_count"})
+    assert {r["usage_count"] for r in res.json()["results"]} == {None}

@@ -7582,6 +7582,5 @@
 	"mergeLabelsSummary": "{labels} will be replaced by {target} on every object, then deleted.",
 	"mergeInto": "Merge into {label}",
 	"mergeLabelsSuccess": "Labels merged into {label}",
-	"mergeLabelsError": "Could not merge labels",
-	"usageCount": "Usage"
+	"mergeLabelsError": "Could not merge labels"
 }

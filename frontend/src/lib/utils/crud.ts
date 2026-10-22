@@ -931,6 +931,7 @@ export const URL_MODEL_MAP: ModelMap = {
 				'quantitative-risk-hypotheses',
 				'security-advisories',
 				'cwes',
+				'techniques',
 				'folders'
 			] as urlModel[]
 		).map((urlModel) => ({

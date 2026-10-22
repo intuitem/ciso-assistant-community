@@ -4327,15 +4327,13 @@ class FilteringLabelViewSet(BaseModelViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset().select_related("folder")
-        params = self.request.query_params
-        if (
-            self.action == "retrieve"
-            or "offset" in params
-            or params.get("usage") in ("unused", "rare")
-            or "usage_count" in params.get("ordering", "")
+        if self.action in ("list", "retrieve") and RoleAssignment.is_access_allowed(
+            user=self.request.user,
+            perm=Permission.objects.get(codename="delete_filteringlabel"),
+            folder=Folder.get_root_folder(),
         ):
-            queryset = queryset.annotate(usage_count=_label_usage_count())
-        return queryset
+            return queryset.annotate(usage_count=_label_usage_count())
+        return queryset.annotate(usage_count=Value(None, output_field=IntegerField()))
 
     @action(detail=True, methods=["get"], url_path="usage")
     def usage(self, request, pk=None):
