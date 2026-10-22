@@ -54,7 +54,7 @@
 
 	// The DPIA forms the viewer may start on this processing, and its latest DPIA:
 	// the card's next step is to start one or to follow it.
-	let dpiaForms: Option[] | null = $state(null);
+	let dpiaForms = $state<Option[] | null>(null);
 	let dpia: Record<string, any> | null | undefined = $state(undefined);
 	$effect(() => {
 		const controller = new AbortController();
@@ -115,6 +115,60 @@
 					background: 'preset-filled-error-500'
 				});
 				return;
+			}
+			await goto(body.redirect);
+		} catch {
+			toastStore.trigger({ message: m.anErrorOccurred(), background: 'preset-filled-error-500' });
+		} finally {
+			starting = false;
+		}
+	}
+
+	// shortcut: imports through the first in-house DPIA form; add a picker if several are loaded.
+	const importForm = $derived(dpiaForms?.find((o) => o.kind === 'form'));
+
+	async function importPia(event: Event) {
+		const input = event.currentTarget as HTMLInputElement;
+		const file = input.files?.[0];
+		input.value = '';
+		if (!file || !importForm || starting) return;
+		starting = true;
+		try {
+			let pia: unknown;
+			try {
+				pia = JSON.parse(await file.text());
+			} catch {
+				toastStore.trigger({
+					message: safeTranslate('piaInvalidFile'),
+					background: 'preset-filled-error-500'
+				});
+				return;
+			}
+			const res = await fetch(`/processings/${processing.id}/import-pia`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ quick_form: importForm.id, pia })
+			});
+			const body = await res.json().catch(() => ({}));
+			if (!res.ok) {
+				toastStore.trigger({
+					message: body.error ? safeTranslate(body.error) : m.anErrorOccurred(),
+					background: 'preset-filled-error-500'
+				});
+				if (body.redirect) await goto(body.redirect);
+				return;
+			}
+			const skipped = (body.skipped ?? []).map((code: string) => safeTranslate(code));
+			toastStore.trigger({
+				message: m.cnilPiaImported({ answers: body.answers, controls: body.controls_created }),
+				background: 'preset-filled-success-500'
+			});
+			if (skipped.length) {
+				toastStore.trigger({
+					message: m.cnilPiaNotImported({ items: skipped.join(', ') }),
+					background: 'preset-filled-warning-500',
+					autohide: false
+				});
 			}
 			await goto(body.redirect);
 		} catch {
@@ -310,6 +364,21 @@
 						<i class="fa-solid fa-file-shield mr-1"></i>{m.startDpia()}
 						{#if dpiaForms.length > 1}<i class="fa-solid fa-caret-down ml-1"></i>{/if}
 					</button>
+					{#if importForm}
+						<label
+							class="btn btn-sm preset-tonal-surface cursor-pointer"
+							class:pointer-events-none={starting}
+							data-testid="import-pia-button"
+						>
+							<i class="fa-solid fa-file-import mr-1"></i>{m.importCnilPia()}
+							<input
+								type="file"
+								accept=".json,.pia,application/json"
+								class="hidden"
+								onchange={importPia}
+							/>
+						</label>
+					{/if}
 				{/if}
 			</div>
 		{/if}
@@ -318,6 +387,7 @@
 	{#if !editing}
 		<p class="border-t border-surface-200-800 pt-3 text-xs text-surface-500">
 			{#if loadFailed}{m.anErrorOccurred()}{:else if screenings?.length === 0}{m.noDpiaScreeningForm()}{/if}
+			{#if !loadFailed && dpia === null && processing.dpia_required && dpiaForms?.length === 0}{m.noDpiaForm()}{/if}
 			<a class="anchor" href="/dpias">{m.dpias()}</a>
 		</p>
 	{/if}

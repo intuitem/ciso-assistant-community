@@ -336,6 +336,7 @@ def agg_countries(viewable_data_transfers, viewable_data_contractors):
 
 class ProcessingViewSet(ExportMixin, BaseModelViewSet):
     model = Processing
+    permission_overrides = {"import_pia": "add_quickformresponse"}
 
     filterset_fields = [
         "folder",
@@ -715,6 +716,69 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
                 }
             )
         return Response(rows)
+
+    @action(
+        detail=True, methods=["post"], url_path="import-pia", name="Import a CNIL PIA"
+    )
+    def import_pia(self, request, pk):
+        """Start a draft DPIA of this processing through `quick_form`, filled from
+        an export of the CNIL PIA software (`pia`, the parsed .json file)."""
+        from core.models import QuickForm
+        from core.object_references import ReferenceError_
+        from core.quick_form_apply import targets_of
+        from core.views import QuickFormViewSet, start_quick_form_response
+        from django.contrib.auth.models import Permission
+
+        from .pia_import import PiaImportError, import_pia, parse_export
+
+        processing = self.get_object()
+        try:
+            form_id = uuid.UUID(str(request.data.get("quick_form")))
+        except ValueError:
+            form_id = None
+        quick_form = QuickForm.objects.filter(
+            pk=form_id,
+            id__in=RoleAssignment.get_viewable_object_ids(request.user, QuickForm),
+        ).first()
+        if quick_form is None or "processing.dpia" not in targets_of(quick_form):
+            return Response(
+                {"error": "invalidRequest"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        found = QuickFormViewSet._assessable(request, "processing.dpia", processing.pk)
+        may_add_controls = RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_appliedcontrol"),
+            folder=processing.folder,
+        )
+        if found is None or not found[2] or not may_add_controls:
+            return Response(
+                {"error": "permissionDenied"}, status=status.HTTP_403_FORBIDDEN
+            )
+        try:
+            data = parse_export(request.data.get("pia"))
+            with transaction.atomic():
+                response, resumed = start_quick_form_response(
+                    request.user,
+                    subject_id=processing.pk,
+                    quick_form=quick_form,
+                    folder=processing.folder,
+                )
+                # Never write over a draft someone is filling.
+                if resumed:
+                    return Response(
+                        {
+                            "error": "dpiaDraftExists",
+                            "redirect": f"/quick-form-responses/{response.id}",
+                        },
+                        status=status.HTTP_409_CONFLICT,
+                    )
+                summary = import_pia(response, processing, data, request.user)
+        except (PiaImportError, ReferenceError_) as e:
+            return Response({"error": e.code}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"redirect": f"/quick-form-responses/{response.id}", **summary},
+            status=status.HTTP_201_CREATED,
+        )
 
     @action(detail=False, url_path="dpia-overview", name="DPIA overview")
     def dpia_overview(self, request):
