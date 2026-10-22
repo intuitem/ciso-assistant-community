@@ -10,6 +10,7 @@ from django.db.models import F, Q
 from django.utils import timezone
 
 from django.conf import settings
+from core import mailer
 from core.models import *
 from doc_management.models import DocumentContainer
 from core.serializer_fields import (
@@ -18,7 +19,7 @@ from core.serializer_fields import (
     PathField,
 )
 from core.constants import LEGACY_TTP_LIBRARIES
-from core.utils import time_state
+from core.utils import get_global_currency, time_state
 from ebios_rm.models import EbiosRMStudy, Stakeholder
 from tprm.models import Contract, Solution
 from threat_modeling.models import ThreatModel
@@ -30,6 +31,7 @@ from core.commitment import COMMITMENT_LIST_FIELDS, CommitmentSerializerMixin
 from iam.models import *
 from django.contrib.auth.models import Permission
 
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework.exceptions import APIException, PermissionDenied
 from django.core.exceptions import FieldDoesNotExist
@@ -652,7 +654,7 @@ class RiskAssessmentWriteSerializer(BaseModelSerializer):
 class RiskAssessmentDuplicateSerializer(BaseModelSerializer):
     class Meta:
         model = RiskAssessment
-        fields = ["name", "version", "perimeter", "description", "folder"]
+        fields = ["name", "ref_id", "version", "perimeter", "description", "folder"]
 
 
 class RiskAssessmentReadSerializer(AssessmentReadSerializer):
@@ -859,6 +861,45 @@ class AssetWriteSerializer(
     class Meta:
         model = Asset
         exclude = ["business_value"]
+
+    def get_fields(self):
+        fields = super().get_fields()
+        # Document the stored dict shape: reads return a display list that can't be written back (#4526)
+        for name, jsonschema, example in (
+            (
+                "security_objectives",
+                Asset.SECURITY_OBJECTIVES_JSONSCHEMA,
+                {"confidentiality": {"value": 2, "is_enabled": True}},
+            ),
+            (
+                "security_capabilities",
+                Asset.SECURITY_OBJECTIVES_JSONSCHEMA,
+                {"confidentiality": {"value": 2, "is_enabled": True}},
+            ),
+            (
+                "disaster_recovery_objectives",
+                Asset.DISASTER_RECOVERY_OBJECTIVES_JSONSCHEMA,
+                {"rto": {"value": 3600}},
+            ),
+            (
+                "recovery_capabilities",
+                Asset.DISASTER_RECOVERY_OBJECTIVES_JSONSCHEMA,
+                {"rto": {"value": 3600}},
+            ),
+        ):
+            (item,) = jsonschema["properties"]["objectives"][
+                "patternProperties"
+            ].values()
+            # OpenAPI 3.0 has no patternProperties
+            schema = {
+                "type": "object",
+                "properties": {
+                    "objectives": {"type": "object", "additionalProperties": item}
+                },
+                "example": {"objectives": example},
+            }
+            extend_schema_field(schema)(fields[name])
+        return fields
 
     def validate(self, data):
         self._check_linked_assets_changeable(data)
@@ -1605,6 +1646,22 @@ class AppliedControlWriteSerializer(
         required=False, default=False, write_only=True
     )
 
+    def validate_cost(self, value):
+        """Keep the stored currency when an update sends a cost without one.
+
+        New controls are handled by ``AppliedControl.save()``, which fills a
+        missing currency from the global setting.
+        """
+        existing = getattr(self.instance, "cost", None)
+        if (
+            isinstance(value, dict)
+            and not value.get("currency")
+            and isinstance(existing, dict)
+            and existing.get("currency")
+        ):
+            value["currency"] = existing["currency"]
+        return value
+
     def validate(self, attrs):
         return self.validate_commitment(super().validate(attrs))
 
@@ -1749,6 +1806,7 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
         source="get_csf_function_display"
     )  # type : get_type_display
     evidences = FieldsRelatedField(many=True)
+    metric_instances = FieldsRelatedField(many=True)
     objectives = FieldsRelatedField(many=True)
     effort = serializers.CharField(source="get_effort_display")
     control_impact = serializers.CharField(source="get_control_impact_display")
@@ -1784,9 +1842,7 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
         return time_state(obj.eta.isoformat())
 
     def get_currency(self, obj):
-        if not obj.cost:
-            return "€"  # Default currency
-        return obj.cost.get("currency", "€")
+        return (obj.cost or {}).get("currency") or get_global_currency()
 
     def get_annual_cost_display(self, obj):
         annual_cost = obj.annual_cost
@@ -2710,7 +2766,7 @@ class UserWriteSerializer(BaseModelSerializer):
         return data
 
     def create(self, validated_data):
-        send_mail = settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE
+        send_mail = mailer.mailing_enabled()
         if not RoleAssignment.is_access_allowed(
             user=self.context["request"].user,
             perm=Permission.objects.get(
@@ -3062,6 +3118,7 @@ class FolderImportExportSerializer(BaseModelSerializer):
         model = Folder
         fields = [
             "parent_folder",
+            "ref_id",
             "name",
             "description",
             "content_type",
@@ -4354,7 +4411,15 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
             "progress_status_enabled",
             "extended_result_enabled",
             "field_visibility",
-            {"framework": ["implementation_groups_definition", "field_visibility"]},
+            {
+                "framework": [
+                    "implementation_groups_definition",
+                    "field_visibility",
+                    # The edit page recomputes the result client-side, so it
+                    # needs the rule the backend will apply on save.
+                    "result_aggregation",
+                ]
+            },
         ]
     )
     folder = FieldsRelatedField()
@@ -5213,15 +5278,10 @@ class RequirementMappingSetReadSerializer(BaseModelSerializer):
         Fallback used on the retrieve path, where no pre-built map is in
         context. Resolves regardless of whether the framework is imported.
         """
-        lib = StoredLibrary.objects.filter(
-            content__framework__urn=urn,
-            content__framework__isnull=False,
-            content__requirement_mapping_set__isnull=True,
-            content__requirement_mapping_sets__isnull=True,
-        ).first()
+        lib = StoredLibrary.framework_libraries([urn]).first()
         if lib is None:
             return None
-        framework = lib.content.get("framework") or {}
+        framework = StoredLibrary.framework_of(lib.content) or {}
         return framework.get("name", urn)
 
     def _framework_info(self, urn):
@@ -7536,7 +7596,8 @@ class QuickFormResponseReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = QuickFormResponse
-        fields = "__all__"
+        # The content endpoint shows facts, to who may view the subject only.
+        exclude = ["facts_snapshot"]
 
 
 class QuickFormResponseWriteSerializer(BaseModelSerializer):
@@ -7555,6 +7616,8 @@ class QuickFormResponseWriteSerializer(BaseModelSerializer):
             "score",
             "started_at",
             "submitted_at",
+            # Frozen on submit: the record of what was assessed.
+            "facts_snapshot",
         ]
 
     def validate_respondents(self, value):

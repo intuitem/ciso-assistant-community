@@ -82,7 +82,8 @@
 		tableHandlers,
 		tableRefreshers,
 		tableStates,
-		tableColumnStates
+		tableColumnStates,
+		tableSortStates
 	} from '$lib/utils/stores';
 	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
@@ -123,6 +124,12 @@
 		// inbox's read flag), so this is separable from `disableEdit` -- which it
 		// defaults to, leaving existing callers unaffected.
 		disableBatchEdit?: boolean;
+		/** Columns the backend cannot meaningfully ORDER BY (computed, or stored
+		 *  in a shape whose order means nothing), so the header must not offer
+		 *  a sort. Defaults to the resolved model's
+		 *  `ModelMapEntry.unsortableColumns`, so every caller gets it; pass this
+		 *  only to override that per table. */
+		unsortableColumns?: string[];
 		disableDelete?: boolean;
 		disableView?: boolean;
 		identifierField?: string;
@@ -188,6 +195,7 @@
 		disableCreate = false,
 		disableEdit = false,
 		disableBatchEdit = undefined,
+		unsortableColumns = undefined,
 		disableDelete = false,
 		disableView = false,
 		identifierField = 'id',
@@ -515,13 +523,29 @@
 		});
 	}
 
+	function applySavedSort() {
+		const saved = $tableSortStates[filterStoreKey];
+		const sort = saved ? { identifier: saved.orderBy, direction: saved.direction } : orderBy;
+		if (!sort) handler.getSort().set({});
+		else if (sort.direction === 'asc') handler.sortAsc(sort.identifier);
+		else handler.sortDesc(sort.identifier);
+	}
+
 	onMount(() => {
-		if (orderBy) {
-			orderBy.direction === 'asc'
-				? handler.sortAsc(orderBy.identifier)
-				: handler.sortDesc(orderBy.identifier);
-		}
+		applySavedSort();
+		const unsubscribeSort = handler.getSort().subscribe(({ orderBy: key, direction }) => {
+			if (!key || !direction) return;
+			const next = { ...$tableSortStates };
+			if (key === orderBy?.identifier && direction === orderBy?.direction) {
+				if (!(filterStoreKey in next)) return;
+				delete next[filterStoreKey];
+			} else {
+				next[filterStoreKey] = { orderBy: String(key), direction };
+			}
+			$tableSortStates = next;
+		});
 		return () => {
+			unsubscribeSort();
 			if (hasRemoteSource)
 				tableRefreshers.update((r) => {
 					delete r[baseEndpoint];
@@ -642,6 +666,7 @@
 	$effect(() => {
 		if (filterStoreKey !== previousFilterStoreKey) {
 			previousFilterStoreKey = filterStoreKey;
+			untrack(applySavedSort);
 			const fresh = seedFilterValues();
 			Object.assign(filterValues, fresh);
 			_form.form.update((data) => ({
@@ -868,6 +893,12 @@
 		const next = { ...$tableFilterStates };
 		delete next[filterStoreKey];
 		$tableFilterStates = next;
+		if (!(filterStoreKey in $tableSortStates)) return;
+		const nextSort = { ...$tableSortStates };
+		delete nextSort[filterStoreKey];
+		$tableSortStates = nextSort;
+		applySavedSort();
+		handler.invalidate();
 	}
 
 	const APPLIED_CONTROL_STATUS_PRESETS: Record<string, string> = {
@@ -902,15 +933,10 @@
 		'user_groups'
 	];
 
-	// Computed in Python from related rows, so there is no column for the backend to
-	// ORDER BY: DRF drops the term and the click does nothing. Better not to offer it.
-	const UNSORTABLE_COMPUTED_COLUMNS = ['completion', 'review_progress', 'schedule'];
-
-	// Function to check if a column is multi-value and should not be sortable
-	const isMultiValueColumn = (key: string): boolean => {
+	const isUnsortableColumn = (key: string): boolean => {
 		return (
 			MULTI_VALUE_COLUMNS.includes(key) ||
-			UNSORTABLE_COMPUTED_COLUMNS.includes(key) ||
+			(unsortableColumns ?? model?.unsortableColumns ?? []).includes(key) ||
 			(tableSource.body.length > 0 && Array.isArray(tableSource.body[0][key]))
 		);
 	};
@@ -1087,7 +1113,7 @@
 												{/key}
 											{/if}
 										{/each}
-										{#if filterCount > 0}
+										{#if filterCount > 0 || filterStoreKey in $tableSortStates}
 											<div class="flex justify-end pt-1">
 												<button
 													type="button"
@@ -1169,7 +1195,7 @@
 					</th>
 				{/if}
 				{#each renderColumnKeys as key (key)}
-					<Th {handler} orderBy={isMultiValueColumn(key) ? undefined : key} class={regionHeadCell}
+					<Th {handler} orderBy={isUnsortableColumn(key) ? undefined : key} class={regionHeadCell}
 						>{safeTranslate(tableSource.head[key])}</Th
 					>
 				{/each}
@@ -1434,6 +1460,7 @@
 														{@const displayValue = [
 															'name',
 															'description',
+															'observation',
 															'ref_id',
 															'key'
 														].includes(key)

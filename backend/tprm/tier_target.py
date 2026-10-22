@@ -1,4 +1,4 @@
-"""`entity.tier`: an accepted response sets its vendor's tier.
+"""`entity.tier` / `solution.tier`: an accepted response sets its subject's tier.
 
 Config (on the form's `on_accept` entry), tiers named by their stable key:
 
@@ -266,13 +266,15 @@ class EntityTierTarget(Target):
                 proposal.extra["band"] = band[2]
         return proposal
 
-    def apply(self, subject, proposal, *, response, user) -> None:
+    def set_tier(self, subject, tier, **kwargs):
         from tprm.tiers import set_entity_tier
 
-        tier = Tier.objects.get(id=proposal.value["tier"])
-        set_entity_tier(
+        set_entity_tier(subject, tier, **kwargs)
+
+    def apply(self, subject, proposal, *, response, user) -> None:
+        self.set_tier(
             subject,
-            tier,
+            Tier.objects.get(id=proposal.value["tier"]),
             source=TierSource.OVERRIDE
             if proposal.overridden
             else TierSource.ASSESSMENT,
@@ -281,3 +283,15 @@ class EntityTierTarget(Target):
             value=proposal.value.get("value"),
             response=response,
         )
+
+
+@register
+class SolutionTierTarget(EntityTierTarget):
+    key = "solution.tier"
+    subject_model = "tprm.Solution"
+    permission = "change_solution"
+
+    def set_tier(self, subject, tier, **kwargs):
+        from tprm.tiers import set_solution_tier
+
+        set_solution_tier(subject, tier, **kwargs)

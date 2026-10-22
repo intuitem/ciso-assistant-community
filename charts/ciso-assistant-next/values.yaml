@@ -223,7 +223,7 @@ backend:
       ## Disabled, each container falls back to its own ephemeral path and the backend
       ## and Huey containers no longer see the same files.
       # -- Enable Local Storage persistence
-      enabled: false
+      enabled: true
       # -- Local Storage persistant volume size
       size: 5Gi
       # -- Local Storage persistant volume storageClass

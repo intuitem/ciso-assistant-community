@@ -84,6 +84,15 @@ export const loginSchema = z
 	})
 	.required();
 
+export const reauthenticateSchema = z.object({
+	password: z.string().optional(),
+	code: z
+		.string()
+		.regex(/^\d{6,8}$/)
+		.optional(),
+	credential: z.string().optional()
+});
+
 export const emailSchema = z
 	.object({
 		email: z.string({
@@ -109,6 +118,7 @@ const NameDescriptionMixin = {
 
 export const FolderSchema = z.object({
 	...NameDescriptionMixin,
+	ref_id: z.string().max(100).optional(),
 	parent_folder: z.string(),
 	create_iam_groups: z.boolean().default(false),
 	filtering_labels: z.array(z.string()).optional(),
@@ -314,7 +324,7 @@ export const AppliedControlSchema = z.object({
 	control_impact: z.number().optional().nullable(),
 	cost: z
 		.object({
-			currency: z.enum(CURRENCY_SYMBOLS).default('€'),
+			currency: z.enum(CURRENCY_SYMBOLS).optional(),
 			amortization_period: z.number().min(1).max(50).default(1),
 			build: z
 				.object({
@@ -723,7 +733,8 @@ export const GeneralSettingsSchema = z.object({
 	default_date_format: z.string().default('auto').optional(),
 	default_packager: z
 		.string()
-		.regex(/^[a-z0-9_-]+$/)
+		// eslint-disable-next-line no-useless-escape
+		.regex(/^[a-z0-9_\-]+$/)
 		.default('custom')
 		.optional(),
 	llm_provider: z.string().default('ollama').optional(),
@@ -801,6 +812,7 @@ export const FeatureFlagsSchema = z.object({
 	purposes: z.boolean().optional(),
 	right_requests: z.boolean().optional(),
 	data_breaches: z.boolean().optional(),
+	dpias: z.boolean().optional(),
 	chat_mode: z.boolean().optional(),
 	auditee_mode: z.boolean().optional(),
 	quick_forms: z.boolean().optional(),
@@ -1013,6 +1025,7 @@ export const solutionSchema = z.object({
 	provider_entity: z.string(),
 	ref_id: z.string().optional(),
 	tier: z.string().uuid().optional().nullable(),
+	tier_note: z.string().optional(),
 	owner: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
 	filtering_labels: z.string().optional().array().optional(),
@@ -1156,6 +1169,8 @@ export const processingSchema = z.object({
 	dpia_required: z.boolean().optional(),
 	dpia_reference: z.string().optional(),
 	has_sensitive_personal_data: z.boolean().optional(),
+	role: z.string().optional(),
+	controllers: z.string().uuid().optional().array().optional(),
 	nature: z.string().optional().array().optional(),
 	associated_controls: z.array(z.string().optional()).optional(),
 	evidences: z.string().optional().array().optional(),
@@ -2084,6 +2099,7 @@ export const MetricInstanceSchema = z.object({
 	target_value: z.coerce.number().optional().nullable(),
 	collection_frequency: z.string().optional().nullable(),
 	organisation_objectives: z.string().uuid().optional().array().optional(),
+	applied_controls: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	filtering_labels: z.string().optional().array().optional(),
 	evidences: z.string().uuid().optional().nullable(),
 	input_choices: jsonSchema.optional().nullable()
@@ -2336,8 +2352,15 @@ export const auditSinkSchema = z.object({
 	transport: z.enum(['http', 'kafka']).default('http'),
 	url: z.string().url().optional().or(z.literal('')),
 	body_format: z.enum(['ocsf', 'raw']).default('ocsf'),
+	body_wrapper: z.enum(['none', 'array']).default('none'),
 	// HTTP: JSON of auth headers, parsed server-side.
 	headers: z.string().optional(),
+	auth_type: z.enum(['static', 'oauth2_client_credentials']).default('static'),
+	// OAuth2: assembled server-side into oauth_config.
+	token_url: z.string().url().optional().or(z.literal('')),
+	client_id: z.string().optional(),
+	client_secret: z.string().optional(),
+	scope: z.string().optional(),
 	// Kafka: assembled server-side into kafka_config {bootstrap_servers, topic, config}.
 	bootstrap_servers: z.string().optional(),
 	topic: z.string().optional(),

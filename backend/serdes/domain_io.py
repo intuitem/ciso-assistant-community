@@ -1,8 +1,7 @@
 """Domain export / import helpers extracted from FolderViewSet.
 
-Exposes the logic used by the three DRF actions on FolderViewSet
-(`export`, `import_domain`, `import_dummy_domain`) as module-level
-functions so the ViewSet stays thin.
+Exposes the logic used by the DRF actions on FolderViewSet (`export`,
+`import_domain`) as module-level functions so the ViewSet stays thin.
 """
 
 from __future__ import annotations
@@ -79,7 +78,7 @@ from tprm.models import (
     Solution,
     Tier,
 )
-from tprm.tiers import set_entity_tier
+from tprm.tiers import set_entity_tier, set_solution_tier
 
 from .serializers import ExportSerializer
 from .utils import (
@@ -905,6 +904,11 @@ def process_model_relationships(
         case "folder":
             # Only enclaves travel, and their domain parent stayed behind.
             _fields["parent_folder"] = link_dump_database_ids.get("base_folder")
+            # Folder ref_ids are unique instance-wide: re-importing or copying a
+            # domain keeps an enclave's ref_id only while it is free.
+            ref_id = _fields.get("ref_id")
+            if ref_id and Folder.ref_id_in_use(ref_id):
+                _fields["ref_id"] = None
 
         case "asset":
             many_to_many_map_ids["parent_ids"] = get_mapped_ids(
@@ -1078,12 +1082,10 @@ def process_model_relationships(
             many_to_many_map_ids["asset_ids"] = get_mapped_ids(
                 _fields.pop("assets", []), link_dump_database_ids
             )
-            tier_ref = _fields.pop("tier", None)
-            _fields["tier"] = (
-                _imported_tier(tier_ref, solution=_fields.get("name"))
-                if tier_ref
-                else None
-            )
+            if tier_ref := _fields.pop("tier", None):
+                many_to_many_map_ids["tier"] = _imported_tier(
+                    tier_ref, solution=_fields.get("name")
+                )
 
         case "solutionsubcontractor":
             _fields["solution"] = Solution.objects.get(
@@ -1560,6 +1562,8 @@ def set_many_to_many_relations(
         case "solution":
             if asset_ids := many_to_many_map_ids.get("asset_ids"):
                 obj.assets.set(Asset.objects.filter(id__in=asset_ids))
+            if tier := many_to_many_map_ids.get("tier"):
+                set_solution_tier(obj, tier, propagate=False)
 
         case "entityassessment":
             if solution_ids := many_to_many_map_ids.get("solution_ids"):

@@ -18,6 +18,7 @@
 	import WordTemplatesSettings from '$lib/components/Settings/WordTemplatesSettings.svelte';
 	import DocHtmlTemplatesSettings from '$lib/components/Settings/DocHtmlTemplatesSettings.svelte';
 	import AuditLogForwardingSettings from '$lib/components/Settings/AuditLogForwardingSettings.svelte';
+	import MailerSettings from '$lib/components/Settings/MailerSettings.svelte';
 
 	// Tabs whose content lives in a dedicated sub-route and is preloaded into
 	// page.state instead of being loaded by the main settings page.
@@ -49,6 +50,7 @@
 		'notificationChannels',
 		'vulnerabilitySla',
 		'secIntelFeeds',
+		'mailer',
 		'webhooks',
 		'auditLogForwarding',
 		'emailTemplates',
@@ -59,6 +61,9 @@
 
 	function tabAvailable(tab: string | null | undefined): tab is string {
 		if (!tab || !KNOWN_TABS.has(tab)) return false;
+		// Loaded only when the backend runs with ENABLE_CUSTOM_MAILER and the
+		// user may view it (see the community +page.server.ts).
+		if (tab === 'mailer') return Boolean(page.data?.mailerSettings);
 		const flag = FLAG_GATED_TABS[tab];
 		return flag ? Boolean(page.data?.featureflags?.[flag]) : true;
 	}
@@ -68,6 +73,10 @@
 		for (const [tab, { href }] of Object.entries(PRELOAD_TABS)) {
 			if (page.url.pathname.endsWith(href.replace('/settings', ''))) return tab;
 		}
+		// A deep link (/settings?tab=featureFlags) names its tab, so it beats the
+		// remembered one. Tabs backed by a sub-route have their own URL instead.
+		const linked = page.url.searchParams.get('tab');
+		if (tabAvailable(linked) && !PRELOAD_TABS[linked]) return linked;
 		if (browser) {
 			const saved = sessionStorage.getItem(SETTINGS_TAB_STORAGE_KEY);
 			if (tabAvailable(saved)) {
@@ -143,6 +152,9 @@
 		<Tabs.Trigger value="secIntelFeeds"
 			><i class="fa-solid fa-satellite-dish"></i> {m.secIntelFeeds()}</Tabs.Trigger
 		>
+		{#if data.mailerSettings}
+			<Tabs.Trigger value="mailer"><i class="fa-solid fa-envelope"></i> {m.mailer()}</Tabs.Trigger>
+		{/if}
 		{#if page.data?.featureflags?.outgoing_webhooks}
 			<Tabs.Trigger value="webhooks"
 				><span class="flex flex-row gap-2 items-center ml-0"
@@ -210,6 +222,11 @@
 	<Tabs.Content value="secIntelFeeds">
 		<SecIntelFeedsSettings {data} />
 	</Tabs.Content>
+	{#if data.mailerSettings}
+		<Tabs.Content value="mailer">
+			<MailerSettings {data} />
+		</Tabs.Content>
+	{/if}
 	<Tabs.Content value="webhooks">
 		<WebhooksSettings {data} allowMultiple />
 	</Tabs.Content>

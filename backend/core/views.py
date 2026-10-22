@@ -180,6 +180,7 @@ from core.answer_attachments import serialize as serialize_attachment
 from core.answer_attachments import serve as serve_attachment
 from core.models import (
     Commitment,
+    DemoManifest,
     AppliedControl,
     ComplianceAssessment,
     RequirementMappingSet,
@@ -210,13 +211,14 @@ from dateutil import relativedelta as rd
 
 from ebios_rm.models import (
     EbiosRMStudy,
+    KillChain,
     RoTo,
     Stakeholder,
 )
 
-from tprm.models import Entity
+from tprm.models import Entity, SolutionSubcontractor
 from privacy.models import Processing, DataBreach
-from resilience.models import AssetAssessment
+from resilience.models import AssetAssessment, DoraIncidentReport
 
 from .models import *
 from .serializers import *
@@ -249,10 +251,12 @@ from global_settings.utils import (
 )
 
 from core import commitment
+from core import mailer
 
 import structlog
 
-from core.quick_form_apply import project, targets_of
+from core.quick_form_apply import always_reviewed, project, targets_of
+from core.quick_form_facts import facts_for, freeze_facts
 from core.quick_form_targets import get_target
 
 logger = structlog.get_logger(__name__)
@@ -5571,6 +5575,7 @@ APPLIED_CONTROL_LINKED_FIELDS = [
     ("risk_scenarios", "Risk Scenarios"),
     ("risk_scenarios_e", "Risk Scenarios (existing)"),
     ("findings", "Findings"),
+    ("evidences", "Evidences"),
     ("vulnerabilities", "Vulnerabilities"),
     ("stakeholders", "Stakeholders"),
     ("processings", "Processings"),
@@ -6058,6 +6063,7 @@ class AppliedControlViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSe
             "has_risk_scenarios": RiskScenario.applied_controls.through,
             "has_risk_scenarios_e": RiskScenario.existing_applied_controls.through,
             "has_findings": Finding.applied_controls.through,
+            "has_evidences": AppliedControl.evidences.through,
             "has_vulnerabilities": Vulnerability.applied_controls.through,
             "has_stakeholders": Stakeholder.applied_controls.through,
             "has_processings": Processing.associated_controls.through,
@@ -7761,6 +7767,7 @@ class RiskScenarioFilter(GenericFilterSet):
         # Only include actual model fields here
         fields = {
             "name": ["exact"],
+            "ref_id": ["exact"],
             "current_impact": ["exact"],
             "current_proba": ["exact"],
             "current_level": ["exact"],
@@ -9183,12 +9190,13 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
 
     model = Folder
     filterset_class = FolderFilter
-    search_fields = ["name"]
+    search_fields = ["name", "ref_id"]
 
     # Columns mirror the domains import template, so an export can be re-imported.
     export_config = {
         "fields": {
             "internal_id": {"source": "id", "label": "internal_id"},
+            "ref_id": {"source": "ref_id", "label": "ref_id", "escape": True},
             "name": {"source": "name", "label": "name", "escape": True},
             "description": {
                 "source": "description",
@@ -9214,6 +9222,21 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
         # the CSV export iterates the prefetched queryset rather than .iterator().
         "prefetch_related": ["filtering_labels"],
     }
+
+    def cascade_preclear(self, instance):
+        # Rows of the domain tree that PROTECT other rows of the same tree.
+        # References from outside the tree are not cleared and still block.
+        folders = instance.get_sub_folders(include_self=True)
+        return [
+            KillChain.objects.filter(folder__in=folders),
+            DoraIncidentReport.objects.filter(folder__in=folders),
+            ComplianceAssessment.objects.filter(
+                folder__in=folders, campaign__isnull=False
+            ),
+            SolutionSubcontractor.objects.filter(
+                solution__provider_entity__folder__in=folders
+            ),
+        ]
 
     def _get_export_queryset(self):
         # Only domains round-trip through the import: the root folder is implicit,
@@ -9874,37 +9897,47 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
         url_path="import-dummy",
     )
     def import_dummy_domain(self, request):
-        from serdes import domain_io
+        """Load the demo dataset (``core.demo``) into its own domain."""
+        from core import demo
 
-        domain_name = "DEMO"
-        try:
-            PROJECT_DIR = Path(__file__).resolve().parent.parent
-            dummy_fixture_path = PROJECT_DIR / "fixtures" / "dummy-domain.bak"
-            if not dummy_fixture_path.exists():
-                logger.error("Dummy domain fixture not found", path=dummy_fixture_path)
-                return Response(
-                    {"error": "dummyDomainFixtureNotFound"},
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                )
-            parsed_data = domain_io.process_uploaded_file(dummy_fixture_path)
-            result = domain_io.import_objects(
-                parsed_data, domain_name, load_missing_libraries=True, user=request.user
-            )
-            logger.info("Dummy domain imported successfully", domain_name=domain_name)
-            return Response(result, status=status.HTTP_200_OK)
-
-        except json.JSONDecodeError:
-            logger.error("Invalid JSON format in dummy fixture file")
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_folder"),
+            folder=Folder.get_root_folder(),
+        ):
             return Response(
-                {"errors": ["Invalid JSON format"]},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                {"error": "userDoesNotHavePermissionToImportDomain"},
+                status=status.HTTP_403_FORBIDDEN,
             )
-        except Exception:
-            logger.error("Error importing dummy domain")
+        existing = Folder.objects.filter(
+            **demo.demo_domain_filter(demo.DEFAULT_DOMAIN)
+        ).first()
+        if existing is not None:
+            # A same-named domain without a manifest is someone's own: never
+            # seed into it.
+            loaded = DemoManifest.objects.filter(domain=existing).exists()
+            return Response(
+                {"error": "demoDataAlreadyLoaded" if loaded else "demoDomainNameTaken"},
+                status=status.HTTP_409_CONFLICT,
+            )
+        # Flags are instance-wide: only switch them on for settings managers.
+        enable_flags = RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="change_globalsettings"),
+            folder=Folder.get_root_folder(),
+        )
+        try:
+            ctx = demo.seed(
+                enable_flags=enable_flags, out=logger.debug, err=logger.warning
+            )
+        except Exception as e:
+            logger.error("Error loading demo data", error=e, exc_info=True)
             return Response(
                 {"error": "failedToImportDummyDomain"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+        logger.info("Demo data loaded", domain=ctx.domain.name)
+        return Response({"id": str(ctx.domain.pk)}, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=["get"])
     def get_accessible_objects(self, request):
@@ -12313,7 +12346,7 @@ class CampaignViewSet(BaseModelViewSet):
                 campaign.status = Campaign.Status.IN_PROGRESS
                 campaign.save(update_fields=["status"])
 
-        if settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE:
+        if mailer.mailing_enabled():
             from core.tasks import notify_campaign_assignees
 
             transaction.on_commit(lambda: notify_campaign_assignees(str(campaign.id)))
@@ -13668,7 +13701,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             )
             started += 1
 
-        if not (settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE):
+        if not mailer.mailing_enabled():
             return Response({"started": started, "warning": ["noMailerConfigured"]})
 
         from core.tasks import notify_audit_assignees
@@ -13731,9 +13764,15 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
 
             # Find the requirement assessment first so we can validate score
             # against the per-RA resolved scale (Node override > CA bounds).
-            requirement_assessment = RequirementAssessment.objects.filter(
-                compliance_assessment=compliance_assessment, requirement__urn=urn
-            ).first()
+            requirement_assessment = (
+                RequirementAssessment.objects.filter(
+                    compliance_assessment=compliance_assessment, requirement__urn=urn
+                )
+                # The requirement is read below, and its framework carries the
+                # result aggregation rule a recompute needs.
+                .select_related("requirement__framework")
+                .first()
+            )
 
             if not requirement_assessment:
                 return Response(
@@ -16187,6 +16226,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
         "applied_controls": ["exact"],
         "security_exceptions": ["exact"],
         "requirement__urn": ["exact"],
+        "requirement__ref_id": ["exact"],
         "result": ["exact"],
         "extended_result": ["exact"],
         "compliance_assessment__ref_id": ["exact"],
@@ -16444,13 +16484,14 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
         if framework_urns:
             # Extract only the urn/name pair in the DB so the (potentially large)
             # framework content blob is never loaded into Python.
-            rows = StoredLibrary.objects.filter(
-                content__framework__urn__in=framework_urns,
-                content__framework__isnull=False,
-                content__requirement_mapping_set__isnull=True,
-                content__requirement_mapping_sets__isnull=True,
-            ).values_list("content__framework__urn", "content__framework__name")
-            for urn, name in rows:
+            rows = StoredLibrary.framework_libraries(framework_urns).values_list(
+                "content__framework__urn",
+                "content__framework__name",
+                "content__frameworks__0__urn",
+                "content__frameworks__0__name",
+            )
+            for urn, name, plural_urn, plural_name in rows:
+                urn, name = (urn, name) if urn else (plural_urn, plural_name)
                 if urn:
                     framework_map[urn] = name or urn
 
@@ -16461,8 +16502,9 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
     def provider(self, request):
         providers = set(
             StoredLibrary.objects.filter(
+                Q(objects_meta__requirement_mapping_sets__isnull=False)
+                | Q(objects_meta__requirement_mapping_set__isnull=False),
                 provider__isnull=False,
-                objects_meta__requirement_mapping_sets__isnull=False,
             ).values_list("provider", flat=True)
         )
         return Response({p: p for p in providers})
@@ -16483,16 +16525,11 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
 
         framework_details = {}
 
-        framework_libs_qs = StoredLibrary.objects.filter(
-            content__framework__urn__in=all_framework_urns,
-            content__framework__isnull=False,
-            content__requirement_mapping_set__isnull=True,
-            content__requirement_mapping_sets__isnull=True,
-        )
+        framework_libs_qs = StoredLibrary.framework_libraries(all_framework_urns)
 
         for lib in framework_libs_qs:
             try:
-                fw_content = lib.content["framework"]
+                fw_content = StoredLibrary.framework_of(lib.content) or {}
                 urn = fw_content.get("urn")
 
                 if not urn:
@@ -16602,15 +16639,10 @@ class RequirementMappingSetViewSet(BaseModelViewSet):
 
     @staticmethod
     def _framework_content(urn, label):
-        lib = StoredLibrary.objects.filter(
-            content__framework__urn=urn,
-            content__framework__isnull=False,
-            content__requirement_mapping_set__isnull=True,
-            content__requirement_mapping_sets__isnull=True,
-        ).first()
+        lib = StoredLibrary.framework_libraries([urn]).first()
         if not lib:
             raise NotFound(f"{label} framework library not found")
-        return lib.content["framework"]
+        return StoredLibrary.framework_of(lib.content)
 
     def _mapping_context(self):
         """Resolve the mapping set and both framework contents.
@@ -18548,6 +18580,41 @@ class CommentViewSet(BaseModelViewSet):
         return super().perform_destroy(instance)
 
 
+def _next_occurrence_status(today):
+    """Status the next-occurrence column shows: a one-time task's only node whatever
+    its date, a recurring task's first node from today on."""
+    return Case(
+        When(
+            is_recurrent=False,
+            then=Subquery(
+                TaskNode.objects.filter(task_template=OuterRef("pk"))
+                .order_by("due_date")
+                .values("status")[:1]
+            ),
+        ),
+        When(
+            is_recurrent=True,
+            then=Subquery(
+                TaskNode.objects.filter(
+                    task_template=OuterRef("pk"), due_date__gte=today
+                )
+                .order_by("due_date")
+                .values("status")[:1]
+            ),
+        ),
+        default=Value(None),
+        output_field=models.CharField(),
+    )
+
+
+def _last_occurrence_status(today):
+    return Subquery(
+        TaskNode.objects.filter(task_template=OuterRef("pk"), due_date__lt=today)
+        .order_by("-due_date")
+        .values("status")[:1]
+    )
+
+
 class TaskTemplateFilter(GenericFilterSet):
     folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
 
@@ -18590,6 +18657,9 @@ class TaskTemplateFilter(GenericFilterSet):
     last_occurrence_status = df.MultipleChoiceFilter(
         choices=TaskNode.TASK_STATUS_CHOICES, method="filter_last_occurrence_status"
     )
+    # An occurrence of an enabled task past its due date that nobody closed. The start
+    # date says nothing about this: a recurring series always started in the past.
+    overdue = df.BooleanFilter(method="filter_overdue", label="Overdue")
 
     class Meta:
         model = TaskTemplate
@@ -18611,28 +18681,30 @@ class TaskTemplateFilter(GenericFilterSet):
         ]
 
     def filter_last_occurrence_status(self, queryset, name, values):
-        start = timezone.now().date()
-        status_subquery = (
-            TaskNode.objects.filter(task_template=OuterRef("pk"), due_date__lt=start)
-            .order_by("-due_date")
-            .values("status")[:1]
-        )
-
-        return queryset.annotate(last_status=Subquery(status_subquery)).filter(
-            last_status__in=values
+        # The column leaves one-time tasks blank, so the filter must not match them.
+        return (
+            queryset.filter(is_recurrent=True)
+            .alias(_last_status=_last_occurrence_status(timezone.localdate()))
+            .filter(_last_status__in=values)
         )
 
     def filter_next_occurrence_status(self, queryset, name, values):
-        start = timezone.now().date()
-        status_subquery = (
-            TaskNode.objects.filter(task_template=OuterRef("pk"), due_date__gte=start)
-            .order_by("due_date")
-            .values("status")[:1]
-        )
+        return queryset.alias(
+            _next_status=_next_occurrence_status(timezone.localdate())
+        ).filter(_next_status__in=values)
 
-        return queryset.annotate(next_status=Subquery(status_subquery)).filter(
-            next_status__in=values
+    def filter_overdue(self, queryset, name, value):
+        if value is None:
+            return queryset
+        # A disabled task is never late, as the overdue email skips it too.
+        late = Q(enabled=True) & Exists(
+            TaskNode.objects.filter(
+                task_template=OuterRef("pk"),
+                due_date__lt=timezone.localdate(),
+                status__in=TaskNode.OPEN_STATUSES,
+            )
         )
+        return queryset.filter(late if value else ~late)
 
 
 def _bucket_by_date(due, today):
@@ -18646,6 +18718,23 @@ def _bucket_by_date(due, today):
     if due <= today + timedelta(days=90):
         return "due_90d"
     return "later"
+
+
+def _due_bucket(task, node, overdue, today):
+    """A date alone does not make a task late: a finished one-time task is closed,
+    and a past date with nothing open behind it (a series with no upcoming
+    occurrence, say) has no due date left to report. A disabled task is closed
+    whatever its occurrences say: the deadline emails skip it too."""
+    if not task.enabled:
+        return "closed"
+    if overdue:
+        return "overdue"
+    if not task.is_recurrent and node and node.status not in TaskNode.OPEN_STATUSES:
+        return "closed"
+    due = node.due_date if node else task.task_date
+    if due is not None and due < today:
+        return "no_eta"
+    return _bucket_by_date(due, today)
 
 
 # Actions that serialize whole templates and so need the related columns resolved
@@ -18686,11 +18775,19 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
         # `get_next_occurrence_status`, so the chart and the column agree.
         recurrent_ids = {t.id for t in tasks if t.is_recurrent}
         next_node_by_template: dict = {}
+        # Same rule as the list's `overdue` filter: an open occurrence past due.
+        overdue_ids: set = set()
         for node in (
             TaskNode.objects.filter(task_template__in=[t.id for t in tasks])
             .order_by("due_date")
             .only("task_template_id", "status", "due_date")
         ):
+            if (
+                node.due_date is not None
+                and node.due_date < today
+                and node.status in TaskNode.OPEN_STATUSES
+            ):
+                overdue_ids.add(node.task_template_id)
             if node.task_template_id in recurrent_ids and (
                 node.due_date is None or node.due_date < today
             ):
@@ -18700,7 +18797,7 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
         by_status: dict = {}
         due_buckets = {
             key: {"key": key, "count": 0}
-            for key in ("overdue", "due_30d", "due_90d", "later", "no_eta")
+            for key in ("overdue", "due_30d", "due_90d", "later", "no_eta", "closed")
         }
         assignee_counts: dict = {}
         folder_counts: dict = {}
@@ -18717,8 +18814,8 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
             entry = by_status.setdefault(status, {"key": status, "count": 0})
             entry["count"] += 1
 
-            due = node.due_date if node else task.task_date
-            due_buckets[_bucket_by_date(due, today)]["count"] += 1
+            bucket_key = _due_bucket(task, node, task.id in overdue_ids, today)
+            due_buckets[bucket_key]["count"] += 1
 
             recurrence["recurrent" if task.is_recurrent else "one_time"] += 1
 
@@ -19104,36 +19201,8 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
                     default=Value(None),
                     output_field=models.DateField(),
                 ),
-                last_occurrence_status=Subquery(
-                    TaskNode.objects.filter(
-                        task_template=OuterRef("pk"), due_date__lt=today
-                    )
-                    .order_by("-due_date")
-                    .values("status")[:1]
-                ),
-                next_occurrence_status=Case(
-                    When(
-                        is_recurrent=False,
-                        then=Subquery(
-                            TaskNode.objects.filter(task_template=OuterRef("pk"))
-                            .order_by("due_date")
-                            .values("status")[:1]
-                        ),
-                    ),
-                    When(
-                        is_recurrent=True,
-                        then=Subquery(
-                            TaskNode.objects.filter(
-                                task_template=OuterRef("pk"),
-                                due_date__gte=today,
-                            )
-                            .order_by("due_date")
-                            .values("status")[:1]
-                        ),
-                    ),
-                    default=Value(None),
-                    output_field=models.CharField(),
-                ),
+                last_occurrence_status=_last_occurrence_status(today),
+                next_occurrence_status=_next_occurrence_status(today),
                 # The serializer exposes the single occurrence's status and
                 # observation directly; without these it fetches that node per row.
                 one_time_status=Subquery(
@@ -19861,6 +19930,7 @@ class TaskNodeFilterSet(GenericFilterSet):
     class Meta:
         model = TaskNode
         fields = {
+            "folder": ["exact"],
             "status": ["exact"],
             "task_template": ["exact"],
             "due_date": ["exact", "lte", "gte", "lt", "gt", "month", "year"],
@@ -20407,6 +20477,28 @@ class QuestionViewSet(BaseModelViewSet):
             qs = qs.filter(requirement_node__framework_id=framework_id)
         return qs
 
+    def destroy(self, request, *args, **kwargs):
+        # Deleting cascades into the quick form responses' answers.
+        if _answered_in_responses(Answer.objects.filter(question=self.get_object())):
+            return Response(
+                {"error": "questionAnsweredInResponses"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return super().destroy(request, *args, **kwargs)
+
+
+def _answered_in_responses(answers) -> bool:
+    """Whether any quick form response holds an answer among `answers`."""
+    return (
+        answers.filter(response__isnull=False)
+        .filter(
+            Q(value__isnull=False)
+            | Q(selected_choices__isnull=False)
+            | Q(attachments__isnull=False)
+        )
+        .exists()
+    )
+
 
 class QuestionChoiceViewSet(BaseModelViewSet):
     """API endpoint for QuestionChoice CRUD."""
@@ -20420,6 +20512,17 @@ class QuestionChoiceViewSet(BaseModelViewSet):
 
     def get_queryset(self):
         return super().get_queryset().select_related("question", "folder")
+
+    def destroy(self, request, *args, **kwargs):
+        # Deleting silently empties the responses' selections.
+        if _answered_in_responses(
+            Answer.objects.filter(selected_choices=self.get_object())
+        ):
+            return Response(
+                {"error": "choiceSelectedInResponses"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return super().destroy(request, *args, **kwargs)
 
 
 class AnswerViewSet(BaseModelViewSet):
@@ -20513,17 +20616,35 @@ class QuickFormViewSet(BaseModelViewSet):
     filterset_fields = ["folder", "library"]
     search_fields = ["name", "description", "ref_id"]
 
+    permission_overrides = {"always_review": "change_quickform"}
+
     def get_queryset(self):
         return super().get_queryset().select_related("folder", "library")
 
     def create(self, request, *args, **kwargs):
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
+    @action(detail=True, methods=["post"], url_path="always-review")
+    def always_review(self, request, pk=None):
+        """The one setting an instance owns on a library form: whether accepting
+        always takes a review, even when the submitter could apply it."""
+        quick_form = self.get_object()
+        value = request.data.get("always_review")
+        if not isinstance(value, bool):
+            return Response(
+                {"error": "alwaysReviewMustBeBoolean"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        quick_form.always_review = value
+        quick_form.save(update_fields=["always_review", "updated_at"])
+        return Response({"always_review": value})
+
     @staticmethod
     def _assessable(request, target_key, subject_id):
         """(target, subject, may_start): the object a form would assess, and
         whether the caller may file a response in its domain. None when the
-        target is unknown or the subject is out of the caller's sight."""
+        target is unknown, does not apply to the subject, or the subject is out
+        of the caller's sight."""
         from core.quick_form_targets import get_target
 
         target = get_target(str(target_key or ""))
@@ -20537,6 +20658,8 @@ class QuickFormViewSet(BaseModelViewSet):
         if subject is None or not RoleAssignment.is_object_readable(
             request.user, model, subject.pk
         ):
+            return None
+        if not target.applies_to(subject):
             return None
         permission = Permission.objects.get(codename="add_quickformresponse")
         may_start = RoleAssignment.is_access_allowed(
@@ -20634,65 +20757,16 @@ class QuickFormViewSet(BaseModelViewSet):
     def preview(self, request, pk):
         """Answer a published form without creating a response.
 
-        Same evaluator as the draft preview — the live rows are turned back into the
+        The draft preview's pipeline — the live rows are turned back into the
         document shape it takes — so an author checking a published form and one
-        checking a draft are looking at the same rules.
+        checking a draft see the same thing.
         """
-        from core.cel_service import evaluate_quick_form_document
+        from core.quick_form_preview import fill_preview, loaded_form_document
 
-        quick_form = self.get_object()
-        pages = []
-        for page in (
-            QuickFormPage.objects.filter(quick_form=quick_form)
-            .prefetch_related("questions__choices")
-            .order_by("order")
-        ):
-            pages.append(
-                {
-                    "urn": page.urn,
-                    "ref_id": page.ref_id,
-                    "name": page.get_name_translated,
-                    "description": page.get_description_translated,
-                    "visibility_expression": page.visibility_expression,
-                    "aggregation": page.aggregation,
-                    "questions": page.get_questions_translated() or {},
-                }
-            )
-        document = {
-            "urn": quick_form.urn,
-            "pages": pages,
-            "outcomes_definition": quick_form.outcomes_definition or [],
-            "scores_definition": quick_form.scores_definition,
-        }
-        answers = request.data.get("answers")
-        evaluation = evaluate_quick_form_document(
-            document, answers if isinstance(answers, dict) else {}
-        )
-        hidden = set(evaluation["hidden_pages"])
         return Response(
-            {
-                "name": quick_form.get_name_translated,
-                "description": quick_form.get_description_translated,
-                "outcomes_definition": document["outcomes_definition"],
-                "pages": [{**page, "hidden": page["urn"] in hidden} for page in pages],
-                "hidden_pages": evaluation["hidden_pages"],
-                "missing_required": evaluation["missing_required"],
-                "progress": evaluation["progress"],
-                "score": evaluation["score"],
-                "computed_outcome": evaluation["computed_outcome"],
-                "computed_values": evaluation["computed_values"],
-                "scored_complete": evaluation["context"]["response"]["scored_complete"],
-                # Authors want to see where answers lead.
-                "projection": project(
-                    quick_form.on_accept,
-                    evaluation["computed_values"],
-                    evaluation["computed_outcome"],
-                    ready=evaluation["context"]["response"]["scored_complete"],
-                    score=evaluation["score"],
-                )
-                if quick_form.on_accept
-                else [],
-            }
+            fill_preview(
+                loaded_form_document(self.get_object()), request.data.get("answers")
+            )
         )
 
     @action(detail=True, methods=["get"], name="Quick form pages")
@@ -20829,10 +20903,7 @@ def _close_on_submit(response, user, evaluation=None) -> list[dict] | None:
     from core.cel_service import evaluate_quick_form
     from core.quick_form_apply import apply_on_accept
 
-    publication = response.publication
-    if not response.quick_form.on_accept or (
-        publication is not None and publication.always_review
-    ):
+    if not response.quick_form.on_accept or always_reviewed(response):
         return None
     if evaluation is None:
         evaluation = evaluate_quick_form(response, persist=True)
@@ -20911,6 +20982,7 @@ def quick_form_response_content(response, user=None):
     questions, the answers dict, hidden pages, progress, score and outcome. Shared by
     the reviewer surface and the requester's own, so the two cannot drift."""
     from core.cel_service import evaluate_quick_form
+    from core.quick_form_ratings import ratings_for_display
     from core.utils import build_answers_dict
 
     evaluation = evaluate_quick_form(response, persist=False)
@@ -20932,6 +21004,7 @@ def quick_form_response_content(response, user=None):
                 "description": page.get_description_translated,
                 "order": page.order,
                 "hidden": page.urn in hidden,
+                "facts": page.facts or [],
                 "questions": page.get_questions_translated() or {},
             }
         )
@@ -20957,6 +21030,10 @@ def quick_form_response_content(response, user=None):
             "answers": answers,
             "attachments": attachments,
             "references": references,
+            # Rating outcomes with their points, labels in the active language.
+            "ratings": ratings_for_display(
+                response.quick_form, evaluation.get("ratings") or []
+            ),
             "produced_objects": response.produced_objects or [],
             "hidden_pages": evaluation["hidden_pages"],
             "missing_required": evaluation["missing_required"],
@@ -20979,6 +21056,8 @@ def quick_form_response_content(response, user=None):
             and (response.publication is None or response.publication.show_projection)
             else [],
             "subject": subject,
+            # The subject's records the pages show: only to who may view it.
+            "facts": facts_for(response) if subject_readable else {},
             "applications": [
                 {
                     "target": a.target,
@@ -21251,6 +21330,7 @@ class MyRequestViewSet(viewsets.ViewSet):
             "observation",
             "updated_at",
         ]
+        update_fields += freeze_facts(response)
         sla_due = _outcome_sla_due_date(response)
         if sla_due is not None and (
             response.due_date is None or sla_due < response.due_date
@@ -21336,6 +21416,7 @@ class MyRequestViewSet(viewsets.ViewSet):
                     response.folder,
                     request.query_params.get("search", ""),
                     user=request.user,
+                    subject=response.subject,
                 )
             )
         except ReferenceError_ as e:
@@ -21638,6 +21719,12 @@ class QuickFormResponseViewSet(BaseModelViewSet):
         if self.request.query_params.get("mine") in ("true", "1"):
             user_actors = Actor.get_all_for_user(self.request.user)
             qs = qs.filter(respondents__in=user_actors).distinct()
+        # What the responses record, whatever form they came from: `processing.dpia`
+        # lists every DPIA, clones and custom templates included.
+        if target := self.request.query_params.get("target"):
+            from core.quick_form_apply import forms_with_target
+
+            qs = qs.filter(quick_form__in=forms_with_target(target))
         return qs
 
     def destroy(self, request, *args, **kwargs):
@@ -21746,6 +21833,7 @@ class QuickFormResponseViewSet(BaseModelViewSet):
                     response.folder,
                     request.query_params.get("search", ""),
                     user=request.user,
+                    subject=response.subject,
                 )
             )
         except ReferenceError_ as e:
@@ -22071,7 +22159,11 @@ class QuickFormResponseViewSet(BaseModelViewSet):
                 planned = plan(response, request.user, overrides)
                 for item in planned:
                     proposal = item["proposal"]
-                    if item["target"] in overrides and not proposal.ok:
+                    if (
+                        item["target"] in overrides
+                        and not proposal.ok
+                        and proposal.reason != "targetNotApplicable"
+                    ):
                         return Response(
                             {
                                 "error": "invalidOverride",
@@ -22126,6 +22218,7 @@ class QuickFormResponseViewSet(BaseModelViewSet):
             # response is reassigned, and the reviewer set is derived against it.
             response.submitted_by = request.user
             update_fields += ["submitted_at", "submitted_by"]
+            update_fields += freeze_facts(response)
             sla_due = _outcome_sla_due_date(response)
             # Most urgent wins, and an outcome never loosens a date a human set.
             if sla_due is not None and (
@@ -22133,6 +22226,10 @@ class QuickFormResponseViewSet(BaseModelViewSet):
             ):
                 response.due_date = sla_due
                 update_fields.append("due_date")
+        elif new_status == QuickFormResponse.Status.DRAFT:
+            # Sent back: the pages read the subject live again until resubmitted.
+            response.facts_snapshot = None
+            update_fields.append("facts_snapshot")
         response.save(update_fields=update_fields)
 
         on_accept = None

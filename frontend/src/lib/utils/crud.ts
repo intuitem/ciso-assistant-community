@@ -12,6 +12,8 @@ import LecChartPreview from '$lib/components/ModelTable/field/LecChartPreview.sv
 import TriggerTypesDisplay from '$lib/components/ModelTable/field/TriggerTypesDisplay.svelte';
 import TierBadge from '$lib/components/ModelTable/field/TierBadge.svelte';
 import TierSource from '$lib/components/ModelTable/field/TierSource.svelte';
+import DpiaRequirementSource from '$lib/components/ModelTable/field/DpiaRequirementSource.svelte';
+import DpiaRequiredBadge from '$lib/components/ModelTable/field/DpiaRequiredBadge.svelte';
 import { listViewFields } from './table';
 import type { TableBatchAction } from './table';
 import type { urlModel } from './types';
@@ -191,6 +193,7 @@ export const MODEL_FEATURE_FLAGS: Record<string, FeatureFlag> = {
 	'entity-scores': 'external_ratings',
 	tiers: 'tprm',
 	'entity-tier-changes': 'tprm',
+	'solution-tier-changes': 'tprm',
 	representatives: 'tprm',
 	solutions: 'tprm',
 	findings: 'follow_up',
@@ -264,6 +267,16 @@ export interface ModelMapEntry {
 	 * rendered as Markdown for this model.
 	 */
 	markdownFields?: string[];
+	/**
+	 * Columns the list header must not offer to sort. Mostly values this model
+	 * computes in Python rather than storing, so there is no column for the
+	 * backend to ORDER BY: DRF drops the term and the header click does nothing.
+	 * Also stored values whose database order means nothing to the reader, like
+	 * the `schedule` JSON shown as a frequency on task templates. Listed per
+	 * model because the same name can be a stored column elsewhere, as
+	 * `progress` is on projects.
+	 */
+	unsortableColumns?: string[];
 }
 
 // A field can name one flag or several, and shows when any of them is on. Indexing
@@ -630,6 +643,7 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlParams: 'content_type=DO&content_type=GL&content_type=EN'
 			},
 			{ field: 'evidences', urlModel: 'evidences' },
+			{ field: 'metric_instances', urlModel: 'metric-instances' },
 			{ field: 'objectives', urlModel: 'organisation-objectives' },
 			{ field: 'owner', urlModel: 'actors' },
 			{ field: 'security_exceptions', urlModel: 'security-exceptions' },
@@ -661,6 +675,13 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'task-templates',
 				addExisting: {
 					parentField: 'task_templates'
+				}
+			},
+			{
+				field: 'applied_controls',
+				urlModel: 'metric-instances',
+				addExisting: {
+					parentField: 'metric_instances'
 				}
 			},
 			{
@@ -1239,7 +1260,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder' },
 			{ field: 'library' },
 			{ field: 'pages_count' },
-			{ field: 'responses_count' }
+			{ field: 'responses_count' },
+			{ field: 'always_review' }
 		],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
@@ -1429,7 +1451,9 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'processings' },
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' }
-		]
+		],
+		// Read off the default document's current revision, not the container.
+		unsortableColumns: ['progress', 'status', 'source']
 	},
 	'document-templates': {
 		name: 'documenttemplate',
@@ -1526,7 +1550,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'compliance_assessment', urlModel: 'findings-assessments', disableCreate: true }
 		],
 		selectFields: [{ field: 'status' }, { field: 'score_calculation_method' }],
-		filters: [{ field: 'status' }]
+		filters: [{ field: 'status' }],
+		unsortableColumns: ['progress']
 	},
 	requirements: {
 		name: 'requirement',
@@ -1711,7 +1736,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' }
 		],
-		filters: [{ field: 'status' }]
+		filters: [{ field: 'status' }],
+		unsortableColumns: ['completion', 'review_progress']
 	},
 	solutions: {
 		name: 'solution',
@@ -1734,7 +1760,15 @@ export const URL_MODEL_MAP: ModelMap = {
 			dora_alternative_providers_identified: 'dora',
 			dora_alternative_providers: 'dora'
 		},
-		reverseForeignKeyFields: [{ field: 'solutions', urlModel: 'contracts', disableDelete: true }],
+		reverseForeignKeyFields: [
+			{ field: 'solutions', urlModel: 'contracts', disableDelete: true },
+			{
+				field: 'solution',
+				urlModel: 'solution-tier-changes',
+				disableCreate: true,
+				disableDelete: true
+			}
+		],
 		foreignKeyFields: [
 			{ field: 'provider_entity', urlModel: 'entities' },
 			{ field: 'recipient_entity', urlModel: 'entities' },
@@ -1763,7 +1797,6 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'provider_entity' },
 			{ field: 'recipient_entity' },
 			{ field: 'is_active' },
-			{ field: 'tier' },
 			{ field: 'owner' },
 			{ field: 'assets' },
 			{ field: 'dora_ict_service_type' },
@@ -1867,7 +1900,26 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'entity', urlModel: 'entities' },
 			{ field: 'tier', urlModel: 'tiers' },
-			{ field: 'previous_tier', urlModel: 'tiers' }
+			{ field: 'previous_tier', urlModel: 'tiers' },
+			{ field: 'response', urlModel: 'quick-form-responses' },
+			{ field: 'changed_by', urlModel: 'users' },
+			{ field: 'folder', urlModel: 'folders' }
+		],
+		selectFields: [{ field: 'source' }]
+	},
+	'solution-tier-changes': {
+		name: 'solutiontierchange',
+		localName: 'solutionTierChange',
+		localNamePlural: 'solutionTierChanges',
+		verboseName: 'Solution tier change',
+		verboseNamePlural: 'Solution tier changes',
+		foreignKeyFields: [
+			{ field: 'solution', urlModel: 'solutions' },
+			{ field: 'tier', urlModel: 'tiers' },
+			{ field: 'previous_tier', urlModel: 'tiers' },
+			{ field: 'response', urlModel: 'quick-form-responses' },
+			{ field: 'changed_by', urlModel: 'users' },
+			{ field: 'folder', urlModel: 'folders' }
 		],
 		selectFields: [{ field: 'source' }]
 	},
@@ -2073,11 +2125,12 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'processings',
 		verboseName: 'processing',
 		verboseNamePlural: 'processings',
-		selectFields: [{ field: 'status' }],
+		selectFields: [{ field: 'status' }, { field: 'role' }],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'purposes', urlModel: 'purposes' },
 			{ field: 'nature', urlModel: 'terminologies' },
+			{ field: 'controllers', urlModel: 'entities' },
 			{ field: 'assigned_to', urlModel: 'actors', urlParams: 'is_third_party=false' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
 			{ field: 'perimeters', urlModel: 'perimeters' },
@@ -2092,6 +2145,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'description' },
 			{ field: 'nature' },
 			{ field: 'status' },
+			{ field: 'role' },
+			{ field: 'controllers' },
 			{ field: 'purposes' },
 			{ field: 'assigned_to' },
 			{ field: 'dpia_required' },
@@ -2120,6 +2175,12 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'processing', urlModel: 'data-recipients' },
 			{ field: 'processing', urlModel: 'data-contractors' },
 			{ field: 'processing', urlModel: 'data-transfers' },
+			{
+				field: 'processing',
+				urlModel: 'dpia-requirement-changes',
+				disableCreate: true,
+				disableDelete: true
+			},
 			{
 				field: 'processings',
 				urlModel: 'right-requests',
@@ -2233,6 +2294,19 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' }
 		]
+	},
+	'dpia-requirement-changes': {
+		endpointUrl: 'privacy/dpia-requirement-changes',
+		name: 'dpiarequirementchange',
+		localName: 'dpiaRequirementChange',
+		localNamePlural: 'dpiaRequirementChanges',
+		verboseName: 'DPIA requirement change',
+		verboseNamePlural: 'DPIA requirement changes',
+		foreignKeyFields: [
+			{ field: 'processing', urlModel: 'processings' },
+			{ field: 'response', urlModel: 'quick-form-responses' }
+		],
+		selectFields: [{ field: 'source' }]
 	},
 	purposes: {
 		endpointUrl: 'privacy/purposes',
@@ -3160,7 +3234,8 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableCreate: true,
 				disableDelete: true
 			}
-		]
+		],
+		unsortableColumns: ['schedule']
 	},
 	'task-nodes': {
 		name: 'tasknode',
@@ -4137,6 +4212,19 @@ const FIELD_COMPONENT_MAP = {
 		tier: TierBadge,
 		previous_tier: TierBadge,
 		source: TierSource
+	},
+	'solution-tier-changes': {
+		tier: TierBadge,
+		previous_tier: TierBadge,
+		source: TierSource
+	},
+	processings: {
+		dpia_required: DpiaRequiredBadge
+	},
+	'dpia-requirement-changes': {
+		dpia_required: DpiaRequiredBadge,
+		previous_dpia_required: DpiaRequiredBadge,
+		source: DpiaRequirementSource
 	}
 };
 

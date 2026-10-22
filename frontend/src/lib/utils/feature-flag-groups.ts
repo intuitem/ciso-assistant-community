@@ -4,6 +4,9 @@ export interface FeatureFlagField {
 	field: string;
 	label: string;
 	description: string;
+	/** Flags this one only works with; the server keeps them on with it
+	 *  (FeatureFlagsSerializer.FLAG_REQUIRES). */
+	requires?: string[];
 }
 
 export interface FeatureFlagGroup {
@@ -321,6 +324,12 @@ export function getFeatureFlagGroups(availableKeys: string[]): FeatureFlagGroup[
 					field: 'data_breaches',
 					label: m.dataBreaches(),
 					description: m.dataBreachesDescription()
+				},
+				{
+					field: 'dpias',
+					label: m.dpias(),
+					description: m.dpiasDescription(),
+					requires: ['quick_forms']
 				}
 			].filter(({ field }) => availableKeys.includes(field))
 		},

@@ -17,8 +17,8 @@ import logging.config
 import structlog
 from django.core.exceptions import ImproperlyConfigured
 from django.core.management.utils import get_random_secret_key
-import ssl
 from . import meta
+from .mailers import build_mailers, describe
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -562,61 +562,32 @@ logger.info("FORCE_CREATE_ADMIN: %s", FORCE_CREATE_ADMIN)
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
 logger.info("DEFAULT_FROM_EMAIL: %s", DEFAULT_FROM_EMAIL)
 
-EMAIL_HOST = os.environ.get("EMAIL_HOST")
-logger.info("EMAIL_HOST: %s", EMAIL_HOST)
-EMAIL_PORT = os.environ.get("EMAIL_PORT")
-logger.info("EMAIL_PORT: %s", EMAIL_PORT)
-EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
-EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "False").lower() in ("true", "1", "yes")
-logger.info("EMAIL_USE_TLS: %s", EMAIL_USE_TLS)
-EMAIL_USE_SSL = os.environ.get("EMAIL_USE_SSL", "False").lower() in ("true", "1", "yes")
-logger.info("EMAIL_USE_SSL: %s", EMAIL_USE_SSL)
-if EMAIL_USE_TLS and EMAIL_USE_SSL:
-    raise ValueError("EMAIL_USE_TLS and EMAIL_USE_SSL are mutually exclusive")
-# rescue mail
-EMAIL_HOST_RESCUE = os.environ.get("EMAIL_HOST_RESCUE")
-logger.info("EMAIL_HOST_RESCUE: %s", EMAIL_HOST_RESCUE)
-EMAIL_PORT_RESCUE = os.environ.get("EMAIL_PORT_RESCUE")
-logger.info("EMAIL_PORT_RESCUE: %s", EMAIL_PORT_RESCUE)
-EMAIL_HOST_USER_RESCUE = os.environ.get("EMAIL_HOST_USER_RESCUE")
-EMAIL_HOST_PASSWORD_RESCUE = os.environ.get("EMAIL_HOST_PASSWORD_RESCUE")
-EMAIL_USE_TLS_RESCUE = os.environ.get("EMAIL_USE_TLS_RESCUE", "False").lower() in (
-    "true",
-    "1",
-    "yes",
-)
-logger.info("EMAIL_USE_TLS_RESCUE: %s", EMAIL_USE_TLS_RESCUE)
-EMAIL_USE_SSL_RESCUE = os.environ.get("EMAIL_USE_SSL_RESCUE", "False").lower() in (
-    "true",
-    "1",
-    "yes",
-)
-logger.info("EMAIL_USE_SSL_RESCUE: %s", EMAIL_USE_SSL_RESCUE)
-if EMAIL_USE_TLS_RESCUE and EMAIL_USE_SSL_RESCUE:
-    raise ValueError(
-        "EMAIL_USE_TLS_RESCUE and EMAIL_USE_SSL_RESCUE are mutually exclusive"
-    )
+# Outgoing mail. The EMAIL_* environment variables are the operator interface
+# and keep their names; they feed Django's MAILERS, tried in order by
+# core.mailer (primary, then the _RESCUE server). Django's own EMAIL_* settings
+# are deprecated in 6.1 and not defined here.
 EMAIL_FORCE_TLS_1_2 = os.environ.get("EMAIL_FORCE_TLS_1_2", "False").lower() in (
     "true",
     "1",
     "yes",
 )
 logger.info("EMAIL_FORCE_TLS_1_2: %s", EMAIL_FORCE_TLS_1_2)
-
-
-def _build_tls12_context():
-    context = ssl.create_default_context()
-    context.minimum_version = ssl.TLSVersion.TLSv1_2
-    context.maximum_version = ssl.TLSVersion.TLSv1_2
-    context.set_ciphers("ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256")
-    return context
-
-
-EMAIL_SSL_CONTEXT = _build_tls12_context() if EMAIL_FORCE_TLS_1_2 else None
-
-EMAIL_TIMEOUT = int(os.environ.get("EMAIL_TIMEOUT", default="5"))  # seconds
-logger.info("EMAIL_TIMEOUT: %s", EMAIL_TIMEOUT)
+MAILERS = build_mailers(os.environ, mail_debug=MAIL_DEBUG)
+# Lets administrators configure the mailers in the app (custom-mailer-settings
+# ADR). Off by default; set per hosted instance at our discretion.
+ENABLE_CUSTOM_MAILER = os.environ.get("ENABLE_CUSTOM_MAILER", "False").lower() in (
+    "true",
+    "1",
+    "yes",
+)
+logger.info("ENABLE_CUSTOM_MAILER: %s", ENABLE_CUSTOM_MAILER)
+for _line in describe(MAILERS):
+    logger.info(_line)
+if not MAILERS:
+    logger.info("no mailer configured (EMAIL_HOST unset): mailing is disabled")
+# An empty MAILERS is the supported "mailing off" state; Django would otherwise
+# warn about the missing "default" entry on every check and migrate.
+SILENCED_SYSTEM_CHECKS = ["mail.W001"]
 
 REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": [
@@ -843,9 +814,8 @@ ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_LOGIN_METHODS = {"email"}
 ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
 
-# NOTE: The reauthentication flow has not been implemented in the frontend yet, hence the long timeout.
 # It is used to reauthenticate the user when they are performing sensitive operations. E.g. enabling/disabling MFA.
-ACCOUNT_REAUTHENTICATION_TIMEOUT = 24 * 60 * 60  # 24 hours
+ACCOUNT_REAUTHENTICATION_TIMEOUT = 2 * 60 * 60  # 2 hours
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
@@ -910,7 +880,6 @@ MFA_PASSKEY_SIGNUP_ENABLED = False
 MFA_ADAPTER = "iam.adapter.MFAAdapter"
 
 if MAIL_DEBUG:
-    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
     DEFAULT_FROM_EMAIL = "noreply@ciso.assistant"
 
 
@@ -952,6 +921,9 @@ WORKFLOWS_DISPATCH_TIMEOUT_SECONDS = int(
 WORKFLOWS_INBOUND_HOOKS = (
     os.environ.get("WORKFLOWS_INBOUND_HOOKS", "true").lower() != "false"
 )
+
+# Per-user rate limit on chat messages (DRF rate string); raised for evals
+CHAT_MESSAGE_THROTTLE_RATE = os.environ.get("CHAT_MESSAGE_THROTTLE_RATE", "120/hour")
 
 # Per-sender-IP rate limit on the unauthenticated inbound hook endpoint (DRF
 # rate string, e.g. "120/min"). Keyed on the trailing X-Forwarded-For entry.

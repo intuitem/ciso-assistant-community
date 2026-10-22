@@ -268,7 +268,21 @@ def read_csv_file(file: io.BytesIO) -> pd.DataFrame:
         sep = csv.Sniffer().sniff(sample, delimiters=",;\t|").delimiter
     except csv.Error:
         sep = ","
-    return pd.read_csv(file, sep=sep, encoding="utf-8-sig").fillna("")
+    # Keep ref_ids as text: parsed as floats, "X.10" collapses onto "X.1".
+    header = pd.read_csv(io.StringIO(sample), sep=sep, nrows=0).columns
+    dtype = {c: str for c in header if str(c).strip().lower().endswith("ref_id")}
+    return pd.read_csv(file, sep=sep, encoding="utf-8-sig", dtype=dtype).fillna("")
+
+
+def read_excel_sheet(file: io.BytesIO, sheet_name=0) -> pd.DataFrame:
+    """Read a sheet keeping text cells as text (pandas would turn "1.10" into 1.1),
+    while numeric, boolean and date cells keep their inferred dtypes.
+    ref_id columns are always text, even when typed as numbers in Excel."""
+    df = pd.read_excel(file, sheet_name=sheet_name, dtype=object)
+    for c in df.columns:
+        if str(c).strip().lower().endswith("ref_id"):
+            df[c] = df[c].map(lambda v: v if pd.isna(v) else str(v))
+    return df.infer_objects()
 
 
 def normalize_datetime_columns(df: pd.DataFrame) -> pd.DataFrame:
@@ -3005,6 +3019,7 @@ class FolderRecordConsumer(RecordConsumer):
             return {}, error
 
         data = {
+            "ref_id": record.get("ref_id", ""),
             "name": name,
             "description": record.get("description", ""),
             "parent_folder": parent_folder_id,
@@ -3342,11 +3357,18 @@ class ProcessingRecordConsumer(RecordConsumer):
     _STATUS_BY_DISPLAY: ClassVar[Mapping[str, str]] = MappingProxyType(
         {v.lower(): k for k, v in Processing.STATUS_CHOICES}
     )
+    _ROLE_KEYS: ClassVar[frozenset[str]] = frozenset(
+        k for k, _ in Processing.ROLE_CHOICES
+    )
+    _ROLE_BY_DISPLAY: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {v.lower(): k for k, v in Processing.ROLE_CHOICES}
+    )
 
     def _build_update_data(self, record: dict, record_data: dict) -> dict:
         update_data = super()._build_update_data(record, record_data)
-        if "assigned_to" not in update_data and "assigned_to" in record:
-            update_data["assigned_to"] = record_data.get("assigned_to", [])
+        for field in ("assigned_to", "controllers"):
+            if field not in update_data and field in record:
+                update_data[field] = record_data.get(field, [])
         return update_data
 
     def create_context(self):
@@ -3373,12 +3395,23 @@ class ProcessingRecordConsumer(RecordConsumer):
         else:
             status_value = "privacy_draft"
 
+        record_role_value = str(record.get("role") or "").strip()
+        if not record_role_value:
+            role_value = "privacy_controller"
+        elif record_role_value in self._ROLE_KEYS:
+            role_value = record_role_value
+        elif record_role_value.lower() in self._ROLE_BY_DISPLAY:
+            role_value = self._ROLE_BY_DISPLAY[record_role_value.lower()]
+        else:
+            return {}, Error(record=record, error=f"Unknown role: {record_role_value}")
+
         data = {
             "name": name,
             "description": record.get("description", ""),
             "ref_id": record.get("ref_id", ""),
             "folder": domain,
             "status": status_value,
+            "role": role_value,
             "information_channel": record.get("information_channel", ""),
             "usage_channel": record.get("usage_channel", ""),
             "dpia_required": record.get("dpia_required", False),
@@ -3398,6 +3431,30 @@ class ProcessingRecordConsumer(RecordConsumer):
                     name__in=nature_names,
                 ).values_list("id", flat=True)
             )
+
+        # Resolve M2M: controllers (by entity name)
+        lines = [
+            line.strip()
+            for line in str(record.get("controllers") or "").splitlines()
+            if line.strip()
+        ]
+        known = set(
+            Entity.objects.filter(name__in=lines).values_list("name", flat=True)
+        )
+        entity_names = set()
+        for line in lines:
+            if line in known:
+                entity_names.add(line)
+            else:
+                entity_names |= {n.strip() for n in line.split(",") if n.strip()}
+        entities = Entity.objects.filter(name__in=entity_names)
+        missing = entity_names - {e.name for e in entities}
+        if missing:
+            return {}, Error(
+                record=record,
+                error=f"Unknown controllers: {', '.join(sorted(missing))}",
+            )
+        data["controllers"] = [e.id for e in entities]
 
         # Resolve M2M: assigned_to (by user email → Actor)
         record_assigned_to = record.get("assigned_to")
@@ -4476,7 +4533,7 @@ class LoadFileView(APIView):
                     is_excel = is_excel_file(record_file)
                     if is_excel:
                         df = normalize_datetime_columns(
-                            pd.read_excel(record_file)
+                            read_excel_sheet(record_file)
                         ).fillna("")
                     else:
                         file_type = RecordFileType.CSV
@@ -4894,7 +4951,7 @@ class LoadFileView(APIView):
 
             summary_df = normalize_df_columns(
                 normalize_datetime_columns(
-                    pd.read_excel(excel_data, sheet_name=summary_sheet)
+                    read_excel_sheet(excel_data, sheet_name=summary_sheet)
                 )
             ).fillna("")
             summary_records = summary_df.to_dict(orient="records")
@@ -5041,7 +5098,7 @@ class LoadFileView(APIView):
 
             sheet_df = normalize_df_columns(
                 normalize_datetime_columns(
-                    pd.read_excel(excel_data, sheet_name=sheet_name)
+                    read_excel_sheet(excel_data, sheet_name=sheet_name)
                 )
             ).fillna("")
 
@@ -5223,11 +5280,15 @@ class LoadFileView(APIView):
 
                     if requirement_assessment:
                         compliance_result = record.get("compliance_result")
+                        extended_result = record.get("extended_result")
                         requirement_progress = record.get("requirement_progress")
                         observations = record.get("observations")
                         requirement_data = {}
+
                         if compliance_result not in (None, ""):
                             requirement_data["result"] = compliance_result
+                        if extended_result not in (None, ""):
+                            requirement_data["extended_result"] = extended_result
                         if requirement_progress not in (None, ""):
                             requirement_data["status"] = requirement_progress
                         if observations not in (None, ""):
@@ -5376,7 +5437,7 @@ class LoadFileView(APIView):
             if len(sheet_names) == 1:
                 # Single-sheet file: treat it as a Summary-only import.
                 df = normalize_datetime_columns(
-                    pd.read_excel(excel_file, sheet_name=sheet_names[0])
+                    read_excel_sheet(excel_file, sheet_name=sheet_names[0])
                 ).fillna("")
                 records = df.to_dict(orient="records")
                 base_context = BaseContext(
@@ -5409,7 +5470,7 @@ class LoadFileView(APIView):
             }
 
             summary_df = normalize_datetime_columns(
-                pd.read_excel(excel_file, sheet_name="Summary")
+                read_excel_sheet(excel_file, sheet_name="Summary")
             ).fillna("")
             summary_records = summary_df.to_dict(orient="records")
 
@@ -5450,7 +5511,7 @@ class LoadFileView(APIView):
                 )
 
                 sheet_df = normalize_datetime_columns(
-                    pd.read_excel(excel_file, sheet_name=sheet_name)
+                    read_excel_sheet(excel_file, sheet_name=sheet_name)
                 ).fillna("")
                 sheet_records = sheet_df.to_dict(orient="records")
 
@@ -5537,7 +5598,7 @@ class LoadFileView(APIView):
             if parent_sheet is None and not has_child_sheets:
                 # Flat list of processings (legacy single-sheet format)
                 df = normalize_df_columns(
-                    normalize_datetime_columns(pd.read_excel(excel_file)).fillna("")
+                    normalize_datetime_columns(read_excel_sheet(excel_file)).fillna("")
                 )
                 return (
                     ProcessingRecordConsumer(base_context)
@@ -5555,7 +5616,7 @@ class LoadFileView(APIView):
 
             parent_df = normalize_df_columns(
                 normalize_datetime_columns(
-                    pd.read_excel(excel_file, sheet_name=parent_sheet)
+                    read_excel_sheet(excel_file, sheet_name=parent_sheet)
                 ).fillna("")
             )
             parent_records = parent_df.to_dict(orient="records")
@@ -5607,7 +5668,7 @@ class LoadFileView(APIView):
                 result_key, consumer_class = PROCESSING_CHILD_SHEETS[key]
                 sheet_df = normalize_df_columns(
                     normalize_datetime_columns(
-                        pd.read_excel(excel_file, sheet_name=sheet_name)
+                        read_excel_sheet(excel_file, sheet_name=sheet_name)
                     ).fillna("")
                 )
                 sheet_records = sheet_df.to_dict(orient="records")
@@ -5666,7 +5727,7 @@ class LoadFileView(APIView):
             if "Entities" in excel_data.sheet_names:
                 logger.info("Processing Entities sheet")
                 entities_df = normalize_datetime_columns(
-                    pd.read_excel(excel_file, sheet_name="Entities")
+                    read_excel_sheet(excel_file, sheet_name="Entities")
                 ).fillna("")
                 entities_records = entities_df.to_dict(orient="records")
                 entities_result, entity_ref_map, entity_name_map = (
@@ -5684,7 +5745,7 @@ class LoadFileView(APIView):
             if "Solutions" in excel_data.sheet_names:
                 logger.info("Processing Solutions sheet")
                 solutions_df = normalize_datetime_columns(
-                    pd.read_excel(excel_file, sheet_name="Solutions")
+                    read_excel_sheet(excel_file, sheet_name="Solutions")
                 ).fillna("")
                 solutions_records = solutions_df.to_dict(orient="records")
                 solutions_result, solution_ref_map = self._process_solutions(
@@ -5704,7 +5765,7 @@ class LoadFileView(APIView):
             if "EntityAssessments" in excel_data.sheet_names:
                 logger.info("Processing EntityAssessments sheet")
                 entity_assessments_df = normalize_datetime_columns(
-                    pd.read_excel(excel_file, sheet_name="EntityAssessments")
+                    read_excel_sheet(excel_file, sheet_name="EntityAssessments")
                 ).fillna("")
                 entity_assessments_records = entity_assessments_df.to_dict(
                     orient="records"
@@ -5729,7 +5790,7 @@ class LoadFileView(APIView):
             if "Contracts" in excel_data.sheet_names:
                 logger.info("Processing Contracts sheet")
                 contracts_df = normalize_datetime_columns(
-                    pd.read_excel(excel_file, sheet_name="Contracts")
+                    read_excel_sheet(excel_file, sheet_name="Contracts")
                 ).fillna("")
                 contracts_records = contracts_df.to_dict(orient="records")
                 contracts_result = self._process_contracts(
@@ -5752,7 +5813,7 @@ class LoadFileView(APIView):
             if "Representatives" in excel_data.sheet_names:
                 logger.info("Processing Representatives sheet")
                 representatives_df = normalize_datetime_columns(
-                    pd.read_excel(excel_file, sheet_name="Representatives")
+                    read_excel_sheet(excel_file, sheet_name="Representatives")
                 ).fillna("")
                 representatives_records = representatives_df.to_dict(orient="records")
                 representatives_result = self._process_representatives(

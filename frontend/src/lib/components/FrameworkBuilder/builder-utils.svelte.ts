@@ -182,7 +182,9 @@ export const REFERENCEABLE_MODELS = [
 	'risk_scenario',
 	'vulnerability',
 	'perimeter',
-	'entity'
+	'entity',
+	'solution',
+	'processing'
 ] as const;
 
 /** Map from composite value to Font Awesome icon class. */

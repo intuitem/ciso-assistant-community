@@ -1,38 +1,41 @@
 {
-  "name": "n8n-nodes-ciso-assistant",
-  "version": "1.0.0",
-  "description": "Custom n8n node to interact with CISO Assistant API",
-  "license": "AGPL",
-  "homepage": "https://github.com/intuitem/ciso-assistant-community",
+  "name": "@intuitem/n8n-nodes-ciso-assistant",
+  "version": "1.0.1",
+  "description": "n8n community node for the CISO Assistant GRC platform",
+  "license": "MIT",
+  "homepage": "https://github.com/intuitem/ciso-assistant-community/tree/main/automation/n8n/n8n-nodes-ca",
+  "keywords": [
+    "n8n-community-node-package",
+    "ciso-assistant",
+    "grc",
+    "compliance",
+    "security"
+  ],
   "author": {
     "name": "intuitem",
     "email": "contact@intuitem.com"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/intuitem/ciso-assistant-community.git"
+    "url": "git+https://github.com/intuitem/ciso-assistant-community.git",
+    "directory": "automation/n8n/n8n-nodes-ca"
   },
-  "keywords": [
-    "n8n",
-    "ciso-assistant",
-    "cybersecurity",
-    "security",
-    "compliance"
-  ],
-  "main": "index.js",
   "scripts": {
-    "build": "tsc && gulp build:icons",
-    "dev": "tsc --watch",
+    "build": "n8n-node build",
+    "build:watch": "tsc --watch",
+    "dev": "n8n-node dev",
+    "lint": "n8n-node lint",
+    "lint:fix": "n8n-node lint --fix",
     "format": "prettier nodes credentials --write",
-    "lint": "eslint nodes credentials package.json",
-    "lintfix": "eslint nodes credentials package.json --fix",
-    "prepublishOnly": "npm run build && npm run lint -s"
+    "test": "vitest run",
+    "prepublishOnly": "n8n-node prerelease"
   },
   "files": [
     "dist"
   ],
   "n8n": {
     "n8nNodesApiVersion": 1,
+    "strict": true,
     "credentials": [
       "dist/credentials/CisoAssistantApi.credentials.js"
     ],
@@ -41,23 +44,13 @@
     ]
   },
   "devDependencies": {
-    "@types/node": "^22.16.5",
-    "@typescript-eslint/parser": "^8.37.0",
-    "eslint": "^9.31.0",
-    "eslint-plugin-n8n-nodes-base": "^1.16.3",
-    "gulp": "^5.0.1",
-    "n8n-workflow": "^1.120.6",
-    "prettier": "^3.6.2",
-    "typescript": "^5.8.3"
+    "@n8n/node-cli": "0.54.0",
+    "eslint": "9.39.4",
+    "prettier": "3.9.10",
+    "typescript": "5.9.3",
+    "vitest": "4.1.11"
   },
   "peerDependencies": {
     "n8n-workflow": "*"
-  },
-  "overrides": {
-    "form-data": "^4.0.4",
-    "lodash": "^4.18.1",
-    "minimatch": "^3.1.3",
-    "flatted": "^3.4.2",
-    "picomatch": "^2.3.2"
   }
 }

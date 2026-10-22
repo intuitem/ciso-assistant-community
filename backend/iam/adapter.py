@@ -16,9 +16,11 @@ from allauth.socialaccount.adapter import (
 from allauth.socialaccount.models import app_settings
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.http import HttpRequest
+from django.utils.translation import gettext_lazy as _
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.response import Response
 from rest_framework.status import HTTP_401_UNAUTHORIZED
@@ -239,6 +241,16 @@ class AccountAdapter(DefaultAccountAdapter):
                     logger.error("Failed to log rate limited IP", exc_info=e)
 
             return None
+
+    def reauthenticate(self, user, password):
+        from allauth.mfa.utils import is_mfa_enabled
+
+        if is_mfa_enabled(user):
+            raise ValidationError(
+                _("Confirm with your second factor instead of your password."),
+                code="mfa_required",
+            )
+        return super().reauthenticate(user, password)
 
 
 class MFAAdapter(DefaultMFAAdapter):

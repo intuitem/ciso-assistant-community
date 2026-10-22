@@ -3,6 +3,9 @@ import { expect, test } from '../utils/test-utils.js';
 test('my profile settings page loads correctly', async ({ logedPage, page }) => {
 	await test.step('navigate to my profile settings page', async () => {
 		await page.goto('/my-profile/settings');
+		await expect(page).toHaveURL(/\/reauthenticate\?method=password&next=/);
+		await page.getByTestId('form-input-password').fill(logedPage.password);
+		await page.getByTestId('reauthenticate-button').click();
 		await expect(page).toHaveURL('/my-profile/settings');
 	});
 

@@ -20,8 +20,10 @@ import ReplaceWith from '$lib/components/ContextMenu/applied-controls/ReplaceWit
 import ChangeAttackStage from '$lib/components/ContextMenu/elementary-actions/ChangeAttackStage.svelte';
 import VulnerabilityChangeStatus from '$lib/components/ContextMenu/vulnerabilities/ChangeStatus.svelte';
 import VulnerabilityChangeSeverity from '$lib/components/ContextMenu/vulnerabilities/ChangeSeverity.svelte';
-import EntityAssessTier from '$lib/components/ContextMenu/entities/AssessTier.svelte';
-import EntityChangeTier from '$lib/components/ContextMenu/entities/ChangeTier.svelte';
+import AssessTier from '$lib/components/ContextMenu/AssessTier.svelte';
+import ChangeTier from '$lib/components/ContextMenu/ChangeTier.svelte';
+import ProcessingScreenDpia from '$lib/components/ContextMenu/processings/ScreenDpia.svelte';
+import ProcessingChangeDpiaRequired from '$lib/components/ContextMenu/processings/ChangeDpiaRequired.svelte';
 import ChangeChoiceField from '$lib/components/ContextMenu/ChangeChoiceField.svelte';
 import ToggleBooleanField from '$lib/components/ContextMenu/ToggleBooleanField.svelte';
 import ToggleRecoveryFlags from '$lib/components/ContextMenu/asset-assessments/ToggleRecoveryFlags.svelte';
@@ -658,6 +660,47 @@ export const PROCESSING_STATUS_FILTER: ListViewFilterConfig = {
 		multiple: true
 	}
 };
+export const DPIA_REQUIRED_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'processings/dpia_required',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'dpiaRequired',
+		browserCache: 'force-cache',
+		multiple: false
+	}
+};
+export const DPIA_REQUIREMENT_SOURCE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		// Labelled on purpose: the raw values translate as generic words
+		// ("assessment" reads "Audit" in French). Getters follow the current language.
+		options: [
+			{
+				get label() {
+					return m.dpiaSourceAssessment();
+				},
+				value: 'assessment'
+			},
+			{
+				get label() {
+					return m.dpiaSourceOverride();
+				},
+				value: 'override'
+			},
+			{
+				get label() {
+					return m.dpiaSourceManual();
+				},
+				value: 'manual'
+			}
+		],
+		translateOptions: false,
+		label: 'source',
+		multiple: true
+	}
+};
 export const LEGAL_BASIS_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1011,6 +1054,15 @@ export const ENABLED_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const TASK_OVERDUE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'overdue',
+		options: YES_NO_OPTIONS,
+		multiple: false
+	}
+};
+
 export const TASK_TEMPLATE_ASSIGNED_TO_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1209,6 +1261,12 @@ export const TIER_SOURCE_FILTER: ListViewFilterConfig = {
 					return m.tierSourceManual();
 				},
 				value: 'manual'
+			},
+			{
+				get label() {
+					return m.tierSourceRollup();
+				},
+				value: 'rollup'
 			}
 		],
 		translateOptions: false,
@@ -1628,6 +1686,18 @@ export const CONTRACT_STATUS_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const QUICK_FORM_RESPONSE_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'status',
+		optionsEndpoint: 'quick-form-responses/status',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+
 export const EVIDENCE_OWNER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1687,8 +1757,9 @@ export const CWE_FILTER: ListViewFilterConfig = {
 
 export const listViewFields = {
 	folders: {
-		head: ['name', 'description', 'contentType', 'parentDomain', 'iamGroups', 'labels'],
+		head: ['ref_id', 'name', 'description', 'contentType', 'parentDomain', 'iamGroups', 'labels'],
 		body: [
+			'ref_id',
 			'name',
 			'description',
 			'content_type',
@@ -2222,6 +2293,8 @@ export const listViewFields = {
 			'is_third_party',
 			'has_mfa_enabled'
 		],
+		optionalFields: { head: ['observation'], body: ['observation'] },
+		hasDescription: false,
 		filters: {
 			is_active: USER_IS_ACTIVE_FILTER,
 			is_third_party: USER_IS_THIRD_PARTY_FILTER
@@ -2285,7 +2358,8 @@ export const listViewFields = {
 		body: ['ref_id', 'name', 'quick_form', 'status', 'respondents', 'due_date', 'folder'],
 		meta: ['id', 'status'],
 		filters: {
-			folder: DOMAIN_FILTER
+			folder: DOMAIN_FILTER,
+			status: QUICK_FORM_RESPONSE_STATUS_FILTER
 		}
 	},
 	'compliance-assessments': {
@@ -2631,6 +2705,29 @@ export const listViewFields = {
 			source: TIER_SOURCE_FILTER
 		}
 	},
+	'solution-tier-changes': {
+		head: ['createdAt', 'tier', 'previousTier', 'source', 'changedBy', 'note', 'solution'],
+		body: ['created_at', 'tier', 'previous_tier', 'source', 'changed_by', 'note', 'solution'],
+		filters: {
+			tier: TIER_FILTER,
+			source: TIER_SOURCE_FILTER
+		}
+	},
+	'dpia-requirement-changes': {
+		head: ['createdAt', 'dpiaRequired', 'previously', 'source', 'changedBy', 'note', 'processing'],
+		body: [
+			'created_at',
+			'dpia_required',
+			'previous_dpia_required',
+			'source',
+			'changed_by',
+			'note',
+			'processing'
+		],
+		filters: {
+			source: DPIA_REQUIREMENT_SOURCE_FILTER
+		}
+	},
 	'entity-scores': {
 		head: ['provider', 'score', 'normalizedScore', 'grade', 'asOf', 'entity'],
 		body: ['provider', 'score', 'normalized_score', 'grade', 'as_of', 'entity'],
@@ -2718,11 +2815,41 @@ export const listViewFields = {
 		}
 	},
 	processings: {
-		head: ['refId', 'name', 'description', 'status', 'processingNature', 'labels', 'folder'],
-		body: ['ref_id', 'name', 'description', 'status', 'nature', 'filtering_labels', 'folder'],
+		head: [
+			'refId',
+			'name',
+			'description',
+			'status',
+			'processingRole',
+			'processingNature',
+			'labels',
+			'folder'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'description',
+			'status',
+			'role',
+			'nature',
+			'filtering_labels',
+			'folder'
+		],
 		optionalFields: {
-			head: ['personalDataCategories', 'dataSubjectCategories', 'updatedAt'],
-			body: ['personal_data_categories', 'data_subject_categories', 'updated_at']
+			head: [
+				'processingControllers',
+				'personalDataCategories',
+				'dataSubjectCategories',
+				'dpiaRequired',
+				'updatedAt'
+			],
+			body: [
+				'controllers',
+				'personal_data_categories',
+				'data_subject_categories',
+				'dpia_required',
+				'updated_at'
+			]
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -2736,7 +2863,27 @@ export const listViewFields = {
 				}
 			},
 			status: PROCESSING_STATUS_FILTER,
+			role: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'processings/role',
+					optionsLabelField: 'label',
+					optionsValueField: 'value',
+					label: 'processingRole',
+					browserCache: 'force-cache',
+					multiple: true
+				}
+			},
+			controllers: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'entities',
+					label: 'processingControllers',
+					multiple: true
+				}
+			},
 			nature: PROCESSING_NATURE_FILTER,
+			dpia_required: DPIA_REQUIRED_FILTER,
 			personal_data__category: PERSONAL_DATA_CATEGORY_FILTER,
 			data_subjects__category: DATA_SUBJECT_CATEGORY_FILTER,
 			filtering_labels: LABELS_FILTER,
@@ -3504,8 +3651,9 @@ export const listViewFields = {
 			enabled: ENABLED_FILTER,
 			last_occurrence_status: LAST_OCCURENCE_STATUS_FILTER,
 			next_occurrence_status: NEXT_OCCURENCE_STATUS_FILTER,
+			overdue: TASK_OVERDUE_FILTER,
 			filtering_labels: LABELS_FILTER,
-			task_date: dateFilter('task_date'),
+			task_date: dateFilter('task_date', { label: 'startDate' }),
 			created_at: CREATED_AT_FILTER,
 			updated_at: UPDATED_AT_FILTER
 		}
@@ -3895,8 +4043,16 @@ export const contextMenuActions = {
 	'asset-assessments': [{ component: ToggleRecoveryFlags, props: {} }],
 	'metric-instances': [{ component: MetricInstanceEditValue, props: {} }],
 	entities: [
-		{ component: EntityAssessTier, props: {} },
-		{ component: EntityChangeTier, props: {} }
+		{ component: AssessTier, props: {} },
+		{ component: ChangeTier, props: {} }
+	],
+	solutions: [
+		{ component: AssessTier, props: {} },
+		{ component: ChangeTier, props: {} }
+	],
+	processings: [
+		{ component: ProcessingScreenDpia, props: {} },
+		{ component: ProcessingChangeDpiaRequired, props: {} }
 	]
 };
 
@@ -3953,6 +4109,25 @@ export interface ParentActionConfig {
 }
 
 export type TableBatchAction = BatchActionConfig | ParentActionConfig;
+
+export const quickFilterPresets: Partial<
+	Record<urlModel, { label: string; icon: string; field: string; values: string[] }[]>
+> = {
+	processings: [
+		{
+			label: 'controllerRegister',
+			icon: 'fa-clipboard-list',
+			field: 'role',
+			values: ['privacy_controller', 'privacy_joint_controller']
+		},
+		{
+			label: 'processorRegister',
+			icon: 'fa-handshake',
+			field: 'role',
+			values: ['privacy_data_processor']
+		}
+	]
+};
 
 export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 	// The whole vocabulary: read stops the reminder, delete removes the message (§4).
@@ -4553,7 +4728,16 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
 	],
 	representatives: [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
-	solutions: [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
+	solutions: [
+		{
+			type: 'change_field',
+			label: 'changeTier',
+			icon: 'fa-solid fa-layer-group',
+			field: 'tier',
+			optionsEndpoint: 'tiers?is_visible=true'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
 	'entity-assessments': [
 		{
 			type: 'change_field',
@@ -4605,6 +4789,13 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			icon: 'fa-solid fa-arrow-right-arrow-left',
 			field: 'status',
 			optionsEndpoint: 'processings/status'
+		},
+		{
+			type: 'change_field',
+			label: 'setDpiaRequirementManually',
+			icon: 'fa-solid fa-scale-balanced',
+			field: 'dpia_required',
+			optionsEndpoint: 'processings/dpia_required'
 		},
 		{
 			type: 'change_folder',
