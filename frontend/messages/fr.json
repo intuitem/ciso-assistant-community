@@ -7570,5 +7570,6 @@
 	"mailerTestAllOk": "Tous les serveurs ont remis le message. Vous pouvez enregistrer.",
 	"mailerTestSomeFailed": "Au moins un serveur a échoué. Corrigez-le ou enregistrez en forçant.",
 	"mailerOutcomeNever": "Jamais tenté",
-	"mailerSendTestHelp": "Envoie un message via chaque serveur à votre propre adresse."
+	"mailerSendTestHelp": "Envoie un message via chaque serveur à votre propre adresse.",
+	"noQuestionnaireAttached": "Aucun questionnaire rattaché"
 }

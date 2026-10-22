@@ -6,6 +6,7 @@
 	import NewRevisionModal from '$lib/components/Modals/NewRevisionModal.svelte';
 	import ExportModal, { type ExportGroup } from '$lib/components/Modals/ExportModal.svelte';
 	import RingProgress from '$lib/components/DataViz/RingProgress.svelte';
+	import ComplianceOverview from '$lib/components/DataViz/ComplianceOverview.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import type { ModalComponent, ModalSettings } from '$lib/components/Modals/stores';
 	import { getToastStore } from '$lib/components/Toast/stores';
@@ -154,7 +155,12 @@
 							</span>
 						{/if}
 					</div>
+					{#if data.data.compliance_overview}
+						<ComplianceOverview overview={data.data.compliance_overview} name="ea_compliance" />
+					{/if}
 				</div>
+			{:else}
+				<ComplianceOverview overview={null} name="ea_compliance" />
 			{/if}
 		{/snippet}
 		{#snippet actions()}
