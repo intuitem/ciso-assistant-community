@@ -18,6 +18,7 @@
 		strokeWidth?: number;
 		fontSize?: number;
 		title?: string;
+		radius?: string;
 	}
 
 	let {
@@ -33,7 +34,8 @@
 		backgroundColor,
 		strokeWidth = 20,
 		fontSize = 32,
-		title = ''
+		title = '',
+		radius = '65%'
 	}: Props = $props();
 
 	const chart_id = `${name}_${crypto.randomUUID().slice(0, 8)}_div`;
@@ -65,7 +67,7 @@
 			series: [
 				{
 					type: 'gauge',
-					radius: '65%',
+					radius: radius,
 					center: ['50%', '45%'],
 					startAngle: 90,
 					endAngle: -270,

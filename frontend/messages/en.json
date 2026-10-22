@@ -7582,5 +7582,6 @@
 	"assessedAssets": "Assessed assets",
 	"assessedAssetsImpacted": "Assessed assets impacted",
 	"extraDependency": "Extra dependency",
-	"biaDependenciesDescription": "Dependencies of every asset assessed in this BIA, and the supporting assets that miss their objectives"
+	"biaDependenciesDescription": "Dependencies of every asset assessed in this BIA, and the supporting assets that miss their objectives",
+	"noQuestionnaireAttached": "No questionnaire attached"
 }
