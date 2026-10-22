@@ -397,7 +397,10 @@ class RequestRefreshSettings(Request):
 
     @staticmethod
     def _from_json_params(params: dict) -> Optional[RequestRefreshSettings]:
-        values: list[Optional[int]] = [params.get(name) for name in ["max_failed_login_attempts", "time_window_size", "ban_time"]]
+        values: list[Optional[int]] = [
+            params.get(name)
+            for name in ["max_failed_login_attempts", "time_window_size", "ban_time"]
+        ]
 
         if not all(isinstance(value, int) for value in values):
             # If any parameter isn't an int, the settings dict is invalid.
@@ -794,7 +797,13 @@ class _BanCache:
                     if ban_info is not None:
                         if ban_info.timestamp_window < current_timestamp_window:
                             if not ban_info.is_banned(current_timestamp_window):
+                                # Unban the IP address.
                                 self.ip_to_ban_info.pop(ip_address, None)
+                                continue
+
+                        # The IP is still banned.
+                        # (so we re-scheduled to the next window, as we don't want it to be forgotten by the eviction process).
+                        self.eviction_cache[current_timestamp_window].add(ip_address)
 
     @staticmethod
     def _normalize_ip_address(ip_address: str) -> str:
