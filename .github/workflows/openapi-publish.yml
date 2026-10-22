@@ -4,9 +4,10 @@ name: Publish OpenAPI to GitBook
 # rebuilds the API reference pages (one page per tag, see
 # backend/ciso_assistant/openapi_hooks.py).
 #
-# Setup: repository secret GITBOOK_TOKEN, repository variables
-# GITBOOK_ORGANIZATION_ID and GITBOOK_SPEC_NAME. Without the token the schema
-# is still generated and uploaded as a workflow artifact.
+# Setup: repository secret GITBOOK_TOKEN and repository variable
+# GITBOOK_ORGANIZATION_ID. Without the token the schema is still generated and
+# uploaded as a workflow artifact. The spec name is referenced by the
+# builtin:openapi block in product-docs/SUMMARY.md: change both together.
 
 on:
   push:
@@ -57,9 +58,8 @@ jobs:
         if: env.GITBOOK_TOKEN != ''
         env:
           GITBOOK_ORGANIZATION_ID: ${{ vars.GITBOOK_ORGANIZATION_ID }}
-          GITBOOK_SPEC_NAME: ${{ vars.GITBOOK_SPEC_NAME }}
         run: |
           npx -y @gitbook/cli@0.32.9 openapi publish \
-            --spec "$GITBOOK_SPEC_NAME" \
+            --spec ciso-assistant \
             --organization "$GITBOOK_ORGANIZATION_ID" \
             "$RUNNER_TEMP/openapi.yaml"
