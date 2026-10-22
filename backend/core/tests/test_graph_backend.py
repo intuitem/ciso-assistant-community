@@ -271,3 +271,16 @@ def test_default_client_honours_the_proxy_environment(monkeypatch):
     with httpx.Client(transport=graph_backend.TRANSPORT) as client:
         pools = {type(t._pool).__name__ for t in client._mounts.values() if t}
     assert "HTTPProxy" in pools
+
+
+def test_token_error_names_the_proxy(settings, monkeypatch):
+    def refuse(request):
+        raise httpx.ProxyError("407 Proxy Authentication Required", request=request)
+
+    monkeypatch.setattr(mail_oauth2, "TRANSPORT", httpx.MockTransport(refuse))
+    configure(settings)
+    result = mailer.send_test("admin@tests.local")
+    assert result.ok is False
+    assert result.skipped == [
+        ("default", "token endpoint unreachable: the HTTP proxy refused the connection")
+    ]

@@ -59,14 +59,10 @@ def describe_error(error: BaseException) -> str:
         return "server closed the connection"
     if isinstance(error, smtplib.SMTPException):
         return "SMTP protocol error"
-    if isinstance(error, httpx.ProxyError):
-        return "the HTTP proxy refused the connection"
-    if isinstance(error, httpx.TimeoutException):
-        return "connection timed out"
-    if isinstance(error, httpx.ConnectError):
-        return "connection failed"
     if isinstance(error, httpx.HTTPError):
-        return "HTTP transport error"
+        from core.mail_oauth2 import describe_http_error
+
+        return describe_http_error(error)
     if isinstance(error, ssl.SSLError):
         return "TLS handshake failed"
     if isinstance(error, socket.gaierror):

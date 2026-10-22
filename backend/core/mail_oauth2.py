@@ -18,6 +18,7 @@ HTTPS because the response carries a bearer secret.
 """
 
 import json
+import socket
 import threading
 import time
 import httpx
@@ -41,6 +42,29 @@ _lock = threading.Lock()
 
 class TokenError(Exception):
     """The token endpoint could not be reached or refused to issue a token."""
+
+
+def describe_http_error(error: httpx.HTTPError) -> str:
+    """What the network did, in our words. Behind an HTTP proxy the
+    difference between the proxy refusing and the endpoint being down is
+    the whole diagnosis, so it is named."""
+    if isinstance(error, httpx.ProxyError):
+        return "the HTTP proxy refused the connection"
+    if isinstance(error, httpx.TimeoutException):
+        return "connection timed out"
+    if isinstance(error, httpx.ConnectError):
+        # httpx wraps httpcore, which wraps the socket error: walk the chain.
+        cause = error
+        for _ in range(4):
+            cause = cause.__cause__ or cause.__context__
+            if cause is None:
+                break
+            if isinstance(cause, ConnectionRefusedError):
+                return "connection refused"
+            if isinstance(cause, socket.gaierror):
+                return "host name could not be resolved"
+        return "connection failed"
+    return "HTTP transport error"
 
 
 def xoauth2_string(user: str, token: str) -> str:
@@ -103,7 +127,9 @@ def fetch_token(config: dict) -> tuple[str, int]:
         with httpx.Client(timeout=timeout, transport=TRANSPORT) as client:
             response = client.post(token_url, data=payload)
     except httpx.HTTPError as error:
-        raise TokenError(f"token endpoint unreachable: {error}") from error
+        raise TokenError(
+            f"token endpoint unreachable: {describe_http_error(error)}"
+        ) from error
     if response.status_code != 200:
         detail = _error_text(response)
         if config["grant_type"] == "refresh_token" and detail.startswith(
