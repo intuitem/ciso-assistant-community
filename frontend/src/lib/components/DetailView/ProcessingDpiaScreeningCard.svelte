@@ -71,7 +71,7 @@
 			ordering: '-updated_at'
 		});
 		fetch(`/quick-form-responses?${query}`, { signal })
-			.then((res) => (res.ok ? res.json() : null))
+			.then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
 			// A rejected DPIA is no DPIA: the card offers to start another.
 			.then(
 				(body) =>
@@ -80,9 +80,7 @@
 							(r: Record<string, any>) => !(r.status === 'closed' && r.resolution === 'rejected')
 						) ?? null)
 			)
-			.catch(() => {
-				if (!signal.aborted) dpia = null;
-			});
+			.catch(() => {});
 		return () => controller.abort();
 	});
 
