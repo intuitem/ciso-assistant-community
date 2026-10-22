@@ -509,6 +509,7 @@ INSTALLED_APPS = [
     "django_filters",
     "library",
     "serdes",
+    "data_wizard",
     "integrations",
     "webhooks",
     "rest_framework",
