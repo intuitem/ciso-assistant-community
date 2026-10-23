@@ -105,6 +105,7 @@ class TestPublishedOnlyReader:
         rev = client.get(f"/api/document-revisions/{doc.current_revision_id}/")
         assert rev.status_code == 200
         assert rev.json()["content"] == "Charter in force"
+        assert "reviewer_comments" not in rev.json()
 
     def test_drafts_history_and_diffs_are_out_of_reach(self, setup):
         client, doc = setup["employee"], setup["charter"]

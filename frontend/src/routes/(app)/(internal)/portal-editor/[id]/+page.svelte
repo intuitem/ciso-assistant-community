@@ -7,6 +7,8 @@
 	import { countIncompleteTiles } from '$lib/components/PortalEditor/tile-validation';
 	import PortalSettingsPanel from '$lib/components/PortalEditor/PortalSettingsPanel.svelte';
 	import { SCAFFOLDABLE_MODELS } from '$lib/utils/modelTargets';
+	import { navData } from '$lib/components/SideBar/navData';
+	import { getSidebarVisibleItems } from '$lib/utils/sidebar-config';
 	import { urlParamModelVerboseName } from '$lib/utils/crud';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { savedToast, savedToastEnhance } from '$lib/utils/portalActions';
@@ -18,10 +20,27 @@
 		!!page.data?.settings?.personal_folders && !page.data?.settings?.personal_folders_parent
 	);
 
-	const modelOptions = SCAFFOLDABLE_MODELS.map((model) => ({
-		value: model,
-		label: safeTranslate(urlParamModelVerboseName(model))
-	})).sort((a, b) => a.label.localeCompare(b.label));
+	// A destination whose module is switched off leads nowhere: same flag rules as the sidebar.
+	const visibleNav: Record<string, boolean> = $derived(
+		getSidebarVisibleItems(page.data?.featureflags)
+	);
+	const moduleOff = (model: string) =>
+		(navData.items as { name?: string; items?: { name?: string; href?: string }[] }[]).some(
+			(section) =>
+				(section.items ?? []).some(
+					(i) =>
+						i.href === `/${model}` &&
+						(visibleNav[i.name ?? ''] === false || visibleNav[section.name ?? ''] === false)
+				)
+		);
+	const modelOptions = $derived(
+		SCAFFOLDABLE_MODELS.filter((model) => !moduleOff(model))
+			.map((model) => ({
+				value: model,
+				label: safeTranslate(urlParamModelVerboseName(model))
+			}))
+			.sort((a, b) => a.label.localeCompare(b.label))
+	);
 
 	let { data }: { data: PageData } = $props();
 

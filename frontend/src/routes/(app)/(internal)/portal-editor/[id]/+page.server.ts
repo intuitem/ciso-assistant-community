@@ -34,7 +34,9 @@ export const load: PageServerLoad = async ({ params, fetch, locals }) => {
 		(await locals.getFeatureFlags())?.quick_forms
 			? fetchAllPages(fetch, `${BASE_API_URL}/quick-form-publications/`)
 			: Promise.resolve([]),
-		documentsEnabled ? fetch(`${BASE_API_URL}/document-containers/catalog/`) : Promise.resolve(null)
+		documentsEnabled
+			? fetch(`${BASE_API_URL}/document-containers/catalog/`).catch(() => null)
+			: Promise.resolve(null)
 	]).catch((e) => {
 		error(e?.status ?? 500, 'Failed to load portal data');
 	});

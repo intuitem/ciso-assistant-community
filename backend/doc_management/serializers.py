@@ -365,3 +365,11 @@ class DocumentRevisionReadSerializer(BaseModelSerializer):
     class Meta:
         model = DocumentRevision
         fields = "__all__"
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        request = self.context.get("request")
+        if request and not has_full_view(request, DocumentRevision, instance.id):
+            for field in ("reviewer_comments", "editing_user", "editing_since"):
+                data.pop(field, None)
+        return data
