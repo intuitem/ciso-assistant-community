@@ -1,5 +1,4 @@
 from collections import defaultdict
-from contextlib import nullcontext
 from datetime import date, timedelta
 from huey import crontab
 from huey.contrib.djhuey import periodic_task, task, db_periodic_task
@@ -18,7 +17,7 @@ from core.models import (
     ValidationFlow,
 )
 from iam.models import ServiceAccount, User
-from django.core.mail import get_connection, EmailMessage
+from core import mailer
 from django.conf import settings
 from django.db import models, transaction
 import logging
@@ -411,9 +410,11 @@ def check_task_nodes_due_soon():
 # @db_periodic_task(crontab(minute="*/1"))  # for testing
 @db_periodic_task(crontab(hour="7", minute="10"))
 def check_task_nodes_overdue():
-    """Check for TaskNodes that are past due and still pending."""
+    """Check for TaskNodes that are past due and still open."""
     overdue_nodes = (
-        TaskNode.objects.filter(due_date__lt=date.today(), status="pending")
+        TaskNode.objects.filter(
+            due_date__lt=date.today(), status__in=TaskNode.OPEN_STATUSES
+        )
         .select_related("task_template")
         .filter(task_template__enabled=True)
         .prefetch_related("task_template__assigned_to")
@@ -598,33 +599,12 @@ def send_email_now(
     html_message: str | None = None,
     connection=None,
 ) -> None:
-    """Synchronous send that propagates failures to the caller. Pass
-    `connection` to batch several sends over one SMTP session (the caller
-    owns its lifecycle).
-
-    Raises RuntimeError when the backend reports the message unsent;
-    connection/backend exceptions propagate as-is."""
-    if connection is None:
-        ssl_context = getattr(settings, "EMAIL_SSL_CONTEXT", None)
-        scope = get_connection(ssl_context=ssl_context)
-    else:
-        scope = nullcontext(connection)
-    with scope as conn:
-        msg = EmailMessage(
-            subject=subject,
-            body=message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            to=[recipient],
-            connection=conn,
-        )
-        if html_message:
-            msg.content_subtype = "html"
-            msg.body = html_message
-        sent = msg.send()
-    # Backends can report 0 sent without raising (fail_silently paths,
-    # filtered recipients); that is a delivery failure, not a success.
-    if sent != 1:
-        raise RuntimeError(f"email backend reported {sent} of 1 messages sent")
+    """Synchronous send through core.mailer; failures propagate to the caller.
+    Pass `connection` (from core.mailer.open_connection) to batch several
+    sends over one session; the caller owns its lifecycle."""
+    mailer.send(
+        subject, message, recipient, html_body=html_message, connection=connection
+    )
 
 
 @task()
@@ -650,19 +630,6 @@ def send_notification_email(subject, message, owner_email, html_message=None):
         )
 
 
-def get_missing_email_settings() -> list[str]:
-    """Names of the email settings that are required but unset; empty when
-    email can be sent. The console backend (MAIL_DEBUG) never opens an SMTP
-    connection, so EMAIL_HOST/EMAIL_PORT are only required for the other
-    backends."""
-    required_settings = ["EMAIL_HOST", "EMAIL_PORT", "DEFAULT_FROM_EMAIL"]
-    if getattr(settings, "EMAIL_BACKEND", "").endswith("console.EmailBackend"):
-        required_settings = ["DEFAULT_FROM_EMAIL"]
-    return [
-        setting for setting in required_settings if not getattr(settings, setting, None)
-    ]
-
-
 def check_email_configuration(owner_email, controls):
     notifications_enable_mailing = GlobalSettings.objects.get(name="general").value.get(
         "notifications_enable_mailing", False
@@ -673,7 +640,7 @@ def check_email_configuration(owner_email, controls):
         )
         return False
 
-    missing_settings = get_missing_email_settings()
+    missing_settings = mailer.missing_configuration()
 
     if missing_settings:
         error_msg = f"Cannot send email notification: Missing email settings: {', '.join(missing_settings)}"

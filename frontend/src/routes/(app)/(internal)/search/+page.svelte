@@ -40,6 +40,11 @@
 			icon: 'fa-solid fa-gears',
 			color: '#64748b'
 		},
+		'document-containers': {
+			label: 'documents',
+			icon: 'fa-solid fa-file-lines',
+			color: '#0891b2'
+		},
 		evidences: { label: 'evidences', icon: 'fa-solid fa-file-circle-check', color: '#22c55e' },
 		'risk-acceptances': {
 			label: 'riskAcceptances',
@@ -78,11 +83,57 @@
 		processings: { label: 'processings', icon: 'fa-solid fa-gavel', color: '#a855f7' },
 		'data-breaches': { label: 'dataBreaches', icon: 'fa-solid fa-unlock', color: '#dc2626' },
 		'right-requests': { label: 'rightRequests', icon: 'fa-solid fa-hand', color: '#f97316' },
+		projects: { label: 'projects', icon: 'fa-solid fa-diagram-project', color: '#0284c7' },
+		'organisation-objectives': {
+			label: 'organisationObjectives',
+			icon: 'fa-solid fa-bullseye',
+			color: '#16a34a'
+		},
+		'organisation-issues': {
+			label: 'organisationIssues',
+			icon: 'fa-solid fa-briefcase',
+			color: '#ca8a04'
+		},
+		'metric-instances': {
+			label: 'metricInstances',
+			icon: 'fa-solid fa-chart-line',
+			color: '#2563eb'
+		},
 		'business-impact-analysis': {
 			label: 'businessImpactAnalysis',
 			icon: 'fa-solid fa-arrows-to-eye',
 			color: '#14b8a6'
-		}
+		},
+		techniques: { label: 'techniques', icon: 'fa-solid fa-crosshairs', color: '#b91c1c' },
+		cwes: { label: 'cwes', icon: 'fa-solid fa-bug-slash', color: '#9a3412' },
+		'security-advisories': {
+			label: 'securityAdvisories',
+			icon: 'fa-solid fa-shield-virus',
+			color: '#ea580c'
+		},
+		'metric-definitions': {
+			label: 'metricDefinitions',
+			icon: 'fa-solid fa-ruler',
+			color: '#1d4ed8'
+		},
+		dashboards: { label: 'dashboards', icon: 'fa-solid fa-gauge', color: '#4f46e5' },
+		'generic-collections': {
+			label: 'genericCollections',
+			icon: 'fa-solid fa-layer-group',
+			color: '#0d9488'
+		},
+		'responsibility-matrices': {
+			label: 'responsibilityMatrices',
+			icon: 'fa-solid fa-table-list',
+			color: '#7c3aed'
+		},
+		workflows: { label: 'workflows', icon: 'fa-solid fa-diagram-next', color: '#475569' },
+		'quantitative-risk-hypotheses': {
+			label: 'quantitativeRiskHypotheses',
+			icon: 'fa-solid fa-flask',
+			color: '#db2777'
+		},
+		representatives: { label: 'representatives', icon: 'fa-solid fa-user-tie', color: '#0369a1' }
 	};
 
 	interface SearchResult {

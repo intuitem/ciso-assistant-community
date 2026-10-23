@@ -12,7 +12,7 @@ ENV PYTHONUNBUFFERED=1 \
   PATH="/code/.venv/bin:$PATH" \
   DJANGO_SETTINGS_MODULE=enterprise_core.settings
 
-COPY --from=ghcr.io/astral-sh/uv:0.12.13 /uv /bin/
+COPY --from=ghcr.io/astral-sh/uv:0.13.5 /uv /bin/
 
 WORKDIR /code
 

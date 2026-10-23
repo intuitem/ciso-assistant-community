@@ -11,7 +11,7 @@ ENV PYTHONUNBUFFERED=1 \
   UV_PYTHON_DOWNLOADS=never \
   PATH="/code/.venv/bin:$PATH"
 
-COPY --from=ghcr.io/astral-sh/uv:0.12.13 /uv /bin/
+COPY --from=ghcr.io/astral-sh/uv:0.13.5 /uv /bin/
 
 WORKDIR /code
 

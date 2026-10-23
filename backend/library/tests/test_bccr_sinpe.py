@@ -257,7 +257,8 @@ class TestBccrSinpe(unittest.TestCase):
                     + ".yaml"
                 )
                 lib = yaml.safe_load(path.read_text())
-                fw = lib["objects"]["framework"]
+                objects = lib["objects"]
+                fw = (objects.get("frameworks") or [None])[0] or objects["framework"]
                 nodes = fw["requirement_nodes"]
                 by_urn = {n["urn"]: n for n in nodes}
                 self.assertEqual(len(nodes), len(by_urn))

@@ -276,53 +276,55 @@ def build_library(nodes, plumber_version, commit, lib_version, publication_date)
         "provider": "Plumber",
         "packager": "intuitem",
         "objects": {
-            "framework": {
-                "urn": FW_URN,
-                "ref_id": "plumber-cicd-checks",
-                "name": "Plumber CI/CD Security Checks",
-                "description": (
-                    "CI/CD pipeline security checks performed by Plumber, the"
-                    " open-source CI/CD security scanner for GitLab CI and GitHub"
-                    " Actions. Each assessable requirement is a Plumber control —"
-                    " the ref_id is the .plumber.yaml key that enables it, grouped"
-                    " by Plumber's own control categories. The annotation gives"
-                    " the Plumber control ID and lists the ISSUE codes the control"
-                    " emits, with their severity, remediation and documentation"
-                    " URL."
-                    "\nImplementation groups reflect what Plumber actually runs:"
-                    " controls whose rules are implemented but not yet enforced"
-                    " upstream (pending test coverage) are grouped under"
-                    " 'not-enforced' and can only be assessed manually."
-                ),
-                "implementation_groups_definition": [
-                    {
-                        "ref_id": IG_GITHUB,
-                        "name": "GitHub Actions",
-                        "description": "Controls Plumber enforces when scanning"
-                        " GitHub Actions workflows and repository settings.",
-                    },
-                    {
-                        "ref_id": IG_GITLAB,
-                        "name": "GitLab CI",
-                        "description": "Controls Plumber enforces when scanning"
-                        " GitLab CI pipelines and project settings.",
-                    },
-                    {
-                        "ref_id": IG_COMMON,
-                        "name": "Cross-provider",
-                        "description": "Controls Plumber enforces on both GitHub"
-                        " and GitLab — the provider-agnostic core.",
-                    },
-                    {
-                        "ref_id": IG_NOT_ENFORCED,
-                        "name": "Not yet enforced",
-                        "description": "Controls implemented in Plumber but held"
-                        " back from enforcement pending test coverage. No scan"
-                        " reports on them; assess them manually or exclude them.",
-                    },
-                ],
-                "requirement_nodes": nodes,
-            }
+            "frameworks": [
+                {
+                    "urn": FW_URN,
+                    "ref_id": "plumber-cicd-checks",
+                    "name": "Plumber CI/CD Security Checks",
+                    "description": (
+                        "CI/CD pipeline security checks performed by Plumber, the"
+                        " open-source CI/CD security scanner for GitLab CI and GitHub"
+                        " Actions. Each assessable requirement is a Plumber control —"
+                        " the ref_id is the .plumber.yaml key that enables it, grouped"
+                        " by Plumber's own control categories. The annotation gives"
+                        " the Plumber control ID and lists the ISSUE codes the control"
+                        " emits, with their severity, remediation and documentation"
+                        " URL."
+                        "\nImplementation groups reflect what Plumber actually runs:"
+                        " controls whose rules are implemented but not yet enforced"
+                        " upstream (pending test coverage) are grouped under"
+                        " 'not-enforced' and can only be assessed manually."
+                    ),
+                    "implementation_groups_definition": [
+                        {
+                            "ref_id": IG_GITHUB,
+                            "name": "GitHub Actions",
+                            "description": "Controls Plumber enforces when scanning"
+                            " GitHub Actions workflows and repository settings.",
+                        },
+                        {
+                            "ref_id": IG_GITLAB,
+                            "name": "GitLab CI",
+                            "description": "Controls Plumber enforces when scanning"
+                            " GitLab CI pipelines and project settings.",
+                        },
+                        {
+                            "ref_id": IG_COMMON,
+                            "name": "Cross-provider",
+                            "description": "Controls Plumber enforces on both GitHub"
+                            " and GitLab — the provider-agnostic core.",
+                        },
+                        {
+                            "ref_id": IG_NOT_ENFORCED,
+                            "name": "Not yet enforced",
+                            "description": "Controls implemented in Plumber but held"
+                            " back from enforcement pending test coverage. No scan"
+                            " reports on them; assess them manually or exclude them.",
+                        },
+                    ],
+                    "requirement_nodes": nodes,
+                }
+            ]
         },
     }
 
@@ -373,6 +375,10 @@ def main():
     existing = None
     if args.output.exists():
         existing = yaml.safe_load(args.output.read_text())
+        # Files written before the plural convention say "framework": compare
+        # the content, not the spelling, so the rename alone bumps no version.
+        if "framework" in existing["objects"]:
+            existing["objects"]["frameworks"] = [existing["objects"].pop("framework")]
 
     lib_version = max(1, args.min_version)
     publication_date = date.today()
@@ -390,7 +396,7 @@ def main():
         lib_version = max(current + (0 if unchanged else 1), args.min_version)
         old = {
             n["ref_id"]
-            for n in existing["objects"]["framework"]["requirement_nodes"]
+            for n in existing["objects"]["frameworks"][0]["requirement_nodes"]
             if n.get("assessable")
         }
         new = {n["ref_id"] for n in nodes if n["assessable"]}

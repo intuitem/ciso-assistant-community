@@ -25,6 +25,7 @@ export const loadTableData = async ({
 	const newParams = getParams(state);
 
 	newParams.forEach((value, key) => params.append(key, value));
+	if (URLModel === 'filtering-labels') params.set('usage_count', 'true');
 	url.search = params.toString();
 
 	let response;

@@ -183,6 +183,7 @@ export const REFERENCEABLE_MODELS = [
 	'vulnerability',
 	'perimeter',
 	'entity',
+	'solution',
 	'processing'
 ] as const;
 
