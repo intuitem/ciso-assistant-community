@@ -4,6 +4,7 @@ the errors reported in our words."""
 
 import json
 import re
+import ssl
 from urllib.parse import parse_qs
 
 import httpx
@@ -225,6 +226,27 @@ def test_html_body_and_a_different_sender(settings, graph):
     }
 
 
+def test_a_batch_reuses_one_client(settings, graph, monkeypatch):
+    """One HTTP client per open(), closed with the session, so a batch
+    does not pay a TLS handshake (and a proxy CONNECT) per message."""
+    configure(settings)
+    clients = []
+
+    class CountingClient(httpx.Client):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            clients.append(self)
+
+    monkeypatch.setattr(httpx, "Client", CountingClient)
+    with mailer.open_connection() as backend:
+        mailer.send("S1", "b", "a@tests.local", connection=backend)
+        mailer.send("S2", "b", "b@tests.local", connection=backend)
+    assert len(graph.sends) == 2
+    # The token request and the Graph session: nothing per message.
+    assert len(clients) == 2
+    assert all(client.is_closed for client in clients)
+
+
 def test_expired_token_is_retried_once_with_a_fresh_one(settings, graph):
     configure(settings)
     graph.expired_tokens = {"tok-1"}
@@ -285,6 +307,21 @@ def test_http_errors_are_described_in_our_words():
     assert mailer.describe_error(httpx.ConnectError("c", request=request)) == (
         "connection failed"
     )
+
+
+def test_certificate_failure_is_named_as_tls():
+    """An intercepting proxy's CA missing from SSL_CERT_FILE must not read
+    like a down endpoint: httpx wraps the ssl error two levels deep."""
+    request = httpx.Request("POST", "https://graph.microsoft.com/")
+    try:
+        try:
+            raise ssl.SSLCertVerificationError("certificate verify failed")
+        except ssl.SSLError as inner:
+            raise ConnectionError("wrapped by httpcore") from inner
+    except ConnectionError as outer:
+        error = httpx.ConnectError("c", request=request)
+        error.__cause__ = outer
+    assert mailer.describe_error(error) == "TLS handshake failed"
 
 
 def test_default_client_honours_the_proxy_environment(monkeypatch):

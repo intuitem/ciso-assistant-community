@@ -100,18 +100,25 @@ class EmailBackend(BaseEmailBackend):
         self.timeout = timeout or DEFAULT_TIMEOUT_SECONDS
         self.graph_url = graph_url.rstrip("/")
         self._token = None
+        self._client = None
 
     def open(self) -> bool:
-        """Obtain the token. Raises ``mail_oauth2.TokenError`` when the
-        token endpoint is unreachable or refuses: that is the failover
-        point, as a refused SMTP connection is."""
+        """Obtain the token, then the HTTP client every message of the
+        session is posted through, so a batch reuses one connection as an
+        SMTP session does. Raises ``mail_oauth2.TokenError`` when the token
+        endpoint is unreachable or refuses: that is the failover point, as a
+        refused SMTP connection is."""
         if self._token is not None:
             return False
         self._token = mail_oauth2.get_token(self.oauth2)
+        self._client = httpx.Client(timeout=self.timeout, transport=TRANSPORT)
         return True
 
     def close(self) -> None:
+        client, self._client = self._client, None
         self._token = None
+        if client is not None:
+            client.close()
 
     def send_messages(self, email_messages) -> int:
         if not email_messages:
@@ -141,10 +148,9 @@ class EmailBackend(BaseEmailBackend):
 
     def _post(self, payload: dict, token: str) -> httpx.Response:
         url = f"{self.graph_url}/users/{quote(self.mailbox, safe='@')}/sendMail"
-        with httpx.Client(timeout=self.timeout, transport=TRANSPORT) as client:
-            return client.post(
-                url, json=payload, headers={"Authorization": f"Bearer {token}"}
-            )
+        return self._client.post(
+            url, json=payload, headers={"Authorization": f"Bearer {token}"}
+        )
 
     def _payload(self, message) -> dict:
         if message.attachments:

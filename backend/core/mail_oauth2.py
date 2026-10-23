@@ -19,6 +19,7 @@ HTTPS because the response carries a bearer secret.
 
 import json
 import socket
+import ssl
 import threading
 import time
 import httpx
@@ -59,6 +60,10 @@ def describe_http_error(error: httpx.HTTPError) -> str:
             cause = cause.__cause__ or cause.__context__
             if cause is None:
                 break
+            if isinstance(cause, ssl.SSLError):
+                # A certificate the trust store does not know, typically an
+                # intercepting proxy's CA missing from SSL_CERT_FILE.
+                return "TLS handshake failed"
             if isinstance(cause, ConnectionRefusedError):
                 return "connection refused"
             if isinstance(cause, socket.gaierror):
