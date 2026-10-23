@@ -89,6 +89,9 @@ from .tools.write_tools import (
 
 from .tools.update_tools import (
     update_team,
+    update_folder,
+    update_user,
+    update_evidence,
     update_asset,
     update_risk_scenario,
     update_applied_control,
@@ -223,8 +226,10 @@ READ_TOOLS = [
 WRITE_TOOLS = [
     import_stored_library,
     create_folder,
+    update_folder,
     create_team,
     update_team,
+    update_user,
     create_perimeter,
     create_asset,
     create_threat,
@@ -243,6 +248,7 @@ WRITE_TOOLS = [
     update_vulnerability,
     delete_vulnerability,
     create_evidence,
+    update_evidence,
     create_incident,
     update_incident,
     create_timeline_entry,

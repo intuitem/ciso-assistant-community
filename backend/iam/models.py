@@ -1062,7 +1062,7 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         if self.is_superuser and not self.is_active:
             # avoid deactivation of superuser
             self.is_active = True
-        if not self.is_local and not self.is_scim_managed:
+        if not self.is_local and not (self.is_scim_managed and self.keep_local_login):
             self.set_unusable_password()
         super().save(*args, **kwargs)
         logger.info("user saved", user=self)
@@ -1972,7 +1972,8 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             )
 
         if iam_scope_field_name in field_names:
-            return f"{iam_scope_field_name}__folder_id"
+            scope_model = model._meta.get_field(iam_scope_field_name).related_model
+            return f"{iam_scope_field_name}__{RoleAssignment.get_iam_folder_field(scope_model)}"
 
         raise NotImplementedError(f"Model {model.__qualname__} not supported.")
 
@@ -1994,8 +1995,7 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
             return obj.folder_id
 
         scope_field = iam_folder_field.split("__", 1)[0]
-        scope_obj = getattr(obj, scope_field)
-        return scope_obj.folder_id
+        return RoleAssignment.get_iam_folder_id(getattr(obj, scope_field))
 
     @staticmethod
     def _get_accessible_ids(

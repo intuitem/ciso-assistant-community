@@ -46,6 +46,7 @@ class EbiosRMStudyReadSerializer(BaseModelSerializer):
     str = serializers.CharField(source="__str__")
     perimeter = FieldsRelatedField(["id", "folder"])
     folder = FieldsRelatedField()
+    filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     reference_entity = FieldsRelatedField()
     risk_matrix = FieldsRelatedField()
     reference_entity = FieldsRelatedField()

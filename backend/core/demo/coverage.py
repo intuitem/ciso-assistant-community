@@ -52,6 +52,7 @@ EXCLUDED = {
     "core.StoredLibrary": LIBRARY,
     "core.Terminology": STARTUP,
     "custom_fields.CustomFieldDefinition": "instance-wide: would alter every user's forms",
+    "data_wizard.ImportMapping": "saved by the import wizard from a user's own file",
     "global_settings.GlobalSettings": STARTUP,
     "iam.IdPGroup": IDENTITY,
     "iam.Role": IDENTITY,

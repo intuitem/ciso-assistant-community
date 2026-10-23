@@ -11,6 +11,7 @@ from structlog import get_logger
 from .models import SSOSettings
 from iam.models import User
 from .oidc.views import oidc_redirect
+from .saml.views import saml_redirect
 from .serializers import SSOSettingsWriteSerializer
 
 logger = get_logger(__name__)
@@ -32,9 +33,17 @@ class RedirectToProviderView(APIView):
         process = form.cleaned_data["process"]
         try:
             # OIDC uses our custom redirect to send a long, standard-compliant
-            # state + nonce. Other providers (SAML, ...) use allauth's default.
+            # state + nonce; SAML to send a non-empty RelayState.
             if provider.id == "openid_connect":
                 return oidc_redirect(
+                    request,
+                    provider,
+                    process=process,
+                    next_url=next_url,
+                    headless=True,
+                )
+            if provider.id == "saml":
+                return saml_redirect(
                     request,
                     provider,
                     process=process,
