@@ -2249,7 +2249,7 @@ def get_requested_timezone(request: Request) -> tzinfo:
     """
     try:
         return ZoneInfo(request.query_params.get("tz", ""))
-    except (ValueError, KeyError, OSError):
+    except ValueError, KeyError, OSError:
         return timezone.utc
 
 
