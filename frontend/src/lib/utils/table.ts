@@ -307,6 +307,22 @@ export const LABELS_FILTER: ListViewFilterConfig = {
 	}
 };
 
+export const LABEL_USAGE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		options: [
+			{ label: 'unused', value: 'unused' },
+			{ label: 'usedOnceOrTwice', value: 'rare' },
+			{ label: 'lookAlikes', value: 'lookalike' }
+		],
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'usage',
+		browserCache: 'force-cache',
+		multiple: false
+	}
+};
+
 export const CLASSIFICATION_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1787,8 +1803,11 @@ export const listViewFields = {
 		}
 	},
 	'filtering-labels': {
-		head: ['label'],
-		body: ['label']
+		head: ['label', 'usage'],
+		body: ['label', 'usage_count'],
+		filters: {
+			usage: LABEL_USAGE_FILTER
+		}
 	},
 	'risk-matrices': {
 		head: ['name', 'description', 'provider', 'domain', 'isEnabled'],
@@ -1868,8 +1887,8 @@ export const listViewFields = {
 			'updated_at'
 		],
 		optionalFields: {
-			head: ['authors', 'createdAt'],
-			body: ['authors', 'created_at']
+			head: ['authors', 'createdAt', 'filteringLabels'],
+			body: ['authors', 'created_at', 'filtering_labels']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -1879,7 +1898,8 @@ export const listViewFields = {
 			due_date: dateFilter('due_date'),
 			eta: dateFilter('eta'),
 			created_at: CREATED_AT_FILTER,
-			updated_at: UPDATED_AT_FILTER
+			updated_at: UPDATED_AT_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	threats: {
@@ -2386,8 +2406,8 @@ export const listViewFields = {
 			'updated_at'
 		],
 		optionalFields: {
-			head: ['status', 'authors'],
-			body: ['status', 'authors']
+			head: ['status', 'authors', 'filteringLabels'],
+			body: ['status', 'authors', 'filtering_labels']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -2399,7 +2419,8 @@ export const listViewFields = {
 			due_date: dateFilter('due_date'),
 			eta: dateFilter('eta'),
 			created_at: CREATED_AT_FILTER,
-			updated_at: UPDATED_AT_FILTER
+			updated_at: UPDATED_AT_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	'requirement-assessments': {
@@ -2493,6 +2514,10 @@ export const listViewFields = {
 			locale: DOC_TEMPLATE_LANGUAGE_FILTER,
 			builtin: BUILTIN_FILTER
 		}
+	},
+	techniques: {
+		head: ['ref_id', 'name', 'description'],
+		body: ['ref_id', 'name', 'description']
 	},
 	'managed-documents': {
 		head: ['name', 'documentType', 'locale', 'domain'],
@@ -2632,8 +2657,8 @@ export const listViewFields = {
 			'folder'
 		],
 		optionalFields: {
-			head: ['perimeter', 'expiryDate'],
-			body: ['perimeter', 'expiry_date']
+			head: ['perimeter', 'expiryDate', 'filteringLabels'],
+			body: ['perimeter', 'expiry_date', 'filtering_labels']
 		},
 		filters: {
 			perimeter: PERIMETER_FILTER,
@@ -2641,7 +2666,8 @@ export const listViewFields = {
 			status: COMPLIANCE_ASSESSMENT_STATUS_FILTER,
 			conclusion: ENTITY_ASSESSMENT_CONCLUSION_FILTER,
 			due_date: dateFilter('due_date'),
-			expiry_date: dateFilter('expiry_date')
+			expiry_date: dateFilter('expiry_date'),
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	solutions: {
@@ -2750,15 +2776,16 @@ export const listViewFields = {
 		head: ['name', 'perimeter', 'folder', 'status'],
 		body: ['name', 'perimeter', 'folder', 'status'],
 		optionalFields: {
-			head: ['createdAt', 'updatedAt'],
-			body: ['created_at', 'updated_at']
+			head: ['createdAt', 'updatedAt', 'filteringLabels'],
+			body: ['created_at', 'updated_at', 'filtering_labels']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
 			status: RISK_ASSESSMENT_STATUS_FILTER,
 			created_at: CREATED_AT_FILTER,
-			updated_at: UPDATED_AT_FILTER
+			updated_at: UPDATED_AT_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	'asset-assessments': {
@@ -3085,8 +3112,8 @@ export const listViewFields = {
 			'updated_at'
 		],
 		optionalFields: {
-			head: ['classification'],
-			body: ['classification']
+			head: ['classification', 'filteringLabels'],
+			body: ['classification', 'filtering_labels']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -3095,7 +3122,8 @@ export const listViewFields = {
 			origin: ORGANISATION_ISSUE_ORIGIN_FILTER,
 			status: ORGANISATION_ISSUE_STATUS_FILTER,
 			created_at: CREATED_AT_FILTER,
-			updated_at: UPDATED_AT_FILTER
+			updated_at: UPDATED_AT_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	'feared-events': {
@@ -3216,8 +3244,13 @@ export const listViewFields = {
 	'threat-models': {
 		head: ['ref_id', 'name', 'description', 'catalog', 'nodeCount', 'domain'],
 		body: ['ref_id', 'name', 'description', 'catalog', 'node_count', 'folder'],
+		optionalFields: {
+			head: ['filteringLabels'],
+			body: ['filtering_labels']
+		},
 		filters: {
-			folder: DOMAIN_FILTER
+			folder: DOMAIN_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	'elementary-actions': {
@@ -3537,11 +3570,16 @@ export const listViewFields = {
 	'quantitative-risk-studies': {
 		head: ['refId', 'name', 'description', 'status', 'updatedAt', 'domain'],
 		body: ['ref_id', 'name', 'description', 'status', 'updated_at', 'folder'],
+		optionalFields: {
+			head: ['filteringLabels'],
+			body: ['filtering_labels']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: RISK_ASSESSMENT_STATUS_FILTER,
 			created_at: CREATED_AT_FILTER,
-			updated_at: UPDATED_AT_FILTER
+			updated_at: UPDATED_AT_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	'quantitative-risk-scenarios': {
@@ -4201,6 +4239,16 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			label: 'changeDomain',
 			icon: 'fa-solid fa-folder',
 			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'filtering-labels': [
+		{
+			type: 'merge',
+			label: 'mergeLabels',
+			icon: 'fa-solid fa-code-merge',
+			minSelection: 2,
+			maxSelection: 20
 		},
 		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
 	],

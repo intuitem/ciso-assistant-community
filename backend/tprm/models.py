@@ -316,7 +316,7 @@ class Entity(
         return sorted({e.strip() for e in emails if e and e.strip()})
 
 
-class EntityAssessment(Assessment):
+class EntityAssessment(Assessment, FilteringLabelMixin):
     class Conclusion(models.TextChoices):
         BLOCKER = "blocker", _("Blocker")
         WARNING = "warning", _("Warning")
