@@ -2,52 +2,30 @@
 	import { m } from '$paraglide/messages';
 	import { getModalStore, type ModalStore } from './stores';
 	import { getToastStore } from '$lib/components/Toast/stores';
-	import { onMount } from 'svelte';
 	import type { DataHandler } from '@vincjo/datatables/remote';
 
 	interface Props {
 		parent: any;
-		sourceIds: string[];
+		labels: { id: string; label: string; usage_count: number | null }[];
 		handler: DataHandler;
 		onClearSelection: () => void;
 	}
 
-	let { parent, sourceIds, handler, onClearSelection }: Props = $props();
+	let { parent, labels: rows, handler, onClearSelection }: Props = $props();
 
 	const modalStore: ModalStore = getModalStore();
 	const toastStore = getToastStore();
 
 	type LabelSummary = { id: string; label: string; usage: number };
 
-	let labels: LabelSummary[] = $state([]);
-	let targetId = $state('');
+	const labels: LabelSummary[] = rows
+		.map((r) => ({ id: r.id, label: r.label, usage: r.usage_count ?? 0 }))
+		.sort((a, b) => b.usage - a.usage);
+	let targetId = $state(labels[0]?.id ?? '');
 	let submitting = $state(false);
-	let loadFailed = $state(false);
 
 	const target = $derived(labels.find((l) => l.id === targetId));
 	const others = $derived(labels.filter((l) => l.id !== targetId));
-
-	onMount(async () => {
-		const rows = await Promise.all(
-			sourceIds.map((id) =>
-				fetch(`/filtering-labels/${id}`)
-					.then((r) => (r.ok ? r.json() : null))
-					.catch(() => null)
-			)
-		);
-		if (rows.some((r) => !r)) {
-			loadFailed = true;
-			return;
-		}
-		labels = rows
-			.map((r: any) => ({
-				id: r.id,
-				label: r.label,
-				usage: r.usage_count ?? 0
-			}))
-			.sort((a, b) => b.usage - a.usage);
-		targetId = labels[0]?.id ?? '';
-	});
 
 	async function handleConfirm() {
 		submitting = true;
@@ -88,9 +66,6 @@
 			{m.mergeLabels()}
 		</header>
 		<p class="text-sm text-surface-600-400">{m.mergeLabelsHelp()}</p>
-		{#if loadFailed}
-			<p class="text-sm text-error-500">{m.mergeLabelsError()}</p>
-		{/if}
 
 		<fieldset class="space-y-2">
 			<legend class="text-sm font-semibold text-surface-700-300 mb-2">{m.labelToKeep()}</legend>

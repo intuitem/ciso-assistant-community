@@ -4331,7 +4331,12 @@ class FilteringLabelViewSet(BaseModelViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset().select_related("folder")
-        if self.action in ("list", "retrieve"):
+        params = self.request.query_params
+        if self.action == "list" and (
+            "usage_count" in params
+            or params.get("usage") in ("unused", "rare")
+            or "usage_count" in params.get("ordering", "")
+        ):
             return queryset.annotate(usage_count=_label_usage_count(self.request.user))
         return queryset.annotate(usage_count=Value(None, output_field=IntegerField()))
 
@@ -4380,6 +4385,17 @@ class FilteringLabelViewSet(BaseModelViewSet):
 
         relabelled = 0
         with transaction.atomic():
+            locked = list(
+                FilteringLabel.objects.select_for_update()
+                .filter(id__in=[target.id, *(s.id for s in sources)])
+                .order_by("id")
+                .values_list("id", flat=True)
+            )
+            if len(locked) != len(sources) + 1:
+                return Response(
+                    {"error": "invalidMergeSelection"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
             for through, label_col, obj_col in _filtering_label_relations():
                 obj_ids = set(
                     through.objects.filter(**{f"{label_col}__in": sources}).values_list(

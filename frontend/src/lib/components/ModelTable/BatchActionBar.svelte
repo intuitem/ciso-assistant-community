@@ -17,6 +17,7 @@
 	import type { BatchActionConfig, TableBatchAction } from '$lib/utils/table';
 	import type { urlModel } from '$lib/utils/types';
 	import type { DataHandler } from '@vincjo/datatables/remote';
+	import { get } from 'svelte/store';
 
 	interface Props {
 		selectedIds: Set<string>;
@@ -130,7 +131,13 @@
 					type: 'component',
 					component: {
 						ref: MergeLabelsModal,
-						props: { sourceIds: ids, handler, onClearSelection }
+						props: {
+							labels: get(handler.getRows())
+								.map((r: any) => r.meta)
+								.filter((row: any) => selectedIds.has(row?.id)),
+							handler,
+							onClearSelection
+						}
 					}
 				});
 				return;

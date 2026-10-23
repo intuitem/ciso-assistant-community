@@ -42,7 +42,7 @@ def labels():
 
 
 def _labels(client, **params):
-    res = client.get("/api/filtering-labels/", {"offset": 0, **params})
+    res = client.get("/api/filtering-labels/", {"usage_count": 1, **params})
     assert res.status_code == 200
     return {r["label"]: r["usage_count"] for r in res.json()["results"]}
 
@@ -123,9 +123,11 @@ def test_merge_rejects_non_list_sources(admin_client, labels):
 
 
 @pytest.mark.django_db
-def test_retrieve_includes_usage_count(admin_client, labels):
+def test_usage_count_only_on_demand(admin_client, labels):
+    res = admin_client.get("/api/filtering-labels/")
+    assert {r["usage_count"] for r in res.json()["results"]} == {None}
     res = admin_client.get(f"/api/filtering-labels/{labels['alias'].id}/")
-    assert res.json()["usage_count"] == 2
+    assert res.json()["usage_count"] is None
 
 
 @pytest.mark.django_db
@@ -154,5 +156,3 @@ def test_usage_count_scoped_to_viewer(admin_client, labels):
     client.force_authenticate(user=reader)
     assert _labels(client) == {"PCI_DSS": 1, "legacy": 0, "pci-dss": 0}
     assert set(_labels(client, usage="unused")) == {"legacy", "pci-dss"}
-    res = client.get(f"/api/filtering-labels/{labels['alias'].id}/")
-    assert res.json()["usage_count"] == 1
