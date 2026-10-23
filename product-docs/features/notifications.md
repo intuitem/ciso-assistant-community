@@ -57,13 +57,18 @@ Narrow the inbox with:
 
 | Category | Notification | Who receives it |
 | --- | --- | --- |
-| **Assignments** | You're added as owner of an applied control, owner of a risk scenario, owner of a security exception, author of an audit, or assignee of a task | The person added |
+| **Assignments** | You're added as owner of an applied control, owner of a risk scenario, owner of a security exception, owner of an incident, author or reviewer of an audit, or assignee of a task; the same for the owners, assignees, authors and reviewers of the other objects listed under [Assignments](#email-notifications) | The person added |
 | **Assignments** | An audit assignment is activated, or reopened for editing | The assignee |
 | **Assignments** | A quick form response is ready for your input, or was sent back to you | The respondents |
 | **Approvals** | An audit assignment is submitted for review | The reviewers (the audit's authors if none are set) |
 | **Approvals** | A quick form response is submitted | The reviewers |
-| **Approvals** | A validation flow is created and needs your approval | The approver |
+| **Approvals** | A validation flow is created, or handed over to you while pending, and needs your approval | The approver |
+| **Approvals** | A risk acceptance is submitted | The approver |
+| **Approvals** | A document revision is submitted for review | The document's reviewers |
 | **Updates** | An audit assignment is reviewed (approved, reopened for review, or changes requested) | The assignee |
+| **Updates** | An evidence is approved or rejected | The evidence owners |
+| **Updates** | A document revision is validated, sent back for changes, or published | The revision's author |
+| **Updates** | A risk acceptance is accepted, rejected or revoked | The owners of the risk scenarios it covers |
 | **Updates** | A security exception or a validation flow changes status | Exception owners and approver; validation-flow requester or approver depending on the transition |
 | **Deadlines** | An applied control, evidence or security exception is expiring; an audit, task or validation flow is due | Owners, authors, assignees or approver — see [Email notifications](#email-notifications) for the details per object |
 | **Deadlines** | An applied control's ETA has passed, an evidence or security exception has expired, a task is overdue | Owners or assignees |
@@ -123,9 +128,30 @@ You receive an email whenever something is assigned to you.
 | ------------------------- | --------------- | ---------------------------- |
 | **Applied Control**       | **Owner**       | You are added as an owner    |
 | **Audit** | **Authors**     | You are added as an author   |
+| **Audit** | **Reviewers**   | You are added as a reviewer  |
 | **Risk Scenario**         | **Owner**       | You are added as an owner    |
 | **Task (template)**       | **Assigned to** | You are added as an assignee |
 | **Security Exception**    | **Owner**       | You are added as an owner    |
+| **Incident**              | **Owner**      | You are added as an owner    |
+| **Asset** | **Assigned to** | You are added as an owner |
+| **Evidence** | **Assigned to** | You are added as an owner |
+| **Finding** | **Assigned to** | You are added as an owner |
+| **Right Request** | **Assigned to** | You are added as an owner |
+| **Solution** | **Assigned to** | You are added as an owner |
+| **Contract** | **Assigned to** | You are added as an owner |
+| **CRQ scenario** | **Assigned to** | You are added as an owner |
+| **Metric Instance** | **Assigned to** | You are added as an owner |
+| **Objective** | **Assigned to** | You are added as an assignee |
+| **Processing** | **Assigned to** | You are added as an assignee |
+| **Data Breach** | **Assigned to** | You are added as an assignee |
+| **Risk assessment** | **Authors** / **Reviewers** | You are added as an author or a reviewer |
+| **Findings binder** | **Authors** / **Reviewers** | You are added as an author or a reviewer |
+| **Entity assessment** | **Authors** / **Reviewers** | You are added as an author or a reviewer |
+| **EBIOS RM study** | **Authors** / **Reviewers** | You are added as an author or a reviewer |
+| **Business Impact Analysis** | **Authors** / **Reviewers** | You are added as an author or a reviewer |
+| **CRQ Study** | **Authors** / **Reviewers** | You are added as an author or a reviewer |
+| **Technical posture** | **Authors** / **Reviewers** | You are added as an author or a reviewer |
+| **Document** | **Reviewers** | You are added as a reviewer |
 
 > **Note:** Task assignment notifications fire when a **task template** is assigned. Due-date reminders (below) fire on the **task occurrences** generated from that template.
 

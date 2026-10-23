@@ -28,7 +28,7 @@ Event Trigger (serializer / periodic cron)
   - Fails over only when a mailer cannot be opened (connection, TLS or login fails)
 ```
 
-There is **no notification model** in the database. Notifications are fire-and-forget emails. Frontend toast notifications are independent and handled client-side only.
+This document covers the email path. Most notification tasks also write an **in-app** inbox row by calling `notify()` (`backend/notifications/service.py`) before sending their emails. Types, channels and title context are declared in `backend/notifications/registry.py`, and rows are stored in the `Notification` model. Frontend toast notifications are independent and handled client-side only.
 
 ---
 
@@ -101,6 +101,8 @@ Worker command: `uv run python manage.py run_huey -w 2 -k process`
 | `backend/global_settings/models.py` | `GlobalSettings` stores `notifications_enable_mailing` |
 | `backend/core/templates/emails/en/` | English YAML email templates |
 | `backend/core/templates/emails/fr/` | French YAML email templates |
+| `backend/core/templates/emails/de/` | German YAML email templates |
+| `backend/core/templates/emails/nl/` | Dutch YAML email templates |
 | `backend/core/templates/registration/` | HTML templates for password reset / welcome emails |
 
 ---
@@ -146,7 +148,7 @@ The `ciso_assistant_url` variable is always injected via `get_default_context()`
 ### How to Add a New Template
 
 1. Create `backend/core/templates/emails/en/{template_name}.yaml` with `subject` and `body` keys
-2. Create `backend/core/templates/emails/fr/{template_name}.yaml` (French translation)
+2. Create the `fr`, `de` and `nl` translations next to it (`backend/core/templates/emails/{fr,de,nl}/{template_name}.yaml`); a missing locale falls back to English
 3. Use `${variable_name}` for dynamic content
 4. `${ciso_assistant_url}` is automatically available
 
@@ -191,12 +193,22 @@ These are triggered from serializer `create()` / `update()` methods when users a
 |-------|-----------------|---------------|----------|
 | AppliedControl owner assigned | `AppliedControlWriteSerializer.create/update` | `send_applied_control_assignment_notification` | `applied_control_assignment` |
 | ComplianceAssessment author assigned | `ComplianceAssessmentWriteSerializer.create/update` | `send_compliance_assessment_assignment_notification` | `compliance_assessment_assignment` |
+| ComplianceAssessment reviewer added | `ComplianceAssessmentWriteSerializer.create/update` | `send_compliance_assessment_reviewer_assignment_notification` | `compliance_assessment_reviewer_assignment` |
 | TaskTemplate assigned_to set | `TaskTemplateWriteSerializer.create/update` | `send_task_template_assignment_notification` | `task_template_assignment` |
 | RiskScenario owner assigned | `RiskScenarioWriteSerializer.create/update` | `send_risk_scenario_assignment_notification` | `risk_scenario_assignment` |
 | ValidationFlow created | `ValidationFlowWriteSerializer.create` | `send_validation_flow_created_notification` | `validation_flow_created` |
 | ValidationFlow status changed | `ValidationFlowWriteSerializer.update` | `send_validation_flow_updated_notification` | `validation_flow_updated` |
+| ValidationFlow approver changed while submitted | `ValidationFlowWriteSerializer.update` | `send_validation_flow_created_notification` (old approver's row deleted) | `validation_flow_created` |
 | SecurityException owner assigned | `SecurityExceptionWriteSerializer.create/update` | `send_security_exception_assignment_notification` | `security_exception_assignment` |
 | SecurityException status changed | `SecurityExceptionWriteSerializer.update` | `send_security_exception_status_notification` | `security_exception_status_changed` |
+| Incident owner assigned | `IncidentWriteSerializer.create/update` | `send_incident_assignment_notification` | `incident_assignment` |
+| DocumentRevision submitted for review | `DocumentRevisionViewSet.submit_for_review` | `send_document_review_requested_notification` (container reviewers, minus the submitter) | `document_review_requested` |
+| DocumentRevision validated / change requested / published | `DocumentRevisionViewSet.approve/request_changes/publish` | `send_document_revision_reviewed_notification` (the author, unless they acted) | `document_revision_reviewed` |
+| Evidence approved / rejected | `EvidenceWriteSerializer.update` | `send_evidence_reviewed_notification` | `evidence_reviewed` |
+| RiskAcceptance submitted | `RiskAcceptanceViewSet.submit` | `send_risk_acceptance_submitted_notification` | `risk_acceptance_submitted` |
+| RiskAcceptance accepted / rejected / revoked | `RiskAcceptanceViewSet.accept/reject/revoke` | `send_risk_acceptance_decided_notification` | `risk_acceptance_decided` |
+
+**Generic assignment notifications** (`AssignmentNotificationMixin` in `core/serializers.py`): a write serializer declares `assignment_notifications = {"<m2m field>": "object_assignment" | "object_review_assignment"}`. The mixin wraps `save()`, diffs the field's members and queues `send_object_assignment_notification` after commit; recipients are re-resolved when the task runs. The model name comes from the paraglide key matching the model (`paraglide_model_key`), localized by the frontend in the inbox and by `_MODEL_LABELS` (`core/email_utils.py`) in email. Wired: owners of assets, evidences, findings, right requests, solutions, contracts, CRQ scenarios, metric instances; assignees of objectives, processings, data breaches; authors (`object_assignment`) and reviewers (`object_review_assignment`) of risk assessments, findings binders, entity assessments, EBIOS RM studies, BIAs, CRQ studies, technical postures. Models with a dedicated type above do not use it.
 
 **Pattern for assignment notifications in serializers:**
 
@@ -302,6 +314,13 @@ This means assigning a Team as owner of a control can notify multiple people in 
 | `security_exception_status_changed.yaml` | `send_security_exception_status_notification` |
 | `security_exception_expiring_soon.yaml` | `send_security_exception_expiring_soon_notification` |
 | `expired_security_exceptions.yaml` | `send_notification_email_expired_security_exception` |
+| `incident_assignment.yaml` | `send_incident_assignment_notification` |
+| `compliance_assessment_reviewer_assignment.yaml` | `send_compliance_assessment_reviewer_assignment_notification` |
+| `document_review_requested.yaml` | `send_document_review_requested_notification` |
+| `document_revision_reviewed.yaml` | `send_document_revision_reviewed_notification` |
+| `evidence_reviewed.yaml` | `send_evidence_reviewed_notification` |
+| `risk_acceptance_submitted.yaml` | `send_risk_acceptance_submitted_notification` |
+| `risk_acceptance_decided.yaml` | `send_risk_acceptance_decided_notification` |
 | `assignment_activated.yaml` | `send_assignment_activated_notification` |
 | `assignment_submitted.yaml` | `send_assignment_submitted_notification` |
 | `assignment_reviewed.yaml` | `send_assignment_reviewed_notification` |
@@ -319,7 +338,7 @@ All English templates have a matching French translation. Both directories conta
 
 1. **Create email templates**:
    - `backend/core/templates/emails/en/{template_name}.yaml`
-   - `backend/core/templates/emails/fr/{template_name}.yaml`
+   - `backend/core/templates/emails/{fr,de,nl}/{template_name}.yaml`
 
 2. **Add a Huey task** in `backend/core/tasks.py`:
    ```python
@@ -339,7 +358,7 @@ All English templates have a matching French translation. Both directories conta
        }
 
        for email in recipient_emails:
-           if email and check_email_configuration(email, [obj]):
+           if email and check_email_configuration(email):
                rendered = render_email_template("my_template_name", context)
                if rendered:
                    send_notification_email(rendered["subject"], rendered["body"], email)
@@ -413,7 +432,7 @@ All English templates have a matching French translation. Both directories conta
 
 1. **Requirement assessment status change**: Notify assigned actors when a requirement assessment result changes (e.g., from `non_compliant` to `partially_compliant`). Useful for audit workflows.
 
-2. **Incident notifications**: When a new incident is created or its severity changes, notify relevant stakeholders. The `Incident` model has owners who should be alerted.
+2. **Incident status/severity notifications**: Owners are already notified when assigned (`incident_assignment`). Notifying them when an incident's severity or status changes is still missing.
 
 3. **Compliance assessment status transitions**: Notify authors when an assessment moves to `in_review` or `done` status, especially when auto-locked by `lock_overdue_compliance_assessments`.
 
