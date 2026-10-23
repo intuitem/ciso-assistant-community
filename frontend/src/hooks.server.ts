@@ -179,6 +179,16 @@ const noStoreForFeApi: Handle = async ({ event, resolve }) => {
 	return response;
 };
 
+/**
+ * Keep instances out of search engines. A header rather than a robots.txt Disallow:
+ * crawlers blocked by robots.txt never see the noindex and still list known URLs.
+ */
+const noIndex: Handle = async ({ event, resolve }) => {
+	const response = await resolve(event);
+	response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+	return response;
+};
+
 const handleRequest: Handle = async ({ event, resolve }) => {
 	// Inbound webhook passthrough: unauthenticated by design (the
 	// URL secret is the credential) — skip locale middleware, CSRF-token fetch
@@ -287,7 +297,7 @@ const handleRequest: Handle = async ({ event, resolve }) => {
 	});
 };
 
-export const handle: Handle = sequence(noStoreForFeApi, handleRequest);
+export const handle: Handle = sequence(noIndex, noStoreForFeApi, handleRequest);
 
 // Replaces SvelteKit's default error logger, which printed every unmatched path
 // as a two-line stderr entry. A 404 on a path that was never a route is not an
