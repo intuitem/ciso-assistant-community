@@ -4275,20 +4275,32 @@ def _filtering_label_relations():
             )
 
 
-def _label_usage_count(user):
+def _visible_label_links(request):
+    if not hasattr(request, "_label_links"):
+        request._label_links = [
+            (
+                label_col,
+                through.objects.filter(
+                    **{
+                        label_col: OuterRef("pk"),
+                        f"{obj_col}_id__in": RoleAssignment.get_viewable_object_ids(
+                            request.user,
+                            through._meta.get_field(obj_col).related_model,
+                        ),
+                    }
+                ),
+            )
+            for through, label_col, obj_col in _filtering_label_relations()
+        ]
+    return request._label_links
+
+
+def _label_usage_count(request):
     total = Value(0)
-    for through, label_col, obj_col in _filtering_label_relations():
-        model = through._meta.get_field(obj_col).related_model
-        viewable = RoleAssignment.get_viewable_object_ids(user, model)
+    for label_col, links in _visible_label_links(request):
         total = total + Coalesce(
             Subquery(
-                through.objects.filter(
-                    **{label_col: OuterRef("pk"), f"{obj_col}_id__in": viewable}
-                )
-                .order_by()
-                .values(label_col)
-                .annotate(c=Count("*"))
-                .values("c"),
+                links.order_by().values(label_col).annotate(c=Count("*")).values("c"),
                 output_field=IntegerField(),
             ),
             0,
@@ -4308,7 +4320,9 @@ class FilteringLabelFilterSet(GenericFilterSet):
 
     def filter_usage(self, queryset, name, value):
         if value == "unused":
-            return queryset.filter(usage_count=0)
+            for _, links in _visible_label_links(self.request):
+                queryset = queryset.exclude(Exists(links))
+            return queryset
         if value == "rare":
             return queryset.filter(usage_count__in=[1, 2])
         groups = defaultdict(list)
@@ -4334,10 +4348,10 @@ class FilteringLabelViewSet(BaseModelViewSet):
         params = self.request.query_params
         if self.action == "list" and (
             "usage_count" in params
-            or params.get("usage") in ("unused", "rare")
+            or params.get("usage") == "rare"
             or "usage_count" in params.get("ordering", "")
         ):
-            return queryset.annotate(usage_count=_label_usage_count(self.request.user))
+            return queryset.annotate(usage_count=_label_usage_count(self.request))
         return queryset.annotate(usage_count=Value(None, output_field=IntegerField()))
 
     @action(detail=True, methods=["get"], url_path="usage")
