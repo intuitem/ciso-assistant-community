@@ -3352,6 +3352,7 @@
 	"fileAcceptOnly": "Accepted files: {extensions}",
 	"object": "Object",
 	"dataWizardSelectFallbackDomain": "Select a fallback Domain (if not set on the file)",
+	"dataWizardFallbackDomainHelp": "Rows without a domain go here, and existing records are looked up in it to spot conflicts.",
 	"dataWizardSelectPerimeter": "Select a Perimeter",
 	"dataWizardUpdateExisting": "Update existing assessment",
 	"dataWizardCreateNewAssessment": "Create new",
@@ -7571,5 +7572,18 @@
 	"assessedAssets": "Assessed assets",
 	"assessedAssetsImpacted": "Assessed assets impacted",
 	"extraDependency": "Extra dependency",
-	"biaDependenciesDescription": "Dependencies of every asset assessed in this BIA, and the supporting assets that miss their objectives"
+	"biaDependenciesDescription": "Dependencies of every asset assessed in this BIA, and the supporting assets that miss their objectives",
+	"usage": "Usage",
+	"unused": "Unused",
+	"usedOnceOrTwice": "Used once or twice",
+	"lookAlikes": "Look-alikes",
+	"mergeLabels": "Merge labels",
+	"mergeLabelsHelp": "Pick the label to keep. Every object tagged with the others gets it instead, then the others are deleted.",
+	"labelToKeep": "Label to keep",
+	"objectsCount": "{count} objects",
+	"mergeLabelsSummary": "{labels} will be replaced by {target} on every object, then deleted.",
+	"mergeInto": "Merge into {label}",
+	"mergeLabelsSuccess": "Labels merged into {label}",
+	"mergeLabelsError": "Could not merge labels",
+	"noQuestionnaireAttached": "No questionnaire attached"
 }
