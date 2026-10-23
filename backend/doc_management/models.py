@@ -72,6 +72,13 @@ class DocumentContainer(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
     class Meta:
         verbose_name = _("Document container")
         verbose_name_plural = _("Document containers")
+        # Read access limited to the revision in force: no drafts, history or diffs.
+        permissions = [
+            (
+                "view_published_documentcontainer",
+                "Can view published document containers",
+            )
+        ]
 
     def save(self, *args, **kwargs):
         propagate = False

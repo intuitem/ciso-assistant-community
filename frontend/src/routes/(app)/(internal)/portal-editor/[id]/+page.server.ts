@@ -56,16 +56,32 @@ export const load: PageServerLoad = async ({ params, fetch, locals }) => {
 		},
 		zod(PortalSettingsSchema)
 	);
+	const documentsEnabled = !!(await locals.getFeatureFlags())?.document_management;
+	// Published documents only: a tile must never point at something a reader cannot open.
+	const catalogRes = documentsEnabled
+		? await fetch(`${BASE_API_URL}/document-containers/catalog/`)
+		: null;
+	const documentCatalog: { id: string; name: string; ref_id: string; document_type: string }[] =
+		catalogRes?.ok
+			? (await catalogRes.json()).map((c: any) => ({
+					id: c.id,
+					name: c.name,
+					ref_id: c.ref_id,
+					document_type: c.document_type
+				}))
+			: [];
 	return {
 		portal,
 		settingsForm,
+		documentCatalog,
 		publicDocuments,
 		snapshots,
 		frameworks,
 		quickForms,
 		actors,
 		publications,
-		quickFormsEnabled: !!(await locals.getFeatureFlags())?.quick_forms
+		quickFormsEnabled: !!(await locals.getFeatureFlags())?.quick_forms,
+		documentsEnabled
 	};
 };
 

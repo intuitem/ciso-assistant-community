@@ -229,6 +229,7 @@ BASELINE_READER_PERMISSIONS_LIST = [
     "view_entitytierchange",
     "view_solutiontierchange",
     "view_documenttemplate",
+    "view_published_documentcontainer",
     "view_customfielddefinition",
     "view_requirementmapping",
     "view_requirementmappingset",

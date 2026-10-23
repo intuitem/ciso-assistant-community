@@ -31,7 +31,8 @@
 	const PAGE_DESTINATIONS = $derived([
 		{ value: 'my-assignments', label: m.myAssignments() },
 		{ value: 'auditee-dashboard', label: m.auditDashboard() },
-		...(data.quickFormsEnabled ? [{ value: 'my-requests', label: m.myRequests() }] : [])
+		...(data.quickFormsEnabled ? [{ value: 'my-requests', label: m.myRequests() }] : []),
+		...(data.documentsEnabled ? [{ value: 'documents', label: m.documents() }] : [])
 	]);
 	const toast = getToastStore();
 	let view = $state<'edit' | 'preview' | 'settings'>('edit');
@@ -172,7 +173,8 @@
 		quickForms: data.quickForms ?? [],
 		actors: data.actors ?? [],
 		publications: data.publications ?? [],
-		docs
+		docs,
+		documentCatalog: data.documentCatalog ?? []
 	});
 
 	const payload = $derived(JSON.stringify({ sections }));
@@ -263,7 +265,8 @@
 			bind:value={name}
 			onblur={saveName}
 			aria-label={m.name()}
-			class="grow min-w-48 max-w-md rounded-md border border-transparent bg-transparent px-2 py-1 text-xl font-bold hover:bg-surface-100-900 focus:border-surface-300-700 focus:bg-surface-100-900 focus:outline-none"
+			size={Math.max(name.length, 8)}
+			class="field-sizing-content min-w-0 max-w-md rounded-md border border-transparent bg-transparent px-2 py-1 text-xl font-bold hover:bg-surface-100-900 focus:border-surface-300-700 focus:bg-surface-100-900 focus:outline-none"
 		/>
 		<span
 			class="shrink-0 text-[10px] uppercase rounded-full px-2 py-0.5 {data.portal.status ===

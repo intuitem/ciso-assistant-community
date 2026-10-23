@@ -6,6 +6,7 @@ from core.serializer_fields import FieldsRelatedField
 from core.serializers import BaseModelSerializer
 from iam.models import Folder, RoleAssignment
 
+from .access import has_full_view
 from .models import (
     DocumentContainer,
     DocumentRevision,
@@ -96,6 +97,9 @@ class DocumentContainerReadSerializer(BaseModelSerializer):
         a new document points current_revision at its own draft, and reporting
         it here would show the same revision twice.
         """
+        request = self.context.get("request")
+        if request and not has_full_view(request, DocumentContainer, obj.id):
+            return None
         doc = self._default_doc(obj)
         if not doc:
             return None
@@ -288,6 +292,9 @@ class ManagedDocumentReadSerializer(BaseModelSerializer):
         return obj.revisions.count()
 
     def get_latest_draft(self, obj):
+        request = self.context.get("request")
+        if request and not has_full_view(request, ManagedDocument, obj.id):
+            return None
         draft = obj.revisions.filter(status=DocumentRevision.Status.DRAFT).first()
         return str(draft.id) if draft else None
 

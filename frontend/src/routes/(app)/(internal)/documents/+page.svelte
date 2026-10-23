@@ -7,12 +7,17 @@
 		documentTypeIcon as typeIcon
 	} from '$lib/utils/documentTypes';
 	import ClassificationBadge from '$lib/components/ClassificationBadge.svelte';
+	import { page } from '$app/state';
+	import { hasPermissionAnywhere } from '$lib/utils/access-control';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 
 	let query = $state('');
-	let selectedTypes = $state<Set<string>>(new Set());
+	// `?type=policy&type=procedure` preselects types, so a portal tile can open a filtered library.
+	let selectedTypes = $state<Set<string>>(new Set(page.url.searchParams.getAll('type')));
+	const canManage = hasPermissionAnywhere(page.data.user, 'view_documentcontainer');
+	const canAdd = hasPermissionAnywhere(page.data.user, 'add_documentcontainer');
 
 	const localeName = (loc: string) => LOCALE_MAP[loc]?.name ?? loc.toUpperCase();
 	const readHref = (doc: any, lang: any) => `/documents/${doc.id}/read?doc=${lang.document_id}`;
@@ -86,12 +91,16 @@
 				</div>
 			</div>
 			<div class="flex items-center gap-2">
-				<a href="/documents/new" class="btn btn-sm preset-filled-primary-500">
-					<i class="fa-solid fa-file-circle-plus mr-2"></i>{m.addDocumentContainer()}
-				</a>
-				<a href="/document-containers" class="btn btn-sm preset-tonal">
-					<i class="fa-solid fa-table-list mr-2"></i>{m.manage()}
-				</a>
+				{#if canAdd}
+					<a href="/documents/new" class="btn btn-sm preset-filled-primary-500">
+						<i class="fa-solid fa-file-circle-plus mr-2"></i>{m.addDocumentContainer()}
+					</a>
+				{/if}
+				{#if canManage}
+					<a href="/document-containers" class="btn btn-sm preset-tonal">
+						<i class="fa-solid fa-table-list mr-2"></i>{m.manage()}
+					</a>
+				{/if}
 			</div>
 		</div>
 	</header>
