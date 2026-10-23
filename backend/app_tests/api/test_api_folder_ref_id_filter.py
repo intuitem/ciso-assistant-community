@@ -38,6 +38,19 @@ class TestFolderRefIdFilter:
         response = authenticated_client.get(ENDPOINT, {"ref_id": "dom.it"})
         assert _ids(response) == {str(folders.id)}
 
+    def test_whitespace_only_value_matches_nothing(self, authenticated_client, folders):
+        response = authenticated_client.get(ENDPOINT, {"ref_id": "  \t "})
+        assert _ids(response) == set()
+
+    def test_non_ascii_padding_is_part_of_the_value(
+        self, authenticated_client, folders
+    ):
+        """The index trims ASCII whitespace only, so the filter must not strip more."""
+        padded = Folder.objects.create(name="Padded", parent_folder=folders)
+        Folder.objects.filter(pk=padded.pk).update(ref_id="\u00a0DOM.IT\u00a0")
+        response = authenticated_client.get(ENDPOINT, {"ref_id": "\u00a0DOM.IT\u00a0"})
+        assert _ids(response) == {str(padded.id)}
+
     def test_partial_value_matches_nothing(self, authenticated_client, folders):
         response = authenticated_client.get(ENDPOINT, {"ref_id": "DOM"})
         assert _ids(response) == set()

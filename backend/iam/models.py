@@ -283,7 +283,9 @@ class Folder(NameDescriptionMixin):
     def filter_by_ref_id(queryset: QuerySet[Folder], ref_id: str) -> QuerySet[Folder]:
         """Folders of *queryset* holding *ref_id*, compared as the unique index does."""
         return queryset.alias(normalized_ref_id=Lower(_trimmed_ref_id())).filter(
-            normalized_ref_id=Lower(_trimmed_ref_id(Value(ref_id)))
+            # The index's own condition, so the partial index can serve the lookup.
+            ~Q(Exact(_trimmed_ref_id(), Value(""))),
+            normalized_ref_id=Lower(_trimmed_ref_id(Value(ref_id))),
         )
 
     def _ref_id_taken_message(self) -> str:
