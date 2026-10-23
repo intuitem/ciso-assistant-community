@@ -722,14 +722,16 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
     )
     def import_pia(self, request, pk):
         """Start a draft DPIA of this processing through `quick_form`, filled from
-        an export of the CNIL PIA software (`pia`, the parsed .json file)."""
+        an export of the CNIL PIA software (`pia`, the parsed .json file). Optional
+        `labels`: the words the import adds to the answers, in the caller's language
+        (see pia_import.DEFAULT_LABELS)."""
         from core.models import QuickForm
         from core.object_references import ReferenceError_
         from core.quick_form_apply import targets_of
         from core.views import QuickFormViewSet, start_quick_form_response
         from django.contrib.auth.models import Permission
 
-        from .pia_import import PiaImportError, import_pia, parse_export
+        from .pia_import import PiaImportError, import_pia, parse_export, parse_labels
 
         processing = self.get_object()
         try:
@@ -756,6 +758,7 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
             )
         try:
             data = parse_export(request.data.get("pia"))
+            labels = parse_labels(request.data.get("labels"))
             with transaction.atomic():
                 response, resumed = start_quick_form_response(
                     request.user,
@@ -772,7 +775,9 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
                         },
                         status=status.HTTP_409_CONFLICT,
                     )
-                summary = import_pia(response, processing, data, request.user)
+                summary = import_pia(
+                    response, processing, data, request.user, labels=labels
+                )
         except (PiaImportError, ReferenceError_) as e:
             return Response({"error": e.code}, status=status.HTTP_400_BAD_REQUEST)
         return Response(

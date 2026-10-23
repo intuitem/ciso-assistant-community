@@ -13,11 +13,9 @@ import re
 from html.parser import HTMLParser
 
 from django.utils.dateparse import parse_date
-from django.utils.translation import gettext as _
 
 from core.models import AppliedControl, Question
 from core.utils import apply_answers_dict
-from iam.models import RoleAssignment
 
 
 class PiaImportError(Exception):
@@ -27,7 +25,7 @@ class PiaImportError(Exception):
 
 
 # CNIL question id -> our "<page>:<question>" leaf. Several ids on one leaf are
-# joined, the later ones under a label.
+# joined, the ones the question does not ask for under a label.
 TEXT_QUESTIONS = {
     111: "overview:benefits",
     112: "overview:benefits",
@@ -52,10 +50,41 @@ TEXT_QUESTIONS = {
 # CNIL items 3.2 / 3.3 / 3.4: questions 3n1…3n6.
 RISKS = {2: "illegitimate_access", 3: "unwanted_modification", 4: "disappearance"}
 
+# CNIL item -> our page, to say what an action plan line is about.
+ITEM_PAGES = {
+    "1.1": "overview",
+    "1.2": "data",
+    "2.1": "proportionality",
+    "2.2": "rights",
+    **{f"3.{n}": page for n, page in RISKS.items()},
+}
 
-def _labels():
-    # The CNIL answers our form folds into a neighbouring question.
-    return {112: _("Responsibilities"), 121: _("Data processed"), 212: _("Legal basis")}
+# The words the import writes into the answers, punctuation included: saved there,
+# so in the importer's language, which only the caller knows. English by default.
+DEFAULT_LABELS = {
+    "responsibilities": "Responsibilities:",
+    "dataProcessed": "Data processed:",
+    "legalBasis": "Legal basis:",
+    "favourable": "favourable",
+    "unfavourable": "unfavourable",
+}
+# The CNIL answers our form folds into a neighbouring question.
+QUESTION_LABELS = {112: "responsibilities", 121: "dataProcessed", 212: "legalBasis"}
+
+
+def parse_labels(value) -> dict:
+    """The caller's `labels`, each a short string; English for those left out."""
+    if value is None:
+        value = {}
+    if not isinstance(value, dict) or not all(
+        isinstance(value.get(key, ""), str) and len(value.get(key, "")) <= 100
+        for key in DEFAULT_LABELS
+    ):
+        raise PiaImportError("invalidRequest")
+    return {
+        key: value.get(key, "").strip() or default
+        for key, default in DEFAULT_LABELS.items()
+    }
 
 
 class _TextExtractor(HTMLParser):
@@ -125,21 +154,22 @@ def parse_export(data) -> dict:
     return data
 
 
-def import_pia(response, processing, data, user) -> dict:
-    """Fill the draft `response` from the parsed export `data`. Creates the CNIL
-    measures as applied controls in the processing's domain (reusing a control of
-    the same name there). Returns counts and the kinds of content left out."""
+def import_pia(response, processing, data, user, *, labels) -> dict:
+    """Fill the draft `response` from the parsed export `data`, in the words of
+    `labels` (see parse_labels). Creates the CNIL measures as applied controls in
+    the processing's domain (reusing a control of the same name there). Returns
+    counts and the kinds of content left out."""
     folder = processing.folder
     questions = {}
+    pages = {}
     for question in Question.objects.filter(
         page__quick_form_id=response.quick_form_id
     ).select_related("page"):
         if not question.page.urn or not question.urn:
             continue
-        leaf = (
-            f"{question.page.urn.rsplit(':', 1)[-1]}:{question.urn.rsplit(':', 1)[-1]}"
-        )
-        questions[leaf] = question
+        page_leaf = question.page.urn.rsplit(":", 1)[-1]
+        questions[f"{page_leaf}:{question.urn.rsplit(':', 1)[-1]}"] = question
+        pages[page_leaf] = question.page
     if "measures:measures" not in questions:
         raise PiaImportError("piaFormMismatch")
 
@@ -169,44 +199,51 @@ def import_pia(response, processing, data, user) -> dict:
         items = answers.get(qid, {}).get("list") or []
         return [str(i).strip() for i in items if str(i).strip()]
 
-    labels = _labels()
     merged = {}
     for qid, leaf in TEXT_QUESTIONS.items():
         text = text_of(qid)
         if text:
-            label = labels.get(qid)
-            merged.setdefault(leaf, []).append(
-                f"{label}: {text}" if label and merged.get(leaf) else text
-            )
+            key = QUESTION_LABELS.get(qid)
+            merged.setdefault(leaf, []).append(f"{labels[key]} {text}" if key else text)
     for leaf, parts in merged.items():
         put(leaf, _join(*parts))
 
     # Measures (CNIL 3.1) -> applied controls, also matched by title from risks.
-    viewable = RoleAssignment.get_viewable_object_ids(user, AppliedControl, folder)
     controls_by_title = {}
     created = reused = 0
     for measure in data["measures"]:
         title = str(measure.get("title") or "").strip()[:200]
         if not title or title.lower() in controls_by_title:
             continue
+        evaluation = evaluations.get(f"3.1.{measure.get('id')}", {})
+        description = html_to_text(measure.get("content"))
+        observation = _join(
+            html_to_text(evaluation.get("evaluation_comment")),
+            html_to_text(evaluation.get("action_plan_comment")),
+        )
+        eta = _date(evaluation.get("estimated_implementation_date"))
+        # Names are unique per domain regardless of case (AbstractBaseModel.clean),
+        # visible or not: matched the same way, or creating it fails.
         control = AppliedControl.objects.filter(
-            folder=folder, name=title, id__in=viewable
+            folder=folder, name__iexact=title
         ).first()
         if control is None:
-            evaluation = evaluations.get(f"3.1.{measure.get('id')}", {})
             control = AppliedControl.objects.create(
                 folder=folder,
                 name=title,
-                description=html_to_text(measure.get("content")),
-                observation=_join(
-                    html_to_text(evaluation.get("evaluation_comment")),
-                    html_to_text(evaluation.get("action_plan_comment")),
-                )
-                or None,
-                eta=_date(evaluation.get("estimated_implementation_date")),
+                description=description,
+                observation=observation or None,
+                eta=eta,
             )
             created += 1
         else:
+            # Linked as it stands: what the file says of it is left out.
+            if (
+                description not in ("", control.description or "")
+                or observation not in ("", control.observation or "")
+                or eta not in (None, control.eta)
+            ):
+                skipped.add("reusedMeasureDetails")
             reused += 1
         controls_by_title[title.lower()] = control
     put("measures:measures", [str(c.pk) for c in controls_by_title.values()])
@@ -250,11 +287,15 @@ def import_pia(response, processing, data, user) -> dict:
         if ref.startswith("3.1."):
             continue
         if comment := html_to_text(evaluation.get("action_plan_comment")):
-            action_plan.append(f"{ref}: {comment}")
+            # "3.2" is an item, "2.1.211" one of its questions: both under its page.
+            page = pages.get(ITEM_PAGES.get(".".join(ref.split(".")[:2])))
+            action_plan.append(
+                f"{page.get_name_translated if page else ref} — {comment}"
+            )
         if html_to_text(evaluation.get("evaluation_comment")):
             skipped.add("evaluationComments")
 
-    status = {0: _("unfavourable"), 1: _("favourable")}
+    status = {0: labels["unfavourable"], 1: labels["favourable"]}
     dpo_header = ", ".join(
         p
         for p in (

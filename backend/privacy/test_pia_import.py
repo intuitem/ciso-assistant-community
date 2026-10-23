@@ -72,7 +72,12 @@ def test_import_pia_fills_a_draft_dpia(admin_client, processing, dpia_form):
     assert res.status_code == 201, res.json()
     body = res.json()
     assert body["controls_created"] == 1 and body["controls_reused"] == 1
-    assert body["skipped"] == ["piaComments", "unmatchedMeasures"]
+    # Pseudonymisation is the processing's own control: linked, its file content left out.
+    assert body["skipped"] == [
+        "piaComments",
+        "reusedMeasureDetails",
+        "unmatchedMeasures",
+    ]
 
     response = QuickFormResponse.objects.get(id=body["redirect"].rsplit("/", 1)[-1])
     assert response.status == QuickFormResponse.Status.DRAFT
@@ -98,7 +103,9 @@ def test_import_pia_fills_a_draft_dpia(admin_client, processing, dpia_form):
     v = f"{P}:validation:question"
     assert answers[f"{v}:dpo_opinion"] == "Jo DPO, favourable\n\nFine with conditions."
     assert answers[f"{v}:views_not_sought_reason"] == "Panel too costly."
-    assert answers[f"{v}:conditions"] == "Encrypt backups.\n\n3.2: Audit"
+    assert answers[f"{v}:conditions"] == (
+        "Encrypt backups.\n\nRisks: illegitimate access to data — Audit"
+    )
     assert answers[f"{v}:decision"] is None
     # Nothing written on the processing before the DPIA is accepted.
     assert not processing.associated_controls.filter(id=encryption.id).exists()
@@ -127,7 +134,68 @@ def test_import_pia_rejects_bad_files(admin_client, processing, dpia_form):
             url, {"quick_form": str(dpia_form.id), "pia": pia}, format="json"
         )
         assert res.status_code == 400 and res.json()["error"] == code
+    for labels in ("Responsibilities:", {"legalBasis": 3}, {"favourable": "x" * 101}):
+        res = admin_client.post(
+            url,
+            {"quick_form": str(dpia_form.id), "pia": EXPORT, "labels": labels},
+            format="json",
+        )
+        assert res.status_code == 400 and res.json()["error"] == "invalidRequest"
     assert not QuickFormResponse.objects.filter(quick_form=dpia_form).exists()
+
+
+@pytest.mark.django_db
+def test_import_pia_reuses_a_control_whatever_its_case(
+    admin_client, processing, dpia_form
+):
+    # Names are unique per domain regardless of case: creating "Encryption" would fail.
+    existing = AppliedControl.objects.create(
+        folder=processing.folder, name="encryption"
+    )
+    url = f"/api/privacy/processings/{processing.id}/import-pia/"
+    res = admin_client.post(
+        url, {"quick_form": str(dpia_form.id), "pia": EXPORT}, format="json"
+    )
+    assert res.status_code == 201, res.json()
+    body = res.json()
+    assert body["controls_created"] == 0 and body["controls_reused"] == 2
+    assert "reusedMeasureDetails" in body["skipped"]
+    assert (
+        AppliedControl.objects.filter(
+            folder=processing.folder, name__iexact="encryption"
+        ).count()
+        == 1
+    )
+    response = QuickFormResponse.objects.get(id=body["redirect"].rsplit("/", 1)[-1])
+    answers = build_answers_dict(response.answers.select_related("question"))
+    assert answers[f"{P}:illegitimate_access:question:measures"] == [str(existing.id)]
+
+
+@pytest.mark.django_db
+def test_import_pia_writes_the_callers_labels(admin_client, processing, dpia_form):
+    url = f"/api/privacy/processings/{processing.id}/import-pia/"
+    export = {
+        **EXPORT,
+        "answers": [a for a in EXPORT["answers"] if a["reference_to"] != 111],
+    }
+    labels = {"responsibilities": "Responsabilités :", "favourable": "favorable"}
+    res = admin_client.post(
+        url,
+        {"quick_form": str(dpia_form.id), "pia": export, "labels": labels},
+        format="json",
+    )
+    assert res.status_code == 201, res.json()
+    response = QuickFormResponse.objects.get(
+        id=res.json()["redirect"].rsplit("/", 1)[-1]
+    )
+    answers = build_answers_dict(response.answers.select_related("question"))
+    # Not what the question asks: labelled, even with nothing before it.
+    assert answers[f"{P}:overview:question:benefits"] == (
+        "Responsabilités : Marketing owns it."
+    )
+    assert answers[f"{P}:validation:question:dpo_opinion"] == (
+        "Jo DPO, favorable\n\nFine with conditions."
+    )
 
 
 @pytest.mark.django_db

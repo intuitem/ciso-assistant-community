@@ -62,12 +62,11 @@
 		const { signal } = controller;
 		dpiaForms = null;
 		dpia = undefined;
+		// A failed lookup leaves the forms unknown: neither a start button nor "no form loaded".
 		fetch(`/processings/${processing.id}/dpia-screening?target=processing.dpia`, { signal })
-			.then((res) => (res.ok ? res.json() : []))
+			.then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
 			.then((rows) => (dpiaForms = Array.isArray(rows) ? rows : []))
-			.catch(() => {
-				if (!signal.aborted) dpiaForms = [];
-			});
+			.catch(() => {});
 		const query = new URLSearchParams({
 			target: 'processing.dpia',
 			subject_object_id: processing.id,
@@ -125,8 +124,28 @@
 		}
 	}
 
+	// Without the right to file a response here, an empty list does not mean no form is loaded.
+	const canStartDpia = $derived(
+		canPerformActionOnObject({
+			user: page.data.user,
+			action: 'add',
+			model: 'quickformresponse',
+			object: processing
+		})
+	);
+
 	// shortcut: imports through the first in-house DPIA form; add a picker if several are loaded.
-	const importForm = $derived(dpiaForms?.find((o) => o.kind === 'form'));
+	// The import creates the file's measures as applied controls in the processing's domain.
+	const importForm = $derived(
+		canPerformActionOnObject({
+			user: page.data.user,
+			action: 'add',
+			model: 'appliedcontrol',
+			object: processing
+		})
+			? dpiaForms?.find((o) => o.kind === 'form')
+			: undefined
+	);
 
 	async function importPia(event: Event) {
 		const input = event.currentTarget as HTMLInputElement;
@@ -148,7 +167,18 @@
 			const res = await fetch(`/processings/${processing.id}/import-pia`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ quick_form: importForm.id, pia })
+				body: JSON.stringify({
+					quick_form: importForm.id,
+					pia,
+					// Saved in the answers: in the importer's language.
+					labels: {
+						responsibilities: m.piaLabelResponsibilities(),
+						dataProcessed: m.piaLabelDataProcessed(),
+						legalBasis: m.piaLabelLegalBasis(),
+						favourable: m.piaOpinionFavourable(),
+						unfavourable: m.piaOpinionUnfavourable()
+					}
+				})
 			});
 			const body = await res.json().catch(() => ({}));
 			if (!res.ok) {
@@ -389,7 +419,7 @@
 	{#if !editing}
 		<p class="border-t border-surface-200-800 pt-3 text-xs text-surface-500">
 			{#if loadFailed}{m.anErrorOccurred()}{:else if screenings?.length === 0}{m.noDpiaScreeningForm()}{/if}
-			{#if !loadFailed && dpia === null && processing.dpia_required && dpiaForms?.length === 0}{m.noDpiaForm()}{/if}
+			{#if !loadFailed && canStartDpia && dpia === null && processing.dpia_required && dpiaForms?.length === 0}{m.noDpiaForm()}{/if}
 			<a class="anchor" href="/dpias">{m.dpias()}</a>
 		</p>
 	{/if}
