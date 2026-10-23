@@ -126,13 +126,13 @@ You receive an email whenever something is assigned to you.
 
 | Object                    | Field to fill   | Your role                    |
 | ------------------------- | --------------- | ---------------------------- |
-| **Applied Control**       | **Owner**       | You are added as an owner    |
+| **Applied Control**       | **Assigned to** | You are added as an owner    |
 | **Audit** | **Authors**     | You are added as an author   |
 | **Audit** | **Reviewers**   | You are added as a reviewer  |
-| **Risk Scenario**         | **Owner**       | You are added as an owner    |
+| **Risk Scenario**         | **Assigned to** | You are added as an owner    |
 | **Task (template)**       | **Assigned to** | You are added as an assignee |
-| **Security Exception**    | **Owner**       | You are added as an owner    |
-| **Incident**              | **Owner**      | You are added as an owner    |
+| **Security Exception**    | **Assigned to** | You are added as an owner    |
+| **Incident**              | **Assigned to** | You are added as an owner    |
 | **Asset** | **Assigned to** | You are added as an owner |
 | **Evidence** | **Assigned to** | You are added as an owner |
 | **Finding** | **Assigned to** | You are added as an owner |

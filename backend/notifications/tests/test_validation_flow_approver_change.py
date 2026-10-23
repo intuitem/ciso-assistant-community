@@ -153,3 +153,16 @@ def test_queued_request_for_a_deleted_flow_sends_nothing(flow):
         send_validation_flow_created_notification.call_local(stale)
 
     notify.assert_not_called()
+
+
+def test_queued_request_for_a_decided_flow_sends_nothing(flow):
+    from core.tasks import send_validation_flow_created_notification
+
+    stale = ValidationFlow.objects.get(pk=flow.pk)
+    ValidationFlow.objects.filter(pk=flow.pk).update(
+        status=ValidationFlow.Status.ACCEPTED
+    )
+    with patch("core.tasks.notify") as notify:
+        send_validation_flow_created_notification.call_local(stale)
+
+    notify.assert_not_called()

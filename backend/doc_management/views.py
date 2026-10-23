@@ -130,13 +130,15 @@ def _queue_review_notification(request, revision):
             transaction.on_commit(
                 lambda: send_document_review_requested_notification(
                     revision_id, actor_name, user.email
-                )
+                ),
+                robust=True,
             )
         elif revision.author_id and revision.author_id != user.id:
             transaction.on_commit(
                 lambda: send_document_revision_reviewed_notification(
                     revision_id, state, actor_name
-                )
+                ),
+                robust=True,
             )
     except Exception as e:
         logger.error(

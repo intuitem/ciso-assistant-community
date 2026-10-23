@@ -990,7 +990,7 @@ def send_risk_acceptance_decided_notification(acceptance_id, decision, actor_nam
         .filter(id=acceptance_id)
         .first()
     )
-    if not acceptance:
+    if not acceptance or acceptance.state != decision:
         return
 
     owners = {o for s in acceptance.risk_scenarios.all() for o in s.owner.all()}
@@ -1509,6 +1509,8 @@ def send_validation_flow_created_notification(validation_flow):
     try:
         validation_flow.refresh_from_db()
     except ValidationFlow.DoesNotExist:
+        return
+    if validation_flow.status != ValidationFlow.Status.SUBMITTED:
         return
     if not validation_flow.approver or not validation_flow.approver.email:
         logger.warning(

@@ -8368,13 +8368,15 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
                 transaction.on_commit(
                     lambda: send_risk_acceptance_submitted_notification(
                         acceptance_id, actor_name
-                    )
+                    ),
+                    robust=True,
                 )
             else:
                 transaction.on_commit(
                     lambda: send_risk_acceptance_decided_notification(
                         acceptance_id, state, actor_name
-                    )
+                    ),
+                    robust=True,
                 )
         except Exception as e:
             logger.error(

@@ -148,3 +148,15 @@ def test_decision_email_is_in_the_owner_language(
 
     subject = send_email.call_args.args[0]
     assert subject.endswith(": Rejeté"), subject
+
+
+def test_a_superseded_decision_is_not_delivered(acceptance):
+    from core.tasks import send_risk_acceptance_decided_notification
+
+    RiskAcceptance.objects.filter(pk=acceptance.pk).update(state="revoked")
+    with patch("core.tasks.notify") as notify:
+        send_risk_acceptance_decided_notification.call_local(
+            str(acceptance.id), "accepted", "Ada Approver"
+        )
+
+    notify.assert_not_called()

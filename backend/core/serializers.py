@@ -365,7 +365,9 @@ class AssignmentNotificationMixin:
                 field,
                 [str(i) for i in added],
             )
-            transaction.on_commit(lambda: send_object_assignment_notification(*args))
+            transaction.on_commit(
+                lambda: send_object_assignment_notification(*args), robust=True
+            )
         except Exception as e:
             logger.error(
                 "Failed to queue assignment notification",
@@ -3569,7 +3571,8 @@ class EvidenceWriteSerializer(AssignmentNotificationMixin, BaseModelSerializer):
             transaction.on_commit(
                 lambda: send_evidence_reviewed_notification(
                     evidence_id, decision, actor_name
-                )
+                ),
+                robust=True,
             )
         except Exception as e:
             logger.error("Failed to queue evidence review notification", error=e)
@@ -4417,7 +4420,8 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
             transaction.on_commit(
                 lambda: send_compliance_assessment_reviewer_assignment_notification(
                     assessment_id, reviewer_ids
-                )
+                ),
+                robust=True,
             )
         except Exception as e:
             logger.error(
@@ -6750,10 +6754,11 @@ class IncidentWriteSerializer(BaseModelSerializer):
             incident_id = incident.id
             owner_ids = [str(owner_id) for owner_id in owner_ids]
             transaction.on_commit(
-                lambda: send_incident_assignment_notification(incident_id, owner_ids)
+                lambda: send_incident_assignment_notification(incident_id, owner_ids),
+                robust=True,
             )
         except Exception as e:
-            logger.error(f"Failed to send Incident assignment notification: {str(e)}")
+            logger.error("Failed to send Incident assignment notification", error=e)
 
 
 class IncidentReadSerializer(IncidentWriteSerializer):
@@ -7244,7 +7249,7 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
 
             # The task reloads the flow, so it must not run before the row is committed.
             transaction.on_commit(
-                lambda: send_validation_flow_created_notification(instance)
+                lambda: send_validation_flow_created_notification(instance), robust=True
             )
         except Exception as e:
             logger.error(
@@ -7429,7 +7434,8 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
                     object_id=validation_flow.id,
                 ).delete()
             transaction.on_commit(
-                lambda: send_validation_flow_created_notification(validation_flow)
+                lambda: send_validation_flow_created_notification(validation_flow),
+                robust=True,
             )
         except Exception as e:
             logger.error(
