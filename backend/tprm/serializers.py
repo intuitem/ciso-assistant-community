@@ -454,6 +454,7 @@ class EntityAssessmentReadSerializer(BaseModelSerializer):
     perimeter = FieldsRelatedField()
     entity = FieldsRelatedField()
     folder = FieldsRelatedField()
+    filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     solutions = FieldsRelatedField(many=True)
     representatives = FieldsRelatedField(many=True)
     authors = FieldsRelatedField(many=True)

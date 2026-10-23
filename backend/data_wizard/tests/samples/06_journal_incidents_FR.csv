@@ -1,0 +1,6 @@
+Réf,Incident,Description,Gravité,Statut,Détection,Domaine
+INC-0142,Phishing ciblé,Campagne visant la comptabilité,Majeure,Résolu,Interne,DEMO
+INC-0143,Perte d'un ordinateur portable,PC non chiffré oublié dans un train,Modérée,Clos,Interne,DEMO
+INC-0144,Fuite de données client,Fichier exposé sur un partage public,Critique,En cours,Externe,DEMO
+INC-0145,Indisponibilité du site,Saturation lors des soldes,Mineure,Nouveau,Interne,DEMO
+INC-0146,Compte compromis,Connexion depuis un pays inhabituel,Majeure,En cours,Interne,DSI Lyon
