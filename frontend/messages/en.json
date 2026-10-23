@@ -7399,6 +7399,8 @@
 	"piaLabelLegalBasis": "Legal basis:",
 	"piaOpinionFavourable": "favourable",
 	"piaOpinionUnfavourable": "unfavourable",
+	"thisDpia": "This DPIA",
+	"theMeasuresPicked": "The measures picked",
 	"questionAnsweredInResponses": "Responses have answered this question: it cannot be deleted",
 	"choiceSelectedInResponses": "Responses have selected this choice: it cannot be deleted",
 	"builderQuestionScaleMissing": "This scale is not defined on the form",
