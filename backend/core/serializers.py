@@ -3737,16 +3737,6 @@ class CampaignWriteSerializer(BaseModelSerializer):
         return super().create(validated_data)
 
 
-def _translate_implementation_groups(framework_data, framework) -> None:
-    """FieldsRelatedField copies the framework's raw JSON: swap in the names
-    and descriptions of the active language, as the framework endpoint does."""
-    if framework_data and framework is not None:
-        if framework.implementation_groups_definition:
-            framework_data["implementation_groups_definition"] = (
-                framework.get_implementation_groups_definition_translated()
-            )
-
-
 class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     path = PathField(read_only=True)
     perimeter = FieldsRelatedField(["id", "folder"])
@@ -3826,11 +3816,6 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
         from core.utils import build_initial_field_visibility
 
         return build_initial_field_visibility(obj.framework)
-
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        _translate_implementation_groups(data.get("framework"), instance.framework)
-        return data
 
     # Derived booleans, kept in the API for backwards compatibility. The actual
     # storage is `field_visibility`; clients that want to change these should
@@ -4484,10 +4469,6 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
         ca = getattr(instance, "compliance_assessment", None)
         if ca is None:
             return data
-
-        _translate_implementation_groups(
-            (data.get("compliance_assessment") or {}).get("framework"), ca.framework
-        )
 
         # Strip fields the viewer is not allowed to read. Resolve through the
         # cascade (CA overrides → DEFAULT_VISIBILITY → EVERYONE_EDIT) so that

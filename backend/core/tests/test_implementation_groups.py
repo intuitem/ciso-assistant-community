@@ -820,3 +820,43 @@ class TestImplementationGroupsTranslation:
         )
         data = ComplianceAssessmentReadSerializer(ca).data
         assert data["framework"]["implementation_groups_definition"] is None
+
+    def test_list_payload_translates_once_per_framework(self, translated_groups_setup):
+        """Every row nests the same framework: its groups are translated once
+        for the whole list, not once per requirement assessment."""
+        from unittest import mock
+
+        from core.serializers import RequirementAssessmentReadSerializer
+
+        ca, ra = translated_groups_setup
+        folder = Folder.get_root_folder()
+        for i in range(2, 5):
+            node = RequirementNode.objects.create(
+                framework=ca.framework,
+                urn=f"urn:test:ig-i18n:req:00{i}",
+                ref_id=f"R{i}",
+                assessable=True,
+                folder=folder,
+            )
+            RequirementAssessment.objects.create(
+                compliance_assessment=ca, requirement=node, folder=folder
+            )
+        translate = Framework.get_implementation_groups_definition_translated
+        rows = RequirementAssessment.objects.filter(compliance_assessment=ca)
+        with (
+            translation.override("en"),
+            mock.patch.object(
+                Framework,
+                "get_implementation_groups_definition_translated",
+                autospec=True,
+                side_effect=translate,
+            ) as spy,
+        ):
+            data = RequirementAssessmentReadSerializer(rows, many=True).data
+        assert spy.call_count == 1
+        assert {
+            row["compliance_assessment"]["framework"][
+                "implementation_groups_definition"
+            ][0]["name"]
+            for row in data
+        } == {"Essential group"}
