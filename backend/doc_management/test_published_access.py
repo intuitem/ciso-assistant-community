@@ -3,11 +3,12 @@ role somewhere reads the revision in force of Global documents, never drafts;
 domain documents stay behind the domain's own roles."""
 
 import pytest
+from django.core.files.uploadedfile import SimpleUploadedFile
 from knox.models import AuthToken
 from rest_framework.test import APIClient
 
 from core.startup import startup
-from doc_management.models import DocumentRevision
+from doc_management.models import DocumentAttachment, DocumentRevision, ManagedDocument
 from doc_management.serializers import ManagedDocumentWriteSerializer
 from iam.models import Folder, User, UserGroup, UserGroupCodename
 
@@ -117,6 +118,32 @@ class TestPublishedOnlyReader:
         assert client.get(f"{base}/{draft.id}/export-pdf/").status_code == 404
         assert client.get(f"{base}/{published}/diff/{draft.id}/").status_code == 403
         assert client.get(f"{base}/{published}/edit-history/").status_code == 403
+
+    def test_counts_do_not_reveal_drafts(self, setup):
+        client, doc = setup["employee"], setup["charter"]
+        container = client.get(f"/api/document-containers/{doc.container_id}/").json()
+        assert container["document_count"] is None
+        docs = client.get(f"/api/managed-documents/?container={doc.container_id}")
+        assert docs.json()["results"][0]["revision_count"] is None
+
+    def test_images_uploaded_for_a_later_draft_stay_hidden(self, setup):
+        client, doc = setup["employee"], setup["charter"]
+        img = DocumentAttachment.objects.create(
+            document=doc, file=SimpleUploadedFile("draft.png", b"\x89PNG\r\n")
+        )
+        resp = client.get(f"/api/document-attachments/{img.id}/file/")
+        assert resp.status_code == 403
+
+    def test_draft_default_locale_reports_no_status(self, setup):
+        # Readable through its published FR locale while the EN default is a draft.
+        en = _document(setup["root"], "Bilingual", published=False)
+        fr = ManagedDocument.objects.create(
+            container=en.container, locale="fr", default_locale=False, name="Bilingue"
+        )
+        DocumentRevision.objects.create(document=fr, content="fr").publish()
+        resp = setup["employee"].get(f"/api/document-containers/{en.container_id}/")
+        assert resp.status_code == 200
+        assert (resp.json()["status"], resp.json()["progress"]) == (None, None)
 
     def test_cannot_change_a_published_document(self, setup):
         client, container_id = setup["employee"], setup["charter"].container_id

@@ -12,23 +12,32 @@ export const load: PageServerLoad = async ({ params, fetch, locals }) => {
 	const res = await fetch(`${BASE_API_URL}/portals/${params.id}/`);
 	if (!res.ok) error(res.status === 404 ? 404 : 500, 'Portal not found');
 	const portal = await res.json();
-	const [publicDocuments, snapshots, rawFrameworks, rawQuickForms, rawActors, rawPublications] =
-		await Promise.all([
-			fetchAllPages(fetch, `${BASE_API_URL}/public-documents/`),
-			fetchAllPages(fetch, `${BASE_API_URL}/framework-snapshots/`),
-			fetchAllPages(fetch, `${BASE_API_URL}/frameworks/`),
-			(await locals.getFeatureFlags())?.quick_forms
-				? fetchAllPages(fetch, `${BASE_API_URL}/quick-forms/`)
-				: Promise.resolve([]),
-			(await locals.getFeatureFlags())?.quick_forms
-				? fetchAllPages(fetch, `${BASE_API_URL}/actors/?is_third_party=false`)
-				: Promise.resolve([]),
-			(await locals.getFeatureFlags())?.quick_forms
-				? fetchAllPages(fetch, `${BASE_API_URL}/quick-form-publications/`)
-				: Promise.resolve([])
-		]).catch((e) => {
-			error(e?.status ?? 500, 'Failed to load portal data');
-		});
+	const documentsEnabled = !!(await locals.getFeatureFlags())?.document_management;
+	const [
+		publicDocuments,
+		snapshots,
+		rawFrameworks,
+		rawQuickForms,
+		rawActors,
+		rawPublications,
+		catalogRes
+	] = await Promise.all([
+		fetchAllPages(fetch, `${BASE_API_URL}/public-documents/`),
+		fetchAllPages(fetch, `${BASE_API_URL}/framework-snapshots/`),
+		fetchAllPages(fetch, `${BASE_API_URL}/frameworks/`),
+		(await locals.getFeatureFlags())?.quick_forms
+			? fetchAllPages(fetch, `${BASE_API_URL}/quick-forms/`)
+			: Promise.resolve([]),
+		(await locals.getFeatureFlags())?.quick_forms
+			? fetchAllPages(fetch, `${BASE_API_URL}/actors/?is_third_party=false`)
+			: Promise.resolve([]),
+		(await locals.getFeatureFlags())?.quick_forms
+			? fetchAllPages(fetch, `${BASE_API_URL}/quick-form-publications/`)
+			: Promise.resolve([]),
+		documentsEnabled ? fetch(`${BASE_API_URL}/document-containers/catalog/`) : Promise.resolve(null)
+	]).catch((e) => {
+		error(e?.status ?? 500, 'Failed to load portal data');
+	});
 	const frameworks = rawFrameworks.map((f: any) => ({
 		id: f.id,
 		name: f.name,
@@ -56,11 +65,8 @@ export const load: PageServerLoad = async ({ params, fetch, locals }) => {
 		},
 		zod(PortalSettingsSchema)
 	);
-	const documentsEnabled = !!(await locals.getFeatureFlags())?.document_management;
-	// Published documents only: a tile must never point at something a reader cannot open.
-	const catalogRes = documentsEnabled
-		? await fetch(`${BASE_API_URL}/document-containers/catalog/`)
-		: null;
+	// The author's catalog: published documents only, but it can include domain documents
+	// the portal audience cannot open (they get a 404; hiding such tiles is a follow-up).
 	const documentCatalog: { id: string; name: string; ref_id: string; document_type: string }[] =
 		catalogRes?.ok
 			? (await catalogRes.json()).map((c: any) => ({

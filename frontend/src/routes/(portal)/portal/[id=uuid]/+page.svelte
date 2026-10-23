@@ -118,9 +118,11 @@
 		types?.length ? `?${types.map((t) => `type=${encodeURIComponent(t)}`).join('&')}` : '';
 	// No ?doc=: the reader opens the default language and offers the others.
 	const navigateHref = (t: PortalItem['target']) =>
-		t.model === 'documents' && t.document
-			? `/documents/${t.document}/read`
-			: `/${t.model}${typeQuery(t.document_types)}`;
+		t.model !== 'documents'
+			? `/${t.model}`
+			: t.document
+				? `/documents/${t.document}/read`
+				: `/documents${typeQuery(t.document_types)}`;
 
 	function trigger(item: PortalItem) {
 		if (openPortalExternal(item)) return;

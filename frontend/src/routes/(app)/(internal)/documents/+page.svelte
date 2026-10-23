@@ -105,7 +105,7 @@
 		</div>
 	</header>
 
-	{#if data.unpublishedCount > 0}
+	{#if canManage && data.unpublishedCount > 0}
 		<a
 			href="/document-containers"
 			class="flex items-center gap-3 rounded-xl border border-surface-200-800 bg-surface-50-950 px-4 py-3 text-sm transition-colors hover:border-primary-500/40"

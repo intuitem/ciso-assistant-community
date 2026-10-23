@@ -114,7 +114,7 @@
 </script>
 
 <div
-	class="overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-surface-950 {issue
+	class="rounded-xl border bg-white shadow-sm dark:bg-surface-950 {issue
 		? 'border-error-400 ring-1 ring-error-300/60'
 		: 'border-surface-200-800'}"
 >

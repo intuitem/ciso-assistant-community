@@ -3,7 +3,7 @@ read the revision in force of the documents in its folders, and nothing else
 (no drafts, pending revisions, edit history or diffs)."""
 
 from django.contrib.auth.models import Permission
-from django.db.models import Q
+from django.db.models import F, Q
 from rest_framework.permissions import SAFE_METHODS
 
 from core.permissions import RBACPermissions
@@ -26,7 +26,12 @@ PUBLISHED_FILTERS = {
     DocumentContainer: Q(documents__revisions__status=_PUBLISHED),
     ManagedDocument: Q(revisions__status=_PUBLISHED),
     DocumentRevision: Q(status=_PUBLISHED),
-    DocumentAttachment: Q(document__revisions__status=_PUBLISHED),
+    # One Q, so both conditions hit the same revision row: images uploaded after the
+    # publication belong to a later draft.
+    DocumentAttachment: Q(
+        document__revisions__status=_PUBLISHED,
+        created_at__lte=F("document__revisions__published_at"),
+    ),
 }
 
 
@@ -60,7 +65,9 @@ class PublishedReadMixin:
 
     def get_queryset(self):
         qs = super().get_queryset()
-        if self.request.method not in SAFE_METHODS:
+        if self.request.method not in SAFE_METHODS or self._user_can_view_all(
+            self.model
+        ):
             return qs
         return qs | self.model.objects.filter(
             id__in=published_only_ids(self.request.user, self.model)

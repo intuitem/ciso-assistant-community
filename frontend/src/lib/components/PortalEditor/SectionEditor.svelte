@@ -40,10 +40,10 @@
 </script>
 
 <section
-	class="overflow-hidden rounded-xl border border-l-4 border-surface-200-800 border-l-primary-500 bg-surface-50-950 shadow-sm"
+	class="rounded-xl border border-l-4 border-surface-200-800 border-l-primary-500 bg-surface-50-950 shadow-sm"
 >
 	<header
-		class="flex items-center gap-3 border-b border-surface-200-800 bg-surface-50-950 px-4 py-3"
+		class="flex items-center gap-3 rounded-tr-xl border-b border-surface-200-800 bg-surface-50-950 px-4 py-3"
 	>
 		<span
 			class="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-primary-500/10 text-primary-500"
@@ -81,7 +81,7 @@
 	</header>
 
 	<!-- Tinted well: tiles read as cards nested inside the group. -->
-	<div class="space-y-3 bg-surface-200-800/50 p-4">
+	<div class="space-y-3 rounded-br-xl bg-surface-200-800/50 p-4">
 		<!-- Keyed on the object: ids are optional, and unkeyed the per-tile form state
 		     would land on a neighbour when reordering. -->
 		{#each section.items as item, ii (item)}

@@ -70,7 +70,14 @@ class DocumentContainerReadSerializer(BaseModelSerializer):
             "hexcolor": lvl.hexcolor,
         }
 
+    def _published_only(self, obj):
+        request = self.context.get("request")
+        return bool(request) and not has_full_view(request, DocumentContainer, obj.id)
+
     def get_document_count(self, obj):
+        # Counts unpublished locales too, so it would reveal them.
+        if self._published_only(obj):
+            return None
         return len(obj.documents.all())
 
     def get_status(self, obj):
@@ -78,14 +85,26 @@ class DocumentContainerReadSerializer(BaseModelSerializer):
         document's current revision (falls back to any document)."""
         doc = self._default_doc(obj)
         if doc and doc.current_revision_id:
-            return doc.current_revision.status
+            status = doc.current_revision.status
+            # Published-only readers may reach a container through another locale
+            # while the default one is still a draft: never report draft state to them.
+            if status != DocumentRevision.Status.PUBLISHED and self._published_only(
+                obj
+            ):
+                return None
+            return status
         return None
 
     def get_progress(self, obj):
         """Rough completion percentage derived from the workflow status."""
         doc = self._default_doc(obj)
         if doc and doc.current_revision_id:
-            return self.STATUS_PROGRESS.get(doc.current_revision.status)
+            status = doc.current_revision.status
+            if status != DocumentRevision.Status.PUBLISHED and self._published_only(
+                obj
+            ):
+                return None
+            return self.STATUS_PROGRESS.get(status)
         return None
 
     def get_pending_revision(self, obj):
@@ -289,6 +308,9 @@ class ManagedDocumentReadSerializer(BaseModelSerializer):
         return obj.container.document_type if obj.container_id else None
 
     def get_revision_count(self, obj):
+        request = self.context.get("request")
+        if request and not has_full_view(request, ManagedDocument, obj.id):
+            return None
         return obj.revisions.count()
 
     def get_latest_draft(self, obj):
