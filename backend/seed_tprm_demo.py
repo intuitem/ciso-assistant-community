@@ -148,8 +148,9 @@ def fill_assessments(audit):
             f"Evidence sampled for Q2-Q3; control owner interviewed on "
             f"{(TODAY - timedelta(days=20 + i)).isoformat()}."
         )
-        ra.is_scored = True
-        ra.score = [4, 3, 1, 0][i % 4]
+        # Not applicable carries no score; the others stay on the 1-5 scale.
+        ra.is_scored = ra.result != "not_applicable"
+        ra.score = [4, 3, 1][i % 4] if ra.is_scored else None
         ra.save()
 
         for question in ra.requirement.questions.all():

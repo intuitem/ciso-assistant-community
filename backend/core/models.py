@@ -8707,7 +8707,11 @@ class RiskScenario(NameDescriptionMixin, FilteringLabelMixin, FolderMixin):
     @classmethod
     def get_default_ref_id(cls, risk_assessment: RiskAssessment):
         """return associated risk assessment id"""
-        scenarios_ref_ids = [x.ref_id for x in risk_assessment.risk_scenarios.all()]
+        scenarios_ref_ids = list(
+            cls.objects.filter(risk_assessment=risk_assessment).values_list(
+                "ref_id", flat=True
+            )
+        )
         nb_scenarios = len(scenarios_ref_ids) + 1
         candidates = [f"R.{i:02d}" for i in range(1, nb_scenarios + 1)]
         return next(x for x in candidates if x not in scenarios_ref_ids)

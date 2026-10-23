@@ -4525,10 +4525,14 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             ).exclude(id=instance.id).update(ebios_rm_study=None)
 
             instance.risk_matrix = instance.ebios_rm_study.risk_matrix
+            from ebios_rm.helpers import OPERATIONAL_SCENARIO_ORDER
+
             ebios_rm_study = EbiosRMStudy.objects.get(id=instance.ebios_rm_study.id)
             for operational_scenario in [
                 operational_scenario
-                for operational_scenario in ebios_rm_study.operational_scenarios.all()
+                for operational_scenario in ebios_rm_study.operational_scenarios.order_by(
+                    *OPERATIONAL_SCENARIO_ORDER
+                )
                 if operational_scenario.is_selected
             ]:
                 # Build comprehensive description from EBIOS RM components
@@ -4616,9 +4620,8 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                     risk_assessment=instance,
                     operational_scenario=operational_scenario,
                     name=operational_scenario.name,
-                    ref_id=operational_scenario.ref_id
-                    if operational_scenario.ref_id
-                    else RiskScenario.get_default_ref_id(instance),
+                    # EBIOS ref_ids are only unique per parent (AP.01 under every strategic scenario)
+                    ref_id=RiskScenario.get_default_ref_id(instance),
                     description="\n\n".join(description_parts),
                 )
                 if ff_is_enabled("inherent_risk"):
