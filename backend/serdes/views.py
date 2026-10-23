@@ -17,12 +17,13 @@ from rest_framework.views import APIView
 from core.pagination import CustomLimitOffsetPagination
 from core.models import EvidenceRevision
 from core.utils import compare_schema_versions
-from iam.models import User, Folder
+from iam.models import Folder
 from serdes.serializers import LoadBackupSerializer
 
 from django.db.models.signals import post_save
 from django.apps import apps
 from django.conf import settings
+from django.utils.module_loading import import_string
 from auditlog.context import disable_auditlog
 from django.core.files.base import ContentFile
 import hashlib
@@ -30,6 +31,25 @@ import hashlib
 logger = structlog.get_logger(__name__)
 
 GZIP_MAGIC_NUMBER = b"\x1f\x8b"
+
+
+def _reload_current_backup(current_backup: str) -> None:
+    """Put back the database content dumped before a restore attempt."""
+    sys.stdin = io.StringIO(current_backup)
+    management.call_command("flush", interactive=False)
+    management.call_command(
+        "loaddata",
+        "-",
+        format="json",
+        verbosity=0,
+        exclude=[
+            "contenttypes",
+            "auth.permission",
+            "sessions.session",
+            "iam.ssosettings",
+            "knox.authtoken",
+        ],
+    )
 
 
 class ExportBackupView(APIView):
@@ -148,21 +168,7 @@ class LoadBackupView(APIView):
             )
             # On failure, restore the original data.
             try:
-                sys.stdin = io.StringIO(current_backup)
-                management.call_command("flush", interactive=False)
-                management.call_command(
-                    "loaddata",
-                    "-",
-                    format="json",
-                    verbosity=0,
-                    exclude=[
-                        "contenttypes",
-                        "auth.permission",
-                        "sessions.session",
-                        "iam.ssosettings",
-                        "knox.authtoken",
-                    ],
-                )
+                _reload_current_backup(current_backup)
             except Exception as restore_error:
                 logger.error("Error restoring original backup", exc_info=restore_error)
                 return Response(
@@ -179,44 +185,26 @@ class LoadBackupView(APIView):
         finally:
             post_save.disconnect(fixture_callback)
 
-        # Enforce LICENSE_SEATS after successful restore
-        license_seats = getattr(settings, "LICENSE_SEATS", None)
-        if license_seats is not None:
-            editor_count = len(User.get_editors())
-            if editor_count > license_seats:
-                logger.error(
-                    "Backup exceeds license seats, rolling back",
-                    editor_count=editor_count,
-                    license_seats=license_seats,
-                )
-                try:
-                    sys.stdin = io.StringIO(current_backup)
-                    management.call_command("flush", interactive=False)
-                    management.call_command(
-                        "loaddata",
-                        "-",
-                        format="json",
-                        verbosity=0,
-                        exclude=[
-                            "contenttypes",
-                            "auth.permission",
-                            "sessions.session",
-                            "iam.ssosettings",
-                            "knox.authtoken",
-                        ],
-                    )
-                except Exception as restore_error:
-                    logger.error(
-                        "Error restoring original backup", exc_info=restore_error
-                    )
-                    return Response(
-                        {"error": "RestoreFailed"},
-                        status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    )
+        # Deployment-specific checks on the restored data (the enterprise build
+        # adds its license rules): the first one to object rolls the restore back.
+        for validator in settings.BACKUP_RESTORE_VALIDATORS:
+            error = import_string(validator)()
+            if error is None:
+                continue
+            logger.error(
+                "Restored backup rejected, rolling back",
+                validator=validator,
+                error=error,
+            )
+            try:
+                _reload_current_backup(current_backup)
+            except Exception as restore_error:
+                logger.error("Error restoring original backup", exc_info=restore_error)
                 return Response(
-                    {"error": "errorLicenseSeatsExceeded"},
-                    status=status.HTTP_400_BAD_REQUEST,
+                    {"error": "RestoreFailed"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 )
+            return Response({"error": error}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({}, status=status.HTTP_200_OK)
 

@@ -1,6 +1,8 @@
 import pytest
 from uuid import uuid4
 from django.contrib.auth.models import Permission
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -403,3 +405,46 @@ class TestUserGroupMembership:
 
         assert response.status_code == status.HTTP_200_OK
         assert builtin_group.user_set.filter(pk=target.pk).exists()
+
+
+@pytest.mark.django_db
+class TestUserGroupListQueries:
+    """UserGroupFilter sorts — and searches — every visible group by its folder
+    path on each list request, before pagination: the path must not cost a query
+    per group, or the eager user-groups picker pays it on every page."""
+
+    @staticmethod
+    def _add_domains(start: int, count: int) -> None:
+        root = Folder.get_root_folder()
+        for i in range(start, start + count):
+            domain = Folder.objects.create(
+                name=f"QD{i}",
+                parent_folder=root,
+                content_type=Folder.ContentType.DOMAIN,
+            )
+            subdomain = Folder.objects.create(
+                name=f"QD{i} sub",
+                parent_folder=domain,
+                content_type=Folder.ContentType.DOMAIN,
+            )
+            UserGroup.objects.create(name=f"QD{i} team", folder=subdomain)
+
+    @staticmethod
+    def _measure(client, url) -> tuple[int, int]:
+        client.get(url)  # warm caches the added folders invalidated
+        with CaptureQueriesContext(connection) as ctx:
+            response = client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        return len(ctx.captured_queries), response.json()["count"]
+
+    @pytest.mark.parametrize("query", ["", "?search=QD"])
+    def test_query_count_does_not_grow_with_groups(self, authenticated_client, query):
+        url = reverse("user-groups-list") + query
+        self._add_domains(0, 3)
+        baseline_queries, baseline_count = self._measure(authenticated_client, url)
+
+        self._add_domains(3, 10)
+        queries, count = self._measure(authenticated_client, url)
+
+        assert count > baseline_count
+        assert queries == baseline_queries

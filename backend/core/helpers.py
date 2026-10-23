@@ -9,7 +9,6 @@ from uuid import UUID
 # from icecream import ic
 from django.core.exceptions import NON_FIELD_ERRORS as DJ_NON_FIELD_ERRORS
 from django.core.exceptions import ValidationError as DjValidationError
-from django.conf import settings
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import ValidationError as DRFValidationError
@@ -1754,9 +1753,6 @@ def get_instance_metrics():
     nb_risk_assessments = RiskAssessment.objects.all().count()
     nb_risk_scenarios = RiskScenario.objects.all().count()
     nb_risk_acceptances = RiskAcceptance.objects.all().count()
-    nb_seats = getattr(settings, "LICENSE_SEATS", 0)
-    nb_editors = len(User.get_editors())
-    expiration = getattr(settings, "LICENSE_EXPIRATION", -1)
 
     created_at = int(Folder.get_root_folder().created_at.timestamp())
     last_login_dt = max(
@@ -1784,9 +1780,6 @@ def get_instance_metrics():
         "nb_risk_assessments": nb_risk_assessments,
         "nb_risk_scenarios": nb_risk_scenarios,
         "nb_risk_acceptances": nb_risk_acceptances,
-        "nb_seats": nb_seats,
-        "nb_editors": nb_editors,
-        "expiration": expiration,
         "created_at": created_at,
         "last_login": last_login,
     }

@@ -19,6 +19,7 @@ from global_settings.serializers import (
 )
 
 from core.models import CustomEmailTemplate, CustomWordTemplate, CustomDocHtmlTemplate
+from .license import NON_SEAT_PERMISSIONS, get_editors, seat_limit_reachable
 from .models import ClientSettings, LogEntryAction
 from auditlog.models import LogEntry
 from global_settings.serializers import (
@@ -64,16 +65,20 @@ class EditorPermissionMixin:
     @staticmethod
     def check_editor_permissions(instance, group):
         editor_prefixes = {"add_", "change_", "delete_"}
-        editors = User.get_editors()
         seats = settings.LICENSE_SEATS
 
         perms = [
             p
             for p in RoleAssignment.get_permissions(group)
-            if p not in User.NON_SEAT_PERMISSIONS
+            if p not in NON_SEAT_PERMISSIONS
         ]
         if any(perm.startswith(prefix) for prefix in editor_prefixes for perm in perms):
             logger.info("Adding editor permissions to user", user=instance, group=group)
+            # get_editors() scans every user, and this runs once per group of the
+            # submitted list: only pay for it when the limit can be reached.
+            if not seat_limit_reachable(seats):
+                return
+            editors = get_editors()
             if instance not in editors and len(editors) >= seats:
                 logger.error(
                     "License seats exceeded, cannot add editor user groups to user",
