@@ -31,6 +31,13 @@ class TestFolderRefIdFilter:
         response = authenticated_client.get(ENDPOINT, {"ref_id": "  dom.it "})
         assert _ids(response) == {str(folders.id)}
 
+    def test_matches_a_padded_value_stored_past_clean(
+        self, authenticated_client, folders
+    ):
+        Folder.objects.filter(pk=folders.pk).update(ref_id="\tDOM.IT ")
+        response = authenticated_client.get(ENDPOINT, {"ref_id": "dom.it"})
+        assert _ids(response) == {str(folders.id)}
+
     def test_partial_value_matches_nothing(self, authenticated_client, folders):
         response = authenticated_client.get(ENDPOINT, {"ref_id": "DOM"})
         assert _ids(response) == set()

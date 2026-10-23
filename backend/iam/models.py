@@ -272,13 +272,18 @@ class Folder(NameDescriptionMixin):
 
     @staticmethod
     def ref_id_in_use(ref_id: str, exclude_pk=None) -> bool:
-        """Whether another folder holds *ref_id*, compared as the unique index does."""
-        normalized = Lower(_trimmed_ref_id(Value(ref_id)))
+        """Whether another folder holds *ref_id*."""
         return (
-            Folder.objects.alias(normalized_ref_id=Lower(_trimmed_ref_id()))
-            .filter(normalized_ref_id=normalized)
+            Folder.filter_by_ref_id(Folder.objects.all(), ref_id)
             .exclude(pk=exclude_pk)
             .exists()
+        )
+
+    @staticmethod
+    def filter_by_ref_id(queryset: QuerySet[Folder], ref_id: str) -> QuerySet[Folder]:
+        """Folders of *queryset* holding *ref_id*, compared as the unique index does."""
+        return queryset.alias(normalized_ref_id=Lower(_trimmed_ref_id())).filter(
+            normalized_ref_id=Lower(_trimmed_ref_id(Value(ref_id)))
         )
 
     def _ref_id_taken_message(self) -> str:
