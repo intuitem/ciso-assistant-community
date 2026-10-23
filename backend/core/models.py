@@ -7994,7 +7994,7 @@ class Assessment(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         return super().save(*args, **kwargs)
 
 
-class RiskAssessment(Assessment):
+class RiskAssessment(Assessment, FilteringLabelMixin):
     risk_matrix = models.ForeignKey(
         RiskMatrix,
         on_delete=models.PROTECT,
@@ -9042,7 +9042,7 @@ def rescale_score(value, old_range, new_range, integer=True):
     return float(exact.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
 
 
-class ComplianceAssessment(Assessment):
+class ComplianceAssessment(Assessment, FilteringLabelMixin):
     class CalculationMethod(models.TextChoices):
         AVG = "average", "Average"
         SUM = "sum", "Sum"
