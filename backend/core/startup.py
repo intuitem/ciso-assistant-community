@@ -180,6 +180,7 @@ READER_PERMISSIONS_LIST = [
     "view_notification",
     "change_notification",
     "delete_notification",
+    "view_importmapping",
 ]
 
 BASELINE_READER_PERMISSIONS_LIST = [
@@ -233,6 +234,7 @@ BASELINE_READER_PERMISSIONS_LIST = [
     "view_requirementmappingset",
     # notifications
     "view_notification",
+    "view_importmapping",
 ]
 
 APPROVER_PERMISSIONS_LIST = [
@@ -841,6 +843,9 @@ ANALYST_PERMISSIONS_LIST = [
     "view_notification",
     "change_notification",
     "delete_notification",
+    "add_importmapping",
+    "view_importmapping",
+    "change_importmapping",
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
@@ -1391,6 +1396,10 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_notification",
     "change_notification",
     "delete_notification",
+    "add_importmapping",
+    "view_importmapping",
+    "change_importmapping",
+    "delete_importmapping",
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
@@ -2027,6 +2036,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_notification",
     "change_notification",
     "delete_notification",
+    "add_importmapping",
+    "view_importmapping",
+    "change_importmapping",
+    "delete_importmapping",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
