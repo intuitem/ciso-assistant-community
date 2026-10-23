@@ -113,9 +113,13 @@ def oauth2_config(env: Mapping[str, str], suffix: str, timeout: int) -> dict:
     return config
 
 
-# A tenant is a GUID or a verified domain name. Anything else cannot be part
-# of the token URL.
-_TENANT_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9.-]{0,252}$")
+# A tenant is a GUID or a verified domain name. The client credentials flow
+# accepts nothing else: the multi-tenant aliases (common, organizations,
+# consumers) are refused by Microsoft, so they are refused at startup.
+_TENANT_ID = re.compile(
+    r"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
+    r"|[A-Za-z0-9](?:[A-Za-z0-9-]{0,62}\.)+[A-Za-z0-9-]{1,63}"
+)
 
 
 def graph_problems(config: dict) -> list[str]:
@@ -125,7 +129,7 @@ def graph_problems(config: dict) -> list[str]:
     tenant = config.get("tenant_id")
     if not tenant:
         problems.append("EMAIL_GRAPH_TENANT_ID is required")
-    elif not _TENANT_ID.match(tenant):
+    elif len(tenant) > 253 or not _TENANT_ID.fullmatch(tenant):
         problems.append("EMAIL_GRAPH_TENANT_ID must be a tenant GUID or domain name")
     if not config.get("mailbox"):
         problems.append("EMAIL_HOST_USER (the mailbox to send as) is required")

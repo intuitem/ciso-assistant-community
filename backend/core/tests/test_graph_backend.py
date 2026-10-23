@@ -144,9 +144,33 @@ def test_missing_graph_variables_stop_startup(missing, expected):
         build_mailers(env)
 
 
-def test_tenant_cannot_carry_a_path():
+@pytest.mark.parametrize(
+    "tenant",
+    [
+        "evil.example/../x",
+        "common",
+        "organizations",
+        "consumers",
+        "contoso.onmicrosoft.com\n",
+        "-bad.example",
+        "x" * 254,
+    ],
+)
+def test_tenant_must_be_a_guid_or_a_domain(tenant):
     with pytest.raises(ValueError, match="tenant GUID or domain name"):
-        build_mailers({**GRAPH_ENV, "EMAIL_GRAPH_TENANT_ID": "evil.example/../x"})
+        build_mailers({**GRAPH_ENV, "EMAIL_GRAPH_TENANT_ID": tenant})
+
+
+@pytest.mark.parametrize(
+    "tenant", ["31537af4-6d77-4bb9-a681-d2394888ea26", "contoso.onmicrosoft.com"]
+)
+def test_tenant_guid_or_domain_is_accepted(tenant):
+    oauth2 = build_mailers({**GRAPH_ENV, "EMAIL_GRAPH_TENANT_ID": tenant})["default"][
+        "OPTIONS"
+    ]["oauth2"]
+    assert oauth2["token_url"] == (
+        f"https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token"
+    )
 
 
 def test_graph_rescue_behind_an_smtp_primary():
