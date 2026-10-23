@@ -3352,6 +3352,7 @@
 	"fileAcceptOnly": "Accepted files: {extensions}",
 	"object": "Object",
 	"dataWizardSelectFallbackDomain": "Select a fallback Domain (if not set on the file)",
+	"dataWizardFallbackDomainHelp": "Rows without a domain go here, and existing records are looked up in it to spot conflicts.",
 	"dataWizardSelectPerimeter": "Select a Perimeter",
 	"dataWizardUpdateExisting": "Update existing assessment",
 	"dataWizardCreateNewAssessment": "Create new",
@@ -7573,5 +7574,6 @@
 	"biaDependenciesDescription": "Dependencies of every asset assessed in this BIA, and the supporting assets that miss their objectives",
 	"mailerTransportGraph": "Microsoft Graph",
 	"mailerTenantId": "Tenant ID",
-	"mailerGraphHelp": "Mail is sent over HTTPS through Microsoft Graph: no SMTP host or port. The connection follows the HTTPS_PROXY environment variable. The application needs the Mail.Send permission, limited to this mailbox by an Exchange application access policy."
+	"mailerGraphHelp": "Mail is sent over HTTPS through Microsoft Graph: no SMTP host or port. The connection follows the HTTPS_PROXY environment variable. The application needs the Mail.Send permission, limited to this mailbox by an Exchange application access policy.",
+	"noQuestionnaireAttached": "No questionnaire attached"
 }

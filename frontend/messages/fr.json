@@ -3882,6 +3882,7 @@
 	"dataWizardLoadData": "Importer un fichier",
 	"dataWizardParsingResults": "Résultats de l'analyse :",
 	"dataWizardSelectFallbackDomain": "Sélectionnez un domaine de repli (si non défini dans le fichier)",
+	"dataWizardFallbackDomainHelp": "Les lignes sans domaine y sont rattachées, et les enregistrements existants y sont recherchés pour repérer les doublons.",
 	"dataWizardSelectFile": "Sélectionnez votre fichier et assurez-vous qu'il correspond aux modèles",
 	"dataWizardSelectFramework": "Sélectionnez un référentiel",
 	"dataWizardSelectPerimeter": "Sélectionnez un périmètre",
@@ -7570,5 +7571,6 @@
 	"mailerTestAllOk": "Tous les serveurs ont remis le message. Vous pouvez enregistrer.",
 	"mailerTestSomeFailed": "Au moins un serveur a échoué. Corrigez-le ou enregistrez en forçant.",
 	"mailerOutcomeNever": "Jamais tenté",
-	"mailerSendTestHelp": "Envoie un message via chaque serveur à votre propre adresse."
+	"mailerSendTestHelp": "Envoie un message via chaque serveur à votre propre adresse.",
+	"noQuestionnaireAttached": "Aucun questionnaire rattaché"
 }

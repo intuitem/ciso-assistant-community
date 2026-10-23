@@ -22,6 +22,7 @@ overrides:
   postcss: ^8.5.18
   source-map-js: ^1.2.2
   maplibre-gl: ^6.4.1
+  dompurify: ^3.4.17
 engineStrict: true
 allowBuilds:
   '@tailwindcss/oxide': true
