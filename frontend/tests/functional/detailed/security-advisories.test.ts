@@ -119,8 +119,9 @@ test.describe('Security Advisories', () => {
 			);
 			await syncBtn.click();
 			const res = await syncResponse;
-			// Live external dependency (cwe.mitre.org), not a regression signal.
-			test.skip(!res.ok(), `MITRE CWE feed unreachable (HTTP ${res.status()})`);
+			// 503 = cwe.mitre.org unreachable, an external outage.
+			test.skip(res.status() === 503, 'MITRE CWE feed unreachable');
+			expect(res.ok(), `CWE sync failed with HTTP ${res.status()}`).toBe(true);
 		});
 
 		await test.step('wait for CWE sync to complete and verify rows', async () => {
