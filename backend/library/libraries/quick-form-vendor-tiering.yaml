@@ -497,7 +497,7 @@ objects:
             fr:
               text: De quel accès le fournisseur dispose-t-il à vos systèmes ou à votre réseau ?
             it:
-              text: A quali risorse dei tuoi sistemi o della tua rete accede il fornitore?
+              text: Che livello di accesso alla tua infrastruttura ha il fornitore?
       translations:
         fr:
           name: Données, vie privée et sécurité
