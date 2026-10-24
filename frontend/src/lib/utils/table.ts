@@ -3912,6 +3912,7 @@ export const listViewFields = {
 			owner: {
 				component: AutocompleteSelect,
 				props: {
+					lazy: true,
 					optionsEndpoint: 'actors',
 					optionsLabelField: 'str',
 					label: 'owner',
