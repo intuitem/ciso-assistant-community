@@ -16,6 +16,7 @@ from django.utils.text import slugify
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import (
     FileUploadParser,
     FormParser,
@@ -34,6 +35,7 @@ from core.validators import validate_file_name, validate_file_size
 from core.views import BaseModelViewSet, GenericFilterSet
 from iam.models import RoleAssignment, Folder
 
+from .access import DocumentRBACPermissions, PublishedReadMixin, readable_ids
 from .models import (
     DocumentAttachment,
     DocumentContainer,
@@ -217,13 +219,14 @@ class DocumentContainerFilter(GenericFilterSet):
         ).distinct()
 
 
-class DocumentContainerViewSet(BaseModelViewSet):
+class DocumentContainerViewSet(PublishedReadMixin, BaseModelViewSet):
     """
     API endpoint that allows document containers (the language-independent
     identity of a managed document) to be viewed or edited.
     """
 
     model = DocumentContainer
+    permission_classes = [IsAuthenticated, DocumentRBACPermissions]
     filterset_class = DocumentContainerFilter
     search_fields = ["name", "ref_id"]
     serializers_module = "doc_management.serializers"
@@ -288,9 +291,7 @@ class DocumentContainerViewSet(BaseModelViewSet):
         """Computed doc-to-doc references for a container: outgoing (this links
         to) and incoming (linked from)."""
         container = self.get_object()
-        accessible = set(
-            RoleAssignment.get_viewable_object_ids(request.user, DocumentContainer)
-        )
+        accessible = readable_ids(request.user, DocumentContainer)
         outgoing = [
             {"id": str(r.target_container_id), "str": r.target_container.name}
             for r in container.outgoing_references.select_related("target_container")
@@ -595,12 +596,13 @@ class DocumentContainerViewSet(BaseModelViewSet):
         )
 
 
-class ManagedDocumentViewSet(BaseModelViewSet):
+class ManagedDocumentViewSet(PublishedReadMixin, BaseModelViewSet):
     """
     API endpoint that allows managed documents to be viewed or edited.
     """
 
     model = ManagedDocument
+    permission_classes = [IsAuthenticated, DocumentRBACPermissions]
     filterset_fields = [
         "container",
         "folder",
@@ -880,7 +882,7 @@ class ManagedDocumentViewSet(BaseModelViewSet):
         )
 
 
-class DocumentAttachmentViewSet(BaseModelViewSet):
+class DocumentAttachmentViewSet(PublishedReadMixin, BaseModelViewSet):
     """
     API endpoint for serving document attachment files.
     """
@@ -888,6 +890,7 @@ class DocumentAttachmentViewSet(BaseModelViewSet):
     http_method_names = ["get", "head", "options"]
 
     model = DocumentAttachment
+    permission_classes = [IsAuthenticated, DocumentRBACPermissions]
 
     @action(detail=True, methods=["get"])
     def file(self, request, pk=None):
@@ -897,9 +900,7 @@ class DocumentAttachmentViewSet(BaseModelViewSet):
         except ValueError, AttributeError:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-        object_ids_view = RoleAssignment.get_viewable_object_ids(
-            request.user, DocumentAttachment
-        )
+        object_ids_view = readable_ids(request.user, DocumentAttachment)
 
         if pk_uuid not in object_ids_view:
             return Response(status=status.HTTP_403_FORBIDDEN)
@@ -936,12 +937,13 @@ class DocumentAttachmentViewSet(BaseModelViewSet):
         )
 
 
-class DocumentRevisionViewSet(BaseModelViewSet):
+class DocumentRevisionViewSet(PublishedReadMixin, BaseModelViewSet):
     """
     API endpoint that allows document revisions to be viewed or edited.
     """
 
     model = DocumentRevision
+    permission_classes = [IsAuthenticated, DocumentRBACPermissions]
     filterset_fields = ["document", "status"]
     ordering = ["-version_number"]
     serializers_module = "doc_management.serializers"
@@ -953,9 +955,7 @@ class DocumentRevisionViewSet(BaseModelViewSet):
             pk_uuid = UUID(pk)
         except ValueError, AttributeError:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        object_ids_view = RoleAssignment.get_viewable_object_ids(
-            request.user, DocumentRevision
-        )
+        object_ids_view = readable_ids(request.user, DocumentRevision)
 
         if pk_uuid not in object_ids_view:
             return Response(status=status.HTTP_403_FORBIDDEN)
@@ -1351,11 +1351,9 @@ class DocumentRevisionViewSet(BaseModelViewSet):
             extensions=["tables", "fenced_code", "toc", "nl2br"],
         )
         content_html = _render_mermaid_blocks(content_html)
-        accessible_ids = RoleAssignment.get_viewable_object_ids(
-            user, DocumentAttachment
-        )
+        accessible_ids = readable_ids(user, DocumentAttachment)
 
-        content_html = mark_safe(self._inline_images(content_html, set(accessible_ids)))
+        content_html = mark_safe(self._inline_images(content_html, accessible_ids))
 
         author_name = str(revision.author) if revision.author else ""
         reviewer_name = (
