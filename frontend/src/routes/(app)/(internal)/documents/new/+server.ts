@@ -7,6 +7,7 @@ const LINK_FIELDS = [
 	'applied_controls',
 	'task_templates',
 	'processings',
+	'reviewers',
 	'filtering_labels'
 ] as const;
 

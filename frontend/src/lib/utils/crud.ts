@@ -1486,6 +1486,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'task_templates', urlModel: 'task-templates' },
 			{ field: 'processings', urlModel: 'processings' },
 			{ field: 'assets', urlModel: 'assets' },
+			{ field: 'reviewers', urlModel: 'actors', urlParams: 'is_third_party=false' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
 			{ field: 'classification', urlModel: 'classification-levels' }
 		],
@@ -1498,6 +1499,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'document_type' },
 			{ field: 'folder' },
 			{ field: 'classification' },
+			{ field: 'reviewers' },
 			{ field: 'policies' },
 			{ field: 'applied_controls' },
 			{ field: 'task_templates' },

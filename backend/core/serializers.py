@@ -326,6 +326,56 @@ class ReferentialSerializer(BaseModelSerializer):
         exclude = ["translations"]
 
 
+class AssignmentNotificationMixin:
+    """Notifies actors newly added to the fields of `assignment_notifications`
+    ({m2m field: notification type}) once the save commits.
+
+    Wraps save() rather than create()/update(), so it sees the final members even
+    when a subclass sets the m2m itself."""
+
+    assignment_notifications: dict[str, str] = {}
+
+    def save(self, **kwargs):
+        def members(instance, field):
+            return set(getattr(instance, field).values_list("id", flat=True))
+
+        before = (
+            {f: members(self.instance, f) for f in self.assignment_notifications}
+            if self.instance is not None
+            else {}
+        )
+        instance = super().save(**kwargs)
+        for field, notification_type in self.assignment_notifications.items():
+            added = members(instance, field) - before.get(field, set())
+            if added:
+                self._queue_assignment_notification(
+                    notification_type, instance, field, added
+                )
+        return instance
+
+    @staticmethod
+    def _queue_assignment_notification(notification_type, instance, field, added):
+        try:
+            from .tasks import send_object_assignment_notification
+
+            args = (
+                notification_type,
+                instance._meta.label_lower,
+                str(instance.pk),
+                field,
+                [str(i) for i in added],
+            )
+            transaction.on_commit(
+                lambda: send_object_assignment_notification(*args), robust=True
+            )
+        except Exception as e:
+            logger.error(
+                "Failed to queue assignment notification",
+                notification_type=notification_type,
+                error=e,
+            )
+
+
 class AssessmentReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
     perimeter = FieldsRelatedField(["id", "folder"])
@@ -601,7 +651,12 @@ class PerimeterImportExportSerializer(BaseModelSerializer):
         ]
 
 
-class RiskAssessmentWriteSerializer(BaseModelSerializer):
+class RiskAssessmentWriteSerializer(AssignmentNotificationMixin, BaseModelSerializer):
+    assignment_notifications = {
+        "authors": "object_assignment",
+        "reviewers": "object_review_assignment",
+    }
+
     genericcollection = serializers.PrimaryKeyRelatedField(
         source="genericcollection_set",
         many=True,
@@ -803,8 +858,13 @@ class IntegrationLinkSerializerMixin(serializers.Serializer):
 
 
 class AssetWriteSerializer(
-    IntegrationLinkSerializerMixin, CustomFieldsSerializerMixin, BaseModelSerializer
+    AssignmentNotificationMixin,
+    IntegrationLinkSerializerMixin,
+    CustomFieldsSerializerMixin,
+    BaseModelSerializer,
 ):
+    assignment_notifications = {"owner": "object_assignment"}
+
     ebios_rm_studies = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=EbiosRMStudy.objects.all(),
@@ -3391,7 +3451,9 @@ class EvidenceReadSerializer(BaseModelSerializer):
         fields = "__all__"
 
 
-class EvidenceWriteSerializer(BaseModelSerializer):
+class EvidenceWriteSerializer(AssignmentNotificationMixin, BaseModelSerializer):
+    assignment_notifications = {"owner": "object_assignment"}
+
     applied_controls = serializers.PrimaryKeyRelatedField(
         many=True, queryset=AppliedControl.objects.all(), required=False
     )
@@ -3470,6 +3532,7 @@ class EvidenceWriteSerializer(BaseModelSerializer):
     def update(self, instance, validated_data):
         # Track old folder before update
         old_folder_id = instance.folder_id
+        old_status = instance.status
         task_templates = validated_data.pop("task_templates", None)
 
         # Handle properly owner field cleaning
@@ -3485,7 +3548,34 @@ class EvidenceWriteSerializer(BaseModelSerializer):
                     folder=instance.folder
                 )
 
+            if instance.status != old_status and instance.status in (
+                Evidence.Status.APPROVED,
+                Evidence.Status.REJECTED,
+            ):
+                self._send_review_notification(instance)
+
         return instance
+
+    def _send_review_notification(self, evidence):
+        """Queue, after commit, the approved/rejected notice to the owners."""
+        try:
+            from .tasks import send_evidence_reviewed_notification
+
+            user = getattr(self.context.get("request"), "user", None)
+            actor_name = (
+                (f"{user.first_name} {user.last_name}".strip() or user.email)
+                if user and user.is_authenticated
+                else "System"
+            )
+            evidence_id, decision = evidence.id, str(evidence.status)
+            transaction.on_commit(
+                lambda: send_evidence_reviewed_notification(
+                    evidence_id, decision, actor_name
+                ),
+                robust=True,
+            )
+        except Exception as e:
+            logger.error("Failed to queue evidence review notification", error=e)
 
     def to_representation(self, instance):
         """Include link and attachment from the latest revision in the response"""
@@ -3617,7 +3707,11 @@ class OrganisationObjectiveReadSerializer(BaseModelSerializer):
         fields = "__all__"
 
 
-class OrganisationObjectiveWriteSerializer(BaseModelSerializer):
+class OrganisationObjectiveWriteSerializer(
+    AssignmentNotificationMixin, BaseModelSerializer
+):
+    assignment_notifications = {"assigned_to": "object_assignment"}
+
     applied_controls = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=AppliedControl.objects.all(),
@@ -4145,6 +4239,7 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
     def create(self, validated_data: Any):
         validated_data.pop("create_applied_controls_from_suggestions", None)
         authors_data = validated_data.get("authors", [])
+        reviewers_data = validated_data.get("reviewers", [])
 
         # Always merge the caller's partial field_visibility with code defaults
         # + framework template so the new CA is stored as a complete snapshot.
@@ -4160,6 +4255,10 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
         if authors_data:
             self._send_assignment_notifications(
                 assessment, [user.id for user in authors_data]
+            )
+        if reviewers_data:
+            self._send_reviewer_notifications(
+                assessment, [actor.id for actor in reviewers_data]
             )
 
         # Only apply default implementation groups if none were provided by the user
@@ -4179,6 +4278,7 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
     def update(self, instance, validated_data):
         # Track old authors, folder, and perimeter before update
         old_author_ids = set(instance.authors.values_list("id", flat=True))
+        old_reviewer_ids = set(instance.reviewers.values_list("id", flat=True))
         old_folder_id = instance.folder_id
 
         # Auto-lock when status changes to deprecated
@@ -4296,7 +4396,37 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
                     )
                 )
 
+            new_reviewer_ids = set(
+                updated_instance.reviewers.values_list("id", flat=True)
+            )
+            self._send_reviewer_notifications(
+                updated_instance, new_reviewer_ids - old_reviewer_ids
+            )
+
         return updated_instance
+
+    @staticmethod
+    def _send_reviewer_notifications(assessment, reviewer_ids):
+        """Queue, after commit, the notification to newly added reviewers."""
+        if not reviewer_ids:
+            return
+        try:
+            from .tasks import (
+                send_compliance_assessment_reviewer_assignment_notification,
+            )
+
+            assessment_id = assessment.id
+            reviewer_ids = [str(i) for i in reviewer_ids]
+            transaction.on_commit(
+                lambda: send_compliance_assessment_reviewer_assignment_notification(
+                    assessment_id, reviewer_ids
+                ),
+                robust=True,
+            )
+        except Exception as e:
+            logger.error(
+                "Failed to queue ComplianceAssessment reviewer notification", error=e
+            )
 
     def _send_assignment_notifications(self, assessment, author_ids):
         """Send assignment notifications to the specified authors"""
@@ -5991,7 +6121,14 @@ class SecurityExceptionReadSerializer(
         fields = "__all__"
 
 
-class FindingsAssessmentWriteSerializer(BaseModelSerializer):
+class FindingsAssessmentWriteSerializer(
+    AssignmentNotificationMixin, BaseModelSerializer
+):
+    assignment_notifications = {
+        "authors": "object_assignment",
+        "reviewers": "object_review_assignment",
+    }
+
     genericcollection = serializers.PrimaryKeyRelatedField(
         source="genericcollection_set",
         many=True,
@@ -6073,7 +6210,9 @@ class FindingsAssessmentReadSerializer(AssessmentReadSerializer):
         fields = "__all__"
 
 
-class FindingWriteSerializer(BaseModelSerializer):
+class FindingWriteSerializer(AssignmentNotificationMixin, BaseModelSerializer):
+    assignment_notifications = {"owner": "object_assignment"}
+
     # Reverse M2M (declared on TaskTemplate): DRF does not pick it up from Meta.
     task_templates = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=TaskTemplate.objects.all()
@@ -6569,15 +6708,57 @@ class IncidentWriteSerializer(BaseModelSerializer):
 
         return super().validate(attrs)
 
+    def create(self, validated_data):
+        owner_data = validated_data.get("owners", [])
+        incident = super().create(validated_data)
+
+        # Notify newly assigned owners
+        if owner_data:
+            self._send_assignment_notifications(
+                incident, [actor.id for actor in owner_data]
+            )
+
+        return incident
+
     def update(self, instance, validated_data):
         old_folder_id = instance.folder_id
+        old_owner_ids = set(instance.owners.values_list("id", flat=True))
         with transaction.atomic():
             updated_instance = super().update(instance, validated_data)
             if old_folder_id != updated_instance.folder_id:
                 TimelineEntry.objects.filter(incident=updated_instance).update(
                     folder=updated_instance.folder
                 )
+
+        # Notify only newly assigned owners
+        new_owner_ids = set(updated_instance.owners.values_list("id", flat=True))
+        newly_assigned_ids = new_owner_ids - old_owner_ids
+        if newly_assigned_ids:
+            self._send_assignment_notifications(
+                updated_instance, list(newly_assigned_ids)
+            )
+
         return updated_instance
+
+    def _send_assignment_notifications(self, incident, owner_ids):
+        """Send assignment notifications to the specified owners"""
+        if not owner_ids:
+            return
+
+        try:
+            from .tasks import send_incident_assignment_notification
+
+            # Pass IDs, not addresses: the task resolves recipients from the owners
+            # the incident still has when it runs. Defer until the transaction
+            # commits, so a rollback doesn't send spurious notifications.
+            incident_id = incident.id
+            owner_ids = [str(owner_id) for owner_id in owner_ids]
+            transaction.on_commit(
+                lambda: send_incident_assignment_notification(incident_id, owner_ids),
+                robust=True,
+            )
+        except Exception as e:
+            logger.error("Failed to send Incident assignment notification", error=e)
 
 
 class IncidentReadSerializer(IncidentWriteSerializer):
@@ -7066,7 +7247,10 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
         try:
             from core.tasks import send_validation_flow_created_notification
 
-            send_validation_flow_created_notification(instance)
+            # The task reloads the flow, so it must not run before the row is committed.
+            transaction.on_commit(
+                lambda: send_validation_flow_created_notification(instance), robust=True
+            )
         except Exception as e:
             logger.error(
                 "Failed to send validation flow creation notification",
@@ -7087,6 +7271,7 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
 
         request_user = self.context["request"].user
         old_folder_id = instance.folder_id
+        old_approver_id = instance.approver_id
 
         # Check if status is being modified
         if "status" in validated_data:
@@ -7211,6 +7396,9 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
                     )
 
             transaction.on_commit(_send_update_notification)
+            # A requester resubmitting already notified the (new) approver above.
+            if request_user != updated_instance.requester:
+                self._notify_new_approver(updated_instance, old_approver_id)
 
             return updated_instance
 
@@ -7222,7 +7410,39 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
                     folder=updated_instance.folder
                 )
 
+        self._notify_new_approver(updated_instance, old_approver_id)
         return updated_instance
+
+    @staticmethod
+    def _notify_new_approver(validation_flow, old_approver_id):
+        """A pending flow handed to another approver: ask the new one, and drop the
+        old one's request row, which no longer asks anything of them."""
+        if (
+            validation_flow.approver_id == old_approver_id
+            or not validation_flow.approver_id
+            or validation_flow.status != ValidationFlow.Status.SUBMITTED
+        ):
+            return
+        try:
+            from core.tasks import send_validation_flow_created_notification
+            from notifications.models import Notification
+
+            if old_approver_id:
+                Notification.objects.filter(
+                    recipient_id=old_approver_id,
+                    type="validation_flow_created",
+                    object_id=validation_flow.id,
+                ).delete()
+            transaction.on_commit(
+                lambda: send_validation_flow_created_notification(validation_flow),
+                robust=True,
+            )
+        except Exception as e:
+            logger.error(
+                "Failed to notify the new validation flow approver",
+                validation_flow_id=validation_flow.id,
+                error=e,
+            )
 
     def _manage_associated_objects_lock(
         self, validation_flow, old_status: str, new_status: str

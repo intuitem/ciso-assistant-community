@@ -2173,6 +2173,7 @@ export const DocumentContainerSchema = z.object({
 	task_templates: z.array(z.string().uuid()).optional().default([]),
 	processings: z.array(z.string().uuid()).optional().default([]),
 	assets: z.array(z.string().uuid()).optional().default([]),
+	reviewers: z.array(z.string().uuid()).optional().default([]),
 	filtering_labels: z.array(z.string()).optional().default([])
 });
 
