@@ -337,6 +337,9 @@ def fake_graph(monkeypatch):
     def handler(request):
         if request.url.host == "login.microsoftonline.com":
             return httpx.Response(200, json={"access_token": "tok", "expires_in": 3600})
+        if request.method == "HEAD":
+            # The backend's reachability probe when it opens.
+            return httpx.Response(405)
         sends.append(str(request.url))
         return httpx.Response(202)
 

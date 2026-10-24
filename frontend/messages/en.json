@@ -7574,7 +7574,7 @@
 	"biaDependenciesDescription": "Dependencies of every asset assessed in this BIA, and the supporting assets that miss their objectives",
 	"mailerTransportGraph": "Microsoft Graph",
 	"mailerTenantId": "Tenant ID",
-	"mailerGraphHelp": "Mail is sent over HTTPS through Microsoft Graph: no SMTP host or port. The connection follows the HTTPS_PROXY environment variable. The application needs the Mail.Send permission, limited to this mailbox by an Exchange application access policy.",
+	"mailerGraphHelp": "Mail is sent over HTTPS through Microsoft Graph: no SMTP host or port. The connection follows the HTTPS_PROXY environment variable. The application needs the Application Mail.Send role in Exchange RBAC for Applications, scoped to this mailbox, and no Mail.Send permission in Entra.",
 	"usage": "Usage",
 	"unused": "Unused",
 	"usedOnceOrTwice": "Used once or twice",

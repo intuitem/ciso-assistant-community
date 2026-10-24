@@ -5,10 +5,10 @@ an HTTP proxy, which SMTP cannot cross. The backend obtains a token with Entra
 client credentials through ``core.mail_oauth2`` and posts each message to the
 sending mailbox's ``sendMail`` endpoint.
 
-Obtaining the token is the "open" step: a token failure is an unreachable
-mailer and ``core.mailer`` fails over, exactly as for a refused SMTP
-connection. A request Graph rejects after that is final, like every other
-transport. The HTTP client follows the standard proxy environment variables
+Obtaining the token and reaching Graph is the "open" step: a token failure,
+or a Graph the network cannot reach, is an unreachable mailer and
+``core.mailer`` fails over, exactly as for a refused SMTP connection. A
+request Graph rejects after that is final, like every other transport. The HTTP client follows the standard proxy environment variables
 (``HTTPS_PROXY``, ``NO_PROXY``) and ``SSL_CERT_FILE``, like every other HTTPS
 call the backend makes.
 
@@ -106,12 +106,23 @@ class EmailBackend(BaseEmailBackend):
         """Obtain the token, then the HTTP client every message of the
         session is posted through, so a batch reuses one connection as an
         SMTP session does. Raises ``mail_oauth2.TokenError`` when the token
-        endpoint is unreachable or refuses: that is the failover point, as a
-        refused SMTP connection is."""
+        endpoint is unreachable or refuses, and the ``httpx`` error when
+        Graph cannot be reached: that is the failover point, as a refused
+        SMTP connection is."""
         if self._token is not None:
             return False
-        self._token = mail_oauth2.get_token(self.oauth2)
-        self._client = httpx.Client(timeout=self.timeout, transport=TRANSPORT)
+        token = mail_oauth2.get_token(self.oauth2)
+        client = httpx.Client(timeout=self.timeout, transport=TRANSPORT)
+        try:
+            # The token may come from the cache, so nothing so far proves
+            # Graph can be reached. Connect now, while failing over is still
+            # safe: any HTTP answer will do (Graph says 405), a transport
+            # error is an unreachable mailer. sendMail reuses the connection.
+            client.head(f"{self.graph_url}/")
+        except Exception:
+            client.close()
+            raise
+        self._token, self._client = token, client
         return True
 
     def close(self) -> None:

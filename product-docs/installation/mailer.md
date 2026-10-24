@@ -44,7 +44,7 @@ Rules enforced by the panel:
 * Every save notifies the other administrators by email, through the mailer that was active before the change, because whoever controls the mail server receives every password reset link.
 * The tab shows delivery health for every configured mailer: the last attempt, its outcome and whether failover reached it, or "never attempted". Testing the saved values refreshes it. The same rows are printed by `send_test_email`.
 
-The Microsoft 365 and Google Workspace buttons fill in the SMTP with OAuth values from the sections below; the tenant-side steps are the same. Microsoft Graph is the third entry of the transport list, not a button: the Microsoft 365 button configures SMTP with OAuth, not Graph. Choosing Graph replaces the encryption, host and port fields with the tenant ID; the mailbox goes in the username field, then the client ID and client secret. The tenant-side steps are those of the [Microsoft Graph section](#microsoft-graph-mail-over-https). A failed test shows the token endpoint's answer, for example `token endpoint answered 400: unauthorized_client ...` for a wrong client ID, or Graph's reply, for example `Graph replied 403 ErrorAccessDenied` when the access policy excludes the mailbox.
+The Microsoft 365 and Google Workspace buttons fill in the SMTP with OAuth values from the sections below; the tenant-side steps are the same. Microsoft Graph is the third entry of the transport list, not a button: the Microsoft 365 button configures SMTP with OAuth, not Graph. Choosing Graph replaces the encryption, host and port fields with the tenant ID; the mailbox goes in the username field, then the client ID and client secret. The tenant-side steps are those of the [Microsoft Graph section](#microsoft-graph-mail-over-https). A failed test shows the token endpoint's answer, for example `token endpoint answered 400: unauthorized_client ...` for a wrong client ID, or Graph's reply, for example `Graph replied 403 ErrorAccessDenied` when the application may not send as the mailbox.
 
 ### Checking the configuration
 
@@ -246,7 +246,13 @@ EMAIL_OAUTH2_CLIENT_SECRET=<client secret>
 On the tenant side:
 
 1. Register an application in Entra ID and create a client secret.
-2. Grant it the `Mail.Send` **application** permission and give admin consent. That permission is tenant-wide by default: a leaked secret could send as any mailbox.
-3. Limit it to the sending mailbox with an Exchange application access policy, for example `New-ApplicationAccessPolicy -AppId <client id> -PolicyScopeGroupId <mail-enabled group holding the mailbox> -AccessRight RestrictAccess`, and check it with `Test-ApplicationAccessPolicy`. SMTP AUTH can stay disabled.
+2. Do not grant `Mail.Send` in Entra: that application permission is tenant-wide, so a leaked secret could send as any mailbox. Grant it through Exchange RBAC for Applications with a management scope limited to the sending mailbox. Grants from Entra and Exchange add up, so an Entra grant would undo the scope. In Exchange Online PowerShell, with the object ID from the Enterprise applications page (not App registrations):
 
-Outbound HTTPS follows the standard proxy variables, `HTTPS_PROXY` and `NO_PROXY`, like every other HTTPS call the backend makes; an intercepting proxy's CA goes in `SSL_CERT_FILE` as described above. Token endpoint failures count as an unreachable mailer and the next configured mailer, if any, is tried. A rejected send is final and the error shows Graph's own answer, for example `Graph replied 403 ErrorAccessDenied` when the access policy excludes the mailbox. Attachments are not supported by this transport; the application does not send any.
+   ```powershell
+   New-ServicePrincipal -AppId <client id> -ObjectId <enterprise application object id> -DisplayName "CISO Assistant mail"
+   New-ManagementScope -Name "CISO Assistant mailbox" -RecipientRestrictionFilter "PrimarySmtpAddress -eq 'noreply@example.com'"
+   New-ManagementRoleAssignment -App <client id> -Role "Application Mail.Send" -CustomResourceScope "CISO Assistant mailbox"
+   ```
+3. Check it with `Test-ServicePrincipalAuthorization -Identity <client id> -Resource noreply@example.com`, which must report `InScope` true. The assignment can take up to two hours to apply to a running application. SMTP AUTH can stay disabled.
+
+Outbound HTTPS follows the standard proxy variables, `HTTPS_PROXY` and `NO_PROXY`, like every other HTTPS call the backend makes; an intercepting proxy's CA goes in `SSL_CERT_FILE` as described above. Token endpoint failures, and a Graph endpoint the network cannot reach (proxy refusal, timeout), count as an unreachable mailer and the next configured mailer, if any, is tried, even while a token is cached. A rejected send is final and the error shows Graph's own answer, for example `Graph replied 403 ErrorAccessDenied` when the application may not send as the mailbox. Attachments are not supported by this transport; the application does not send any.

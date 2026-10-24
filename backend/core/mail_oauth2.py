@@ -1,4 +1,5 @@
-"""OAuth 2.0 access tokens for SMTP authentication (SASL XOAUTH2).
+"""OAuth 2.0 access tokens for the mail transports: SMTP authentication
+(SASL XOAUTH2) and Microsoft Graph.
 
 The SMTP side of XOAUTH2 is one mechanism whoever issued the token. The token
 side is one of three standard grants:

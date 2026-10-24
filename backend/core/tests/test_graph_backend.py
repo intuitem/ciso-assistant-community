@@ -41,10 +41,14 @@ class FakeGraph:
 
     def __init__(self):
         self.token_requests = []
+        self.probes = 0
         self.sends = []
         self.expired_tokens = set()
         self.token_status = 200
         self.send_status = 202
+        # An httpx error class raised for every Graph request: nothing
+        # reaches Graph, as when it or the proxy is down.
+        self.graph_error = None
 
     def handler(self, request: httpx.Request) -> httpx.Response:
         if request.url.host == "login.microsoftonline.com":
@@ -63,6 +67,11 @@ class FakeGraph:
                     "expires_in": 3600,
                 },
             )
+        if self.graph_error is not None:
+            raise self.graph_error("unreachable", request=request)
+        if request.method == "HEAD":
+            self.probes += 1
+            return httpx.Response(405)
         token = request.headers["Authorization"].removeprefix("Bearer ")
         self.sends.append((str(request.url), token, json.loads(request.content)))
         if token in self.expired_tokens:
@@ -273,6 +282,27 @@ def test_token_failure_fails_over_to_the_rescue_mailer(settings, graph):
     mailer.send("S", "b", "a@tests.local")
     assert graph.sends == []
     assert [m.to for m in mail.outbox] == [["a@tests.local"]]
+
+
+@pytest.mark.parametrize("error", [httpx.ConnectError, httpx.ProxyError])
+def test_unreachable_graph_fails_over_with_a_cached_token(settings, graph, error):
+    """A cached token means open() needs no token request; it must still
+    find Graph unreachable before anything is handed over, or an outage
+    would fail every message until the token expires."""
+    configure(settings, rescue=LOCMEM)
+    mailer.send("first", "b", "a@tests.local")
+    graph.graph_error = error
+    mailer.send("second", "b", "b@tests.local")
+    assert len(graph.token_requests) == 1
+    assert [m.subject for m in mail.outbox] == ["second"]
+
+
+def test_a_session_probes_graph_once(settings, graph):
+    configure(settings)
+    with mailer.open_connection() as backend:
+        mailer.send("S1", "b", "a@tests.local", connection=backend)
+        mailer.send("S2", "b", "b@tests.local", connection=backend)
+    assert (graph.probes, len(graph.sends)) == (1, 2)
 
 
 def test_attachments_are_refused_before_anything_is_sent(settings, graph):
