@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 import structlog
 from django.conf import settings
 from django.contrib.auth.models import Permission
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 
 from iam.models import RoleAssignment, User
 
@@ -30,24 +30,19 @@ def effective_expiration(expiration_date: datetime) -> datetime:
     return expiration_date + LICENSE_GRACE_PERIOD
 
 
-def is_editor(user: User) -> bool:
-    permissions = RoleAssignment.get_permissions(user)
-    editor_prefixes = {"add_", "change_", "delete_"}
-    return any(
-        any(perm.startswith(prefix) for prefix in editor_prefixes)
-        for perm in permissions
-        if perm not in NON_SEAT_PERMISSIONS
-    )
-
-
-def get_editors() -> list[User]:
-    editor_permissions = Permission.objects.filter(
+def seat_permissions() -> QuerySet[Permission]:
+    """The permissions that make their holder an editor, taking a seat: every
+    write permission but NON_SEAT_PERMISSIONS."""
+    return Permission.objects.filter(
         Q(codename__startswith="add_")
         | Q(codename__startswith="change_")
         | Q(codename__startswith="delete_")
     ).exclude(codename__in=NON_SEAT_PERMISSIONS)
-    return list(
-        RoleAssignment.users_with_permission_anywhere(editor_permissions)
+
+
+def get_editors() -> QuerySet[User]:
+    return (
+        RoleAssignment.users_with_permission_anywhere(seat_permissions())
         .exclude(service_account__isnull=False)
         .filter(is_third_party=False)
     )
@@ -74,7 +69,7 @@ def check_restored_seats() -> str | None:
     seats = settings.LICENSE_SEATS
     if not seat_limit_reachable(seats):
         return None
-    editor_count = len(get_editors())
+    editor_count = get_editors().count()
     if editor_count > seats:
         logger.error(
             "Backup exceeds license seats",

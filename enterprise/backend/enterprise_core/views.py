@@ -389,13 +389,13 @@ class RoleViewSet(BaseModelViewSet):
             # before, it stays so after, and both editor scans can be skipped.
             check_seats = seat_limit_reachable(settings.LICENSE_SEATS)
             if check_seats:
-                editors_before = len(get_editors())
+                editors_before = get_editors().count()
 
             role = serializer.save()
             self._ensure_default_permissions(role)
 
             if check_seats:
-                editors_after = len(get_editors())
+                editors_after = get_editors().count()
                 if (
                     editors_after > editors_before
                     and editors_after > settings.LICENSE_SEATS
@@ -517,7 +517,7 @@ def get_build(request):
             "build": BUILD,
             "infrastructure": database_type,
             "licenseSeats": LICENSE_SEATS,
-            "availableSeats": LICENSE_SEATS - len(get_editors()),
+            "availableSeats": LICENSE_SEATS - get_editors().count(),
             "licenseExpiration": license_expiration,
             **disk_response,
         }

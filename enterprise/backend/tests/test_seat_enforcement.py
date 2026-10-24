@@ -5,9 +5,10 @@ import pytest
 from django.contrib.auth.models import Permission
 from django.test import override_settings
 
+from enterprise_core import license
 from global_settings.models import GlobalSettings
 from global_settings.utils import clear_feature_flags_cache
-from iam.models import Role, RoleAssignment, User, UserGroup
+from iam.models import Folder, Role, RoleAssignment, User, UserGroup
 
 SA_ENDPOINT = "/api/iam/service-accounts/"
 
@@ -50,6 +51,39 @@ class TestUserGroupSeatCheck:
 
         assert response.status_code == 200, response.content
         assert user.user_groups.filter(folder=domain).exists()
+
+    def test_one_editor_scan_for_all_submitted_groups(
+        self, admin_client, domain, monkeypatch
+    ):
+        other = Folder.objects.create(
+            parent_folder=Folder.get_root_folder(),
+            name="EE other domain",
+            content_type=Folder.ContentType.DOMAIN,
+            create_iam_groups=True,
+        )
+        Folder.create_default_ug_and_ra(other)
+        analysts = UserGroup.objects.filter(
+            folder__in=[domain, other], name="BI-UG-ANA"
+        )
+        user = User.objects.create_user("new@ee-tests.com")
+        scans = []
+
+        def counted_scan():
+            scans.append(1)
+            return license.get_editors()
+
+        monkeypatch.setattr("enterprise_core.serializers.get_editors", counted_scan)
+
+        # Two seats, for the admin and the new user: in reach, so checked.
+        with override_settings(LICENSE_SEATS=2):
+            response = admin_client.patch(
+                f"/api/users/{user.id}/",
+                {"user_groups": [str(group.id) for group in analysts]},
+                format="json",
+            )
+
+        assert response.status_code == 200, response.content
+        assert len(scans) == 1
 
 
 @pytest.mark.django_db

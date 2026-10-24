@@ -27,14 +27,14 @@ expiration_gauge = get_or_create_gauge(
 def status_fields() -> list[tuple[str, object]]:
     return [
         ("seats", settings.LICENSE_SEATS),
-        ("editors", len(get_editors())),
+        ("editors", get_editors().count()),
         ("expiration", settings.LICENSE_EXPIRATION),
     ]
 
 
 def update_metrics() -> None:
     nb_seats_gauge.set(settings.LICENSE_SEATS)
-    nb_editors_gauge.set(len(get_editors()))
+    nb_editors_gauge.set(get_editors().count())
     # Prometheus only has float64 gauges, so the expiration date becomes a UTC
     # timestamp, and -1 for unset/invalid dates.
     try:

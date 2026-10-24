@@ -13,7 +13,6 @@ from enterprise_core import instance_status
 from enterprise_core.license import (
     check_restored_seats,
     get_editors,
-    is_editor,
     seat_limit_reachable,
 )
 from iam.models import Role, RoleAssignment, User
@@ -38,14 +37,12 @@ class TestEditors:
     def test_reader_is_not_editor(self, domain):
         user = _user_with("reader@ee-tests.com", domain, READ)
 
-        assert not is_editor(user)
         assert user not in get_editors()
 
     def test_writer_is_editor(self, domain):
         user = _user_with("writer@ee-tests.com", domain, WRITE)
 
-        assert is_editor(user)
-        assert get_editors() == [user]
+        assert list(get_editors()) == [user]
 
     def test_non_seat_permissions_do_not_make_an_editor(self, domain):
         user = _user_with(
@@ -54,12 +51,12 @@ class TestEditors:
             READ + ["change_notification", "delete_notification"],
         )
 
-        assert not is_editor(user)
+        assert user not in get_editors()
 
     def test_third_parties_hold_no_seat(self, domain):
         _user_with("vendor@ee-tests.com", domain, WRITE, is_third_party=True)
 
-        assert get_editors() == []
+        assert not get_editors().exists()
 
 
 @pytest.mark.django_db

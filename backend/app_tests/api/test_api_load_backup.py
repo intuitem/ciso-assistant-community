@@ -300,6 +300,11 @@ def accept_restored_data():
     return None
 
 
+def crash_on_restored_data():
+    """BACKUP_RESTORE_VALIDATORS stub failing to run, as on a database error."""
+    raise RuntimeError("restore check crashed")
+
+
 @pytest.mark.django_db(transaction=True)
 class TestBackupRestoreValidators:
     """Deployments (e.g. the enterprise license rules) check restored data
@@ -328,6 +333,22 @@ class TestBackupRestoreValidators:
         # The state dumped before the restore is the one put back.
         assert len(reloaded) == 1
         assert "Domain Before Restore" in reloaded[0]
+
+    def test_crashing_check_rolls_the_restore_back(
+        self, authenticated_client, monkeypatch
+    ):
+        reloaded = []
+        monkeypatch.setattr("serdes.views._reload_current_backup", reloaded.append)
+        backup = create_mock_backup_data(include_enterprise=False)
+
+        with override_settings(
+            BACKUP_RESTORE_VALIDATORS=[f"{__name__}.crash_on_restored_data"]
+        ):
+            resp = send_backup_to_api(authenticated_client, backup)
+
+        assert resp.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+        assert resp.json() == {"error": "RestoreCheckFailed"}
+        assert len(reloaded) == 1
 
     def test_restore_kept_when_validators_accept(self, authenticated_client):
         backup = create_mock_backup_data(include_enterprise=False)

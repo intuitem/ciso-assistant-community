@@ -186,9 +186,18 @@ class LoadBackupView(APIView):
             post_save.disconnect(fixture_callback)
 
         # Deployment-specific checks on the restored data (the enterprise build
-        # adds its license rules): the first one to object rolls the restore back.
+        # adds its license rules): the first one to object rolls the restore back,
+        # and so does one that fails to run, since it cannot vouch for the data.
         for validator in settings.BACKUP_RESTORE_VALIDATORS:
-            error = import_string(validator)()
+            error_status = status.HTTP_400_BAD_REQUEST
+            try:
+                error = import_string(validator)()
+            except Exception as check_error:
+                logger.error(
+                    "Restore check failed", validator=validator, exc_info=check_error
+                )
+                error = "RestoreCheckFailed"
+                error_status = status.HTTP_500_INTERNAL_SERVER_ERROR
             if error is None:
                 continue
             logger.error(
@@ -204,7 +213,7 @@ class LoadBackupView(APIView):
                     {"error": "RestoreFailed"},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 )
-            return Response({"error": error}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": error}, status=error_status)
 
         return Response({}, status=status.HTTP_200_OK)
 
