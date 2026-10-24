@@ -3,12 +3,17 @@
 	import { page } from '$app/stores';
 	import {
 		InfraConfigSchema,
-		isIpOrCidr,
-		normalizeIpForCompare,
-		IP_INPUT_MAXLENGTH,
-		MAX_ALLOWED_IPS
+		MAX_ALLOWED_IPS,
+		MIN_MAX_FAILED_LOGIN_ATTEMPTS,
+		MAX_MAX_FAILED_LOGIN_ATTEMPTS,
+		MAX_TIME_WINDOW_SIZE,
+		MAX_BAN_TIME,
+		MAX_ABSOLUTE_BAN_TIME
 	} from '$lib/utils/infra-config';
-	import { superForm } from 'sveltekit-superforms/client';
+	import IpListInput from '$lib/components/Settings/IpListInput.svelte';
+	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
+	import NumberField from '$lib/components/Forms/NumberField.svelte';
+	import { superForm, type SuperForm } from 'sveltekit-superforms/client';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { getFlash } from 'sveltekit-flash-message';
 	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
@@ -22,7 +27,7 @@
 	let formEl: HTMLFormElement;
 	let confirmedEmpty = false;
 
-	const { form, enhance, submitting } = superForm(data.form, {
+	const superFormObject = superForm(data.form, {
 		dataType: 'json',
 		validators: zod(InfraConfigSchema),
 		// Keep the user on this tab after save: don't let SvelteKit re-apply the
@@ -58,47 +63,13 @@
 			}
 		}
 	});
-
-	let newIp = $state('');
-	let inputError = $state('');
+	const { form, enhance, submitting } = superFormObject;
+	// `Checkbox` and `NumberField` take a loosely typed form (same as the other settings forms).
+	const formProp = superFormObject as SuperForm<any>;
 
 	const allowedIps = $derived(($form.allowed_ips ?? []) as string[]);
-	const allowsAll = $derived(allowedIps.some((ip) => ['0.0.0.0/0', '::/0'].includes(ip.trim())));
-
-	function addIp() {
-		const ip = newIp.trim();
-		if (!ip) {
-			inputError = m.enterIpFirst();
-			return;
-		}
-		if (allowedIps.length >= MAX_ALLOWED_IPS) {
-			inputError = m.tooManyAllowedIps({ max: MAX_ALLOWED_IPS });
-			return;
-		}
-		if (!isIpOrCidr(ip)) {
-			inputError = m.invalidIpOrCidr();
-			return;
-		}
-		const norm = normalizeIpForCompare(ip);
-		if (allowedIps.some((existing) => normalizeIpForCompare(existing) === norm)) {
-			inputError = m.ipAlreadyAdded();
-			return;
-		}
-		$form.allowed_ips = [...allowedIps, ip];
-		newIp = '';
-		inputError = '';
-	}
-
-	function removeIp(index: number) {
-		$form.allowed_ips = allowedIps.filter((_, i) => i !== index);
-	}
-
-	function onKeydown(e: KeyboardEvent) {
-		if (e.key === 'Enter') {
-			e.preventDefault();
-			addIp();
-		}
-	}
+	const notRateLimitedIps = $derived(($form.not_rate_limited_ips ?? []) as string[]);
+	const proxyIps = $derived(($form.proxy_ips ?? []) as string[]);
 </script>
 
 <form
@@ -119,68 +90,91 @@
 			>
 		</h3>
 
-		<div class="flex items-start gap-2">
-			<div class="flex flex-col gap-1 w-full max-w-md">
-				<input
-					id="allowed-ip-input"
-					name="allowed-ip-input"
-					type="text"
-					bind:value={newIp}
-					onkeydown={onKeydown}
-					oninput={() => (inputError = '')}
-					placeholder={m.ipAddressOrCidr()}
-					aria-label={m.ipAddressOrCidr()}
-					aria-invalid={inputError ? 'true' : undefined}
-					aria-describedby={inputError ? 'allowed-ip-error' : undefined}
-					autocomplete="off"
-					maxlength={IP_INPUT_MAXLENGTH}
-					class="input font-mono {inputError ? 'border border-error-500' : ''}"
-					data-testid="allowed-ip-input"
-				/>
-				{#if inputError}
-					<span id="allowed-ip-error" class="text-error-500 text-xs">{inputError}</span>
-				{/if}
-			</div>
-			<button
-				type="button"
-				class="btn preset-tonal-primary-500"
-				onclick={addIp}
-				disabled={allowedIps.length >= MAX_ALLOWED_IPS}
-			>
-				<i class="fa-solid fa-plus mr-1"></i>
-				{m.add()}
-			</button>
+		<IpListInput
+			bind:ips={$form.allowed_ips}
+			idPrefix="allowed-ip"
+			allMatchWarning={m.allowsAllIpsWarning()}
+			emptyText={m.noAllowedIpsYet()}
+		/>
+	</div>
+
+	<div class="flex flex-col gap-3">
+		<h3 class="text-base font-semibold flex items-center gap-2">
+			<i class="fa-solid fa-gauge-high text-sm text-primary-500"></i>
+			{m.rateLimiting()}
+		</h3>
+		<span class="text-surface-600-400 text-sm">{m.rateLimitingDescription()}</span>
+
+		<div class="flex flex-col gap-4 max-w-md">
+			<Checkbox
+				form={formProp}
+				field="is_rate_limit_activated"
+				label={m.isRateLimitActivated()}
+				helpText={m.isRateLimitActivatedHelpText()}
+			/>
+			<NumberField
+				form={formProp}
+				field="max_failed_login_attempts"
+				label={m.maxFailedLoginAttempts()}
+				helpText={m.maxFailedLoginAttemptsHelpText()}
+				min={MIN_MAX_FAILED_LOGIN_ATTEMPTS}
+				max={MAX_MAX_FAILED_LOGIN_ATTEMPTS}
+				step={1}
+			/>
+			<NumberField
+				form={formProp}
+				field="time_window_size"
+				label={m.timeWindowSize()}
+				helpText={m.timeWindowSizeHelpText()}
+				min={1}
+				max={MAX_TIME_WINDOW_SIZE}
+				step={1}
+			/>
+			<NumberField
+				form={formProp}
+				field="ban_time"
+				label={m.banTime()}
+				helpText={m.banTimeHelpText({ max: MAX_ABSOLUTE_BAN_TIME })}
+				min={1}
+				max={MAX_BAN_TIME}
+				step={1}
+			/>
 		</div>
+	</div>
 
-		{#if allowsAll}
-			<p class="text-warning-700-300 text-sm flex items-center gap-2">
-				<i class="fa-solid fa-triangle-exclamation"></i>
-				{m.allowsAllIpsWarning()}
-			</p>
-		{/if}
+	<div class="flex flex-col gap-3">
+		<h3 class="text-base font-semibold flex items-center gap-2">
+			<i class="fa-solid fa-circle-check text-sm text-primary-500"></i>
+			{m.notRateLimitedIps()}
+			<span class="text-xs font-normal text-surface-500"
+				>({notRateLimitedIps.length}/{MAX_ALLOWED_IPS})</span
+			>
+		</h3>
+		<span class="text-surface-600-400 text-sm">{m.notRateLimitedIpsDescription()}</span>
 
-		{#if allowedIps.length > 0}
-			<div class="flex flex-wrap gap-2 max-h-64 overflow-y-auto" data-testid="allowed-ip-list">
-				{#each allowedIps as ip, i (ip)}
-					<span
-						class="badge preset-tonal-surface flex items-center gap-2 font-mono max-w-xs"
-						data-testid="allowed-ip-chip"
-					>
-						<span class="truncate">{ip}</span>
-						<button
-							type="button"
-							aria-label={m.removeIp({ ip })}
-							class="hover:text-error-500 cursor-pointer shrink-0"
-							onclick={() => removeIp(i)}
-						>
-							<i class="fa-solid fa-xmark"></i>
-						</button>
-					</span>
-				{/each}
-			</div>
-		{:else}
-			<p class="text-surface-500 italic">{m.noAllowedIpsYet()}</p>
-		{/if}
+		<IpListInput
+			bind:ips={$form.not_rate_limited_ips}
+			idPrefix="not-rate-limited-ip"
+			allMatchWarning={m.excludesAllIpsWarning()}
+			emptyText={m.noNotRateLimitedIpsYet()}
+		/>
+	</div>
+
+	<div class="flex flex-col gap-3">
+		<h3 class="text-base font-semibold flex items-center gap-2">
+			<i class="fa-solid fa-server text-sm text-primary-500"></i>
+			{m.proxyIps()}
+			<span class="text-xs font-normal text-surface-500">({proxyIps.length}/{MAX_ALLOWED_IPS})</span
+			>
+		</h3>
+		<span class="text-surface-600-400 text-sm">{m.proxyIpsDescription()}</span>
+
+		<IpListInput
+			bind:ips={$form.proxy_ips}
+			idPrefix="proxy-ip"
+			allMatchWarning={m.trustsAllProxiesWarning()}
+			emptyText={m.noProxyIpsYet()}
+		/>
 	</div>
 
 	<div>

@@ -3389,6 +3389,7 @@
 	"resetSecret": "시크릿 재설정",
 	"createWebhookEndpoint": "웹훅 엔드포인트 생성",
 	"loginFailed": "로그인 실패",
+	"ipBanned": "IP 차단됨 (속도 제한)",
 	"reports": "보고서",
 	"reportsDescription": "데이터를 기반으로 사용자 지정 보고서를 생성하고 관리합니다",
 	"doraSpecific": "DORA 전용",

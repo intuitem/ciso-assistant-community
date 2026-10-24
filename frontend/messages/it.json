@@ -1469,6 +1469,7 @@
 	"ruleOfThree": "Regola dei tre",
 	"ruleOfThreeDescription": "Applica la Regola dei tre per scalare i punteggi tra nuovi limiti",
 	"loginFailed": "Login fallito",
+	"ipBanned": "IP bannato (limitazione della frequenza)",
 	"expectedEvidence": "Evidenze attese",
 	"taskNodeLegacyEvidence": "Il campo di evidenza precedente è obsoleto. Le evidenze sono ora a livello di attività e condivise tra le occorrenze in attesa di revisioni.\n Per spostarle nelle evidenze attese o rimuoverle dall'occorrenza, usa i pulsanti",
 	"taskNodeNewEvidence": "Evidenze collegate globalmente all'attività e diffuse tra le occorrenze. Puoi aggiungere una revisione nella scheda 'Evidenze' qui sotto",

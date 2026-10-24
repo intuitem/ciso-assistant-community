@@ -8,7 +8,8 @@ import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch }) => {
-	let infraConfig: { allowed_ips: string[] } = { allowed_ips: [] };
+	// Empty config: `superValidate` fills the missing keys with the schema defaults.
+	let infraConfig: Record<string, unknown> = {};
 	try {
 		const response = await fetch(`${BASE_API_URL}/settings/infra-config/`);
 		if (response.ok) {
@@ -47,16 +48,20 @@ export const actions: Actions = {
 
 		if (!response.ok) {
 			const res: Record<string, any> = await response.json().catch(() => ({}));
-			// Collect human-readable messages: allowed_ips field errors first, then generic.
-			const raw: string[] = Array.isArray(res.allowed_ips)
-				? res.allowed_ips
-				: res.detail
-					? [res.detail]
-					: res.error
-						? Array.isArray(res.error)
-							? res.error
-							: [res.error]
-						: [];
+			// Collect human-readable messages: field errors first, then generic.
+			const fieldErrors: string[] = Object.keys(InfraConfigSchema.shape).flatMap((field) =>
+				Array.isArray(res[field]) ? res[field] : []
+			);
+			const raw: string[] =
+				fieldErrors.length > 0
+					? fieldErrors
+					: res.detail
+						? [res.detail]
+						: res.error
+							? Array.isArray(res.error)
+								? res.error
+								: [res.error]
+							: [];
 			const text = raw.map((msg) => safeTranslate(msg)).join(' ') || m.anErrorOccurred();
 			// Surfaced inline via $message in the page (no flash: with applyAction/
 			// invalidateAll disabled the flash cookie would otherwise show stale on

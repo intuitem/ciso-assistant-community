@@ -96,6 +96,7 @@ class LogEntryAction(IntEnum):
     DELETE = 2
     ACCESS = 3
     LOGIN_FAILED = 4
+    IP_BANNED = 5
 
     def to_string(self):
         LOG_ENTRY_ACTION_TRANSLATIONS: dict[LogEntryAction, str] = {
@@ -104,6 +105,7 @@ class LogEntryAction(IntEnum):
             LogEntryAction.DELETE: "delete",
             LogEntryAction.ACCESS: "access",
             LogEntryAction.LOGIN_FAILED: "loginFailed",
+            LogEntryAction.IP_BANNED: "ipBanned",
         }
         UNKNOWN_ACTION_TRANSLATION = "unknown"
         return LOG_ENTRY_ACTION_TRANSLATIONS.get(self, UNKNOWN_ACTION_TRANSLATION)

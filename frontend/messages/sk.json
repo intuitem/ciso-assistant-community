@@ -3689,6 +3689,7 @@
 	"resetSecret": "Obnoviť heslo/kľúč",
 	"createWebhookEndpoint": "Vytvoriť koncový bod webhooku",
 	"loginFailed": "Prihlásenie zlyhalo",
+	"ipBanned": "IP zablokovaná (obmedzenie počtu požiadaviek)",
 	"reports": "Reporty",
 	"reportsDescription": "Vytvárajte a spravujte vlastné prehľady na základe vašich údajov",
 	"doraSpecific": "Špecifické pre DORA",

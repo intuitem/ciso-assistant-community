@@ -49,10 +49,12 @@ spec:
           {{- end }}
           - name: ORIGIN
             value: {{ template "ciso-assistant.url" . }}
-          - name: PROTOCOL_HEADER
-            value: x-forwarded-proto
-          - name: HOST_HEADER
-            value: x-forwarded-host
+          {{- if .Values.ingress.enabled }}
+          - name: ADDRESS_HEADER
+            value: x-forwarded-for
+          - name: XFF_DEPTH
+            value: {{ .Values.frontend.config.xffDepth | quote }}
+          {{- end }}
           - name: PUBLIC_BACKEND_API_URL
             value: {{ include "ciso-assistant.backendApiUrl" . }}
           - name: PUBLIC_BACKEND_API_EXPOSED_URL

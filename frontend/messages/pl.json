@@ -4682,6 +4682,7 @@
 	"resetSecret": "Resetuj sekret",
 	"createWebhookEndpoint": "Utwórz punkt końcowy webhooka",
 	"loginFailed": "Logowanie nie powiodło się",
+	"ipBanned": "Adres IP zablokowany (ograniczanie liczby żądań)",
 	"reports": "Raporty",
 	"reportsDescription": "Generuj raporty niestandardowe na podstawie swoich danych i zarządzaj nimi",
 	"doraSpecific": "Specyficzne dla DORA",

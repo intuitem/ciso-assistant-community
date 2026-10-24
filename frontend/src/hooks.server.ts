@@ -339,6 +339,19 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 		}
 		request.headers.set('Accept-Language', currentLang);
 
+		try {
+			// (Note that `getClientAddress` is adaptater-depndant)
+			request.headers.set('X-Forwarded-For', event.getClientAddress());
+		} catch (error) {
+			// The above `getClientAddress` can fail if the `ADDRESS_HEADER`/`XFF_DEPTH` config can't resolve the IP.
+			// If so we use the real client's IP instead.
+			const clientAddress = event.platform?.req?.socket?.remoteAddress;
+			if (clientAddress !== undefined) {
+				request.headers.set('X-Forwarded-For', clientAddress);
+			}
+			logger.warning('getClientAddress failed, using socket address', { error, clientAddress });
+		}
+
 		const token = event.cookies.get('token');
 		const csrfToken = event.cookies.get('csrftoken');
 

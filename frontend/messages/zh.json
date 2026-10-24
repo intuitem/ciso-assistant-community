@@ -2660,6 +2660,7 @@
 	"resetSecret": "重置密钥",
 	"createWebhookEndpoint": "创建webhook端点",
 	"loginFailed": "登录失败",
+	"ipBanned": "IP 已封禁（速率限制）",
 	"doraSpecific": "DORA特定",
 	"ebiosRmDefaults": "快速关键性评估（EBIOS RM）",
 	"ebiosRmDefaultsHelpText": "在EBIOS RM工作坊3中创建利益相关者时使用的依赖性、渗透性、成熟度和信任的默认值",

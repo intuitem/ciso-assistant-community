@@ -835,7 +835,8 @@ export const FeatureFlagsSchema = z.object({
 	findings_from_requirements: z.boolean().optional(),
 	dora: z.boolean().optional(),
 	external_ratings: z.boolean().optional(),
-	jit_provisioning: z.boolean().optional()
+	jit_provisioning: z.boolean().optional(),
+	infra_config_management: z.boolean().optional()
 });
 
 export const PortalSettingsSchema = z.object({

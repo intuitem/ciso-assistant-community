@@ -1101,6 +1101,7 @@
 	"ruleOfThree": "Dreigesetz",
 	"ruleOfThreeDescription": "Wenden Sie das Dreigesetz an, um Punktzahlen zwischen neuen Grenzen zu skalieren",
 	"loginFailed": "Anmeldung fehlgeschlagen",
+	"ipBanned": "IP gesperrt (Ratenbegrenzung)",
 	"expectedEvidence": "Erwartete Nachweise",
 	"taskNodeLegacyEvidence": "Das alte Nachweisfeld ist veraltet. Nachweise befinden sich nun auf Aufgabenebene und werden für alle anstehenden Vorkommen gemeinsam verwendet.\n Verwenden Sie die Schaltflächen, um sie in erwartete Nachweise zu verschieben oder aus dem Vorkommen zu entfernen.",
 	"taskNodeNewEvidence": "Nachweise, die der gesamten Aufgabe zugeordnet und an ihre Termine vererbt werden. Sie können im Tab „Nachweise“ unten eine Nachweisversion hinzufügen.",

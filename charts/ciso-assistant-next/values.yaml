@@ -324,6 +324,8 @@ frontend:
   config:
     # -- Configure body size limit for uploads in bytes (unit suffix like K/M/G can be used)
     bodySizeLimit: "50M"
+    # -- How many proxies sit in front of the frontend, counted from the right of `X-Forwarded-For`, used to pick the real client address for login rate limiting (only used when `ingress.enabled`).
+    xffDepth: 1 # @schema minimum: 1
 
   # -- Set extra volumes for frontend
   extraVolumes: []
