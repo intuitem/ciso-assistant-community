@@ -122,6 +122,11 @@ def html_to_text(value) -> str:
     return re.sub(r"\n{3,}", "\n\n", "\n".join(lines)).strip()
 
 
+def _plain(value) -> str:
+    """The validation page's fields are plain textareas: a `<` there is text."""
+    return value.strip() if isinstance(value, str) else ""
+
+
 def _join(*parts) -> str:
     return "\n\n".join(p for p in parts if p)
 
@@ -253,12 +258,9 @@ def import_pia(response, processing, data, user, *, labels) -> dict:
         base = 300 + n * 10
         for offset, field in ((1, "impacts"), (2, "threats"), (3, "sources")):
             put(f"{page}:{field}", ", ".join(list_of(base + offset)))
-        titles = list_of(base + 4)
-        picked = [
-            controls_by_title[t.lower()]
-            for t in titles
-            if t.lower() in controls_by_title
-        ]
+        # Keyed like the measures: cut to a control's name length.
+        titles = [t[:200].lower() for t in list_of(base + 4)]
+        picked = [controls_by_title[t] for t in titles if t in controls_by_title]
         if len(picked) < len(titles):
             skipped.add("unmatchedMeasures")
         put(f"{page}:measures", [str(c.pk) for c in picked])
@@ -306,12 +308,12 @@ def import_pia(response, processing, data, user, *, labels) -> dict:
     )
     put(
         "validation:dpo_opinion",
-        _join(dpo_header, html_to_text(pia.get("dpo_opinion"))),
+        _join(dpo_header, _plain(pia.get("dpo_opinion"))),
     )
     if pia.get("concerned_people_searched_opinion") in (False, 0, "0", "false"):
         put(
             "validation:views_not_sought_reason",
-            html_to_text(pia.get("concerned_people_searched_content")),
+            _plain(pia.get("concerned_people_searched_content")),
         )
     else:
         people_header = ", ".join(
@@ -324,13 +326,13 @@ def import_pia(response, processing, data, user, *, labels) -> dict:
         )
         put(
             "validation:data_subject_views",
-            _join(people_header, html_to_text(pia.get("concerned_people_opinion"))),
+            _join(people_header, _plain(pia.get("concerned_people_opinion"))),
         )
     put(
         "validation:conditions",
         _join(
-            html_to_text(pia.get("applied_adjustments")),
-            html_to_text(pia.get("rejection_reason")),
+            _plain(pia.get("applied_adjustments")),
+            _plain(pia.get("rejection_reason")),
             "\n".join(action_plan),
         ),
     )

@@ -21,7 +21,8 @@ EXPORT = {
         "name": "Loyalty",
         "dpo_status": 1,
         "dpos_names": "Jo DPO",
-        "dpo_opinion": "<p>Fine with <strong>conditions</strong>.</p>",
+        # A plain textarea in the CNIL software, not rich text.
+        "dpo_opinion": "Fine with conditions <after the audit>.",
         "concerned_people_searched_opinion": False,
         "concerned_people_searched_content": "Panel too costly.",
         "applied_adjustments": "Encrypt backups.",
@@ -101,7 +102,9 @@ def test_import_pia_fills_a_draft_dpia(admin_client, processing, dpia_form):
     )
     assert answers[f"{a}:severity_justification"] == "Moderate"
     v = f"{P}:validation:question"
-    assert answers[f"{v}:dpo_opinion"] == "Jo DPO, favourable\n\nFine with conditions."
+    assert answers[f"{v}:dpo_opinion"] == (
+        "Jo DPO, favourable\n\nFine with conditions <after the audit>."
+    )
     assert answers[f"{v}:views_not_sought_reason"] == "Panel too costly."
     assert answers[f"{v}:conditions"] == (
         "Encrypt backups.\n\nRisks: illegitimate access to data — Audit"
@@ -194,8 +197,33 @@ def test_import_pia_writes_the_callers_labels(admin_client, processing, dpia_for
         "Responsabilités : Marketing owns it."
     )
     assert answers[f"{P}:validation:question:dpo_opinion"] == (
-        "Jo DPO, favorable\n\nFine with conditions."
+        "Jo DPO, favorable\n\nFine with conditions <after the audit>."
     )
+
+
+@pytest.mark.django_db
+def test_import_pia_links_a_long_measure_to_its_risks(
+    admin_client, processing, dpia_form
+):
+    # Longer than a control's name: cut the same way on both sides.
+    title = "Encryption " + "x" * 240
+    export = {
+        **EXPORT,
+        "answers": [{"reference_to": 324, "data": {"list": [title]}}],
+        "measures": [{"id": 7, "title": title}],
+    }
+    url = f"/api/privacy/processings/{processing.id}/import-pia/"
+    res = admin_client.post(
+        url, {"quick_form": str(dpia_form.id), "pia": export}, format="json"
+    )
+    assert res.status_code == 201, res.json()
+    assert "unmatchedMeasures" not in res.json()["skipped"]
+    control = AppliedControl.objects.get(folder=processing.folder, name=title[:200])
+    response = QuickFormResponse.objects.get(
+        id=res.json()["redirect"].rsplit("/", 1)[-1]
+    )
+    answers = build_answers_dict(response.answers.select_related("question"))
+    assert answers[f"{P}:illegitimate_access:question:measures"] == [str(control.id)]
 
 
 @pytest.mark.django_db

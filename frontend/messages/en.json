@@ -7401,6 +7401,7 @@
 	"piaOpinionUnfavourable": "unfavourable",
 	"thisDpia": "This DPIA",
 	"theMeasuresPicked": "The measures picked",
+	"invalidRequest": "Invalid request",
 	"questionAnsweredInResponses": "Responses have answered this question: it cannot be deleted",
 	"choiceSelectedInResponses": "Responses have selected this choice: it cannot be deleted",
 	"builderQuestionScaleMissing": "This scale is not defined on the form",

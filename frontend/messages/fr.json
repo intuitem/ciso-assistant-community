@@ -7401,6 +7401,7 @@
 	"piaOpinionUnfavourable": "défavorable",
 	"thisDpia": "Cette AIPD",
 	"theMeasuresPicked": "Les mesures retenues",
+	"invalidRequest": "Requête invalide",
 	"questionAnsweredInResponses": "Des réponses portent sur cette question : elle ne peut pas être supprimée",
 	"choiceSelectedInResponses": "Des réponses ont retenu ce choix : il ne peut pas être supprimé",
 	"builderQuestionScaleMissing": "Cette échelle n'est pas définie sur le formulaire",
