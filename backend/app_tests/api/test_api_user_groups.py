@@ -448,3 +448,30 @@ class TestUserGroupListQueries:
 
         assert count > baseline_count
         assert queries == baseline_queries
+
+
+@pytest.mark.django_db
+class TestUserGroupAutocomplete:
+    """Lazy user-group pickers search and hydrate through autocomplete and label
+    options with `name`: it must match the list's, not a built-in group's code."""
+
+    def test_builtin_group_named_as_in_list(self, authenticated_client):
+        domain = Folder.objects.create(
+            name="AC domain",
+            parent_folder=Folder.get_root_folder(),
+            content_type=Folder.ContentType.DOMAIN,
+            create_iam_groups=True,
+        )
+        Folder.create_default_ug_and_ra(domain)
+        group = UserGroup.objects.get(folder=domain, name="BI-UG-ANA")
+        query = f"?id={group.id}"
+
+        listed = authenticated_client.get(reverse("user-groups-list") + query)
+        completed = authenticated_client.get(
+            reverse("user-groups-autocomplete") + query
+        )
+
+        assert completed.status_code == status.HTTP_200_OK
+        name = completed.json()["results"][0]["name"]
+        assert name == listed.json()["results"][0]["name"] == str(group)
+        assert name != group.name

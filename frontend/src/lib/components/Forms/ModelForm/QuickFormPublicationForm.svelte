@@ -71,6 +71,7 @@
 	multiple
 	{form}
 	optionsEndpoint="user-groups"
+	lazy
 	field="audience_groups"
 	cacheLock={cacheLocks['audience_groups']}
 	bind:cachedValue={formDataCache['audience_groups']}

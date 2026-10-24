@@ -38,6 +38,7 @@
 		form={superform}
 		multiple
 		optionsEndpoint="user-groups"
+		lazy
 		field="audience_groups"
 		pathField="path"
 		label={m.audience()}
