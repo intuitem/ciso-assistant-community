@@ -16,7 +16,8 @@ export const GET: RequestHandler = async ({ fetch, params, url }) => {
 		subject: params.id
 	});
 	const res = await fetch(`${BASE_API_URL}/quick-forms/assess-options/?${query}`);
-	return json(res.ok ? await res.json() : []);
+	// A failed lookup keeps its status: the card tells it from "no form loaded".
+	return res.ok ? json(await res.json()) : json([], { status: res.status });
 };
 
 // Start (or resume) a screening of this processing through one of them.
