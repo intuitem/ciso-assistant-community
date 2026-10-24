@@ -205,6 +205,7 @@
 
 	function buildExportGroups(): ExportGroup[] {
 		const id = data.data.id;
+		const timeZone = encodeURIComponent(Intl.DateTimeFormat().resolvedOptions().timeZone);
 		return [
 			{
 				titleKey: 'incident',
@@ -213,14 +214,14 @@
 						titleKey: 'exportIncidentReport',
 						descriptionKey: 'exportIncidentReportDesc',
 						format: 'MD',
-						href: `/incidents/${id}/export/md`,
+						href: `/incidents/${id}/export/md?tz=${timeZone}`,
 						testId: 'export-option-md'
 					},
 					{
 						titleKey: 'exportIncidentReportPrintable',
 						descriptionKey: 'exportIncidentReportPrintableDesc',
 						format: 'PDF',
-						href: `/incidents/${id}/export/pdf`,
+						href: `/incidents/${id}/export/pdf?tz=${timeZone}`,
 						testId: 'export-option-pdf'
 					}
 				]

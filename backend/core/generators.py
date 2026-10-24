@@ -1,4 +1,5 @@
 import io
+from datetime import timezone, tzinfo
 from math import ceil
 
 import matplotlib
@@ -10,7 +11,7 @@ from docx.shared import Cm
 from docxtpl import InlineImage
 from library.helpers import get_referential_translation
 
-from .utils import is_field_visible_to
+from .utils import format_timestamp, is_field_visible_to
 
 from .models import (
     AppliedControl,
@@ -552,12 +553,8 @@ def findings_assessment_context(assessment, findings, lang="en"):
     }
 
 
-def _timestamp_str(value):
-    return value.strftime("%Y-%m-%d %H:%M:%S") if value else "-"
-
-
-def incident_context(incident, timeline_entries, lang="en"):
-    """Payload for the incident report.
+def incident_context(incident, timeline_entries, lang="en", tz: tzinfo = timezone.utc):
+    """Payload for the incident report, with every date shown in `tz`.
 
     The timeline is the substance: entries in chronological order, each keyed by
     its raw `entry_type` so the locale template supplies the label and the accent
@@ -569,7 +566,7 @@ def incident_context(incident, timeline_entries, lang="en"):
             {
                 "entry": entry.entry or "-",
                 "type_key": entry.entry_type or "observation",
-                "timestamp": _timestamp_str(entry.timestamp),
+                "timestamp": format_timestamp(entry.timestamp, tz),
                 "author": str(entry.author) if entry.author else "",
                 "observation": entry.observation or "",
                 "evidences": [e.name for e in entry.evidences.all()],
@@ -596,13 +593,14 @@ def incident_context(incident, timeline_entries, lang="en"):
             "entities": [e.name for e in incident.entities.all()],
             "assets": [a.name for a in incident.assets.all()],
             "threats": [t.name for t in incident.threats.all()],
-            "reported_at": _timestamp_str(incident.reported_at),
-            "occurred_at": _timestamp_str(incident.occurred_at),
-            "resolved_at": _timestamp_str(incident.resolved_at),
+            "reported_at": format_timestamp(incident.reported_at, tz),
+            "occurred_at": format_timestamp(incident.occurred_at, tz),
+            "resolved_at": format_timestamp(incident.resolved_at, tz),
         },
         "id": str(incident.id),
-        "date": now().strftime("%d/%m/%Y"),
-        "generated_at": now().strftime("%Y-%m-%d %H:%M:%S %Z"),
+        "date": now().astimezone(tz).strftime("%d/%m/%Y"),
+        "generated_at": f"{format_timestamp(now(), tz)} {tz}",
+        "timezone": str(tz),
         "counts": {
             "total": len(entries),
             "detection": counts.get("detection", 0),
