@@ -250,6 +250,13 @@ class LibraryDraftWriteSerializer(BaseModelSerializer):
                     raise serializers.ValidationError(
                         {field: "identityFrozenAfterPublication"}
                     )
+        packager = data.get("packager")
+        if (
+            packager is not None
+            and len(packager) > LibraryDraft.PACKAGER_MAX_LENGTH
+            and packager != getattr(self.instance, "packager", None)
+        ):
+            raise serializers.ValidationError({"packager": "packagerTooLong"})
         return data
 
     def create(self, validated_data):
