@@ -69,6 +69,11 @@ class TestSeatLimit:
         User.objects.create_user(
             email="tp@ee-tests.com", password="password", is_third_party=True
         )
+        inactive = User.objects.create_user(
+            email="gone@ee-tests.com", password="password"
+        )
+        inactive.is_active = False
+        inactive.save()
 
         assert seat_limit_reachable(1)
         assert seat_limit_reachable(2)

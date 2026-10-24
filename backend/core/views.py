@@ -1178,7 +1178,19 @@ def get_optimized_object_data(queryset):
         return {}
 
     path_results = {}
-    folders = {f.id: f for f in Folder.objects.all()}
+    # Only the objects' folders and their ancestors, from the closure table
+    # get_folder_full_path also relies on, not the whole Folder table.
+    folder_ids = {
+        getattr(obj, "folder_id", None) or getattr(obj, "parent_folder_id", None)
+        for obj in initial_objects
+    } - {None}
+    folders = {
+        f.id: f
+        for f in Folder.objects.filter(
+            Q(id__in=folder_ids)
+            | Q(id__in=Folder.objects.filter(descendants__in=folder_ids).values("id"))
+        )
+    }
     for obj in initial_objects:
         path = []
         if getattr(obj, "folder_id", None):

@@ -57,7 +57,7 @@ def seat_limit_reachable(seats: int) -> bool:
     users: for them every seat check costs this one COUNT."""
     return (
         User.objects.exclude(service_account__isnull=False)
-        .filter(is_third_party=False)
+        .filter(is_active=True, is_third_party=False)
         .count()
         >= seats
     )

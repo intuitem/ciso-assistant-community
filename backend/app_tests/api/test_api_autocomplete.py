@@ -259,3 +259,42 @@ class TestLightweightAutocompletePayloads:
         large = _query_count(authenticated_client, url, {"limit": 12})
 
         assert large == small
+
+
+@pytest.mark.django_db
+class TestOptimizedObjectData:
+    def test_paths_read_only_the_needed_folders(self):
+        """Folder paths come from the objects' folders and their ancestors,
+        not from the whole Folder table."""
+        from core.views import get_optimized_object_data
+        from django.db.models.signals import post_init
+
+        root = Folder.get_root_folder()
+        domain = Folder.objects.create(
+            name="Paths A", parent_folder=root, content_type=Folder.ContentType.DOMAIN
+        )
+        subdomain = Folder.objects.create(
+            name="Paths B",
+            parent_folder=domain,
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        for i in range(3):
+            Folder.objects.create(
+                name=f"Unrelated {i}",
+                parent_folder=root,
+                content_type=Folder.ContentType.DOMAIN,
+            )
+        threat = Threat.objects.create(name="Nested", folder=subdomain)
+        loaded = []
+
+        def record(sender, instance, **kwargs):
+            loaded.append(instance.id)
+
+        post_init.connect(record, sender=Folder)
+        try:
+            data = get_optimized_object_data([threat])
+        finally:
+            post_init.disconnect(record, sender=Folder)
+
+        assert [p["id"] for p in data["paths"][threat.id]] == [domain.id, subdomain.id]
+        assert set(loaded) == {root.id, domain.id, subdomain.id}
