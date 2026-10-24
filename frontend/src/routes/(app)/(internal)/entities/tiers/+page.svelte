@@ -17,6 +17,7 @@
 		rank: number;
 		hexcolor: string;
 		is_visible: boolean;
+		compliance_target: number | null;
 		builtin: boolean;
 		entities_count: number;
 		solutions_count?: number;
@@ -95,7 +96,12 @@
 				const detail =
 					result.type === 'failure' ? (result.data?.error as Record<string, any>) : undefined;
 				const message =
-					detail?.error ?? detail?.detail ?? detail?.name?.[0] ?? detail?.rank?.[0] ?? undefined;
+					detail?.error ??
+					detail?.detail ??
+					detail?.name?.[0] ??
+					detail?.rank?.[0] ??
+					detail?.compliance_target?.[0] ??
+					undefined;
 				toastStore.trigger({
 					message: message ? safeTranslate(String(message)) : m.anErrorOccurred(),
 					background: 'preset-filled-error-500'
@@ -297,6 +303,38 @@
 										>{m.entitiesCountLabel({ count: tier.entities_count })}</span
 									>
 								</a>
+
+								{#if canEdit}
+									<label
+										class="flex items-center gap-1.5 text-sm text-surface-600-400"
+										title={m.complianceTargetHelp()}
+									>
+										<span class="whitespace-nowrap">{m.complianceTarget()}</span>
+										<input
+											type="number"
+											min="0"
+											max="100"
+											step="1"
+											class="input w-20 px-2 py-1 text-sm tabular-nums"
+											value={tier.compliance_target ?? ''}
+											placeholder="—"
+											disabled={busy}
+											data-testid="tier-compliance-target"
+											onchange={(e) => {
+												const raw = e.currentTarget.value.trim();
+												const value = raw === '' ? null : Number(raw);
+												if (value !== tier.compliance_target)
+													update(tier, { compliance_target: value });
+											}}
+										/>
+										<span aria-hidden="true">%</span>
+									</label>
+								{:else if tier.compliance_target != null}
+									<span class="text-sm text-surface-600-400 whitespace-nowrap">
+										{m.complianceTarget()}
+										<span class="font-semibold tabular-nums">{tier.compliance_target}%</span>
+									</span>
+								{/if}
 
 								{#if canEdit}
 									<button
