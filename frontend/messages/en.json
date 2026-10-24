@@ -4492,6 +4492,7 @@
 	"testConnection": "Test Connection",
 	"connectionSuccessful": "Connection Successful",
 	"connectionFailed": "Connection Failed",
+	"reenterSecretToTestModifiedConnection": "Re-enter the secret to test a modified connection",
 	"overlapWithOtherFrameworks": "Overlap with other frameworks",
 	"showOverlapWithOtherFrameworks": "Show overlap with other frameworks",
 	"spPrivateKeyAlreadySetHelpText": "A private key has already been set. For security reasons, you cannot view it again. You can only replace it with a new one.",

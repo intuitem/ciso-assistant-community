@@ -105,3 +105,21 @@ def test_rejects_backfill_through_a_different_provider():
 def test_no_config_leaves_credentials_untouched():
     data = _validate({"server_url": "https://anywhere.example"}, config=None)
     assert data["credentials"] == {"server_url": "https://anywhere.example"}
+
+
+def test_ignores_stale_empty_stored_keys():
+    # Older saves wrote ``password: None`` into Jira rows; it is not a secret to
+    # replay and must not block testing a rotated token.
+    class StaleConfig(StubConfig):
+        credentials = {**STORED, "password": None}
+
+    data = _validate(
+        {
+            "server_url": STORED["server_url"],
+            "email": STORED["email"],
+            "api_token": "rotated",
+        },
+        config=StaleConfig(),
+    )
+    assert data["credentials"]["api_token"] == "rotated"
+    assert "password" not in data["credentials"]

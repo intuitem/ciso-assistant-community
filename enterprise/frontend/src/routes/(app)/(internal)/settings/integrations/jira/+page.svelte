@@ -12,6 +12,7 @@
 	import { m } from '$paraglide/messages';
 	import { page } from '$app/state';
 	import LoadingSpinner from '$lib/components/utils/LoadingSpinner.svelte';
+	import { safeTranslate } from '$lib/utils/i18n';
 
 	interface Props {
 		data: PageData;
@@ -71,10 +72,43 @@
 
 	let showApiTokenField = $state(!data?.config?.has_api_token);
 	let showWebhookSecretField = $state(!data?.config?.has_webhook_secret);
-	let testConnectionState: { loading: boolean; success?: boolean } = $state({
+	let testConnectionState: { loading: boolean; success?: boolean; detail?: string } = $state({
 		loading: false,
 		success: undefined
 	});
+
+	// The test-connection proxy forwards backend error bodies as a JSON-encoded
+	// string. Pull out the first useful reason so a validation or permission
+	// error is not shown as a plain "connection failed".
+	async function describeTestFailure(response: Response): Promise<string> {
+		let body: unknown;
+		try {
+			body = await response.json();
+			if (typeof body === 'string') body = JSON.parse(body);
+		} catch {
+			return '';
+		}
+		if (!body || typeof body !== 'object') return '';
+		const errors = body as Record<string, unknown>;
+		const firstString = (...values: unknown[]) =>
+			values.flat().find((v): v is string => typeof v === 'string');
+		// These carry frontend message keys.
+		const messageKey = firstString(
+			errors.credentials,
+			errors.configuration_id,
+			errors.provider,
+			errors.detail
+		);
+		if (messageKey) return safeTranslate(messageKey);
+		// Provider schema errors are plain text from the backend, shown as-is.
+		const providerError = firstString(errors.provider_specific_errors);
+		if (providerError) return providerError;
+		// status "failure" means the provider rejected the credentials, which the
+		// generic label already says; "error" means the request itself blew up
+		// (network, URL, SSRF guard) and is worth telling apart, in the UI locale.
+		if (errors.status === 'error') return m.anErrorOccurred();
+		return '';
+	}
 </script>
 
 {#key page.data}
@@ -168,7 +202,11 @@
 										configuration_id: page.data?.config?.id
 									})
 								});
-								testConnectionState = { loading: false, success: response.ok };
+								testConnectionState = {
+									loading: false,
+									success: response.ok,
+									detail: response.ok ? '' : await describeTestFailure(response)
+								};
 							}}>{m.testConnection()}</button
 						>
 						<div class="flex items-center">
@@ -177,7 +215,11 @@
 							{:else if testConnectionState.success === true}
 								<span class="text-success-700-300 font-semibold">{m.connectionSuccessful()}</span>
 							{:else if testConnectionState.success === false}
-								<span class="text-error-500 font-semibold">{m.connectionFailed()}</span>
+								<span class="text-error-500 font-semibold"
+									>{m.connectionFailed()}{testConnectionState.detail
+										? `: ${testConnectionState.detail}`
+										: ''}</span
+								>
 							{/if}
 						</div>
 					</span>
