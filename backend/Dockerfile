@@ -25,8 +25,8 @@ RUN apt-get update \
   libharfbuzz0b \
   libfontconfig1 \
   libfreetype6 \
-  # pinned: DHI's 1.1.0-2+dhi2 outranks the fixed +deb13u1 (CVE-2026-111497), drop once DHI ships a higher fixed build
-  libbrotli1=1.1.0-2+deb13u1 \
+  # pinned: DHI's unfixed 1.1.0-2+dhi2 outranks its fixed +deb13u1+dhi0 (CVE-2026-111497), drop once DHI ships a higher fixed build
+  libbrotli1=1.1.0-2+deb13u1+dhi0 \
   libstdc++6 \
   zlib1g \
   libffi8 \
