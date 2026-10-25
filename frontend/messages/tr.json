@@ -1989,7 +1989,7 @@
 	"detectedAt": "Tespit tarihi",
 	"detectedAtHelpText": "Zafiyetin keşfedildiği zaman. SLA kapalı değilse varsayılan olarak bugündür. Politika tespit tarihine ayarlandığında SLA başlangıç noktası olarak kullanılır.",
 	"remediatedAt": "Giderme tarihi",
-	"remediatedAtHelpText": "Zafiyetin çözüldüğü güne (hafifletilmiş, düzeltilmiş, istismar edilemez veya etkilenmemiş) ayarlanır; bir tarih girerseniz o kullanılır. Yeniden açıldığında temizlenir.",
+	"remediatedAtHelpText": "Zafiyetin çözüldüğü güne (hafifletilmiş, düzeltilmiş, istismar edilemez veya etkilenmemiş) ayarlanır; bir tarih girerseniz o kullanılır. Yeniden açıldığında korunur.",
 	"vulnerabilityOpenForDays": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
@@ -2788,5 +2788,7 @@
 	"dpiaRequiredNo": "DPIA gerekmez",
 	"dpiaRequirementChange": "DPIA gerekliliği değişikliği",
 	"dpiaRequirementChanges": "DPIA gerekliliği geçmişi",
-	"previously": "Önceden"
+	"previously": "Önceden",
+	"vulnerabilityOpenWithRemediationDate": "Açık zafiyetin giderme tarihi var",
+	"vulnerabilityResolvedWithoutRemediationDate": "Çözülmüş zafiyetin giderme tarihi yok"
 }

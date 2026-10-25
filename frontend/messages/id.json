@@ -1419,7 +1419,7 @@
 	"detectedAt": "Tanggal terdeteksi",
 	"detectedAtHelpText": "Kapan kerentanan ditemukan. Bawaannya hari ini, kecuali SLA dinonaktifkan. Digunakan sebagai acuan SLA saat kebijakan diatur ke tanggal terdeteksi.",
 	"remediatedAt": "Tanggal remediasi",
-	"remediatedAtHelpText": "Diatur ke hari kerentanan diselesaikan (dimitigasi, diperbaiki, tidak dapat dieksploitasi, atau tidak terdampak), kecuali Anda memasukkan tanggal sendiri. Dihapus saat dibuka kembali.",
+	"remediatedAtHelpText": "Diatur ke hari kerentanan diselesaikan (dimitigasi, diperbaiki, tidak dapat dieksploitasi, atau tidak terdampak), kecuali Anda memasukkan tanggal sendiri. Tetap disimpan saat dibuka kembali.",
 	"vulnerabilityOpenForDays": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
@@ -2321,5 +2321,7 @@
 	"dpiaRequiredNo": "DPIA tidak diperlukan",
 	"dpiaRequirementChange": "Perubahan persyaratan DPIA",
 	"dpiaRequirementChanges": "Riwayat persyaratan DPIA",
-	"previously": "Sebelumnya"
+	"previously": "Sebelumnya",
+	"vulnerabilityOpenWithRemediationDate": "Kerentanan terbuka memiliki tanggal remediasi",
+	"vulnerabilityResolvedWithoutRemediationDate": "Kerentanan yang selesai tidak memiliki tanggal remediasi"
 }

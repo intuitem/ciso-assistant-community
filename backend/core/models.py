@@ -7801,7 +7801,8 @@ class Vulnerability(
         NOTEXPLOITABLE = "not_exploitable", _("Not exploitable")
         UNAFFECTED = "unaffected", _("Unaffected")
 
-    # Statuses that close a vulnerability: no SLA clock, a remediation date.
+    # Statuses that close a vulnerability: no SLA clock, and reaching one fills in
+    # an empty remediation date.
     RESOLVED_STATUSES = frozenset(
         {Status.MITIGATED, Status.FIXED, Status.NOTEXPLOITABLE, Status.UNAFFECTED}
     )
@@ -7892,15 +7893,16 @@ class Vulnerability(
             if old and old["severity"] != self.severity:
                 severity_changed = True
             was_resolved = bool(old) and old["status"] in self.RESOLVED_STATUSES
-        # The remediation date follows the status: set on the day it becomes
-        # resolved, unless one was entered, and cleared when it is reopened.
-        remediated_at = self.remediated_at
-        if self.status not in self.RESOLVED_STATUSES:
-            self.remediated_at = None
-        elif not was_resolved and not self.remediated_at:
+        # The remediation date is the user's: when the status becomes resolved
+        # without one, it is today; it is never cleared, reopening included.
+        if (
+            self.status in self.RESOLVED_STATUSES
+            and not was_resolved
+            and not self.remediated_at
+        ):
             self.remediated_at = date.today()
-        if update_fields is not None and self.remediated_at != remediated_at:
-            update_fields.add("remediated_at")
+            if update_fields is not None:
+                update_fields.add("remediated_at")
         sla_policy = (
             self.get_active_sla_policy() if is_new or severity_changed else None
         )

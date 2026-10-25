@@ -3274,7 +3274,7 @@
 	"detectedAt": "Fecha de detección",
 	"detectedAtHelpText": "Cuándo se descubrió la vulnerabilidad. Por defecto, hoy, salvo que el SLA esté desactivado. Se usa como referencia del SLA cuando la política se basa en la fecha de detección.",
 	"remediatedAt": "Fecha de remediación",
-	"remediatedAtHelpText": "Se fija en el día en que la vulnerabilidad se resuelve (mitigada, corregida, no explotable o no afectada), salvo que indique una. Se borra cuando se reabre.",
+	"remediatedAtHelpText": "Se fija en el día en que la vulnerabilidad se resuelve (mitigada, corregida, no explotable o no afectada), salvo que indique una. Se conserva cuando se reabre.",
 	"vulnerabilityOpenForDays": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
@@ -3923,5 +3923,7 @@
 	"dpiaRequiredNo": "EIPD no requerida",
 	"dpiaRequirementChange": "Cambio del requisito de EIPD",
 	"dpiaRequirementChanges": "Historial del requisito de EIPD",
-	"previously": "Anteriormente"
+	"previously": "Anteriormente",
+	"vulnerabilityOpenWithRemediationDate": "Vulnerabilidad abierta con fecha de remediación",
+	"vulnerabilityResolvedWithoutRemediationDate": "Vulnerabilidad resuelta sin fecha de remediación"
 }

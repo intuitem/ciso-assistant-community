@@ -1234,6 +1234,8 @@
 	"appliedControlNoStatus": "Az alkalmazott kontrollnak nincs állapota",
 	"taskTemplateNoAssignee": "A feladatnak nincs felelőse",
 	"taskNodeOverdue": "A feladat-előfordulás határideje lejárt",
+	"vulnerabilityOpenWithRemediationDate": "Nyitott sérülékenységnek van javítási dátuma",
+	"vulnerabilityResolvedWithoutRemediationDate": "Megoldott sérülékenységnek nincs javítási dátuma",
 	"evidenceNoFile": "A bizonyítékhoz nincs fájl feltöltve",
 	"requirementAppliedControlHelpText": "A kiválasztott alkalmazott kontrollokhoz kapcsolódó bizonyítékok automatikusan hozzárendelődnek a követelményhez.",
 	"requirementEvidenceHelpText": "Ezen a lapon további bizonyítékokat adhat hozzá a követelményhez.",
@@ -3054,7 +3056,7 @@
 	"batchChangeSeverity": "Súlyosság módosítása",
 	"detectedAtHelpText": "A sérülékenység észlelésének időpontja. Alapértelmezés szerint a mai nap, kivéve, ha az SLA ki van kapcsolva. Ez az SLA kiindulópontja, ha a szabály az észlelés dátumára van állítva.",
 	"remediatedAt": "Javítás dátuma",
-	"remediatedAtHelpText": "Arra a napra áll be, amikor a sérülékenység megoldódik (csökkentve, javítva, nem kihasználható vagy nem érintett), hacsak nem ad meg dátumot. Újranyitáskor törlődik.",
+	"remediatedAtHelpText": "Arra a napra áll be, amikor a sérülékenység megoldódik (csökkentve, javítva, nem kihasználható vagy nem érintett), hacsak nem ad meg dátumot. Újranyitáskor megmarad.",
 	"vulnerabilityOpenForDays": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],

@@ -3370,7 +3370,7 @@
 	"changeSeverity": "Změnit závažnost",
 	"detectedAtHelpText": "Kdy byla zranitelnost odhalena. Výchozí je dnes, pokud není SLA vypnuté. Slouží jako kotva pro SLA, když jsou zásady nastaveny na datum detekce.",
 	"remediatedAt": "Datum nápravy",
-	"remediatedAtHelpText": "Nastaví se na den, kdy je zranitelnost vyřešena (zmírněná, opravená, nezneužitelná nebo nedotčená), pokud datum nezadáte sami. Při opětovném otevření se vymaže.",
+	"remediatedAtHelpText": "Nastaví se na den, kdy je zranitelnost vyřešena (zmírněná, opravená, nezneužitelná nebo nedotčená), pokud datum nezadáte sami. Při opětovném otevření se zachová.",
 	"vulnerabilityOpenForDays": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
@@ -6850,5 +6850,7 @@
 	"dpiaRequiredNo": "DPIA se nevyžaduje",
 	"dpiaRequirementChange": "Změna požadavku na DPIA",
 	"dpiaRequirementChanges": "Historie požadavku na DPIA",
-	"previously": "Dříve"
+	"previously": "Dříve",
+	"vulnerabilityOpenWithRemediationDate": "Otevřená zranitelnost má datum nápravy",
+	"vulnerabilityResolvedWithoutRemediationDate": "Vyřešená zranitelnost nemá datum nápravy"
 }

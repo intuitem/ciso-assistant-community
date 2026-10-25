@@ -1221,7 +1221,7 @@
 	"detectedAt": "Upptäcktsdatum",
 	"detectedAtHelpText": "När sårbarheten upptäcktes. Standard är i dag, om inte SLA är avstängt. Används som SLA-ankare när policyn är inställd på upptäcktsdatum.",
 	"remediatedAt": "Åtgärdsdatum",
-	"remediatedAtHelpText": "Sätts till dagen då sårbarheten löses (mildrad, åtgärdad, inte exploaterbar eller inte påverkad), om du inte själv anger ett datum. Rensas när den öppnas igen.",
+	"remediatedAtHelpText": "Sätts till dagen då sårbarheten löses (mildrad, åtgärdad, inte exploaterbar eller inte påverkad), om du inte själv anger ett datum. Behålls när den öppnas igen.",
 	"vulnerabilityOpenForDays": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
@@ -2184,5 +2184,7 @@
 	"dpiaRequiredNo": "Ingen DPIA krävs",
 	"dpiaRequirementChange": "Ändring av DPIA-krav",
 	"dpiaRequirementChanges": "Historik över DPIA-krav",
-	"previously": "Tidigare"
+	"previously": "Tidigare",
+	"vulnerabilityOpenWithRemediationDate": "Öppen sårbarhet har ett åtgärdsdatum",
+	"vulnerabilityResolvedWithoutRemediationDate": "Löst sårbarhet saknar åtgärdsdatum"
 }

@@ -2482,7 +2482,7 @@
 	"detectedAt": "Dátum detekcie",
 	"detectedAtHelpText": "Dátum zistenia zraniteľnosti. Predvolene je nastavený na dnešný deň, pokiaľ nie je SLA vypnuté. Používa sa ako referenčný dátum SLA, ak je politika nastavená na dátum zistenia.",
 	"remediatedAt": "Dátum nápravy",
-	"remediatedAtHelpText": "Nastaví sa na deň, keď je zraniteľnosť vyriešená (zmiernená, opravená, nezneužiteľná alebo neovplyvnená), pokiaľ dátum nezadáte sami. Pri opätovnom otvorení sa vymaže.",
+	"remediatedAtHelpText": "Nastaví sa na deň, keď je zraniteľnosť vyriešená (zmiernená, opravená, nezneužiteľná alebo neovplyvnená), pokiaľ dátum nezadáte sami. Pri opätovnom otvorení sa zachová.",
 	"vulnerabilityOpenForDays": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
@@ -5897,5 +5897,7 @@
 	"dpiaRequiredNo": "DPIA nie je potrebné",
 	"dpiaRequirementChange": "Zmena požiadavky na DPIA",
 	"dpiaRequirementChanges": "História požiadaviek na DPIA",
-	"previously": "Predtým"
+	"previously": "Predtým",
+	"vulnerabilityOpenWithRemediationDate": "Otvorená zraniteľnosť má dátum nápravy",
+	"vulnerabilityResolvedWithoutRemediationDate": "Vyriešená zraniteľnosť nemá dátum nápravy"
 }

@@ -443,7 +443,7 @@
 	"batchChangeSeverity": "Modifier la gravité",
 	"detectedAtHelpText": "Date de découverte de la vulnérabilité. Aujourd'hui par défaut, sauf si le SLA est désactivé. Utilisée comme point d'ancrage SLA lorsque la politique est basée sur la date de détection.",
 	"remediatedAt": "Date de remédiation",
-	"remediatedAtHelpText": "Renseignée le jour où la vulnérabilité est résolue (atténuée, corrigée, non exploitable ou non affectée), sauf si vous en saisissez une. Effacée si elle est rouverte.",
+	"remediatedAtHelpText": "Renseignée le jour où la vulnérabilité est résolue (atténuée, corrigée, non exploitable ou non affectée), sauf si vous en saisissez une. Conservée si elle est rouverte.",
 	"vulnerabilityOpenForDays": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
@@ -1299,6 +1299,8 @@
 	"appliedControlNoStatus": "La mesure appliquée n'a pas de statut",
 	"taskTemplateNoAssignee": "La tâche n'est assignée à personne",
 	"taskNodeOverdue": "L'occurrence de tâche a dépassé son échéance",
+	"vulnerabilityOpenWithRemediationDate": "Vulnérabilité ouverte avec une date de remédiation",
+	"vulnerabilityResolvedWithoutRemediationDate": "Vulnérabilité résolue sans date de remédiation",
 	"evidenceNoFile": "Aucun fichier n'a été téléchargé pour les preuves",
 	"requirementAppliedControlHelpText": "Les preuves liées aux mesures sélectionnées seront automatiquement associées à l'exigence.",
 	"requirementEvidenceHelpText": "Cet onglet vous permet d'ajouter des preuves supplémentaires à l'exigence.",

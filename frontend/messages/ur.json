@@ -1199,7 +1199,7 @@
 	"detectedAt": "پتہ لگنے کی تاریخ",
 	"detectedAtHelpText": "کمزوری کب دریافت ہوئی۔ پہلے سے طے شدہ قدر آج ہے، جب تک SLA بند نہ ہو۔ جب پالیسی پتہ لگنے کی تاریخ پر سیٹ ہو تو SLA کے نقطۂ آغاز کے طور پر استعمال ہوتی ہے۔",
 	"remediatedAt": "تدارک کی تاریخ",
-	"remediatedAtHelpText": "کمزوری حل ہونے کے دن (تخفیف شدہ، درست شدہ، قابلِ استحصال نہیں یا غیر متاثرہ) پر سیٹ ہوتی ہے، جب تک آپ خود کوئی تاریخ درج نہ کریں۔ دوبارہ کھولنے پر صاف ہو جاتی ہے۔",
+	"remediatedAtHelpText": "کمزوری حل ہونے کے دن (تخفیف شدہ، درست شدہ، قابلِ استحصال نہیں یا غیر متاثرہ) پر سیٹ ہوتی ہے، جب تک آپ خود کوئی تاریخ درج نہ کریں۔ دوبارہ کھولنے پر برقرار رہتی ہے۔",
 	"vulnerabilityOpenForDays": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
@@ -2167,5 +2167,7 @@
 	"dpiaRequiredNo": "DPIA درکار نہیں",
 	"dpiaRequirementChange": "DPIA کی ضرورت میں تبدیلی",
 	"dpiaRequirementChanges": "DPIA کی ضرورت کا تاریخچہ",
-	"previously": "پہلے"
+	"previously": "پہلے",
+	"vulnerabilityOpenWithRemediationDate": "کھلی کمزوری کی تدارک کی تاریخ ہے",
+	"vulnerabilityResolvedWithoutRemediationDate": "حل شدہ کمزوری کی تدارک کی تاریخ نہیں ہے"
 }

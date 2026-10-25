@@ -1228,7 +1228,7 @@
 	"detectedAt": "Data detectării",
 	"detectedAtHelpText": "Când a fost descoperită vulnerabilitatea. Implicit astăzi, cu excepția cazului în care SLA-ul este dezactivat. Folosită ca punct de referință pentru SLA când politica este setată pe data detectării.",
 	"remediatedAt": "Data remedierii",
-	"remediatedAtHelpText": "Se setează la ziua în care vulnerabilitatea este rezolvată (atenuată, remediată, neexploatabilă sau neafectată), dacă nu introduceți una. Se șterge la redeschidere.",
+	"remediatedAtHelpText": "Se setează la ziua în care vulnerabilitatea este rezolvată (atenuată, remediată, neexploatabilă sau neafectată), dacă nu introduceți una. Se păstrează la redeschidere.",
 	"vulnerabilityOpenForDays": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
@@ -2189,5 +2189,7 @@
 	"dpiaRequiredNo": "DPIA nu este necesară",
 	"dpiaRequirementChange": "Modificarea cerinței DPIA",
 	"dpiaRequirementChanges": "Istoricul cerinței DPIA",
-	"previously": "Anterior"
+	"previously": "Anterior",
+	"vulnerabilityOpenWithRemediationDate": "Vulnerabilitate deschisă cu dată de remediere",
+	"vulnerabilityResolvedWithoutRemediationDate": "Vulnerabilitate rezolvată fără dată de remediere"
 }

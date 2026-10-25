@@ -1197,6 +1197,8 @@
 	"appliedControlNoStatus": "Zastosowany środek zabezpieczający nie ma statusu",
 	"taskTemplateNoAssignee": "Zadanie nie ma osoby przypisanej",
 	"taskNodeOverdue": "Termin wystąpienia zadania minął",
+	"vulnerabilityOpenWithRemediationDate": "Otwarta podatność ma datę naprawy",
+	"vulnerabilityResolvedWithoutRemediationDate": "Rozwiązana podatność nie ma daty naprawy",
 	"evidenceNoFile": "Do dowodu nie przesłano pliku",
 	"requirementAppliedControlHelpText": "Dowody związane z wybranymi środkami zostaną automatycznie powiązane z wymaganiem.",
 	"requirementEvidenceHelpText": "Ta karta umożliwia dodanie dodatkowych dowodów do wymagania.",
@@ -3080,7 +3082,7 @@
 	"detectedAt": "Data wykrycia",
 	"detectedAtHelpText": "Data wykrycia podatności. Domyślnie dzisiejsza, chyba że SLA jest wyłączone. Używana jako punkt odniesienia SLA, gdy zasady ustawiono na datę wykrycia.",
 	"remediatedAt": "Data naprawy",
-	"remediatedAtHelpText": "Ustawiana na dzień rozwiązania podatności (ograniczona, naprawiona, niemożliwa do wykorzystania lub bez wpływu), chyba że wpiszesz ją samodzielnie. Czyszczona po ponownym otwarciu.",
+	"remediatedAtHelpText": "Ustawiana na dzień rozwiązania podatności (ograniczona, naprawiona, niemożliwa do wykorzystania lub bez wpływu), chyba że wpiszesz ją samodzielnie. Zachowywana po ponownym otwarciu.",
 	"vulnerabilityOpenForDays": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],

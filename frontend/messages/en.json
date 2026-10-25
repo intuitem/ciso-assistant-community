@@ -1198,6 +1198,8 @@
 	"appliedControlNoStatus": "Applied control has no status",
 	"taskTemplateNoAssignee": "Task has no assignee",
 	"taskNodeOverdue": "Task occurrence is past its due date",
+	"vulnerabilityOpenWithRemediationDate": "Open vulnerability has a remediation date",
+	"vulnerabilityResolvedWithoutRemediationDate": "Resolved vulnerability has no remediation date",
 	"evidenceNoFile": "Evidence has no file uploaded",
 	"requirementAppliedControlHelpText": "Evidences linked to the selected measures will be automatically associated with the requirement.",
 	"requirementEvidenceHelpText": "This tab allows you to add extra evidences to the requirement.",
@@ -3072,7 +3074,7 @@
 	"detectedAt": "Detection date",
 	"detectedAtHelpText": "When the vulnerability was discovered. Defaults to today unless the SLA is disabled. Used as the SLA anchor when the policy is set to detection date.",
 	"remediatedAt": "Remediation date",
-	"remediatedAtHelpText": "Set to the day the vulnerability is resolved (mitigated, fixed, not exploitable or unaffected), unless you enter one. Cleared when it is reopened.",
+	"remediatedAtHelpText": "Set to the day the vulnerability is resolved (mitigated, fixed, not exploitable or unaffected), unless you enter one. Kept when it is reopened.",
 	"vulnerabilityOpenForDays": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],

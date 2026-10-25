@@ -12,10 +12,13 @@ import type { APIRequestContext, BrowserContext } from '@playwright/test';
 
 const BACKEND_API_URL = process.env.PUBLIC_BACKEND_API_URL ?? 'http://localhost:8000/api';
 
-const DAY_MS = 86_400_000;
-/** A calendar day relative to today, as the API's YYYY-MM-DD. */
-const isoDay = (offset: number) =>
-	new Date(Date.now() + offset * DAY_MS).toLocaleDateString('en-CA');
+/** A calendar day relative to today, as the API's YYYY-MM-DD. Counted in calendar
+ * days, not 24-hour steps, which land on the wrong day across a DST change. */
+const isoDay = (offset: number) => {
+	const day = new Date();
+	day.setDate(day.getDate() + offset);
+	return day.toLocaleDateString('en-CA');
+};
 
 async function api(context: BrowserContext, request: APIRequestContext) {
 	const token = (await context.cookies()).find((c) => c.name === 'token')?.value;
@@ -188,6 +191,9 @@ test('the SLA filter lists the vulnerabilities in that state', async ({
 	});
 
 	await page.goto('/vulnerabilities?state=overdue');
+	await page.waitForLoadState('networkidle');
+	// Narrow to this run's vulnerabilities: a reused database holds earlier ones.
+	await page.getByTestId('search-input').fill(String(suffix));
 	await page.waitForLoadState('networkidle');
 
 	await expect(page.getByText(overdue.name)).toBeVisible();

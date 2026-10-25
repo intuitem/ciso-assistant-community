@@ -3770,7 +3770,7 @@
 	"detectedAt": "Datum otkrivanja",
 	"detectedAtHelpText": "Kada je ranjivost otkrivena. Zadano je danas, osim ako je SLA isključen. Koristi se kao polazište SLA-a kada je pravilo postavljeno na datum otkrivanja.",
 	"remediatedAt": "Datum otklanjanja",
-	"remediatedAtHelpText": "Postavlja se na dan kada je ranjivost riješena (ublažena, popravljena, nije iskoristiva ili nije pogođena), osim ako ga sami ne unesete. Briše se kada se ponovno otvori.",
+	"remediatedAtHelpText": "Postavlja se na dan kada je ranjivost riješena (ublažena, popravljena, nije iskoristiva ili nije pogođena), osim ako ga sami ne unesete. Zadržava se kada se ponovno otvori.",
 	"vulnerabilityOpenForDays": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
@@ -4379,5 +4379,7 @@
 	"dpiaRequiredNo": "DPIA nije obavezna",
 	"dpiaRequirementChange": "Promjena zahtjeva za DPIA",
 	"dpiaRequirementChanges": "Povijest zahtjeva za DPIA",
-	"previously": "Prethodno"
+	"previously": "Prethodno",
+	"vulnerabilityOpenWithRemediationDate": "Otvorena ranjivost ima datum otklanjanja",
+	"vulnerabilityResolvedWithoutRemediationDate": "Riješena ranjivost nema datum otklanjanja"
 }

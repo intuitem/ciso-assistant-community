@@ -1198,6 +1198,8 @@
 	"appliedControlNoStatus": "O controle aplicado não tem status",
 	"taskTemplateNoAssignee": "A tarefa não tem responsável",
 	"taskNodeOverdue": "A ocorrência da tarefa passou do prazo",
+	"vulnerabilityOpenWithRemediationDate": "Vulnerabilidade aberta tem data de remediação",
+	"vulnerabilityResolvedWithoutRemediationDate": "Vulnerabilidade resolvida sem data de remediação",
 	"evidenceNoFile": "A evidência não tem nenhum arquivo carregado",
 	"requirementAppliedControlHelpText": "As evidências vinculadas às medidas selecionadas serão automaticamente associadas ao requisito.",
 	"requirementEvidenceHelpText": "Esta aba permite adicionar evidências extras ao requisito.",
@@ -3071,7 +3073,7 @@
 	"detectedAt": "Data de deteção",
 	"detectedAtHelpText": "Quando a vulnerabilidade foi descoberta. O padrão é hoje, a menos que o SLA esteja desativado. Usado como âncora do SLA quando a política está definida para data de detecção.",
 	"remediatedAt": "Data de remediação",
-	"remediatedAtHelpText": "Definida para o dia em que a vulnerabilidade é resolvida (mitigada, corrigida, não explorável ou não afetada), a menos que você informe uma. Apagada quando ela é reaberta.",
+	"remediatedAtHelpText": "Definida para o dia em que a vulnerabilidade é resolvida (mitigada, corrigida, não explorável ou não afetada), a menos que você informe uma. Mantida quando ela é reaberta.",
 	"vulnerabilityOpenForDays": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],

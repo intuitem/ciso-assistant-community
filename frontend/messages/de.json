@@ -4376,7 +4376,7 @@
 	"batchChangeSeverity": "Schweregrad ändern",
 	"detectedAtHelpText": "Als die Sicherheitslücke entdeckt wurde. Der Standardwert ist heute, sofern das SLA nicht deaktiviert ist. Wird als SLA-Anker verwendet, wenn die Richtlinie auf das Erkennungsdatum eingestellt ist.",
 	"remediatedAt": "Behebungsdatum",
-	"remediatedAtHelpText": "Wird auf den Tag gesetzt, an dem die Schwachstelle gelöst wird (gemindert, behoben, nicht ausnutzbar oder nicht betroffen), sofern Sie kein Datum eingeben. Wird beim erneuten Öffnen geleert.",
+	"remediatedAtHelpText": "Wird auf den Tag gesetzt, an dem die Schwachstelle gelöst wird (gemindert, behoben, nicht ausnutzbar oder nicht betroffen), sofern Sie kein Datum eingeben. Bleibt beim erneuten Öffnen erhalten.",
 	"vulnerabilityOpenForDays": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
@@ -6427,6 +6427,8 @@
 	"appliedControlNoStatus": "Maßnahme hat keinen Status",
 	"taskTemplateNoAssignee": "Aufgabe hat keine zuständige Person",
 	"taskNodeOverdue": "Das Fälligkeitsdatum der Aufgabe ist überschritten",
+	"vulnerabilityOpenWithRemediationDate": "Offene Schwachstelle hat ein Behebungsdatum",
+	"vulnerabilityResolvedWithoutRemediationDate": "Gelöste Schwachstelle hat kein Behebungsdatum",
 	"customFieldsLoadError": "Benutzerdefinierte Felder konnten nicht geladen werden. Bereich erneut auswählen oder Formular erneut öffnen.",
 	"templateAssignmentReopenedName": "Zuweisung wieder geöffnet",
 	"templateAssignmentReopenedDescription": "Wird an einen Befragten gesendet, wenn seine Audit-Zuweisung erneut zur Bearbeitung geöffnet wird",

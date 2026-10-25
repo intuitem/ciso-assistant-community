@@ -1205,7 +1205,7 @@
 	"detectedAt": "पता लगाने की तिथि",
 	"detectedAtHelpText": "भेद्यता का पता कब चला। डिफ़ॉल्ट रूप से आज, जब तक कि SLA बंद न हो। जब नीति पता लगाने की तिथि पर सेट हो, तो SLA के आधार के रूप में उपयोग होती है।",
 	"remediatedAt": "निवारण तिथि",
-	"remediatedAtHelpText": "भेद्यता के हल होने (कम की गई, ठीक की गई, शोषण योग्य नहीं या अप्रभावित) के दिन पर सेट होती है, जब तक कि आप स्वयं कोई तिथि दर्ज न करें। दोबारा खोलने पर हटा दी जाती है।",
+	"remediatedAtHelpText": "भेद्यता के हल होने (कम की गई, ठीक की गई, शोषण योग्य नहीं या अप्रभावित) के दिन पर सेट होती है, जब तक कि आप स्वयं कोई तिथि दर्ज न करें। दोबारा खोलने पर बनी रहती है।",
 	"vulnerabilityOpenForDays": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
@@ -2157,5 +2157,7 @@
 	"dpiaRequiredNo": "DPIA आवश्यक नहीं",
 	"dpiaRequirementChange": "DPIA आवश्यकता में बदलाव",
 	"dpiaRequirementChanges": "DPIA आवश्यकता का इतिहास",
-	"previously": "पहले"
+	"previously": "पहले",
+	"vulnerabilityOpenWithRemediationDate": "खुली भेद्यता की निवारण तिथि है",
+	"vulnerabilityResolvedWithoutRemediationDate": "हल हो चुकी भेद्यता की कोई निवारण तिथि नहीं है"
 }

@@ -4218,7 +4218,7 @@
 	"detailedView": "Gedetailleerde weergave",
 	"detectedAtHelpText": "Wanneer de kwetsbaarheid werd ontdekt. Standaard is dit vandaag, tenzij de SLA is uitgeschakeld. Wordt gebruikt als SLA-anker wanneer het beleid is ingesteld op detectiedatum.",
 	"remediatedAt": "Hersteldatum",
-	"remediatedAtHelpText": "Wordt ingesteld op de dag waarop de kwetsbaarheid is opgelost (verzacht, verholpen, niet exploiteerbaar of niet getroffen), tenzij je zelf een datum invult. Wordt gewist bij heropenen.",
+	"remediatedAtHelpText": "Wordt ingesteld op de dag waarop de kwetsbaarheid is opgelost (verzacht, verholpen, niet exploiteerbaar of niet getroffen), tenzij je zelf een datum invult. Blijft behouden bij heropenen.",
 	"vulnerabilityOpenForDays": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
@@ -6202,5 +6202,7 @@
 	"dpiaRequiredNo": "Geen DPIA vereist",
 	"dpiaRequirementChange": "Wijziging van DPIA-vereiste",
 	"dpiaRequirementChanges": "Geschiedenis van DPIA-vereiste",
-	"previously": "Voorheen"
+	"previously": "Voorheen",
+	"vulnerabilityOpenWithRemediationDate": "Open kwetsbaarheid heeft een hersteldatum",
+	"vulnerabilityResolvedWithoutRemediationDate": "Opgeloste kwetsbaarheid heeft geen hersteldatum"
 }

@@ -1578,7 +1578,7 @@ async def update_vulnerability(
         published_date: Publication date of the advisory (YYYY-MM-DD)
         due_date: Due date (YYYY-MM-DD); computed from the SLA policy when left empty
         eta: Expected resolution date (YYYY-MM-DD)
-        remediated_at: Remediation date (YYYY-MM-DD); set automatically when the status becomes resolved
+        remediated_at: Remediation date (YYYY-MM-DD); kept whatever the status, and set to today when the status becomes resolved without one
     """
     try:
         from ..resolvers import (

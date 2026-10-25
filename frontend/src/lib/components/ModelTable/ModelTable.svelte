@@ -50,11 +50,11 @@
 	import type { ListViewFilterConfig, BatchActionConfig } from '$lib/utils/table';
 	import { goto, breadcrumbs } from '$lib/utils/breadcrumbs';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
-	import { isDark } from '$lib/utils/helpers';
 	import { contextMenuActions, listViewFields, getBatchActions } from '$lib/utils/table';
 	import { tableFilterStates } from '$lib/utils/stores';
 	import BatchActionBar from './BatchActionBar.svelte';
 	import ColumnSelector from './ColumnSelector.svelte';
+	import HexColorPill from './HexColorPill.svelte';
 	import type { urlModel } from '$lib/utils/types.js';
 	import { countMasked, isMaskedPlaceholder } from '$lib/utils/related-visibility';
 	import { m } from '$paraglide/messages';
@@ -912,13 +912,6 @@
 		deprecated: 'preset-tonal-surface'
 	};
 
-	let classesHexBackgroundText = $derived((backgroundHexColor: string) => {
-		// The badge background is a fixed hex color, so the text must be a fixed color too
-		// (not theme-dependent), otherwise it turns light in dark mode and vanishes on a
-		// light-colored badge. White on dark backgrounds, fixed dark surface otherwise.
-		return isDark(backgroundHexColor) ? 'text-white' : 'text-surface-950';
-	});
-
 	const tail_render = $derived(tail);
 
 	// Multi-value columns that should not be sortable
@@ -1372,14 +1365,11 @@
 															{safeTranslate(value.str) ?? '-'}
 														{/if}
 													{:else if value && value.hexcolor}
-														<p
-															class="flex w-fit min-w-24 justify-center px-2 py-1 rounded-md ml-2 whitespace-nowrap {classesHexBackgroundText(
-																value.hexcolor
-															)}"
-															style="background-color: {value.hexcolor}"
-														>
-															{safeTranslate(value.name ?? value.str) ?? '-'}
-														</p>
+														<HexColorPill
+															hexcolor={value.hexcolor}
+															label={safeTranslate(value.name ?? value.str) ?? '-'}
+															class="ml-2"
+														/>
 													{:else if ISO_8601_REGEX.test(value) && DATE_FIELDS_TO_FORMAT.includes(key)}
 														{formatDateOrDateTime(value, getLocale())}
 													{:else if [true, false].includes(value)}

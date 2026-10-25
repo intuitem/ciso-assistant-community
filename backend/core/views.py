@@ -4075,16 +4075,26 @@ class VulnerabilityViewSet(BaseModelViewSet):
     search_fields = ["name", "description", "ref_id"]
     # The SLA column sorts by urgency: the state's rank, then the due date (most
     # days late, or fewest left, first); vulnerabilities without either last.
-    ordering_remap = {"state": ["sla_rank", "due_date"]}
-    ordering_nulls_last = ("sla_rank", "due_date")
+    # The date goes through its own alias so that nulls-last rule stays off the
+    # Due date column, which keeps the database's order.
+    ordering_remap = {"state": ["sla_rank", "sla_due_date"]}
+    ordering_nulls_last = ("sla_rank", "sla_due_date")
 
     autocomplete_serializer_class = VulnerabilityAutocompleteSerializer
 
     def get_queryset(self):
         qs = super().get_queryset()
+        # Any action sorting by SLA needs the annotations, autocomplete included.
+        if (
+            self.action in READ_HEAVY_ACTIONS
+            or "state" in self.request.query_params.get("ordering", "")
+        ):
+            qs = qs.annotate(
+                **Vulnerability.sla_state_annotations(), sla_due_date=F("due_date")
+            )
         if self.action == "autocomplete":
             return qs
-        qs = qs.prefetch_related(
+        return qs.prefetch_related(
             actor_prefetch("owner"),
             "applied_controls",
             "evidences",
@@ -4094,12 +4104,6 @@ class VulnerabilityViewSet(BaseModelViewSet):
             "cwes",
             "filtering_labels__folder",
         )
-        if (
-            self.action in READ_HEAVY_ACTIONS
-            or "state" in self.request.query_params.get("ordering", "")
-        ):
-            qs = qs.annotate(**Vulnerability.sla_state_annotations())
-        return qs
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")

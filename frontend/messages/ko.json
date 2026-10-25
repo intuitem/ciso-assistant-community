@@ -3954,7 +3954,7 @@
 	"detectedAt": "탐지 날짜",
 	"detectedAtHelpText": "취약점이 발견된 시점입니다. SLA가 꺼져 있지 않으면 기본값은 오늘입니다. 정책이 탐지 날짜로 설정된 경우 SLA 기준으로 사용됩니다.",
 	"remediatedAt": "조치 완료일",
-	"remediatedAtHelpText": "취약점이 해결된 날(완화됨, 수정됨, 악용 불가 또는 영향 없음)로 설정되며, 직접 입력한 경우에는 그 날짜를 사용합니다. 다시 열면 지워집니다.",
+	"remediatedAtHelpText": "취약점이 해결된 날(완화됨, 수정됨, 악용 불가 또는 영향 없음)로 설정되며, 직접 입력한 경우에는 그 날짜를 사용합니다. 다시 열어도 유지됩니다.",
 	"vulnerabilityOpenForDays": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
@@ -4531,5 +4531,7 @@
 	"dpiaRequiredNo": "DPIA 불필요",
 	"dpiaRequirementChange": "DPIA 요건 변경",
 	"dpiaRequirementChanges": "DPIA 요건 이력",
-	"previously": "이전"
+	"previously": "이전",
+	"vulnerabilityOpenWithRemediationDate": "열린 취약점에 조치 완료일이 있습니다",
+	"vulnerabilityResolvedWithoutRemediationDate": "해결된 취약점에 조치 완료일이 없습니다"
 }

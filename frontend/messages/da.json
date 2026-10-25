@@ -1511,7 +1511,7 @@
 	"detectedAt": "Detektionsdato",
 	"detectedAtHelpText": "Hvornår sårbarheden blev opdaget. Standard er i dag, medmindre SLA er slået fra. Bruges som SLA-anker, når politikken er sat til detektionsdato.",
 	"remediatedAt": "Udbedringsdato",
-	"remediatedAtHelpText": "Sættes til den dag, sårbarheden løses (afbødet, rettet, ikke udnyttelig eller ikke berørt), medmindre du selv angiver en. Ryddes, når den genåbnes.",
+	"remediatedAtHelpText": "Sættes til den dag, sårbarheden løses (afbødet, rettet, ikke udnyttelig eller ikke berørt), medmindre du selv angiver en. Bevares, når den genåbnes.",
 	"vulnerabilityOpenForDays": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
@@ -2416,5 +2416,7 @@
 	"dpiaRequiredNo": "Ingen DPIA påkrævet",
 	"dpiaRequirementChange": "Ændring af DPIA-krav",
 	"dpiaRequirementChanges": "Historik over DPIA-krav",
-	"previously": "Tidligere"
+	"previously": "Tidligere",
+	"vulnerabilityOpenWithRemediationDate": "Åben sårbarhed har en udbedringsdato",
+	"vulnerabilityResolvedWithoutRemediationDate": "Løst sårbarhed har ingen udbedringsdato"
 }

@@ -2596,7 +2596,7 @@
 	"detectedAt": "Tuvastamise kuupäev",
 	"detectedAtHelpText": "Kuupäev, mil haavatavus avastati. Vaikimisi tänane päev, kui SLA pole välja lülitatud. Kasutatakse SLA ankruna, kui poliitika on seatud tuvastamise kuupäevale.",
 	"remediatedAt": "Parandamise kuupäev",
-	"remediatedAtHelpText": "Määratakse päevale, mil haavatavus lahendatakse (leevendatud, parandatud, mitteärakasutatav või mõjutamata), kui te ise kuupäeva ei sisesta. Tühjendatakse uuesti avamisel.",
+	"remediatedAtHelpText": "Määratakse päevale, mil haavatavus lahendatakse (leevendatud, parandatud, mitteärakasutatav või mõjutamata), kui te ise kuupäeva ei sisesta. Säilib uuesti avamisel.",
 	"vulnerabilityOpenForDays": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
@@ -5038,5 +5038,7 @@
 	"dpiaRequiredNo": "Andmekaitsealast mõjuhinnangut ei nõuta",
 	"dpiaRequirementChange": "Andmekaitsealase mõjuhinnangu nõude muutus",
 	"dpiaRequirementChanges": "Andmekaitsealase mõjuhinnangu nõude ajalugu",
-	"previously": "Varem"
+	"previously": "Varem",
+	"vulnerabilityOpenWithRemediationDate": "Avatud haavatavusel on parandamise kuupäev",
+	"vulnerabilityResolvedWithoutRemediationDate": "Lahendatud haavatavusel puudub parandamise kuupäev"
 }

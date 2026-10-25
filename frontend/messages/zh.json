@@ -3273,7 +3273,7 @@
 	"detectedAt": "发现日期",
 	"detectedAtHelpText": "漏洞被发现的时间。除非关闭了SLA，否则默认为今天。当策略设置为发现日期时，用作SLA的起算点。",
 	"remediatedAt": "修复日期",
-	"remediatedAtHelpText": "设为漏洞被解决（已缓解、已修复、不可利用或未受影响）的日期，除非您自行填写。重新打开时清除。",
+	"remediatedAtHelpText": "设为漏洞被解决（已缓解、已修复、不可利用或未受影响）的日期，除非您自行填写。重新打开时保留。",
 	"vulnerabilityOpenForDays": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
@@ -3915,5 +3915,7 @@
 	"dpiaRequiredNo": "无需 DPIA",
 	"dpiaRequirementChange": "DPIA 要求变更",
 	"dpiaRequirementChanges": "DPIA 要求历史",
-	"previously": "此前"
+	"previously": "此前",
+	"vulnerabilityOpenWithRemediationDate": "未关闭的漏洞有修复日期",
+	"vulnerabilityResolvedWithoutRemediationDate": "已解决的漏洞没有修复日期"
 }

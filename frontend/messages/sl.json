@@ -2665,7 +2665,7 @@
 	"detectedAt": "Datum zaznave",
 	"detectedAtHelpText": "Kdaj je bila ranljivost odkrita. Privzeto je nastavljeno na danes, razen če je SLA izklopljen. Uporablja se kot sidro SLA, ko je politika nastavljena na datum zaznave.",
 	"remediatedAt": "Datum odprave",
-	"remediatedAtHelpText": "Nastavi se na dan, ko je ranljivost razrešena (ublažena, popravljena, ni izkoriščevalna ali neprizadeta), razen če datum vnesete sami. Ob ponovnem odprtju se počisti.",
+	"remediatedAtHelpText": "Nastavi se na dan, ko je ranljivost razrešena (ublažena, popravljena, ni izkoriščevalna ali neprizadeta), razen če datum vnesete sami. Ob ponovnem odprtju se ohrani.",
 	"vulnerabilityOpenForDays": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
@@ -5801,5 +5801,7 @@
 	"dpiaRequiredNo": "DPIA ni zahtevana",
 	"dpiaRequirementChange": "Sprememba zahteve za DPIA",
 	"dpiaRequirementChanges": "Zgodovina zahtev za DPIA",
-	"previously": "Prej"
+	"previously": "Prej",
+	"vulnerabilityOpenWithRemediationDate": "Odprta ranljivost ima datum odprave",
+	"vulnerabilityResolvedWithoutRemediationDate": "Razrešena ranljivost nima datuma odprave"
 }

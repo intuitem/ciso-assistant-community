@@ -4240,7 +4240,7 @@
 	"detectedAt": "Aptikimo data",
 	"detectedAtHelpText": "Kada pažeidžiamumas buvo aptiktas. Numatytoji reikšmė – šiandien, nebent SLA išjungtas. Naudojama kaip SLA atskaitos taškas, kai politika nustatyta pagal aptikimo datą.",
 	"remediatedAt": "Ištaisymo data",
-	"remediatedAtHelpText": "Nustatoma į dieną, kai pažeidžiamumas išsprendžiamas (sušvelnintas, ištaisytas, neišnaudojamas arba nepaveiktas), nebent datą įvedate patys. Išvaloma vėl atidarius.",
+	"remediatedAtHelpText": "Nustatoma į dieną, kai pažeidžiamumas išsprendžiamas (sušvelnintas, ištaisytas, neišnaudojamas arba nepaveiktas), nebent datą įvedate patys. Išlieka vėl atidarius.",
 	"vulnerabilityOpenForDays": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
@@ -4815,5 +4815,7 @@
 	"dpiaRequiredNo": "DPIA nereikalingas",
 	"dpiaRequirementChange": "DPIA reikalavimo pakeitimas",
 	"dpiaRequirementChanges": "DPIA reikalavimo istorija",
-	"previously": "Anksčiau"
+	"previously": "Anksčiau",
+	"vulnerabilityOpenWithRemediationDate": "Atviras pažeidžiamumas turi ištaisymo datą",
+	"vulnerabilityResolvedWithoutRemediationDate": "Išspręstas pažeidžiamumas neturi ištaisymo datos"
 }

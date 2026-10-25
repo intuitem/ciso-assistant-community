@@ -3438,7 +3438,7 @@
 	"batchChangeSeverity": "تغيير الخطورة",
 	"detectedAtHelpText": "وقت اكتشاف الثغرة. القيمة الافتراضية هي اليوم ما لم تكن اتفاقية مستوى الخدمة معطّلة. تُستخدم كمرجع لاتفاقية مستوى الخدمة عندما تكون السياسة محددة بتاريخ الاكتشاف.",
 	"remediatedAt": "تاريخ المعالجة",
-	"remediatedAtHelpText": "يُضبط على يوم معالجة الثغرة (مخففة أو مُصلحة أو غير قابلة للاستغلال أو غير متأثرة)، ما لم تُدخل تاريخًا بنفسك. يُمسح عند إعادة فتحها.",
+	"remediatedAtHelpText": "يُضبط على يوم معالجة الثغرة (مخففة أو مُصلحة أو غير قابلة للاستغلال أو غير متأثرة)، ما لم تُدخل تاريخًا بنفسك. يُحتفظ به عند إعادة فتحها.",
 	"vulnerabilityOpenForDays": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
@@ -6727,5 +6727,7 @@
 	"dpiaRequiredNo": "تقييم أثر حماية البيانات غير مطلوب",
 	"dpiaRequirementChange": "تغيير متطلب تقييم أثر حماية البيانات",
 	"dpiaRequirementChanges": "سجل متطلب تقييم أثر حماية البيانات",
-	"previously": "سابقًا"
+	"previously": "سابقًا",
+	"vulnerabilityOpenWithRemediationDate": "ثغرة مفتوحة لها تاريخ معالجة",
+	"vulnerabilityResolvedWithoutRemediationDate": "ثغرة محلولة بلا تاريخ معالجة"
 }

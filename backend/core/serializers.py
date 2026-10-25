@@ -266,9 +266,55 @@ class BaseModelSerializer(serializers.ModelSerializer):
                         }
                     )
 
+    def _check_reverse_m2m_change(self, validated_data: dict) -> None:
+        """A reverse many-to-many (declared on the other model) edits the objects
+        on that side: adding or removing one needs change permission on it, not
+        just the visibility _check_m2m_visibility asks for."""
+        request = self.context.get("request")
+        if not request or not request.user.is_authenticated:
+            return
+        model = self.Meta.model
+        for field_name, value in validated_data.items():
+            if not isinstance(value, list):
+                continue
+            try:
+                field = model._meta.get_field(field_name)
+            except FieldDoesNotExist:
+                continue
+            if not (field.many_to_many and field.auto_created and not field.concrete):
+                continue
+            current_ids: set = set()
+            if self.instance is not None and not isinstance(self.instance, list):
+                current_ids = {
+                    str(pk)
+                    for pk in getattr(self.instance, field_name).values_list(
+                        "pk", flat=True
+                    )
+                }
+            touched = {str(item.pk) for item in value} ^ current_ids
+            if not touched:
+                continue
+            related_model = field.related_model
+            try:
+                changeable = {
+                    str(pk)
+                    for pk in RoleAssignment.get_changeable_object_ids(
+                        request.user, related_model
+                    )
+                }
+            except NotImplementedError, Permission.DoesNotExist:
+                continue
+            if touched - changeable:
+                raise PermissionDenied(
+                    {
+                        field_name: f"You do not have permission to change this {related_model._meta.model_name}"
+                    }
+                )
+
     def validate(self, data):
         data = super().validate(data)
         self._check_m2m_visibility(data)
+        self._check_reverse_m2m_change(data)
         data = self._strip_respondent_protected_fields(data)
         return data
 
@@ -384,6 +430,33 @@ class RiskMatrixImportExportSerializer(BaseModelSerializer):
         ]
 
 
+def _attach_sla_states(vulnerabilities) -> None:
+    """Give vulnerabilities the viewset didn't annotate their SLA state, all in one
+    query, so the column, its filter and its sort share one definition."""
+    missing = [v for v in vulnerabilities if not hasattr(v, "sla_state")]
+    if not missing:
+        return
+    rows = (
+        Vulnerability.objects.filter(pk__in=[v.pk for v in missing])
+        .annotate(**Vulnerability.sla_state_annotations())
+        .values("pk", "sla_state", "sla_until")
+    )
+    by_pk = {row["pk"]: row for row in rows}
+    for vulnerability in missing:
+        row = by_pk.get(vulnerability.pk, {})
+        vulnerability.sla_state = row.get("sla_state")
+        vulnerability.sla_until = row.get("sla_until")
+
+
+class VulnerabilityListSerializer(serializers.ListSerializer):
+    def to_representation(self, data):
+        items = list(
+            data.all() if isinstance(data, models.manager.BaseManager) else data
+        )
+        _attach_sla_states(items)
+        return super().to_representation(items)
+
+
 class VulnerabilityReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
@@ -399,14 +472,7 @@ class VulnerabilityReadSerializer(BaseModelSerializer):
     state = serializers.SerializerMethodField()
 
     def get_state(self, obj):
-        # The viewset annotates the SLA state; anything else gets it the same way,
-        # so the column, its filter and its sort share one definition.
-        if not hasattr(obj, "sla_state"):
-            obj = (
-                Vulnerability.objects.filter(pk=obj.pk)
-                .annotate(**Vulnerability.sla_state_annotations())
-                .get()
-            )
+        _attach_sla_states([obj])
         if obj.sla_state is None:
             return None
         state = {
@@ -420,6 +486,7 @@ class VulnerabilityReadSerializer(BaseModelSerializer):
     class Meta:
         model = Vulnerability
         fields = "__all__"
+        list_serializer_class = VulnerabilityListSerializer
 
 
 class VulnerabilityWriteSerializer(BaseModelSerializer):
