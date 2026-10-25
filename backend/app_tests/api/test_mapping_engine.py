@@ -530,7 +530,9 @@ class TestLinkOrderIndependence:
         self, scores_compatible
     ):
         mismatches = []
-        for rel1, rel2 in product(("equal", "superset", "subset", "intersect"), repeat=2):
+        for rel1, rel2 in product(
+            ("equal", "superset", "subset", "intersect"), repeat=2
+        ):
             for res1, res2 in product(RESULTS, repeat=2):
                 first, second = (rel1, res1), (rel2, res2)
                 forward = self._target_result([first, second], scores_compatible)
