@@ -391,6 +391,13 @@ class MappingEngine:
                 return rescale_score(value, source_range, target_range)
             return value
 
+        # Per target: the most restrictive result over its full-coverage links,
+        # over its partial links (capped), and over the gaps (non_compliant,
+        # not_assessed) its partial links report.
+        full_results: dict[str, Optional[str]] = {}
+        partial_results: dict[str, Optional[str]] = {}
+        partial_gaps: dict[str, Optional[str]] = {}
+
         for mapping in requirement_mapping_set["requirement_mappings"]:
             src = mapping["source_requirement_urn"]
             dst = mapping["target_requirement_urn"]
@@ -426,13 +433,6 @@ class MappingEngine:
                                 existing = set(existing_target.get(m2m_field, []))
                                 new_values = set(src_assessment.get(m2m_field, []))
                                 existing_target[m2m_field] = list(existing | new_values)
-                        # Keep the most restrictive result
-                        if "result" in src_assessment:
-                            existing_result = existing_target.get("result")
-                            new_result = src_assessment["result"]
-                            existing_target["result"] = self._most_restrictive_result(
-                                existing_result, new_result
-                            )
                     else:
                         target_audit["requirement_assessments"][dst] = {
                             k: scaled(k, v, own_scale)
@@ -442,21 +442,13 @@ class MappingEngine:
                 else:
                     target_assessment = target_audit["requirement_assessments"][dst]
                     for field in self.fields_to_map:
-                        if field not in ["score", "is_scored", "documentation_score"]:
-                            existing_target = target_audit[
-                                "requirement_assessments"
-                            ].get(dst)
-                            if field == "result" and existing_target:
-                                # Keep the most restrictive result
-                                existing_result = existing_target.get("result")
-                                new_result = src_assessment.get(field)
-                                target_assessment[field] = (
-                                    self._most_restrictive_result(
-                                        existing_result, new_result
-                                    )
-                                )
-                            else:
-                                target_assessment[field] = src_assessment.get(field)
+                        if field not in [
+                            "result",
+                            "score",
+                            "is_scored",
+                            "documentation_score",
+                        ]:
+                            target_assessment[field] = src_assessment.get(field)
 
                     # Merge m2m fields for collisions
                     for m2m_field in self.m2m_fields:
@@ -478,7 +470,6 @@ class MappingEngine:
 
             elif rel in ("subset", "intersect"):
                 target_assessment = target_audit["requirement_assessments"][dst]
-                result = src_assessment.get("result")
 
                 # Merge applied_controls for collisions
                 src_applied_controls = src_assessment.get("applied_controls", [])
@@ -517,19 +508,6 @@ class MappingEngine:
                                 src_assessment.get(score_field),
                                 own_scale,
                             )
-
-                # Handle result: keep the most restrictive
-                existing_target = target_audit["requirement_assessments"].get(dst)
-                if existing_target and "result" in existing_target:
-                    existing_result = existing_target["result"]
-                    target_assessment["result"] = self._most_restrictive_result(
-                        existing_result, result
-                    )
-                else:
-                    if result in ("not_assessed", "non_compliant"):
-                        target_assessment["result"] = result
-                    elif result in ("compliant", "partially_compliant"):
-                        target_assessment["result"] = "partially_compliant"
                 mapped = True
 
             # Fix 3: Only build mapping_inference for recognized relationships
@@ -538,6 +516,33 @@ class MappingEngine:
                 continue
 
             target_assessment = target_audit["requirement_assessments"][dst]
+
+            # Result: full-coverage links decide. A partial link's cap only
+            # says that link can't vouch for the whole target, so it counts
+            # only for targets without a full-coverage result, while gaps from
+            # partial links always count. Each aggregate keeps the most
+            # restrictive result, so the order of the links doesn't matter.
+            if rel in ("equal", "superset"):
+                full_results[dst] = self._most_restrictive_result(
+                    full_results.get(dst), src_assessment.get("result")
+                )
+            else:
+                result = self._partial_link_result(src_assessment.get("result"))
+                partial_results[dst] = self._most_restrictive_result(
+                    partial_results.get(dst), result
+                )
+                if result in ("non_compliant", "not_assessed"):
+                    partial_gaps[dst] = self._most_restrictive_result(
+                        partial_gaps.get(dst), result
+                    )
+            if full_results.get(dst) is not None:
+                result = self._most_restrictive_result(
+                    full_results[dst], partial_gaps.get(dst)
+                )
+            else:
+                result = partial_results.get(dst)
+            if result is not None:
+                target_assessment["result"] = result
 
             mapping_set_info = {
                 k: v
@@ -654,8 +659,27 @@ class MappingEngine:
 
         return target_audit
 
+    def _partial_link_result(self, result):
+        """Returns what a subset/intersect link can tell about its target.
+
+        Such a link covers only part of the target, so on its own a compliant
+        or partially compliant source makes the target partially compliant at
+        best. not_assessed and non_compliant carry over as they are.
+        not_applicable says nothing about the rest of the target and is
+        dropped (None).
+        """
+        if result in ("compliant", "partially_compliant"):
+            return "partially_compliant"
+        if result in ("not_assessed", "non_compliant"):
+            return result
+        return None
+
     def _most_restrictive_result(self, result1, result2):
-        """Returns the most restrictive result between two results."""
+        """Returns the most restrictive result between two results.
+
+        A minimum over a fixed order, with None as "no result": folding the
+        links to one target gives the same answer whatever their order.
+        """
         if result1 is None:
             return result2
         if result2 is None:

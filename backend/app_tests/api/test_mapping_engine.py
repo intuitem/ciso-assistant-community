@@ -7,6 +7,7 @@ _most_restrictive_result using plain dicts — no database required.
 
 import pytest
 from collections import defaultdict
+from itertools import product
 from unittest.mock import patch, MagicMock
 
 # Patch DB access before importing the module (module-level `engine = MappingEngine()`)
@@ -426,6 +427,117 @@ class TestMapAuditResults:
         ra_dict = result.get("requirement_assessments", {})
         # Should be empty or have no meaningful data
         assert "urn:req:B1" not in ra_dict or ra_dict.get("urn:req:B1") == {}
+
+
+# ---------------------------------------------------------------------------
+# One target reached by several links: the result must not depend on the
+# order of the links in the mapping set
+# ---------------------------------------------------------------------------
+
+
+RESULTS = [
+    "non_compliant",
+    "partially_compliant",
+    "not_assessed",
+    "compliant",
+    "not_applicable",
+]
+
+
+class TestLinkOrderIndependence:
+    def _target_result(self, links, scores_compatible=True):
+        """Map one source requirement per (relationship, result) link onto B1."""
+        engine = _make_engine(
+            frameworks={
+                "urn:fw:A": {"min_score": 0, "max_score": 100},
+                "urn:fw:B": {
+                    "min_score": 0,
+                    "max_score": 100 if scores_compatible else 10,
+                },
+            }
+        )
+        source = _source_audit(
+            {
+                f"urn:req:A{i}": {
+                    "result": result,
+                    "status": "done",
+                    "score": 80,
+                    "is_scored": True,
+                    "observation": "",
+                    "documentation_score": 0,
+                    "applied_controls": [],
+                    "security_exceptions": [],
+                    "evidences": [],
+                    "name": f"RA-src-{i}",
+                    "id": f"ra-{i}-id",
+                    "source_framework": {"id": "fw-a-id", "name": "Framework A"},
+                }
+                for i, (_, result) in enumerate(links)
+            }
+        )
+        rms = _rms(
+            requirement_mappings=[
+                {
+                    "source_requirement_urn": f"urn:req:A{i}",
+                    "target_requirement_urn": "urn:req:B1",
+                    "relationship": rel,
+                }
+                for i, (rel, _) in enumerate(links)
+            ]
+        )
+        result = engine.map_audit_results(
+            source, rms, hop_index=1, path=["urn:fw:A", "urn:fw:B"]
+        )
+        return result["requirement_assessments"]["urn:req:B1"].get("result")
+
+    @pytest.mark.parametrize("scores_compatible", [True, False])
+    @pytest.mark.parametrize(
+        "links, expected",
+        [
+            # A.5.3 in the CCM v4.1 → ISO 27001 mapping: a compliant partial
+            # link doesn't hide a gap from a full-coverage link.
+            (
+                [("equal", "non_compliant"), ("intersect", "compliant")],
+                "non_compliant",
+            ),
+            # A.8.14 (superset from BCR-11, intersect from DCS-18): the partial
+            # link's cap isn't a gap, so the full-coverage link decides.
+            ([("superset", "compliant"), ("intersect", "compliant")], "compliant"),
+            # Gaps from partial links always count.
+            (
+                [("equal", "compliant"), ("intersect", "not_assessed")],
+                "not_assessed",
+            ),
+            (
+                [("equal", "compliant"), ("subset", "non_compliant")],
+                "non_compliant",
+            ),
+            # Without a full-coverage link, partial links cap the target.
+            (
+                [("subset", "compliant"), ("intersect", "compliant")],
+                "partially_compliant",
+            ),
+        ],
+    )
+    def test_merged_result_in_both_link_orders(
+        self, links, expected, scores_compatible
+    ):
+        assert self._target_result(links, scores_compatible) == expected
+        assert self._target_result(links[::-1], scores_compatible) == expected
+
+    @pytest.mark.parametrize("scores_compatible", [True, False])
+    def test_any_pair_of_links_gives_the_same_result_in_both_orders(
+        self, scores_compatible
+    ):
+        mismatches = []
+        for rel1, rel2 in product(("equal", "superset", "subset", "intersect"), repeat=2):
+            for res1, res2 in product(RESULTS, repeat=2):
+                first, second = (rel1, res1), (rel2, res2)
+                forward = self._target_result([first, second], scores_compatible)
+                backward = self._target_result([second, first], scores_compatible)
+                if forward != backward:
+                    mismatches.append((first, second, forward, backward))
+        assert mismatches == []
 
 
 # ---------------------------------------------------------------------------
