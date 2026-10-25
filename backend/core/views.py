@@ -199,6 +199,8 @@ from core.utils import (
     sanitize_xlsx_value,
     bulk_update_with_log,
     compare_schema_versions,
+    format_report_timestamp,
+    get_report_timezone,
     get_respondent_scoped_folder_ids,
     is_field_visible_to,
     render_answers_cell,
@@ -5110,6 +5112,7 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 use_risk_category_label=settings_value.get(
                     "use_risk_category_label", False
                 ),
+                tz=get_report_timezone(),
             )
             response = HttpResponse(
                 render_pdf(localized_template("risk_report", lang), payload),
@@ -5148,7 +5151,11 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             }
             lang = request.user.preferences.get("lang") or "en"
             payload = action_plan_context(
-                risk_assessment, applied_controls, lang, linked
+                risk_assessment,
+                applied_controls,
+                lang,
+                linked,
+                tz=get_report_timezone(),
             )
             response = HttpResponse(
                 render_pdf(localized_template("action_plan", lang), payload),
@@ -13506,7 +13513,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         # children in place but the returned dict drops them).
         filter_graph_by_implementation_groups(tree, implementation_groups)
         annotate_tree_with_aggregated_scores(tree, audit_obj)
-        context = gen_audit_context(pk, tree, user_lang)
+        context = gen_audit_context(pk, tree, user_lang, tz=get_report_timezone())
         doc.render(
             inline_charts_for_docx(context, doc), jinja_env=SandboxedEnvironment()
         )
@@ -13569,7 +13576,12 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         lang = request.user.preferences.get("lang") or "en"
         wants_charts = "charts" in REPORT_PROFILES[profile]["sections"]
         context = gen_audit_context(
-            pk, tree, lang, assessments=assessments, charts=wants_charts
+            pk,
+            tree,
+            lang,
+            assessments=assessments,
+            charts=wants_charts,
+            tz=get_report_timezone(),
         )
         payload, images = audit_context_for_typst(
             context, audit, role, lang, profile, assessments=assessments
@@ -13813,7 +13825,9 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 for control in applied_controls
             }
             lang = request.user.preferences.get("lang") or "en"
-            payload = action_plan_context(audit, applied_controls, lang, linked)
+            payload = action_plan_context(
+                audit, applied_controls, lang, linked, tz=get_report_timezone()
+            )
             response = HttpResponse(
                 render_pdf(localized_template("action_plan", lang), payload),
                 content_type="application/pdf",
@@ -17772,10 +17786,13 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         closed_findings_count = findings.filter(status__in=closed_statuses).count()
         open_findings_count = findings.filter(status__in=open_statuses).count()
 
+        tz = get_report_timezone()
+
         # Generate Markdown content
         md_content = f"# {findings_assessment.name}\n\n"
 
         # Assessment metadata
+        md_content += f"- **Time Zone**: {tz} - each time shows its UTC offset\n\n"
         md_content += "## Assessment Information\n\n"
         md_content += f"- **Name**: {findings_assessment.name}\n"
         md_content += f"- **Reference ID**: {findings_assessment.ref_id or 'N/A'}\n"
@@ -17787,7 +17804,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             md_content += f"- **Authors**: {', '.join([str(actor) for actor in findings_assessment.authors.all()])}\n"
         if findings_assessment.reviewers.exists():
             md_content += f"- **Reviewers**: {', '.join([str(actor) for actor in findings_assessment.reviewers.all()])}\n"
-        md_content += f"- **Created**: {findings_assessment.created_at.strftime('%Y-%m-%d %H:%M:%S') if findings_assessment.created_at else 'N/A'}\n\n"
+        md_content += f"- **Created**: {format_report_timestamp(findings_assessment.created_at, tz, 'N/A')}\n\n"
 
         # Metrics summary
         metrics = findings_assessment.get_findings_metrics()
@@ -17874,7 +17891,9 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             .order_by("ref_id")
         )
         lang = request.user.preferences.get("lang") or "en"
-        payload = findings_assessment_context(findings_assessment, findings, lang)
+        payload = findings_assessment_context(
+            findings_assessment, findings, lang, tz=get_report_timezone()
+        )
         response = HttpResponse(
             render_pdf(localized_template("findings_report", lang), payload),
             content_type="application/pdf",
@@ -18348,7 +18367,9 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
         )
 
         lang = request.user.preferences.get("lang") or "en"
-        payload = incident_context(incident, timeline_entries, lang)
+        payload = incident_context(
+            incident, timeline_entries, lang, tz=get_report_timezone()
+        )
         response = HttpResponse(
             render_pdf(localized_template("incident_report", lang), payload),
             content_type="application/pdf",
@@ -18381,10 +18402,13 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
             .order_by("timestamp")
         )
 
+        tz = get_report_timezone()
+
         # Generate Markdown content
         md_content = f"# {incident.name}\n\n"
 
         # Incident metadata
+        md_content += f"- **Time Zone**: {tz} - each time shows its UTC offset\n\n"
         md_content += "## Incident Information\n\n"
         md_content += f"- **Name**: {incident.name}\n"
         md_content += f"- **Reference ID**: {incident.ref_id or 'N/A'}\n"
@@ -18402,15 +18426,15 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
         if incident.entities.exists():
             md_content += f"- **Related Entities**: {', '.join([entity.name for entity in incident.entities.all()])}\n"
 
-        md_content += f"- **Reported At**: {incident.reported_at.strftime('%Y-%m-%d %H:%M:%S') if incident.reported_at else 'N/A'}\n"
-        md_content += f"- **Occurred At**: {incident.occurred_at.strftime('%Y-%m-%d %H:%M:%S') if incident.occurred_at else 'N/A'}\n"
-        md_content += f"- **Resolved At**: {incident.resolved_at.strftime('%Y-%m-%d %H:%M:%S') if incident.resolved_at else 'N/A'}\n"
+        md_content += f"- **Reported At**: {format_report_timestamp(incident.reported_at, tz, 'N/A')}\n"
+        md_content += f"- **Occurred At**: {format_report_timestamp(incident.occurred_at, tz, 'N/A')}\n"
+        md_content += f"- **Resolved At**: {format_report_timestamp(incident.resolved_at, tz, 'N/A')}\n"
         if incident.is_bcp_activated is not None:
             md_content += (
                 f"- **BCP Activated**: {'Yes' if incident.is_bcp_activated else 'No'}\n"
             )
-        md_content += f"- **Created**: {incident.created_at.strftime('%Y-%m-%d %H:%M:%S') if incident.created_at else 'N/A'}\n"
-        md_content += f"- **Last Updated**: {incident.updated_at.strftime('%Y-%m-%d %H:%M:%S') if incident.updated_at else 'N/A'}\n"
+        md_content += f"- **Created**: {format_report_timestamp(incident.created_at, tz, 'N/A')}\n"
+        md_content += f"- **Last Updated**: {format_report_timestamp(incident.updated_at, tz, 'N/A')}\n"
         if incident.resolution:
             md_content += f"\n### Resolution\n\n{incident.resolution}\n"
         md_content += "\n"
@@ -18439,7 +18463,7 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
             md_content += "*Events are listed in chronological order*\n\n"
 
             for entry in timeline_entries:
-                md_content += f"### {entry.timestamp.strftime('%Y-%m-%d %H:%M:%S')} - {entry.entry}\n\n"
+                md_content += f"### {format_report_timestamp(entry.timestamp, tz)} - {entry.entry}\n\n"
                 md_content += f"**Type**: {entry.get_entry_type_display()}\n\n"
 
                 if entry.author:

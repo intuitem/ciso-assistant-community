@@ -6,6 +6,7 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
 
 from core.permissions import IsGlobalAdmin
+from core.utils import get_report_timezone_choices
 from core.serializers import SerializerFactory
 from iam.models import Folder, Permission, RoleAssignment, User
 from iam.sso.models import SSOSettings
@@ -208,6 +209,10 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
     def default_language(self, request, pk=None):
         choices = {code: name for code, name in settings.LANGUAGES}
         return Response(choices)
+
+    @action(detail=True, name="Get report time zones")
+    def report_timezone(self, request, pk=None):
+        return Response(get_report_timezone_choices())
 
     @action(
         detail=True,

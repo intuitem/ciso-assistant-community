@@ -1,12 +1,14 @@
 """The findings report, rendered by Typst."""
 
 import io
+from datetime import datetime, timezone
 
 import openpyxl
 import pymupdf
 import pytest
 from django.urls import reverse
 from rest_framework import status as http
+from rest_framework.test import APIClient
 
 from core.generators import findings_assessment_context
 from core.models import Finding, FilteringLabel, FindingsAssessment
@@ -15,6 +17,7 @@ from core.tests.test_audit_word_export import (  # noqa: F401
     admin_client,
     app_config,
 )
+from global_settings.models import GlobalSettings
 from iam.models import Folder
 
 
@@ -328,3 +331,24 @@ def test_xlsx_export_keeps_undefined_status_importable(
     rows = list(sheet.iter_rows(values_only=True))
     header, first = rows[0], rows[1]
     assert first[header.index("status")] == "--"
+
+
+@pytest.mark.django_db
+def test_markdown_export_prints_times_in_the_instance_timezone(
+    admin_client: APIClient,  # noqa: F811
+    assessment: FindingsAssessment,
+) -> None:
+    settings, _ = GlobalSettings.objects.get_or_create(name="general")
+    settings.value = {**(settings.value or {}), "report_timezone": "Europe/Paris"}
+    settings.save()
+    FindingsAssessment.objects.filter(pk=assessment.pk).update(
+        created_at=datetime(2026, 7, 1, 8, 0, tzinfo=timezone.utc)
+    )
+    url = reverse("findings-assessments-md", kwargs={"pk": str(assessment.pk)})
+
+    content = admin_client.get(url).content.decode()
+
+    assert "- **Created**: 2026-07-01 10:00:00 (UTC+02:00)" in content
+    assert content.index("- **Time Zone**: Europe/Paris") < content.index(
+        "## Assessment Information"
+    )

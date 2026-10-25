@@ -1,4 +1,5 @@
 import io
+from datetime import timezone, tzinfo
 from math import ceil
 
 import matplotlib
@@ -10,7 +11,7 @@ from docx.shared import Cm
 from docxtpl import InlineImage
 from library.helpers import get_referential_translation
 
-from .utils import is_field_visible_to
+from .utils import format_report_timestamp, is_field_visible_to
 
 from .models import (
     AppliedControl,
@@ -393,7 +394,19 @@ _ACTION_PLAN_STATUS_FILLS = {
 }
 
 
-def action_plan_context(assessment, controls, lang="en", linked=None):
+def _report_time_context(tz: tzinfo) -> dict[str, str]:
+    """Return the report's `date`, `generated_at` and `timezone`, in `tz`."""
+    moment = now()
+    return {
+        "date": moment.astimezone(tz).strftime("%d/%m/%Y"),
+        "generated_at": format_report_timestamp(moment, tz),
+        "timezone": str(tz),
+    }
+
+
+def action_plan_context(
+    assessment, controls, lang="en", linked=None, tz: tzinfo = timezone.utc
+):
     """Payload for the action plan, grouped by status and sorted by ETA.
 
     `assessment` is whatever the controls hang off — a compliance assessment or a
@@ -441,8 +454,7 @@ def action_plan_context(assessment, controls, lang="en", linked=None):
             "framework": str(framework) if framework else "",
         },
         "id": str(assessment.id),
-        "date": now().strftime("%d/%m/%Y"),
-        "generated_at": now().strftime("%Y-%m-%d %H:%M:%S %Z"),
+        **_report_time_context(tz),
         "groups": groups,
         "total": sum(len(g["controls"]) for g in groups),
     }
@@ -469,7 +481,9 @@ _CLOSED_FINDING_STATUSES = (
 )
 
 
-def findings_assessment_context(assessment, findings, lang="en"):
+def findings_assessment_context(
+    assessment, findings, lang="en", tz: tzinfo = timezone.utc
+):
     """Payload for the findings report.
 
     Findings are grouped by severity, worst first: a reader triages by severity,
@@ -533,8 +547,7 @@ def findings_assessment_context(assessment, findings, lang="en"):
             "reviewers": ", ".join(str(r) for r in assessment.reviewers.all()) or "-",
         },
         "id": str(assessment.id),
-        "date": now().strftime("%d/%m/%Y"),
-        "generated_at": now().strftime("%Y-%m-%d %H:%M:%S %Z"),
+        **_report_time_context(tz),
         "metrics": {
             "total": total,
             "closed": closed,
@@ -552,11 +565,7 @@ def findings_assessment_context(assessment, findings, lang="en"):
     }
 
 
-def _timestamp_str(value):
-    return value.strftime("%Y-%m-%d %H:%M:%S") if value else "-"
-
-
-def incident_context(incident, timeline_entries, lang="en"):
+def incident_context(incident, timeline_entries, lang="en", tz: tzinfo = timezone.utc):
     """Payload for the incident report.
 
     The timeline is the substance: entries in chronological order, each keyed by
@@ -569,7 +578,7 @@ def incident_context(incident, timeline_entries, lang="en"):
             {
                 "entry": entry.entry or "-",
                 "type_key": entry.entry_type or "observation",
-                "timestamp": _timestamp_str(entry.timestamp),
+                "timestamp": format_report_timestamp(entry.timestamp, tz),
                 "author": str(entry.author) if entry.author else "",
                 "observation": entry.observation or "",
                 "evidences": [e.name for e in entry.evidences.all()],
@@ -596,13 +605,12 @@ def incident_context(incident, timeline_entries, lang="en"):
             "entities": [e.name for e in incident.entities.all()],
             "assets": [a.name for a in incident.assets.all()],
             "threats": [t.name for t in incident.threats.all()],
-            "reported_at": _timestamp_str(incident.reported_at),
-            "occurred_at": _timestamp_str(incident.occurred_at),
-            "resolved_at": _timestamp_str(incident.resolved_at),
+            "reported_at": format_report_timestamp(incident.reported_at, tz),
+            "occurred_at": format_report_timestamp(incident.occurred_at, tz),
+            "resolved_at": format_report_timestamp(incident.resolved_at, tz),
         },
         "id": str(incident.id),
-        "date": now().strftime("%d/%m/%Y"),
-        "generated_at": now().strftime("%Y-%m-%d %H:%M:%S %Z"),
+        **_report_time_context(tz),
         "counts": {
             "total": len(entries),
             "detection": counts.get("detection", 0),
@@ -621,6 +629,7 @@ def risk_assessment_context(
     lang="en",
     label_standard="ISO",
     use_risk_category_label=False,
+    tz: tzinfo = timezone.utc,
 ):
     """Payload for the risk assessment report.
 
@@ -730,8 +739,7 @@ def risk_assessment_context(
             "due_date": _date_str(assessment.due_date),
         },
         "id": str(assessment.id),
-        "date": now().strftime("%d/%m/%Y"),
-        "generated_at": now().strftime("%Y-%m-%d %H:%M:%S %Z"),
+        **_report_time_context(tz),
         "include_inherent": include_inherent,
         # `risk_matrix_labels`: ISO says "Impact", EBIOS says "Severity".
         "label_standard": label_standard
@@ -762,7 +770,9 @@ def _risk_level(level):
     }
 
 
-def gen_audit_context(id, tree, lang, assessments=None, charts=True):
+def gen_audit_context(
+    id, tree, lang, assessments=None, charts=True, tz: tzinfo = timezone.utc
+):
     def count_category_results(data):
         def recursive_result_count(node_data):
             # Initialize result counts for this node
@@ -1156,9 +1166,8 @@ def gen_audit_context(id, tree, lang, assessments=None, charts=True):
     IGs = ", ".join([str(x) for x in audit.get_selected_implementation_groups()])
     context = {
         "audit": _build_safe_audit_context(audit),
-        "date": now().strftime("%d/%m/%Y"),
         # Traceability on the cover: which render, of which audit.
-        "generated_at": now().strftime("%Y-%m-%d %H:%M:%S %Z"),
+        **_report_time_context(tz),
         "contributors": f"{authors}\n{reviewers}",
         "req": aggregated,
         "compliance_donut": donut_buffer,

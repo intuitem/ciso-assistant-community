@@ -511,6 +511,8 @@
 	"dateFormatSettings": "Format de date",
 	"defaultDateFormat": "Format de date par défaut",
 	"defaultDateFormatHelpText": "Format de date appliqué aux nouveaux utilisateurs. Utilisez le bouton ci-dessous pour l'appliquer à tous les utilisateurs existants.",
+	"reportTimezone": "Fuseau horaire des rapports",
+	"reportTimezoneHelpText": "Région utilisée pour les heures imprimées dans les rapports et exports (PDF, Markdown). Chaque heure indique son décalage UTC. L'affichage à l'écran n'est pas concerné.",
 	"forceDateFormatForAllUsers": "Forcer le format de date pour tous les utilisateurs",
 	"forceDateFormatHelpText": "Remplacer la préférence de format de date de tous les utilisateurs existants par le format par défaut enregistré ci-dessus.",
 	"forceDateFormatConfirmTitle": "Forcer le format de date pour tous les utilisateurs",
