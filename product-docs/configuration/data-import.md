@@ -839,25 +839,35 @@ Every choice column accepts either the raw key (e.g. `privacy_contract`) or its 
 
 ### Supported fields
 
-* ref\_id
-* name\*
-* description
-* status
-  * Potential
-  * Exploitable
-  * Mitigated
-  * Not exploitable
-  * Fixed
-  * Unaffected
-* severity
-  * Information
-  * Low
-  * Medium
-  * High
-  * Critical
-* assets (newline-separated list of the name of the assets)
-* applied\_controls (newline-separated of the names)
-* security\_exceptions (newline-separated of the names)
+* **ref\_id** - e.g. a CVE identifier
+* **name**<mark style="color:red;">\*</mark>
+* **description**
+* **observation** - how the vulnerability is handled (Markdown)
+* **status** - case-insensitive; any other value reads as undefined
+  * `potential`
+  * `exploitable`
+  * `mitigated`
+  * `fixed`
+  * `not exploitable`
+  * `unaffected`
+* **severity** - case-insensitive, or the number `0`–`4`; any other value reads as undefined
+  * `info`
+  * `low`
+  * `medium`
+  * `high`
+  * `critical`
+* **detected\_at** - detection date (YYYY-MM-DD). Left empty, it is set to the import day while the [vulnerability SLA](settings/vulnerability-sla.md) is on
+* **due\_date** - due date (YYYY-MM-DD). Left empty, it is computed from the [vulnerability SLA policy](settings/vulnerability-sla.md) while the SLA is on
+* **assets**\
+  Names or ref\_ids separated by `|`, commas or new lines, looked up in the domain folder. A name that matches nothing rejects the row.
+* **applied\_controls**\
+  Names or ref\_ids separated by `|`, commas or new lines, looked up in the domain folder. A name that matches nothing rejects the row.
+* **security\_exceptions**\
+  Names or ref\_ids separated by `|`, commas or new lines, looked up in the domain folder. A name that matches nothing rejects the row.
+* **filtering\_labels**\
+  Label names separated by `|`, commas or new lines; missing labels are created.
+
+In update mode, an existing vulnerability is matched by **ref\_id**, then by **name**, in the domain folder. Empty cells leave its fields as they are.
 
 
 
