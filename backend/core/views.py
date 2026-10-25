@@ -4024,29 +4024,55 @@ class RiskMatrixViewSet(BaseModelViewSet):
         return errors
 
 
+class VulnerabilityFilterSet(GenericFilterSet):
+    # The SLA state is computed, not stored: filter on the same expression the
+    # serializer shows (Vulnerability.sla_state_annotations).
+    state = df.MultipleChoiceFilter(
+        choices=[(state, state) for state in Vulnerability.SLA_STATES],
+        method="filter_state",
+        label="SLA",
+    )
+
+    def filter_state(self, queryset, name, values):
+        if "sla_state" not in queryset.query.annotations:
+            queryset = queryset.annotate(**Vulnerability.sla_state_annotations())
+        return queryset.filter(sla_state__in=values)
+
+    class Meta:
+        model = Vulnerability
+        fields = {
+            "folder": ["exact"],
+            "owner": ["exact"],
+            "assets": ["exact"],
+            "status": ["exact"],
+            "severity": ["exact"],
+            "risk_scenarios": ["exact"],
+            "applied_controls": ["exact"],
+            "security_exceptions": ["exact"],
+            "evidences": ["exact"],
+            "incidents": ["exact"],
+            "task_templates": ["exact"],
+            "filtering_labels": ["exact"],
+            "findings": ["exact"],
+            "security_advisories": ["exact"],
+            "cwes": ["exact"],
+            "created_at": ["gte", "lt"],
+            "updated_at": ["gte", "lt"],
+            "due_date": ["exact"],
+        }
+
+
 class VulnerabilityViewSet(BaseModelViewSet):
     """
     API endpoint that allows vulnerabilities to be viewed or edited.
     """
 
     model = Vulnerability
-    filterset_fields = {
-        "folder": ["exact"],
-        "assets": ["exact"],
-        "status": ["exact"],
-        "severity": ["exact"],
-        "risk_scenarios": ["exact"],
-        "applied_controls": ["exact"],
-        "security_exceptions": ["exact"],
-        "filtering_labels": ["exact"],
-        "findings": ["exact"],
-        "security_advisories": ["exact"],
-        "cwes": ["exact"],
-        "created_at": ["gte", "lt"],
-        "updated_at": ["gte", "lt"],
-        "due_date": ["exact"],
-    }
+    filterset_class = VulnerabilityFilterSet
     search_fields = ["name", "description", "ref_id"]
+    # The SLA column sorts by urgency, vulnerabilities without a state last.
+    ordering_remap = {"state": "sla_rank"}
+    ordering_nulls_last = ("sla_rank",)
 
     autocomplete_serializer_class = VulnerabilityAutocompleteSerializer
 
@@ -4054,14 +4080,22 @@ class VulnerabilityViewSet(BaseModelViewSet):
         qs = super().get_queryset()
         if self.action == "autocomplete":
             return qs
-        return qs.prefetch_related(
+        qs = qs.prefetch_related(
+            actor_prefetch("owner"),
             "applied_controls",
+            "evidences",
             "assets",
             "security_exceptions",
             "security_advisories",
             "cwes",
             "filtering_labels__folder",
         )
+        if (
+            self.action in READ_HEAVY_ACTIONS
+            or "state" in self.request.query_params.get("ordering", "")
+        ):
+            qs = qs.annotate(**Vulnerability.sla_state_annotations())
+        return qs
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
@@ -5939,6 +5973,7 @@ class AppliedControlFilterSet(GenericFilterSet):
             "owner": ["exact"],
             "findings": ["exact"],
             "incidents": ["exact"],
+            "vulnerabilities": ["exact"],
             "eta": ["exact", "lte", "gte", "lt", "gt", "month", "year"],
             "start_date": ["exact"],
             "expiry_date": ["exact"],
@@ -11513,6 +11548,7 @@ class EvidenceFilterSet(GenericFilterSet):
             "processings",
             "data_breaches",
             "security_exceptions",
+            "vulnerabilities",
         ]
 
 
@@ -17348,6 +17384,7 @@ class SecurityExceptionViewSet(ExportMixin, BaseModelViewSet):
         "name": ["exact"],
         "requirement_assessments": ["exact"],
         "risk_scenarios": ["exact"],
+        "vulnerabilities": ["exact"],
         "evidences": ["exact"],
         "owners": ["exact"],
         "approver": ["exact"],
@@ -18171,6 +18208,7 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
         "owners": ["exact"],
         "entities": ["exact"],
         "assets": ["exact"],
+        "vulnerabilities": ["exact"],
         "applied_controls": ["exact"],
         "task_templates": ["exact"],
         "risk_scenarios": ["exact"],
@@ -18189,6 +18227,7 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
                 "threats",
                 actor_prefetch("owners"),
                 "assets",
+                "vulnerabilities",
                 "qualifications",
                 "entities",
                 "applied_controls",
@@ -18862,6 +18901,7 @@ class TaskTemplateFilter(GenericFilterSet):
             "objectives",
             "incidents",
             "findings",
+            "vulnerabilities",
             "requirement_assessments",
             "filtering_labels",
             "task_date",
@@ -19357,6 +19397,7 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
                 "risk_assessments",
                 actor_prefetch("assigned_to"),
                 "findings_assessment",
+                "vulnerabilities",
                 "commitments__committed_by",
                 # Stands in for a plain "findings": same lookup, binder-scoped.
                 scoped_findings_prefetch(self.request),

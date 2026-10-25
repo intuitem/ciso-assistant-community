@@ -1455,6 +1455,8 @@
 	"templateQuickFormSubmittedDescription": "Sent to a reviewer when a quick form response is submitted",
 	"templateSecurityExceptionAssignmentName": "Exception assignment",
 	"templateSecurityExceptionAssignmentDescription": "Sent when a security exception is assigned",
+	"templateVulnerabilityAssignmentName": "Vulnerability assignment",
+	"templateVulnerabilityAssignmentDescription": "Sent when a vulnerability is assigned",
 	"templateSecurityExceptionExpiringSoonName": "Exception expiring soon",
 	"templateSecurityExceptionExpiringSoonDescription": "Sent when security exceptions are about to expire",
 	"templateSecurityExceptionStatusChangedName": "Exception status changed",
@@ -1482,6 +1484,7 @@
 	"notificationTitleQuickFormSubmitted": "Quick form '{response_name}' awaits your review",
 	"notificationTitleRiskScenarioAssignment": "You have been assigned to risk scenario '{scenario_name}'",
 	"notificationTitleSecurityExceptionAssignment": "You have been assigned to exception '{exception_name}'",
+	"notificationTitleVulnerabilityAssignment": "You have been assigned to vulnerability '{vulnerability_name}'",
 	"notificationTitleSecurityExceptionExpiringSoon": "Exception '{exception_name}' expires in {days_remaining} day(s)",
 	"notificationTitleSecurityExceptionStatusChanged": "Exception '{exception_name}' is now {new_status}",
 	"notificationTitleTaskNodeDueSoon": "Task '{task_name}' is due in {days_remaining} day(s)",
@@ -3068,6 +3071,30 @@
 	"batchChangeSeverity": "Change severity",
 	"detectedAt": "Detection date",
 	"detectedAtHelpText": "When the vulnerability was discovered. Defaults to today unless the SLA is disabled. Used as the SLA anchor when the policy is set to detection date.",
+	"remediatedAt": "Remediation date",
+	"remediatedAtHelpText": "Set to the day the vulnerability is resolved (mitigated, fixed, not exploitable or unaffected), unless you enter one. Cleared when it is reopened.",
+	"vulnerabilityOpenForDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Open for {count} day since detection",
+				"countPlural=other": "Open for {count} days since detection"
+			}
+		}
+	],
+	"vulnerabilityRemediatedInDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Remediated {count} day after detection",
+				"countPlural=other": "Remediated {count} days after detection"
+			}
+		}
+	],
+	"excepted": "Excepted",
+	"exceptionEnds": "Exception ends",
 	"refreshDueDates": "Refresh SLA due dates",
 	"refreshDueDatesConfirm": "This will recalculate all due dates based on the current SLA policy. Existing due dates will be overwritten. Continue?",
 	"resetToDefaults": "Reset to defaults",

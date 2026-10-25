@@ -442,6 +442,30 @@
 	"changeSeverity": "... la gravité",
 	"batchChangeSeverity": "Modifier la gravité",
 	"detectedAtHelpText": "Date de découverte de la vulnérabilité. Aujourd'hui par défaut, sauf si le SLA est désactivé. Utilisée comme point d'ancrage SLA lorsque la politique est basée sur la date de détection.",
+	"remediatedAt": "Date de remédiation",
+	"remediatedAtHelpText": "Renseignée le jour où la vulnérabilité est résolue (atténuée, corrigée, non exploitable ou non affectée), sauf si vous en saisissez une. Effacée si elle est rouverte.",
+	"vulnerabilityOpenForDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Détectée il y a {count} jour, toujours ouverte",
+				"countPlural=other": "Détectée il y a {count} jours, toujours ouverte"
+			}
+		}
+	],
+	"vulnerabilityRemediatedInDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Remédiée {count} jour après sa détection",
+				"countPlural=other": "Remédiée {count} jours après sa détection"
+			}
+		}
+	],
+	"excepted": "Sous exception",
+	"exceptionEnds": "Fin de l'exception",
 	"refreshDueDates": "Recalculer les échéances SLA",
 	"refreshDueDatesConfirm": "Cette action recalculera toutes les échéances selon la politique SLA en vigueur. Les échéances existantes seront écrasées. Continuer ?",
 	"refreshDueDatesFailed": "Échec du recalcul des échéances",
@@ -1490,6 +1514,8 @@
 	"templateQuickFormSubmittedDescription": "Envoyé à un relecteur lorsqu'une réponse de formulaire rapide est soumise",
 	"templateSecurityExceptionAssignmentName": "Attribution d'exception",
 	"templateSecurityExceptionAssignmentDescription": "Envoyé lorsqu'une exception est attribuée à un utilisateur",
+	"templateVulnerabilityAssignmentName": "Attribution de vulnérabilité",
+	"templateVulnerabilityAssignmentDescription": "Envoyé lorsqu'une vulnérabilité est attribuée",
 	"templateSecurityExceptionExpiringSoonName": "Exception expirant bientôt",
 	"templateSecurityExceptionExpiringSoonDescription": "Envoyé lorsque des exceptions sont sur le point d'expirer",
 	"templateSecurityExceptionStatusChangedName": "Statut d'exception modifié",
@@ -1517,6 +1543,7 @@
 	"notificationTitleQuickFormSubmitted": "Le formulaire « {response_name} » attend votre revue",
 	"notificationTitleRiskScenarioAssignment": "Le scénario de risque « {scenario_name} » vous a été attribué",
 	"notificationTitleSecurityExceptionAssignment": "L'exception « {exception_name} » vous a été attribuée",
+	"notificationTitleVulnerabilityAssignment": "La vulnérabilité « {vulnerability_name} » vous a été attribuée",
 	"notificationTitleSecurityExceptionExpiringSoon": "L'exception « {exception_name} » expire dans {days_remaining} jour(s)",
 	"notificationTitleSecurityExceptionStatusChanged": "L'exception « {exception_name} » est désormais {new_status}",
 	"notificationTitleTaskNodeDueSoon": "La tâche « {task_name} » est à faire dans {days_remaining} jour(s)",

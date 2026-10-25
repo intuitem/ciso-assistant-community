@@ -1118,6 +1118,8 @@
 	"templateValidationFlowUpdatedDescription": "검증 흐름 상태가 변경될 때 전송됩니다",
 	"templateAuditReportName": "감사 보고서",
 	"templateAuditReportDescription": "컴플라이언스 평가 Word 보고서",
+	"templateVulnerabilityAssignmentName": "취약점 할당",
+	"templateVulnerabilityAssignmentDescription": "취약점이 할당될 때 전송됩니다",
 	"wordTemplates": "Word 보고서 템플릿",
 	"wordTemplatesDescription": "보고서 생성에 사용되는 Word 보고서 템플릿(.docx)을 사용자 지정합니다. 사용자 템플릿을 업로드하여 기본 제공 기본값을 덮어쓸 수 있습니다.",
 	"wordTemplatesWarning": "사용 전에 템플릿 내용을 주의 깊게 검토하고 조직의 보안 및 규정 준수 정책을 준수하는지 확인하세요.",
@@ -3439,6 +3441,7 @@
 	"assetsDescription": "비즈니스 프로세스와 기능(주요), 앱 또는 기술 구성요소(지원)",
 	"threatsDescription": "조직에 대한 잠재적 위협입니다",
 	"vulnerabilitiesDescription": "알려진 취약점과 약점입니다",
+	"vulnerabilitySlaDescription": "심각도에 따라 취약점 마감일을 계산하고 각 취약점이 마감일에 얼마나 가까운지 표시합니다",
 	"riskScenariosDescription": "시나리오와 그 처리 방안을 포함한 위험 등록부입니다",
 	"referenceControlsDescription": "일반적인 보안 통제 템플릿입니다",
 	"requirementMappingSetsDescription": "서로 다른 프레임워크와 표준 간의 매핑입니다",
@@ -3942,12 +3945,36 @@
 	"commandPaletteSearchHint": "모든 객체에서 검색하려면 Enter를 누르세요",
 	"searchPagesAndObjects": "페이지 및 객체 검색...",
 	"search": "검색",
-	"vulnerabilitySlaPolicyHelpText": "심각도에 따라 취약점을 수정하는 데 허용되는 최대 일수를 정의합니다.",
+	"vulnerabilitySlaPolicyHelpText": "심각도에 따라 취약점을 수정하는 데 허용되는 최대 일수를 정의합니다. SLA를 완전히 끄려면 취약점 SLA 기능 플래그를 비활성화하세요.",
 	"slaAnchor": "SLA 시작일",
 	"slaAnchorHelpText": "SLA가 시작되는 시점을 선택합니다.",
 	"slaDaysHelpText": "수정 허용 일수",
 	"resetToDefaults": "기본값으로 초기화",
+	"vulnerabilitySlaDisabledHint": "기능 플래그에서 취약점 SLA가 꺼져 있어 마감일이 계산되지 않습니다",
 	"detectedAt": "탐지 날짜",
+	"detectedAtHelpText": "취약점이 발견된 시점입니다. SLA가 꺼져 있지 않으면 기본값은 오늘입니다. 정책이 탐지 날짜로 설정된 경우 SLA 기준으로 사용됩니다.",
+	"remediatedAt": "조치 완료일",
+	"remediatedAtHelpText": "취약점이 해결된 날(완화됨, 수정됨, 악용 불가 또는 영향 없음)로 설정되며, 직접 입력한 경우에는 그 날짜를 사용합니다. 다시 열면 지워집니다.",
+	"vulnerabilityOpenForDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=other": "탐지 후 {count}일 동안 열려 있음"
+			}
+		}
+	],
+	"vulnerabilityRemediatedInDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=other": "탐지 후 {count}일 만에 조치 완료"
+			}
+		}
+	],
+	"excepted": "예외 적용",
+	"exceptionEnds": "예외 종료",
 	"publishedDate": "게시 날짜",
 	"vulnerabilitySlaPolicy": "취약점 SLA",
 	"secIntelFeeds": "취약점 피드",
@@ -4337,6 +4364,7 @@
 	"fieldType": "필드 유형",
 	"model": "모델",
 	"readAt": "읽은 시각",
+	"notificationTitleVulnerabilityAssignment": "취약점 '{vulnerability_name}'에 할당되었습니다",
 	"notification": "알림",
 	"notifications": "알림",
 	"read": "읽음",

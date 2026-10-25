@@ -1278,6 +1278,8 @@
 	"templateValidationFlowUpdatedDescription": "Saadetakse, kui kinnitustöövoo olek muutub",
 	"templateAuditReportName": "Auditi aruanne",
 	"templateAuditReportDescription": "Nõuetele vastavuse hindamise Wordi aruanne",
+	"templateVulnerabilityAssignmentName": "Haavatavuse määramine",
+	"templateVulnerabilityAssignmentDescription": "Saadetakse, kui haavatavus määratakse",
 	"wordTemplates": "Wordi aruandemallid",
 	"wordTemplatesDescription": "Kohanda aruannete loomiseks kasutatavaid Wordi malle (.docx). Üles laetud mallid kirjutavad sisseehitatud vaikemallid üle.",
 	"wordTemplatesWarning": "Vaadake malli sisu enne kasutamist hoolikalt üle ja veenduge, et see vastab teie organisatsiooni turbe- ja vastavuspoliitikatele.",
@@ -2592,11 +2594,36 @@
 	"replaceWithConfirmTitle": "Kinnita asendamine",
 	"changeSeverity": "Muuda raskusastet",
 	"detectedAt": "Tuvastamise kuupäev",
-	"detectedAtHelpText": "Kuupäev, mil haavatavus avastati. Vaikimisi tänane päev. Kasutatakse SLA ankruna, kui poliitika on seatud tuvastamise kuupäevale.",
+	"detectedAtHelpText": "Kuupäev, mil haavatavus avastati. Vaikimisi tänane päev, kui SLA pole välja lülitatud. Kasutatakse SLA ankruna, kui poliitika on seatud tuvastamise kuupäevale.",
+	"remediatedAt": "Parandamise kuupäev",
+	"remediatedAtHelpText": "Määratakse päevale, mil haavatavus lahendatakse (leevendatud, parandatud, mitteärakasutatav või mõjutamata), kui te ise kuupäeva ei sisesta. Tühjendatakse uuesti avamisel.",
+	"vulnerabilityOpenForDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Avatud {count} päev tuvastamisest",
+				"countPlural=other": "Avatud {count} päeva tuvastamisest"
+			}
+		}
+	],
+	"vulnerabilityRemediatedInDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Parandatud {count} päev pärast tuvastamist",
+				"countPlural=other": "Parandatud {count} päeva pärast tuvastamist"
+			}
+		}
+	],
+	"excepted": "Erandiga",
+	"exceptionEnds": "Erand lõpeb",
 	"refreshDueDates": "Värskenda SLA tähtaegu",
 	"refreshDueDatesConfirm": "See arvutab kõik tähtajad ümber vastavalt kehtivale SLA poliitikale. Olemasolevad tähtajad kirjutatakse üle. Kas jätkata?",
 	"resetToDefaults": "Taasta vaikeseaded",
 	"refreshDueDatesFailed": "Tähtaegade värskendamine ebaõnnestus",
+	"vulnerabilitySlaDisabledHint": "Haavatavuse SLA on funktsioonilülitites välja lülitatud, seega tähtaegu ei arvutata",
 	"changeTreatment": "Muuda käsitlust",
 	"changeAssignee": "Muuda vastutajat",
 	"changeResult": "Muuda tulemust",
@@ -3798,6 +3825,7 @@
 	"assetsDescription": "Äriprotsessid ja funktsioonid (esmased), rakendused või tehnilised komponendid (toetavad)",
 	"threatsDescription": "Potentsiaalsed ohud sinu organisatsioonile",
 	"vulnerabilitiesDescription": "Teadaolevad haavatavused ja nõrkused",
+	"vulnerabilitySlaDescription": "Arvuta haavatavuste tähtajad nende tõsiduse põhjal ja näita, kui lähedal on igaüks oma tähtajale",
 	"riskScenariosDescription": "Riskiregister koos stsenaariumide ja nende käsitlusega",
 	"referenceControlsDescription": "Tüüpiliste turvakontrollide mall",
 	"requirementMappingSetsDescription": "Vastendused erinevate raamistike ja standardite vahel",
@@ -3901,7 +3929,7 @@
 	"syncCweCatalogFailed": "CWE kataloogi toomine ebaõnnestus",
 	"vulnerability": "Haavatavus",
 	"vulnerabilitySlaPolicy": "Haavatavuse SLA",
-	"vulnerabilitySlaPolicyHelpText": "Määra raskusastme põhjal maksimaalne päevade arv haavatavuse parandamiseks. Jäta tühjaks, et selle raskusastme automaatarvutus keelata. Määramisel arvutatakse tähtaeg automaatselt haavatavuse loomisel või raskusastme muutumisel.",
+	"vulnerabilitySlaPolicyHelpText": "Määra raskusastme põhjal maksimaalne päevade arv haavatavuse parandamiseks. Jäta tühjaks, et selle raskusastme automaatarvutus keelata. Määramisel arvutatakse tähtaeg automaatselt haavatavuse loomisel või raskusastme muutumisel. SLA täielikuks väljalülitamiseks lülitage välja funktsioonilüliti „Haavatavuse SLA”.",
 	"sla": "SLA",
 	"caution": "Caution",
 	"slaAnchor": "SLA alguskuupäev",
@@ -4881,6 +4909,7 @@
 	"fieldType": "Välja tüüp",
 	"model": "Mudel",
 	"readAt": "Lugemise aeg",
+	"notificationTitleVulnerabilityAssignment": "Teile määrati haavatavus '{vulnerability_name}'",
 	"notification": "Teavitus",
 	"notifications": "Teavitused",
 	"read": "Loetud",

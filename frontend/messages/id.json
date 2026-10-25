@@ -1410,12 +1410,36 @@
 	"syncToAppliedControl": "Sinkronkan dengan kontrol yang diterapkan",
 	"syncToReferenceControl": "Sinkronkan dengan kontrol referensi",
 	"expirationDate": "Tanggal kedaluwarsa",
-	"vulnerabilitySlaPolicyHelpText": "Tentukan jumlah maksimum hari untuk memperbaiki kerentanan berdasarkan tingkat keparahannya.",
+	"vulnerabilitySlaPolicyHelpText": "Tentukan jumlah maksimum hari untuk memperbaiki kerentanan berdasarkan tingkat keparahannya. Untuk mematikan SLA sepenuhnya, nonaktifkan feature flag SLA kerentanan.",
 	"slaAnchor": "Tanggal mulai SLA",
 	"slaAnchorHelpText": "Pilih kapan SLA dimulai.",
 	"slaDaysHelpText": "Jumlah hari perbaikan",
 	"resetToDefaults": "Reset ke default",
+	"vulnerabilitySlaDisabledHint": "SLA kerentanan dinonaktifkan di feature flag, sehingga batas waktu tidak dihitung",
 	"detectedAt": "Tanggal terdeteksi",
+	"detectedAtHelpText": "Kapan kerentanan ditemukan. Bawaannya hari ini, kecuali SLA dinonaktifkan. Digunakan sebagai acuan SLA saat kebijakan diatur ke tanggal terdeteksi.",
+	"remediatedAt": "Tanggal remediasi",
+	"remediatedAtHelpText": "Diatur ke hari kerentanan diselesaikan (dimitigasi, diperbaiki, tidak dapat dieksploitasi, atau tidak terdampak), kecuali Anda memasukkan tanggal sendiri. Dihapus saat dibuka kembali.",
+	"vulnerabilityOpenForDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=other": "Terbuka selama {count} hari sejak terdeteksi"
+			}
+		}
+	],
+	"vulnerabilityRemediatedInDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=other": "Diremediasi {count} hari setelah terdeteksi"
+			}
+		}
+	],
+	"excepted": "Dikecualikan",
+	"exceptionEnds": "Pengecualian berakhir",
 	"publishedDate": "Tanggal publikasi",
 	"vulnerabilitySlaPolicy": "SLA kerentanan",
 	"secIntelFeeds": "Feed kerentanan",
@@ -1896,7 +1920,10 @@
 	"templateSaved": "Templat berhasil disimpan",
 	"templateReset": "Templat disetel ulang ke default",
 	"confirmResetTemplate": "Anda yakin ingin menyetel ulang templat ini ke default? Kustomisasi Anda akan hilang.",
+	"templateVulnerabilityAssignmentName": "Penugasan kerentanan",
+	"templateVulnerabilityAssignmentDescription": "Dikirim saat kerentanan ditugaskan",
 	"readAt": "Dibaca pada",
+	"notificationTitleVulnerabilityAssignment": "Anda telah ditugaskan ke kerentanan '{vulnerability_name}'",
 	"notification": "Notifikasi",
 	"notifications": "Notifikasi",
 	"read": "Dibaca",
@@ -2167,6 +2194,7 @@
 	"events": "Peristiwa",
 	"reports": "Laporan",
 	"annualExpense": "Pengeluaran tahunan",
+	"vulnerabilitySlaDescription": "Hitung batas waktu kerentanan berdasarkan tingkat keparahannya dan tampilkan seberapa dekat masing-masing dengan tenggatnya",
 	"targetDomains": "Domain target",
 	"vulnerability": "Kerentanan",
 	"sla": "SLA",

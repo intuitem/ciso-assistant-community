@@ -41,6 +41,21 @@
 	cacheLock={cacheLocks['severity']}
 	bind:cachedValue={formDataCache['severity']}
 />
+<AutocompleteSelect
+	{form}
+	multiple
+	optionsEndpoint="actors"
+	lazy
+	optionsLabelField="str"
+	optionsInfoFields={{
+		fields: [{ field: 'type', translate: true }],
+		position: 'prefix'
+	}}
+	field="owner"
+	cacheLock={cacheLocks['owner']}
+	bind:cachedValue={formDataCache['owner']}
+	label={m.owner()}
+/>
 <MarkdownField
 	{form}
 	field="observation"
@@ -137,6 +152,15 @@
 	label={m.dueDate()}
 	cacheLock={cacheLocks['due_date']}
 	bind:cachedValue={formDataCache['due_date']}
+/>
+<TextField
+	type="date"
+	{form}
+	field="remediated_at"
+	label={m.remediatedAt()}
+	helpText={m.remediatedAtHelpText()}
+	cacheLock={cacheLocks['remediated_at']}
+	bind:cachedValue={formDataCache['remediated_at']}
 />
 <AutocompleteSelect
 	multiple

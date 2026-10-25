@@ -2165,6 +2165,7 @@
 	"visualize": "Visualizza",
 	"visualizeButton": "Visualizza vulnerabilità",
 	"vulnerabilitiesDescription": "Vulnerabilità e debolezze conosciute",
+	"vulnerabilitySlaDescription": "Calcolare le date di scadenza delle vulnerabilità in base alla gravità e mostrare quanto ciascuna è vicina alla propria scadenza",
 	"vulnerability": "Vulnerabilità",
 	"vulnerabilityDistribution": "Distribuzione vulnerabilità",
 	"vulnerabilityTreemap": "Albero vulnerabilità",
@@ -2435,12 +2436,40 @@
 	"confirmModalMessagePlural": "Sei sicuro? Questa azione avrà effetto permanente sui seguenti oggetti",
 	"syncAppliedControlsMessage": "I controlli applicati che utilizzano questo controllo di riferimento saranno sincronizzati con esso. Si prega di notare che questa operazione non può essere annullata.",
 	"syncToAppliedControl": "Sincronizza con il controllo applicato",
-	"vulnerabilitySlaPolicyHelpText": "Definire il numero massimo di giorni consentiti per correggere una vulnerabilità in base alla sua gravità. Lasciare vuoto per disattivare il calcolo automatico per questo livello di gravità. Quando impostato, la data di scadenza viene calcolata automaticamente alla creazione della vulnerabilità o al cambiamento di gravità.",
+	"vulnerabilitySlaPolicyHelpText": "Definire il numero massimo di giorni consentiti per correggere una vulnerabilità in base alla sua gravità. Lasciare vuoto per disattivare il calcolo automatico per questo livello di gravità. Quando impostato, la data di scadenza viene calcolata automaticamente alla creazione della vulnerabilità o al cambiamento di gravità. Per disattivare completamente lo SLA, disattivare il flag della funzionalità SLA delle vulnerabilità.",
 	"slaAnchor": "Data di inizio SLA",
 	"slaAnchorHelpText": "Scegli quando inizia il conteggio dello SLA. Data di rilevamento: quando la vulnerabilità è stata scoperta dalla tua organizzazione. Data di pubblicazione: quando l’avviso è stato reso pubblico. Usa la data di rilevamento come fallback se la data di pubblicazione non è disponibile.",
 	"slaDaysHelpText": "Numero di giorni consentiti per la remediation",
 	"resetToDefaults": "Ripristina valori predefiniti",
+	"vulnerabilitySlaDisabledHint": "Lo SLA delle vulnerabilità è disattivato nei flag delle funzionalità, quindi le date di scadenza non vengono calcolate",
 	"detectedAt": "Data di rilevamento",
+	"detectedAtHelpText": "Quando è stata scoperta la vulnerabilità. Per impostazione predefinita è oggi, a meno che lo SLA non sia disattivato. Usata come riferimento dello SLA quando la politica è impostata sulla data di rilevamento.",
+	"remediatedAt": "Data di correzione",
+	"remediatedAtHelpText": "Impostata al giorno in cui la vulnerabilità viene risolta (mitigata, corretta, non sfruttabile o non interessata), a meno che non venga inserita manualmente. Viene cancellata alla riapertura.",
+	"vulnerabilityOpenForDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Aperta da {count} giorno dal rilevamento",
+				"countPlural=many": "Aperta da {count} giorni dal rilevamento",
+				"countPlural=other": "Aperta da {count} giorni dal rilevamento"
+			}
+		}
+	],
+	"vulnerabilityRemediatedInDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Corretta {count} giorno dopo il rilevamento",
+				"countPlural=many": "Corretta {count} giorni dopo il rilevamento",
+				"countPlural=other": "Corretta {count} giorni dopo il rilevamento"
+			}
+		}
+	],
+	"excepted": "In eccezione",
+	"exceptionEnds": "Fine dell'eccezione",
 	"publishedDate": "Data di pubblicazione",
 	"vulnerabilitySlaPolicy": "SLA delle vulnerabilità",
 	"secIntelFeeds": "Feed di vulnerabilità",
@@ -3953,6 +3982,8 @@
 	"templateAuditReportDescription": "Report di audit in formato Word",
 	"templateDocumentPdfName": "Layout PDF del documento",
 	"templateDocumentPdfDescription": "Layout PDF dei documenti gestiti (copertina, intestazioni e piè di pagina)",
+	"templateVulnerabilityAssignmentName": "Assegnazione vulnerabilità",
+	"templateVulnerabilityAssignmentDescription": "Inviata quando viene assegnata una vulnerabilità",
 	"docHtmlTemplates": "Layout PDF dei documenti",
 	"docHtmlTemplatesDescription": "Personalizza il layout HTML/CSS utilizzato per l'esportazione dei documenti in PDF, inclusi copertina, intestazioni, piè di pagina ed elementi grafici. Carica un modello personalizzato per sostituire quello predefinito.",
 	"docHtmlTemplateUploadHelp": "Carica un file .html che utilizzi la sintassi dei template Django e le stesse variabili del modello predefinito. Scarica prima il modello predefinito per utilizzarlo come punto di partenza.",
@@ -4099,6 +4130,7 @@
 	"documentRevision": "Revisione del documento",
 	"approvedBy": "Approvato da",
 	"readAt": "Letto il",
+	"notificationTitleVulnerabilityAssignment": "Ti è stata assegnata la vulnerabilità '{vulnerability_name}'",
 	"notification": "Notifica",
 	"notifications": "Notifiche",
 	"read": "Letto",

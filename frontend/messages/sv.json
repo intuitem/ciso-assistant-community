@@ -1212,12 +1212,38 @@
 	"syncAppliedControlsMessage": "De tillämpade kontroller som använder denna referenskontroll kommer att synkroniseras med den. Observera att detta inte kan ångras.",
 	"syncToAppliedControl": "Synkronisera med tillämpad kontroll",
 	"syncToReferenceControl": "Synkronisera med referenskontroll",
-	"vulnerabilitySlaPolicyHelpText": "Definiera det maximala antalet dagar för att åtgärda en sårbarhet baserat på dess allvarlighetsgrad.",
+	"vulnerabilitySlaPolicyHelpText": "Definiera det maximala antalet dagar för att åtgärda en sårbarhet baserat på dess allvarlighetsgrad. Stäng av funktionsflaggan SLA för sårbarheter för att stänga av SLA helt.",
 	"slaAnchor": "SLA startdatum",
 	"slaAnchorHelpText": "Välj när SLA börjar.",
 	"slaDaysHelpText": "Antal dagar för åtgärd",
 	"resetToDefaults": "Återställ till standard",
+	"vulnerabilitySlaDisabledHint": "SLA för sårbarheter är avstängt i funktionsflaggorna, så förfallodatum beräknas inte",
 	"detectedAt": "Upptäcktsdatum",
+	"detectedAtHelpText": "När sårbarheten upptäcktes. Standard är i dag, om inte SLA är avstängt. Används som SLA-ankare när policyn är inställd på upptäcktsdatum.",
+	"remediatedAt": "Åtgärdsdatum",
+	"remediatedAtHelpText": "Sätts till dagen då sårbarheten löses (mildrad, åtgärdad, inte exploaterbar eller inte påverkad), om du inte själv anger ett datum. Rensas när den öppnas igen.",
+	"vulnerabilityOpenForDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Öppen i {count} dag sedan upptäckt",
+				"countPlural=other": "Öppen i {count} dagar sedan upptäckt"
+			}
+		}
+	],
+	"vulnerabilityRemediatedInDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Åtgärdad {count} dag efter upptäckt",
+				"countPlural=other": "Åtgärdad {count} dagar efter upptäckt"
+			}
+		}
+	],
+	"excepted": "Undantagen",
+	"exceptionEnds": "Undantaget upphör",
 	"publishedDate": "Publiceringsdatum",
 	"vulnerabilitySlaPolicy": "SLA för sårbarheter",
 	"secIntelFeeds": "Sårbarhetsflöden",
@@ -1719,7 +1745,10 @@
 	"templateSaved": "Mallen har sparats",
 	"templateReset": "Mallen har återställts till standard",
 	"confirmResetTemplate": "Är du säker på att du vill återställa mallen till standard? Din anpassning går förlorad.",
+	"templateVulnerabilityAssignmentName": "Tilldelning av sårbarhet",
+	"templateVulnerabilityAssignmentDescription": "Skickas när en sårbarhet tilldelas",
 	"readAt": "Läst den",
+	"notificationTitleVulnerabilityAssignment": "Du har tilldelats sårbarheten '{vulnerability_name}'",
 	"notification": "Avisering",
 	"notifications": "Aviseringar",
 	"read": "Läst",
@@ -2026,6 +2055,7 @@
 	"events": "Händelser",
 	"reports": "Rapporter",
 	"annualExpense": "Årlig kostnad",
+	"vulnerabilitySlaDescription": "Beräkna förfallodatum för sårbarheter utifrån deras allvarlighet och visa hur nära sin tidsfrist var och en är",
 	"targetDomains": "Måldomäner",
 	"vulnerability": "Sårbarhet",
 	"sla": "SLA",

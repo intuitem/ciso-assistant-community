@@ -70,7 +70,7 @@ from ebios_rm.models import (
     StrategicScenario,
 )
 from iam.models import Folder, RoleAssignment, User
-from sec_intel.models import Tactic, Technique, TTPCatalog
+from sec_intel.models import CWE, SecurityAdvisory, Tactic, Technique, TTPCatalog
 from tprm.models import (
     Contract,
     Entity,
@@ -374,6 +374,29 @@ def import_terminologies(
     if single_value:
         return result_qs.first()
     return result_qs
+
+
+def _imported_catalog_entries(model, ref_ids: list, **context) -> list:
+    """The catalog entries (advisories, CWEs) an export names by ref_id. They
+    don't travel with a domain, so a ref_id this instance lacks, or holds more
+    than once, is skipped rather than guessed."""
+    found: dict[str, list] = {}
+    for entry in model.objects.filter(ref_id__in=ref_ids):
+        found.setdefault(entry.ref_id, []).append(entry)
+    entries = []
+    for ref_id in ref_ids:
+        matches = found.get(ref_id, [])
+        if len(matches) == 1:
+            entries.append(matches[0])
+        else:
+            logger.warning(
+                "Import: catalog entry not matched on this instance",
+                model=model._meta.model_name,
+                ref_id=ref_id,
+                matches=len(matches),
+                **context,
+            )
+    return entries
 
 
 def _imported_tier(ref: str, **context) -> Tier | None:
@@ -1022,9 +1045,13 @@ def process_model_relationships(
                 many_to_many_map_ids["selected_choices_urns"] = choice_urns
 
         case "vulnerability":
-            many_to_many_map_ids["applied_controls"] = get_mapped_ids(
-                _fields.pop("applied_controls", []), link_dump_database_ids
-            )
+            for field in ("applied_controls", "assets", "evidences"):
+                many_to_many_map_ids[f"{field}_ids"] = get_mapped_ids(
+                    _fields.pop(field, []), link_dump_database_ids
+                )
+            # Catalog entries, named by ref_id: matched in set_many_to_many_relations.
+            for field in ("security_advisories", "cwes"):
+                many_to_many_map_ids[f"{field}_refs"] = _fields.pop(field, [])
 
         case "riskscenario":
             _fields["risk_assessment"] = RiskAssessment.objects.get(
@@ -1345,7 +1372,7 @@ def process_model_relationships(
             )
 
         case "incident":
-            for field in ("threats", "assets", "entities"):
+            for field in ("threats", "assets", "entities", "vulnerabilities"):
                 many_to_many_map_ids[f"{field}_ids"] = get_mapped_ids(
                     _fields.pop(field, []), link_dump_database_ids
                 )
@@ -1365,6 +1392,7 @@ def process_model_relationships(
                 "requirement_assessments",
                 "risk_assessments",
                 "findings_assessment",
+                "vulnerabilities",
             ):
                 many_to_many_map_ids[f"{field}_ids"] = get_mapped_ids(
                     _fields.pop(field, []), link_dump_database_ids
@@ -1432,10 +1460,21 @@ def set_many_to_many_relations(
                 obj.evidences.set(Evidence.objects.filter(id__in=evidence_ids))
 
         case "vulnerability":
-            if applied_control_ids := many_to_many_map_ids.get("applied_controls"):
-                obj.applied_controls.set(
-                    AppliedControl.objects.filter(id__in=applied_control_ids)
-                )
+            for key, mcls, attr in (
+                ("applied_controls_ids", AppliedControl, "applied_controls"),
+                ("assets_ids", Asset, "assets"),
+                ("evidences_ids", Evidence, "evidences"),
+            ):
+                if ids := many_to_many_map_ids.get(key):
+                    getattr(obj, attr).set(mcls.objects.filter(id__in=ids))
+            for key, mcls, attr in (
+                ("security_advisories_refs", SecurityAdvisory, "security_advisories"),
+                ("cwes_refs", CWE, "cwes"),
+            ):
+                if ref_ids := many_to_many_map_ids.get(key):
+                    getattr(obj, attr).set(
+                        _imported_catalog_entries(mcls, ref_ids, vulnerability=obj.name)
+                    )
 
         case "riskscenario":
             if threat_ids := many_to_many_map_ids.get("threat_ids"):
@@ -1611,6 +1650,10 @@ def set_many_to_many_relations(
                 obj.assets.set(Asset.objects.filter(id__in=asset_ids))
             if entity_ids := many_to_many_map_ids.get("entities_ids"):
                 obj.entities.set(Entity.objects.filter(id__in=entity_ids))
+            if vulnerability_ids := many_to_many_map_ids.get("vulnerabilities_ids"):
+                obj.vulnerabilities.set(
+                    Vulnerability.objects.filter(id__in=vulnerability_ids)
+                )
 
         case "campaign":
             if framework_urns := many_to_many_map_ids.get("framework_urns"):
@@ -1639,6 +1682,7 @@ def set_many_to_many_relations(
                     FindingsAssessment,
                     "findings_assessment",
                 ),
+                ("vulnerabilities_ids", Vulnerability, "vulnerabilities"),
             ):
                 if ids := many_to_many_map_ids.get(key):
                     getattr(obj, attr).set(mcls.objects.filter(id__in=ids))

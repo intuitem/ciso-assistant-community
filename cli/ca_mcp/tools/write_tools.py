@@ -27,6 +27,7 @@ from ..resolvers import (
     resolve_task_template_id,
     resolve_in_folder_or_global,
     parse_duration,
+    resolve_vulnerability_id,
 )
 from ..config import GLOBAL_FOLDER_ID
 from ..utils.response_formatter import (
@@ -1434,6 +1435,7 @@ async def create_task_template(
     link: str = None,
     assigned_to: list = None,
     assets: list = None,
+    vulnerabilities: list = None,
     applied_controls: list = None,
     compliance_assessments: list = None,
     risk_assessments: list = None,
@@ -1456,6 +1458,7 @@ async def create_task_template(
         link: Link to evidence (e.g. Jira ticket)
         assigned_to: List of assignees as actor UUIDs, emails or names
         assets: List of asset IDs/names
+        vulnerabilities: List of vulnerability IDs/names
         applied_controls: List of applied control IDs/names
         compliance_assessments: Array of compliance assessment UUIDs
         risk_assessments: Array of risk assessment UUIDs
@@ -1513,6 +1516,11 @@ async def create_task_template(
         if findings_assessment is not None:
             payload["findings_assessment"] = findings_assessment
 
+        if vulnerabilities:
+            payload["vulnerabilities"] = [
+                resolve_vulnerability_id(v) for v in vulnerabilities
+            ]
+
         res = make_post_request("/task-templates/", payload)
 
         if res.status_code == 201:
@@ -1528,6 +1536,7 @@ async def create_vulnerability(
     name: str,
     description: str = None,
     observation: str = None,
+    owner: list = None,
     ref_id: str = None,
     status: str = "--",
     severity: int = -1,
@@ -1536,6 +1545,14 @@ async def create_vulnerability(
     applied_controls: list = None,
     assets: list = None,
     security_exceptions: list = None,
+    evidences: list = None,
+    incidents: list = None,
+    task_templates: list = None,
+    detected_at: str = None,
+    published_date: str = None,
+    due_date: str = None,
+    eta: str = None,
+    remediated_at: str = None,
 ) -> str:
     """Create a new vulnerability
 
@@ -1543,6 +1560,7 @@ async def create_vulnerability(
         name: Vulnerability name (required)
         description: Description
         observation: How the vulnerability is handled (markdown)
+        owner: List of owners as actor UUIDs, emails or names (users, teams, entities)
         ref_id: Reference ID (e.g. CVE identifier)
         status: -- | potential | exploitable | mitigated | fixed | not_exploitable | unaffected
         severity: -1 (undefined) | 0 (info) | 1 (low) | 2 (medium) | 3 (high) | 4 (critical)
@@ -1551,9 +1569,23 @@ async def create_vulnerability(
         applied_controls: List of applied control IDs/names
         assets: List of asset IDs/names
         security_exceptions: List of security exception UUIDs
+        evidences: List of evidence IDs/names
+        incidents: List of incident IDs/names
+        task_templates: List of task IDs/names
+        detected_at: Detection date (YYYY-MM-DD)
+        published_date: Publication date of the advisory (YYYY-MM-DD)
+        due_date: Due date (YYYY-MM-DD); computed from the SLA policy when left empty
+        eta: Expected resolution date (YYYY-MM-DD)
+        remediated_at: Remediation date (YYYY-MM-DD); set automatically when the status becomes resolved
     """
     try:
-        from ..resolvers import resolve_asset_id, resolve_applied_control_id
+        from ..resolvers import (
+            resolve_applied_control_id,
+            resolve_asset_id,
+            resolve_evidence_id,
+            resolve_incident_id,
+            resolve_task_template_id,
+        )
 
         if not folder_id and GLOBAL_FOLDER_ID:
             folder_id = GLOBAL_FOLDER_ID
@@ -1564,6 +1596,8 @@ async def create_vulnerability(
             payload["description"] = description
         if observation is not None:
             payload["observation"] = observation
+        if owner is not None:
+            payload["owner"] = resolve_actor_ids(owner)
         if ref_id is not None:
             payload["ref_id"] = ref_id
         if status is not None:
@@ -1591,6 +1625,24 @@ async def create_vulnerability(
 
         if security_exceptions:
             payload["security_exceptions"] = security_exceptions
+        if evidences is not None:
+            payload["evidences"] = [resolve_evidence_id(x) for x in evidences]
+        if incidents is not None:
+            payload["incidents"] = [resolve_incident_id(x) for x in incidents]
+        if task_templates is not None:
+            payload["task_templates"] = [
+                resolve_task_template_id(x) for x in task_templates
+            ]
+        if detected_at is not None:
+            payload["detected_at"] = detected_at
+        if published_date is not None:
+            payload["published_date"] = published_date
+        if due_date is not None:
+            payload["due_date"] = due_date
+        if eta is not None:
+            payload["eta"] = eta
+        if remediated_at is not None:
+            payload["remediated_at"] = remediated_at
 
         res = make_post_request("/vulnerabilities/", payload)
 
@@ -1744,6 +1796,7 @@ async def create_incident(
     threats: list = None,
     owners: list = None,
     assets: list = None,
+    vulnerabilities: list = None,
     qualifications: list = None,
     entities: list = None,
     applied_controls: list = None,
@@ -1769,6 +1822,7 @@ async def create_incident(
         threats: List of threat IDs/names (resolved within the incident's folder, then Global)
         owners: List of owners as actor UUIDs, emails or names
         assets: List of asset IDs/names (resolved within the incident's folder, then Global)
+        vulnerabilities: List of vulnerability IDs/names
         qualifications: List of qualifications: letters C/I/A/T, names or UUIDs
         entities: List of third-party entity IDs/names
         applied_controls: List of applied control IDs/names (resolved within the incident's folder, then Global)
@@ -1826,6 +1880,11 @@ async def create_incident(
             ]
         if filtering_labels:
             payload["filtering_labels"] = filtering_labels
+
+        if vulnerabilities:
+            payload["vulnerabilities"] = [
+                resolve_vulnerability_id(v) for v in vulnerabilities
+            ]
 
         res = make_post_request("/incidents/", payload)
 

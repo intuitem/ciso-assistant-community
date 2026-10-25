@@ -1454,6 +1454,8 @@
 	"templateQuickFormSubmittedDescription": "Wysyłane do recenzenta po przesłaniu odpowiedzi w szybkim formularzu",
 	"templateSecurityExceptionAssignmentName": "Przypisanie wyjątku",
 	"templateSecurityExceptionAssignmentDescription": "Wysyłane po przypisaniu wyjątku bezpieczeństwa",
+	"templateVulnerabilityAssignmentName": "Przypisanie podatności",
+	"templateVulnerabilityAssignmentDescription": "Wysyłane po przypisaniu podatności",
 	"templateSecurityExceptionExpiringSoonName": "Wyjątek wkrótce wygaśnie",
 	"templateSecurityExceptionExpiringSoonDescription": "Wysyłane, gdy wyjątki bezpieczeństwa wkrótce wygasną",
 	"templateSecurityExceptionStatusChangedName": "Zmiana statusu wyjątku",
@@ -1481,6 +1483,7 @@
 	"notificationTitleQuickFormSubmitted": "Szybki formularz „{response_name}” czeka na Twoją recenzję",
 	"notificationTitleRiskScenarioAssignment": "Przypisano Cię do scenariusza ryzyka „{scenario_name}”",
 	"notificationTitleSecurityExceptionAssignment": "Przypisano Cię do wyjątku „{exception_name}”",
+	"notificationTitleVulnerabilityAssignment": "Przypisano Cię do podatności „{vulnerability_name}”",
 	"notificationTitleSecurityExceptionExpiringSoon": "Wyjątek „{exception_name}” wygasa (pozostało dni: {days_remaining})",
 	"notificationTitleSecurityExceptionStatusChanged": "Wyjątek „{exception_name}” ma teraz status: {new_status}",
 	"notificationTitleTaskNodeDueSoon": "Termin zadania „{task_name}” upływa (pozostało dni: {days_remaining})",
@@ -3075,11 +3078,40 @@
 	"changeSeverity": "... istotność",
 	"batchChangeSeverity": "Zmień istotność",
 	"detectedAt": "Data wykrycia",
-	"detectedAtHelpText": "Data wykrycia podatności. Domyślnie dzisiejsza. Używana jako punkt odniesienia SLA, gdy zasady ustawiono na datę wykrycia.",
+	"detectedAtHelpText": "Data wykrycia podatności. Domyślnie dzisiejsza, chyba że SLA jest wyłączone. Używana jako punkt odniesienia SLA, gdy zasady ustawiono na datę wykrycia.",
+	"remediatedAt": "Data naprawy",
+	"remediatedAtHelpText": "Ustawiana na dzień rozwiązania podatności (ograniczona, naprawiona, niemożliwa do wykorzystania lub bez wpływu), chyba że wpiszesz ją samodzielnie. Czyszczona po ponownym otwarciu.",
+	"vulnerabilityOpenForDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Otwarta przez {count} dzień od wykrycia",
+				"countPlural=few": "Otwarta przez {count} dni od wykrycia",
+				"countPlural=many": "Otwarta przez {count} dni od wykrycia",
+				"countPlural=other": "Otwarta przez {count} dnia od wykrycia"
+			}
+		}
+	],
+	"vulnerabilityRemediatedInDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Naprawiona {count} dzień po wykryciu",
+				"countPlural=few": "Naprawiona {count} dni po wykryciu",
+				"countPlural=many": "Naprawiona {count} dni po wykryciu",
+				"countPlural=other": "Naprawiona {count} dnia po wykryciu"
+			}
+		}
+	],
+	"excepted": "Objęta wyjątkiem",
+	"exceptionEnds": "Koniec wyjątku",
 	"refreshDueDates": "Odśwież terminy SLA",
 	"refreshDueDatesConfirm": "Spowoduje to ponowne obliczenie wszystkich terminów na podstawie bieżących zasad SLA. Istniejące terminy zostaną nadpisane. Kontynuować?",
 	"resetToDefaults": "Przywróć domyślne",
 	"refreshDueDatesFailed": "Nie udało się odświeżyć terminów",
+	"vulnerabilitySlaDisabledHint": "SLA podatności jest wyłączone we flagach funkcji, więc terminy nie są obliczane",
 	"changeTreatment": "Zmień postępowanie z ryzykiem",
 	"changeAssignee": "Zmień osobę przypisaną",
 	"changeResult": "Zmień wynik",
@@ -4768,6 +4800,7 @@
 	"assetsDescription": "Procesy i funkcje biznesowe (podstawowe), aplikacje lub komponenty techniczne (wspierające)",
 	"threatsDescription": "Potencjalne zagrożenia dla organizacji",
 	"vulnerabilitiesDescription": "Znane podatności i słabości",
+	"vulnerabilitySlaDescription": "Obliczaj terminy podatności na podstawie ich istotności i pokazuj, jak blisko terminu jest każda z nich",
 	"riskScenariosDescription": "Rejestr ryzyka ze scenariuszami i postępowaniem z ryzykiem",
 	"referenceControlsDescription": "Wzorce typowych środków zabezpieczających",
 	"requirementMappingSetsDescription": "Mapowania między różnymi standardami i normami",
@@ -4871,7 +4904,7 @@
 	"syncCweCatalogFailed": "Pobieranie katalogu CWE nie powiodło się",
 	"vulnerability": "Podatność",
 	"vulnerabilitySlaPolicy": "SLA podatności",
-	"vulnerabilitySlaPolicyHelpText": "Określ maksymalną liczbę dni na naprawę podatności w zależności od jej istotności. Pozostaw puste, aby wyłączyć automatyczne obliczanie dla danego poziomu istotności. Po ustawieniu termin jest obliczany automatycznie przy utworzeniu podatności lub zmianie jej istotności.",
+	"vulnerabilitySlaPolicyHelpText": "Określ maksymalną liczbę dni na naprawę podatności w zależności od jej istotności. Pozostaw puste, aby wyłączyć automatyczne obliczanie dla danego poziomu istotności. Po ustawieniu termin jest obliczany automatycznie przy utworzeniu podatności lub zmianie jej istotności. Aby całkowicie wyłączyć SLA, wyłącz flagę funkcji „SLA podatności”.",
 	"sla": "SLA",
 	"caution": "Uwaga",
 	"slaAnchor": "Data rozpoczęcia SLA",

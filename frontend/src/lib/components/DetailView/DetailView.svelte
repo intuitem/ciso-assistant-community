@@ -103,6 +103,8 @@
 		/** Lets a caller keep the widget column out of the layout when its only
 		 * widget is behind a feature flag that is off. */
 		widgetsEnabled?: boolean;
+		/** List every field instead of folding them after MAX_ROWS behind "view more". */
+		showAllFields?: boolean;
 		actions?: import('svelte').Snippet;
 		disableCreate?: boolean;
 		disableEdit?: boolean;
@@ -118,6 +120,7 @@
 		dateFieldsToFormat = DATE_FIELDS_TO_FORMAT,
 		widgets,
 		widgetsEnabled = true,
+		showAllFields = false,
 		actions,
 		disableCreate = false,
 		disableEdit = false,
@@ -622,7 +625,9 @@
 						{@const hiddenCountForValue = isRelatedField ? countMasked(value) : 0}
 						<div
 							class="grid grid-cols-1 gap-1 py-3 px-2 even:bg-surface-100-900 sm:grid-cols-5 sm:gap-4 {index >=
-								MAX_ROWS && !expandedTable
+								MAX_ROWS &&
+							!expandedTable &&
+							!showAllFields
 								? 'hidden'
 								: ''}"
 						>
@@ -879,7 +884,7 @@
 				</div>
 			{/if}
 		</div>
-		{#if orderedEntries().filter( ([key, _]) => (fields.length > 0 ? fields.includes(key) : true && !exclude.includes(key)) ).length > MAX_ROWS}
+		{#if !showAllFields && orderedEntries().filter( ([key, _]) => (fields.length > 0 ? fields.includes(key) : true && !exclude.includes(key)) ).length > MAX_ROWS}
 			<button
 				onclick={() => (expandedTable = !expandedTable)}
 				class="m-5 text-primary-800-200"

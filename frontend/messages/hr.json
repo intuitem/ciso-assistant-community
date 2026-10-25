@@ -3726,6 +3726,7 @@
 	"visualizeButton": "Vizualiziraj ranjivosti",
 	"visualizeRequirements": "Vizualiziraj sve zahtjeve na svim auditima",
 	"vulnerabilitiesDescription": "Poznate ranjivosti i slabosti",
+	"vulnerabilitySlaDescription": "Izračunajte krajnje rokove ranjivosti prema njihovoj ozbiljnosti i prikažite koliko je svaka blizu svog roka",
 	"vulnerability": "Ranjivost",
 	"vulnerabilityDistribution": "Distribucija ranjivosti",
 	"vulnerabilityTreemap": "Stablo ranjivosti",
@@ -3760,12 +3761,40 @@
 	"xRaysDescription": "Otkriva nedosljednosti u vašim revizijama i analizama rizika.",
 	"xRaysLoadingData": "Analiziranje podataka...",
 	"xRaysView": "Pregledaj",
-	"vulnerabilitySlaPolicyHelpText": "Definirajte maksimalan broj dana za ispravljanje ranjivosti prema njezinoj ozbiljnosti.",
+	"vulnerabilitySlaPolicyHelpText": "Definirajte maksimalan broj dana za ispravljanje ranjivosti prema njezinoj ozbiljnosti. Da biste potpuno isključili SLA, onemogućite zastavicu značajke SLA ranjivosti.",
 	"slaAnchor": "Početak SLA",
 	"slaAnchorHelpText": "Odaberite kada SLA počinje.",
 	"slaDaysHelpText": "Broj dana za ispravak",
 	"resetToDefaults": "Vrati zadano",
+	"vulnerabilitySlaDisabledHint": "SLA ranjivosti isključen je u zastavicama značajki, pa se krajnji rokovi ne izračunavaju",
 	"detectedAt": "Datum otkrivanja",
+	"detectedAtHelpText": "Kada je ranjivost otkrivena. Zadano je danas, osim ako je SLA isključen. Koristi se kao polazište SLA-a kada je pravilo postavljeno na datum otkrivanja.",
+	"remediatedAt": "Datum otklanjanja",
+	"remediatedAtHelpText": "Postavlja se na dan kada je ranjivost riješena (ublažena, popravljena, nije iskoristiva ili nije pogođena), osim ako ga sami ne unesete. Briše se kada se ponovno otvori.",
+	"vulnerabilityOpenForDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Otvoreno {count} dan od otkrivanja",
+				"countPlural=few": "Otvoreno {count} dana od otkrivanja",
+				"countPlural=other": "Otvoreno {count} dana od otkrivanja"
+			}
+		}
+	],
+	"vulnerabilityRemediatedInDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Otklonjeno {count} dan nakon otkrivanja",
+				"countPlural=few": "Otklonjeno {count} dana nakon otkrivanja",
+				"countPlural=other": "Otklonjeno {count} dana nakon otkrivanja"
+			}
+		}
+	],
+	"excepted": "Izuzeto",
+	"exceptionEnds": "Kraj iznimke",
 	"publishedDate": "Datum objave",
 	"vulnerabilitySlaPolicy": "SLA ranjivosti",
 	"secIntelFeeds": "Feedovi ranjivosti",
@@ -4171,7 +4200,10 @@
 	"templateSaved": "Predložak je uspješno spremljen",
 	"templateReset": "Predložak je vraćen na zadano",
 	"confirmResetTemplate": "Jeste li sigurni da želite vratiti ovaj predložak na zadano? Vaša prilagodba bit će izgubljena.",
+	"templateVulnerabilityAssignmentName": "Dodjela ranjivosti",
+	"templateVulnerabilityAssignmentDescription": "Šalje se kada je ranjivost dodijeljena",
 	"readAt": "Pročitano u",
+	"notificationTitleVulnerabilityAssignment": "Dodijeljena vam je ranjivost '{vulnerability_name}'",
 	"notification": "Obavijest",
 	"notifications": "Obavijesti",
 	"read": "Pročitano",

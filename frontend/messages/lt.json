@@ -1173,6 +1173,8 @@
 	"templateValidationFlowUpdatedDescription": "Siunčiamas, kai keičiasi patvirtinimo eigos būsena",
 	"templateAuditReportName": "Audito ataskaita",
 	"templateAuditReportDescription": "Atitikties vertinimo Word ataskaita",
+	"templateVulnerabilityAssignmentName": "Pažeidžiamumo priskyrimas",
+	"templateVulnerabilityAssignmentDescription": "Siunčiamas, kai priskiriamas pažeidžiamumas",
 	"wordTemplates": "Word ataskaitų šablonai",
 	"wordTemplatesDescription": "Tinkinti Word ataskaitų šablonus (.docx), naudojamus ataskaitoms generuoti. Įkelkite savo šablonus, kad perrašytumėte įtaisytuosius numatytuosius.",
 	"wordTemplatesWarning": "Prieš naudodami atidžiai peržiūrėkite šablono turinį ir įsitikinkite, kad jis atitinka jūsų organizacijos saugumo ir atitikties politiką.",
@@ -3631,6 +3633,7 @@
 	"assetsDescription": "Verslo procesai ir funkcijos (pagrindiniai), programos ar techniniai komponentai (palaikantys)",
 	"threatsDescription": "Potencialios grėsmės jūsų organizacijai",
 	"vulnerabilitiesDescription": "Žinomi pažeidžiamumai ir silpnosios vietos",
+	"vulnerabilitySlaDescription": "Skaičiuoti pažeidžiamumų terminus pagal jų rimtumą ir rodyti, kiek kiekvienas arti savo termino",
 	"riskScenariosDescription": "Rizikos registras su scenarijais ir jų apdorojimo metodais",
 	"referenceControlsDescription": "Tipinių saugos kontrolių šablonas",
 	"requirementMappingSetsDescription": "Skirtingų sistemų ir standartų susiejimai",
@@ -4228,12 +4231,42 @@
 	"riskTreatmentControlsDescription": "Taikytos kontrolės, identifikuotos per rizikos vertinimo scenarijus",
 	"linkedRiskScenarios": "Susieti rizikos scenarijai",
 	"control": "Kontrolė",
-	"vulnerabilitySlaPolicyHelpText": "Nustatykite maksimalų dienų skaičių pažeidžiamumui ištaisyti pagal jo sunkumą.",
+	"vulnerabilitySlaPolicyHelpText": "Nustatykite maksimalų dienų skaičių pažeidžiamumui ištaisyti pagal jo sunkumą. Norėdami visiškai išjungti SLA, išjunkite funkcijos vėliavėlę „Pažeidžiamumų SLA“.",
 	"slaAnchor": "SLA pradžios data",
 	"slaAnchorHelpText": "Pasirinkite kada prasideda SLA.",
 	"slaDaysHelpText": "Ištaisymo dienų skaičius",
 	"resetToDefaults": "Atstatyti numatytuosius",
+	"vulnerabilitySlaDisabledHint": "Pažeidžiamumų SLA išjungtas funkcijų vėliavėlėse, todėl terminai neskaičiuojami",
 	"detectedAt": "Aptikimo data",
+	"detectedAtHelpText": "Kada pažeidžiamumas buvo aptiktas. Numatytoji reikšmė – šiandien, nebent SLA išjungtas. Naudojama kaip SLA atskaitos taškas, kai politika nustatyta pagal aptikimo datą.",
+	"remediatedAt": "Ištaisymo data",
+	"remediatedAtHelpText": "Nustatoma į dieną, kai pažeidžiamumas išsprendžiamas (sušvelnintas, ištaisytas, neišnaudojamas arba nepaveiktas), nebent datą įvedate patys. Išvaloma vėl atidarius.",
+	"vulnerabilityOpenForDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Atviras {count} dieną nuo aptikimo",
+				"countPlural=few": "Atviras {count} dienas nuo aptikimo",
+				"countPlural=many": "Atviras {count} dienų nuo aptikimo",
+				"countPlural=other": "Atviras {count} dienų nuo aptikimo"
+			}
+		}
+	],
+	"vulnerabilityRemediatedInDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Ištaisytas per {count} dieną nuo aptikimo",
+				"countPlural=few": "Ištaisytas per {count} dienas nuo aptikimo",
+				"countPlural=many": "Ištaisytas per {count} dienų nuo aptikimo",
+				"countPlural=other": "Ištaisytas per {count} dienų nuo aptikimo"
+			}
+		}
+	],
+	"excepted": "Su išimtimi",
+	"exceptionEnds": "Išimties pabaiga",
 	"publishedDate": "Paskelbimo data",
 	"vulnerabilitySlaPolicy": "Pažeidžiamumų SLA",
 	"secIntelFeeds": "Pažeidžiamumų šaltiniai",
@@ -4621,6 +4654,7 @@
 	"fieldType": "Lauko tipas",
 	"model": "Modelis",
 	"readAt": "Perskaitymo laikas",
+	"notificationTitleVulnerabilityAssignment": "Jums priskirtas pažeidžiamumas '{vulnerability_name}'",
 	"notification": "Pranešimas",
 	"notifications": "Pranešimai",
 	"read": "Perskaityta",

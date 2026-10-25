@@ -3426,11 +3426,20 @@ class VulnerabilityRecordConsumer(RecordConsumer[None]):
         if due_date:
             data["due_date"] = due_date
 
+        remediated_at = _parse_date(record.get("remediated_at"))
+        if remediated_at:
+            data["remediated_at"] = remediated_at
+
         filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"))
         if filtering_labels:
             data["filtering_labels"] = filtering_labels
 
-        return data, None
+        # Present-but-blank still sets it, so UPDATE mode can clear the owners.
+        unresolved: list[str] = []
+        if "owner" in record:
+            data["owner"] = _resolve_owners(record.get("owner"), unresolved)
+
+        return data, _owner_warning(record, unresolved)
 
 
 class ElementaryActionRecordConsumer(RecordConsumer):

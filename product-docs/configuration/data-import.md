@@ -858,6 +858,9 @@ Every choice column accepts either the raw key (e.g. `privacy_contract`) or its 
   * `critical`
 * **detected\_at** - detection date (YYYY-MM-DD). Left empty, it is set to the import day while the [vulnerability SLA](settings/vulnerability-sla.md) is on
 * **due\_date** - due date (YYYY-MM-DD). Left empty, it is computed from the [vulnerability SLA policy](settings/vulnerability-sla.md) while the SLA is on
+* **remediated\_at** - remediation date (YYYY-MM-DD). Left empty, a resolved status (mitigated, fixed, not exploitable, unaffected) sets it to the import day
+* **owner**\
+  Semicolon-separated list of user emails and/or team names, shown as **Assigned to**. Resolved case-insensitively: first by user email, then by team name. Unresolved entries are skipped with a warning and will not block the import. This column isn't in the template: add it when you need it.
 * **assets**\
   Names or ref\_ids separated by `|`, commas or new lines, looked up in the domain folder. A name that matches nothing rejects the row.
 * **applied\_controls**\
@@ -867,7 +870,7 @@ Every choice column accepts either the raw key (e.g. `privacy_contract`) or its 
 * **filtering\_labels**\
   Label names separated by `|`, commas or new lines; missing labels are created.
 
-In update mode, an existing vulnerability is matched by **ref\_id**, then by **name**, in the domain folder. Empty cells leave its fields as they are.
+In update mode, an existing vulnerability is matched by **ref\_id**, then by **name**, in the domain folder. Empty cells leave its fields as they are, except **owner**: an empty owner cell removes the owners.
 
 
 

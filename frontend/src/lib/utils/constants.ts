@@ -222,6 +222,7 @@ export const DATE_FIELDS_TO_FORMAT = [
 	'published_date',
 	'read_at',
 	'rejected_at',
+	'remediated_at',
 	'reported_at',
 	'requested_on',
 	'resolved_at',
