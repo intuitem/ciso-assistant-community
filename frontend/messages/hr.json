@@ -3793,6 +3793,28 @@
 			}
 		}
 	],
+	"vulnerabilitySlaDaysLeft": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Preostao {count} dan",
+				"countPlural=few": "Preostala {count} dana",
+				"countPlural=other": "Preostalo {count} dana"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} dan kašnjenja",
+				"countPlural=few": "{count} dana kašnjenja",
+				"countPlural=other": "{count} dana kašnjenja"
+			}
+		}
+	],
 	"excepted": "Izuzeto",
 	"exceptionEnds": "Kraj iznimke",
 	"publishedDate": "Datum objave",

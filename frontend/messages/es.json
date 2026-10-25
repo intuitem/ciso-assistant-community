@@ -3297,6 +3297,28 @@
 			}
 		}
 	],
+	"vulnerabilitySlaDaysLeft": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Queda {count} día",
+				"countPlural=many": "Quedan {count} días",
+				"countPlural=other": "Quedan {count} días"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} día de retraso",
+				"countPlural=many": "{count} días de retraso",
+				"countPlural=other": "{count} días de retraso"
+			}
+		}
+	],
 	"excepted": "Exceptuada",
 	"exceptionEnds": "Fin de la excepción",
 	"publishedDate": "Fecha de publicación",

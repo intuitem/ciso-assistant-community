@@ -117,6 +117,56 @@ export const breakdownSemanticColorMap: { [key: string]: string } = {
 	good_practice: '#22c55e'
 };
 
+// Vulnerability statuses (raw values): solid and soft for the treemap filters,
+// outline for the badge on a vulnerability's page. Class names are written out
+// in full because Tailwind only generates the classes it finds in the source.
+export const VULNERABILITY_STATUS_COLORS: Record<
+	string,
+	{ solid: string; soft: string; outline: string }
+> = {
+	potential: {
+		solid: 'bg-yellow-500 text-white border-yellow-600 hover:bg-yellow-600',
+		soft: 'bg-yellow-50 text-yellow-400 border-yellow-200 hover:bg-yellow-100',
+		outline:
+			'bg-yellow-50 text-yellow-800 border-yellow-400 dark:bg-yellow-950 dark:text-yellow-200 dark:border-yellow-600'
+	},
+	exploitable: {
+		solid: 'bg-red-500 dark:bg-red-600 text-white border-red-600 hover:bg-red-600',
+		soft: 'bg-red-50 text-red-400 border-red-200 hover:bg-red-100',
+		outline:
+			'bg-red-50 text-red-800 border-red-400 dark:bg-red-950 dark:text-red-200 dark:border-red-600'
+	},
+	mitigated: {
+		solid: 'bg-blue-500 dark:bg-blue-600 text-white border-blue-600 hover:bg-blue-600',
+		soft: 'bg-blue-50 text-blue-400 border-blue-200 hover:bg-blue-100',
+		outline:
+			'bg-blue-50 text-blue-800 border-blue-400 dark:bg-blue-950 dark:text-blue-200 dark:border-blue-600'
+	},
+	fixed: {
+		solid: 'bg-green-500 dark:bg-green-600 text-white border-green-600 hover:bg-green-600',
+		soft: 'bg-green-50 text-green-400 border-green-200 hover:bg-green-100',
+		outline:
+			'bg-green-50 text-green-800 border-green-400 dark:bg-green-950 dark:text-green-200 dark:border-green-600'
+	},
+	not_exploitable: {
+		solid: 'bg-teal-500 dark:bg-teal-600 text-white border-teal-600 hover:bg-teal-600',
+		soft: 'bg-teal-50 text-teal-400 border-teal-200 hover:bg-teal-100',
+		outline:
+			'bg-teal-50 text-teal-800 border-teal-400 dark:bg-teal-950 dark:text-teal-200 dark:border-teal-600'
+	},
+	unaffected: {
+		solid: 'bg-emerald-500 dark:bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-600',
+		soft: 'bg-emerald-50 text-emerald-400 border-emerald-200 hover:bg-emerald-100',
+		outline:
+			'bg-emerald-50 text-emerald-800 border-emerald-400 dark:bg-emerald-950 dark:text-emerald-200 dark:border-emerald-600'
+	},
+	'--': {
+		solid: 'bg-surface-950-50 text-surface-50-950 border-surface-600-400 hover:bg-surface-800-200',
+		soft: 'bg-surface-50-950 text-surface-400-600 border-surface-200-800 hover:bg-surface-100-900',
+		outline: 'bg-surface-50-950 text-surface-700-300 border-surface-300-700'
+	}
+};
+
 // Fallback palette for breakdown keys not in breakdownSemanticColorMap.
 // Picked for color-blind friendliness and reasonable contrast against light backgrounds.
 export const DEFAULT_BREAKDOWN_PALETTE: string[] = [

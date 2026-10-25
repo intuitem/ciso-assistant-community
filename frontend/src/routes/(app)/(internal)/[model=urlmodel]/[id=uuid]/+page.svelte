@@ -121,12 +121,13 @@
 		{/snippet}
 	</DetailView>
 {:else if data.urlModel === 'vulnerabilities'}
-	<!-- Severity, SLA state and dates live in the summary card, not the field list. -->
+	<!-- Severity, status, SLA state and dates live in the summary card, not the field list. -->
 	<DetailView
 		{data}
 		showAllFields
 		exclude={[
 			'severity',
+			'status',
 			'state',
 			'published_date',
 			'detected_at',

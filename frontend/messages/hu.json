@@ -3075,6 +3075,26 @@
 			}
 		}
 	],
+	"vulnerabilitySlaDaysLeft": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Még {count} nap",
+				"countPlural=other": "Még {count} nap"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} nap késés",
+				"countPlural=other": "{count} nap késés"
+			}
+		}
+	],
 	"excepted": "Kivétel alatt",
 	"exceptionEnds": "Kivétel vége",
 	"refreshDueDates": "SLA-határidők frissítése",

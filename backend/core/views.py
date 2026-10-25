@@ -941,10 +941,13 @@ class SmartOrderingFilter(filters.OrderingFilter):
         def resolved(term):
             descending = term.startswith("-")
             field = term[1:] if descending else term
-            target = remap.get(field, field)
-            return f"-{target}" if descending else target
+            targets = remap.get(field, field)
+            # A column can sort on several keys in turn (e.g. a rank, then a date).
+            if isinstance(targets, str):
+                targets = [targets]
+            return [f"-{target}" if descending else target for target in targets]
 
-        ordering = [resolved(f) for f in ordering]
+        ordering = [target for term in ordering for target in resolved(term)]
         # Offset pagination is only lossless over a total order: without a
         # unique tiebreaker, rows tied on the sort key can swap between the
         # separate queries that back each page, silently skipping or
@@ -4070,9 +4073,10 @@ class VulnerabilityViewSet(BaseModelViewSet):
     model = Vulnerability
     filterset_class = VulnerabilityFilterSet
     search_fields = ["name", "description", "ref_id"]
-    # The SLA column sorts by urgency, vulnerabilities without a state last.
-    ordering_remap = {"state": "sla_rank"}
-    ordering_nulls_last = ("sla_rank",)
+    # The SLA column sorts by urgency: the state's rank, then the due date (most
+    # days late, or fewest left, first); vulnerabilities without either last.
+    ordering_remap = {"state": ["sla_rank", "due_date"]}
+    ordering_nulls_last = ("sla_rank", "due_date")
 
     autocomplete_serializer_class = VulnerabilityAutocompleteSerializer
 

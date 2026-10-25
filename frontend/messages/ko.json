@@ -3973,6 +3973,24 @@
 			}
 		}
 	],
+	"vulnerabilitySlaDaysLeft": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=other": "{count}일 남음"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=other": "{count}일 지연"
+			}
+		}
+	],
 	"excepted": "예외 적용",
 	"exceptionEnds": "예외 종료",
 	"publishedDate": "게시 날짜",

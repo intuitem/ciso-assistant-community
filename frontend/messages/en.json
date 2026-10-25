@@ -3093,6 +3093,26 @@
 			}
 		}
 	],
+	"vulnerabilitySlaDaysLeft": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} day left",
+				"countPlural=other": "{count} days left"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} day late",
+				"countPlural=other": "{count} days late"
+			}
+		}
+	],
 	"excepted": "Excepted",
 	"exceptionEnds": "Exception ends",
 	"refreshDueDates": "Refresh SLA due dates",

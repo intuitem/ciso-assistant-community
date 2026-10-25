@@ -1438,6 +1438,24 @@
 			}
 		}
 	],
+	"vulnerabilitySlaDaysLeft": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=other": "Sisa {count} hari"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=other": "Terlambat {count} hari"
+			}
+		}
+	],
 	"excepted": "Dikecualikan",
 	"exceptionEnds": "Pengecualian berakhir",
 	"publishedDate": "Tanggal publikasi",

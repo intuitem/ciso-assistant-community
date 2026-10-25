@@ -3395,6 +3395,30 @@
 			}
 		}
 	],
+	"vulnerabilitySlaDaysLeft": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Zbývá {count} den",
+				"countPlural=few": "Zbývají {count} dny",
+				"countPlural=many": "Zbývá {count} dní",
+				"countPlural=other": "Zbývá {count} dní"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} den po termínu",
+				"countPlural=few": "{count} dny po termínu",
+				"countPlural=many": "{count} dní po termínu",
+				"countPlural=other": "{count} dní po termínu"
+			}
+		}
+	],
 	"excepted": "S výjimkou",
 	"exceptionEnds": "Konec výjimky",
 	"refreshDueDates": "Obnovit termíny SLA (due dates)",

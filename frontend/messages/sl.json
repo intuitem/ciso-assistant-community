@@ -2690,6 +2690,30 @@
 			}
 		}
 	],
+	"vulnerabilitySlaDaysLeft": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Še {count} dan",
+				"countPlural=two": "Še {count} dneva",
+				"countPlural=few": "Še {count} dnevi",
+				"countPlural=other": "Še {count} dni"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} dan zamude",
+				"countPlural=two": "{count} dneva zamude",
+				"countPlural=few": "{count} dni zamude",
+				"countPlural=other": "{count} dni zamude"
+			}
+		}
+	],
 	"excepted": "Z izjemo",
 	"exceptionEnds": "Konec izjeme",
 	"refreshDueDates": "Osveži roke SLA",

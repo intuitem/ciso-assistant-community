@@ -3467,6 +3467,34 @@
 			}
 		}
 	],
+	"vulnerabilitySlaDaysLeft": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=zero": "المتبقي: {count} يوم",
+				"countPlural=one": "المتبقي: يوم واحد",
+				"countPlural=two": "المتبقي: يومان",
+				"countPlural=few": "المتبقي: {count} أيام",
+				"countPlural=many": "المتبقي: {count} يومًا",
+				"countPlural=other": "المتبقي: {count} يوم"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=zero": "التأخير: {count} يوم",
+				"countPlural=one": "التأخير: يوم واحد",
+				"countPlural=two": "التأخير: يومان",
+				"countPlural=few": "التأخير: {count} أيام",
+				"countPlural=many": "التأخير: {count} يومًا",
+				"countPlural=other": "التأخير: {count} يوم"
+			}
+		}
+	],
 	"excepted": "مستثناة",
 	"exceptionEnds": "انتهاء الاستثناء",
 	"refreshDueDates": "تحديث مواعيد استحقاق اتفاقية مستوى الخدمة",

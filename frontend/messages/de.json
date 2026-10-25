@@ -4397,6 +4397,26 @@
 			}
 		}
 	],
+	"vulnerabilitySlaDaysLeft": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Noch {count} Tag",
+				"countPlural=other": "Noch {count} Tage"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} Tag überfällig",
+				"countPlural=other": "{count} Tage überfällig"
+			}
+		}
+	],
 	"excepted": "Ausgenommen",
 	"exceptionEnds": "Ausnahme endet",
 	"refreshDueDates": "SLA-Fälligkeitstermine aktualisieren",

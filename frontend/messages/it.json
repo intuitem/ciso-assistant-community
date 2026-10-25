@@ -2468,6 +2468,28 @@
 			}
 		}
 	],
+	"vulnerabilitySlaDaysLeft": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Manca {count} giorno",
+				"countPlural=many": "Mancano {count} giorni",
+				"countPlural=other": "Mancano {count} giorni"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} giorno di ritardo",
+				"countPlural=many": "{count} giorni di ritardo",
+				"countPlural=other": "{count} giorni di ritardo"
+			}
+		}
+	],
 	"excepted": "In eccezione",
 	"exceptionEnds": "Fine dell'eccezione",
 	"publishedDate": "Data di pubblicazione",

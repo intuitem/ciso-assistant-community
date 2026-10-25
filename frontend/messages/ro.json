@@ -1251,6 +1251,28 @@
 			}
 		}
 	],
+	"vulnerabilitySlaDaysLeft": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "A mai rămas {count} zi",
+				"countPlural=few": "Au mai rămas {count} zile",
+				"countPlural=other": "Au mai rămas {count} de zile"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} zi de întârziere",
+				"countPlural=few": "{count} zile de întârziere",
+				"countPlural=other": "{count} de zile de întârziere"
+			}
+		}
+	],
 	"excepted": "Exceptată",
 	"exceptionEnds": "Sfârșitul excepției",
 	"publishedDate": "Data publicării",

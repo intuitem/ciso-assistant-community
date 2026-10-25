@@ -464,6 +464,26 @@
 			}
 		}
 	],
+	"vulnerabilitySlaDaysLeft": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} jour restant",
+				"countPlural=other": "{count} jours restants"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} jour de retard",
+				"countPlural=other": "{count} jours de retard"
+			}
+		}
+	],
 	"excepted": "Sous exception",
 	"exceptionEnds": "Fin de l'exception",
 	"refreshDueDates": "Recalculer les échéances SLA",

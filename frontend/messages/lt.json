@@ -4265,6 +4265,30 @@
 			}
 		}
 	],
+	"vulnerabilitySlaDaysLeft": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Liko {count} diena",
+				"countPlural=few": "Liko {count} dienos",
+				"countPlural=many": "Liko {count} dienų",
+				"countPlural=other": "Liko {count} dienų"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Vėluoja {count} dieną",
+				"countPlural=few": "Vėluoja {count} dienas",
+				"countPlural=many": "Vėluoja {count} dienų",
+				"countPlural=other": "Vėluoja {count} dienų"
+			}
+		}
+	],
 	"excepted": "Su išimtimi",
 	"exceptionEnds": "Išimties pabaiga",
 	"publishedDate": "Paskelbimo data",

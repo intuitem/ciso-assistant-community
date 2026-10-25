@@ -1226,6 +1226,26 @@
 			}
 		}
 	],
+	"vulnerabilitySlaDaysLeft": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} दिन शेष",
+				"countPlural=other": "{count} दिन शेष"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} दिन की देरी",
+				"countPlural=other": "{count} दिन की देरी"
+			}
+		}
+	],
 	"excepted": "अपवाद में",
 	"exceptionEnds": "अपवाद समाप्ति",
 	"publishedDate": "प्रकाशन तिथि",

@@ -3094,6 +3094,28 @@
 			}
 		}
 	],
+	"vulnerabilitySlaDaysLeft": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Falta {count} dia",
+				"countPlural=many": "Faltam {count} dias",
+				"countPlural=other": "Faltam {count} dias"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} dia de atraso",
+				"countPlural=many": "{count} dias de atraso",
+				"countPlural=other": "{count} dias de atraso"
+			}
+		}
+	],
 	"excepted": "Com exceção",
 	"exceptionEnds": "Fim da exceção",
 	"refreshDueDates": "Atualizar prazos de SLA",

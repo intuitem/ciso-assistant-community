@@ -4239,6 +4239,26 @@
 			}
 		}
 	],
+	"vulnerabilitySlaDaysLeft": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Nog {count} dag",
+				"countPlural=other": "Nog {count} dagen"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} dag te laat",
+				"countPlural=other": "{count} dagen te laat"
+			}
+		}
+	],
 	"excepted": "Uitgezonderd",
 	"exceptionEnds": "Uitzondering eindigt",
 	"detectedComplianceAssessments": "Gedetecteerde {total} audits ({counted} geteld, {excluded} uitgesloten):",

@@ -3292,6 +3292,24 @@
 			}
 		}
 	],
+	"vulnerabilitySlaDaysLeft": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=other": "剩余 {count} 天"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=other": "已逾期 {count} 天"
+			}
+		}
+	],
 	"excepted": "已例外",
 	"exceptionEnds": "例外结束",
 	"publishedDate": "发布日期",

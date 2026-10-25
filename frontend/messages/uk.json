@@ -3643,6 +3643,30 @@
 			}
 		}
 	],
+	"vulnerabilitySlaDaysLeft": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Залишився {count} день",
+				"countPlural=few": "Залишилося {count} дні",
+				"countPlural=many": "Залишилося {count} днів",
+				"countPlural=other": "Залишилося {count} дня"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} день прострочення",
+				"countPlural=few": "{count} дні прострочення",
+				"countPlural=many": "{count} днів прострочення",
+				"countPlural=other": "{count} дня прострочення"
+			}
+		}
+	],
 	"excepted": "Із винятком",
 	"exceptionEnds": "Кінець винятку",
 	"refreshDueDates": "Оновити терміни SLA",

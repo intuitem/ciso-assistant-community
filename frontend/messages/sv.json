@@ -1242,6 +1242,26 @@
 			}
 		}
 	],
+	"vulnerabilitySlaDaysLeft": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} dag kvar",
+				"countPlural=other": "{count} dagar kvar"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Försenad {count} dag",
+				"countPlural=other": "Försenad {count} dagar"
+			}
+		}
+	],
 	"excepted": "Undantagen",
 	"exceptionEnds": "Undantaget upphör",
 	"publishedDate": "Publiceringsdatum",

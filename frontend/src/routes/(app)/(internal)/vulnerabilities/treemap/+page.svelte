@@ -2,6 +2,7 @@
 	import TreemapChart from '$lib/components/Chart/TreemapChart.svelte';
 	import LoadingSpinner from '$lib/components/utils/LoadingSpinner.svelte';
 	import { pageTitle } from '$lib/utils/stores';
+	import { VULNERABILITY_STATUS_COLORS } from '$lib/utils/constants';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
 	import type { PageData } from './$types';
@@ -120,29 +121,6 @@
 		undefined:
 			'bg-surface-50-950 text-surface-400-600 border-surface-200-800 hover:bg-surface-100-900'
 	};
-
-	// Status colors based on vulnerability lifecycle (using raw status values)
-	const statusColors: Record<string, string> = {
-		potential: 'bg-yellow-500 text-white border-yellow-600 hover:bg-yellow-600',
-		exploitable: 'bg-red-500 dark:bg-red-600 text-white border-red-600 hover:bg-red-600',
-		mitigated: 'bg-blue-500 dark:bg-blue-600 text-white border-blue-600 hover:bg-blue-600',
-		fixed: 'bg-green-500 dark:bg-green-600 text-white border-green-600 hover:bg-green-600',
-		not_exploitable: 'bg-teal-500 dark:bg-teal-600 text-white border-teal-600 hover:bg-teal-600',
-		unaffected:
-			'bg-emerald-500 dark:bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-600',
-		'--': 'bg-surface-950-50 text-surface-50-950 border-surface-600-400 hover:bg-surface-800-200'
-	};
-
-	// Inactive status colors
-	const statusColorsInactive: Record<string, string> = {
-		potential: 'bg-yellow-50 text-yellow-400 border-yellow-200 hover:bg-yellow-100',
-		exploitable: 'bg-red-50 text-red-400 border-red-200 hover:bg-red-100',
-		mitigated: 'bg-blue-50 text-blue-400 border-blue-200 hover:bg-blue-100',
-		fixed: 'bg-green-50 text-green-400 border-green-200 hover:bg-green-100',
-		not_exploitable: 'bg-teal-50 text-teal-400 border-teal-200 hover:bg-teal-100',
-		unaffected: 'bg-emerald-50 text-emerald-400 border-emerald-200 hover:bg-emerald-100',
-		'--': 'bg-surface-50-950 text-surface-400-600 border-surface-200-800 hover:bg-surface-100-900'
-	};
 </script>
 
 <div class="bg-surface-50-950 p-6 h-screen overflow-auto">
@@ -223,8 +201,8 @@
 						class="px-4 py-2 rounded-lg border-2 transition-all duration-200 font-medium text-sm shadow-sm {selectedStatuses.includes(
 							status
 						)
-							? statusColors[status] + ' ring-2 ring-offset-1 ring-current'
-							: statusColorsInactive[status]}"
+							? VULNERABILITY_STATUS_COLORS[status].solid + ' ring-2 ring-offset-1 ring-current'
+							: VULNERABILITY_STATUS_COLORS[status].soft}"
 					>
 						{safeTranslate(status)}
 						{#if selectedStatuses.includes(status)}

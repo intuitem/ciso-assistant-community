@@ -1220,6 +1220,26 @@
 			}
 		}
 	],
+	"vulnerabilitySlaDaysLeft": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} دن باقی",
+				"countPlural=other": "{count} دن باقی"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} دن کی تاخیر",
+				"countPlural=other": "{count} دن کی تاخیر"
+			}
+		}
+	],
 	"excepted": "استثنا میں",
 	"exceptionEnds": "استثنا کا اختتام",
 	"publishedDate": "اشاعت کی تاریخ",

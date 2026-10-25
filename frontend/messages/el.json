@@ -1970,6 +1970,26 @@
 			}
 		}
 	],
+	"vulnerabilitySlaDaysLeft": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Απομένει {count} ημέρα",
+				"countPlural=other": "Απομένουν {count} ημέρες"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} ημέρα καθυστέρηση",
+				"countPlural=other": "{count} ημέρες καθυστέρηση"
+			}
+		}
+	],
 	"excepted": "Σε εξαίρεση",
 	"exceptionEnds": "Λήξη εξαίρεσης",
 	"publishedDate": "Ημερομηνία δημοσίευσης",

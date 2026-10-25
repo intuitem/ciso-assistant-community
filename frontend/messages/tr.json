@@ -2010,6 +2010,26 @@
 			}
 		}
 	],
+	"vulnerabilitySlaDaysLeft": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} gün kaldı",
+				"countPlural=other": "{count} gün kaldı"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} gün gecikti",
+				"countPlural=other": "{count} gün gecikti"
+			}
+		}
+	],
 	"excepted": "İstisna kapsamında",
 	"exceptionEnds": "İstisna bitişi",
 	"publishedDate": "Yayın tarihi",

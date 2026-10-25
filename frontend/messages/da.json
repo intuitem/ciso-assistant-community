@@ -1532,6 +1532,26 @@
 			}
 		}
 	],
+	"vulnerabilitySlaDaysLeft": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} dag tilbage",
+				"countPlural=other": "{count} dage tilbage"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} dag for sent",
+				"countPlural=other": "{count} dage for sent"
+			}
+		}
+	],
 	"excepted": "Undtaget",
 	"exceptionEnds": "Undtagelsen udløber",
 	"publishedDate": "Publiceringsdato",

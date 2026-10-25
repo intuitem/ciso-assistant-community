@@ -14,6 +14,7 @@ import TierBadge from '$lib/components/ModelTable/field/TierBadge.svelte';
 import TierSource from '$lib/components/ModelTable/field/TierSource.svelte';
 import DpiaRequirementSource from '$lib/components/ModelTable/field/DpiaRequirementSource.svelte';
 import DpiaRequiredBadge from '$lib/components/ModelTable/field/DpiaRequiredBadge.svelte';
+import VulnerabilitySlaState from '$lib/components/ModelTable/field/VulnerabilitySlaState.svelte';
 import { listViewFields } from './table';
 import type { TableBatchAction } from './table';
 import type { urlModel } from './types';
@@ -4392,6 +4393,9 @@ const FIELD_COMPONENT_MAP = {
 	},
 	processings: {
 		dpia_required: DpiaRequiredBadge
+	},
+	vulnerabilities: {
+		state: VulnerabilitySlaState
 	},
 	'dpia-requirement-changes': {
 		dpia_required: DpiaRequiredBadge,

@@ -45,7 +45,7 @@ async function api(context: BrowserContext, request: APIRequestContext) {
 	return { call, create, enableSla };
 }
 
-test('the summary card shows severity, SLA state and dates in order', async ({
+test('the summary card shows severity, status, SLA state and dates in order', async ({
 	logedPage,
 	page,
 	context
@@ -67,7 +67,14 @@ test('the summary card shows severity, SLA state and dates in order', async ({
 
 	const card = page.getByTestId('vulnerability-summary');
 	await expect(card.getByTestId('vulnerability-severity-badge')).toContainText(/critical/i);
+	await expect(card.getByTestId('vulnerability-status-badge')).toHaveText(m.exploitable());
 	await expect(card.getByTestId('vulnerability-sla-state')).toContainText(m.overdue());
+	await expect(card.getByTestId('vulnerability-sla-state')).toContainText(
+		m.vulnerabilitySlaDaysLate({ count: 2 })
+	);
+	// The card shows them, so the field list doesn't repeat them.
+	await expect(page.getByTestId('status-field-title')).toHaveCount(0);
+	await expect(page.getByTestId('severity-field-title')).toHaveCount(0);
 	const events = await card
 		.getByTestId('vulnerability-timeline')
 		.locator('li[data-testid^="timeline-"]')
@@ -184,5 +191,11 @@ test('the SLA filter lists the vulnerabilities in that state', async ({
 	await page.waitForLoadState('networkidle');
 
 	await expect(page.getByText(overdue.name)).toBeVisible();
+	await expect(
+		page
+			.getByRole('row')
+			.filter({ hasText: overdue.name })
+			.getByTestId('vulnerability-sla-countdown')
+	).toHaveText(m.vulnerabilitySlaDaysLate({ count: 3 }));
 	await expect(page.getByText(onTrack.name)).toHaveCount(0);
 });
