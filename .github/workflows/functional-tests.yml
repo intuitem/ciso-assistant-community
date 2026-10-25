@@ -60,7 +60,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
         with:
-          version: 11
+          version: 12
 
       - name: Install community frontend dependencies
         working-directory: ${{ env.frontend-directory }}
@@ -108,7 +108,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
         with:
-          version: 11
+          version: 12
 
       - name: Build enterprise frontend
         working-directory: ${{ env.enterprise-frontend-directory }}
@@ -382,7 +382,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
         with:
-          version: 11
+          version: 12
 
       - name: Install community frontend dependencies (if not cached/part of build artifact)
         working-directory: ${{ env.frontend-directory }}
@@ -592,7 +592,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
         with:
-          version: 11
+          version: 12
 
       - name: Install enterprise frontend dependencies
         working-directory: ${{ env.enterprise-frontend-build-directory }}

@@ -24,6 +24,8 @@ overrides:
   maplibre-gl: ^6.4.1
   dompurify: ^3.4.17
 engineStrict: true
+# no version switch, so no packageManagerDependencies document in the lockfile; Dockerfiles and CI install the pinned pnpm themselves
+pmOnFail: ignore
 allowBuilds:
   '@tailwindcss/oxide': true
   esbuild: true
