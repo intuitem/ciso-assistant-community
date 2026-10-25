@@ -882,6 +882,17 @@ class TestVulnerabilityConsumer:
             record_data, _ = consumer.prepare_create({"name": "X", "status": raw}, None)
             assert record_data["status"] == expected
 
+    def test_update_keeps_observation_when_column_absent(self, base_context):
+        consumer = VulnerabilityRecordConsumer(base_context)
+        record = {"name": "Log4Shell", "status": "fixed"}
+        record_data, _ = consumer.prepare_create(record, None)
+        assert "observation" not in consumer._build_update_data(record, record_data)
+
+        record = {"name": "Log4Shell", "observation": "Patched in 2.17.1"}
+        record_data, _ = consumer.prepare_create(record, None)
+        update_data = consumer._build_update_data(record, record_data)
+        assert update_data["observation"] == "Patched in 2.17.1"
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # PolicyRecordConsumer

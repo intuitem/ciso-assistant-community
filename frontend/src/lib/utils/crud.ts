@@ -716,6 +716,11 @@ export const URL_MODEL_MAP: ModelMap = {
 			},
 			{
 				field: 'applied_controls',
+				urlModel: 'vulnerabilities',
+				disableDelete: true
+			},
+			{
+				field: 'applied_controls',
 				urlModel: 'incidents',
 				disableDelete: true,
 				addExisting: {
@@ -842,6 +847,29 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'vulnerabilities',
 		verboseName: 'Vulnerability',
 		verboseNamePlural: 'Vulnerabilities',
+		flaggedFields: { state: 'vulnerability_sla' },
+		detailViewFields: [
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'severity' },
+			{ field: 'status' },
+			{ field: 'state' },
+			{ field: 'folder' },
+			{ field: 'description' },
+			{ field: 'observation' },
+			{ field: 'detected_at', type: 'date' },
+			{ field: 'due_date', type: 'date' },
+			{ field: 'eta', type: 'date' },
+			{ field: 'published_date', type: 'date' },
+			{ field: 'assets' },
+			{ field: 'applied_controls' },
+			{ field: 'security_exceptions' },
+			{ field: 'security_advisories' },
+			{ field: 'cwes' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' }
+		],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'assets', urlModel: 'assets' },
@@ -871,6 +899,13 @@ export const URL_MODEL_MAP: ModelMap = {
 			{
 				field: 'vulnerabilities',
 				urlModel: 'risk-scenarios',
+				disableCreate: true,
+				disableDelete: true
+			},
+			{
+				field: 'vulnerabilities',
+				urlModel: 'quantitative-risk-scenarios',
+				endpointUrl: 'crq/quantitative-risk-scenarios',
 				disableCreate: true,
 				disableDelete: true
 			},
@@ -3553,6 +3588,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'status' },
 			{ field: 'assets' },
 			{ field: 'threats' },
+			{ field: 'vulnerabilities' },
 			{ field: 'qualifications' },
 			{ field: 'folder' },
 			{ field: 'observation' },

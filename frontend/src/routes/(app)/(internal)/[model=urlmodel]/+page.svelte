@@ -83,6 +83,7 @@
 	type RemoteAction = keyof typeof remoteActions;
 	let runningAction = $state<RemoteAction | null>(null);
 	const isBusy = $derived(runningAction !== null);
+	const slaEnabled = $derived(Boolean(page.data?.featureflags?.vulnerability_sla));
 	const isSyncing = $derived(
 		runningAction !== null && remoteActions[runningAction].model === URLModel
 	);
@@ -97,7 +98,10 @@
 			// backend's detail/error shape, so fall back to a real message.
 			const result = await res.json().catch(() => ({}));
 			toastStore.trigger({
-				message: result.detail || result.error || (res.ok ? m.done() : failed()),
+				message:
+					result.detail ||
+					(result.error && safeTranslate(result.error)) ||
+					(res.ok ? m.done() : failed()),
 				preset: res.ok ? 'success' : 'error'
 			});
 			if (res.ok) {
@@ -502,10 +506,10 @@
 								{#if URLModel === 'vulnerabilities'}
 									<button
 										class="inline-block p-3 btn-mini-tertiary w-12 focus:relative disabled:opacity-50 disabled:cursor-not-allowed"
-										title={m.refreshDueDates()}
+										title={slaEnabled ? m.refreshDueDates() : m.vulnerabilitySlaDisabledHint()}
 										aria-label={m.refreshDueDates()}
 										data-testid="refresh-due-dates-button"
-										disabled={isBusy}
+										disabled={isBusy || !slaEnabled}
 										onclick={() =>
 											confirmRemoteAction(
 												'refresh-due-dates',

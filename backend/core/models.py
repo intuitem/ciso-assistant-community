@@ -7843,6 +7843,7 @@ class Vulnerability(
     published_date = models.DateField(
         null=True, blank=True, verbose_name=_("Publication date")
     )
+    observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
 
     fields_to_check = ["ref_id", "name"]
 
@@ -7859,8 +7860,11 @@ class Vulnerability(
             old = Vulnerability.objects.filter(pk=self.pk).values("severity").first()
             if old and old["severity"] != self.severity:
                 severity_changed = True
-        # Default detected_at to today on creation
-        if is_new and not self.detected_at:
+        sla_policy = (
+            self.get_active_sla_policy() if is_new or severity_changed else None
+        )
+        # Default detected_at to today on creation, when an SLA applies
+        if is_new and not self.detected_at and sla_policy is not None:
             self.detected_at = date.today()
             if update_fields is not None:
                 update_fields.add("detected_at")
@@ -7868,29 +7872,37 @@ class Vulnerability(
         # (from the wizard or manual input) are preserved; the bulk
         # refresh-due-dates action is the sole path that overrides them.
         if (is_new or severity_changed) and not self.due_date:
-            self._apply_sla_policy()
+            self._apply_sla_policy(sla_policy)
             if update_fields is not None:
                 update_fields.add("due_date")
         if update_fields is not None:
             kwargs["update_fields"] = list(update_fields)
         super().save(*args, **kwargs)
 
-    def _apply_sla_policy(self):
+    @staticmethod
+    def get_active_sla_policy():
+        """The vulnerability SLA policy, or None when no SLA applies: the
+        vulnerability_sla feature flag is off, or no policy is configured."""
+        from global_settings.models import GlobalSettings
+        from global_settings.utils import ff_is_enabled
+
+        if not ff_is_enabled("vulnerability_sla"):
+            return None
+        sla_settings = GlobalSettings.objects.filter(name="vulnerability-sla").first()
+        sla_policy = sla_settings.value if sla_settings is not None else None
+        if not isinstance(sla_policy, dict) or not sla_policy:
+            return None
+        return sla_policy
+
+    def _apply_sla_policy(self, sla_policy):
         from datetime import date, timedelta
 
-        from global_settings.models import GlobalSettings
-
-        try:
-            sla_settings = GlobalSettings.objects.get(name="vulnerability-sla")
-            sla_policy = (
-                sla_settings.value if isinstance(sla_settings.value, dict) else {}
-            )
-        except GlobalSettings.DoesNotExist:
+        if sla_policy is None:
             return
+        sla_anchor = sla_policy.get("sla_anchor", "detected_at")
         severity_label = self.get_severity_display()
         days = sla_policy.get(severity_label)
         if days is not None:
-            sla_anchor = sla_policy.get("sla_anchor", "detected_at")
             if sla_anchor == "published_date" and self.published_date:
                 anchor = self.published_date
             else:

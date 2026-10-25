@@ -401,15 +401,7 @@ class VulnerabilityReadSerializer(BaseModelSerializer):
     def _get_sla_policy(self):
         """Per-instance cache — one DB query per serializer instantiation."""
         if not hasattr(self, "_sla_policy"):
-            from global_settings.models import GlobalSettings
-
-            try:
-                sla_settings = GlobalSettings.objects.get(name="vulnerability-sla")
-                self._sla_policy = (
-                    sla_settings.value if isinstance(sla_settings.value, dict) else {}
-                )
-            except GlobalSettings.DoesNotExist:
-                self._sla_policy = {}
+            self._sla_policy = Vulnerability.get_active_sla_policy() or {}
         return self._sla_policy
 
     def get_state(self, obj):
@@ -471,6 +463,7 @@ class VulnerabilityImportExportSerializer(BaseModelSerializer):
             "status",
             "severity",
             "applied_controls",
+            "observation",
             "created_at",
             "updated_at",
         ]

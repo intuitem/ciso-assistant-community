@@ -4081,18 +4081,9 @@ class VulnerabilityViewSet(BaseModelViewSet):
         from django.db.models import F
         from django.db.models.functions import Cast
 
-        from global_settings.models import GlobalSettings
-
-        try:
-            sla_settings = GlobalSettings.objects.get(name="vulnerability-sla")
-            sla_policy = (
-                sla_settings.value if isinstance(sla_settings.value, dict) else {}
-            )
-        except GlobalSettings.DoesNotExist:
-            return Response({"error": "No SLA policy configured"}, status=400)
-
-        if not sla_policy:
-            return Response({"error": "SLA policy is empty"}, status=400)
+        sla_policy = Vulnerability.get_active_sla_policy()
+        if sla_policy is None:
+            return Response({"error": "vulnerabilitySlaDisabledHint"}, status=400)
 
         sla_anchor = sla_policy.get("sla_anchor", "detected_at")
 

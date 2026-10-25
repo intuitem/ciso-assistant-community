@@ -265,6 +265,12 @@ export function getFeatureFlagGroups(availableKeys: string[]): FeatureFlagGroup[
 					description: m.vulnerabilitiesDescription()
 				},
 				{
+					field: 'vulnerability_sla',
+					label: m.vulnerabilitySlaPolicy(),
+					description: m.vulnerabilitySlaDescription(),
+					requires: ['vulnerabilities']
+				},
+				{
 					field: 'ebiosrm',
 					label: m.ebiosRM(),
 					description: m.ebiosRmDescription()

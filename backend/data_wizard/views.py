@@ -3409,6 +3409,7 @@ class VulnerabilityRecordConsumer(RecordConsumer[None]):
             "ref_id": record.get("ref_id", ""),
             "name": name,
             "description": record.get("description", ""),
+            "observation": record.get("observation", ""),
             "status": status,
             "severity": severity,
             "folder": folder_id,

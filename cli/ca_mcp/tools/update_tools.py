@@ -1528,6 +1528,7 @@ async def update_vulnerability(
     vulnerability_id: str,
     name: str = None,
     description: str = None,
+    observation: str = None,
     ref_id: str = None,
     status: str = None,
     severity: int = None,
@@ -1543,6 +1544,7 @@ async def update_vulnerability(
         vulnerability_id: Vulnerability UUID or name
         name: New name
         description: New description
+        observation: How the vulnerability is handled (markdown)
         ref_id: Reference ID (e.g. CVE identifier)
         status: -- | potential | exploitable | mitigated | fixed | not_exploitable | unaffected
         severity: -1 (undefined) | 0 (info) | 1 (low) | 2 (medium) | 3 (high) | 4 (critical)
@@ -1568,6 +1570,8 @@ async def update_vulnerability(
             payload["name"] = name
         if description is not None:
             payload["description"] = description
+        if observation is not None:
+            payload["observation"] = observation
         if ref_id is not None:
             payload["ref_id"] = ref_id
         if status is not None:

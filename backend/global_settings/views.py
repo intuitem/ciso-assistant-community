@@ -423,7 +423,11 @@ class VulnerabilitySlaViewSet(viewsets.ModelViewSet):
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data)
+        # PATCH must not fill in defaults for fields it leaves out: a missing
+        # sla_anchor would otherwise switch a disabled SLA back on.
+        serializer = self.get_serializer(
+            instance, data=request.data, partial=kwargs.get("partial", False)
+        )
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)

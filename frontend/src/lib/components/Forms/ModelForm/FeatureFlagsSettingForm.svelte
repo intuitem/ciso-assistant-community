@@ -65,6 +65,7 @@
 				'risk_acceptances',
 				'exceptions',
 				'vulnerabilities',
+				'vulnerability_sla',
 				'ebiosrm',
 				'quantitative_risk_studies',
 				'scoring_assistant',

@@ -545,6 +545,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
         source="value.security_advisories", required=False, default=True
     )
     cwes = serializers.BooleanField(source="value.cwes", required=False, default=True)
+    vulnerability_sla = serializers.BooleanField(
+        source="value.vulnerability_sla", required=False, default=True
+    )
     custom_portals = serializers.BooleanField(
         source="value.custom_portals", required=False, default=False
     )
@@ -628,6 +631,8 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
         {
             # DPIAs are quick forms: screenings and assessments are responses.
             "dpias": frozenset({"quick_forms"}),
+            # The SLA computes vulnerability due dates.
+            "vulnerability_sla": frozenset({"vulnerabilities"}),
         }
     )
 
