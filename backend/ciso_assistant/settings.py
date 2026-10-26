@@ -159,6 +159,13 @@ FEATURE_FLAGS = {}
 MODULE_PATHS = {}
 ROUTES = {}
 MODULES = {}
+# Dotted paths to callables run after a backup is restored: each returns an
+# error key to reject the restored data (rolled back, 400) or None to accept it.
+BACKUP_RESTORE_VALIDATORS = []
+# Dotted paths to modules adding to the instance status: each provides
+# status_fields() -> list of (key, value) appended to the `status` command line,
+# and update_metrics() setting its own Prometheus gauges.
+INSTANCE_STATUS_EXTENSIONS = []
 
 logger.info("BASE_DIR: %s", BASE_DIR)
 logger.info("VERSION: %s", VERSION)
@@ -509,6 +516,7 @@ INSTALLED_APPS = [
     "django_filters",
     "library",
     "serdes",
+    "data_wizard",
     "integrations",
     "webhooks",
     "rest_framework",
@@ -604,7 +612,7 @@ REST_FRAMEWORK = {
     "DEFAULT_FILTER_CLASSES": ["django_filters.rest_framework.DjangoFilterBackend"],
     "DEFAULT_PAGINATION_CLASS": "core.pagination.CustomLimitOffsetPagination",
     "PAGE_SIZE": PAGINATE_BY,
-    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_SCHEMA_CLASS": "ciso_assistant.openapi.AutoSchema",
     "EXCEPTION_HANDLER": "core.helpers.handle",
 }
 
@@ -801,10 +809,24 @@ PASSWORD_HASHERS = [
 ]
 
 SPECTACULAR_SETTINGS = {
-    "TITLE": "CISO Assistant API - Experimental",
-    "DESCRIPTION": "CISO Assistant - API Documentation for automating all your GRC needs",
-    "VERSION": "0.7.0",
+    "TITLE": "CISO Assistant API",
+    "DESCRIPTION": (
+        "Automate your GRC work with the CISO Assistant REST API.\n\n"
+        "- **Authentication**: send a personal access token, created from your "
+        "user profile, as `Authorization: Token <PAT>`.\n"
+        "- **Pagination**: list endpoints take `limit` and `offset`.\n"
+        "- **Filters**: date and number filters take the suffixes `__gt`, `__gte`, "
+        "`__lt`, `__lte` and `__isnull` (e.g. `created_at__date__gte=2026-01-01`).\n"
+        "- **Sparse fields**: `?fields=a,b,c` trims a GET response to those fields."
+    ),
+    "VERSION": VERSION,
     "SERVE_INCLUDE_SCHEMA": False,
+    # serdes routes live outside /api/, which would collapse every tag to "api"
+    "SCHEMA_PATH_PREFIX": r"/api/",
+    "POSTPROCESSING_HOOKS": [
+        "drf_spectacular.hooks.postprocess_schema_enums",
+        "ciso_assistant.openapi.split_namespace_tags",
+    ],
     # OTHER SETTINGS
 }
 
@@ -814,9 +836,8 @@ ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_LOGIN_METHODS = {"email"}
 ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
 
-# NOTE: The reauthentication flow has not been implemented in the frontend yet, hence the long timeout.
 # It is used to reauthenticate the user when they are performing sensitive operations. E.g. enabling/disabling MFA.
-ACCOUNT_REAUTHENTICATION_TIMEOUT = 24 * 60 * 60  # 24 hours
+ACCOUNT_REAUTHENTICATION_TIMEOUT = 2 * 60 * 60  # 2 hours
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 

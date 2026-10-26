@@ -662,6 +662,7 @@ class RiskAssessmentReadSerializer(AssessmentReadSerializer):
     str = serializers.CharField(source="__str__")
     perimeter = FieldsRelatedField(["id", "folder"])
     folder = FieldsRelatedField()
+    filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     risk_scenarios = FieldsRelatedField(many=True, fields=["id", "name", "ref_id"])
     risk_scenarios_count = serializers.IntegerField(source="risk_scenarios.count")
     risk_matrix = FieldsRelatedField()
@@ -2897,6 +2898,12 @@ class UserGroupReadSerializer(BaseModelSerializer):
         fields = "__all__"
 
 
+class UserGroupAutocompleteSerializer(build_autocomplete_serializer(UserGroup)):
+    # Lazy pickers label options with `name`: serve the translated one, as the
+    # list does, not the code a built-in group stores (BI-UG-ANA).
+    name = serializers.CharField(source="__str__")
+
+
 class UserGroupWriteSerializer(BaseModelSerializer):
     class Meta:
         model = UserGroup
@@ -3741,6 +3748,7 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     path = PathField(read_only=True)
     perimeter = FieldsRelatedField(["id", "folder"])
     folder = FieldsRelatedField()
+    filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     campaign = FieldsRelatedField()
     # The binder raised from this audit's requirements, so the page can link to it.
     findings_assessments = FieldsRelatedField(many=True)
@@ -3836,6 +3844,7 @@ class ComplianceAssessmentListSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
     authors = FieldsRelatedField(many=True)
     folder = FieldsRelatedField()
+    filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     framework = FieldsRelatedField()
     perimeter = FieldsRelatedField()
     progress = serializers.SerializerMethodField()
@@ -3879,6 +3888,7 @@ class ComplianceAssessmentListSerializer(BaseModelSerializer):
             "path",
             "authors",
             "entity_assessments",
+            "filtering_labels",
         ]
 
 
@@ -5751,6 +5761,10 @@ class ComputeMappingSerializer(serializers.Serializer):
 class FilteringLabelReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
+    usage_count = serializers.SerializerMethodField()
+
+    def get_usage_count(self, obj):
+        return getattr(obj, "usage_count", None)
 
     class Meta:
         model = FilteringLabel

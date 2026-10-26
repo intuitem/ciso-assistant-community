@@ -26,6 +26,7 @@
 		vulnerability: 'vulnerabilities',
 		perimeter: 'perimeters',
 		entity: 'entities',
+		solution: 'solutions',
 		processing: 'processings'
 	};
 
@@ -99,6 +100,20 @@
 	// Override at accept, per target: what the reviewer may pick, the refusals
 	// that still leave the call to them, and the payload the target reads.
 	type OverrideOption = { id: string; name: string };
+	const TIER_OVERRIDE = {
+		reasons: ['noTierResolved'],
+		options: async () => {
+			try {
+				const res = await fetch('/tiers?is_visible=true');
+				const body = res.ok ? await res.json().catch(() => null) : null;
+				const tiers = body?.results ?? body;
+				return Array.isArray(tiers) && tiers.length ? tiers : null;
+			} catch {
+				return null;
+			}
+		},
+		payload: (value: string) => ({ tier: value })
+	};
 	const OVERRIDABLE: Record<
 		string,
 		{
@@ -107,20 +122,8 @@
 			payload: (value: string) => Record<string, unknown>;
 		}
 	> = {
-		'entity.tier': {
-			reasons: ['noTierResolved'],
-			options: async () => {
-				try {
-					const res = await fetch('/tiers?is_visible=true');
-					const body = res.ok ? await res.json().catch(() => null) : null;
-					const tiers = body?.results ?? body;
-					return Array.isArray(tiers) && tiers.length ? tiers : null;
-				} catch {
-					return null;
-				}
-			},
-			payload: (value) => ({ tier: value })
-		},
+		'entity.tier': TIER_OVERRIDE,
+		'solution.tier': TIER_OVERRIDE,
 		'processing.dpia_required': {
 			reasons: ['reviewerDecides', 'noVerdictResolved', 'conflictingVerdicts'],
 			options: async () => [

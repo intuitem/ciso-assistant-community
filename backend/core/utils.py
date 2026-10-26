@@ -2092,6 +2092,112 @@ def compute_respondent_progress(compliance_assessment, requirement_assessments) 
     return int(answered_q / total_q * 100) if total_q else 0
 
 
+def assessable_requirement_assessments(audit):
+    """The rows an audit's own aggregates expect, read off a caller's prefetch:
+    assessable, and within the selected implementation groups.
+
+    Same selection rules as `get_requirement_assessments(include_non_assessable=False)`,
+    which would re-query per audit.
+    """
+    rows = [
+        ra for ra in audit.requirement_assessments.all() if ra.requirement.assessable
+    ]
+    selected = set(audit.selected_implementation_groups or [])
+    if not selected:
+        return rows
+    return [
+        ra for ra in rows if selected & set(ra.requirement.implementation_groups or [])
+    ]
+
+
+def viewable_audit_ids(user, audit_ids) -> set:
+    """Which of `audit_ids` the user may read.
+
+    Seeing a third-party assessment does not carry the right to read its
+    questionnaire: the audit sits in an enclave folder of its own, and a role
+    assignment only reaches sub-folders when it is recursive.
+    """
+    from core.models import ComplianceAssessment
+    from iam.models import RoleAssignment
+
+    audit_ids = list(audit_ids)
+    if not audit_ids or user is None:
+        return set()
+    return set(
+        ComplianceAssessment.objects.filter(id__in=audit_ids)
+        .filter(
+            id__in=RoleAssignment.get_viewable_object_ids(user, ComplianceAssessment)
+        )
+        .values_list("id", flat=True)
+    )
+
+
+def compliance_overview(audit, requirement_assessments=None) -> dict:
+    """The questionnaire's compliance split and global score, as its own page shows them.
+
+    Built from the audit's own methods, so a third-party card and the audit
+    page cannot drift apart. Pass `requirement_assessments` to read a caller's
+    prefetch; left out, the rows are fetched in one query.
+    """
+    if requirement_assessments is None:
+        from core.models import RequirementAssessment
+
+        requirement_assessments = list(
+            RequirementAssessment.objects.filter(
+                compliance_assessment=audit, requirement__assessable=True
+            ).select_related("requirement", "compliance_assessment")
+        )
+    return {
+        "donut": audit.get_donut_data(requirement_assessments)["result"],
+        "global_score": {
+            **audit.get_global_score(requirement_assessments),
+            "min_score": audit.min_score,
+            "max_score": audit.max_score,
+            "total_max_score": audit.get_total_max_score(requirement_assessments),
+            "score_calculation_method": audit.score_calculation_method,
+        },
+        "show_result": is_field_visible_to(audit, "result", "auditor"),
+        "show_score": is_field_visible_to(audit, "score", "auditor"),
+    }
+
+
+def compliance_overviews(audits) -> dict:
+    """`compliance_overview` for a page of audits, keyed by audit id.
+
+    Reads the requirement rows off the caller's prefetch and primes the
+    framework trees AVG_OF_AVG needs in a single query, so the cost stays flat
+    as the page grows.
+    """
+    from core.models import ComplianceAssessment
+
+    audits = list(audits)
+    tree_frameworks = {
+        audit.framework_id
+        for audit in audits
+        if audit.score_calculation_method
+        == ComplianceAssessment.CalculationMethod.AVG_OF_AVG
+    }
+    trees = (
+        ComplianceAssessment.framework_node_trees(tree_frameworks)
+        if tree_frameworks
+        else {}
+    )
+    overviews = {}
+    for audit in audits:
+        tree = trees.get(audit.framework_id)
+        if tree is not None:
+            audit.__dict__["framework_node_tree"] = tree
+        overviews[audit.id] = compliance_overview(
+            audit,
+            [
+                ra
+                for ra in audit.requirement_assessments.all()
+                if ra.requirement.assessable
+            ],
+        )
+    return overviews
+
+
 def build_third_party_field_visibility(framework):
     """The map a questionnaire sent to a third party starts from; the framework still wins."""
     return build_initial_field_visibility(framework, base=THIRD_PARTY_VISIBILITY)

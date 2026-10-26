@@ -69,10 +69,21 @@
 	helpText={m.solutionTierHelpText()}
 	nullable
 />
+{#if ($formData.tier ?? null) !== (object.tier?.id ?? object.tier ?? null)}
+	<TextField
+		{form}
+		field="tier_note"
+		label={m.tierNote()}
+		helpText={m.tierNoteHelpText()}
+		cacheLock={cacheLocks['tier_note']}
+		bind:cachedValue={formDataCache['tier_note']}
+	/>
+{/if}
 <AutocompleteSelect
 	{form}
 	multiple
 	optionsEndpoint="actors"
+	lazy
 	optionsLabelField="str"
 	optionsInfoFields={{
 		fields: [{ field: 'type', translate: true }],

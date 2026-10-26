@@ -45,7 +45,7 @@ from django.db.models import (
 )
 from django.db.models.functions import Coalesce, Concat
 
-from collections import defaultdict
+from collections import defaultdict, deque
 import pytz
 from uuid import UUID
 from itertools import chain, cycle
@@ -80,7 +80,7 @@ from .generators import (
     inline_charts_for_docx,
 )
 from .typst_render import localized_template, render_pdf
-from .serializer_fields import FieldsRelatedField
+from .serializer_fields import FieldsRelatedField, PathField
 
 from django.utils import timezone, translation
 from django.utils.text import slugify
@@ -109,11 +109,9 @@ from core.instance_metrics import (
     nb_risk_assessments_gauge,
     nb_risk_scenarios_gauge,
     nb_risk_acceptances_gauge,
-    nb_seats_gauge,
-    nb_editors_gauge,
-    expiration_gauge,
     created_at_gauge,
     last_login_gauge,
+    instance_status_extensions,
 )
 
 from django.apps import apps
@@ -1171,6 +1169,55 @@ def check_folder_add_permission(user, folder, *models):
             )
 
 
+def get_optimized_object_data(queryset):
+    """
+    Calculate folder full paths for objects in the queryset in 1 DB request.
+    """
+    initial_objects = list(queryset)
+    if not initial_objects:
+        return {}
+
+    path_results = {}
+    # Only the objects' folders and their ancestors, from the closure table
+    # get_folder_full_path also relies on, not the whole Folder table.
+    folder_ids = {
+        getattr(obj, "folder_id", None) or getattr(obj, "parent_folder_id", None)
+        for obj in initial_objects
+    } - {None}
+    folders = {
+        f.id: f
+        for f in Folder.objects.filter(
+            Q(id__in=folder_ids)
+            | Q(id__in=Folder.objects.filter(descendants__in=folder_ids).values("id"))
+        )
+    }
+    for obj in initial_objects:
+        path = []
+        if getattr(obj, "folder_id", None):
+            queue = deque([obj.folder_id])
+        elif getattr(obj, "parent_folder_id", None):
+            queue = deque([obj.parent_folder_id])
+        else:
+            continue
+        while queue:
+            folder_id = queue.popleft()
+            folder = folders[folder_id]
+            if folder.parent_folder_id:
+                path.append(
+                    {
+                        "str": str(folder),
+                        "id": folder.id,
+                        "parent_id": folder.parent_folder_id,
+                    }
+                )
+                queue.append(folder.parent_folder_id)
+        path_results[obj.id] = path[::-1]  # Reverse to get root to leaf order
+
+    return {
+        "paths": path_results,
+    }
+
+
 class AutocompleteMixin:
     """Adds a lightweight, server-paginated ``autocomplete`` action for entity
     pickers (search/ordering/filtering come from the viewset's existing filter
@@ -1216,7 +1263,18 @@ class AutocompleteMixin:
         qs = self.filter_queryset(qs)
         page = self.paginate_queryset(qs)
         objects = page if page is not None else qs
-        serializer = self.get_autocomplete_serializer_class()(objects, many=True)
+        serializer_class = self.get_autocomplete_serializer_class()
+        # Folder paths precomputed in one query, as list() does: otherwise each
+        # row's `path` walks its folder's ancestors on its own. That query reads
+        # the whole Folder table, so only serializers showing a path run it, and
+        # with the base data, not a viewset's heavier, list-only additions.
+        context = {}
+        if any(
+            isinstance(field, PathField)
+            for field in serializer_class._declared_fields.values()
+        ):
+            context["optimized_data"] = get_optimized_object_data(objects)
+        serializer = serializer_class(objects, many=True, context=context)
         data = serializer.data
         # Apply the same related-field IAM masking as list()/retrieve(): the
         # nested folder must not leak where the user lacks view access.
@@ -1354,7 +1412,7 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
             queryset = queryset.select_related(*joinable)
 
         if "filtering_labels" in model_fields:
-            queryset = queryset.prefetch_related("filtering_labels")
+            queryset = queryset.prefetch_related("filtering_labels__folder")
 
         return queryset
 
@@ -2344,40 +2402,8 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
         return Response(payload)
 
     def _get_optimized_object_data(self, queryset):
-        """
-        Calculate folder full paths for objects in the queryset in 1 DB request.
-        """
-        initial_objects = list(queryset)
-        if not initial_objects:
-            return {}
-
-        path_results = {}
-        folders = {f.id: f for f in Folder.objects.all()}
-        for obj in initial_objects:
-            path = []
-            if getattr(obj, "folder_id", None):
-                queue = deque([obj.folder_id])
-            elif getattr(obj, "parent_folder_id", None):
-                queue = deque([obj.parent_folder_id])
-            else:
-                continue
-            while queue:
-                folder_id = queue.popleft()
-                folder = folders[folder_id]
-                if folder.parent_folder_id:
-                    path.append(
-                        {
-                            "str": str(folder),
-                            "id": folder.id,
-                            "parent_id": folder.parent_folder_id,
-                        }
-                    )
-                    queue.append(folder.parent_folder_id)
-            path_results[obj.id] = path[::-1]  # Reverse to get root to leaf order
-
-        return {
-            "paths": path_results,
-        }
+        """Serializer context for list(); viewsets extend it with their own data."""
+        return get_optimized_object_data(queryset)
 
     class Meta:
         abstract = True
@@ -4265,18 +4291,175 @@ class VulnerabilityViewSet(BaseModelViewSet):
         return Response(treemap_data, status=status.HTTP_200_OK)
 
 
+def _filtering_label_relations():
+    for rel in FilteringLabel._meta.related_objects:
+        if rel.many_to_many:
+            yield (
+                rel.through,
+                rel.field.m2m_reverse_field_name(),
+                rel.field.m2m_field_name(),
+            )
+
+
+def _visible_label_links(request):
+    if not hasattr(request, "_label_links"):
+        request._label_links = [
+            (
+                label_col,
+                through.objects.filter(
+                    **{
+                        label_col: OuterRef("pk"),
+                        f"{obj_col}_id__in": RoleAssignment.get_viewable_object_ids(
+                            request.user,
+                            through._meta.get_field(obj_col).related_model,
+                        ),
+                    }
+                ),
+            )
+            for through, label_col, obj_col in _filtering_label_relations()
+        ]
+    return request._label_links
+
+
+def _label_usage_count(request):
+    total = Value(0)
+    for label_col, links in _visible_label_links(request):
+        total = total + Coalesce(
+            Subquery(
+                links.order_by().values(label_col).annotate(c=Count("*")).values("c"),
+                output_field=IntegerField(),
+            ),
+            0,
+        )
+    return ExpressionWrapper(total, output_field=IntegerField())
+
+
+class FilteringLabelFilterSet(GenericFilterSet):
+    usage = df.ChoiceFilter(
+        choices=[("unused", "unused"), ("rare", "rare"), ("lookalike", "lookalike")],
+        method="filter_usage",
+    )
+
+    class Meta:
+        model = FilteringLabel
+        fields = ["folder"]
+
+    def filter_usage(self, queryset, name, value):
+        if value == "unused":
+            for _, links in _visible_label_links(self.request):
+                queryset = queryset.exclude(Exists(links))
+            return queryset
+        if value == "rare":
+            return queryset.filter(usage_count__in=[1, 2])
+        groups = defaultdict(list)
+        for pk, label in queryset.values_list("pk", "label"):
+            groups[label.lower().replace("-", "").replace("_", "")].append(pk)
+        return queryset.filter(
+            pk__in=[pk for pks in groups.values() if len(pks) > 1 for pk in pks]
+        )
+
+
 class FilteringLabelViewSet(BaseModelViewSet):
     """
     API endpoint that allows labels to be viewed or edited.
     """
 
     model = FilteringLabel
-    filterset_fields = ["folder"]
+    filterset_class = FilteringLabelFilterSet
     search_fields = ["label"]
     ordering = ["label"]
 
     def get_queryset(self):
-        return super().get_queryset().select_related("folder")
+        queryset = super().get_queryset().select_related("folder")
+        params = self.request.query_params
+        if self.action == "list" and (
+            "usage_count" in params
+            or params.get("usage") == "rare"
+            or "usage_count" in params.get("ordering", "")
+        ):
+            return queryset.annotate(usage_count=_label_usage_count(self.request))
+        return queryset.annotate(usage_count=Value(None, output_field=IntegerField()))
+
+    @action(detail=True, methods=["get"], url_path="usage")
+    def usage(self, request, pk=None):
+        label = self.get_object()
+        counts = {}
+        for through, label_col, obj_col in _filtering_label_relations():
+            model = through._meta.get_field(obj_col).related_model
+            viewable = RoleAssignment.get_viewable_object_ids(request.user, model)
+            counts[model._meta.model_name] = through.objects.filter(
+                **{label_col: label, f"{obj_col}_id__in": viewable}
+            ).count()
+        return Response(counts)
+
+    @action(detail=False, methods=["post"], url_path="merge")
+    def merge(self, request):
+        target_id = request.data.get("target")
+        raw_sources = request.data.get("sources") or []
+        if not isinstance(raw_sources, list):
+            return Response(
+                {"error": "invalidMergeSelection"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        source_ids = {str(i) for i in raw_sources} - {str(target_id)}
+        queryset = self.get_queryset()
+        target = queryset.filter(id=target_id).first() if target_id else None
+        sources = list(queryset.filter(id__in=source_ids)) if source_ids else []
+        if target is None or not sources or len(sources) != len(source_ids):
+            return Response(
+                {"error": "invalidMergeSelection"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        change_perm = Permission.objects.get(codename="change_filteringlabel")
+        delete_perm = Permission.objects.get(codename="delete_filteringlabel")
+        if not RoleAssignment.is_access_allowed(
+            user=request.user, perm=change_perm, folder=Folder.get_folder(target)
+        ) or not all(
+            RoleAssignment.is_access_allowed(
+                user=request.user, perm=delete_perm, folder=Folder.get_folder(s)
+            )
+            for s in sources
+        ):
+            return Response(
+                {"error": "permissionDenied"}, status=status.HTTP_403_FORBIDDEN
+            )
+
+        relabelled = 0
+        with transaction.atomic():
+            locked = list(
+                FilteringLabel.objects.select_for_update()
+                .filter(id__in=[target.id, *(s.id for s in sources)])
+                .order_by("id")
+                .values_list("id", flat=True)
+            )
+            if len(locked) != len(sources) + 1:
+                return Response(
+                    {"error": "invalidMergeSelection"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            for through, label_col, obj_col in _filtering_label_relations():
+                obj_ids = set(
+                    through.objects.filter(**{f"{label_col}__in": sources}).values_list(
+                        f"{obj_col}_id", flat=True
+                    )
+                )
+                if not obj_ids:
+                    continue
+                already = set(
+                    through.objects.filter(
+                        **{label_col: target, f"{obj_col}_id__in": obj_ids}
+                    ).values_list(f"{obj_col}_id", flat=True)
+                )
+                missing = obj_ids - already
+                through.objects.bulk_create(
+                    through(**{f"{obj_col}_id": oid, f"{label_col}_id": target.id})
+                    for oid in missing
+                )
+                relabelled += len(missing)
+            FilteringLabel.objects.filter(id__in=[s.id for s in sources]).delete()
+
+        return Response(
+            {"target": str(target.id), "merged": len(sources), "relabelled": relabelled}
+        )
 
 
 class LibraryFilteringLabelViewSet(BaseModelViewSet):
@@ -4313,6 +4496,7 @@ class RiskAssessmentFilterSet(GenericFilterSet):
             "genericcollection": ["exact"],
             "due_date": ["exact", "year", "month"],
             "eta": ["exact"],
+            "filtering_labels": ["exact"],
         }
 
     def filter_status(self, queryset, name, value):
@@ -4367,10 +4551,14 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             ).exclude(id=instance.id).update(ebios_rm_study=None)
 
             instance.risk_matrix = instance.ebios_rm_study.risk_matrix
+            from ebios_rm.helpers import OPERATIONAL_SCENARIO_ORDER
+
             ebios_rm_study = EbiosRMStudy.objects.get(id=instance.ebios_rm_study.id)
             for operational_scenario in [
                 operational_scenario
-                for operational_scenario in ebios_rm_study.operational_scenarios.all()
+                for operational_scenario in ebios_rm_study.operational_scenarios.order_by(
+                    *OPERATIONAL_SCENARIO_ORDER
+                )
                 if operational_scenario.is_selected
             ]:
                 # Build comprehensive description from EBIOS RM components
@@ -4458,9 +4646,8 @@ class RiskAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                     risk_assessment=instance,
                     operational_scenario=operational_scenario,
                     name=operational_scenario.name,
-                    ref_id=operational_scenario.ref_id
-                    if operational_scenario.ref_id
-                    else RiskScenario.get_default_ref_id(instance),
+                    # EBIOS ref_ids are only unique per parent (AP.01 under every strategic scenario)
+                    ref_id=RiskScenario.get_default_ref_id(instance),
                     description="\n\n".join(description_parts),
                 )
                 if ff_is_enabled("inherent_risk"):
@@ -8313,12 +8500,9 @@ class UserFilter(GenericFilterSet):
 
     def filter_approver(self, queryset, name, value):
         """we don't know yet which folders will be used, so filter on any folder"""
-        approvers_id = []
-        for candidate in User.objects.all():
-            if RoleAssignment.has_permission_anywhere(
-                candidate, "approve_riskacceptance"
-            ):
-                approvers_id.append(candidate.id)
+        approvers_id = RoleAssignment.users_with_permission_anywhere(
+            Permission.objects.filter(codename="approve_riskacceptance")
+        ).values("id")
         if value:
             return queryset.filter(id__in=approvers_id)
         return queryset.exclude(id__in=approvers_id)
@@ -8740,7 +8924,10 @@ class UserViewSet(BaseModelViewSet):
                     queryset=UserGroup.objects.filter(id__in=viewable_user_group_ids)
                     .select_related("folder")
                     .only("id", "builtin", "name", "folder", "folder__name"),
-                )
+                ),
+                # UserReadSerializer.idp_groups and .has_mfa_enabled, per row.
+                "idp_groups",
+                "authenticator_set",
             )
         )
 
@@ -9016,6 +9203,7 @@ class UserGroupViewSet(BaseModelViewSet):
         DjangoFilterBackend,
         UserGroupFilter,
     ]
+    autocomplete_serializer_class = UserGroupAutocompleteSerializer
     # Membership is a property of the *group* (folder = its domain), not of the
     # globally-scoped User. Authorizing add/remove members on change_usergroup —
     # checked against the group's folder by has_object_permission — lets a domain
@@ -9027,7 +9215,14 @@ class UserGroupViewSet(BaseModelViewSet):
     }
 
     def get_queryset(self):
-        return super().get_queryset().select_related("folder")
+        queryset = super().get_queryset().select_related("folder")
+        # UserGroupFilter sorts and searches every visible group by its folder
+        # path (get_folder_full_path reads folder.ancestors) in list and
+        # autocomplete: without the prefetch, one query per group on each page
+        # request. Other actions read the path of one group at most.
+        if self.action in ("list", "autocomplete"):
+            queryset = queryset.prefetch_related("folder__ancestors")
+        return queryset
 
     # Deletion of built-in groups is blocked generically by the permission layer.
 
@@ -12673,6 +12868,7 @@ class ComplianceAssessmentFilterSet(GenericFilterSet):
             "authors",
             "reviewers",
             "genericcollection",
+            "filtering_labels",
             "due_date",
             "eta",
         ]
@@ -16226,6 +16422,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
         "applied_controls": ["exact"],
         "security_exceptions": ["exact"],
         "requirement__urn": ["exact"],
+        "requirement__ref_id": ["exact"],
         "result": ["exact"],
         "extended_result": ["exact"],
         "compliance_assessment__ref_id": ["exact"],
@@ -19929,6 +20126,7 @@ class TaskNodeFilterSet(GenericFilterSet):
     class Meta:
         model = TaskNode
         fields = {
+            "folder": ["exact"],
             "status": ["exact"],
             "task_template": ["exact"],
             "due_date": ["exact", "lte", "gte", "lt", "gt", "month", "year"],
@@ -20627,24 +20825,10 @@ def metrics_view(request):
         nb_risk_assessments_gauge.set(metrics.get("nb_risk_assessments", 0))
         nb_risk_scenarios_gauge.set(metrics.get("nb_risk_scenarios", 0))
         nb_risk_acceptances_gauge.set(metrics.get("nb_risk_acceptances", 0))
-        nb_seats_gauge.set(metrics.get("nb_seats", 0))
-        nb_editors_gauge.set(metrics.get("nb_editors", 0))
-        # Prometheus onlyhave float64 gauge, so we convert expiration timestamp to int and use -1 for unset/invalid dates
-        try:
-            expiration_date = date.fromisoformat(str(metrics.get("expiration", "")))
-            expiration_ts = int(
-                datetime(
-                    expiration_date.year,
-                    expiration_date.month,
-                    expiration_date.day,
-                    tzinfo=timezone.utc,
-                ).timestamp()
-            )
-        except ValueError, AttributeError, TypeError:
-            expiration_ts = -1
-        expiration_gauge.set(expiration_ts)
         created_at_gauge.set(metrics.get("created_at", 0))
         last_login_gauge.set(metrics.get("last_login", 0))
+        for extension in instance_status_extensions():
+            extension.update_metrics()
     except Exception as e:
         logger.warning(f"# Error collecting metrics: {e}\n", exc_info=True)
         return HttpResponse(

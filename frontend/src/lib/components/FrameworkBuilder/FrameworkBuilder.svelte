@@ -1101,7 +1101,7 @@
 										value={($frameworkStore.on_accept ?? []) as any[]}
 										rules={$frameworkStore.outcomes_definition ?? []}
 										{subjectModel}
-										onaddvendorsubject={() => addSubjectQuestion('entity')}
+										onaddsubject={addSubjectQuestion}
 										scored={formGivesPoints}
 										onupdate={(on_accept) => builder.updateFramework({ on_accept })}
 									/>

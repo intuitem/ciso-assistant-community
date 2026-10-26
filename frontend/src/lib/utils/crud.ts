@@ -193,6 +193,7 @@ export const MODEL_FEATURE_FLAGS: Record<string, FeatureFlag> = {
 	'entity-scores': 'external_ratings',
 	tiers: 'tprm',
 	'entity-tier-changes': 'tprm',
+	'solution-tier-changes': 'tprm',
 	representatives: 'tprm',
 	solutions: 'tprm',
 	findings: 'follow_up',
@@ -254,6 +255,8 @@ export interface ModelMapEntry {
 	detailViewFields?: Field[];
 	foreignKeyFields?: ForeignKeyField[];
 	reverseForeignKeyFields?: ReverseForeignKeyField[];
+	hideEmptyReverseTabs?: boolean;
+	reverseCountsEndpoint?: string;
 	selectFields?: SelectField[];
 	selectOptions?: Record<string, SelectFieldData[]>;
 	fileFields?: string[];
@@ -885,7 +888,58 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'labels',
 		verboseName: 'Label',
 		verboseNamePlural: 'Labels',
-		foreignKeyFields: [{ field: 'folder', urlModel: 'folders' }]
+		foreignKeyFields: [{ field: 'folder', urlModel: 'folders' }],
+		detailViewFields: [{ field: 'label' }, { field: 'created_at' }, { field: 'updated_at' }],
+		hideEmptyReverseTabs: true,
+		reverseCountsEndpoint: 'usage',
+		reverseForeignKeyFields: (
+			[
+				'applied-controls',
+				'risk-scenarios',
+				'assets',
+				'compliance-assessments',
+				'risk-assessments',
+				'ebios-rm',
+				'quantitative-risk-studies',
+				'business-impact-analysis',
+				'entity-assessments',
+				'threat-models',
+				'evidences',
+				'findings',
+				'findings-assessments',
+				'incidents',
+				'vulnerabilities',
+				'threats',
+				'reference-controls',
+				'task-templates',
+				'validation-flows',
+				'document-containers',
+				'entities',
+				'solutions',
+				'contracts',
+				'representatives',
+				'entity-scores',
+				'processings',
+				'projects',
+				'accreditations',
+				'generic-collections',
+				'responsibility-matrices',
+				'metric-definitions',
+				'metric-instances',
+				'dashboards',
+				'workflows',
+				'quantitative-risk-hypotheses',
+				'security-advisories',
+				'cwes',
+				'techniques',
+				'folders'
+			] as urlModel[]
+		).map((urlModel) => ({
+			field: 'filtering_labels',
+			urlModel,
+			disableCreate: true,
+			disableDelete: true
+		}))
 	},
 	'risk-acceptances': {
 		name: 'riskacceptance',
@@ -1759,7 +1813,15 @@ export const URL_MODEL_MAP: ModelMap = {
 			dora_alternative_providers_identified: 'dora',
 			dora_alternative_providers: 'dora'
 		},
-		reverseForeignKeyFields: [{ field: 'solutions', urlModel: 'contracts', disableDelete: true }],
+		reverseForeignKeyFields: [
+			{ field: 'solutions', urlModel: 'contracts', disableDelete: true },
+			{
+				field: 'solution',
+				urlModel: 'solution-tier-changes',
+				disableCreate: true,
+				disableDelete: true
+			}
+		],
 		foreignKeyFields: [
 			{ field: 'provider_entity', urlModel: 'entities' },
 			{ field: 'recipient_entity', urlModel: 'entities' },
@@ -1788,7 +1850,6 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'provider_entity' },
 			{ field: 'recipient_entity' },
 			{ field: 'is_active' },
-			{ field: 'tier' },
 			{ field: 'owner' },
 			{ field: 'assets' },
 			{ field: 'dora_ict_service_type' },
@@ -1892,7 +1953,26 @@ export const URL_MODEL_MAP: ModelMap = {
 		foreignKeyFields: [
 			{ field: 'entity', urlModel: 'entities' },
 			{ field: 'tier', urlModel: 'tiers' },
-			{ field: 'previous_tier', urlModel: 'tiers' }
+			{ field: 'previous_tier', urlModel: 'tiers' },
+			{ field: 'response', urlModel: 'quick-form-responses' },
+			{ field: 'changed_by', urlModel: 'users' },
+			{ field: 'folder', urlModel: 'folders' }
+		],
+		selectFields: [{ field: 'source' }]
+	},
+	'solution-tier-changes': {
+		name: 'solutiontierchange',
+		localName: 'solutionTierChange',
+		localNamePlural: 'solutionTierChanges',
+		verboseName: 'Solution tier change',
+		verboseNamePlural: 'Solution tier changes',
+		foreignKeyFields: [
+			{ field: 'solution', urlModel: 'solutions' },
+			{ field: 'tier', urlModel: 'tiers' },
+			{ field: 'previous_tier', urlModel: 'tiers' },
+			{ field: 'response', urlModel: 'quick-form-responses' },
+			{ field: 'changed_by', urlModel: 'users' },
+			{ field: 'folder', urlModel: 'folders' }
 		],
 		selectFields: [{ field: 'source' }]
 	},
@@ -4182,6 +4262,11 @@ const FIELD_COMPONENT_MAP = {
 		tier: TierBadge
 	},
 	'entity-tier-changes': {
+		tier: TierBadge,
+		previous_tier: TierBadge,
+		source: TierSource
+	},
+	'solution-tier-changes': {
 		tier: TierBadge,
 		previous_tier: TierBadge,
 		source: TierSource

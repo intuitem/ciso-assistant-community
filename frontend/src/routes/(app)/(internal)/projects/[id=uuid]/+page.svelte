@@ -1565,6 +1565,7 @@
 						<AutocompleteSelect
 							form={workspaceForm}
 							optionsEndpoint="actors?user__is_third_party=False"
+							lazy
 							optionsLabelField="str"
 							optionsInfoFields={{
 								fields: [{ field: 'type', translate: true }],
@@ -1589,6 +1590,7 @@
 						<AutocompleteSelect
 							form={workspaceForm}
 							optionsEndpoint="actors?user__is_third_party=False"
+							lazy
 							optionsLabelField="str"
 							optionsInfoFields={{
 								fields: [{ field: 'type', translate: true }],

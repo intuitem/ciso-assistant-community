@@ -71,6 +71,7 @@
 	multiple
 	{form}
 	optionsEndpoint="user-groups"
+	lazy
 	field="audience_groups"
 	cacheLock={cacheLocks['audience_groups']}
 	bind:cachedValue={formDataCache['audience_groups']}
@@ -81,6 +82,7 @@
 	multiple
 	{form}
 	optionsEndpoint="actors?is_third_party=false"
+	lazy
 	field="default_reviewers"
 	cacheLock={cacheLocks['default_reviewers']}
 	bind:cachedValue={formDataCache['default_reviewers']}

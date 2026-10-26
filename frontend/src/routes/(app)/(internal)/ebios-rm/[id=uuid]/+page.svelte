@@ -6,6 +6,8 @@
 	import { m } from '$paraglide/messages';
 	import type { ActionData, PageData } from './$types';
 	import Tile from './Tile.svelte';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import Card from '$lib/components/DataViz/Card.svelte';
 	import {
 		getModalStore,
@@ -246,9 +248,33 @@
 	}
 </script>
 
-<div class="h-full w-full p-8">
+<div class="h-full w-full p-8 flex flex-col gap-6">
+	<section class="card bg-surface-50-950 shadow-lg w-full p-6 border-l-4 border-pink-600 space-y-2">
+		<h2 class="text-2xl font-bold">
+			{data.data.name}
+			<span class="text-base font-normal text-surface-500">v{data.data.version}</span>
+		</h2>
+		{#if data.data.description}
+			<div class="line-clamp-4">
+				<MarkdownRenderer content={data.data.description} />
+			</div>
+		{:else}
+			<p class="alert preset-tonal-warning flex items-center gap-2">
+				<i class="fa-solid fa-triangle-exclamation"></i>
+				<span>{m.studyDescriptionMissing()}</span>
+			</p>
+
+			<Anchor
+				href={workshopsData.ws1[0].href}
+				class="anchor inline-flex items-center gap-2 text-sm"
+			>
+				{m.describeStudy()}
+				<i class="fa-solid fa-arrow-right"></i>
+			</Anchor>
+		{/if}
+	</section>
 	<div
-		class="card relative bg-surface-50-950 shadow-lg w-full h-full grid xl:grid-cols-3 lg:grid-cols-2 md:grid-cols-1 gap-8 p-8"
+		class="card relative bg-surface-50-950 shadow-lg w-full flex-1 grid xl:grid-cols-3 lg:grid-cols-2 md:grid-cols-1 gap-8 p-8"
 	>
 		{#if data.data.classification}
 			<ClassificationBadge
