@@ -12,8 +12,8 @@ ciso-assistant-manage createsuperuser
 # 3. Start services
 sudo systemctl start ciso-assistant-backend ciso-assistant-huey ciso-assistant-frontend
 
-# 4. Put a reverse proxy with HTTPS in front of :3000 (see README.md)
-# Open browser: https://your-domain.com
+# 4. Access application
+# Open browser: http://localhost:3000
 ```
 
 ## Daily Operations
@@ -145,7 +145,7 @@ sudo chown -R ciso-assistant:ciso-assistant /var/lib/ciso-assistant
 
 | Port | Service | Internal/External |
 |------|---------|-------------------|
-| 3000 | Frontend | Internal (behind the reverse proxy) |
+| 3000 | Frontend | External (user-facing) |
 | 8000 | Backend API | Internal (localhost only) |
 
 ## Support

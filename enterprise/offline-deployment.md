@@ -259,8 +259,7 @@ Group=ciso-assistant
 WorkingDirectory=/path/to/ciso-assistant-community/frontend
 Environment="NODE_ENV=production"
 Environment="BODY_SIZE_LIMIT=50000000"
-Environment="PROTOCOL_HEADER=x-forwarded-proto"
-Environment="HOST_HEADER=x-forwarded-host"
+Environment="ORIGIN=http://localhost:3000"
 Environment="PUBLIC_BACKEND_API_URL=http://localhost:8000/api"
 ExecStart=/usr/bin/node server
 
@@ -269,7 +268,7 @@ WantedBy=multi-user.target
 ```
 
 **Important environment variables:**
-- `PROTOCOL_HEADER` / `HOST_HEADER`: The frontend builds its origin from these headers, set by the reverse proxy below. It must be reached through that proxy: over plain http on port 3000, logins are rejected.
+- `ORIGIN`: Must match the URL users will access in their browser. The default is `http://localhost:3000`. For production with a reverse proxy, change this to your actual domain (e.g., `https://your-domain` or `https://your-domain:8443`). Pay attention to the protocol (http/https) and port.
 - `PUBLIC_BACKEND_API_URL`: Points to the backend API. Use `http://localhost:8000/api` for internal communication between frontend and backend services.
 
 ### Start Services
@@ -393,7 +392,7 @@ sudo apache2ctl configtest
 sudo systemctl reload apache2
 ```
 
-**Important:** The proxy must pass the original `Host` header (Caddy and Traefik do by default; Apache needs `ProxyPreserveHost On`, as above).
+**Important:** After configuring your reverse proxy with your actual domain, update the `ORIGIN` environment variable in the frontend service configuration (`/etc/systemd/system/ciso-assistant-frontend.service`) to match your domain (e.g., `https://your-domain`), then restart the frontend service: `sudo systemctl restart ciso-assistant-frontend`.
 
 ## Post-Deployment
 
@@ -426,7 +425,7 @@ sudo systemctl status ciso-assistant-frontend
   - Frontend: `sudo journalctl -u ciso-assistant-frontend -n 100`
   - Huey: `sudo journalctl -u ciso-assistant-huey -n 100`
 - Ensure `.env` file has correct permissions (600)
-- Verify `PROTOCOL_HEADER`, `HOST_HEADER` and `PUBLIC_BACKEND_API_URL` are correctly set in frontend service
+- Verify `ORIGIN` and `PUBLIC_BACKEND_API_URL` are correctly set in frontend service
 
 ## Updates
 

@@ -163,9 +163,8 @@ CORS_ALLOWED_ORIGINS=https://your-domain.com
 Edit `/etc/ciso-assistant/frontend.env`:
 
 ```bash
-# Origin is read from your reverse proxy: the frontend cannot be used over plain http on :3000
-PROTOCOL_HEADER=x-forwarded-proto
-HOST_HEADER=x-forwarded-host
+# Update if using different port or reverse proxy
+ORIGIN=https://your-domain.com
 PORT=3000
 
 # Backend API connection (usually localhost)
@@ -261,11 +260,11 @@ ciso-assistant-manage <command> [args]
 
 Once services are running:
 
-- **Frontend**: through your reverse proxy (see [Example nginx Configuration](#example-nginx-configuration)), e.g. https://your-domain.com
+- **Frontend**: http://localhost:3000
 - **Backend API**: http://localhost:8000/api
 - **API Documentation**: http://localhost:8000/api/schema/swagger/ (if DEBUG=True)
 
-The frontend must be reached through a reverse proxy (nginx/Apache) with HTTPS; it rejects logins over plain http on :3000.
+For production, use a reverse proxy (nginx/Apache) with HTTPS.
 
 ## Upgrading
 

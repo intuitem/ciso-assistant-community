@@ -896,7 +896,7 @@ The following recommendations apply for production:
 - Manage secrets in environment variables instead of putting them directly in the docker-compose.yml file.
 
 > [!NOTE]
-> The frontend cannot infer the host automatically behind a proxy, so you need to set the `HOST_HEADER` and `PROTOCOL_HEADER` variables (e.g. `x-forwarded-host` and `x-forwarded-proto`), as the provided docker-compose files do. The `ORIGIN` variable is no longer supported. Please see [the sveltekit doc](https://svelte.dev/docs/kit/adapter-node#Environment-variables-PROTOCOL_HEADER-HOST_HEADER-and-PORT_HEADER) on this tricky issue. Beware that this approach does not work with "pnpm run dev", which should not be a worry for production.
+> The frontend cannot infer the host automatically, so you need to either set the ORIGIN variable, or the `HOST_HEADER` and `PROTOCOL_HEADER` variables. Please see [the sveltekit doc](https://kit.svelte.dev/docs/adapter-node#environment-variables-origin-protocolheader-hostheader-and-port-header) on this tricky issue. Beware that this approach does not work with "pnpm run dev", which should not be a worry for production.
 
 > [!NOTE]
 > Caddy needs to receive a SNI header. Therefore, for your public URL (the one declared in `CISO_ASSISTANT_URL`), you need to use a FQDN, not an IP address, as the SNI is not transmitted by a browser if the host is an IP address. Another tricky issue!
