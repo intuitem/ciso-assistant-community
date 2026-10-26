@@ -627,6 +627,7 @@ class Folder(NameDescriptionMixin):
         # NOTE: There are probably better ways to represent these, but it works.
         # NOTE: This list is not complete.
         paths = [
+            ["matrix", "folder"],
             ["folder"],
             ["parent_folder"],
             ["perimeter", "folder"],
