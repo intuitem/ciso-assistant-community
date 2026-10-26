@@ -42,6 +42,7 @@
 	{form}
 	multiple
 	optionsEndpoint="actors?is_third_party=false"
+	lazy
 	optionsLabelField="str"
 	optionsInfoFields={{
 		fields: [{ field: 'type', translate: true }],
@@ -57,6 +58,7 @@
 	{form}
 	multiple
 	optionsEndpoint="actors?is_third_party=false"
+	lazy
 	optionsLabelField="str"
 	optionsInfoFields={{
 		fields: [{ field: 'type', translate: true }],

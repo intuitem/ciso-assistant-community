@@ -34,6 +34,7 @@
 	{form}
 	multiple
 	optionsEndpoint="actors?user__is_third_party=False"
+	lazy
 	optionsLabelField="str"
 	optionsInfoFields={{
 		fields: [{ field: 'type', translate: true }],
@@ -264,6 +265,7 @@
 					field="evidences"
 					multiple
 					optionsEndpoint="evidences"
+					lazy
 					optionsExtraFields={[['folder', 'str']]}
 					cacheLock={cacheLocks['evidences']}
 					bind:cachedValue={formDataCache['evidences']}

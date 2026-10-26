@@ -28,11 +28,17 @@ from core.views import (
 from core.models import (
     Asset,
     ComplianceAssessment,
+    Question,
     RequirementAssessment,
     RequirementAssignment,
     Terminology,
 )
-from core.utils import compute_respondent_progress
+from core.utils import (
+    assessable_requirement_assessments,
+    compliance_overviews,
+    compute_respondent_progress,
+    viewable_audit_ids,
+)
 from custom_fields.filters import CustomFieldFilterBackend, CustomFieldSearchFilter
 from django.db.models import (
     Case,
@@ -54,6 +60,7 @@ from tprm.models import (
     Representative,
     Solution,
     SolutionSubcontractor,
+    SolutionTierChange,
     EntityAssessment,
     Contract,
 )
@@ -1361,27 +1368,7 @@ class EntityAssessmentViewSet(ExportMixin, BaseModelViewSet):
             assignment_status_rank=Subquery(least_advanced)
         ).prefetch_related("filtering_labels", "custom_field_values__definition")
 
-    @staticmethod
-    def _prefetched_requirement_assessments(audit):
-        """Same selection rules as `get_requirement_assessments`, read off what is in memory:
-
-        calling it would bypass the page-level prefetch and re-query per row.
-        """
-        rows = [
-            ra
-            for ra in audit.requirement_assessments.all()
-            if ra.requirement.assessable
-        ]
-        selected = set(audit.selected_implementation_groups or [])
-        if not selected:
-            return rows
-        return [
-            ra
-            for ra in rows
-            if selected & set(ra.requirement.implementation_groups or [])
-        ]
-
-    def _get_optimized_object_data(self, queryset):
+    def _get_optimized_object_data(self, queryset, with_compliance=True):
         """Answering progress and assignment state for the whole page at once: per row the walk is a query storm."""
         data = super()._get_optimized_object_data(queryset)
 
@@ -1413,7 +1400,7 @@ class EntityAssessmentViewSet(ExportMixin, BaseModelViewSet):
         )
         data["completion"] = {
             audit.id: compute_respondent_progress(
-                audit, self._prefetched_requirement_assessments(audit)
+                audit, assessable_requirement_assessments(audit)
             )
             for audit in audits
         }
@@ -1426,6 +1413,12 @@ class EntityAssessmentViewSet(ExportMixin, BaseModelViewSet):
             else 0
             for audit in audits
         }
+
+        if with_compliance:
+            data["viewable_audits"] = viewable_audit_ids(self.request.user, audit_ids)
+            data["compliance_overview"] = compliance_overviews(
+                audit for audit in audits if audit.id in data["viewable_audits"]
+            )
 
         statuses: dict = {}
         for audit_id, status_value in RequirementAssignment.objects.filter(
@@ -1468,7 +1461,11 @@ class EntityAssessmentViewSet(ExportMixin, BaseModelViewSet):
             by_id = {ea.pk: ea for ea in queryset.filter(pk__in=batch)}
             rows = [by_id[pk] for pk in batch if pk in by_id]
             serializer = EntityAssessmentReadSerializer(
-                context={"optimized_data": self._get_optimized_object_data(rows)}
+                context={
+                    "optimized_data": self._get_optimized_object_data(
+                        rows, with_compliance=False
+                    )
+                }
             )
             for ea in rows:
                 ea._export_completion = serializer.get_completion(ea)
@@ -1657,9 +1654,33 @@ class EntityAssessmentViewSet(ExportMixin, BaseModelViewSet):
                 ),
             )
         }
+        # Same page-level pass as the completion figures: the rows are already
+        # in memory, and the framework trees are primed in one query.
+        viewable_audits = viewable_audit_ids(request.user, audits_by_id)
+        overviews = compliance_overviews(
+            audit for audit in audits_by_id.values() if audit.id in viewable_audits
+        )
 
-        for ea in EntityAssessment.objects.filter(id__in=viewable_items).select_related(
-            "folder", "entity", "entity__tier"
+        # `has_questions` and `progress` query per audit when read off the model.
+        frameworks_with_questions = set(
+            Question.objects.filter(
+                requirement_node__framework_id__in={
+                    audit.framework_id for audit in audits_by_id.values()
+                }
+            )
+            .values_list("requirement_node__framework_id", flat=True)
+            .distinct()
+        )
+        for audit in audits_by_id.values():
+            audit._has_questions = audit.framework_id in frameworks_with_questions
+        totals, assessed = ComplianceAssessmentViewSet.get_requirement_counts(
+            list(audits_by_id)
+        )
+
+        for ea in (
+            EntityAssessment.objects.filter(id__in=viewable_items)
+            .select_related("folder", "entity", "entity__tier")
+            .prefetch_related("solutions", "reviewers")
         ):
             audit = audits_by_id.get(ea.compliance_assessment_id)
             # Use entity assessment's folder for grouping
@@ -1709,15 +1730,27 @@ class EntityAssessmentViewSet(ExportMixin, BaseModelViewSet):
             # `answers_progress` counted questions only: a framework without any read 0%.
             completion = (
                 compute_respondent_progress(
-                    audit, self._prefetched_requirement_assessments(audit)
+                    audit, assessable_requirement_assessments(audit)
                 )
                 if audit
                 else 0
             )
             entry.update({"completion": completion})
 
-            review_progress = audit.progress if audit else 0
+            review_progress = (
+                int(assessed.get(audit.id, 0) / totals[audit.id] * 100)
+                if audit and totals.get(audit.id)
+                else 0
+            )
             entry.update({"review_progress": review_progress})
+
+            # None, not an empty donut: no questionnaire, or one out of reach,
+            # is not a result.
+            entry["compliance_overview"] = (
+                overviews.get(ea.compliance_assessment_id)
+                if ea.compliance_assessment_id in viewable_audits
+                else None
+            )
             assessments_data.append(entry)
 
         return Response(assessments_data)
@@ -1726,12 +1759,14 @@ class EntityAssessmentViewSet(ExportMixin, BaseModelViewSet):
 class TierFedByMixin:
     @action(detail=False, url_path="fed-by", name="Forms that set tiers")
     def fed_by(self, request):
-        """Forms the caller can see whose accepted responses set an entity's
-        tier, with what keeps them from applying on this scale."""
+        """Forms the caller can see whose accepted responses set a tier
+        (`?target=`, entity.tier by default), with what keeps them from
+        applying on this scale."""
         from core.models import QuickForm
         from core.quick_form_apply import on_accept_health
         from iam.models import RoleAssignment
 
+        target = request.query_params.get("target") or "entity.tier"
         viewable = RoleAssignment.get_viewable_object_ids(request.user, QuickForm)
         rows = []
         cache: dict = {}
@@ -1745,7 +1780,7 @@ class TierFedByMixin:
                 (
                     h
                     for h in on_accept_health(quick_form, cache)
-                    if h["target"] == "entity.tier"
+                    if h["target"] == target
                 ),
                 None,
             )
@@ -1790,6 +1825,11 @@ class TierViewSet(TierFedByMixin, BaseModelViewSet):
                 # tier can be hidden, never deleted.
                 in_history=Exists(
                     EntityTierChange.objects.filter(
+                        Q(tier=OuterRef("pk")) | Q(previous_tier=OuterRef("pk"))
+                    )
+                )
+                | Exists(
+                    SolutionTierChange.objects.filter(
                         Q(tier=OuterRef("pk")) | Q(previous_tier=OuterRef("pk"))
                     )
                 ),
@@ -1865,20 +1905,94 @@ class TierViewSet(TierFedByMixin, BaseModelViewSet):
             ).data
         )
 
+    @action(detail=False, methods=["get", "put"], name="Tier propagation")
+    def propagation(self, request):
+        """How solution tiers reach their provider: off, suggest or floor."""
+        from global_settings.models import GlobalSettings
+        from tprm.tiers import (
+            Propagation,
+            entities_below_floor,
+            propagation_mode,
+            raise_all_to_floor,
+        )
+
+        raised = 0
+        can_change = all(
+            RoleAssignment.is_access_allowed(
+                user=request.user,
+                perm=Permission.objects.get(codename=codename),
+                folder=Folder.get_root_folder(),
+            )
+            for codename in ("change_tier", "change_entity")
+        )
+        if request.method == "PUT":
+            if not can_change:
+                raise PermissionDenied()
+            mode = request.data.get("mode")
+            if mode not in Propagation.MODES:
+                return Response(
+                    {"error": "invalidPropagationMode"}, status=HTTP_400_BAD_REQUEST
+                )
+            row, _ = GlobalSettings.objects.get_or_create(
+                name=GlobalSettings.Names.TPRM,
+                defaults={"folder": Folder.get_root_folder()},
+            )
+            previous = propagation_mode()
+            with transaction.atomic():
+                row.value = {**(row.value or {}), "tier_propagation": mode}
+                row.save(update_fields=["value", "updated_at"])
+                # Switching the floor on raises the vendors already below it.
+                if mode == Propagation.FLOOR and previous != Propagation.FLOOR:
+                    raised = raise_all_to_floor(request.user)
+        # Counts every vendor: only for those who may switch the mode.
+        return Response(
+            {
+                "mode": propagation_mode(),
+                "below_floor": entities_below_floor().count() if can_change else None,
+                "raised": raised,
+            }
+        )
+
 
 class EntityTierChangeViewSet(BaseModelViewSet):
     """History of tier changes. Written only by `set_entity_tier`."""
 
     model = EntityTierChange
     http_method_names = ["get", "head", "options"]
-    filterset_fields = ["entity", "tier", "source", "changed_by", "folder"]
+    filterset_fields = ["entity", "tier", "source", "changed_by"]
     ordering = ["-created_at"]
 
     def get_queryset(self):
         return (
             super()
             .get_queryset()
-            .select_related("entity", "tier", "previous_tier", "changed_by", "folder")
+            .select_related(
+                "entity__folder", "tier", "previous_tier", "changed_by", "response"
+            )
+        )
+
+    @action(detail=False, name="Get source choices")
+    def source(self, request):
+        return Response(dict(TierSource.choices))
+
+
+class SolutionTierChangeViewSet(BaseModelViewSet):
+    model = SolutionTierChange
+    http_method_names = ["get", "head", "options"]
+    filterset_fields = ["solution", "tier", "source", "changed_by"]
+    ordering = ["-created_at"]
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                "solution__provider_entity__folder",
+                "tier",
+                "previous_tier",
+                "changed_by",
+                "response",
+            )
         )
 
     @action(detail=False, name="Get source choices")
@@ -1985,6 +2099,7 @@ SOLUTION_FILTERSET_FIELDS = [
     "assets",
     "criticality",
     "tier",
+    "tier_source",
     "contracts",
     "owner",
     "dora_ict_service_type",
@@ -2064,7 +2179,9 @@ class SolutionViewSet(ExportMixin, BaseModelViewSet):
         return (
             super()
             .get_queryset()
-            .select_related("provider_entity__folder", "recipient_entity")
+            .select_related(
+                "provider_entity__folder", "recipient_entity", "tier", "tier_response"
+            )
             .prefetch_related(
                 "assets",
                 "contracts",
@@ -2198,6 +2315,7 @@ class ContractViewSet(ExportMixin, BaseModelViewSet):
         "notice_period_provider",
         "end_date",
         "start_date",
+        "filtering_labels",
     ]
 
     @action(detail=False, name="Get status choices")

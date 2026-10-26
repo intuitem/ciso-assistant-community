@@ -1,8 +1,8 @@
 ---
 description: >-
-  CISO Assistant uses SMTP to send transactional emails (password reset,
-  superuser creation, notifications). This page covers configuration and the TLS
-  specifics introduced in 3.16.
+  CISO Assistant sends transactional emails (password reset, superuser
+  creation, notifications) over SMTP, SMTP with OAuth 2.0 or Microsoft Graph.
+  This page covers configuration and the TLS specifics introduced in 3.16.
 ---
 
 # Setting up mailer
@@ -38,13 +38,13 @@ With `ENABLE_CUSTOM_MAILER=True` in the environment, administrators get a **Mail
 Rules enforced by the panel:
 
 * A blank port means the standard port for the TLS mode: 465 with SSL, 25 otherwise. Enter 587 explicitly for submission over STARTTLS.
-* The mail server host, and the token URL for OAuth, must resolve to a public address, like the other URLs an administrator can configure (LLM, integrations, audit sinks). For a relay or identity provider on a private network, start the backend with `ALLOW_PRIVATE_NETWORK_REQUESTS=True`.
+* The mail server host, and the token URL for OAuth, must resolve to a public address, like the other URLs an administrator can configure (LLM, integrations, audit sinks). For a relay or identity provider on a private network, start the backend with `ALLOW_PRIVATE_NETWORK_REQUESTS=True`. A Microsoft Graph mailer has no address of the administrator's to check: its endpoints are Microsoft's.
 * Every mailer must pass a test before the configuration can be saved: the test sends one message through each mailer, on its own, to the administrator's own address, and reports per mailer. The test uses the values in the form, not the stored ones. An override exists for servers that only accept mail for their own domain.
 * Secrets are write-only. Leaving a secret field blank on an existing mailer keeps the stored value.
 * Every save notifies the other administrators by email, through the mailer that was active before the change, because whoever controls the mail server receives every password reset link.
 * The tab shows delivery health for every configured mailer: the last attempt, its outcome and whether failover reached it, or "never attempted". Testing the saved values refreshes it. The same rows are printed by `send_test_email`.
 
-The Microsoft 365 and Google Workspace buttons fill in the values from the sections above; the tenant-side steps are the same.
+The Microsoft 365 and Google Workspace buttons fill in the SMTP with OAuth values from the sections below; the tenant-side steps are the same. Microsoft Graph is the third entry of the transport list, not a button: the Microsoft 365 button configures SMTP with OAuth, not Graph. Choosing Graph replaces the encryption, host and port fields with the tenant ID; the mailbox goes in the username field, then the client ID and client secret. The tenant-side steps are those of the [Microsoft Graph section](#microsoft-graph-mail-over-https). A failed test shows the token endpoint's answer, for example `token endpoint answered 400: unauthorized_client ...` for a wrong client ID, or Graph's reply, for example `Graph replied 403 ErrorAccessDenied` when the application may not send as the mailbox.
 
 ### Checking the configuration
 
@@ -54,7 +54,7 @@ Send a test email through the configured mailers and see which one delivered:
 python manage.py send_test_email you@example.com
 ```
 
-With Docker Compose: `docker compose exec backend python manage.py send_test_email you@example.com`. The command prints the mailers it found, warns about any it had to skip, and exits non-zero with the reason when nothing was sent.
+With Docker Compose: `docker compose exec backend python manage.py send_test_email you@example.com`. The command prints the mailers it found, warns about any it had to skip, and exits non-zero with the reason when nothing was sent. It works for every transport, and so does the test button of the Mailer tab; the SMTP snippet further down is only for isolating a TLS trust problem.
 
 ### TLS certificate requirements (3.16+)
 
@@ -107,9 +107,10 @@ services:
 
 How it works:
 
-* Django's mailer goes through `smtplib`, which builds its TLS context with `ssl.create_default_context()`.
+* The SMTP transports go through `smtplib`, which builds its TLS context with `ssl.create_default_context()`.
 * That function asks OpenSSL to load its default trust store.
 * When `SSL_CERT_FILE` is set, OpenSSL uses **that file instead** of the system bundle (`/etc/ssl/certs/ca-certificates.crt`).
+* The OAuth token request and the Microsoft Graph transport go through `httpx`, which reads the same variable. One bundle covers all of them, including an intercepting proxy's CA.
 
 Requirements for the bundle file:
 
@@ -117,7 +118,7 @@ Requirements for the bundle file:
 * Each cert in the bundle must itself satisfy the strict X.509 checks listed above (BasicConstraints, KeyUsage, AKI).
 
 {% hint style="info" %}
-`REQUESTS_CA_BUNDLE` is only honored by the `requests`/`urllib3` libraries (used by outbound HTTP calls such as OIDC/SAML metadata fetch). It has **no effect on SMTP**, so you don't need to set it for the mailer.
+`REQUESTS_CA_BUNDLE` is only honored by the `requests`/`urllib3` libraries (used by outbound HTTP calls such as OIDC/SAML metadata fetch). It has **no effect on SMTP or on Microsoft Graph**, so you don't need to set it for the mailer.
 {% endhint %}
 
 ### Verifying the setup
@@ -133,12 +134,16 @@ print(s.noop()); s.quit()"
 
 A clean `(250, b'2.0.0 OK')` means TLS and trust are correctly configured. Any `SSL: CERTIFICATE_VERIFY_FAILED` will name the missing extension or the failing cert.
 
-You can also trigger a password reset from the UI and watch the backend logs — failures are logged at `iam.models` with `email_host`, `email_port`, and the underlying SSL error.
+This snippet checks SMTP only. For Microsoft Graph, `send_test_email` (or the test button) is the check: a certificate the bundle does not trust reads `TLS handshake failed`, a proxy that will not connect reads `the HTTP proxy refused the connection`.
 
-### Deprecated: rescue mailer
+You can also trigger a password reset from the UI and watch the backend logs: the mail service logs every mailer it had to skip with the reason, and the Mailer tab's health table keeps the last outcome and error per mailer.
+
+### Second mailer (`_RESCUE`)
+
+The `EMAIL_*_RESCUE` variables define a second mailer, with its own `EMAIL_TRANSPORT_RESCUE`, tried only when the first cannot be reached: connection refused, login refused, token refused. Once a server has accepted the message, a failure is final and the second mailer is not tried, so a message is never sent twice. Any transport works in either position; the Mailer tab offers the same second mailer.
 
 {% hint style="warning" %}
-The `EMAIL_*_RESCUE` variables (a secondary mailer used as fallback) are deprecated and will be removed in a future release. They are not a workaround for TLS issues — fix the certificate instead.
+A second mailer is not a workaround for a TLS problem: fix the certificate instead. Every failover is logged as an error and shown in the health table.
 {% endhint %}
 
 ### Deprecated: `update-ca-certificates` recipe (pre-3.16)
@@ -170,7 +175,7 @@ When upgrading to 3.16+, remove the `command:` override and switch to the CA bun
 
 Microsoft 365 and Google Workspace no longer accept a mailbox password for SMTP. CISO Assistant can authenticate with an OAuth 2.0 token instead. The session is still SMTP: same host, same port, same firewall rules. Set `EMAIL_TRANSPORT=smtp-oauth2`, then give the token endpoint, the grant and the credentials. The same variables exist with a `_RESCUE` suffix for the second mailer.
 
-`EMAIL_HOST_USER` is the mailbox mail is sent as. `EMAIL_HOST_PASSWORD` is not used. `EMAIL_USE_TLS` or `EMAIL_USE_SSL` is required: the token is a bearer credential and is never sent over a plaintext session. `EMAIL_TIMEOUT` also bounds the token request.
+`EMAIL_HOST_USER` is the mailbox mail is sent as. `EMAIL_HOST_PASSWORD` is not used. `EMAIL_USE_TLS` or `EMAIL_USE_SSL` is required: the token is a bearer credential and is never sent over a plaintext session. `EMAIL_TIMEOUT` (5 seconds by default) also bounds the token request.
 
 There are no provider presets in the application. The blocks below are the values for the two common providers; any provider that follows the OAuth 2.0 standards works the same way.
 
@@ -222,3 +227,32 @@ SMTP with OAuth on Google requires the full mail scope, and domain-wide delegati
 Use the same variables with the values from the provider's documentation. `refresh_token` additionally needs `EMAIL_OAUTH2_REFRESH_TOKEN`; `EMAIL_OAUTH2_CLIENT_SECRET` is optional for it, so public clients work. The application keeps using the refresh token from the environment. That works with providers that hand out a new refresh token on each refresh while the old one stays valid (Microsoft, Keycloak by default), but not when the provider revokes a refresh token once it has been used (Keycloak "Revoke Refresh Token", rotation with reuse detection in Okta or Auth0): turn that off for this client. When the token is refused, the error says so. `jwt_bearer` needs either `EMAIL_OAUTH2_SERVICE_ACCOUNT_FILE` or `EMAIL_OAUTH2_ISSUER` plus `EMAIL_OAUTH2_PRIVATE_KEY`, and optionally `EMAIL_OAUTH2_AUDIENCE` when it differs from the token URL. The token URL must use https. It may point at a private identity provider.
 
 Tokens are cached until shortly before they expire. A token the server rejects is dropped from the cache and the login is retried once with a new token, on a new connection when the server took longer than `EMAIL_TIMEOUT` to answer the failed login. A second rejection counts as an unreachable mailer and the next configured mailer, if any, is tried.
+
+### Microsoft Graph (mail over HTTPS)
+
+Two situations rule out SMTP, with or without OAuth: a tenant whose policy disables SMTP AUTH for every mailbox, and a network whose only way out is an HTTP proxy, which SMTP cannot cross. Microsoft Graph sends mail over HTTPS and covers both. Set `EMAIL_TRANSPORT=graph`; there is no host, port or TLS setting.
+
+```bash
+EMAIL_TRANSPORT=graph
+EMAIL_GRAPH_TENANT_ID=<tenant id or verified domain>
+EMAIL_HOST_USER=noreply@example.com
+DEFAULT_FROM_EMAIL=noreply@example.com
+EMAIL_OAUTH2_CLIENT_ID=<application (client) id>
+EMAIL_OAUTH2_CLIENT_SECRET=<client secret>
+```
+
+`EMAIL_HOST_USER` is the mailbox mail is sent as. The same variables exist with a `_RESCUE` suffix, so Graph can also be the second mailer behind an SMTP relay. `EMAIL_TIMEOUT` bounds each request, the token request included; it is 15 seconds by default for this transport, since both endpoints are reached across the internet and often through a proxy. In the Mailer tab, the same four values go under the Microsoft Graph transport.
+
+On the tenant side:
+
+1. Register an application in Entra ID and create a client secret.
+2. Do not grant `Mail.Send` in Entra: that application permission is tenant-wide, so a leaked secret could send as any mailbox. Grant it through Exchange RBAC for Applications with a management scope limited to the sending mailbox. Grants from Entra and Exchange add up, so an Entra grant would undo the scope. In Exchange Online PowerShell, with the object ID from the Enterprise applications page (not App registrations):
+
+   ```powershell
+   New-ServicePrincipal -AppId <client id> -ObjectId <enterprise application object id> -DisplayName "CISO Assistant mail"
+   New-ManagementScope -Name "CISO Assistant mailbox" -RecipientRestrictionFilter "PrimarySmtpAddress -eq 'noreply@example.com'"
+   New-ManagementRoleAssignment -App <client id> -Role "Application Mail.Send" -CustomResourceScope "CISO Assistant mailbox"
+   ```
+3. Check it with `Test-ServicePrincipalAuthorization -Identity <client id> -Resource noreply@example.com`, which must report `InScope` true. The assignment can take up to two hours to apply to a running application. SMTP AUTH can stay disabled.
+
+Outbound HTTPS follows the standard proxy variables, `HTTPS_PROXY` and `NO_PROXY`, like every other HTTPS call the backend makes; an intercepting proxy's CA goes in `SSL_CERT_FILE` as described above. Token endpoint failures, and a Graph endpoint the network cannot reach (proxy refusal, timeout), count as an unreachable mailer and the next configured mailer, if any, is tried, even while a token is cached. A rejected send is final and the error shows Graph's own answer, for example `Graph replied 403 ErrorAccessDenied` when the application may not send as the mailbox. Attachments are not supported by this transport; the application does not send any.

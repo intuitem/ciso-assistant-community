@@ -233,6 +233,7 @@
 			{form}
 			multiple
 			optionsEndpoint="users"
+			lazy
 			optionsDetailedUrlParameters={[
 				['is_third_party', 'true'],
 				['representative__entity', selectedEntity || '']
@@ -254,18 +255,6 @@
 	helpText={m.dueDateHelpText()}
 	cacheLock={cacheLocks['due_date']}
 	bind:cachedValue={formDataCache['due_date']}
-/>
-<AutocompleteSelect
-	multiple
-	{form}
-	createFromSelection={true}
-	optionsEndpoint="filtering-labels"
-	optionsLabelField="label"
-	field="filtering_labels"
-	helpText={m.labelsHelpText()}
-	label={m.labels()}
-	translateOptions={false}
-	allowUserOptions="append"
 />
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
 	<Select
@@ -313,6 +302,7 @@
 		{form}
 		multiple
 		optionsEndpoint="actors"
+		lazy
 		optionsLabelField="str"
 		optionsInfoFields={{
 			fields: [{ field: 'type', translate: true }],
@@ -327,6 +317,7 @@
 		{form}
 		multiple
 		optionsEndpoint="actors"
+		lazy
 		optionsLabelField="str"
 		optionsInfoFields={{
 			fields: [{ field: 'type', translate: true }],
@@ -338,8 +329,21 @@
 		label={m.reviewers()}
 	/>
 	<AutocompleteSelect
+		multiple
+		{form}
+		createFromSelection={true}
+		optionsEndpoint="filtering-labels"
+		optionsLabelField="label"
+		translateOptions={false}
+		field="filtering_labels"
+		helpText={m.labelsHelpText()}
+		label={m.labels()}
+		allowUserOptions="append"
+	/>
+	<AutocompleteSelect
 		{form}
 		optionsEndpoint="evidences"
+		lazy
 		optionsExtraFields={[['folder', 'str']]}
 		field="evidence"
 		cacheLock={cacheLocks['evidence']}

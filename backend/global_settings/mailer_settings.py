@@ -32,6 +32,10 @@ def network_problems(row) -> list[str]:
         assert_public_url_unless_dev,
     )
 
+    if row.is_graph:
+        # Both endpoints are Microsoft's, derived from the tenant: nothing
+        # the administrator typed can point them elsewhere.
+        return []
     targets = [("host", lambda: assert_public_host_unless_dev(row.host))]
     if row.transport == row.Transport.SMTP_OAUTH2:
         targets.append(

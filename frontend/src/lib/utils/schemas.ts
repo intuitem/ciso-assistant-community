@@ -84,6 +84,15 @@ export const loginSchema = z
 	})
 	.required();
 
+export const reauthenticateSchema = z.object({
+	password: z.string().optional(),
+	code: z
+		.string()
+		.regex(/^\d{6,8}$/)
+		.optional(),
+	credential: z.string().optional()
+});
+
 export const emailSchema = z
 	.object({
 		email: z.string({
@@ -152,6 +161,7 @@ export const WorkflowImportSchema = z.object({
 });
 
 export const RiskAssessmentSchema = z.object({
+	filtering_labels: z.string().optional().array().optional(),
 	...NameDescriptionMixin,
 	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	version: z.string().optional().default('1.0'),
@@ -200,6 +210,7 @@ export const TacticSchema = z.object({
 });
 
 export const ThreatModelSchema = z.object({
+	filtering_labels: z.string().optional().array().optional(),
 	...NameDescriptionMixin,
 	folder: z.string(),
 	ref_id: z.string().optional(),
@@ -567,6 +578,7 @@ export const SetPasswordSchema = z.object({
 });
 
 export const ComplianceAssessmentSchema = z.object({
+	filtering_labels: z.string().optional().array().optional(),
 	...NameDescriptionMixin,
 	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	version: z.string().optional().default('1.0'),
@@ -967,6 +979,7 @@ export const tierSchema = z.object({
 });
 
 export const EntityAssessmentSchema = z.object({
+	filtering_labels: z.string().optional().array().optional(),
 	...NameDescriptionMixin,
 	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	create_audit: z.boolean().optional().default(false),
@@ -1008,7 +1021,6 @@ export const EntityAssessmentSchema = z.object({
 			message: "Link must be either empty or a valid URL starting with 'http'"
 		})
 		.optional(),
-	filtering_labels: z.string().optional().array().optional(),
 	custom_fields: z.record(z.string(), z.any()).optional()
 });
 
@@ -1017,6 +1029,7 @@ export const solutionSchema = z.object({
 	provider_entity: z.string(),
 	ref_id: z.string().optional(),
 	tier: z.string().uuid().optional().nullable(),
+	tier_note: z.string().optional(),
 	owner: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
 	filtering_labels: z.string().optional().array().optional(),
@@ -1116,6 +1129,7 @@ export const vulnerabilitySchema = z.object({
 });
 
 export const BusinessImpactAnalysisSchema = z.object({
+	filtering_labels: z.string().optional().array().optional(),
 	...NameDescriptionMixin,
 	version: z.string().optional().default('0.1'),
 	folder: z.string(),
@@ -1317,6 +1331,7 @@ export const organisationIssueSchema = z.object({
 });
 
 export const quantitativeRiskStudySchema = z.object({
+	filtering_labels: z.string().optional().array().optional(),
 	...NameDescriptionMixin,
 	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	ref_id: z.string().optional(),
@@ -1403,6 +1418,7 @@ export const quantitativeRiskHypothesisSchema = z.object({
 	filtering_labels: z.string().optional().array().optional()
 });
 export const ebiosRMSchema = z.object({
+	filtering_labels: z.string().optional().array().optional(),
 	...NameDescriptionMixin,
 	genericcollection: z.preprocess(toArrayPreprocessor, z.array(z.string().optional())).optional(),
 	version: z.string().optional().default('0.1'),

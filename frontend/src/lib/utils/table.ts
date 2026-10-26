@@ -20,8 +20,8 @@ import ReplaceWith from '$lib/components/ContextMenu/applied-controls/ReplaceWit
 import ChangeAttackStage from '$lib/components/ContextMenu/elementary-actions/ChangeAttackStage.svelte';
 import VulnerabilityChangeStatus from '$lib/components/ContextMenu/vulnerabilities/ChangeStatus.svelte';
 import VulnerabilityChangeSeverity from '$lib/components/ContextMenu/vulnerabilities/ChangeSeverity.svelte';
-import EntityAssessTier from '$lib/components/ContextMenu/entities/AssessTier.svelte';
-import EntityChangeTier from '$lib/components/ContextMenu/entities/ChangeTier.svelte';
+import AssessTier from '$lib/components/ContextMenu/AssessTier.svelte';
+import ChangeTier from '$lib/components/ContextMenu/ChangeTier.svelte';
 import ProcessingScreenDpia from '$lib/components/ContextMenu/processings/ScreenDpia.svelte';
 import ProcessingChangeDpiaRequired from '$lib/components/ContextMenu/processings/ChangeDpiaRequired.svelte';
 import ChangeChoiceField from '$lib/components/ContextMenu/ChangeChoiceField.svelte';
@@ -304,6 +304,22 @@ export const LABELS_FILTER: ListViewFilterConfig = {
 		label: 'filtering_labels',
 		optionsLabelField: 'label',
 		multiple: true
+	}
+};
+
+export const LABEL_USAGE_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		options: [
+			{ label: 'unused', value: 'unused' },
+			{ label: 'usedOnceOrTwice', value: 'rare' },
+			{ label: 'lookAlikes', value: 'lookalike' }
+		],
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'usage',
+		browserCache: 'force-cache',
+		multiple: false
 	}
 };
 
@@ -1261,6 +1277,12 @@ export const TIER_SOURCE_FILTER: ListViewFilterConfig = {
 					return m.tierSourceManual();
 				},
 				value: 'manual'
+			},
+			{
+				get label() {
+					return m.tierSourceRollup();
+				},
+				value: 'rollup'
 			}
 		],
 		translateOptions: false,
@@ -1781,8 +1803,11 @@ export const listViewFields = {
 		}
 	},
 	'filtering-labels': {
-		head: ['label'],
-		body: ['label']
+		head: ['label', 'usage'],
+		body: ['label', 'usage_count'],
+		filters: {
+			usage: LABEL_USAGE_FILTER
+		}
 	},
 	'risk-matrices': {
 		head: ['name', 'description', 'provider', 'domain', 'isEnabled'],
@@ -1862,8 +1887,8 @@ export const listViewFields = {
 			'updated_at'
 		],
 		optionalFields: {
-			head: ['authors', 'createdAt'],
-			body: ['authors', 'created_at']
+			head: ['authors', 'createdAt', 'filteringLabels'],
+			body: ['authors', 'created_at', 'filtering_labels']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -1873,7 +1898,8 @@ export const listViewFields = {
 			due_date: dateFilter('due_date'),
 			eta: dateFilter('eta'),
 			created_at: CREATED_AT_FILTER,
-			updated_at: UPDATED_AT_FILTER
+			updated_at: UPDATED_AT_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	threats: {
@@ -2287,6 +2313,8 @@ export const listViewFields = {
 			'is_third_party',
 			'has_mfa_enabled'
 		],
+		optionalFields: { head: ['observation'], body: ['observation'] },
+		hasDescription: false,
 		filters: {
 			is_active: USER_IS_ACTIVE_FILTER,
 			is_third_party: USER_IS_THIRD_PARTY_FILTER
@@ -2378,8 +2406,8 @@ export const listViewFields = {
 			'updated_at'
 		],
 		optionalFields: {
-			head: ['status', 'authors'],
-			body: ['status', 'authors']
+			head: ['status', 'authors', 'filteringLabels'],
+			body: ['status', 'authors', 'filtering_labels']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -2391,7 +2419,8 @@ export const listViewFields = {
 			due_date: dateFilter('due_date'),
 			eta: dateFilter('eta'),
 			created_at: CREATED_AT_FILTER,
-			updated_at: UPDATED_AT_FILTER
+			updated_at: UPDATED_AT_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	'requirement-assessments': {
@@ -2485,6 +2514,10 @@ export const listViewFields = {
 			locale: DOC_TEMPLATE_LANGUAGE_FILTER,
 			builtin: BUILTIN_FILTER
 		}
+	},
+	techniques: {
+		head: ['ref_id', 'name', 'description'],
+		body: ['ref_id', 'name', 'description']
 	},
 	'managed-documents': {
 		head: ['name', 'documentType', 'locale', 'domain'],
@@ -2624,7 +2657,7 @@ export const listViewFields = {
 			'folder'
 		],
 		optionalFields: {
-			head: ['perimeter', 'expiryDate', 'labels'],
+			head: ['perimeter', 'expiryDate', 'filteringLabels'],
 			body: ['perimeter', 'expiry_date', 'filtering_labels']
 		},
 		filters: {
@@ -2632,9 +2665,9 @@ export const listViewFields = {
 			entity: ENTITY_FILTER,
 			status: COMPLIANCE_ASSESSMENT_STATUS_FILTER,
 			conclusion: ENTITY_ASSESSMENT_CONCLUSION_FILTER,
-			filtering_labels: LABELS_FILTER,
 			due_date: dateFilter('due_date'),
-			expiry_date: dateFilter('expiry_date')
+			expiry_date: dateFilter('expiry_date'),
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	solutions: {
@@ -2698,6 +2731,14 @@ export const listViewFields = {
 			source: TIER_SOURCE_FILTER
 		}
 	},
+	'solution-tier-changes': {
+		head: ['createdAt', 'tier', 'previousTier', 'source', 'changedBy', 'note', 'solution'],
+		body: ['created_at', 'tier', 'previous_tier', 'source', 'changed_by', 'note', 'solution'],
+		filters: {
+			tier: TIER_FILTER,
+			source: TIER_SOURCE_FILTER
+		}
+	},
 	'dpia-requirement-changes': {
 		head: ['createdAt', 'dpiaRequired', 'previously', 'source', 'changedBy', 'note', 'processing'],
 		body: [
@@ -2735,15 +2776,16 @@ export const listViewFields = {
 		head: ['name', 'perimeter', 'folder', 'status'],
 		body: ['name', 'perimeter', 'folder', 'status'],
 		optionalFields: {
-			head: ['createdAt', 'updatedAt'],
-			body: ['created_at', 'updated_at']
+			head: ['createdAt', 'updatedAt', 'filteringLabels'],
+			body: ['created_at', 'updated_at', 'filtering_labels']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
 			status: RISK_ASSESSMENT_STATUS_FILTER,
 			created_at: CREATED_AT_FILTER,
-			updated_at: UPDATED_AT_FILTER
+			updated_at: UPDATED_AT_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	'asset-assessments': {
@@ -3070,8 +3112,8 @@ export const listViewFields = {
 			'updated_at'
 		],
 		optionalFields: {
-			head: ['classification'],
-			body: ['classification']
+			head: ['classification', 'filteringLabels'],
+			body: ['classification', 'filtering_labels']
 		},
 		filters: {
 			folder: DOMAIN_FILTER,
@@ -3080,7 +3122,8 @@ export const listViewFields = {
 			origin: ORGANISATION_ISSUE_ORIGIN_FILTER,
 			status: ORGANISATION_ISSUE_STATUS_FILTER,
 			created_at: CREATED_AT_FILTER,
-			updated_at: UPDATED_AT_FILTER
+			updated_at: UPDATED_AT_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	'feared-events': {
@@ -3201,8 +3244,13 @@ export const listViewFields = {
 	'threat-models': {
 		head: ['ref_id', 'name', 'description', 'catalog', 'nodeCount', 'domain'],
 		body: ['ref_id', 'name', 'description', 'catalog', 'node_count', 'folder'],
+		optionalFields: {
+			head: ['filteringLabels'],
+			body: ['filtering_labels']
+		},
 		filters: {
-			folder: DOMAIN_FILTER
+			folder: DOMAIN_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	'elementary-actions': {
@@ -3522,11 +3570,16 @@ export const listViewFields = {
 	'quantitative-risk-studies': {
 		head: ['refId', 'name', 'description', 'status', 'updatedAt', 'domain'],
 		body: ['ref_id', 'name', 'description', 'status', 'updated_at', 'folder'],
+		optionalFields: {
+			head: ['filteringLabels'],
+			body: ['filtering_labels']
+		},
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: RISK_ASSESSMENT_STATUS_FILTER,
 			created_at: CREATED_AT_FILTER,
-			updated_at: UPDATED_AT_FILTER
+			updated_at: UPDATED_AT_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	'quantitative-risk-scenarios': {
@@ -3859,6 +3912,7 @@ export const listViewFields = {
 			owner: {
 				component: AutocompleteSelect,
 				props: {
+					lazy: true,
 					optionsEndpoint: 'actors',
 					optionsLabelField: 'str',
 					label: 'owner',
@@ -4028,8 +4082,12 @@ export const contextMenuActions = {
 	'asset-assessments': [{ component: ToggleRecoveryFlags, props: {} }],
 	'metric-instances': [{ component: MetricInstanceEditValue, props: {} }],
 	entities: [
-		{ component: EntityAssessTier, props: {} },
-		{ component: EntityChangeTier, props: {} }
+		{ component: AssessTier, props: {} },
+		{ component: ChangeTier, props: {} }
+	],
+	solutions: [
+		{ component: AssessTier, props: {} },
+		{ component: ChangeTier, props: {} }
 	],
 	processings: [
 		{ component: ProcessingScreenDpia, props: {} },
@@ -4183,6 +4241,16 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			label: 'changeDomain',
 			icon: 'fa-solid fa-folder',
 			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'filtering-labels': [
+		{
+			type: 'merge',
+			label: 'mergeLabels',
+			icon: 'fa-solid fa-code-merge',
+			minSelection: 2,
+			maxSelection: 20
 		},
 		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
 	],
@@ -4645,7 +4713,16 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
 	],
 	representatives: [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
-	solutions: [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
+	solutions: [
+		{
+			type: 'change_field',
+			label: 'changeTier',
+			icon: 'fa-solid fa-layer-group',
+			field: 'tier',
+			optionsEndpoint: 'tiers?is_visible=true'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
 	'entity-assessments': [
 		{
 			type: 'change_field',

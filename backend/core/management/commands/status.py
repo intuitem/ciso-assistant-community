@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from core.models import *
+from core.instance_metrics import instance_status_extensions
 from iam.models import User, Folder
-from django.conf import settings
 
 
 class Command(BaseCommand):
@@ -22,9 +22,6 @@ class Command(BaseCommand):
         nb_risk_assessments = RiskAssessment.objects.all().count()
         nb_risk_scenarios = RiskScenario.objects.all().count()
         nb_risk_acceptances = RiskAcceptance.objects.all().count()
-        nb_seats = getattr(settings, "LICENSE_SEATS", 0)
-        nb_editors = len(User.get_editors())
-        expiration = getattr(settings, "LICENSE_EXPIRATION", "")
 
         created_at = Folder.get_root_folder().created_at
         last_login = max(
@@ -41,6 +38,10 @@ class Command(BaseCommand):
             + f"domains={nb_domains} perimeters={nb_perimeters} assets={nb_assets} "
             + f"threats={nb_threats} functions={nb_functions} measures={nb_measures} "
             + f"evidences={nb_evidences} compliance={nb_compliance_assessments} risk={nb_risk_assessments} "
-            + f"scenarios={nb_risk_scenarios} acceptances={nb_risk_acceptances} "
-            + f"seats={nb_seats} editors={nb_editors} expiration={expiration}"
+            + f"scenarios={nb_risk_scenarios} acceptances={nb_risk_acceptances}"
+            + "".join(
+                f" {key}={value}"
+                for extension in instance_status_extensions()
+                for key, value in extension.status_fields()
+            )
         )
