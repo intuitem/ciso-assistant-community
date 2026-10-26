@@ -2848,8 +2848,6 @@
 	"templateValidationFlowUpdatedDescription": "Надсилається, коли статус процесу погодження змінюється",
 	"templateAuditReportName": "Звіт аудиту",
 	"templateAuditReportDescription": "Word-звіт аудиту",
-	"wordTemplates": "Шаблони звітів Word",
-	"wordTemplatesDescription": "Налаштуйте шаблони звітів Word (.docx), що використовуються для генерування звітів. Завантажте власні шаблони, щоб замінити вбудовані значення за замовчуванням.",
 	"uploadTemplate": "Завантажити шаблон",
 	"wordTemplateUploadHelp": "Завантажте файл .docx з тими самими змінними шаблону, що й типовий. Спочатку завантажте типовий шаблон, щоб використати його як основу.",
 	"downloadDefaultTemplate": "Завантажити типовий шаблон",

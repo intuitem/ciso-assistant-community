@@ -405,3 +405,75 @@ def test_hidden_categories_drop_their_undertakings(audit):
         audit, "en", None, hidden={"applied_controls", "task_templates"}
     )
     assert commitments == []
+
+
+def _override(profile_key, body):
+    from django.core.files.base import ContentFile
+
+    from core.models import CustomWordTemplate
+
+    return CustomWordTemplate.objects.create(
+        template_key=profile_key,
+        language="en",
+        file=ContentFile(body.encode(), name="custom.typ"),
+    )
+
+
+CUSTOM_TYPST = (
+    "#let d = json(bytes(sys.inputs.data))\ncustom-override-marker #d.audit.name\n"
+)
+
+
+@pytest.mark.django_db
+def test_posture_pdf_uses_the_custom_override(admin_client, audit):
+    _override("audit_attestation", CUSTOM_TYPST)
+    url = reverse("compliance-assessments-posture-pdf", kwargs={"pk": str(audit.pk)})
+
+    attestation = admin_client.get(url, {"profile": "attestation"})
+    text = pymupdf.open(stream=attestation.content, filetype="pdf")[0].get_text()
+    assert "custom-override-marker" in text
+    assert audit.name in text
+
+    full = admin_client.get(url)
+    text = pymupdf.open(stream=full.content, filetype="pdf")[0].get_text()
+    assert "custom-override-marker" not in text, "override leaked to another profile"
+
+
+@pytest.mark.django_db
+def test_broken_override_falls_back_to_the_default(admin_client, audit):
+    _override(
+        "audit_posture", "#let d = json(bytes(sys.inputs.data))\n#d.no_such_key\n"
+    )
+    url = reverse("compliance-assessments-posture-pdf", kwargs={"pk": str(audit.pk)})
+
+    response = admin_client.get(url)
+    assert response.status_code == status.HTTP_200_OK
+    doc = pymupdf.open(stream=response.content, filetype="pdf")
+    assert doc.page_count >= 2
+
+
+def test_override_compile_is_killed_past_the_timeout(monkeypatch):
+    import subprocess
+
+    from core import typst_render
+
+    monkeypatch.setattr(typst_render, "OVERRIDE_TIMEOUT_SEC", 2)
+    with pytest.raises(subprocess.TimeoutExpired):
+        render_pdf(
+            "", {}, source=b"#for i in range(100000) { for j in range(100000) {} }"
+        )
+
+
+@pytest.mark.django_db
+def test_typst_override_passes_model_validation():
+    from django.core.files.base import ContentFile
+
+    from core.models import CustomWordTemplate, Folder
+
+    template = CustomWordTemplate(
+        template_key="audit_posture",
+        language="en",
+        folder=Folder.get_root_folder(),
+        file=ContentFile(CUSTOM_TYPST.encode(), name="custom.typ"),
+    )
+    template.full_clean()

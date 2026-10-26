@@ -237,7 +237,7 @@
 		<div class="space-y-8">
 			<section>
 				<h3 class="h4 font-semibold mb-4">
-					<i class="fa-solid fa-file-word mr-2"></i>{m.wordTemplates()}
+					<i class="fa-solid fa-file-lines mr-2"></i>{m.reportTemplates()}
 				</h3>
 				<WordTemplatesSettings />
 			</section>

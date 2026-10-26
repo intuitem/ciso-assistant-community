@@ -5563,8 +5563,6 @@
 	"width": "Breedte",
 	"wordTemplateSyntaxHelp": "Sjablonen gebruiken de docxtpl-syntaxis. Raadpleeg de docxtpl-documentatie voor meer informatie over het gebruik van variabelen, afbeeldingen en lussen in uw .docx-sjabloon.",
 	"wordTemplateUploadHelp": "Upload een .docx-bestand met dezelfde sjabloonvariabelen als de standaardsjabloon. Download eerst de standaardsjabloon om als startpunt te gebruiken.",
-	"wordTemplates": "Word-rapportsjablonen",
-	"wordTemplatesDescription": "Pas de Word-rapportsjablonen (.docx) aan die worden gebruikt voor het genereren van rapporten. Upload uw eigen sjablonen om de ingebouwde standaardsjablonen te overschrijven.",
 	"workspaceSettings": "Werkruimte en interface",
 	"writeDocumentPlaceholder": "Schrijf uw beleidsdocument in Markdown...",
 	"yearly": "Jaarlijks",

@@ -3902,8 +3902,6 @@
 	"docHtmlTemplatesDescription": "Passen Sie das HTML/CSS-Layout an, das beim Exportieren von Dokumenten in PDF verwendet wird (Deckblatt, Kopf- und Fußzeilen, Branding). Laden Sie Ihre eigene Vorlage hoch, um die integrierte Standardeinstellung zu überschreiben.",
 	"docHtmlTemplateUploadHelp": "Laden Sie eine .html-Datei (Django-Vorlagensyntax) hoch und verwenden Sie dabei dieselben Variablen wie standardmäßig. Laden Sie zunächst die Standardversion herunter, um sie als Ausgangspunkt zu verwenden.",
 	"docHtmlTemplateSyntaxHelp": "Vorlagen verwenden die von WeasyPrint gerenderte Django-Vorlagensyntax. Betten Sie CSS in ein <style>-Tag ein und verwenden Sie die folgenden Variablen, um das Layout zu erstellen.",
-	"wordTemplates": "Word-Berichtsvorlagen",
-	"wordTemplatesDescription": "Passen Sie Word-Berichtsvorlagen (.docx) an, die für die Berichtserstellung verwendet werden. Laden Sie Ihre eigenen Vorlagen hoch, um die integrierten Standardeinstellungen zu überschreiben.",
 	"uploadTemplate": "Vorlage hochladen",
 	"wordTemplateUploadHelp": "Laden Sie eine .docx-Datei mit denselben Vorlagenvariablen wie standardmäßig hoch. Laden Sie zunächst die Standardversion herunter, um sie als Ausgangspunkt zu verwenden.",
 	"downloadDefaultTemplate": "Laden Sie die Standardvorlage herunter",
