@@ -27,6 +27,12 @@
 		tags={['evidences', 'bulk', 'upload']}
 	/>
 	<Article
+		title="Data import"
+		desc="Drop any spreadsheet: header rows, target objects, column and value mappings are suggested per tab, then reviewed. Dry run before import."
+		link="/experimental/data-import"
+		tags={['import', 'xlsx', 'mapping', 'prototype']}
+	/>
+	<Article
 		title="Questionnaire Autopilot"
 		desc="Upload a customer security questionnaire (.xlsx), scope it to a folder, then map its columns. LLM prefill comes next."
 		link="/experimental/questionnaire-autopilot"

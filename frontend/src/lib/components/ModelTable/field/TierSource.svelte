@@ -13,7 +13,8 @@
 	const LABELS: Record<string, () => string> = {
 		assessment: m.tierSourceAssessment,
 		override: m.tierSourceOverride,
-		manual: m.tierSourceManual
+		manual: m.tierSourceManual,
+		rollup: m.tierSourceRollup
 	};
 </script>
 

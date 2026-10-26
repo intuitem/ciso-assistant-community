@@ -804,7 +804,9 @@
 				: false)
 	);
 
-	let contextMenuDisplayDelete = $derived(contextMenuCanDeleteObject && deleteForm !== undefined);
+	let contextMenuDisplayDelete = $derived(
+		!disableDelete && contextMenuCanDeleteObject && deleteForm !== undefined
+	);
 
 	function contextMenuModalConfirmDelete(
 		id: string,
@@ -1470,6 +1472,7 @@
 														{@const displayValue = [
 															'name',
 															'description',
+															'observation',
 															'ref_id',
 															'key'
 														].includes(key)

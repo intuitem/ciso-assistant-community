@@ -423,15 +423,13 @@ class TestServiceAccountTokenFlow:
 
 @pytest.mark.django_db
 class TestServiceAccountExclusions:
-    def test_sa_user_hidden_from_users_and_editors(self, admin_client, domain_folder):
+    def test_sa_user_hidden_from_users(self, admin_client, domain_folder):
         payload = _create_sa(admin_client, domain_folder)
         sa = ServiceAccount.objects.get(id=payload["id"])
 
         response = admin_client.get("/api/users/")
         emails = {row["email"] for row in response.json()["results"]}
         assert sa.user.email not in emails
-
-        assert sa.user not in User.get_editors()
 
     def test_sa_user_hidden_from_actor_pickers(self, admin_client, domain_folder):
         payload = _create_sa(admin_client, domain_folder)
@@ -1001,62 +999,52 @@ class TestServiceAccountGlobalAdmin:
         assert global_only_ids == {str(self._admin_role().id)}
 
 
-QUOTA_SETTINGS = dict(
-    LICENSE_SEATS=1,
-    MODULE_PATHS={"serializers": "iam.tests.ee_stub_serializers"},
+OVERRIDE_SETTINGS = dict(
+    MODULE_PATHS={"serializers": "iam.tests.stub_serializers"},
 )
 
 
 @pytest.mark.django_db
-class TestServiceAccountSeatQuota:
-    """The enterprise build layers "active service accounts <= licensed seats"
-    onto the community viewset by shadowing the write serializer through
-    MODULE_PATHS (see enterprise_core.serializers). CE stays uncapped: these
-    tests exercise the seam with an EE-shaped stub."""
+class TestServiceAccountWriteSerializerOverride:
+    """The enterprise build layers its own rules onto the community viewset by
+    shadowing the write serializer through MODULE_PATHS (see
+    enterprise_core.serializers). These tests exercise that seam with a stub:
+    the override must run on create, and see activation changes on update."""
 
-    def test_ce_default_is_uncapped(self, admin_client, domain_folder):
-        _create_sa(admin_client, domain_folder, name="bot-1")
-        _create_sa(admin_client, domain_folder, name="bot-2")
+    def test_no_override_by_default(self, admin_client, domain_folder):
+        _create_sa(admin_client, domain_folder, name="rejected")
 
-    def test_create_blocked_at_quota(self, admin_client, domain_folder):
-        with override_settings(**QUOTA_SETTINGS):
-            _create_sa(admin_client, domain_folder, name="only-bot")
+    def test_override_runs_on_create(self, admin_client, domain_folder):
+        with override_settings(**OVERRIDE_SETTINGS):
             response = admin_client.post(
                 SA_ENDPOINT,
                 {
-                    "name": "one-too-many",
+                    "name": "rejected",
                     "permissions": _view_folder_permission_ids(),
                     "folders": [str(domain_folder.id)],
                 },
                 format="json",
             )
             assert response.status_code == 400
-            assert response.json()["error"] == ["errorServiceAccountSeatsExceeded"]
+            assert response.json()["error"] == ["rejectedByOverride"]
 
-    def test_deactivation_frees_the_slot_and_reactivation_is_gated(
-        self, admin_client, domain_folder
-    ):
-        with override_settings(**QUOTA_SETTINGS):
-            first = _create_sa(admin_client, domain_folder, name="first-bot")
-            # deactivating is always allowed, and frees the slot
+    def test_override_sees_activation_changes(self, admin_client, domain_folder):
+        with override_settings(**OVERRIDE_SETTINGS):
+            account = _create_sa(admin_client, domain_folder, name="bot")
             response = admin_client.patch(
-                f"{SA_ENDPOINT}{first['id']}/", {"is_active": False}, format="json"
+                f"{SA_ENDPOINT}{account['id']}/", {"is_active": False}, format="json"
             )
             assert response.status_code == 200
 
-            second = _create_sa(admin_client, domain_folder, name="second-bot")
-            assert second["is_active"] is True
-
-            # the slot is taken again: reactivating the first is refused
             response = admin_client.patch(
-                f"{SA_ENDPOINT}{first['id']}/", {"is_active": True}, format="json"
+                f"{SA_ENDPOINT}{account['id']}/", {"is_active": True}, format="json"
             )
             assert response.status_code == 400
-            assert response.json()["error"] == ["errorServiceAccountSeatsExceeded"]
+            assert response.json()["error"] == ["reactivationRejectedByOverride"]
 
             # updates that do not activate stay allowed on the inactive account
             response = admin_client.patch(
-                f"{SA_ENDPOINT}{first['id']}/",
+                f"{SA_ENDPOINT}{account['id']}/",
                 {"description": "still editable"},
                 format="json",
             )

@@ -94,7 +94,7 @@ class ThreatModelViewSet(BaseModelViewSet):
     }
 
     model = ThreatModel
-    filterset_fields = ["folder", "catalog"]
+    filterset_fields = ["folder", "catalog", "filtering_labels"]
     search_fields = ["ref_id", "name", "description"]
 
     @action(detail=True, name="Get the catalog matrix with the selection applied")

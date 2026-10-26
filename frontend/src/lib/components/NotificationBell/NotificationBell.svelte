@@ -26,13 +26,16 @@
 	const title = $derived(count > 0 ? m.unreadNotifications({ count }) : m.noUnreadNotifications());
 
 	let lastRefresh = 0;
+	let unauthorized = false;
 
 	async function refresh({ force = false } = {}) {
+		if (unauthorized) return;
 		const now = Date.now();
 		if (!force && now - lastRefresh < MIN_REFRESH_GAP_MS) return;
 		lastRefresh = now;
 		try {
 			const res = await fetch('/fe-api/notifications/unread-count');
+			if (res.status === 401) unauthorized = true;
 			if (!res.ok) throw new Error(String(res.status));
 			const data = await res.json();
 			unreadNotificationCount.set(Number(data?.count ?? 0));
@@ -46,7 +49,9 @@
 
 	onMount(() => {
 		// No initial refresh here: the $effect below already fires on mount.
-		const interval = setInterval(() => refresh({ force: true }), POLL_INTERVAL_MS);
+		const interval = setInterval(() => {
+			if (document.visibilityState === 'visible') refresh({ force: true });
+		}, POLL_INTERVAL_MS);
 		const onFocus = () => {
 			if (document.visibilityState === 'visible') refresh();
 		};

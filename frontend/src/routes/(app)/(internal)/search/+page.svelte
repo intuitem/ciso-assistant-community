@@ -103,7 +103,37 @@
 			label: 'businessImpactAnalysis',
 			icon: 'fa-solid fa-arrows-to-eye',
 			color: '#14b8a6'
-		}
+		},
+		techniques: { label: 'techniques', icon: 'fa-solid fa-crosshairs', color: '#b91c1c' },
+		cwes: { label: 'cwes', icon: 'fa-solid fa-bug-slash', color: '#9a3412' },
+		'security-advisories': {
+			label: 'securityAdvisories',
+			icon: 'fa-solid fa-shield-virus',
+			color: '#ea580c'
+		},
+		'metric-definitions': {
+			label: 'metricDefinitions',
+			icon: 'fa-solid fa-ruler',
+			color: '#1d4ed8'
+		},
+		dashboards: { label: 'dashboards', icon: 'fa-solid fa-gauge', color: '#4f46e5' },
+		'generic-collections': {
+			label: 'genericCollections',
+			icon: 'fa-solid fa-layer-group',
+			color: '#0d9488'
+		},
+		'responsibility-matrices': {
+			label: 'responsibilityMatrices',
+			icon: 'fa-solid fa-table-list',
+			color: '#7c3aed'
+		},
+		workflows: { label: 'workflows', icon: 'fa-solid fa-diagram-next', color: '#475569' },
+		'quantitative-risk-hypotheses': {
+			label: 'quantitativeRiskHypotheses',
+			icon: 'fa-solid fa-flask',
+			color: '#db2777'
+		},
+		representatives: { label: 'representatives', icon: 'fa-solid fa-user-tie', color: '#0369a1' }
 	};
 
 	interface SearchResult {

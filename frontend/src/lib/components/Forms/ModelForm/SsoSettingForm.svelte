@@ -93,6 +93,7 @@
 			{form}
 			multiple
 			optionsEndpoint="user-groups"
+			lazy
 			field="default_user_groups"
 			pathField="path"
 			cacheLock={cacheLocks['default_user_groups']}
