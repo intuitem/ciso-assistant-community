@@ -103,6 +103,7 @@
 	},
 	"packageManager": "pnpm@12.15.0",
 	"imports": {
+		"#lib/*.js": "./src/lib/*.ts",
 		"#lib/*": "./src/lib/*",
 		"#paraglide/*": "./src/paraglide/*"
 	}
