@@ -98,9 +98,9 @@
 		busy = false;
 	}
 
-	// The backend replies with translation keys (e.g. the enterprise seat
-	// quota's errorServiceAccountSeatsExceeded); surface them instead of a
-	// generic failure message when present.
+	// The backend replies with translation keys (e.g. from the enterprise
+	// license rules); surface them instead of a generic failure message when
+	// present.
 	async function extractErrorMessage(res: Response): Promise<string> {
 		try {
 			const body = await res.json();

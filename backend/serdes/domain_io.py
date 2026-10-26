@@ -78,7 +78,7 @@ from tprm.models import (
     Solution,
     Tier,
 )
-from tprm.tiers import set_entity_tier
+from tprm.tiers import set_entity_tier, set_solution_tier
 
 from .serializers import ExportSerializer
 from .utils import (
@@ -1082,12 +1082,10 @@ def process_model_relationships(
             many_to_many_map_ids["asset_ids"] = get_mapped_ids(
                 _fields.pop("assets", []), link_dump_database_ids
             )
-            tier_ref = _fields.pop("tier", None)
-            _fields["tier"] = (
-                _imported_tier(tier_ref, solution=_fields.get("name"))
-                if tier_ref
-                else None
-            )
+            if tier_ref := _fields.pop("tier", None):
+                many_to_many_map_ids["tier"] = _imported_tier(
+                    tier_ref, solution=_fields.get("name")
+                )
 
         case "solutionsubcontractor":
             _fields["solution"] = Solution.objects.get(
@@ -1564,6 +1562,8 @@ def set_many_to_many_relations(
         case "solution":
             if asset_ids := many_to_many_map_ids.get("asset_ids"):
                 obj.assets.set(Asset.objects.filter(id__in=asset_ids))
+            if tier := many_to_many_map_ids.get("tier"):
+                set_solution_tier(obj, tier, propagate=False)
 
         case "entityassessment":
             if solution_ids := many_to_many_map_ids.get("solution_ids"):

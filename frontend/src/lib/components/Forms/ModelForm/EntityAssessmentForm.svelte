@@ -209,6 +209,7 @@
 			{form}
 			multiple
 			optionsEndpoint="users"
+			lazy
 			optionsDetailedUrlParameters={[
 				['is_third_party', 'true'],
 				['representative__entity', selectedEntity || '']
@@ -277,6 +278,7 @@
 		{form}
 		multiple
 		optionsEndpoint="actors"
+		lazy
 		optionsLabelField="str"
 		optionsInfoFields={{
 			fields: [{ field: 'type', translate: true }],
@@ -291,6 +293,7 @@
 		{form}
 		multiple
 		optionsEndpoint="actors"
+		lazy
 		optionsLabelField="str"
 		optionsInfoFields={{
 			fields: [{ field: 'type', translate: true }],
@@ -302,8 +305,21 @@
 		label={m.reviewers()}
 	/>
 	<AutocompleteSelect
+		multiple
+		{form}
+		createFromSelection={true}
+		optionsEndpoint="filtering-labels"
+		optionsLabelField="label"
+		translateOptions={false}
+		field="filtering_labels"
+		helpText={m.labelsHelpText()}
+		label={m.labels()}
+		allowUserOptions="append"
+	/>
+	<AutocompleteSelect
 		{form}
 		optionsEndpoint="evidences"
+		lazy
 		optionsExtraFields={[['folder', 'str']]}
 		field="evidence"
 		cacheLock={cacheLocks['evidence']}

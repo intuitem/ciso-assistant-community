@@ -15,6 +15,7 @@ from core.base_models import (
     NameDescriptionMixin,
 )
 from core.models import (
+    FilteringLabelMixin,
     Actor,
     AppliedControl,
     Asset,
@@ -61,7 +62,9 @@ def get_initial_meta():
     return INITIAL_META
 
 
-class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
+class EbiosRMStudy(
+    NameDescriptionMixin, ETADueDateMixin, FolderMixin, FilteringLabelMixin
+):
     class Status(models.TextChoices):
         PLANNED = "planned", _("Planned")
         IN_PROGRESS = "in_progress", _("In progress")
