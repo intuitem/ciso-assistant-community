@@ -7614,5 +7614,6 @@
 	"mergeLabelsError": "Could not merge labels",
 	"noQuestionnaireAttached": "No questionnaire attached",
 	"evidenceProvided": "Evidence provided",
-	"missingEvidenceBeforeSubmission": "These requirements still need an evidence before you can submit:"
+	"missingEvidenceBeforeSubmission": "These requirements still need an evidence before you can submit:",
+	"evidenceRequiredHiddenWarning": "Some requirements of this framework cannot be submitted without evidence: respondents need to be able to edit evidences."
 }

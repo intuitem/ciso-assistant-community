@@ -7614,5 +7614,6 @@
 	"mergeLabelsError": "Impossible de fusionner les étiquettes",
 	"noQuestionnaireAttached": "Aucun questionnaire rattaché",
 	"evidenceProvided": "Preuve fournie",
-	"missingEvidenceBeforeSubmission": "Ces exigences attendent encore une preuve avant la soumission :"
+	"missingEvidenceBeforeSubmission": "Ces exigences attendent encore une preuve avant la soumission :",
+	"evidenceRequiredHiddenWarning": "Certaines exigences de ce référentiel ne peuvent pas être soumises sans preuve : les répondants doivent pouvoir modifier les preuves."
 }

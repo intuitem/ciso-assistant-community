@@ -990,7 +990,20 @@
 						</button>
 					{/if}
 				</div>
-				{#if reviewerObservation}
+				{#snippet observationLine(clickable: boolean)}
+					<i class="fa-solid fa-comment-dots mt-1 shrink-0" title={m.reviewerObservation()}></i>
+					<span bind:this={observationEl} class="flex-1 min-w-0 truncate"
+						>{reviewerObservation}</span
+					>
+					{#if clickable}
+						<i
+							class="fa-solid {observationExpanded
+								? 'fa-chevron-up'
+								: 'fa-chevron-down'} text-xs mt-1.5 shrink-0"
+						></i>
+					{/if}
+				{/snippet}
+				{#if reviewerObservation && observationOverflows}
 					<Popover
 						open={observationExpanded}
 						onOpenChange={(e) => (observationExpanded = e.open)}
@@ -998,25 +1011,13 @@
 						autoFocus={false}
 						closeOnInteractOutside={true}
 					>
-						<Popover.Anchor
-							class="flex flex-1 min-w-0 items-start gap-2 text-sm rounded-md px-3 py-1.5 preset-tonal-error"
+						<Popover.Trigger
+							class="flex flex-1 min-w-0 items-start gap-2 text-sm text-left rounded-md px-3 py-1.5 bg-red-50 border-l-[3px] border-l-red-500 text-red-800 cursor-pointer hover:bg-red-100 transition-colors"
+							title={observationExpanded ? m.collapse() : m.expand()}
 							data-testid="reviewer-observation-strip"
 						>
-							<i class="fa-solid fa-comment-dots mt-1 shrink-0" title={m.reviewerObservation()}></i>
-							<span bind:this={observationEl} class="flex-1 min-w-0 truncate"
-								>{reviewerObservation}</span
-							>
-							{#if observationOverflows}
-								<Popover.Trigger
-									class="shrink-0 text-xs mt-0.5 px-1 hover:opacity-70"
-									aria-label={observationExpanded ? m.collapse() : m.expand()}
-									title={observationExpanded ? m.collapse() : m.expand()}
-								>
-									<i class="fa-solid {observationExpanded ? 'fa-chevron-up' : 'fa-chevron-down'}"
-									></i>
-								</Popover.Trigger>
-							{/if}
-						</Popover.Anchor>
+							{@render observationLine(true)}
+						</Popover.Trigger>
 						<Popover.Positioner class="z-50!">
 							<Popover.Content
 								class="card p-2 bg-surface-50-950 shadow-lg space-y-2 border border-surface-200"
@@ -1036,6 +1037,13 @@
 							</Popover.Content>
 						</Popover.Positioner>
 					</Popover>
+				{:else if reviewerObservation}
+					<div
+						class="flex flex-1 min-w-0 items-start gap-2 text-sm rounded-md px-3 py-1.5 bg-red-50 border-l-[3px] border-l-red-500 text-red-800"
+						data-testid="reviewer-observation-strip"
+					>
+						{@render observationLine(false)}
+					</div>
 				{/if}
 				<div class="flex items-center gap-3 shrink-0 ml-auto">
 					{#if !isAuditor && assignment?.events?.length > 0}
@@ -1326,10 +1334,11 @@
 						</div>
 						{#if showReviewFlags && !isAuditor && requirementAssessment.review_state === 'changes_requested'}
 							<div
-								class="bg-red-50 border-l-[3px] border-l-red-500 rounded-md px-4 py-2 flex items-center justify-between gap-3 text-sm text-red-800"
+								class="bg-surface-100-900 rounded-md px-4 py-2 flex items-center justify-between gap-3 text-sm text-surface-700-300"
 							>
 								<span
-									><i class="fa-solid fa-comment-dots mr-2"></i>{m.changesRequestedItemHint()}</span
+									><i class="fa-solid fa-flag text-red-500 mr-2"
+									></i>{m.changesRequestedItemHint()}</span
 								>
 								{#if page.data?.featureflags?.comments && showComments}
 									<button

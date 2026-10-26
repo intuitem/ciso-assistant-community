@@ -1499,7 +1499,12 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
                 ["ref_id", "name", "description", "annotation", "typical_evidence"],
             )
             # Optional: evidence_required ("x" = the requirement needs an evidence)
-            if data.get("evidence_required"):
+            if str(data.get("evidence_required") or "").strip().lower() in (
+                "1",
+                "true",
+                "yes",
+                "x",
+            ):
                 node["evidence_required"] = True
             # Optional: importance: mandatory/recommended/nice_to_have or empty (= undefined)
             if "importance" in data and data["importance"]:

@@ -61,11 +61,11 @@ To change a locked assignment, a reviewer reopens it back to `draft` from any ot
 
 ### Requirements that require an evidence
 
-Evidence attached to a requirement is optional by default. A framework can mark a requirement with `evidence_required`, and that requirement then cannot be handed back empty: submitting an assignment is refused while it carries no evidence, and the refusal names the requirements that are missing one.
+Evidence attached to a requirement is optional by default. A framework can mark a requirement with `evidence_required`, and that requirement then cannot be handed back empty: submitting an assignment is refused while it carries no evidence holding a file or a link, and the refusal names the requirements that are missing one. An evidence record left empty does not count.
 
 This is set per requirement by whoever authors the framework, in the [library builder](../configuration/authoring/library-builder.md#require-an-evidence) or in the [Excel source](../configuration/libraries/library-objects/framework.md). It is separate from `importance`, which states how much a requirement matters, and from `typical_evidence`, which describes what to attach without making it compulsory.
 
-Respondents see the obligation while they work, not only when they submit: the requirement carries an **Evidence required** badge, red until a document is attached, and the confirmation dialog lists what is still missing.
+Respondents see the obligation while they work, not only when they submit: the requirement carries an **Evidence required** badge that turns into **Evidence provided** once a document or a link is attached, its entry stays amber in the table of contents until then, and **Submit for review** opens a recap of the requirements still missing one.
 
 The check only covers requirements that are actually part of the questionnaire. A requirement hidden by a visibility condition never blocks a submission. The rule is enforced by the API, so it applies the same way to an integration posting the transition directly.
 

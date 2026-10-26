@@ -10764,6 +10764,11 @@ class FrameworkViewSet(BaseModelViewSet):
             has_compliance_assessments_flag=Exists(
                 ComplianceAssessment.objects.filter(framework=OuterRef("pk"))
             ),
+            has_required_evidence=Exists(
+                RequirementNode.objects.filter(
+                    framework=OuterRef("pk"), evidence_required=True
+                )
+            ),
             scale_bound_flag=ExpressionWrapper(
                 Framework.scale_bound_q(OuterRef("pk")),
                 output_field=models.BooleanField(),

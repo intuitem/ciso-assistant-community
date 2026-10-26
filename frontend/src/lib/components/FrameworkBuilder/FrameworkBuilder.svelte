@@ -281,6 +281,12 @@
 		return walk($rootNodesStore);
 	});
 
+	const hasRequiredEvidence = $derived.by(() => {
+		const walk = (nodes: BuilderNode[]): boolean =>
+			nodes.some((bn) => bn.node.evidence_required || walk(bn.children));
+		return walk($rootNodesStore);
+	});
+
 	const ruleGroups = $derived(
 		($frameworkStore.implementation_groups_definition ?? [])
 			.map((g) => g as Record<string, unknown>)
@@ -1136,6 +1142,7 @@
 									<VisibilityEditor
 										value={$frameworkStore.field_visibility}
 										onChange={(next) => builder.updateFramework({ field_visibility: next })}
+										evidenceRequired={hasRequiredEvidence}
 									/>
 								</div>
 							{/if}
