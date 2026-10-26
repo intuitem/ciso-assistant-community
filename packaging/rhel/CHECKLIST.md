@@ -52,7 +52,7 @@
   - [ ] `CORS_ALLOWED_ORIGINS` updated
   - [ ] Email settings configured (if needed)
 - [ ] Frontend configuration reviewed (`/etc/ciso-assistant/frontend.env`)
-  - [ ] `ORIGIN` updated for production URL
+  - [ ] `PROTOCOL_HEADER`/`HOST_HEADER` match your reverse proxy headers
   - [ ] `PUBLIC_BACKEND_API_URL` verified (usually localhost:8000)
 - [ ] Permissions verified: `ls -la /opt/ciso-assistant /var/lib/ciso-assistant /etc/ciso-assistant`
 
@@ -68,7 +68,7 @@
 
 ## Verification Tests
 
-- [ ] Frontend accessible at http://localhost:3000
+- [ ] Frontend accessible through the reverse proxy (https://your-domain.com)
 - [ ] Login page loads correctly
 - [ ] Can log in with superuser credentials
 - [ ] Backend API responding at http://localhost:8000/api
