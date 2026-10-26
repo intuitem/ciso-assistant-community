@@ -3581,6 +3581,7 @@
 	"resetSecret": "Atstatyti paslaptį",
 	"createWebhookEndpoint": "Kurti webhook galinį tašką",
 	"loginFailed": "Prisijungimas nepavyko",
+	"ipBanned": "IP užblokuotas (užklausų ribojimas)",
 	"reports": "Ataskaitos",
 	"reportsDescription": "Generuoti ir valdyti pasirinktines ataskaitas pagal jūsų duomenis",
 	"doraSpecific": "DORA specifinis",

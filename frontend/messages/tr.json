@@ -1897,6 +1897,7 @@
 	"ruleOfThree": "Üçlü Kural",
 	"ruleOfThreeDescription": "Puanları yeni sınırlar arasında ölçeklemek için Üçlü Kuralı uygulayın",
 	"loginFailed": "Giriş başarısız",
+	"ipBanned": "IP engellendi (hız sınırlaması)",
 	"expectedEvidence": "Beklenen Kanıt",
 	"taskNodeLegacyEvidence": "Eski kanıt alanı kullanımdan kaldırıldı. Kanıt şimdi görev düzeyinde ve revizyonlar için beklenilen kanıtlar arasında paylaşılır.\n Bunları beklenilen kanıtlara taşımak veya gerçekleşmeden kaldırmak için aşağıdaki düğmeleri kullanın",
 	"taskNodeNewEvidence": "Göreve genel olarak bağlı kanıtlar ve gerçekleşmelere yayılan kanıtlar. Aşağıdaki 'Kanıtlar' sekmesinde bir revizyon ekleyebilirsiniz",

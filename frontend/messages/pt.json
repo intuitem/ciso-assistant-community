@@ -4667,6 +4667,7 @@
 	"resetSecret": "Redefinir segredo",
 	"createWebhookEndpoint": "Criar endpoint de webhook",
 	"loginFailed": "Falha no login",
+	"ipBanned": "IP banido (limitação de taxa)",
 	"reports": "Relatórios",
 	"reportsDescription": "Gere e gerencie relatórios personalizados com base nos seus dados",
 	"doraSpecific": "Específico do DORA",

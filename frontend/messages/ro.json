@@ -1134,6 +1134,7 @@
 	"ruleOfThree": "Regula celor trei",
 	"ruleOfThreeDescription": "Aplicați Regula celor trei pentru a scala scorurile între limite noi",
 	"loginFailed": "Autentificare eșuată",
+	"ipBanned": "IP blocat (limitarea ratei)",
 	"expectedEvidence": "Dovadă așteptată",
 	"taskNodeLegacyEvidence": "Câmpul vechi de dovadă este scos din uz. Dovezile sunt acum la nivel de sarcină și sunt partajate între apariții așteptând revizuiri.\n Pentru a le muta la dovezi așteptate sau pentru a le elimina din apariție, utilizați butoanele",
 	"taskNodeNewEvidence": "Dovezi legate global de sarcina și extinse la apariții. Puteți adăuga o revizuire în fila 'Dovezi' de mai jos",

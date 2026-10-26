@@ -27,7 +27,9 @@ declare global {
 				autohide?: boolean;
 			};
 		}
-		// interface Platform {}
+		interface Platform {
+			req: import('node:http').IncomingMessage;
+		}
 	}
 }
 

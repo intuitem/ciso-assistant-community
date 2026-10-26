@@ -306,6 +306,10 @@
                     "properties": {
                         "bodySizeLimit": {
                             "type": "string"
+                        },
+                        "xffDepth": {
+                            "type": "integer",
+                            "minimum": 1
                         }
                     },
                     "additionalProperties": false

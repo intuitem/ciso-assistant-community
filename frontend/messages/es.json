@@ -1103,6 +1103,7 @@
 	"ruleOfThree": "Regla de Tres",
 	"ruleOfThreeDescription": "Aplicar la Regla de Tres para escalar puntuaciones entre nuevos límites",
 	"loginFailed": "Inicio de sesión fallido",
+	"ipBanned": "IP bloqueada (limitación de frecuencia)",
 	"expectedEvidence": "Evidencia esperada",
 	"taskNodeLegacyEvidence": "El campo de evidencia anterior está obsoleto. La evidencia ahora es a nivel de tarea y compartida entre ocurrencias en espera de revisiones.\n Para moverlas a evidencia esperada o eliminarlas de la ocurrencia, use los botones",
 	"taskNodeNewEvidence": "Evidencia vinculada globalmente a la tarea y extendida a las ocurrencias. Puede agregar una revisión en la pestaña 'Evidencias' a continuación",

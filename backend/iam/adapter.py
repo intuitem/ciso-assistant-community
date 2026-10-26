@@ -1,6 +1,12 @@
 from urllib.parse import urlparse
+import ipaddress
+import structlog
+import time
+from typing import Optional
 
 from allauth.account.adapter import DefaultAccountAdapter
+from allauth.core.exceptions import ImmediateHttpResponse
+from allauth.headless.base.response import RateLimitResponse
 from allauth.mfa.adapter import DefaultMFAAdapter
 from allauth.socialaccount.adapter import (
     DefaultSocialAccountAdapter,
@@ -8,17 +14,25 @@ from allauth.socialaccount.adapter import (
     warnings,
 )
 from allauth.socialaccount.models import app_settings
+from allauth.headless.internal.restkit.response import APIResponse
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.http import HttpRequest
 from django.utils.translation import gettext_lazy as _
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.response import Response
-from rest_framework.status import HTTP_401_UNAUTHORIZED
+from rest_framework.status import HTTP_401_UNAUTHORIZED, HTTP_429_TOO_MANY_REQUESTS
+from django.contrib.contenttypes.models import ContentType
+from auditlog.models import LogEntry
+from auditlog.cid import get_cid
+from auditlog.context import set_actor
 
-import structlog
+from iam.rate_limiting import get_ban_cache
+from global_settings.models import GlobalSettings
+from global_settings.serializers import InfraConfigSerializer
 
 logger = structlog.get_logger(__name__)
 
@@ -27,7 +41,145 @@ User = get_user_model()
 DEFAULT_ATTRIBUTE_MAPPING_GROUPS = ["groups"]
 
 
+def parse_ip(
+    ip_address: str,
+) -> Optional[ipaddress.IPv4Address | ipaddress.IPv6Address]:
+    """
+    Parse an IP address (which may come from the `X-Forwarded-For` HTTP header).
+
+    Accepts:
+    - `1.2.3.4`, `1.2.3.4:5678`, `2001:db8::1`, `[2001:db8::1]` and `[2001:db8::1]:443`.
+    - IPv4-mapped IPv6 addresses (`::ffff:1.2.3.4`) are converted to IPv4.
+
+    Return `None` if `ip_address` is not a valid IP address.
+    """
+    ip_address = (ip_address or "").strip()
+    if ip_address.startswith("["):
+        ip_address = ip_address[1:].split("]", 1)[0]
+    elif ip_address.count(":") == 1:
+        ip_address = ip_address.split(":", 1)[0]
+
+    try:
+        parsed_ip = ipaddress.ip_address(ip_address)
+    except ValueError:
+        return
+
+    if isinstance(parsed_ip, ipaddress.IPv6Address) and parsed_ip.ipv4_mapped:
+        return parsed_ip.ipv4_mapped
+    return parsed_ip
+
+
+def is_in_networks(
+    target_ip: str | ipaddress.IPv4Address | ipaddress.IPv6Address,
+    ip_networks: list[str],
+) -> bool:
+    """
+    Return `True` if the `target_ip` match one of the IP/CIDR Range in `ip_networks`, return `False` otherwise.
+
+    Invalid `target_ip` and invalid `ip_networks` entries never raise (they do not match anything).
+    """
+    ip = target_ip if not isinstance(target_ip, str) else parse_ip(target_ip)
+    if ip is None:
+        return False
+
+    for raw_network in ip_networks:
+        try:
+            network = ipaddress.ip_network(str(raw_network).strip(), strict=False)
+        except ValueError:
+            continue
+
+        if network.version == ip.version and ip in network:
+            return True
+
+    return False
+
+
+def resolve_client_ip(
+    request: Optional[HttpRequest], proxy_ips: list[str]
+) -> Optional[str]:
+    """Return the real client IP address from which the `request` originates (`None` if it can't be determined)."""
+    if request is None:
+        return
+
+    client_ip = parse_ip(request.META.get("REMOTE_ADDR", ""))
+    if client_ip is None:
+        return
+
+    def is_trusted_proxy(ip) -> bool:
+        return ip.is_loopback or is_in_networks(ip, proxy_ips)
+
+    if is_trusted_proxy(client_ip):
+        x_forwarded_ip_entry = request.headers.get("X-Forwarded-For", "").split(",")[-1]
+        x_forwarded_ip = parse_ip(x_forwarded_ip_entry)
+        if x_forwarded_ip is None:
+            # Malformed entry (nothing on its left can be trusted).
+            return str(client_ip)
+
+        return str(x_forwarded_ip)
+    else:
+        return str(client_ip)
+
+
+AUDIT_LOG_COUNT_TIME_UNIT = 86400
+AUDIT_LOG_COUNT: tuple[int, int] = (
+    int(time.monotonic() / AUDIT_LOG_COUNT_TIME_UNIT),
+    0,
+)
+AUDIT_LOG_LIMIT = 500
+
+
+def create_ip_ban_audit_log(ip_address: str, user: Optional[User]):
+    global AUDIT_LOG_COUNT
+    start_time, count = AUDIT_LOG_COUNT
+    current_time = int(time.monotonic() / AUDIT_LOG_COUNT_TIME_UNIT)
+    if current_time > start_time:
+        # Reset the `count` every `AUDIT_LOG_COUNT_TIME_UNIT` seconds.
+        count = 0
+
+    if count >= AUDIT_LOG_LIMIT:
+        # Naive rate limiting to limit IP ban audit log spamming.
+        return
+
+    AUDIT_LOG_COUNT = (current_time, count + 1)
+
+    try:
+        from enterprise_core.models import LogEntryAction
+
+        action = LogEntryAction.IP_BANNED
+    except ImportError:
+        # Community edition (`enterprise_core` isn't installed).
+        action = LogEntry.Action.ACCESS
+
+    try:
+        with set_actor(actor=None, remote_addr=ip_address):
+            LogEntry.objects.create(
+                content_type=ContentType.objects.get_for_model(User),
+                object_pk=str(user.pk) if user else "",
+                object_repr=str(user) if user else "unknown user",
+                action=action,
+                changes={},
+                additional_data={"folder_id": None},
+                cid=get_cid(),
+            )
+    except Exception:
+        logger.exception("Could not create the failed-login ban audit log")
+
+
 class AccountAdapter(DefaultAccountAdapter):
+    @staticmethod
+    def _make_rate_limit_response(request: HttpRequest):
+        return APIResponse(
+            request,
+            status=HTTP_429_TOO_MANY_REQUESTS,
+            errors=[
+                {
+                    "message": "Too many failed login attempts. Please try again later.",
+                    "code": "too_many_login_attempts",
+                    "param": "password",
+                }
+            ],
+        )
+
     def is_safe_url(self, url):
         allowed_hosts = {urlparse(settings.CISO_ASSISTANT_URL).hostname} | set(
             settings.ALLOWED_HOSTS
@@ -41,13 +193,44 @@ class AccountAdapter(DefaultAccountAdapter):
     def is_open_for_signup(self, request):
         return False
 
-    def authenticate(self, request, **credentials):
+    def authenticate(self, request: HttpRequest, **credentials):
+        infra_settings_obj = GlobalSettings.objects.filter(
+            name=GlobalSettings.Names.INFRA_CONFIG
+        ).first()
+        infra_settings = infra_settings_obj.value if infra_settings_obj else {}
+
+        is_rate_limit_activated = infra_settings.get("is_rate_limit_activated", False)
+
+        proxy_ips = infra_settings.get(
+            "proxy_ips", list(InfraConfigSerializer.DEFAULT_PROXY_IPS)
+        )
+        not_rate_limited_ips = infra_settings.get("not_rate_limited_ips", [])
+
+        ip_address = resolve_client_ip(request, proxy_ips)
+
+        # Outside the try below, otherwise `except Exception` would swallow it
+        if is_rate_limit_activated and ip_address is not None:
+            is_rate_limited = not is_in_networks(ip_address, not_rate_limited_ips)
+
+            if is_rate_limited:
+                try:
+                    is_banned = get_ban_cache().is_banned(ip_address)
+                except Exception as e:
+                    logger.error("Failed to to check if an IP was banned", exc_info=e)
+                    is_banned = False
+
+                if is_banned:
+                    raise ImmediateHttpResponse(self._make_rate_limit_response(request))
+
+        email = credentials.get("email")
+
         try:
             serializer = AuthTokenSerializer(
                 data={
-                    "username": credentials.get("email"),
+                    "username": email,
                     "password": credentials.get("password"),
-                }
+                },
+                context={"request": request},
             )
             serializer.is_valid(raise_exception=True)
             user = serializer.validated_data["user"]
@@ -58,6 +241,20 @@ class AccountAdapter(DefaultAccountAdapter):
 
             return user
         except Exception:
+            # Failed login: bad credentials, invalid input or non-local user
+            if is_rate_limit_activated and ip_address is not None:
+                try:
+                    create_audit_log = get_ban_cache().register_failed_login(
+                        ip_address, email
+                    )
+                    if create_audit_log:
+                        user = (
+                            User.objects.filter(email=email).first() if email else None
+                        )
+                        create_ip_ban_audit_log(ip_address, user)
+                except Exception as e:
+                    logger.error("Failed to log rate limited IP", exc_info=e)
+
             return None
 
     def reauthenticate(self, user, password):
