@@ -9351,11 +9351,17 @@ class RoleAssignmentViewSet(BaseModelViewSet):
 
 class FolderFilter(GenericFilterSet):
     parent_folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
+    # ref_id is unique across folders: an exact lookup returns one folder at most.
+    # Not stripped here: filter_by_ref_id trims exactly as the unique index does.
+    ref_id = df.CharFilter(method="filter_ref_id", strip=False)
 
     owned = df.BooleanFilter(method="get_owned_folders", label="owned")
     content_type = df.MultipleChoiceFilter(
         choices=Folder.ContentType, lookup_expr="icontains"
     )
+
+    def filter_ref_id(self, queryset, name, value):
+        return Folder.filter_by_ref_id(queryset, value)
 
     def get_owned_folders(self, queryset, name, value):
         owned_folders_id = []
