@@ -546,6 +546,7 @@
 									form={contactFillForm}
 									field="primary_fill"
 									optionsEndpoint="users"
+									lazy
 									includeAllOptionFields
 									baseClass="w-56"
 									placeholder={safeTranslate('fillFromUser')}
@@ -573,6 +574,7 @@
 									form={contactFillForm}
 									field="secondary_fill"
 									optionsEndpoint="users"
+									lazy
 									includeAllOptionFields
 									baseClass="w-56"
 									placeholder={safeTranslate('fillFromUser')}

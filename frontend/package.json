@@ -102,5 +102,5 @@
 		"svelte-multiselect": "^11.8.0",
 		"svelte-persisted-store": "^0.12.0"
 	},
-	"packageManager": "pnpm@11.24.0"
+	"packageManager": "pnpm@12.15.0"
 }
