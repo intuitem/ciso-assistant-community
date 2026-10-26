@@ -17,7 +17,7 @@
 		type ModalSettings
 	} from '#lib/components/Modals/stores.js';
 	import { page } from '$app/state';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 
 	interface Props {
 		data: PageData;
@@ -69,7 +69,7 @@
 			console.error('Failed to update status');
 			return;
 		}
-		invalidateAll();
+		refreshAll();
 	}
 
 	async function submitObservationChange(observation: string): void {
@@ -84,7 +84,7 @@
 			console.error('Failed to update observation');
 			return;
 		}
-		invalidateAll();
+		refreshAll();
 	}
 
 	async function submitDueDateChange(due_date: string): Promise<void> {
@@ -98,7 +98,7 @@
 		if (!response.ok) {
 			console.error('Failed to update due date');
 		}
-		invalidateAll();
+		refreshAll();
 	}
 
 	async function removeEvidence(id: string, move: boolean): void {
@@ -113,7 +113,7 @@
 			console.error('Failed to move legacy evidence');
 			return;
 		}
-		invalidateAll();
+		refreshAll();
 	}
 
 	const categories = [

@@ -7,7 +7,7 @@
 	import PostureHistoryChart from '#lib/components/Chart/PostureHistoryChart.svelte';
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 	import { deserialize, enhance } from '$app/forms';
-	import { invalidateAll, goto } from '$app/navigation';
+	import { refreshAll, goto } from '$app/navigation';
 	import { m } from '#paraglide/messages.js';
 	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { page } from '$app/state';
@@ -203,7 +203,7 @@
 				message: created ? m.findingCreated() : m.findingAlreadyExists(),
 				background: created ? 'preset-filled-success-500' : 'preset-filled-warning-500'
 			});
-			await invalidateAll();
+			await refreshAll();
 		} else {
 			toastError((result as any).data?.error ?? m.error());
 		}
@@ -235,7 +235,7 @@
 				if (result.type !== 'success') {
 					toastError((result as any).data?.error ?? m.error());
 				}
-				await invalidateAll();
+				await refreshAll();
 			}
 		});
 	}
@@ -269,7 +269,7 @@
 			result.type === 'success'
 				? (result.data?.importSummary ?? { done: true })
 				: { error: (result as any).data?.error ?? true };
-		await invalidateAll();
+		await refreshAll();
 	}
 
 	function openImportModal(file: File, analysis: object | null) {
@@ -687,7 +687,14 @@
 													<i class="fa-solid fa-download"></i>
 												</a>
 												{#if row.measured === 0}
-													<form method="POST" action="?/removeAsset" use:enhance={() => ({ update }) => update({ navigate: false })} class="inline">
+													<form
+														method="POST"
+														action="?/removeAsset"
+														use:enhance={() =>
+															({ update }) =>
+																update({ navigate: false })}
+														class="inline"
+													>
 														<input type="hidden" name="asset" value={row.id} />
 														<button
 															type="submit"
@@ -912,7 +919,13 @@
 													{/if}
 												</div>
 											{:else}
-												<form method="POST" action="?/createFinding" use:enhance={() => ({ update }) => update({ navigate: false })}>
+												<form
+													method="POST"
+													action="?/createFinding"
+													use:enhance={() =>
+														({ update }) =>
+															update({ navigate: false })}
+												>
 													<input type="hidden" name="requirement" value={row.requirement.id} />
 													<input type="hidden" name="asset" value={row.asset.id} />
 													<button type="submit" class="btn btn-sm preset-filled-primary-500">

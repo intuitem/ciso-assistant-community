@@ -1,5 +1,4 @@
 import { BASE_API_URL } from '#lib/utils/constants.js';
-import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 async function forward(url: string, method: string, body: unknown, fetchFn: typeof fetch) {
@@ -15,7 +14,7 @@ async function forward(url: string, method: string, body: unknown, fetchFn: type
 		return new Response(null, { status: r.status });
 	}
 	try {
-		return json(JSON.parse(text), { status: r.status });
+		return Response.json(JSON.parse(text), { status: r.status });
 	} catch {
 		// Non-JSON body (e.g. an upstream error page): pass it through with
 		// the original status instead of masking it with a parse 500.
@@ -53,7 +52,7 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 			return new Response(null, { status: r.status });
 		}
 		try {
-			return json(JSON.parse(text), { status: r.status });
+			return Response.json(JSON.parse(text), { status: r.status });
 		} catch {
 			return new Response(text, {
 				status: r.status,
@@ -70,13 +69,13 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 	if (action === 'adopt') {
 		return forward(`${BASE_API_URL}/library-drafts/adopt/`, 'POST', body, fetch);
 	}
-	return json({ error: `unknown action '${action}'` }, { status: 400 });
+	return Response.json({ error: `unknown action '${action}'` }, { status: 400 });
 };
 
 export const DELETE: RequestHandler = async ({ url, fetch }) => {
 	const id = url.searchParams.get('id');
 	if (!id) {
-		return json({ error: 'missing id' }, { status: 400 });
+		return Response.json({ error: 'missing id' }, { status: 400 });
 	}
 	return forward(`${BASE_API_URL}/library-drafts/${id}/`, 'DELETE', undefined, fetch);
 };

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { tableSourceMapper } from '#lib/utils/table.js';
 	import { applyAction, deserialize, enhance, type ActionResult } from '$app/forms';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import { page } from '$app/state';
 	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
 	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
@@ -128,7 +128,7 @@
 		const result: ActionResult = deserialize(await response.text());
 
 		if (result.type === 'success') {
-			await invalidateAll();
+			await refreshAll();
 		}
 		applyAction(result);
 	}

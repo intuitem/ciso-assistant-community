@@ -2,7 +2,7 @@
 	import EntityPickerModal from './EntityPickerModal.svelte';
 	import { m } from '#paraglide/messages.js';
 	import { safeTranslate } from '#lib/utils/i18n.js';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import { getToastStore } from '#lib/components/Toast/stores.js';
 
 	interface Props {
@@ -44,7 +44,7 @@
 			message: messages.join(', ') || m.anErrorOccurred(),
 			...(created === 0 && errorCount > 0 ? { background: 'preset-filled-error-500' } : {})
 		});
-		await invalidateAll();
+		await refreshAll();
 	}
 </script>
 

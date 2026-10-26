@@ -3,7 +3,7 @@
 	import { getModalStore, type ModalStore } from './stores';
 	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { fetchAllPages } from '#lib/utils/pagination.js';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import { getToastStore } from '#lib/components/Toast/stores.js';
 	import { onMount } from 'svelte';
 
@@ -243,7 +243,7 @@
 					messages.push(`${data.errors.length} error(s)`);
 				}
 				toastStore.trigger({ message: messages.join(', ') });
-				await invalidateAll();
+				await refreshAll();
 				parent.onClose();
 			} else {
 				toastStore.trigger({

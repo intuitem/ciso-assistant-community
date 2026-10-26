@@ -7,7 +7,7 @@
 		type ModalSettings,
 		type ModalStore
 	} from '#lib/components/Modals/stores.js';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import { m } from '#paraglide/messages.js';
 	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { superForm } from 'sveltekit-superforms';
@@ -412,7 +412,7 @@
 			await ops('reorder-activities', { ids: activities.map((a) => a.id) });
 		} catch (e) {
 			console.error(e);
-			await invalidateAll();
+			await refreshAll();
 		}
 	}
 
@@ -442,7 +442,7 @@
 			await ops('reorder-actors', { ids: matrixActors.map((a) => a.id) });
 		} catch (e) {
 			console.error(e);
-			await invalidateAll();
+			await refreshAll();
 		}
 	}
 

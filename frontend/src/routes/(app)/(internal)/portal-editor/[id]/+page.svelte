@@ -302,7 +302,13 @@
 					aria-label={m.openPortal()}><i class="fa-solid fa-arrow-up-right-from-square"></i></a
 				>
 			{/if}
-			<form method="POST" action="?/duplicate" use:enhance={() => ({ update }) => update({ navigate: false })}>
+			<form
+				method="POST"
+				action="?/duplicate"
+				use:enhance={() =>
+					({ update }) =>
+						update({ navigate: false })}
+			>
 				<button
 					class="btn-icon btn-sm preset-tonal"
 					aria-label={m.duplicate()}

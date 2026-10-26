@@ -46,7 +46,7 @@
 	import { superForm, type SuperForm } from 'sveltekit-superforms';
 	import type { ActionData, PageData } from './$types';
 	import Anchor from '#lib/components/Anchor/Anchor.svelte';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 
 	interface Props {
 		data: PageData;
@@ -184,7 +184,7 @@
 					const result = deserialize(await response.text());
 					if (result.type === 'success' && result.data?.submitStatus === 200) {
 						await applyAction(result);
-						await invalidateAll();
+						await refreshAll();
 						toastStore.trigger({
 							message: m.statusUpdatedSuccessfully(),
 							background: 'preset-filled-success-500',
@@ -224,7 +224,7 @@
 			const result = deserialize(await response.text());
 			if (result.type === 'success' && result.data?.submitStatus === 200) {
 				await applyAction(result);
-				await invalidateAll();
+				await refreshAll();
 				toastStore.trigger({
 					message: m.statusUpdatedSuccessfully(),
 					background: 'preset-filled-success-500',
@@ -470,7 +470,7 @@
 		await updateBulk(requirementAssessment, {
 			[field]: value
 		});
-		await invalidateAll();
+		await refreshAll();
 		if (requirementAssessment.updateForm && requirementAssessment.updateForm.data) {
 			requirementAssessment.updateForm.data[field] = value;
 		}
@@ -571,7 +571,7 @@
 				body: JSON.stringify({ id: requirementAssessment.id, review_state: next })
 			});
 			if (!(await applied(res))) return;
-			await invalidateAll();
+			await refreshAll();
 		} finally {
 			reviewPending = false;
 		}
@@ -589,7 +589,7 @@
 			body: JSON.stringify({ id: taskId, status })
 		});
 		if (!(await applied(res))) return;
-		await invalidateAll();
+		await refreshAll();
 	}
 
 	function modalTaskTemplateCreateForm(createform: SuperForm<any>): void {

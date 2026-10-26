@@ -28,7 +28,7 @@
 
 	import { onMount } from 'svelte';
 
-	import { goto, invalidateAll } from '$app/navigation';
+	import { goto, refreshAll } from '$app/navigation';
 	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
 	import { getListViewFields } from '#lib/utils/table.js';
 	import {
@@ -63,7 +63,7 @@
 			toastStore.trigger({ message: m.anErrorOccurred(), background: 'preset-filled-error-500' });
 			return;
 		}
-		await invalidateAll();
+		await refreshAll();
 	}
 
 	const defaultExcludes = ['id', 'str', 'path', 'sync_mappings'];

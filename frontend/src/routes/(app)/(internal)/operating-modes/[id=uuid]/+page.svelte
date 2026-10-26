@@ -9,7 +9,7 @@
 	import { m } from '#paraglide/messages.js';
 	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 	import OperatingModeGraph from './graph/OperatingModeGraph.svelte';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 
@@ -54,7 +54,7 @@
 	}
 
 	function handleSaved() {
-		invalidateAll();
+		refreshAll();
 	}
 
 	function handleCreateEA() {

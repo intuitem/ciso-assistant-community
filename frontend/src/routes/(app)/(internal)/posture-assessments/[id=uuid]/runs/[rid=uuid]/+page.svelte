@@ -2,7 +2,7 @@
 	import type { PageData } from './$types';
 	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 	import { deserialize, enhance } from '$app/forms';
-	import { goto } from '$app/navigation';
+	import { gotoOrLoad } from '#lib/utils/breadcrumbs.js';
 	import { page } from '$app/state';
 	import { m } from '#paraglide/messages.js';
 	import { postureResultTailwindColorMap } from '#lib/utils/constants.js';
@@ -38,7 +38,7 @@
 				});
 				const result = deserialize(await res.text());
 				if (result.type === 'redirect') {
-					goto(result.location);
+					gotoOrLoad(result.location);
 				} else if (result.type === 'failure') {
 					toastError((result.data as any)?.error ?? m.error());
 				}

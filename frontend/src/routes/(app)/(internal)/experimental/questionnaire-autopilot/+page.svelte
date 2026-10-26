@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { goto, invalidateAll } from '$app/navigation';
+	import { goto, refreshAll } from '$app/navigation';
 	import { page } from '$app/state';
 	import { getLocale } from '#paraglide/runtime.js';
 	import { formatDate } from '#lib/utils/datetime.js';
@@ -118,7 +118,7 @@
 			});
 			if (res.status === 204 || res.ok) {
 				toast.trigger({ message: `Deleted "${label}".` });
-				await invalidateAll();
+				await refreshAll();
 			} else {
 				const data = await res.json().catch(() => ({}));
 				toast.trigger({ message: data.detail || 'Failed to delete the run.' });

@@ -12,7 +12,7 @@
 	} from '#lib/components/Modals/stores.js';
 	import ValidationFlowsSection from '#lib/components/ValidationFlows/ValidationFlowsSection.svelte';
 	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 
 	interface Props {
 		data: PageData;
@@ -44,7 +44,7 @@
 				invalidateAll: true,
 				formAction: '/validation-flows?/create',
 				onConfirm: async () => {
-					await invalidateAll();
+					await refreshAll();
 				}
 			}
 		};

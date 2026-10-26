@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { deserialize } from '$app/forms';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 	import ValidationFlowActionModal from '#lib/components/Modals/ValidationFlowActionModal.svelte';
 	import { getModalStore, type ModalStore } from '#lib/components/Modals/stores.js';
@@ -76,7 +76,7 @@
 							throw new Error(message ?? m.anErrorOccurred());
 						}
 					},
-					onSuccess: () => invalidateAll()
+					onSuccess: () => refreshAll()
 				}
 			}
 		});

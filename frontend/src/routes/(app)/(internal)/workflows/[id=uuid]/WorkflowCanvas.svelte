@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { m } from '#paraglide/messages.js';
-	import { invalidateAll, goto } from '$app/navigation';
+	import { refreshAll, goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { getFlash } from 'sveltekit-flash-message';
 	import { safeTranslate } from '#lib/utils/i18n.js';
@@ -905,7 +905,7 @@
 			versionGone = true;
 			saveError = m.draftNoLongerExists();
 			saveState = 'error';
-			await invalidateAll();
+			await refreshAll();
 			return false;
 		}
 		if (!res.ok) {
@@ -979,7 +979,7 @@
 		});
 		if (res.ok) {
 			await refreshRegistrations();
-			await invalidateAll();
+			await refreshAll();
 			return;
 		}
 		const body = await res.json().catch(() => ({}));
@@ -1024,7 +1024,7 @@
 			if (res.ok || res.status === 404) {
 				versionGone = true;
 				if (saveTimer) clearTimeout(saveTimer);
-				await invalidateAll();
+				await refreshAll();
 				// Force the remount: when this draft was auto-drafted in-session,
 				// page data (still the published version) is unchanged by the
 				// reload, so the page's {#key} alone would never fire.
@@ -1243,7 +1243,7 @@
 		// Flush pending edits like startRun does, or navigating away drops them.
 		const pending = saveState === 'dirty' || saveState === 'saving' || saveState === 'error';
 		if (!readonly && pending && !(await save())) return;
-		await goto(`/workflows/${workflowId}?version=${version.id}`, { invalidateAll: true });
+		await goto(`/workflows/${workflowId}?version=${version.id}`, { refreshAll: true });
 	}
 
 	async function restoreVersion(version: any) {
@@ -1258,7 +1258,7 @@
 			});
 			if (res.ok) {
 				// The new draft becomes the default active version.
-				await goto(`/workflows/${workflowId}`, { invalidateAll: true });
+				await goto(`/workflows/${workflowId}`, { refreshAll: true });
 				return;
 			}
 			const body = await res.json().catch(() => ({}));

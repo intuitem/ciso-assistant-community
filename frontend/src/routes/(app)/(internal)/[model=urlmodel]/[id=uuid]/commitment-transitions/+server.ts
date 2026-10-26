@@ -1,7 +1,7 @@
 import { BASE_API_URL } from '#lib/utils/constants.js';
 import { getModelInfo } from '#lib/utils/crud.js';
-import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { errorFromBody } from '#lib/utils/errors.js';
 
 // `[field=fields]` only matches table columns, and a plain PATCH on `/{model}/{id}`
 // is shadowed (405) by static route folders without a `+server.ts` — hence its own proxy.
@@ -12,7 +12,7 @@ const endpointFor = (params: { model: string; id: string }) => {
 
 const forward = async (res: Response) => {
 	if (!res.ok) {
-		error(res.status, await res.json());
+		errorFromBody(res.status, await res.json());
 	}
 	return new Response(JSON.stringify(await res.json()), {
 		// Fetched straight from the browser: logout clears cookies, not the cache.

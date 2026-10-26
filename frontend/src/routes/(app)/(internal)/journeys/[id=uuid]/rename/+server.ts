@@ -1,5 +1,4 @@
 import { BASE_API_URL } from '#lib/utils/constants.js';
-import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ params, fetch, request }) => {
@@ -12,8 +11,8 @@ export const POST: RequestHandler = async ({ params, fetch, request }) => {
 
 	if (!response.ok) {
 		const error = await response.json().catch(() => ({ error: 'Failed to rename journey' }));
-		return json(error, { status: response.status });
+		return Response.json(error, { status: response.status });
 	}
 
-	return json(await response.json());
+	return Response.json(await response.json());
 };

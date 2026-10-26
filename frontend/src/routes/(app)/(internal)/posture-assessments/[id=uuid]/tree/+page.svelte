@@ -32,7 +32,7 @@
 		const url = new URL(page.url.href);
 		if (value) url.searchParams.set('asset', value);
 		else url.searchParams.delete('asset');
-		goto(url, { invalidateAll: true });
+		goto(url, { refreshAll: true });
 	}
 
 	function submitOnChange(event: Event) {

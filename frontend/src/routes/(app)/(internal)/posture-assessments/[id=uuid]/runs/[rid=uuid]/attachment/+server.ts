@@ -1,6 +1,6 @@
 import { BASE_API_URL } from '#lib/utils/constants.js';
-import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { errorFromBody } from '#lib/utils/errors.js';
 
 export const GET: RequestHandler = async ({ fetch, params }) => {
 	const res = await fetch(
@@ -15,7 +15,7 @@ export const GET: RequestHandler = async ({ fetch, params }) => {
 		} catch {
 			detail = { message: body };
 		}
-		error(res.status, detail);
+		errorFromBody(res.status, detail);
 	}
 	return new Response(res.body, {
 		status: res.status,

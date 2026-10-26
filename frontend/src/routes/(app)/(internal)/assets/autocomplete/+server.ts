@@ -1,6 +1,6 @@
 import { BASE_API_URL } from '#lib/utils/constants.js';
-import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { errorFromBody } from '#lib/utils/errors.js';
 
 export const GET: RequestHandler = async ({ fetch, url }) => {
 	const endpoint = `${BASE_API_URL}/assets/autocomplete/${
@@ -16,7 +16,7 @@ export const GET: RequestHandler = async ({ fetch, url }) => {
 		} catch {
 			parsed = body;
 		}
-		error(res.status, parsed as any);
+		errorFromBody(res.status, parsed as any);
 	}
 	return new Response(res.body, {
 		status: res.status,

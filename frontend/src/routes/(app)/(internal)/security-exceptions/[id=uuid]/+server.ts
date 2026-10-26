@@ -1,7 +1,7 @@
 import { BASE_API_URL } from '#lib/utils/constants.js';
 import { getModelInfo } from '#lib/utils/crud.js';
-import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { errorFromBody } from '#lib/utils/errors.js';
 
 export const PATCH: RequestHandler = async ({ fetch, params, request }) => {
 	const model = getModelInfo('security-exceptions');
@@ -17,7 +17,7 @@ export const PATCH: RequestHandler = async ({ fetch, params, request }) => {
 	});
 
 	if (!res.ok) {
-		error(res.status, await res.json());
+		errorFromBody(res.status, await res.json());
 	}
 
 	const data = await res.json();

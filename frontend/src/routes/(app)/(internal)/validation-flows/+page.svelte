@@ -65,7 +65,7 @@
 	function handleTabChange(tab: string): void {
 		const url = new URL(page.url.href);
 		url.searchParams.set('tab', tab);
-		goto(url, { invalidateAll: true });
+		goto(url, { refreshAll: true });
 	}
 
 	function modalCreateForm(): void {

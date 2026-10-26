@@ -9,7 +9,7 @@
 	import type { FormDataShape } from '#lib/utils/schemas.js';
 	import { getModalStore, type ModalStore } from './stores';
 	import { page } from '$app/state';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -87,7 +87,7 @@
 			});
 
 			if (res.ok) {
-				await invalidateAll();
+				await refreshAll();
 				if (parent && typeof parent.onConfirm === 'function') {
 					parent.onConfirm();
 				}

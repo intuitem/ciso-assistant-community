@@ -1,5 +1,4 @@
 import { BASE_API_URL } from '#lib/utils/constants.js';
-import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 export const DELETE: RequestHandler = async ({ params, fetch }) => {
@@ -9,7 +8,7 @@ export const DELETE: RequestHandler = async ({ params, fetch }) => {
 
 	if (!response.ok) {
 		const error = await response.json().catch(() => ({ error: 'Failed to delete journey' }));
-		return json(error, { status: response.status });
+		return Response.json(error, { status: response.status });
 	}
 
 	return new Response(null, { status: 204 });

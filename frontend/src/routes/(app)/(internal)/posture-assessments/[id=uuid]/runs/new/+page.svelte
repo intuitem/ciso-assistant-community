@@ -56,7 +56,7 @@
 		pickerOpen = false;
 		const url = new URL(page.url.href);
 		url.searchParams.set('asset', id);
-		goto(url, { invalidateAll: true });
+		goto(url, { refreshAll: true });
 	}
 </script>
 
@@ -126,7 +126,13 @@
 	{#if !data.selectedAsset}
 		<p class="text-sm text-surface-600-400 px-2">{m.selectAssetToEditHelp()}</p>
 	{:else}
-		<form method="POST" action="?/saveRun" use:enhance={() => ({ update }) => update({ navigate: false })}>
+		<form
+			method="POST"
+			action="?/saveRun"
+			use:enhance={() =>
+				({ update }) =>
+					update({ navigate: false })}
+		>
 			<input type="hidden" name="asset" value={data.selectedAsset} />
 			<div class="card p-4 bg-surface-50-950 shadow-xs space-y-3">
 				<div class="flex items-center gap-3 flex-wrap border-b border-surface-200-800 pb-3">

@@ -30,7 +30,7 @@
 	let assignedToParams = $derived(buildMultiParam('assigned_to', actorIds));
 
 	function toggleTeamAssignments() {
-		goto(`/my-assignments?include_teams=${!data.includeTeams}`, { invalidateAll: true });
+		goto(`/my-assignments?include_teams=${!data.includeTeams}`, { refreshAll: true });
 	}
 </script>
 

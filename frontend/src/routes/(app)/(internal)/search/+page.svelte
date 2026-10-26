@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/env';
 	import { goto } from '$app/navigation';
+	import { gotoOrLoad } from '#lib/utils/breadcrumbs.js';
 	import { m } from '#paraglide/messages.js';
 	import { safeTranslate } from '#lib/utils/i18n.js';
 
@@ -180,7 +181,7 @@
 	function submitSearch() {
 		const q = searchInput.trim();
 		if (!q) return;
-		goto(`/search?q=${encodeURIComponent(q)}`, { invalidateAll: true });
+		goto(`/search?q=${encodeURIComponent(q)}`, { refreshAll: true });
 	}
 
 	function toggleTypeFilter(type: string) {
@@ -270,7 +271,7 @@
 		} else if (e.key === 'Enter' && !isInInput && selectedIndex >= 0) {
 			e.preventDefault();
 			const result = flatResults[selectedIndex];
-			if (result) goto(result.url);
+			if (result) gotoOrLoad(result.url);
 		} else if (e.key === 'Escape' && !isInInput) {
 			selectedIndex = -1;
 		}

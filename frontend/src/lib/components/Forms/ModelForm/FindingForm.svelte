@@ -15,7 +15,7 @@
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
 	import {
 		getModalStore,
@@ -107,7 +107,7 @@
 			title: safeTranslate('add-' + remediationModel.localName),
 			response: (r: boolean) => {
 				if (r) {
-					invalidateAll();
+					refreshAll();
 				}
 			}
 		};

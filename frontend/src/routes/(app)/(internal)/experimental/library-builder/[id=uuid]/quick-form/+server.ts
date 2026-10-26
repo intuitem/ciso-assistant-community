@@ -1,5 +1,4 @@
 import { BASE_API_URL } from '#lib/utils/constants.js';
-import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 /**
@@ -20,7 +19,7 @@ async function backend(url: string, method: string, body: unknown, fetchFn: type
 		return new Response(null, { status: r.status });
 	}
 	try {
-		return json(JSON.parse(text), { status: r.status });
+		return Response.json(JSON.parse(text), { status: r.status });
 	} catch {
 		return new Response(text, {
 			status: r.status,
@@ -40,7 +39,7 @@ export const POST: RequestHandler = async ({ params, request, url, fetch }) => {
 		return backend(`${base}/quick-form-editor/${query}`, 'GET', undefined, fetch);
 	}
 
-	return json({ error: `unknown action '${action}'` }, { status: 400 });
+	return Response.json({ error: `unknown action '${action}'` }, { status: 400 });
 };
 
 export const PATCH: RequestHandler = async ({ params, request, url, fetch }) => {

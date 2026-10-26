@@ -179,7 +179,7 @@
 			const url = new URL(page.url.href);
 			url.searchParams.set('tab', 'custom');
 			url.searchParams.delete('dashboard');
-			goto(url, { invalidateAll: true });
+			goto(url, { refreshAll: true });
 		} else {
 			const url = new URL(page.url.href);
 			url.searchParams.set('tab', 'custom');
@@ -188,7 +188,7 @@
 			} else {
 				url.searchParams.delete('dashboard');
 			}
-			goto(url, { invalidateAll: true });
+			goto(url, { refreshAll: true });
 		}
 	}
 </script>

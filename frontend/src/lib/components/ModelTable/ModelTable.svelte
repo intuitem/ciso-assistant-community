@@ -666,7 +666,7 @@
 		if (filterStoreKey !== previousFilterStoreKey) {
 			previousFilterStoreKey = filterStoreKey;
 			untrack(applySavedSort);
-			const fresh = seedFilterValues();
+			const fresh = untrack(seedFilterValues);
 			Object.assign(filterValues, fresh);
 			_form.form.update((data) => ({
 				...data,
@@ -676,6 +676,8 @@
 			}));
 		}
 
+		// untracked: the shallow goto below swaps page.url, which must not rerun this effect
+		const url = syncFiltersToUrl ? new URL(untrack(() => page.url.href)) : null;
 		for (const field of filteredFields) {
 			const finalFilterValue = overrideFilters[field] || filterValues[field] || [];
 
@@ -687,22 +689,22 @@
 			}
 			for (const [param, values] of Object.entries(buckets)) {
 				handler.filter(values, param);
-				if (!syncFiltersToUrl) continue;
-				// shortcut: Kit 3 types page.url readonly but it is still a mutable URL; replace with goto(url, { shallow: true }) when ModelTable moves to shallow routing
-				const url = page.url as URL;
+				if (!url) continue;
 				url.searchParams.delete(param);
 				values.forEach((value: string) => url.searchParams.append(param, value));
 			}
 		}
-		if (syncFiltersToUrl) {
-			history.replaceState(history.state, '', page.url.pathname + page.url.search);
+		if (url) {
+			if (url.href !== untrack(() => page.url.href)) {
+				_goto(url, { shallow: true, replace: true, state: untrack(() => page.state) });
+			}
 			// Sync the current crumb's href with the new filter query.
 			breadcrumbs.update((crumbs) => {
 				if (crumbs.length < 2) return crumbs;
 				const last = crumbs[crumbs.length - 1];
 				const lastPath = last.href?.split('?')[0];
-				if (lastPath !== page.url.pathname) return crumbs;
-				const newHref = page.url.pathname + page.url.search;
+				if (lastPath !== url.pathname) return crumbs;
+				const newHref = url.pathname + url.search;
 				if (last.href === newHref) return crumbs;
 				const next = crumbs.slice();
 				next[next.length - 1] = { ...last, href: newHref };
@@ -727,14 +729,13 @@
 			}, 10);
 	});
 
-	// Refetch when the page reloads its data (invalidateAll() swaps page.url for a
-	// new URL object). Standalone tables get this from syncing filters with the
-	// URL above; embedded ones no longer touch it, so track it here.
-	let pageUrlSeen = false;
+	// Refetch when the page reloads its data (navigation, refreshAll(), form actions).
+	// page.data, not page.url: the shallow goto that syncs filters also swaps page.url.
+	let pageDataSeen = false;
 	$effect(() => {
-		page.url;
-		if (!pageUrlSeen) return void (pageUrlSeen = true);
-		if (hasRemoteSource && !syncFiltersToUrl) untrack(() => handler.invalidate());
+		page.data;
+		if (!pageDataSeen) return void (pageDataSeen = true);
+		if (hasRemoteSource) untrack(() => handler.invalidate());
 	});
 
 	$effect(() => {
@@ -1628,7 +1629,7 @@
 			<RowCount {handler} />
 		{/if}
 		{#if pagination}
-			<Pagination {handler} {URLModel} scrollTarget={tableWrapEl} />
+			<Pagination {handler} {URLModel} scrollTarget={tableWrapEl} syncToUrl={syncFiltersToUrl} />
 		{/if}
 	</footer>
 </div>

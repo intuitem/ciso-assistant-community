@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { m } from '#paraglide/messages.js';
 	import { enhance } from '$app/forms';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import { BACKEND_API_EXPOSED_URL } from '#lib/utils/constants.js';
 
 	interface Props {
@@ -91,7 +91,7 @@
 						newToken = result.data.token as string;
 					}
 					await update({ reset: false, navigate: false });
-					await invalidateAll();
+					await refreshAll();
 				};
 			}}
 		>
@@ -132,7 +132,7 @@
 									use:enhance={() => {
 										return async ({ update }) => {
 											await update({ reset: false, navigate: false });
-											await invalidateAll();
+											await refreshAll();
 										};
 									}}
 								>

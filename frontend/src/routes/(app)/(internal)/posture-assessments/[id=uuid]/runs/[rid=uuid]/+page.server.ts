@@ -1,18 +1,18 @@
 import { BASE_API_URL } from '#lib/utils/constants.js';
 import type { PageServerLoad } from './$types';
-import { error, fail, redirect, type Actions } from '@sveltejs/kit';
+import { fail, redirect, type Actions } from '@sveltejs/kit';
+import { errorFromBody } from '#lib/utils/errors.js';
 
 export const load: PageServerLoad = async (event) => {
 	const res = await event.fetch(
 		`${BASE_API_URL}/automation/posture-assessments/${event.params.id}/runs/${event.params.rid}/`
 	);
-	if (!res.ok) error(res.status, await res.json());
+	if (!res.ok) errorFromBody(res.status, await res.json());
 	const body = await res.json();
 	const assessmentRes = await event.fetch(
 		`${BASE_API_URL}/automation/posture-assessments/${event.params.id}/`
 	);
-	if (!assessmentRes.ok)
-		error(assessmentRes.status, await assessmentRes.json());
+	if (!assessmentRes.ok) errorFromBody(assessmentRes.status, await assessmentRes.json());
 	const assessment = await assessmentRes.json();
 	return { run: body.run, results: body.results, assessment, title: assessment.name };
 };

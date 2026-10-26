@@ -45,7 +45,7 @@
 	import { Switch } from '@skeletonlabs/skeleton-svelte';
 	import type { Actions, PageData } from './$types';
 	import { onMount, tick } from 'svelte';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import { deserialize } from '$app/forms';
 	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 
@@ -226,12 +226,12 @@
 
 		// Reload to drop the optimistic value the backend rejected
 		if (!ok) {
-			if (invalidateAllBool) await invalidateAll();
+			if (invalidateAllBool) await refreshAll();
 			return false;
 		}
 
 		if (refresh && invalidateAllBool) {
-			await invalidateAll();
+			await refreshAll();
 		}
 
 		if (requirementAssessment.updateForm && requirementAssessment.updateForm.data) {
@@ -320,7 +320,7 @@
 					documentation_score: documentationScore
 				});
 				if (!ok) {
-					if (invalidateAllBool) await invalidateAll();
+					if (invalidateAllBool) await refreshAll();
 					return;
 				}
 				await refreshScores();
@@ -1427,7 +1427,7 @@
 																answers: { [urn]: newAnswer }
 															});
 															if (invalidateAllBool) {
-																await invalidateAll();
+																await refreshAll();
 															}
 														}}
 													/>

@@ -21,7 +21,7 @@
 		} else {
 			url.searchParams.delete('folder');
 		}
-		goto(url, { replaceState: false, invalidateAll: true });
+		goto(url, { replace: false, refreshAll: true });
 	}
 </script>
 

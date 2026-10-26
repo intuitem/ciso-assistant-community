@@ -1,5 +1,4 @@
 import { BASE_API_URL } from '#lib/utils/constants.js';
-import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 export const PATCH: RequestHandler = async ({ params, request, fetch }) => {
@@ -13,9 +12,9 @@ export const PATCH: RequestHandler = async ({ params, request, fetch }) => {
 
 	if (!response.ok) {
 		const error = await response.json().catch(() => ({ error: 'Failed to update step' }));
-		return json(error, { status: response.status });
+		return Response.json(error, { status: response.status });
 	}
 
 	const result = await response.json();
-	return json(result);
+	return Response.json(result);
 };

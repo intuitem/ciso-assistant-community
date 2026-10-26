@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import { m } from '#paraglide/messages.js';
 	import { safeTranslate } from '#lib/utils/i18n.js';
 
@@ -164,7 +164,7 @@
 			}
 			payload = await res.json();
 			picked = null;
-			await invalidateAll();
+			await refreshAll();
 		} finally {
 			submitting = false;
 		}

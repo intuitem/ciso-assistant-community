@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { m } from '#paraglide/messages.js';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import { goto } from '#lib/utils/breadcrumbs.js';
 	import { getSecureRedirect } from '#lib/utils/helpers.js';
 	import { page } from '$app/state';
@@ -66,7 +66,7 @@
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ status: newStatus })
 		});
-		invalidateAll();
+		refreshAll();
 	}
 
 	function buildQueryString(params: Record<string, unknown> | null | undefined): string {
@@ -144,7 +144,7 @@
 		if (!touchedStepPickers[step.id]) return;
 		const targetRef = (Array.isArray(value) ? (value[0] ?? null) : value) || null;
 		// Compare against the live server state, not the load-time snapshot in
-		// editableSteps — after a PATCH + invalidateAll the snapshot is stale and
+		// editableSteps — after a PATCH + refreshAll the snapshot is stale and
 		// would silently drop a revert to the original value.
 		const liveStep = (data.steps ?? []).find((s: any) => s.id === step.id);
 		const currentRef = (liveStep ? liveStep.target_ref : step.target_ref) ?? null;
@@ -158,7 +158,7 @@
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ target_ref: targetRef })
 		});
-		invalidateAll();
+		refreshAll();
 	}
 
 	let renaming = $state(false);
@@ -181,7 +181,7 @@
 			body: JSON.stringify({ name: trimmed })
 		});
 		renaming = false;
-		invalidateAll();
+		refreshAll();
 	}
 
 	let compactMode = $state(false);
@@ -193,7 +193,7 @@
 			const response = await fetch(`/journeys/${page.params.id}/upgrade`, { method: 'POST' });
 
 			if (response.ok) {
-				invalidateAll();
+				refreshAll();
 			}
 		} catch (e) {
 			console.error('Failed to upgrade journey', e);

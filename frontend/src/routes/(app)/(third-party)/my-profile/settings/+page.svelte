@@ -7,7 +7,7 @@
 	import RegisterWebAuthnModal from './mfa/components/RegisterWebAuthnModal.svelte';
 
 	import ConfirmModal from '#lib/components/Modals/ConfirmModal.svelte';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import { page } from '$app/state';
 	import {
 		formatDate,
@@ -120,7 +120,7 @@
 				dateFormat = previous;
 				return;
 			}
-			await invalidateAll();
+			await refreshAll();
 		} catch {
 			dateFormat = previous;
 		}
@@ -156,13 +156,13 @@
 				landing = previous;
 				return;
 			}
-			await invalidateAll();
+			await refreshAll();
 		} catch {
 			landing = previous;
 		}
 	}
 
-	// Derived, not read once: every toggle ends in `invalidateAll()`.
+	// Derived, not read once: every toggle ends in `refreshAll()`.
 	const hideableFlags: string[] = $derived(data.moduleVisibility?.hideable ?? []);
 	const moduleGroups = $derived(getFeatureFlagGroups(hideableFlags));
 
@@ -229,7 +229,7 @@
 			// of the tree stale — rolling the toggle back would make it wrong.
 			// Sidebar, palette and flagged tables are built server-side from the
 			// effective flags, hence the reload at all.
-			await invalidateAll().catch(() => {});
+			await refreshAll().catch(() => {});
 		} finally {
 			modulePendingWrites -= 1;
 		}

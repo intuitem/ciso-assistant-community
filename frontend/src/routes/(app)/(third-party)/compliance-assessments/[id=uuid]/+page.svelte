@@ -14,7 +14,7 @@
 
 	import { Switch, Progress, Popover, Tooltip } from '@skeletonlabs/skeleton-svelte';
 
-	import { goto, invalidateAll } from '$app/navigation';
+	import { goto, refreshAll } from '$app/navigation';
 
 	import type { ActionData, PageData } from './$types';
 	import TreeViewItemContent from './TreeViewItemContent.svelte';
@@ -606,7 +606,7 @@
 				formAction: '/validation-flows?/create',
 				invalidateAll: true,
 				onConfirm: async () => {
-					await invalidateAll();
+					await refreshAll();
 				}
 			}
 		};

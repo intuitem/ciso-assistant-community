@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { goto, invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
+	import { gotoOrLoad } from '#lib/utils/breadcrumbs.js';
 	import { page } from '$app/state';
 	import { getToastStore } from '#lib/components/Toast/stores.js';
 	import { canPerformActionOnObject } from '#lib/utils/access-control.js';
@@ -116,7 +117,7 @@
 				});
 				return;
 			}
-			await goto(body.redirect);
+			await gotoOrLoad(body.redirect);
 		} catch {
 			toastStore.trigger({ message: m.anErrorOccurred(), background: 'preset-filled-error-500' });
 		} finally {
@@ -186,7 +187,7 @@
 					message: body.error ? safeTranslate(body.error) : m.anErrorOccurred(),
 					background: 'preset-filled-error-500'
 				});
-				if (body.redirect) await goto(body.redirect);
+				if (body.redirect) await gotoOrLoad(body.redirect);
 				return;
 			}
 			const skipped = (body.skipped ?? []).map((code: string) => safeTranslate(code));
@@ -201,7 +202,7 @@
 					autohide: false
 				});
 			}
-			await goto(body.redirect);
+			await gotoOrLoad(body.redirect);
 		} catch {
 			toastStore.trigger({ message: m.anErrorOccurred(), background: 'preset-filled-error-500' });
 		} finally {
@@ -250,7 +251,7 @@
 				return;
 			}
 			editing = false;
-			await invalidateAll();
+			await refreshAll();
 		} catch {
 			toastStore.trigger({ message: m.anErrorOccurred(), background: 'preset-filled-error-500' });
 		} finally {

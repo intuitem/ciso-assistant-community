@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { gotoOrLoad } from '#lib/utils/breadcrumbs.js';
 	import { page } from '$app/state';
 	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { m } from '#paraglide/messages.js';
@@ -51,7 +51,7 @@
 				});
 				return;
 			}
-			await goto(body.redirect);
+			await gotoOrLoad(body.redirect);
 		} catch {
 			flash.set({ type: 'error', message: m.anErrorOccurred() });
 		} finally {

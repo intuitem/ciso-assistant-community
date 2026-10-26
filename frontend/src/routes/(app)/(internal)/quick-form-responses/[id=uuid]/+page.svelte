@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { ruleLabel } from '#lib/components/QuickForms/rule-label.js';
 	import { deserialize } from '$app/forms';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import { page } from '$app/state';
 	import { tick } from 'svelte';
 	import Question from '#lib/components/Forms/Question.svelte';
@@ -225,7 +225,7 @@
 					background: 'preset-filled-error-500'
 				});
 			}
-			await invalidateAll();
+			await refreshAll();
 		} finally {
 			busy = false;
 		}
@@ -254,7 +254,7 @@
 		const result: any = deserialize(await res.text());
 		const failure = actionError(result);
 		if (failure) throw new Error(failure);
-		await invalidateAll();
+		await refreshAll();
 	}
 
 	async function removeAttachment(_urn: string, attachmentId: string) {

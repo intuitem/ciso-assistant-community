@@ -6,7 +6,7 @@
 	import { m } from '#paraglide/messages.js';
 	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { page } from '$app/state';
-	import { goto, invalidateAll } from '$app/navigation';
+	import { goto, refreshAll } from '$app/navigation';
 	import { getToastStore } from '#lib/components/Toast/stores.js';
 	import {
 		getModalStore,
@@ -54,7 +54,7 @@
 			});
 			if (res.ok) {
 				const result = await res.json();
-				await invalidateAll();
+				await refreshAll();
 				setTimeout(() => modalSecret(result), 0);
 			} else {
 				toastStore.trigger({ message: m.anErrorOccurred(), preset: 'error' });
@@ -88,7 +88,7 @@
 				body: JSON.stringify({ is_active: isActive })
 			});
 			if (res.ok) {
-				await invalidateAll();
+				await refreshAll();
 			} else {
 				toastStore.trigger({ message: await extractErrorMessage(res), preset: 'error' });
 			}
@@ -140,7 +140,7 @@
 				try {
 					const res = await fetch(`/service-accounts/${data.data.id}`, { method: 'DELETE' });
 					if (res.ok) {
-						await goto('/service-accounts', { invalidateAll: true });
+						await goto('/service-accounts', { refreshAll: true });
 					} else {
 						toastStore.trigger({ message: m.anErrorOccurred(), preset: 'error' });
 					}

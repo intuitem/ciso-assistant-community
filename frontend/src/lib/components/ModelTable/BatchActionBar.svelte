@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { m } from '#paraglide/messages.js';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { getToastStore } from '#lib/components/Toast/stores.js';
 	import {
@@ -80,7 +80,7 @@
 							background: 'preset-filled-success-500'
 						});
 						handler.invalidate();
-						await invalidateAll();
+						await refreshAll();
 						onClearSelection();
 					} catch (e) {
 						console.error('Parent batch action failed', e);
@@ -218,7 +218,7 @@
 						}
 
 						handler.invalidate();
-						await invalidateAll();
+						await refreshAll();
 						onClearSelection();
 					} catch (e) {
 						console.error('Batch action failed', e);

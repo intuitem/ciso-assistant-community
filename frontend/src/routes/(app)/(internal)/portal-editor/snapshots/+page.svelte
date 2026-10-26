@@ -234,7 +234,13 @@
 								<i class="fa-solid fa-rotate mr-1"></i>{m.sync()}
 							</button>
 						</form>
-						<form method="POST" action="?/delete" use:enhance={() => ({ update }) => update({ navigate: false })}>
+						<form
+							method="POST"
+							action="?/delete"
+							use:enhance={() =>
+								({ update }) =>
+									update({ navigate: false })}
+						>
 							<input type="hidden" name="id" value={s.id} />
 							<button
 								type="button"

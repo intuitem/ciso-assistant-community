@@ -14,7 +14,7 @@
 	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { LOCALE_MAP, language, defaultLangLabels } from '#lib/utils/locales.js';
 	import { setLocale } from '#paraglide/runtime.js';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import type { DateFormatPreference } from '#lib/utils/datetime.js';
 	import { getModalStore, type ModalSettings } from '#lib/components/Modals/stores.js';
 	import { getToastStore } from '#lib/components/Toast/stores.js';
@@ -116,7 +116,7 @@
 									message: m.forceDateFormatSuccess(),
 									preset: 'success'
 								});
-								await invalidateAll();
+								await refreshAll();
 							} else {
 								toastStore.trigger({
 									message: data.error ? safeTranslate(data.error) : m.forceDateFormatFailed(),

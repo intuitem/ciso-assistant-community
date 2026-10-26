@@ -19,7 +19,7 @@
 	import * as m from '#paraglide/messages.js';
 	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { browser } from '$app/env';
-	import { goto } from '$app/navigation';
+	import { gotoOrLoad } from '#lib/utils/breadcrumbs.js';
 	import { getSecureRedirect } from '#lib/utils/helpers.js';
 	import type { SuperValidated } from 'sveltekit-superforms';
 
@@ -67,7 +67,7 @@
 			// In create mode: redirect to the new report's all-in-one page
 			// In edit mode: stay on page (no redirect)
 			if (mode === 'create' && updatedForm.message?.redirect) {
-				goto(getSecureRedirect(updatedForm.message.redirect));
+				gotoOrLoad(getSecureRedirect(updatedForm.message.redirect));
 			}
 		}
 	});
@@ -178,7 +178,7 @@
 		if (browser) {
 			const url = new URL(window.location.href);
 			const next = getSecureRedirect(url.searchParams.get('next'));
-			if (next) goto(next);
+			if (next) gotoOrLoad(next);
 			else history.back();
 		}
 	}

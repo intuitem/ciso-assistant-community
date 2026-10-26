@@ -229,7 +229,14 @@
 			{/if}
 		{/if}
 
-		<form method="POST" action={formAction} use:enhance={() => ({ update }) => update({ navigate: false })} class="modal-form {cForm}">
+		<form
+			method="POST"
+			action={formAction}
+			use:enhance={() =>
+				({ update }) =>
+					update({ navigate: false })}
+			class="modal-form {cForm}"
+		>
 			<footer class="flex gap-3 justify-end pt-4 border-t border-surface-200-800">
 				<button
 					type="button"

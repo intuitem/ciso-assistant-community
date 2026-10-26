@@ -10,7 +10,7 @@
 	import { getModelInfo } from '#lib/utils/crud.js';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { safeTranslate } from '#lib/utils/i18n.js';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import { AppliedControlSchema } from '#lib/utils/schemas.js';
 	import { page } from '$app/state';
 	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
@@ -78,7 +78,7 @@
 			title: safeTranslate('add-' + appliedControlModel.localName),
 			response: (r: boolean) => {
 				if (r) {
-					invalidateAll();
+					refreshAll();
 				}
 			}
 		};

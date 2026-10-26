@@ -7,7 +7,12 @@ import type { FeatureFlags } from '#lib/feature-flags.js';
 
 declare global {
 	namespace App {
-		// interface Error {}
+		interface Error {
+			message: string;
+			status: number;
+			// Backend error fields (detail, error, ...) relayed to the client by errorFromBody
+			[key: string]: unknown;
+		}
 		interface Locals {
 			// Set by the accessors below; only valid after awaiting the matching one.
 			user?: User;

@@ -3,7 +3,7 @@
 	import DetailView from '#lib/components/DetailView/DetailView.svelte';
 	import MetricSampleChart from '#lib/components/Chart/MetricSampleChart.svelte';
 	import { m } from '#paraglide/messages.js';
-	import { invalidate, invalidateAll } from '$app/navigation';
+	import { invalidate, refreshAll } from '$app/navigation';
 	import { page } from '$app/state';
 	import { getModalStore } from '#lib/components/Modals/stores.js';
 	import ComposeMetricModal from '#lib/components/Modals/ComposeMetricModal.svelte';
@@ -73,7 +73,7 @@
 			await new Promise((resolve) => setTimeout(resolve, REFRESH_LOOK_MS));
 			// Left the page, or clicked again: this run has nothing more to do.
 			if (run !== refreshRun) return;
-			await invalidateAll();
+			await refreshAll();
 			if (stamp(data.data?.last_computed_at) !== stamp(before)) {
 				refreshSampleTables();
 				refreshState = 'done';
@@ -130,7 +130,7 @@
 		if (looks.count >= 10) return;
 		const timer = setTimeout(() => {
 			looks.count += 1;
-			invalidateAll();
+			refreshAll();
 		}, 2000);
 		return () => clearTimeout(timer);
 	});

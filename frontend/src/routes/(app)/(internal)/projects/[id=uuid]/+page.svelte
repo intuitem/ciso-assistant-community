@@ -3,7 +3,7 @@
 	import { m } from '#paraglide/messages.js';
 	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import { page } from '$app/state';
 	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
@@ -146,7 +146,7 @@
 				errorMessage = String(text || `HTTP ${res.status}`);
 				return false;
 			}
-			await invalidateAll();
+			await refreshAll();
 			return true;
 		} finally {
 			savingSection = null;
@@ -954,7 +954,7 @@
 				model="pmbok.project"
 				folderId={project.folder?.id}
 				values={project.custom_fields}
-				onSaved={invalidateAll}
+				onSaved={refreshAll}
 			/>
 		</Tabs.Content>
 		<Tabs.Content value="charter" class="p-6">

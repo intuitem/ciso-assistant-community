@@ -5,7 +5,7 @@
 	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 	import { page } from '$app/state';
 	import { Popover } from '@skeletonlabs/skeleton-svelte';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import ActivityTracker from '#lib/components/DataViz/ActivityTracker.svelte';
 	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
 	import {
@@ -36,7 +36,7 @@
 				invalidateAll: true,
 				formAction: '/validation-flows?/create',
 				onConfirm: async () => {
-					await invalidateAll();
+					await refreshAll();
 				}
 			}
 		};

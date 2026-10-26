@@ -13,7 +13,7 @@
 
 	async function toggleEnclaves(checked: boolean) {
 		await goto(`/x-rays/inspect?include_enclaves=${checked ? 'true' : 'false'}`, {
-			replaceState: true
+			replace: true
 		});
 	}
 </script>

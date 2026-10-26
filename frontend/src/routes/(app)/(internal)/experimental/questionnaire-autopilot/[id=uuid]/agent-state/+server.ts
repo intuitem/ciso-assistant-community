@@ -1,6 +1,5 @@
 import { BASE_API_URL } from '#lib/utils/constants.js';
 import { fetchAllPages } from '#lib/utils/pagination.js';
-import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 // run_id comes from the client and is interpolated straight into a backend
@@ -12,10 +11,10 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 export const GET: RequestHandler = async ({ fetch, params, url }) => {
 	const runId = url.searchParams.get('run_id');
 	if (!runId) {
-		return json({ detail: 'run_id required' }, { status: 400 });
+		return Response.json({ detail: 'run_id required' }, { status: 400 });
 	}
 	if (!UUID_RE.test(runId)) {
-		return json({ detail: 'invalid run_id' }, { status: 400 });
+		return Response.json({ detail: 'invalid run_id' }, { status: 400 });
 	}
 
 	// The actions request is best-effort: a non-OK response, an unparseable
@@ -31,12 +30,12 @@ export const GET: RequestHandler = async ({ fetch, params, url }) => {
 	]);
 
 	if (!runRes.ok) {
-		return json({ detail: 'agent run not found' }, { status: runRes.status });
+		return Response.json({ detail: 'agent run not found' }, { status: runRes.status });
 	}
 	const agentRun = await runRes.json();
 
 	// Filter to currently active proposals (drop expired iterations)
 	const activeActions = actions.filter((a: any) => a?.state !== 'expired');
 
-	return json({ agentRun, actions: activeActions });
+	return Response.json({ agentRun, actions: activeActions });
 };

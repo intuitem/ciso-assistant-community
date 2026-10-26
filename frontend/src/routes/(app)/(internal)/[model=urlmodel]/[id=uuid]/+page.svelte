@@ -9,7 +9,7 @@
 	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { openEntityPicker } from '#lib/utils/entityPicker.js';
 	import { canPerformAction } from '#lib/utils/access-control.js';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import type { PageData, ActionData } from './$types';
 	import { page } from '$app/state';
 	import { m } from '#paraglide/messages.js';
@@ -71,7 +71,7 @@
 					// instead of closing as if it succeeded.
 					throw new Error('Failed to add members');
 				}
-				await invalidateAll();
+				await refreshAll();
 				toastStore.trigger({
 					message: m.membersAdded(),
 					background: 'preset-filled-success-500'

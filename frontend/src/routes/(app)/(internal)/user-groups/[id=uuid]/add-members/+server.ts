@@ -1,6 +1,6 @@
 import { BASE_API_URL } from '#lib/utils/constants.js';
-import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { errorFromBody } from '#lib/utils/errors.js';
 
 export const POST: RequestHandler = async ({ fetch, params, request }) => {
 	const endpoint = `${BASE_API_URL}/user-groups/${params.id}/add-members/`;
@@ -12,7 +12,7 @@ export const POST: RequestHandler = async ({ fetch, params, request }) => {
 		body
 	});
 	if (!res.ok) {
-		error(res.status, await res.json());
+		errorFromBody(res.status, await res.json());
 	}
 	return new Response(res.body, {
 		status: res.status,

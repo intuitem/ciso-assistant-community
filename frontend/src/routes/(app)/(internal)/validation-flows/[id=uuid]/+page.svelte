@@ -8,7 +8,7 @@
 	import { formatDateOrDateTime } from '#lib/utils/datetime.js';
 	import { getLocale } from '#paraglide/runtime.js';
 	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import { canPerformActionOnObject } from '#lib/utils/access-control.js';
 	import ValidationFlowActionModal from '#lib/components/Modals/ValidationFlowActionModal.svelte';
 	import { deserialize } from '$app/forms';
@@ -71,7 +71,7 @@
 							throw new Error(message ?? m.anErrorOccurred());
 						}
 					},
-					onSuccess: () => invalidateAll()
+					onSuccess: () => refreshAll()
 				}
 			}
 		};

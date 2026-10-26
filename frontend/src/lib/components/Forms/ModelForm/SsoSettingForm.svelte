@@ -13,7 +13,7 @@
 	import type { SuperForm } from 'sveltekit-superforms';
 	import { enhance } from '$app/forms';
 	import Anchor from '#lib/components/Anchor/Anchor.svelte';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 
 	interface Props {
 		form: SuperForm<any>;
@@ -53,7 +53,7 @@
 		// NOTE: This is a kludge to avoid backend throwing if SSOSettings have not been saved yet.
 		if (!page.data?.ssoSettings?.settings?.idp?.entity_id) {
 			form.submit();
-			invalidateAll();
+			refreshAll();
 		}
 
 		return async ({ result, update }) => {

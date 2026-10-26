@@ -1,5 +1,4 @@
 import { BASE_API_URL } from '#lib/utils/constants.js';
-import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ request, fetch }) => {
@@ -20,9 +19,9 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 
 	if (!response.ok) {
 		const error = await response.json().catch(() => ({ error: 'Failed to apply preset' }));
-		return json(error, { status: response.status });
+		return Response.json(error, { status: response.status });
 	}
 
 	const result = await response.json();
-	return json(result, { status: 201 });
+	return Response.json(result, { status: 201 });
 };

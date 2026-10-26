@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { ruleLabel } from '#lib/components/QuickForms/rule-label.js';
-	import { invalidateAll, goto } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
+	import { gotoOrLoad } from '#lib/utils/breadcrumbs.js';
 	import { deserialize } from '$app/forms';
 	import { m } from '#paraglide/messages.js';
 	import { getModalStore } from '#lib/components/Modals/stores.js';
@@ -61,10 +62,10 @@
 			const res = await fetch(`?/${action}`, { method: 'POST', body });
 			const result: any = deserialize(await res.text());
 			if (result.type === 'success' && result.data?.redirect) {
-				await goto(result.data.redirect);
+				await gotoOrLoad(result.data.redirect);
 				return;
 			}
-			await invalidateAll();
+			await refreshAll();
 		} finally {
 			busy = '';
 		}

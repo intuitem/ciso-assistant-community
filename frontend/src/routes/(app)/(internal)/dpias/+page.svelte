@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { gotoOrLoad } from '#lib/utils/breadcrumbs.js';
 	import { page } from '$app/state';
 	import { getToastStore } from '#lib/components/Toast/stores.js';
 	import { formatDate } from '#lib/utils/datetime.js';
@@ -102,7 +103,7 @@
 				});
 				return;
 			}
-			await goto(body.redirect);
+			await gotoOrLoad(body.redirect);
 		} catch {
 			toastStore.trigger({ message: m.anErrorOccurred(), background: 'preset-filled-error-500' });
 		} finally {

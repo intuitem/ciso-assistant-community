@@ -95,7 +95,13 @@
 							class="btn btn-sm preset-tonal"
 							aria-label={m.open()}><i class="fa-solid fa-arrow-up-right-from-square"></i></a
 						>
-						<form method="POST" action="?/delete" use:enhance={() => ({ update }) => update({ navigate: false })}>
+						<form
+							method="POST"
+							action="?/delete"
+							use:enhance={() =>
+								({ update }) =>
+									update({ navigate: false })}
+						>
 							<input type="hidden" name="id" value={doc.id} />
 							<button
 								type="button"

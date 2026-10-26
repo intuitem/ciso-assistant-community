@@ -6,7 +6,7 @@
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { activateTOTPSchema } from '#lib/utils/schemas.js';
 	import { startRegistration } from '@simplewebauthn/browser';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 
 	let { data } = $props();
 

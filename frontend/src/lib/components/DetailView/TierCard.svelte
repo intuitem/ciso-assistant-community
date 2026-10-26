@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { goto, invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
+	import { gotoOrLoad } from '#lib/utils/breadcrumbs.js';
 	import { page } from '$app/state';
 	import TierBadge from '#lib/components/ModelTable/field/TierBadge.svelte';
 	import { getToastStore } from '#lib/components/Toast/stores.js';
@@ -74,7 +75,7 @@
 				});
 				return;
 			}
-			await goto(body.redirect);
+			await gotoOrLoad(body.redirect);
 		} catch {
 			toastStore.trigger({ message: m.anErrorOccurred(), background: 'preset-filled-error-500' });
 		} finally {
@@ -125,7 +126,7 @@
 				return;
 			}
 			editing = false;
-			await invalidateAll();
+			await refreshAll();
 		} finally {
 			saving = false;
 		}

@@ -6,10 +6,10 @@ import type { RequestHandler } from './$types';
 // Accept: text/html — reach this handler instead of rendering the app page.
 export const GET: RequestHandler = async ({ fetch, url, locals }) => {
 	if (!(await locals.getFeatureFlags())?.document_management) {
-		error(403, { message: 'Document management feature is disabled' });
+		error(403, 'Document management feature is disabled');
 	}
 	const rev = url.searchParams.get('rev');
-	if (!rev) error(400, { message: 'Missing rev' });
+	if (!rev) error(400, 'Missing rev');
 	const res = await fetch(`${BASE_API_URL}/document-revisions/${rev}/file/`);
 	if (!res.ok) {
 		error(res.status, await res.text());

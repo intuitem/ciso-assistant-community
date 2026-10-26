@@ -1,5 +1,4 @@
 import { ALLAUTH_API_URL } from '#lib/utils/constants.js';
-import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ fetch }) => {
@@ -9,19 +8,22 @@ export const GET: RequestHandler = async ({ fetch }) => {
 	try {
 		response = await fetch(endpoint);
 	} catch {
-		return json({ error: 'Could not reach authentication server' }, { status: 502 });
+		return Response.json({ error: 'Could not reach authentication server' }, { status: 502 });
 	}
 
 	if (!response.ok) {
-		return json({ error: 'Could not get WebAuthn challenge' }, { status: response.status });
+		return Response.json(
+			{ error: 'Could not get WebAuthn challenge' },
+			{ status: response.status }
+		);
 	}
 
 	let data;
 	try {
 		data = await response.json();
 	} catch {
-		return json({ error: 'Invalid response from authentication server' }, { status: 502 });
+		return Response.json({ error: 'Invalid response from authentication server' }, { status: 502 });
 	}
 
-	return json(data);
+	return Response.json(data);
 };

@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import { goto as breadcrumbGoto } from '#lib/utils/breadcrumbs.js';
+	import { gotoOrLoad, goto as breadcrumbGoto } from '#lib/utils/breadcrumbs.js';
 	import { URL_MODEL_MAP } from '#lib/utils/crud.js';
 	import { deserialize } from '$app/forms';
 	import { openPortalExternal } from '#lib/utils/external-links.js';
@@ -82,7 +81,7 @@
 				if (result.data.resumed && result.data.ref_id) {
 					resumedRef = result.data.ref_id;
 				}
-				await goto(result.data.redirect);
+				await gotoOrLoad(result.data.redirect);
 			} else {
 				launchError = result.data?.error || m.assessmentLaunchFailed();
 			}

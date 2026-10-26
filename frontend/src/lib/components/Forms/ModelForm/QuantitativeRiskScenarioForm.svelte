@@ -12,7 +12,7 @@
 	import { ThreatModelSchema } from '#lib/utils/schemas.js';
 	import { defaults } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 
 	import Select from '../Select.svelte';
 	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
@@ -79,7 +79,7 @@
 			component: modalComponent,
 			title: safeTranslate('add-' + threatModelModel.localName),
 			response: (r: boolean) => {
-				if (r) invalidateAll();
+				if (r) refreshAll();
 			}
 		});
 	}

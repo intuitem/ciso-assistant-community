@@ -7,7 +7,7 @@
 	import LossExceedanceCurve from '#lib/components/Chart/LossExceedanceCurve.svelte';
 	import { Progress } from '@skeletonlabs/skeleton-svelte';
 	import { enhance } from '$app/forms';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import { run } from 'svelte/legacy';
 	import { getToastStore } from '#lib/components/Toast/stores.ts';
 	import { safeTranslate } from '#lib/utils/i18n.js';
@@ -26,7 +26,7 @@
 		if (form?.message?.simulationsComplete) {
 			// Add a small delay to ensure database transaction is committed
 			setTimeout(() => {
-				invalidateAll();
+				refreshAll();
 			}, 100);
 		}
 	});

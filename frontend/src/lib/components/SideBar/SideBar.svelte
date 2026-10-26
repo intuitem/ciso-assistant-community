@@ -10,7 +10,7 @@
 	import { driverInstance, tableHandlers, getStartedTrigger } from '#lib/utils/stores.js';
 	import { m } from '#paraglide/messages.js';
 
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import { page } from '$app/state';
 	import FirstLoginModal from '#lib/components/Modals/FirstLoginModal.svelte';
 	import { breadcrumbs, goto } from '#lib/utils/breadcrumbs.js';
@@ -282,7 +282,7 @@
 			breadcrumbAction: 'replace'
 		});
 
-		invalidateAll();
+		refreshAll();
 		Object.values($tableHandlers).forEach((handler) => {
 			handler.invalidate();
 		});

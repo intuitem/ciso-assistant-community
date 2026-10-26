@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { goto, invalidateAll, preloadData } from '$app/navigation';
+	import { goto, refreshAll, preloadData } from '$app/navigation';
 	import { page } from '$app/state';
 	import { deserialize } from '$app/forms';
 	import { getModalStore, type ModalStore } from '#lib/components/Modals/stores.js';
@@ -52,7 +52,7 @@
 				cloneBody?: { id?: string; error?: string; name?: string[]; version?: string[] };
 			} | null;
 			if (cloned?.cloneStatus === 201) {
-				await invalidateAll();
+				await refreshAll();
 				goto(`/entity-assessments/${cloned.cloneBody?.id}`);
 			} else {
 				const body = cloned?.cloneBody;

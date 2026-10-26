@@ -1,10 +1,11 @@
 import { BASE_API_URL } from '#lib/utils/constants.js';
-import { error, json } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { errorFromBody } from '#lib/utils/errors.js';
 
 async function assertFeatureEnabled(locals: App.Locals) {
 	if (!(await locals.getFeatureFlags())?.policy_documents) {
-		error(403, { message: 'Policy documents feature is disabled' });
+		error(403, 'Policy documents feature is disabled');
 	}
 }
 
@@ -16,12 +17,12 @@ export const POST: RequestHandler = async ({ fetch, request, url, locals }) => {
 	if (url.searchParams.get('_action') === 'upload-image') {
 		const documentId = url.searchParams.get('document_id');
 		if (!documentId) {
-			error(400, { message: 'Missing document_id' });
+			error(400, 'Missing document_id');
 		}
 		const incoming = await request.formData();
 		const file = incoming.get('file') as File | null;
 		if (!file) {
-			error(400, { message: 'Missing file' });
+			error(400, 'Missing file');
 		}
 		// Rebuild FormData with a concrete Blob so fetch serialises it correctly
 		const bytes = new Uint8Array(await file.arrayBuffer());
@@ -36,7 +37,7 @@ export const POST: RequestHandler = async ({ fetch, request, url, locals }) => {
 			const errorBody = await res.text();
 			error(res.status, errorBody);
 		}
-		return json(await res.json(), { status: res.status });
+		return Response.json(await res.json(), { status: res.status });
 	}
 
 	const body = await request.json();
@@ -88,7 +89,7 @@ export const POST: RequestHandler = async ({ fetch, request, url, locals }) => {
 			delete body.revision_id;
 			break;
 		default:
-			error(400, { message: 'Unknown action' });
+			error(400, 'Unknown action');
 	}
 
 	const res = await fetch(endpoint, {
@@ -98,10 +99,10 @@ export const POST: RequestHandler = async ({ fetch, request, url, locals }) => {
 	});
 
 	if (!res.ok) {
-		error(res.status, await res.json());
+		errorFromBody(res.status, await res.json());
 	}
 
-	return json(await res.json(), { status: res.status });
+	return Response.json(await res.json(), { status: res.status });
 };
 
 // Proxy GET requests for revisions, diffs, PDF export
@@ -112,7 +113,7 @@ export const GET: RequestHandler = async ({ fetch, url, params, locals }) => {
 
 	const req = (key: string): string => {
 		const value = url.searchParams.get(key);
-		if (!value) error(400, { message: `Missing ${key}` });
+		if (!value) error(400, `Missing ${key}`);
 		return value;
 	};
 
@@ -124,13 +125,13 @@ export const GET: RequestHandler = async ({ fetch, url, params, locals }) => {
 		case 'references': {
 			const containerId = req('container_id');
 			if (!UUID_RE.test(containerId)) {
-				error(400, { message: 'Invalid container_id' });
+				error(400, 'Invalid container_id');
 			}
 			const refRes = await fetch(`${BASE_API_URL}/document-containers/${containerId}/references/`);
 			if (!refRes.ok) {
-				error(refRes.status, await refRes.json());
+				errorFromBody(refRes.status, await refRes.json());
 			}
-			return json(await refRes.json());
+			return Response.json(await refRes.json());
 		}
 		case 'templates': {
 			const lang = url.searchParams.get('lang') || '';
@@ -141,20 +142,20 @@ export const GET: RequestHandler = async ({ fetch, url, params, locals }) => {
 			const templatesEndpoint = `${BASE_API_URL}/managed-documents/templates/${qp.toString() ? `?${qp}` : ''}`;
 			const templatesRes = await fetch(templatesEndpoint);
 			if (!templatesRes.ok) {
-				error(templatesRes.status, await templatesRes.json());
+				errorFromBody(templatesRes.status, await templatesRes.json());
 			}
-			return json(await templatesRes.json());
+			return Response.json(await templatesRes.json());
 		}
 		case 'documents-by-locale': {
 			const locale = req('locale');
 			const qp = new URLSearchParams({ container__policies: params.id, locale });
 			const docsRes = await fetch(`${BASE_API_URL}/managed-documents/?${qp}`);
 			if (!docsRes.ok) {
-				error(docsRes.status, await docsRes.json());
+				errorFromBody(docsRes.status, await docsRes.json());
 			}
 			const docsData = await docsRes.json();
 			const doc = docsData.results?.[0] || null;
-			return json(doc);
+			return Response.json(doc);
 		}
 		case 'revisions': {
 			const documentId = req('document');
@@ -223,14 +224,14 @@ export const GET: RequestHandler = async ({ fetch, url, params, locals }) => {
 			break;
 		}
 		default:
-			error(400, { message: 'Unknown action' });
+			error(400, 'Unknown action');
 	}
 
 	const res = await fetch(endpoint);
 	if (!res.ok) {
-		error(res.status, await res.json());
+		errorFromBody(res.status, await res.json());
 	}
-	return json(await res.json());
+	return Response.json(await res.json());
 };
 
 // Delete a document or revision
@@ -241,7 +242,7 @@ export const DELETE: RequestHandler = async ({ fetch, url, locals }) => {
 	const id = url.searchParams.get('id');
 
 	if (!type || !id) {
-		error(400, { message: 'Missing _type or id parameter' });
+		error(400, 'Missing _type or id parameter');
 	}
 
 	let endpoint: string;
@@ -253,7 +254,7 @@ export const DELETE: RequestHandler = async ({ fetch, url, locals }) => {
 			endpoint = `${BASE_API_URL}/document-revisions/${id}/`;
 			break;
 		default:
-			error(400, { message: 'Unknown type' });
+			error(400, 'Unknown type');
 	}
 
 	const res = await fetch(endpoint, { method: 'DELETE' });

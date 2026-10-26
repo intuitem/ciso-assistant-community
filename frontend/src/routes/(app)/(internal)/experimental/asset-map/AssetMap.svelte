@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { setContext, tick, untrack } from 'svelte';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import {
 		SvelteFlow,
 		useSvelteFlow,
@@ -235,7 +235,7 @@
 		if (ok) {
 			edges = edges.filter((e) => !(e.source === source && e.target === target));
 			toastStore.trigger({ message: 'Link removed', background: 'preset-tonal-success' });
-			void invalidateAll();
+			void refreshAll();
 		}
 	}
 

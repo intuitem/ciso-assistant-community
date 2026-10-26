@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import { page } from '$app/state';
 	import { getLocale } from '#paraglide/runtime.js';
 	import { formatDate } from '#lib/utils/datetime.js';
@@ -131,7 +131,7 @@
 	}
 
 	// Polling override layers — when the client polls, we override server-side
-	// load data without losing the ability to react to invalidateAll().
+	// load data without losing the ability to react to refreshAll().
 	let polledRun = $state<Run | null>(null);
 	let polledAgentRun = $state<AgentRunState | null>(null);
 	let polledActions = $state<AgentAction[] | null>(null);
@@ -216,7 +216,7 @@
 				stopPoll();
 				// Sync the freshly-completed run into the page-server load so
 				// reloads don't re-fetch and so further polls see consistent state.
-				await invalidateAll();
+				await refreshAll();
 				polledRun = null;
 				polledAgentRun = null;
 				polledActions = null;
@@ -306,7 +306,7 @@
 			toast.trigger({
 				message: `Mapping saved · extracted ${extractResult.extracted} questions.`
 			});
-			await invalidateAll();
+			await refreshAll();
 		} finally {
 			saving = false;
 		}
@@ -324,7 +324,7 @@
 				return;
 			}
 			toast.trigger({ message: `Extracted ${result.extracted} questions.` });
-			await invalidateAll();
+			await refreshAll();
 		} finally {
 			extractBusy = false;
 		}
@@ -352,7 +352,7 @@
 			polledRun = null;
 			polledAgentRun = null;
 			polledActions = null;
-			await invalidateAll();
+			await refreshAll();
 		} finally {
 			startBusy = false;
 		}
@@ -531,7 +531,7 @@
 		if (agentRun) {
 			await refreshAgentRun();
 		}
-		await invalidateAll();
+		await refreshAll();
 	}
 
 	async function cancelRun() {

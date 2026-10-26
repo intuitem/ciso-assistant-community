@@ -27,7 +27,7 @@
 		type ModalStore
 	} from '#lib/components/Modals/stores.js';
 	import { getToastStore } from '#lib/components/Toast/stores.js';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 
 	interface Props {
 		data: PageData;
@@ -106,7 +106,7 @@
 				// frees once the new rows are on screen.
 				const refresh = $tableRefreshers[`/${model}`];
 				if (refresh) await refresh().catch(() => {});
-				else await invalidateAll().catch(() => {});
+				else await refreshAll().catch(() => {});
 			}
 		} catch {
 			toastStore.trigger({ message: failed(), preset: 'error' });

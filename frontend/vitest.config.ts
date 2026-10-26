@@ -16,6 +16,7 @@ export default defineConfig({
 			'$app/env/public': path.resolve(__dirname, 'vitest-mocks/app-env-public.ts'),
 			'$app/env': path.resolve(__dirname, 'vitest-mocks/app-env.ts'),
 			'$app/navigation': path.resolve(__dirname, 'vitest-mocks/app-navigation.ts'),
+			'$app/paths': path.resolve(__dirname, 'vitest-mocks/app-paths.ts'),
 			'$app/forms': path.resolve(__dirname, 'vitest-mocks/app-forms.ts'),
 			'$app/state': path.resolve(__dirname, 'vitest-mocks/app-state.ts')
 		}

@@ -33,7 +33,13 @@
 					{/each}
 				</div>
 				<span class="flex flex-row space-x-2 justify-end">
-					<form method="POST" action="?/regenerateRecoveryCodes" use:enhance={() => ({ update }) => update({ navigate: false })}>
+					<form
+						method="POST"
+						action="?/regenerateRecoveryCodes"
+						use:enhance={() =>
+							({ update }) =>
+								update({ navigate: false })}
+					>
 						<input type="hidden" name="regenerate" value="1" />
 						<button type="submit" class="btn px-2 py-1 {parent?.buttonNeutral ?? ''}"
 							><i class="fa-solid fa-sync mr-2"></i>{m.regenerateRecoveryCodes()}</button

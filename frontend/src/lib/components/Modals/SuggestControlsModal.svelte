@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { getModalStore, type ModalStore } from './stores';
 	import { m } from '#paraglide/messages.js';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import { getFlash } from 'sveltekit-flash-message';
 	import { page } from '$app/state';
 
@@ -74,7 +74,7 @@
 					$modalStore[0].response?.(newControlIds);
 				}
 				modalStore.close();
-				await invalidateAll();
+				await refreshAll();
 			} else {
 				flash.set({
 					type: 'error',

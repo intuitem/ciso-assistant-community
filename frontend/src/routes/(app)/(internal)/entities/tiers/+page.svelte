@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { deserialize } from '$app/forms';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import { page } from '$app/state';
 	import TierBadge from '#lib/components/ModelTable/field/TierBadge.svelte';
 	import { getModalStore, type ModalSettings } from '#lib/components/Modals/stores.js';
@@ -104,7 +104,7 @@
 			}
 			return true;
 		} finally {
-			await invalidateAll();
+			await refreshAll();
 			busy = false;
 		}
 	}

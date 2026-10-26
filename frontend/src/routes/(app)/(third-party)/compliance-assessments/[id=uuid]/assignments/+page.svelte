@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import { applyAction, deserialize } from '$app/forms';
 	import { setContext } from 'svelte';
 	import { writable } from 'svelte/store';
@@ -367,7 +367,7 @@
 				$checkedNodesStore = new Set();
 				// Apply the action result and refresh page data
 				await applyAction(result);
-				await invalidateAll();
+				await refreshAll();
 				toastStore.trigger({
 					message: m.assignmentCreated(),
 					background: 'preset-filled-success-500',
@@ -420,7 +420,7 @@
 			if (result.type === 'success' && result.data?.status === 204) {
 				// Apply the action result and refresh page data
 				await applyAction(result);
-				await invalidateAll();
+				await refreshAll();
 				toastStore.trigger({
 					message: m.assignmentDeleted(),
 					background: 'preset-filled-success-500',
@@ -485,7 +485,7 @@
 				// Reset edit state
 				cancelEdit();
 				await applyAction(result);
-				await invalidateAll();
+				await refreshAll();
 				toastStore.trigger({
 					message: m.assignmentUpdated(),
 					background: 'preset-filled-success-500',
@@ -625,7 +625,7 @@
 			const result = deserialize(await response.text());
 			if (result.type === 'success' && result.data?.status === 200) {
 				await applyAction(result);
-				await invalidateAll();
+				await refreshAll();
 				toastStore.trigger({
 					message: m.statusUpdatedSuccessfully(),
 					background: 'preset-filled-success-500',

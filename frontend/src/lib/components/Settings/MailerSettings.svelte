@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import { getToastStore } from '#lib/components/Toast/stores.js';
 	import { m } from '#paraglide/messages.js';
 	import { Switch } from '@skeletonlabs/skeleton-svelte';
@@ -197,7 +197,7 @@
 			}
 			testResult = body;
 			testToken = body.ok ? (body.test_token ?? null) : null;
-			await invalidateAll();
+			await refreshAll();
 		} catch (error) {
 			testResult = { ok: false, error: String(error), results: [] };
 			testToken = null;
@@ -226,7 +226,7 @@
 			testToken = null;
 			testResult = null;
 			override = false;
-			await invalidateAll();
+			await refreshAll();
 			mailers = body.mailers?.length ? body.mailers.map(fromApi) : [emptyMailer(1)];
 			lastTestedAt = body.last_tested_at ?? null;
 		} catch (error) {

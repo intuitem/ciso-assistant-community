@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { setContext, tick, untrack } from 'svelte';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import {
 		SvelteFlow,
 		useSvelteFlow,
@@ -331,7 +331,7 @@
 						void updateParents(newAssetId, (parents) =>
 							Array.from(new Set([...parents, parentToWire]))
 						).then((ok) => {
-							if (ok) invalidateAll();
+							if (ok) refreshAll();
 						});
 					}
 				}
@@ -399,7 +399,7 @@
 			);
 		} else {
 			toastStore.trigger({ message: 'Link saved', background: 'preset-tonal-success' });
-			void invalidateAll();
+			void refreshAll();
 		}
 	}
 
@@ -414,7 +414,7 @@
 			const ok = await updateParents(childId, (parents) =>
 				parents.filter((p) => !removedSources.has(p))
 			);
-			if (ok) void invalidateAll();
+			if (ok) void refreshAll();
 			if (!ok) {
 				// Re-add removed edges to local state. `type: 'asset'` is required —
 				// defaultEdgeOptions only applies to edges created via onConnect, not to
@@ -537,7 +537,7 @@
 				message: `Type set to ${nextType === 'PR' ? 'Primary' : 'Support'}`,
 				background: 'preset-tonal-success'
 			});
-			void invalidateAll();
+			void refreshAll();
 			return true;
 		} catch {
 			toastStore.trigger({
@@ -567,7 +567,7 @@
 			// Locally update the visible label so the change shows immediately,
 			// then re-fetch to keep the server state authoritative.
 			nodes = nodes.map((n) => (n.id === assetId ? { ...n, data: { ...n.data, label: name } } : n));
-			void invalidateAll();
+			void refreshAll();
 			return true;
 		} catch {
 			toastStore.trigger({
@@ -608,7 +608,7 @@
 			if (ok) {
 				edges = edges.filter((e) => !(e.source === source && e.target === target));
 				toastStore.trigger({ message: 'Link removed', background: 'preset-tonal-success' });
-				void invalidateAll();
+				void refreshAll();
 			}
 		}
 	});

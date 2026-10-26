@@ -2,6 +2,7 @@ import { BASE_API_URL, UUID_LIST_REGEX } from '#lib/utils/constants.js';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { m } from '#paraglide/messages.js';
+import { errorFromBody } from '#lib/utils/errors.js';
 
 export const load: PageServerLoad = async ({ fetch, url }) => {
 	const params = url.searchParams;
@@ -21,7 +22,7 @@ export const load: PageServerLoad = async ({ fetch, url }) => {
 	const resp = await req.json();
 
 	if (resp.error) {
-		error(req.status, resp.error);
+		errorFromBody(req.status, resp.error);
 	}
 
 	return { ...resp.result, title: m.composer() };

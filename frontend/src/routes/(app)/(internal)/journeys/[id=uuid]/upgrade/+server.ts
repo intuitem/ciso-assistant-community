@@ -1,5 +1,4 @@
 import { BASE_API_URL } from '#lib/utils/constants.js';
-import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ params, fetch }) => {
@@ -11,8 +10,8 @@ export const POST: RequestHandler = async ({ params, fetch }) => {
 	const data = await response.json().catch(() => ({}));
 
 	if (!response.ok) {
-		return json(data, { status: response.status });
+		return Response.json(data, { status: response.status });
 	}
 
-	return json(data);
+	return Response.json(data);
 };

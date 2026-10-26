@@ -2,7 +2,7 @@
 // matrix) that bypass form actions for fast JSON mutations. One implementation
 // of the request/response plumbing; each route keeps its own thin wrapper and
 // UUID error shape.
-import { json, error } from '@sveltejs/kit';
+import { errorFromBody } from '#lib/utils/errors.js';
 
 export const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -26,8 +26,8 @@ export async function proxyJson(
 	if (res.status === 204) return new Response(null, { status: 204 });
 	const data = await res.json().catch(() => ({}));
 	if (!res.ok) {
-		if (passThrough400 && res.status === 400) return json(data, { status: 400 });
-		error(res.status, data);
+		if (passThrough400 && res.status === 400) return Response.json(data, { status: 400 });
+		errorFromBody(res.status, data);
 	}
-	return json(data, { status: res.status });
+	return Response.json(data, { status: res.status });
 }

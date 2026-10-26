@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { m } from '#paraglide/messages.js';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import { page } from '$app/state';
 	import { isDark } from '#lib/utils/helpers.js';
 	import { getToastStore } from '#lib/components/Toast/stores.js';
@@ -69,7 +69,7 @@
 				headers: { 'Content-Type': 'application/json' },
 				body: body ? JSON.stringify(body) : undefined
 			});
-			if (res.ok) await invalidateAll();
+			if (res.ok) await refreshAll();
 			else {
 				const d = await res.json().catch(() => null);
 				notifyError(d?.detail || d?.error || d?.abbreviation || m.error());
@@ -135,10 +135,10 @@
 				})
 			]);
 			if (results.some((r) => !r.ok)) notifyError(m.error());
-			await invalidateAll();
+			await refreshAll();
 		} catch {
 			notifyError(m.error());
-			await invalidateAll();
+			await refreshAll();
 		} finally {
 			busy = false;
 		}

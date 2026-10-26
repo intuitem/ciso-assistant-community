@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { m } from '#paraglide/messages.js';
-	import { invalidateAll, goto } from '$app/navigation';
+	import { refreshAll, goto } from '$app/navigation';
 	import { LOCALE_MAP } from '#lib/utils/locales.js';
 	import {
 		APPROVED_REVISION_STATUSES,
@@ -103,7 +103,7 @@
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify(body)
 			});
-			if (res.ok) await invalidateAll();
+			if (res.ok) await refreshAll();
 			else {
 				const data = await res.json().catch(() => null);
 				notifyError(data?.detail || data?.error || m.error());
@@ -125,7 +125,7 @@
 				method: 'POST',
 				body: fd
 			});
-			if (res.ok) await invalidateAll();
+			if (res.ok) await refreshAll();
 			else notifyError(m.uploadFailed());
 		} finally {
 			busy = false;
@@ -135,7 +135,7 @@
 
 	function switchLocale(loc: string) {
 		if (loc === currentLocale) return;
-		goto(`${proxyBase}?locale=${loc}`, { invalidateAll: true });
+		goto(`${proxyBase}?locale=${loc}`, { refreshAll: true });
 	}
 
 	function startAddLang() {
@@ -164,7 +164,7 @@
 				return;
 			}
 			addingLang = false;
-			await goto(`${proxyBase}?locale=${newLocale}`, { invalidateAll: true });
+			await goto(`${proxyBase}?locale=${newLocale}`, { refreshAll: true });
 		} finally {
 			busy = false;
 		}

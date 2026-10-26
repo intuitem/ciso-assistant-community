@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { gotoOrLoad } from '#lib/utils/breadcrumbs.js';
 	import { deserialize } from '$app/forms';
 	import { onDestroy } from 'svelte';
 	import { m } from '#paraglide/messages.js';
@@ -63,7 +63,7 @@
 			const result: any = deserialize(await res.text());
 			if (result.type === 'success' && result.data?.redirect) {
 				modalStore.close();
-				await goto(result.data.redirect);
+				await gotoOrLoad(result.data.redirect);
 			} else {
 				error = result.data?.error || m.assessmentLaunchFailed();
 			}
