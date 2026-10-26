@@ -20259,6 +20259,13 @@ class ClassificationLevelViewSet(BaseModelViewSet):
     ordering = ["object_classification", "rank"]
 
 
+# An evidence counts once a revision carries a file or a link, the line the
+# `evidenceNoFile` quality check already draws.
+USABLE_EVIDENCE_REVISION = (Q(attachment__isnull=False) & ~Q(attachment="")) | (
+    Q(link__isnull=False) & ~Q(link="")
+)
+
+
 class RequirementAssignmentViewSet(BaseModelViewSet):
     """
     API endpoint that allows requirement assignments to be viewed or edited.
@@ -20356,7 +20363,7 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
     # reviewer_only: respondents are forbidden
     # actor_only: only assigned actors can perform this transition
     # check_evidence: every visible requirement flagged `evidence_required` must
-    #                 carry at least one evidence
+    #                 carry an evidence holding a file or a link
     # observation: "clear" removes it, "optional" keeps if provided, "required" must be provided
     TRANSITIONS = {
         ("draft", "in_progress"): {"reviewer_only": True},
@@ -20495,10 +20502,12 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
 
     @staticmethod
     def _requirements_missing_evidence(assignment):
-        """Assigned requirements that ask for an evidence and carry none.
+        """Assigned requirements that ask for an evidence and hold none.
 
-        A requirement hidden by its visibility expression is not part of the
-        questionnaire, so it cannot hold the submission.
+        An evidence with no file and no link is an empty shell, so it does not
+        satisfy the obligation. A requirement hidden by its visibility
+        expression is not part of the questionnaire, so it cannot hold the
+        submission.
         """
         from core.cel_service import build_cel_context
 
@@ -20508,8 +20517,13 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
                 requirement__evidence_required=True,
             )
             .select_related("requirement")
-            .annotate(evidence_count=Count("evidences"))
-            .filter(evidence_count=0)
+            .exclude(
+                Exists(
+                    EvidenceRevision.objects.filter(
+                        evidence__requirement_assessments=OuterRef("pk")
+                    ).filter(USABLE_EVIDENCE_REVISION)
+                )
+            )
         )
         if not candidates:
             return []
@@ -20626,6 +20640,17 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
             total_visible_questions += visible
             total_answered_questions += answered
 
+        # Same verdict the submission check applies, so the respondent cannot be
+        # shown a satisfied requirement that submission then refuses.
+        ra_ids_with_usable_evidence = {
+            str(ra_id)
+            for ra_id in EvidenceRevision.objects.filter(
+                evidence__requirement_assessments__in=assigned_ra_ids
+            )
+            .filter(USABLE_EVIDENCE_REVISION)
+            .values_list("evidence__requirement_assessments", flat=True)
+        }
+
         for ra_data in requirement_assessments:
             ra_id = str(ra_data["id"])
             if ra_id in question_counts:
@@ -20635,6 +20660,7 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
                 ra_data["answered_questions"] = question_counts[ra_id][
                     "answered_questions"
                 ]
+            ra_data["has_usable_evidence"] = ra_id in ra_ids_with_usable_evidence
 
         return Response(
             {

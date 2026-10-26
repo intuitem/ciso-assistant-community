@@ -311,14 +311,19 @@
 		return requirement.display_short || requirement.ref_id || requirement.name || requirement.urn;
 	}
 
-	// Requirements the framework asks an evidence for, still empty. Hidden ones are
-	// already out of `requirementAssessments`: the API filters them.
+	// An evidence with no file and no link is an empty shell; the API decides and
+	// says so in `has_usable_evidence`, so this view cannot drift from it.
+	function owesEvidence(requirementAssessment: Record<string, any>): boolean {
+		if (!requirementOf(requirementAssessment).evidence_required) return false;
+		return !requirementAssessment.has_usable_evidence;
+	}
+
+	// Hidden requirements are already out of `requirementAssessments`: the API filters them.
 	let missingEvidence = $derived(
-		requirementAssessments.filter((requirementAssessment) => {
-			if (!requirementAssessment.assessable) return false;
-			if (!requirementOf(requirementAssessment).evidence_required) return false;
-			return (requirementAssessment.evidences ?? []).length === 0;
-		})
+		requirementAssessments.filter(
+			(requirementAssessment) =>
+				requirementAssessment.assessable && owesEvidence(requirementAssessment)
+		)
 	);
 
 	// --- Navigation items: assessable items + splash screen nodes + section headers ---
@@ -1742,7 +1747,7 @@
 												{/if}
 												{#if requirement.evidence_required}
 													<span
-														class="badge {(requirementAssessment.evidences ?? []).length === 0
+														class="badge {owesEvidence(requirementAssessment)
 															? 'preset-tonal-error'
 															: 'preset-tonal-success'}"
 														data-testid="evidence-required-badge"
@@ -1766,7 +1771,7 @@
 											>
 										</Accordion.ItemTrigger>
 										<Accordion.ItemContent>
-											{#if requirement.evidence_required && (requirementAssessment.evidences ?? []).length === 0}
+											{#if owesEvidence(requirementAssessment)}
 												<div class="rounded-md px-3 py-2 mb-2 text-sm preset-tonal-error">
 													<i class="fa-solid fa-triangle-exclamation mr-2"
 													></i>{m.evidenceRequiredBlocksSubmission()}
