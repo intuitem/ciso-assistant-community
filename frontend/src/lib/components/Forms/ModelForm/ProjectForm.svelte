@@ -42,6 +42,7 @@
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="actors?user__is_third_party=False"
+	lazy
 	optionsLabelField="str"
 	field="owner"
 	cacheLock={cacheLocks['owner']}

@@ -840,6 +840,7 @@
 							<AutocompleteSelect
 								form={assignmentSuperForm}
 								optionsEndpoint="actors"
+								lazy
 								optionsDetailedUrlParameters={[['include_third_parties', 'true']]}
 								optionsLabelField="str"
 								optionsInfoFields={{

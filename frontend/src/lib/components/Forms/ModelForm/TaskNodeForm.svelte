@@ -48,6 +48,7 @@
 	disabled
 	{form}
 	optionsEndpoint="evidences"
+	lazy
 	optionsExtraFields={[['folder', 'str']]}
 	helpText={m.taskNodeLegacyEvidence()}
 	optionsLabelField="auto"

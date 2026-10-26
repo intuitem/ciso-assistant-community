@@ -104,6 +104,7 @@
 		{form}
 		multiple
 		optionsEndpoint="evidences"
+		lazy
 		optionsExtraFields={[['folder', 'str']]}
 		optionsLabelField="auto"
 		field="documents"
@@ -242,6 +243,7 @@
 			{form}
 			multiple
 			optionsEndpoint="evidences"
+			lazy
 			optionsExtraFields={[['folder', 'str']]}
 			optionsLabelField="auto"
 			field="documents"

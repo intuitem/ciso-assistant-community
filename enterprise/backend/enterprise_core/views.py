@@ -75,7 +75,7 @@ from .template_registry import (
     WORD_TEMPLATE_REGISTRY,
     DOC_HTML_TEMPLATE_REGISTRY,
 )
-from .license import effective_expiration
+from .license import effective_expiration, get_editors, seat_limit_reachable
 
 from auditlog.models import LogEntry
 
@@ -385,19 +385,24 @@ class RoleViewSet(BaseModelViewSet):
         Update the user groups associated with the role.
         """
         with transaction.atomic():
-            editors_before = len(User.get_editors())
+            # A role edit changes no user count: when the limit is out of reach
+            # before, it stays so after, and both editor scans can be skipped.
+            check_seats = seat_limit_reachable(settings.LICENSE_SEATS)
+            if check_seats:
+                editors_before = get_editors().count()
 
             role = serializer.save()
             self._ensure_default_permissions(role)
 
-            editors_after = len(User.get_editors())
-            if (
-                editors_after > editors_before
-                and editors_after > settings.LICENSE_SEATS
-            ):
-                raise serializers.ValidationError(
-                    {"permissions": "errorLicenseSeatsExceeded"}
-                )
+            if check_seats:
+                editors_after = get_editors().count()
+                if (
+                    editors_after > editors_before
+                    and editors_after > settings.LICENSE_SEATS
+                ):
+                    raise serializers.ValidationError(
+                        {"permissions": "errorLicenseSeatsExceeded"}
+                    )
 
             ug_ids = (
                 RoleAssignment.objects.filter(
@@ -512,7 +517,7 @@ def get_build(request):
             "build": BUILD,
             "infrastructure": database_type,
             "licenseSeats": LICENSE_SEATS,
-            "availableSeats": LICENSE_SEATS - len(User.get_editors()),
+            "availableSeats": LICENSE_SEATS - get_editors().count(),
             "licenseExpiration": license_expiration,
             **disk_response,
         }
