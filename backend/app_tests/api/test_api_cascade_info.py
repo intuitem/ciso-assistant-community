@@ -29,7 +29,7 @@ def target_folder(app_ready):
     return folder
 
 
-def _scoped_client(email, role_name, folder, app_ready):
+def _scoped_client(email, role_name, folder, app_ready, is_recursive=True):
     user = User.objects.create_user(email)
     user.folder = app_ready
     user.save()
@@ -39,7 +39,7 @@ def _scoped_client(email, role_name, folder, app_ready):
         user_group=group,
         role=Role.objects.get(name=role_name),
         folder=folder,
-        is_recursive=True,
+        is_recursive=is_recursive,
     )
     assignment.perimeter_folders.add(folder)
     return _client(user)
@@ -322,32 +322,72 @@ def test_sub_domains_are_grouped_as_domains_and_enclaves_are_left_out(
     assert {o["name"] for o in group["objects"]} == {"SUB-DOMAIN", "SUB-SUB-DOMAIN"}
 
 
-def test_batch_preview_names_the_selected_domains_that_block_the_delete(
+def test_batch_preview_needs_the_change_permission_not_the_delete_one(
+    app_ready: Folder, domain_tree: dict[str, Folder]
+) -> None:
+    from django.contrib.auth.models import Permission
+
+    mover = Role.objects.create(name="MOVER", folder=app_ready)
+    mover.permissions.set(
+        Permission.objects.filter(
+            codename__in=["view_folder", "change_folder", "view_asset"]
+        )
+    )
+    client = _scoped_client(
+        "mover@cascade.test", "MOVER", domain_tree["target"], app_ready
+    )
+
+    res = client.post(BATCH_URL, {"ids": [str(domain_tree["sub"].id)]}, format="json")
+
+    assert res.status_code == 200, res.content
+    assert "SUB-SUB-ASSET" in _bucket_names(res.json()["deleted"])
+
+
+def test_batch_preview_leaves_out_what_stays_in_other_domains(
     admin_client: APIClient, app_ready: Folder, target_folder: Folder
 ) -> None:
-    from core.models import Campaign, ComplianceAssessment
+    from core.models import AppliedControl, ReferenceControl
 
-    free = Folder.objects.create(
-        name="FREE-DOMAIN",
-        parent_folder=app_ready,
-        content_type=Folder.ContentType.DOMAIN,
-    )
     elsewhere = Folder.objects.create(
         name="ELSEWHERE",
         parent_folder=app_ready,
         content_type=Folder.ContentType.DOMAIN,
     )
-    campaign = Campaign.objects.create(name="CAMPAIGN", folder=target_folder)
-    ea = _entity_assessment_with_audit(elsewhere, enclave=False)
-    audit = ComplianceAssessment.objects.get(pk=ea.compliance_assessment_id)
-    audit.campaign = campaign
-    audit.save()
+    reference = ReferenceControl.objects.create(
+        name="LOCAL-REFERENCE", folder=target_folder
+    )
+    AppliedControl.objects.create(
+        name="FOREIGN-CONTROL", folder=elsewhere, reference_control=reference
+    )
 
-    res = admin_client.post(
-        BATCH_URL, {"ids": [str(target_folder.id), str(free.id)]}, format="json"
+    res = admin_client.post(BATCH_URL, {"ids": [str(target_folder.id)]}, format="json")
+
+    assert res.status_code == 200, res.content
+    carried = _bucket_names(res.json()["deleted"])
+    assert "LOCAL-REFERENCE" in carried
+    assert "FOREIGN-CONTROL" not in carried
+
+
+def test_batch_preview_only_names_what_the_caller_may_view(
+    app_ready: Folder, domain_tree: dict[str, Folder]
+) -> None:
+    """A non-recursive role grants nothing on the sub-domains: their names and
+    content stay hidden, but the preview still says that something moves along."""
+    client = _scoped_client(
+        "non-recursive@cascade.test",
+        "BI-RL-DMA",
+        domain_tree["target"],
+        app_ready,
+        is_recursive=False,
+    )
+
+    res = client.post(
+        BATCH_URL, {"ids": [str(domain_tree["target"].id)]}, format="json"
     )
 
     assert res.status_code == 200, res.content
-    assert res.json()["blocked_subjects"] == [
-        {"id": str(target_folder.id), "name": "Target"}
-    ]
+    deleted = res.json()["deleted"]
+    names = _bucket_names(deleted)
+    assert "CANARY-ASSET" in names
+    assert not {"SUB-DOMAIN", "SUB-SUB-DOMAIN", "SUB-ASSET", "SUB-SUB-ASSET"} & names
+    assert deleted["hidden_count"] == 4

@@ -11,6 +11,7 @@ export const folderBatchActions: BatchActionConfig[] = [
 		icon: 'fa-solid fa-folder-tree',
 		field: 'parent_folder',
 		optionsEndpoint: 'folders?content_type=DO&content_type=GL',
-		excludeSelectedSubtree: true
+		excludeSelectedSubtree: true,
+		movePreview: true
 	}
 ];

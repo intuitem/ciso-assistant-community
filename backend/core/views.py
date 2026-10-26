@@ -1982,16 +1982,6 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
                 )
                 continue
 
-            # `objects_by_id` is a snapshot: an earlier id in this batch may have
-            # cascaded onto this row. The permission lookup below would then resolve
-            # against nothing and report a denial the caller never hit.
-            if (
-                action_type == "delete"
-                and not self.model.objects.filter(pk=obj.pk).exists()
-            ):
-                succeeded.append({"id": str(obj_id), "name": str(obj)})
-                continue
-
             if not RoleAssignment.is_access_allowed(
                 user=request.user,
                 perm=required_perm,
@@ -2107,51 +2097,26 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
         # as respondent or auditee hold view_folder without view_user/view_asset.
         if not RoleAssignment.is_access_allowed(
             user=request.user,
-            perm=self._delete_permission(),
+            perm=Permission.objects.get(
+                codename=f"delete_{self.model._meta.model_name}"
+            ),
             folder=Folder.get_folder(instance),
         ):
             return Response(status=status.HTTP_403_FORBIDDEN)
 
         return Response(self._cascade_preview([instance], request.user))
 
-    @action(detail=False, methods=["post"], url_path="batch-cascade-info")
-    def batch_cascade_info(self, request: Request) -> Response:
-        """Cascade preview of a batch delete, in the `cascade_info` format.
-
-        Covers the listed objects the caller may delete, collected in one pass so a
-        subtree shared by two of them is reported once. 403 if none is deletable.
-        """
-        ids = request.data.get("ids")
-        if not isinstance(ids, list) or not ids:
-            return Response(
-                {"error": "No ids provided"}, status=status.HTTP_400_BAD_REQUEST
-            )
-        if len(ids) > BATCH_SIZE_LIMIT:
-            return Response(
-                {"error": "too many ids", "max": BATCH_SIZE_LIMIT},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        perm = self._delete_permission()
-        subjects = [
-            obj
-            for obj in self.get_queryset().filter(id__in=ids)
-            if RoleAssignment.is_access_allowed(
-                user=request.user, perm=perm, folder=Folder.get_folder(obj)
-            )
-        ]
-        if not subjects:
-            return Response(status=status.HTTP_403_FORBIDDEN)
-
-        return Response(self._cascade_preview(subjects, request.user))
-
-    def _delete_permission(self) -> Permission:
-        return Permission.objects.get(codename=f"delete_{self.model._meta.model_name}")
-
-    def _cascade_preview(self, subjects: list, user: User) -> dict:
+    def _cascade_preview(
+        self, subjects: list[models.Model], user: User, carried_only: bool = False
+    ) -> dict:
         """Deleted, affected and blocked buckets for deleting `subjects` together.
 
-        Callers check the delete permission on each subject beforehand.
+        Objects lie in domains the user may not view when a role is not recursive;
+        each bucket names only the viewable ones and counts the rest in
+        `hidden_count`. With `carried_only`, the deleted bucket keeps only what is filed under the
+        subjects, which is what moving them carries along: deleting them also
+        cascades onto objects of other domains, which a move leaves in place.
+        Callers check their own permission on each subject beforehand.
         """
         using = router.db_for_write(subjects[0])
         collector = NestedObjects(using=using)
@@ -2163,12 +2128,14 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
         # it most destroys.
         show_deleted_folders = any(isinstance(s, Folder) for s in subjects)
 
+        subject_folder_ids = set()
         in_scope_folder_ids = set()
         for subject in subjects:
             scope_folder = (
                 subject if isinstance(subject, Folder) else Folder.get_folder(subject)
             )
             if scope_folder is not None:
+                subject_folder_ids.add(str(scope_folder.id))
                 in_scope_folder_ids |= {str(scope_folder.id)} | {
                     str(f.id) for f in scope_folder.get_sub_folders()
                 }
@@ -2181,7 +2148,11 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
             if folder is None:
                 return True
             folder_id = str(folder.id)
-            return folder_id in in_scope_folder_ids or folder_id in viewable_folder_ids
+            return folder_id in subject_folder_ids or folder_id in viewable_folder_ids
+
+        def is_outside_subjects(obj):
+            folder = Folder.get_folder(obj)
+            return folder is not None and str(folder.id) not in in_scope_folder_ids
 
         skip_model_names = {
             "Token",
@@ -2237,12 +2208,15 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
                 show_deleted_folders and model is Folder and bucket is deleted_bucket
             ):
                 return
-            if not is_visible(obj):
+            if carried_only and bucket is deleted_bucket and is_outside_subjects(obj):
                 return
             if model is Folder and obj.content_type != Folder.ContentType.DOMAIN:
                 return
             key = model.__name__
             pk = str(getattr(obj, "pk", "")) or ""
+            if not is_visible(obj):
+                bucket["_hidden"].add((key, pk))
+                return
             if (key, pk) in bucket["_seen"]:
                 return
 
@@ -2282,9 +2256,9 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
             count = sum(len(g["objects"]) for g in groups)
             return groups, count
 
-        deleted_bucket = {"by_model": {}, "_seen": set()}
-        affected_bucket = {"by_model": {}, "_seen": set()}
-        blocked_bucket = {"by_model": {}, "_seen": set()}
+        deleted_bucket = {"by_model": {}, "_seen": set(), "_hidden": set()}
+        affected_bucket = {"by_model": {}, "_seen": set(), "_hidden": set()}
+        blocked_bucket = {"by_model": {}, "_seen": set(), "_hidden": set()}
 
         # Cleared before the cascade (see cascade_preclear), so gone by the
         # time the PROTECT would be evaluated.
@@ -2301,14 +2275,12 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
 
         # 0) PROTECT/RESTRICT references: NestedObjects.collect() swallows the
         # ProtectedError and parks the blockers here.
-        visible_blockers = []
         for obj in getattr(collector, "protected", ()):
-            if is_hidden_model(type(obj)) or not is_visible(obj):
+            if is_hidden_model(type(obj)):
                 continue
             if (type(obj).__name__, str(getattr(obj, "pk", ""))) in precleared_index:
                 continue
             add_grouped(blocked_bucket, obj)
-            visible_blockers.append(obj)
 
         # 1) Concrete deletions
         through_rows = []
@@ -2452,6 +2424,7 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
         payload = {
             "deleted": {
                 "count": deleted_count,
+                "hidden_count": len(deleted_bucket["_hidden"]),
                 "grouped_objects": deleted_groups,
                 "related_objects": flatten(deleted_groups),
                 "message": "The following objects will be permanently deleted.",
@@ -2459,6 +2432,7 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
             },
             "affected": {
                 "count": affected_count,
+                "hidden_count": len(affected_bucket["_hidden"]),
                 "grouped_objects": affected_groups,
                 "related_objects": flatten(affected_groups),
                 "message": "These objects will NOT be deleted but will lose one or more relationships.",
@@ -2466,57 +2440,14 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
             },
             "blocked": {
                 "count": blocked_count,
+                "hidden_count": len(blocked_bucket["_hidden"]),
                 "grouped_objects": blocked_groups,
                 "related_objects": flatten(blocked_groups),
                 "message": "Deletion is blocked while these objects still reference this one.",
                 "level": "error",
             },
-            "blocked_subjects": self._blocked_subjects(
-                subjects, collector, visible_blockers
-            ),
         }
         return payload
-
-    @staticmethod
-    def _blocked_subjects(
-        subjects: list[models.Model],
-        collector: NestedObjects,
-        blockers: list[models.Model],
-    ) -> list[dict[str, str]]:
-        """Return the subjects, as `{id, name}`, whose deletion a blocker prevents.
-
-        Each blocker protects an object of the cascade; following the cascade back
-        to its root tells which selected subject to deselect for the rest to go.
-        """
-        parent_of = {
-            child: source
-            for source, children in collector.edges.items()
-            for child in children
-        }
-        collected = {
-            str(obj.pk): obj for objs in collector.model_objs.values() for obj in objs
-        }
-        blocked_ids = set()
-        for blocker in blockers:
-            for field in blocker._meta.concrete_fields:
-                remote = field.remote_field
-                if remote is None or remote.on_delete not in [
-                    models.PROTECT,
-                    models.RESTRICT,
-                ]:
-                    continue
-                node = collected.get(str(getattr(blocker, field.attname)))
-                seen = set()
-                while parent_of.get(node) is not None and node not in seen:
-                    seen.add(node)
-                    node = parent_of[node]
-                if node is not None:
-                    blocked_ids.add(str(node.pk))
-        return [
-            {"id": str(s.pk), "name": getattr(s, "name", None) or str(s)}
-            for s in subjects
-            if str(s.pk) in blocked_ids
-        ]
 
     def _get_optimized_object_data(self, queryset):
         """Serializer context for list(); viewsets extend it with their own data."""
@@ -9534,6 +9465,42 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
         # the CSV export iterates the prefetched queryset rather than .iterator().
         "prefetch_related": ["filtering_labels"],
     }
+
+    @action(detail=False, methods=["post"], url_path="batch-cascade-info")
+    def batch_cascade_info(self, request: Request) -> Response:
+        """What moving the listed domains carries along, in the `cascade_info` format.
+
+        The `deleted` bucket holds the sub-domains and everything filed under them;
+        the other buckets are not meaningful for a move. Covers the listed domains
+        the caller may change, collected in one pass so a subtree shared by two of
+        them is reported once. 400 if `ids` is empty or longer than
+        `BATCH_SIZE_LIMIT`, 403 if none is changeable.
+        """
+        ids = request.data.get("ids")
+        if not isinstance(ids, list) or not ids:
+            return Response(
+                {"error": "No ids provided"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        if len(ids) > BATCH_SIZE_LIMIT:
+            return Response(
+                {"error": "too many ids", "max": BATCH_SIZE_LIMIT},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        perm = Permission.objects.get(codename="change_folder")
+        subjects = [
+            obj
+            for obj in self.get_queryset().filter(id__in=ids)
+            if RoleAssignment.is_access_allowed(
+                user=request.user, perm=perm, folder=Folder.get_folder(obj)
+            )
+        ]
+        if not subjects:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        return Response(
+            self._cascade_preview(subjects, request.user, carried_only=True)
+        )
 
     def cascade_preclear(self, instance):
         # Rows of the domain tree that PROTECT other rows of the same tree.

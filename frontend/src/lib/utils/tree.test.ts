@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { subtreeIds, type TreeRow } from '$lib/utils/tree';
+import { nestedIds, subtreeIds, type TreeRow } from '$lib/utils/tree';
 
 const rows: TreeRow[] = [
 	{ id: 'root', parent_folder: null },
@@ -37,5 +37,23 @@ describe('subtreeIds', () => {
 	it('accepts numeric ids', () => {
 		const numeric: TreeRow[] = [{ id: 1 }, { id: 2, parent_folder: { id: 1 } }];
 		expect(subtreeIds(numeric, ['1'])).toEqual(new Set(['1', '2']));
+	});
+});
+
+describe('nestedIds', () => {
+	it('keeps the ids filed below another selected id, at any depth', () => {
+		expect(nestedIds(rows, ['a', 'a1', 'a11', 'b'])).toEqual(new Set(['a1', 'a11']));
+	});
+
+	it('is empty when no selected id sits below another', () => {
+		expect(nestedIds(rows, ['a1', 'b'])).toEqual(new Set());
+	});
+
+	it('terminates on a cycle', () => {
+		const looped: TreeRow[] = [
+			{ id: 'x', parent_folder: { id: 'y' } },
+			{ id: 'y', parent_folder: { id: 'x' } }
+		];
+		expect(nestedIds(looped, ['x'])).toEqual(new Set());
 	});
 });

@@ -3,6 +3,8 @@
 	type CascadeGroup = { model: string; verbose_name?: string; objects: CascadeObject[] };
 	type CascadeBucket = {
 		count: number;
+		/** Objects in domains the user may not view: counted, never named. */
+		hidden_count?: number;
 		grouped_objects: CascadeGroup[];
 		related_objects?: CascadeObject[];
 		message?: string;
@@ -14,12 +16,16 @@
 		deleted: CascadeBucket;
 		affected: CascadeBucket;
 		blocked?: CascadeBucket;
-		blocked_subjects?: CascadeObject[];
 	};
 
-	/** Whether a PROTECT/RESTRICT reference makes the delete fail server-side. */
+	function total(bucket: CascadeBucket | undefined): number {
+		return (bucket?.count ?? 0) + (bucket?.hidden_count ?? 0);
+	}
+
+	/** Whether a PROTECT/RESTRICT reference makes the delete fail server-side,
+	 * including one the user may not view. */
 	export function isCascadeBlocked(cascadeInfo: CascadeInfo | null): boolean {
-		return (cascadeInfo?.blocked?.count ?? 0) > 0;
+		return total(cascadeInfo?.blocked) > 0;
 	}
 </script>
 
@@ -31,11 +37,14 @@
 
 	interface Props {
 		cascadeInfo: CascadeInfo;
+		/** `move` lists only what the subjects carry along: nothing is deleted, blocked
+		 * or unlinked by a move. */
+		mode?: 'delete' | 'move';
 	}
 
-	let { cascadeInfo }: Props = $props();
+	let { cascadeInfo, mode = 'delete' }: Props = $props();
 
-	const isBlocked = $derived(isCascadeBlocked(cascadeInfo));
+	const isBlocked = $derived(mode === 'delete' && isCascadeBlocked(cascadeInfo));
 
 	// Buckets share group keys, so the bucket name is part of the key.
 	const expanded = new SvelteSet<string>();
@@ -80,31 +89,45 @@
 				{/if}
 			</section>
 		{/each}
+		{#if data.hidden_count}
+			<p class="px-3 pt-2 text-xs text-surface-600-400" data-testid="cascade-hidden-objects">
+				{m.cascadeHiddenObjects({ count: data.hidden_count })}
+			</p>
+		{/if}
 	</div>
 {/snippet}
 
 {#if isBlocked && cascadeInfo.blocked}
 	<div class="p-4 bg-error-50 dark:bg-error-500/15 border-l-2 border-error-500">
 		<div class="text-sm font-medium text-surface-950-50 mb-3">
-			{m.cascadeBlockedWarning({ count: cascadeInfo.blocked.count })}
+			{m.cascadeBlockedWarning({ count: total(cascadeInfo.blocked) })}
 		</div>
 		{@render groups('blocked', 'blk', cascadeInfo.blocked)}
 	</div>
 {/if}
 
-{#if !isBlocked && cascadeInfo.deleted?.count > 0}
+{#if mode === 'move' && total(cascadeInfo.deleted) > 0}
+	<div class="p-4 bg-blue-50 dark:bg-blue-500/15 border-l-2 border-blue-400">
+		<div class="text-sm font-medium text-surface-950-50 mb-3">
+			{m.batchMoveCarriedNotice({ count: total(cascadeInfo.deleted) })}
+		</div>
+		{@render groups('deleted', 'mov', cascadeInfo.deleted)}
+	</div>
+{/if}
+
+{#if mode === 'delete' && !isBlocked && total(cascadeInfo.deleted) > 0}
 	<div class="p-4 bg-orange-50 dark:bg-orange-500/15 border-l-2 border-orange-400">
 		<div class="text-sm font-medium text-surface-950-50 mb-3">
-			{m.cascadeDeleteWarning({ count: cascadeInfo.deleted.count })}
+			{m.cascadeDeleteWarning({ count: total(cascadeInfo.deleted) })}
 		</div>
 		{@render groups('deleted', 'del', cascadeInfo.deleted)}
 	</div>
 {/if}
 
-{#if !isBlocked && cascadeInfo.affected?.count > 0}
+{#if mode === 'delete' && !isBlocked && total(cascadeInfo.affected) > 0}
 	<div class="p-4 bg-blue-50 dark:bg-blue-500/15 border-l-2 border-blue-400">
 		<div class="text-sm font-medium text-surface-950-50 mb-1">
-			{m.cascadeAffectedNotice({ count: cascadeInfo.affected.count })}
+			{m.cascadeAffectedNotice({ count: total(cascadeInfo.affected) })}
 		</div>
 		<p class="text-xs text-surface-600-400 mb-3">
 			{m.cascadeAffectedHint()}

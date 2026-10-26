@@ -13,7 +13,7 @@ import EvidenceChangeStatus from '$lib/components/ContextMenu/evidences/ChangeSt
 import WorkflowToggleActive from '$lib/components/ContextMenu/workflows/ToggleActive.svelte';
 import TaskNodeChangeStatus from '$lib/components/ContextMenu/task-nodes/ChangeStatus.svelte';
 import { getModelInfo, isFieldFlagEnabled } from './crud';
-import { folderBatchActions } from './folder-batch-actions';
+import { folderBatchActions } from '$lib/utils/folder-batch-actions';
 import { toCamelCase } from './locales';
 import SelectObject from '$lib/components/ContextMenu/ebios-rm/SelectObject.svelte';
 import ChangePriority from '$lib/components/ContextMenu/applied-controls/ChangePriority.svelte';
@@ -4137,9 +4137,9 @@ export interface BatchActionConfig {
 	 * picker: reparenting a row into its own descendant is a cycle the API rejects.
 	 * Reads each option's `parent_folder`, so it only fits models keyed on that. */
 	excludeSelectedSubtree?: boolean;
-	/** On a delete, list what the cascade removes before the user confirms, as the
-	 * single-object delete does. */
-	cascadePreview?: boolean;
+	/** Before a domain move is confirmed, list what the selected domains carry along
+	 * and which of them leave a selected parent. Only fits the folders endpoint. */
+	movePreview?: boolean;
 }
 
 export interface ParentActionConfig {
@@ -4878,16 +4878,7 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 		},
 		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
 	],
-	folders: [
-		...folderBatchActions,
-		{
-			type: 'delete',
-			label: 'delete',
-			icon: 'fa-solid fa-trash',
-			confirmMessage: 'confirmDeleteDomains',
-			cascadePreview: true
-		}
-	],
+	folders: folderBatchActions,
 	'metric-instances': [
 		{
 			type: 'compose',

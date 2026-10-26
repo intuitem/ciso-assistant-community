@@ -172,7 +172,7 @@
 				confirmMessage: action.confirmMessage,
 				fixedValue: action.value,
 				URLModel,
-				cascadePreviewIds: action.cascadePreview ? ids : [],
+				movePreviewIds: action.movePreview ? ids : [],
 				onConfirm: async (value?: string | string[]) => {
 					try {
 						const res = await fetch(`/${URLModel}/batch-action`, {

@@ -3,12 +3,9 @@
 	import { getModalStore, type ModalStore } from './stores';
 	import { safeTranslate, unsafeTranslate } from '$lib/utils/i18n';
 	import { fetchAllPages } from '$lib/utils/pagination';
-	import { subtreeIds } from '$lib/utils/tree';
+	import { nestedIds, subtreeIds } from '$lib/utils/tree';
 	import type { urlModel } from '$lib/utils/types';
-	import CascadePreview, {
-		isCascadeBlocked,
-		type CascadeInfo
-	} from '$lib/components/Modals/CascadePreview.svelte';
+	import CascadePreview, { type CascadeInfo } from '$lib/components/Modals/CascadePreview.svelte';
 	import { onMount } from 'svelte';
 
 	function translateOption(option: { label: string; value: string }): string {
@@ -38,11 +35,10 @@
 		// Value fixed by config ("mark as read"): skips the picker, so the modal is a
 		// plain confirmation and this is what gets sent.
 		fixedValue?: string;
-		/** Model the selected rows belong to; needed to fetch the cascade preview. */
 		URLModel?: urlModel;
-		/** Rows whose deletion cascade is previewed before a delete is confirmed.
-		 * Empty means no preview. */
-		cascadePreviewIds?: string[];
+		/** Domains whose move is previewed (what they carry along) before it is
+		 * confirmed. Empty means no preview. */
+		movePreviewIds?: string[];
 		onConfirm: (value?: string | string[]) => void;
 	}
 
@@ -58,16 +54,16 @@
 		confirmMessage = undefined,
 		fixedValue = undefined,
 		URLModel = undefined,
-		cascadePreviewIds = [],
+		movePreviewIds = [],
 		onConfirm
 	}: Props = $props();
 
-	const showsCascadePreview =
-		actionType === 'delete' && URLModel !== undefined && cascadePreviewIds.length > 0;
+	const showsMovePreview =
+		actionType !== 'delete' && URLModel !== undefined && movePreviewIds.length > 0;
 	let cascadeInfo: CascadeInfo | null = $state(null);
 	let cascadeLoading = $state(false);
 	let cascadeError = $state(false);
-	const cascadeBlocked = $derived(isCascadeBlocked(cascadeInfo));
+	let flattenedNames: string[] = $state([]);
 
 	let options: { label: string; value: string }[] = $state([]);
 	let selectedValue: string = $state('');
@@ -116,24 +112,25 @@
 		return opts;
 	}
 
-	onMount(async () => {
-		if (showsCascadePreview) {
-			cascadeLoading = true;
-			try {
-				const res = await fetch(`/fe-api/batch-cascade-info/${URLModel}`, {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ ids: cascadePreviewIds })
-				});
-				if (!res.ok) throw new Error(`HTTP ${res.status}`);
-				cascadeInfo = await res.json();
-			} catch (e) {
-				cascadeError = true;
-				console.error('Failed to fetch the cascade preview', e);
-			} finally {
-				cascadeLoading = false;
-			}
+	async function loadMovePreview(): Promise<void> {
+		cascadeLoading = true;
+		try {
+			const res = await fetch(`/fe-api/batch-cascade-info/${URLModel}`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ ids: movePreviewIds })
+			});
+			if (!res.ok) throw new Error(`HTTP ${res.status}`);
+			cascadeInfo = await res.json();
+		} catch (e) {
+			cascadeError = true;
+			console.error('Failed to fetch the cascade preview', e);
+		} finally {
+			cascadeLoading = false;
 		}
+	}
+
+	async function loadOptions(): Promise<void> {
 		if (needsSelection && optionsEndpoint) {
 			loading = true;
 			try {
@@ -149,6 +146,12 @@
 						excludeIds.length > 0 && Array.isArray(rows)
 							? subtreeIds(rows, excludeIds)
 							: new Set<string>();
+					if (showsMovePreview && excludeIds.length > 0 && Array.isArray(rows)) {
+						const nested = nestedIds(rows, excludeIds);
+						flattenedNames = rows
+							.filter((row) => nested.has(String(row.id)))
+							.map((row) => row.str ?? row.name);
+					}
 					options = withDoubleDash(parsed.filter((o) => !excluded.has(o.value)));
 				}
 			} catch (e) {
@@ -157,6 +160,10 @@
 				loading = false;
 			}
 		}
+	}
+
+	onMount(async () => {
+		await Promise.all([showsMovePreview ? loadMovePreview() : undefined, loadOptions()]);
 	});
 
 	function handleConfirm() {
@@ -183,7 +190,7 @@
 
 	const canConfirm = $derived(
 		actionType === 'delete'
-			? !cascadeBlocked && !!deleteConfirmInput && deleteConfirmInput.trim().toLowerCase() === yes
+			? !!deleteConfirmInput && deleteConfirmInput.trim().toLowerCase() === yes
 			: fixedValue !== undefined
 				? true
 				: multiSelect
@@ -210,41 +217,37 @@
 					{safeTranslate(confirmMessage, { count })}
 				</article>
 			{/if}
-			{#if cascadeLoading}
-				<div class="text-sm text-surface-600-400">Loading...</div>
-			{:else if cascadeError}
-				<div class="p-4 bg-error-50-950 text-error-900-100 text-sm">
-					{m.errorFetching()}
-				</div>
-			{:else if cascadeInfo}
-				<CascadePreview {cascadeInfo} />
-				{#if cascadeBlocked && cascadeInfo.blocked_subjects?.length}
-					<p class="text-sm font-medium text-error-600-400" data-testid="cascade-blocked-subjects">
-						{m.cascadeBlockedSubjects({
-							names: cascadeInfo.blocked_subjects.map((subject) => subject.name).join(', ')
-						})}
-					</p>
-				{/if}
-			{/if}
-			{#if !cascadeBlocked}
-				<div class="space-y-2">
-					<p class="text-sm font-medium text-red-600">{m.confirmYes({ word: m.yes() })}</p>
-					<input
-						type="text"
-						data-testid="batch-delete-confirm-textfield"
-						bind:value={deleteConfirmInput}
-						placeholder={m.confirmYesPlaceHolder({ word: m.yes() })}
-						class="input w-full"
-						aria-label={m.confirmYes({ word: m.yes() })}
-					/>
-				</div>
-			{/if}
+			<div class="space-y-2">
+				<p class="text-sm font-medium text-red-600">{m.confirmYes({ word: m.yes() })}</p>
+				<input
+					type="text"
+					data-testid="batch-delete-confirm-textfield"
+					bind:value={deleteConfirmInput}
+					placeholder={m.confirmYesPlaceHolder({ word: m.yes() })}
+					class="input w-full"
+					aria-label={m.confirmYes({ word: m.yes() })}
+				/>
+			</div>
 		{:else}
 			<article>{m.batchActionConfirmChange({ count })}</article>
 			{#if confirmMessage}
 				<article class="text-sm font-medium text-amber-600">
 					{safeTranslate(confirmMessage, { count })}
 				</article>
+			{/if}
+			{#if flattenedNames.length > 0}
+				<p class="text-sm font-medium text-amber-600" data-testid="batch-move-flatten-warning">
+					{m.batchMoveFlattenWarning({ names: flattenedNames.join(', ') })}
+				</p>
+			{/if}
+			{#if cascadeLoading}
+				<div class="text-sm text-surface-600-400">{m.loading()}</div>
+			{:else if cascadeError}
+				<div class="p-4 bg-error-50-950 text-error-900-100 text-sm">
+					{m.errorFetching()}
+				</div>
+			{:else if cascadeInfo}
+				<CascadePreview {cascadeInfo} mode="move" />
 			{/if}
 
 			{#if !needsSelection}
@@ -258,7 +261,7 @@
 					bind:value={selectedValue}
 				/>
 			{:else if loading}
-				<div class="text-sm text-surface-600-400">Loading...</div>
+				<div class="text-sm text-surface-600-400">{m.loading()}</div>
 			{:else if multiSelect}
 				<div class="space-y-2">
 					<input

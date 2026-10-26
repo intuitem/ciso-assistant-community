@@ -5169,7 +5169,8 @@
 	"viewWebhookendpoint": "View webhook endpoint",
 	"cascadeDeleteWarning": "Warning: Deleting this will also permanently delete {count} related object(s):",
 	"cascadeBlockedWarning": "This cannot be deleted: {count} object(s) still reference it. Delete or reassign them first.",
-	"cascadeBlockedSubjects": "Blocked by these selected items: {names}. Deselect them to delete the others.",
+	"cascadeHiddenObjects": "+ {count} object(s) in domains you cannot access",
+	"batchMoveCarriedNotice": "{count} related object(s) filed under the selected domains will move with them:",
 	"errorFetching": "Unable to load cascade information. Please try again.",
 	"cascadeAffectedNotice": [
 		{
@@ -5234,7 +5235,7 @@
 	"membersAdded": "Members added",
 	"membersRemoved": "Members removed",
 	"confirmRemoveSelected": "Are you sure you want to remove {count} selected item(s)?",
-	"confirmDeleteDomains": "Deleting a domain also deletes its sub-domains and everything filed under them.",
+	"batchMoveFlattenWarning": "These domains will leave their parent, which is also selected, and be placed directly under the target: {names}",
 	"confirmRemoveAssetAssessments": "The asset(s) will not be deleted, but their assessments and escalation thresholds in this BIA will be.",
 	"includeInactive": "Include inactive",
 	"noResults": "No results. Refine your search.",
