@@ -123,3 +123,22 @@ def test_ignores_stale_empty_stored_keys():
     )
     assert data["credentials"]["api_token"] == "rotated"
     assert "password" not in data["credentials"]
+
+
+def test_accepts_new_secret_when_another_stored_key_is_backfilled():
+    # Only keys the stored row holds pin the connection; a key the row lacks
+    # must not be compared against the missing value and refused.
+    class StaleConfig(StubConfig):
+        credentials = {**STORED, "password": None}
+
+    data = _validate(
+        {
+            "server_url": STORED["server_url"],
+            "email": STORED["email"],
+            "api_token": "",
+            "password": "rotated",
+        },
+        config=StaleConfig(),
+    )
+    assert data["credentials"]["api_token"] == "s3cret"
+    assert data["credentials"]["password"] == "rotated"

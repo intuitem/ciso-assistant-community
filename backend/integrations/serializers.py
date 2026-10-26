@@ -71,7 +71,7 @@ class ConnectionTestSerializer(serializers.Serializer):
             if backfilled and any(
                 v != stored.get(k)
                 for k, v in credentials.items()
-                if k not in backfilled
+                if k in stored and k not in backfilled
             ):
                 raise serializers.ValidationError(
                     {"credentials": "reenterSecretToTestModifiedConnection"}
