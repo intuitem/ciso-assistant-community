@@ -666,7 +666,7 @@ class ServiceAccountViewSet(viewsets.ModelViewSet):
     def get_write_serializer_class(self):
         """Resolve the write serializer by name through MODULE_PATHS, like
         BaseModelViewSet does — the seam the enterprise build uses to layer
-        license rules (seat quota) on top without any license code here."""
+        its license rules on top without any license code here."""
         # Deferred import: core.serializers circles into iam at import time.
         from core.serializers import SerializerFactory
 

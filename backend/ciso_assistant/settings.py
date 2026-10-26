@@ -159,6 +159,13 @@ FEATURE_FLAGS = {}
 MODULE_PATHS = {}
 ROUTES = {}
 MODULES = {}
+# Dotted paths to callables run after a backup is restored: each returns an
+# error key to reject the restored data (rolled back, 400) or None to accept it.
+BACKUP_RESTORE_VALIDATORS = []
+# Dotted paths to modules adding to the instance status: each provides
+# status_fields() -> list of (key, value) appended to the `status` command line,
+# and update_metrics() setting its own Prometheus gauges.
+INSTANCE_STATUS_EXTENSIONS = []
 
 logger.info("BASE_DIR: %s", BASE_DIR)
 logger.info("VERSION: %s", VERSION)

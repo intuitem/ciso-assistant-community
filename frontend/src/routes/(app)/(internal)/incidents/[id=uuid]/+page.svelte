@@ -419,6 +419,7 @@
 											{form}
 											multiple
 											optionsEndpoint="evidences"
+											lazy
 											optionsDetailedUrlParameters={[
 												['scope_folder_id', page.data.data?.folder?.id]
 											]}

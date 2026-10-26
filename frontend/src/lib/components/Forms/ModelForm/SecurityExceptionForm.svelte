@@ -105,6 +105,7 @@
 	{form}
 	multiple
 	optionsEndpoint="actors"
+	lazy
 	optionsLabelField="str"
 	optionsInfoFields={{
 		fields: [{ field: 'type', translate: true }],
@@ -217,6 +218,7 @@
 	multiple
 	{form}
 	optionsEndpoint="evidences"
+	lazy
 	optionsExtraFields={[['folder', 'str']]}
 	optionsLabelField="auto"
 	field="evidences"
