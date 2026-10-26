@@ -663,6 +663,8 @@
 	// under the new key -- two separate effects can't guarantee that order.
 	let previousFilterStoreKey = filterStoreKey;
 	$effect(() => {
+		// Rerun (and refetch) when the page reloads its data
+		page.data;
 		if (filterStoreKey !== previousFilterStoreKey) {
 			previousFilterStoreKey = filterStoreKey;
 			untrack(applySavedSort);
@@ -730,12 +732,14 @@
 	});
 
 	// Refetch when the page reloads its data (navigation, refreshAll(), form actions).
-	// page.data, not page.url: the shallow goto that syncs filters also swaps page.url.
+	// Standalone tables get this from the filter effect above; embedded ones don't sync
+	// filters, so track it here. page.data, not page.url: the filter-syncing shallow goto
+	// also swaps page.url.
 	let pageDataSeen = false;
 	$effect(() => {
 		page.data;
 		if (!pageDataSeen) return void (pageDataSeen = true);
-		if (hasRemoteSource) untrack(() => handler.invalidate());
+		if (hasRemoteSource && !syncFiltersToUrl) untrack(() => handler.invalidate());
 	});
 
 	$effect(() => {
