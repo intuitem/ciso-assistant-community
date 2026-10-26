@@ -3,7 +3,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0199_framework_result_aggregation"),
+        ("core", "0200_complianceassessment_filtering_labels_and_more"),
     ]
 
     operations = [
