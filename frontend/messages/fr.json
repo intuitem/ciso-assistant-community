@@ -7597,9 +7597,6 @@
 	"mailerOutcomeNever": "Jamais tenté",
 	"mailerSendTestHelp": "Envoie un message via chaque serveur à votre propre adresse.",
 	"evidenceRequired": "Preuve obligatoire",
-	"evidenceRequiredHint": "Cette exigence requiert une preuve.",
-	"evidenceRequiredBlocksSubmission": "Joignez au moins une preuve : le questionnaire ne peut pas être soumis sans elle.",
-	"missingEvidenceWarning": "Une preuve manque encore pour : {requirements}.",
 	"submissionBlockedMissingEvidence": "Soumission refusée : une preuve manque pour {requirements}.",
 	"builderEvidenceRequiredLabel": "Preuve obligatoire",
 	"builderEvidenceRequiredHint": "Les répondants ne peuvent pas soumettre cette exigence sans joindre une preuve.",
@@ -7615,5 +7612,7 @@
 	"mergeInto": "Fusionner dans {label}",
 	"mergeLabelsSuccess": "Étiquettes fusionnées dans {label}",
 	"mergeLabelsError": "Impossible de fusionner les étiquettes",
-	"noQuestionnaireAttached": "Aucun questionnaire rattaché"
+	"noQuestionnaireAttached": "Aucun questionnaire rattaché",
+	"evidenceProvided": "Preuve fournie",
+	"missingEvidenceBeforeSubmission": "Ces exigences attendent encore une preuve avant la soumission :"
 }

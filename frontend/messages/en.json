@@ -7594,9 +7594,6 @@
 	"extraDependency": "Extra dependency",
 	"biaDependenciesDescription": "Dependencies of every asset assessed in this BIA, and the supporting assets that miss their objectives",
 	"evidenceRequired": "Evidence required",
-	"evidenceRequiredHint": "This requirement requires an evidence.",
-	"evidenceRequiredBlocksSubmission": "Attach at least one evidence: the questionnaire cannot be submitted without it.",
-	"missingEvidenceWarning": "An evidence is still missing for: {requirements}.",
 	"submissionBlockedMissingEvidence": "Submission refused: an evidence is missing for {requirements}.",
 	"builderEvidenceRequiredLabel": "Evidence required",
 	"builderEvidenceRequiredHint": "Respondents cannot submit this requirement without attaching an evidence.",
@@ -7615,5 +7612,7 @@
 	"mergeInto": "Merge into {label}",
 	"mergeLabelsSuccess": "Labels merged into {label}",
 	"mergeLabelsError": "Could not merge labels",
-	"noQuestionnaireAttached": "No questionnaire attached"
+	"noQuestionnaireAttached": "No questionnaire attached",
+	"evidenceProvided": "Evidence provided",
+	"missingEvidenceBeforeSubmission": "These requirements still need an evidence before you can submit:"
 }

@@ -839,18 +839,18 @@
 										onblur={(e) => saveField('typical_evidence', e.currentTarget.value || null)}
 									></textarea>
 								</div>
-								<label class="flex items-center gap-2 text-xs text-surface-600-400">
+								<label
+									class="flex items-center gap-1.5 text-xs text-surface-500 cursor-pointer hover:text-surface-600-400 transition-colors"
+									title={m.builderEvidenceRequiredHint()}
+								>
 									<input
 										type="checkbox"
-										class="checkbox"
 										checked={node.node.evidence_required}
 										onchange={(e) => saveField('evidence_required', e.currentTarget.checked)}
+										class="w-4 h-4 rounded border-surface-300-700 cursor-pointer"
 									/>
-									<span>{m.builderEvidenceRequiredLabel()}</span>
+									{m.builderEvidenceRequiredLabel()}
 								</label>
-								<p class="text-[10px] text-surface-500">
-									{m.builderEvidenceRequiredHint()}
-								</p>
 							{/if}
 						</div>
 					{/if}
