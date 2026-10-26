@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
-	import { isDarkTheme, mountThemeAwareChart } from '$lib/utils/echartsTheme';
-	import { roundScore } from '$lib/utils/helpers';
+	import { isDarkTheme, mountThemeAwareChart } from '#lib/utils/echartsTheme.js';
+	import { roundScore } from '#lib/utils/helpers.js';
 
 	interface Props {
 		width?: string;

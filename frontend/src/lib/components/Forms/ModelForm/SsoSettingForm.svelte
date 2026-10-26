@@ -1,18 +1,18 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
-	import HiddenInput from '$lib/components/Forms/HiddenInput.svelte';
-	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
-	import Select from '$lib/components/Forms/Select.svelte';
-	import TextArea from '$lib/components/Forms/TextArea.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import type { CacheLock, ModelInfo } from '$lib/utils/types';
-	import { m } from '$paraglide/messages';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import Checkbox from '#lib/components/Forms/Checkbox.svelte';
+	import HiddenInput from '#lib/components/Forms/HiddenInput.svelte';
+	import RadioGroup from '#lib/components/Forms/RadioGroup.svelte';
+	import Select from '#lib/components/Forms/Select.svelte';
+	import TextArea from '#lib/components/Forms/TextArea.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import type { CacheLock, ModelInfo } from '#lib/utils/types.js';
+	import { m } from '#paraglide/messages.js';
 	import { Accordion } from '@skeletonlabs/skeleton-svelte';
 	import type { SuperForm } from 'sveltekit-superforms';
 	import { enhance } from '$app/forms';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 	import { invalidateAll } from '$app/navigation';
 
 	interface Props {
@@ -60,7 +60,7 @@
 			if (result.type === 'success' && result.data?.generatedKeys?.cert) {
 				$formStore.sp_x509cert = result.data.generatedKeys.cert;
 			}
-			await update({ invalidateAll: false });
+			await update({ refreshAll: false, navigate: false });
 		};
 	};
 </script>

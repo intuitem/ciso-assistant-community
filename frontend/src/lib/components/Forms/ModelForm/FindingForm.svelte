@@ -1,27 +1,27 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
+	import FolderTreeSelect from '#lib/components/Forms/FolderTreeSelect.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
 	import Select from '../Select.svelte';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
 	import { defaults, type SuperForm, type SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import { m } from '$paraglide/messages';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import { getModelInfo } from '$lib/utils/crud';
-	import { formatSelectFieldData } from '$lib/utils/load';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { AppliedControlSchema, TaskTemplateSchema } from '$lib/utils/schemas';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import { m } from '#paraglide/messages.js';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
+	import { getModelInfo } from '#lib/utils/crud.js';
+	import { formatSelectFieldData } from '#lib/utils/load.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { AppliedControlSchema, TaskTemplateSchema } from '#lib/utils/schemas.js';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
+	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 
 	interface Props {
 		form: SuperForm<any>;

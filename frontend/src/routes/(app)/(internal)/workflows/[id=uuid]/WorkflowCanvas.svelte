@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { invalidateAll, goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { getFlash } from 'sveltekit-flash-message';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { Switch } from '@skeletonlabs/skeleton-svelte';
 	import { setContext } from 'svelte';
-	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
+	import { getModalStore, type ModalStore } from '#lib/components/Modals/stores.js';
 	import {
 		SvelteFlow,
 		useSvelteFlow,
@@ -127,6 +127,7 @@
 					taskTemplates.find((t) => t.id === domain.task_template)?.name ??
 					null
 				);
+
 			case 'action': {
 				const config = domain.action_config ?? {};
 				switch (config.type) {
@@ -158,6 +159,7 @@
 					subprocessCandidates.find((w) => w.id === domain.subprocess_workflow)?.name ??
 					null
 				);
+
 			case 'event':
 				return domain.event_key || null;
 			case 'loop': {
@@ -1324,7 +1326,9 @@
 		const manual = triggerNodes.find(
 			(n) => (n.data.domain as any)?.trigger_config?.type === 'manual'
 		);
+
 		if (manual) return ((manual.data.domain as any).ref as string) ?? null;
+
 		if (triggerNodes.length <= 1) {
 			return ((triggerNodes[0]?.data.domain as any)?.ref as string) ?? null;
 		}
@@ -1616,6 +1620,7 @@
 			.filter((b: any) => !b.is_default)
 			.sort((a: any, b: any) => (a.order ?? 0) - (b.order ?? 0))
 			.forEach((b: any, index: number) => (b.order = index));
+
 		// A wired branch drops its edge; the default keeps its guaranteed slot.
 		edges = edges.filter((e) => (e.data?.domain as any)?.source_branch !== branchId);
 		refreshVisuals();
@@ -2258,10 +2263,9 @@
 												<button
 													type="button"
 													class="btn preset-tonal text-xs"
-													onclick={() => (runVarsOpen = false)}
+													onclick={() => (runVarsOpen = false)}>{m.cancel()}</button
 												>
-													{m.cancel()}
-												</button>
+
 												<button
 													type="button"
 													class="btn preset-filled-primary-500 text-xs"

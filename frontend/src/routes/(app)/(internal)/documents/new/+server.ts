@@ -1,4 +1,4 @@
-import { BASE_API_URL } from '$lib/utils/constants';
+import { BASE_API_URL } from '#lib/utils/constants.js';
 import { error, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 

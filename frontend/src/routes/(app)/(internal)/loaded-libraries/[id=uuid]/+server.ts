@@ -1,7 +1,7 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { discardBody } from '$lib/utils/responses';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { discardBody } from '#lib/utils/responses.js';
 
-import { error, type NumericRange } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ fetch, url, params }) => {
@@ -13,11 +13,11 @@ export const GET: RequestHandler = async ({ fetch, url, params }) => {
 
 	if (!res.ok) {
 		await discardBody(contentRes);
-		error(res.status as NumericRange<400, 599>, await res.json());
+		error(res.status, await res.json());
 	}
 	if (!contentRes.ok) {
 		await discardBody(res);
-		error(contentRes.status as NumericRange<400, 599>, await contentRes.json());
+		error(contentRes.status, await contentRes.json());
 	}
 
 	const data = await res.json();

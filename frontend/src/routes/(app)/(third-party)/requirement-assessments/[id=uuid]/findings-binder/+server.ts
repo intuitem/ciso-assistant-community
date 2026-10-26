@@ -1,5 +1,5 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { error, type NumericRange } from '@sveltejs/kit';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 // `requirement-assessments` is a static route tree, so the generic
@@ -13,7 +13,7 @@ export const POST: RequestHandler = async ({ fetch, params }) => {
 		body: '{}'
 	});
 	if (!res.ok) {
-		error(res.status as NumericRange<400, 599>, await res.json());
+		error(res.status, await res.json());
 	}
 
 	return new Response(JSON.stringify(await res.json()), {

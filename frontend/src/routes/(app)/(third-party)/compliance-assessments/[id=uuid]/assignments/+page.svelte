@@ -4,22 +4,22 @@
 	import { applyAction, deserialize } from '$app/forms';
 	import { setContext } from 'svelte';
 	import { writable } from 'svelte/store';
-	import RecursiveTreeView from '$lib/components/TreeView/RecursiveTreeView.svelte';
+	import RecursiveTreeView from '#lib/components/TreeView/RecursiveTreeView.svelte';
 	import { Popover } from '@skeletonlabs/skeleton-svelte';
-	import type { TreeViewNode } from '$lib/components/TreeView/types';
+	import type { TreeViewNode } from '#lib/components/TreeView/types.js';
 	import type { PageData } from './$types';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import { m } from '$paraglide/messages';
-	import { getLocale } from '$paraglide/runtime';
-	import { formatDate } from '$lib/utils/datetime';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import { m } from '#paraglide/messages.js';
+	import { getLocale } from '#paraglide/runtime.js';
+	import { formatDate } from '#lib/utils/datetime.js';
 	import TreeViewItemContentSimple from './TreeViewItemContentSimple.svelte';
 	import TreeViewItemLeadSimple from './TreeViewItemLeadSimple.svelte';
-	import { complianceResultColorMap } from '$lib/utils/constants';
-	import TreeExpandCollapseToggle from '$lib/components/TreeView/TreeExpandCollapseToggle.svelte';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import { complianceResultColorMap } from '#lib/utils/constants.js';
+	import TreeExpandCollapseToggle from '#lib/components/TreeView/TreeExpandCollapseToggle.svelte';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
 	import { superForm } from 'sveltekit-superforms';
-	import { getToastStore } from '$lib/components/Toast/stores';
-	import { getModalStore, type ModalSettings } from '$lib/components/Modals/stores';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import { getModalStore, type ModalSettings } from '#lib/components/Modals/stores.js';
 
 	interface Props {
 		data: PageData;

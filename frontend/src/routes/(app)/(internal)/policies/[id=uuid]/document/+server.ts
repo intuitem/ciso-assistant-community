@@ -1,5 +1,5 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { error, json, type NumericRange } from '@sveltejs/kit';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { error, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 async function assertFeatureEnabled(locals: App.Locals) {
@@ -34,7 +34,7 @@ export const POST: RequestHandler = async ({ fetch, request, url, locals }) => {
 		});
 		if (!res.ok) {
 			const errorBody = await res.text();
-			error(res.status as NumericRange<400, 599>, errorBody);
+			error(res.status, errorBody);
 		}
 		return json(await res.json(), { status: res.status });
 	}
@@ -98,7 +98,7 @@ export const POST: RequestHandler = async ({ fetch, request, url, locals }) => {
 	});
 
 	if (!res.ok) {
-		error(res.status as NumericRange<400, 599>, await res.json());
+		error(res.status, await res.json());
 	}
 
 	return json(await res.json(), { status: res.status });
@@ -128,7 +128,7 @@ export const GET: RequestHandler = async ({ fetch, url, params, locals }) => {
 			}
 			const refRes = await fetch(`${BASE_API_URL}/document-containers/${containerId}/references/`);
 			if (!refRes.ok) {
-				error(refRes.status as NumericRange<400, 599>, await refRes.json());
+				error(refRes.status, await refRes.json());
 			}
 			return json(await refRes.json());
 		}
@@ -141,7 +141,7 @@ export const GET: RequestHandler = async ({ fetch, url, params, locals }) => {
 			const templatesEndpoint = `${BASE_API_URL}/managed-documents/templates/${qp.toString() ? `?${qp}` : ''}`;
 			const templatesRes = await fetch(templatesEndpoint);
 			if (!templatesRes.ok) {
-				error(templatesRes.status as NumericRange<400, 599>, await templatesRes.json());
+				error(templatesRes.status, await templatesRes.json());
 			}
 			return json(await templatesRes.json());
 		}
@@ -150,7 +150,7 @@ export const GET: RequestHandler = async ({ fetch, url, params, locals }) => {
 			const qp = new URLSearchParams({ container__policies: params.id, locale });
 			const docsRes = await fetch(`${BASE_API_URL}/managed-documents/?${qp}`);
 			if (!docsRes.ok) {
-				error(docsRes.status as NumericRange<400, 599>, await docsRes.json());
+				error(docsRes.status, await docsRes.json());
 			}
 			const docsData = await docsRes.json();
 			const doc = docsData.results?.[0] || null;
@@ -191,7 +191,7 @@ export const GET: RequestHandler = async ({ fetch, url, params, locals }) => {
 			endpoint = `${BASE_API_URL}/document-revisions/${req('revision_id')}/export-pdf/`;
 			const res = await fetch(endpoint);
 			if (!res.ok) {
-				error(res.status as NumericRange<400, 599>, 'PDF export failed');
+				error(res.status, 'PDF export failed');
 			}
 			const pdfBuffer = await res.arrayBuffer();
 			return new Response(pdfBuffer, {
@@ -207,7 +207,7 @@ export const GET: RequestHandler = async ({ fetch, url, params, locals }) => {
 			const imageEndpoint = `${BASE_API_URL}/document-attachments/${attachmentId}/file/`;
 			const res = await fetch(imageEndpoint);
 			if (!res.ok) {
-				error(res.status as NumericRange<400, 599>, 'Image fetch failed');
+				error(res.status, 'Image fetch failed');
 			}
 			const imageBuffer = await res.arrayBuffer();
 			return new Response(imageBuffer, {
@@ -228,7 +228,7 @@ export const GET: RequestHandler = async ({ fetch, url, params, locals }) => {
 
 	const res = await fetch(endpoint);
 	if (!res.ok) {
-		error(res.status as NumericRange<400, 599>, await res.json());
+		error(res.status, await res.json());
 	}
 	return json(await res.json());
 };
@@ -259,7 +259,7 @@ export const DELETE: RequestHandler = async ({ fetch, url, locals }) => {
 	const res = await fetch(endpoint, { method: 'DELETE' });
 	if (!res.ok) {
 		const body = await res.text();
-		error(res.status as NumericRange<400, 599>, body || 'Delete failed');
+		error(res.status, body || 'Delete failed');
 	}
 
 	return new Response(null, { status: 204 });

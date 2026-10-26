@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
-	import SuperForm from '$lib/components/Forms/Form.svelte';
-	import OTPInput from '$lib/components/Forms/OTP/OTPInput.svelte';
+	import { m } from '#paraglide/messages.js';
+	import SuperForm from '#lib/components/Forms/Form.svelte';
+	import OTPInput from '#lib/components/Forms/OTP/OTPInput.svelte';
 	import QR from '@svelte-put/qr/svg/QR.svelte';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
-	import { activateTOTPSchema } from '$lib/utils/schemas';
+	import { activateTOTPSchema } from '#lib/utils/schemas.js';
 	import { startRegistration } from '@simplewebauthn/browser';
 	import { invalidateAll } from '$app/navigation';
 

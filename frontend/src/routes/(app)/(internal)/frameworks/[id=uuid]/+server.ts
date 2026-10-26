@@ -1,6 +1,6 @@
-import { error, type NumericRange } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { BASE_API_URL } from '$lib/utils/constants';
+import { BASE_API_URL } from '#lib/utils/constants.js';
 
 export const GET: RequestHandler = async ({ fetch, params, url }) => {
 	const endpoint = `${BASE_API_URL}/frameworks/${params.id}/${
@@ -9,7 +9,7 @@ export const GET: RequestHandler = async ({ fetch, params, url }) => {
 
 	const res = await fetch(endpoint);
 	if (!res.ok) {
-		error(res.status as NumericRange<400, 599>, await res.json());
+		error(res.status, await res.json());
 	}
 	const data = await res.json();
 

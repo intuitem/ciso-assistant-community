@@ -6,14 +6,14 @@
 	import SideBarToggle from './SideBarToggle.svelte';
 	import { writable } from 'svelte/store';
 
-	import { getCookie, setCookie } from '$lib/utils/cookies';
-	import { driverInstance, tableHandlers, getStartedTrigger } from '$lib/utils/stores';
-	import { m } from '$paraglide/messages';
+	import { getCookie, setCookie } from '#lib/utils/cookies.js';
+	import { driverInstance, tableHandlers, getStartedTrigger } from '#lib/utils/stores.js';
+	import { m } from '#paraglide/messages.js';
 
 	import { invalidateAll } from '$app/navigation';
-	import { page } from '$app/stores';
-	import FirstLoginModal from '$lib/components/Modals/FirstLoginModal.svelte';
-	import { breadcrumbs, goto } from '$lib/utils/breadcrumbs';
+	import { page } from '$app/state';
+	import FirstLoginModal from '#lib/components/Modals/FirstLoginModal.svelte';
+	import { breadcrumbs, goto } from '#lib/utils/breadcrumbs.js';
 	import { driver } from 'driver.js';
 	import 'driver.js/dist/driver.css';
 	import { getFlash } from 'sveltekit-flash-message';
@@ -23,7 +23,7 @@
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 
 	interface Props {
 		open: boolean;
@@ -32,7 +32,7 @@
 
 	let { open = $bindable(), sideBarVisibleItems }: Props = $props();
 
-	const user = $page.data?.user;
+	const user = page.data?.user;
 
 	// id is not needed, just to help us with authoring
 	// this is not great, but couldn't find a way for i18n while separating the file.

@@ -1,9 +1,9 @@
 <script lang="ts">
 	import EntityPickerModal from './EntityPickerModal.svelte';
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { invalidateAll } from '$app/navigation';
-	import { getToastStore } from '$lib/components/Toast/stores';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
 
 	interface Props {
 		parent: any;

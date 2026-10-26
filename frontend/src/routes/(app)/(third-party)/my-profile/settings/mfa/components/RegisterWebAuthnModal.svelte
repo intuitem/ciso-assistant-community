@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
-	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
+	import { m } from '#paraglide/messages.js';
+	import { getModalStore, type ModalStore } from '#lib/components/Modals/stores.js';
 	import { startRegistration } from '@simplewebauthn/browser';
 	import { invalidateAll } from '$app/navigation';
 

@@ -19,12 +19,12 @@
 
 	import AssetNodeComponent from './AssetNode.svelte';
 	import GhostNodeComponent from './GhostNode.svelte';
-	import { computeLayout } from '$lib/components/AssetGraph/layout';
-	import { createLinkWriter, idOf } from '$lib/components/AssetGraph/links';
-	import { createPickerForm } from '$lib/components/AssetGraph/picker';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import { fetchAllByIds } from '$lib/utils/pagination';
-	import AssetEdgeComponent from '$lib/components/AssetGraph/AssetEdge.svelte';
+	import { computeLayout } from '#lib/components/AssetGraph/layout.js';
+	import { createLinkWriter, idOf } from '#lib/components/AssetGraph/links.js';
+	import { createPickerForm } from '#lib/components/AssetGraph/picker.js';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import { fetchAllByIds } from '#lib/utils/pagination.js';
+	import AssetEdgeComponent from '#lib/components/AssetGraph/AssetEdge.svelte';
 	import {
 		loadPositions,
 		savePositions,
@@ -36,16 +36,16 @@
 		saveInstructionsOpen,
 		type XY
 	} from './positions';
-	import { getToastStore } from '$lib/components/Toast/stores';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings
-	} from '$lib/components/Modals/stores';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
-	import { m } from '$paraglide/messages';
-	import { resolvedTheme } from '$lib/utils/theme';
+	} from '#lib/components/Modals/stores.js';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
+	import DeleteConfirmModal from '#lib/components/Modals/DeleteConfirmModal.svelte';
+	import { m } from '#paraglide/messages.js';
+	import { resolvedTheme } from '#lib/utils/theme.js';
 
 	interface AssetItem {
 		id: string;

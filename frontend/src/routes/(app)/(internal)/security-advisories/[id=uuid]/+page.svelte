@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import DetailView from '$lib/components/DetailView/DetailView.svelte';
-	import { m } from '$paraglide/messages';
-	import { getToastStore } from '$lib/components/Toast/stores';
+	import DetailView from '#lib/components/DetailView/DetailView.svelte';
+	import { m } from '#paraglide/messages.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
 	import { invalidateAll } from '$app/navigation';
 
 	interface Props {

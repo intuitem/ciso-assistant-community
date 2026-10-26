@@ -1,5 +1,5 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { error, type NumericRange } from '@sveltejs/kit';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ fetch, params, url }) => {
@@ -7,7 +7,7 @@ export const GET: RequestHandler = async ({ fetch, params, url }) => {
 		`${BASE_API_URL}/automation/posture-assessments/${params.id}/history/${url.search}`
 	);
 	if (!res.ok) {
-		error(res.status as NumericRange<400, 599>, await res.json());
+		error(res.status, await res.json());
 	}
 	return new Response(JSON.stringify(await res.json()), {
 		status: res.status,

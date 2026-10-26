@@ -1,22 +1,22 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { invalidateAll, goto } from '$app/navigation';
-	import { LOCALE_MAP } from '$lib/utils/locales';
+	import { LOCALE_MAP } from '#lib/utils/locales.js';
 	import {
 		APPROVED_REVISION_STATUSES,
 		pickInForceRevisionToShow
-	} from '$lib/utils/documentRevisions';
-	import { safeTranslate } from '$lib/utils/i18n';
+	} from '#lib/utils/documentRevisions.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { page } from '$app/state';
-	import { canPerformActionOnObject } from '$lib/utils/access-control';
-	import { getToastStore } from '$lib/components/Toast/stores';
+	import { canPerformActionOnObject } from '#lib/utils/access-control.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
-	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
+	} from '#lib/components/Modals/stores.js';
+	import PromptConfirmModal from '#lib/components/Modals/PromptConfirmModal.svelte';
 
 	interface Props {
 		parent: { id: string; name: string };

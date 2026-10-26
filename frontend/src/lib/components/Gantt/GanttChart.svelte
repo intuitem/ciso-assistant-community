@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { tick } from 'svelte';
-	import { m } from '$paraglide/messages';
-	import { getLocale } from '$paraglide/runtime';
-	import { formatDate as formatDatePref, getDateFormatPreference } from '$lib/utils/datetime';
+	import { m } from '#paraglide/messages.js';
+	import { getLocale } from '#paraglide/runtime.js';
+	import { formatDate as formatDatePref, getDateFormatPreference } from '#lib/utils/datetime.js';
 
 	export interface GanttItem {
 		id: string;

@@ -1,10 +1,10 @@
 <script lang="ts">
 	import type { DataHandler } from '@vincjo/datatables/remote';
 	import { page } from '$app/state';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { afterNavigate } from '$app/navigation';
-	import { tableStates } from '$lib/utils/stores';
-	import { breadcrumbs } from '$lib/utils/breadcrumbs';
+	import { tableStates } from '#lib/utils/stores.js';
+	import { breadcrumbs } from '#lib/utils/breadcrumbs.js';
 	interface Props {
 		handler: DataHandler;
 		URLModel: string;
@@ -24,7 +24,8 @@
 			pageNumber: $pageNumber,
 			rowsPerPage: $rowsPerPage as number
 		};
-		page.url.searchParams.set('page', $pageNumber.toString());
+		// shortcut: Kit 3 types page.url readonly but it is still a mutable URL; replace with goto(url, { shallow: true }) when ModelTable moves to shallow routing
+		(page.url as URL).searchParams.set('page', $pageNumber.toString());
 		const fullPath = page.url.pathname + page.url.search;
 		const hrefPattern = new RegExp(`^/${URLModel}(\\?.*)?$`);
 		if (hrefPattern.test(fullPath)) {
@@ -34,7 +35,8 @@
 		scrollTarget?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 	};
 
-	afterNavigate(() => {
+	afterNavigate(({ shallow, type }) => {
+		if (shallow && type === 'goto') return;
 		if (!page.url) return;
 
 		const parsed = parseInt(page.url.searchParams.get('page') ?? '1');

@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { focusMode, setFocusMode, clearFocusMode } from '$lib/utils/stores';
+	import { focusMode, setFocusMode, clearFocusMode } from '#lib/utils/stores.js';
 	import { invalidateAll } from '$app/navigation';
-	import * as m from '$paraglide/messages';
+	import * as m from '#paraglide/messages.js';
 	import FolderTreeNode, { type TreeNode } from './FolderTreeNode.svelte';
 
 	interface Props {

@@ -1,18 +1,18 @@
 <script lang="ts">
-	import DetailView from '$lib/components/DetailView/DetailView.svelte';
-	import StakeholderCriticalityWidget from '$lib/components/EbiosRM/StakeholderCriticalityWidget.svelte';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
-	import TierCard from '$lib/components/DetailView/TierCard.svelte';
-	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
-	import { getToastStore } from '$lib/components/Toast/stores';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { openEntityPicker } from '$lib/utils/entityPicker';
-	import { canPerformAction } from '$lib/utils/access-control';
+	import DetailView from '#lib/components/DetailView/DetailView.svelte';
+	import StakeholderCriticalityWidget from '#lib/components/EbiosRM/StakeholderCriticalityWidget.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import CommentsPanel from '#lib/components/CommentsPanel/CommentsPanel.svelte';
+	import TierCard from '#lib/components/DetailView/TierCard.svelte';
+	import { getModalStore, type ModalStore } from '#lib/components/Modals/stores.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { openEntityPicker } from '#lib/utils/entityPicker.js';
+	import { canPerformAction } from '#lib/utils/access-control.js';
 	import { invalidateAll } from '$app/navigation';
 	import type { PageData, ActionData } from './$types';
 	import { page } from '$app/state';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		data: PageData;

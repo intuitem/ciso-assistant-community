@@ -2,22 +2,25 @@
 	import { run } from 'svelte/legacy';
 
 	import { applyAction, deserialize } from '$app/forms';
-	import { getToastStore } from '$lib/components/Toast/stores';
-	import Question from '$lib/components/Forms/Question.svelte';
-	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
-	import Score from '$lib/components/Forms/Score.svelte';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import SplashCard from '$lib/components/FrameworkBuilder/SplashCard.svelte';
-	import TableMarkdownField from '$lib/components/Forms/TableMarkdownField.svelte';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import Question from '#lib/components/Forms/Question.svelte';
+	import RadioGroup from '#lib/components/Forms/RadioGroup.svelte';
+	import Score from '#lib/components/Forms/Score.svelte';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import SplashCard from '#lib/components/FrameworkBuilder/SplashCard.svelte';
+	import TableMarkdownField from '#lib/components/Forms/TableMarkdownField.svelte';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
-	import UpdateModal from '$lib/components/Modals/UpdateModal.svelte';
-	import { complianceResultColorMap, complianceResultTailwindColorMap } from '$lib/utils/constants';
+	} from '#lib/components/Modals/stores.js';
+	import UpdateModal from '#lib/components/Modals/UpdateModal.svelte';
+	import {
+		complianceResultColorMap,
+		complianceResultTailwindColorMap
+	} from '#lib/utils/constants.js';
 	import {
 		displayScoreColor,
 		formatScoreValue,
@@ -33,16 +36,16 @@
 		alignmentColorMap,
 		requirementResultOptions,
 		AUTO_ALIGNMENT_QUESTION_URN
-	} from '$lib/utils/helpers';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
-	import ScorePair from '$lib/components/ComplianceAssessment/ScorePair.svelte';
-	import { getLocale } from '$paraglide/runtime';
-	import { formatDate } from '$lib/utils/datetime';
+	} from '#lib/utils/helpers.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
+	import ScorePair from '#lib/components/ComplianceAssessment/ScorePair.svelte';
+	import { getLocale } from '#paraglide/runtime.js';
+	import { formatDate } from '#lib/utils/datetime.js';
 	import { Accordion, Progress } from '@skeletonlabs/skeleton-svelte';
 	import { superForm, type SuperForm } from 'sveltekit-superforms';
 	import type { ActionData, PageData } from './$types';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 	import { invalidateAll } from '$app/navigation';
 
 	interface Props {
@@ -791,8 +794,8 @@
 	}
 
 	import { page } from '$app/state';
-	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
-	import CommitmentPanel from '$lib/components/CommitmentPanel/CommitmentPanel.svelte';
+	import CommentsPanel from '#lib/components/CommentsPanel/CommentsPanel.svelte';
+	import CommitmentPanel from '#lib/components/CommitmentPanel/CommitmentPanel.svelte';
 	import { onMount } from 'svelte';
 	onMount(() => {
 		document.addEventListener('keydown', handleKeydown);

@@ -1,18 +1,18 @@
 <script lang="ts">
 	import type { PageData, ActionData } from './$types';
-	import DetailView from '$lib/components/DetailView/DetailView.svelte';
-	import MetricSampleChart from '$lib/components/Chart/MetricSampleChart.svelte';
-	import { m } from '$paraglide/messages';
+	import DetailView from '#lib/components/DetailView/DetailView.svelte';
+	import MetricSampleChart from '#lib/components/Chart/MetricSampleChart.svelte';
+	import { m } from '#paraglide/messages.js';
 	import { invalidate, invalidateAll } from '$app/navigation';
 	import { page } from '$app/state';
-	import { getModalStore } from '$lib/components/Modals/stores';
-	import ComposeMetricModal from '$lib/components/Modals/ComposeMetricModal.svelte';
-	import FormulaDrawer from '$lib/components/Metrology/FormulaDrawer.svelte';
-	import type { Composition } from '$lib/components/Metrology/ComposeMetricEditor.svelte';
-	import type { DefinitionComposition } from '$lib/components/Metrology/DefinitionFormulaPanel.svelte';
+	import { getModalStore } from '#lib/components/Modals/stores.js';
+	import ComposeMetricModal from '#lib/components/Modals/ComposeMetricModal.svelte';
+	import FormulaDrawer from '#lib/components/Metrology/FormulaDrawer.svelte';
+	import type { Composition } from '#lib/components/Metrology/ComposeMetricEditor.svelte';
+	import type { DefinitionComposition } from '#lib/components/Metrology/DefinitionFormulaPanel.svelte';
 	import { onDestroy, onMount, tick } from 'svelte';
 	import { get } from 'svelte/store';
-	import { tableRefreshers } from '$lib/utils/stores';
+	import { tableRefreshers } from '#lib/utils/stores.js';
 
 	interface Props {
 		data: PageData;

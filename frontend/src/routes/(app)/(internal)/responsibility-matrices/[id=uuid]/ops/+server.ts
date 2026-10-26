@@ -6,9 +6,9 @@
 // mutations (cell-cycle, drag-reorder, inline add) that don't fit the form
 // submission round-trip. Each action proxies straight to the backend.
 
-import { BASE_API_URL } from '$lib/utils/constants';
+import { BASE_API_URL } from '#lib/utils/constants.js';
 import { error } from '@sveltejs/kit';
-import { UUID_RE, proxyJson } from '$lib/utils/jsonProxy';
+import { UUID_RE, proxyJson } from '#lib/utils/jsonProxy.js';
 import type { RequestHandler } from './$types';
 
 function requireUuid(value: unknown, field: string): string {

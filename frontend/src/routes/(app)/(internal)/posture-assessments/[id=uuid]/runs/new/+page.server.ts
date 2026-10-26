@@ -1,7 +1,7 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { discardBody } from '$lib/utils/responses';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { discardBody } from '#lib/utils/responses.js';
 import type { PageServerLoad } from './$types';
-import { error, fail, redirect, type Actions, type NumericRange } from '@sveltejs/kit';
+import { error, fail, redirect, type Actions } from '@sveltejs/kit';
 
 function flattenChecks(nodes: any[], acc: any[] = []) {
 	for (const node of nodes) {
@@ -19,9 +19,9 @@ export const load: PageServerLoad = async (event) => {
 	]);
 	if (!assessmentRes.ok) {
 		await discardBody(treeRes);
-		error(assessmentRes.status as NumericRange<400, 599>, await assessmentRes.json());
+		error(assessmentRes.status, await assessmentRes.json());
 	}
-	if (!treeRes.ok) error(treeRes.status as NumericRange<400, 599>, await treeRes.json());
+	if (!treeRes.ok) error(treeRes.status, await treeRes.json());
 	const [assessment, tree] = await Promise.all([assessmentRes.json(), treeRes.json()]);
 	const asset =
 		event.url.searchParams.get('asset') ??

@@ -1,28 +1,28 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import type { PageData } from './$types';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import { URL_MODEL_MAP } from '$lib/utils/crud';
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { formatDateOrDateTime } from '$lib/utils/datetime';
-	import { getLocale } from '$paraglide/runtime.js';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import { URL_MODEL_MAP } from '#lib/utils/crud.js';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { formatDateOrDateTime } from '#lib/utils/datetime.js';
+	import { getLocale } from '#paraglide/runtime.js';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
 	import { invalidateAll } from '$app/navigation';
-	import { canPerformActionOnObject } from '$lib/utils/access-control';
-	import ValidationFlowActionModal from '$lib/components/Modals/ValidationFlowActionModal.svelte';
+	import { canPerformActionOnObject } from '#lib/utils/access-control.js';
+	import ValidationFlowActionModal from '#lib/components/Modals/ValidationFlowActionModal.svelte';
 	import { deserialize } from '$app/forms';
 	import {
 		validationFlowErrorMessage,
 		validationFlowItemHref,
 		validationFlowModelLabels,
 		validationStatusColor
-	} from '$lib/utils/validationFlows';
+	} from '#lib/utils/validationFlows.js';
 	import {
 		getModalStore,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 
 	interface Props {
 		data: PageData;

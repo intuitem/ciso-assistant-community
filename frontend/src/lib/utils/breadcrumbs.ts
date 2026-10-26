@@ -1,7 +1,7 @@
 import { writable } from 'svelte/store';
-import { browser } from '$app/environment';
+import { browser } from '$app/env';
 import { goto as _goto } from '$app/navigation';
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 
 const STORAGE_KEY = 'ciso:breadcrumbs';
 

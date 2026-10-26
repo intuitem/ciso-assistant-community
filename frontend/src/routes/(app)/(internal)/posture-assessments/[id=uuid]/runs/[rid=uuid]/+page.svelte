@@ -1,14 +1,14 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 	import { deserialize, enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { m } from '$paraglide/messages';
-	import { postureResultTailwindColorMap } from '$lib/utils/constants';
-	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
-	import { getToastStore } from '$lib/components/Toast/stores';
-	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
+	import { m } from '#paraglide/messages.js';
+	import { postureResultTailwindColorMap } from '#lib/utils/constants.js';
+	import { getModalStore, type ModalStore } from '#lib/components/Modals/stores.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import PromptConfirmModal from '#lib/components/Modals/PromptConfirmModal.svelte';
 
 	interface Props {
 		data: PageData;
@@ -119,7 +119,7 @@
 							background: 'preset-filled-success-500'
 						});
 					}
-					await update();
+					await update({ navigate: false });
 				}}
 			class="space-y-3"
 		>
@@ -199,7 +199,7 @@
 									if (result.type === 'failure') {
 										toastError((result.data as any)?.error ?? m.error());
 									}
-									await update();
+									await update({ navigate: false });
 								}}
 							class="flex items-center gap-2"
 						>

@@ -1,21 +1,21 @@
 <script lang="ts">
 	import type { PageData, ActionData } from './$types';
-	import DetailView from '$lib/components/DetailView/DetailView.svelte';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import PostureTrendChart from '$lib/components/Chart/PostureTrendChart.svelte';
-	import PostureHeatmapChart from '$lib/components/Chart/PostureHeatmapChart.svelte';
-	import PostureHistoryChart from '$lib/components/Chart/PostureHistoryChart.svelte';
+	import DetailView from '#lib/components/DetailView/DetailView.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import PostureTrendChart from '#lib/components/Chart/PostureTrendChart.svelte';
+	import PostureHeatmapChart from '#lib/components/Chart/PostureHeatmapChart.svelte';
+	import PostureHistoryChart from '#lib/components/Chart/PostureHistoryChart.svelte';
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 	import { deserialize, enhance } from '$app/forms';
-	import { invalidateAll, replaceState } from '$app/navigation';
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { invalidateAll, goto } from '$app/navigation';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { page } from '$app/state';
-	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
-	import { getToastStore } from '$lib/components/Toast/stores';
-	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
-	import ImportMappingModal from '$lib/components/Modals/ImportMappingModal.svelte';
-	import { postureResultTailwindColorMap } from '$lib/utils/constants';
+	import { getModalStore, type ModalStore } from '#lib/components/Modals/stores.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import PromptConfirmModal from '#lib/components/Modals/PromptConfirmModal.svelte';
+	import ImportMappingModal from '#lib/components/Modals/ImportMappingModal.svelte';
+	import { postureResultTailwindColorMap } from '#lib/utils/constants.js';
 
 	interface Props {
 		data: PageData;
@@ -94,6 +94,7 @@
 	const displayedScore = $derived.by(() => {
 		if (!filterActive) return data.posture?.score != null ? `${data.posture.score}%` : '--';
 		const applicable = (counts['pass'] ?? 0) + (counts['fail'] ?? 0);
+
 		return applicable ? `${Math.round((100 * (counts['pass'] ?? 0)) / applicable)}%` : '--';
 	});
 
@@ -107,6 +108,7 @@
 			history = null;
 			return;
 		}
+
 		fetch(`/posture-assessments/${data.data.id}/history?asset=${assetId}`)
 			.then((res) => (res.ok ? res.json() : null))
 			.then((body) => {
@@ -123,10 +125,11 @@
 	);
 
 	$effect(() => {
-		const url = new URL(page.url);
+		const url = new URL(page.url.href);
+
 		if (filterAsset) url.searchParams.set('asset', filterAsset);
 		else url.searchParams.delete('asset');
-		if (url.href !== page.url.href) replaceState(url, page.state);
+		if (url.href !== page.url.href) goto(url, { shallow: true, replace: true, state: page.state });
 	});
 
 	const scopedAssets = $derived(data.data?.assets ?? []);
@@ -261,6 +264,7 @@
 		if (assetIds.length) fd.set('assets', JSON.stringify(assetIds));
 		fd.set('file', file);
 		const result = await postAction('importFile', fd);
+
 		importSummary =
 			result.type === 'success'
 				? (result.data?.importSummary ?? { done: true })
@@ -597,7 +601,7 @@
 											use:enhance={() =>
 												({ update }) => {
 													pickerOpen = false;
-													update();
+													update({ navigate: false });
 												}}
 										>
 											<input type="hidden" name="asset" value={candidate.id} />
@@ -636,15 +640,16 @@
 								{#each rows as row (row.id)}
 									<tr class="border-t border-surface-200-800" data-testid="posture-asset-row">
 										<td class="px-2 py-2 font-medium pl-6">{row.shortName}</td>
-										<td class="px-2 py-2 {row.measured === 0 ? 'text-surface-500' : ''}">
-											{row.measured}/{totalChecks}
-										</td>
-										<td class="px-2 py-2">
-											{row.passRate != null ? `${row.passRate}%` : '--'}
-										</td>
-										<td class="px-2 py-2 whitespace-nowrap">
-											{row.lastRun ? new Date(row.lastRun).toLocaleString() : '--'}
-										</td>
+
+										<td class="px-2 py-2 {row.measured === 0 ? 'text-surface-500' : ''}"
+											>{row.measured}/{totalChecks}</td
+										>
+
+										<td class="px-2 py-2">{row.passRate != null ? `${row.passRate}%` : '--'}</td>
+										<td class="px-2 py-2 whitespace-nowrap"
+											>{row.lastRun ? new Date(row.lastRun).toLocaleString() : '--'}</td
+										>
+
 										<td class="px-2 py-2">
 											<div class="flex items-center gap-3 justify-end">
 												<button
@@ -682,7 +687,7 @@
 													<i class="fa-solid fa-download"></i>
 												</a>
 												{#if row.measured === 0}
-													<form method="POST" action="?/removeAsset" use:enhance class="inline">
+													<form method="POST" action="?/removeAsset" use:enhance={() => ({ update }) => update({ navigate: false })} class="inline">
 														<input type="hidden" name="asset" value={row.id} />
 														<button
 															type="submit"
@@ -907,7 +912,7 @@
 													{/if}
 												</div>
 											{:else}
-												<form method="POST" action="?/createFinding" use:enhance>
+												<form method="POST" action="?/createFinding" use:enhance={() => ({ update }) => update({ navigate: false })}>
 													<input type="hidden" name="requirement" value={row.requirement.id} />
 													<input type="hidden" name="asset" value={row.asset.id} />
 													<button type="submit" class="btn btn-sm preset-filled-primary-500">
@@ -977,10 +982,8 @@
 				type="button"
 				class="text-surface-500 hover:text-surface-700-300"
 				aria-label={m.close()}
-				onclick={() => (expandedRow = null)}
+				onclick={() => (expandedRow = null)}><i class="fa-solid fa-xmark"></i></button
 			>
-				<i class="fa-solid fa-xmark"></i>
-			</button>
 		</div>
 		<p class="text-sm flex items-center gap-2">
 			<span

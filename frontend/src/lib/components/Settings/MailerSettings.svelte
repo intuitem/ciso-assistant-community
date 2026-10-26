@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
-	import { getToastStore } from '$lib/components/Toast/stores';
-	import { m } from '$paraglide/messages';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import { m } from '#paraglide/messages.js';
 	import { Switch } from '@skeletonlabs/skeleton-svelte';
 	import { untrack } from 'svelte';
 

@@ -19,17 +19,17 @@
 	import '@xyflow/svelte/dist/style.css';
 
 	import MapNode from './MapNode.svelte';
-	import AssetEdge from '$lib/components/AssetGraph/AssetEdge.svelte';
-	import { computeLayout } from '$lib/components/AssetGraph/layout';
-	import { createLinkWriter } from '$lib/components/AssetGraph/links';
-	import { createPickerForm } from '$lib/components/AssetGraph/picker';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import { fetchAllByIds } from '$lib/utils/pagination';
-	import { getToastStore } from '$lib/components/Toast/stores';
-	import { getModalStore, type ModalSettings } from '$lib/components/Modals/stores';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import { m } from '$paraglide/messages';
-	import { resolvedTheme } from '$lib/utils/theme';
+	import AssetEdge from '#lib/components/AssetGraph/AssetEdge.svelte';
+	import { computeLayout } from '#lib/components/AssetGraph/layout.js';
+	import { createLinkWriter } from '#lib/components/AssetGraph/links.js';
+	import { createPickerForm } from '#lib/components/AssetGraph/picker.js';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import { fetchAllByIds } from '#lib/utils/pagination.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import { getModalStore, type ModalSettings } from '#lib/components/Modals/stores.js';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
+	import { m } from '#paraglide/messages.js';
+	import { resolvedTheme } from '#lib/utils/theme.js';
 
 	interface GraphNode {
 		id: string;

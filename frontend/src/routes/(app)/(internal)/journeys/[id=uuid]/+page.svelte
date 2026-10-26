@@ -1,14 +1,14 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { invalidateAll } from '$app/navigation';
-	import { goto } from '$lib/utils/breadcrumbs';
-	import { getSecureRedirect } from '$lib/utils/helpers';
-	import { page } from '$app/stores';
-	import { getModalStore } from '$lib/components/Modals/stores';
-	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import { goto } from '#lib/utils/breadcrumbs.js';
+	import { getSecureRedirect } from '#lib/utils/helpers.js';
+	import { page } from '$app/state';
+	import { getModalStore } from '#lib/components/Modals/stores.js';
+	import PromptConfirmModal from '#lib/components/Modals/PromptConfirmModal.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
@@ -61,7 +61,7 @@
 	};
 
 	async function updateStepStatus(stepId: string, newStatus: string) {
-		await fetch(`/journeys/${$page.params.id}/step/${stepId}`, {
+		await fetch(`/journeys/${page.params.id}/step/${stepId}`, {
 			method: 'PATCH',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ status: newStatus })
@@ -153,7 +153,7 @@
 	}
 
 	async function updateStepTargetRef(stepId: string, targetRef: string | null) {
-		await fetch(`/journeys/${$page.params.id}/step/${stepId}`, {
+		await fetch(`/journeys/${page.params.id}/step/${stepId}`, {
 			method: 'PATCH',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ target_ref: targetRef })
@@ -175,7 +175,7 @@
 			renaming = false;
 			return;
 		}
-		await fetch(`/journeys/${$page.params.id}/rename`, {
+		await fetch(`/journeys/${page.params.id}/rename`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ name: trimmed })
@@ -190,9 +190,8 @@
 	async function upgradeJourney() {
 		upgrading = true;
 		try {
-			const response = await fetch(`/journeys/${$page.params.id}/upgrade`, {
-				method: 'POST'
-			});
+			const response = await fetch(`/journeys/${page.params.id}/upgrade`, { method: 'POST' });
+
 			if (response.ok) {
 				invalidateAll();
 			}
@@ -216,9 +215,9 @@
 			},
 			response: async (confirmed: boolean) => {
 				if (!confirmed) return;
-				const response = await fetch(`/journeys/${$page.params.id}`, {
-					method: 'DELETE'
-				});
+
+				const response = await fetch(`/journeys/${page.params.id}`, { method: 'DELETE' });
+
 				if (response.ok) {
 					goto('/presets', { label: m.presets(), breadcrumbAction: 'replace' });
 				}

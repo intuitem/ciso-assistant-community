@@ -2,8 +2,8 @@
 // for information about these interfaces
 // and what to do when importing types
 
-import type { User } from '$lib/utils/types';
-import type { FeatureFlags } from '$lib/feature-flags';
+import type { User } from '#lib/utils/types.js';
+import type { FeatureFlags } from '#lib/feature-flags.js';
 
 declare global {
 	namespace App {

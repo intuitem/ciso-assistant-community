@@ -1,26 +1,26 @@
 <script lang="ts">
-	import SuperForm from '$lib/components/Forms/Form.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import Select from '$lib/components/Forms/Select.svelte';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
+	import SuperForm from '#lib/components/Forms/Form.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import Select from '#lib/components/Forms/Select.svelte';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import PromptConfirmModal from '#lib/components/Modals/PromptConfirmModal.svelte';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
-	import { modelSchema } from '$lib/utils/schemas';
-	import * as m from '$paraglide/messages.js';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { browser } from '$app/environment';
+	import { modelSchema } from '#lib/utils/schemas.js';
+	import * as m from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { browser } from '$app/env';
 	import { goto } from '$app/navigation';
-	import { getSecureRedirect } from '$lib/utils/helpers';
+	import { getSecureRedirect } from '#lib/utils/helpers.js';
 	import type { SuperValidated } from 'sveltekit-superforms';
 
 	interface Props {
@@ -421,10 +421,8 @@
 				>
 				<button
 					class="text-amber-600 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-300 text-xs"
-					onclick={() => (showValidationErrors = false)}
+					onclick={() => (showValidationErrors = false)}><i class="fa-solid fa-xmark"></i></button
 				>
-					<i class="fa-solid fa-xmark"></i>
-				</button>
 			</div>
 			<ul class="space-y-1">
 				{#each validation.errors as error}
@@ -554,7 +552,9 @@
 									onChange={(value) => fillContact('primary', value, primaryFillOptions)}
 								/>
 							</div>
+
 							<TextField form={_form} field="primary_contact_name" label={m.primaryContactName()} />
+
 							<TextField
 								form={_form}
 								field="primary_contact_email"
@@ -610,6 +610,7 @@
 					</h2>
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<TextField form={_form} field="financial_entity_code" label={m.financialEntityCode()} />
+
 						<TextField
 							form={_form}
 							field="competent_authority_code"
@@ -923,6 +924,7 @@
 
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<TextField form={_form} field="root_causes_other" label={m.rootCausesOther()} />
+
 						<TextField
 							form={_form}
 							field="root_cause_addressing_date_time"

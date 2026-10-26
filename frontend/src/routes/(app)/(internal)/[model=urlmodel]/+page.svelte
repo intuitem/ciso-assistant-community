@@ -2,31 +2,31 @@
 	import { handlers } from 'svelte/legacy';
 	import { page } from '$app/state';
 
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import ChoiceCardsModal from '$lib/components/Modals/ChoiceCardsModal.svelte';
-	import ImportWorkflowModal from '$lib/components/Modals/ImportWorkflowModal.svelte';
-	import ComposeMetricModal from '$lib/components/Modals/ComposeMetricModal.svelte';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
+	import ChoiceCardsModal from '#lib/components/Modals/ChoiceCardsModal.svelte';
+	import ImportWorkflowModal from '#lib/components/Modals/ImportWorkflowModal.svelte';
+	import ComposeMetricModal from '#lib/components/Modals/ComposeMetricModal.svelte';
 	import ExportModal, {
 		type ExportGroup,
 		type ExportOption
-	} from '$lib/components/Modals/ExportModal.svelte';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { buildCustomFieldFilters, listViewFields, quickFilterPresets } from '$lib/utils/table';
-	import { NON_CREATABLE_URL_MODELS } from '$lib/utils/crud';
-	import { consumeCreateIntent } from '$lib/utils/create-intent';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { driverInstance, tableRefreshers } from '$lib/utils/stores';
-	import { m } from '$paraglide/messages';
+	} from '#lib/components/Modals/ExportModal.svelte';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
+	import { buildCustomFieldFilters, listViewFields, quickFilterPresets } from '#lib/utils/table.js';
+	import { NON_CREATABLE_URL_MODELS } from '#lib/utils/crud.js';
+	import { consumeCreateIntent } from '#lib/utils/create-intent.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { driverInstance, tableRefreshers } from '#lib/utils/stores.js';
+	import { m } from '#paraglide/messages.js';
 	import type { ActionData, PageData } from './$types';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 	import { onMount } from 'svelte';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
-	import { getToastStore } from '$lib/components/Toast/stores';
+	} from '#lib/components/Modals/stores.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
 	import { invalidateAll } from '$app/navigation';
 
 	interface Props {

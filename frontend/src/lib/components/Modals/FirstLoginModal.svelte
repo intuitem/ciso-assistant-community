@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getModalStore, type ModalStore } from './stores';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 
 	interface Action {
 		label: string;

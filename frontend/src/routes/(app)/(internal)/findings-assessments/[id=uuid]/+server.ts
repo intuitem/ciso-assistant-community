@@ -1,7 +1,7 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { getModelInfo } from '$lib/utils/crud';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { getModelInfo } from '#lib/utils/crud.js';
 
-import { error, type NumericRange } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 // This route shadows the generic [model=urlmodel] one, so it must serve GET too:
@@ -14,7 +14,7 @@ export const GET: RequestHandler = async ({ fetch, params, url }) => {
 
 	const res = await fetch(endpoint);
 	if (!res.ok) {
-		error(res.status as NumericRange<400, 599>, await res.json());
+		error(res.status, await res.json());
 	}
 
 	const data = await res.json();
@@ -40,7 +40,7 @@ export const PATCH: RequestHandler = async ({ fetch, params, request }) => {
 	});
 
 	if (!res.ok) {
-		error(res.status as NumericRange<400, 599>, await res.json());
+		error(res.status, await res.json());
 	}
 
 	const data = await res.json();

@@ -1,6 +1,6 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { getModelInfo } from '$lib/utils/crud';
-import { error, type NumericRange } from '@sveltejs/kit';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { getModelInfo } from '#lib/utils/crud.js';
+import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 // `[field=fields]` only matches table columns, and a plain PATCH on `/{model}/{id}`
@@ -12,7 +12,7 @@ const endpointFor = (params: { model: string; id: string }) => {
 
 const forward = async (res: Response) => {
 	if (!res.ok) {
-		error(res.status as NumericRange<400, 599>, await res.json());
+		error(res.status, await res.json());
 	}
 	return new Response(JSON.stringify(await res.json()), {
 		// Fetched straight from the browser: logout clears cookies, not the cache.

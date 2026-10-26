@@ -1,12 +1,12 @@
 <script lang="ts">
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { modelSchema } from '$lib/utils/schemas';
-	import { m } from '$paraglide/messages';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { modelSchema } from '#lib/utils/schemas.js';
+	import { m } from '#paraglide/messages.js';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
-	import type { FormDataShape } from '$lib/utils/schemas';
+	import type { FormDataShape } from '#lib/utils/schemas.js';
 	import { getModalStore, type ModalStore } from './stores';
 	import { page } from '$app/state';
 	import { invalidateAll } from '$app/navigation';

@@ -1,4 +1,4 @@
-import { ALLAUTH_API_URL } from '$lib/utils/constants';
+import { ALLAUTH_API_URL } from '#lib/utils/constants.js';
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 

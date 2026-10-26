@@ -1,7 +1,7 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { getModelInfo } from '$lib/utils/crud';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { getModelInfo } from '#lib/utils/crud.js';
 
-import { error, type NumericRange } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ fetch, params }) => {
@@ -9,7 +9,7 @@ export const GET: RequestHandler = async ({ fetch, params }) => {
 	const endpoint = `${BASE_API_URL}/${model.endpointUrl ?? 'policies'}/${params.id}/`;
 	const res = await fetch(endpoint);
 	if (!res.ok) {
-		error(res.status as NumericRange<400, 599>, await res.json());
+		error(res.status, await res.json());
 	}
 	const data = await res.json();
 	return new Response(JSON.stringify(data), {
@@ -32,7 +32,7 @@ export const PATCH: RequestHandler = async ({ fetch, params, request }) => {
 	});
 
 	if (!res.ok) {
-		error(res.status as NumericRange<400, 599>, await res.json());
+		error(res.status, await res.json());
 	}
 
 	const data = await res.json();

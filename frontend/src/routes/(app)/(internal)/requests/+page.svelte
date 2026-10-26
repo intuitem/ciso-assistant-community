@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { ruleLabel } from '$lib/components/QuickForms/rule-label';
+	import { ruleLabel } from '#lib/components/QuickForms/rule-label.js';
 	import { invalidateAll } from '$app/navigation';
 	import { deserialize } from '$app/forms';
 	import { page } from '$app/state';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();

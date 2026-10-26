@@ -2,15 +2,15 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
 	import { page } from '$app/state';
-	import { getLocale } from '$paraglide/runtime';
-	import { formatDate } from '$lib/utils/datetime';
-	import { pageTitle } from '$lib/utils/stores';
-	import { getToastStore } from '$lib/components/Toast/stores';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import { getLocale } from '#paraglide/runtime.js';
+	import { formatDate } from '#lib/utils/datetime.js';
+	import { pageTitle } from '#lib/utils/stores.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
-	import { VERDICT, VERDICT_ORDER, type Verdict } from '$lib/utils/questionnaire-verdict';
+	import { VERDICT, VERDICT_ORDER, type Verdict } from '#lib/utils/questionnaire-verdict.js';
 	import type { PageData } from './$types';
 
 	interface Sheet {

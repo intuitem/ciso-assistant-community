@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { m } from '$paraglide/messages';
-	import { getModalStore } from '$lib/components/Modals/stores';
-	import { getToastStore } from '$lib/components/Toast/stores';
+	import { m } from '#paraglide/messages.js';
+	import { getModalStore } from '#lib/components/Modals/stores.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
 	import { superForm } from 'sveltekit-superforms';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
-	import Overlay from '$lib/components/PortalEditor/Overlay.svelte';
-	import { confirmDeleteForm, savedToast } from '$lib/utils/portalActions';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import FolderTreeSelect from '#lib/components/Forms/FolderTreeSelect.svelte';
+	import Overlay from '#lib/components/PortalEditor/Overlay.svelte';
+	import { confirmDeleteForm, savedToast } from '#lib/utils/portalActions.js';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -113,7 +113,7 @@
 	const applyEnhance =
 		() =>
 		async ({ result, update }: { result: any; update: any }) => {
-			await update();
+			await update({ navigate: false });
 			if (result.type === 'success') {
 				toast.trigger({ message: m.saved(), background: 'preset-filled-success-500' });
 				diff = null;
@@ -234,7 +234,7 @@
 								<i class="fa-solid fa-rotate mr-1"></i>{m.sync()}
 							</button>
 						</form>
-						<form method="POST" action="?/delete" use:enhance>
+						<form method="POST" action="?/delete" use:enhance={() => ({ update }) => update({ navigate: false })}>
 							<input type="hidden" name="id" value={s.id} />
 							<button
 								type="button"

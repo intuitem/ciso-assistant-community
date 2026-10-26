@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { ruleLabel } from '$lib/components/QuickForms/rule-label';
+	import { ruleLabel } from '#lib/components/QuickForms/rule-label.js';
 	import { run } from 'svelte/legacy';
 
 	import { page } from '$app/state';
 	import RecursiveTreeView, {
 		setContextRecursiveTreeView,
 		DEFAULT_CONTEXT_RECURSIVE_TREE_VIEW
-	} from '$lib/components/TreeView/RecursiveTreeView.svelte';
+	} from '#lib/components/TreeView/RecursiveTreeView.svelte';
 
 	import { onMount } from 'svelte';
 
-	import type { TreeViewNode } from '$lib/components/TreeView/types';
+	import type { TreeViewNode } from '#lib/components/TreeView/types.js';
 
 	import { Switch, Progress, Popover, Tooltip } from '@skeletonlabs/skeleton-svelte';
 
@@ -19,49 +19,49 @@
 	import type { ActionData, PageData } from './$types';
 	import TreeViewItemContent from './TreeViewItemContent.svelte';
 
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import AuditTrailButton from '#lib/components/AuditTrail/AuditTrailButton.svelte';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
 	import ExportModal, {
 		type ExportFormat,
 		type ExportGroup
-	} from '$lib/components/Modals/ExportModal.svelte';
+	} from '#lib/components/Modals/ExportModal.svelte';
 
 	import {
 		complianceResultColorMap,
 		complianceStatusColorMap,
 		extendedResultColorMap
-	} from '$lib/utils/constants';
+	} from '#lib/utils/constants.js';
 
-	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
-	import RingProgress from '$lib/components/DataViz/RingProgress.svelte';
-	import { URL_MODEL_MAP, getModelInfo, getMarkdownFields } from '$lib/utils/crud';
+	import DonutChart from '#lib/components/Chart/DonutChart.svelte';
+	import RingProgress from '#lib/components/DataViz/RingProgress.svelte';
+	import { URL_MODEL_MAP, getModelInfo, getMarkdownFields } from '#lib/utils/crud.js';
 	import type { Node } from './types';
 
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
-	import { formatDateOrDateTime } from '$lib/utils/datetime';
-	import { getLocale } from '$paraglide/runtime.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
+	import { formatDateOrDateTime } from '#lib/utils/datetime.js';
+	import { getLocale } from '#paraglide/runtime.js';
 
-	import List from '$lib/components/List/List.svelte';
-	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
-	import SuggestControlsModal from '$lib/components/Modals/SuggestControlsModal.svelte';
+	import List from '#lib/components/List/List.svelte';
+	import ConfirmModal from '#lib/components/Modals/ConfirmModal.svelte';
+	import SuggestControlsModal from '#lib/components/Modals/SuggestControlsModal.svelte';
 	import {
 		displayScoreColor,
 		darkenColor,
 		getScoreHexColor,
 		getFieldVisibility,
 		roundScore
-	} from '$lib/utils/helpers';
-	import { auditFiltersStore, expandedNodesState } from '$lib/utils/stores';
-	import TreeExpandCollapseToggle from '$lib/components/TreeView/TreeExpandCollapseToggle.svelte';
-	import ExcludeNotApplicableRequirements from '$lib/components/TreeView/ExcludeNotApplicableRequirements.svelte';
+	} from '#lib/utils/helpers.js';
+	import { auditFiltersStore, expandedNodesState } from '#lib/utils/stores.js';
+	import TreeExpandCollapseToggle from '#lib/components/TreeView/TreeExpandCollapseToggle.svelte';
+	import ExcludeNotApplicableRequirements from '#lib/components/TreeView/ExcludeNotApplicableRequirements.svelte';
 
 	import { derived } from 'svelte/store';
-	import { canPerformActionOnObject } from '$lib/utils/access-control';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import ValidationFlowsSection from '$lib/components/ValidationFlows/ValidationFlowsSection.svelte';
-	import { countMasked, isMaskedPlaceholder } from '$lib/utils/related-visibility';
+	import { canPerformActionOnObject } from '#lib/utils/access-control.js';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import ValidationFlowsSection from '#lib/components/ValidationFlows/ValidationFlowsSection.svelte';
+	import { countMasked, isMaskedPlaceholder } from '#lib/utils/related-visibility.js';
 
 	const ISO27001_FRAMEWORK_URN_PREFIX = 'urn:intuitem:risk:framework:iso27001';
 
@@ -195,16 +195,16 @@
 		if (dialogElement) dialogElement.close();
 	}
 
-	import ForceCirclePacking from '$lib/components/DataViz/ForceCirclePacking.svelte';
+	import ForceCirclePacking from '#lib/components/DataViz/ForceCirclePacking.svelte';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
-	import CompareAuditModal from '$lib/components/Modals/CompareAuditModal.svelte';
-	import MapFromAuditModal from '$lib/components/Modals/MapFromAuditModal.svelte';
-	import MappingDirectionModal from '$lib/components/Modals/MappingDirectionModal.svelte';
+	} from '#lib/components/Modals/stores.js';
+	import CompareAuditModal from '#lib/components/Modals/CompareAuditModal.svelte';
+	import MapFromAuditModal from '#lib/components/Modals/MapFromAuditModal.svelte';
+	import MappingDirectionModal from '#lib/components/Modals/MappingDirectionModal.svelte';
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;

@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { getToastStore } from '$lib/components/Toast/stores';
-	import { formatDate } from '$lib/utils/datetime';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
-	import { getLocale } from '$paraglide/runtime';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import { formatDate } from '#lib/utils/datetime.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
+	import { getLocale } from '#paraglide/runtime.js';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -46,7 +46,7 @@
 
 	// The page's URL with these params changed; a new filter or search starts at the top.
 	function hrefWith(changes: Record<string, string | number | null>): string {
-		const params = new URLSearchParams(page.url.searchParams);
+		const params = new URLSearchParams(page.url.search);
 		if (!('offset' in changes)) params.delete('offset');
 		for (const [key, value] of Object.entries(changes)) {
 			if (value === null || value === '' || value === 0) params.delete(key);
@@ -59,7 +59,7 @@
 	function onSearch(event: SubmitEvent) {
 		event.preventDefault();
 		const value = new FormData(event.currentTarget as HTMLFormElement).get('search');
-		goto(hrefWith({ search: String(value ?? '').trim() }), { keepFocus: true });
+		goto(hrefWith({ search: String(value ?? '').trim() }), { reset: false });
 	}
 
 	// One start at a time: a double click must not open two drafts.
@@ -180,7 +180,7 @@
 					oninput={(e) => {
 						// The field's clear button resets the list too.
 						if (search && !e.currentTarget.value)
-							goto(hrefWith({ search: null }), { keepFocus: true });
+							goto(hrefWith({ search: null }), { reset: false });
 					}}
 					placeholder={m.searchPlaceholder()}
 					aria-label={m.search()}

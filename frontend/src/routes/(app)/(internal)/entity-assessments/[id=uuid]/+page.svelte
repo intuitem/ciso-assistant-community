@@ -1,20 +1,20 @@
 <script lang="ts">
-	import { goto, invalidateAll, preloadData, pushState } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { goto, invalidateAll, preloadData } from '$app/navigation';
+	import { page } from '$app/state';
 	import { deserialize } from '$app/forms';
-	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
-	import NewRevisionModal from '$lib/components/Modals/NewRevisionModal.svelte';
-	import ExportModal, { type ExportGroup } from '$lib/components/Modals/ExportModal.svelte';
-	import RingProgress from '$lib/components/DataViz/RingProgress.svelte';
-	import ComplianceOverview from '$lib/components/DataViz/ComplianceOverview.svelte';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import type { ModalComponent, ModalSettings } from '$lib/components/Modals/stores';
-	import { getToastStore } from '$lib/components/Toast/stores';
-	import DetailView from '$lib/components/DetailView/DetailView.svelte';
-	import { m } from '$paraglide/messages';
+	import { getModalStore, type ModalStore } from '#lib/components/Modals/stores.js';
+	import NewRevisionModal from '#lib/components/Modals/NewRevisionModal.svelte';
+	import ExportModal, { type ExportGroup } from '#lib/components/Modals/ExportModal.svelte';
+	import RingProgress from '#lib/components/DataViz/RingProgress.svelte';
+	import ComplianceOverview from '#lib/components/DataViz/ComplianceOverview.svelte';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import type { ModalComponent, ModalSettings } from '#lib/components/Modals/stores.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import DetailView from '#lib/components/DetailView/DetailView.svelte';
+	import { m } from '#paraglide/messages.js';
 	import AuditTableMode from '../../../(third-party)/compliance-assessments/[id=uuid]/table-mode/+page.svelte';
-	import TreeView from '$lib/components/TreeView/TreeView.svelte';
-	import TreeViewItem from '$lib/components/TreeView/TreeViewItem.svelte';
+	import TreeView from '#lib/components/TreeView/TreeView.svelte';
+	import TreeViewItem from '#lib/components/TreeView/TreeViewItem.svelte';
 	import type { Actions, PageData } from './$types';
 
 	interface Props {
@@ -200,7 +200,7 @@
 						const href = `/compliance-assessments/${data.data.compliance_assessment.id}/table-mode`;
 						const result = await preloadData(href);
 						if (result.type === 'loaded' && result.status === 200) {
-							pushState('', { auditTableMode: result.data });
+							goto(page.url.href, { shallow: true, state: { auditTableMode: result.data } });
 						} else {
 							// Something went wrong, try navigating
 							goto(href);
@@ -209,11 +209,11 @@
 				>
 					<span class="font-semibold text-lg select-none">{m.questionnaire()}</span>
 					{#snippet childrenSlot()}
-						{#if Object.hasOwn($page?.state, 'auditTableMode')}
+						{#if Object.hasOwn(page?.state, 'auditTableMode')}
 							<div class="max-h-192 overflow-y-scroll">
 								<AuditTableMode
 									{form}
-									data={$page?.state?.auditTableMode}
+									data={page?.state?.auditTableMode}
 									actionPath={`/compliance-assessments/${data.data.compliance_assessment.id}/table-mode`}
 									shallow
 									questionnaireOnly

@@ -1,17 +1,17 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { invalidateAll } from '$app/navigation';
 	import { page } from '$app/state';
-	import { isDark } from '$lib/utils/helpers';
-	import { getToastStore } from '$lib/components/Toast/stores';
-	import { canPerformActionOnObject } from '$lib/utils/access-control';
+	import { isDark } from '#lib/utils/helpers.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import { canPerformActionOnObject } from '#lib/utils/access-control.js';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
-	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
+	} from '#lib/components/Modals/stores.js';
+	import PromptConfirmModal from '#lib/components/Modals/PromptConfirmModal.svelte';
 
 	let { data } = $props();
 	let scheme = $derived(data.scheme);

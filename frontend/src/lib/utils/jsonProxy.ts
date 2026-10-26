@@ -2,7 +2,7 @@
 // matrix) that bypass form actions for fast JSON mutations. One implementation
 // of the request/response plumbing; each route keeps its own thin wrapper and
 // UUID error shape.
-import { json, error, type NumericRange } from '@sveltejs/kit';
+import { json, error } from '@sveltejs/kit';
 
 export const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -27,7 +27,7 @@ export async function proxyJson(
 	const data = await res.json().catch(() => ({}));
 	if (!res.ok) {
 		if (passThrough400 && res.status === 400) return json(data, { status: 400 });
-		error(res.status as NumericRange<400, 599>, data);
+		error(res.status, data);
 	}
 	return json(data, { status: res.status });
 }

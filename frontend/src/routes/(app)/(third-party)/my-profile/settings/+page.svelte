@@ -6,17 +6,17 @@
 	import ActivateTOTPModal from './mfa/components/ActivateTOTPModal.svelte';
 	import RegisterWebAuthnModal from './mfa/components/RegisterWebAuthnModal.svelte';
 
-	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
+	import ConfirmModal from '#lib/components/Modals/ConfirmModal.svelte';
 	import { invalidateAll } from '$app/navigation';
 	import { page } from '$app/state';
 	import {
 		formatDate,
 		sampleDateForPreference,
 		type DateFormatPreference
-	} from '$lib/utils/datetime';
-	import { m } from '$paraglide/messages';
-	import { getLocale } from '$paraglide/runtime';
-	import { setTheme, type ThemeMode } from '$lib/utils/theme';
+	} from '#lib/utils/datetime.js';
+	import { m } from '#paraglide/messages.js';
+	import { getLocale } from '#paraglide/runtime.js';
+	import { setTheme, type ThemeMode } from '#lib/utils/theme.js';
 	import { defaults } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
@@ -27,10 +27,10 @@
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 	import CreatePatModal from './pat/components/CreatePATModal.svelte';
-	import { getFeatureFlagGroups } from '$lib/utils/feature-flag-groups';
-	import FeatureFlagGroupList from '$lib/components/Forms/FeatureFlagGroupList.svelte';
+	import { getFeatureFlagGroups } from '#lib/utils/feature-flag-groups.js';
+	import FeatureFlagGroupList from '#lib/components/Forms/FeatureFlagGroupList.svelte';
 
 	interface Props {
 		data: PageData;

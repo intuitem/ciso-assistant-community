@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
-	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { mountThemeAwareChart } from '#lib/utils/echartsTheme.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 
-	import { level } from '$paraglide/messages';
+	import { level } from '#paraglide/messages.js';
 	interface riskChartData {
 		name: string;
 		value: number;

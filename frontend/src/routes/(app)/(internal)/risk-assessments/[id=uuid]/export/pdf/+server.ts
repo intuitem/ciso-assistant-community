@@ -1,5 +1,5 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { contentDispositionHeader } from '$lib/utils/contentDisposition';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { contentDispositionHeader } from '#lib/utils/contentDisposition.js';
 
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
