@@ -15,21 +15,21 @@ copyright: 'COPYRIGHT NOTICE
   OWASP does not endorse or recommend commercial products or services, allowing our
   community to remain vendor neutral with the collective wisdom of the best minds
   in software security worldwide. Copyright 2022, OWASP Foundation, Inc.'
-version: 1
+version: 2
 publication_date: 2026-10-26
 provider: OWASP
 packager: intuitem
 objects:
   threats:
   - urn: urn:intuitem:risk:threat:a01
-    ref_id: A01
+    ref_id: A01:2021
     name: Broken Access Control
     description: Access control enforces policy such that users cannot act outside
       of their intended permissions. Failures typically lead to unauthorized information
       disclosure, modification, or destruction of all data or performing a business
       function outside the user's limits.
   - urn: urn:intuitem:risk:threat:a02
-    ref_id: A02
+    ref_id: A02:2021
     name: Cryptographic Failures
     description: The first thing is to determine the protection needs of data in transit
       and at rest. For example, passwords, credit card numbers, health records, personal
@@ -38,7 +38,7 @@ objects:
       or regulations, e.g., financial data protection such as PCI Data Security Standard
       (PCI DSS).
   - urn: urn:intuitem:risk:threat:a03
-    ref_id: A03
+    ref_id: A03:2021
     name: Injection
     description: 'An application is vulnerable to attack when: User-supplied data
       is not validated, filtered, or sanitized by the application / Dynamic queries
@@ -48,12 +48,12 @@ objects:
       directly used or concatenated. The SQL or command contains the structure and
       malicious data in dynamic queries, commands, or stored procedures.'
   - urn: urn:intuitem:risk:threat:a04
-    ref_id: A04
+    ref_id: A04:2021
     name: Insecure Design
     description: Insecure design is a broad category representing different weaknesses,
       expressed as missing or ineffective control design.
   - urn: urn:intuitem:risk:threat:a05
-    ref_id: A05
+    ref_id: A05:2021
     name: Security Misconfiguration
     description: 'The application might be vulnerable if the application is: Missing
       appropriate security hardening across any part of the application stack or improperly
@@ -68,7 +68,7 @@ objects:
       or directives, or they are not set to secure values. / The software is out of
       date or vulnerable'
   - urn: urn:intuitem:risk:threat:a06
-    ref_id: A06
+    ref_id: A06:2021
     name: Vulnerable and Outdated Components
     description: "You are likely vulnerable: If you do not know the versions of all\
       \ components you use (both client-side and server-side). This includes components\
@@ -84,12 +84,12 @@ objects:
       \ / If software developers do not test the compatibility of updated, upgraded,\
       \ or patched libraries. / If you do not secure the components\u2019 configurations"
   - urn: urn:intuitem:risk:threat:a07
-    ref_id: A07
+    ref_id: A07:2021
     name: Identification and Authentication Failures
     description: Confirmation of the user's identity, authentication, and session
       management is critical to protect against authentication-related attacks.
   - urn: urn:intuitem:risk:threat:a08
-    ref_id: A08
+    ref_id: A08:2021
     name: Software and Data Integrity Failures
     description: Software and data integrity failures relate to code and infrastructure
       that does not protect against integrity violations. An example of this is where
@@ -103,13 +103,13 @@ objects:
       is where objects or data are encoded or serialized into a structure that an
       attacker can see and modify is vulnerable to insecure deserialization.
   - urn: urn:intuitem:risk:threat:a09
-    ref_id: A09
+    ref_id: A09:2021
     name: Security Logging and Monitoring Failures
     description: Returning to the OWASP Top 10 2021, this category is to help detect,
       escalate, and respond to active breaches. Without logging and monitoring, breaches
       cannot be detected.
   - urn: urn:intuitem:risk:threat:a10
-    ref_id: A10
+    ref_id: A10:2021
     name: Server Side Request Forgery (SSRF)
     description: SSRF flaws occur whenever a web application is fetching a remote
       resource without validating the user-supplied URL. It allows an attacker to
