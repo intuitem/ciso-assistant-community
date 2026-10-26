@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/state';
+	import { navigating, page } from '$app/state';
 	import * as m from '#paraglide/messages.js';
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 	import ClientSettings from './client-settings/+page.svelte';
@@ -111,6 +111,8 @@
 		const preload = PRELOAD_TABS[newValue];
 		if (preload && !page.state[preload.stateKey]) {
 			const result = await preloadData(preload.href);
+			// A shallow goto would cancel a navigation the user started meanwhile
+			if (navigating.to) return;
 
 			if (result.type === 'loaded' && result.status === 200) {
 				// Shallow goto updates page.state without a full navigation.

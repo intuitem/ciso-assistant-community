@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto, refreshAll, preloadData } from '$app/navigation';
-	import { page } from '$app/state';
+	import { navigating, page } from '$app/state';
 	import { deserialize } from '$app/forms';
 	import { getModalStore, type ModalStore } from '#lib/components/Modals/stores.js';
 	import NewRevisionModal from '#lib/components/Modals/NewRevisionModal.svelte';
@@ -199,6 +199,8 @@
 					onToggle={async () => {
 						const href = `/compliance-assessments/${data.data.compliance_assessment.id}/table-mode`;
 						const result = await preloadData(href);
+						// A shallow goto would cancel a navigation the user started meanwhile
+						if (navigating.to) return;
 						if (result.type === 'loaded' && result.status === 200) {
 							goto(page.url.href, { shallow: true, state: { auditTableMode: result.data } });
 						} else {
