@@ -1,5 +1,7 @@
 import io
+from datetime import date, datetime, timedelta
 from math import ceil
+from typing import ClassVar
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -7,8 +9,19 @@ import numpy as np
 from django.db.models import Count
 from django.utils.timezone import now
 from docx.shared import Cm
-from docxtpl import InlineImage
+from docxtpl import DocxTemplate, InlineImage
+from jinja2.filters import _GroupTuple
+from jinja2.runtime import (
+    BlockReference,
+    LoopContext,
+    Macro,
+    TemplateReference,
+    Undefined,
+)
+from jinja2.sandbox import SandboxedEnvironment
+from jinja2.utils import Cycler, Joiner, Namespace
 from library.helpers import get_referential_translation
+from markupsafe import Markup
 
 from .utils import is_field_visible_to
 
@@ -1202,6 +1215,56 @@ def inline_charts_for_docx(context, doc, width=Cm(15)):
         buffer.seek(0)
         wrapped[key] = InlineImage(doc, buffer, width=width)
     return wrapped
+
+
+class DocxReportSandbox(SandboxedEnvironment):
+    """Sandbox for user-supplied Word templates.
+
+    Only plain data and Jinja's own helpers expose attributes. Anything else in
+    the context is opaque: `InlineImage.tpl` alone leads to a `DocxTemplate`,
+    whose public methods render without a sandbox and read or write arbitrary
+    files. Data is matched on its exact type, since a subclass brings its own
+    methods (`numpy.float64.tofile` writes a file).
+    """
+
+    data_types: ClassVar[frozenset[type]] = frozenset(
+        {
+            str,
+            Markup,
+            int,
+            bool,
+            float,
+            date,
+            datetime,
+            timedelta,
+            list,
+            tuple,
+            _GroupTuple,
+            dict,
+            range,
+        }
+    )
+    jinja_helper_types: ClassVar[tuple[type, ...]] = (
+        Undefined,
+        LoopContext,
+        Namespace,
+        Cycler,
+        Joiner,
+        Macro,
+        TemplateReference,
+        BlockReference,
+    )
+
+    def is_safe_attribute(self, obj: object, attr: str, value: object) -> bool:
+        readable = type(obj) in self.data_types or isinstance(
+            obj, self.jinja_helper_types
+        )
+        return readable and super().is_safe_attribute(obj, attr, value)
+
+
+def render_docx_report(doc: DocxTemplate, context: dict) -> None:
+    """Render `doc` in place with `context`, charts included."""
+    doc.render(inline_charts_for_docx(context, doc), jinja_env=DocxReportSandbox())
 
 
 # Requirement-assessment fields governed by the audit's `field_visibility`;

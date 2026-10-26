@@ -65,7 +65,6 @@ import random
 from django.db.models.functions import Lower
 
 from docxtpl import DocxTemplate
-from jinja2.sandbox import SandboxedEnvironment
 from integrations.models import SyncMapping
 from integrations.tasks import sync_object_to_integrations
 from webhooks.service import dispatch_webhook_event
@@ -77,7 +76,7 @@ from .generators import (
     risk_assessment_context,
     audit_context_for_typst,
     gen_audit_context,
-    inline_charts_for_docx,
+    render_docx_report,
 )
 from .typst_render import localized_template, render_pdf
 from .serializer_fields import FieldsRelatedField, PathField
@@ -13541,9 +13540,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         filter_graph_by_implementation_groups(tree, implementation_groups)
         annotate_tree_with_aggregated_scores(tree, audit_obj)
         context = gen_audit_context(pk, tree, user_lang)
-        doc.render(
-            inline_charts_for_docx(context, doc), jinja_env=SandboxedEnvironment()
-        )
+        render_docx_report(doc, context)
         buffer_doc = io.BytesIO()
         doc.save(buffer_doc)
         buffer_doc.seek(0)
