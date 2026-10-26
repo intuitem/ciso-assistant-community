@@ -66,7 +66,8 @@
 				fetch(`/perimeters/${perimeterId}`).then((res) => res.json()),
 				fetch(`/folders/${folder}`).then((res) => res.json())
 			]);
-			if (current?.content_type !== 'GL') return;
+			// Only Global has a null parent; content_type comes back as a display label.
+			if (current?.parent_folder !== null) return;
 			if ($formData.perimeter !== perimeterId || $formData.folder !== folder) return;
 			const target = perimeter?.folder?.id ?? perimeter?.folder;
 			if (target) form.form.update((data) => ({ ...data, folder: target }), { taint: false });
