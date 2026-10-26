@@ -14,6 +14,7 @@
 		deleted: CascadeBucket;
 		affected: CascadeBucket;
 		blocked?: CascadeBucket;
+		blocked_subjects?: CascadeObject[];
 	};
 
 	/** Whether a PROTECT/RESTRICT reference makes the delete fail server-side. */

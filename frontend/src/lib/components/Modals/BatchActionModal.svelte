@@ -218,6 +218,13 @@
 				</div>
 			{:else if cascadeInfo}
 				<CascadePreview {cascadeInfo} />
+				{#if cascadeBlocked && cascadeInfo.blocked_subjects?.length}
+					<p class="text-sm font-medium text-error-600-400" data-testid="cascade-blocked-subjects">
+						{m.cascadeBlockedSubjects({
+							names: cascadeInfo.blocked_subjects.map((subject) => subject.name).join(', ')
+						})}
+					</p>
+				{/if}
 			{/if}
 			{#if !cascadeBlocked}
 				<div class="space-y-2">

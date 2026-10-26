@@ -5169,6 +5169,7 @@
 	"viewWebhookendpoint": "View webhook endpoint",
 	"cascadeDeleteWarning": "Warning: Deleting this will also permanently delete {count} related object(s):",
 	"cascadeBlockedWarning": "This cannot be deleted: {count} object(s) still reference it. Delete or reassign them first.",
+	"cascadeBlockedSubjects": "Blocked by these selected items: {names}. Deselect them to delete the others.",
 	"errorFetching": "Unable to load cascade information. Please try again.",
 	"cascadeAffectedNotice": [
 		{

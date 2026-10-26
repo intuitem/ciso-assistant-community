@@ -2239,6 +2239,8 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
                 return
             if not is_visible(obj):
                 return
+            if model is Folder and obj.content_type != Folder.ContentType.DOMAIN:
+                return
             key = model.__name__
             pk = str(getattr(obj, "pk", "")) or ""
             if (key, pk) in bucket["_seen"]:
@@ -2263,7 +2265,9 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
                 key,
                 {
                     "model": key,
-                    "verbose_name": str(model._meta.verbose_name),
+                    "verbose_name": str(
+                        _("Domain") if model is Folder else model._meta.verbose_name
+                    ),
                     "objects": [],
                 },
             )
@@ -2297,12 +2301,14 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
 
         # 0) PROTECT/RESTRICT references: NestedObjects.collect() swallows the
         # ProtectedError and parks the blockers here.
+        visible_blockers = []
         for obj in getattr(collector, "protected", ()):
             if is_hidden_model(type(obj)) or not is_visible(obj):
                 continue
             if (type(obj).__name__, str(getattr(obj, "pk", ""))) in precleared_index:
                 continue
             add_grouped(blocked_bucket, obj)
+            visible_blockers.append(obj)
 
         # 1) Concrete deletions
         through_rows = []
@@ -2465,8 +2471,52 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
                 "message": "Deletion is blocked while these objects still reference this one.",
                 "level": "error",
             },
+            "blocked_subjects": self._blocked_subjects(
+                subjects, collector, visible_blockers
+            ),
         }
         return payload
+
+    @staticmethod
+    def _blocked_subjects(
+        subjects: list[models.Model],
+        collector: NestedObjects,
+        blockers: list[models.Model],
+    ) -> list[dict[str, str]]:
+        """Return the subjects, as `{id, name}`, whose deletion a blocker prevents.
+
+        Each blocker protects an object of the cascade; following the cascade back
+        to its root tells which selected subject to deselect for the rest to go.
+        """
+        parent_of = {
+            child: source
+            for source, children in collector.edges.items()
+            for child in children
+        }
+        collected = {
+            str(obj.pk): obj for objs in collector.model_objs.values() for obj in objs
+        }
+        blocked_ids = set()
+        for blocker in blockers:
+            for field in blocker._meta.concrete_fields:
+                remote = field.remote_field
+                if remote is None or remote.on_delete not in [
+                    models.PROTECT,
+                    models.RESTRICT,
+                ]:
+                    continue
+                node = collected.get(str(getattr(blocker, field.attname)))
+                seen = set()
+                while parent_of.get(node) is not None and node not in seen:
+                    seen.add(node)
+                    node = parent_of[node]
+                if node is not None:
+                    blocked_ids.add(str(node.pk))
+        return [
+            {"id": str(s.pk), "name": getattr(s, "name", None) or str(s)}
+            for s in subjects
+            if str(s.pk) in blocked_ids
+        ]
 
     def _get_optimized_object_data(self, queryset):
         """Serializer context for list(); viewsets extend it with their own data."""

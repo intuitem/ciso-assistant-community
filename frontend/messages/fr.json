@@ -5023,6 +5023,7 @@
 	"workshopTwo": "Atelier 2",
 	"cascadeDeleteWarning": "Attention : La suppression de cet élément entraînera également la suppression définitive de {count} objet(s) associé(s) :",
 	"cascadeBlockedWarning": "Suppression impossible : {count} objet(s) y font encore référence. Supprimez-les ou rattachez-les ailleurs au préalable.",
+	"cascadeBlockedSubjects": "Bloqué par ces éléments sélectionnés : {names}. Désélectionnez-les pour supprimer les autres.",
 	"errorFetching": "Impossible de charger les informations de cascade. Veuillez réessayer.",
 	"cascadeAffectedNotice": [
 		{

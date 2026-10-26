@@ -299,3 +299,55 @@ def test_entity_assessment_batch_delete_removes_enclave_audit(
     assert res.status_code == 200, res.content
     assert res.json()["failed"] == []
     assert not ComplianceAssessment.objects.filter(pk=audit_id).exists()
+
+
+def _folder_group(bucket: dict) -> dict | None:
+    return next((g for g in bucket["grouped_objects"] if g["model"] == "Folder"), None)
+
+
+def test_sub_domains_are_grouped_as_domains_and_enclaves_are_left_out(
+    admin_client: APIClient, domain_tree: dict[str, Folder]
+) -> None:
+    Folder.objects.create(
+        name="SOME-ENCLAVE",
+        parent_folder=domain_tree["target"],
+        content_type=Folder.ContentType.ENCLAVE,
+    )
+
+    res = admin_client.get(_url(domain_tree["target"]))
+
+    assert res.status_code == 200
+    group = _folder_group(res.json()["deleted"])
+    assert group["verbose_name"] == "Domain"
+    assert {o["name"] for o in group["objects"]} == {"SUB-DOMAIN", "SUB-SUB-DOMAIN"}
+
+
+def test_batch_preview_names_the_selected_domains_that_block_the_delete(
+    admin_client: APIClient, app_ready: Folder, target_folder: Folder
+) -> None:
+    from core.models import Campaign, ComplianceAssessment
+
+    free = Folder.objects.create(
+        name="FREE-DOMAIN",
+        parent_folder=app_ready,
+        content_type=Folder.ContentType.DOMAIN,
+    )
+    elsewhere = Folder.objects.create(
+        name="ELSEWHERE",
+        parent_folder=app_ready,
+        content_type=Folder.ContentType.DOMAIN,
+    )
+    campaign = Campaign.objects.create(name="CAMPAIGN", folder=target_folder)
+    ea = _entity_assessment_with_audit(elsewhere, enclave=False)
+    audit = ComplianceAssessment.objects.get(pk=ea.compliance_assessment_id)
+    audit.campaign = campaign
+    audit.save()
+
+    res = admin_client.post(
+        BATCH_URL, {"ids": [str(target_folder.id), str(free.id)]}, format="json"
+    )
+
+    assert res.status_code == 200, res.content
+    assert res.json()["blocked_subjects"] == [
+        {"id": str(target_folder.id), "name": "Target"}
+    ]
