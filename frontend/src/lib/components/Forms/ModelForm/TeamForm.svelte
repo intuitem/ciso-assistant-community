@@ -34,6 +34,7 @@
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="users?is_third_party=false"
+	lazy
 	optionsLabelField="email"
 	field="leader"
 	cacheLock={cacheLocks['leader']}
@@ -44,6 +45,7 @@
 	{form}
 	multiple
 	optionsEndpoint="users?is_third_party=false"
+	lazy
 	optionsLabelField="email"
 	field="deputies"
 	cacheLock={cacheLocks['deputies']}
@@ -54,6 +56,7 @@
 	{form}
 	multiple
 	optionsEndpoint="users?is_third_party=false"
+	lazy
 	optionsLabelField="email"
 	field="members"
 	cacheLock={cacheLocks['members']}

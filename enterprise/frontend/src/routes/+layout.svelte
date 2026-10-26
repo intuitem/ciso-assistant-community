@@ -90,7 +90,10 @@
 	// 	mimeType: ''
 	// });
 
-	const clientSettings = $page.data.clientSettings;
+	const clientSettings = $derived($page.data.clientSettings);
+	// Empty when none is uploaded or hidden from this viewer: serve the static
+	// icon instead of asking the backend for a favicon it would 404 on.
+	const customFavicon = $derived(Boolean(clientSettings?.settings?.favicon));
 	// let favicon = $state($faviconB64?.hash ? `data:${$faviconB64?.mimeType};base64, ${$faviconB64?.data}` : undefined);
 	// let faviconHash = $derived(clientSettings?.settings?.favicon_hash);
 	//
@@ -131,8 +134,10 @@
 <svelte:head>
 	<link
 		rel="icon"
-		type={clientSettings?.settings?.favicon_mime_type ?? 'image/x-icon'}
-		href="/favicon"
+		type={customFavicon
+			? (clientSettings.settings.favicon_mime_type ?? 'image/x-icon')
+			: 'image/x-icon'}
+		href={customFavicon ? '/favicon' : '/favicon.ico'}
 	/>
 </svelte:head>
 

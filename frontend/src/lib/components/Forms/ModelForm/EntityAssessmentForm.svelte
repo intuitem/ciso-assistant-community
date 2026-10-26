@@ -209,6 +209,7 @@
 			{form}
 			multiple
 			optionsEndpoint="users"
+			lazy
 			optionsDetailedUrlParameters={[
 				['is_third_party', 'true'],
 				['representative__entity', selectedEntity || '']
@@ -277,6 +278,7 @@
 		{form}
 		multiple
 		optionsEndpoint="actors"
+		lazy
 		optionsLabelField="str"
 		optionsInfoFields={{
 			fields: [{ field: 'type', translate: true }],
@@ -291,6 +293,7 @@
 		{form}
 		multiple
 		optionsEndpoint="actors"
+		lazy
 		optionsLabelField="str"
 		optionsInfoFields={{
 			fields: [{ field: 'type', translate: true }],
@@ -316,6 +319,7 @@
 	<AutocompleteSelect
 		{form}
 		optionsEndpoint="evidences"
+		lazy
 		optionsExtraFields={[['folder', 'str']]}
 		field="evidence"
 		cacheLock={cacheLocks['evidence']}

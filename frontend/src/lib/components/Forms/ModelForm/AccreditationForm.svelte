@@ -30,6 +30,7 @@
 <AutocompleteSelect
 	{form}
 	optionsEndpoint="actors?user__is_third_party=False"
+	lazy
 	optionsLabelField="str"
 	optionsInfoFields={{
 		fields: [{ field: 'type', translate: true }],
@@ -134,6 +135,7 @@
 		multiple
 		{form}
 		optionsEndpoint="evidences"
+		lazy
 		optionsLabelField="auto"
 		field="decision_evidence"
 		cacheLock={cacheLocks['decision_evidence']}
