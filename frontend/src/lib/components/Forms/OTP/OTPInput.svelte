@@ -41,10 +41,13 @@
 
 	const { value, errors } = formFieldProxy(form, field);
 
-	let codes: string[] = $state([
-		...$value.slice(0, numOfInputs).split(''),
-		...Array(numOfInputs <= $value.length ? 0 : numOfInputs - $value.length).fill('')
-	]);
+	// An optional schema field starts as undefined, not ''.
+	function toCodes(code: string | undefined): string[] {
+		const digits = (code ?? '').slice(0, numOfInputs).split('');
+		return [...digits, ...Array(numOfInputs - digits.length).fill('')];
+	}
+
+	let codes: string[] = $state(toCodes($value));
 	let inputs: (null | HTMLInputElement)[] = $state(Array(numOfInputs).fill(null));
 
 	function reset() {
@@ -61,10 +64,7 @@
 	}
 
 	$effect(() => {
-		codes = [
-			...$value.slice(0, numOfInputs).split(''),
-			...Array(numOfInputs <= $value.length ? 0 : numOfInputs - $value.length).fill('')
-		];
+		codes = toCodes($value);
 	});
 
 	run(() => {
@@ -116,6 +116,7 @@
 		{/each}
 	</div>
 {/if}
+<input type="hidden" name={field} value={$value ?? ''} />
 <div class={`wrapper ${wrapperClass}`} style={wrapperStyle} onkeyup={keyUpHandler}>
 	{#each codes as value, i (i)}
 		<OTPItem
