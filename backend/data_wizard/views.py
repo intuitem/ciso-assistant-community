@@ -1150,8 +1150,12 @@ class RecordConsumer[Context = None](ABC):
                 continue
             source_keys = self.SOURCE_KEY_MAP.get(key, [key])
             # For M2M owner, propagate even when blank so UPDATE mode clears stale owners.
+            # Names that resolved to nobody are not a blank: keep the owners (the
+            # row's warning reports the names).
             if key == "owner" and any(sk in record for sk in source_keys):
-                update_data[key] = value
+                blank = all(not str(record.get(sk) or "").strip() for sk in source_keys)
+                if value or blank:
+                    update_data[key] = value
                 continue
             if any(record.get(sk) not in (None, "") for sk in source_keys):
                 update_data[key] = value

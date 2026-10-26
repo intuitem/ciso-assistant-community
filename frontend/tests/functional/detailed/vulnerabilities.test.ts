@@ -17,7 +17,8 @@ const BACKEND_API_URL = process.env.PUBLIC_BACKEND_API_URL ?? 'http://localhost:
 const isoDay = (offset: number) => {
 	const day = new Date();
 	day.setDate(day.getDate() + offset);
-	return day.toLocaleDateString('en-CA');
+	const pad = (n: number) => String(n).padStart(2, '0');
+	return `${day.getFullYear()}-${pad(day.getMonth() + 1)}-${pad(day.getDate())}`;
 };
 
 async function api(context: BrowserContext, request: APIRequestContext) {

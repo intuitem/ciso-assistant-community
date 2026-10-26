@@ -904,6 +904,15 @@ class TestVulnerabilityConsumer:
         record_data, _ = consumer.prepare_create(record, None)
         assert consumer._build_update_data(record, record_data)["owner"] == []
 
+    def test_unresolved_owner_names_keep_the_owners(self, base_context):
+        # Not a blank cell: clearing the owners would contradict the row's warning.
+        consumer = VulnerabilityRecordConsumer(base_context)
+        record = {"name": "Log4Shell", "owner": "nobody@example.com"}
+        record_data, warning = consumer.prepare_create(record, None)
+
+        assert warning is not None and warning.is_warning
+        assert "owner" not in consumer._build_update_data(record, record_data)
+
     def test_update_keeps_observation_when_column_absent(self, base_context):
         consumer = VulnerabilityRecordConsumer(base_context)
         record = {"name": "Log4Shell", "status": "fixed"}

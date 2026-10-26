@@ -1489,17 +1489,16 @@ async def update_task_template(
             payload["risk_assessments"] = risk_assessments
         if findings_assessment is not None:
             payload["findings_assessment"] = findings_assessment
+        if vulnerabilities is not None:
+            payload["vulnerabilities"] = [
+                resolve_vulnerability_id(v) for v in vulnerabilities
+            ]
 
         if not payload:
             return "Error: No fields provided to update"
 
         # Resolve task name to ID if needed
         resolved_task_id = resolve_task_template_id(task_id)
-
-        if vulnerabilities is not None:
-            payload["vulnerabilities"] = [
-                resolve_vulnerability_id(v) for v in vulnerabilities
-            ]
 
         res = make_patch_request(f"/task-templates/{resolved_task_id}/", payload)
 
@@ -1793,14 +1792,13 @@ async def update_incident(
             ]
         if filtering_labels is not None:
             payload["filtering_labels"] = filtering_labels
-
-        if not payload:
-            return "Error: No fields provided to update"
-
         if vulnerabilities is not None:
             payload["vulnerabilities"] = [
                 resolve_vulnerability_id(v) for v in vulnerabilities
             ]
+
+        if not payload:
+            return "Error: No fields provided to update"
 
         res = make_patch_request(f"/incidents/{resolved_id}/", payload)
 
