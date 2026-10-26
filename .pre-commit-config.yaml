@@ -3,6 +3,8 @@ repos:
     rev: v4.5.0
     hooks:
       - id: check-yaml
+        # pnpm 12 lockfiles open with a separate packageManagerDependencies document
+        args: [--allow-multiple-documents]
       - id: end-of-file-fixer
         # Vendored, generated bundle (ncc output) must stay byte-exact so it
         # remains reproducible from src and passes cla-assistant-dist-check.
