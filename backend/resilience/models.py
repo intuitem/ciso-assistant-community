@@ -18,6 +18,7 @@ from auditlog.registry import auditlog
 
 from iam.models import FolderMixin
 from core.models import (
+    FilteringLabelMixin,
     AppliedControl,
     Asset,
     Assessment,
@@ -28,7 +29,7 @@ from core.models import (
 )
 
 
-class BusinessImpactAnalysis(Assessment):
+class BusinessImpactAnalysis(Assessment, FilteringLabelMixin):
     risk_matrix = models.ForeignKey(
         RiskMatrix,
         on_delete=models.PROTECT,

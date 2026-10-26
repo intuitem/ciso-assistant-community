@@ -11,7 +11,7 @@ ENV PYTHONUNBUFFERED=1 \
   UV_PYTHON_DOWNLOADS=never \
   PATH="/code/.venv/bin:$PATH"
 
-COPY --from=ghcr.io/astral-sh/uv:0.13.1 /uv /bin/
+COPY --from=ghcr.io/astral-sh/uv:0.13.5 /uv /bin/
 
 WORKDIR /code
 
@@ -25,6 +25,8 @@ RUN apt-get update \
   libharfbuzz0b \
   libfontconfig1 \
   libfreetype6 \
+  # pinned: DHI's unfixed 1.1.0-2+dhi2 outranks its fixed +deb13u1+dhi0 (CVE-2026-111497), drop once DHI ships a higher fixed build
+  libbrotli1=1.1.0-2+deb13u1+dhi0 \
   libstdc++6 \
   zlib1g \
   libffi8 \

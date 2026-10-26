@@ -21,6 +21,7 @@ READER_PERMISSIONS_LIST = [
     "view_entity",
     "view_tier",
     "view_entitytierchange",
+    "view_solutiontierchange",
     "view_entityassessment",
     "view_evidence",
     "view_evidencerevision",
@@ -179,6 +180,7 @@ READER_PERMISSIONS_LIST = [
     "view_notification",
     "change_notification",
     "delete_notification",
+    "view_importmapping",
 ]
 
 BASELINE_READER_PERMISSIONS_LIST = [
@@ -221,15 +223,18 @@ BASELINE_READER_PERMISSIONS_LIST = [
     "view_assetclass",
     "view_assetcapability",
     "view_objectclassification",
+    "view_classificationlevel",
     "view_entity",
     "view_tier",
     "view_entitytierchange",
+    "view_solutiontierchange",
     "view_documenttemplate",
     "view_customfielddefinition",
     "view_requirementmapping",
     "view_requirementmappingset",
     # notifications
     "view_notification",
+    "view_importmapping",
 ]
 
 APPROVER_PERMISSIONS_LIST = [
@@ -470,6 +475,7 @@ ANALYST_PERMISSIONS_LIST = [
     "view_entity",
     "view_tier",
     "view_entitytierchange",
+    "view_solutiontierchange",
     "view_entityassessment",
     "view_evidence",
     "view_folder",
@@ -837,6 +843,9 @@ ANALYST_PERMISSIONS_LIST = [
     "view_notification",
     "change_notification",
     "delete_notification",
+    "add_importmapping",
+    "view_importmapping",
+    "change_importmapping",
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
@@ -939,6 +948,7 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_entity",
     "view_tier",
     "view_entitytierchange",
+    "view_solutiontierchange",
     "add_tier",
     "change_tier",
     "delete_tier",
@@ -1386,6 +1396,10 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_notification",
     "change_notification",
     "delete_notification",
+    "add_importmapping",
+    "view_importmapping",
+    "change_importmapping",
+    "delete_importmapping",
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
@@ -1634,6 +1648,7 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_entity",
     "view_tier",
     "view_entitytierchange",
+    "view_solutiontierchange",
     "add_tier",
     "change_tier",
     "delete_tier",
@@ -2021,6 +2036,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_notification",
     "change_notification",
     "delete_notification",
+    "add_importmapping",
+    "view_importmapping",
+    "change_importmapping",
+    "delete_importmapping",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [

@@ -116,6 +116,7 @@ class QuantitativeRiskStudyWriteSerializer(BaseModelSerializer):
 
 class QuantitativeRiskStudyReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
+    filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     authors = FieldsRelatedField(many=True)
     reviewers = FieldsRelatedField(many=True)
     risk_tolerance_display = serializers.CharField(

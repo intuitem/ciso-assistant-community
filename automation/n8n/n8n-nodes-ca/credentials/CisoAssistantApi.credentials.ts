@@ -1,9 +1,17 @@
-import { ICredentialType, INodeProperties } from "n8n-workflow";
+import type {
+  IAuthenticateGeneric,
+  Icon,
+  ICredentialTestRequest,
+  ICredentialType,
+  INodeProperties,
+} from "n8n-workflow";
 
 export class CisoAssistantApi implements ICredentialType {
   name = "cisoAssistantApi";
   displayName = "CISO Assistant API";
-  documentationUrl = "https://ca-api-doc.pages.dev";
+  icon: Icon = "file:../icons/cisoAssistant.svg";
+  documentationUrl =
+    "https://github.com/intuitem/ciso-assistant-community/tree/main/automation/n8n/n8n-nodes-ca#credentials";
   properties: INodeProperties[] = [
     {
       displayName: "Personal Access Token (PAT)",
@@ -14,7 +22,8 @@ export class CisoAssistantApi implements ICredentialType {
       },
       default: "",
       required: true,
-      description: "The PAT key to authenticate",
+      description:
+        "Personal Access Token created from your CISO Assistant user profile",
     },
     {
       displayName: "API URL",
@@ -25,12 +34,29 @@ export class CisoAssistantApi implements ICredentialType {
       description: "The base URL for CISO Assistant API",
     },
     {
-      displayName: "Skip TLS verification",
+      displayName: "Skip TLS Verification",
       name: "skipTLS",
       type: "boolean",
-      default: "true",
-      required: true,
-      description: "Enable TLS checking if there is a valid certificate",
+      default: false,
+      description:
+        "Whether to accept self-signed or invalid TLS certificates. Only enable on a trusted network.",
     },
   ];
+
+  authenticate: IAuthenticateGeneric = {
+    type: "generic",
+    properties: {
+      headers: {
+        Authorization: "=Token {{$credentials.patKey}}",
+      },
+    },
+  };
+
+  test: ICredentialTestRequest = {
+    request: {
+      baseURL: "={{$credentials.baseUrl}}",
+      url: "/build/",
+      skipSslCertificateValidation: "={{$credentials.skipTLS}}",
+    },
+  };
 }

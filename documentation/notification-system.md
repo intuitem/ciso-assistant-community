@@ -53,7 +53,8 @@ There is **no notification model** in the database. Notifications are fire-and-f
 | `EMAIL_USE_TLS_RESCUE` | No | Fallback STARTTLS setting |
 | `EMAIL_USE_SSL_RESCUE` | No | Fallback implicit TLS setting |
 | `ENABLE_CUSTOM_MAILER` | No | `true` shows the Mailer settings tab and lets a stored configuration replace the environment mailers (`global_settings.MailerConfiguration`). Off by default; off also ignores any stored configuration |
-| `EMAIL_TRANSPORT` | No | `smtp` (password, default) or `smtp-oauth2` (bearer token). Also `_RESCUE` |
+| `EMAIL_TRANSPORT` | No | `smtp` (password, default), `smtp-oauth2` (bearer token) or `graph` (Microsoft Graph over HTTPS). Also `_RESCUE` |
+| `EMAIL_GRAPH_TENANT_ID` | With `graph` | Entra tenant GUID or verified domain; with `EMAIL_OAUTH2_CLIENT_ID`, `EMAIL_OAUTH2_CLIENT_SECRET` and `EMAIL_HOST_USER` (the mailbox). No host: the endpoints are Microsoft's and follow `HTTPS_PROXY` |
 | `EMAIL_OAUTH2_GRANT_TYPE`, `EMAIL_OAUTH2_TOKEN_URL`, `EMAIL_OAUTH2_SCOPE` | With `smtp-oauth2` | `client_credentials`, `refresh_token` (RFC 6749) or `jwt_bearer` (RFC 7523); the token URL must be https. Values per provider in the installation docs |
 | `EMAIL_OAUTH2_CLIENT_ID`, `EMAIL_OAUTH2_CLIENT_SECRET`, `EMAIL_OAUTH2_REFRESH_TOKEN` | Per grant | Client credentials and refresh token grants |
 | `EMAIL_OAUTH2_SERVICE_ACCOUNT_FILE`, or `EMAIL_OAUTH2_ISSUER` + `EMAIL_OAUTH2_PRIVATE_KEY`, `EMAIL_OAUTH2_AUDIENCE` | jwt_bearer | Signing identity for the JWT bearer grant (Google service accounts) |

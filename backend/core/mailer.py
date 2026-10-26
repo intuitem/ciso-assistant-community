@@ -21,8 +21,10 @@ import smtplib
 import socket
 import ssl
 from contextlib import contextmanager
+from contextvars import ContextVar
 from dataclasses import dataclass, field
 
+import httpx
 import structlog
 from django.conf import settings
 from django.core.mail import EmailMessage
@@ -36,8 +38,21 @@ SOURCE_ENVIRONMENT = "environment"
 SOURCE_CUSTOM = "custom"
 
 
+_suppressed: ContextVar[bool] = ContextVar("mailer_suppressed", default=False)
+
+
 class NoMailerAvailable(Exception):
     """No mailer is configured, or none accepted a connection."""
+
+
+@contextmanager
+def suppressed():
+    """Swallow every message sent in this context, e.g. during a dry run."""
+    token = _suppressed.set(True)
+    try:
+        yield
+    finally:
+        _suppressed.reset(token)
 
 
 def describe_error(error: BaseException) -> str:
@@ -58,6 +73,10 @@ def describe_error(error: BaseException) -> str:
         return "server closed the connection"
     if isinstance(error, smtplib.SMTPException):
         return "SMTP protocol error"
+    if isinstance(error, httpx.HTTPError):
+        from core.mail_oauth2 import describe_http_error
+
+        return describe_http_error(error)
     if isinstance(error, ssl.SSLError):
         return "TLS handshake failed"
     if isinstance(error, socket.gaierror):
@@ -185,6 +204,9 @@ def open_connection(
     caller while the connection is open propagates unchanged: the next
     mailer is not tried, because the server may already have the message.
     """
+    if _suppressed.get():
+        yield import_string("django.core.mail.backends.dummy.EmailBackend")()
+        return
     specs = active_mailers() if mailers is None else list(mailers)
     if not specs:
         raise NoMailerAvailable("no mailer configured (set EMAIL_HOST)")

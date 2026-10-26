@@ -81,6 +81,7 @@
 	{form}
 	multiple
 	optionsEndpoint="evidences"
+	lazy
 	optionsDetailedUrlParameters={$formStore.folder
 		? [['scope_folder_id', $formStore.folder]]
 		: undefined}

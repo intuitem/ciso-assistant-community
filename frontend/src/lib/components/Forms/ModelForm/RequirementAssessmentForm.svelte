@@ -36,6 +36,7 @@
 		multiple
 		{form}
 		optionsEndpoint="evidences"
+		lazy
 		optionsExtraFields={[['folder', 'str']]}
 		field="evidences"
 		label={m.evidences()}
