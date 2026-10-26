@@ -3,9 +3,9 @@ becomes the processing's DPIA of record. No config: the form is the DPIA."""
 
 import uuid
 
-from django.utils.translation import gettext as _
-
 from core.quick_form_targets import Proposal, Target, register
+
+# Placeholder displays are message keys: the frontend translates them (safeTranslate).
 
 
 @register
@@ -27,7 +27,7 @@ class ProcessingDpiaTarget(Target):
         pk = getattr(response, "pk", None)
         label = getattr(response, "ref_id", "") or getattr(response, "name", "")
         return Proposal(
-            ok=True, value=str(pk) if pk else None, display=label or _("This DPIA")
+            ok=True, value=str(pk) if pk else None, display=label or "thisDpia"
         )
 
     def apply(self, subject, proposal, *, response, user) -> None:
@@ -55,7 +55,7 @@ class ProcessingControlsTarget(Target):
 
         # A preview passes the form's results only: the picks are not among them.
         if getattr(response, "pk", None) is None:
-            return Proposal(ok=True, value=None, display=_("The measures picked"))
+            return Proposal(ok=True, value=None, display="theMeasuresPicked")
         # Picks on a page the answers hid no longer count.
         hidden = set(evaluate_quick_form(response, persist=False)["hidden_pages"])
         ids = set()
@@ -78,7 +78,7 @@ class ProcessingControlsTarget(Target):
         return Proposal(
             ok=True,
             value=[str(c.pk) for c in controls],
-            display=", ".join(str(c) for c in controls) or _("None"),
+            display=", ".join(str(c) for c in controls) or "none",
         )
 
     def apply(self, subject, proposal, *, response, user) -> None:

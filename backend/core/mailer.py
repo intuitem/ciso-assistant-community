@@ -24,6 +24,7 @@ from contextlib import contextmanager
 from contextvars import ContextVar
 from dataclasses import dataclass, field
 
+import httpx
 import structlog
 from django.conf import settings
 from django.core.mail import EmailMessage
@@ -72,6 +73,10 @@ def describe_error(error: BaseException) -> str:
         return "server closed the connection"
     if isinstance(error, smtplib.SMTPException):
         return "SMTP protocol error"
+    if isinstance(error, httpx.HTTPError):
+        from core.mail_oauth2 import describe_http_error
+
+        return describe_http_error(error)
     if isinstance(error, ssl.SSLError):
         return "TLS handshake failed"
     if isinstance(error, socket.gaierror):
