@@ -11,7 +11,7 @@
 	import { m } from '#paraglide/messages.js';
 	import { Accordion } from '@skeletonlabs/skeleton-svelte';
 	import type { SuperForm } from 'sveltekit-superforms';
-	import { enhance } from '$app/forms';
+	import { applyAction, deserialize } from '$app/forms';
 	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 	import { refreshAll } from '$app/navigation';
 
@@ -44,11 +44,10 @@
 	let showSecretField = $state(!page.data?.ssoSettings.oidc_has_secret);
 	let showPrivateKeyField = $state(!page.data?.ssoSettings.saml_has_sp_private_key);
 
-	const handleGenerateKeys = ({ cancel }) => {
-		if (!data.is_enabled || !data.authn_request_signed) {
-			cancel();
-			return;
-		}
+	// Not a nested <form>: this one renders inside ModelForm's, and browsers drop nested form
+	// tags from the server HTML, which breaks hydration of the whole settings page
+	async function generateKeys() {
+		if (!data.is_enabled || !data.authn_request_signed) return;
 
 		// NOTE: This is a kludge to avoid backend throwing if SSOSettings have not been saved yet.
 		if (!page.data?.ssoSettings?.settings?.idp?.entity_id) {
@@ -56,13 +55,17 @@
 			refreshAll();
 		}
 
-		return async ({ result, update }) => {
-			if (result.type === 'success' && result.data?.generatedKeys?.cert) {
-				$formStore.sp_x509cert = result.data.generatedKeys.cert;
-			}
-			await update({ refreshAll: false, navigate: false });
-		};
-	};
+		const res = await fetch('?/generateSamlKeys', {
+			method: 'POST',
+			body: new FormData(),
+			headers: { 'x-sveltekit-action': 'true' }
+		});
+		const result = deserialize<{ generatedKeys?: { cert?: string } }, undefined>(await res.text());
+		if (result.type === 'success' && result.data?.generatedKeys?.cert) {
+			$formStore.sp_x509cert = result.data.generatedKeys.cert;
+		}
+		await applyAction(result);
+	}
 </script>
 
 <Accordion
@@ -499,13 +502,12 @@
 					/>
 					<div class="w-full p-4 flex flex-col gap-4 border rounded-md mt-1">
 						<div class="flex flex-row gap-4 items-center">
-							<form method="post" action="?/generateSamlKeys" use:enhance={handleGenerateKeys}>
-								<button
-									type="submit"
-									disabled={!data.is_enabled || !data.authn_request_signed}
-									class="btn preset-filled-secondary-500">{m.generate()}</button
-								>
-							</form>
+							<button
+								type="button"
+								onclick={generateKeys}
+								disabled={!data.is_enabled || !data.authn_request_signed}
+								class="btn preset-filled-secondary-500">{m.generate()}</button
+							>
 							{#if data.is_enabled && data.authn_request_signed}
 								<Anchor
 									href="settings/saml/download-cert"
