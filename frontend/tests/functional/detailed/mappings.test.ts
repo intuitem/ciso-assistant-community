@@ -1,4 +1,4 @@
-import { m } from '$paraglide/messages.js';
+import { m } from '#paraglide/messages.js';
 import { FormContent, FormFieldType } from '../../utils/form-content.js';
 import { LoginPage } from '../../utils/login-page.js';
 import { PageContent } from '../../utils/page-content.js';

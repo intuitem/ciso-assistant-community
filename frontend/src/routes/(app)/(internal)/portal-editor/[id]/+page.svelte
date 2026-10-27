@@ -1,15 +1,15 @@
 <script lang="ts">
 	import { enhance, deserialize } from '$app/forms';
-	import { m } from '$paraglide/messages';
-	import { getToastStore } from '$lib/components/Toast/stores';
-	import PortalGrid from '$lib/components/PortalGrid/PortalGrid.svelte';
-	import SectionEditor from '$lib/components/PortalEditor/SectionEditor.svelte';
-	import { countIncompleteTiles } from '$lib/components/PortalEditor/tile-validation';
-	import PortalSettingsPanel from '$lib/components/PortalEditor/PortalSettingsPanel.svelte';
-	import { SCAFFOLDABLE_MODELS } from '$lib/utils/modelTargets';
-	import { urlParamModelVerboseName } from '$lib/utils/crud';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { savedToast, savedToastEnhance } from '$lib/utils/portalActions';
+	import { m } from '#paraglide/messages.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import PortalGrid from '#lib/components/PortalGrid/PortalGrid.svelte';
+	import SectionEditor from '#lib/components/PortalEditor/SectionEditor.svelte';
+	import { countIncompleteTiles } from '#lib/components/PortalEditor/tile-validation.js';
+	import PortalSettingsPanel from '#lib/components/PortalEditor/PortalSettingsPanel.svelte';
+	import { SCAFFOLDABLE_MODELS } from '#lib/utils/modelTargets.js';
+	import { urlParamModelVerboseName } from '#lib/utils/crud.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { savedToast, savedToastEnhance } from '#lib/utils/portalActions.js';
 	import { superForm } from 'sveltekit-superforms';
 	import { page } from '$app/state';
 	import type { PageData } from './$types';
@@ -302,7 +302,13 @@
 					aria-label={m.openPortal()}><i class="fa-solid fa-arrow-up-right-from-square"></i></a
 				>
 			{/if}
-			<form method="POST" action="?/duplicate" use:enhance>
+			<form
+				method="POST"
+				action="?/duplicate"
+				use:enhance={() =>
+					({ update }) =>
+						update({ navigate: false })}
+			>
 				<button
 					class="btn-icon btn-sm preset-tonal"
 					aria-label={m.duplicate()}

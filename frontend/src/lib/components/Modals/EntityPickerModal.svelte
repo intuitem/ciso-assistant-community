@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { SvelteMap } from 'svelte/reactivity';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
 	import { getModalStore, type ModalStore } from './stores';
-	import type { EntityPickerOptions } from '$lib/utils/entityPicker';
+	import type { EntityPickerOptions } from '#lib/utils/entityPicker.js';
 
 	// Canonical picker types live in entityPicker.ts; the modal just adds the
 	// Skeleton-injected `parent`.

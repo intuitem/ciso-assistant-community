@@ -12,10 +12,10 @@
 	import QuestionEditor from './QuestionEditor.svelte';
 	import CelInput from './CelInput.svelte';
 	import { getCelCatalogContext } from './cel-complete';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
 	import AddNodeMenu from './AddNodeMenu.svelte';
 	import ReferentialLinks from './ReferentialLinks.svelte';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		node: BuilderNode;

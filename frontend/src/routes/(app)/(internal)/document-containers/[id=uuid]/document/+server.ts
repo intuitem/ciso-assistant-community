@@ -1,10 +1,11 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { error, json, type NumericRange } from '@sveltejs/kit';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { errorFromBody } from '#lib/utils/errors.js';
 
 async function assertFeatureEnabled(locals: App.Locals) {
 	if (!(await locals.getFeatureFlags())?.document_management) {
-		error(403, { message: 'Document management feature is disabled' });
+		error(403, 'Document management feature is disabled');
 	}
 }
 
@@ -28,21 +29,21 @@ export const POST: RequestHandler = async ({ fetch, request, url, locals, params
 			body: outgoing
 		});
 		if (!res.ok) {
-			error(res.status as NumericRange<400, 599>, await res.text());
+			error(res.status, await res.text());
 		}
-		return json(await res.json(), { status: res.status });
+		return Response.json(await res.json(), { status: res.status });
 	}
 
 	// Handle image uploads — read file into memory and forward as multipart
 	if (url.searchParams.get('_action') === 'upload-image') {
 		const documentId = url.searchParams.get('document_id');
 		if (!documentId) {
-			error(400, { message: 'Missing document_id' });
+			error(400, 'Missing document_id');
 		}
 		const incoming = await request.formData();
 		const file = incoming.get('file') as File | null;
 		if (!file) {
-			error(400, { message: 'Missing file' });
+			error(400, 'Missing file');
 		}
 		// Rebuild FormData with a concrete Blob so fetch serialises it correctly
 		const bytes = new Uint8Array(await file.arrayBuffer());
@@ -55,21 +56,21 @@ export const POST: RequestHandler = async ({ fetch, request, url, locals, params
 		});
 		if (!res.ok) {
 			const errorBody = await res.text();
-			error(res.status as NumericRange<400, 599>, errorBody);
+			error(res.status, errorBody);
 		}
-		return json(await res.json(), { status: res.status });
+		return Response.json(await res.json(), { status: res.status });
 	}
 
 	// Upload a file as a new draft revision (uploaded documents).
 	if (url.searchParams.get('_action') === 'upload-revision') {
 		const documentId = url.searchParams.get('document_id');
 		if (!documentId) {
-			error(400, { message: 'Missing document_id' });
+			error(400, 'Missing document_id');
 		}
 		const incoming = await request.formData();
 		const file = incoming.get('file') as File | null;
 		if (!file) {
-			error(400, { message: 'Missing file' });
+			error(400, 'Missing file');
 		}
 		const bytes = new Uint8Array(await file.arrayBuffer());
 		const outgoing = new FormData();
@@ -79,9 +80,9 @@ export const POST: RequestHandler = async ({ fetch, request, url, locals, params
 			body: outgoing
 		});
 		if (!res.ok) {
-			error(res.status as NumericRange<400, 599>, await res.text());
+			error(res.status, await res.text());
 		}
-		return json(await res.json(), { status: res.status });
+		return Response.json(await res.json(), { status: res.status });
 	}
 
 	const body = await request.json();
@@ -140,7 +141,7 @@ export const POST: RequestHandler = async ({ fetch, request, url, locals, params
 			delete body.revision_id;
 			break;
 		default:
-			error(400, { message: 'Unknown action' });
+			error(400, 'Unknown action');
 	}
 
 	const res = await fetch(endpoint, {
@@ -150,10 +151,10 @@ export const POST: RequestHandler = async ({ fetch, request, url, locals, params
 	});
 
 	if (!res.ok) {
-		error(res.status as NumericRange<400, 599>, await res.json());
+		errorFromBody(res.status, await res.json());
 	}
 
-	return json(await res.json(), { status: res.status });
+	return Response.json(await res.json(), { status: res.status });
 };
 
 // Proxy GET requests for revisions, diffs, PDF export
@@ -164,7 +165,7 @@ export const GET: RequestHandler = async ({ fetch, url, params, locals }) => {
 
 	const req = (key: string): string => {
 		const value = url.searchParams.get(key);
-		if (!value) error(400, { message: `Missing ${key}` });
+		if (!value) error(400, `Missing ${key}`);
 		return value;
 	};
 
@@ -174,9 +175,9 @@ export const GET: RequestHandler = async ({ fetch, url, params, locals }) => {
 		case 'references': {
 			const refRes = await fetch(`${BASE_API_URL}/document-containers/${params.id}/references/`);
 			if (!refRes.ok) {
-				error(refRes.status as NumericRange<400, 599>, await refRes.json());
+				errorFromBody(refRes.status, await refRes.json());
 			}
-			return json(await refRes.json());
+			return Response.json(await refRes.json());
 		}
 		case 'templates': {
 			const lang = url.searchParams.get('lang') || '';
@@ -187,20 +188,20 @@ export const GET: RequestHandler = async ({ fetch, url, params, locals }) => {
 			const templatesEndpoint = `${BASE_API_URL}/managed-documents/templates/${qp.toString() ? `?${qp}` : ''}`;
 			const templatesRes = await fetch(templatesEndpoint);
 			if (!templatesRes.ok) {
-				error(templatesRes.status as NumericRange<400, 599>, await templatesRes.json());
+				errorFromBody(templatesRes.status, await templatesRes.json());
 			}
-			return json(await templatesRes.json());
+			return Response.json(await templatesRes.json());
 		}
 		case 'documents-by-locale': {
 			const locale = req('locale');
 			const qp = new URLSearchParams({ container: params.id, locale });
 			const docsRes = await fetch(`${BASE_API_URL}/managed-documents/?${qp}`);
 			if (!docsRes.ok) {
-				error(docsRes.status as NumericRange<400, 599>, await docsRes.json());
+				errorFromBody(docsRes.status, await docsRes.json());
 			}
 			const docsData = await docsRes.json();
 			const doc = docsData.results?.[0] || null;
-			return json(doc);
+			return Response.json(doc);
 		}
 		case 'revisions': {
 			const documentId = req('document');
@@ -237,7 +238,7 @@ export const GET: RequestHandler = async ({ fetch, url, params, locals }) => {
 			endpoint = `${BASE_API_URL}/document-revisions/${req('revision_id')}/export-pdf/`;
 			const res = await fetch(endpoint);
 			if (!res.ok) {
-				error(res.status as NumericRange<400, 599>, 'PDF export failed');
+				error(res.status, 'PDF export failed');
 			}
 			const pdfBuffer = await res.arrayBuffer();
 			return new Response(pdfBuffer, {
@@ -253,7 +254,7 @@ export const GET: RequestHandler = async ({ fetch, url, params, locals }) => {
 			const imageEndpoint = `${BASE_API_URL}/document-attachments/${attachmentId}/file/`;
 			const res = await fetch(imageEndpoint);
 			if (!res.ok) {
-				error(res.status as NumericRange<400, 599>, 'Image fetch failed');
+				error(res.status, 'Image fetch failed');
 			}
 			const imageBuffer = await res.arrayBuffer();
 			return new Response(imageBuffer, {
@@ -269,14 +270,14 @@ export const GET: RequestHandler = async ({ fetch, url, params, locals }) => {
 			break;
 		}
 		default:
-			error(400, { message: 'Unknown action' });
+			error(400, 'Unknown action');
 	}
 
 	const res = await fetch(endpoint);
 	if (!res.ok) {
-		error(res.status as NumericRange<400, 599>, await res.json());
+		errorFromBody(res.status, await res.json());
 	}
-	return json(await res.json());
+	return Response.json(await res.json());
 };
 
 // Delete a document or revision
@@ -287,7 +288,7 @@ export const DELETE: RequestHandler = async ({ fetch, url, locals }) => {
 	const id = url.searchParams.get('id');
 
 	if (!type || !id) {
-		error(400, { message: 'Missing _type or id parameter' });
+		error(400, 'Missing _type or id parameter');
 	}
 
 	let endpoint: string;
@@ -299,13 +300,13 @@ export const DELETE: RequestHandler = async ({ fetch, url, locals }) => {
 			endpoint = `${BASE_API_URL}/document-revisions/${id}/`;
 			break;
 		default:
-			error(400, { message: 'Unknown type' });
+			error(400, 'Unknown type');
 	}
 
 	const res = await fetch(endpoint, { method: 'DELETE' });
 	if (!res.ok) {
 		const body = await res.text();
-		error(res.status as NumericRange<400, 599>, body || 'Delete failed');
+		error(res.status, body || 'Delete failed');
 	}
 
 	return new Response(null, { status: 204 });
