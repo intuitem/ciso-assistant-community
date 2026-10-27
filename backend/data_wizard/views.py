@@ -8,7 +8,7 @@ import structlog
 import re
 from abc import ABC, abstractmethod
 from collections import defaultdict
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import date, datetime
 from functools import cached_property
 from pathlib import Path
@@ -8895,8 +8895,68 @@ class LoadFileView(APIView):
                                 )
                         results["details"]["operating_modes_created"] += 1
 
-                if not stopped:
-                    results["successful"] = 1
+                if stopped:
+                    return results
+
+                # Workshop 5: risk assessment, security measures, then scenarios
+                ra_data = data.get("risk_assessment") or {}
+                if ra_data or data.get("risk_scenarios"):
+                    ra_serializer = RiskAssessmentWriteSerializer(
+                        data={
+                            "name": ra_data.get("name") or study.name,
+                            "ref_id": ra_data.get("ref_id", ""),
+                            "version": ra_data.get("version", ""),
+                            "description": ra_data.get("description", ""),
+                            "folder": str(folder.id),
+                            "risk_matrix": str(study.risk_matrix_id),
+                            "ebios_rm_study": str(study.id),
+                        },
+                        context={"request": request},
+                    )
+                    if not ra_serializer.is_valid():
+                        results["errors"].append(
+                            {
+                                "risk_assessment": ra_data.get("name", ""),
+                                "error": readable_error(ra_serializer.errors),
+                            }
+                        )
+                        return results
+                    risk_assessment = ra_serializer.save()
+                    results["details"]["risk_assessment"] = str(risk_assessment.id)
+
+                    base_context = BaseContext(
+                        request, folder_id=str(folder.id), on_conflict=on_conflict
+                    )
+                    for key, consumer, records, context in (
+                        (
+                            "security_measures",
+                            AppliedControlRecordConsumer,
+                            data.get("security_measures", []),
+                            base_context,
+                        ),
+                        (
+                            "risk_scenarios",
+                            RiskAssessmentRecordConsumer,
+                            data.get("risk_scenarios", []),
+                            replace(base_context, target_id=str(risk_assessment.id)),
+                        ),
+                    ):
+                        res = consumer(context).process_records(records).to_dict()
+                        results["details"][key] = res
+                        results["errors"].extend(res["errors"])
+                        if res["stopped"]:
+                            return results
+
+                    for rs_data in data.get("risk_scenarios", []):
+                        op_scenario = op_scenario_lookup.get(
+                            rs_data.get("operational_scenario")
+                        )
+                        if op_scenario:
+                            risk_assessment.risk_scenarios.filter(
+                                name__iexact=rs_data.get("name")
+                            ).update(operational_scenario=op_scenario)
+
+                results["successful"] = 1
 
             else:
                 results["failed"] = 1

@@ -4,7 +4,7 @@ import uuid
 import django_filters as df
 import pandas as pd
 from django.db import transaction
-from django.db.models import Case, F, FloatField, Value, When
+from django.db.models import Case, F, FloatField, Q, Value, When
 from django.http import HttpResponse
 from core.serializers import RiskMatrixReadSerializer
 from core.views import (
@@ -17,6 +17,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
 from core.models import Asset, Terminology
 from openpyxl.styles import Alignment
+from openpyxl.workbook.child import INVALID_TITLE_REGEX
 
 from .helpers import ecosystem_radar_chart_data, ebios_rm_visual_analysis
 from .models import (
@@ -551,6 +552,9 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
             "elementary_actions": "4.0 Elementary Actions",
             "operational_scenarios": "4.1.1 Operational Scenarios",
             "operating_modes": "4.1.2 Operating Modes",
+            "risk_assessment": "5.1 Risk Assessment",
+            "risk_scenarios": "5.2 Risk Scenarios",
+            "security_measures": "5.3 Security Measures",
         }
 
         with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
@@ -645,7 +649,9 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                     )
                 if ca_data:
                     # Sheet name: "1.4.1 AuditName" (max 31 chars for Excel)
-                    sheet_name = f"1.4.{idx} {ca.name}"[:31]
+                    sheet_name = INVALID_TITLE_REGEX.sub("_", f"1.4.{idx} {ca.name}")[
+                        :31
+                    ]
                     df_ca = pd.DataFrame(ca_data)
                     df_ca.to_excel(writer, sheet_name=sheet_name, index=False)
 
@@ -859,6 +865,89 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 df_om.to_excel(
                     writer, sheet_name=SHEET_NAMES["operating_modes"], index=False
                 )
+
+            # 5.x Risk treatment, from the study's current risk assessment.
+            # Column names match the risk assessment / applied control imports.
+            risk_assessment = study.last_risk_assessment
+            if risk_assessment:
+                pd.DataFrame(
+                    [
+                        {
+                            "ref_id": risk_assessment.ref_id or "",
+                            "name": risk_assessment.name,
+                            "version": risk_assessment.version or "",
+                            "description": risk_assessment.description or "",
+                        }
+                    ]
+                ).to_excel(
+                    writer, sheet_name=SHEET_NAMES["risk_assessment"], index=False
+                )
+
+                scenarios = risk_assessment.risk_scenarios.select_related(
+                    "operational_scenario"
+                ).prefetch_related(
+                    "assets", "threats", "applied_controls", "existing_applied_controls"
+                )
+                rs_data = []
+                for rs in scenarios:
+                    rs_data.append(
+                        {
+                            "ref_id": rs.ref_id or "",
+                            "name": rs.name,
+                            "description": rs.description or "",
+                            "operational_scenario": rs.operational_scenario.name
+                            if rs.operational_scenario
+                            else "",
+                            "assets": "\n".join(a.name for a in rs.assets.all()),
+                            "threats": "\n".join(
+                                t.ref_id or t.name for t in rs.threats.all()
+                            ),
+                            "existing_applied_controls": "\n".join(
+                                c.name for c in rs.existing_applied_controls.all()
+                            ),
+                            "current_proba": rs.get_current_proba()["name"],
+                            "current_impact": rs.get_current_impact()["name"],
+                            "current_risk": rs.get_current_risk()["name"],
+                            "treatment": rs.treatment,
+                            "applied_controls": "\n".join(
+                                c.name for c in rs.applied_controls.all()
+                            ),
+                            "residual_proba": rs.get_residual_proba()["name"],
+                            "residual_impact": rs.get_residual_impact()["name"],
+                            "residual_risk": rs.get_residual_risk()["name"],
+                            "justification": rs.justification or "",
+                        }
+                    )
+                if rs_data:
+                    pd.DataFrame(rs_data).to_excel(
+                        writer, sheet_name=SHEET_NAMES["risk_scenarios"], index=False
+                    )
+
+                measures = AppliedControl.objects.filter(
+                    Q(risk_scenarios__risk_assessment=risk_assessment)
+                    | Q(risk_scenarios_e__risk_assessment=risk_assessment)
+                ).distinct()
+                measures_data = [
+                    {
+                        "ref_id": ac.ref_id or "",
+                        "name": ac.name,
+                        "description": ac.description or "",
+                        "category": ac.category or "",
+                        "csf_function": ac.csf_function or "",
+                        "status": ac.status or "",
+                        "priority": ac.priority,
+                        "effort": ac.effort or "",
+                        "start_date": ac.start_date,
+                        "eta": ac.eta,
+                        "expiry_date": ac.expiry_date,
+                        "link": ac.link or "",
+                    }
+                    for ac in measures
+                ]
+                if measures_data:
+                    pd.DataFrame(measures_data).to_excel(
+                        writer, sheet_name=SHEET_NAMES["security_measures"], index=False
+                    )
 
             # Apply styling to all sheets
             for sheet_name in writer.sheets:
