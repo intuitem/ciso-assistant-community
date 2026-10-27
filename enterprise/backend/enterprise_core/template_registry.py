@@ -283,6 +283,20 @@ EMAIL_TEMPLATE_REGISTRY = {
             "ciso_assistant_url",
         ],
     },
+    "vulnerability_assignment": {
+        "description": "Sent when a vulnerability is assigned",
+        "category": "notification",
+        "variables": [
+            "vulnerability_name",
+            "vulnerability_description",
+            "vulnerability_ref_id",
+            "vulnerability_severity",
+            "vulnerability_status",
+            "due_date",
+            "folder_name",
+            "ciso_assistant_url",
+        ],
+    },
     "security_exception_status_changed": {
         "description": "Sent when a security exception status changes",
         "category": "notification",
