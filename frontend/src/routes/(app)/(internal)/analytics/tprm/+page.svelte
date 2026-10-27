@@ -140,7 +140,8 @@
 				class="px-6 pt-6 flex flex-wrap items-end justify-between gap-4"
 				data-testid="tprm-filters"
 			>
-				{#if tiers.length}
+				<!-- A posture fallback row can set a filter even when tiers failed to load. -->
+				{#if tiers.length || selectedTiers.length}
 					<div data-testid="entities-by-tier">
 						<h2 class="text-sm font-semibold uppercase tracking-wider text-surface-500 mb-2">
 							{m.entitiesByTier()}

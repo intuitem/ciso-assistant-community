@@ -58,6 +58,7 @@
 			if (key !== noTier && !scale.some((row) => row.key === key))
 				scale.push({ key, tier: list[0].tier, target: null });
 		}
+		scale.sort((a, b) => b.tier.rank - a.tier.rank);
 		if (byTier.has(noTier)) scale.push({ key: noTier, tier: null, target: null });
 
 		return scale.map(({ key, tier, target: complianceTarget }) => {
