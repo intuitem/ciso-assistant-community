@@ -1,9 +1,9 @@
-import { BASE_API_URL } from '$lib/utils/constants';
+import { BASE_API_URL } from '#lib/utils/constants.js';
 import { fail, superValidate } from 'sveltekit-superforms';
 import { z } from 'zod';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { setFlash } from 'sveltekit-flash-message/server';
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 import type { Actions } from '@sveltejs/kit';
 
 export const actions: Actions = {

@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import type { TableSource } from '$lib/components/ModelTable/types';
-	import { m } from '$paraglide/messages';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import ActionPlanBudgetOverview from '$lib/components/DataViz/ActionPlanBudgetOverview.svelte';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
+	import type { TableSource } from '#lib/components/ModelTable/types.js';
+	import { m } from '#paraglide/messages.js';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import ActionPlanBudgetOverview from '#lib/components/DataViz/ActionPlanBudgetOverview.svelte';
 
 	let { data } = $props();
 

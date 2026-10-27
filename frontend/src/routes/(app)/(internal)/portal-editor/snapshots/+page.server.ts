@@ -1,7 +1,7 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { fetchAllPages } from '$lib/utils/pagination';
-import { del, patchJSON, postJSON } from '$lib/utils/portalApi';
-import { SnapshotCreateSchema, SnapshotEditSchema } from '$lib/utils/schemas';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { fetchAllPages } from '#lib/utils/pagination.js';
+import { del, patchJSON, postJSON } from '#lib/utils/portalApi.js';
+import { SnapshotCreateSchema, SnapshotEditSchema } from '#lib/utils/schemas.js';
 import { error, fail, redirect, type Actions } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';

@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { getScoreTextClass, roundScore } from '$lib/utils/helpers';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
-	import type { ComplianceOverview } from '$lib/utils/types';
+	import { getScoreTextClass, roundScore } from '#lib/utils/helpers.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
+	import type { ComplianceOverview } from '#lib/utils/types.js';
 
 	interface Props {
 		overview: ComplianceOverview | null | undefined;

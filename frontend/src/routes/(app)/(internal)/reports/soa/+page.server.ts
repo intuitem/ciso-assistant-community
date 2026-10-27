@@ -1,5 +1,5 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { error, type NumericRange } from '@sveltejs/kit';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
 // fetch() does not reject on 4xx, so an unchecked count turns a 403 into an
@@ -7,7 +7,7 @@ import type { PageServerLoad } from './$types';
 const probeCount = async (fetchFn: typeof fetch, endpoint: string, label: string) => {
 	const res = await fetchFn(`${BASE_API_URL}/${endpoint}/?limit=1`);
 	if (!res.ok) {
-		error(res.status as NumericRange<400, 599>, `Error loading ${label}`);
+		error(res.status, `Error loading ${label}`);
 	}
 	return (await res.json()).count ?? 0;
 };

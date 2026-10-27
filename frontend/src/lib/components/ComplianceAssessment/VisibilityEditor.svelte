@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { VISIBILITY_FIELDS, type RoleAccess } from '$lib/utils/helpers';
-	import { page } from '$app/stores';
-	import { m } from '$paraglide/messages';
+	import { VISIBILITY_FIELDS, type RoleAccess } from '#lib/utils/helpers.js';
+	import { page } from '$app/state';
+	import { m } from '#paraglide/messages.js';
 
 	type Pair = { auditor: RoleAccess; respondent: RoleAccess };
 	type VisibilityMap = Record<string, Pair>;
@@ -48,7 +48,8 @@
 	const visibleFields = $derived(
 		VISIBILITY_FIELDS.filter((field) => {
 			const flag = FEATURE_FLAG_BY_FIELD[field];
-			return !flag || $page.data?.featureflags?.[flag];
+
+			return !flag || page.data?.featureflags?.[flag];
 		})
 	);
 

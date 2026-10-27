@@ -1,16 +1,16 @@
 <script lang="ts">
 	import { copy } from '@svelte-put/copy';
 
-	import NumberField from '$lib/components/Forms/NumberField.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import { AuthTokenCreateSchema } from '$lib/utils/schemas';
+	import NumberField from '#lib/components/Forms/NumberField.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import { AuthTokenCreateSchema } from '#lib/utils/schemas.js';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 
-	import SuperForm from '$lib/components/Forms/Form.svelte';
+	import SuperForm from '#lib/components/Forms/Form.svelte';
 	import { page } from '$app/state';
 	import { superForm } from 'sveltekit-superforms';
-	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
+	import { getModalStore, type ModalStore } from '#lib/components/Modals/stores.js';
 
 	const modalStore: ModalStore = getModalStore();
 

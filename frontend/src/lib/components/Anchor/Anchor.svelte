@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { breadcrumbs, goto, type Breadcrumb } from '$lib/utils/breadcrumbs';
+	import { breadcrumbs, goto, type Breadcrumb } from '#lib/utils/breadcrumbs.js';
 
 	interface Props {
 		href?: string;
