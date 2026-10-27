@@ -28,7 +28,9 @@ from ebios_rm.tests.test_kill_chain_steps import _operating_mode
 from rest_framework.test import APIClient
 
 from core.utils import UserGroupCodename
-from iam.models import Folder, User, UserGroup
+from django.contrib.auth.models import Permission
+
+from iam.models import Folder, Role, RoleAssignment, User, UserGroup
 from tprm.models import Entity
 
 
@@ -88,6 +90,8 @@ def test_export_import_round_trips_workshop_5(
         risk_assessment=ra,
         name="Ransomware via phishing",
         ref_id="R.1",
+        inherent_proba=3,
+        inherent_impact=3,
         current_proba=2,
         current_impact=3,
         residual_proba=0,
@@ -130,6 +134,7 @@ def test_export_import_round_trips_workshop_5(
         "mitigate",
         "MFA cuts the entry vector",
     )
+    assert (rs.inherent_proba, rs.inherent_impact) == (3, 3)
     assert (rs.current_proba, rs.current_impact) == (2, 3)
     assert (rs.residual_proba, rs.residual_impact) == (0, 1)
     assert [c.name for c in rs.existing_applied_controls.all()] == ["Firewall"]
@@ -250,3 +255,56 @@ def test_export_xlsx_hides_linked_objects_the_user_cannot_view(
         assert any(name in c for c in cells), name
     assert [c for c in cells if "Hidden" in c] == []
     assert not any(sheet.startswith("1.4") for sheet in workbook.sheetnames)
+
+
+@pytest.mark.django_db
+def test_export_xlsx_hides_risk_scenarios_without_scenario_permission(
+    admin_client, ebios_rm_matrix_fixture
+):
+    domain = Folder.objects.create(
+        name="Study domain",
+        content_type=Folder.ContentType.DOMAIN,
+        parent_folder=Folder.get_root_folder(),
+    )
+    study = EbiosRMStudy.objects.create(
+        name="Scoped study", risk_matrix=ebios_rm_matrix_fixture, folder=domain
+    )
+    ra = RiskAssessment.objects.create(
+        name="Scoped RA",
+        folder=domain,
+        risk_matrix=ebios_rm_matrix_fixture,
+        ebios_rm_study=study,
+    )
+    scenario = RiskScenario.objects.create(risk_assessment=ra, name="Hidden scenario")
+    scenario.applied_controls.set(
+        [AppliedControl.objects.create(name="Hidden measure", folder=domain)]
+    )
+
+    # Custom role: study, risk assessment and controls, but no risk scenarios
+    role = Role.objects.create(name="NoScenarios", folder=Folder.get_root_folder())
+    role.permissions.set(
+        Permission.objects.filter(
+            codename__in=[
+                "view_ebiosrmstudy",
+                "view_riskassessment",
+                "view_appliedcontrol",
+                "view_folder",
+            ]
+        )
+    )
+    reader = User.objects.create_user("noscenario@ebios-export-tests.com")
+    ug = UserGroup.objects.create(name="NoScenariosUG", folder=domain)
+    ug.user_set.add(reader)
+    RoleAssignment.objects.create(
+        user_group=ug, role=role, folder=Folder.get_root_folder(), is_recursive=True
+    ).perimeter_folders.add(domain)
+    client = APIClient()
+    client.force_authenticate(reader)
+
+    response = client.get(f"/api/ebios-rm/studies/{study.id}/export-xlsx/")
+
+    assert response.status_code == 200
+    sheets = openpyxl.load_workbook(io.BytesIO(response.content)).sheetnames
+    assert "5.1 Risk Assessment" in sheets
+    assert "5.2 Risk Scenarios" not in sheets
+    assert "5.3 Security Measures" not in sheets

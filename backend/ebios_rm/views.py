@@ -533,6 +533,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
             AppliedControl,
             ComplianceAssessment,
             RiskAssessment,
+            RiskScenario,
             Threat,
         )
         from iam.models import RoleAssignment
@@ -927,13 +928,18 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                     writer, sheet_name=SHEET_NAMES["risk_assessment"], index=False
                 )
 
-                scenarios = risk_assessment.risk_scenarios.select_related(
-                    "operational_scenario"
-                ).prefetch_related(
-                    Prefetch("assets", queryset=viewable_assets),
-                    Prefetch("threats", queryset=viewable(Threat)),
-                    Prefetch("applied_controls", queryset=viewable_controls),
-                    Prefetch("existing_applied_controls", queryset=viewable_controls),
+                # Risk assessment access doesn't imply scenario access
+                scenarios = (
+                    risk_assessment.risk_scenarios.filter(id__in=viewable(RiskScenario))
+                    .select_related("operational_scenario")
+                    .prefetch_related(
+                        Prefetch("assets", queryset=viewable_assets),
+                        Prefetch("threats", queryset=viewable(Threat)),
+                        Prefetch("applied_controls", queryset=viewable_controls),
+                        Prefetch(
+                            "existing_applied_controls", queryset=viewable_controls
+                        ),
+                    )
                 )
                 rs_data = []
                 for rs in scenarios:
@@ -952,6 +958,9 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                             "existing_applied_controls": "\n".join(
                                 c.name for c in rs.existing_applied_controls.all()
                             ),
+                            "inherent_proba": rs.get_inherent_proba()["name"],
+                            "inherent_impact": rs.get_inherent_impact()["name"],
+                            "inherent_risk": rs.get_inherent_risk()["name"],
                             "current_proba": rs.get_current_proba()["name"],
                             "current_impact": rs.get_current_impact()["name"],
                             "current_risk": rs.get_current_risk()["name"],
@@ -971,8 +980,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                     )
 
                 measures = viewable_controls.filter(
-                    Q(risk_scenarios__risk_assessment=risk_assessment)
-                    | Q(risk_scenarios_e__risk_assessment=risk_assessment)
+                    Q(risk_scenarios__in=scenarios) | Q(risk_scenarios_e__in=scenarios)
                 ).distinct()
                 measures_data = [
                     {
