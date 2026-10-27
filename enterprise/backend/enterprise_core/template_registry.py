@@ -11,9 +11,14 @@ TYPST_AUDIT_VARIABLES = [
         "description": "The compliance assessment (name, description, framework, version, status, ...)",
     },
     {
-        "name": "date / generated_at",
+        "name": "date",
         "type": "string",
-        "description": "Export date (DD/MM/YYYY) and full generation timestamp",
+        "description": "Export date formatted as DD/MM/YYYY",
+    },
+    {
+        "name": "generated_at",
+        "type": "string",
+        "description": "Full generation timestamp",
     },
     {
         "name": "contributors",
@@ -41,9 +46,14 @@ TYPST_AUDIT_VARIABLES = [
         "description": "Chart image filenames available to `image()` (compliance_donut.png, completion_bar.png, ...)",
     },
     {
-        "name": "commitments / tasks",
+        "name": "commitments",
         "type": "list",
-        "description": "Commitments and tasks linked to the requirements, when the profile includes them",
+        "description": "Commitments linked to the requirements, when the profile includes them",
+    },
+    {
+        "name": "tasks",
+        "type": "list",
+        "description": "Tasks linked to the requirements, when the profile includes them",
     },
     {
         "name": "counterparty",
@@ -51,9 +61,29 @@ TYPST_AUDIT_VARIABLES = [
         "description": "Third-party entity and representatives, or none for an internal audit",
     },
     {
-        "name": "req / category_scores / drifts_per_domain / p1_controls / full_controls",
+        "name": "req",
         "type": "object",
-        "description": "Same aggregates as the Word report, when the profile and visibility allow them",
+        "description": "Aggregated result counts (as in the Word report), when visibility allows them",
+    },
+    {
+        "name": "category_scores",
+        "type": "object",
+        "description": "Per-category score details, when the profile includes categories",
+    },
+    {
+        "name": "drifts_per_domain",
+        "type": "list",
+        "description": "List of {name, drift_count} per top-level domain",
+    },
+    {
+        "name": "p1_controls",
+        "type": "list",
+        "description": "P1 priority controls: {name, description, status, category, coverage}",
+    },
+    {
+        "name": "full_controls",
+        "type": "list",
+        "description": "All applied controls: {name, description, prio, status, eta, category, coverage}",
     },
 ]
 
