@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { deserialize } from '$app/forms';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import { page } from '$app/state';
-	import TierBadge from '$lib/components/ModelTable/field/TierBadge.svelte';
-	import { getModalStore, type ModalSettings } from '$lib/components/Modals/stores';
-	import { getToastStore } from '$lib/components/Toast/stores';
-	import { canPerformAction } from '$lib/utils/access-control';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
+	import TierBadge from '#lib/components/ModelTable/field/TierBadge.svelte';
+	import { getModalStore, type ModalSettings } from '#lib/components/Modals/stores.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import { canPerformAction } from '#lib/utils/access-control.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
 	import type { PageData } from './$types';
 
 	interface Tier {
@@ -104,7 +104,7 @@
 			}
 			return true;
 		} finally {
-			await invalidateAll();
+			await refreshAll();
 			busy = false;
 		}
 	}

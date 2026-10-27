@@ -3,26 +3,26 @@
 
 	// Most of the app wide CSS should be put in this file
 	import '../app.css';
-	import '@fortawesome/fontawesome-free/css/all.min.css';
 
-	import { browser } from '$app/environment';
+	import '@fortawesome/fontawesome-free/css/all.min.css';
+	import { browser } from '$app/env';
 	import { onMount } from 'svelte';
 
-	import Toast from '$lib/components/Toast/Toast.svelte';
-	import Modal from '$lib/components/Modals/Modal.svelte';
-	import DisplayJSONModal from '$lib/components/Modals/DisplayJSONModal.svelte';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
-	import { initializeModalStore, type ModalComponent } from '$lib/components/Modals/stores';
+	import Toast from '#lib/components/Toast/Toast.svelte';
+	import Modal from '#lib/components/Modals/Modal.svelte';
+	import DisplayJSONModal from '#lib/components/Modals/DisplayJSONModal.svelte';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
+	import DeleteConfirmModal from '#lib/components/Modals/DeleteConfirmModal.svelte';
+	import { initializeModalStore, type ModalComponent } from '#lib/components/Modals/stores.js';
 	import {
 		initializeToastStore,
 		getToastStore,
 		type ToastSettings
-	} from '$lib/components/Toast/stores';
+	} from '#lib/components/Toast/stores.js';
 
 	import { getFlash } from 'sveltekit-flash-message';
-	import { page } from '$app/stores';
-	import { clientSideToast } from '$lib/utils/stores';
+	import { page } from '$app/state';
+	import { clientSideToast } from '#lib/utils/stores.js';
 
 	initializeModalStore();
 	initializeToastStore();
@@ -31,10 +31,8 @@
 	const toastStore = getToastStore();
 
 	const toast = (message: string, options: Record<string, string>) => {
-		const t: ToastSettings = {
-			message: message,
-			...options
-		};
+		const t: ToastSettings = { message, ...options };
+
 		toastStore.trigger(t);
 	};
 
@@ -90,7 +88,7 @@
 	// 	mimeType: ''
 	// });
 
-	const clientSettings = $derived($page.data.clientSettings);
+	const clientSettings = $derived(page.data.clientSettings);
 	// Empty when none is uploaded or hidden from this viewer: serve the static
 	// icon instead of asking the backend for a favicon it would 404 on.
 	const customFavicon = $derived(Boolean(clientSettings?.settings?.favicon));

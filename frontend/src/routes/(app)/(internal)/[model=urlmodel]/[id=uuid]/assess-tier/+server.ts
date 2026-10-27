@@ -1,5 +1,5 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { error, json } from '@sveltejs/kit';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 const TIER_TARGETS: Record<string, string> = {
@@ -18,7 +18,7 @@ function tierTarget(model: string) {
 export const GET: RequestHandler = async ({ fetch, params }) => {
 	const query = new URLSearchParams({ target: tierTarget(params.model), subject: params.id });
 	const res = await fetch(`${BASE_API_URL}/quick-forms/assess-options/?${query}`);
-	return json(res.ok ? await res.json() : []);
+	return Response.json(res.ok ? await res.json() : []);
 };
 
 // Start (or resume) an assessment of this object through one of them.
@@ -31,5 +31,5 @@ export const POST: RequestHandler = async ({ fetch, params, request }) => {
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({ subject: params.id })
 	});
-	return json(await res.json().catch(() => ({})), { status: res.status });
+	return Response.json(await res.json().catch(() => ({})), { status: res.status });
 };

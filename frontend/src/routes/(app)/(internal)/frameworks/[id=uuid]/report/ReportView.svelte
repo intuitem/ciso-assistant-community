@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { pageTitle } from '$lib/utils/stores';
+	import { pageTitle } from '#lib/utils/stores.js';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { m } from '$paraglide/messages';
-	import { getLocale } from '$paraglide/runtime';
-	import { formatDate } from '$lib/utils/datetime';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { m } from '#paraglide/messages.js';
+	import { getLocale } from '#paraglide/runtime.js';
+	import { formatDate } from '#lib/utils/datetime.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 
 	// -----------------------------------------------------------------------------
 	// Types — match the backend response shape from GET /api/frameworks/{id}/report/
@@ -200,10 +200,10 @@
 
 	function onIGChange(event: Event) {
 		const nextIG = (event.currentTarget as HTMLSelectElement).value;
-		const url = new URL(page.url);
+		const url = new URL(page.url.href);
 		if (nextIG && nextIG !== 'all') url.searchParams.set('implementation_group', nextIG);
 		else url.searchParams.delete('implementation_group');
-		goto(url, { invalidateAll: true, keepFocus: true });
+		goto(url, { refreshAll: true, reset: false });
 	}
 
 	const RESULT_COLORS: Record<Result, string> = {

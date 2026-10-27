@@ -1,52 +1,52 @@
 <script lang="ts">
 	import { run } from 'svelte/legacy';
 
-	import DetailView from '$lib/components/DetailView/DetailView.svelte';
+	import DetailView from '#lib/components/DetailView/DetailView.svelte';
 	import type { PageData, ActionData } from './$types';
-	import SuperForm from '$lib/components/Forms/Form.svelte';
+	import SuperForm from '#lib/components/Forms/Form.svelte';
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
-	import { modelSchema } from '$lib/utils/schemas';
-	import * as m from '$paraglide/messages.js';
+	import { modelSchema } from '#lib/utils/schemas.js';
+	import * as m from '#paraglide/messages.js';
 	import { onMount } from 'svelte';
-	import { ensureSelectOptions } from '$lib/utils/select-options';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { createModalCache } from '$lib/utils/stores';
+	import { ensureSelectOptions } from '#lib/utils/select-options.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { createModalCache } from '#lib/utils/stores.js';
 	import { DataHandler, type State } from '@vincjo/datatables/remote';
-	import { loadTableData } from '$lib/components/ModelTable/handler';
-	import Search from '$lib/components/ModelTable/Search.svelte';
-	import RowsPerPage from '$lib/components/ModelTable/RowsPerPage.svelte';
-	import RowCount from '$lib/components/ModelTable/RowCount.svelte';
-	import Pagination from '$lib/components/ModelTable/Pagination.svelte';
-	import { listViewFields } from '$lib/utils/table';
+	import { loadTableData } from '#lib/components/ModelTable/handler.js';
+	import Search from '#lib/components/ModelTable/Search.svelte';
+	import RowsPerPage from '#lib/components/ModelTable/RowsPerPage.svelte';
+	import RowCount from '#lib/components/ModelTable/RowCount.svelte';
+	import Pagination from '#lib/components/ModelTable/Pagination.svelte';
+	import { listViewFields } from '#lib/utils/table.js';
 	import { goto as _goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { formatDateOrDateTime } from '$lib/utils/datetime';
-	import { getLocale } from '$paraglide/runtime.js';
-	import TableRowActions from '$lib/components/TableRowActions/TableRowActions.svelte';
-	import Select from '$lib/components/Forms/Select.svelte';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
-	import SelectExistingModal from '$lib/components/Modals/SelectExistingModal.svelte';
-	import ExportModal, { type ExportGroup } from '$lib/components/Modals/ExportModal.svelte';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { getListViewFields } from '$lib/utils/table';
-	import type { ReverseForeignKeyField } from '$lib/utils/crud';
-	import { countMasked } from '$lib/utils/related-visibility';
+	import { formatDateOrDateTime } from '#lib/utils/datetime.js';
+	import { getLocale } from '#paraglide/runtime.js';
+	import TableRowActions from '#lib/components/TableRowActions/TableRowActions.svelte';
+	import Select from '#lib/components/Forms/Select.svelte';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
+	import PromptConfirmModal from '#lib/components/Modals/PromptConfirmModal.svelte';
+	import SelectExistingModal from '#lib/components/Modals/SelectExistingModal.svelte';
+	import ExportModal, { type ExportGroup } from '#lib/components/Modals/ExportModal.svelte';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
+	import { getListViewFields } from '#lib/utils/table.js';
+	import type { ReverseForeignKeyField } from '#lib/utils/crud.js';
+	import { countMasked } from '#lib/utils/related-visibility.js';
 
-	import { canPerformAction } from '$lib/utils/access-control';
+	import { canPerformAction } from '#lib/utils/access-control.js';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
-	import { getToastStore } from '$lib/components/Toast/stores';
-	import type { TableSource } from '$lib/components/ModelTable/types';
+	} from '#lib/components/Modals/stores.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import type { TableSource } from '#lib/components/ModelTable/types.js';
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 
 	interface Props {
@@ -137,7 +137,7 @@
 	$effect(() => {
 		if (invalidateTable) {
 			handler.invalidate();
-			_goto(page.url);
+			_goto(page.url.href);
 			invalidateTable = false;
 		}
 	});
