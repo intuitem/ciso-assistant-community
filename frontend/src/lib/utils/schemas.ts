@@ -88,7 +88,7 @@ export const reauthenticateSchema = z.object({
 	password: z.string().optional(),
 	code: z
 		.string()
-		.regex(/^\d{6,8}$/)
+		.regex(/^(\d{6,8})?$/, { error: 'incorrectCode' })
 		.optional(),
 	credential: z.string().optional()
 });
