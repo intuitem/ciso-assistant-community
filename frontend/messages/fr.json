@@ -7684,5 +7684,12 @@
 	"notAvailableShort": "n/d",
 	"noVendorBelowTarget": "Aucun fournisseur sous la cible",
 	"postureMetric": "Indicateur de posture",
-	"postureView": "Vue"
+	"postureView": "Vue",
+	"quadrant": "Quadrant",
+	"actFirstFrom": "Agir d'abord à partir de",
+	"actFirst": "Agir d'abord",
+	"maintain": "Maintenir",
+	"improveWhenDue": "Améliorer en temps voulu",
+	"lowConcern": "Peu préoccupant",
+	"notPlotted": "Non représentés"
 }

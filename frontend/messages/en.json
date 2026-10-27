@@ -7684,5 +7684,12 @@
 	"notAvailableShort": "n/a",
 	"noVendorBelowTarget": "No vendor below target",
 	"postureMetric": "Posture metric",
-	"postureView": "View"
+	"postureView": "View",
+	"quadrant": "Quadrant",
+	"actFirstFrom": "Act first from",
+	"actFirst": "Act first",
+	"maintain": "Maintain",
+	"improveWhenDue": "Improve when due",
+	"lowConcern": "Low concern",
+	"notPlotted": "Not plotted"
 }

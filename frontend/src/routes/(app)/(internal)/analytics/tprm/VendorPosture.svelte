@@ -6,6 +6,7 @@
 		type Missing,
 		type PostureMetric
 	} from '#lib/utils/vendor-posture.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { m } from '#paraglide/messages.js';
 
 	interface Props {
@@ -22,7 +23,9 @@
 	// Dots stacked per side in a lane; deeper ones overlap rather than leave it.
 	const MAX_STACK = 3;
 
-	let view = $state<'list' | 'lanes'>('list');
+	let view = $state<'list' | 'lanes' | 'quadrant'>('list');
+	// Tier key the act-first group ends at; null = the second tier of the scale.
+	let actFrom = $state<string | null>(null);
 	let metric = $state<PostureMetric>('compliance');
 
 	interface Vendor {
@@ -93,6 +96,15 @@
 	});
 
 	const belowCount = $derived(rows.reduce((sum, row) => sum + row.below.length, 0));
+
+	const tiered = $derived(rows.filter((row) => row.tier));
+	const cutIndex = $derived(
+		Math.max(
+			0,
+			rows.findIndex((row) => row.key === (actFrom ?? tiered[Math.min(1, tiered.length - 1)]?.key))
+		)
+	);
+	const notPlotted = $derived(rows.flatMap((row) => row.missing));
 
 	// Close dots stack above and below the axis instead of hiding each other.
 	function swarm(vendors: Vendor[]) {
@@ -165,6 +177,52 @@
 	{/if}
 {/snippet}
 
+{#snippet dot(vendor: Vendor, offset: number, label: boolean, drop: boolean)}
+	<a
+		href="/entity-assessments/{vendor.id}"
+		class="group absolute size-4 rounded-full ring-2 ring-surface-50-950 hover:z-20 hover:ring-primary-500 focus-visible:z-20 {vendor.gap ==
+		null
+			? 'bg-surface-500'
+			: vendor.gap < 0
+				? 'bg-error-500'
+				: 'border-[3px] border-success-600-400 bg-surface-50-950'}"
+		style="left: calc({vendor.value}% - 8px); top: calc(50% - 8px + {offset}px)"
+		aria-label="{vendor.name} {vendor.value}%"
+		data-testid="posture-dot"
+	>
+		<!-- Instant, unlike `title`; flips near the edges since the scroll box clips overflow. -->
+		<span
+			class="pointer-events-none absolute hidden flex-col gap-1 whitespace-nowrap rounded-md bg-surface-900-100 px-2.5 py-1.5 text-xs text-surface-50-950 shadow-lg group-hover:flex group-focus-visible:flex {drop
+				? 'top-full mt-2'
+				: 'bottom-full mb-2'} {vendor.value > 70
+				? 'right-0'
+				: vendor.value < 15
+					? 'left-0'
+					: 'left-1/2 -translate-x-1/2'}"
+			role="tooltip"
+		>
+			<span class="font-semibold">{vendor.name}</span>
+			<span class="flex items-center gap-1.5 tabular-nums">
+				<span class="font-bold">{vendor.value}%</span>
+				{#if vendor.gap != null}{@render gapPill(vendor.gap)}{/if}
+				{#if vendor.completion < 100}
+					<span class="opacity-75"
+						>{vendor.completion === 0
+							? m.notStarted()
+							: m.answeredPercent({ value: vendor.completion })}</span
+					>
+				{/if}
+			</span>
+		</span>
+		{#if label}
+			<span
+				class="pointer-events-none absolute left-full top-1/2 ml-1.5 max-w-40 -translate-y-1/2 truncate text-xs font-semibold text-surface-950-50"
+				>{vendor.name}</span
+			>
+		{/if}
+	</a>
+{/snippet}
+
 {#snippet tierLabel(row: (typeof rows)[number])}
 	<div class="flex flex-col gap-1">
 		{#if row.tier}
@@ -218,6 +276,14 @@
 					onclick={() => (view = 'lanes')}
 				>
 					<i class="fa-solid fa-chart-simple fa-rotate-90"></i>{m.lanes()}
+				</button>
+				<button
+					type="button"
+					class={segment(view === 'quadrant')}
+					aria-pressed={view === 'quadrant'}
+					onclick={() => (view = 'quadrant')}
+				>
+					<i class="fa-solid fa-table-cells-large"></i>{m.quadrant()}
 				</button>
 			</div>
 			<div
@@ -307,6 +373,112 @@
 				</div>
 			{/each}
 		</div>
+	{:else if view === 'quadrant'}
+		<div class="flex flex-col gap-3" data-testid="posture-quadrant">
+			<label class="flex items-center gap-2 self-start text-sm font-semibold text-surface-700-300">
+				{m.actFirstFrom()}
+				<select
+					class="select w-auto py-1 text-sm"
+					value={rows[cutIndex]?.key}
+					onchange={(event) => (actFrom = event.currentTarget.value)}
+				>
+					{#each tiered as row (row.key)}
+						<option value={row.key}>{safeTranslate(row.tier.name)}</option>
+					{/each}
+				</select>
+			</label>
+			<div class="overflow-x-auto">
+				<div class="min-w-[40rem]">
+					{#each rows as row, index (row.key)}
+						{@const act = index <= cutIndex && row.tier != null}
+						{@const groupStart = index === 0 || index === cutIndex + 1}
+						{@const previous = rows[index - 1]?.target ?? null}
+						<div class="grid grid-cols-[10rem_1fr] items-center gap-3">
+							{@render tierLabel(row)}
+							<div
+								class="relative h-28 {index === cutIndex + 1
+									? 'border-t-[3px] border-surface-950-50'
+									: index
+										? 'border-t border-surface-200-800'
+										: ''}"
+								data-testid="posture-band"
+							>
+								{#if row.target != null}
+									<div
+										class="absolute inset-y-0 left-0 {act
+											? 'bg-error-500/10'
+											: 'bg-surface-500/10'}"
+										style="width: {row.target}%"
+									></div>
+									{#if act}
+										<div
+											class="absolute inset-y-0 right-0 bg-success-500/10"
+											style="left: {row.target}%"
+										></div>
+									{/if}
+									<div
+										class="absolute inset-y-0 border-l-2 border-dashed border-surface-500"
+										style="left: {row.target}%"
+									></div>
+									<!-- Staircase step joining this tier's target to the previous one. -->
+									{#if previous != null && index !== cutIndex + 1}
+										<div
+											class="absolute top-0 border-t-2 border-dashed border-surface-500"
+											style="left: {Math.min(previous, row.target)}%; width: {Math.abs(
+												previous - row.target
+											)}%"
+										></div>
+									{/if}
+								{/if}
+								{#if groupStart && row.tier}
+									<span
+										class="pointer-events-none absolute left-2 top-1.5 text-[11px] font-bold uppercase tracking-wider {act
+											? 'text-error-700-300'
+											: 'text-surface-600-400'}"
+									>
+										{act ? m.actFirst() : m.improveWhenDue()}
+									</span>
+									<span
+										class="pointer-events-none absolute right-2 top-1.5 text-[11px] font-bold uppercase tracking-wider {act
+											? 'text-success-700-300'
+											: 'text-surface-600-400'}"
+									>
+										{act ? m.maintain() : m.lowConcern()}
+									</span>
+								{/if}
+								{#each swarm(row.known) as { vendor, offset } (vendor.id)}
+									{@render dot(
+										vendor,
+										offset,
+										act && vendor.gap != null && vendor.gap < 0,
+										index === 0
+									)}
+								{/each}
+							</div>
+						</div>
+					{/each}
+					<div
+						class="grid grid-cols-[10rem_1fr] gap-3 border-t border-surface-200-800 pt-1 text-xs font-semibold text-surface-600-400"
+					>
+						<span></span>
+						<span class="flex justify-between tabular-nums"
+							><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span
+							></span
+						>
+					</div>
+				</div>
+			</div>
+			{#if notPlotted.length}
+				<p class="text-xs text-surface-600-400">
+					<span class="font-semibold">{m.notPlotted()}:</span>
+					{#each notPlotted as vendor, index (vendor.id)}
+						<a href="/entity-assessments/{vendor.id}" class="hover:text-primary-500"
+							>{vendor.name} ({vendor.why})</a
+						>{index < notPlotted.length - 1 ? ', ' : ''}
+					{/each}
+				</p>
+			{/if}
+		</div>
 	{:else}
 		<div class="flex flex-col gap-4 lg:flex-row" data-testid="posture-lanes">
 			<div class="min-w-0 flex-1 overflow-x-auto">
@@ -321,7 +493,7 @@
 							></span
 						>
 					</div>
-					{#each rows as row (row.key)}
+					{#each rows as row, index (row.key)}
 						<div
 							class="grid grid-cols-[10rem_3.5rem_1fr] items-center gap-3 border-b border-surface-100-900"
 						>
@@ -338,7 +510,9 @@
 								{row.missing.length || '–'}
 								{#if row.missing.length}
 									<span
-										class="pointer-events-none absolute bottom-full left-0 z-20 mb-1 hidden flex-col gap-0.5 whitespace-nowrap rounded-md bg-surface-900-100 px-2.5 py-1.5 text-left text-xs font-normal text-surface-50-950 shadow-lg group-hover:flex group-focus-visible:flex"
+										class="pointer-events-none absolute left-0 z-20 hidden {index === 0
+											? 'top-full mt-1'
+											: 'bottom-full mb-1'} flex-col gap-0.5 whitespace-nowrap rounded-md bg-surface-900-100 px-2.5 py-1.5 text-left text-xs font-normal text-surface-50-950 shadow-lg group-hover:flex group-focus-visible:flex"
 										role="tooltip"
 									>
 										{#each row.missing as vendor (vendor.id)}
@@ -360,42 +534,7 @@
 								{/if}
 								<div class="absolute inset-x-0 top-1/2 h-px bg-surface-200-800"></div>
 								{#each swarm(row.known) as { vendor, offset } (vendor.id)}
-									<a
-										href="/entity-assessments/{vendor.id}"
-										class="group absolute size-4 rounded-full ring-2 ring-surface-50-950 hover:z-20 hover:ring-primary-500 focus-visible:z-20 {vendor.gap ==
-										null
-											? 'bg-surface-500'
-											: vendor.gap < 0
-												? 'bg-error-500'
-												: 'border-[3px] border-success-600-400 bg-surface-50-950'}"
-										style="left: calc({vendor.value}% - 8px); top: calc(50% - 8px + {offset}px)"
-										aria-label="{vendor.name} {vendor.value}%"
-										data-testid="posture-dot"
-									>
-										<!-- Instant, unlike `title`; flips left near the right edge so it is not clipped. -->
-										<span
-											class="pointer-events-none absolute bottom-full mb-2 hidden flex-col gap-1 whitespace-nowrap rounded-md bg-surface-900-100 px-2.5 py-1.5 text-xs text-surface-50-950 shadow-lg group-hover:flex group-focus-visible:flex {vendor.value >
-											70
-												? 'right-0'
-												: vendor.value < 15
-													? 'left-0'
-													: 'left-1/2 -translate-x-1/2'}"
-											role="tooltip"
-										>
-											<span class="font-semibold">{vendor.name}</span>
-											<span class="flex items-center gap-1.5 tabular-nums">
-												<span class="font-bold">{vendor.value}%</span>
-												{#if vendor.gap != null}{@render gapPill(vendor.gap)}{/if}
-												{#if vendor.completion < 100}
-													<span class="opacity-75"
-														>{vendor.completion === 0
-															? m.notStarted()
-															: m.answeredPercent({ value: vendor.completion })}</span
-													>
-												{/if}
-											</span>
-										</span>
-									</a>
+									{@render dot(vendor, offset, false, index === 0)}
 								{/each}
 							</div>
 						</div>
