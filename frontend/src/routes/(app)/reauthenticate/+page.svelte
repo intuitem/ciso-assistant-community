@@ -43,7 +43,7 @@
 	function switchMode(next: Mode, form: SuperFormApi<Record<string, unknown>>) {
 		mode = next;
 		webAuthnError = null;
-		form.form.update((data) => ({ ...data, code: undefined }), { taint: false });
+		form.form.update((data) => ({ ...data, mode: next, code: undefined }), { taint: false });
 		form.errors.update((errors) => ({ ...errors, code: undefined }));
 	}
 </script>
