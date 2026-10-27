@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { enhance } from '$app/forms';
-	import { invalidateAll } from '$app/navigation';
-	import { BACKEND_API_EXPOSED_URL } from '$lib/utils/constants';
+	import { refreshAll } from '$app/navigation';
+	import { BACKEND_API_EXPOSED_URL } from '#lib/utils/constants.js';
 
 	interface Props {
 		data: any;
@@ -90,8 +90,8 @@
 					if (result.type === 'success' && result.data?.token) {
 						newToken = result.data.token as string;
 					}
-					await update({ reset: false });
-					await invalidateAll();
+					await update({ reset: false, navigate: false });
+					await refreshAll();
 				};
 			}}
 		>
@@ -131,8 +131,8 @@
 									action="?/revokeScimToken"
 									use:enhance={() => {
 										return async ({ update }) => {
-											await update({ reset: false });
-											await invalidateAll();
+											await update({ reset: false, navigate: false });
+											await refreshAll();
 										};
 									}}
 								>

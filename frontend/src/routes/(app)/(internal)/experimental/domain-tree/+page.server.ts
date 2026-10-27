@@ -1,5 +1,5 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { match as isUuid } from '../../../../../params/uuid';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { matchUuid as isUuid } from '../../../../../params';
 import type { PageServerLoad } from './$types';
 import type { DomainTreeFeed } from './feed';
 

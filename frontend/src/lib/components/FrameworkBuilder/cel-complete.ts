@@ -1,5 +1,5 @@
 import { getContext, setContext } from 'svelte';
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 import { extractNodeId, type BuilderNode, type OutcomeRule, type Question } from './builder-state';
 import FIELDS from './cel-fields.json';
 
