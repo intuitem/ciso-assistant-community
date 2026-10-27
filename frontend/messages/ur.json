@@ -1190,12 +1190,58 @@
 	"syncToAppliedControl": "لاگو کنٹرول کے ساتھ ہم آہنگ کریں",
 	"syncToReferenceControl": "حوالہ کنٹرول کے ساتھ ہم آہنگ کریں",
 	"expirationDate": "میعاد ختم کی تاریخ",
-	"vulnerabilitySlaPolicyHelpText": "شدت کے مطابق کمزوری کو ٹھیک کرنے کے لیے زیادہ سے زیادہ دن مقرر کریں۔",
+	"vulnerabilitySlaPolicyHelpText": "شدت کے مطابق کمزوری کو ٹھیک کرنے کے لیے زیادہ سے زیادہ دن مقرر کریں۔ SLA کو مکمل طور پر بند کرنے کے لیے کمزوری SLA فیچر فلیگ کو غیر فعال کریں۔",
 	"slaAnchor": "SLA آغاز کی تاریخ",
 	"slaAnchorHelpText": "منتخب کریں کہ SLA کب شروع ہوگا۔",
 	"slaDaysHelpText": "درستگی کے دن",
 	"resetToDefaults": "ڈیفالٹ پر واپس جائیں",
+	"vulnerabilitySlaDisabledHint": "فیچر فلیگز میں کمزوری SLA بند ہے، اس لیے آخری تاریخوں کا حساب نہیں لگایا جاتا",
 	"detectedAt": "پتہ لگنے کی تاریخ",
+	"detectedAtHelpText": "کمزوری کب دریافت ہوئی۔ پہلے سے طے شدہ قدر آج ہے، جب تک SLA بند نہ ہو۔ جب پالیسی پتہ لگنے کی تاریخ پر سیٹ ہو تو SLA کے نقطۂ آغاز کے طور پر استعمال ہوتی ہے۔",
+	"remediatedAt": "تدارک کی تاریخ",
+	"remediatedAtHelpText": "کمزوری حل ہونے کے دن (تخفیف شدہ، درست شدہ، قابلِ استحصال نہیں یا غیر متاثرہ) پر سیٹ ہوتی ہے، جب تک آپ خود کوئی تاریخ درج نہ کریں۔ دوبارہ کھولنے پر برقرار رہتی ہے۔",
+	"vulnerabilityOpenForDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "پتہ لگنے کے بعد سے {count} دن سے کھلی ہے",
+				"countPlural=other": "پتہ لگنے کے بعد سے {count} دن سے کھلی ہے"
+			}
+		}
+	],
+	"vulnerabilityRemediatedInDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "پتہ لگنے کے {count} دن بعد تدارک کیا گیا",
+				"countPlural=other": "پتہ لگنے کے {count} دن بعد تدارک کیا گیا"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLeft": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} دن باقی",
+				"countPlural=other": "{count} دن باقی"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} دن کی تاخیر",
+				"countPlural=other": "{count} دن کی تاخیر"
+			}
+		}
+	],
+	"excepted": "استثنا میں",
+	"exceptionEnds": "استثنا کا اختتام",
 	"publishedDate": "اشاعت کی تاریخ",
 	"vulnerabilitySlaPolicy": "کمزوری SLA",
 	"secIntelFeeds": "کمزوری فیڈز",
@@ -1697,7 +1743,10 @@
 	"templateSaved": "سانچہ کامیابی سے محفوظ ہو گیا",
 	"templateReset": "سانچہ ڈیفالٹ پر ری سیٹ ہو گیا",
 	"confirmResetTemplate": "کیا آپ واقعی اس سانچے کو ڈیفالٹ پر ری سیٹ کرنا چاہتے ہیں؟ آپ کی حسب ضرورت تبدیلیاں ضائع ہو جائیں گی۔",
+	"templateVulnerabilityAssignmentName": "کمزوری کی تفویض",
+	"templateVulnerabilityAssignmentDescription": "کمزوری تفویض ہونے پر بھیجا جاتا ہے",
 	"readAt": "پڑھنے کا وقت",
+	"notificationTitleVulnerabilityAssignment": "آپ کو کمزوری '{vulnerability_name}' تفویض کی گئی ہے",
 	"notification": "اطلاع",
 	"notifications": "اطلاعات",
 	"read": "پڑھا ہوا",
@@ -2009,6 +2058,7 @@
 	"events": "واقعات",
 	"reports": "رپورٹس",
 	"annualExpense": "سالانہ اخراجات",
+	"vulnerabilitySlaDescription": "شدت کی بنیاد پر کمزوریوں کی آخری تاریخوں کا حساب لگائیں اور دکھائیں کہ ہر ایک اپنی مہلت کے کتنا قریب ہے",
 	"targetDomains": "ہدفی ڈومینز",
 	"vulnerability": "کمزوری",
 	"sla": "SLA",
@@ -2117,5 +2167,7 @@
 	"dpiaRequiredNo": "DPIA درکار نہیں",
 	"dpiaRequirementChange": "DPIA کی ضرورت میں تبدیلی",
 	"dpiaRequirementChanges": "DPIA کی ضرورت کا تاریخچہ",
-	"previously": "پہلے"
+	"previously": "پہلے",
+	"vulnerabilityOpenWithRemediationDate": "کھلی کمزوری کی تدارک کی تاریخ ہے",
+	"vulnerabilityResolvedWithoutRemediationDate": "حل شدہ کمزوری کی تدارک کی تاریخ نہیں ہے"
 }

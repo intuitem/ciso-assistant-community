@@ -1198,6 +1198,8 @@
 	"appliedControlNoStatus": "Applied control has no status",
 	"taskTemplateNoAssignee": "Task has no assignee",
 	"taskNodeOverdue": "Task occurrence is past its due date",
+	"vulnerabilityOpenWithRemediationDate": "Open vulnerability has a remediation date",
+	"vulnerabilityResolvedWithoutRemediationDate": "Resolved vulnerability has no remediation date",
 	"evidenceNoFile": "Evidence has no file uploaded",
 	"requirementAppliedControlHelpText": "Evidences linked to the selected measures will be automatically associated with the requirement.",
 	"requirementEvidenceHelpText": "This tab allows you to add extra evidences to the requirement.",
@@ -1455,6 +1457,8 @@
 	"templateQuickFormSubmittedDescription": "Sent to a reviewer when a quick form response is submitted",
 	"templateSecurityExceptionAssignmentName": "Exception assignment",
 	"templateSecurityExceptionAssignmentDescription": "Sent when a security exception is assigned",
+	"templateVulnerabilityAssignmentName": "Vulnerability assignment",
+	"templateVulnerabilityAssignmentDescription": "Sent when a vulnerability is assigned",
 	"templateSecurityExceptionExpiringSoonName": "Exception expiring soon",
 	"templateSecurityExceptionExpiringSoonDescription": "Sent when security exceptions are about to expire",
 	"templateSecurityExceptionStatusChangedName": "Exception status changed",
@@ -1482,6 +1486,7 @@
 	"notificationTitleQuickFormSubmitted": "Quick form '{response_name}' awaits your review",
 	"notificationTitleRiskScenarioAssignment": "You have been assigned to risk scenario '{scenario_name}'",
 	"notificationTitleSecurityExceptionAssignment": "You have been assigned to exception '{exception_name}'",
+	"notificationTitleVulnerabilityAssignment": "You have been assigned to vulnerability '{vulnerability_name}'",
 	"notificationTitleSecurityExceptionExpiringSoon": "Exception '{exception_name}' expires in {days_remaining} day(s)",
 	"notificationTitleSecurityExceptionStatusChanged": "Exception '{exception_name}' is now {new_status}",
 	"notificationTitleTaskNodeDueSoon": "Task '{task_name}' is due in {days_remaining} day(s)",
@@ -3071,11 +3076,56 @@
 	"changeSeverity": "... severity",
 	"batchChangeSeverity": "Change severity",
 	"detectedAt": "Detection date",
-	"detectedAtHelpText": "When the vulnerability was discovered. Defaults to today. Used as the SLA anchor when the policy is set to detection date.",
+	"detectedAtHelpText": "When the vulnerability was discovered. Defaults to today unless the SLA is disabled. Used as the SLA anchor when the policy is set to detection date.",
+	"remediatedAt": "Remediation date",
+	"remediatedAtHelpText": "Set to the day the vulnerability is resolved (mitigated, fixed, not exploitable or unaffected), unless you enter one. Kept when it is reopened.",
+	"vulnerabilityOpenForDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Open for {count} day since detection",
+				"countPlural=other": "Open for {count} days since detection"
+			}
+		}
+	],
+	"vulnerabilityRemediatedInDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Remediated {count} day after detection",
+				"countPlural=other": "Remediated {count} days after detection"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLeft": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} day left",
+				"countPlural=other": "{count} days left"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} day late",
+				"countPlural=other": "{count} days late"
+			}
+		}
+	],
+	"excepted": "Excepted",
+	"exceptionEnds": "Exception ends",
 	"refreshDueDates": "Refresh SLA due dates",
 	"refreshDueDatesConfirm": "This will recalculate all due dates based on the current SLA policy. Existing due dates will be overwritten. Continue?",
 	"resetToDefaults": "Reset to defaults",
 	"refreshDueDatesFailed": "Failed to refresh due dates",
+	"vulnerabilitySlaDisabledHint": "The vulnerability SLA is turned off in the feature flags, so due dates are not computed",
 	"changeTreatment": "Change treatment",
 	"changeAssignee": "Change assignee",
 	"changeResult": "Change result",
@@ -4769,6 +4819,7 @@
 	"assetsDescription": "Business process and functions (Primary), apps or technical components (Supporting)",
 	"threatsDescription": "Potential threats to your organization",
 	"vulnerabilitiesDescription": "Known vulnerabilities and weaknesses",
+	"vulnerabilitySlaDescription": "Compute vulnerability due dates from their severity and show how close each one is to its deadline",
 	"riskScenariosDescription": "Risk register with scenarios and their treatments",
 	"referenceControlsDescription": "Template of typical security controls",
 	"requirementMappingSetsDescription": "Mappings between different frameworks and standards",
@@ -4872,7 +4923,7 @@
 	"syncCweCatalogFailed": "CWE catalog pull failed",
 	"vulnerability": "Vulnerability",
 	"vulnerabilitySlaPolicy": "Vulnerability SLA",
-	"vulnerabilitySlaPolicyHelpText": "Define the maximum number of days allowed to remediate a vulnerability based on its severity. Leave empty to disable auto-calculation for that severity level. When set, the due date will be automatically computed on vulnerability creation or severity change.",
+	"vulnerabilitySlaPolicyHelpText": "Define the maximum number of days allowed to remediate a vulnerability based on its severity. Leave empty to disable auto-calculation for that severity level. When set, the due date will be automatically computed on vulnerability creation or severity change. To turn the SLA off entirely, disable the Vulnerability SLA feature flag.",
 	"sla": "SLA",
 	"caution": "Caution",
 	"slaAnchor": "SLA start date",
