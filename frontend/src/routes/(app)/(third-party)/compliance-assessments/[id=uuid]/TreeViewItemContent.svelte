@@ -4,20 +4,20 @@
 		complianceResultColorMap,
 		complianceStatusColorMap,
 		extendedResultColorMap
-	} from '$lib/utils/constants';
-	import { darkenColor } from '$lib/utils/helpers';
-	import type { ReferenceControlSchema, ThreatSchema } from '$lib/utils/schemas';
+	} from '#lib/utils/constants.js';
+	import { darkenColor } from '#lib/utils/helpers.js';
+	import type { ReferenceControlSchema, ThreatSchema } from '#lib/utils/schemas.js';
 	import { Progress } from '@skeletonlabs/skeleton-svelte';
-	import { displayScoreColor, formatScoreValue, roundScore } from '$lib/utils/helpers';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { displayScoreColor, formatScoreValue, roundScore } from '#lib/utils/helpers.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import type { z } from 'zod';
-	import { m } from '$paraglide/messages';
-	import ScorePair from '$lib/components/ComplianceAssessment/ScorePair.svelte';
-	import { auditFiltersStore } from '$lib/utils/stores';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import { isQuestionVisible } from '$lib/utils/helpers';
-	import { getContextRecursiveTreeView } from '$lib/components/TreeView/RecursiveTreeView.svelte';
+	import { m } from '#paraglide/messages.js';
+	import ScorePair from '#lib/components/ComplianceAssessment/ScorePair.svelte';
+	import { auditFiltersStore } from '#lib/utils/stores.js';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import { isQuestionVisible } from '#lib/utils/helpers.js';
+	import { getContextRecursiveTreeView } from '#lib/components/TreeView/RecursiveTreeView.svelte';
 
 	interface Props {
 		ref_id: string;

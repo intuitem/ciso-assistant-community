@@ -1,7 +1,7 @@
-import { error, type NumericRange } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { BASE_API_URL, UUID_REGEX } from '$lib/utils/constants';
-import { getModelInfo } from '$lib/utils/crud';
+import { BASE_API_URL, UUID_REGEX } from '#lib/utils/constants.js';
+import { getModelInfo } from '#lib/utils/crud.js';
 
 export const GET: RequestHandler = async ({ fetch, url }) => {
 	const urlModel = url.searchParams.get('model') ?? '';
@@ -22,7 +22,7 @@ export const GET: RequestHandler = async ({ fetch, url }) => {
 			: `${BASE_API_URL}/${model.endpointUrl ?? urlModel}/${selectField.field}/`;
 
 	const res = await fetch(endpoint);
-	if (!res.ok) error(res.status as NumericRange<400, 599>, await res.text());
+	if (!res.ok) error(res.status, await res.text());
 	return new Response(JSON.stringify(await res.json()), {
 		headers: { 'Content-Type': 'application/json' }
 	});

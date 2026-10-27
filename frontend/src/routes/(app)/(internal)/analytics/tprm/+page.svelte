@@ -1,9 +1,9 @@
 <script lang="ts">
 	import FlippableCard from './FlippableCard.svelte';
-	import TierBadge from '$lib/components/ModelTable/field/TierBadge.svelte';
+	import TierBadge from '#lib/components/ModelTable/field/TierBadge.svelte';
 	import type { PageData } from './$types';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		data: PageData;

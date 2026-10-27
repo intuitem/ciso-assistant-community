@@ -3,7 +3,7 @@
 		dynamicTransition,
 		type Transition,
 		type TransitionParams
-	} from '$lib/components/utils/transitions';
+	} from '#lib/components/utils/transitions.js';
 	import { fade, fly } from 'svelte/transition';
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -28,7 +28,7 @@
 	const dispatch = createEventDispatcher<ModalEvent>();
 
 	// Types
-	import type { SvelteEvent } from '$lib/utils/types';
+	import type { SvelteEvent } from '#lib/utils/types.js';
 	import { getModalStore, type ModalComponent, type ModalSettings } from './stores';
 
 	interface Props {

@@ -1,17 +1,17 @@
 <script lang="ts">
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import SuperForm from '$lib/components/Forms/Form.svelte';
-	import { goto } from '$lib/utils/breadcrumbs';
-	import { getSecureRedirect } from '$lib/utils/helpers';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import SuperForm from '#lib/components/Forms/Form.svelte';
+	import { goto } from '#lib/utils/breadcrumbs.js';
+	import { getSecureRedirect } from '#lib/utils/helpers.js';
 	import { defaults, superForm, type SuperValidated } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 
-	import * as m from '$paraglide/messages';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
-	import { quickStartSchema } from '$lib/utils/schemas';
-	import { getLocale } from '$paraglide/runtime';
-	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
+	import * as m from '#paraglide/messages.js';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import Checkbox from '#lib/components/Forms/Checkbox.svelte';
+	import { quickStartSchema } from '#lib/utils/schemas.js';
+	import { getLocale } from '#paraglide/runtime.js';
+	import { getModalStore, type ModalStore } from '#lib/components/Modals/stores.js';
 
 	const modalStore: ModalStore = getModalStore();
 
