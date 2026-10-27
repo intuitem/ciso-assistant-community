@@ -25,7 +25,8 @@ export const load = loadFlash(async ({ fetch, locals, url, cookies, request }) =
 		!user.is_superuser &&
 		user.is_local &&
 		!user.is_sso &&
-		!url.pathname.startsWith('/setup-mfa')
+		!url.pathname.startsWith('/setup-mfa') &&
+		!url.pathname.startsWith('/reauthenticate')
 	) {
 		redirect(302, '/setup-mfa');
 	}
