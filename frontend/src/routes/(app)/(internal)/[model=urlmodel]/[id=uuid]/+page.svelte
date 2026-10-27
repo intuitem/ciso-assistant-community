@@ -4,6 +4,7 @@
 	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 	import CommentsPanel from '#lib/components/CommentsPanel/CommentsPanel.svelte';
 	import TierCard from '#lib/components/DetailView/TierCard.svelte';
+	import VulnerabilitySummaryCard from '#lib/components/DetailView/VulnerabilitySummaryCard.svelte';
 	import { getModalStore, type ModalStore } from '#lib/components/Modals/stores.js';
 	import { getToastStore } from '#lib/components/Toast/stores.js';
 	import { safeTranslate } from '#lib/utils/i18n.js';
@@ -117,6 +118,26 @@
 	<DetailView {data}>
 		{#snippet widgets()}
 			<TierCard object={data.data} urlModel={data.urlModel} />
+		{/snippet}
+	</DetailView>
+{:else if data.urlModel === 'vulnerabilities'}
+	<!-- Severity, status, SLA state and dates live in the summary card, not the field list. -->
+	<DetailView
+		{data}
+		showAllFields
+		exclude={[
+			'severity',
+			'status',
+			'state',
+			'published_date',
+			'detected_at',
+			'eta',
+			'due_date',
+			'remediated_at'
+		]}
+	>
+		{#snippet widgets()}
+			<VulnerabilitySummaryCard vulnerability={data.data} />
 		{/snippet}
 	</DetailView>
 {:else}
