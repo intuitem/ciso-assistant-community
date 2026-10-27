@@ -144,7 +144,8 @@ class TestPublishedOnlyReader:
         DocumentRevision.objects.create(document=fr, content="fr").publish()
         resp = setup["employee"].get(f"/api/document-containers/{en.container_id}/")
         assert resp.status_code == 200
-        assert (resp.json()["status"], resp.json()["progress"]) == (None, None)
+        body = resp.json()
+        assert (body["status"], body["progress"], body["source"]) == (None, None, None)
 
     def test_cannot_change_a_published_document(self, setup):
         client, container_id = setup["employee"], setup["charter"].container_id

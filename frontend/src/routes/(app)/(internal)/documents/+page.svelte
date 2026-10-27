@@ -15,7 +15,7 @@
 
 	let query = $state('');
 	// `?type=policy&type=procedure` preselects types, so a portal tile can open a filtered library.
-	let selectedTypes = $state<Set<string>>(new Set(page.url.searchParams.getAll('type')));
+	let selectedTypes = $derived<Set<string>>(new Set(page.url.searchParams.getAll('type')));
 	const canManage = hasPermissionAnywhere(page.data.user, 'view_documentcontainer');
 	const canAdd = hasPermissionAnywhere(page.data.user, 'add_documentcontainer');
 

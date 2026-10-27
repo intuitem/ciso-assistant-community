@@ -9,7 +9,7 @@
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
 	import { tileIssue } from './tile-validation';
-	import { DOCUMENT_TYPES } from '$lib/utils/documentTypes';
+	import { DOCUMENT_TYPES } from '#lib/utils/documentTypes.js';
 
 	type Item = {
 		id?: string;

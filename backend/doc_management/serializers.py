@@ -54,7 +54,12 @@ class DocumentContainerReadSerializer(BaseModelSerializer):
     def get_source(self, obj):
         doc = self._default_doc(obj)
         if doc and doc.current_revision_id:
-            return doc.current_revision.source
+            rev = doc.current_revision
+            if rev.status != DocumentRevision.Status.PUBLISHED and self._published_only(
+                obj
+            ):
+                return None
+            return rev.source
         return None
 
     def get_classification(self, obj):
