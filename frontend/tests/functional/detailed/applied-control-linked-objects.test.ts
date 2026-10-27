@@ -9,7 +9,7 @@
  */
 
 import { test, expect } from '../../utils/test-utils.js';
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 import type { BrowserContext } from '@playwright/test';
 
 const BACKEND_API_URL = process.env.PUBLIC_BACKEND_API_URL ?? 'http://localhost:8000/api';

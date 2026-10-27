@@ -20,15 +20,15 @@
 	// which every metric using it follows: the drawer says so.
 	import { onMount, tick } from 'svelte';
 	import { page } from '$app/state';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
-	import { getToastStore } from '$lib/components/Toast/stores';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
 	import DefinitionFormulaEditor, { type FormulaPreview } from './DefinitionFormulaEditor.svelte';
 	import FormulaSparkline from './FormulaSparkline.svelte';
 	import type { Saved } from './ComposeMetricEditor.svelte';
-	import { levelIndex, samplesOnPeriods, type Level } from '$lib/utils/derived-metrics';
+	import { levelIndex, samplesOnPeriods, type Level } from '#lib/utils/derived-metrics.js';
 
 	interface Props {
 		instanceId: string;

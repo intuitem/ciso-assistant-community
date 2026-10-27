@@ -1,21 +1,21 @@
-import { defaultDeleteFormAction, defaultWriteFormAction } from '$lib/utils/actions';
-import { BASE_API_URL } from '$lib/utils/constants';
+import { defaultDeleteFormAction, defaultWriteFormAction } from '#lib/utils/actions.js';
+import { BASE_API_URL } from '#lib/utils/constants.js';
 import {
 	getModelInfo,
 	urlParamModelForeignKeyFields,
 	urlParamModelSelectFields
-} from '$lib/utils/crud';
-import { formatSelectFieldData } from '$lib/utils/load';
-import { modelSchema, WorkflowImportSchema } from '$lib/utils/schemas';
-import type { ModelInfo } from '$lib/utils/types';
+} from '#lib/utils/crud.js';
+import { formatSelectFieldData } from '#lib/utils/load.js';
+import { modelSchema, WorkflowImportSchema } from '#lib/utils/schemas.js';
+import type { ModelInfo } from '#lib/utils/types.js';
 import { type Actions, redirect } from '@sveltejs/kit';
 import { fail, superValidate, withFiles, setError, message } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import type { PageServerLoad } from './$types';
 import { setFlash } from 'sveltekit-flash-message/server';
-import { m } from '$paraglide/messages';
-import { safeTranslate } from '$lib/utils/i18n';
+import { m } from '#paraglide/messages.js';
+import { safeTranslate } from '#lib/utils/i18n.js';
 
 export const load: PageServerLoad = async ({ params, fetch, url }) => {
 	const schema = z.object({ id: z.string().uuid() });

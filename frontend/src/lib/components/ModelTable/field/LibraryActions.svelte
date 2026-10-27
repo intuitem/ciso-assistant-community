@@ -1,15 +1,15 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { page } from '$app/state';
 	import type { DataHandler } from '@vincjo/datatables/remote';
-	import { tableHandlers } from '$lib/utils/stores';
-	import ChoicesModal from '$lib/components/Modals/ChoicesModal.svelte';
+	import { tableHandlers } from '#lib/utils/stores.js';
+	import ChoicesModal from '#lib/components/Modals/ChoicesModal.svelte';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 
 	interface Props {
 		meta: any;
@@ -77,7 +77,7 @@
 					return async ({ update }) => {
 						loading.form = false;
 						loading.library = '';
-						await update();
+						await update({ navigate: false });
 						Object.values($tableHandlers).forEach((handler) => {
 							handler.invalidate();
 						});
@@ -114,7 +114,7 @@
 						loading.form = false;
 						loading.library = '';
 						if (result.type !== 'error') {
-							await update();
+							await update({ navigate: false });
 						}
 						if (result.type === 'failure' && result.data?.error === 'score_change_detected') {
 							choicesModal(result.data.choices);
@@ -151,7 +151,7 @@
 					return async ({ update }) => {
 						updating.form = false;
 						updating.library = '';
-						await update();
+						await update({ navigate: false });
 						Object.values($tableHandlers).forEach((handler) => {
 							handler.invalidate();
 						});

@@ -1,10 +1,10 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import MarkdownField from '../MarkdownField.svelte';
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
-	import type { CacheLock, ModelInfo } from '$lib/utils/types';
+	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
+	import type { CacheLock, ModelInfo } from '#lib/utils/types.js';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		form: SuperValidated<any>;

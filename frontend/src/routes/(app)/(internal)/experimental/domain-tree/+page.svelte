@@ -4,15 +4,15 @@
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import RingGlyph from '$lib/components/DataViz/RingTree/RingGlyph.svelte';
-	import { pageTitle } from '$lib/utils/stores';
-	import { complianceResultColorMap } from '$lib/utils/constants';
-	import { formatPercent } from '$lib/components/DataViz/RingTree/format';
-	import RingTree from '$lib/components/DataViz/RingTree/RingTree.svelte';
-	import RingOutline from '$lib/components/DataViz/RingTree/RingOutline.svelte';
-	import { visibleList } from '$lib/components/DataViz/RingTree/layout';
-	import type { RingNode } from '$lib/components/DataViz/RingTree/types';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import RingGlyph from '#lib/components/DataViz/RingTree/RingGlyph.svelte';
+	import { pageTitle } from '#lib/utils/stores.js';
+	import { complianceResultColorMap } from '#lib/utils/constants.js';
+	import { formatPercent } from '#lib/components/DataViz/RingTree/format.js';
+	import RingTree from '#lib/components/DataViz/RingTree/RingTree.svelte';
+	import RingOutline from '#lib/components/DataViz/RingTree/RingOutline.svelte';
+	import { visibleList } from '#lib/components/DataViz/RingTree/layout.js';
+	import type { RingNode } from '#lib/components/DataViz/RingTree/types.js';
 	import { generateFeed, type FeedSize } from './data';
 	import { COUNT } from './feed';
 	import {
@@ -75,7 +75,7 @@
 		const params = new URLSearchParams();
 		if (id) params.set('framework', id);
 		if (id && data.campaignId) params.set('campaign', data.campaignId);
-		goto(`?${params}`, { noScroll: true });
+		goto(`?${params}`, { reset: false });
 	}
 
 	const isDummy = $derived(!data.frameworkId);

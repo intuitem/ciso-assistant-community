@@ -4,7 +4,7 @@
 		dynamicTransition,
 		type Transition,
 		type TransitionParams
-	} from '$lib/components/utils/transitions';
+	} from '#lib/components/utils/transitions.js';
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	type FlyTransition = typeof fly;

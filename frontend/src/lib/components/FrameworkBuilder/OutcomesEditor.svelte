@@ -8,13 +8,13 @@
 		type Scale
 	} from './builder-state';
 	import RatingRuleEditor from './RatingRuleEditor.svelte';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { createHandleGatedDragHandlers } from './builder-utils.svelte';
 	import ConfirmAction from './ConfirmAction.svelte';
 	import CelInput from './CelInput.svelte';
 	import { SECTION_ICON, SECTION_TITLE } from './section-style';
 	import { readableValues, type CelCatalog } from './cel-complete';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		outcomes: OutcomeRule[];

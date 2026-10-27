@@ -2,22 +2,22 @@
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import CustomFieldsSection from '../CustomFieldsSection.svelte';
 	import Select from '../Select.svelte';
-	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import NumberField from '$lib/components/Forms/NumberField.svelte';
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
-	import Score from '$lib/components/Forms/Score.svelte';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
+	import Checkbox from '#lib/components/Forms/Checkbox.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import NumberField from '#lib/components/Forms/NumberField.svelte';
+	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
+	import Score from '#lib/components/Forms/Score.svelte';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import { formFieldProxy } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import { m } from '$paraglide/messages';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import { m } from '#paraglide/messages.js';
 	import { onMount } from 'svelte';
 	import { run } from 'svelte/legacy';
 	import { page } from '$app/state';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { formatDate } from '$lib/utils/datetime';
-	import { getLocale } from '$paraglide/runtime';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { formatDate } from '#lib/utils/datetime.js';
+	import { getLocale } from '#paraglide/runtime.js';
 
 	interface Props {
 		form: SuperValidated<any>;
