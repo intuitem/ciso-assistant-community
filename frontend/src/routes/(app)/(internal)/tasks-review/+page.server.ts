@@ -1,5 +1,5 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { fetchAllPages } from '$lib/utils/pagination';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { fetchAllPages } from '#lib/utils/pagination.js';
 import type { PageServerLoad } from './$types';
 
 function clampInt(raw: string | null, fallback: number, min: number, max: number): number {

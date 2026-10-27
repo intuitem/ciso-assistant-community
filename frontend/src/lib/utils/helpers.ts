@@ -1,5 +1,5 @@
-import { complianceResultColorMap } from '$lib/utils/constants';
-import { m } from '$paraglide/messages';
+import { complianceResultColorMap } from '#lib/utils/constants.js';
+import { m } from '#paraglide/messages.js';
 
 export function formatStringToDate(inputString: string, locale = 'en') {
 	const date = new Date(inputString);

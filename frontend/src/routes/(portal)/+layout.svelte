@@ -1,12 +1,12 @@
 <script lang="ts">
 	import '../../app.css';
 	import { onMount } from 'svelte';
-	import { browser } from '$app/environment';
-	import { page } from '$app/stores';
-	import { m } from '$paraglide/messages';
-	import CommandPalette from '$lib/components/CommandPalette/CommandPalette.svelte';
-	import ThemeToggle from '$lib/components/ThemeToggle/ThemeToggle.svelte';
-	import { initThemeFromUser } from '$lib/utils/theme';
+	import { browser } from '$app/env';
+	import { page } from '$app/state';
+	import { m } from '#paraglide/messages.js';
+	import CommandPalette from '#lib/components/CommandPalette/CommandPalette.svelte';
+	import ThemeToggle from '#lib/components/ThemeToggle/ThemeToggle.svelte';
+	import { initThemeFromUser } from '#lib/utils/theme.js';
 	import type { LayoutData } from './$types';
 
 	let { data, children }: { data: LayoutData; children?: import('svelte').Snippet } = $props();
@@ -18,7 +18,7 @@
 	let menuOpen = $state(false);
 	let switcherOpen = $state(false);
 
-	const current = $derived(data.portals.find((p) => p.id === $page.params.id));
+	const current = $derived(data.portals.find((p) => p.id === page.params.id));
 
 	// Admins-only nudge: personal folders enabled but no parent set, so "My space" is off.
 	const personalFoldersMisconfigured = $derived(

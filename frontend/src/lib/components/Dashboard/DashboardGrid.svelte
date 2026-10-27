@@ -1,5 +1,5 @@
 <script lang="ts">
-	import DashboardWidgetChart from '$lib/components/Chart/DashboardWidgetChart.svelte';
+	import DashboardWidgetChart from '#lib/components/Chart/DashboardWidgetChart.svelte';
 
 	interface Props {
 		widgets: any[];

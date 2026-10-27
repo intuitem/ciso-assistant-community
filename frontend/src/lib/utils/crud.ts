@@ -1,25 +1,25 @@
 // define the content of forms
 
-import EvidenceFileName from '$lib/components/ModelTable/field/EvidenceFileName.svelte';
-import NotificationTitle from '$lib/components/ModelTable/field/NotificationTitle.svelte';
-import CommitmentTarget from '$lib/components/ModelTable/field/CommitmentTarget.svelte';
-import ScheduleDisplay from '$lib/components/ModelTable/field/ScheduleDisplay.svelte';
-import LanguageDisplay from '$lib/components/ModelTable/field/LanguageDisplay.svelte';
-import FrameworkName from '$lib/components/ModelTable/field/FrameworkName.svelte';
-import LibraryActions from '$lib/components/ModelTable/field/LibraryActions.svelte';
-import UserGroupNameDisplay from '$lib/components/ModelTable/field/UserGroupNameDisplay.svelte';
-import LecChartPreview from '$lib/components/ModelTable/field/LecChartPreview.svelte';
-import TriggerTypesDisplay from '$lib/components/ModelTable/field/TriggerTypesDisplay.svelte';
-import TierBadge from '$lib/components/ModelTable/field/TierBadge.svelte';
-import TierSource from '$lib/components/ModelTable/field/TierSource.svelte';
-import DpiaRequirementSource from '$lib/components/ModelTable/field/DpiaRequirementSource.svelte';
-import DpiaRequiredBadge from '$lib/components/ModelTable/field/DpiaRequiredBadge.svelte';
-import VulnerabilitySlaState from '$lib/components/ModelTable/field/VulnerabilitySlaState.svelte';
+import EvidenceFileName from '#lib/components/ModelTable/field/EvidenceFileName.svelte';
+import NotificationTitle from '#lib/components/ModelTable/field/NotificationTitle.svelte';
+import CommitmentTarget from '#lib/components/ModelTable/field/CommitmentTarget.svelte';
+import ScheduleDisplay from '#lib/components/ModelTable/field/ScheduleDisplay.svelte';
+import LanguageDisplay from '#lib/components/ModelTable/field/LanguageDisplay.svelte';
+import FrameworkName from '#lib/components/ModelTable/field/FrameworkName.svelte';
+import LibraryActions from '#lib/components/ModelTable/field/LibraryActions.svelte';
+import UserGroupNameDisplay from '#lib/components/ModelTable/field/UserGroupNameDisplay.svelte';
+import LecChartPreview from '#lib/components/ModelTable/field/LecChartPreview.svelte';
+import TriggerTypesDisplay from '#lib/components/ModelTable/field/TriggerTypesDisplay.svelte';
+import TierBadge from '#lib/components/ModelTable/field/TierBadge.svelte';
+import TierSource from '#lib/components/ModelTable/field/TierSource.svelte';
+import DpiaRequirementSource from '#lib/components/ModelTable/field/DpiaRequirementSource.svelte';
+import DpiaRequiredBadge from '#lib/components/ModelTable/field/DpiaRequiredBadge.svelte';
+import VulnerabilitySlaState from '#lib/components/ModelTable/field/VulnerabilitySlaState.svelte';
 import { listViewFields } from './table';
 import type { TableBatchAction } from './table';
 import type { urlModel } from './types';
-import LibraryOverview from '$lib/components/ModelTable/field/LibraryOverview.svelte';
-import MarkdownDescription from '$lib/components/ModelTable/field/MarkdownDescription.svelte';
+import LibraryOverview from '#lib/components/ModelTable/field/LibraryOverview.svelte';
+import MarkdownDescription from '#lib/components/ModelTable/field/MarkdownDescription.svelte';
 
 type GetOptionsParams = {
 	objects: any[];

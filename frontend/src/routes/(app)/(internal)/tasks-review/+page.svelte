@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { pageTitle } from '$lib/utils/stores';
+	import { pageTitle } from '#lib/utils/stores.js';
 	import { goto } from '$app/navigation';
-	import { m } from '$paraglide/messages';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import { m } from '#paraglide/messages.js';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';

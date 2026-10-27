@@ -1,33 +1,33 @@
-import { m } from '$paraglide/messages';
-import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-import DateFilter from '$lib/components/Forms/DateFilter.svelte';
+import { m } from '#paraglide/messages.js';
+import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+import DateFilter from '#lib/components/Forms/DateFilter.svelte';
 import type { ComponentType } from 'svelte';
 import type { Option } from 'svelte-multiselect';
 import type { urlModel } from './types';
 
-import ChangeStatus from '$lib/components/ContextMenu/applied-controls/ChangeStatus.svelte';
-import ChangeImpact from '$lib/components/ContextMenu/applied-controls/ChangeImpact.svelte';
-import ChangeEffort from '$lib/components/ContextMenu/applied-controls/ChangeEffort.svelte';
-import ChangeCsfFunction from '$lib/components/ContextMenu/applied-controls/ChangeCsfFunction.svelte';
-import EvidenceChangeStatus from '$lib/components/ContextMenu/evidences/ChangeStatus.svelte';
-import WorkflowToggleActive from '$lib/components/ContextMenu/workflows/ToggleActive.svelte';
-import TaskNodeChangeStatus from '$lib/components/ContextMenu/task-nodes/ChangeStatus.svelte';
+import ChangeStatus from '#lib/components/ContextMenu/applied-controls/ChangeStatus.svelte';
+import ChangeImpact from '#lib/components/ContextMenu/applied-controls/ChangeImpact.svelte';
+import ChangeEffort from '#lib/components/ContextMenu/applied-controls/ChangeEffort.svelte';
+import ChangeCsfFunction from '#lib/components/ContextMenu/applied-controls/ChangeCsfFunction.svelte';
+import EvidenceChangeStatus from '#lib/components/ContextMenu/evidences/ChangeStatus.svelte';
+import WorkflowToggleActive from '#lib/components/ContextMenu/workflows/ToggleActive.svelte';
+import TaskNodeChangeStatus from '#lib/components/ContextMenu/task-nodes/ChangeStatus.svelte';
 import { getModelInfo, isFieldFlagEnabled } from './crud';
 import { toCamelCase } from './locales';
-import SelectObject from '$lib/components/ContextMenu/ebios-rm/SelectObject.svelte';
-import ChangePriority from '$lib/components/ContextMenu/applied-controls/ChangePriority.svelte';
-import ReplaceWith from '$lib/components/ContextMenu/applied-controls/ReplaceWith.svelte';
-import ChangeAttackStage from '$lib/components/ContextMenu/elementary-actions/ChangeAttackStage.svelte';
-import VulnerabilityChangeStatus from '$lib/components/ContextMenu/vulnerabilities/ChangeStatus.svelte';
-import VulnerabilityChangeSeverity from '$lib/components/ContextMenu/vulnerabilities/ChangeSeverity.svelte';
-import AssessTier from '$lib/components/ContextMenu/AssessTier.svelte';
-import ChangeTier from '$lib/components/ContextMenu/ChangeTier.svelte';
-import ProcessingScreenDpia from '$lib/components/ContextMenu/processings/ScreenDpia.svelte';
-import ProcessingChangeDpiaRequired from '$lib/components/ContextMenu/processings/ChangeDpiaRequired.svelte';
-import ChangeChoiceField from '$lib/components/ContextMenu/ChangeChoiceField.svelte';
-import ToggleBooleanField from '$lib/components/ContextMenu/ToggleBooleanField.svelte';
-import ToggleRecoveryFlags from '$lib/components/ContextMenu/asset-assessments/ToggleRecoveryFlags.svelte';
-import MetricInstanceEditValue from '$lib/components/ContextMenu/metric-instances/EditValue.svelte';
+import SelectObject from '#lib/components/ContextMenu/ebios-rm/SelectObject.svelte';
+import ChangePriority from '#lib/components/ContextMenu/applied-controls/ChangePriority.svelte';
+import ReplaceWith from '#lib/components/ContextMenu/applied-controls/ReplaceWith.svelte';
+import ChangeAttackStage from '#lib/components/ContextMenu/elementary-actions/ChangeAttackStage.svelte';
+import VulnerabilityChangeStatus from '#lib/components/ContextMenu/vulnerabilities/ChangeStatus.svelte';
+import VulnerabilityChangeSeverity from '#lib/components/ContextMenu/vulnerabilities/ChangeSeverity.svelte';
+import AssessTier from '#lib/components/ContextMenu/AssessTier.svelte';
+import ChangeTier from '#lib/components/ContextMenu/ChangeTier.svelte';
+import ProcessingScreenDpia from '#lib/components/ContextMenu/processings/ScreenDpia.svelte';
+import ProcessingChangeDpiaRequired from '#lib/components/ContextMenu/processings/ChangeDpiaRequired.svelte';
+import ChangeChoiceField from '#lib/components/ContextMenu/ChangeChoiceField.svelte';
+import ToggleBooleanField from '#lib/components/ContextMenu/ToggleBooleanField.svelte';
+import ToggleRecoveryFlags from '#lib/components/ContextMenu/asset-assessments/ToggleRecoveryFlags.svelte';
+import MetricInstanceEditValue from '#lib/components/ContextMenu/metric-instances/EditValue.svelte';
 
 export function tableSourceMapper(source: any[], keys: string[]): any[] {
 	return source.map((row) => {

@@ -1,9 +1,12 @@
-import { env } from '$env/dynamic/public';
-import { m } from '$paraglide/messages';
+import {
+	PUBLIC_BACKEND_API_URL,
+	PUBLIC_DEFAULT_LANGUAGE,
+	PUBLIC_BACKEND_API_EXPOSED_URL
+} from '$app/env/public';
 
-const rawBackendApiUrl = Object.hasOwn(env, 'PUBLIC_BACKEND_API_URL')
-	? env.PUBLIC_BACKEND_API_URL
-	: 'http://localhost:8000/api';
+import { m } from '#paraglide/messages.js';
+
+const rawBackendApiUrl = PUBLIC_BACKEND_API_URL ?? 'http://localhost:8000/api';
 
 // Strip default ports so this matches request.url in handleFetch's startsWith check (issue #4422).
 export const BASE_API_URL = (() => {
@@ -14,17 +17,9 @@ export const BASE_API_URL = (() => {
 	}
 })();
 
-export const DEFAULT_LANGUAGE = `${
-	Object.hasOwn(env, 'PUBLIC_DEFAULT_LANGUAGE') ? env.PUBLIC_DEFAULT_LANGUAGE : 'en'
-}`;
-
+export const DEFAULT_LANGUAGE = PUBLIC_DEFAULT_LANGUAGE ?? 'en';
 export const ALLAUTH_API_URL = `${BASE_API_URL}/_allauth/app/v1`;
-
-export const BACKEND_API_EXPOSED_URL = `${
-	Object.hasOwn(env, 'PUBLIC_BACKEND_API_EXPOSED_URL')
-		? env.PUBLIC_BACKEND_API_EXPOSED_URL
-		: BASE_API_URL
-}`;
+export const BACKEND_API_EXPOSED_URL = PUBLIC_BACKEND_API_EXPOSED_URL ?? BASE_API_URL;
 
 export const complianceResultColorMap: { [key: string]: string } = {
 	not_assessed: '#d1d5db',
@@ -212,9 +207,6 @@ export const TODAY = new Date();
 
 export const UUID_REGEX = '([0-9a-f]{8}\\-[0-9a-f]{4}\\-[0-9a-f]{4}\\-[0-9a-f]{4}\\-[0-9a-f]{12})';
 export const UUID_LIST_REGEX = new RegExp(`^${UUID_REGEX}(,${UUID_REGEX})*$`);
-
-export const URN_REGEX =
-	/^urn:([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+)(?::([a-zA-Z0-9_-]+))?:([0-9A-Za-z\[\]\(\)\-\._:]+)$/;
 
 export const LOCALE_DISPLAY_MAP = {
 	en: '🇬🇧 English',

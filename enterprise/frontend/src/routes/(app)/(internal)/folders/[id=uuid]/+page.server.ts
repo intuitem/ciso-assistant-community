@@ -1,6 +1,6 @@
-import { getModelInfo } from '$lib/utils/crud';
-import { loadDetail } from '$lib/utils/load';
-import { nestedDeleteFormAction, nestedWriteFormAction } from '$lib/utils/actions';
+import { getModelInfo } from '#lib/utils/crud.js';
+import { loadDetail } from '#lib/utils/load.js';
+import { nestedDeleteFormAction, nestedWriteFormAction } from '#lib/utils/actions.js';
 
 import type { Actions, PageServerLoad } from './$types';
 

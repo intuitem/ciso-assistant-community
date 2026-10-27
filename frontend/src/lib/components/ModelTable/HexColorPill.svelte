@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isDark } from '$lib/utils/helpers';
+	import { isDark } from '#lib/utils/helpers.js';
 
 	interface Props {
 		hexcolor: string;

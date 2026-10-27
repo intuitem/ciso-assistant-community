@@ -1,9 +1,9 @@
 <script lang="ts">
 	import type { SuperForm } from 'sveltekit-superforms';
-	import { m } from '$paraglide/messages';
-	import FeatureFlagGroupList from '$lib/components/Forms/FeatureFlagGroupList.svelte';
+	import { m } from '#paraglide/messages.js';
+	import FeatureFlagGroupList from '#lib/components/Forms/FeatureFlagGroupList.svelte';
 	import { page } from '$app/state';
-	import { getFeatureFlagGroups } from '$lib/utils/feature-flag-groups';
+	import { getFeatureFlagGroups } from '#lib/utils/feature-flag-groups.js';
 
 	interface Props {
 		form: SuperForm<Record<string, boolean | undefined>>;

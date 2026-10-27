@@ -4,16 +4,16 @@
 
 	import { goto as _goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import TableRowActions from '$lib/components/TableRowActions/TableRowActions.svelte';
-	import { booleanDisplay } from '$lib/utils/boolean-display';
-	import { DATE_FIELDS_TO_FORMAT, ISO_8601_REGEX } from '$lib/utils/constants';
+	import TableRowActions from '#lib/components/TableRowActions/TableRowActions.svelte';
+	import { booleanDisplay } from '#lib/utils/boolean-display.js';
+	import { DATE_FIELDS_TO_FORMAT, ISO_8601_REGEX } from '#lib/utils/constants.js';
 	import {
 		CUSTOM_ACTIONS_COMPONENT,
 		getFieldComponentMap,
 		isFieldFlagEnabled,
 		URL_MODEL_MAP,
 		urlModelForDjangoName
-	} from '$lib/utils/crud';
+	} from '#lib/utils/crud.js';
 
 	// Presentational row weighting, declared per model in listViewFields.rowEmphasis.
 	function rowEmphasisClass(row: TableSource): string {
@@ -35,36 +35,36 @@
 			})
 		);
 	}
-	import { safeTranslate, unsafeTranslate } from '$lib/utils/i18n';
-	import { toCamelCase } from '$lib/utils/locales.js';
+	import { safeTranslate, unsafeTranslate } from '#lib/utils/i18n.js';
+	import { toCamelCase } from '#lib/utils/locales.js';
 	import { onMount, tick, untrack } from 'svelte';
-	import { getToastStore } from '$lib/components/Toast/stores';
-	import { applyUnreadCount } from '$lib/utils/stores';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import { applyUnreadCount } from '#lib/utils/stores.js';
 
 	// Types
-	import { browser } from '$app/environment';
-	import LecChartPreview from '$lib/components/ModelTable/field/LecChartPreview.svelte';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import SuperForm from '$lib/components/Forms/Form.svelte';
-	import type { TableSource } from '$lib/components/ModelTable/types';
-	import type { ListViewFilterConfig, BatchActionConfig } from '$lib/utils/table';
-	import { goto, breadcrumbs } from '$lib/utils/breadcrumbs';
-	import { formatDateOrDateTime } from '$lib/utils/datetime';
-	import { contextMenuActions, listViewFields, getBatchActions } from '$lib/utils/table';
-	import { tableFilterStates } from '$lib/utils/stores';
+	import { browser } from '$app/env';
+	import LecChartPreview from '#lib/components/ModelTable/field/LecChartPreview.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import SuperForm from '#lib/components/Forms/Form.svelte';
+	import type { TableSource } from '#lib/components/ModelTable/types.js';
+	import type { ListViewFilterConfig, BatchActionConfig } from '#lib/utils/table.js';
+	import { goto, breadcrumbs } from '#lib/utils/breadcrumbs.js';
+	import { formatDateOrDateTime } from '#lib/utils/datetime.js';
+	import { contextMenuActions, listViewFields, getBatchActions } from '#lib/utils/table.js';
+	import { tableFilterStates } from '#lib/utils/stores.js';
 	import BatchActionBar from './BatchActionBar.svelte';
 	import ColumnSelector from './ColumnSelector.svelte';
 	import HexColorPill from './HexColorPill.svelte';
-	import type { urlModel } from '$lib/utils/types.js';
-	import { countMasked, isMaskedPlaceholder } from '$lib/utils/related-visibility';
-	import { m } from '$paraglide/messages';
-	import { getLocale } from '$paraglide/runtime';
-	import type { SvelteEvent } from '$lib/utils/types';
+	import type { urlModel } from '#lib/utils/types.js';
+	import { countMasked, isMaskedPlaceholder } from '#lib/utils/related-visibility.js';
+	import { m } from '#paraglide/messages.js';
+	import { getLocale } from '#paraglide/runtime.js';
+	import type { SvelteEvent } from '#lib/utils/types.js';
 	import { DataHandler, type State } from '@vincjo/datatables/remote';
 	import { defaults, superForm, type SuperValidated } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
-	import type { FormDataShape } from '$lib/utils/schemas';
+	import type { FormDataShape } from '#lib/utils/schemas.js';
 	import { getParams, loadTableData } from './handler';
 	import Pagination from './Pagination.svelte';
 	import RowCount from './RowCount.svelte';
@@ -76,7 +76,7 @@
 		canPerformAction,
 		canPerformActionOnObject,
 		hasPermissionAnywhere
-	} from '$lib/utils/access-control';
+	} from '#lib/utils/access-control.js';
 	import { ContextMenu } from 'bits-ui';
 	import {
 		tableHandlers,
@@ -84,15 +84,15 @@
 		tableStates,
 		tableColumnStates,
 		tableSortStates
-	} from '$lib/utils/stores';
-	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
-	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
+	} from '#lib/utils/stores.js';
+	import DeleteConfirmModal from '#lib/components/Modals/DeleteConfirmModal.svelte';
+	import PromptConfirmModal from '#lib/components/Modals/PromptConfirmModal.svelte';
 	import {
 		getModalStore,
 		type ModalStore,
 		type ModalComponent,
 		type ModalSettings
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 
 	interface Props {
 		// Props
@@ -167,7 +167,7 @@
 		// only applies the disableDelete/disableEdit filters — never the
 		// child-model permission filter, which would ask the wrong question for
 		// parent_action entries.
-		extraBatchActions?: import('$lib/utils/table').TableBatchAction[];
+		extraBatchActions?: import('#lib/utils/table.js').TableBatchAction[];
 	}
 
 	let {
@@ -448,12 +448,11 @@
 			totalRows: source?.meta?.count
 		}
 	);
-	const rows = handler.getRows();
 
+	const rows = handler.getRows();
 	const relatedFieldNames = $derived(
 		new Set(model?.foreignKeyFields?.map((field) => field.field) ?? [])
 	);
-
 	const hiddenRowCount = $derived(typeof expectedCount === 'number' ? expectedCount : 0);
 
 	// A table handed its rows up front has no model or endpoint ("/undefined"): the
@@ -565,7 +564,6 @@
 		forcePreventDelete;
 	const preventEdit = (row: TableSource) =>
 		(row?.meta?.builtin && !BUILTIN_EDITABLE_URL_MODELS.includes(URLModel)) || forcePreventEdit;
-
 	const tableURLModel = URLModel;
 
 	let contextMenuOpenRow: TableSource | undefined = $state(undefined);
@@ -596,6 +594,7 @@
 			)
 			.sort()
 			.join('&');
+
 	const isDefaultFilterState = (state: Record<string, any[]>) =>
 		filteredFields.every(
 			(field) =>
@@ -664,22 +663,23 @@
 	// under the new key -- two separate effects can't guarantee that order.
 	let previousFilterStoreKey = filterStoreKey;
 	$effect(() => {
+		// Rerun (and refetch) when the page reloads its data
+		page.data;
 		if (filterStoreKey !== previousFilterStoreKey) {
 			previousFilterStoreKey = filterStoreKey;
 			untrack(applySavedSort);
-			const fresh = seedFilterValues();
+			const fresh = untrack(seedFilterValues);
 			Object.assign(filterValues, fresh);
 			_form.form.update((data) => ({
 				...data,
 				...Object.fromEntries(
-					Object.entries(fresh).map(([f, v]: [string, any]) => [
-						f,
-						(v ?? []).map((x: any) => x.value)
-					])
+					Object.entries(fresh).map(([f, v]) => [f, (v ?? []).map((x: any) => x.value)])
 				)
 			}));
 		}
 
+		// untracked: the shallow goto below swaps page.url, which must not rerun this effect
+		const url = syncFiltersToUrl ? new URL(untrack(() => page.url.href)) : null;
 		for (const field of filteredFields) {
 			const finalFilterValue = overrideFilters[field] || filterValues[field] || [];
 
@@ -691,20 +691,22 @@
 			}
 			for (const [param, values] of Object.entries(buckets)) {
 				handler.filter(values, param);
-				if (!syncFiltersToUrl) continue;
-				page.url.searchParams.delete(param);
-				values.forEach((value: string) => page.url.searchParams.append(param, value));
+				if (!url) continue;
+				url.searchParams.delete(param);
+				values.forEach((value: string) => url.searchParams.append(param, value));
 			}
 		}
-		if (syncFiltersToUrl) {
-			history.replaceState(history.state, '', page.url.pathname + page.url.search);
+		if (url) {
+			if (url.href !== untrack(() => page.url.href)) {
+				_goto(url, { shallow: true, replace: true, state: untrack(() => page.state) });
+			}
 			// Sync the current crumb's href with the new filter query.
 			breadcrumbs.update((crumbs) => {
 				if (crumbs.length < 2) return crumbs;
 				const last = crumbs[crumbs.length - 1];
 				const lastPath = last.href?.split('?')[0];
-				if (lastPath !== page.url.pathname) return crumbs;
-				const newHref = page.url.pathname + page.url.search;
+				if (lastPath !== url.pathname) return crumbs;
+				const newHref = url.pathname + url.search;
 				if (last.href === newHref) return crumbs;
 				const next = crumbs.slice();
 				next[next.length - 1] = { ...last, href: newHref };
@@ -729,13 +731,14 @@
 			}, 10);
 	});
 
-	// Refetch when the page reloads its data (invalidateAll() swaps page.url for a
-	// new URL object). Standalone tables get this from syncing filters with the
-	// URL above; embedded ones no longer touch it, so track it here.
-	let pageUrlSeen = false;
+	// Refetch when the page reloads its data (navigation, refreshAll(), form actions).
+	// Standalone tables get this from the filter effect above; embedded ones don't sync
+	// filters, so track it here. page.data, not page.url: the filter-syncing shallow goto
+	// also swaps page.url.
+	let pageDataSeen = false;
 	$effect(() => {
-		page.url;
-		if (!pageUrlSeen) return void (pageUrlSeen = true);
+		page.data;
+		if (!pageDataSeen) return void (pageDataSeen = true);
 		if (hasRemoteSource && !syncFiltersToUrl) untrack(() => handler.invalidate());
 	});
 
@@ -814,17 +817,13 @@
 	): void {
 		const modalComponent: ModalComponent = {
 			ref: DeleteConfirmModal,
-			props: {
-				_form: deleteForm,
-				id: id,
-				debug: false,
-				URLModel: URLModel
-			}
+			props: { _form: deleteForm, id, debug: false, URLModel }
 		};
 		const name =
 			URLModel === 'users' && row.first_name
 				? `${row.first_name} ${row.last_name} (${row.email})`
 				: (row.name ?? row.meta?.str ?? Object.values(row)[0]);
+
 		const body =
 			URLModel === 'users'
 				? m.deleteUserMessage({ name: name as string })
@@ -833,7 +832,7 @@
 			type: 'component',
 			component: modalComponent,
 			title: m.deleteModalTitle(),
-			body: body
+			body
 		};
 		modalStore.trigger(modal);
 	}
@@ -846,9 +845,9 @@
 			ref: PromptConfirmModal,
 			props: {
 				_form: deleteForm,
-				id: id,
+				id,
 				debug: false,
-				URLModel: URLModel,
+				URLModel,
 				formAction: '?/delete'
 			}
 		};
@@ -856,6 +855,7 @@
 			URLModel === 'users' && row.first_name
 				? `${row.first_name} ${row.last_name} (${row.email})`
 				: (row.name ?? Object.values(row)[0]);
+
 		const body =
 			URLModel === 'users'
 				? m.deleteUserMessage({ name: name as string })
@@ -864,7 +864,7 @@
 			type: 'component',
 			component: modalComponent,
 			title: m.deleteModalTitle(),
-			body: body
+			body
 		};
 		modalStore.trigger(modal);
 	}
@@ -1001,6 +1001,7 @@
 	const extraActions = $derived(
 		extraBatchActions.filter((a) => (a.type === 'delete' ? !disableDelete : !noBatchFieldEdit))
 	);
+
 	const allBatchActions = $derived([...currentBatchActions, ...extraActions]);
 	const hasBatchActions = $derived(
 		(currentBatchActions.length > 0 && deleteForm !== undefined) || extraActions.length > 0
@@ -1397,13 +1398,14 @@
 																{#each Object.entries(value) as [lang, translation]}
 																	<div class="flex flex-row gap-2">
 																		<strong>{lang}:</strong>
-																		<span
-																			>{safeTranslate(
+
+																		<span>
+																			{safeTranslate(
 																				typeof translation === 'object' && translation !== null
 																					? ((translation as Record<string, string>).name ?? '')
 																					: translation
-																			)}</span
-																		>
+																			)}
+																		</span>
 																	</div>
 																{/each}
 															</div>
@@ -1458,6 +1460,7 @@
 														].includes(key)
 															? (value ?? '-')
 															: safeTranslate(value ?? '-')}
+
 														{#if displayValue?.length > 300}
 															{displayValue.slice(0, 300)}...
 														{:else}
@@ -1505,7 +1508,10 @@
 												{/snippet}
 												{#snippet tail()}
 													{@const ActionsComponent = actionsComponent}
-													{#if tail_render}{@render tail_render()}{:else if ActionsComponent}
+
+													{#if tail_render}
+														{@render tail_render()}
+													{:else if ActionsComponent}
 														<ActionsComponent meta={row.meta ?? {}} {actionsURLModel} {handler} />
 													{/if}
 												{/snippet}
@@ -1617,7 +1623,7 @@
 			<RowCount {handler} />
 		{/if}
 		{#if pagination}
-			<Pagination {handler} {URLModel} scrollTarget={tableWrapEl} />
+			<Pagination {handler} {URLModel} scrollTarget={tableWrapEl} syncToUrl={syncFiltersToUrl} />
 		{/if}
 	</footer>
 </div>

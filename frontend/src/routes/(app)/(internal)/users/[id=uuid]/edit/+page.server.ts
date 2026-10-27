@@ -1,10 +1,10 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { getModelInfo } from '$lib/utils/crud';
-import { formatSelectFieldData } from '$lib/utils/load';
-import { getSecureRedirect } from '$lib/utils/helpers';
-import { safeTranslate } from '$lib/utils/i18n';
-import { UserEditSchema } from '$lib/utils/schemas';
-import { m } from '$paraglide/messages';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { getModelInfo } from '#lib/utils/crud.js';
+import { formatSelectFieldData } from '#lib/utils/load.js';
+import { getSecureRedirect } from '#lib/utils/helpers.js';
+import { safeTranslate } from '#lib/utils/i18n.js';
+import { UserEditSchema } from '#lib/utils/schemas.js';
+import { m } from '#paraglide/messages.js';
 import { fail, redirect, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { setError, superValidate } from 'sveltekit-superforms';

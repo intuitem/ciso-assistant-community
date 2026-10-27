@@ -1,4 +1,4 @@
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 
 export interface FeatureFlagField {
 	field: string;
