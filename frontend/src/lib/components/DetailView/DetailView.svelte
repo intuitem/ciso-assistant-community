@@ -1,49 +1,49 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { urlModelForDjangoName } from '$lib/utils/crud';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import List from '$lib/components/List/List.svelte';
-	import BatchCreatePersonalDataModal from '$lib/components/Modals/BatchCreatePersonalDataModal.svelte';
-	import BatchAddAssetAssessmentsModal from '$lib/components/Modals/BatchAddAssetAssessmentsModal.svelte';
-	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
-	import RiskAcceptanceModal from '$lib/components/Modals/RiskAcceptanceModal.svelte';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import SelectExistingModal from '$lib/components/Modals/SelectExistingModal.svelte';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import CustomFieldsDisplay from '$lib/components/Forms/CustomFieldsDisplay.svelte';
-	import { hasRelationGraph } from '$lib/components/RelationsGraph/relations';
-	import { booleanDisplay } from '$lib/utils/boolean-display';
-	import { DATE_FIELDS_TO_FORMAT, ISO_8601_REGEX } from '$lib/utils/constants';
-	import { type ModelMapEntry, type ReverseForeignKeyField } from '$lib/utils/crud';
-	import { getModelInfo, getMarkdownFields, isFieldFlagEnabled } from '$lib/utils/crud';
-	import { formatDate, formatDateOrDateTime } from '$lib/utils/datetime';
-	import { isURL } from '$lib/utils/helpers';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { toCamelCase } from '$lib/utils/locales.js';
-	import { countMasked, isMaskedPlaceholder } from '$lib/utils/related-visibility';
-	import { m } from '$paraglide/messages';
-	import { getLocale } from '$paraglide/runtime.js';
+	import { urlModelForDjangoName } from '#lib/utils/crud.js';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import List from '#lib/components/List/List.svelte';
+	import BatchCreatePersonalDataModal from '#lib/components/Modals/BatchCreatePersonalDataModal.svelte';
+	import BatchAddAssetAssessmentsModal from '#lib/components/Modals/BatchAddAssetAssessmentsModal.svelte';
+	import ConfirmModal from '#lib/components/Modals/ConfirmModal.svelte';
+	import RiskAcceptanceModal from '#lib/components/Modals/RiskAcceptanceModal.svelte';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
+	import SelectExistingModal from '#lib/components/Modals/SelectExistingModal.svelte';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
+	import CustomFieldsDisplay from '#lib/components/Forms/CustomFieldsDisplay.svelte';
+	import { hasRelationGraph } from '#lib/components/RelationsGraph/relations.js';
+	import { booleanDisplay } from '#lib/utils/boolean-display.js';
+	import { DATE_FIELDS_TO_FORMAT, ISO_8601_REGEX } from '#lib/utils/constants.js';
+	import { type ModelMapEntry, type ReverseForeignKeyField } from '#lib/utils/crud.js';
+	import { getModelInfo, getMarkdownFields, isFieldFlagEnabled } from '#lib/utils/crud.js';
+	import { formatDate, formatDateOrDateTime } from '#lib/utils/datetime.js';
+	import { isURL } from '#lib/utils/helpers.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { toCamelCase } from '#lib/utils/locales.js';
+	import { countMasked, isMaskedPlaceholder } from '#lib/utils/related-visibility.js';
+	import { m } from '#paraglide/messages.js';
+	import { getLocale } from '#paraglide/runtime.js';
 
 	import { Tabs, Tooltip } from '@skeletonlabs/skeleton-svelte';
 
 	import { onMount } from 'svelte';
 
-	import { goto, invalidateAll } from '$app/navigation';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import { getListViewFields } from '$lib/utils/table';
+	import { goto, refreshAll } from '$app/navigation';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import { getListViewFields } from '#lib/utils/table.js';
 	import {
 		canPerformActionOnObject,
 		hasPermissionAnywhere,
 		resolveObjectDomain
-	} from '$lib/utils/access-control';
-	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
+	} from '#lib/utils/access-control.js';
+	import AuditTrailButton from '#lib/components/AuditTrail/AuditTrailButton.svelte';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
-	import { getToastStore } from '$lib/components/Toast/stores';
+	} from '#lib/components/Modals/stores.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
 
 	const modalStore: ModalStore = getModalStore();
 	const toastStore = getToastStore();
@@ -63,7 +63,7 @@
 			toastStore.trigger({ message: m.anErrorOccurred(), background: 'preset-filled-error-500' });
 			return;
 		}
-		await invalidateAll();
+		await refreshAll();
 	}
 
 	const defaultExcludes = ['id', 'str', 'path', 'sync_mappings'];
@@ -1190,7 +1190,7 @@
 {/if}
 
 {#if showRelations}
-	{#await import('$lib/components/RelationsGraph/RelationsDrawer.svelte') then { default: RelationsDrawer }}
+	{#await import('#lib/components/RelationsGraph/RelationsDrawer.svelte') then { default: RelationsDrawer }}
 		<RelationsDrawer
 			open={relationsOpen}
 			urlModel={data.urlModel}

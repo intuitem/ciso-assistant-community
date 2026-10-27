@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { fetchAllPages } from '$lib/utils/pagination';
-	import type { CacheLock } from '$lib/utils/types';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { fetchAllPages } from '#lib/utils/pagination.js';
+	import type { CacheLock } from '#lib/utils/types.js';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
-	import * as m from '$paraglide/messages';
+	import * as m from '#paraglide/messages.js';
 
 	interface Option {
 		label: string;

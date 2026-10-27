@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import timedelta
-from typing import Any, List, Literal, Optional, Final
+from typing import Any, Literal, Optional, Final
 from typing import TYPE_CHECKING, cast
 import secrets
 import uuid
@@ -51,7 +51,6 @@ logger = structlog.get_logger(__name__)
 
 from auditlog.registry import auditlog
 from auditlog.signals import pre_log
-from allauth.mfa.models import Authenticator
 from allauth.idp.oidc.models import Client, Token
 from core.context import focus_folder_id_var
 
@@ -118,6 +117,18 @@ def _trimmed_ref_id(expression=None) -> Func:
         expression if expression is not None else F("ref_id"),
         Value(_REF_ID_WHITESPACE),
         function="TRIM",
+        output_field=models.CharField(),
+    )
+
+
+def _trimmed_ref_id_literal(expression=None) -> Func:
+    # _trimmed_ref_id() with the characters written into the SQL, not bound:
+    # SQLite only matches an indexed expression whose constants are literals.
+    # Queries only: the constraint keeps _trimmed_ref_id(), so its migration stays.
+    return Func(
+        expression if expression is not None else F("ref_id"),
+        function="TRIM",
+        template=f"%(function)s(%(expressions)s, '{_REF_ID_WHITESPACE}')",
         output_field=models.CharField(),
     )
 
@@ -272,13 +283,22 @@ class Folder(NameDescriptionMixin):
 
     @staticmethod
     def ref_id_in_use(ref_id: str, exclude_pk=None) -> bool:
-        """Whether another folder holds *ref_id*, compared as the unique index does."""
-        normalized = Lower(_trimmed_ref_id(Value(ref_id)))
+        """Whether another folder holds *ref_id*."""
         return (
-            Folder.objects.alias(normalized_ref_id=Lower(_trimmed_ref_id()))
-            .filter(normalized_ref_id=normalized)
+            Folder.filter_by_ref_id(Folder.objects.all(), ref_id)
             .exclude(pk=exclude_pk)
             .exists()
+        )
+
+    @staticmethod
+    def filter_by_ref_id(queryset: QuerySet[Folder], ref_id: str) -> QuerySet[Folder]:
+        """Folders of *queryset* holding *ref_id*, compared as the unique index does."""
+        return queryset.alias(
+            normalized_ref_id=Lower(_trimmed_ref_id_literal())
+        ).filter(
+            # The index's own condition, so the partial index can serve the lookup.
+            ~Q(Exact(_trimmed_ref_id_literal(), Value(""))),
+            normalized_ref_id=Lower(_trimmed_ref_id_literal(Value(ref_id))),
         )
 
     def _ref_id_taken_message(self) -> str:
@@ -607,6 +627,7 @@ class Folder(NameDescriptionMixin):
         # NOTE: There are probably better ways to represent these, but it works.
         # NOTE: This list is not complete.
         paths = [
+            ["matrix", "folder"],
             ["folder"],
             ["parent_folder"],
             ["perimeter", "folder"],
@@ -1297,26 +1318,6 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
             and self.idp_groups.filter(user_groups__name="BI-UG-ADM").exists()
         )
 
-    # Permissions that grant write access but do not consume a license seat
-    NON_SEAT_PERMISSIONS = {
-        "change_validationflow",
-        "add_chatsession",
-        "change_chatsession",
-        "delete_chatsession",
-        "change_notification",
-        "delete_notification",
-    }
-
-    @property
-    def is_editor(self) -> bool:
-        permissions = RoleAssignment.get_permissions(self)
-        editor_prefixes = {"add_", "change_", "delete_"}
-        return any(
-            any(perm.startswith(prefix) for prefix in editor_prefixes)
-            for perm in permissions
-            if perm not in self.NON_SEAT_PERMISSIONS
-        )
-
     @property
     def is_local(self) -> bool:
         """
@@ -1342,14 +1343,6 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
             or not sso_settings.get("force_sso", False)
         )
 
-    @classmethod
-    def get_editors(cls) -> List["User"]:
-        return [
-            user
-            for user in cls.objects.exclude(service_account__isnull=False)
-            if user.is_editor and not user.is_third_party
-        ]
-
     @property
     def is_sso(self) -> bool:
         """
@@ -1364,7 +1357,8 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         Check if the user has Multi-Factor Authentication (MFA) enabled.
         Returns True if the user has any active MFA authenticators (TOTP, WebAuthn, etc.).
         """
-        return Authenticator.objects.filter(user=self).exists()
+        # Through the reverse relation, so a prefetch (UserViewSet) answers it.
+        return self.authenticator_set.exists()
 
 
 class Role(NameDescriptionMixin, FolderMixin):
@@ -2110,6 +2104,60 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         return RoleAssignment._get_directly_granted_permissions(
             principal, permission
         ).exists()
+
+    @staticmethod
+    def users_with_permission_anywhere(
+        permissions: QuerySet[Permission],
+    ) -> QuerySet["User"]:
+        """
+        Batch form of `has_permission_anywhere` for users: the users holding any
+        of `permissions` on any `Folder`, in one query instead of one per user.
+
+        Same grant sources as `_get_permission_grant_sources`: the user's own,
+        group and (when inherited) IdP-group role assignments, and the
+        `folder.default_role` a builtin-group assignment grants on its folders
+        and their ancestors, outside enclaves and never to third parties.
+        Inactive users hold nothing.
+        """
+        from global_settings.utils import idp_group_role_inheritance_enabled
+
+        roles = Role.objects.filter(permissions__in=permissions)
+        default_role_folders = Folder.objects.filter(
+            default_role__permissions__in=permissions
+        )
+        # Folders whose builtin-group assignments grant one of those default roles.
+        default_role_grant_folders = (
+            Folder.objects.filter(
+                Q(id__in=default_role_folders) | Q(ancestors__in=default_role_folders)
+            )
+            .exclude(content_type=Folder.ContentType.ENCLAVE)
+            .exclude(ancestors__content_type=Folder.ContentType.ENCLAVE)
+        )
+
+        group_paths = ["user_groups"]
+        if idp_group_role_inheritance_enabled():
+            group_paths.append("idp_groups__user_groups")
+        grants = [Q(roleassignment__role__in=roles)]
+        for path in group_paths:
+            grants.append(Q(**{f"{path}__roleassignment__role__in": roles}))
+            grants.append(
+                Q(
+                    **{
+                        f"{path}__builtin": True,
+                        f"{path}__roleassignment__perimeter_folders__in": (
+                            default_role_grant_folders
+                        ),
+                    },
+                    is_third_party=False,
+                )
+            )
+
+        # One semi-join per grant source: OR-ing them in a single filter would
+        # join every relation at once.
+        holders = Q()
+        for grant in grants:
+            holders |= Q(id__in=User.objects.filter(grant).values("id"))
+        return User.objects.filter(holders, is_active=True)
 
     @staticmethod
     def get_permissions(

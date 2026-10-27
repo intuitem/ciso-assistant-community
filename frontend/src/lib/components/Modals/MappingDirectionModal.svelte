@@ -1,6 +1,6 @@
 <script lang="ts">
 	import ChoiceCardsModal from './ChoiceCardsModal.svelte';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		parent: any;

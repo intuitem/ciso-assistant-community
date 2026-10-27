@@ -2,11 +2,11 @@
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import Select from '../Select.svelte';
 	import TextField from '../TextField.svelte';
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
-	import type { CacheLock, ModelInfo } from '$lib/utils/types';
+	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
+	import type { CacheLock, ModelInfo } from '#lib/utils/types.js';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import { m } from '$paraglide/messages';
-	import { DOCUMENT_TYPES } from '$lib/utils/documentTypes';
+	import { m } from '#paraglide/messages.js';
+	import { DOCUMENT_TYPES } from '#lib/utils/documentTypes.js';
 
 	interface Props {
 		form: SuperValidated<any>;

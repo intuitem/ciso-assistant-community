@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import NodeLinks from './NodeLinks.svelte';
 
 	interface Props {

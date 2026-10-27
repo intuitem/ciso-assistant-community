@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 
 	/**
 	 * Title rendered from `type` + `context` against the message catalogs, so it

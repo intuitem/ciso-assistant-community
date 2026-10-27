@@ -1,10 +1,10 @@
 <script lang="ts">
 	import type { DataHandler } from '@vincjo/datatables/remote';
 	import { ContextMenu } from 'bits-ui';
-	import { invalidateAll } from '$app/navigation';
-	import { m } from '$paraglide/messages';
+	import { refreshAll } from '$app/navigation';
+	import { m } from '#paraglide/messages.js';
 	import { getFlash } from 'sveltekit-flash-message';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
 	interface Props {
 		row: any;
@@ -39,7 +39,7 @@
 				message: m.successfullyUpdatedObject({ object: m.assetAssessment().toLowerCase() })
 			});
 			handler.invalidate();
-			await invalidateAll();
+			await refreshAll();
 		} catch (error) {
 			console.error('Error toggling recovery flag:', error);
 			flash.set({ type: 'error', message: m.anErrorOccurred() });

@@ -2958,6 +2958,12 @@ class UserGroupReadSerializer(BaseModelSerializer):
         fields = "__all__"
 
 
+class UserGroupAutocompleteSerializer(build_autocomplete_serializer(UserGroup)):
+    # Lazy pickers label options with `name`: serve the translated one, as the
+    # list does, not the code a built-in group stores (BI-UG-ANA).
+    name = serializers.CharField(source="__str__")
+
+
 class UserGroupWriteSerializer(BaseModelSerializer):
     class Meta:
         model = UserGroup

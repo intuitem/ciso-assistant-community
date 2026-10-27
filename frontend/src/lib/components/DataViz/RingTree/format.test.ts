@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { formatPercent } from './format';
-import { compliancePercent } from '$lib/utils/compliance';
+import { compliancePercent } from '#lib/utils/compliance.js';
 
 describe('formatPercent', () => {
 	it('only shows 100% and 0% when exact', () => {
