@@ -21,7 +21,7 @@
 	let tab = $state(page.url.searchParams.get('tab') === 'assessments' ? 'assessments' : 'posture');
 	function setTab(value: string) {
 		tab = value;
-		const url = new URL(page.url);
+		const url = new URL(page.url.href);
 		url.searchParams.set('tab', value);
 		replaceState(url, {});
 	}
