@@ -1150,8 +1150,12 @@ class RecordConsumer[Context = None](ABC):
                 continue
             source_keys = self.SOURCE_KEY_MAP.get(key, [key])
             # For M2M owner, propagate even when blank so UPDATE mode clears stale owners.
+            # Names that resolved to nobody are not a blank: keep the owners (the
+            # row's warning reports the names).
             if key == "owner" and any(sk in record for sk in source_keys):
-                update_data[key] = value
+                blank = all(not str(record.get(sk) or "").strip() for sk in source_keys)
+                if value or blank:
+                    update_data[key] = value
                 continue
             if any(record.get(sk) not in (None, "") for sk in source_keys):
                 update_data[key] = value
@@ -3409,6 +3413,7 @@ class VulnerabilityRecordConsumer(RecordConsumer[None]):
             "ref_id": record.get("ref_id", ""),
             "name": name,
             "description": record.get("description", ""),
+            "observation": record.get("observation", ""),
             "status": status,
             "severity": severity,
             "folder": folder_id,
@@ -3425,11 +3430,20 @@ class VulnerabilityRecordConsumer(RecordConsumer[None]):
         if due_date:
             data["due_date"] = due_date
 
+        remediated_at = _parse_date(record.get("remediated_at"))
+        if remediated_at:
+            data["remediated_at"] = remediated_at
+
         filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"))
         if filtering_labels:
             data["filtering_labels"] = filtering_labels
 
-        return data, None
+        # Present-but-blank still sets it, so UPDATE mode can clear the owners.
+        unresolved: list[str] = []
+        if "owner" in record:
+            data["owner"] = _resolve_owners(record.get("owner"), unresolved)
+
+        return data, _owner_warning(record, unresolved)
 
 
 class ElementaryActionRecordConsumer(RecordConsumer):
