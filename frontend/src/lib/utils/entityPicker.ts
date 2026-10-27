@@ -1,5 +1,5 @@
-import EntityPickerModal from '$lib/components/Modals/EntityPickerModal.svelte';
-import type { ModalComponent, ModalSettings, ModalStore } from '$lib/components/Modals/stores';
+import EntityPickerModal from '#lib/components/Modals/EntityPickerModal.svelte';
+import type { ModalComponent, ModalSettings, ModalStore } from '#lib/components/Modals/stores.js';
 
 export interface EntityPickerOptions {
 	/** API resource whose `/{endpoint}/autocomplete` action backs the picker. */

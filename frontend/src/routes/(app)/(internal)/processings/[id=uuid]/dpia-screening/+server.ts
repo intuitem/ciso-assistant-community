@@ -1,5 +1,4 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { json } from '@sveltejs/kit';
+import { BASE_API_URL } from '#lib/utils/constants.js';
 import type { RequestHandler } from './$types';
 
 // The screening by default; `?target=processing.dpia` for the DPIA itself.
@@ -17,7 +16,7 @@ export const GET: RequestHandler = async ({ fetch, params, url }) => {
 	});
 	const res = await fetch(`${BASE_API_URL}/quick-forms/assess-options/?${query}`);
 	// A failed lookup keeps its status: the card tells it from "no form loaded".
-	return res.ok ? json(await res.json()) : json([], { status: res.status });
+	return res.ok ? Response.json(await res.json()) : Response.json([], { status: res.status });
 };
 
 // Start (or resume) a screening of this processing through one of them.
@@ -25,7 +24,7 @@ export const POST: RequestHandler = async ({ fetch, params, request }) => {
 	const { kind, id } = await request.json().catch(() => ({}));
 	// Both go into the backend path: only a known kind and a UUID.
 	if (!['form', 'publication'].includes(kind) || typeof id !== 'string' || !UUID.test(id)) {
-		return json({ error: 'invalidRequest' }, { status: 400 });
+		return Response.json({ error: 'invalidRequest' }, { status: 400 });
 	}
 	const base = kind === 'form' ? 'quick-forms' : 'quick-form-publications';
 	const res = await fetch(`${BASE_API_URL}/${base}/${id}/start/`, {
@@ -33,5 +32,5 @@ export const POST: RequestHandler = async ({ fetch, params, request }) => {
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({ subject: params.id })
 	});
-	return json(await res.json().catch(() => ({})), { status: res.status });
+	return Response.json(await res.json().catch(() => ({})), { status: res.status });
 };

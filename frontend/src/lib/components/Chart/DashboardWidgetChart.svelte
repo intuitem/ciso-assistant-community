@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { sampleMoment } from '$lib/utils/derived-metrics';
-	import { escapeHtml, roundScore } from '$lib/utils/helpers';
+	import { sampleMoment } from '#lib/utils/derived-metrics.js';
+	import { escapeHtml, roundScore } from '#lib/utils/helpers.js';
 	import { onMount } from 'svelte';
 
-	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { resolveBreakdownColor } from '$lib/utils/constants';
+	import { mountThemeAwareChart } from '#lib/utils/echartsTheme.js';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { resolveBreakdownColor } from '#lib/utils/constants.js';
 	import MarkdownRenderer from '../MarkdownRenderer.svelte';
 	import BreakdownSmallMultiples from './BreakdownSmallMultiples.svelte';
 

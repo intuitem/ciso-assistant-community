@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { mountThemeAwareChart, isDarkTheme } from '$lib/utils/echartsTheme';
+	import { mountThemeAwareChart, isDarkTheme } from '#lib/utils/echartsTheme.js';
 	import { buildGraphOption } from './option';
 	import type { LiveGraph, LiveNode } from './accretion';
 

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import RecursiveLogEntryChanges from './components/RecursiveLogEntryChanges.svelte';
-	import DetailView from '$lib/components/DetailView/DetailView.svelte';
+	import DetailView from '#lib/components/DetailView/DetailView.svelte';
 	import type { PageData } from './$types';
 
 	interface Props {

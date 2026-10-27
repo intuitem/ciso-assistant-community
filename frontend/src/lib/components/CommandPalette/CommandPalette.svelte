@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { goto } from '$lib/utils/breadcrumbs';
+	import { browser } from '$app/env';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { goto } from '#lib/utils/breadcrumbs.js';
 	import { page } from '$app/state';
 	import {
 		expandChat,
@@ -9,8 +9,8 @@
 		sendMessage,
 		setInputText
 	} from '../ChatWidget/chatStore.svelte';
-	import { m } from '$paraglide/messages';
-	import { createIntentHref } from '$lib/utils/create-intent';
+	import { m } from '#paraglide/messages.js';
+	import { createIntentHref } from '#lib/utils/create-intent.js';
 	import {
 		awaitingArgument,
 		buildCreateCommands,

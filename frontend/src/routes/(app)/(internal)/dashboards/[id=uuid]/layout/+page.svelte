@@ -1,12 +1,12 @@
 <script lang="ts">
 	import type { PageData, ActionData } from './$types';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
-	import { m } from '$paraglide/messages';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
+	import DeleteConfirmModal from '#lib/components/Modals/DeleteConfirmModal.svelte';
+	import { m } from '#paraglide/messages.js';
 	import { invalidate, goto } from '$app/navigation';
-	import { getModalStore } from '$lib/components/Modals/stores';
-	import { getToastStore } from '$lib/components/Toast/stores';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { getModalStore } from '#lib/components/Modals/stores.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { onMount } from 'svelte';
 	import { enhance } from '$app/forms';
 

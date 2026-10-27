@@ -1,6 +1,6 @@
 import { isHttpError } from '@sveltejs/kit';
 import { describe, expect, it } from 'vitest';
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 import { GET } from './+server';
 
 async function exportError(
