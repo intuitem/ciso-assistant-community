@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import { m } from '$paraglide/messages';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		value: string;

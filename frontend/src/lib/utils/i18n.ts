@@ -1,5 +1,5 @@
-import { m } from '$paraglide/messages';
-import { toCamelCase } from '$lib/utils/locales';
+import { m } from '#paraglide/messages.js';
+import { toCamelCase } from '#lib/utils/locales.js';
 
 // Alternate wording for the "qualification" concept, driven by the
 // use_risk_category_label general setting (display only). The flag is synced

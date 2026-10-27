@@ -1,8 +1,12 @@
-import { hasPermissionAnywhere } from '$lib/utils/access-control';
-import { CREATE_ROUTE_OVERRIDES, NON_CREATABLE_URL_MODELS, URL_MODEL_MAP } from '$lib/utils/crud';
-import { safeTranslate } from '$lib/utils/i18n';
-import { getSidebarVisibleItems } from '$lib/utils/sidebar-config';
-import type { User } from '$lib/utils/types';
+import { hasPermissionAnywhere } from '#lib/utils/access-control.js';
+import {
+	CREATE_ROUTE_OVERRIDES,
+	NON_CREATABLE_URL_MODELS,
+	URL_MODEL_MAP
+} from '#lib/utils/crud.js';
+import { safeTranslate } from '#lib/utils/i18n.js';
+import { getSidebarVisibleItems } from '#lib/utils/sidebar-config.js';
+import type { User } from '#lib/utils/types.js';
 import { navData } from '../SideBar/navData';
 import { canSeeNavItem, type NavItem } from '../SideBar/navVisibility';
 

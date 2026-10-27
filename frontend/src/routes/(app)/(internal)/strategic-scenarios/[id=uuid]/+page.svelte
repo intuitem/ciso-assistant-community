@@ -1,10 +1,10 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import DetailView from '$lib/components/DetailView/DetailView.svelte';
-	import AttackPathGraph from '$lib/components/EbiosRM/AttackPathGraph.svelte';
-	import AttackPathFlowText from '$lib/components/EbiosRM/AttackPathFlowText.svelte';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import { m } from '$paraglide/messages';
+	import DetailView from '#lib/components/DetailView/DetailView.svelte';
+	import AttackPathGraph from '#lib/components/EbiosRM/AttackPathGraph.svelte';
+	import AttackPathFlowText from '#lib/components/EbiosRM/AttackPathFlowText.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		data: PageData;

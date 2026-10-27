@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { run } from 'svelte/legacy';
 
-	import { displayScoreColor } from '$lib/utils/helpers';
-	import { getLocale } from '$paraglide/runtime.js';
-	import { localizedLevelField, type ScoreLevel } from '$lib/utils/score-scales';
+	import { displayScoreColor } from '#lib/utils/helpers.js';
+	import { getLocale } from '#paraglide/runtime.js';
+	import { localizedLevelField, type ScoreLevel } from '#lib/utils/score-scales.js';
 	import { Progress } from '@skeletonlabs/skeleton-svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 

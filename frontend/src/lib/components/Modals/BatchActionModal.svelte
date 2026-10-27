@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { getModalStore, type ModalStore } from './stores';
-	import { safeTranslate, unsafeTranslate } from '$lib/utils/i18n';
-	import { fetchAllPages } from '$lib/utils/pagination';
+	import { safeTranslate, unsafeTranslate } from '#lib/utils/i18n.js';
+	import { fetchAllPages } from '#lib/utils/pagination.js';
 	import { onMount } from 'svelte';
 
 	function translateOption(option: { label: string; value: string }): string {

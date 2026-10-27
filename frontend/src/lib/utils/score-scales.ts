@@ -1,5 +1,5 @@
-import * as m from '$paraglide/messages';
-import type { locales } from '$paraglide/runtime';
+import * as m from '#paraglide/messages.js';
+import type { locales } from '#paraglide/runtime.js';
 
 type Locale = (typeof locales)[number];
 type LevelMessage = (inputs?: Record<string, never>, options?: { locale?: Locale }) => string;

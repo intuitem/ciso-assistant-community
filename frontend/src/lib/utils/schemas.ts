@@ -7,7 +7,7 @@ import { z } from 'zod';
 export type FormDataShape = Record<string, unknown>;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ZodSchema = z.ZodObject<any>;
-import * as m from '$paraglide/messages';
+import * as m from '#paraglide/messages.js';
 
 const toArrayPreprocessor = (value: unknown) => {
 	if (Array.isArray(value)) {
