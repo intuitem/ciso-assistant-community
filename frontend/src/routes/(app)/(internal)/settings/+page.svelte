@@ -35,9 +35,11 @@
 				><i class="fa-solid fa-bell"></i> {m.notifications()}</Tabs.Trigger
 			>
 		{/if}
-		<Tabs.Trigger value="vulnerabilitySla"
-			><i class="fa-solid fa-bug"></i> {m.vulnerabilitySlaPolicy()}</Tabs.Trigger
-		>
+		{#if page.data?.featureflags?.vulnerability_sla}
+			<Tabs.Trigger value="vulnerabilitySla"
+				><i class="fa-solid fa-bug"></i> {m.vulnerabilitySlaPolicy()}</Tabs.Trigger
+			>
+		{/if}
 		<Tabs.Trigger value="secIntelFeeds"
 			><i class="fa-solid fa-satellite-dish"></i> {m.secIntelFeeds()}</Tabs.Trigger
 		>
@@ -84,9 +86,11 @@
 			<NotificationChannelsSettings />
 		</Tabs.Content>
 	{/if}
-	<Tabs.Content value="vulnerabilitySla">
-		<VulnerabilitySlaSettings {data} />
-	</Tabs.Content>
+	{#if page.data?.featureflags?.vulnerability_sla}
+		<Tabs.Content value="vulnerabilitySla">
+			<VulnerabilitySlaSettings {data} />
+		</Tabs.Content>
+	{/if}
 	{#if data.mailerSettings}
 		<Tabs.Content value="mailer">
 			<MailerSettings {data} />

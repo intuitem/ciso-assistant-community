@@ -3050,6 +3050,7 @@
 	"visualizeButton": "Visualizar vulnerabilidades",
 	"visualizeRequirements": "Visualizar todos los requisitos en todas las auditorías",
 	"vulnerabilitiesDescription": "Vulnerabilidades y debilidades conocidas",
+	"vulnerabilitySlaDescription": "Calcular las fechas de vencimiento de las vulnerabilidades según su gravedad y mostrar cuán cerca está cada una de su plazo",
 	"vulnerability": "Vulnerabilidad",
 	"vulnerabilityDistribution": "Distribución de vulnerabilidades",
 	"vulnerabilityTreemap": "Mapa de árbol de vulnerabilidades",
@@ -3264,12 +3265,62 @@
 	"confirmModalMessagePlural": "¿Estás seguro? Esta acción afectará permanentemente a los siguientes objetos",
 	"syncAppliedControlsMessage": "Los controles aplicados que utilizan este control de referencia se sincronizarán con él. Tenga en cuenta que esto no se puede deshacer.",
 	"syncToAppliedControl": "Sincronizar con el control aplicado",
-	"vulnerabilitySlaPolicyHelpText": "Definir el número máximo de días permitidos para corregir una vulnerabilidad según su gravedad. Dejar vacío para desactivar el cálculo automático para este nivel de gravedad. Cuando se define, la fecha de vencimiento se calcula automáticamente al crear la vulnerabilidad o al cambiar su gravedad.",
+	"vulnerabilitySlaPolicyHelpText": "Definir el número máximo de días permitidos para corregir una vulnerabilidad según su gravedad. Dejar vacío para desactivar el cálculo automático para este nivel de gravedad. Cuando se define, la fecha de vencimiento se calcula automáticamente al crear la vulnerabilidad o al cambiar su gravedad. Para desactivar el SLA por completo, desactive la bandera de funcionalidad SLA de vulnerabilidades.",
 	"slaAnchor": "Fecha de inicio del SLA",
 	"slaAnchorHelpText": "Elige cuándo comienza el plazo del SLA. Fecha de detección: cuando la vulnerabilidad fue descubierta por tu organización. Fecha de publicación: cuando el aviso se hizo público. Usa la fecha de detección por defecto si no hay fecha de publicación disponible.",
 	"slaDaysHelpText": "Número de días permitidos para la remediación",
 	"resetToDefaults": "Restablecer valores predeterminados",
+	"vulnerabilitySlaDisabledHint": "El SLA de vulnerabilidades está desactivado en las banderas de funcionalidad, por lo que no se calculan las fechas de vencimiento",
 	"detectedAt": "Fecha de detección",
+	"detectedAtHelpText": "Cuándo se descubrió la vulnerabilidad. Por defecto, hoy, salvo que el SLA esté desactivado. Se usa como referencia del SLA cuando la política se basa en la fecha de detección.",
+	"remediatedAt": "Fecha de remediación",
+	"remediatedAtHelpText": "Se fija en el día en que la vulnerabilidad se resuelve (mitigada, corregida, no explotable o no afectada), salvo que indique una. Se conserva cuando se reabre.",
+	"vulnerabilityOpenForDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Abierta {count} día desde la detección",
+				"countPlural=many": "Abierta {count} días desde la detección",
+				"countPlural=other": "Abierta {count} días desde la detección"
+			}
+		}
+	],
+	"vulnerabilityRemediatedInDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Remediada {count} día después de la detección",
+				"countPlural=many": "Remediada {count} días después de la detección",
+				"countPlural=other": "Remediada {count} días después de la detección"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLeft": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Queda {count} día",
+				"countPlural=many": "Quedan {count} días",
+				"countPlural=other": "Quedan {count} días"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} día de retraso",
+				"countPlural=many": "{count} días de retraso",
+				"countPlural=other": "{count} días de retraso"
+			}
+		}
+	],
+	"excepted": "Exceptuada",
+	"exceptionEnds": "Fin de la excepción",
 	"publishedDate": "Fecha de publicación",
 	"vulnerabilitySlaPolicy": "SLA de vulnerabilidades",
 	"secIntelFeeds": "Fuentes de vulnerabilidades",
@@ -3695,7 +3746,10 @@
 	"templateSaved": "Plantilla guardada correctamente",
 	"templateReset": "Plantilla restablecida a los valores predeterminados",
 	"confirmResetTemplate": "¿Seguro que desea restablecer esta plantilla a los valores predeterminados? Se perderá su personalización.",
+	"templateVulnerabilityAssignmentName": "Asignación de vulnerabilidad",
+	"templateVulnerabilityAssignmentDescription": "Se envía cuando se asigna una vulnerabilidad",
 	"readAt": "Leído el",
+	"notificationTitleVulnerabilityAssignment": "Se le ha asignado la vulnerabilidad '{vulnerability_name}'",
 	"notification": "Notificación",
 	"notifications": "Notificaciones",
 	"read": "Leído",
@@ -3869,5 +3923,7 @@
 	"dpiaRequiredNo": "EIPD no requerida",
 	"dpiaRequirementChange": "Cambio del requisito de EIPD",
 	"dpiaRequirementChanges": "Historial del requisito de EIPD",
-	"previously": "Anteriormente"
+	"previously": "Anteriormente",
+	"vulnerabilityOpenWithRemediationDate": "Vulnerabilidad abierta con fecha de remediación",
+	"vulnerabilityResolvedWithoutRemediationDate": "Vulnerabilidad resuelta sin fecha de remediación"
 }

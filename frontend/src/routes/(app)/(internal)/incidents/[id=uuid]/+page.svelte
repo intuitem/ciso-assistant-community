@@ -341,6 +341,12 @@
 			urlmodel: 'risk-scenarios',
 			icon: 'fa-solid fa-triangle-exclamation',
 			labelKey: 'riskScenarios'
+		},
+		{
+			tabValue: 'vulnerabilities',
+			urlmodel: 'vulnerabilities',
+			icon: 'fa-solid fa-bug',
+			labelKey: 'vulnerabilities'
 		}
 	];
 
