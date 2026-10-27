@@ -21,6 +21,7 @@ from core.generators import (
     gen_audit_context,
     inline_charts_for_docx,
     render_docx_report,
+    render_docx_report_bounded,
 )
 from core.models import AppliedControl, RequirementAssessment
 from core.tests.test_audit_word_export import app_config, audit  # noqa: F401
@@ -115,6 +116,38 @@ def test_report_template_cannot_use_other_objects(
     assert not target.exists()
 
 
+def test_report_template_cannot_mutate_the_context() -> None:
+    rows = [1, 2]
+    template = DocxTemplate(_docx_with("{{ rows.clear() }}"))
+    with pytest.raises(SecurityError):
+        render_docx_report(template, {"rows": rows})
+    assert rows == [1, 2]
+
+
+def test_bounded_render_returns_the_report() -> None:
+    report = render_docx_report_bounded(
+        DocxTemplate(_docx_with("{{ name }}")), {"name": "audit"}
+    )
+    assert Document(io.BytesIO(report)).paragraphs[0].text == "audit"
+
+
+def test_bounded_render_fails_on_template_errors() -> None:
+    with pytest.raises(EOFError):
+        render_docx_report_bounded(DocxTemplate(_docx_with(_SSTI_PAYLOAD)), {})
+
+
+def test_bounded_render_stops_runaway_templates(monkeypatch) -> None:
+    monkeypatch.setattr("core.generators.DOCX_RENDER_TIMEOUT", 1)
+    template = DocxTemplate(
+        _docx_with(
+            "{% for i in range(99999) %}{% for j in range(99999) %}"
+            "{% endfor %}{% endfor %}"
+        )
+    )
+    with pytest.raises(TimeoutError):
+        render_docx_report_bounded(template, {})
+
+
 def _rendered_text(template: DocxTemplate) -> str:
     out = io.BytesIO()
     template.save(out)
@@ -147,8 +180,8 @@ def test_report_template_keeps_the_usual_jinja_features() -> None:
 
 def _template_values(value: object):
     yield value
-    children = value.values() if isinstance(value, dict) else value
-    if isinstance(value, (dict, list)):
+    children = [*value.keys(), *value.values()] if isinstance(value, dict) else value
+    if isinstance(value, (dict, list, tuple)):
         for child in children:
             yield from _template_values(child)
 

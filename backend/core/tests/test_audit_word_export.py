@@ -20,7 +20,9 @@ import uuid
 import zipfile
 
 import pytest
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
+from docx import Document
 from knox.models import AuthToken
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -29,6 +31,7 @@ from core.apps import startup
 from core.generators import AUDIT_CHART_KEYS
 from core.models import (
     ComplianceAssessment,
+    CustomWordTemplate,
     Framework,
     Perimeter,
     RequirementAssessment,
@@ -219,6 +222,28 @@ class TestAuditWordExport:
         for req, result in zip(reqs, assignments):
             req.result = result
             req.save()
+
+        url = reverse(
+            "compliance-assessments-word-report", kwargs={"pk": str(audit.pk)}
+        )
+        response = admin_client.get(url)
+
+        assert response.status_code == status.HTTP_200_OK
+        assert zipfile.is_zipfile(io.BytesIO(_read_streaming(response)))
+
+    def test_word_report_falls_back_when_custom_template_fails(
+        self, admin_client, audit
+    ):
+        doc = Document()
+        doc.add_paragraph("{{ ''.__class__.__mro__[1].__subclasses__() }}")
+        buf = io.BytesIO()
+        doc.save(buf)
+        CustomWordTemplate.objects.create(
+            template_key="audit_report",
+            language="en",
+            folder=Folder.get_root_folder(),
+            file=SimpleUploadedFile("broken.docx", buf.getvalue()),
+        )
 
         url = reverse(
             "compliance-assessments-word-report", kwargs={"pk": str(audit.pk)}

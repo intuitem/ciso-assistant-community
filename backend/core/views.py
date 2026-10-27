@@ -77,6 +77,7 @@ from .generators import (
     audit_context_for_typst,
     gen_audit_context,
     render_docx_report,
+    render_docx_report_bounded,
 )
 from .typst_render import localized_template, render_pdf
 from .serializer_fields import FieldsRelatedField, PathField
@@ -13503,30 +13504,6 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         """
         user_lang = request.user.preferences.get("lang") or "en"
 
-        # Custom overrides support any language; auto-generated strings only en/fr.
-        doc = None
-        try:
-            custom = CustomWordTemplate.objects.filter(
-                template_key="audit_report",
-                language=user_lang,
-                is_active=True,
-            ).first()
-            if custom and custom.file:
-                custom.file.open("rb")
-                doc = DocxTemplate(io.BytesIO(custom.file.read()))
-        except Exception as e:
-            logger.warning(
-                "Failed to load custom Word template, falling back to default",
-                exc_info=e,
-            )
-
-        if doc is None:
-            core_templates = Path(__file__).resolve().parent / "templates" / "core"
-            template_path = core_templates / f"audit_report_template_{user_lang}.docx"
-            if not template_path.exists():
-                template_path = core_templates / "audit_report_template_en.docx"
-            doc = DocxTemplate(template_path)
-
         audit_obj = self.get_object()
         _framework = audit_obj.framework
         tree = get_sorted_requirement_nodes(
@@ -13546,13 +13523,39 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         filter_graph_by_implementation_groups(tree, implementation_groups)
         annotate_tree_with_aggregated_scores(tree, audit_obj)
         context = gen_audit_context(pk, tree, user_lang)
-        render_docx_report(doc, context)
-        buffer_doc = io.BytesIO()
-        doc.save(buffer_doc)
-        buffer_doc.seek(0)
+
+        # Custom overrides support any language; auto-generated strings only en/fr.
+        report = None
+        try:
+            custom = CustomWordTemplate.objects.filter(
+                template_key="audit_report",
+                language=user_lang,
+                is_active=True,
+            ).first()
+            if custom and custom.file:
+                custom.file.open("rb")
+                report = render_docx_report_bounded(
+                    DocxTemplate(io.BytesIO(custom.file.read())), context
+                )
+        except Exception as e:
+            logger.warning(
+                "Failed to render custom Word template, falling back to default",
+                exc_info=e,
+            )
+
+        if report is None:
+            core_templates = Path(__file__).resolve().parent / "templates" / "core"
+            template_path = core_templates / f"audit_report_template_{user_lang}.docx"
+            if not template_path.exists():
+                template_path = core_templates / "audit_report_template_en.docx"
+            doc = DocxTemplate(template_path)
+            render_docx_report(doc, context)
+            buffer_doc = io.BytesIO()
+            doc.save(buffer_doc)
+            report = buffer_doc.getvalue()
 
         response = StreamingHttpResponse(
-            FileWrapper(buffer_doc),
+            FileWrapper(io.BytesIO(report)),
             content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         )
         response["Content-Disposition"] = "attachment; filename=exec_report.docx"

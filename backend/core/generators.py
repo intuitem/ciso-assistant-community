@@ -1,24 +1,29 @@
 import io
+import multiprocessing
+import resource
+from collections import OrderedDict, defaultdict
 from datetime import date, datetime, timedelta
+from decimal import Decimal
 from math import ceil
 from typing import ClassVar
+from uuid import UUID
 
+import jinja2.filters
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 from django.db.models import Count
+from django.utils.safestring import SafeString
 from django.utils.timezone import now
 from docx.shared import Cm
 from docxtpl import DocxTemplate, InlineImage
-from jinja2.filters import _GroupTuple
 from jinja2.runtime import (
     BlockReference,
     LoopContext,
     Macro,
     TemplateReference,
-    Undefined,
 )
-from jinja2.sandbox import SandboxedEnvironment
+from jinja2.sandbox import ImmutableSandboxedEnvironment
 from jinja2.utils import Cycler, Joiner, Namespace
 from library.helpers import get_referential_translation
 from markupsafe import Markup
@@ -1217,7 +1222,7 @@ def inline_charts_for_docx(context, doc, width=Cm(15)):
     return wrapped
 
 
-class DocxReportSandbox(SandboxedEnvironment):
+class DocxReportSandbox(ImmutableSandboxedEnvironment):
     """Sandbox for user-supplied Word templates.
 
     Only plain data and Jinja's own helpers expose attributes. Anything else in
@@ -1231,21 +1236,25 @@ class DocxReportSandbox(SandboxedEnvironment):
         {
             str,
             Markup,
+            SafeString,
             int,
             bool,
             float,
+            Decimal,
+            UUID,
             date,
             datetime,
             timedelta,
             list,
             tuple,
-            _GroupTuple,
+            getattr(jinja2.filters, "_GroupTuple", tuple),
             dict,
+            OrderedDict,
+            defaultdict,
             range,
         }
     )
     jinja_helper_types: ClassVar[tuple[type, ...]] = (
-        Undefined,
         LoopContext,
         Namespace,
         Cycler,
@@ -1265,6 +1274,40 @@ class DocxReportSandbox(SandboxedEnvironment):
 def render_docx_report(doc: DocxTemplate, context: dict) -> None:
     """Render `doc` in place with `context`, charts included."""
     doc.render(inline_charts_for_docx(context, doc), jinja_env=DocxReportSandbox())
+
+
+DOCX_RENDER_TIMEOUT = 60
+DOCX_RENDER_MEMORY = 1 << 30
+
+
+def _render_docx_in_child(doc: DocxTemplate, context: dict, conn) -> None:
+    try:
+        with open("/proc/self/statm") as statm:
+            used = int(statm.read().split()[0]) * resource.getpagesize()
+        resource.setrlimit(resource.RLIMIT_AS, (used + DOCX_RENDER_MEMORY,) * 2)
+    except OSError, ValueError:
+        pass
+    render_docx_report(doc, context)
+    out = io.BytesIO()
+    doc.save(out)
+    conn.send_bytes(out.getvalue())
+
+
+def render_docx_report_bounded(doc: DocxTemplate, context: dict) -> bytes:
+    recv, send = multiprocessing.Pipe(duplex=False)
+    child = multiprocessing.get_context("fork").Process(
+        target=_render_docx_in_child, args=(doc, context, send)
+    )
+    child.start()
+    send.close()
+    try:
+        if not recv.poll(DOCX_RENDER_TIMEOUT):
+            raise TimeoutError("Word template rendering timed out")
+        return recv.recv_bytes()
+    finally:
+        recv.close()
+        child.kill()
+        child.join()
 
 
 # Requirement-assessment fields governed by the audit's `field_visibility`;
