@@ -1,18 +1,17 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import { goto as breadcrumbGoto } from '$lib/utils/breadcrumbs';
-	import { URL_MODEL_MAP } from '$lib/utils/crud';
+	import { gotoOrLoad, goto as breadcrumbGoto } from '#lib/utils/breadcrumbs.js';
+	import { URL_MODEL_MAP } from '#lib/utils/crud.js';
 	import { deserialize } from '$app/forms';
-	import { openPortalExternal } from '$lib/utils/external-links';
-	import { m } from '$paraglide/messages';
-	import PortalGrid from '$lib/components/PortalGrid/PortalGrid.svelte';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import AssessmentLaunchModal from '$lib/components/Modals/AssessmentLaunchModal.svelte';
+	import { openPortalExternal } from '#lib/utils/external-links.js';
+	import { m } from '#paraglide/messages.js';
+	import PortalGrid from '#lib/components/PortalGrid/PortalGrid.svelte';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
+	import AssessmentLaunchModal from '#lib/components/Modals/AssessmentLaunchModal.svelte';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 	import type { PageData } from './$types';
 
 	interface PortalItem {
@@ -84,7 +83,7 @@
 				if (result.data.resumed && result.data.ref_id) {
 					resumedRef = result.data.ref_id;
 				}
-				await goto(result.data.redirect);
+				await gotoOrLoad(result.data.redirect);
 			} else {
 				launchError = result.data?.error || m.assessmentLaunchFailed();
 			}

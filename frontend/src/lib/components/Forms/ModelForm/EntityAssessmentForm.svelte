@@ -1,15 +1,15 @@
 <script lang="ts">
-	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
+	import Checkbox from '#lib/components/Forms/Checkbox.svelte';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
+	import FolderTreeSelect from '#lib/components/Forms/FolderTreeSelect.svelte';
 	import Select from '../Select.svelte';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import { m } from '$paraglide/messages';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import { m } from '#paraglide/messages.js';
 
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
-	import VisibilityEditor from '$lib/components/ComplianceAssessment/VisibilityEditor.svelte';
+	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
+	import VisibilityEditor from '#lib/components/ComplianceAssessment/VisibilityEditor.svelte';
 	import type { SuperForm } from 'sveltekit-superforms';
 
 	interface Props {
@@ -209,6 +209,7 @@
 			{form}
 			multiple
 			optionsEndpoint="users"
+			lazy
 			optionsDetailedUrlParameters={[
 				['is_third_party', 'true'],
 				['representative__entity', selectedEntity || '']
@@ -277,6 +278,7 @@
 		{form}
 		multiple
 		optionsEndpoint="actors"
+		lazy
 		optionsLabelField="str"
 		optionsInfoFields={{
 			fields: [{ field: 'type', translate: true }],
@@ -291,6 +293,7 @@
 		{form}
 		multiple
 		optionsEndpoint="actors"
+		lazy
 		optionsLabelField="str"
 		optionsInfoFields={{
 			fields: [{ field: 'type', translate: true }],
@@ -316,6 +319,7 @@
 	<AutocompleteSelect
 		{form}
 		optionsEndpoint="evidences"
+		lazy
 		optionsExtraFields={[['folder', 'str']]}
 		field="evidence"
 		cacheLock={cacheLocks['evidence']}

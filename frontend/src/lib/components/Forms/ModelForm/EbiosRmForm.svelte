@@ -1,15 +1,15 @@
 <script lang="ts">
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
-	import { m } from '$paraglide/messages';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
-	import Select from '$lib/components/Forms/Select.svelte';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import FolderTreeSelect from '#lib/components/Forms/FolderTreeSelect.svelte';
+	import { m } from '#paraglide/messages.js';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
+	import Select from '#lib/components/Forms/Select.svelte';
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
-	import { getModalStore } from '$lib/components/Modals/stores';
+	import { getModalStore } from '#lib/components/Modals/stores.js';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -274,6 +274,7 @@
 			multiple
 			{form}
 			optionsEndpoint="actors"
+			lazy
 			optionsLabelField="str"
 			optionsInfoFields={{
 				fields: [{ field: 'type', translate: true }],
@@ -288,6 +289,7 @@
 			multiple
 			{form}
 			optionsEndpoint="actors"
+			lazy
 			optionsLabelField="str"
 			optionsInfoFields={{
 				fields: [{ field: 'type', translate: true }],

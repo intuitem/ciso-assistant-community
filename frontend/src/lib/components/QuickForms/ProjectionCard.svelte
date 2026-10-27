@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { ruleLabel as labelOf } from './rule-label';
-	import TierBadge from '$lib/components/ModelTable/field/TierBadge.svelte';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
+	import TierBadge from '#lib/components/ModelTable/field/TierBadge.svelte';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
 
 	type Row = {
 		target: string;

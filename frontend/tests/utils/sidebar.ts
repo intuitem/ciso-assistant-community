@@ -1,6 +1,6 @@
 import { expect, type Locator, type Page } from './test-utils.js';
-import { navData } from '$lib/components/SideBar/navData.js';
-import { getSidebarVisibleItems } from '$lib/utils/sidebar-config.js';
+import { navData } from '#lib/components/SideBar/navData.js';
+import { getSidebarVisibleItems } from '#lib/utils/sidebar-config.js';
 
 type TabContent = {
 	name: string;

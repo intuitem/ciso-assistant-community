@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { isDark } from '$lib/utils/helpers';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { isDark } from '#lib/utils/helpers.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 
 	interface Props {
 		cell: { name?: string; str?: string; hexcolor?: string } | null | undefined;

@@ -1,18 +1,18 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
 	import {
 		getModalStore,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { hasPermissionAnywhere } from '$lib/utils/access-control';
-	import { consumeCreateIntent } from '$lib/utils/create-intent';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { listViewFields } from '$lib/utils/table';
-	import { m } from '$paraglide/messages';
+	} from '#lib/components/Modals/stores.js';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
+	import { hasPermissionAnywhere } from '#lib/utils/access-control.js';
+	import { consumeCreateIntent } from '#lib/utils/create-intent.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { listViewFields } from '#lib/utils/table.js';
+	import { m } from '#paraglide/messages.js';
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 	import type { PageData } from './$types';
 	import ValidationFlowCard from './ValidationFlowCard.svelte';
@@ -63,9 +63,9 @@
 	};
 
 	function handleTabChange(tab: string): void {
-		const url = new URL(page.url);
+		const url = new URL(page.url.href);
 		url.searchParams.set('tab', tab);
-		goto(url, { invalidateAll: true });
+		goto(url, { refreshAll: true });
 	}
 
 	function modalCreateForm(): void {

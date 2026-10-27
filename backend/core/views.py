@@ -45,7 +45,7 @@ from django.db.models import (
 )
 from django.db.models.functions import Coalesce, Concat
 
-from collections import defaultdict
+from collections import defaultdict, deque
 import pytz
 from uuid import UUID
 from itertools import chain, cycle
@@ -80,7 +80,7 @@ from .generators import (
     inline_charts_for_docx,
 )
 from .typst_render import localized_template, render_pdf
-from .serializer_fields import FieldsRelatedField
+from .serializer_fields import FieldsRelatedField, PathField
 
 from django.utils import timezone, translation
 from django.utils.text import slugify
@@ -109,11 +109,9 @@ from core.instance_metrics import (
     nb_risk_assessments_gauge,
     nb_risk_scenarios_gauge,
     nb_risk_acceptances_gauge,
-    nb_seats_gauge,
-    nb_editors_gauge,
-    expiration_gauge,
     created_at_gauge,
     last_login_gauge,
+    instance_status_extensions,
 )
 
 from django.apps import apps
@@ -1171,6 +1169,55 @@ def check_folder_add_permission(user, folder, *models):
             )
 
 
+def get_optimized_object_data(queryset):
+    """
+    Calculate folder full paths for objects in the queryset in 1 DB request.
+    """
+    initial_objects = list(queryset)
+    if not initial_objects:
+        return {}
+
+    path_results = {}
+    # Only the objects' folders and their ancestors, from the closure table
+    # get_folder_full_path also relies on, not the whole Folder table.
+    folder_ids = {
+        getattr(obj, "folder_id", None) or getattr(obj, "parent_folder_id", None)
+        for obj in initial_objects
+    } - {None}
+    folders = {
+        f.id: f
+        for f in Folder.objects.filter(
+            Q(id__in=folder_ids)
+            | Q(id__in=Folder.objects.filter(descendants__in=folder_ids).values("id"))
+        )
+    }
+    for obj in initial_objects:
+        path = []
+        if getattr(obj, "folder_id", None):
+            queue = deque([obj.folder_id])
+        elif getattr(obj, "parent_folder_id", None):
+            queue = deque([obj.parent_folder_id])
+        else:
+            continue
+        while queue:
+            folder_id = queue.popleft()
+            folder = folders[folder_id]
+            if folder.parent_folder_id:
+                path.append(
+                    {
+                        "str": str(folder),
+                        "id": folder.id,
+                        "parent_id": folder.parent_folder_id,
+                    }
+                )
+                queue.append(folder.parent_folder_id)
+        path_results[obj.id] = path[::-1]  # Reverse to get root to leaf order
+
+    return {
+        "paths": path_results,
+    }
+
+
 class AutocompleteMixin:
     """Adds a lightweight, server-paginated ``autocomplete`` action for entity
     pickers (search/ordering/filtering come from the viewset's existing filter
@@ -1216,7 +1263,18 @@ class AutocompleteMixin:
         qs = self.filter_queryset(qs)
         page = self.paginate_queryset(qs)
         objects = page if page is not None else qs
-        serializer = self.get_autocomplete_serializer_class()(objects, many=True)
+        serializer_class = self.get_autocomplete_serializer_class()
+        # Folder paths precomputed in one query, as list() does: otherwise each
+        # row's `path` walks its folder's ancestors on its own. That query reads
+        # the whole Folder table, so only serializers showing a path run it, and
+        # with the base data, not a viewset's heavier, list-only additions.
+        context = {}
+        if any(
+            isinstance(field, PathField)
+            for field in serializer_class._declared_fields.values()
+        ):
+            context["optimized_data"] = get_optimized_object_data(objects)
+        serializer = serializer_class(objects, many=True, context=context)
         data = serializer.data
         # Apply the same related-field IAM masking as list()/retrieve(): the
         # nested folder must not leak where the user lacks view access.
@@ -2344,40 +2402,8 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
         return Response(payload)
 
     def _get_optimized_object_data(self, queryset):
-        """
-        Calculate folder full paths for objects in the queryset in 1 DB request.
-        """
-        initial_objects = list(queryset)
-        if not initial_objects:
-            return {}
-
-        path_results = {}
-        folders = {f.id: f for f in Folder.objects.all()}
-        for obj in initial_objects:
-            path = []
-            if getattr(obj, "folder_id", None):
-                queue = deque([obj.folder_id])
-            elif getattr(obj, "parent_folder_id", None):
-                queue = deque([obj.parent_folder_id])
-            else:
-                continue
-            while queue:
-                folder_id = queue.popleft()
-                folder = folders[folder_id]
-                if folder.parent_folder_id:
-                    path.append(
-                        {
-                            "str": str(folder),
-                            "id": folder.id,
-                            "parent_id": folder.parent_folder_id,
-                        }
-                    )
-                    queue.append(folder.parent_folder_id)
-            path_results[obj.id] = path[::-1]  # Reverse to get root to leaf order
-
-        return {
-            "paths": path_results,
-        }
+        """Serializer context for list(); viewsets extend it with their own data."""
+        return get_optimized_object_data(queryset)
 
     class Meta:
         abstract = True
@@ -8474,12 +8500,9 @@ class UserFilter(GenericFilterSet):
 
     def filter_approver(self, queryset, name, value):
         """we don't know yet which folders will be used, so filter on any folder"""
-        approvers_id = []
-        for candidate in User.objects.all():
-            if RoleAssignment.has_permission_anywhere(
-                candidate, "approve_riskacceptance"
-            ):
-                approvers_id.append(candidate.id)
+        approvers_id = RoleAssignment.users_with_permission_anywhere(
+            Permission.objects.filter(codename="approve_riskacceptance")
+        ).values("id")
         if value:
             return queryset.filter(id__in=approvers_id)
         return queryset.exclude(id__in=approvers_id)
@@ -8901,7 +8924,10 @@ class UserViewSet(BaseModelViewSet):
                     queryset=UserGroup.objects.filter(id__in=viewable_user_group_ids)
                     .select_related("folder")
                     .only("id", "builtin", "name", "folder", "folder__name"),
-                )
+                ),
+                # UserReadSerializer.idp_groups and .has_mfa_enabled, per row.
+                "idp_groups",
+                "authenticator_set",
             )
         )
 
@@ -9177,6 +9203,7 @@ class UserGroupViewSet(BaseModelViewSet):
         DjangoFilterBackend,
         UserGroupFilter,
     ]
+    autocomplete_serializer_class = UserGroupAutocompleteSerializer
     # Membership is a property of the *group* (folder = its domain), not of the
     # globally-scoped User. Authorizing add/remove members on change_usergroup —
     # checked against the group's folder by has_object_permission — lets a domain
@@ -9188,7 +9215,14 @@ class UserGroupViewSet(BaseModelViewSet):
     }
 
     def get_queryset(self):
-        return super().get_queryset().select_related("folder")
+        queryset = super().get_queryset().select_related("folder")
+        # UserGroupFilter sorts and searches every visible group by its folder
+        # path (get_folder_full_path reads folder.ancestors) in list and
+        # autocomplete: without the prefetch, one query per group on each page
+        # request. Other actions read the path of one group at most.
+        if self.action in ("list", "autocomplete"):
+            queryset = queryset.prefetch_related("folder__ancestors")
+        return queryset
 
     # Deletion of built-in groups is blocked generically by the permission layer.
 
@@ -9318,11 +9352,17 @@ class RoleAssignmentViewSet(BaseModelViewSet):
 
 class FolderFilter(GenericFilterSet):
     parent_folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
+    # ref_id is unique across folders: an exact lookup returns one folder at most.
+    # Not stripped here: filter_by_ref_id trims exactly as the unique index does.
+    ref_id = df.CharFilter(method="filter_ref_id", strip=False)
 
     owned = df.BooleanFilter(method="get_owned_folders", label="owned")
     content_type = df.MultipleChoiceFilter(
         choices=Folder.ContentType, lookup_expr="icontains"
     )
+
+    def filter_ref_id(self, queryset, name, value):
+        return Folder.filter_by_ref_id(queryset, value)
 
     def get_owned_folders(self, queryset, name, value):
         owned_folders_id = []
@@ -20734,24 +20774,10 @@ def metrics_view(request):
         nb_risk_assessments_gauge.set(metrics.get("nb_risk_assessments", 0))
         nb_risk_scenarios_gauge.set(metrics.get("nb_risk_scenarios", 0))
         nb_risk_acceptances_gauge.set(metrics.get("nb_risk_acceptances", 0))
-        nb_seats_gauge.set(metrics.get("nb_seats", 0))
-        nb_editors_gauge.set(metrics.get("nb_editors", 0))
-        # Prometheus onlyhave float64 gauge, so we convert expiration timestamp to int and use -1 for unset/invalid dates
-        try:
-            expiration_date = date.fromisoformat(str(metrics.get("expiration", "")))
-            expiration_ts = int(
-                datetime(
-                    expiration_date.year,
-                    expiration_date.month,
-                    expiration_date.day,
-                    tzinfo=timezone.utc,
-                ).timestamp()
-            )
-        except ValueError, AttributeError, TypeError:
-            expiration_ts = -1
-        expiration_gauge.set(expiration_ts)
         created_at_gauge.set(metrics.get("created_at", 0))
         last_login_gauge.set(metrics.get("last_login", 0))
+        for extension in instance_status_extensions():
+            extension.update_metrics()
     except Exception as e:
         logger.warning(f"# Error collecting metrics: {e}\n", exc_info=True)
         return HttpResponse(

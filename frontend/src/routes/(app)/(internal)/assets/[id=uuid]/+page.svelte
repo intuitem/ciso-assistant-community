@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import DetailView from '$lib/components/DetailView/DetailView.svelte';
-	import ObjectivesComparisonTable from '$lib/components/Assets/ObjectivesComparisonTable.svelte';
-	import { m } from '$paraglide/messages';
+	import DetailView from '#lib/components/DetailView/DetailView.svelte';
+	import ObjectivesComparisonTable from '#lib/components/Assets/ObjectivesComparisonTable.svelte';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		data: PageData;

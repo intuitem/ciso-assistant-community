@@ -1,16 +1,16 @@
 <script lang="ts">
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
 	import type { PageData } from './$types';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
 	import { page } from '$app/state';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
-	import { getToastStore } from '$lib/components/Toast/stores';
+	} from '#lib/components/Modals/stores.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
 
 	const modalStore: ModalStore = getModalStore();
 	const toastStore = getToastStore();

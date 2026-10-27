@@ -1,9 +1,9 @@
 import { getContext, setContext } from 'svelte';
 import { writable, type Writable } from 'svelte/store';
 import { apiSaveDraft, BuilderRequestError, type DraftJSON } from './builder-api';
-import { m } from '$paraglide/messages';
-import { safeTranslate } from '$lib/utils/i18n';
-import { resolveComputeResult } from '$lib/utils/helpers';
+import { m } from '#paraglide/messages.js';
+import { safeTranslate } from '#lib/utils/i18n.js';
+import { resolveComputeResult } from '#lib/utils/helpers.js';
 
 // --- Types ---
 
