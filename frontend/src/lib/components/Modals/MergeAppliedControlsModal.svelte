@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { getModalStore, type ModalStore } from './stores';
-	import { getToastStore } from '$lib/components/Toast/stores';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
 	import { onDestroy, onMount } from 'svelte';
-	import type { urlModel } from '$lib/utils/types';
+	import type { urlModel } from '#lib/utils/types.js';
 	import type { DataHandler } from '@vincjo/datatables/remote';
-	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import FolderTreeSelect from '#lib/components/Forms/FolderTreeSelect.svelte';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';

@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
-	import SuperForm from '$lib/components/Forms/Form.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import OTPInput from '$lib/components/Forms/OTP/OTPInput.svelte';
+	import { m } from '#paraglide/messages.js';
+	import SuperForm from '#lib/components/Forms/Form.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import OTPInput from '#lib/components/Forms/OTP/OTPInput.svelte';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import type { SuperForm as SuperFormApi } from 'sveltekit-superforms';
 	import { reauthenticateSchema } from '$lib/utils/schemas';

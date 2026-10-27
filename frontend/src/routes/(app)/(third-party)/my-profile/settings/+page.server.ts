@@ -1,14 +1,14 @@
-import { ALLAUTH_API_URL, BASE_API_URL } from '$lib/utils/constants';
+import { ALLAUTH_API_URL, BASE_API_URL } from '#lib/utils/constants.js';
 import { error, fail, isRedirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { activateTOTPSchema, registerWebAuthnSchema } from '$lib/utils/schemas';
+import { activateTOTPSchema, registerWebAuthnSchema } from '#lib/utils/schemas.js';
 import { message, setError, superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { setFlash } from 'sveltekit-flash-message/server';
-import { m } from '$paraglide/messages';
-import { safeTranslate } from '$lib/utils/i18n';
+import { m } from '#paraglide/messages.js';
+import { safeTranslate } from '#lib/utils/i18n.js';
 import { z } from 'zod';
-import { AuthTokenCreateSchema } from '$lib/utils/schemas';
+import { AuthTokenCreateSchema } from '#lib/utils/schemas.js';
 
 export const load: PageServerLoad = async (event) => {
 	const authenticatorsEndpoint = `${ALLAUTH_API_URL}/account/authenticators`;

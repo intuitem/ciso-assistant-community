@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
-	import { LOCALE_MAP } from '$lib/utils/locales';
+	import { m } from '#paraglide/messages.js';
+	import { LOCALE_MAP } from '#lib/utils/locales.js';
 	import {
 		DOCUMENT_TYPES as TYPES,
 		documentTypeLabel as typeLabel,
 		documentTypeIcon as typeIcon
-	} from '$lib/utils/documentTypes';
-	import ClassificationBadge from '$lib/components/ClassificationBadge.svelte';
+	} from '#lib/utils/documentTypes.js';
+	import ClassificationBadge from '#lib/components/ClassificationBadge.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();

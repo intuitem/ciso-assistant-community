@@ -1,17 +1,17 @@
-import { getModelInfo } from '$lib/utils/crud';
+import { getModelInfo } from '#lib/utils/crud.js';
 import { type Actions } from '@sveltejs/kit';
 import {
 	nestedDeleteFormAction,
 	defaultWriteFormAction,
 	nestedWriteFormAction
-} from '$lib/utils/actions';
-import { modelSchema } from '$lib/utils/schemas';
+} from '#lib/utils/actions.js';
+import { modelSchema } from '#lib/utils/schemas.js';
 import { superValidate } from 'sveltekit-superforms';
-import { loadDetail, formatSelectFieldData } from '$lib/utils/load';
+import { loadDetail, formatSelectFieldData } from '#lib/utils/load.js';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
-import { BASE_API_URL } from '$lib/utils/constants';
-import { fetchAllPages } from '$lib/utils/pagination';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { fetchAllPages } from '#lib/utils/pagination.js';
 
 export const load: PageServerLoad = async (event) => {
 	const modelInfo = getModelInfo('incidents');

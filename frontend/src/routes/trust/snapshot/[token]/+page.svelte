@@ -1,8 +1,8 @@
 <script lang="ts">
-	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
-	import { m } from '$paraglide/messages';
-	import { donutValues } from '$lib/utils/portalResults';
-	import SnapshotTreeNode from '$lib/components/TrustPortal/SnapshotTreeNode.svelte';
+	import DonutChart from '#lib/components/Chart/DonutChart.svelte';
+	import { m } from '#paraglide/messages.js';
+	import { donutValues } from '#lib/utils/portalResults.js';
+	import SnapshotTreeNode from '#lib/components/TrustPortal/SnapshotTreeNode.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();

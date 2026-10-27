@@ -121,6 +121,18 @@ def _trimmed_ref_id(expression=None) -> Func:
     )
 
 
+def _trimmed_ref_id_literal(expression=None) -> Func:
+    # _trimmed_ref_id() with the characters written into the SQL, not bound:
+    # SQLite only matches an indexed expression whose constants are literals.
+    # Queries only: the constraint keeps _trimmed_ref_id(), so its migration stays.
+    return Func(
+        expression if expression is not None else F("ref_id"),
+        function="TRIM",
+        template=f"%(function)s(%(expressions)s, '{_REF_ID_WHITESPACE}')",
+        output_field=models.CharField(),
+    )
+
+
 class Folder(NameDescriptionMixin):
     """A folder is a container for other folders or any object
     Folders are organized in a tree structure, with a single root folder
@@ -271,13 +283,22 @@ class Folder(NameDescriptionMixin):
 
     @staticmethod
     def ref_id_in_use(ref_id: str, exclude_pk=None) -> bool:
-        """Whether another folder holds *ref_id*, compared as the unique index does."""
-        normalized = Lower(_trimmed_ref_id(Value(ref_id)))
+        """Whether another folder holds *ref_id*."""
         return (
-            Folder.objects.alias(normalized_ref_id=Lower(_trimmed_ref_id()))
-            .filter(normalized_ref_id=normalized)
+            Folder.filter_by_ref_id(Folder.objects.all(), ref_id)
             .exclude(pk=exclude_pk)
             .exists()
+        )
+
+    @staticmethod
+    def filter_by_ref_id(queryset: QuerySet[Folder], ref_id: str) -> QuerySet[Folder]:
+        """Folders of *queryset* holding *ref_id*, compared as the unique index does."""
+        return queryset.alias(
+            normalized_ref_id=Lower(_trimmed_ref_id_literal())
+        ).filter(
+            # The index's own condition, so the partial index can serve the lookup.
+            ~Q(Exact(_trimmed_ref_id_literal(), Value(""))),
+            normalized_ref_id=Lower(_trimmed_ref_id_literal(Value(ref_id))),
         )
 
     def _ref_id_taken_message(self) -> str:
@@ -606,6 +627,7 @@ class Folder(NameDescriptionMixin):
         # NOTE: There are probably better ways to represent these, but it works.
         # NOTE: This list is not complete.
         paths = [
+            ["matrix", "folder"],
             ["folder"],
             ["parent_folder"],
             ["perimeter", "folder"],

@@ -1,6 +1,6 @@
 import { page } from '$app/state';
-import { DEFAULT_LANGUAGE } from '$lib/utils/constants';
-import { defineCustomClientStrategy } from '$paraglide/runtime';
+import { DEFAULT_LANGUAGE } from '#lib/utils/constants.js';
+import { defineCustomClientStrategy } from '#paraglide/runtime.js';
 
 defineCustomClientStrategy('custom-userPreference', {
 	getLocale: () => {

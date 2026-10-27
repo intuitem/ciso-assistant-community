@@ -1,14 +1,14 @@
 import { describe, expect, it, vi } from 'vitest';
 
-// $lib/server/logger reads $env/dynamic/private, a SvelteKit virtual module
+// $lib/server/logger reads $app/env/private, a SvelteKit virtual module
 // vitest cannot resolve; mocking it keeps hooks.server.ts importable here.
-vi.mock('$lib/server/logger', () => ({
+vi.mock('#lib/server/logger.js', () => ({
 	installJsonConsole: () => {},
 	logger: { debug: () => {}, info: () => {}, warning: () => {}, error: () => {} }
 }));
 
 const { handleFetch } = await import('./hooks.server');
-const { ALLAUTH_API_URL } = await import('$lib/utils/constants');
+const { ALLAUTH_API_URL } = await import('#lib/utils/constants.js');
 
 const SESSION_COOKIES = ['token', 'allauth_session_token'];
 
