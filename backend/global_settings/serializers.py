@@ -545,6 +545,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
         source="value.security_advisories", required=False, default=True
     )
     cwes = serializers.BooleanField(source="value.cwes", required=False, default=True)
+    vulnerability_sla = serializers.BooleanField(
+        source="value.vulnerability_sla", required=False, default=True
+    )
     custom_portals = serializers.BooleanField(
         source="value.custom_portals", required=False, default=False
     )
@@ -628,6 +631,8 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
         {
             # DPIAs are quick forms: screenings and assessments are responses.
             "dpias": frozenset({"quick_forms"}),
+            # The SLA computes vulnerability due dates.
+            "vulnerability_sla": frozenset({"vulnerabilities"}),
         }
     )
 
@@ -680,6 +685,15 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
                 field_instance, "source"
             ) or not field_instance.source.startswith("value."):
                 continue  # Skip fields not mapped to the 'value' dictionary
+
+            # A dependent flag a full PUT leaves out keeps its stored value: its
+            # default could otherwise switch on the flags it needs (FLAG_REQUIRES).
+            if (
+                field_name in self.FLAG_REQUIRES
+                and not self.partial
+                and field_name not in self.initial_data
+            ):
+                continue
 
             if field_name in new_value_dict:
                 # Get the key name used within the 'value' dictionary (e.g., 'xrays')
