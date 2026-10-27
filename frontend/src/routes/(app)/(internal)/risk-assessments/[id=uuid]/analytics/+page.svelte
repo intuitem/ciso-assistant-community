@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
-	import RadarChart from '$lib/components/Chart/RadarChart.svelte';
-	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
-	import BarChart from '$lib/components/Chart/BarChart.svelte';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import LoadingSpinner from '$lib/components/utils/LoadingSpinner.svelte';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
+	import { mountThemeAwareChart } from '#lib/utils/echartsTheme.js';
+	import RadarChart from '#lib/components/Chart/RadarChart.svelte';
+	import DonutChart from '#lib/components/Chart/DonutChart.svelte';
+	import BarChart from '#lib/components/Chart/BarChart.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import LoadingSpinner from '#lib/components/utils/LoadingSpinner.svelte';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
 
 	let { data } = $props();
 

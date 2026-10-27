@@ -1,17 +1,17 @@
-import { getModelInfo } from '$lib/utils/crud';
+import { getModelInfo } from '#lib/utils/crud.js';
 import type { PageServerLoad } from './$types';
 import { fail, type Actions } from '@sveltejs/kit';
-import { nestedDeleteFormAction, nestedWriteFormAction } from '$lib/utils/actions';
-import { loadDetail } from '$lib/utils/load';
-import { defaultWriteFormAction } from '$lib/utils/actions';
-import { BASE_API_URL } from '$lib/utils/constants';
-import { fetchAllPages } from '$lib/utils/pagination';
-import { discardBody } from '$lib/utils/responses';
-import { modelSchema } from '$lib/utils/schemas';
+import { nestedDeleteFormAction, nestedWriteFormAction } from '#lib/utils/actions.js';
+import { loadDetail } from '#lib/utils/load.js';
+import { defaultWriteFormAction } from '#lib/utils/actions.js';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { fetchAllPages } from '#lib/utils/pagination.js';
+import { discardBody } from '#lib/utils/responses.js';
+import { modelSchema } from '#lib/utils/schemas.js';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { setFlash } from 'sveltekit-flash-message/server';
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 
 export const load: PageServerLoad = async (event) => {
 	const URLModel = 'operating-modes';

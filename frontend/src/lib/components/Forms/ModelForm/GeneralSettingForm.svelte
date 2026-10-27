@@ -4,21 +4,21 @@
 	import NumberField from '../NumberField.svelte';
 	import TextField from '../TextField.svelte';
 	import TextArea from '../TextArea.svelte';
-	import { m } from '$paraglide/messages';
-	import type { CacheLock, ModelInfo } from '$lib/utils/types';
+	import { m } from '#paraglide/messages.js';
+	import type { CacheLock, ModelInfo } from '#lib/utils/types.js';
 	import type { SuperForm } from 'sveltekit-superforms';
 	import { Accordion } from '@skeletonlabs/skeleton-svelte';
-	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
+	import Checkbox from '#lib/components/Forms/Checkbox.svelte';
 	import RadioGroup from '../RadioGroup.svelte';
-	import { page } from '$app/stores';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { LOCALE_MAP, language, defaultLangLabels } from '$lib/utils/locales';
-	import { setLocale } from '$paraglide/runtime';
-	import { invalidateAll } from '$app/navigation';
-	import type { DateFormatPreference } from '$lib/utils/datetime';
-	import { getModalStore, type ModalSettings } from '$lib/components/Modals/stores';
-	import { getToastStore } from '$lib/components/Toast/stores';
-	import ScoreScaleEditor from '$lib/components/ComplianceAssessment/ScoreScaleEditor.svelte';
+	import { page } from '$app/state';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { LOCALE_MAP, language, defaultLangLabels } from '#lib/utils/locales.js';
+	import { setLocale } from '#paraglide/runtime.js';
+	import { refreshAll } from '$app/navigation';
+	import type { DateFormatPreference } from '#lib/utils/datetime.js';
+	import { getModalStore, type ModalSettings } from '#lib/components/Modals/stores.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import ScoreScaleEditor from '#lib/components/ComplianceAssessment/ScoreScaleEditor.svelte';
 
 	// The backend always returns a value; this only covers a missing one.
 	const ORGANISATION_SCALE_FALLBACK = {
@@ -116,7 +116,7 @@
 									message: m.forceDateFormatSuccess(),
 									preset: 'success'
 								});
-								await invalidateAll();
+								await refreshAll();
 							} else {
 								toastStore.trigger({
 									message: data.error ? safeTranslate(data.error) : m.forceDateFormatFailed(),
@@ -236,12 +236,13 @@
 			>
 			<Accordion.ItemIndicator
 				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
-				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
-					><path
-						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-					/></svg
-				></Accordion.ItemIndicator
 			>
+				<svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512">
+					<path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					></path>
+				</svg>
+			</Accordion.ItemIndicator>
 		</Accordion.ItemTrigger>
 		<Accordion.ItemContent>
 			<div class="p-4 space-y-4">
@@ -281,12 +282,13 @@
 			>
 			<Accordion.ItemIndicator
 				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
-				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
-					><path
-						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-					/></svg
-				></Accordion.ItemIndicator
 			>
+				<svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512">
+					<path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					></path>
+				</svg>
+			</Accordion.ItemIndicator>
 		</Accordion.ItemTrigger>
 		<Accordion.ItemContent>
 			<div class="p-4 space-y-4">
@@ -332,12 +334,13 @@
 			>
 			<Accordion.ItemIndicator
 				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
-				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
-					><path
-						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-					/></svg
-				></Accordion.ItemIndicator
 			>
+				<svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512">
+					<path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					></path>
+				</svg>
+			</Accordion.ItemIndicator>
 		</Accordion.ItemTrigger>
 		<Accordion.ItemContent>
 			<div class="p-4 space-y-4">
@@ -395,12 +398,13 @@
 			>
 			<Accordion.ItemIndicator
 				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
-				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
-					><path
-						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-					/></svg
-				></Accordion.ItemIndicator
 			>
+				<svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512">
+					<path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					></path>
+				</svg>
+			</Accordion.ItemIndicator>
 		</Accordion.ItemTrigger>
 		<Accordion.ItemContent>
 			<div class="p-4">
@@ -417,12 +421,13 @@
 			<i class="fa-solid fa-gem mr-2"></i><span class="flex-1 text-left">{m.assets()}</span>
 			<Accordion.ItemIndicator
 				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
-				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
-					><path
-						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-					/></svg
-				></Accordion.ItemIndicator
 			>
+				<svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512">
+					<path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					></path>
+				</svg>
+			</Accordion.ItemIndicator>
 		</Accordion.ItemTrigger>
 		<Accordion.ItemContent>
 			<div class="p-4">
@@ -445,12 +450,13 @@
 			>
 			<Accordion.ItemIndicator
 				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
-				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
-					><path
-						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-					/></svg
-				></Accordion.ItemIndicator
 			>
+				<svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512">
+					<path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					></path>
+				</svg>
+			</Accordion.ItemIndicator>
 		</Accordion.ItemTrigger>
 		<Accordion.ItemContent>
 			<div class="p-4 space-y-4">
@@ -471,7 +477,7 @@
 					label={m.documentationScoreFirst()}
 					helpText={m.documentationScoreFirstHelpText()}
 				/>
-				{#if $page.data.featureflags?.audit_tree_inheritance}
+				{#if page.data.featureflags?.audit_tree_inheritance}
 					<Select
 						{form}
 						field="audit_tree_aggregation_strategy"
@@ -496,12 +502,13 @@
 			>
 			<Accordion.ItemIndicator
 				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
-				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
-					><path
-						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-					/></svg
-				></Accordion.ItemIndicator
 			>
+				<svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512">
+					<path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					></path>
+				</svg>
+			</Accordion.ItemIndicator>
 		</Accordion.ItemTrigger>
 		<Accordion.ItemContent>
 			<div class="p-4 flex flex-row gap-4">
@@ -576,12 +583,13 @@
 			>
 			<Accordion.ItemIndicator
 				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
-				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
-					><path
-						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-					/></svg
-				></Accordion.ItemIndicator
 			>
+				<svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512">
+					<path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					></path>
+				</svg>
+			</Accordion.ItemIndicator>
 		</Accordion.ItemTrigger>
 		<Accordion.ItemContent>
 			<div class="p-4 space-y-4">
@@ -625,12 +633,13 @@
 			>
 			<Accordion.ItemIndicator
 				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
-				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
-					><path
-						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-					/></svg
-				></Accordion.ItemIndicator
 			>
+				<svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512">
+					<path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					></path>
+				</svg>
+			</Accordion.ItemIndicator>
 		</Accordion.ItemTrigger>
 		<Accordion.ItemContent>
 			<div class="p-4 space-y-4">
@@ -686,12 +695,13 @@
 			>
 			<Accordion.ItemIndicator
 				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
-				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
-					><path
-						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-					/></svg
-				></Accordion.ItemIndicator
 			>
+				<svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512">
+					<path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					></path>
+				</svg>
+			</Accordion.ItemIndicator>
 		</Accordion.ItemTrigger>
 		<Accordion.ItemContent>
 			<div class="p-4">
@@ -714,12 +724,13 @@
 			>
 			<Accordion.ItemIndicator
 				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
-				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
-					><path
-						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-					/></svg
-				></Accordion.ItemIndicator
 			>
+				<svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512">
+					<path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					></path>
+				</svg>
+			</Accordion.ItemIndicator>
 		</Accordion.ItemTrigger>
 		<Accordion.ItemContent>
 			<div class="p-4">
@@ -739,12 +750,13 @@
 			>
 			<Accordion.ItemIndicator
 				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
-				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
-					><path
-						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-					/></svg
-				></Accordion.ItemIndicator
 			>
+				<svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512">
+					<path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					></path>
+				</svg>
+			</Accordion.ItemIndicator>
 		</Accordion.ItemTrigger>
 		<Accordion.ItemContent>
 			<div class="p-4 space-y-4">
@@ -763,7 +775,7 @@
 			</div>
 		</Accordion.ItemContent>
 	</Accordion.Item>
-	{#if $page.data.featureflags?.chat_mode !== undefined}
+	{#if page.data.featureflags?.chat_mode !== undefined}
 		<Accordion.Item value="chatAi">
 			<Accordion.ItemTrigger
 				class="flex w-full items-center cursor-pointer"
@@ -774,12 +786,13 @@
 				>
 				<Accordion.ItemIndicator
 					class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
-					><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
-						><path
-							d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-						/></svg
-					></Accordion.ItemIndicator
 				>
+					<svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512">
+						<path
+							d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+						></path>
+					</svg>
+				</Accordion.ItemIndicator>
 			</Accordion.ItemTrigger>
 			<Accordion.ItemContent>
 				<div class="p-4 space-y-4">
@@ -903,12 +916,13 @@
 			>
 			<Accordion.ItemIndicator
 				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
-				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
-					><path
-						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
-					/></svg
-				></Accordion.ItemIndicator
 			>
+				<svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512">
+					<path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					></path>
+				</svg>
+			</Accordion.ItemIndicator>
 		</Accordion.ItemTrigger>
 		<Accordion.ItemContent>
 			<div class="p-4">

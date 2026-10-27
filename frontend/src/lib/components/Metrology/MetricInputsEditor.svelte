@@ -2,16 +2,16 @@
 	// Editor for a metric formula's inputs: each one names another metric
 	// definition and says how its instances in the domain and its sub-domains
 	// combine, period by period. The value is the backend's own list.
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import type { ComponentProps } from 'svelte';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
 	import {
 		COMBINES,
 		datasetNameProblem,
 		sanitizeDatasetName,
 		type Combine,
 		type MetricInput
-	} from '$lib/utils/derived-metrics';
+	} from '#lib/utils/derived-metrics.js';
 
 	export interface DefinitionOption {
 		id: string;

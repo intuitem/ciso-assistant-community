@@ -135,13 +135,14 @@ class MailerConfiguration(AbstractBaseModel, FolderMixin):
 
 
 class Mailer(AbstractBaseModel, FolderMixin):
-    """One SMTP mailer of the stored configuration. Position 1 is tried
-    first, position 2 only when 1 cannot be reached. The fields are what a
+    """One mailer of the stored configuration. Position 1 is tried first,
+    position 2 only when 1 cannot be reached. The fields are what a
     ``MAILERS`` entry holds; secrets are write-only through the API."""
 
     class Transport(models.TextChoices):
         SMTP = "smtp", "SMTP with a password"
         SMTP_OAUTH2 = "smtp-oauth2", "SMTP with OAuth 2.0"
+        GRAPH = "graph", "Microsoft Graph"
 
     class Grant(models.TextChoices):
         CLIENT_CREDENTIALS = "client_credentials", "Client credentials"
@@ -162,7 +163,8 @@ class Mailer(AbstractBaseModel, FolderMixin):
     transport = models.CharField(
         max_length=16, choices=Transport.choices, default=Transport.SMTP
     )
-    host = models.CharField(max_length=253)
+    # Blank for Microsoft Graph, which has no host of the operator's.
+    host = models.CharField(max_length=253, blank=True)
     port = models.PositiveIntegerField(null=True, blank=True)
     use_tls = models.BooleanField(default=False)
     use_ssl = models.BooleanField(default=False)
@@ -179,6 +181,7 @@ class Mailer(AbstractBaseModel, FolderMixin):
     oauth2_issuer = models.CharField(max_length=512, blank=True)
     oauth2_private_key = models.TextField(blank=True)
     oauth2_audience = models.CharField(max_length=2048, blank=True)
+    graph_tenant_id = models.CharField(max_length=253, blank=True)
 
     class Meta:
         ordering = ["position"]
@@ -193,7 +196,22 @@ class Mailer(AbstractBaseModel, FolderMixin):
         return f"custom-{self.position}"
 
     def __str__(self):
-        return f"{self.alias} ({self.transport} {self.host})"
+        target = self.graph_tenant_id if self.is_graph else self.host
+        return f"{self.alias} ({self.transport} {target})"
+
+    @property
+    def is_graph(self) -> bool:
+        return self.transport == self.Transport.GRAPH
+
+    def graph_config(self) -> dict:
+        """The Graph configuration for this row, unvalidated. The client
+        credentials share the OAuth columns."""
+        return {
+            "tenant_id": self.graph_tenant_id or None,
+            "client_id": self.oauth2_client_id or None,
+            "client_secret": self.oauth2_client_secret or None,
+            "mailbox": self.username or None,
+        }
 
     def oauth2_config(self) -> dict:
         """The ``oauth2`` option for this row, unvalidated."""
@@ -216,9 +234,13 @@ class Mailer(AbstractBaseModel, FolderMixin):
         the way the environment builder validates its variables. Empty when
         the row is usable. Never raises: the settings API reports these
         messages to the caller, and no exception text must reach it."""
-        from ciso_assistant.mailers import oauth2_problems
+        from ciso_assistant.mailers import graph_problems, oauth2_problems
 
+        if self.is_graph:
+            return graph_problems(self.graph_config())
         problems = []
+        if not self.host:
+            problems.append("a host is required")
         if self.use_tls and self.use_ssl:
             problems.append("TLS and SSL are mutually exclusive")
         if self.transport == self.Transport.SMTP_OAUTH2:
@@ -228,11 +250,13 @@ class Mailer(AbstractBaseModel, FolderMixin):
     def mailer_entry(self) -> dict:
         """The ``MAILERS``-shaped entry for this row. Raises ValueError with
         the first configuration problem."""
-        from ciso_assistant.mailers import SMTP_BACKEND
+        from ciso_assistant.mailers import SMTP_BACKEND, graph_entry
 
         problems = self.configuration_problems()
         if problems:
             raise ValueError(problems[0])
+        if self.is_graph:
+            return graph_entry(self.graph_config(), timeout=15)
         options = {
             "host": self.host,
             "port": self.port,

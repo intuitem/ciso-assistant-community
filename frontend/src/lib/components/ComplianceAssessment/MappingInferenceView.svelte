@@ -1,7 +1,7 @@
 <script lang="ts">
-	import * as m from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { resultBadgeStyle } from '$lib/utils/helpers';
+	import * as m from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { resultBadgeStyle } from '#lib/utils/helpers.js';
 
 	interface SourceFramework {
 		id: string;

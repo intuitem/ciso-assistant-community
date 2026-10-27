@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { goto } from '$app/navigation';
-	import DocumentCreate from '$lib/components/DocumentEditor/DocumentCreate.svelte';
+	import DocumentCreate from '#lib/components/DocumentEditor/DocumentCreate.svelte';
 </script>
 
 <div class="mx-auto max-w-2xl space-y-6 p-4 sm:p-6">

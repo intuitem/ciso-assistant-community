@@ -3,21 +3,21 @@
 	// model, filters its rows (an "or" of "and" groups, the same shape the
 	// workflow builder edits) and lists the aggregates to compute. The value
 	// is the backend's own read configuration, keyed by dataset name.
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import {
 		aliasOf,
 		datasetNameProblem,
 		sanitizeDatasetName,
 		type AggregateRow
-	} from '$lib/utils/derived-metrics';
+	} from '#lib/utils/derived-metrics.js';
 	import {
 		newCondition,
 		treeToGroups,
 		groupsToTree,
 		FILTER_OPS,
 		type Condition
-	} from '$lib/utils/filter-dnf';
+	} from '#lib/utils/filter-dnf.js';
 
 	export interface AggregateFn {
 		name: string;

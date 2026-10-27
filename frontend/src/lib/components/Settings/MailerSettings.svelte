@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { invalidateAll } from '$app/navigation';
-	import { getToastStore } from '$lib/components/Toast/stores';
-	import { m } from '$paraglide/messages';
+	import { refreshAll } from '$app/navigation';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import { m } from '#paraglide/messages.js';
 	import { Switch } from '@skeletonlabs/skeleton-svelte';
 	import { untrack } from 'svelte';
 
@@ -14,7 +14,7 @@
 	type Encryption = 'none' | 'starttls' | 'ssl';
 	type MailerForm = {
 		position: number;
-		transport: 'smtp' | 'smtp-oauth2';
+		transport: 'smtp' | 'smtp-oauth2' | 'graph';
 		host: string;
 		port: string;
 		encryption: Encryption;
@@ -33,6 +33,7 @@
 		oauth2_private_key: string;
 		has_oauth2_private_key: boolean;
 		oauth2_audience: string;
+		graph_tenant_id: string;
 	};
 
 	type MailerTestResult = {
@@ -93,7 +94,8 @@
 			oauth2_issuer: '',
 			oauth2_private_key: '',
 			has_oauth2_private_key: false,
-			oauth2_audience: ''
+			oauth2_audience: '',
+			graph_tenant_id: ''
 		};
 	}
 
@@ -195,7 +197,7 @@
 			}
 			testResult = body;
 			testToken = body.ok ? (body.test_token ?? null) : null;
-			await invalidateAll();
+			await refreshAll();
 		} catch (error) {
 			testResult = { ok: false, error: String(error), results: [] };
 			testToken = null;
@@ -224,7 +226,7 @@
 			testToken = null;
 			testResult = null;
 			override = false;
-			await invalidateAll();
+			await refreshAll();
 			mailers = body.mailers?.length ? body.mailers.map(fromApi) : [emptyMailer(1)];
 			lastTestedAt = body.last_tested_at ?? null;
 		} catch (error) {
@@ -366,34 +368,42 @@
 					<select class="select" bind:value={mailer.transport}>
 						<option value="smtp">{m.mailerTransportPassword()}</option>
 						<option value="smtp-oauth2">{m.mailerTransportOauth2()}</option>
+						<option value="graph">{m.mailerTransportGraph()}</option>
 					</select>
 				</label>
-				<label class="label">
-					<span class="text-sm font-medium">{m.mailerEncryption()}</span>
-					<select class="select" bind:value={mailer.encryption}>
-						<option value="starttls">{m.mailerEncryptionStarttls()}</option>
-						<option value="ssl">{m.mailerEncryptionSsl()}</option>
-						<option value="none">{m.mailerEncryptionNone()}</option>
-					</select>
-				</label>
-				<label class="label">
-					<span class="text-sm font-medium">{m.mailerHost()}</span>
-					<input class={inputClass} type="text" bind:value={mailer.host} />
-				</label>
-				<label class="label">
-					<span class="text-sm font-medium">{m.mailerPort()}</span>
-					<input
-						class={inputClass}
-						type="number"
-						min="1"
-						max="65535"
-						placeholder={mailer.use_ssl ? '465' : '25'}
-						bind:value={mailer.port}
-					/>
-				</label>
+				{#if mailer.transport !== 'graph'}
+					<label class="label">
+						<span class="text-sm font-medium">{m.mailerEncryption()}</span>
+						<select class="select" bind:value={mailer.encryption}>
+							<option value="starttls">{m.mailerEncryptionStarttls()}</option>
+							<option value="ssl">{m.mailerEncryptionSsl()}</option>
+							<option value="none">{m.mailerEncryptionNone()}</option>
+						</select>
+					</label>
+					<label class="label">
+						<span class="text-sm font-medium">{m.mailerHost()}</span>
+						<input class={inputClass} type="text" bind:value={mailer.host} />
+					</label>
+					<label class="label">
+						<span class="text-sm font-medium">{m.mailerPort()}</span>
+						<input
+							class={inputClass}
+							type="number"
+							min="1"
+							max="65535"
+							placeholder={mailer.encryption === 'ssl' ? '465' : '25'}
+							bind:value={mailer.port}
+						/>
+					</label>
+				{:else}
+					<label class="label">
+						<span class="text-sm font-medium">{m.mailerTenantId()}</span>
+						<input class={inputClass} type="text" bind:value={mailer.graph_tenant_id} />
+					</label>
+				{/if}
 				<label class="label">
 					<span class="text-sm font-medium">
-						{mailer.transport === 'smtp-oauth2' ? m.mailerMailbox() : m.mailerUsername()}
+						{mailer.transport === 'smtp' ? m.mailerUsername() : m.mailerMailbox()}
 					</span>
 					<input class={inputClass} type="text" bind:value={mailer.username} />
 				</label>
@@ -412,6 +422,28 @@
 					</label>
 				{/if}
 			</div>
+
+			{#if mailer.transport === 'graph'}
+				<p class="text-sm text-surface-600-400">{m.mailerGraphHelp()}</p>
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<label class="label">
+						<span class="text-sm font-medium">{m.mailerClientId()}</span>
+						<input class={inputClass} type="text" bind:value={mailer.oauth2_client_id} />
+					</label>
+					<label class="label">
+						<span class="text-sm font-medium">{m.mailerClientSecret()}</span>
+						<input
+							class={inputClass}
+							type="password"
+							autocomplete="new-password"
+							bind:value={mailer.oauth2_client_secret}
+						/>
+						{#if mailer.has_oauth2_client_secret}
+							<span class="text-xs text-surface-600-400">{m.mailerSecretStored()}</span>
+						{/if}
+					</label>
+				</div>
+			{/if}
 
 			{#if mailer.transport === 'smtp-oauth2'}
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">

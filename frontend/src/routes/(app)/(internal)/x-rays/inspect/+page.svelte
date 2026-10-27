@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import TreeChart from '$lib/components/Chart/TreeChart.svelte';
+	import TreeChart from '#lib/components/Chart/TreeChart.svelte';
 	import { goto } from '$app/navigation';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		data: PageData;
@@ -13,7 +13,7 @@
 
 	async function toggleEnclaves(checked: boolean) {
 		await goto(`/x-rays/inspect?include_enclaves=${checked ? 'true' : 'false'}`, {
-			replaceState: true
+			replace: true
 		});
 	}
 </script>

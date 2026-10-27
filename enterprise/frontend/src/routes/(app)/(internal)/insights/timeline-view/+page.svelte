@@ -1,8 +1,8 @@
 <script lang="ts">
-	import GanttChart from '$lib/components/Gantt/GanttChart.svelte';
-	import type { GanttItem } from '$lib/components/Gantt/GanttChart.svelte';
-	import { pageTitle } from '$lib/utils/stores';
-	import { m } from '$paraglide/messages';
+	import GanttChart from '#lib/components/Gantt/GanttChart.svelte';
+	import type { GanttItem } from '#lib/components/Gantt/GanttChart.svelte';
+	import { pageTitle } from '#lib/utils/stores.js';
+	import { m } from '#paraglide/messages.js';
 
 	let { data } = $props();
 
