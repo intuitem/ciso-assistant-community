@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { safeTranslate, translateChoiceLabel } from '$lib/utils/i18n';
-	import { fetchAllByIds, fetchAllPages } from '$lib/utils/pagination';
-	import type { CacheLock } from '$lib/utils/types';
+	import { safeTranslate, translateChoiceLabel } from '#lib/utils/i18n.js';
+	import { fetchAllByIds, fetchAllPages } from '#lib/utils/pagination.js';
+	import type { CacheLock } from '#lib/utils/types.js';
 	import { onMount, untrack } from 'svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
-	import { getSearchTarget, normalizeSearchString } from '$lib/utils/helpers';
+	import { getSearchTarget, normalizeSearchString } from '#lib/utils/helpers.js';
 	import MultiSelect, { type LoadOptionsParams } from 'svelte-multiselect';
 	import { getContext, onDestroy } from 'svelte';
-	import * as m from '$paraglide/messages.js';
+	import * as m from '#paraglide/messages.js';
 	import { run } from 'svelte/legacy';
 
 	interface Option {

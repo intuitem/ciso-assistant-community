@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import IconPicker from '$lib/components/IconPicker/IconPicker.svelte';
-	import VisibilityEditor from '$lib/components/ComplianceAssessment/VisibilityEditor.svelte';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import IconPicker from '#lib/components/IconPicker/IconPicker.svelte';
+	import VisibilityEditor from '#lib/components/ComplianceAssessment/VisibilityEditor.svelte';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import FolderTreeSelect from '#lib/components/Forms/FolderTreeSelect.svelte';
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';

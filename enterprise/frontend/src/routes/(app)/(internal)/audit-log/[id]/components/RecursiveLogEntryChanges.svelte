@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import LogEntryChange from './LogEntryChange.svelte';
 	import M2MAdd from './M2MAdd.svelte';
 

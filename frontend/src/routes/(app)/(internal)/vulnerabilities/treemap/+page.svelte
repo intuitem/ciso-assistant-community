@@ -1,9 +1,9 @@
 <script lang="ts">
-	import TreemapChart from '$lib/components/Chart/TreemapChart.svelte';
-	import LoadingSpinner from '$lib/components/utils/LoadingSpinner.svelte';
-	import { pageTitle } from '$lib/utils/stores';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
+	import TreemapChart from '#lib/components/Chart/TreemapChart.svelte';
+	import LoadingSpinner from '#lib/components/utils/LoadingSpinner.svelte';
+	import { pageTitle } from '#lib/utils/stores.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
 	import type { PageData } from './$types';
 
 	interface Props {

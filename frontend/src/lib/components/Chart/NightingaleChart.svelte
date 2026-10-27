@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
+	import { mountThemeAwareChart } from '#lib/utils/echartsTheme.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
 
 	interface ndChartData {
 		name: string;

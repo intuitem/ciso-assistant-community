@@ -12,7 +12,7 @@ WorkingDirectory=/opt/ciso-assistant/frontend
 EnvironmentFile=/etc/ciso-assistant/frontend.env
 
 # Use bundled Node.js runtime
-ExecStart=/opt/ciso-assistant/node/bin/node build/index.js
+ExecStart=/opt/ciso-assistant/node/bin/node server
 
 # Security hardening
 NoNewPrivileges=true
