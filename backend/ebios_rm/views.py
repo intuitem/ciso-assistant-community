@@ -4,7 +4,7 @@ import uuid
 import django_filters as df
 import pandas as pd
 from django.db import transaction
-from django.db.models import Case, F, FloatField, Q, Value, When
+from django.db.models import Case, F, FloatField, Prefetch, Q, Value, When
 from django.http import HttpResponse
 from core.serializers import RiskMatrixReadSerializer
 from core.views import (
@@ -529,6 +529,13 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         """Export EBIOS RM study data to Excel with multiple sheets."""
 
         study = self.get_object()
+        from core.models import AppliedControl
+        from iam.models import RoleAssignment
+
+        # Study access doesn't imply access to every linked control
+        viewable_controls = AppliedControl.objects.filter(
+            id__in=RoleAssignment.get_viewable_object_ids(request.user, AppliedControl)
+        )
         # Get all related data
         feared_events = FearedEvent.objects.filter(ebios_rm_study=study)
         ro_to_couples = RoTo.objects.filter(ebios_rm_study=study)
@@ -627,7 +634,9 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 ca_data = []
                 for ra in (
                     ca.requirement_assessments.select_related("requirement")
-                    .prefetch_related("applied_controls")
+                    .prefetch_related(
+                        Prefetch("applied_controls", queryset=viewable_controls)
+                    )
                     .order_by("requirement__order_id")
                 ):
                     req = ra.requirement
@@ -758,9 +767,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 )
 
             # 3.3 Stakeholder Controls sheet
-            from core.models import AppliedControl
-
-            stakeholder_controls = AppliedControl.objects.filter(
+            stakeholder_controls = viewable_controls.filter(
                 stakeholders__ebios_rm_study=study
             ).distinct()
             sc_data = []
@@ -886,7 +893,10 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 scenarios = risk_assessment.risk_scenarios.select_related(
                     "operational_scenario"
                 ).prefetch_related(
-                    "assets", "threats", "applied_controls", "existing_applied_controls"
+                    "assets",
+                    "threats",
+                    Prefetch("applied_controls", queryset=viewable_controls),
+                    Prefetch("existing_applied_controls", queryset=viewable_controls),
                 )
                 rs_data = []
                 for rs in scenarios:
@@ -923,7 +933,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                         writer, sheet_name=SHEET_NAMES["risk_scenarios"], index=False
                     )
 
-                measures = AppliedControl.objects.filter(
+                measures = viewable_controls.filter(
                     Q(risk_scenarios__risk_assessment=risk_assessment)
                     | Q(risk_scenarios_e__risk_assessment=risk_assessment)
                 ).distinct()

@@ -15,7 +15,10 @@ from core.models import (
     RiskScenario,
 )
 from ebios_rm.models import EbiosRMStudy
-from iam.models import Folder
+from rest_framework.test import APIClient
+
+from core.utils import UserGroupCodename
+from iam.models import Folder, User, UserGroup
 
 
 @pytest.mark.django_db
@@ -123,3 +126,55 @@ def test_export_import_round_trips_workshop_5(
     assert imported_measure.folder == target
     assert (imported_measure.ref_id, imported_measure.status) == ("M.1", "in_progress")
     assert imported_measure.eta == date(2027, 3, 31)
+
+
+@pytest.mark.django_db
+def test_export_xlsx_hides_controls_the_user_cannot_view(
+    admin_client, ebios_rm_matrix_fixture
+):
+    domain = Folder.objects.create(
+        name="Study domain",
+        content_type=Folder.ContentType.DOMAIN,
+        parent_folder=Folder.get_root_folder(),
+        create_iam_groups=True,
+    )
+    Folder.create_default_ug_and_ra(domain)
+    study = EbiosRMStudy.objects.create(
+        name="Scoped study", risk_matrix=ebios_rm_matrix_fixture, folder=domain
+    )
+    ra = RiskAssessment.objects.create(
+        name="Scoped RA",
+        folder=domain,
+        risk_matrix=ebios_rm_matrix_fixture,
+        ebios_rm_study=study,
+    )
+    visible = AppliedControl.objects.create(name="Visible control", folder=domain)
+    other_domain = Folder.objects.create(
+        name="Other domain",
+        content_type=Folder.ContentType.DOMAIN,
+        parent_folder=Folder.get_root_folder(),
+    )
+    hidden = AppliedControl.objects.create(name="Hidden control", folder=other_domain)
+    scenario = RiskScenario.objects.create(risk_assessment=ra, name="Scenario")
+    scenario.applied_controls.set([visible, hidden])
+    scenario.existing_applied_controls.set([hidden])
+
+    reader = User.objects.create_user("reader@ebios-export-tests.com")
+    UserGroup.objects.get(
+        folder=domain, name=str(UserGroupCodename.READER)
+    ).user_set.add(reader)
+    client = APIClient()
+    client.force_authenticate(reader)
+
+    response = client.get(f"/api/ebios-rm/studies/{study.id}/export-xlsx/")
+
+    assert response.status_code == 200
+    cells = [
+        str(cell)
+        for ws in openpyxl.load_workbook(io.BytesIO(response.content)).worksheets
+        for row in ws.iter_rows(values_only=True)
+        for cell in row
+        if cell is not None
+    ]
+    assert any("Visible control" in c for c in cells)
+    assert not any("Hidden control" in c for c in cells)
