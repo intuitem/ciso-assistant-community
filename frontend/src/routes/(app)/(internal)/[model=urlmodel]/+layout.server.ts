@@ -1,9 +1,9 @@
-import { listViewFields } from '$lib/utils/table';
-import { type TableSource } from '$lib/components/ModelTable/types';
-import { urlParamModelVerboseName, urlParamModelDescriptionKey } from '$lib/utils/crud';
-import { CUSTOM_FIELD_HOST_MODELS, type CustomFieldDef } from '$lib/utils/customFields';
-import { BASE_API_URL } from '$lib/utils/constants';
-import { fetchAllPages } from '$lib/utils/pagination';
+import { listViewFields } from '#lib/utils/table.js';
+import { type TableSource } from '#lib/components/ModelTable/types.js';
+import { urlParamModelVerboseName, urlParamModelDescriptionKey } from '#lib/utils/crud.js';
+import { CUSTOM_FIELD_HOST_MODELS, type CustomFieldDef } from '#lib/utils/customFields.js';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { fetchAllPages } from '#lib/utils/pagination.js';
 
 export const load = async ({ fetch, params }) => {
 	// Full column superset (defaults + optional), unfiltered: ModelTable strips flag-disabled

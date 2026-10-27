@@ -1,15 +1,15 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { Accordion, Progress } from '@skeletonlabs/skeleton-svelte';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import { complianceResultColorMap, complianceStatusColorMap } from '$lib/utils/constants';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import * as m from '$paraglide/messages';
-	import { darkenColor } from '$lib/utils/helpers';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import { complianceResultColorMap, complianceStatusColorMap } from '#lib/utils/constants.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import * as m from '#paraglide/messages.js';
+	import { darkenColor } from '#lib/utils/helpers.js';
 	import { page } from '$app/state';
-	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import ScorePair from '$lib/components/ComplianceAssessment/ScorePair.svelte';
+	import { displayScoreColor, formatScoreValue } from '#lib/utils/helpers.js';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import ScorePair from '#lib/components/ComplianceAssessment/ScorePair.svelte';
 
 	interface Props {
 		data: PageData;

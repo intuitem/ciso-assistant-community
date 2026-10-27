@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import EcosystemRadarChart from '$lib/components/Chart/EcosystemRadarChart.svelte';
-	import { m } from '$paraglide/messages';
+	import EcosystemRadarChart from '#lib/components/Chart/EcosystemRadarChart.svelte';
+	import { m } from '#paraglide/messages.js';
 	interface Props {
 		data: PageData;
 	}

@@ -1,14 +1,14 @@
 import type { Actions, PageServerLoad } from './$types';
 
-import { BASE_API_URL } from '$lib/utils/constants';
-import { fetchAllPages } from '$lib/utils/pagination';
-import { type TableSource } from '$lib/components/ModelTable/types';
-import { headData } from '$lib/utils/table';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { fetchAllPages } from '#lib/utils/pagination.js';
+import { type TableSource } from '#lib/components/ModelTable/types.js';
+import { headData } from '#lib/utils/table.js';
 import { fail, superValidate } from 'sveltekit-superforms';
 import { z } from 'zod';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { setFlash } from 'sveltekit-flash-message/server';
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 import { error, redirect } from '@sveltejs/kit';
 
 export const load = (async ({ fetch, params, cookies, locals }) => {

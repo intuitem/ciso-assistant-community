@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { navData } from '$lib/components/SideBar/navData';
+	import { navData } from '#lib/components/SideBar/navData.js';
 
-	import SideBarItem from '$lib/components/SideBar/SideBarItem.svelte';
-	import SideBarCategory from '$lib/components/SideBar/SideBarCategory.svelte';
+	import SideBarItem from '#lib/components/SideBar/SideBarItem.svelte';
+	import SideBarCategory from '#lib/components/SideBar/SideBarCategory.svelte';
 	import { Accordion } from '@skeletonlabs/skeleton-svelte';
 	import { page } from '$app/state';
-	import { canSeeNavItem } from '$lib/components/SideBar/navVisibility';
-	import { driverInstance } from '$lib/utils/stores';
+	import { canSeeNavItem } from '#lib/components/SideBar/navVisibility.js';
+	import { driverInstance } from '#lib/utils/stores.js';
 
 	const user = page.data.user;
 
@@ -18,7 +18,7 @@
 		}))
 		.filter((item) => item.items.length > 0); // Filter out items with no sub-items
 
-	import { lastAccordionItem } from '$lib/utils/stores';
+	import { lastAccordionItem } from '#lib/utils/stores.js';
 	interface Props {
 		sideBarVisibleItems: Record<string, boolean>;
 	}

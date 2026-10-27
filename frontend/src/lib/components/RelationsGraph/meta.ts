@@ -1,6 +1,6 @@
 /** Visual identity per model: colour carries the type, shape carries a second cut
  *  (diamond = asset-like, roundRect = assessment-like, rect = artefact). */
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 
 export interface NodeMeta {
 	label: string;

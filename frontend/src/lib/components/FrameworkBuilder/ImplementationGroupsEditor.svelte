@@ -3,7 +3,7 @@
 	import { createHandleGatedDragHandlers } from './builder-utils.svelte';
 	import { SECTION_ICON, SECTION_TITLE } from './section-style';
 	import ConfirmAction from './ConfirmAction.svelte';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		groups: ImplementationGroup[];
