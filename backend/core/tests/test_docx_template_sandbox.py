@@ -3,8 +3,11 @@ inside a Jinja2 sandbox so a malicious .docx can't RCE via classic
 `{{ ''.__class__.__mro__[1].__subclasses__()[...] }}` payloads."""
 
 import io
+import os
+import struct
 import zipfile
 from datetime import date
+from multiprocessing.connection import Connection
 from pathlib import Path
 
 import numpy as np
@@ -17,6 +20,9 @@ from PIL import Image
 
 from core.generators import (
     AUDIT_CHART_KEYS,
+    DocxRenderCrash,
+    DocxRenderError,
+    DocxRenderTimeout,
     DocxReportSandbox,
     gen_audit_context,
     inline_charts_for_docx,
@@ -131,12 +137,14 @@ def test_bounded_render_returns_the_report() -> None:
     assert Document(io.BytesIO(report)).paragraphs[0].text == "audit"
 
 
-def test_bounded_render_fails_on_template_errors() -> None:
-    with pytest.raises(EOFError):
+def test_bounded_render_reports_template_errors() -> None:
+    with pytest.raises(DocxRenderError, match="unsafe"):
         render_docx_report_bounded(DocxTemplate(_docx_with(_SSTI_PAYLOAD)), {})
 
 
-def test_bounded_render_stops_runaway_templates(monkeypatch) -> None:
+def test_bounded_render_stops_runaway_templates(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     monkeypatch.setattr("core.generators.DOCX_RENDER_TIMEOUT", 1)
     template = DocxTemplate(
         _docx_with(
@@ -144,8 +152,27 @@ def test_bounded_render_stops_runaway_templates(monkeypatch) -> None:
             "{% endfor %}{% endfor %}"
         )
     )
-    with pytest.raises(TimeoutError):
+    with pytest.raises(DocxRenderTimeout):
         render_docx_report_bounded(template, {})
+
+
+@pytest.mark.parametrize(
+    "dying_words",
+    [
+        pytest.param(b"", id="nothing_sent"),
+        pytest.param(struct.pack("!i", 100) + b"cut", id="message_cut_short"),
+    ],
+)
+def test_bounded_render_reports_a_dead_child(
+    dying_words: bytes, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def die(doc: DocxTemplate, context: dict, conn: Connection) -> None:
+        os.write(conn.fileno(), dying_words)
+        os._exit(1)
+
+    monkeypatch.setattr("core.generators._render_docx_in_child", die)
+    with pytest.raises(DocxRenderCrash):
+        render_docx_report_bounded(DocxTemplate(_docx_with("{{ name }}")), {})
 
 
 def _rendered_text(template: DocxTemplate) -> str:

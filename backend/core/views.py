@@ -78,6 +78,9 @@ from .generators import (
     gen_audit_context,
     render_docx_report,
     render_docx_report_bounded,
+    DocxRenderCrash,
+    DocxRenderError,
+    DocxRenderTimeout,
 )
 from .typst_render import localized_template, render_pdf
 from .serializer_fields import FieldsRelatedField, PathField
@@ -13525,7 +13528,7 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         context = gen_audit_context(pk, tree, user_lang)
 
         # Custom overrides support any language; auto-generated strings only en/fr.
-        report = None
+        custom_template = None
         try:
             custom = CustomWordTemplate.objects.filter(
                 template_key="audit_report",
@@ -13534,16 +13537,26 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             ).first()
             if custom and custom.file:
                 custom.file.open("rb")
-                report = render_docx_report_bounded(
-                    DocxTemplate(io.BytesIO(custom.file.read())), context
-                )
+                custom_template = DocxTemplate(io.BytesIO(custom.file.read()))
         except Exception as e:
             logger.warning(
-                "Failed to render custom Word template, falling back to default",
+                "Failed to load custom Word template, falling back to default",
                 exc_info=e,
             )
 
-        if report is None:
+        if custom_template is not None:
+            try:
+                report = render_docx_report_bounded(custom_template, context)
+            except DocxRenderError as e:
+                logger.warning("Failed to render custom Word template", exc_info=e)
+                if isinstance(e, DocxRenderTimeout):
+                    failure = {"error": "customWordTemplateTimedOut"}
+                elif isinstance(e, DocxRenderCrash):
+                    failure = {"error": "customWordTemplateCrashed"}
+                else:
+                    failure = {"error": "invalidCustomWordTemplate", "detail": str(e)}
+                return Response(failure, status=status.HTTP_400_BAD_REQUEST)
+        else:
             core_templates = Path(__file__).resolve().parent / "templates" / "core"
             template_path = core_templates / f"audit_report_template_{user_lang}.docx"
             if not template_path.exists():

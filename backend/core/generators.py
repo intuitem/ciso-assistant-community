@@ -5,6 +5,7 @@ from collections import OrderedDict, defaultdict
 from datetime import date, datetime, timedelta
 from decimal import Decimal
 from math import ceil
+from multiprocessing.connection import Connection
 from typing import ClassVar
 from uuid import UUID
 
@@ -1280,20 +1281,43 @@ DOCX_RENDER_TIMEOUT = 60
 DOCX_RENDER_MEMORY = 1 << 30
 
 
-def _render_docx_in_child(doc: DocxTemplate, context: dict, conn) -> None:
+class DocxRenderError(Exception):
+    """A custom Word template failed to render; the message says why."""
+
+
+class DocxRenderTimeout(DocxRenderError):
+    """A custom Word template ran longer than `DOCX_RENDER_TIMEOUT` seconds."""
+
+
+class DocxRenderCrash(DocxRenderError):
+    """The process rendering a custom Word template died, likely out of memory."""
+
+
+def _render_docx_in_child(doc: DocxTemplate, context: dict, conn: Connection) -> None:
     try:
         with open("/proc/self/statm") as statm:
             used = int(statm.read().split()[0]) * resource.getpagesize()
         resource.setrlimit(resource.RLIMIT_AS, (used + DOCX_RENDER_MEMORY,) * 2)
     except OSError, ValueError:
         pass
-    render_docx_report(doc, context)
-    out = io.BytesIO()
-    doc.save(out)
-    conn.send_bytes(out.getvalue())
+    try:
+        render_docx_report(doc, context)
+        out = io.BytesIO()
+        doc.save(out)
+    except Exception as e:
+        conn.send(("error", str(e) or type(e).__name__))
+    else:
+        conn.send(("report", out.getvalue()))
 
 
 def render_docx_report_bounded(doc: DocxTemplate, context: dict) -> bytes:
+    """Render `doc` with `context` in a forked child bounded in time and memory,
+    since a custom template can loop or allocate without limit.
+
+    Returns the rendered .docx; raises `DocxRenderTimeout` past
+    `DOCX_RENDER_TIMEOUT` seconds, `DocxRenderCrash` when the child dies, and
+    `DocxRenderError` when the template itself fails.
+    """
     recv, send = multiprocessing.Pipe(duplex=False)
     child = multiprocessing.get_context("fork").Process(
         target=_render_docx_in_child, args=(doc, context, send)
@@ -1302,8 +1326,14 @@ def render_docx_report_bounded(doc: DocxTemplate, context: dict) -> bytes:
     send.close()
     try:
         if not recv.poll(DOCX_RENDER_TIMEOUT):
-            raise TimeoutError("Word template rendering timed out")
-        return recv.recv_bytes()
+            raise DocxRenderTimeout
+        try:
+            outcome, payload = recv.recv()
+        except EOFError, OSError:
+            raise DocxRenderCrash from None
+        if outcome == "error":
+            raise DocxRenderError(payload)
+        return payload
     finally:
         recv.close()
         child.kill()

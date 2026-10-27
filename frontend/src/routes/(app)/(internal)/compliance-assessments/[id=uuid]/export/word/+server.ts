@@ -1,14 +1,30 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { m } from '$paraglide/messages';
 
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+
+type WordExportFailure = {
+	error?: 'invalidCustomWordTemplate' | 'customWordTemplateTimedOut' | 'customWordTemplateCrashed';
+	detail?: string;
+};
+
+function failureMessage(failure: WordExportFailure): string {
+	if (failure.error === 'customWordTemplateTimedOut') return m.customWordTemplateTimedOut();
+	if (failure.error === 'customWordTemplateCrashed') return m.customWordTemplateCrashed();
+	if (failure.error === 'invalidCustomWordTemplate' && failure.detail)
+		return m.invalidCustomWordTemplate({ detail: failure.detail });
+	return 'Error fetching the Word file';
+}
+
 export const GET: RequestHandler = async ({ fetch, params }) => {
 	const URLModel = 'compliance-assessments';
 	const endpoint = `${BASE_API_URL}/${URLModel}/${params.id}/word_report/`;
 
 	const res = await fetch(endpoint);
 	if (!res.ok) {
-		error(400, 'Error fetching the Word file');
+		const failure: WordExportFailure = await res.json().catch(() => ({}));
+		error(res.status, failureMessage(failure));
 	}
 
 	const fileName = `audit-exec-summary-${new Date().toISOString()}.docx`;
