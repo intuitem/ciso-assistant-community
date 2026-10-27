@@ -18,7 +18,9 @@
 	const NO_TIER = 'none';
 
 	// Kept in the URL so a reload or a shared link opens the same tab.
-	let tab = $state(page.url.searchParams.get('tab') === 'assessments' ? 'assessments' : 'posture');
+	let tab = $derived(
+		page.url.searchParams.get('tab') === 'assessments' ? 'assessments' : 'posture'
+	);
 	function setTab(value: string) {
 		tab = value;
 		const url = new URL(page.url.href);

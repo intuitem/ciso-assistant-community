@@ -53,6 +53,11 @@
 		const scale = tiers
 			.filter((tier) => tier.is_visible || byTier.has(tier.id))
 			.map((tier) => ({ key: tier.id, tier, target: tier.compliance_target ?? null }));
+		// A tier missing from the scale (fetch failed, not readable) still gets a row, without target.
+		for (const [key, list] of byTier) {
+			if (key !== noTier && !scale.some((row) => row.key === key))
+				scale.push({ key, tier: list[0].tier, target: null });
+		}
 		if (byTier.has(noTier)) scale.push({ key: noTier, tier: null, target: null });
 
 		return scale.map(({ key, tier, target: complianceTarget }) => {
