@@ -528,6 +528,17 @@
 		useQuestionProgress ? answeredQuestions < totalQuestions : assessedCount < totalAssessable
 	);
 
+	// ToC dot for any section; an owed evidence keeps a compliant dot amber.
+	function sectionDotColor(section: Record<string, any>): string {
+		if (section.result === '__splash__') return '#a855f7';
+		if (useQuestionProgress || section.hasVisibleQuestions) return section.questionColor;
+		const result = useAlignmentProgress
+			? alignmentResultEquivalent[section.alignment]
+			: section.result;
+		if (section.owesEvidence && result === 'compliant') return '#f59e0b';
+		return complianceResultColorMap[result ?? ''] ?? '#d1d5db';
+	}
+
 	// Per-requirement question completion status for ToC dots
 	function getQuestionStatus(item: { data: Record<string, any> }): string {
 		const visible = item.data.visible_questions ?? 0;
@@ -1224,15 +1235,7 @@
 								>
 									<span
 										class="inline-block w-2 h-2 rounded-full flex-shrink-0"
-										style="background-color: {section.result === '__splash__'
-											? '#a855f7'
-											: useQuestionProgress || section.hasVisibleQuestions
-												? section.questionColor
-												: useAlignmentProgress
-													? (complianceResultColorMap[
-															alignmentResultEquivalent[section.alignment] ?? ''
-														] ?? '#d1d5db')
-													: (complianceResultColorMap[section.result] ?? '#d1d5db')};"
+										style="background-color: {sectionDotColor(section)};"
 									></span>
 									<span class="truncate">{section.title}</span>
 									{#if showReviewFlags && reviewStateMeta(section.reviewState)}
