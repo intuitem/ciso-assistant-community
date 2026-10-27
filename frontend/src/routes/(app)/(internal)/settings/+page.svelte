@@ -1,15 +1,15 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
-	import GeneralSettings from '$lib/components/Settings/GeneralSettings.svelte';
-	import SSOSettings from '$lib/components/Settings/SSOSettings.svelte';
-	import FeatureFlagsSettings from '$lib/components/Settings/FeatureFlagsSettings.svelte';
-	import NotificationChannelsSettings from '$lib/components/Settings/NotificationChannelsSettings.svelte';
-	import WebhooksSettings from '$lib/components/Settings/WebhooksSettings.svelte';
-	import VulnerabilitySlaSettings from '$lib/components/Settings/VulnerabilitySlaSettings.svelte';
-	import SecIntelFeedsSettings from '$lib/components/Settings/SecIntelFeedsSettings.svelte';
-	import MailerSettings from '$lib/components/Settings/MailerSettings.svelte';
+	import GeneralSettings from '#lib/components/Settings/GeneralSettings.svelte';
+	import SSOSettings from '#lib/components/Settings/SSOSettings.svelte';
+	import FeatureFlagsSettings from '#lib/components/Settings/FeatureFlagsSettings.svelte';
+	import NotificationChannelsSettings from '#lib/components/Settings/NotificationChannelsSettings.svelte';
+	import WebhooksSettings from '#lib/components/Settings/WebhooksSettings.svelte';
+	import VulnerabilitySlaSettings from '#lib/components/Settings/VulnerabilitySlaSettings.svelte';
+	import SecIntelFeedsSettings from '#lib/components/Settings/SecIntelFeedsSettings.svelte';
+	import MailerSettings from '#lib/components/Settings/MailerSettings.svelte';
 
 	import { goto } from '$app/navigation';
 

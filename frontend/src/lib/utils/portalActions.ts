@@ -1,5 +1,5 @@
-import { m } from '$paraglide/messages';
-import type { ModalStore } from '$lib/components/Modals/stores';
+import { m } from '#paraglide/messages.js';
+import type { ModalStore } from '#lib/components/Modals/stores.js';
 
 type Toast = { trigger: (s: { message: string; background: string }) => void };
 
@@ -37,6 +37,6 @@ export const savedToastEnhance =
 	(toast: Toast, opts?: { reset?: boolean }) =>
 	() =>
 	async ({ result, update }: EnhanceArgs) => {
-		await update(opts);
+		await update({ ...opts, navigate: false });
 		if (result.type === 'success') savedToast(toast);
 	};

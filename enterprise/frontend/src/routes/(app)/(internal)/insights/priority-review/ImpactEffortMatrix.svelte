@@ -1,6 +1,6 @@
 <script lang="ts">
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { m } from '$paraglide/messages';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
+	import { m } from '#paraglide/messages.js';
 
 	const EFFORT_REVERSE_MAP = { 1: 'XS', 2: 'S', 3: 'M', 4: 'L', 5: 'XL' };
 

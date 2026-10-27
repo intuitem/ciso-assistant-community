@@ -1,7 +1,7 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { getModelInfo } from '$lib/utils/crud';
-import { error, type NumericRange } from '@sveltejs/kit';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { getModelInfo } from '#lib/utils/crud.js';
 import type { RequestHandler } from './$types';
+import { errorFromBody } from '#lib/utils/errors.js';
 
 // The custom list page shadows [model=urlmodel]/+server.ts, so a fetch() for
 // this model gets HTML back — which is what left the catalog autocomplete empty.
@@ -17,7 +17,7 @@ export const GET: RequestHandler = async ({ fetch, url }) => {
 		const detail = res.headers.get('content-type')?.includes('application/json')
 			? await res.json()
 			: await res.text();
-		error(res.status as NumericRange<400, 599>, detail);
+		errorFromBody(res.status, detail);
 	}
 
 	return new Response(await res.text(), {

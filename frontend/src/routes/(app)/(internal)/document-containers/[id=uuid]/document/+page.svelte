@@ -1,7 +1,7 @@
 <script lang="ts">
-	import DocumentEditor from '$lib/components/DocumentEditor/DocumentEditor.svelte';
-	import UploadedDocumentView from '$lib/components/DocumentEditor/UploadedDocumentView.svelte';
-	import LinkedDocumentView from '$lib/components/DocumentEditor/LinkedDocumentView.svelte';
+	import DocumentEditor from '#lib/components/DocumentEditor/DocumentEditor.svelte';
+	import UploadedDocumentView from '#lib/components/DocumentEditor/UploadedDocumentView.svelte';
+	import LinkedDocumentView from '#lib/components/DocumentEditor/LinkedDocumentView.svelte';
 	let { data } = $props();
 
 	let isUploaded = $derived(data.currentRevision?.source === 'uploaded');
