@@ -1312,6 +1312,9 @@ def _render_docx_in_child(doc: DocxTemplate, context: dict, conn: Connection) ->
         doc.save(out)
     except TemplateError as e:
         conn.send(("template_error", str(e) or type(e).__name__))
+    except MemoryError:
+        # Closing the pipe unsent makes the parent report it as a crash.
+        return
     except Exception:
         conn.send(("error", traceback.format_exc()))
     else:

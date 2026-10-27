@@ -28,7 +28,7 @@ export const GET: RequestHandler = async ({ fetch, params }) => {
 
 	const res = await fetch(endpoint);
 	if (!res.ok) {
-		const failure: WordExportFailure = await res.json().catch(() => ({}));
+		const failure: WordExportFailure = (await res.json().catch(() => null)) ?? {};
 		error(res.status, failureMessage(failure));
 	}
 

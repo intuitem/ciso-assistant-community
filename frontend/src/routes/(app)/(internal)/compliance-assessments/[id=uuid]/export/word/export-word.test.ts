@@ -40,6 +40,13 @@ describe('Word export route', () => {
 		expect(failure?.message).toBe(m.customWordTemplateFailed());
 	});
 
+	it('keeps the backend status when the error body is null', async () => {
+		expect(await exportError(null, 502)).toEqual({
+			status: 502,
+			message: 'Error fetching the Word file'
+		});
+	});
+
 	it('keeps the backend status and the generic message for other failures', async () => {
 		expect(await exportError({ detail: 'Forbidden.' }, 403)).toEqual({
 			status: 403,

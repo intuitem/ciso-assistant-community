@@ -148,6 +148,18 @@ class _Unprintable:
         raise ValueError("/srv/secrets")
 
 
+class _Huge:
+    def __str__(self) -> str:
+        raise MemoryError
+
+
+def test_bounded_render_reports_running_out_of_memory_as_a_crash() -> None:
+    with pytest.raises(DocxRenderCrash):
+        render_docx_report_bounded(
+            DocxTemplate(_docx_with("{{ value }}")), {"value": _Huge()}
+        )
+
+
 def test_bounded_render_keeps_other_errors_apart_from_template_errors() -> None:
     with pytest.raises(DocxRenderError, match="ValueError") as failure:
         render_docx_report_bounded(
