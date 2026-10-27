@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { DataHandler } from '@vincjo/datatables/remote';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	interface Props {
 		handler: DataHandler;
 	}

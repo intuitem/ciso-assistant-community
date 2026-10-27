@@ -1,6 +1,6 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { error, type NumericRange } from '@sveltejs/kit';
+import { BASE_API_URL } from '#lib/utils/constants.js';
 import type { RequestHandler } from './$types';
+import { errorFromBody } from '#lib/utils/errors.js';
 
 // `requirement-assessments` is a static route tree, so the generic
 // `[model=urlmodel]` proxy never sees this path — it needs its own handler.
@@ -13,7 +13,7 @@ export const POST: RequestHandler = async ({ fetch, params }) => {
 		body: '{}'
 	});
 	if (!res.ok) {
-		error(res.status as NumericRange<400, 599>, await res.json());
+		errorFromBody(res.status, await res.json());
 	}
 
 	return new Response(JSON.stringify(await res.json()), {

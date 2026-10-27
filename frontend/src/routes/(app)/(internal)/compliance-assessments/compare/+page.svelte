@@ -1,16 +1,16 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import type { PageData } from './$types';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import { formatDateOrDateTime } from '$lib/utils/datetime';
-	import { getLocale } from '$paraglide/runtime.js';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
-	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
-	import RingProgress from '$lib/components/DataViz/RingProgress.svelte';
-	import { displayScoreColor, getScoreHexColor, roundScore } from '$lib/utils/helpers';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import ComparisonRadarChart from '$lib/components/Chart/ComparisonRadarChart.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import { formatDateOrDateTime } from '#lib/utils/datetime.js';
+	import { getLocale } from '#paraglide/runtime.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
+	import DonutChart from '#lib/components/Chart/DonutChart.svelte';
+	import RingProgress from '#lib/components/DataViz/RingProgress.svelte';
+	import { displayScoreColor, getScoreHexColor, roundScore } from '#lib/utils/helpers.js';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import ComparisonRadarChart from '#lib/components/Chart/ComparisonRadarChart.svelte';
 
 	interface Props {
 		data: PageData;

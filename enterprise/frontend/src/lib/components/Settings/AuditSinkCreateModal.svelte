@@ -1,15 +1,15 @@
 <script lang="ts">
-	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
-	import Form from '$lib/components/Forms/Form.svelte';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
-	import Select from '$lib/components/Forms/Select.svelte';
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
-	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
-	import { auditSinkSchema } from '$lib/utils/schemas';
-	import { m } from '$paraglide/messages';
+	import Checkbox from '#lib/components/Forms/Checkbox.svelte';
+	import Form from '#lib/components/Forms/Form.svelte';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import RadioGroup from '#lib/components/Forms/RadioGroup.svelte';
+	import Select from '#lib/components/Forms/Select.svelte';
+	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
+	import { getModalStore, type ModalStore } from '#lib/components/Modals/stores.js';
+	import { auditSinkSchema } from '#lib/utils/schemas.js';
+	import { m } from '#paraglide/messages.js';
 	import { onMount, tick } from 'svelte';
 	import type { SuperForm } from 'sveltekit-superforms';
 	import { formFieldProxy } from 'sveltekit-superforms';
