@@ -1562,6 +1562,7 @@
 	"invalidCustomWordTemplate": "Le modèle Word personnalisé n'a pas pu être généré : {detail}",
 	"customWordTemplateTimedOut": "Le modèle Word personnalisé a mis trop de temps à être généré.",
 	"customWordTemplateCrashed": "Le modèle Word personnalisé n'a pas pu être généré, probablement parce qu'il utilise trop de mémoire.",
+	"customWordTemplateFailed": "Le modèle Word personnalisé n'a pas pu être généré.",
 	"invalidFileType": "Type de fichier non valide",
 	"logoHelpText": "Le logo sera affiché dans l'en-tête de l'application. Les formats acceptés sont PNG, JPEG, WEBP, SVG.",
 	"faviconHelpText": "Le favicon s'affichera dans l'onglet du navigateur. Les formats acceptés sont ICO, PNG, JPEG, WEBP, SVG.",

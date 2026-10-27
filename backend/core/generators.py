@@ -1,6 +1,7 @@
 import io
 import multiprocessing
 import resource
+import traceback
 from collections import OrderedDict, defaultdict
 from datetime import date, datetime, timedelta
 from decimal import Decimal
@@ -18,6 +19,7 @@ from django.utils.safestring import SafeString
 from django.utils.timezone import now
 from docx.shared import Cm
 from docxtpl import DocxTemplate, InlineImage
+from jinja2.exceptions import TemplateError
 from jinja2.runtime import (
     BlockReference,
     LoopContext,
@@ -1285,6 +1287,10 @@ class DocxRenderError(Exception):
     """A custom Word template failed to render; the message says why."""
 
 
+class DocxTemplateError(DocxRenderError):
+    """The Jinja template itself is wrong; the message is meant for its author."""
+
+
 class DocxRenderTimeout(DocxRenderError):
     """A custom Word template ran longer than `DOCX_RENDER_TIMEOUT` seconds."""
 
@@ -1304,8 +1310,10 @@ def _render_docx_in_child(doc: DocxTemplate, context: dict, conn: Connection) ->
         render_docx_report(doc, context)
         out = io.BytesIO()
         doc.save(out)
-    except Exception as e:
-        conn.send(("error", str(e) or type(e).__name__))
+    except TemplateError as e:
+        conn.send(("template_error", str(e) or type(e).__name__))
+    except Exception:
+        conn.send(("error", traceback.format_exc()))
     else:
         conn.send(("report", out.getvalue()))
 
@@ -1315,8 +1323,9 @@ def render_docx_report_bounded(doc: DocxTemplate, context: dict) -> bytes:
     since a custom template can loop or allocate without limit.
 
     Returns the rendered .docx; raises `DocxRenderTimeout` past
-    `DOCX_RENDER_TIMEOUT` seconds, `DocxRenderCrash` when the child dies, and
-    `DocxRenderError` when the template itself fails.
+    `DOCX_RENDER_TIMEOUT` seconds, `DocxRenderCrash` when the child dies,
+    `DocxTemplateError` when Jinja rejects the template, and `DocxRenderError`
+    carrying the child's traceback for any other failure.
     """
     recv, send = multiprocessing.Pipe(duplex=False)
     child = multiprocessing.get_context("fork").Process(
@@ -1331,6 +1340,8 @@ def render_docx_report_bounded(doc: DocxTemplate, context: dict) -> bytes:
             outcome, payload = recv.recv()
         except EOFError, OSError:
             raise DocxRenderCrash from None
+        if outcome == "template_error":
+            raise DocxTemplateError(payload)
         if outcome == "error":
             raise DocxRenderError(payload)
         return payload

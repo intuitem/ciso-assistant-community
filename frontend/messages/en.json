@@ -1528,6 +1528,7 @@
 	"invalidCustomWordTemplate": "The custom Word template could not be rendered: {detail}",
 	"customWordTemplateTimedOut": "The custom Word template took too long to render.",
 	"customWordTemplateCrashed": "The custom Word template could not be rendered, likely because it uses too much memory.",
+	"customWordTemplateFailed": "The custom Word template could not be rendered.",
 	"invalidFileType": "Invalid file type",
 	"logoHelpText": "The logo will be displayed in the header of the application. Accepted formats are PNG, JPEG, WEBP, SVG.",
 	"faviconHelpText": "The favicon will be displayed in the browser tab. Accepted formats are ICO, PNG, JPEG, WEBP, SVG.",

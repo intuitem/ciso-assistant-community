@@ -81,6 +81,7 @@ from .generators import (
     DocxRenderCrash,
     DocxRenderError,
     DocxRenderTimeout,
+    DocxTemplateError,
 )
 from .typst_render import localized_template, render_pdf
 from .serializer_fields import FieldsRelatedField, PathField
@@ -13553,8 +13554,10 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                     failure = {"error": "customWordTemplateTimedOut"}
                 elif isinstance(e, DocxRenderCrash):
                     failure = {"error": "customWordTemplateCrashed"}
-                else:
+                elif isinstance(e, DocxTemplateError):
                     failure = {"error": "invalidCustomWordTemplate", "detail": str(e)}
+                else:
+                    failure = {"error": "customWordTemplateFailed"}
                 return Response(failure, status=status.HTTP_400_BAD_REQUEST)
         else:
             core_templates = Path(__file__).resolve().parent / "templates" / "core"

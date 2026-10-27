@@ -35,6 +35,11 @@ describe('Word export route', () => {
 		expect(failure?.message).toBe(m.customWordTemplateCrashed());
 	});
 
+	it('translates a custom template that failed for another reason', async () => {
+		const failure = await exportError({ error: 'customWordTemplateFailed' });
+		expect(failure?.message).toBe(m.customWordTemplateFailed());
+	});
+
 	it('keeps the backend status and the generic message for other failures', async () => {
 		expect(await exportError({ detail: 'Forbidden.' }, 403)).toEqual({
 			status: 403,

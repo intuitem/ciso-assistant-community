@@ -23,6 +23,7 @@ from core.generators import (
     DocxRenderCrash,
     DocxRenderError,
     DocxRenderTimeout,
+    DocxTemplateError,
     DocxReportSandbox,
     gen_audit_context,
     inline_charts_for_docx,
@@ -138,8 +139,21 @@ def test_bounded_render_returns_the_report() -> None:
 
 
 def test_bounded_render_reports_template_errors() -> None:
-    with pytest.raises(DocxRenderError, match="unsafe"):
+    with pytest.raises(DocxTemplateError, match="unsafe"):
         render_docx_report_bounded(DocxTemplate(_docx_with(_SSTI_PAYLOAD)), {})
+
+
+class _Unprintable:
+    def __str__(self) -> str:
+        raise ValueError("/srv/secrets")
+
+
+def test_bounded_render_keeps_other_errors_apart_from_template_errors() -> None:
+    with pytest.raises(DocxRenderError, match="ValueError") as failure:
+        render_docx_report_bounded(
+            DocxTemplate(_docx_with("{{ value }}")), {"value": _Unprintable()}
+        )
+    assert not isinstance(failure.value, DocxTemplateError)
 
 
 def test_bounded_render_stops_runaway_templates(

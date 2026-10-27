@@ -277,9 +277,10 @@ class TestAuditWordExport:
         [
             (DocxRenderTimeout, "customWordTemplateTimedOut"),
             (DocxRenderCrash, "customWordTemplateCrashed"),
+            (DocxRenderError, "customWordTemplateFailed"),
         ],
     )
-    def test_word_report_names_why_a_custom_template_did_not_finish(
+    def test_word_report_names_why_a_custom_template_failed_without_details(
         self,
         admin_client: APIClient,
         audit: ComplianceAssessment,
@@ -288,7 +289,7 @@ class TestAuditWordExport:
         code: str,
     ) -> None:
         def fail(doc: DocxTemplate, context: dict) -> bytes:
-            raise failure
+            raise failure("Traceback ... /srv/secrets")
 
         monkeypatch.setattr("core.views.render_docx_report_bounded", fail)
         buf = io.BytesIO()

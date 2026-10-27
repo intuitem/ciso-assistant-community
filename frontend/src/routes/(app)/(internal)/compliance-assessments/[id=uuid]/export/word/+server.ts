@@ -5,13 +5,18 @@ import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 type WordExportFailure = {
-	error?: 'invalidCustomWordTemplate' | 'customWordTemplateTimedOut' | 'customWordTemplateCrashed';
+	error?:
+		| 'invalidCustomWordTemplate'
+		| 'customWordTemplateTimedOut'
+		| 'customWordTemplateCrashed'
+		| 'customWordTemplateFailed';
 	detail?: string;
 };
 
 function failureMessage(failure: WordExportFailure): string {
 	if (failure.error === 'customWordTemplateTimedOut') return m.customWordTemplateTimedOut();
 	if (failure.error === 'customWordTemplateCrashed') return m.customWordTemplateCrashed();
+	if (failure.error === 'customWordTemplateFailed') return m.customWordTemplateFailed();
 	if (failure.error === 'invalidCustomWordTemplate' && failure.detail)
 		return m.invalidCustomWordTemplate({ detail: failure.detail });
 	return 'Error fetching the Word file';
