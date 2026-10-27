@@ -334,6 +334,27 @@ def test_xlsx_export_keeps_undefined_status_importable(
 
 
 @pytest.mark.django_db
+def test_xlsx_export_prints_times_in_the_instance_timezone(
+    admin_client: APIClient,  # noqa: F811
+    assessment: FindingsAssessment,
+) -> None:
+    settings, _ = GlobalSettings.objects.get_or_create(name="general")
+    settings.value = {**(settings.value or {}), "report_timezone": "Europe/Paris"}
+    settings.save()
+    [finding] = _findings(assessment, [3])
+    Finding.objects.filter(pk=finding.pk).update(
+        created_at=datetime(2026, 7, 1, 8, 0, tzinfo=timezone.utc)
+    )
+    url = reverse("findings-assessments-xlsx", kwargs={"pk": str(assessment.pk)})
+
+    sheet = openpyxl.load_workbook(io.BytesIO(admin_client.get(url).content))[
+        "Findings"
+    ]
+    header, first = list(sheet.iter_rows(values_only=True))[:2]
+    assert first[header.index("created_at")] == "2026-07-01 10:00:00 (UTC+02:00)"
+
+
+@pytest.mark.django_db
 def test_markdown_export_prints_times_in_the_instance_timezone(
     admin_client: APIClient,  # noqa: F811
     assessment: FindingsAssessment,

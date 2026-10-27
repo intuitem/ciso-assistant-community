@@ -3,9 +3,15 @@
 import pytest
 from django.db.backends.base.base import BaseDatabaseWrapper
 from rest_framework.exceptions import ValidationError
+from rest_framework.test import APIClient
 
 from global_settings.models import GlobalSettings
 from global_settings.serializers import GeneralSettingsSerializer
+from global_settings.tests.test_global_settings_api import (  # noqa: F401
+    app_config,
+    domain,
+    reader_client,
+)
 
 
 @pytest.fixture
@@ -61,3 +67,30 @@ class TestReportTimezoneSetting:
 
         general_settings.refresh_from_db()
         assert general_settings.value["report_timezone"] == "Europe/Kiev"
+
+    def test_an_already_stored_unknown_name_is_not_kept(
+        self, general_settings: GlobalSettings
+    ) -> None:
+        general_settings.value = {
+            **general_settings.value,
+            "report_timezone": "Mars/Olympus_Mons",
+        }
+        general_settings.save()
+
+        with pytest.raises(ValidationError):
+            _save(general_settings, "Mars/Olympus_Mons")
+
+    def test_the_offered_zones_include_a_stored_legacy_name(
+        self,
+        general_settings: GlobalSettings,
+        reader_client: APIClient,  # noqa: F811
+    ) -> None:
+        general_settings.value = {
+            **general_settings.value,
+            "report_timezone": "Europe/Kiev",
+        }
+        general_settings.save()
+
+        response = reader_client.get("/api/settings/general/report_timezone/")
+
+        assert "Europe/Kiev" in response.json()

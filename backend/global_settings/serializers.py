@@ -13,7 +13,7 @@ from rest_framework import serializers
 
 from urllib.parse import urlparse
 
-from core.utils import get_report_timezone_names
+from core.utils import get_report_timezone, get_report_timezone_names
 from core.net_safety import (
     BlockedRequestError,
     DnsLookupError,
@@ -258,11 +258,12 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                         }
                     )
             if key == "report_timezone":
-                # A name already stored stays accepted: the form sends every key,
-                # so rejecting it would block saving any other general setting.
-                stored = (instance.value or {}).get(key)
+                # A stored name that still loads (a renamed region) stays accepted:
+                # the form sends every key, so rejecting it would block saving any
+                # other general setting.
                 if not isinstance(value, str) or (
-                    value not in get_report_timezone_names() and value != stored
+                    value not in get_report_timezone_names()
+                    and value != get_report_timezone().key
                 ):
                     raise serializers.ValidationError(
                         {

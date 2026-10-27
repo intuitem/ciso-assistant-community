@@ -17646,6 +17646,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         )
 
         # Prepare data for Excel export
+        tz = get_report_timezone()
         entries = []
         for finding in findings:
             entry = {
@@ -17679,9 +17680,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
                 ),
                 "observation": escape_excel_formula(finding.observation),
                 "recommendation": escape_excel_formula(finding.recommendation),
-                "created_at": finding.created_at.strftime("%Y-%m-%d %H:%M:%S")
-                if finding.created_at
-                else "",
+                "created_at": format_report_timestamp(finding.created_at, tz, ""),
                 "eta": finding.eta.strftime("%Y-%m-%d") if finding.eta else "",
                 "due_date": finding.due_date.strftime("%Y-%m-%d")
                 if finding.due_date

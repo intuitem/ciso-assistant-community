@@ -2372,7 +2372,8 @@ def _utc_offset(local: datetime) -> str:
 def format_report_timestamp(
     value: datetime | None, tz: tzinfo, empty: str = "-"
 ) -> str:
-    """Return `value` as `YYYY-MM-DD HH:MM:SS (UTC+hh:mm)` in `tz`, or `empty`.
+    """Return the timezone-aware `value` as `YYYY-MM-DD HH:MM:SS (UTC+hh:mm)` in
+    `tz`, or `empty` when it is None.
 
     The offset is worked out per timestamp because it changes at clock changes.
     """
@@ -2383,7 +2384,7 @@ def format_report_timestamp(
 
 
 @functools.cache
-def get_report_timezone_names() -> list[str]:
+def get_report_timezone_names() -> tuple[str, ...]:
     """Return `UTC` and the current IANA region names, one per zone and country.
 
     Read from tzdata's `zone.tab` rather than `available_timezones()`, which also
@@ -2395,16 +2396,23 @@ def get_report_timezone_names() -> list[str]:
         for line in zone_tab.splitlines()
         if line and not line.startswith("#")
     }
-    return ["UTC", *sorted(regions)]
+    return ("UTC", *sorted(regions))
 
 
-def get_report_timezone_choices(at: datetime | None = None) -> dict[str, str]:
+def get_report_timezone_choices(
+    at: datetime | None = None, current: str | None = None
+) -> dict[str, str]:
     """Return the report time zones as `{name: "(UTC+hh:mm) name"}`, from west to
-    east, labelled with the offset in force at `at` (now by default)."""
+    east, labelled with the offset in force at `at` (now by default).
+
+    `current`, the stored zone, is offered even when renamed since (`Europe/Kiev`),
+    so the settings form can still show it.
+    """
     moment = at or datetime.now(timezone.utc)
-    offsets = {
-        name: moment.astimezone(ZoneInfo(name)) for name in get_report_timezone_names()
-    }
+    names = get_report_timezone_names()
+    if current and current not in names:
+        names = (*names, current)
+    offsets = {name: moment.astimezone(ZoneInfo(name)) for name in names}
     ordered = sorted(
         offsets,
         key=lambda name: (offsets[name].utcoffset(), name != "UTC", name),

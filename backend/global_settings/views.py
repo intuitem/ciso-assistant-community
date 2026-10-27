@@ -6,7 +6,7 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
 
 from core.permissions import IsGlobalAdmin
-from core.utils import get_report_timezone_choices
+from core.utils import get_report_timezone, get_report_timezone_choices
 from core.serializers import SerializerFactory
 from iam.models import Folder, Permission, RoleAssignment, User
 from iam.sso.models import SSOSettings
@@ -212,7 +212,7 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, name="Get report time zones")
     def report_timezone(self, request, pk=None):
-        return Response(get_report_timezone_choices())
+        return Response(get_report_timezone_choices(current=get_report_timezone().key))
 
     @action(
         detail=True,

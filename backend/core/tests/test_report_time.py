@@ -103,3 +103,8 @@ class TestGetReportTimezoneChoices:
         assert names.index("UTC") < names.index("Europe/London")
         assert names.index("Europe/London") < names.index("Europe/Paris")
         assert get_report_timezone_choices(winter)["UTC"] == "(UTC) UTC"
+
+    def test_keeps_the_current_zone_when_it_was_renamed_since(self) -> None:
+        winter = datetime(2026, 12, 1, 8, 0, tzinfo=timezone.utc)
+        choices = get_report_timezone_choices(winter, current="Europe/Kiev")
+        assert choices["Europe/Kiev"] == "(UTC+02:00) Europe/Kiev"
