@@ -314,7 +314,6 @@ class BaseModelSerializer(serializers.ModelSerializer):
     def validate(self, data):
         data = super().validate(data)
         self._check_m2m_visibility(data)
-        self._check_reverse_m2m_change(data)
         data = self._strip_respondent_protected_fields(data)
         return data
 
@@ -500,6 +499,11 @@ class VulnerabilityWriteSerializer(BaseModelSerializer):
     task_templates = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=TaskTemplate.objects.all()
     )
+
+    def validate(self, data):
+        data = super().validate(data)
+        self._check_reverse_m2m_change(data)
+        return data
 
     def create(self, validated_data):
         owner_data = validated_data.get("owner", [])

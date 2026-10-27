@@ -846,6 +846,11 @@ def create_batch(
                         if not dedup_clashing_fields(model, fields, e):
                             raise
                         obj_created = model.objects.create(**fields)
+                    if model is Vulnerability and not fields.get("remediated_at"):
+                        model.objects.filter(pk=obj_created.pk).update(
+                            remediated_at=None
+                        )
+                        obj_created.remediated_at = None
                     created_objects.append(obj_created)
             else:
                 objects_to_create = [
