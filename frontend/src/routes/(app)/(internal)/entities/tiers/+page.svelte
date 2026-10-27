@@ -320,11 +320,19 @@
 											placeholder="—"
 											disabled={busy}
 											data-testid="tier-compliance-target"
-											onchange={(e) => {
-												const raw = e.currentTarget.value.trim();
+											onchange={async (e) => {
+												const input = e.currentTarget;
+												const raw = input.value.trim();
 												const value = raw === '' ? null : Number(raw);
-												if (value !== tier.compliance_target)
-													update(tier, { compliance_target: value });
+												// Svelte skips rewriting an unchanged value, so a rejected entry would stay on screen.
+												const reset = () => (input.value = String(tier.compliance_target ?? ''));
+												// Unparseable text reads as '' and would clear the target.
+												if (input.validity.badInput) return reset();
+												if (
+													value !== tier.compliance_target &&
+													!(await update(tier, { compliance_target: value }))
+												)
+													reset();
 											}}
 										/>
 										<span aria-hidden="true">%</span>
