@@ -529,17 +529,31 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         """Export EBIOS RM study data to Excel with multiple sheets."""
 
         study = self.get_object()
-        from core.models import AppliedControl
-        from iam.models import RoleAssignment
-
-        # Study access doesn't imply access to every linked control
-        viewable_controls = AppliedControl.objects.filter(
-            id__in=RoleAssignment.get_viewable_object_ids(request.user, AppliedControl)
+        from core.models import (
+            AppliedControl,
+            ComplianceAssessment,
+            RiskAssessment,
+            Threat,
         )
+        from iam.models import RoleAssignment
+        from tprm.models import Entity
+
+        # Study access doesn't imply access to the objects it links outside its
+        # domain (controls, assets, threats, audits, entities, elementary actions)
+        def viewable(model):
+            return model.objects.filter(
+                id__in=RoleAssignment.get_viewable_object_ids(request.user, model)
+            )
+
+        viewable_controls = viewable(AppliedControl)
+        viewable_assets = viewable(Asset)
+        viewable_ea_ids = set(viewable(ElementaryAction).values_list("id", flat=True))
         # Get all related data
         feared_events = FearedEvent.objects.filter(ebios_rm_study=study)
         ro_to_couples = RoTo.objects.filter(ebios_rm_study=study)
-        stakeholders = Stakeholder.objects.filter(ebios_rm_study=study)
+        stakeholders = Stakeholder.objects.filter(
+            ebios_rm_study=study, entity__in=viewable(Entity)
+        )
         strategic_scenarios = StrategicScenario.objects.filter(ebios_rm_study=study)
         attack_paths = AttackPath.objects.filter(ebios_rm_study=study)
         operational_scenarios = OperationalScenario.objects.filter(ebios_rm_study=study)
@@ -591,16 +605,17 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
 
             # 1.2 Assets sheet
             assets_data = []
-            for asset in study.assets.all():
+            for asset in study.assets.filter(id__in=viewable_assets):
+                parent_asset = asset.parent_assets.filter(
+                    id__in=viewable_assets
+                ).first()
                 assets_data.append(
                     {
                         "ref_id": asset.ref_id or "",
                         "name": asset.name,
                         "description": asset.description or "",
                         "type": asset.type or "",
-                        "parent_asset": asset.parent_assets.first().name
-                        if asset.parent_assets.exists()
-                        else "",
+                        "parent_asset": parent_asset.name if parent_asset else "",
                     }
                 )
             if assets_data:
@@ -620,7 +635,9 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                         "gravity": fe.get_gravity_display().get("name", ""),
                         "is_selected": fe.is_selected,
                         "justification": fe.justification or "",
-                        "assets": "\n".join([a.name for a in fe.assets.all()]),
+                        "assets": "\n".join(
+                            a.name for a in fe.assets.filter(id__in=viewable_assets)
+                        ),
                     }
                 )
             if fe_data:
@@ -630,7 +647,12 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 )
 
             # 1.4.x Compliance Assessment sheets
-            for idx, ca in enumerate(study.compliance_assessments.all(), start=1):
+            for idx, ca in enumerate(
+                study.compliance_assessments.filter(
+                    id__in=viewable(ComplianceAssessment)
+                ),
+                start=1,
+            ):
                 ca_data = []
                 for ra in (
                     ca.requirement_assessments.select_related("requirement")
@@ -754,7 +776,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                         if ap.strategic_scenario
                         else "",
                         "stakeholders": "\n".join(
-                            [str(s) for s in ap.stakeholders.all()]
+                            str(s) for s in ap.stakeholders.filter(id__in=stakeholders)
                         ),
                         "is_selected": ap.is_selected,
                         "justification": ap.justification or "",
@@ -768,7 +790,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
 
             # 3.3 Stakeholder Controls sheet
             stakeholder_controls = viewable_controls.filter(
-                stakeholders__ebios_rm_study=study
+                stakeholders__in=stakeholders
             ).distinct()
             sc_data = []
             for ac in stakeholder_controls:
@@ -781,7 +803,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                         "stakeholders": "\n".join(
                             [
                                 str(s)
-                                for s in ac.stakeholders.filter(ebios_rm_study=study)
+                                for s in ac.stakeholders.filter(id__in=stakeholders)
                             ]
                         ),
                     }
@@ -794,7 +816,8 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
 
             # 4.0 Elementary Actions sheet
             elementary_actions = ElementaryAction.objects.filter(
-                as_kill_chain__operating_mode__operational_scenario__ebios_rm_study=study
+                as_kill_chain__operating_mode__operational_scenario__ebios_rm_study=study,
+                id__in=viewable_ea_ids,
             ).distinct()
             ea_data = []
             for ea in elementary_actions:
@@ -814,6 +837,13 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 )
 
             # 4.1.1 Operational Scenarios sheet
+            visible_step_ids = {
+                str(step_id)
+                for step_id in KillChain.objects.filter(
+                    operating_mode__operational_scenario__ebios_rm_study=study,
+                    elementary_action__in=viewable_ea_ids,
+                ).values_list("id", flat=True)
+            }
             os_data = []
             for os in operational_scenarios:
                 most_likely = os.most_likely_operating_mode() or {}
@@ -831,6 +861,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                         "critical_steps": " → ".join(
                             step["name"]
                             for step in most_likely.get("critical_steps", [])
+                            if step["id"] in visible_step_ids
                         ),
                         "is_selected": os.is_selected,
                         "justification": os.justification or "",
@@ -858,11 +889,14 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                         else "",
                         "likelihood": om.get_likelihood_display().get("name", ""),
                         "elementary_actions": "\n".join(
-                            [
-                                f"{step.elementary_action.name} ({', '.join(asset.name for asset in step.assets.all())})"
-                                if step.assets.all()
-                                else step.elementary_action.name
-                                for step in om.kill_chain_steps.all()
+                            f"{step.elementary_action.name} ({', '.join(asset.name for asset in step_assets)})"
+                            if step_assets
+                            else step.elementary_action.name
+                            for step in om.kill_chain_steps.filter(
+                                elementary_action__in=viewable_ea_ids
+                            )
+                            for step_assets in [
+                                list(step.assets.filter(id__in=viewable_assets))
                             ]
                         ),
                     }
@@ -876,7 +910,10 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
             # 5.x Risk treatment, from the study's current risk assessment.
             # Column names match the risk assessment / applied control imports.
             risk_assessment = study.last_risk_assessment
-            if risk_assessment:
+            if (
+                risk_assessment
+                and viewable(RiskAssessment).filter(id=risk_assessment.id).exists()
+            ):
                 pd.DataFrame(
                     [
                         {
@@ -893,8 +930,8 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 scenarios = risk_assessment.risk_scenarios.select_related(
                     "operational_scenario"
                 ).prefetch_related(
-                    "assets",
-                    "threats",
+                    Prefetch("assets", queryset=viewable_assets),
+                    Prefetch("threats", queryset=viewable(Threat)),
                     Prefetch("applied_controls", queryset=viewable_controls),
                     Prefetch("existing_applied_controls", queryset=viewable_controls),
                 )
