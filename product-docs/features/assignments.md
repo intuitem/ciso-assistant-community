@@ -65,7 +65,7 @@ Evidence attached to a requirement is optional by default. A framework can mark 
 
 This is set per requirement by whoever authors the framework, in the [library builder](../configuration/authoring/library-builder.md#require-an-evidence) or in the [Excel source](../configuration/libraries/library-objects/framework.md). It is separate from `importance`, which states how much a requirement matters, and from `typical_evidence`, which describes what to attach without making it compulsory.
 
-Respondents see the obligation while they work, not only when they submit: the requirement carries an **Evidence required** badge that turns into **Evidence provided** once a document or a link is attached, its entry stays amber in the table of contents until then, and **Submit for review** opens a recap of the requirements still missing one.
+Respondents see the obligation while they work, not only when they submit: the requirement carries an **Evidence required** badge that turns into **Evidence provided** once a document or a link is attached, its table of contents entry shows amber where it would otherwise turn green, and **Submit for review** opens a recap of the requirements still missing one.
 
 The check only covers requirements that are actually part of the questionnaire. A requirement hidden by a visibility condition never blocks a submission. The rule is enforced by the API, so it applies the same way to an integration posting the transition directly.
 

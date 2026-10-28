@@ -283,7 +283,7 @@
 
 	const hasRequiredEvidence = $derived.by(() => {
 		const walk = (nodes: BuilderNode[]): boolean =>
-			nodes.some((bn) => bn.node.evidence_required || walk(bn.children));
+			nodes.some((bn) => (bn.node.assessable && bn.node.evidence_required) || walk(bn.children));
 		return walk($rootNodesStore);
 	});
 

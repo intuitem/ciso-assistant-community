@@ -99,11 +99,20 @@
 
 	let isAuditor = $derived(viewerRole === 'auditor');
 
-	// Back returns where the visit started: dashboard, audit, assignments or entity assessment.
+	// Back returns where the visit started, remembered per assignment for the tab.
 	let cameFrom = $state<string | null>(null);
-	afterNavigate(({ from, to }) => {
-		if (cameFrom || !from?.url || from.url.pathname === to?.url.pathname) return;
-		cameFrom = from.url.pathname + from.url.search;
+	afterNavigate(({ from, to, type }) => {
+		const key = `assignmentBack:${to?.params?.id}`;
+		try {
+			if (type !== 'popstate' && from?.url && from.url.pathname !== to?.url.pathname) {
+				cameFrom = from.url.pathname + from.url.search;
+				sessionStorage.setItem(key, cameFrom);
+			} else {
+				cameFrom ??= sessionStorage.getItem(key);
+			}
+		} catch {
+			// Storage unavailable: backHref falls back below.
+		}
 	});
 	const backHref = $derived(
 		cameFrom ??

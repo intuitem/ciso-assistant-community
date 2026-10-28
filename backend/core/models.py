@@ -2083,6 +2083,10 @@ class LibraryUpdater:
                     for field, default in requirement_node_defaults.items():
                         if requirement_node_dict.get(field) is None:
                             requirement_node_dict[field] = default
+                    # Same strict parse as the importer.
+                    requirement_node_dict["evidence_required"] = (
+                        requirement_node_dict["evidence_required"] is True
+                    )
 
                     if urn in existing_requirement_node_objects:
                         requirement_node_object = existing_requirement_node_objects[urn]
@@ -6603,6 +6607,11 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
 
     fields_to_check = ["evidence", "version"]
 
+    # A revision without a file or a link carries no evidence.
+    HAS_CONTENT = (models.Q(attachment__isnull=False) & ~models.Q(attachment="")) | (
+        models.Q(link__isnull=False) & ~models.Q(link="")
+    )
+
     class Meta:
         verbose_name = _("Evidence Revision")
         verbose_name_plural = _("Evidence Revisions")
@@ -10569,10 +10578,7 @@ class ComplianceAssessment(Assessment, FilteringLabelMixin):
         # in a single query instead of two per evidence.
         evidence_ids_with_content = set(
             EvidenceRevision.objects.filter(evidence__in=evidences)
-            .filter(
-                (models.Q(attachment__isnull=False) & ~models.Q(attachment=""))
-                | (models.Q(link__isnull=False) & ~models.Q(link=""))
-            )
+            .filter(EvidenceRevision.HAS_CONTENT)
             .values_list("evidence_id", flat=True)
         )
 
@@ -11628,6 +11634,21 @@ class RequirementAssignment(AbstractBaseModel, FolderMixin):
     def __str__(self) -> str:
         actors = ", ".join(str(a) for a in self.actor.all())
         return f"{self.compliance_assessment} - v{self.compliance_assessment.version}:{actors}"
+
+    def get_visible_requirement_assessments(self, hidden_urns=None, lightweight=False):
+        """Assigned requirement assessments in the audit scope and not hidden."""
+        if hidden_urns is None:
+            from core.cel_service import build_cel_context
+
+            _ctx, hidden_urns = build_cel_context(self.compliance_assessment)
+        assigned_ids = set(self.requirement_assessments.values_list("id", flat=True))
+        return [
+            ra
+            for ra in self.compliance_assessment.get_requirement_assessments(
+                include_non_assessable=True, lightweight=lightweight
+            )
+            if ra.id in assigned_ids and ra.requirement.urn not in hidden_urns
+        ]
 
 
 class RequirementAssignmentEvent(AbstractBaseModel, FolderMixin):

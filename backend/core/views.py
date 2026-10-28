@@ -10772,7 +10772,9 @@ class FrameworkViewSet(BaseModelViewSet):
             ),
             has_required_evidence=Exists(
                 RequirementNode.objects.filter(
-                    framework=OuterRef("pk"), evidence_required=True
+                    framework=OuterRef("pk"),
+                    assessable=True,
+                    evidence_required=True,
                 )
             ),
             scale_bound_flag=ExpressionWrapper(
@@ -20270,11 +20272,15 @@ class ClassificationLevelViewSet(BaseModelViewSet):
     ordering = ["object_classification", "rank"]
 
 
-# An evidence counts once a revision carries a file or a link, the line the
-# `evidenceNoFile` quality check already draws.
-USABLE_EVIDENCE_REVISION = (Q(attachment__isnull=False) & ~Q(attachment="")) | (
-    Q(link__isnull=False) & ~Q(link="")
-)
+def _ra_ids_with_usable_evidence(ra_ids) -> set[str]:
+    return {
+        str(ra_id)
+        for ra_id in EvidenceRevision.objects.filter(
+            evidence__requirement_assessments__in=ra_ids
+        )
+        .filter(EvidenceRevision.HAS_CONTENT)
+        .values_list("evidence__requirement_assessments", flat=True)
+    }
 
 
 class RequirementAssignmentViewSet(BaseModelViewSet):
@@ -20513,53 +20519,29 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
 
     @staticmethod
     def _requirements_missing_evidence(assignment):
-        """Assigned requirements that ask for an evidence and hold none.
+        """Visible assigned requirements that ask for an evidence and hold none.
 
         An evidence with no file and no link is an empty shell, so it does not
-        satisfy the obligation. A requirement hidden by its visibility
-        expression is not part of the questionnaire, so it cannot hold the
-        submission.
+        satisfy the obligation.
         """
-        from core.cel_service import build_cel_context
-
-        candidates = list(
-            assignment.requirement_assessments.filter(
-                requirement__assessable=True,
-                requirement__evidence_required=True,
-            )
-            .select_related("requirement")
-            .exclude(
-                Exists(
-                    EvidenceRevision.objects.filter(
-                        evidence__requirement_assessments=OuterRef("pk")
-                    ).filter(USABLE_EVIDENCE_REVISION)
-                )
-            )
-        )
-        if not candidates:
+        flagged = [
+            ra
+            for ra in assignment.get_visible_requirement_assessments(lightweight=True)
+            if ra.requirement.assessable and ra.requirement.evidence_required
+        ]
+        if not flagged:
             return []
-        ca = assignment.compliance_assessment
-        selected_igs = set(ca.selected_implementation_groups or [])
-        _ctx, hidden_urns = build_cel_context(ca)
-        missing = []
-        for ra in candidates:
-            if ra.requirement.urn in hidden_urns:
-                continue
-            # Same rule as ComplianceAssessment.get_requirement_assessments: a
-            # requirement outside the selected groups is not part of the audit.
-            if selected_igs and not (
-                selected_igs & set(ra.requirement.implementation_groups or [])
-            ):
-                continue
-            missing.append(
-                {
-                    "id": str(ra.id),
-                    "urn": ra.requirement.urn,
-                    "ref_id": ra.requirement.ref_id,
-                    "name": ra.requirement.safe_display_str,
-                }
-            )
-        return missing
+        with_evidence = _ra_ids_with_usable_evidence([ra.id for ra in flagged])
+        return [
+            {
+                "id": str(ra.id),
+                "urn": ra.requirement.urn,
+                "ref_id": ra.requirement.ref_id,
+                "name": ra.requirement.safe_display_str,
+            }
+            for ra in flagged
+            if str(ra.id) not in with_evidence
+        ]
 
     @action(detail=True, methods=["get"])
     def requirements_list(self, request, pk=None):
@@ -20578,29 +20560,12 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
         ).exists()
         viewer_role = "respondent" if is_assigned_actor else "auditor"
 
-        assigned_ra_ids = set(
-            assignment.requirement_assessments.values_list("id", flat=True)
-        )
-
-        requirement_assessments_objects = list(
-            compliance_assessment.get_requirement_assessments(
-                include_non_assessable=True
-            )
-        )
-        requirement_assessments_objects = [
-            ra for ra in requirement_assessments_objects if ra.id in assigned_ra_ids
-        ]
-
-        # CEL visibility filtering: exclude requirements hidden by visibility_expression
         from core.cel_service import build_cel_context
 
         _ctx, hidden_urns = build_cel_context(compliance_assessment)
-        if hidden_urns:
-            requirement_assessments_objects = [
-                ra
-                for ra in requirement_assessments_objects
-                if ra.requirement.urn not in hidden_urns
-            ]
+        requirement_assessments_objects = (
+            assignment.get_visible_requirement_assessments(hidden_urns=hidden_urns)
+        )
 
         requirements_objects = list(
             RequirementNode.objects.filter(framework=compliance_assessment.framework)
@@ -20653,14 +20618,9 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
 
         # Same verdict the submission check applies, so the respondent cannot be
         # shown a satisfied requirement that submission then refuses.
-        ra_ids_with_usable_evidence = {
-            str(ra_id)
-            for ra_id in EvidenceRevision.objects.filter(
-                evidence__requirement_assessments__in=assigned_ra_ids
-            )
-            .filter(USABLE_EVIDENCE_REVISION)
-            .values_list("evidence__requirement_assessments", flat=True)
-        }
+        ra_ids_with_usable_evidence = _ra_ids_with_usable_evidence(
+            [ra.id for ra in requirement_assessments_objects]
+        )
 
         for ra_data in requirement_assessments:
             ra_id = str(ra_data["id"])
