@@ -828,6 +828,8 @@ SPECTACULAR_SETTINGS = {
         "drf_spectacular.hooks.postprocess_schema_enums",
         "ciso_assistant.openapi.split_namespace_tags",
     ],
+    # Redoc 3 ships an ES module bundle that drf-spectacular's template cannot load
+    "REDOC_DIST": "https://cdn.jsdelivr.net/npm/redoc@2",
     # OTHER SETTINGS
 }
 
