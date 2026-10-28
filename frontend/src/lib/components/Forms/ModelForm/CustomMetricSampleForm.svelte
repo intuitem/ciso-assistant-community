@@ -1,12 +1,13 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
 	import { formFieldProxy } from 'sveltekit-superforms';
+	import { onMount } from 'svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -29,6 +30,17 @@
 	}: Props = $props();
 
 	const { value: valueFieldProxy, errors: valueErrors } = formFieldProxy(form, 'value');
+	const { value: timestampProxy } = formFieldProxy(form, 'timestamp');
+
+	// A new sample is for now, to the second: a metric keeps one sample per
+	// second, so two entries made at different moments never replace each other.
+	onMount(() => {
+		if (!object?.id && !$timestampProxy) {
+			const now = new Date();
+			now.setMilliseconds(0);
+			$timestampProxy = now.toISOString();
+		}
+	});
 
 	// Get full metric instance data from autocomplete cache (includes nested fields like metric_definition, evidences)
 	const metricInstanceCache = $derived.by(() => {
@@ -90,7 +102,8 @@
 	});
 
 	function handleQualitativeChange(selectedIndex: string) {
-		$valueFieldProxy = { choice_index: parseInt(selectedIndex) };
+		const choiceIndex = parseInt(selectedIndex);
+		$valueFieldProxy = Number.isNaN(choiceIndex) ? null : { choice_index: choiceIndex };
 	}
 
 	// For quantitative metrics, parse the numeric value
@@ -108,7 +121,7 @@
 	function handleQuantitativeChange(event: Event) {
 		const value = (event.target as HTMLInputElement).value;
 		const numValue = parseFloat(value);
-		if (!isNaN(numValue)) {
+		if (!Number.isNaN(numValue)) {
 			$valueFieldProxy = { result: numValue };
 		}
 	}
@@ -117,7 +130,7 @@
 	const maxTimestamp = $derived(() => {
 		const now = new Date();
 		now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-		return now.toISOString().slice(0, 16);
+		return now.toISOString().slice(0, 19);
 	});
 </script>
 
@@ -146,6 +159,7 @@
 	cacheLock={cacheLocks['timestamp']}
 	bind:cachedValue={formDataCache['timestamp']}
 	disabled={object.id}
+	seconds
 	max={maxTimestamp()}
 />
 

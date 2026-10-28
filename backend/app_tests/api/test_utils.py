@@ -8,6 +8,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 from core.models import StoredLibrary
+from library.builder import normalize_objects
 from iam.models import Folder, User, UserGroup
 
 from test_vars import *
@@ -80,7 +81,7 @@ class EndpointTestsUtils:
             )
             test_folder = Folder.objects.get(name=test_folder_name)
 
-        user = User.objects.create_user(TEST_USER_EMAIL, is_published=True)
+        user = User.objects.create_user(TEST_USER_EMAIL)
         user_group = UserGroup.objects.get(
             name=role,
             folder=Folder.objects.get(name=GROUPS_PERMISSIONS[role]["folder"]),
@@ -433,9 +434,8 @@ class EndpointTestsQueries:
             if build_params and object:
                 if object.__name__ == "User":
                     # Ensure new test users are published so they're visible through IAM filtering
-                    build_params_with_published = {**build_params, "is_published": True}
                     user = object.objects.create_superuser(
-                        **build_params_with_published
+                        **build_params
                     )  # no password is required in the build_params
                     # create the new user in the same group as the test user to make it visible
                     if user_group:
@@ -1153,9 +1153,8 @@ class EndpointTestsQueries:
             if isinstance(content, str):
                 content = json.loads(content)
 
-            for object in content["framework"][object_name.lower().replace(" ", "_")][
-                :count
-            ]:
+            framework = normalize_objects(content)["frameworks"][0]
+            for object in framework[object_name.lower().replace(" ", "_")][:count]:
                 comparelist = authenticated_client.get(compare_url)
                 compare = dict()
                 assert comparelist.status_code == expected_status, (

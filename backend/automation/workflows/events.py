@@ -26,6 +26,8 @@ import structlog
 
 from iam.models import Folder
 
+from core.reads import subtree_folder_ids
+from core.reads import validate_filter_tree as _validate_filter_tree
 from .models import Condition, WorkflowInstance, WorkflowNode, WorkflowTrigger
 
 logger = structlog.get_logger(__name__)
@@ -37,8 +39,25 @@ COALESCE_WINDOW = timedelta(minutes=5)
 
 CUD_ACTIONS = ["created", "updated", "deleted"]
 
+# Events a model emits itself, beyond create/update/delete. A CUD event cannot say
+# "this request was submitted": answering a question saves the row too, so a trigger
+# would fire on every keystroke's worth of progress and have to filter by status.
+# A named key makes the trigger say what it means, which is what a starter workflow
+# has to teach.
+CUSTOM_EVENTS = [
+    {
+        "key": "quickformresponse.submitted",
+        "model": "quickformresponse",
+        "action": "submitted",
+    },
+    {
+        "key": "quickformresponse.closed",
+        "model": "quickformresponse",
+        "action": "closed",
+    },
+]
+
 VALID_FILTER_OPS = {choice[0] for choice in Condition.Operator.choices}
-MAX_FILTER_DEPTH = 5
 
 
 def _log_entry_verb(action):
@@ -80,6 +99,7 @@ def event_key_catalog():
                     "action": action,
                 }
             )
+    keys.extend(CUSTOM_EVENTS)
     return keys
 
 
@@ -193,49 +213,16 @@ def _bookkeep(trigger, result, fired=False):
 
 def _workflow_scope(workflow):
     # String ids: additional_data serializes folder_id as str.
-    from .actions import _read_scope_folder_ids
-
-    return {str(fid) for fid in _read_scope_folder_ids(workflow.folder)}
+    return {str(fid) for fid in subtree_folder_ids(workflow.folder)}
 
 
 # ---------- filter tree validation ----------
 
 
 def validate_filter_tree(tree):
-    """Shape-check a boolean filter tree. Raises ValueError on bad shape."""
-    if tree in (None, {}):
-        return
-    _validate_group(tree, depth=0)
-
-
-def _validate_group(group, depth):
-    if depth > MAX_FILTER_DEPTH:
-        raise ValueError("filter tree too deep")
-    if not isinstance(group, dict):
-        raise ValueError("group must be a mapping")
-    if group.get("operator", "and") not in ("and", "or", "not"):
-        raise ValueError("invalid operator")
-    conditions = group.get("conditions", [])
-    children = group.get("children", [])
-    if not isinstance(conditions, list) or not isinstance(children, list):
-        raise ValueError("conditions and children must be lists")
-    for condition in conditions:
-        if (
-            not isinstance(condition, dict)
-            or not isinstance(condition.get("field"), str)
-            or not condition.get("field")
-            or condition.get("op", "eq") not in VALID_FILTER_OPS
-            or not isinstance(condition.get("changed", False), bool)
-        ):
-            raise ValueError("invalid condition")
-    for child in children:
-        _validate_group(child, depth + 1)
-
-
-def walk_conditions(group):
-    yield from group.get("conditions", [])
-    for child in group.get("children", []):
-        yield from walk_conditions(child)
+    """Shape-check an event filter tree: the shared read grammar, with the
+    condition operators this app's Condition model declares."""
+    _validate_filter_tree(tree, ops=VALID_FILTER_OPS)
 
 
 # ---------- filter tree evaluation ----------

@@ -14,8 +14,10 @@ from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
 router.register(r"log-entries", LogEntryViewSet, basename="log-entries")
-router.register(r"roles", RoleViewSet, basename="roles")
 router.register(r"permissions", PermissionViewSet, basename="permissions")
+# Custom-role management is an enterprise-only feature.
+# The enterprise viewsets override the community ones (so this one override the community read-only `RoleViewSet` (`"roles"` route)).
+router.register(r"roles", RoleViewSet, basename="roles")
 
 urlpatterns = [
     path("", include(router.urls)),

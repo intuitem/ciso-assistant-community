@@ -1,25 +1,29 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
-	import { type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton-svelte';
-	import { getModelInfo } from '$lib/utils/crud';
-	import { ThreatModelSchema } from '$lib/utils/schemas';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
+	} from '#lib/components/Modals/stores.js';
+	import { getModelInfo } from '#lib/utils/crud.js';
+	import { ThreatModelSchema } from '#lib/utils/schemas.js';
 	import { defaults } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 
 	import Select from '../Select.svelte';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { run } from 'svelte/legacy';
 
-	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
+	import Checkbox from '#lib/components/Forms/Checkbox.svelte';
+	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
 	interface Props {
 		form: SuperValidated<any>;
 		model: ModelInfo;
@@ -60,7 +64,7 @@
 				// picks it from the refreshed list
 				form: defaults(
 					{
-						folder: $page.data?.scenario?.folder?.id ?? initialData?.folder,
+						folder: page.data?.scenario?.folder?.id ?? initialData?.folder,
 						...(object?.id ? { quantitative_risk_scenarios: [object.id] } : {})
 					},
 					zod(ThreatModelSchema)
@@ -75,7 +79,7 @@
 			component: modalComponent,
 			title: safeTranslate('add-' + threatModelModel.localName),
 			response: (r: boolean) => {
-				if (r) invalidateAll();
+				if (r) refreshAll();
 			}
 		});
 	}
@@ -95,6 +99,7 @@
 />
 
 <Checkbox {form} field="is_selected" label={m.isSelected()} helpText={m.isSelectedHelpText()} />
+
 <AutocompleteSelect
 	{form}
 	multiple
@@ -128,7 +133,7 @@
 	label={m.threats()}
 />
 
-{#if $page.data.featureflags?.threat_modeling}
+{#if page.data.featureflags?.threat_modeling}
 	<div class="flex flex-row space-x-2 items-center">
 		<div class="w-full">
 			<AutocompleteSelect
@@ -195,6 +200,7 @@
 		{form}
 		multiple
 		optionsEndpoint="actors"
+		lazy
 		optionsLabelField="str"
 		optionsInfoFields={{
 			fields: [{ field: 'type', translate: true }],

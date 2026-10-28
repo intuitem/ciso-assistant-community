@@ -2,11 +2,11 @@
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import Select from '../Select.svelte';
 	import TextField from '../TextField.svelte';
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
-	import type { CacheLock, ModelInfo } from '$lib/utils/types';
+	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
+	import type { CacheLock, ModelInfo } from '#lib/utils/types.js';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import { m } from '$paraglide/messages';
-	import { DOCUMENT_TYPES } from '$lib/utils/documentTypes';
+	import { m } from '#paraglide/messages.js';
+	import { DOCUMENT_TYPES } from '#lib/utils/documentTypes.js';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -66,8 +66,9 @@
 
 <AutocompleteSelect
 	{form}
-	optionsEndpoint="classification-levels"
+	optionsEndpoint="classification-levels?is_visible=true&object_classification__is_visible=true"
 	optionsLabelField="label"
+	optionsExtraFields={[['object_classification', 'str']]}
 	field="classification"
 	label={m.classification()}
 	nullable
@@ -128,5 +129,16 @@
 		label={m.processings()}
 		cacheLock={cacheLocks['processings']}
 		bind:cachedValue={formDataCache['processings']}
+	/>
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="assets"
+		optionsExtraFields={[['folder', 'str']]}
+		optionsLabelField="auto"
+		field="assets"
+		label={m.assets()}
+		cacheLock={cacheLocks['assets']}
+		bind:cachedValue={formDataCache['assets']}
 	/>
 </Dropdown>

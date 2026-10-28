@@ -14,7 +14,7 @@ def setup(db):
         name="Posture Domain",
         content_type=Folder.ContentType.DOMAIN,
     )
-    fw = Framework.objects.create(name="Test Benchmark", folder=root, is_published=True)
+    fw = Framework.objects.create(name="Test Benchmark", folder=root)
     section = RequirementNode.objects.create(
         framework=fw,
         urn="urn:test:posture:section:1",
@@ -22,7 +22,6 @@ def setup(db):
         name="Control Plane",
         assessable=False,
         folder=root,
-        is_published=True,
     )
     nodes = {}
     for ref_id in ("1.1", "1.2", "1.3", "2.1"):
@@ -33,7 +32,6 @@ def setup(db):
             ref_id=ref_id,
             assessable=True,
             folder=root,
-            is_published=True,
         )
     RequirementNode.objects.create(
         framework=fw,
@@ -41,7 +39,6 @@ def setup(db):
         ref_id="9",
         assessable=False,
         folder=root,
-        is_published=True,
     )
     asset1 = Asset.objects.create(name="vm-1", folder=domain)
     asset2 = Asset.objects.create(name="vm-2", folder=domain)
@@ -603,7 +600,6 @@ def ig_setup(db):
     fw = Framework.objects.create(
         name="IG Benchmark",
         folder=root,
-        is_published=True,
         implementation_groups_definition=[
             {"ref_id": "A", "name": "Automatic"},
             {"ref_id": "B", "name": "Manual"},
@@ -615,7 +611,6 @@ def ig_setup(db):
         ref_id="1",
         assessable=False,
         folder=root,
-        is_published=True,
     )
     groups = {"1.1": ["A"], "1.2": ["B"], "1.3": None, "2.1": ["A", "B"]}
     nodes = {}
@@ -628,7 +623,6 @@ def ig_setup(db):
             assessable=True,
             implementation_groups=igs,
             folder=root,
-            is_published=True,
         )
     asset = Asset.objects.create(name="ig-vm", folder=domain)
     pa = PostureAssessment.objects.create(
@@ -844,6 +838,95 @@ class TestImportResults:
             PostureResult.objects.get(requirement=s["nodes"]["1.3"]).result
             == "not_checked"
         )
+
+    def test_plumber_ocsf_import(self, setup):
+        s = setup
+        import json
+
+        def event(control, status, status_id, details=None):
+            compliance = {
+                "control": control,
+                "standards": ["Plumber"],
+                "requirements": ["ISSUE-701", "ISSUE-702"],
+                "status": status,
+                "status_id": status_id,
+            }
+            if details:
+                compliance["status_details"] = details
+            return {
+                "class_uid": 2003,
+                "status_id": 1,
+                "message": f"Control {control} {status}.",
+                "metadata": {"product": {"name": "Plumber", "version": "0.6.1"}},
+                "compliance": compliance,
+            }
+
+        first = [
+            event("1.1", "Pass", 1),
+            event("1.2", "Fail", 3, ["job a uses @v1", "job b uses @v2"]),
+            event("1.3", "Skipped", 99),
+            event("2.1", "Pass", 1),
+        ]
+        res = self.import_file(
+            s, "plumber.ocsf.json", json.dumps(first).encode(), "application/json"
+        )
+        assert res.status_code == 200
+        body = res.json()
+        assert body["created"] == 4
+        assert body["unknown_ref_ids"] == []
+
+        failed = PostureResult.objects.get(requirement=s["nodes"]["1.2"])
+        assert failed.result == "fail"
+        assert failed.message == "job a uses @v1\njob b uses @v2"
+        assert failed.run.tool == "Plumber 0.6.1"
+        assert (
+            PostureResult.objects.get(requirement=s["nodes"]["1.3"]).result
+            == "not_checked"
+        )
+
+        second = [event("1.1", "Fail", 3)]
+        res = self.import_file(
+            s, "plumber.ocsf.json", json.dumps(second).encode(), "application/json"
+        )
+        assert res.status_code == 200
+        second_run = PostureRun.objects.get(id=res.json()["run_id"])
+        assert list(
+            second_run.results.values_list("requirement__ref_id", flat=True)
+        ) == ["1.1"]
+        current = {
+            row["requirement__ref_id"]: row["result"]
+            for row in s["pa"].current_posture(asset_id=s["asset1"].id)
+        }
+        assert current == {
+            "1.1": "fail",
+            "1.2": "fail",
+            "1.3": "not_checked",
+            "2.1": "pass",
+        }
+
+    def test_ocsf_control_falls_back_to_requirements(self, setup):
+        s = setup
+        import json
+
+        events = [
+            {
+                "class_uid": 2003,
+                "compliance": {
+                    "control": "EC2.1",
+                    "requirements": ["CIS-1.1"],
+                    "status": "Fail",
+                    "status_details": "port 22 open",
+                },
+            }
+        ]
+        res = self.import_file(
+            s, "hub.json", json.dumps(events).encode(), "application/json"
+        )
+        assert res.status_code == 200
+        assert res.json()["created"] == 1
+        row = PostureResult.objects.get()
+        assert row.requirement == s["nodes"]["1.1"]
+        assert row.message == "port 22 open"
 
     def test_unsupported_extension(self, setup):
         s = setup

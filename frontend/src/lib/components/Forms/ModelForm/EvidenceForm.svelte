@@ -2,12 +2,12 @@
 	import HiddenInput from '../HiddenInput.svelte';
 	import FileInput from '../FileInput.svelte';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import Select from '$lib/components/Forms/Select.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import Select from '#lib/components/Forms/Select.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
 	import { onMount } from 'svelte';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { page } from '$app/state';
 
 	interface Props {
@@ -60,6 +60,7 @@
 <HiddenInput {form} field="security_exceptions" />
 <HiddenInput {form} field="timeline_entries" />
 <HiddenInput {form} field="contracts" />
+<HiddenInput {form} field="task_templates" />
 
 {#if context !== 'edit'}
 	<FileInput
@@ -100,6 +101,7 @@
 	{form}
 	multiple
 	optionsEndpoint="actors"
+	lazy
 	optionsLabelField="str"
 	optionsInfoFields={{
 		fields: [{ field: 'type', translate: true }],

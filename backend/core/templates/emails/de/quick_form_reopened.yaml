@@ -1,0 +1,13 @@
+subject: "CISO Assistant: Das Schnellformular '${response_name}' wurde erneut geöffnet"
+body: |
+  Hallo,
+
+  Die folgende Antwort auf ein Schnellformular wurde zur Überarbeitung an Sie zurückgegeben:
+
+  - Antwort: ${response_name}
+  - Formular: ${quick_form_name}
+  - Hinweis des Prüfers: ${observation}
+
+  Melden Sie sich in CISO Assistant an, um Ihre Antworten zu aktualisieren: [Formular öffnen](${ciso_assistant_url}/quick-form-responses/${response_id})
+
+  Vielen Dank.

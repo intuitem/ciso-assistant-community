@@ -4,6 +4,15 @@ Feature flags turn whole product areas on or off. They're how you tailor the nav
 
 Flags affect what's visible in the sidebar, what appears in CRUD pages, and which permissions are even relevant. They do **not** delete any underlying data — turning a flag off hides the feature; turning it back on restores the UI as it was.
 
+## Users can narrow, never widen
+
+The flags set here are the ceiling. Each user can hide modules they don't need from their own navigation, under **My profile** → **Settings** → **Modules** (see [Personal module visibility](../../features/personal-module-visibility.md)). A user can't turn on anything that is off here: a flag you disable is shown to them greyed out as **Disabled by your organization.**
+
+- Only flags that gate a navigation area are offered to users, such as `compliance`, `risk_management`, `tprm`, `privacy`, `incidents` or `xrays`. Flags that change how data is displayed or behaves (`inherent_risk`, `dora`, `focus_mode`, `comments`, `custom_fields`, the integration and identity flags, …) stay instance-wide only, so every user reads the same data the same way.
+- A user's hidden modules are personal. They don't affect other users and aren't a substitute for IAM: hiding a module removes it from that user's navigation but doesn't change their permissions.
+- When you enable a flag, it appears for every user who hasn't hidden it themselves.
+- This page always shows and saves the organisation's values, even if you have hidden modules for yourself.
+
 ## Operations
 
 - **xrays** — the X-rays inconsistency-detection page.
@@ -15,7 +24,7 @@ Flags affect what's visible in the sidebar, what appears in CRUD pages, and whic
 ## Governance
 
 - **risk_acceptances** — the risk-acceptance workflow.
-- **exceptions** — security-exception tracking.
+- **exceptions** — [security exception](../../concepts/security-exceptions.md) tracking.
 - **follow_up** — [findings binders](../../concepts/findings-assessments.md) and the standalone **Findings** list.
 - **findings_from_requirements** — adds a **Findings** tab on a requirement assessment, so a finding can be raised straight from an audit. The audit's findings are collected in a binder created on first use. _Default off._
 - **commitment_management** — [commitments](../../concepts/commitments.md): the delivery date an owner promises on an applied control or a one-off task, and its renegotiation. _Default off._
@@ -23,6 +32,7 @@ Flags affect what's visible in the sidebar, what appears in CRUD pages, and whic
 - **organisation_issues** — context register: issues affecting the organisation.
 - **organisation_objectives** — context register: organisational objectives.
 - **policy_documents** — the dedicated Policies surface (a filtered view of applied controls).
+- **quick_forms** — labelled **Forms and Requests**: [quick forms and the requests they raise](../../concepts/quick-forms.md). Turns on **Published forms**, **My requests** and the **Requests** queue. _Default off._
 - **document_management** — the standalone [Documents](../../concepts/documents.md) module: the reading catalogue, document list, and templates. Author or upload documents through a draft → published lifecycle, independent of policies.
 
 ## Risk
@@ -30,9 +40,10 @@ Flags affect what's visible in the sidebar, what appears in CRUD pages, and whic
 - **ebiosrm** — the EBIOS RM module.
 - **scoring_assistant** — the OWASP-based scoring assistant.
 - **vulnerabilities** — vulnerability tracking.
+- **vulnerability_sla** — labelled **Vulnerability SLA**: the [vulnerability SLA policy](vulnerability-sla.md), which gives vulnerabilities a due date from their severity and shows their SLA status. Turned off, no detection or due date is filled in automatically, **Refresh SLA due dates** is greyed out, and the **SLA** column, the SLA badge on a vulnerability's page and the settings tab are hidden; the policy is kept. Runs on vulnerabilities, so turning it on also turns on **vulnerabilities**.
 - **quantitative_risk_studies** — Monte-Carlo quantitative risk.
 - **inherent_risk** — surface inherent-risk columns alongside residual risk on assessments. _Default off._
-- **threat_modeling** — the threat-modeling surface. _Default off._
+- **threat_modeling** — [threat models](../../concepts/ttps-and-threat-models.md#threat-models): attack graphs built from TTP catalog techniques. Needs `ttps` on as well. _Default off._
 
 ## Compliance
 
@@ -57,12 +68,13 @@ Flags affect what's visible in the sidebar, what appears in CRUD pages, and whic
 - **purposes** — purposes register.
 - **right_requests** — data-subject right requests.
 - **data_breaches** — data-breach tracking.
+- **dpias** — labelled **DPIAs**: [DPIA screening and data protection impact assessments](../../concepts/dpia.md) on the processing register, and the **DPIAs** page. Runs on quick forms, so turning it on also turns on **quick_forms**. _Default off._
 
 ## Catalog
 
 - **security_advisories** — the security advisories catalogue.
 - **cwes** — the CWE catalogue.
-- **ttps** — the TTP catalogues (MITRE ATT&CK, ATLAS): tactics and techniques. _Default off._
+- **ttps** — the [TTP catalogues](../../concepts/ttps-and-threat-models.md) (MITRE ATT&CK Enterprise, ICS and Mobile, ATLAS): tactics and techniques. Also required by threat models. _Default off._
 
 ## Metrology and reporting
 
@@ -77,6 +89,7 @@ Flags affect what's visible in the sidebar, what appears in CRUD pages, and whic
 - **jit_provisioning** — [SSO auto-provisioning](../sso/README.md#auto-provisioning-jit): auto-create an account on a user's first SSO login. Also unlocks the **IdP groups** menu and the **IdP groups** column on the users table (see `idp_groups` below), so auto-provisioned users can inherit roles through IdP group mapping.
 - **idp_groups** — [SCIM 2.0 provisioning and IdP group mapping](../sso/scim.md): the SCIM settings tab, and — same as `jit_provisioning` above — the IdP groups menu and the IdP groups column on the users table. _PRO._
 - **service_accounts** — [service accounts](../../integrations/service-accounts.md) for machine-to-machine API access via OAuth2 client credentials. _PRO._
+- **notification_center** — the in-app [notification inbox](../../features/notifications.md) and the **Notifications** settings tab. Email notifications don't depend on it. _Default on._
 - **chat_mode** — the in-product chat assistant. _Default off; only visible when `ENABLE_CHAT` is set on the instance._
 - **infra_config_management** — the [allowed-IP whitelist](infra-config-allowed-ip.md) settings tab. _Only visible when `ENABLE_INFRA_CONFIG_MANAGEMENT` is set on the instance._
 - **terminologies** — organisation-specific label overrides.

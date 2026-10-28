@@ -17,12 +17,13 @@ from rest_framework.views import APIView
 from core.pagination import CustomLimitOffsetPagination
 from core.models import EvidenceRevision
 from core.utils import compare_schema_versions
-from iam.models import User, Folder
+from iam.models import Folder
 from serdes.serializers import LoadBackupSerializer
 
 from django.db.models.signals import post_save
 from django.apps import apps
 from django.conf import settings
+from django.utils.module_loading import import_string
 from auditlog.context import disable_auditlog
 from django.core.files.base import ContentFile
 import hashlib
@@ -32,14 +33,33 @@ logger = structlog.get_logger(__name__)
 GZIP_MAGIC_NUMBER = b"\x1f\x8b"
 
 
+def _reload_current_backup(current_backup: str) -> None:
+    """Put back the database content dumped before a restore attempt."""
+    sys.stdin = io.StringIO(current_backup)
+    management.call_command("flush", interactive=False)
+    management.call_command(
+        "loaddata",
+        "-",
+        format="json",
+        verbosity=0,
+        exclude=[
+            "contenttypes",
+            "auth.permission",
+            "sessions.session",
+            "iam.ssosettings",
+            "knox.authtoken",
+        ],
+    )
+
+
 class ExportBackupView(APIView):
     def get(self, request, *args, **kwargs):
         if not request.user.has_backup_permission:
             return Response(status=status.HTTP_403_FORBIDDEN)
-        response = HttpResponse(content_type="application/json")
+        response = HttpResponse(content_type="application/gzip")
         timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
         response["Content-Disposition"] = (
-            f'attachment; filename="ciso-assistant-db-{settings.VERSION}-{timestamp}.json"'
+            f'attachment; filename="ciso-assistant-db-{settings.VERSION}-{timestamp}.json.gz"'
         )
 
         buffer = io.StringIO()
@@ -148,21 +168,7 @@ class LoadBackupView(APIView):
             )
             # On failure, restore the original data.
             try:
-                sys.stdin = io.StringIO(current_backup)
-                management.call_command("flush", interactive=False)
-                management.call_command(
-                    "loaddata",
-                    "-",
-                    format="json",
-                    verbosity=0,
-                    exclude=[
-                        "contenttypes",
-                        "auth.permission",
-                        "sessions.session",
-                        "iam.ssosettings",
-                        "knox.authtoken",
-                    ],
-                )
+                _reload_current_backup(current_backup)
             except Exception as restore_error:
                 logger.error("Error restoring original backup", exc_info=restore_error)
                 return Response(
@@ -179,44 +185,35 @@ class LoadBackupView(APIView):
         finally:
             post_save.disconnect(fixture_callback)
 
-        # Enforce LICENSE_SEATS after successful restore
-        license_seats = getattr(settings, "LICENSE_SEATS", None)
-        if license_seats is not None:
-            editor_count = len(User.get_editors())
-            if editor_count > license_seats:
+        # Deployment-specific checks on the restored data (the enterprise build
+        # adds its license rules): the first one to object rolls the restore back,
+        # and so does one that fails to run, since it cannot vouch for the data.
+        for validator in settings.BACKUP_RESTORE_VALIDATORS:
+            error_status = status.HTTP_400_BAD_REQUEST
+            try:
+                error = import_string(validator)()
+            except Exception as check_error:
                 logger.error(
-                    "Backup exceeds license seats, rolling back",
-                    editor_count=editor_count,
-                    license_seats=license_seats,
+                    "Restore check failed", validator=validator, exc_info=check_error
                 )
-                try:
-                    sys.stdin = io.StringIO(current_backup)
-                    management.call_command("flush", interactive=False)
-                    management.call_command(
-                        "loaddata",
-                        "-",
-                        format="json",
-                        verbosity=0,
-                        exclude=[
-                            "contenttypes",
-                            "auth.permission",
-                            "sessions.session",
-                            "iam.ssosettings",
-                            "knox.authtoken",
-                        ],
-                    )
-                except Exception as restore_error:
-                    logger.error(
-                        "Error restoring original backup", exc_info=restore_error
-                    )
-                    return Response(
-                        {"error": "RestoreFailed"},
-                        status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    )
+                error = "RestoreCheckFailed"
+                error_status = status.HTTP_500_INTERNAL_SERVER_ERROR
+            if error is None:
+                continue
+            logger.error(
+                "Restored backup rejected, rolling back",
+                validator=validator,
+                error=error,
+            )
+            try:
+                _reload_current_backup(current_backup)
+            except Exception as restore_error:
+                logger.error("Error restoring original backup", exc_info=restore_error)
                 return Response(
-                    {"error": "errorLicenseSeatsExceeded"},
-                    status=status.HTTP_400_BAD_REQUEST,
+                    {"error": "RestoreFailed"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 )
+            return Response({"error": error}, status=error_status)
 
         return Response({}, status=status.HTTP_200_OK)
 

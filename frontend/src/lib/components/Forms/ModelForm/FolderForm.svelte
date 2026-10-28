@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { m } from '$paraglide/messages';
+	import * as m from '#paraglide/messages.js';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import FileInput from '../FileInput.svelte';
 	import Checkbox from '../Checkbox.svelte';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import type { CacheLock, ModelInfo } from '$lib/utils/types';
+	import type { CacheLock, ModelInfo } from '#lib/utils/types.js';
 
 	// Props unused but referenced to avoid browser warnings because they're needed for enterprise Folderform
 

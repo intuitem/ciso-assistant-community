@@ -1,0 +1,16 @@
+subject: "CISO Assistant: Ihnen wurde '${task_name}' zugewiesen"
+body: |
+  Hallo,
+
+  Ihnen wurde folgende Aufgabe zugewiesen:
+
+  - Name: ${task_name}
+  - Beschreibung: ${task_description}
+  - Referenz-ID: ${task_ref_id}
+  - Aufgabendatum: ${task_date}
+  - Wiederkehrend: ${is_recurrent}
+  - Bereich: ${folder_name}
+
+  Melden Sie sich in Ihrem CISO-Assistant-Portal an, um diese Aufgabe anzuzeigen und zu verwalten: [CISO Assistant öffnen](${ciso_assistant_url}/task-templates/${task_id})
+
+  Vielen Dank.

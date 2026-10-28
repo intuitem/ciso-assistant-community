@@ -1,9 +1,8 @@
 import { writable, derived } from 'svelte/store';
-import { browser } from '$app/environment';
+import { browser } from '$app/env';
 import { persisted, type Persisted } from 'svelte-persisted-store';
 import type { Driver } from 'driver.js';
 import { DataHandler } from '@vincjo/datatables/remote';
-import type { TreeViewNode } from '$lib/components/TreeView/types';
 
 // Focus mode
 export interface FocusModeState {
@@ -32,6 +31,7 @@ export function clearFocusMode() {
 export const showNotification = writable(
 	(browser && localStorage.getItem('showNotification')) || 'false'
 );
+
 showNotification.subscribe((val) => {
 	if (browser) return (localStorage.showNotification = val);
 });
@@ -55,7 +55,7 @@ export const showAllEvents = persisted('showAllEvents', true, {
 
 export const lastAccordionItem = persisted('lastAccordionItem', ['']);
 
-const expandedNodes: TreeViewNode[] = [];
+const expandedNodes: string[] = [];
 
 export const expandedNodesState = persisted('expandedNodes', expandedNodes, {
 	storage: 'session'
@@ -88,6 +88,9 @@ export const createModalCache = {
 export const driverInstance = writable<Driver | null>(null);
 
 export const tableHandlers = writable<Record<string, DataHandler>>({});
+// Promise-returning refetch per table endpoint: DataHandler.invalidate() itself
+// returns void, so callers that need to wait for the rows use this instead.
+export const tableRefreshers = writable<Record<string, () => Promise<unknown>>>({});
 
 export const tableStates: Persisted<Record<string, { pageNumber: number; rowsPerPage: number }>> =
 	persisted('tableStates', {});
@@ -95,6 +98,10 @@ export const tableStates: Persisted<Record<string, { pageNumber: number; rowsPer
 // Persisted table filters per model path (e.g. "/applied-controls" -> { folder: [{value: "uuid"}], status: [{value: "active"}] })
 export const tableFilterStates: Persisted<Record<string, Record<string, { value: string }[]>>> =
 	persisted('tableFilterStates', {});
+
+export const tableSortStates: Persisted<
+	Record<string, { orderBy: string; direction: 'asc' | 'desc' }>
+> = persisted('tableSortStates', {});
 
 // Persisted visible columns per URLModel, in display order (e.g. "applied-controls" -> ["ref_id", "name"]). Absent = defaults.
 export const tableColumnStates: Persisted<Record<string, string[]>> = persisted(
@@ -164,3 +171,17 @@ function createPersistedAuditFilters() {
 }
 
 export const auditFiltersStore = createPersistedAuditFilters();
+
+// Unread notification count, shared between the app-bar bell and whatever changes it.
+// The bell's poll covers changes made elsewhere, but marking rows read inside the inbox
+// never navigates, so the mutation endpoints answer with the new count instead.
+export const unreadNotificationCount = writable<number>(0);
+
+/**
+ * Update the badge from any mutation response that reports a count. Shaped as "if the
+ * response mentions it, use it" so the generic callers stay model-agnostic.
+ */
+export function applyUnreadCount(payload: unknown): void {
+	const count = (payload as { unread_count?: unknown } | null)?.unread_count;
+	if (typeof count === 'number') unreadNotificationCount.set(count);
+}

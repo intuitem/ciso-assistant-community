@@ -1,5 +1,5 @@
 from django.db import models
-from iam.models import User, FolderMixin, PublishInRootFolderMixin
+from iam.models import FolderMixin
 from tprm.models import Entity
 from core.models import Actor, AppliedControl, Asset, Evidence, Incident, Perimeter
 from core.models import FilteringLabelMixin, Terminology
@@ -12,6 +12,12 @@ from auditlog.registry import auditlog
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 import uuid
+
+
+class DpiaRequirementSource(models.TextChoices):
+    ASSESSMENT = "assessment", _("Assessment")
+    OVERRIDE = "override", _("Override")
+    MANUAL = "manual", _("Manual")
 
 
 class NameDescriptionFolderMixin(NameDescriptionMixin, FolderMixin):
@@ -78,8 +84,25 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
         ("privacy_approved", "Approved"),
         ("privacy_deprecated", "Deprecated"),
     )
+    ROLE_CHOICES = (
+        ("privacy_controller", "Controller"),
+        ("privacy_joint_controller", "Joint Controller"),
+        ("privacy_data_processor", "Data Processor"),
+    )
+    # A DPIA is the controller's (Art. 35): a processor only assists (Art. 28(3)(f)).
+    DPIA_ROLES = ("privacy_controller", "privacy_joint_controller")
 
     ref_id = models.CharField(max_length=100, blank=True)
+    # Art. 30(1) register for controller roles, Art. 30(2) for processor roles
+    role = models.CharField(
+        max_length=30, choices=ROLE_CHOICES, default="privacy_controller"
+    )
+    controllers = models.ManyToManyField(
+        Entity,
+        blank=True,
+        related_name="processings_as_controller",
+        help_text="Controllers on whose behalf this processing is carried out",
+    )
     nature = models.ManyToManyField(
         Terminology,
         blank=True,
@@ -99,6 +122,35 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
     usage_channel = models.CharField(max_length=255, blank=True)
     dpia_required = models.BooleanField(default=False, blank=True)
     dpia_reference = models.CharField(max_length=255, blank=True)
+    dpia_screening = models.ForeignKey(
+        "core.QuickFormResponse",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="screened_processings",
+        verbose_name=_("DPIA screening"),
+    )
+    # The DPIA last validated for this processing, a quick form response.
+    dpia = models.ForeignKey(
+        "core.QuickFormResponse",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="assessed_processings",
+        verbose_name=_("DPIA"),
+    )
+    # Who or what last set `dpia_required`; written through
+    # `privacy.dpia_requirement.set_dpia_required` with its history row.
+    dpia_required_source = models.CharField(
+        max_length=20,
+        choices=DpiaRequirementSource.choices,
+        blank=True,
+        default="",
+        verbose_name=_("DPIA requirement source"),
+    )
+    dpia_required_set_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("DPIA requirement set at")
+    )
     has_sensitive_personal_data = models.BooleanField(default=False)
     associated_controls = models.ManyToManyField(
         AppliedControl, blank=True, related_name="processings"
@@ -121,6 +173,10 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
         Perimeter, blank=True, related_name="processings"
     )
     fields_to_check = ["ref_id", "name"]
+
+    @property
+    def dpia_applies(self) -> bool:
+        return self.role in self.DPIA_ROLES
 
     def update_sensitive_data_flag(self):
         """Update the has_sensitive_personal_data flag based on associated personal data"""
@@ -390,6 +446,8 @@ class DataContractor(ProcessingChildMixin, NameDescriptionFolderMixin):
 
     fields_to_check = ["entity", "relationship_type", "processing"]
 
+    IAM_SCOPE_FIELD = "entity"
+
     def __str__(self):
         return self.name if self.name else self.relationship_type
 
@@ -420,6 +478,8 @@ class DataTransfer(ProcessingChildMixin, NameDescriptionFolderMixin):
     documentation_link = models.URLField(blank=True, max_length=2048)
 
     fields_to_check = ["entity", "country", "processing"]
+
+    IAM_SCOPE_FIELD = "entity"
 
     def __str__(self):
         return self.name if self.name else self.country
@@ -573,6 +633,54 @@ class DataBreach(NameDescriptionFolderMixin):
         ordering = ["-discovered_on"]
         verbose_name = "Data Breach"
         verbose_name_plural = "Data Breaches"
+
+
+class DpiaRequirementChange(AbstractBaseModel, FolderMixin):
+    """One change of a processing's `dpia_required`, whatever the path (form,
+    API, batch, accepted screening). Append-only; `created_at` is when it
+    happened."""
+
+    processing = models.ForeignKey(
+        Processing,
+        on_delete=models.CASCADE,
+        related_name="dpia_requirement_changes",
+        verbose_name=_("Processing"),
+    )
+    dpia_required = models.BooleanField(verbose_name=_("DPIA required"))
+    previous_dpia_required = models.BooleanField(
+        null=True, blank=True, verbose_name=_("Previously required")
+    )
+    source = models.CharField(
+        max_length=20,
+        choices=DpiaRequirementSource.choices,
+        verbose_name=_("Source"),
+    )
+    response = models.ForeignKey(
+        "core.QuickFormResponse",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name=_("Screening"),
+    )
+    changed_by = models.ForeignKey(
+        "iam.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="dpia_requirement_changes",
+        verbose_name=_("Changed by"),
+    )
+    note = models.TextField(blank=True, default="", verbose_name=_("Note"))
+
+    class Meta:
+        verbose_name = _("DPIA requirement change")
+        verbose_name_plural = _("DPIA requirement changes")
+        ordering = ["-created_at"]
+
+    def save(self, *args, **kwargs):
+        self.folder = self.processing.folder
+        super().save(*args, **kwargs)
 
 
 common_exclude = ["created_at", "updated_at"]

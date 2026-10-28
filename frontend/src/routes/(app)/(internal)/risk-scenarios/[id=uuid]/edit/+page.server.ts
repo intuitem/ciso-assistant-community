@@ -1,19 +1,19 @@
 import { setError, superValidate } from 'sveltekit-superforms';
 import type { PageServerLoad } from './$types';
 
-import { BASE_API_URL } from '$lib/utils/constants';
-import { getModelInfo } from '$lib/utils/crud';
-import { formatSelectFieldData } from '$lib/utils/load';
-import { modelSchema } from '$lib/utils/schemas';
-import { headData } from '$lib/utils/table';
-import type { StrengthOfKnowledgeEntry } from '$lib/utils/types';
-import { type TableSource } from '@skeletonlabs/skeleton-svelte';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { getModelInfo } from '#lib/utils/crud.js';
+import { formatSelectFieldData } from '#lib/utils/load.js';
+import { modelSchema } from '#lib/utils/schemas.js';
+import { headData } from '#lib/utils/table.js';
+import type { StrengthOfKnowledgeEntry } from '#lib/utils/types.js';
+import { type TableSource } from '#lib/components/ModelTable/types.js';
 import { fail, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
-import { defaultWriteFormAction } from '$lib/utils/actions';
-import { safeTranslate } from '$lib/utils/i18n';
+import { defaultWriteFormAction } from '#lib/utils/actions.js';
+import { safeTranslate } from '#lib/utils/i18n.js';
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
 	const URLModel = 'risk-scenarios';
@@ -32,22 +32,14 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 	const tables: Record<string, any> = {};
 
-	await Promise.all(
-		['assets', 'applied-controls', 'vulnerabilities'].map(async (key) => {
-			const keyEndpoint = `${BASE_API_URL}/${key}/?risk_scenarios=${params.id}`;
-			const response = await fetch(keyEndpoint);
-			if (response.ok) {
-				const table: TableSource = {
-					head: headData(key),
-					body: [],
-					meta: []
-				};
-				tables[key] = table;
-			} else {
-				console.error(`Failed to fetch data for ${key}: ${response.statusText}`);
-			}
-		})
-	);
+	for (const key of ['assets', 'applied-controls', 'vulnerabilities']) {
+		const table: TableSource = {
+			head: headData(key),
+			body: [],
+			meta: []
+		};
+		tables[key] = table;
+	}
 
 	const selectOptions: Record<string, any> = {};
 

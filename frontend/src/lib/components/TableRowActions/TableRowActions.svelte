@@ -1,21 +1,21 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
-	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
-	import type { ModelMapEntry } from '$lib/utils/crud';
-	import type { urlModel } from '$lib/utils/types';
+	import DeleteConfirmModal from '#lib/components/Modals/DeleteConfirmModal.svelte';
+	import PromptConfirmModal from '#lib/components/Modals/PromptConfirmModal.svelte';
+	import type { ModelMapEntry } from '#lib/utils/crud.js';
+	import type { urlModel } from '#lib/utils/types.js';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { FormDataShape } from '$lib/utils/schemas';
+	import type { FormDataShape } from '#lib/utils/schemas.js';
 
-	import { m } from '$paraglide/messages';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import { canPerformActionOnObject } from '$lib/utils/access-control';
+	import { m } from '#paraglide/messages.js';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import { canPerformActionOnObject } from '#lib/utils/access-control.js';
 	import {
 		getModalStore,
 		type ModalStore,
 		type ModalComponent,
 		type ModalSettings
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -147,6 +147,7 @@
 			!['frameworks', 'risk-matrices'].includes(URLModel) &&
 			editURL
 	);
+
 	let displayDelete = $derived(canDeleteObject && deleteForm !== null);
 </script>
 

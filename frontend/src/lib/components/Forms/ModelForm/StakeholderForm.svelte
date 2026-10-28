@@ -1,15 +1,15 @@
 <script lang="ts">
 	import type { SuperForm } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import { m } from '$paraglide/messages';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import { m } from '#paraglide/messages.js';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
 	import Checkbox from '../Checkbox.svelte';
 	import RadioGroup from '../RadioGroup.svelte';
-	import { type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton-svelte';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import { type ModalComponent, type ModalSettings } from '#lib/components/Modals/stores.js';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
 	import { page } from '$app/state';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 
 	interface Props {
 		form: SuperForm<Record<string, any>>;

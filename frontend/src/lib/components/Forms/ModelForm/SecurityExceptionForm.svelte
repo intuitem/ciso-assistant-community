@@ -1,21 +1,24 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import HiddenInput from '../HiddenInput.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
 	import Select from '../Select.svelte';
 	import { defaults, type SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import { m } from '$paraglide/messages';
-	import { type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton-svelte';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import { m } from '#paraglide/messages.js';
 	import { onMount } from 'svelte';
-	import { getModelInfo } from '$lib/utils/crud';
+	import { getModelInfo } from '#lib/utils/crud.js';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { invalidateAll } from '$app/navigation';
-	import { AppliedControlSchema } from '$lib/utils/schemas';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { refreshAll } from '$app/navigation';
+	import { AppliedControlSchema } from '#lib/utils/schemas.js';
 	import { page } from '$app/state';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import { getModalStore } from '$lib/components/Modals/stores';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings
+	} from '#lib/components/Modals/stores.js';
 	import MarkdownField from '../MarkdownField.svelte';
 	import CustomFieldsSection from '../CustomFieldsSection.svelte';
 	import { formFieldProxy } from 'sveltekit-superforms';
@@ -75,7 +78,7 @@
 			title: safeTranslate('add-' + appliedControlModel.localName),
 			response: (r: boolean) => {
 				if (r) {
-					invalidateAll();
+					refreshAll();
 				}
 			}
 		};
@@ -102,6 +105,7 @@
 	{form}
 	multiple
 	optionsEndpoint="actors"
+	lazy
 	optionsLabelField="str"
 	optionsInfoFields={{
 		fields: [{ field: 'type', translate: true }],
@@ -214,6 +218,7 @@
 	multiple
 	{form}
 	optionsEndpoint="evidences"
+	lazy
 	optionsExtraFields={[['folder', 'str']]}
 	optionsLabelField="auto"
 	field="evidences"

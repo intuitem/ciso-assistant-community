@@ -1,7 +1,8 @@
 import { writable } from 'svelte/store';
-import { browser } from '$app/environment';
+import { browser } from '$app/env';
 import { goto as _goto } from '$app/navigation';
-import { m } from '$paraglide/messages';
+import { match } from '$app/paths';
+import { m } from '#paraglide/messages.js';
 
 const STORAGE_KEY = 'ciso:breadcrumbs';
 
@@ -47,7 +48,7 @@ export function syncBreadcrumbsToCurrentUrl(
 	if (idx > 0) {
 		const trimmed = breadcrumbs.slice(0, idx + 1);
 		const matched = trimmed[idx];
-		trimmed[idx] = { ...matched, href: currentUrl };
+		trimmed[idx] = { ...matched, href: currentUrl, label: matched.label || fallbackLabel };
 		return trimmed;
 	}
 	// Fresh load with no match: reset trail.
@@ -175,5 +176,11 @@ export function goto(
 	const { crumbs, label, breadcrumbAction } = opts;
 	const crumb = { label, href: url };
 	crumbs[breadcrumbAction]([crumb]);
-	return _goto(url, opts);
+	return gotoOrLoad(url, opts);
+}
+
+/** goto() for destinations built from data: Kit 3 rejects URLs outside the app's routes, so load those as a full page (server 404) instead */
+export async function gotoOrLoad(url: string | URL, opts?: Parameters<typeof _goto>[1]) {
+	if (await match(url)) return _goto(url, opts);
+	window.location.href = String(url);
 }

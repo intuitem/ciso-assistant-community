@@ -231,7 +231,7 @@ def expand_urns_from_prefixed_list(
 ):
     """
     Convert a prefixed list like 'abc:xyz, def:uvw' into a list of full URNs,
-    using a prefix mapping. Fully qualified URNs (starting with 'urn:') are left untouched.
+    using a prefix mapping. Fully qualified URNs (starting with 'urn:') are only lowercased.
 
     Args:
         field_value (str): Raw string field value from the sheet (e.g., 'abc:id1, urn:...').
@@ -249,7 +249,7 @@ def expand_urns_from_prefixed_list(
             continue
 
         if element.startswith("urn:"):
-            result.append(element)
+            result.append(element.lower())
             continue
 
         parts = element.split(":")
@@ -394,7 +394,7 @@ def inject_questions_into_node(
     Injects parsed questions and their metadata into a requirement node.
     Ensures that question type is valid and handles multiple questions/answers.
 
-    :param qa_data: Allows to retrieve the string from the following columns: "questions", "answer" and "depends_on"
+    :param qa_data: Allows to retrieve the string from the following columns: "questions", "answer", "depends_on" and "question_group"
     :param node: The requirement node (dict)
     :param answers_dict: Dictionary of all available answers (from answer sheet)
     """
@@ -403,6 +403,8 @@ def inject_questions_into_node(
     raw_answer_str = qa_data.get("answer")
     raw_depends_on_str = qa_data.get("depends_on")
     raw_condition_str = qa_data.get("condition")
+    raw_group_str = qa_data.get("question_group")
+    raw_group_color_str = qa_data.get("question_group_color")
 
     if not raw_question_str:
         return
@@ -468,6 +470,35 @@ def inject_questions_into_node(
             f"Mismatch between questions and 'condition' for node {node.get('urn')}"
         )
 
+    group_lines = (
+        [g.strip() for g in str(raw_group_str).split("\n") if g.strip()]
+        if raw_group_str
+        else None
+    )
+    if group_lines and len(group_lines) != len(question_lines):
+        raise ValueError(
+            f"Mismatch between questions and 'question_group' for node {node.get('urn')}"
+        )
+    group_color_lines = (
+        [c.strip() for c in str(raw_group_color_str).split("\n") if c.strip()]
+        if raw_group_color_str
+        else None
+    )
+    if group_color_lines:
+        if not group_lines or len(group_color_lines) != len(question_lines):
+            raise ValueError(
+                f"Mismatch between questions and 'question_group_color' for node {node.get('urn')}"
+            )
+        for color, group in zip(group_color_lines, group_lines):
+            if color != "/" and not re.fullmatch(r"#([0-9a-fA-F]{6})", color):
+                raise ValueError(
+                    f"Invalid 'question_group_color' value '{color}' for node {node.get('urn')}. Must match #RRGGBB or be '/'"
+                )
+            if color != "/" and group == "/":
+                raise ValueError(
+                    f"'question_group_color' '{color}' set on a question without a group for node {node.get('urn')}"
+                )
+
     question_block = {}
 
     for idx, question_text in enumerate(question_lines):
@@ -489,6 +520,10 @@ def inject_questions_into_node(
         }
 
         question_entry["text"] = question_text
+        if group_lines and group_lines[idx] != "/":
+            question_entry["config"] = {"group": group_lines[idx]}
+            if group_color_lines and group_color_lines[idx] != "/":
+                question_entry["config"]["group_color"] = group_color_lines[idx].upper()
         _attach_question_translations(
             question_entry,
             row_translations,
@@ -1211,6 +1246,15 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
     if "max_score" in meta:
         framework["max_score"] = int(meta["max_score"])
 
+    if meta.get("result_aggregation"):
+        result_aggregation = str(meta["result_aggregation"]).strip().lower()
+        if result_aggregation not in ("per_answer", "tiered_all"):
+            raise ValueError(
+                f'(framework) Invalid result_aggregation "{result_aggregation}": '
+                "expected per_answer or tiered_all."
+            )
+        framework["result_aggregation"] = result_aggregation
+
     if meta.get("field_visibility"):
         try:
             field_visibility = json.loads(meta["field_visibility"])
@@ -1222,6 +1266,31 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
                 '({"field": {"role": "edit"|"read"|"hidden"}})'
             )
         framework["field_visibility"] = field_visibility
+
+    # The standard defines the score scale: audits of the framework keep it.
+    if "score_scale_locked" in meta:
+        framework["score_scale_locked"] = str(
+            meta["score_scale_locked"]
+        ).strip().lower() in ("1", "true", "yes", "x")
+
+    # Calculation method proposed for new audits (defaults to "average").
+    if meta.get("score_calculation_method"):
+        method = str(meta["score_calculation_method"]).strip()
+        if method not in ("average", "sum", "average_of_averages"):
+            raise ValueError(
+                f"(framework) Invalid score_calculation_method {method!r}: "
+                "expected average, sum or average_of_averages"
+            )
+        framework["score_calculation_method"] = method
+
+    # Scoring proposed for new audits: N/A requirements counted as the target
+    # score, which implementation groups can override (see below).
+    if "anchor_na_to_target" in meta:
+        framework["anchor_na_to_target"] = str(
+            meta["anchor_na_to_target"]
+        ).strip().lower() in ("1", "true", "yes", "x")
+    if meta.get("target_score") not in (None, ""):
+        framework["target_score"] = float(meta["target_score"])
 
     score_name = meta.get("scores_definition")
     if score_name and score_name in object_blocks:
@@ -1266,11 +1335,33 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
 
             if data.get("default_selected") is not None:
                 ig_entry["default_selected"] = bool(data.get("default_selected"))
+            if data.get("target_score") not in (None, ""):
+                if "target_score" not in framework:
+                    raise ValueError(
+                        f"(framework) Implementation group {ig_entry['ref_id']!r} "
+                        "sets a target_score: the framework needs one too"
+                    )
+                ig_entry["target_score"] = float(data["target_score"])
 
             attach_translations_from_row(ig_entry, ig_header, row)
             ig_defs.append(ig_entry)
 
         framework["implementation_groups_definition"] = ig_defs
+
+    # Audits must accept what the framework proposes (same rules as the loader).
+    if framework.get("anchor_na_to_target") and "target_score" not in framework:
+        raise ValueError("(framework) anchor_na_to_target needs a target_score")
+    scale = (framework.get("min_score", 0), framework.get("max_score", 100))
+    targets = [("target_score", framework.get("target_score"))] + [
+        (f"implementation group {ig['ref_id']!r} target_score", ig.get("target_score"))
+        for ig in framework.get("implementation_groups_definition") or []
+    ]
+    for label, target in targets:
+        if target is not None and not scale[0] <= target <= scale[1]:
+            raise ValueError(
+                f"(framework) {label} {target} is outside the scale "
+                f"{scale[0]}-{scale[1]}"
+            )
 
     # NOTE: The requirement_nodes loop counts ALL rows (including empty) for its
     # counter logic, so we cannot use parse_content_rows here.
@@ -1562,7 +1653,7 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
                 f"from the implementation groups definition {sorted(defined_igs)}: {details}"
             )
 
-    library["objects"]["framework"] = framework
+    library["objects"].setdefault("frameworks", []).append(framework)
 
 
 def _handle_metric_definitions(obj, library, compat_mode, verbose):
@@ -1659,9 +1750,7 @@ def _handle_risk_matrix(obj, library, wb):
     """Process a risk_matrix object block into the library."""
     matrix = parse_risk_matrix(obj["meta"], obj["content_sheet"], wb)
     if matrix:
-        if "risk_matrix" not in library["objects"]:
-            library["objects"]["risk_matrix"] = []
-        library["objects"]["risk_matrix"].append(matrix)
+        library["objects"].setdefault("risk_matrices", []).append(matrix)
 
 
 def _handle_requirement_mapping_set(obj, library, wb, sheets, compat_mode, verbose):
@@ -1742,6 +1831,9 @@ def _handle_requirement_mapping_set(obj, library, wb, sheets, compat_mode, verbo
         if "rationale" in data and data["rationale"]:
             entry["rationale"] = data.get("rationale").strip()
             entry_revert["rationale"] = data.get("rationale").strip()
+        if "annotation" in data and data["annotation"]:
+            entry["annotation"] = data.get("annotation").strip()
+            entry_revert["annotation"] = data.get("annotation").strip()
         if "strength_of_relationship" in data and data["strength_of_relationship"]:
             entry["strength_of_relationship"] = int(
                 data.get("strength_of_relationship")
@@ -1882,9 +1974,8 @@ def validate_name_lengths(library: dict) -> list:
 
     objects = library.get("objects", {})
 
-    # Check framework
-    framework = objects.get("framework")
-    if framework:
+    # Check frameworks
+    for framework in objects.get("frameworks", []):
         if framework.get("name") and len(framework["name"]) > NAME_MAX_LENGTH:
             violations.append(
                 ("framework", framework.get("urn", "?"), len(framework["name"]))
@@ -1906,7 +1997,7 @@ def validate_name_lengths(library: dict) -> list:
         "tactics",
         "techniques",
         "reference_controls",
-        "risk_matrix",
+        "risk_matrices",
         "metric_definitions",
         "requirement_mapping_sets",
     ):

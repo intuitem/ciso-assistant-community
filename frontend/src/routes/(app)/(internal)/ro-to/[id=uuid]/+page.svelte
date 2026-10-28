@@ -1,13 +1,13 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { page } from '$app/state';
-	import { pageTitle } from '$lib/utils/stores';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import { canPerformAction } from '$lib/utils/access-control';
+	import { pageTitle } from '#lib/utils/stores.js';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import { canPerformAction } from '#lib/utils/access-control.js';
 	interface Props {
 		data: PageData;
 	}
@@ -26,16 +26,17 @@
 		}
 	});
 
-	const pertinenceColor: Record<string, string> = {
-		undefined: 'bg-surface-200-800 text-surface-700-300',
-		irrelevant: 'bg-green-200 text-green-700',
-		partially_relevant: 'bg-yellow-200 text-yellow-700',
-		fairly_relevant: 'bg-orange-200 text-orange-700',
-		highly_relevant: 'bg-red-200 text-red-700'
+	// Keyed by level (0 = undefined): labels come from the study's matrix.
+	const pertinenceColor: Record<number, string> = {
+		0: 'bg-surface-200-800 text-surface-700-300',
+		1: 'bg-green-200 text-green-700',
+		2: 'bg-yellow-200 text-yellow-700',
+		3: 'bg-orange-200 text-orange-700',
+		4: 'bg-red-200 text-red-700'
 	};
 
 	const user = page.data.user;
-	import { URL_MODEL_MAP } from '$lib/utils/crud';
+	import { URL_MODEL_MAP } from '#lib/utils/crud.js';
 
 	pageTitle.set(data.title);
 
@@ -133,7 +134,7 @@
 				<i class="fa-solid fa-equals"></i>
 				<p class="flex flex-col items-center">
 					<span class="text-xs text-surface-600-400">{m.pertinence()}</span>
-					<span class="badge text-sm font-bold {pertinenceColor[roto.pertinence]}"
+					<span class="badge text-sm font-bold {pertinenceColor[roto.pertinence_level]}"
 						>{safeTranslate(roto.pertinence)}</span
 					>
 				</p>

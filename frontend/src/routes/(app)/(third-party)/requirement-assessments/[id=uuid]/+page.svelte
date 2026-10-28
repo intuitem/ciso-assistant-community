@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { complianceResultColorMap, complianceStatusColorMap } from '$lib/utils/constants';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
+	import { complianceResultColorMap, complianceStatusColorMap } from '#lib/utils/constants.js';
 	import {
 		displayScoreColor,
 		formatScoreValue,
@@ -10,18 +10,20 @@
 		getRequirementTitle,
 		getSecureRedirect,
 		alignmentColorMap
-	} from '$lib/utils/helpers';
-	import { safeTranslate } from '$lib/utils/i18n';
+	} from '#lib/utils/helpers.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 
-	import { hideSuggestions } from '$lib/utils/stores';
-	import { m } from '$paraglide/messages';
+	import { hideSuggestions } from '#lib/utils/stores.js';
+	import { m } from '#paraglide/messages.js';
+	import ScorePair from '#lib/components/ComplianceAssessment/ScorePair.svelte';
 	import { Progress, Tabs } from '@skeletonlabs/skeleton-svelte';
 	import type { PageData } from '../[id=uuid]/$types';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import MappingInferenceView from '$lib/components/ComplianceAssessment/MappingInferenceView.svelte';
-	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
-	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
-	import { countMasked } from '$lib/utils/related-visibility';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import MappingInferenceView from '#lib/components/ComplianceAssessment/MappingInferenceView.svelte';
+	import AuditTrailButton from '#lib/components/AuditTrail/AuditTrailButton.svelte';
+	import CommentsPanel from '#lib/components/CommentsPanel/CommentsPanel.svelte';
+	import Question from '#lib/components/Forms/Question.svelte';
+	import { countMasked } from '#lib/utils/related-visibility.js';
 
 	interface Props {
 		data: PageData;
@@ -93,7 +95,8 @@
 		showScore,
 		showDocumentationScore,
 		showRespondentAlignment,
-		showComments
+		showComments,
+		showAnswers
 	} = getFieldVisibility(complianceAssessment, viewerRole);
 
 	const canShowAppliedControls = showAppliedControls && !page.data.user.is_third_party;
@@ -113,7 +116,7 @@
 
 <div class="card space-y-2 p-4 bg-surface-50-950 shadow-sm">
 	<div class="flex flex-row space-x-2 items-center">
-		<code class="code">{data.requirement.urn}</code>
+		<code>{data.requirement.urn}</code>
 		{#if showStatus}
 			<span
 				class="badge h-fit"
@@ -161,38 +164,53 @@
 			</div>
 		{/if}
 		{#if data.complianceAssessmentScore.scoring_enabled && data.requirementAssessment.is_scored}
-			{#if showScore}
-				<div class="shrink-0 relative">
-					<Progress value={formatScoreValue(score, max_score, false, min_score)} min={0} max={100}>
-						<Progress.Circle class="[--size:--spacing(10)]">
-							<Progress.CircleTrack />
-							<Progress.CircleRange class={displayScoreColor(score, max_score, false, min_score)} />
-						</Progress.Circle>
-						<div class="absolute inset-0 flex items-center justify-center">
-							<span class="text-xs font-bold">{score}</span>
+			<ScorePair>
+				{#snippet implementation()}
+					{#if showScore}
+						<div
+							class="shrink-0 relative"
+							title={showDocumentationScore ? m.implementationScore() : m.score()}
+						>
+							<Progress
+								value={formatScoreValue(score, max_score, false, min_score)}
+								min={0}
+								max={100}
+							>
+								<Progress.Circle class="[--size:--spacing(10)]">
+									<Progress.CircleTrack />
+									<Progress.CircleRange
+										class={displayScoreColor(score, max_score, false, min_score)}
+									/>
+								</Progress.Circle>
+								<div class="absolute inset-0 flex items-center justify-center">
+									<span class="text-xs font-bold">{score}</span>
+								</div>
+							</Progress>
 						</div>
-					</Progress>
-				</div>
-			{/if}
-			{#if showDocumentationScore}
-				<div class="shrink-0 relative">
-					<Progress
-						value={formatScoreValue(documentationScore, max_score, false, min_score)}
-						min={0}
-						max={100}
-					>
-						<Progress.Circle class="[--size:--spacing(10)]">
-							<Progress.CircleTrack />
-							<Progress.CircleRange
-								class={displayScoreColor(documentationScore, max_score, false, min_score)}
-							/>
-						</Progress.Circle>
-						<div class="absolute inset-0 flex items-center justify-center">
-							<span class="text-xs font-bold">{documentationScore}</span>
+					{/if}
+				{/snippet}
+				{#snippet documentation()}
+					{#if showDocumentationScore}
+						<div class="shrink-0 relative" title={m.documentationScore()}>
+							<Progress
+								value={formatScoreValue(documentationScore, max_score, false, min_score)}
+								min={0}
+								max={100}
+							>
+								<Progress.Circle class="[--size:--spacing(10)]">
+									<Progress.CircleTrack />
+									<Progress.CircleRange
+										class={displayScoreColor(documentationScore, max_score, false, min_score)}
+									/>
+								</Progress.Circle>
+								<div class="absolute inset-0 flex items-center justify-center">
+									<span class="text-xs font-bold">{documentationScore}</span>
+								</div>
+							</Progress>
 						</div>
-					</Progress>
-				</div>
-			{/if}
+					{/if}
+				{/snippet}
+			</ScorePair>
 		{/if}
 		<div class="ml-auto shrink-0 self-center">
 			<AuditTrailButton
@@ -395,11 +413,22 @@
 	{/if}
 	{#if data.requirementAssessment.requirement.questions != null && Object.keys(data.requirementAssessment.requirement.questions).length !== 0}
 		<h1 class="font-semibold text-sm">{m.questions()}</h1>
-		{#each Object.entries(data.requirementAssessment.requirement.questions) as [urn, question]}
-			<li class="flex justify-between items-center border rounded-xl p-2 disabled">
-				<p>{question.text} ({safeTranslate(question.type)})</p>
-			</li>
-		{/each}
+		{#if showAnswers}
+			<div data-testid="read-only-answers-field">
+				<Question
+					questions={data.requirementAssessment.requirement.questions}
+					initialValue={data.requirementAssessment.answers ?? {}}
+					field="answers"
+					disabled={true}
+				/>
+			</div>
+		{:else}
+			{#each Object.entries(data.requirementAssessment.requirement.questions) as [urn, question]}
+				<li class="flex justify-between items-center border rounded-xl p-2 disabled">
+					<p>{question.text} ({safeTranslate(question.type)})</p>
+				</li>
+			{/each}
+		{/if}
 	{/if}
 	{#if data.requirementAssessment.observation}
 		<div class="card p-4 space-y-2 preset-tonal-primary">

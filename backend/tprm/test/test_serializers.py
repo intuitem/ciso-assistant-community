@@ -77,6 +77,20 @@ class EntitySerializersTestCase(TestCase):
         self.assertEqual(entity.reference_link, new_entity_data["reference_link"])
         self.assertEqual(entity.folder, self.folder)
 
+    def test_entity_write_serializer_rejects_non_dict_legal_identifiers(self):
+        for bad in ["LEI123", ["LEI123"], 42]:
+            serializer = EntityWriteSerializer(
+                data={"name": "Bad", "folder": self.folder.id, "legal_identifiers": bad}
+            )
+            self.assertFalse(serializer.is_valid())
+            self.assertIn("legal_identifiers", serializer.errors)
+
+    def test_entity_read_serializer_tolerates_legacy_non_dict_legal_identifiers(self):
+        Entity.objects.filter(pk=self.entity.pk).update(legal_identifiers="LEI123")
+        self.entity.refresh_from_db()
+        data = EntityReadSerializer(self.entity).data
+        self.assertEqual(data["legal_identifiers"], "LEI123")
+
     def test_entity_import_export_serializer(self):
         """Test that EntityImportExportSerializer correctly serializes an Entity for import/export"""
         serializer = EntityImportExportSerializer(self.entity)

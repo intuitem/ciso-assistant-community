@@ -1,6 +1,8 @@
 import pytest
 from uuid import uuid4
 from django.contrib.auth.models import Permission
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -98,9 +100,16 @@ class TestUserGroupMembership:
             content_type=Folder.ContentType.DOMAIN,
         )
         group = UserGroup.objects.create(name=f"{name} team", folder=domain)
-        manager = User.objects.create_user(f"dm-{name}@tests.com", is_published=True)
+        manager = User.objects.create_user(f"dm-{name}@tests.com")
+        # Managers hold their role through a standard (builtin) group, as
+        # production provisioning does — group membership is also what enrolls
+        # them in ancestor default-role audiences (e.g. view_user at the root).
+        manager_group = UserGroup.objects.create(
+            name=f"{name} managers", folder=domain, builtin=True
+        )
+        manager_group.user_set.add(manager)
         ra = RoleAssignment.objects.create(
-            user=manager,
+            user_group=manager_group,
             role=_domain_manager_role(),
             folder=domain,
             is_recursive=True,
@@ -111,8 +120,8 @@ class TestUserGroupMembership:
 
     def test_domain_manager_can_add_members(self, app_config):
         _, group, manager = self._setup_domain()
-        a = User.objects.create_user("a@tests.com", is_published=True)
-        b = User.objects.create_user("b@tests.com", is_published=True)
+        a = User.objects.create_user("a@tests.com")
+        b = User.objects.create_user("b@tests.com")
         client = _client_for(manager)
 
         url = reverse("user-groups-add-members", args=[group.id])
@@ -124,9 +133,9 @@ class TestUserGroupMembership:
 
     def test_domain_manager_can_batch_remove_members(self, app_config):
         _, group, manager = self._setup_domain()
-        keep = User.objects.create_user("keep@tests.com", is_published=True)
-        drop1 = User.objects.create_user("drop1@tests.com", is_published=True)
-        drop2 = User.objects.create_user("drop2@tests.com", is_published=True)
+        keep = User.objects.create_user("keep@tests.com")
+        drop1 = User.objects.create_user("drop1@tests.com")
+        drop2 = User.objects.create_user("drop2@tests.com")
         group.user_set.add(keep, drop1, drop2)
         client = _client_for(manager)
 
@@ -144,7 +153,7 @@ class TestUserGroupMembership:
         group belonging to a sibling domain D2."""
         _, _, manager = self._setup_domain("D1")
         _, other_group, _ = self._setup_domain("D2")
-        target = User.objects.create_user("member@tests.com", is_published=True)
+        target = User.objects.create_user("member@tests.com")
         client = _client_for(manager)
 
         url = reverse("user-groups-add-members", args=[other_group.id])
@@ -161,7 +170,7 @@ class TestUserGroupMembership:
         legacy user-form path stays Global-admin-only. Only the group-scoped path
         is newly permitted."""
         _, group, manager = self._setup_domain()
-        target = User.objects.create_user("member@tests.com", is_published=True)
+        target = User.objects.create_user("member@tests.com")
         client = _client_for(manager)
 
         url = reverse("users-detail", args=[target.id])
@@ -210,7 +219,7 @@ class TestUserGroupMembership:
     def test_domain_manager_cannot_remove_self_from_dma_group(self, app_config):
         """A sole domain admin can't strip their own entitlement (self-lockout)."""
         _, group = self._dma_group()
-        manager = User.objects.create_user("dm@tests.com", is_published=True)
+        manager = User.objects.create_user("dm@tests.com")
         group.user_set.add(manager)
         client = _client_for(manager)
 
@@ -225,8 +234,8 @@ class TestUserGroupMembership:
         """The self-lockout guard only blocks removing oneself; removing a peer
         (even the last other member) stays allowed."""
         _, group = self._dma_group()
-        manager = User.objects.create_user("dm@tests.com", is_published=True)
-        other = User.objects.create_user("other@tests.com", is_published=True)
+        manager = User.objects.create_user("dm@tests.com")
+        other = User.objects.create_user("other@tests.com")
         group.user_set.add(manager, other)
         client = _client_for(manager)
 
@@ -241,7 +250,7 @@ class TestUserGroupMembership:
         """A global admin retains admin from a higher level (root), so self-removal
         from a domain admin group is allowed."""
         _, group = self._dma_group()
-        admin = User.objects.create_user("ga@tests.com", is_published=True)
+        admin = User.objects.create_user("ga@tests.com")
         admin.user_groups.add(UserGroup.objects.get(name="BI-UG-ADM"))
         group.user_set.add(admin)
         client = _client_for(admin)
@@ -259,7 +268,7 @@ class TestUserGroupMembership:
         the child's domain admin group is allowed (higher-level exemption)."""
         parent, _ = self._dma_group("P")
         _, child_group = self._dma_group("C", parent=parent)
-        manager = User.objects.create_user("pm@tests.com", is_published=True)
+        manager = User.objects.create_user("pm@tests.com")
         parent_ra = RoleAssignment.objects.create(
             user=manager,
             role=Role.objects.get(name="BI-RL-DMA"),
@@ -294,7 +303,7 @@ class TestUserGroupMembership:
         member still shows up in the autocomplete results."""
         _, _, manager = self._setup_domain("D1")
         _, d2_group, _ = self._setup_domain("D2")
-        d2_member = User.objects.create_user("d2member@tests.com", is_published=True)
+        d2_member = User.objects.create_user("d2member@tests.com")
         d2_group.user_set.add(d2_member)
         client = _client_for(manager)
 
@@ -388,7 +397,7 @@ class TestUserGroupMembership:
         builtin_group = UserGroup.objects.create(
             name="D1 anchor", folder=domain, builtin=True
         )
-        target = User.objects.create_user("member@tests.com", is_published=True)
+        target = User.objects.create_user("member@tests.com")
         client = _client_for(manager)
 
         url = reverse("user-groups-add-members", args=[builtin_group.id])
@@ -396,3 +405,73 @@ class TestUserGroupMembership:
 
         assert response.status_code == status.HTTP_200_OK
         assert builtin_group.user_set.filter(pk=target.pk).exists()
+
+
+@pytest.mark.django_db
+class TestUserGroupListQueries:
+    """UserGroupFilter sorts — and searches — every visible group by its folder
+    path on each list request, before pagination: the path must not cost a query
+    per group, or the eager user-groups picker pays it on every page."""
+
+    @staticmethod
+    def _add_domains(start: int, count: int) -> None:
+        root = Folder.get_root_folder()
+        for i in range(start, start + count):
+            domain = Folder.objects.create(
+                name=f"QD{i}",
+                parent_folder=root,
+                content_type=Folder.ContentType.DOMAIN,
+            )
+            subdomain = Folder.objects.create(
+                name=f"QD{i} sub",
+                parent_folder=domain,
+                content_type=Folder.ContentType.DOMAIN,
+            )
+            UserGroup.objects.create(name=f"QD{i} team", folder=subdomain)
+
+    @staticmethod
+    def _measure(client, url) -> tuple[int, int]:
+        client.get(url)  # warm caches the added folders invalidated
+        with CaptureQueriesContext(connection) as ctx:
+            response = client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        return len(ctx.captured_queries), response.json()["count"]
+
+    @pytest.mark.parametrize("query", ["", "?search=QD"])
+    def test_query_count_does_not_grow_with_groups(self, authenticated_client, query):
+        url = reverse("user-groups-list") + query
+        self._add_domains(0, 3)
+        baseline_queries, baseline_count = self._measure(authenticated_client, url)
+
+        self._add_domains(3, 10)
+        queries, count = self._measure(authenticated_client, url)
+
+        assert count > baseline_count
+        assert queries == baseline_queries
+
+
+@pytest.mark.django_db
+class TestUserGroupAutocomplete:
+    """Lazy user-group pickers search and hydrate through autocomplete and label
+    options with `name`: it must match the list's, not a built-in group's code."""
+
+    def test_builtin_group_named_as_in_list(self, authenticated_client):
+        domain = Folder.objects.create(
+            name="AC domain",
+            parent_folder=Folder.get_root_folder(),
+            content_type=Folder.ContentType.DOMAIN,
+            create_iam_groups=True,
+        )
+        Folder.create_default_ug_and_ra(domain)
+        group = UserGroup.objects.get(folder=domain, name="BI-UG-ANA")
+        query = f"?id={group.id}"
+
+        listed = authenticated_client.get(reverse("user-groups-list") + query)
+        completed = authenticated_client.get(
+            reverse("user-groups-autocomplete") + query
+        )
+
+        assert completed.status_code == status.HTTP_200_OK
+        name = completed.json()["results"][0]["name"]
+        assert name == listed.json()["results"][0]["name"] == str(group)
+        assert name != group.name

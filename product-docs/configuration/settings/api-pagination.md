@@ -42,6 +42,15 @@ keep working. It is expected to come down to 200 in a future release — build
 new clients to follow `next` rather than to request a large `limit`.
 {% endhint %}
 
+{% hint style="warning" %}
+**Power BI connector 1.0.2 and older truncate their imports** on an instance
+where `PAGINATE_MAX` is below 5000: they page by the `limit` they asked for
+rather than the number of rows served, so each table stops after one page —
+with no error. Connector 1.1.0 and later read the page size back from the
+response and are correct at any ceiling. Upgrade every desktop and gateway
+running the connector before lowering `PAGINATE_MAX`.
+{% endhint %}
+
 ## Client rules
 
 * `limit` must be a strictly positive integer and `offset` a non-negative
@@ -59,4 +68,36 @@ The default page size is unchanged, but `limit` and `offset` validation is
 stricter: values that are not positive integers are rejected with **HTTP 400**
 instead of falling back to the default, so a client sending `limit=0` now gets
 an error where it previously got a full page.
+{% endhint %}
+
+## Selecting fields
+
+A `GET` on a list or detail endpoint accepts `fields`, a comma-separated list
+of the columns to return:
+
+```
+GET /api/applied-controls/?fields=id,name,status
+GET /api/risk-scenarios/?fields=id,applied_controls
+```
+
+This is worth using when a bulk reader needs one or two columns out of a wide
+row — building a link table between two objects, for instance, or exporting a
+single attribute for every record. Responses get smaller and the server does
+less work per row.
+
+* The parameter can only **narrow** a response, never widen one. A name the
+  endpoint does not expose — a model column it does not publish, or a field
+  belonging to a disabled feature — is rejected with **HTTP 400**.
+* Fields hidden from your role are still hidden: naming one is accepted, and
+  the response simply does not contain it, exactly as without the parameter.
+* `id` is always included, even when it is not requested.
+* Names are the top-level keys of the response, not paths: request `folder`,
+  not `folder.name`. The whole nested object is returned.
+* Everything else is unchanged — permissions, pagination, filters and ordering
+  behave exactly as they do without the parameter.
+
+{% hint style="info" %}
+The Power BI connector uses this from version 1.1.0 for its bridge tables. An
+older instance that does not know the parameter simply ignores it and returns
+full rows, so the connector keeps working either way.
 {% endhint %}

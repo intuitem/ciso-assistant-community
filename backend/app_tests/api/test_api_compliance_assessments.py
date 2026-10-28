@@ -512,16 +512,6 @@ class TestComplianceAssessmentMapFrom:
     the engine to exercise partial coverage and mapping_inference.
     """
 
-    @pytest.fixture(autouse=True)
-    def _reset_engine_cache(self):
-        # After each test the django_db transaction rolls back; reload the
-        # global engine so any mapping libraries we created don't leak into
-        # other tests via the in-memory cache.
-        yield
-        from core.mappings.engine import engine
-
-        engine.reload_cache()
-
     # --- helpers -----------------------------------------------------------
     def _audit(self, framework, **kwargs):
         audit = _make_audit(Folder.get_root_folder(), framework, **kwargs)
@@ -570,9 +560,6 @@ class TestComplianceAssessmentMapFrom:
             is_loaded=True,
             content={"requirement_mapping_sets": [rms]},
         )
-        from core.mappings.engine import engine
-
-        engine.reload_cache()
 
     # --- same-framework merge strategy -------------------------------------
     def test_full_copy_into_empty_target(self, authenticated_client):
@@ -809,9 +796,6 @@ class TestComplianceAssessmentMapFrom:
         _make_requirement(src_fw, "A")
         _make_requirement(tgt_fw, "X")
         # no mapping library loaded for this pair
-        from core.mappings.engine import engine
-
-        engine.reload_cache()
 
         source = self._audit(src_fw)
         target = self._audit(tgt_fw)
@@ -855,7 +839,7 @@ class TestComplianceAssessmentDetailActionAuthorization:
     @pytest.fixture
     def outsider_client(self, app_config):
         """An authenticated user with no role assignment on any folder."""
-        user = User.objects.create_user("outsider@tests.com", is_published=True)
+        user = User.objects.create_user("outsider@tests.com")
         client = APIClient()
         client.credentials(
             HTTP_AUTHORIZATION=f"Token {AuthToken.objects.create(user=user)[1]}"

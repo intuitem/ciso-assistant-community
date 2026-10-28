@@ -1,4 +1,5 @@
-import { BASE_API_URL } from '$lib/utils/constants';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { toLocale } from '#paraglide/runtime.js';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ fetch, request }) => {
@@ -15,7 +16,7 @@ export const GET: RequestHandler = async ({ fetch, request }) => {
 	});
 };
 
-export const PATCH: RequestHandler = async ({ fetch, request }) => {
+export const PATCH: RequestHandler = async ({ fetch, request, cookies }) => {
 	const newPreferences = await request.text();
 	const requestInitOptions: RequestInit = {
 		method: 'PATCH',
@@ -26,6 +27,11 @@ export const PATCH: RequestHandler = async ({ fetch, request }) => {
 	const req = await fetch(endpoint, requestInitOptions);
 	const status = await req.status;
 	const responseData = await req.text();
+
+	const lang = req.ok ? toLocale(JSON.parse(newPreferences || '{}')?.lang) : undefined;
+	if (lang) {
+		cookies.set('LOCALE', lang, { httpOnly: false, sameSite: 'lax', path: '/', secure: true });
+	}
 
 	return new Response(responseData, {
 		status: status,

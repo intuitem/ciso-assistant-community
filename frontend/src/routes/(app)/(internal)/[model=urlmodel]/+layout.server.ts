@@ -1,9 +1,9 @@
-import { listViewFields } from '$lib/utils/table';
-import { type TableSource } from '@skeletonlabs/skeleton-svelte';
-import { urlParamModelVerboseName, urlParamModelDescriptionKey } from '$lib/utils/crud';
-import { CUSTOM_FIELD_HOST_MODELS, type CustomFieldDef } from '$lib/utils/customFields';
-import { BASE_API_URL } from '$lib/utils/constants';
-import { fetchAllPages } from '$lib/utils/pagination';
+import { listViewFields } from '#lib/utils/table.js';
+import { type TableSource } from '#lib/components/ModelTable/types.js';
+import { urlParamModelVerboseName, urlParamModelDescriptionKey } from '#lib/utils/crud.js';
+import { CUSTOM_FIELD_HOST_MODELS, type CustomFieldDef } from '#lib/utils/customFields.js';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { fetchAllPages } from '#lib/utils/pagination.js';
 
 export const load = async ({ fetch, params }) => {
 	// Full column superset (defaults + optional), unfiltered: ModelTable strips flag-disabled
@@ -17,8 +17,9 @@ export const load = async ({ fetch, params }) => {
 	}, {});
 
 	// `description` is a standard field on most objects — offer it as an opt-in column
-	// (off by default) wherever a model doesn't already surface it.
-	if (base && !body.includes('description')) {
+	// (off by default) wherever a model doesn't already surface it. A model without one
+	// opts out, so the picker never offers a column that can only be blank.
+	if (base && base.hasDescription !== false && !body.includes('description')) {
 		headData['description'] = 'description';
 	}
 

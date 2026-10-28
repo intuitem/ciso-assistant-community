@@ -1,5 +1,5 @@
 <script lang="ts">
-	import ModelForm from '$lib/components/Forms/ModelForm.svelte';
+	import ModelForm from '#lib/components/Forms/ModelForm.svelte';
 	import type { PageData } from './$types';
 
 	interface Props {
@@ -9,17 +9,26 @@
 	let { data }: Props = $props();
 
 	// NOTE: duplicates `customNameDescription` in crud.ts, which this route ignores.
-	const customNameDescription = ['operational-scenarios', 'terminologies', 'asset-class'].includes(
-		data.model.urlModel
+	// `$derived`, not `const`: this route is shared by every model, so a client-side
+	// navigation between two edit pages swaps `data` without remounting.
+	const customNameDescription = $derived(
+		['operational-scenarios', 'terminologies', 'asset-class', 'quick-form-publications'].includes(
+			data.model.urlModel
+		)
 	);
 </script>
 
-<ModelForm
-	form={data.form}
-	object={data.object}
-	selectOptions={data.selectOptions}
-	model={data.model}
-	{customNameDescription}
-	context="edit"
-	supportedModels={data.supportedModels}
-/>
+<!-- Keyed on what is edited: the form is built once from `data`, so moving
+     to another object's edit page (a metric instance to its definition, say)
+     must build it again, or the previous object's form stays on screen. -->
+{#key `${data.model.urlModel}/${data.object?.id ?? ''}`}
+	<ModelForm
+		form={data.form}
+		object={data.object}
+		selectOptions={data.selectOptions}
+		model={data.model}
+		{customNameDescription}
+		context="edit"
+		supportedModels={data.supportedModels}
+	/>
+{/key}

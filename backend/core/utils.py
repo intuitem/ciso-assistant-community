@@ -41,7 +41,7 @@ def extract_node_id(urn: str | None) -> str | None:
     URN format: urn:{org}:risk:{type}:{slug}:{node_id}
     The node_id is everything after the 5th colon and may contain colons.
     """
-    if not urn:
+    if not urn or not isinstance(urn, str):
         return None
     parts = urn.split(":")
     if len(parts) <= 5:
@@ -71,8 +71,87 @@ def resolve_compute_result(compute_result: str | None) -> str | None:
     return None
 
 
+def resolve_result_tier(compute_results) -> str | None:
+    """The tier a question states, read from the results its choices can set.
+
+    A question that can set `compliant` states the top tier; one that can only
+    set `partially_compliant` states the middle tier; one that can only set
+    `non_compliant` is a blocking statement (the "at least one of these is
+    true" column of a maturity table). A question whose choices set nothing is
+    captured for the record only and states no tier.
+    """
+    resolved = {resolve_compute_result(value) for value in compute_results}
+    if "compliant" in resolved:
+        return "compliant"
+    if "partially_compliant" in resolved:
+        return "partially_compliant"
+    if "non_compliant" in resolved:
+        return "blocking"
+    return None
+
+
+def aggregate_tiered_results(question_results: list[tuple]) -> str | None:
+    """Aggregate answers where a tier is earned only if all of it holds.
+
+    `question_results` is one `(tier, selected)` pair per answered question,
+    `selected` being the resolved results of the choices the respondent picked.
+    A tier is earned when every question stating it was answered with that
+    tier's result; a blocking statement answered `non_compliant` denies every
+    tier outright. `not_applicable` answers stay neutral, as in
+    `aggregate_compute_results`, and an all-`not_applicable` set is
+    `not_applicable`.
+
+    Unlike per-answer aggregation, this can express "all of these must hold",
+    which is how assessment tables built on indicator statements are read (the
+    NCSC CAF being the reference case).
+    """
+    # Every entry is an answered question (the caller only records those), so a
+    # question that states a tier but whose answer affirms nothing - the False
+    # side of "all the following are true" - means that tier does not hold.
+    # Questions stating no tier at all are captured for the record only.
+    answered = [(tier, selected) for tier, selected in question_results if tier]
+    if not answered:
+        return None
+
+    # `not_applicable` is neutral, as in `aggregate_compute_results`: on a
+    # multiple choice answer it drops out of the selection rather than failing
+    # the tier, and a question answered entirely `not_applicable` stops
+    # contributing at all.
+    contributing = []
+    for tier, selected in answered:
+        effective = [result for result in selected if result != "not_applicable"]
+        if selected and not effective:
+            continue
+        contributing.append((tier, effective))
+    if not contributing:
+        return "not_applicable"
+
+    holds_by_tier: dict[str, list[bool]] = {"compliant": [], "partially_compliant": []}
+    for tier, selected in contributing:
+        if tier == "blocking":
+            if any(result == "non_compliant" for result in selected):
+                return "non_compliant"
+            continue
+        holds_by_tier[tier].append(
+            bool(selected) and all(result == tier for result in selected)
+        )
+
+    for tier in ("compliant", "partially_compliant"):
+        if holds_by_tier[tier] and all(holds_by_tier[tier]):
+            return tier
+
+    # Nothing states a tier - only blocking statements, none of them triggered.
+    if not holds_by_tier["compliant"] and not holds_by_tier["partially_compliant"]:
+        return "compliant"
+    return "non_compliant"
+
+
 def aggregate_compute_results(resolved_results: list[str | None]) -> str | None:
-    """Aggregate resolved compute_result values: not_applicable is neutral, else worst-wins."""
+    """Aggregate resolved compute_result values, each answer standing on its own.
+
+    not_applicable is neutral; unanimous answers carry, and answers that
+    disagree land on partially_compliant.
+    """
     contributing = [r for r in resolved_results if r is not None]
     if not contributing:
         return None
@@ -132,7 +211,8 @@ def get_global_currency() -> str:
     from global_settings.models import GlobalSettings
 
     general_settings = GlobalSettings.objects.filter(name="general").first()
-    return general_settings.value.get("currency", "€") if general_settings else "€"
+    value = general_settings.value if general_settings else None
+    return (value or {}).get("currency") or "€"
 
 
 def format_currency(value, currency: str) -> str:
@@ -198,6 +278,7 @@ class RoleCodename(Enum):
     THIRD_PARTY_RESPONDENT = "BI-RL-TPR"
     AUDITEE = "BI-RL-ADE"
     TECHNICAL_TESTER = "BI-RL-TST"
+    USER_CREATOR = "BI-RL-UCR"
 
     def __str__(self) -> str:
         return self.value
@@ -208,6 +289,7 @@ class UserGroupCodename(Enum):
     GLOBAL_READER = "BI-UG-GAD"
     GLOBAL_APPROVER = "BI-UG-GAP"
     GLOBAL_AUDITEE = "BI-UG-GAE"
+    GLOBAL_USER_CREATOR = "BI-UG-GUC"
     DOMAIN_MANAGER = "BI-UG-DMA"
     ANALYST = "BI-UG-ANA"
     APPROVER = "BI-UG-APP"
@@ -440,6 +522,60 @@ BUILTIN_ROLE_TRANSLATIONS = {
         "ur": {"name": "تکنیکی ٹیسٹر"},
         "zh": {"name": "技术测试员"},
     },
+    "BI-RL-BSL": {
+        "en": {"name": "Baseline reader"},
+        "ar": {"name": "قارئ خط الأساس"},
+        "cs": {"name": "Čtenář základní úrovně"},
+        "da": {"name": "Basislæser"},
+        "de": {"name": "Basis-Leser"},
+        "el": {"name": "Αναγνώστης βασικής γραμμής"},
+        "es": {"name": "Lector de línea base"},
+        "et": {"name": "Baastaseme lugeja"},
+        "fr": {"name": "Lecteur de socle"},
+        "hi": {"name": "आधारभूत रीडर"},
+        "hr": {"name": "Osnovni čitatelj"},
+        "hu": {"name": "Alapszintű olvasó"},
+        "id": {"name": "Pembaca dasar"},
+        "it": {"name": "Lettore di base"},
+        "ko": {"name": "기본 열람자"},
+        "lt": {"name": "Bazinis skaitytojas"},
+        "nl": {"name": "Basislezer"},
+        "pl": {"name": "Czytelnik bazowy"},
+        "pt": {"name": "Leitor de base"},
+        "ro": {"name": "Cititor de bază"},
+        "sv": {"name": "Basläsare"},
+        "tr": {"name": "Temel okuyucu"},
+        "uk": {"name": "Базовий читач"},
+        "ur": {"name": "بنیادی ریڈر"},
+        "zh": {"name": "基线阅读者"},
+    },
+    "BI-RL-UCR": {
+        "en": {"name": "User creator"},
+        "ar": {"name": "منشئ المستخدمين"},
+        "cs": {"name": "Tvůrce uživatelů"},
+        "da": {"name": "Brugeropretter"},
+        "de": {"name": "Benutzerersteller"},
+        "el": {"name": "Δημιουργός χρηστών"},
+        "es": {"name": "Creador de usuarios"},
+        "et": {"name": "Kasutajate looja"},
+        "fr": {"name": "Créateur d'utilisateurs"},
+        "hi": {"name": "उपयोगकर्ता निर्माता"},
+        "hr": {"name": "Kreator korisnika"},
+        "hu": {"name": "Felhasználólétrehozó"},
+        "id": {"name": "Pembuat pengguna"},
+        "it": {"name": "Creatore di utenti"},
+        "ko": {"name": "사용자 생성자"},
+        "lt": {"name": "Naudotojų kūrėjas"},
+        "nl": {"name": "Gebruikersaanmaker"},
+        "pl": {"name": "Twórca użytkowników"},
+        "pt": {"name": "Criador de usuários"},
+        "ro": {"name": "Creator de utilizatori"},
+        "sv": {"name": "Användarskapare"},
+        "tr": {"name": "Kullanıcı oluşturucu"},
+        "uk": {"name": "Творець користувачів"},
+        "ur": {"name": "صارف تخلیق کار"},
+        "zh": {"name": "用户创建者"},
+    },
 }
 
 
@@ -466,6 +602,7 @@ BUILTIN_USERGROUP_CODENAMES = {
     str(UserGroupCodename.GLOBAL_READER): str(RoleCodename.READER),
     str(UserGroupCodename.GLOBAL_APPROVER): str(RoleCodename.APPROVER),
     str(UserGroupCodename.GLOBAL_AUDITEE): str(RoleCodename.AUDITEE),
+    str(UserGroupCodename.GLOBAL_USER_CREATOR): str(RoleCodename.USER_CREATOR),
     str(UserGroupCodename.DOMAIN_MANAGER): str(RoleCodename.DOMAIN_MANAGER),
     str(UserGroupCodename.ANALYST): str(RoleCodename.ANALYST),
     str(UserGroupCodename.APPROVER): str(RoleCodename.APPROVER),
@@ -1128,6 +1265,86 @@ def _is_question_visible(question, answers_by_urn, questions_by_urn=None, visite
     return False
 
 
+def apply_answers_dict(owner_field, owner, questions_by_urn, answers_data, user=None):
+    """Write a legacy `{question_urn: value}` dict onto the Answer rows of
+    *owner*, a RequirementAssessment (owner_field="requirement_assessment")
+    or a QuickFormResponse (owner_field="response").
+
+    Choice questions receive URNs (one string for unique_choice, a list for
+    multiple_choice) resolved into `selected_choices`; every other type
+    stores the raw value. Unknown question URNs and unknown choice URNs are
+    logged and skipped rather than rejected, matching the historical
+    requirement assessment write path.
+    """
+    from core.models import Answer, Question
+
+    for q_urn, answer_value in answers_data.items():
+        question = questions_by_urn.get(q_urn)
+        if not question:
+            logger.warning(
+                "Question URN not found, skipping answer",
+                q_urn=q_urn,
+                available_urns=list(questions_by_urn.keys()),
+            )
+            continue
+
+        answer, _created = Answer.objects.update_or_create(
+            **{owner_field: owner},
+            question=question,
+            defaults={"folder": owner.folder},
+        )
+
+        if question.type == Question.Type.UNIQUE_CHOICE:
+            if answer_value:
+                choice = question.choices.filter(urn=answer_value).first()
+                answer.selected_choices.set([choice] if choice else [])
+                if not choice:
+                    logger.warning(
+                        "Choice not found for answer", q_urn=q_urn, value=answer_value
+                    )
+            else:
+                answer.selected_choices.clear()
+            answer.value = None
+            answer.save(update_fields=["value"])
+        elif question.type == Question.Type.MULTIPLE_CHOICE:
+            if isinstance(answer_value, list) and answer_value:
+                choices = question.choices.filter(urn__in=answer_value)
+                found_identifiers = set(choices.values_list("urn", flat=True))
+                missing = set(answer_value) - found_identifiers
+                answer.selected_choices.set(choices)
+                if missing:
+                    logger.warning(
+                        "Some choices not found for answer",
+                        q_urn=q_urn,
+                        missing_values=list(missing),
+                    )
+            else:
+                answer.selected_choices.clear()
+            answer.value = None
+            answer.save(update_fields=["value"])
+        elif question.type == Question.Type.OBJECT_REFERENCE:
+            # Ids only, always a list, and only ones reachable from the owner's folder —
+            # this path bypasses the serializer, so it cannot bypass the check too.
+            from core.object_references import ReferenceError_, validate_ids
+
+            ids = (
+                answer_value
+                if isinstance(answer_value, list)
+                else ([answer_value] if answer_value else [])
+            )
+            try:
+                answer.value = validate_ids(
+                    question, owner.folder, [str(i) for i in ids], user=user
+                )
+            except ReferenceError_ as e:
+                logger.warning("Rejected object reference answer", q_urn=q_urn, error=e)
+                answer.value = []
+            answer.save(update_fields=["value"])
+        else:
+            answer.value = answer_value
+            answer.save(update_fields=["value"])
+
+
 def build_answers_dict(answers_qs):
     """Build {question.urn: answer_value} dict from Answer queryset for backward compat.
 
@@ -1146,6 +1363,47 @@ def build_answers_dict(answers_qs):
         else:
             result[a.question.urn] = a.value
     return result
+
+
+def question_score_bounds(scores, multiple: bool) -> tuple[int, int]:
+    """Lowest and highest total a completed choice question can reach.
+
+    `scores` is the contribution of every selectable choice, an unscored one counting
+    as 0. A completed question has at least one choice selected, so a unique choice
+    reaches exactly one score, and a multiple choice reaches every positive (or every
+    negative) one at once.
+    """
+    scores = list(scores)
+    if not scores:
+        return 0, 0
+    if multiple:
+        positives = [s for s in scores if s > 0]
+        negatives = [s for s in scores if s < 0]
+        hi = sum(positives) if positives else max(scores)
+        lo = sum(negatives) if negatives else min(scores)
+        return lo, hi
+    return min(scores), max(scores)
+
+
+def project_weighted_sum(total, weighted_lo, weighted_hi, lo, hi):
+    """Map a weighted SUM total back onto the unweighted scale of the same questions.
+
+    Weights multiply the answers but not the scale the library author designed, so a
+    raw weighted total saturates at max_score whatever the answers. When the total can
+    reach 0, each side of it is scaled on its own, the positive one from weighted_hi to
+    hi and the negative one from weighted_lo to lo, so both ends of the original scale
+    stay reachable and a choice worth 0 stays neutral. When 0 sits outside the reachable
+    range, the whole range is mapped onto the unweighted one. With all weights at 1 the
+    two ranges coincide and the total comes back unchanged.
+    """
+    if weighted_lo > 0 or weighted_hi < 0:
+        span = weighted_hi - weighted_lo
+        if span <= 0:
+            return total
+        return lo + (total - weighted_lo) * (hi - lo) / span
+    if total >= 0:
+        return total * hi / weighted_hi if weighted_hi > 0 else total
+    return total * lo / weighted_lo if weighted_lo < 0 else total
 
 
 def _build_answer_context(questions_qs, answers_qs):
@@ -1169,6 +1427,12 @@ def _build_answer_context(questions_qs, answers_qs):
             pks = {c.id for c in a.selected_choices.all()}
             selected_choice_pks_by_qid[a.question_id] = pks
             has_answer_by_qid[a.question_id] = len(pks) > 0
+        elif q_type == Question.Type.FILE:
+            # A file question is answered by uploading, not by writing a value.
+            has_answer_by_qid[a.question_id] = a.attachments.exists()
+        elif q_type == Question.Type.OBJECT_REFERENCE:
+            # Always a list, so an empty one is unanswered rather than "[]".
+            has_answer_by_qid[a.question_id] = bool(a.value)
         else:
             has_answer_by_qid[a.question_id] = a.value is not None and a.value != ""
 
@@ -1186,6 +1450,79 @@ def _build_answer_context(questions_qs, answers_qs):
     )
 
 
+def _trigger_assignment(groups, new_groups, ig_triggers, assignment_by_ra_id):
+    """The assignment owning an answer that selected one of the new groups."""
+    for group in groups or []:
+        if group not in new_groups:
+            continue
+        for trigger_ra_id in ig_triggers.get(group, []):
+            if trigger_ra_id in assignment_by_ra_id:
+                return assignment_by_ra_id[trigger_ra_id]
+    return None
+
+
+def sync_requirement_assignments(compliance_assessment, ig_triggers, previous_groups):
+    """Keep assignment scopes in step with the selected implementation groups.
+
+    Requirements already visible under the previous groups are left alone. Call
+    inside the transaction that saves the selection: previous_groups is the only
+    record of the old scope, so a partial write cannot be retried.
+    """
+    from core.models import RequirementAssessment, RequirementAssignment
+
+    selected = set(compliance_assessment.selected_implementation_groups or [])
+    if selected == previous_groups:
+        return
+
+    # A submitted or closed assignment keeps the scope it was judged on.
+    open_statuses = {
+        RequirementAssignment.Status.DRAFT,
+        RequirementAssignment.Status.IN_PROGRESS,
+        RequirementAssignment.Status.CHANGES_REQUESTED,
+    }
+    assigned_ra_ids: set = set()
+    assignment_by_ra_id: dict = {}
+    for assignment_id, assignment_status, ra_id in RequirementAssignment.objects.filter(
+        compliance_assessment=compliance_assessment
+    ).values_list("id", "status", "requirement_assessments__id"):
+        if not ra_id:
+            continue
+        assigned_ra_ids.add(ra_id)
+        if assignment_status in open_statuses:
+            assignment_by_ra_id[ra_id] = assignment_id
+    if not assignment_by_ra_id:
+        return
+
+    new_groups = selected - previous_groups
+    to_add: dict = {}
+    to_remove: dict = {}
+    for ra_id, assessable, groups in RequirementAssessment.objects.filter(
+        compliance_assessment=compliance_assessment
+    ).values_list(
+        "id", "requirement__assessable", "requirement__implementation_groups"
+    ):
+        owner = assignment_by_ra_id.get(ra_id)
+        if owner is not None:
+            if selected and not selected & set(groups or []):
+                to_remove.setdefault(owner, []).append(ra_id)
+            continue
+        if ra_id in assigned_ra_ids or not assessable:
+            continue
+        if not previous_groups or previous_groups & set(groups or []):
+            continue
+        target = _trigger_assignment(
+            groups, new_groups, ig_triggers, assignment_by_ra_id
+        )
+        if target is not None:
+            to_add.setdefault(target, []).append(ra_id)
+
+    assignments = RequirementAssignment.objects.in_bulk(set(to_add) | set(to_remove))
+    for assignment_id, ra_ids in to_add.items():
+        assignments[assignment_id].requirement_assessments.add(*ra_ids)
+    for assignment_id, ra_ids in to_remove.items():
+        assignments[assignment_id].requirement_assessments.remove(*ra_ids)
+
+
 def update_selected_implementation_groups(compliance_assessment):
     """Recalculate dynamic IGs from visible answers, preserving manually-picked ones.
 
@@ -1193,6 +1530,9 @@ def update_selected_implementation_groups(compliance_assessment):
     select_implementation_groups. Those get fully recomputed here. Any other IG already
     on the assessment is treated as a manual pick and left untouched.
     """
+    from django.db import transaction
+    from django.db.models import F
+
     from core.models import Answer, Question, QuestionChoice
 
     dynamic_eligible_igs: set[str] = set()
@@ -1204,11 +1544,14 @@ def update_selected_implementation_groups(compliance_assessment):
             dynamic_eligible_igs.update(select_list)
 
     igs_to_select: set[str] = set()
+    # ref_id -> the RAs whose answers selected that IG
+    ig_triggers: dict[str, list] = {}
 
     requirement_assessments = (
-        compliance_assessment.requirement_assessments.select_related(
-            "requirement", "requirement__framework"
+        compliance_assessment.requirement_assessments.order_by(
+            F("requirement__order_id").asc(nulls_last=True)
         )
+        .select_related("requirement", "requirement__framework")
         .prefetch_related(
             "answers",
             "answers__question",
@@ -1242,7 +1585,9 @@ def update_selected_implementation_groups(compliance_assessment):
             selected_pks = selected_choice_pks_by_qid.get(question.id, set())
             for choice in question.choices.all():
                 if choice.id in selected_pks:
-                    igs_to_select.update(choice.select_implementation_groups or [])
+                    for ig in choice.select_implementation_groups or []:
+                        igs_to_select.add(ig)
+                        ig_triggers.setdefault(ig, []).append(ra.id)
 
         if ra.requirement.framework.implementation_groups_definition:
             for ig in ra.requirement.framework.implementation_groups_definition:
@@ -1255,7 +1600,10 @@ def update_selected_implementation_groups(compliance_assessment):
     compliance_assessment.selected_implementation_groups = list(
         manual_only | igs_to_select
     )
-    compliance_assessment.save(update_fields=["selected_implementation_groups"])
+    # Answer.save() defers this to on_commit, so the outer transaction is gone.
+    with transaction.atomic():
+        compliance_assessment.save(update_fields=["selected_implementation_groups"])
+        sync_requirement_assignments(compliance_assessment, ig_triggers, current)
 
 
 def build_questions_dict(node):
@@ -1556,8 +1904,6 @@ def get_respondent_scoped_folder_ids(user) -> set[UUID]:
     treated as a respondent. Auditor-side roles (reader, approver, analyst,
     domain-manager, administrator) hold ``view_compliance_assessment_full`` and are therefore
     excluded; auditee and third-party respondent do not and are included.
-
-    Uses the IAM snapshot caches exclusively (no extra DB queries).
     """
     from iam.models import RoleAssignment
 
@@ -1601,6 +1947,9 @@ DEFAULT_VISIBILITY = {
     # Off unless the audit opts in: existing audits track remediation through
     # applied controls or findings, and should not sprout a tasks tab.
     "task_templates": HIDDEN,
+    # Findings are the auditor's verdict; a missing key would resolve to
+    # EVERYONE_EDIT and show them to the auditee.
+    "findings": AUDITOR_ONLY,
 }
 
 
@@ -1616,6 +1965,7 @@ THIRD_PARTY_VISIBILITY = {
     "score": HIDDEN,
     "documentation_score": HIDDEN,
     "applied_controls": AUDITOR_ONLY,
+    "findings": AUDITOR_ONLY,
     "task_templates": EVERYONE_EDIT,
     "evidences": EVERYONE_EDIT,
     "observation": EVERYONE_EDIT,
@@ -1742,6 +2092,112 @@ def compute_respondent_progress(compliance_assessment, requirement_assessments) 
     return int(answered_q / total_q * 100) if total_q else 0
 
 
+def assessable_requirement_assessments(audit):
+    """The rows an audit's own aggregates expect, read off a caller's prefetch:
+    assessable, and within the selected implementation groups.
+
+    Same selection rules as `get_requirement_assessments(include_non_assessable=False)`,
+    which would re-query per audit.
+    """
+    rows = [
+        ra for ra in audit.requirement_assessments.all() if ra.requirement.assessable
+    ]
+    selected = set(audit.selected_implementation_groups or [])
+    if not selected:
+        return rows
+    return [
+        ra for ra in rows if selected & set(ra.requirement.implementation_groups or [])
+    ]
+
+
+def viewable_audit_ids(user, audit_ids) -> set:
+    """Which of `audit_ids` the user may read.
+
+    Seeing a third-party assessment does not carry the right to read its
+    questionnaire: the audit sits in an enclave folder of its own, and a role
+    assignment only reaches sub-folders when it is recursive.
+    """
+    from core.models import ComplianceAssessment
+    from iam.models import RoleAssignment
+
+    audit_ids = list(audit_ids)
+    if not audit_ids or user is None:
+        return set()
+    return set(
+        ComplianceAssessment.objects.filter(id__in=audit_ids)
+        .filter(
+            id__in=RoleAssignment.get_viewable_object_ids(user, ComplianceAssessment)
+        )
+        .values_list("id", flat=True)
+    )
+
+
+def compliance_overview(audit, requirement_assessments=None) -> dict:
+    """The questionnaire's compliance split and global score, as its own page shows them.
+
+    Built from the audit's own methods, so a third-party card and the audit
+    page cannot drift apart. Pass `requirement_assessments` to read a caller's
+    prefetch; left out, the rows are fetched in one query.
+    """
+    if requirement_assessments is None:
+        from core.models import RequirementAssessment
+
+        requirement_assessments = list(
+            RequirementAssessment.objects.filter(
+                compliance_assessment=audit, requirement__assessable=True
+            ).select_related("requirement", "compliance_assessment")
+        )
+    return {
+        "donut": audit.get_donut_data(requirement_assessments)["result"],
+        "global_score": {
+            **audit.get_global_score(requirement_assessments),
+            "min_score": audit.min_score,
+            "max_score": audit.max_score,
+            "total_max_score": audit.get_total_max_score(requirement_assessments),
+            "score_calculation_method": audit.score_calculation_method,
+        },
+        "show_result": is_field_visible_to(audit, "result", "auditor"),
+        "show_score": is_field_visible_to(audit, "score", "auditor"),
+    }
+
+
+def compliance_overviews(audits) -> dict:
+    """`compliance_overview` for a page of audits, keyed by audit id.
+
+    Reads the requirement rows off the caller's prefetch and primes the
+    framework trees AVG_OF_AVG needs in a single query, so the cost stays flat
+    as the page grows.
+    """
+    from core.models import ComplianceAssessment
+
+    audits = list(audits)
+    tree_frameworks = {
+        audit.framework_id
+        for audit in audits
+        if audit.score_calculation_method
+        == ComplianceAssessment.CalculationMethod.AVG_OF_AVG
+    }
+    trees = (
+        ComplianceAssessment.framework_node_trees(tree_frameworks)
+        if tree_frameworks
+        else {}
+    )
+    overviews = {}
+    for audit in audits:
+        tree = trees.get(audit.framework_id)
+        if tree is not None:
+            audit.__dict__["framework_node_tree"] = tree
+        overviews[audit.id] = compliance_overview(
+            audit,
+            [
+                ra
+                for ra in audit.requirement_assessments.all()
+                if ra.requirement.assessable
+            ],
+        )
+    return overviews
+
+
 def build_third_party_field_visibility(framework):
     """The map a questionnaire sent to a third party starts from; the framework still wins."""
     return build_initial_field_visibility(framework, base=THIRD_PARTY_VISIBILITY)
@@ -1848,3 +2304,41 @@ def ensure_audit_assignment(audit):
     # add, not set: never remove an author the audit already had.
     audit.authors.add(*actors)
     return assign_audit_to(audit, actors)
+
+
+def escape_excel_formula(value):
+    """
+    Escape Excel formula injection by prefixing dangerous characters.
+    Prevents CSV/Formula injection (OWASP) when values start with =+-@
+    """
+    if value is None:
+        return ""
+    s = str(value)
+    if not s:
+        return ""
+    stripped = s.lstrip()
+    if stripped and stripped[0] in ("=", "+", "-", "@"):
+        return "'" + s
+    return s
+
+
+def unescape_excel_formula(value):
+    """Undo escape_excel_formula, so an exported value re-imports unchanged."""
+    if not isinstance(value, str) or not value.startswith("'"):
+        return value
+    stripped = value[1:].lstrip()
+    if stripped and stripped[0] in ("=", "+", "-", "@"):
+        return value[1:]
+    return value
+
+
+ILLEGAL_XLSX_CHARS_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
+XLSX_MAX_CELL_CHARS = 32_767
+
+
+def sanitize_xlsx_value(value):
+    """Strip ASCII control characters openpyxl refuses to write (tab/LF/CR are allowed)
+    and cap strings at Excel's per-cell limit."""
+    if isinstance(value, str):
+        return ILLEGAL_XLSX_CHARS_RE.sub("", value)[:XLSX_MAX_CELL_CHARS]
+    return value

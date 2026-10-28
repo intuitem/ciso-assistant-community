@@ -29,7 +29,7 @@ def victim_folder(app_ready):
 
 @pytest.fixture
 def norole_client(app_ready):
-    user = User.objects.create_user("norole@charts.test", is_published=True)
+    user = User.objects.create_user("norole@charts.test")
     user.folder = app_ready
     user.save()
     return _client(user)
@@ -37,7 +37,7 @@ def norole_client(app_ready):
 
 @pytest.fixture
 def admin_client(app_ready):
-    user = User.objects.create_user("admin@charts.test", is_published=True)
+    user = User.objects.create_user("admin@charts.test")
     group = UserGroup.objects.get(name="BI-UG-ADM", folder=app_ready)
     user.folder = group.folder
     user.save()

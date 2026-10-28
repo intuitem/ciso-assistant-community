@@ -1,4 +1,4 @@
-# API reference
+# API overview
 
 CISO Assistant exposes a REST API that mirrors the platform's object model. The same API powers the web frontend, the CLI, the MCP server, and every external integration. Anything you can do in the UI, you can do over HTTP.
 
@@ -31,8 +31,8 @@ Notes:
 
 Two ways to read the API surface:
 
-- **Live online docs** — [ca-api-doc.pages.dev](https://ca-api-doc.pages.dev).
-- **On your instance, in debug mode** — set `DJANGO_DEBUG=True`, start the backend, then browse:
+- **[API reference](../api-reference/README.md)** — every endpoint, generated from the latest release, with the conventions for pagination, filters and sparse fields.
+- **On your instance, in debug mode** — matches the exact version you run. Set `DJANGO_DEBUG=True`, start the backend, then browse:
   - Swagger UI: `http://127.0.0.1:8000/api/schema/swagger/`
   - ReDoc: `http://127.0.0.1:8000/api/schema/redoc/`
 

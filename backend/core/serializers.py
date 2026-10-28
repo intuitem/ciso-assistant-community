@@ -1,3 +1,4 @@
+import copy
 import importlib
 from typing import Any
 
@@ -5,30 +6,34 @@ import structlog
 from django.db import models, transaction
 from datetime import datetime
 
-from django.db.models import F
+from django.db.models import F, Q
 from django.utils import timezone
 
 from django.conf import settings
+from core import mailer
 from core.models import *
+from doc_management.models import DocumentContainer
 from core.serializer_fields import (
     FieldsRelatedField,
     HashSlugRelatedField,
     PathField,
 )
 from core.constants import LEGACY_TTP_LIBRARIES
-from core.utils import time_state
+from core.utils import get_global_currency, time_state
 from ebios_rm.models import EbiosRMStudy, Stakeholder
 from tprm.models import Contract, Solution
 from threat_modeling.models import ThreatModel
 from pmbok.models import GenericCollection
+from doc_management.models import DocumentContainer
 from global_settings.utils import ff_is_enabled
 
 from core.commitment import COMMITMENT_LIST_FIELDS, CommitmentSerializerMixin
 from iam.models import *
 from django.contrib.auth.models import Permission
 
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import APIException, PermissionDenied
 from django.core.exceptions import FieldDoesNotExist
 from django.core.exceptions import ValidationError as DjangoValidationError
 
@@ -261,6 +266,51 @@ class BaseModelSerializer(serializers.ModelSerializer):
                         }
                     )
 
+    def _check_reverse_m2m_change(self, validated_data: dict) -> None:
+        """A reverse many-to-many (declared on the other model) edits the objects
+        on that side: adding or removing one needs change permission on it, not
+        just the visibility _check_m2m_visibility asks for."""
+        request = self.context.get("request")
+        if not request or not request.user.is_authenticated:
+            return
+        model = self.Meta.model
+        for field_name, value in validated_data.items():
+            if not isinstance(value, list):
+                continue
+            try:
+                field = model._meta.get_field(field_name)
+            except FieldDoesNotExist:
+                continue
+            if not (field.many_to_many and field.auto_created and not field.concrete):
+                continue
+            current_ids: set = set()
+            if self.instance is not None and not isinstance(self.instance, list):
+                current_ids = {
+                    str(pk)
+                    for pk in getattr(self.instance, field_name).values_list(
+                        "pk", flat=True
+                    )
+                }
+            touched = {str(item.pk) for item in value} ^ current_ids
+            if not touched:
+                continue
+            related_model = field.related_model
+            try:
+                changeable = {
+                    str(pk)
+                    for pk in RoleAssignment.get_changeable_object_ids(
+                        request.user, related_model
+                    )
+                }
+            except NotImplementedError, Permission.DoesNotExist:
+                continue
+            if touched - changeable:
+                raise PermissionDenied(
+                    {
+                        field_name: f"You do not have permission to change this {related_model._meta.model_name}"
+                    }
+                )
+
     def validate(self, data):
         data = super().validate(data)
         self._check_m2m_visibility(data)
@@ -379,10 +429,39 @@ class RiskMatrixImportExportSerializer(BaseModelSerializer):
         ]
 
 
+def _attach_sla_states(vulnerabilities) -> None:
+    """Give vulnerabilities the viewset didn't annotate their SLA state, all in one
+    query, so the column, its filter and its sort share one definition."""
+    missing = [v for v in vulnerabilities if not hasattr(v, "sla_state")]
+    if not missing:
+        return
+    rows = (
+        Vulnerability.objects.filter(pk__in=[v.pk for v in missing])
+        .annotate(**Vulnerability.sla_state_annotations())
+        .values("pk", "sla_state", "sla_until")
+    )
+    by_pk = {row["pk"]: row for row in rows}
+    for vulnerability in missing:
+        row = by_pk.get(vulnerability.pk, {})
+        vulnerability.sla_state = row.get("sla_state")
+        vulnerability.sla_until = row.get("sla_until")
+
+
+class VulnerabilityListSerializer(serializers.ListSerializer):
+    def to_representation(self, data):
+        items = list(
+            data.all() if isinstance(data, models.manager.BaseManager) else data
+        )
+        _attach_sla_states(items)
+        return super().to_representation(items)
+
+
 class VulnerabilityReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
+    owner = FieldsRelatedField(many=True)
     applied_controls = FieldsRelatedField(many=True)
+    evidences = FieldsRelatedField(many=True)
     assets = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     security_exceptions = FieldsRelatedField(many=True)
@@ -391,70 +470,102 @@ class VulnerabilityReadSerializer(BaseModelSerializer):
     severity = serializers.CharField(source="get_severity_display")
     state = serializers.SerializerMethodField()
 
-    RESOLVED_STATUSES = {"mitigated", "fixed", "not_exploitable", "unaffected"}
-
-    def _get_sla_policy(self):
-        """Per-instance cache — one DB query per serializer instantiation."""
-        if not hasattr(self, "_sla_policy"):
-            from global_settings.models import GlobalSettings
-
-            try:
-                sla_settings = GlobalSettings.objects.get(name="vulnerability-sla")
-                self._sla_policy = (
-                    sla_settings.value if isinstance(sla_settings.value, dict) else {}
-                )
-            except GlobalSettings.DoesNotExist:
-                self._sla_policy = {}
-        return self._sla_policy
-
     def get_state(self, obj):
-        from datetime import date
-
-        if obj.status in self.RESOLVED_STATUSES:
-            return {"name": "resolved", "hexcolor": "#86efac"}
-
-        if not obj.due_date:
+        _attach_sla_states([obj])
+        if obj.sla_state is None:
             return None
-
-        today = date.today()
-
-        if obj.due_date < today:
-            return {"name": "overdue", "hexcolor": "#f87171"}
-        if obj.due_date == today:
-            return {"name": "today", "hexcolor": "#f97316"}
-
-        # Check if we're in the caution zone (past 50% of the SLA window)
-        sla_policy = self._get_sla_policy()
-        severity_label = obj.get_severity_display()
-        try:
-            sla_days = int(sla_policy.get(severity_label, 0)) or None
-        except TypeError, ValueError:
-            sla_days = None
-        if sla_days is not None:
-            remaining = (obj.due_date - today).days
-            if remaining < sla_days * 0.5:
-                return {"name": "caution", "hexcolor": "#fbbf24"}
-
-        return {"name": "on track", "hexcolor": "#93c5fd"}
+        state = {
+            "name": obj.sla_state,
+            "hexcolor": Vulnerability.SLA_STATE_COLORS[obj.sla_state],
+        }
+        if obj.sla_state == "excepted":
+            state["until"] = obj.sla_until.isoformat() if obj.sla_until else None
+        return state
 
     class Meta:
         model = Vulnerability
-        exclude = ["is_published"]
+        fields = "__all__"
+        list_serializer_class = VulnerabilityListSerializer
 
 
 class VulnerabilityWriteSerializer(BaseModelSerializer):
     findings = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=Finding.objects.all()
     )
+    # Reverse M2M (declared on Incident and TaskTemplate): DRF does not pick them up from Meta.
+    incidents = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=Incident.objects.all()
+    )
+    task_templates = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=TaskTemplate.objects.all()
+    )
+
+    def validate(self, data):
+        data = super().validate(data)
+        self._check_reverse_m2m_change(data)
+        return data
+
+    def create(self, validated_data):
+        owner_data = validated_data.get("owner", [])
+        vulnerability = super().create(validated_data)
+        if owner_data:
+            self._send_assignment_notifications(
+                vulnerability, [actor.id for actor in owner_data]
+            )
+        return vulnerability
+
+    def update(self, instance, validated_data):
+        old_owner_ids = set(instance.owner.values_list("id", flat=True))
+        vulnerability = super().update(instance, validated_data)
+        # Notify only newly assigned owners
+        newly_assigned_ids = (
+            set(vulnerability.owner.values_list("id", flat=True)) - old_owner_ids
+        )
+        if newly_assigned_ids:
+            self._send_assignment_notifications(vulnerability, list(newly_assigned_ids))
+        return vulnerability
+
+    def _send_assignment_notifications(self, vulnerability, owner_ids):
+        """Send assignment notifications to the specified owners"""
+        try:
+            from core.models import Actor
+            from .tasks import send_vulnerability_assignment_notification
+
+            assigned_emails = []
+            for actor in Actor.objects.filter(id__in=owner_ids):
+                assigned_emails.extend(actor.get_emails())
+
+            # Dedupe (several actors can resolve to the same email) and defer until
+            # the transaction commits, so a rollback doesn't send spurious emails.
+            unique_emails = list(dict.fromkeys(filter(None, assigned_emails)))
+            if unique_emails:
+                vulnerability_id = vulnerability.id
+                transaction.on_commit(
+                    lambda: send_vulnerability_assignment_notification(
+                        vulnerability_id, unique_emails
+                    )
+                )
+        except Exception as e:
+            logger.error(
+                f"Failed to send Vulnerability assignment notification: {str(e)}"
+            )
 
     class Meta:
         model = Vulnerability
-        exclude = ["created_at", "updated_at", "is_published"]
+        exclude = ["created_at", "updated_at"]
 
 
 class VulnerabilityImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
     applied_controls = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    assets = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    evidences = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    # Catalog entries don't travel with a domain: the import matches the target
+    # instance's own by ref_id.
+    security_advisories = serializers.SlugRelatedField(
+        slug_field="ref_id", read_only=True, many=True
+    )
+    cwes = serializers.SlugRelatedField(slug_field="ref_id", read_only=True, many=True)
 
     class Meta:
         model = Vulnerability
@@ -465,7 +576,17 @@ class VulnerabilityImportExportSerializer(BaseModelSerializer):
             "folder",
             "status",
             "severity",
+            "detected_at",
+            "published_date",
+            "eta",
+            "due_date",
+            "remediated_at",
             "applied_controls",
+            "assets",
+            "evidences",
+            "security_advisories",
+            "cwes",
+            "observation",
             "created_at",
             "updated_at",
         ]
@@ -485,6 +606,37 @@ class RiskAcceptanceWriteSerializer(BaseModelSerializer):
         if not self.instance and data.get("submit") and not data.get("approver"):
             raise serializers.ValidationError(
                 {"approver": "An approver is required to submit for approval."}
+            )
+        if self.instance and not {"approver", "folder", "risk_scenarios"} & set(data):
+            return super().validate(data)
+        approver = (
+            data["approver"]
+            if "approver" in data
+            else getattr(self.instance, "approver", None)
+        )
+        if not approver:
+            return super().validate(data)
+        folder = data.get("folder") or (
+            self.instance.folder if self.instance else Folder.get_root_folder()
+        )
+        scenarios = data.get("risk_scenarios")
+        if scenarios is None:
+            scenarios = self.instance.risk_scenarios.all() if self.instance else []
+        folders = {folder} | set(
+            Folder.objects.filter(
+                id__in=RiskScenario.objects.filter(
+                    id__in=[s.id for s in scenarios]
+                ).values("risk_assessment__folder")
+            )
+        )
+        perm = Permission.objects.get(codename="approve_riskacceptance")
+        if any(
+            not RoleAssignment.is_access_allowed(approver, perm, f) for f in folders
+        ):
+            raise serializers.ValidationError(
+                {
+                    "approver": "The approver is not allowed to approve risk acceptances in this domain."
+                }
             )
         return super().validate(data)
 
@@ -618,7 +770,7 @@ class RiskAssessmentWriteSerializer(BaseModelSerializer):
 class RiskAssessmentDuplicateSerializer(BaseModelSerializer):
     class Meta:
         model = RiskAssessment
-        fields = ["name", "version", "perimeter", "description", "folder"]
+        fields = ["name", "ref_id", "version", "perimeter", "description", "folder"]
 
 
 class RiskAssessmentReadSerializer(AssessmentReadSerializer):
@@ -626,6 +778,7 @@ class RiskAssessmentReadSerializer(AssessmentReadSerializer):
     str = serializers.CharField(source="__str__")
     perimeter = FieldsRelatedField(["id", "folder"])
     folder = FieldsRelatedField()
+    filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     risk_scenarios = FieldsRelatedField(many=True, fields=["id", "name", "ref_id"])
     risk_scenarios_count = serializers.IntegerField(source="risk_scenarios.count")
     risk_matrix = FieldsRelatedField()
@@ -796,6 +949,11 @@ class AssetWriteSerializer(
         queryset=SecurityException.objects.all(),
         required=False,
     )
+    documents = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=DocumentContainer.objects.all(),
+        required=False,
+    )
     applied_controls = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=AppliedControl.objects.all(),
@@ -821,7 +979,47 @@ class AssetWriteSerializer(
         model = Asset
         exclude = ["business_value"]
 
+    def get_fields(self):
+        fields = super().get_fields()
+        # Document the stored dict shape: reads return a display list that can't be written back (#4526)
+        for name, jsonschema, example in (
+            (
+                "security_objectives",
+                Asset.SECURITY_OBJECTIVES_JSONSCHEMA,
+                {"confidentiality": {"value": 2, "is_enabled": True}},
+            ),
+            (
+                "security_capabilities",
+                Asset.SECURITY_OBJECTIVES_JSONSCHEMA,
+                {"confidentiality": {"value": 2, "is_enabled": True}},
+            ),
+            (
+                "disaster_recovery_objectives",
+                Asset.DISASTER_RECOVERY_OBJECTIVES_JSONSCHEMA,
+                {"rto": {"value": 3600}},
+            ),
+            (
+                "recovery_capabilities",
+                Asset.DISASTER_RECOVERY_OBJECTIVES_JSONSCHEMA,
+                {"rto": {"value": 3600}},
+            ),
+        ):
+            (item,) = jsonschema["properties"]["objectives"][
+                "patternProperties"
+            ].values()
+            # OpenAPI 3.0 has no patternProperties
+            schema = {
+                "type": "object",
+                "properties": {
+                    "objectives": {"type": "object", "additionalProperties": item}
+                },
+                "example": {"objectives": example},
+            }
+            extend_schema_field(schema)(fields[name])
+        return fields
+
     def validate(self, data):
+        self._check_linked_assets_changeable(data)
         parent_assets = data.get("parent_assets", [])
         support_assets = data.get("child_assets", [])
         """
@@ -839,6 +1037,44 @@ class AssetWriteSerializer(
                         "errorAssetGraphMustNotContainCycles"
                     )
         return super().validate(data)
+
+    def _check_linked_assets_changeable(self, data):
+        request = self.context.get("request")
+        if request is None:
+            return
+        perm = Permission.objects.get(codename="change_asset")
+        for field, error_key in (
+            ("parent_assets", "parent_assets"),
+            ("child_assets", "support_assets"),
+        ):
+            if field not in data:
+                continue
+            proposed = {a.id: a for a in data[field] or []}
+            current = (
+                {a.id: a for a in getattr(self.instance, field).all()}
+                if self.instance is not None
+                else {}
+            )
+            removed = [current[i] for i in current.keys() - proposed.keys()]
+            unseen = [
+                a
+                for a in removed
+                if not RoleAssignment.is_object_readable(request.user, Asset, a.id)
+            ]
+            if unseen:
+                data[field] = [*proposed.values(), *unseen]
+            touched = [proposed[i] for i in proposed.keys() - current.keys()] + [
+                a for a in removed if a not in unseen
+            ]
+            for asset in touched:
+                if not RoleAssignment.is_access_allowed(
+                    user=request.user, perm=perm, folder=asset.folder
+                ):
+                    raise PermissionDenied(
+                        {
+                            error_key: "You do not have permission to change the linked asset"
+                        }
+                    )
 
     def create(self, validated_data):
         parent_assets = validated_data.pop("parent_assets", None)
@@ -899,6 +1135,7 @@ class AssetReadSerializer(AssetWriteSerializer):
     overridden_children_capabilities = FieldsRelatedField(["id", "name"], many=True)
     solutions = FieldsRelatedField(many=True)
     applied_controls = FieldsRelatedField(many=True)
+    documents = FieldsRelatedField(many=True)
 
     children_assets = serializers.SerializerMethodField()
     security_objectives = serializers.SerializerMethodField()
@@ -1058,10 +1295,38 @@ class AssetAutocompleteSerializer(BaseModelSerializer):
 
 class AppliedControlAutocompleteSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
+    category = serializers.CharField(source="get_category_display")
 
     class Meta:
         model = AppliedControl
+        fields = ["id", "name", "ref_id", "folder", "category"]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["str"] = str(instance)
+        return data
+
+
+class VulnerabilityAutocompleteSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+
+    class Meta:
+        model = Vulnerability
         fields = ["id", "name", "ref_id", "folder"]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["str"] = str(instance)
+        return data
+
+
+class RiskScenarioAutocompleteSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    risk_assessment = FieldsRelatedField()
+
+    class Meta:
+        model = RiskScenario
+        fields = ["id", "name", "ref_id", "folder", "risk_assessment"]
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -1110,7 +1375,7 @@ class AssetClassReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = AssetClass
-        exclude = ["created_at", "updated_at", "is_published"]
+        exclude = ["created_at", "updated_at"]
 
 
 class AssetClassWriteSerializer(BaseModelSerializer):
@@ -1119,7 +1384,7 @@ class AssetClassWriteSerializer(BaseModelSerializer):
 
     class Meta:
         model = AssetClass
-        exclude = ["created_at", "updated_at", "folder", "is_published"]
+        exclude = ["created_at", "updated_at", "folder"]
 
     def validate_name(self, value):
         if "/" in value:
@@ -1481,6 +1746,12 @@ class AppliedControlWriteSerializer(
     incidents = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=Incident.objects.all()
     )
+    vulnerabilities = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=Vulnerability.objects.all()
+    )
+    control_documents = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=DocumentContainer.objects.all()
+    )
     cost = serializers.JSONField(required=False, allow_null=True)
     integration_config = serializers.PrimaryKeyRelatedField(
         required=False,
@@ -1494,6 +1765,22 @@ class AppliedControlWriteSerializer(
     create_remote_object = serializers.BooleanField(
         required=False, default=False, write_only=True
     )
+
+    def validate_cost(self, value):
+        """Keep the stored currency when an update sends a cost without one.
+
+        New controls are handled by ``AppliedControl.save()``, which fills a
+        missing currency from the global setting.
+        """
+        existing = getattr(self.instance, "cost", None)
+        if (
+            isinstance(value, dict)
+            and not value.get("currency")
+            and isinstance(existing, dict)
+            and existing.get("currency")
+        ):
+            value["currency"] = existing["currency"]
+        return value
 
     def validate(self, attrs):
         return self.validate_commitment(super().validate(attrs))
@@ -1639,6 +1926,7 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
         source="get_csf_function_display"
     )  # type : get_type_display
     evidences = FieldsRelatedField(many=True)
+    metric_instances = FieldsRelatedField(many=True)
     objectives = FieldsRelatedField(many=True)
     effort = serializers.CharField(source="get_effort_display")
     control_impact = serializers.CharField(source="get_control_impact_display")
@@ -1674,9 +1962,7 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
         return time_state(obj.eta.isoformat())
 
     def get_currency(self, obj):
-        if not obj.cost:
-            return "€"  # Default currency
-        return obj.cost.get("currency", "€")
+        return (obj.cost or {}).get("currency") or get_global_currency()
 
     def get_annual_cost_display(self, obj):
         annual_cost = obj.annual_cost
@@ -2152,7 +2438,7 @@ class UserReadSerializer(BaseModelSerializer):
     def get_language(self, obj):
         # The label, not the code: this feeds the detail view. The edit form reads the
         # code from the write serializer instead.
-        code = obj.get_preferences().get("lang")
+        code = obj.language_code()
         return dict(settings.LANGUAGES).get(code, code)
 
     class Meta:
@@ -2600,7 +2886,7 @@ class UserWriteSerializer(BaseModelSerializer):
         return data
 
     def create(self, validated_data):
-        send_mail = settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE
+        send_mail = mailer.mailing_enabled()
         if not RoleAssignment.is_access_allowed(
             user=self.context["request"].user,
             perm=Permission.objects.get(
@@ -2731,6 +3017,12 @@ class UserGroupReadSerializer(BaseModelSerializer):
         fields = "__all__"
 
 
+class UserGroupAutocompleteSerializer(build_autocomplete_serializer(UserGroup)):
+    # Lazy pickers label options with `name`: serve the translated one, as the
+    # list does, not the code a built-in group stores (BI-UG-ANA).
+    name = serializers.CharField(source="__str__")
+
+
 class UserGroupWriteSerializer(BaseModelSerializer):
     class Meta:
         model = UserGroup
@@ -2788,6 +3080,12 @@ class PermissionWriteSerializer(BaseModelSerializer):
 
 
 class RoleAssignmentReadSerializer(BaseModelSerializer):
+    user = FieldsRelatedField()
+    user_group = FieldsRelatedField()
+    role = FieldsRelatedField()
+    perimeter_folders = FieldsRelatedField(many=True)
+    folder = FieldsRelatedField()
+
     class Meta:
         model = RoleAssignment
         fields = "__all__"
@@ -2801,12 +3099,39 @@ class RoleAssignmentWriteSerializer(BaseModelSerializer):
 
 class FolderWriteSerializer(BaseModelSerializer):
     class Meta:
+        read_only_fields = ["content_type"]
         model = Folder
         exclude = [
             "builtin",
-            "content_type",
             "descendants",
+            # The default role is not configurable through this serializer: the
+            # root folder carries the baseline reader role, pinned by startup(),
+            # and no other folder gets one. A subclass may reopen the field
+            # (and inherits the validator below).
+            "default_role",
         ]
+
+    def validate_default_role(self, default_role):
+        if default_role is None:
+            return default_role
+
+        # The default role's audience is coarse (everyone working below), so only
+        # read capability may ever be ambient — write capability reaches people
+        # through explicit group placement, never through a default role.
+        if default_role.permissions.exclude(codename__startswith="view_").exists():
+            raise serializers.ValidationError(
+                "defaultRoleMustContainOnlyViewPermissions"
+            )
+
+        # Enclaves are visitor spaces and receive explicit grants only; a member
+        # audience there would contradict their purpose.
+        if (
+            self.instance is not None
+            and self.instance.content_type == Folder.ContentType.ENCLAVE
+        ):
+            raise serializers.ValidationError("enclaveFolderCannotHaveDefaultRole")
+
+        return default_role
 
     def update(self, instance, validated_data):
         if (
@@ -2859,26 +3184,51 @@ class FolderWriteSerializer(BaseModelSerializer):
             )
         return value
 
-    def validate_parent_folder(self, value):
-        """
-        If parent_folder is empty or None, default to the root folder.
-        On update, check add permission on the target parent folder.
+    def _resolve_parent_folder(self, value):
+        """Normalise and authorise a target parent, independent of edition policy.
+
+        Kept out of `validate_parent_folder` so that editions which allow nesting can
+        override the policy without losing these rules, and so permission is resolved
+        before any policy — a 403 must beat "this needs PRO".
         """
         if not value:
-            return Folder.get_root_folder()
-        if (
-            self.instance is not None
-            and self.instance.parent_folder_id
-            and str(value.id) != str(self.instance.parent_folder_id)
+            root = Folder.get_root_folder()
+            # Detaching to the root is still an add there. Create is left to `create()`;
+            # without this, `parent_folder: null` was the one target needing no rights.
+            if self.instance is not None and str(self.instance.parent_folder_id) != str(
+                root.id
+            ):
+                self._check_object_perm(self.instance, "add", folder=root)
+            return root
+        if self.instance is None:
+            # The base class checks this only in `create()`, after field validation —
+            # too late for a policy that rejects during `is_valid()`.
+            self._check_object_perm(None, "add", folder=value)
+        elif self.instance.parent_folder_id and str(value.id) != str(
+            self.instance.parent_folder_id
         ):
             self._check_object_perm(self.instance, "add", folder=value)
         return value
+
+    def validate_parent_folder(self, value):
+        """Community domains sit directly under the root; nesting is a PRO capability.
+
+        Only *changing* the nesting is gated: an already-nested folder stays editable,
+        so downgrading from PRO never strands existing data.
+        """
+        parent_folder = self._resolve_parent_folder(value)
+        if parent_folder == Folder.get_root_folder():
+            return parent_folder
+        if self.instance is not None and parent_folder == self.instance.parent_folder:
+            return parent_folder
+        raise serializers.ValidationError("subDomainsRequirePro")
 
 
 class FolderReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
     parent_folder = FieldsRelatedField()
     filtering_labels = FieldsRelatedField(many=True)
+    default_role = FieldsRelatedField()
 
     content_type = serializers.CharField(source="get_content_type_display")
 
@@ -2894,6 +3244,7 @@ class FolderImportExportSerializer(BaseModelSerializer):
         model = Folder
         fields = [
             "parent_folder",
+            "ref_id",
             "name",
             "description",
             "content_type",
@@ -2901,6 +3252,39 @@ class FolderImportExportSerializer(BaseModelSerializer):
             "created_at",
             "updated_at",
         ]
+
+
+class RoleReadSerializer(BaseModelSerializer):
+    name = serializers.CharField(source="__str__")
+    permissions = serializers.SerializerMethodField()
+    folder = FieldsRelatedField()
+
+    class Meta:
+        model = Role
+        fields = "__all__"
+
+    def get_permissions(self, obj):
+        return [{"str": perm.codename} for perm in obj.permissions.all()]
+
+
+class RoleWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = Role
+        fields = "__all__"
+
+    def validate_permissions(self, permissions):
+        # A role already in use as some folder's default role must stay view-only;
+        # otherwise editing the role would silently hand write capability to every
+        # member audience that references it.
+        if (
+            self.instance is not None
+            and self.instance.default_role_folders.exists()
+            and not all(
+                permission.codename.startswith("view_") for permission in permissions
+            )
+        ):
+            raise serializers.ValidationError("roleUsedAsDefaultRoleMustStayViewOnly")
+        return permissions
 
 
 # Compliance Assessment
@@ -2924,6 +3308,7 @@ class FrameworkReadSerializer(ReferentialSerializer):
     is_dynamic = serializers.BooleanField(read_only=True)
     has_update = serializers.BooleanField(read_only=True)
     has_compliance_assessments = serializers.SerializerMethodField()
+    is_scale_bound = serializers.SerializerMethodField()
     scores_definition = serializers.SerializerMethodField()
     # The complete per-role visibility map a new CA created from this framework
     # would inherit: DEFAULT_VISIBILITY ⊕ framework.field_visibility. The
@@ -2935,6 +3320,7 @@ class FrameworkReadSerializer(ReferentialSerializer):
     third_party_field_visibility = serializers.SerializerMethodField()
 
     implementation_groups_definition = serializers.SerializerMethodField()
+    default_scoring = serializers.DictField(read_only=True)
 
     def get_implementation_groups_definition(self, obj):
         return obj.get_implementation_groups_definition_translated()
@@ -2944,6 +3330,12 @@ class FrameworkReadSerializer(ReferentialSerializer):
         if flag is not None:
             return flag
         return obj.complianceassessment_set.exists()
+
+    def get_is_scale_bound(self, obj):
+        flag = getattr(obj, "scale_bound_flag", None)
+        if flag is not None:
+            return flag
+        return obj.is_scale_bound
 
     def get_scores_definition(self, obj):
         sd = obj.scores_definition
@@ -2981,6 +3373,34 @@ class FrameworkWriteSerializer(FrameworkReadSerializer):
     implementation_groups_definition = serializers.JSONField(
         required=False, allow_null=True
     )
+    score_calculation_method = serializers.ChoiceField(
+        choices=ComplianceAssessment.CalculationMethod.choices, required=False
+    )
+
+    SCORING_DEFAULT_FIELDS = (
+        "min_score",
+        "max_score",
+        "anchor_na_to_target",
+        "target_score",
+        "implementation_groups_definition",
+    )
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        if any(field in attrs for field in self.SCORING_DEFAULT_FIELDS):
+            current = {
+                field: attrs.get(
+                    field,
+                    getattr(self.instance, field, None)
+                    if self.instance
+                    else Framework._meta.get_field(field).get_default(),
+                )
+                for field in self.SCORING_DEFAULT_FIELDS
+            }
+            if problem := Framework.scoring_defaults_problem(**current):
+                error_key, _detail = problem
+                raise serializers.ValidationError({"target_score": error_key})
+        return attrs
 
     def create(self, validated_data):
         # Strip any non-model fields that leak through from the read serializer
@@ -3075,6 +3495,7 @@ class EvidenceReadSerializer(BaseModelSerializer):
     requirement_assessments = FieldsRelatedField(many=True)
     security_exceptions = FieldsRelatedField(many=True)
     contracts = FieldsRelatedField(many=True)
+    task_templates = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     owner = FieldsRelatedField(many=True)
     status = serializers.CharField(source="get_status_display")
@@ -3117,6 +3538,13 @@ class EvidenceWriteSerializer(BaseModelSerializer):
     contracts = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Contract.objects.all(), required=False
     )
+    # Reverse M2M (declared on TaskTemplate): DRF does not pick it up from Meta.
+    task_templates = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=TaskTemplate.objects.all(), required=False
+    )
+    vulnerabilities = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Vulnerability.objects.all(), required=False
+    )
     genericcollection = serializers.PrimaryKeyRelatedField(
         source="genericcollection_set",
         many=True,
@@ -3138,14 +3566,18 @@ class EvidenceWriteSerializer(BaseModelSerializer):
 
     class Meta:
         model = Evidence
-        exclude = ["is_published"]
+        fields = "__all__"
 
     def create(self, validated_data):
         attachment = validated_data.pop("attachment", None)
         link = validated_data.pop("link", None)
         observation = validated_data.pop("observation", None)
+        task_templates = validated_data.pop("task_templates", [])
 
         evidence = super().create(validated_data)
+
+        if task_templates:
+            evidence.task_templates.set(task_templates)
 
         # A revision stands for a deposited artifact. Opening an empty one just to
         # have a row makes an evidence that holds nothing look like it holds
@@ -3166,10 +3598,14 @@ class EvidenceWriteSerializer(BaseModelSerializer):
     def update(self, instance, validated_data):
         # Track old folder before update
         old_folder_id = instance.folder_id
+        task_templates = validated_data.pop("task_templates", None)
 
         # Handle properly owner field cleaning
         with transaction.atomic():
             instance = super().update(instance, validated_data)
+
+            if task_templates is not None:
+                instance.task_templates.set(task_templates)
 
             # Update all EvidenceRevisions' folder if the Evidence's folder changed
             if old_folder_id != instance.folder_id:
@@ -3277,6 +3713,7 @@ class EvidenceRevisionImportExportSerializer(BaseModelSerializer):
             "observation",
             "version",
             "attachment",
+            "original_filename",
             "link",
             "created_at",
             "updated_at",
@@ -3433,6 +3870,7 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     path = PathField(read_only=True)
     perimeter = FieldsRelatedField(["id", "folder"])
     folder = FieldsRelatedField()
+    filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     campaign = FieldsRelatedField()
     # The binder raised from this audit's requirements, so the page can link to it.
     findings_assessments = FieldsRelatedField(many=True)
@@ -3452,6 +3890,8 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     selected_implementation_groups = serializers.ReadOnlyField(
         source="get_selected_implementation_groups"
     )
+    framework_exports = serializers.ReadOnlyField()
+    outcome_rules = serializers.ReadOnlyField()
     progress = serializers.SerializerMethodField()
     answers_progress = serializers.SerializerMethodField()
     assets = FieldsRelatedField(many=True)
@@ -3526,6 +3966,7 @@ class ComplianceAssessmentListSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
     authors = FieldsRelatedField(many=True)
     folder = FieldsRelatedField()
+    filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     framework = FieldsRelatedField()
     perimeter = FieldsRelatedField()
     progress = serializers.SerializerMethodField()
@@ -3556,6 +3997,7 @@ class ComplianceAssessmentListSerializer(BaseModelSerializer):
             "version",
             "framework",
             "computed_outcome",
+            "computed_values",
             "folder",
             "perimeter",
             "progress",
@@ -3568,10 +4010,28 @@ class ComplianceAssessmentListSerializer(BaseModelSerializer):
             "path",
             "authors",
             "entity_assessments",
+            "filtering_labels",
         ]
 
 
+class ScoreRescaleConfirmationRequired(APIException):
+    status_code = 409
+    default_code = "score_rescale_confirmation_required"
+
+    def __init__(self, impact: dict):
+        self.impact = impact
+        super().__init__()
+        # Set after init: APIException would turn every number into a string.
+        self.detail = {
+            "confirm_rescale": ["scoreScaleConfirmRequired"],
+            "rescale_impact": impact,
+        }
+
+
 class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
+    confirm_rescale = serializers.BooleanField(
+        write_only=True, required=False, default=False
+    )
     genericcollection = serializers.PrimaryKeyRelatedField(
         source="genericcollection_set",
         many=True,
@@ -3596,17 +4056,40 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
     )
 
     def validate(self, attrs):
-        if hasattr(self, "instance") and self.instance and self.instance.is_locked:
-            # If we're unlocking (setting is_locked to False), allow the operation
-            if "is_locked" in attrs and attrs["is_locked"] is False:
-                return super().validate(attrs)
+        # Drop implementation groups that don't exist in the framework.
+        if "selected_implementation_groups" in attrs or (
+            "framework" in attrs and self.instance
+        ):
+            framework = attrs.get("framework") or getattr(
+                self.instance, "framework", None
+            )
+            defined = {
+                ig.get("ref_id")
+                for ig in (
+                    getattr(framework, "implementation_groups_definition", None) or []
+                )
+            }
+            selected = attrs.get(
+                "selected_implementation_groups",
+                getattr(self.instance, "selected_implementation_groups", None),
+            )
+            selected = selected if isinstance(selected, list) else []
+            attrs["selected_implementation_groups"] = [
+                g for g in selected if isinstance(g, str) and g in defined
+            ]
 
-            # Otherwise, only allow modifying the is_locked field
+        if hasattr(self, "instance") and self.instance and self.instance.is_locked:
+            # Unlocking may come with other changes in the same save; they still
+            # go through the checks below. Otherwise only is_locked may change.
+            unlocking = "is_locked" in attrs and attrs["is_locked"] is False
             locked_fields = [field for field in attrs.keys() if field != "is_locked"]
-            if locked_fields:
+            if not unlocking and locked_fields:
                 raise serializers.ValidationError(
                     f"⚠️ Cannot modify the audit attributes when it is locked. Only the 'Locked' field can be modified."
                 )
+
+        self._validate_score_scale(attrs, confirm=attrs.pop("confirm_rescale", False))
+        self._apply_default_scoring(attrs)
 
         target = attrs.get(
             "target_score",
@@ -3625,23 +4108,167 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
                 }
             )
         if target is not None:
-            min_s = attrs.get(
-                "min_score",
-                getattr(self.instance, "min_score", None) if self.instance else None,
-            )
-            max_s = attrs.get(
-                "max_score",
-                getattr(self.instance, "max_score", None) if self.instance else None,
+            min_s, max_s = getattr(self, "_effective_score_range", None) or (
+                attrs.get(
+                    "min_score",
+                    getattr(self.instance, "min_score", None)
+                    if self.instance
+                    else None,
+                ),
+                attrs.get(
+                    "max_score",
+                    getattr(self.instance, "max_score", None)
+                    if self.instance
+                    else None,
+                ),
             )
             if min_s is not None and max_s is not None:
                 if not (min_s <= target <= max_s):
                     raise serializers.ValidationError(
-                        {
-                            "target_score": f"Target score must be between {min_s} and {max_s}."
-                        }
+                        {"target_score": "targetScoreOutOfRange"}
                     )
 
         return super().validate(attrs)
+
+    def _apply_default_scoring(self, attrs):
+        """New audit: the framework's scoring settings fill the fields the caller
+        left out, so the API, presets and imports match the form. A copy of an
+        audit on the same framework keeps the caller's settings."""
+        framework = attrs.get("framework")
+        baseline = attrs.get("baseline")
+        if (
+            self.instance
+            or not framework
+            or (baseline and baseline.framework_id == framework.id)
+        ):
+            return
+        defaults = framework.default_scoring_for(
+            attrs.get("selected_implementation_groups")
+        )
+        # The framework's target is on the framework scale: carry it over to the
+        # audit's (resolved by _validate_score_scale).
+        framework_range = (framework.min_score, framework.max_score)
+        audit_range = getattr(self, "_effective_score_range", None)
+        if (
+            defaults.get("target_score") is not None
+            and audit_range
+            and tuple(audit_range) != framework_range
+        ):
+            defaults["target_score"] = rescale_score(
+                defaults["target_score"], framework_range, audit_range, integer=False
+            )
+        for field, value in defaults.items():
+            attrs.setdefault(field, value)
+
+    def _validate_score_scale(self, attrs, confirm=False):
+        scale_fields = {
+            "score_scale_preset",
+            "min_score",
+            "max_score",
+            "scores_definition",
+        }
+        instance = self.instance
+        # Creation always resolves the scale, so the target is checked against
+        # the range the audit will actually get.
+        if instance and not scale_fields & attrs.keys():
+            return
+        framework = attrs.get("framework") or getattr(instance, "framework", None)
+        baseline = None if instance else attrs.get("baseline")
+        if (
+            baseline
+            and framework
+            and baseline.framework_id == framework.id
+            and not scale_fields & attrs.keys()
+        ):
+            # A copy of an audit keeps its scale by default.
+            default = {
+                "source": "baseline",
+                "score_scale_preset": baseline.score_scale_preset,
+                "min_score": baseline.min_score,
+                "max_score": baseline.max_score,
+                "scores_definition": copy.deepcopy(baseline.scores_definition),
+            }
+        elif framework:
+            # No scale sent: the framework's. The organisation scale is only
+            # ever proposed by the form, so non-form clients behave as before.
+            default = {
+                "source": "framework",
+                "score_scale_preset": None,
+                "min_score": framework.min_score,
+                "max_score": framework.max_score,
+                "scores_definition": framework.scores_definition,
+            }
+        else:
+            default = None
+        default_range = (
+            (default["min_score"], default["max_score"]) if default else None
+        )
+
+        preset = attrs.get("score_scale_preset")
+        min_s = attrs.get(
+            "min_score", None if preset else getattr(instance, "min_score", None)
+        )
+        max_s = attrs.get(
+            "max_score", None if preset else getattr(instance, "max_score", None)
+        )
+        try:
+            preset, min_s, max_s = normalize_score_scale(
+                preset, min_s, max_s, attrs.get("scores_definition"), default_range
+            )
+        except DjangoValidationError as e:
+            raise serializers.ValidationError(e.message_dict)
+        if preset:
+            attrs["min_score"], attrs["max_score"] = min_s, max_s
+
+        resolved = (min_s, max_s) if min_s is not None else default_range
+        if min_s is None:
+            if default and (
+                attrs.get("scores_definition") or default["source"] == "baseline"
+            ):
+                attrs["min_score"], attrs["max_score"] = default_range
+                attrs["score_scale_preset"] = default["score_scale_preset"]
+                if not attrs.get("scores_definition"):
+                    attrs["scores_definition"] = default["scores_definition"]
+            else:
+                attrs["score_scale_preset"] = None
+                attrs["scores_definition"] = None
+        elif (
+            "score_scale_preset" not in attrs
+            and instance
+            and instance.score_scale_preset
+        ):
+            if SCORE_SCALE_PRESETS.get(instance.score_scale_preset) != resolved:
+                attrs["score_scale_preset"] = None
+
+        current = (
+            (instance.min_score, instance.max_score) if instance else default_range
+        )
+        self._effective_score_range = resolved
+        if resolved == current:
+            return
+        if (
+            framework
+            and framework.is_scale_bound
+            and resolved != (framework.min_score, framework.max_score)
+        ):
+            raise serializers.ValidationError(
+                {"score_scale_preset": "scoreScaleBoundToFramework"}
+            )
+        if instance and None not in (*current, *resolved):
+            self._score_rescale = (current, resolved)
+            impact = instance.rescale_impact()
+            unchanged = attrs.get("target_score", instance.target_score) == (
+                instance.target_score
+            )
+            if unchanged and instance.target_score is not None:
+                attrs["target_score"] = rescale_score(
+                    instance.target_score, current, resolved, integer=False
+                )
+                impact["target"] = [instance.target_score, attrs["target_score"]]
+            if not confirm and any(impact.values()):
+                raise ScoreRescaleConfirmationRequired(
+                    {"from": list(current), "to": list(resolved), **impact}
+                )
 
     def create(self, validated_data: Any):
         validated_data.pop("create_applied_controls_from_suggestions", None)
@@ -3705,6 +4332,11 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
         old_scoring_enabled = instance.scoring_enabled
 
         with transaction.atomic():
+            # Stored scores move to the new scale first, so that save()
+            # snapshots today's metrics after the move.
+            if rescale := getattr(self, "_score_rescale", None):
+                instance.rescale_requirement_scores(*rescale)
+
             # Perform the main update (fields + M2M)
             updated_instance = super().update(instance, validated_data)
 
@@ -3820,13 +4452,20 @@ class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
     class Meta:
         model = ComplianceAssessment
         fields = "__all__"
+        read_only_fields = ["computed_outcome", "computed_values"]
 
 
 class ComplianceAssessmentImportExportSerializer(BaseModelSerializer):
     framework = serializers.SlugRelatedField(slug_field="urn", read_only=True)
+    evidences = HashSlugRelatedField(slug_field="pk", many=True, read_only=True)
 
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
     perimeter = HashSlugRelatedField(slug_field="pk", read_only=True)
+
+    def validate_score_scale_preset(self, value):
+        if value and value not in SCORE_SCALE_PRESETS:
+            raise serializers.ValidationError("scoreScaleErrorUnknownPreset")
+        return value
 
     class Meta:
         model = ComplianceAssessment
@@ -3844,13 +4483,16 @@ class ComplianceAssessmentImportExportSerializer(BaseModelSerializer):
             "framework",
             "selected_implementation_groups",
             "computed_outcome",
+            "computed_values",
             "min_score",
             "max_score",
             "scores_definition",
+            "score_scale_preset",
             "score_calculation_method",
             "target_score",
             "anchor_na_to_target",
             "field_visibility",
+            "evidences",
             "created_at",
             "updated_at",
         ]
@@ -3901,7 +4543,15 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
             "progress_status_enabled",
             "extended_result_enabled",
             "field_visibility",
-            {"framework": ["implementation_groups_definition", "field_visibility"]},
+            {
+                "framework": [
+                    "implementation_groups_definition",
+                    "field_visibility",
+                    # The edit page recomputes the result client-side, so it
+                    # needs the rule the backend will apply on save.
+                    "result_aggregation",
+                ]
+            },
         ]
     )
     folder = FieldsRelatedField()
@@ -3911,6 +4561,8 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
     security_exceptions = FieldsRelatedField(many=True)
     is_locked = serializers.BooleanField()
     applied_controls = FieldsRelatedField(many=True)
+    # Reverse FK from Finding: DRF does not pick it up from Meta.
+    findings = FieldsRelatedField(many=True)
     answers = serializers.SerializerMethodField()
 
     # Effective scale after the Node -> CA cascade. Null when the CA has
@@ -3973,6 +4625,11 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
     answers = serializers.JSONField(required=False, write_only=True)
     task_templates = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=TaskTemplate.objects.all()
+    )
+    # Reverse FK from Finding: binding an existing finding to this requirement
+    # assessment is done from the assessment's side, like the other pickers.
+    findings = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=Finding.objects.all()
     )
 
     def to_internal_value(self, data):
@@ -4184,10 +4841,63 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                 "The specified Compliance Assessment does not exist."
             )
 
+    def _check_findings_rebind(self, instance, findings):
+        """Binding or unbinding a finding edits the finding, not just the assessment.
+
+        Runs inside update()'s transaction: the current, changed and binder rows
+        are read under row locks (on PostgreSQL; SQLite has a single writer), so
+        a binder locked between validation and the write is still refused and
+        a finding bound meanwhile is not silently dropped. `instance.findings`
+        is not used here because get_object() prefetched it before the
+        transaction.
+        """
+        current = set(
+            Finding.objects.select_for_update().filter(requirement_assessment=instance)
+        )
+        changed_ids = [f.id for f in current.symmetric_difference(findings)]
+        if not changed_ids:
+            return
+        changed = list(Finding.objects.select_for_update().filter(id__in=changed_ids))
+        binder_ids = {
+            f.findings_assessment_id for f in changed if f.findings_assessment_id
+        }
+        # Lock every binder involved, not only the locked ones: an unlocked
+        # binder must not get locked between this check and the write.
+        locked_binders = {
+            binder.id
+            for binder in FindingsAssessment.objects.select_for_update().filter(
+                id__in=binder_ids
+            )
+            if binder.is_locked
+        }
+        for finding in changed:
+            if finding.findings_assessment_id in locked_binders:
+                raise serializers.ValidationError(
+                    {
+                        "findings": "⚠️ Cannot bind or unbind a finding whose findings assessment is locked."
+                    }
+                )
+            # A finding belongs to one requirement assessment. Moving it is done
+            # from the finding, never as a side effect of editing another assessment.
+            if (
+                finding.requirement_assessment_id
+                and finding.requirement_assessment_id != instance.id
+            ):
+                raise serializers.ValidationError(
+                    {
+                        "findings": "⚠️ This finding is already bound to another requirement assessment."
+                    }
+                )
+            self._check_object_perm(finding, "change", model=Finding)
+
     def update(self, instance, validated_data):
         with transaction.atomic():
             # Handle answers if provided in old JSON format
             answers_data = validated_data.pop("answers", None)
+
+            findings = validated_data.pop("findings", None)
+            if findings is not None:
+                self._check_findings_rebind(instance, findings)
 
             # Question-driven score is recompute-owned: drop manual writes
             # unless is_score_overridden pins a value.
@@ -4204,7 +4914,13 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                 validated_data.pop("is_scored", None)
 
             was_overridden = instance.is_score_overridden
+            previous_alignment = instance.respondent_alignment
             instance = super().update(instance, validated_data)
+
+            if findings is not None:
+                # bulk=False goes through Finding.save(): updated_at moves and the
+                # binder's daily metrics are refreshed, as on any finding edit.
+                instance.findings.set(findings, bulk=False)
 
             # Override turned off: resync score from answers below.
             override_turned_off = (
@@ -4221,7 +4937,7 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
 
             if answers_data and isinstance(answers_data, dict):
                 # Convert incoming answers dict to Answer model updates
-                from core.models import Answer, Question
+                from core.models import Question
 
                 questions_by_urn = {
                     q.urn: q
@@ -4229,59 +4945,11 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                         requirement_node=instance.requirement
                     ).prefetch_related("choices")
                 }
-                for q_urn, answer_value in answers_data.items():
-                    question = questions_by_urn.get(q_urn)
-                    if not question:
-                        logger.warning(
-                            "Question URN not found, skipping answer",
-                            q_urn=q_urn,
-                            available_urns=list(questions_by_urn.keys()),
-                        )
-                        continue
+                from core.utils import apply_answers_dict
 
-                    answer, _created = Answer.objects.update_or_create(
-                        requirement_assessment=instance,
-                        question=question,
-                        defaults={"folder": instance.folder},
-                    )
-
-                    if question.type == Question.Type.UNIQUE_CHOICE:
-                        if answer_value:
-                            choice = question.choices.filter(urn=answer_value).first()
-
-                            answer.selected_choices.set([choice] if choice else [])
-                            if not choice:
-                                logger.warning(
-                                    "Choice not found for answer",
-                                    q_urn=q_urn,
-                                    value=answer_value,
-                                )
-                        else:
-                            answer.selected_choices.clear()
-                        answer.value = None
-                        answer.save(update_fields=["value"])
-                    elif question.type == Question.Type.MULTIPLE_CHOICE:
-                        if isinstance(answer_value, list) and answer_value:
-                            choices = question.choices.filter(urn__in=answer_value)
-                            found_identifiers = set(
-                                choices.values_list("urn", flat=True)
-                            )
-                            missing = set(answer_value) - found_identifiers
-
-                            answer.selected_choices.set(choices)
-                            if missing:
-                                logger.warning(
-                                    "Some choices not found for answer",
-                                    q_urn=q_urn,
-                                    missing_values=list(missing),
-                                )
-                        else:
-                            answer.selected_choices.clear()
-                        answer.value = None
-                        answer.save(update_fields=["value"])
-                    else:
-                        answer.value = answer_value
-                        answer.save(update_fields=["value"])
+                apply_answers_dict(
+                    "requirement_assessment", instance, questions_by_urn, answers_data
+                )
 
                 # Check if any choice has scoring or result logic. For
                 # compute_result, mirror `resolve_compute_result`: empty strings,
@@ -4316,20 +4984,21 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                 "in_progress": RequirementAssessment.Result.PARTIALLY_COMPLIANT,
                 "not_applicable": RequirementAssessment.Result.NOT_APPLICABLE,
             }
-            # Skip auto-map when the auditor explicitly sets result in the same
-            # request: SuperForm round-trips the existing respondent_alignment
-            # on every submit, and we must not clobber an auditor-edited result
-            # (or zero it to NOT_ASSESSED if the respondent never answered).
+            # Only an actual change drives the result. SuperForm round-trips the
+            # existing respondent_alignment on every submit, so re-applying it
+            # would clobber an auditor-edited result (or zero it out when the
+            # respondent never answered). Blank and null mean the same thing.
             if (
                 "respondent_alignment" in validated_data
                 and "result" not in validated_data
                 and not requirement_has_questions
             ):
-                new_alignment = validated_data.get("respondent_alignment")
-                if new_alignment and new_alignment in ALIGNMENT_TO_RESULT:
+                new_alignment = validated_data.get("respondent_alignment") or None
+                changed = new_alignment != (previous_alignment or None)
+                if changed and new_alignment in ALIGNMENT_TO_RESULT:
                     instance.result = ALIGNMENT_TO_RESULT[new_alignment]
                     instance.save(update_fields=["result"])
-                elif not new_alignment:
+                elif changed and not new_alignment:
                     # Deselection: reset result and scores so the RA is truly
                     # unassessed (progress() flags an RA as assessed when score
                     # is set, even if result is NOT_ASSESSED).
@@ -4425,53 +5094,97 @@ class AnswerWriteSerializer(BaseModelSerializer):
         value = attrs.get("value")
         selected_choices_list = attrs.get("selected_choices")
 
-        if not requirement_assessment:
-            raise serializers.ValidationError(
-                {"requirement_assessment": "This field is required."}
-            )
+        response = attrs.get("response") or (
+            self.instance.response if self.instance else None
+        )
 
-        # 1. Parent/child consistency check
-        if (
-            question
-            and question.requirement_node_id != requirement_assessment.requirement_id
-        ):
+        if not requirement_assessment and not response:
             raise serializers.ValidationError(
                 {
-                    "question": f"Question '{question}' does not belong to requirement assessment '{requirement_assessment}'."
+                    "requirement_assessment": "Either requirement_assessment or response is required."
                 }
             )
-
-        # 2. Assessment state/locked checks
-        compliance_assessment = requirement_assessment.compliance_assessment
-        if compliance_assessment.is_locked:
+        if requirement_assessment and response:
             raise serializers.ValidationError(
-                "⚠️ Cannot modify the answer when the audit is locked."
+                "An answer belongs to a requirement assessment or to a quick form response, not both."
             )
 
-        from core.models import ComplianceAssessment
-
-        if compliance_assessment.status == ComplianceAssessment.Status.IN_REVIEW:
-            raise serializers.ValidationError(
-                "⚠️ Cannot modify the answer when the audit is in review."
-            )
-
-        # 3. Assignment-level locking for respondent users
-        request = self.context.get("request")
-        if request and requirement_assessment:
-            from core.utils import get_respondent_scoped_folder_ids
-
-            respondent_folders = get_respondent_scoped_folder_ids(request.user)
-            if (
-                respondent_folders
-                and requirement_assessment.folder_id in respondent_folders
+        if response:
+            # Quick form branch: the question must sit on a page of the
+            # response's form, and the response must still be in progress.
+            if question and (
+                question.page_id is None
+                or question.page.quick_form_id != response.quick_form_id
             ):
-                locked_assignment = requirement_assessment.assignments.filter(
-                    status__in=["submitted", "closed"]
-                ).first()
-                if locked_assignment:
-                    raise serializers.ValidationError(
-                        "Cannot modify: this requirement's assignment has been submitted or closed."
-                    )
+                raise serializers.ValidationError(
+                    {
+                        "question": f"Question '{question}' does not belong to quick form response '{response}'."
+                    }
+                )
+            from core.models import QuickFormResponse
+
+            if response.status != QuickFormResponse.Status.DRAFT:
+                raise serializers.ValidationError(
+                    "Answers can only be modified while the response is in progress."
+                )
+            if (
+                question
+                and "value" in attrs
+                and response.changes_locked_subject({question.urn: attrs["value"]})
+            ):
+                raise serializers.ValidationError({"value": "subjectLocked"})
+            # Same rule as the `answers` dict on the response itself: folder-level rights
+            # on Answer are not rights over someone else's request.
+            request = self.context.get("request")
+            if request is not None and not response.is_requester(request.user):
+                raise serializers.ValidationError(
+                    "Only the requester can change the answers."
+                )
+
+        if requirement_assessment:
+            # 1. Parent/child consistency check
+            if (
+                question
+                and question.requirement_node_id
+                != requirement_assessment.requirement_id
+            ):
+                raise serializers.ValidationError(
+                    {
+                        "question": f"Question '{question}' does not belong to requirement assessment '{requirement_assessment}'."
+                    }
+                )
+
+            # 2. Assessment state/locked checks
+            compliance_assessment = requirement_assessment.compliance_assessment
+            if compliance_assessment.is_locked:
+                raise serializers.ValidationError(
+                    "⚠️ Cannot modify the answer when the audit is locked."
+                )
+
+            from core.models import ComplianceAssessment
+
+            if compliance_assessment.status == ComplianceAssessment.Status.IN_REVIEW:
+                raise serializers.ValidationError(
+                    "⚠️ Cannot modify the answer when the audit is in review."
+                )
+
+            # 3. Assignment-level locking for respondent users
+            request = self.context.get("request")
+            if request:
+                from core.utils import get_respondent_scoped_folder_ids
+
+                respondent_folders = get_respondent_scoped_folder_ids(request.user)
+                if (
+                    respondent_folders
+                    and requirement_assessment.folder_id in respondent_folders
+                ):
+                    locked_assignment = requirement_assessment.assignments.filter(
+                        status__in=["submitted", "closed"]
+                    ).first()
+                    if locked_assignment:
+                        raise serializers.ValidationError(
+                            "Cannot modify: this requirement's assignment has been submitted or closed."
+                        )
 
         if question:
             q_type = question.type
@@ -4588,6 +5301,33 @@ class AnswerWriteSerializer(BaseModelSerializer):
                     attrs["_m2m_choices"] = selected_choices_list
                     attrs["value"] = None
 
+            elif q_type == Question.Type.OBJECT_REFERENCE:
+                from core.object_references import ReferenceError_, validate_ids
+
+                # The answer's owner, never the question's folder: library questions
+                # live in the root folder, so falling back to it would admit every
+                # object there — the scope check is the whole point of this branch.
+                owner = (
+                    self.instance.owner
+                    if self.instance
+                    else attrs.get("response") or attrs.get("requirement_assessment")
+                )
+                folder = getattr(owner, "folder", None)
+                if folder is None:
+                    raise serializers.ValidationError({"value": "unknownAnswerOwner"})
+                request = self.context.get("request")
+                try:
+                    attrs["value"] = validate_ids(
+                        question,
+                        folder,
+                        value or [],
+                        user=getattr(request, "user", None),
+                    )
+                except ReferenceError_ as e:
+                    # The code, not the exception text: the response is translatable and
+                    # carries nothing the caller did not already send.
+                    logger.warning("Rejected object reference", error=e)
+                    raise serializers.ValidationError({"value": e.code})
             elif q_type == Question.Type.BOOLEAN:
                 if value is not None and not isinstance(value, bool):
                     raise serializers.ValidationError(
@@ -4659,7 +5399,6 @@ class RequirementMappingSetReadSerializer(BaseModelSerializer):
             "builtin",
             "locale",
             "default_locale",
-            "is_published",
             "translations",
             "frameworks_available",
         ]
@@ -4671,15 +5410,10 @@ class RequirementMappingSetReadSerializer(BaseModelSerializer):
         Fallback used on the retrieve path, where no pre-built map is in
         context. Resolves regardless of whether the framework is imported.
         """
-        lib = StoredLibrary.objects.filter(
-            content__framework__urn=urn,
-            content__framework__isnull=False,
-            content__requirement_mapping_set__isnull=True,
-            content__requirement_mapping_sets__isnull=True,
-        ).first()
+        lib = StoredLibrary.framework_libraries([urn]).first()
         if lib is None:
             return None
-        framework = lib.content.get("framework") or {}
+        framework = StoredLibrary.framework_of(lib.content) or {}
         return framework.get("name", urn)
 
     def _framework_info(self, urn):
@@ -4741,9 +5475,14 @@ class RequirementAssessmentImportExportSerializer(BaseModelSerializer):
             "folder",
             "status",
             "result",
+            "extended_result",
             "score",
             "is_scored",
             "is_score_overridden",
+            "documentation_score",
+            "target_score",
+            "respondent_alignment",
+            "review_state",
             "observation",
             "compliance_assessment",
             "requirement",
@@ -4765,6 +5504,7 @@ class RequirementAssignmentEventSerializer(BaseModelSerializer):
 class AnswerImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
     requirement_assessment = HashSlugRelatedField(slug_field="pk", read_only=True)
+    response = HashSlugRelatedField(slug_field="pk", read_only=True)
     question = serializers.SlugRelatedField(slug_field="urn", read_only=True)
     selected_choices_urns = serializers.SerializerMethodField()
 
@@ -4778,9 +5518,50 @@ class AnswerImportExportSerializer(BaseModelSerializer):
             "updated_at",
             "folder",
             "requirement_assessment",
+            "response",
             "question",
             "value",
             "selected_choices_urns",
+        ]
+
+
+class QuickFormImportExportSerializer(BaseModelSerializer):
+    library = serializers.SlugRelatedField(slug_field="urn", read_only=True)
+
+    class Meta:
+        model = QuickForm
+        fields = [
+            "urn",
+            "ref_id",
+            "name",
+            "library",
+            "outcomes_definition",
+            "scores_definition",
+        ]
+
+
+class QuickFormResponseImportExportSerializer(BaseModelSerializer):
+    quick_form = serializers.SlugRelatedField(slug_field="urn", read_only=True)
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+
+    class Meta:
+        model = QuickFormResponse
+        fields = [
+            "name",
+            "description",
+            "folder",
+            "quick_form",
+            "status",
+            "eta",
+            "due_date",
+            "computed_outcome",
+            "computed_values",
+            "score",
+            "started_at",
+            "submitted_at",
+            "observation",
+            "created_at",
+            "updated_at",
         ]
 
 
@@ -4788,6 +5569,7 @@ class FindingsAssessmentImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
     perimeter = HashSlugRelatedField(slug_field="pk", read_only=True)
     evidences = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    compliance_assessment = HashSlugRelatedField(slug_field="pk", read_only=True)
 
     class Meta:
         model = FindingsAssessment
@@ -4806,6 +5588,7 @@ class FindingsAssessmentImportExportSerializer(BaseModelSerializer):
             "folder",
             "perimeter",
             "evidences",
+            "compliance_assessment",
             "created_at",
             "updated_at",
         ]
@@ -4909,6 +5692,7 @@ class IncidentImportExportSerializer(BaseModelSerializer):
     threats = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
     assets = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
     entities = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    vulnerabilities = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
 
     class Meta:
         model = Incident
@@ -4929,6 +5713,7 @@ class IncidentImportExportSerializer(BaseModelSerializer):
             "threats",
             "assets",
             "entities",
+            "vulnerabilities",
             "created_at",
             "updated_at",
         ]
@@ -4970,10 +5755,14 @@ class TaskTemplateImportExportSerializer(BaseModelSerializer):
     compliance_assessments = HashSlugRelatedField(
         slug_field="pk", read_only=True, many=True
     )
+    requirement_assessments = HashSlugRelatedField(
+        slug_field="pk", read_only=True, many=True
+    )
     risk_assessments = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
     findings_assessment = HashSlugRelatedField(
         slug_field="pk", read_only=True, many=True
     )
+    vulnerabilities = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
 
     class Meta:
         model = TaskTemplate
@@ -4991,8 +5780,10 @@ class TaskTemplateImportExportSerializer(BaseModelSerializer):
             "assets",
             "applied_controls",
             "compliance_assessments",
+            "requirement_assessments",
             "risk_assessments",
             "findings_assessment",
+            "vulnerabilities",
             "created_at",
             "updated_at",
         ]
@@ -5095,6 +5886,10 @@ class ComputeMappingSerializer(serializers.Serializer):
 class FilteringLabelReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
+    usage_count = serializers.SerializerMethodField()
+
+    def get_usage_count(self, obj):
+        return getattr(obj, "usage_count", None)
 
     class Meta:
         model = FilteringLabel
@@ -5104,7 +5899,7 @@ class FilteringLabelReadSerializer(BaseModelSerializer):
 class FilteringLabelWriteSerializer(BaseModelSerializer):
     class Meta:
         model = FilteringLabel
-        exclude = ["folder", "is_published"]
+        exclude = ["folder"]
 
 
 class LibraryFilteringLabelReadSerializer(BaseModelSerializer):
@@ -5119,7 +5914,7 @@ class LibraryFilteringLabelReadSerializer(BaseModelSerializer):
 class LibraryFilteringLabelWriteSerializer(BaseModelSerializer):
     class Meta:
         model = LibraryFilteringLabel
-        exclude = ["folder", "is_published"]
+        exclude = ["folder"]
 
 
 class SecurityExceptionWriteSerializer(
@@ -5139,6 +5934,9 @@ class SecurityExceptionWriteSerializer(
     )
     assets = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Asset.objects.all(), required=False
+    )
+    vulnerabilities = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Vulnerability.objects.all(), required=False
     )
     evidences = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Evidence.objects.all(), required=False
@@ -5248,7 +6046,34 @@ class SecurityExceptionWriteSerializer(
         read_only_fields = ["approver"]
 
 
-class SecurityExceptionReadSerializer(CustomFieldsSerializerMixin, BaseModelSerializer):
+class ProducedFromMixin(serializers.Serializer):
+    """`produced_from` on any read serializer whose model can be created by automation.
+
+    One indexed query against `ProducedObjectLink`, so adding it to another model costs
+    a mixin and nothing else. Answers "where did this record come from?" — the half of
+    provenance that a register needs and a forward-only link cannot give.
+    """
+
+    produced_from = serializers.SerializerMethodField()
+
+    def get_produced_from(self, obj) -> list[dict]:
+        from core.models import ProducedObjectLink
+
+        return [
+            link.describe(link.source_object)
+            for link in ProducedObjectLink.produced_by(obj)
+            if link.source_object is not None
+        ]
+
+
+class SecurityExceptionReadSerializer(
+    ProducedFromMixin, CustomFieldsSerializerMixin, BaseModelSerializer
+):
+    # Two bases declare FLAGGED_FIELDS and the MRO picks a winner silently. Stating it
+    # here means a future change to the base order cannot quietly drop custom-field
+    # flagging on this serializer.
+    FLAGGED_FIELDS = CustomFieldsSerializerMixin.FLAGGED_FIELDS
+
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
     owners = FieldsRelatedField(many=True)
@@ -5402,6 +6227,14 @@ class FindingWriteSerializer(BaseModelSerializer):
                     "findings_assessment": "⚠️ Cannot attach the finding to a locked findings assessment."
                 }
             )
+        # Same rule as the findings-binder endpoint, for direct API writes.
+        target_requirement_assessment = attrs.get("requirement_assessment")
+        if target_requirement_assessment and target_requirement_assessment.is_locked:
+            raise serializers.ValidationError(
+                {
+                    "requirement_assessment": "⚠️ Cannot bind a finding to a requirement of a locked audit."
+                }
+            )
         return super().validate(attrs)
 
     class Meta:
@@ -5479,7 +6312,7 @@ class FindingReadSerializer(FindingWriteSerializer):
     threats = FieldsRelatedField(many=True)
     vulnerabilities = FieldsRelatedField(many=True)
     reference_controls = FieldsRelatedField(many=True)
-    applied_controls = FieldsRelatedField(many=True)
+    applied_controls = FieldsRelatedField(["id", "status"], many=True)
     filtering_labels = FieldsRelatedField(many=True)
     evidences = FieldsRelatedField(many=True)
     task_templates = FieldsRelatedField(many=True)
@@ -5517,7 +6350,7 @@ class CommitmentReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = Commitment
-        exclude = ["content_type", "object_id", "is_published"]
+        exclude = ["content_type", "object_id"]
 
 
 class PresetReadSerializer(BaseModelSerializer):
@@ -5887,6 +6720,7 @@ class IncidentReadSerializer(IncidentWriteSerializer):
     threats = FieldsRelatedField(many=True)
     owners = FieldsRelatedField(many=True)
     assets = FieldsRelatedField(many=True)
+    vulnerabilities = FieldsRelatedField(many=True)
     qualifications = FieldsRelatedField(many=True)
     entities = FieldsRelatedField(many=True)
     applied_controls = FieldsRelatedField(many=True)
@@ -5920,6 +6754,7 @@ class TaskTemplateReadSerializer(CommitmentSerializerMixin, BaseModelSerializer)
     assigned_to = FieldsRelatedField(many=True)
     findings_assessment = FieldsRelatedField(many=True)
     findings = FieldsRelatedField(many=True)
+    vulnerabilities = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
 
     next_occurrence = serializers.ReadOnlyField(source="get_next_occurrence")
@@ -6194,12 +7029,26 @@ class TaskNodeReadSerializer(BaseModelSerializer):
         return obj.task_template.name if obj.task_template else ""
 
     def get_evidence_reviewed(self, obj):
-        evidence_reviewed = []
-        for evidence in obj.expected_evidence:
-            last_revision = evidence.last_revision
-            if last_revision and last_revision.task_node == obj:
-                evidence_reviewed.append(evidence.id)
-        return evidence_reviewed
+        """Which expected evidences this occurrence has a file for.
+
+        Read from the occurrence's own revisions, the same source as
+        get_evidence_revisions_map below. The evidence's *latest* revision is
+        the wrong question: expected_evidence is the template's list, shared by
+        every occurrence, so February filing v2 used to un-tick January, and a
+        revision filed by anything other than an occurrence (a workflow
+        collecting the file, say) used to un-tick whoever had answered.
+        """
+        expected = {evidence.id for evidence in obj.expected_evidence}
+        reviewed = []
+        # An occurrence may hold several revisions of one evidence; the tick is
+        # per evidence, so report each at most once.
+        for revision in obj.evidence_revisions.all():
+            if (
+                revision.evidence_id in expected
+                and revision.evidence_id not in reviewed
+            ):
+                reviewed.append(revision.evidence_id)
+        return reviewed
 
     def get_evidence_revisions_map(self, obj):
         """Returns a mapping of evidence ID to revision ID for this task node"""
@@ -6257,7 +7106,7 @@ class TerminologyWriteSerializer(BaseModelSerializer):
 
     class Meta:
         model = Terminology
-        exclude = ["folder", "is_published"]
+        exclude = ["folder"]
 
 
 class ClassificationLevelReadSerializer(BaseModelSerializer):
@@ -6276,7 +7125,7 @@ class ClassificationLevelWriteSerializer(BaseModelSerializer):
 
     class Meta:
         model = ClassificationLevel
-        exclude = ["folder", "is_published"]
+        exclude = ["folder"]
 
 
 class ObjectClassificationReadSerializer(BaseModelSerializer):
@@ -6295,7 +7144,7 @@ class ObjectClassificationWriteSerializer(BaseModelSerializer):
 
     class Meta:
         model = ObjectClassification
-        exclude = ["folder", "is_published"]
+        exclude = ["folder"]
 
 
 class ValidationFlowWriteSerializer(BaseModelSerializer):
@@ -6674,11 +7523,12 @@ class ComplianceAssessmentEvidenceSerializer(BaseModelSerializer):
         pk = self.context.get("pk")
         if pk is None:
             return {"direct_links": [], "indirect_links": []}
+        indirect_evidence_links = self.context.get("indirect_evidence_links") or {}
 
         # Get requirement assessments for this compliance assessment
         requirement_assessments = RequirementAssessment.objects.filter(
             compliance_assessment=pk
-        ).prefetch_related("applied_controls")
+        ).prefetch_related("evidences")
 
         direct_links = []
         indirect_links = []
@@ -6695,20 +7545,20 @@ class ComplianceAssessmentEvidenceSerializer(BaseModelSerializer):
                     }
                 )
 
-        # Indirect links - evidence is linked through applied controls
+        # Indirect links - evidence is linked through an applied control or a
+        # task template attached to the requirement assessment (precomputed in the view)
         for req_assessment in requirement_assessments:
-            for applied_control in req_assessment.applied_controls.all():
-                if obj in applied_control.evidences.all():
-                    indirect_links.append(
-                        {
-                            "requirement_assessment_id": str(req_assessment.id),
-                            "requirement_assessment_name": str(
-                                req_assessment.requirement.safe_display_str
-                            ),
-                            "applied_control_id": str(applied_control.id),
-                            "applied_control_name": applied_control.name,
-                        }
-                    )
+            via_names = indirect_evidence_links.get((req_assessment.id, obj.id), [])
+            for via_name in via_names:
+                indirect_links.append(
+                    {
+                        "requirement_assessment_id": str(req_assessment.id),
+                        "requirement_assessment_name": str(
+                            req_assessment.requirement.safe_display_str
+                        ),
+                        "via_name": via_name,
+                    }
+                )
 
         # Return a simplified format similar to action-plan
         all_links = []
@@ -6726,7 +7576,7 @@ class ComplianceAssessmentEvidenceSerializer(BaseModelSerializer):
         for link in indirect_links:
             all_links.append(
                 {
-                    "str": f"{link['requirement_assessment_name']} (via {link['applied_control_name'][:15]}...)",
+                    "str": f"{link['requirement_assessment_name']} (via {link['via_name'][:15]}...)",
                     "id": link["requirement_assessment_id"],
                 }
             )
@@ -6746,3 +7596,265 @@ class ComplianceAssessmentEvidenceSerializer(BaseModelSerializer):
             "size",
             "requirement_assessments",
         ]
+
+
+# ---------------------------------------------------------------------------
+# Quick forms
+# ---------------------------------------------------------------------------
+
+
+class QuickFormReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    library = FieldsRelatedField(["id", "urn", "name"])
+    pages_count = serializers.SerializerMethodField()
+    responses_count = serializers.SerializerMethodField()
+    is_deletable = serializers.SerializerMethodField()
+    on_accept_health = serializers.SerializerMethodField()
+
+    def get_pages_count(self, obj):
+        return obj.pages.count()
+
+    def get_responses_count(self, obj):
+        return obj.responses.count()
+
+    def get_is_deletable(self, obj):
+        return obj.is_deletable()
+
+    def get_on_accept_health(self, obj) -> list[dict]:
+        from core.quick_form_apply import on_accept_health
+
+        # One tier scale per request, not per listed form.
+        cache = self.context.setdefault("on_accept_health_cache", {})
+        return on_accept_health(obj, cache) if obj.on_accept else []
+
+    class Meta:
+        model = QuickForm
+        fields = "__all__"
+
+
+class QuickFormWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = QuickForm
+        exclude = ["created_at", "updated_at"]
+        # Comes with the library, edited in the library builder.
+        read_only_fields = ["on_accept"]
+
+
+class QuickFormPageReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    quick_form = FieldsRelatedField()
+    questions = serializers.SerializerMethodField()
+
+    def get_questions(self, obj):
+        return obj.get_questions_translated() or {}
+
+    class Meta:
+        model = QuickFormPage
+        fields = "__all__"
+
+
+class QuickFormPageWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = QuickFormPage
+        exclude = ["created_at", "updated_at"]
+
+
+def _reject_entity_actors(actors):
+    """Third-party respondents are out of scope for quick forms: only user
+    and team actors may be picked."""
+    for actor in actors or []:
+        if actor.entity_id is not None:
+            raise serializers.ValidationError(
+                f"Entity actor '{actor}' cannot be picked on a quick form response."
+            )
+    return actors
+
+
+class QuickFormPublicationWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = QuickFormPublication
+        exclude = ["created_at", "updated_at"]
+
+    def validate_default_reviewers(self, value):
+        return _reject_entity_actors(value)
+
+
+class QuickFormPublicationReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    submission_folder = FieldsRelatedField()
+    quick_form = FieldsRelatedField(["id", "name", "urn"])
+    audience_groups = FieldsRelatedField(many=True)
+    default_reviewers = FieldsRelatedField(many=True)
+    responses_count = serializers.SerializerMethodField()
+
+    def get_responses_count(self, obj) -> int:
+        return obj.responses.count()
+
+    class Meta:
+        model = QuickFormPublication
+        fields = "__all__"
+
+
+class QuickFormResponseReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    quick_form = FieldsRelatedField(["id", "name", "urn"])
+    respondents = FieldsRelatedField(many=True)
+    reviewers = FieldsRelatedField(many=True)
+    assignee = FieldsRelatedField()
+    publication = FieldsRelatedField()
+    cloned_from = FieldsRelatedField(["id", "ref_id"])
+    progress = serializers.SerializerMethodField()
+    is_deletable = serializers.SerializerMethodField()
+    awaiting_conversion = serializers.BooleanField(read_only=True)
+    subject = serializers.SerializerMethodField()
+
+    def get_subject(self, obj):
+        user = getattr(self.context.get("request"), "user", None)
+        # Listed: every subject on the page is labelled at once.
+        page = getattr(self.parent, "instance", None)
+        if page is None or isinstance(page, QuickFormResponse):
+            return obj.subject_summary(user)
+        if "_subject_labels" not in self.context:
+            self.context["_subject_labels"] = QuickFormResponse.subject_labels(
+                page, user
+            )
+        return obj.subject_summary(user, self.context["_subject_labels"])
+
+    def get_is_deletable(self, obj) -> bool:
+        # Answered per caller: a closed request is administrator-only.
+        request = self.context.get("request")
+        return obj.is_deletable(getattr(request, "user", None))
+
+    def get_progress(self, obj):
+        """Cheap list-view progress: answered vs seeded questions, ignoring
+        page visibility and depends_on. The `content` endpoint carries the
+        exact figures."""
+        total = Question.objects.filter(page__quick_form_id=obj.quick_form_id).count()
+        answered = (
+            obj.answers.filter(
+                ~Answer.empty_value_q() | Q(selected_choices__isnull=False)
+            )
+            .distinct()
+            .count()
+        )
+        return {"answered_count": answered, "total_count": total}
+
+    class Meta:
+        model = QuickFormResponse
+        # The content endpoint shows facts, to who may view the subject only.
+        exclude = ["facts_snapshot"]
+
+
+class QuickFormResponseWriteSerializer(BaseModelSerializer):
+    answers = serializers.JSONField(required=False, write_only=True)
+    start_now = serializers.BooleanField(required=False, write_only=True, default=False)
+
+    class Meta:
+        model = QuickFormResponse
+        exclude = ["created_at", "updated_at"]
+        read_only_fields = [
+            "status",
+            "computed_outcome",
+            "computed_values",
+            "subject_content_type",
+            "subject_object_id",
+            "score",
+            "started_at",
+            "submitted_at",
+            # Frozen on submit: the record of what was assessed.
+            "facts_snapshot",
+        ]
+
+    def validate_respondents(self, value):
+        return _reject_entity_actors(value)
+
+    def validate_reviewers(self, value):
+        return _reject_entity_actors(value)
+
+    def validate_answers(self, value):
+        if value is not None and not isinstance(value, dict):
+            raise serializers.ValidationError("answers must be an object keyed by URN")
+        return value
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        if (
+            self.instance
+            and attrs.get("answers")
+            and self.instance.status != QuickFormResponse.Status.DRAFT
+        ):
+            raise serializers.ValidationError(
+                {
+                    "answers": "Answers can only be modified while the response is in progress."
+                }
+            )
+        # The content of a request belongs to whoever is asking. A reviewer with change
+        # rights on the domain sends it back with a note; they do not answer it for you.
+        if self.instance and attrs.get("answers") is not None:
+            request = self.context.get("request")
+            if request is not None and not self.instance.is_requester(request.user):
+                raise serializers.ValidationError(
+                    {"answers": "Only the requester can change the answers."}
+                )
+            if self.instance.changes_locked_subject(attrs["answers"]):
+                raise serializers.ValidationError({"answers": "subjectLocked"})
+        if self.instance and "quick_form" in attrs:
+            if attrs["quick_form"] != self.instance.quick_form:
+                raise serializers.ValidationError(
+                    {
+                        "quick_form": "The form of an existing response cannot be changed."
+                    }
+                )
+        return attrs
+
+    def _apply_answers(self, instance, answers_data):
+        from core.utils import apply_answers_dict
+
+        questions_by_urn = {
+            q.urn: q
+            for q in Question.objects.filter(
+                page__quick_form_id=instance.quick_form_id
+            ).prefetch_related("choices")
+        }
+        apply_answers_dict(
+            "response",
+            instance,
+            questions_by_urn,
+            answers_data,
+            user=getattr(self.context.get("request"), "user", None),
+        )
+        instance.refresh_title_from_answers()
+
+    def create(self, validated_data):
+        from core.tasks import send_quick_form_started_notification
+
+        answers_data = validated_data.pop("answers", None)
+        start_now = validated_data.pop("start_now", False)
+        request = self.context.get("request")
+        with transaction.atomic():
+            if not validated_data.get("reviewers") and request is not None:
+                # Someone has to hear about the submission: default the
+                # reviewers to the creator when none were picked.
+                creator_actor = Actor.objects.filter(user=request.user).first()
+                if creator_actor is not None:
+                    validated_data["reviewers"] = [creator_actor]
+            instance = super().create(validated_data)
+            instance.seed_answers()
+            if answers_data:
+                self._apply_answers(instance, answers_data)
+            if start_now:
+                instance.started_at = timezone.now()
+                instance.save(update_fields=["started_at"])
+                transaction.on_commit(
+                    lambda pk=instance.pk: send_quick_form_started_notification(pk)
+                )
+        return instance
+
+    def update(self, instance, validated_data):
+        answers_data = validated_data.pop("answers", None)
+        validated_data.pop("start_now", None)
+        with transaction.atomic():
+            instance = super().update(instance, validated_data)
+            if answers_data:
+                self._apply_answers(instance, answers_data)
+        return instance

@@ -1,6 +1,6 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { error, type NumericRange } from '@sveltejs/kit';
+import { BASE_API_URL } from '#lib/utils/constants.js';
 import type { RequestHandler } from './$types';
+import { errorFromBody } from '#lib/utils/errors.js';
 
 export const POST: RequestHandler = async ({ fetch, request }) => {
 	const body = await request.json();
@@ -13,7 +13,7 @@ export const POST: RequestHandler = async ({ fetch, request }) => {
 	});
 
 	if (!res.ok) {
-		error(res.status as NumericRange<400, 599>, await res.json());
+		errorFromBody(res.status, await res.json());
 	}
 
 	const data = await res.json();

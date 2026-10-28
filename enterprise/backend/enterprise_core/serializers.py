@@ -19,6 +19,7 @@ from global_settings.serializers import (
 )
 
 from core.models import CustomEmailTemplate, CustomWordTemplate, CustomDocHtmlTemplate
+from .license import get_editors, seat_limit_reachable, seat_permissions
 from .models import ClientSettings, LogEntryAction
 from auditlog.models import LogEntry
 from global_settings.serializers import (
@@ -30,11 +31,23 @@ logger = structlog.get_logger(__name__)
 
 
 class FolderWriteSerializer(CommunityFolderWriteSerializer):
+    BUILTIN_EDITABLE_FIELDS = {"name", "default_role"}
+
+    class Meta(CommunityFolderWriteSerializer.Meta):
+        # The default role is configurable here only; the community serializer
+        # excludes it (fixed baseline on the root). The eligibility and enclave
+        # validators are inherited from the community class and bind here.
+        exclude = [
+            field
+            for field in CommunityFolderWriteSerializer.Meta.exclude
+            if field != "default_role"
+        ]
+
     def validate_parent_folder(self, parent_folder):
+        """Nesting is allowed here, so this replaces the community policy outright
+        (hence `_resolve_parent_folder`, not `super()`); only cycles remain to reject.
         """
-        Check that the folders graph will not contain cycles
-        """
-        parent_folder = super().validate_parent_folder(parent_folder)
+        parent_folder = self._resolve_parent_folder(parent_folder)
         if not self.instance:
             return parent_folder
         if parent_folder:
@@ -48,48 +61,35 @@ class FolderWriteSerializer(CommunityFolderWriteSerializer):
         return parent_folder
 
 
-class RoleReadSerializer(BaseModelSerializer):
-    name = serializers.CharField(source="__str__")
-    permissions = serializers.SerializerMethodField()
-    folder = FieldsRelatedField()
-
-    class Meta:
-        model = Role
-        fields = "__all__"
-
-    def get_permissions(self, obj):
-        return [{"str": perm.codename} for perm in obj.permissions.all()]
-
-
-class RoleWriteSerializer(BaseModelSerializer):
-    class Meta:
-        model = Role
-        fields = "__all__"
-
-
 class EditorPermissionMixin:
     @staticmethod
-    def check_editor_permissions(instance, group):
-        editor_prefixes = {"add_", "change_", "delete_"}
-        editors = User.get_editors()
+    def check_editor_permissions(instance, groups):
+        """Refuse groups that would make `instance` an editor when no seat is
+        left: one check for all the groups of a request."""
         seats = settings.LICENSE_SEATS
-
-        perms = [
-            p
-            for p in RoleAssignment.get_permissions(group)
-            if p not in User.NON_SEAT_PERMISSIONS
-        ]
-        if any(perm.startswith(prefix) for prefix in editor_prefixes for perm in perms):
-            logger.info("Adding editor permissions to user", user=instance, group=group)
-            if instance not in editors and len(editors) >= seats:
-                logger.error(
-                    "License seats exceeded, cannot add editor user groups to user",
-                    user=instance,
-                    seats=seats,
-                )
-                raise serializers.ValidationError(
-                    {"user_groups": "errorLicenseSeatsExceeded"}
-                )
+        # While the limit is out of reach no check can fail, and get_editors()
+        # scans every user: test the cheap bound first.
+        if not seat_limit_reachable(seats):
+            return
+        seat_codenames = set(seat_permissions().values_list("codename", flat=True))
+        if all(
+            seat_codenames.isdisjoint(RoleAssignment.get_permissions(group))
+            for group in groups
+        ):
+            return
+        logger.info("Adding editor permissions to user", user=instance)
+        editors = get_editors()
+        if instance is not None and editors.filter(pk=instance.pk).exists():
+            return
+        if editors.count() >= seats:
+            logger.error(
+                "License seats exceeded, cannot add editor user groups to user",
+                user=instance,
+                seats=seats,
+            )
+            raise serializers.ValidationError(
+                {"user_groups": "errorLicenseSeatsExceeded"}
+            )
 
 
 class UserWriteSerializer(CommunityUserWriteSerializer, EditorPermissionMixin):
@@ -100,8 +100,7 @@ class UserWriteSerializer(CommunityUserWriteSerializer, EditorPermissionMixin):
                 user=instance,
                 groups=validated_data["user_groups"],
             )
-            for group in validated_data["user_groups"]:
-                self.check_editor_permissions(instance, group)
+            self.check_editor_permissions(instance, validated_data["user_groups"])
 
     def create(self, validated_data):
         self._update_user_groups(None, validated_data)
@@ -119,7 +118,7 @@ class UserWriteSerializer(CommunityUserWriteSerializer, EditorPermissionMixin):
 class ClientSettingsWriteSerializer(BaseModelSerializer):
     class Meta:
         model = ClientSettings
-        exclude = ["is_published", "folder"]
+        exclude = ["folder"]
 
 
 class ClientSettingsReadSerializer(BaseModelSerializer):
@@ -142,7 +141,7 @@ class ClientSettingsReadSerializer(BaseModelSerializer):
 
     class Meta:
         model = ClientSettings
-        exclude = ["is_published", "folder"]
+        exclude = ["folder"]
 
 
 class LogEntrySerializer(serializers.ModelSerializer):
@@ -326,6 +325,12 @@ class FeatureFlagsSerializer(CommunityFeatureFlagSerializer):
     service_accounts = serializers.BooleanField(
         source="value.service_accounts", required=False, default=False
     )
+
+    # The only enterprise flag that merely hides a navigation area; the rest
+    # change what the data means or are configuration.
+    USER_HIDEABLE_FLAGS = CommunityFeatureFlagSerializer.USER_HIDEABLE_FLAGS | {
+        "campaigns"
+    }
 
 
 class ServiceAccountWriteSerializer(CommunityServiceAccountWriteSerializer):

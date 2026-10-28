@@ -1,10 +1,10 @@
-import { BASE_API_URL } from '$lib/utils/constants';
+import { BASE_API_URL } from '#lib/utils/constants.js';
 
-import { defaultDeleteFormAction } from '$lib/utils/actions';
-import { safeTranslate } from '$lib/utils/i18n';
-import { LibraryUploadSchema } from '$lib/utils/schemas';
-import { listViewFields } from '$lib/utils/table';
-import { m } from '$paraglide/messages';
+import { defaultDeleteFormAction } from '#lib/utils/actions.js';
+import { safeTranslate } from '#lib/utils/i18n.js';
+import { LibraryUploadSchema } from '#lib/utils/schemas.js';
+import { listViewFields } from '#lib/utils/table.js';
+import { m } from '#paraglide/messages.js';
 import { fail, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { superValidate } from 'sveltekit-superforms';
@@ -12,11 +12,7 @@ import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import type { PageServerLoad } from './$types';
 
-export const load = (async ({ fetch }) => {
-	const storedLibrariesEndpoint = `${BASE_API_URL}/stored-libraries/`;
-	const storedLibrariesResponse = await fetch(storedLibrariesEndpoint);
-	const storedLibraries = await storedLibrariesResponse.json();
-
+export const load = (async () => {
 	const makeHeadData = (URLModel) => {
 		return listViewFields[URLModel].body.reduce((obj, key, index) => {
 			obj[key] = listViewFields[URLModel].head[index];
@@ -26,7 +22,8 @@ export const load = (async ({ fetch }) => {
 
 	const storedLibrariesTable = {
 		head: makeHeadData('stored-libraries'),
-		meta: { urlmodel: 'stored-libraries', ...storedLibraries },
+		// The table pages through the API itself: nothing to fetch up front.
+		meta: { urlmodel: 'stored-libraries' },
 		body: []
 	};
 
@@ -46,7 +43,7 @@ export const actions: Actions = {
 	upload: async (event) => {
 		const formData = await event.request.formData();
 		const form = await superValidate(formData, zod(LibraryUploadSchema));
-		const locale = event.locals.user?.preferences?.lang;
+		const locale = (await event.locals.getUser())?.preferences?.lang;
 
 		if (formData.has('file')) {
 			const { file } = Object.fromEntries(formData) as { file: File };

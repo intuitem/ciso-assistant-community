@@ -1,5 +1,5 @@
-import { safeTranslate } from '$lib/utils/i18n';
-import { m } from '$paraglide/messages';
+import { safeTranslate } from '#lib/utils/i18n.js';
+import { m } from '#paraglide/messages.js';
 
 export type ValidationFlowAction =
 	'approve' | 'reject' | 'request_changes' | 'drop' | 'revoke' | 'resubmit';

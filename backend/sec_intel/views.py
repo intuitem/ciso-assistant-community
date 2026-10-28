@@ -28,6 +28,7 @@ class SecurityAdvisoryViewSet(BaseModelViewSet):
         "filtering_labels",
         "urn",
         "source",
+        "published_date",
     ]
     search_fields = ["name", "ref_id", "description", "cvss_vector", "aliases"]
 
@@ -250,6 +251,8 @@ class CWEViewSet(BaseModelViewSet):
     )
     def sync_catalog(self, request):
         """Sync CWE catalog from MITRE."""
+        import httpx
+
         from sec_intel.feeds import CWEFeed
 
         try:
@@ -259,6 +262,12 @@ class CWEViewSet(BaseModelViewSet):
                     "detail": f"CWE sync complete: {result['created']} created, {result['updated']} updated",
                     **result,
                 }
+            )
+        except httpx.HTTPError:
+            logger.warning("CWE feed unreachable", exc_info=True)
+            return Response(
+                {"error": "CWE feed is unreachable, try again later"},
+                status=503,
             )
         except Exception:
             logger.warning("CWE sync failed", exc_info=True)
@@ -291,7 +300,8 @@ class TechniqueViewSet(BaseModelViewSet):
     API endpoint that allows techniques to be viewed or edited.
     """
 
-    feature_flag = "ttps"
+    # EBIOS RM elementary actions draw on techniques (M4_03)
+    feature_flag = ("ttps", "ebiosrm")
 
     def get_permissions(self):
         return super().get_permissions() + [FeatureFlagRequired()]
@@ -361,6 +371,7 @@ def build_catalog_matrix(catalog) -> dict:
         payload = {
             "id": technique.id,
             "ref_id": technique.ref_id,
+            "order_id": technique.order_id,
             "name": technique.get_name_translated,
             "tactics": [str(t.id) for t in technique.tactics.all()],
             "groups": technique.groups or [],
@@ -370,10 +381,11 @@ def build_catalog_matrix(catalog) -> dict:
         else:
             cells.append(payload)
 
-    # published matrices order cells by name, sub-techniques by ref_id
+    # published matrices order cells by name, sub-techniques by ref_id (else library order)
     for cell in cells:
         cell["children"] = sorted(
-            children.pop(str(cell["id"]), []), key=lambda item: item["ref_id"]
+            children.pop(str(cell["id"]), []),
+            key=lambda item: (item["ref_id"] or "", item["order_id"] or 0),
         )
     for orphans in children.values():
         cells.extend({**orphan, "children": []} for orphan in orphans)

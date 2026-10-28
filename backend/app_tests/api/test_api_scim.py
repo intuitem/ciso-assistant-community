@@ -53,7 +53,7 @@ def _scim_client():
     """A client authenticated with a genuine SCIM bearer token (Knox token
     wrapped in a SCIMToken). The owner is a non-admin so it does not affect
     admin-count assertions."""
-    owner = User.objects.create_user("scim-bot@tests.com", is_published=True)
+    owner = User.objects.create_user("scim-bot@tests.com")
     instance, token = AuthToken.objects.create(user=owner)
     SCIMToken.objects.create(auth_token=instance, name="test")
     client = APIClient()
@@ -65,7 +65,7 @@ def _scim_user(email, external_id):
     # create_user only persists a whitelist of fields, so set the SCIM markers
     # explicitly. is_scim_managed is what marks the account as SCIM-owned;
     # external_id is optional (RFC 7643) and kept here for realism.
-    user = User.objects.create_user(email, is_published=True)
+    user = User.objects.create_user(email)
     user.scim_external_id = external_id
     user.is_scim_managed = True
     user.save(update_fields=["scim_external_id", "is_scim_managed"])
@@ -83,7 +83,7 @@ class TestSCIMAuthentication:
 
     def test_non_scim_token_is_rejected(self, enable_idp_groups):
         # A valid Knox token that is NOT a SCIM token must not reach SCIM.
-        user = User.objects.create_user("plain@tests.com", is_published=True)
+        user = User.objects.create_user("plain@tests.com")
         _, token = AuthToken.objects.create(user=user)
         client = APIClient()
         client.credentials(HTTP_AUTHORIZATION=f"Bearer {token}")
@@ -98,7 +98,7 @@ class TestSCIMAuthentication:
 class TestSCIMOwnershipInvariant:
     def test_list_returns_only_scim_managed_users(self, enable_idp_groups):
         _scim_user("provisioned@tests.com", "ext-1")
-        User.objects.create_user("local@tests.com", is_published=True)  # not SCIM
+        User.objects.create_user("local@tests.com")  # not SCIM
         resp = _scim_client().get(USERS_URL)
         assert resp.status_code == 200
         emails = {r["userName"] for r in json.loads(resp.content)["Resources"]}
@@ -139,7 +139,7 @@ class TestSCIMOwnershipInvariant:
         assert client.delete(f"{USERS_URL}/{uid}").status_code == 204
 
     def test_create_refuses_to_adopt_an_admin(self, enable_idp_groups):
-        admin = User.objects.create_user("boss@tests.com", is_published=True)
+        admin = User.objects.create_user("boss@tests.com")
         _admin_group().user_set.add(admin)
         resp = _scim_client().post(
             USERS_URL,
@@ -152,16 +152,14 @@ class TestSCIMOwnershipInvariant:
         assert admin.scim_external_id is None
 
     def test_create_refuses_to_adopt_a_local_login_account(self, enable_idp_groups):
-        User.objects.create_user(
-            "keeplocal@tests.com", is_published=True, keep_local_login=True
-        )
+        User.objects.create_user("keeplocal@tests.com", keep_local_login=True)
         resp = _scim_client().post(
             USERS_URL, data={"userName": "keeplocal@tests.com"}, format="json"
         )
         assert resp.status_code == 409
 
     def test_create_adopts_a_plain_local_account(self, enable_idp_groups):
-        User.objects.create_user("joiner@tests.com", is_published=True)
+        User.objects.create_user("joiner@tests.com")
         resp = _scim_client().post(
             USERS_URL,
             data={"userName": "joiner@tests.com", "externalId": "ext-99"},
@@ -178,7 +176,7 @@ class TestSCIMOwnershipInvariant:
         """SCIM may freely redirect an adopted account's email — on the same
         request or a later one — because is_local closes the actual
         exploitation surface (local login / password-reset) regardless."""
-        User.objects.create_user("joiner2@tests.com", is_published=True)
+        User.objects.create_user("joiner2@tests.com")
         client = _scim_client()
         first = client.post(
             USERS_URL,
@@ -198,7 +196,7 @@ class TestSCIMOwnershipInvariant:
         """The real security boundary: once is_scim_managed, is_local is
         False (unless keep_local_login), so no email SCIM puts on the
         account ever re-opens local password login or password-reset."""
-        User.objects.create_user("joiner3@tests.com", is_published=True)
+        User.objects.create_user("joiner3@tests.com")
         resp = _scim_client().post(
             USERS_URL,
             data={
@@ -213,7 +211,7 @@ class TestSCIMOwnershipInvariant:
         assert user.is_local is False
 
     def test_cannot_patch_a_non_scim_user(self, enable_idp_groups):
-        local = User.objects.create_user("local@tests.com", is_published=True)
+        local = User.objects.create_user("local@tests.com")
         resp = _scim_client().patch(
             f"{USERS_URL}/{local.id}",
             data={"Operations": [{"op": "replace", "path": "active", "value": False}]},
@@ -227,7 +225,7 @@ class TestSCIMOwnershipInvariant:
 @pytest.mark.django_db
 class TestSCIMGroupMembershipEscalation:
     def test_non_scim_user_cannot_be_added_to_a_group(self, enable_idp_groups):
-        local_admin = User.objects.create_user("victim@tests.com", is_published=True)
+        local_admin = User.objects.create_user("victim@tests.com")
         resp = _scim_client().post(
             GROUPS_URL,
             data={

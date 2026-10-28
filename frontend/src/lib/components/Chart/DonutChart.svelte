@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { mountThemeAwareChart } from '#lib/utils/echartsTheme.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	interface Props {
 		name: string;
 		s_label?: string;
@@ -84,7 +84,7 @@
 					legend: showLegend
 						? {
 								top: 'bottom',
-								right: '0',
+								...(orientation === 'horizontal' ? { left: 'center' } : { right: '0' }),
 								orient: orientation
 							}
 						: { show: false },

@@ -24,7 +24,7 @@ def build_audit(name, requirement_count):
     a single-choice question, plus an audit with one empty answer per question."""
     folder = Folder.get_root_folder()
     framework = Framework.objects.create(
-        name=name, folder=folder, is_published=True, urn=f"urn:test:fw:{name}"
+        name=name, folder=folder, urn=f"urn:test:fw:{name}"
     )
     perimeter = Perimeter.objects.create(name=f"{name} perimeter", folder=folder)
     audit = ComplianceAssessment.objects.create(
@@ -32,7 +32,6 @@ def build_audit(name, requirement_count):
         framework=framework,
         folder=folder,
         perimeter=perimeter,
-        is_published=True,
     )
 
     for index in range(requirement_count):
@@ -43,7 +42,6 @@ def build_audit(name, requirement_count):
             assessable=True,
             order_id=index,
             folder=folder,
-            is_published=True,
         )
         q_text = Question.objects.create(
             requirement_node=node,
@@ -53,7 +51,6 @@ def build_audit(name, requirement_count):
             type=Question.Type.TEXT,
             order=0,
             folder=folder,
-            is_published=True,
         )
         q_choice = Question.objects.create(
             requirement_node=node,
@@ -63,7 +60,6 @@ def build_audit(name, requirement_count):
             type=Question.Type.UNIQUE_CHOICE,
             order=1,
             folder=folder,
-            is_published=True,
         )
         for order, value in enumerate(("Yes", "No")):
             QuestionChoice.objects.create(
@@ -73,7 +69,6 @@ def build_audit(name, requirement_count):
                 value=value,
                 order=order,
                 folder=folder,
-                is_published=True,
             )
         assessment = RequirementAssessment.objects.create(
             compliance_assessment=audit,

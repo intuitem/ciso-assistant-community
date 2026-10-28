@@ -4,9 +4,9 @@
 // new-draft transitions; these are fast JSON mutations that don't fit the
 // form-action round-trip (same rationale as the responsibility-matrix editor).
 
-import { BASE_API_URL } from '$lib/utils/constants';
+import { BASE_API_URL } from '#lib/utils/constants.js';
 import { error } from '@sveltejs/kit';
-import { UUID_RE, proxyJson } from '$lib/utils/jsonProxy';
+import { UUID_RE, proxyJson } from '#lib/utils/jsonProxy.js';
 import type { RequestHandler } from './$types';
 
 function requireUuid(value: unknown, field: string): string {
@@ -109,6 +109,22 @@ export const POST: RequestHandler = async ({ fetch, request, url, params }) => {
 			);
 		}
 
+		case 'preview-expression': {
+			const versionId = requireUuid(body.version, 'version');
+			const payload: Record<string, unknown> = {
+				rows: Array.isArray(body.rows) ? body.rows : []
+			};
+			if (typeof body.reference_run === 'string' && UUID_RE.test(body.reference_run)) {
+				payload.reference_run = body.reference_run;
+			}
+			return proxy(
+				fetch,
+				`${BASE_API_URL}/workflows/workflow-versions/${versionId}/preview-expression/`,
+				'POST',
+				payload
+			);
+		}
+
 		case 'list-instances': {
 			const workflowId = requireUuid(body.workflow, 'workflow');
 			return proxy(
@@ -181,6 +197,11 @@ export const POST: RequestHandler = async ({ fetch, request, url, params }) => {
 
 		case 'event-keys': {
 			return proxy(fetch, `${BASE_API_URL}/workflows/workflow-triggers/event-keys/`, 'GET');
+		}
+
+		case 'get-instance': {
+			const instanceId = requireUuid(body.instance, 'instance');
+			return proxy(fetch, `${BASE_API_URL}/workflows/workflow-instances/${instanceId}/`, 'GET');
 		}
 
 		case 'instance-logs': {

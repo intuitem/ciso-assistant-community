@@ -1,8 +1,10 @@
+from collections import deque
 import io
 import re
 import uuid
 
 from django.db import IntegrityError
+from django.db.models import Prefetch
 from django.http import HttpResponse
 from openpyxl import Workbook
 from openpyxl.styles import Alignment
@@ -23,7 +25,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 
 from iam.models import RoleAssignment, Folder, Permission
-from core.models import Asset
+from core.models import AppliedControl, Asset
 from .models import (
     BusinessImpactAnalysis,
     AssetAssessment,
@@ -41,6 +43,133 @@ class BaseModelViewSet(AbstractBaseModelViewSet):
     serializers_module = "resilience.serializers"
 
 
+def asset_dependency_graph(user, assessments):
+    roots = {aa.asset_id for aa in assessments}
+    extra = {(d.id, aa.asset_id) for aa in assessments for d in aa.dependencies.all()}
+    starts = list(Asset.objects.filter(id__in=roots | {d for d, _ in extra}))
+    tree = Asset._prefetch_graph_data(starts)["parent_to_children"]
+    reachable = {d for d, _ in extra} | {
+        d.id for a in starts for d in Asset._get_all_descendants(a, tree)
+    }
+    ids = (roots | reachable) & set(RoleAssignment.get_viewable_object_ids(user, Asset))
+    kids = {}
+    for parent, children in tree.items():
+        kids.setdefault(parent.id, set()).update(c.id for c in children)
+    for child, parent in extra:
+        kids.setdefault(parent, set()).add(child)
+    depth = dict.fromkeys(roots, 0)
+    queue = deque(roots)
+    while queue:
+        current = queue.popleft()
+        step = depth[current] + 1
+        for child in kids.get(current, ()):
+            if depth.get(child, -1) < step <= len(reachable):
+                depth[child] = step
+                queue.append(child)
+    roots &= ids
+    graph = Asset._prefetch_graph_data(list(Asset.objects.filter(id__in=ids)))
+    c2p, p2c = graph["child_to_parents"], graph["parent_to_children"]
+    linked = {x.id for m in graph.values() for k, v in m.items() for x in (k, *v)}
+    by_id = {
+        a.id: a
+        for a in Asset.objects.filter(id__in=ids | linked)
+        .select_related("folder")
+        .prefetch_related("overridden_children_capabilities")
+    }
+
+    def evaluate(a):
+        if a.is_primary:
+            supporting = {
+                by_id[x.id]
+                for x in Asset._get_all_descendants(a, p2c)
+                if not x.is_primary
+            }
+            so = a.security_objectives.get("objectives", {})
+            ro = a.disaster_recovery_objectives.get("objectives", {})
+            sc = Asset._aggregate_security_capabilities(
+                supporting, parent_to_children=p2c
+            )
+            rc = Asset._aggregate_recovery_capabilities(
+                supporting, parent_to_children=p2c
+            )
+        else:
+            primaries = {x for x in Asset._get_all_ancestors(a, c2p) if x.is_primary}
+            so = Asset._aggregate_security_objectives(primaries)
+            ro = Asset._aggregate_dro_objectives(primaries)
+            sc = a.security_capabilities.get("objectives", {})
+            rc = a.recovery_capabilities.get("objectives", {})
+        comparisons = [
+            (c, so, sc)
+            for c in a.get_security_objectives_comparison(
+                {"objectives": so}, {"objectives": sc}
+            )
+        ] + [
+            (c, ro, rc)
+            for c in a.get_recovery_objectives_comparison(
+                {"objectives": ro}, {"objectives": rc}, [], []
+            )
+        ]
+        gaps = [
+            {
+                "objective": c["objective"],
+                "expected": exp[c["objective"]]["value"],
+                "actual": act[c["objective"]]["value"],
+            }
+            for c, exp, act in comparisons
+            if c["verdict"] is False
+        ]
+        return gaps, any(c["verdict"] is not None for c, _, _ in comparisons)
+
+    assets = [by_id[i] for i in ids]
+    results = {a.id: evaluate(a) for a in assets}
+    causes = {a.id for a in assets if not a.is_primary and results[a.id][0]}
+
+    regular = {
+        (child.id, parent.id)
+        for parent, children in p2c.items()
+        if parent.id in ids
+        for child in children
+        if child.id in ids
+    }
+    extra = {(c, p) for c, p in extra if c in ids and p in ids} - regular
+
+    nodes = []
+    for a in assets:
+        gaps, checked = results[a.id]
+        below = (
+            []
+            if a.is_primary and not gaps
+            else sorted(
+                str(d.id) for d in Asset._get_all_descendants(a, p2c) if d.id in causes
+            )
+        )
+        if a.id in causes:
+            state = "cause"
+        elif (a.is_primary and gaps) or (not a.is_primary and below):
+            state = "impacted"
+        else:
+            state = "ok" if checked else "none"
+        nodes.append(
+            {
+                "id": str(a.id),
+                "label": a.name,
+                "type": a.type,
+                "domain": str(a.folder_id),
+                "domain_name": a.folder.name,
+                "depth": depth.get(a.id, 0),
+                "status": state,
+                "gaps": gaps,
+                "causes": below,
+            }
+        )
+
+    links = [
+        {"source": str(c), "target": str(p), "extra": (c, p) in extra}
+        for c, p in regular | extra
+    ]
+    return {"roots": [str(r) for r in roots], "nodes": nodes, "links": links}
+
+
 class BusinessImpactAnalysisViewSet(BaseModelViewSet, ExportMixin):
     model = BusinessImpactAnalysis
     filterset_fields = [
@@ -50,6 +179,7 @@ class BusinessImpactAnalysisViewSet(BaseModelViewSet, ExportMixin):
         "authors",
         "risk_matrix",
         "status",
+        "filtering_labels",
     ]
 
     export_config = {
@@ -387,6 +517,16 @@ class BusinessImpactAnalysisViewSet(BaseModelViewSet, ExportMixin):
         response["Content-Disposition"] = f'attachment; filename="{filename}"'
         return response
 
+    @action(detail=True, name="Get dependency graph", url_path="dependency-graph")
+    def dependency_graph(self, request, pk):
+        assessments = AssetAssessment.objects.filter(
+            bia=self.get_object(),
+            id__in=RoleAssignment.get_viewable_object_ids(
+                request.user, AssetAssessment
+            ),
+        ).prefetch_related("dependencies")
+        return Response(asset_dependency_graph(request.user, list(assessments)))
+
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get status choices")
     def status(self, request):
@@ -410,34 +550,21 @@ class AssetAssessmentViewSet(BaseModelViewSet):
     search_fields = ["bia__name", "asset__name"]
     ordering = ["asset"]
 
-    def _get_asset_verdict(self, asset):
-        """
-        Calculate verdict based on security and recovery objectives vs capabilities.
-        Returns False if any objective is not met, True if all are met, None otherwise.
-        """
-        # Get comparisons from the asset's methods
-        security_comparison = asset.get_security_objectives_comparison()
-        recovery_comparison = asset.get_recovery_objectives_comparison()
-
-        all_comparisons = []
-
-        if security_comparison:
-            all_comparisons.extend(security_comparison)
-        if recovery_comparison:
-            all_comparisons.extend(recovery_comparison)
-
-        if not all_comparisons:
-            return None
-
-        # Check if any comparison has failed (verdict is False)
-        if any(comp.get("verdict") is False for comp in all_comparisons):
-            return False
-
-        # Check if all comparisons have passed (verdict is True)
-        if all(comp.get("verdict") is True for comp in all_comparisons):
-            return True
-
-        return None  # Some are indeterminate
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related("bia", "asset", "asset__folder")
+            .prefetch_related(
+                "dependencies",
+                "evidences",
+                # Serialized with its folder: join it in the prefetch query.
+                Prefetch(
+                    "associated_controls",
+                    queryset=AppliedControl.objects.select_related("folder"),
+                ),
+            )
+        )
 
     @action(detail=False, methods=["post"], url_path="batch-create")
     def batch_create(self, request):
@@ -554,76 +681,7 @@ class AssetAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True, name="Get dependency graph", url_path="dependency-graph")
     def dependency_graph(self, request, pk):
-        """
-        Returns graph data for visualizing asset dependencies.
-        Includes nodes grouped by folder and links between parent-child assets.
-        Only includes assets that are viewable by the current user.
-        """
-
-        aa = self.get_object()
-        asset = aa.asset
-
-        # Get all descendants of the asset
-        descendants = asset.get_descendants()
-        all_assets = {asset} | descendants
-        all_asset_ids = {a.id for a in all_assets}
-
-        # Get viewable asset IDs using the standard pattern
-        viewable_asset_ids = RoleAssignment.get_viewable_object_ids(request.user, Asset)
-
-        # Filter to only assets that are both in our tree and viewable
-        accessible_asset_ids = all_asset_ids & set(viewable_asset_ids)
-        viewable_assets = Asset.objects.filter(id__in=accessible_asset_ids)
-
-        # Build nodes grouped by folder
-        folder_groups = {}
-        nodes = []
-
-        for a in viewable_assets:
-            folder_name = a.folder.name if a.folder else "No Folder"
-            folder_id = str(a.folder.id) if a.folder else "no-folder"
-
-            if folder_id not in folder_groups:
-                folder_groups[folder_id] = {
-                    "id": folder_id,
-                    "name": folder_name,
-                    "nodes": [],
-                }
-
-            # Calculate verdict based on objectives vs capabilities
-            verdict = self._get_asset_verdict(a)
-
-            node = {
-                "id": str(a.id),
-                "label": a.name,
-                "folder": folder_id,
-                "verdict": verdict,
-            }
-            nodes.append(node)
-            folder_groups[folder_id]["nodes"].append(str(a.id))
-
-        # Build links - invert direction to show children supporting parents
-        links = []
-
-        for a in viewable_assets:
-            # Get direct children that are also viewable
-            children = a.child_assets.filter(id__in=accessible_asset_ids)
-            for child in children:
-                # Invert: child (source) -> parent (target) to show support relationship
-                links.append(
-                    {
-                        "source": str(child.id),
-                        "target": str(a.id),
-                    }
-                )
-
-        return Response(
-            {
-                "nodes": nodes,
-                "links": links,
-                "groups": list(folder_groups.values()),
-            }
-        )
+        return Response(asset_dependency_graph(request.user, [self.get_object()]))
 
 
 class EscalationThresholdViewSet(BaseModelViewSet):

@@ -13,17 +13,23 @@ from .models import (
     WorkflowSecret,
     WorkflowVersion,
 )
-from .actions import validate_create_config as _validate_create_config
-from .actions import validate_date_offset_config as _validate_date_offset_config
+from .actions import (
+    AI_ACTION_TYPES,
+    CREATABLE_MODELS,
+    UPDATABLE_MODELS,
+    _creatable_values,
+    _writable_values,
+)
+from .actions import compute_rows as _compute_rows
+from .actions import validate_action_config as _validate_action_config
 from .actions import validate_read_config as _validate_read_config
-from .actions import validate_attach_evidence_config as _validate_attach_evidence_config
-from .actions import validate_set_variables_config as _validate_set_variables_config
-from .actions import validate_update_config as _validate_update_config
 from .context import RESERVED_VARIABLE_KEYS
+from core.expressions import referenced_paths
 from .triggers import validate_trigger_config
 
 SECRET_NAME_RE = re.compile(r"\{\{\s*secrets\.(\w+)")
 NODE_REF_RE = re.compile(r"\{\{\s*nodes\.([A-Za-z_]\w*)")
+TEMPLATE_TOKEN_RE = re.compile(r"\{\{\s*([\w.]+)\s*\}\}")
 
 # Node/action types cut from v1: the engine still runs them for seeded/legacy
 # graphs, but the API refuses to author (graph PUT) or import them. Enabling a
@@ -40,11 +46,15 @@ DISABLED_ACTION_TYPES = frozenset({"emit_event"})
 
 
 def validate_graph(version):
+    # Local: engine imports actions, actions is imported here.
+    from .engine import coerce_variable_value
+
     errors = []
     nodes = list(version.nodes.prefetch_related("branches"))
     edges = list(version.edges.all())
     nodes_by_id = {node.id: node for node in nodes}
     existing_secrets = _existing_secret_names(version, nodes)
+    ai_sources = _ai_sources(nodes)
     # Which branches carry a wire (a branch with a condition but no wire is a
     # defined-but-unrouted case).
     wired_branch_ids = {
@@ -60,6 +70,21 @@ def validate_graph(version):
                     "rename this variable",
                 )
             )
+        # "" is how YAML and older graphs spell "no default".
+        if variable.default_value not in (None, ""):
+            # The editor writes typed defaults; YAML and older graphs may not.
+            # Same rule as the run dialog's seeds, so a default never fails
+            # where a seed would pass.
+            try:
+                coerce_variable_value(variable.default_value, variable.type)
+            except ValueError, TypeError:
+                errors.append(
+                    _error(
+                        "variable_default_invalid",
+                        f"'{variable.key}' has a default that is not a valid "
+                        f"{variable.type}",
+                    )
+                )
 
     loop_ids = {n.id for n in nodes if n.type == WorkflowNode.Type.LOOP}
     for edge in edges:
@@ -152,18 +177,19 @@ def validate_graph(version):
                             node=node,
                         )
                     )
-            for code, message in _validate_read_config(node):
+            for code, message in _validate_action_config(node):
                 errors.append(_error(code, message, node=node))
-            for code, message in _validate_create_config(node):
+            for code, message in _validate_ai_value_fencing(node, *ai_sources):
                 errors.append(_error(code, message, node=node))
-            for code, message in _validate_date_offset_config(node):
-                errors.append(_error(code, message, node=node))
-            for code, message in _validate_update_config(node):
-                errors.append(_error(code, message, node=node))
-            for code, message in _validate_set_variables_config(node):
-                errors.append(_error(code, message, node=node))
-            for code, message in _validate_attach_evidence_config(node):
-                errors.append(_error(code, message, node=node))
+        for key in sorted(RESERVED_VARIABLE_KEYS & set(node.output_mapping or {})):
+            errors.append(
+                _error(
+                    "output_mapping_reserved",
+                    f"'{key}' is set by the engine on every run — map this "
+                    "step's output to a different variable",
+                    node=node,
+                )
+            )
         for ref in sorted(_referenced_node_refs(node) - known_refs):
             errors.append(
                 _error(
@@ -287,9 +313,9 @@ def validate_graph(version):
             # the target must sit within this workflow's folder subtree, so a
             # subprocess can never reach into an unrelated domain.
             if target is not None and target.id != version.workflow_id:
-                from .actions import _read_scope_folder_ids
+                from core.reads import subtree_folder_ids
 
-                if target.folder_id not in _read_scope_folder_ids(version.folder):
+                if target.folder_id not in subtree_folder_ids(version.folder):
                     errors.append(
                         _error(
                             "subprocess_out_of_scope",
@@ -332,6 +358,13 @@ def _validate_loop_read(node):
             (
                 "loop_source_ambiguous",
                 "A loop reads its own pages or iterates a collection, not both",
+            )
+        ]
+    if read_config.get("mode") == "aggregate":
+        return [
+            (
+                "loop_read_invalid",
+                "A loop pages rows; aggregate mode returns none",
             )
         ]
     probe = WorkflowNode(action_config={**read_config, "type": "read_objects"})
@@ -467,7 +500,185 @@ def _referenced_node_refs(node):
             node.loop_config or {},
         ]
     )
-    return set(NODE_REF_RE.findall(blob))
+    refs = set(NODE_REF_RE.findall(blob))
+    # compute expressions name outputs as bare `nodes.<ref>` paths, not
+    # {{...}} templates, so the regex above does not see them.
+    for path in _compute_paths(node):
+        segments = path.split(".")
+        if segments[0] == "nodes" and len(segments) > 1 and segments[1] != "*":
+            refs.add(segments[1])
+    return refs
+
+
+def _compute_paths(node):
+    """Every path a compute node's expressions read, or an empty set for any
+    other node."""
+    config = node.action_config or {}
+    if config.get("type") != "compute":
+        return set()
+    paths = set()
+    for _, expression in _compute_rows(config):
+        paths |= referenced_paths(expression)
+    return paths
+
+
+def _ai_sources(nodes):
+    """AI node refs, and every variable that can carry their answer.
+
+    Directly: a variable an AI node's own output_mapping writes. Indirectly: a
+    variable a set_variables step assigns from one, which is how a graph would
+    otherwise walk an AI answer past the fencing check. Chains and a node list
+    that is not in execution order both need a fixpoint rather than one pass.
+
+    A loop's `collect` is deliberately not followed: it yields the loop's
+    `results` list, and a list can never match a fenced field's value.
+    """
+    refs, variables = set(), set()
+    setters = []
+    for node in nodes:
+        action_type = (node.action_config or {}).get("type")
+        if action_type in AI_ACTION_TYPES:
+            if node.ref:
+                refs.add(node.ref)
+            variables |= {str(key) for key in (node.output_mapping or {})}
+        elif action_type == "set_variables":
+            setters.append((node, _set_variables_rows(node), _template_paths))
+        elif action_type == "compute":
+            # Same hop, other syntax: a compute row reads bare CEL paths
+            # instead of {{tokens}}, and a derived number is still a guess.
+            setters.append((node, _compute_rows(node.action_config), referenced_paths))
+
+    changed = bool(setters)
+    while changed:
+        changed = False
+        for node, rows, paths_of in setters:
+            tainted = {
+                key
+                for key, value in rows
+                if _ai_sources_among(paths_of(value), refs, variables)
+            }
+            if not tainted:
+                continue
+            # The step's own output carries the answer under those keys, so
+            # {{nodes.<ref>.<key>}} downstream is a source too. Only those
+            # keys: a clean sibling row stays writable to a fenced field.
+            for key in tainted:
+                output = f"{node.ref}.{key}"
+                if node.ref and output not in refs:
+                    refs.add(output)
+                    changed = True
+            for key in tainted - variables:
+                variables.add(key)
+                changed = True
+            # An output_mapping alias of a tainted row is the same value
+            # under another name.
+            for alias, source in (node.output_mapping or {}).items():
+                if str(source) in tainted and str(alias) not in variables:
+                    variables.add(str(alias))
+                    changed = True
+    return refs, variables
+
+
+def _set_variables_rows(node):
+    assigned = (node.action_config or {}).get("variables") or {}
+    if not isinstance(assigned, dict):
+        return []
+    return [(str(key), value) for key, value in assigned.items()]
+
+
+def _template_paths(value):
+    """The {{token}} paths a config value reads, as the author wrote them."""
+    if not isinstance(value, str):
+        # set_variables may assign a dict or list; the tokens are in there.
+        value = json.dumps(value, default=str)
+    return set(TEMPLATE_TOKEN_RE.findall(value))
+
+
+def _ai_sources_in(value, ai_refs, ai_variables):
+    """AI-derived references a config value reads, as the author wrote them."""
+    return _ai_sources_among(_template_paths(value), ai_refs, ai_variables)
+
+
+def _ai_sources_among(paths, ai_refs, ai_variables):
+    """`ai_refs` holds whole AI node refs (`classify`) and the tainted outputs
+    of setter steps (`score_step.score`)."""
+    found = set()
+    for path in paths:
+        segments = path.split(".")
+        if segments[0] == "nodes":
+            # `nodes` alone or `nodes.*` (a computed index) can reach any
+            # step: read as every AI output rather than none.
+            if ai_refs and (len(segments) == 1 or segments[1] == "*"):
+                found.add(path)
+            elif len(segments) == 1:
+                continue
+            elif segments[1] in ai_refs:
+                found.add(path)
+            elif len(segments) == 2 or segments[2] == "*":
+                # The whole output, or any key of it.
+                if any(ref.startswith(segments[1] + ".") for ref in ai_refs):
+                    found.add(path)
+            elif f"{segments[1]}.{segments[2]}" in ai_refs:
+                found.add(path)
+        elif segments[0] in ai_variables:
+            found.add(path)
+    return found
+
+
+def _validate_ai_value_fencing(node, ai_refs, ai_variables):
+    """A model's answer must not set a fenced field: the audit trail would
+    record a guess as fact, and the registry cannot tell a template from a
+    literal at the write site. Branch on the output and write literals instead.
+
+    Creating a row is the same problem as updating one — a severity a model
+    guessed reads as a severity someone set, whichever verb wrote it — so both
+    write actions are checked, each against its own registry's fence.
+
+    Provenance is followed through set_variables (see _ai_sources), so routing
+    the answer through a variable first does not evade this."""
+    config = node.action_config or {}
+    action_type = config.get("type")
+    if action_type == "update_object":
+        entry = UPDATABLE_MODELS.get(config.get("model"))
+        fields, fenced = (
+            (entry.fields, lambda key: _writable_values(entry, key))
+            if entry is not None
+            else (None, None)
+        )
+    elif action_type in ("create_object", "upsert_objects"):
+        entry = CREATABLE_MODELS.get(config.get("model"))
+        fields, fenced = (
+            (entry["fields"], lambda key: _creatable_values(entry, key))
+            if entry is not None
+            else (None, None)
+        )
+    else:
+        return []
+    if entry is None or not (ai_refs or ai_variables):
+        return []
+    items_from_ai = action_type == "upsert_objects" and _ai_sources_in(
+        config.get("items"), ai_refs, ai_variables
+    )
+    errors = []
+    for key, value in sorted((config.get("fields") or {}).items()):
+        if key not in fields or fenced(key) is None:
+            continue
+        sources = _ai_sources_in(value, ai_refs, ai_variables)
+        if items_from_ai:
+            sources |= {
+                path for path in _template_paths(value) if path.split(".")[0] == "item"
+            }
+        for source in sorted(sources):
+            errors.append(
+                (
+                    "action_update_ai_value_on_fenced_field",
+                    f"'{key}' only accepts a fixed set of values, so it cannot "
+                    f"be set from '{{{{{source}}}}}', which carries an AI "
+                    f"answer — branch on it and write the value on each "
+                    f"branch instead",
+                )
+            )
+    return errors
 
 
 def _existing_secret_names(version, nodes):

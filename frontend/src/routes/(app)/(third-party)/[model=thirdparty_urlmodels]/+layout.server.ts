@@ -1,7 +1,7 @@
-import { listViewFields } from '$lib/utils/table';
-import { type TableSource } from '@skeletonlabs/skeleton-svelte';
+import { listViewFields } from '#lib/utils/table.js';
+import { type TableSource } from '#lib/components/ModelTable/types.js';
 
-import type { urlModel } from '$lib/utils/types';
+import type { urlModel } from '#lib/utils/types.js';
 
 export const load = async ({ params }) => {
 	const fields = listViewFields[params.model as urlModel];

@@ -1,0 +1,195 @@
+---
+description: Standalone forms filled outside an audit, and the requests they raise — intake, pre-qualification and light questionnaires with a decision at the end
+---
+
+# Quick forms and requests
+
+A **quick form** is a short, standalone questionnaire that someone fills in without an audit behind it: a derogation request, a vendor review request, a pre-qualification, an intake form. A **request** is one filled copy of that form, submitted to someone who decides on it.
+
+It answers _"how does someone outside the security team ask us for something, and how do we decide and keep the record?"_ — the question that otherwise gets answered by email, a spreadsheet, or a ticketing tool that knows nothing about your controls.
+
+The distinction from an audit matters. An audit measures an organisation against a framework, and every question hangs off a requirement. A quick form has no requirements, no assessable nodes and no compliance result — it has pages, questions, and an outcome.
+
+{% hint style="info" %}
+Quick forms are gated by the **Forms and Requests** feature flag, off by default. Turn it on under **Settings → Feature flags**.
+
+You also need **Custom portals**. A portal tile is how a requester starts a request, so a published form with no portal behind it cannot be reached. The exception is a form about an object, such as a vendor tiering form or a DPIA: it is started from that object, for example with **Assess tier** on a vendor or **Run DPIA screening** on a processing (see [Writing back onto the subject](#writing-back-onto-the-subject)).
+{% endhint %}
+
+## Mental model
+
+```mermaid
+graph LR
+  LIB[Library] -->|imports| QF[Quick form]
+  QF -->|published as| PUB[Published form]
+  PUB -->|scopes| AUD[Audience]
+  PUB -->|surfaced on| POR[Portal tile]
+  POR -->|filed as| REQ[Request]
+  SUBJ[Subject object] -.->|Assess tier| REQ
+  REQ -->|classified by| OUT[Outcomes]
+  REQ -->|decided by| REV[Reviewer]
+  OUT -.->|may produce| OBJ[Security exception / applied control]
+  REQ -.->|on accept, may write to| SUBJ
+```
+
+A **quick form** arrives from a **library**, like a framework or a risk matrix does. On its own it cannot be filled — it must first be **published**, which is what names the **audience** allowed to file it and the domain their requests land in. A publication is then surfaced to people through a **portal tile**, which is where they click to start. Someone in that audience files a **request**, answers it, and submits. The answers compute a **score** and fire **outcomes**, which classify the request. A **reviewer** decides. An accepted request can then produce a real governed object, with the link back to the request that caused it.
+
+A form about an object, such as a vendor tiering form, takes a shorter route: it is started from that object, with no publication or portal, and when the form has an **On accept** setting, an accepted request writes its result back onto it.
+
+| User-facing | Internal | Notes |
+|---|---|---|
+| Quick form | `QuickForm` | Library content; lives in the catalog, not in a domain |
+| Page | `QuickFormPage` | Ordered; can be hidden by a condition on earlier answers |
+| Published form | `QuickFormPublication` | The offer: which audience, which domain, which reviewers |
+| Request | `QuickFormResponse` | One filed copy, with its own reference and lifecycle |
+| Outcome | `QuickFormOutcome` | One row per rule that fired on the answers |
+| Requester | `respondents` / `submitted_by` | Whoever is on the asking side |
+| Reviewer | `reviewers` / `assignee` | Whoever may decide |
+
+## Where each piece lives
+
+Three places in the sidebar, and they are deliberately different audiences:
+
+| Screen | Who it is for | What it holds |
+|---|---|---|
+| **Quick forms** (Catalog) | Anyone building the catalog | The form templates themselves, imported from libraries |
+| **My requests** | Everyone | The requests *you* filed, including unfinished drafts |
+| **Requests** (Governance) | Reviewers | The queue of requests waiting on a decision |
+
+**My requests** is the only route back to an unfinished draft, and it is scoped by who you are rather than by domain permissions — a requester holds no role on the domain their request lands in.
+
+## Publishing is what makes a form usable
+
+A quick form sitting in the catalog cannot be filled by anyone. Publishing it is a separate, deliberate step, because the form says *what* is asked and the publication says *who may ask and where it lands*:
+
+| Field | Meaning |
+|---|---|
+| **Audience** | Groups that may file this request. Empty means every user |
+| **Submission domain** | Where responses land. The publication's own domain when left empty |
+| **Default reviewers** | Who is put on each request as reviewer |
+| **Allow multiple drafts** | Off: a requester with an unfinished draft is handed it back instead of starting a new one. Submitted requests are never limited |
+
+The same form can be published more than once — to different audiences, landing in different domains, with different reviewers. That is how one derogation form serves several business units without being copied.
+
+Publishing is necessary but not sufficient: a publication becomes reachable when a **portal tile** points at it. **My requests** lists the portals you can ask from, not the publications themselves.
+
+{% hint style="info" %}
+A portal tile does not have to point at a publication. It can be wired straight to a quick form — the **inline** wiring — and then it carries the domain, reviewers and drafts policy itself instead of inheriting them. What it cannot carry is an audience, so it authorises on domain permissions instead: whoever clicks it must be allowed to create a request in the domain the tile names.
+
+That makes the two wirings a deliberate choice rather than a shortcut. Inline suits an internal tile whose users already work in the domain; a publication suits self-service, where the requester holds nothing. Published forms have no screen of their own in the navigation yet, so inline is the easier of the two to reach today.
+{% endhint %}
+
+Audience membership is the authorisation here. It is not folder permissions: someone in the audience can file a request into a domain they otherwise cannot see, and they will still not see anything else in it.
+
+## Lifecycle
+
+```mermaid
+graph LR
+  D[Draft] -->|submit| S[Submitted]
+  S -->|take it| IR[In review]
+  S -->|decide| C[Closed]
+  IR -->|decide| C
+  IR -->|release| S
+  S -.->|send back| D
+  IR -.->|send back| D
+```
+
+| Status | Meaning |
+|---|---|
+| **Draft** | Being filled. Answers save as you go; only the requester can change them |
+| **Submitted** | Waiting for a reviewer. Content is frozen |
+| **In review** | A reviewer has taken it. Claiming is optional — a quick decision does not require it first |
+| **Closed** | Decided, with a resolution |
+
+A closed request carries a **Resolution**: _Accepted_, _Rejected_, _Dropped_ (the requester withdrew it), or _Closed automatically_. Reject is the reviewer's act and drop is the requester's; neither substitutes for the other.
+
+A reviewer can also send a request back to **Draft**, which returns it to the requester to change and resubmit.
+
+## Separation of duties
+
+Whoever submitted a request may not decide it, whatever permissions they hold. An analyst who files a derogation cannot approve their own derogation.
+
+Two things follow:
+
+- Deciding needs a specific permission, not merely write access to the domain. A reviewer who can edit everything in a domain still cannot decide a request they filed.
+- Organisations too small to separate the two can turn on self-validation in the settings, which lifts the restriction deliberately rather than by accident.
+
+The rule is anchored on who *submitted* the request, not who created the record — cloning and reassignment move authorship, and the check follows it.
+
+## Outcomes — the decision the form makes for itself
+
+Scores and outcomes are what separate a quick form from a web form that emails someone.
+
+Each question can carry a score, and each form can carry **outcome rules** — expressions over the answers that classify the request when it is evaluated. All matching rules fire; a request can carry several outcomes at once.
+
+Two ways to write a rule, both useful:
+
+- **On a specific answer** — "personal data was ticked", "no compensating control is in place". Precise, and reads like the question it depends on.
+- **On a score** — "anything above 100 needs a full assessment". One threshold to tune, instead of an enumeration that grows each time a choice is added. The score can be the form's, or a page's when each page measures something different (business impact on one, data exposure on another).
+
+A rule can also compute a **number** instead of firing: an average, the higher of two page scores, a formula such as the EBIOS RM threat level. The value shows on the request, and later rules read it. That is how a form turns answers into one figure a decision can rest on.
+
+Outcomes are what the rest of the platform reacts to. They drive which supervised actions a reviewer is offered, and they are the hook for turning an accepted request into a governed object or a change to an existing one.
+
+{% hint style="warning" %}
+Saving a form refuses a rule that names a question, a page or a rule the form does not have. A rule that only tests whether an answer exists, such as `"q1" in answers`, passes that check even with a typo, and then never fires. Fill a form in and check the outcomes before relying on them.
+{% endhint %}
+
+## Scales and ratings
+
+Some forms rate the same thing several times: a DPIA rates the severity and the likelihood of each of its three risks. A **scale** names those ordered levels once, for example _Negligible_, _Limited_, _Significant_, _Maximum_, each with an optional description and number. A choice question on a scale gets the scale's levels as its choices, so every question measuring severity uses the same ones.
+
+A **rating** is the third kind of outcome rule, next to **Yes / no** and **Number**. It classifies the answers to its scales, its **dimensions**, into named levels of its own:
+
+- With two dimensions, a **grid** crosses them: one cell per pair of levels, like a risk matrix.
+- With any number of dimensions, **rules** do: the first rule that holds gives the level, for example `dims.severity.value * dims.likelihood.value >= 8.0`.
+
+Each page that answers every dimension is a **point**, rated on its own: a DPIA rates each of its risk pages. A question can also belong to a second **stage**, such as `residual` for the level once planned measures are in place, which gives a second point on the same page. Other rules read the highest level among the current points as `values.RATING_ID`, and the residual one as `values.RATING_ID_residual`.
+
+In the library builder, scales are edited under **Scales**, and a question uses one by picking it in **Choices**. A rating is created by choosing **Rating** as an outcome rule's **Result**. It starts from the form's first two scales, which the builder adds when the form has fewer, and a grid of three levels, _Low_, _Medium_ and _High_, to repaint. A dimension no question measures yet is flagged.
+
+## Writing back onto the subject
+
+Some forms are _about_ an object: a vendor tiering form is about a vendor, a DPIA about a processing. The form names that object in a **subject** question, and the request is then linked to it.
+
+Such a form can say what an accepted request writes onto its subject, in its **On accept** setting:
+
+| Subject | What an accepted request writes |
+|---|---|
+| Vendor | Its [criticality tier](third-party-risk.md#tier): bands on a score or a number rule, and knock-out rules that force at least a given tier. When several apply, the highest tier wins |
+| Processing | Whether it needs a DPIA, from the outcomes that fired ([screening](dpia.md#screening)) |
+| Processing | The request itself, as the processing's DPIA of record ([DPIA](dpia.md#accepting-a-dpia)) |
+| Processing | The applied controls the form picked, added to the processing's own |
+
+A page of such a form can also show what the subject already records, read-only: a DPIA's data page shows the processing's personal data, data subjects and recipients. While the request is a draft, these reflect the object as it is; once submitted, as it stood then. The form then asks about what the record does not hold, instead of copying it.
+
+Three things follow:
+
+- **It starts from the object.** **Assess tier** on a vendor, or **Run DPIA screening** and **Start DPIA** on a processing, opens a request with the object filled in and locked. No publication or portal is needed.
+- **The reviewer sees the write before deciding.** The request shows **On accept, this will write** and the value. The reviewer can override it, with a justification. If the vendor's tier came from another form, the request warns that accepting replaces it.
+- **No review when there is nothing to grant.** When the submitter could make the change themselves and every scored question is answered, submitting applies the result at once and closes the request as accepted. A publication can require a review anyway, with **Always require review**.
+
+When the result cannot be written — no subject, a tier missing from the scale, a permission missing, an object the form no longer applies to — nothing is written and the request goes to review with the reason.
+
+[Tiering your vendors](../guides/vendor-tiering.md) and [Screening processings and running DPIAs](../guides/dpia.md) walk through the whole loop.
+
+## From a request to a real object
+
+A ticketing tool stops at "approved". The point of filing a derogation request here is that an accepted one can become a **security exception** — a governed object with an expiry, an approver and a place in the register.
+
+That conversion is done by a **supervised action**: a workflow the reviewer runs deliberately on a request they have read, rather than something that fires on its own. The outcomes decide which actions are offered; the reviewer chooses whether to run one.
+
+Whatever is produced keeps a link back to the request that caused it, visible from both ends — the request shows what it produced, and the produced object shows where it came from.
+
+## Attachments
+
+Questions can ask for a file. Uploads are held on the answer, and a reviewer who wants to keep one can promote it to an **evidence** in the domain — so a document that mattered to a decision stops being an attachment on a request and becomes part of the record.
+
+## Authoring a form
+
+Quick forms are library content. There are two ways to get one:
+
+- **Import a library** that contains one, from **Libraries** — the same route as a framework or a risk matrix.
+- **Build your own** in the library builder: **New quick form** creates the draft and opens the editor. Pages, questions, choices, scores, conditions and outcome rules are all edited there, and the result is a library you can export and re-import elsewhere.
+
+Because a form is library content, it is versioned like one. Re-importing a newer version updates the form in place — except for questions already answered by a request that has left draft. Those are kept deliberately: deleting them would rewrite the record a decision was made on.

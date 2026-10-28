@@ -18,17 +18,27 @@ Test coverage:
 import io
 import uuid
 import zipfile
+from pathlib import Path
 
 import pytest
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
+from docx import Document
+from docxtpl import DocxTemplate
 from knox.models import AuthToken
 from rest_framework import status
 from rest_framework.test import APIClient
 
 from core.apps import startup
-from core.generators import AUDIT_CHART_KEYS
+from core.generators import (
+    AUDIT_CHART_KEYS,
+    DocxRenderCrash,
+    DocxRenderError,
+    DocxRenderTimeout,
+)
 from core.models import (
     ComplianceAssessment,
+    CustomWordTemplate,
     Framework,
     Perimeter,
     RequirementAssessment,
@@ -129,9 +139,7 @@ def app_config():
 
 @pytest.fixture
 def admin_client(app_config):
-    admin = User.objects.create_superuser(
-        "admin@audit-word-export-tests.com", is_published=True
-    )
+    admin = User.objects.create_superuser("admin@audit-word-export-tests.com")
     admin_group = UserGroup.objects.get(name="BI-UG-ADM")
     admin.folder = admin_group.folder
     admin.save()
@@ -140,6 +148,12 @@ def admin_client(app_config):
     token = AuthToken.objects.create(user=admin)
     client.credentials(HTTP_AUTHORIZATION=f"Token {token[1]}")
     return client
+
+
+@pytest.fixture
+def media_root(settings, tmp_path: Path) -> Path:
+    settings.MEDIA_ROOT = str(tmp_path)
+    return tmp_path
 
 
 @pytest.fixture
@@ -221,6 +235,81 @@ class TestAuditWordExport:
         for req, result in zip(reqs, assignments):
             req.result = result
             req.save()
+
+        url = reverse(
+            "compliance-assessments-word-report", kwargs={"pk": str(audit.pk)}
+        )
+        response = admin_client.get(url)
+
+        assert response.status_code == status.HTTP_200_OK
+        assert zipfile.is_zipfile(io.BytesIO(_read_streaming(response)))
+
+    def _upload_custom_template(self, content: bytes) -> CustomWordTemplate:
+        return CustomWordTemplate.objects.create(
+            template_key="audit_report",
+            language="en",
+            folder=Folder.get_root_folder(),
+            file=SimpleUploadedFile("custom.docx", content),
+        )
+
+    @pytest.mark.usefixtures("media_root")
+    def test_word_report_rejects_a_custom_template_that_fails_to_render(
+        self, admin_client: APIClient, audit: ComplianceAssessment
+    ) -> None:
+        doc = Document()
+        doc.add_paragraph("{{ ''.__class__.__mro__[1].__subclasses__() }}")
+        buf = io.BytesIO()
+        doc.save(buf)
+        self._upload_custom_template(buf.getvalue())
+
+        url = reverse(
+            "compliance-assessments-word-report", kwargs={"pk": str(audit.pk)}
+        )
+        response = admin_client.get(url)
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json()["error"] == "invalidCustomWordTemplate"
+        assert "unsafe" in response.json()["detail"]
+
+    @pytest.mark.usefixtures("media_root")
+    @pytest.mark.parametrize(
+        "failure, code",
+        [
+            (DocxRenderTimeout, "customWordTemplateTimedOut"),
+            (DocxRenderCrash, "customWordTemplateCrashed"),
+            (DocxRenderError, "customWordTemplateFailed"),
+        ],
+    )
+    def test_word_report_names_why_a_custom_template_failed_without_details(
+        self,
+        admin_client: APIClient,
+        audit: ComplianceAssessment,
+        monkeypatch: pytest.MonkeyPatch,
+        failure: type[DocxRenderError],
+        code: str,
+    ) -> None:
+        def fail(doc: DocxTemplate, context: dict) -> bytes:
+            raise failure("Traceback ... /srv/secrets")
+
+        monkeypatch.setattr("core.views.render_docx_report_bounded", fail)
+        buf = io.BytesIO()
+        Document().save(buf)
+        self._upload_custom_template(buf.getvalue())
+
+        url = reverse(
+            "compliance-assessments-word-report", kwargs={"pk": str(audit.pk)}
+        )
+        response = admin_client.get(url)
+
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json() == {"error": code}
+
+    @pytest.mark.usefixtures("media_root")
+    def test_word_report_falls_back_when_custom_template_file_is_missing(
+        self, admin_client: APIClient, audit: ComplianceAssessment
+    ) -> None:
+        custom = self._upload_custom_template(b"")
+        custom.file.storage.delete(custom.file.name)
 
         url = reverse(
             "compliance-assessments-word-report", kwargs={"pk": str(audit.pk)}

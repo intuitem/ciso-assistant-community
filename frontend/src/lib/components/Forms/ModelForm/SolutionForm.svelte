@@ -1,21 +1,21 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
-	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
+	import Checkbox from '#lib/components/Forms/Checkbox.svelte';
 	import SubcontractingChainEditor from './SubcontractingChainEditor.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import { page } from '$app/stores';
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import Score from '../Score.svelte';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import { page } from '$app/state';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	interface Props {
 		form: SuperValidated<any>;
 		model: ModelInfo;
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
 		initialData?: Record<string, any>;
+		object?: Record<string, any>;
 	}
 
 	let {
@@ -23,10 +23,11 @@
 		model,
 		cacheLocks = {},
 		formDataCache = $bindable({}),
-		initialData = {}
+		initialData = {},
+		object = {}
 	}: Props = $props();
 
-	let doraEnabled = $derived(!!$page.data?.featureflags?.dora);
+	let doraEnabled = $derived(!!page.data?.featureflags?.dora);
 
 	const formData = form.form;
 
@@ -58,19 +59,31 @@
 	bind:cachedValue={formDataCache['provider_entity']}
 	label={m.providerEntity()}
 />
-<Score
+<AutocompleteSelect
 	{form}
-	label={m.criticality()}
-	field="criticality"
-	inversedColors
-	fullDonut
-	min_score={1}
-	max_score={4}
+	optionsEndpoint={`tiers?selectable=${object.tier?.id ?? object.tier ?? ''}`}
+	field="tier"
+	cacheLock={cacheLocks['tier']}
+	bind:cachedValue={formDataCache['tier']}
+	label={m.tier()}
+	helpText={m.solutionTierHelpText()}
+	nullable
 />
+{#if ($formData.tier ?? null) !== (object.tier?.id ?? object.tier ?? null)}
+	<TextField
+		{form}
+		field="tier_note"
+		label={m.tierNote()}
+		helpText={m.tierNoteHelpText()}
+		cacheLock={cacheLocks['tier_note']}
+		bind:cachedValue={formDataCache['tier_note']}
+	/>
+{/if}
 <AutocompleteSelect
 	{form}
 	multiple
 	optionsEndpoint="actors"
+	lazy
 	optionsLabelField="str"
 	optionsInfoFields={{
 		fields: [{ field: 'type', translate: true }],
@@ -242,7 +255,5 @@
 	open={false}
 	style="hover:text-primary-700"
 	icon="fa-solid fa-sitemap"
-	header={m.subcontractingChain()}
+	header={m.subcontractingChain()}><SubcontractingChainEditor {form} {directProviderId} /></Dropdown
 >
-	<SubcontractingChainEditor {form} {directProviderId} />
-</Dropdown>

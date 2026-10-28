@@ -1,13 +1,13 @@
-import { listViewFields } from '$lib/utils/table';
-import { type TableSource } from '@skeletonlabs/skeleton-svelte';
-import { urlParamModelVerboseName, urlParamModelDescriptionKey } from '$lib/utils/crud';
+import { listViewFields } from '#lib/utils/table.js';
+import { type TableSource } from '#lib/components/ModelTable/types.js';
+import { urlParamModelVerboseName, urlParamModelDescriptionKey } from '#lib/utils/crud.js';
 import { redirect } from '@sveltejs/kit';
 import type { LayoutServerLoad } from './$types';
 
 const URLModel = 'service-accounts';
 
 export const load: LayoutServerLoad = async ({ locals }) => {
-	if (!locals?.featureflags?.service_accounts) {
+	if (!(await locals.getFeatureFlags())?.service_accounts) {
 		redirect(302, '/analytics');
 	}
 	const base = listViewFields[URLModel];

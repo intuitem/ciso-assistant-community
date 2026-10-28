@@ -2,23 +2,22 @@
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import CustomFieldsSection from '../CustomFieldsSection.svelte';
 	import Select from '../Select.svelte';
-	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import NumberField from '$lib/components/Forms/NumberField.svelte';
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
-	import Score from '$lib/components/Forms/Score.svelte';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
+	import Checkbox from '#lib/components/Forms/Checkbox.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import NumberField from '#lib/components/Forms/NumberField.svelte';
+	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
+	import Score from '#lib/components/Forms/Score.svelte';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import { m } from '$paraglide/messages';
+	import { formFieldProxy } from 'sveltekit-superforms';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import { m } from '#paraglide/messages.js';
 	import { onMount } from 'svelte';
 	import { run } from 'svelte/legacy';
 	import { page } from '$app/state';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { formatDate } from '$lib/utils/datetime';
-	import { getLocale } from '$paraglide/runtime';
-
-	let displayCurrency = $state(page.data?.settings?.currency ?? '€'); // Default to Euro
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { formatDate } from '#lib/utils/datetime.js';
+	import { getLocale } from '#paraglide/runtime.js';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -49,19 +48,14 @@
 
 	// Declare form store at top level
 	const formStore = form.form;
+	const { value: folderId } = formFieldProxy(form, 'folder');
 
 	let syncMappings: Record<string, any>[] = $state(page.data?.object?.sync_mappings ?? []);
 
-	// Update currency when form data changes
-	$effect(() => {
-		const costData = $formStore.cost;
-		if (costData?.currency) {
-			displayCurrency = costData.currency;
-		}
-	});
+	let displayCurrency = $derived($formStore.cost?.currency || page.data?.settings?.currency || '€');
 
 	onMount(async () => {
-		if (!model.selectOptions) {
+		if (!Object.keys(model.selectOptions ?? {}).length) {
 			const selectOptions = {
 				status: await fetch('/applied-controls/status').then((r) => r.json()),
 				priority: await fetch('/applied-controls/priority').then((r) => r.json()),
@@ -102,6 +96,7 @@
 		{form}
 		multiple
 		optionsEndpoint="actors"
+		lazy
 		optionsLabelField="str"
 		optionsInfoFields={{
 			fields: [{ field: 'type', translate: true }],
@@ -142,6 +137,7 @@
 		{form}
 		multiple
 		optionsEndpoint="evidences"
+		lazy
 		optionsExtraFields={[['folder', 'str']]}
 		field="evidences"
 		cacheLock={cacheLocks['evidences']}
@@ -371,7 +367,6 @@
 						<AutocompleteSelect
 							{form}
 							lazy
-							minSearchLength={1}
 							optionsEndpoint="settings/integrations/configs/{$formStore.integration_config}/remote-objects"
 							optionsLabelField="summary"
 							optionsValueField="key"
@@ -448,5 +443,5 @@
 {/if}
 
 {#if model?.name === 'appliedcontrol'}
-	<CustomFieldsSection {form} model="core.appliedcontrol" folderId={$formStore.folder} />
+	<CustomFieldsSection {form} model="core.appliedcontrol" folderId={$folderId} />
 {/if}

@@ -1,4 +1,4 @@
-import { BASE_API_URL } from '$lib/utils/constants';
+import { BASE_API_URL } from '#lib/utils/constants.js';
 import { error } from '@sveltejs/kit';
 
 import type { PageServerLoad } from './$types';
@@ -6,7 +6,7 @@ import type { PageServerLoad } from './$types';
 export const load: PageServerLoad = async ({ params, fetch }) => {
 	const res = await fetch(`${BASE_API_URL}/ttp-catalogs/${params.id}/matrix/`);
 	if (!res.ok) {
-		error(res.status, await res.text());
+		error(res.status, 'Failed to load the catalog matrix');
 	}
 	const matrix = await res.json();
 

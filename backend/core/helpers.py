@@ -9,7 +9,6 @@ from uuid import UUID
 # from icecream import ic
 from django.core.exceptions import NON_FIELD_ERRORS as DJ_NON_FIELD_ERRORS
 from django.core.exceptions import ValidationError as DjValidationError
-from django.conf import settings
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import ValidationError as DRFValidationError
@@ -394,7 +393,9 @@ def annotate_tree_with_aggregated_scores(
     contribute their own ceiling; 100% stays achievable.
 
     Leaves are included only when is_scored is True, the node is assessable,
-    and the result is not N/A.
+    and the result is not N/A. When the audit anchors N/A to its target, N/A
+    leaves are included with both layers set to the target projected onto
+    their scale (or their max when no target is set), like get_global_score.
     """
     method = compliance_assessment.score_calculation_method
     show_doc = compliance_assessment.show_documentation_score
@@ -409,14 +410,14 @@ def annotate_tree_with_aggregated_scores(
         else 100
     )
     ca_range = ca_max - ca_min if ca_max > ca_min else 1
+    anchor_na = compliance_assessment.anchor_na_to_target
 
     def _clean(value):
-        """Trim float-precision noise (~1e-9) from denormalized display values
-        without losing precision for upstream rollups, which use the raw
-        _aggregated_ratio."""
+        """A parent's value like the global score (clean_score): unrounded,
+        rendering rounds it."""
         if value is None:
             return None
-        return round(value, 9)
+        return clean_score(value)
 
     def walk(node: dict) -> None:
         children = node.get("children") or {}
@@ -425,11 +426,9 @@ def annotate_tree_with_aggregated_scores(
             walk(child)
 
         if not children:
-            is_assessed = (
-                node.get("is_scored")
-                and node.get("assessable")
-                and node.get("result") != "not_applicable"
-            )
+            is_na = node.get("result") == "not_applicable"
+            anchored = bool(anchor_na and is_na and node.get("assessable"))
+            is_assessed = node.get("is_scored") and node.get("assessable") and not is_na
             score_val = node.get("score")
             # `is_scored` with `score is None` is a data inconsistency; treat
             # it as unscored to avoid producing a negative ratio on offset
@@ -437,18 +436,19 @@ def annotate_tree_with_aggregated_scores(
             if is_assessed and score_val is None:
                 is_assessed = False
             weight = node.get("weight") or 1
+            ra_min = (
+                node.get("min_score") if node.get("min_score") is not None else ca_min
+            )
+            ra_max = (
+                node.get("max_score") if node.get("max_score") is not None else ca_max
+            )
+            ra_range = ra_max - ra_min if ra_max > ra_min else 1
+            doc_val = node.get("documentation_score")
+            if anchored:
+                score_val = compliance_assessment.na_anchor_score(ra_min, ra_max)
+                doc_val = score_val
+                is_assessed = True
             if is_assessed:
-                ra_min = (
-                    node.get("min_score")
-                    if node.get("min_score") is not None
-                    else ca_min
-                )
-                ra_max = (
-                    node.get("max_score")
-                    if node.get("max_score") is not None
-                    else ca_max
-                )
-                ra_range = ra_max - ra_min if ra_max > ra_min else 1
                 ratio = (score_val - ra_min) / ra_range
                 node["aggregated_score"] = score_val
                 node["aggregated_min_score"] = ra_min
@@ -461,13 +461,11 @@ def annotate_tree_with_aggregated_scores(
                 node["_leaf_weighted_max"] = ra_max * weight
                 node["_leaf_weight"] = weight
                 if show_doc:
-                    # documentation_score=None keeps its legacy "no doc -> 0"
-                    # semantic so the tree matches the global score and radar,
-                    # which also map doc None -> 0 in _compute_score_for_field.
-                    # (score=None is excluded above; doc is not.)
-                    doc_val = node.get("documentation_score")
+                    # documentation_score=None counts as the bottom of the
+                    # scale, like _compute_raw_score_for_field, with every
+                    # method. (score=None is excluded above; doc is not.)
                     if doc_val is None:
-                        doc_val = 0
+                        doc_val = ra_min
                     doc_ratio = (doc_val - ra_min) / ra_range
                     node["aggregated_documentation_score"] = doc_val
                     node["_aggregated_doc_ratio"] = doc_ratio
@@ -540,7 +538,7 @@ def annotate_tree_with_aggregated_scores(
                 node["_aggregated_doc_ratio"] = None
         elif method == ComplianceAssessment.CalculationMethod.SUM:
             if leaf_weight > 0:
-                node["aggregated_score"] = leaf_weighted_score
+                node["aggregated_score"] = _clean(leaf_weighted_score)
                 node["aggregated_max_score"] = leaf_weighted_max
                 node["aggregated_min_score"] = 0
                 # Ratio in [0, 1] for any future consumer (e.g. nested SUM).
@@ -550,7 +548,7 @@ def annotate_tree_with_aggregated_scores(
                     else None
                 )
                 if show_doc:
-                    node["aggregated_documentation_score"] = leaf_weighted_doc
+                    node["aggregated_documentation_score"] = _clean(leaf_weighted_doc)
                     node["_aggregated_doc_ratio"] = (
                         leaf_weighted_doc / leaf_weighted_max
                         if leaf_weighted_max
@@ -1755,9 +1753,6 @@ def get_instance_metrics():
     nb_risk_assessments = RiskAssessment.objects.all().count()
     nb_risk_scenarios = RiskScenario.objects.all().count()
     nb_risk_acceptances = RiskAcceptance.objects.all().count()
-    nb_seats = getattr(settings, "LICENSE_SEATS", 0)
-    nb_editors = len(User.get_editors())
-    expiration = getattr(settings, "LICENSE_EXPIRATION", -1)
 
     created_at = int(Folder.get_root_folder().created_at.timestamp())
     last_login_dt = max(
@@ -1785,9 +1780,6 @@ def get_instance_metrics():
         "nb_risk_assessments": nb_risk_assessments,
         "nb_risk_scenarios": nb_risk_scenarios,
         "nb_risk_acceptances": nb_risk_acceptances,
-        "nb_seats": nb_seats,
-        "nb_editors": nb_editors,
-        "expiration": expiration,
         "created_at": created_at,
         "last_login": last_login,
     }
@@ -2090,53 +2082,122 @@ def qualifications_count_per_name(user: User, folder_id=None) -> Dict[str, List]
     return {"labels": labels, "values": values}
 
 
+# Curated, not every folder-FK model: there are 151 of those, ~150 queries. Deletion
+# emptiness is checked exhaustively instead (FolderViewSet._folder_emptiness_blocker).
+FOLDER_CONTENT_MODELS = (
+    "core.Perimeter",
+    "core.Asset",
+    "core.AppliedControl",
+    "core.ComplianceAssessment",
+    "core.RiskAssessment",
+    "core.FindingsAssessment",
+    "core.Evidence",
+    "core.Policy",
+    "core.RiskScenario",
+    "tprm.Entity",
+)
+
+
+def folder_direct_content_counts() -> dict:
+    """{folder_id: curated content objects directly in it}. Callers roll subtrees up."""
+    from django.apps import apps
+    from django.db.models import Count
+
+    totals: dict = {}
+    for label in FOLDER_CONTENT_MODELS:
+        try:
+            model = apps.get_model(label)
+        except LookupError:
+            continue
+        for row in model.objects.values("folder").annotate(n=Count("id")):
+            if row["folder"] is not None:
+                totals[row["folder"]] = totals.get(row["folder"], 0) + row["n"]
+    return totals
+
+
+def build_folder_indexes(*, include_perimeters: bool):
+    """Fetch the whole folder tree (and optionally its perimeters) in two queries.
+
+    Left unordered deliberately: `Folder._meta.ordering` is empty, so the per-parent
+    queries this replaces had no defined order either.
+    """
+    folders = list(
+        Folder.objects.values("id", "name", "parent_folder_id", "content_type")
+    )
+    children_by_parent = defaultdict(list)
+    for f in folders:
+        children_by_parent[f["parent_folder_id"]].append(f)
+
+    parent_of = {f["id"]: f["parent_folder_id"] for f in folders}
+
+    perimeters_by_folder = defaultdict(list)
+    if include_perimeters:
+        for p in Perimeter.objects.values("id", "name", "folder_id"):
+            perimeters_by_folder[p["folder_id"]].append(p)
+
+    return children_by_parent, parent_of, perimeters_by_folder
+
+
 def get_folder_content(
-    folder: Folder,
+    folder_id,
+    *,
     include_perimeters,
     include_enclaves,
     viewable_objects,
     needed_folders,
+    children_by_parent,
+    perimeters_by_folder,
     writable_ids: Optional[set[UUID]] = None,
+    content_counts: Optional[dict] = None,
 ):
+    """Nested payload for one folder, from prebuilt indexes. No queries."""
     content = []
-    for f in Folder.objects.filter(parent_folder=folder).distinct():
-        if f.id in viewable_objects or f.id in needed_folders:
-            # Skip enclaves if not included
-            if not include_enclaves and f.content_type == Folder.ContentType.ENCLAVE:
-                continue
-            entry = {
-                "name": f.name,
-                "uuid": f.id,
-                "viewable": viewable_objects and f.id in viewable_objects,
-                "writable": f.id in writable_ids if writable_ids is not None else True,
-                "content_type": f.content_type,
-            }
-            # Add enclave-specific styling
-            if f.content_type == Folder.ContentType.ENCLAVE:
-                entry.update(
-                    {
-                        "symbol": "triangle",
-                        "symbolSize": 12,
-                        "itemStyle": {"color": "#6366f1"},
-                    }
-                )
-            children = get_folder_content(
-                f,
-                include_perimeters=include_perimeters,
-                include_enclaves=include_enclaves,
-                viewable_objects=viewable_objects,
-                needed_folders=needed_folders,
-                writable_ids=writable_ids,
+    for f in children_by_parent.get(folder_id, ()):
+        if f["id"] not in viewable_objects and f["id"] not in needed_folders:
+            continue
+        # Skip enclaves if not included
+        if not include_enclaves and f["content_type"] == Folder.ContentType.ENCLAVE:
+            continue
+        entry = {
+            "name": f["name"],
+            "uuid": f["id"],
+            "viewable": bool(viewable_objects) and f["id"] in viewable_objects,
+            "writable": f["id"] in writable_ids if writable_ids is not None else True,
+            "content_type": f["content_type"],
+        }
+        # Counts only for folders the caller can see: ancestors are here to keep the
+        # tree connected, not to be described.
+        if content_counts is not None and entry["viewable"]:
+            entry["content_count"] = content_counts.get(f["id"], 0)
+        # Add enclave-specific styling
+        if f["content_type"] == Folder.ContentType.ENCLAVE:
+            entry.update(
+                {
+                    "symbol": "triangle",
+                    "symbolSize": 12,
+                    "itemStyle": {"color": "#6366f1"},
+                }
             )
-            if len(children) > 0:
-                entry.update({"children": children})
-            content.append(entry)
+        children = get_folder_content(
+            f["id"],
+            include_perimeters=include_perimeters,
+            include_enclaves=include_enclaves,
+            viewable_objects=viewable_objects,
+            needed_folders=needed_folders,
+            children_by_parent=children_by_parent,
+            perimeters_by_folder=perimeters_by_folder,
+            writable_ids=writable_ids,
+            content_counts=content_counts,
+        )
+        if len(children) > 0:
+            entry.update({"children": children})
+        content.append(entry)
 
-    if include_perimeters and folder.id in viewable_objects:
-        for p in Perimeter.objects.filter(folder=folder).distinct():
+    if include_perimeters and folder_id in viewable_objects:
+        for p in perimeters_by_folder.get(folder_id, ()):
             content.append(
                 {
-                    "name": p.name,
+                    "name": p["name"],
                     "symbol": "circle",
                     "symbolSize": 10,
                     "itemStyle": {"color": "#222436"},
@@ -2198,8 +2259,14 @@ def duplicate_related_objects(
             # If the object exists in the target folder, link it to the duplicate object
             link_existing_object(duplicate_object, existing_obj, field_name)
 
-        elif obj.folder in target_parent_folders and obj.is_published:
-            # If the object's folder is a parent and it's published, link it
+        elif (
+            obj.folder in target_parent_folders
+            and obj.folder.default_role is not None
+            and obj.folder.default_role.permissions.filter(
+                codename=f"view_{model_class._meta.model_name}"
+            ).exists()
+        ):
+            # Link the object if the user can see it thanks to the `obj.folder.default_role`.
             link_existing_object(duplicate_object, obj, field_name)
 
         elif obj.folder in sub_folders:

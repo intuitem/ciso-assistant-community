@@ -18,6 +18,7 @@ class BusinessImpactAnalysisReadSerializer(AssessmentReadSerializer):
     str = serializers.CharField(source="__str__")
     perimeter = FieldsRelatedField(["id", "folder"])
     folder = FieldsRelatedField()
+    filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     risk_matrix = FieldsRelatedField()
     validation_flows = FieldsRelatedField(
         many=True,

@@ -1,27 +1,27 @@
 <script lang="ts">
 	import { run } from 'svelte/legacy';
 
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import SuperForm from '$lib/components/Forms/Form.svelte';
-	import Select from '$lib/components/Forms/Select.svelte';
-	import TextArea from '$lib/components/Forms/TextArea.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import { getSecureRedirect } from '$lib/utils/helpers';
-	import { modelSchema } from '$lib/utils/schemas';
-	import type { StrengthOfKnowledgeEntry } from '$lib/utils/types';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import SuperForm from '#lib/components/Forms/Form.svelte';
+	import Select from '#lib/components/Forms/Select.svelte';
+	import TextArea from '#lib/components/Forms/TextArea.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
+	import { getSecureRedirect } from '#lib/utils/helpers.js';
+	import { modelSchema } from '#lib/utils/schemas.js';
+	import type { StrengthOfKnowledgeEntry } from '#lib/utils/types.js';
 	import type { PageData, ActionData } from './$types';
 	import RiskLevel from './RiskLevel.svelte';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
-	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
+	import CommentsPanel from '#lib/components/CommentsPanel/CommentsPanel.svelte';
 
-	import { browser } from '$app/environment';
+	import { browser } from '$app/env';
 	import { page } from '$app/state';
-	import { goto } from '$lib/utils/breadcrumbs';
+	import { goto } from '#lib/utils/breadcrumbs.js';
 
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { superForm } from 'sveltekit-superforms/client';
 	import {
@@ -29,7 +29,7 @@
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 
 	interface Props {
 		data: PageData;
@@ -207,6 +207,7 @@
 							form={_form}
 							multiple
 							optionsEndpoint="actors"
+							lazy
 							optionsLabelField="str"
 							optionsInfoFields={{
 								fields: [{ field: 'type', translate: true }],
@@ -277,6 +278,7 @@
 						form={_form}
 						multiple
 						optionsEndpoint="threats"
+						lazy
 						optionsDetailedUrlParameters={[['scope_folder_id', page.data.scenario.folder.id]]}
 						optionsExtraFields={[['folder', 'str']]}
 						optionsLabelField="auto"
@@ -310,6 +312,7 @@
 						multiple
 						form={_form}
 						optionsEndpoint="security-exceptions"
+						lazy
 						optionsExtraFields={[['folder', 'str']]}
 						field="security_exceptions"
 						portalDropdown
@@ -349,6 +352,7 @@
 					form={_form}
 					multiple
 					optionsEndpoint="risk-scenarios"
+					lazy
 					optionsExtraFields={[
 						['risk_assessment', 'str'],
 						['ref_id', 'str']
@@ -375,6 +379,7 @@
 									form={_form}
 									nullable
 									optionsEndpoint="threat-models"
+									lazy
 									optionsDetailedUrlParameters={[['scope_folder_id', page.data.scenario.folder.id]]}
 									optionsExtraFields={[['folder', 'str']]}
 									optionsLabelField="auto"
@@ -424,8 +429,9 @@
 						</div>
 						<span
 							class="flex items-center justify-center w-8 h-8 rounded-full bg-surface-200-800 text-surface-400-600 text-xs font-bold select-none mt-5"
-							>&times;</span
+							>×</span
 						>
+
 						<div class="min-w-36">
 							<Select
 								form={_form}
@@ -480,6 +486,7 @@
 										multiple
 										form={_form}
 										optionsEndpoint="applied-controls"
+										lazy
 										optionsExtraFields={[['folder', 'str']]}
 										optionsDetailedUrlParameters={[
 											['scope_folder_id', page.data.scenario.folder.id]
@@ -517,8 +524,9 @@
 							</div>
 							<span
 								class="flex items-center justify-center w-8 h-8 rounded-full bg-surface-200-800 text-surface-400-600 text-xs font-bold select-none mt-5"
-								>&times;</span
+								>×</span
 							>
+
 							<div class="min-w-36">
 								<Select
 									form={_form}
@@ -572,6 +580,7 @@
 										multiple
 										form={_form}
 										optionsEndpoint="applied-controls"
+										lazy
 										optionsExtraFields={[['folder', 'str']]}
 										optionsDetailedUrlParameters={[
 											['scope_folder_id', page.data.scenario.folder.id]
@@ -609,8 +618,9 @@
 							</div>
 							<span
 								class="flex items-center justify-center w-8 h-8 rounded-full bg-surface-200-800 text-surface-400-600 text-xs font-bold select-none mt-5"
-								>&times;</span
+								>×</span
 							>
+
 							<div class="min-w-36">
 								<Select
 									form={_form}

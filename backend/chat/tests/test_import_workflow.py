@@ -181,7 +181,7 @@ def reader_request(domain):
 
     from iam.models import Role, RoleAssignment, User, UserGroup
 
-    user = User.objects.create_user("reader@chat-import.test", is_published=True)
+    user = User.objects.create_user("reader@chat-import.test")
     group = UserGroup.objects.create(name="readers", folder=domain)
     group.user_set.add(user)
     assignment = RoleAssignment.objects.create(
@@ -339,6 +339,13 @@ def test_risk_columns_map_export_and_legacy_names():
     assert mapped["residual_proba"] == "residual_proba"
     assert mapped["additional_controls"] == "applied_controls"
     assert mapped["asset"] == "assets"
+
+
+def test_risk_threats_column_is_mapped_with_its_singular_alias():
+    # A M2M field is not concrete, so only SOURCE_KEY_MAP makes it known.
+    mapped, unmapped = map_columns(["threats", "threat"], "risk_scenario")
+    assert mapped == {"threats": "threats", "threat": "threats"}
+    assert not unmapped
 
 
 def test_container_fk_and_computed_levels_are_never_mapped():

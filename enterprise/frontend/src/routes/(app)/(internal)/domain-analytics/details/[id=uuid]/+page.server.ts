@@ -1,7 +1,7 @@
-import { BASE_API_URL } from '$lib/utils/constants';
+import { BASE_API_URL } from '#lib/utils/constants.js';
 import type { PageServerLoad } from './$types';
-import { TODAY } from '$lib/utils/constants';
-import { m } from '$paraglide/messages';
+import { TODAY } from '#lib/utils/constants.js';
+import { m } from '#paraglide/messages.js';
 
 export const load: PageServerLoad = async ({ locals, fetch, params }) => {
 	const req_applied_control_status = await fetch(`${BASE_API_URL}/applied-controls/per_status/`);
@@ -53,7 +53,7 @@ export const load: PageServerLoad = async ({ locals, fetch, params }) => {
 		threats_count,
 		folderData,
 		applied_control_status: applied_control_status.results,
-		user: locals.user,
+		user: await locals.getUser(),
 		title: `${m.analytics()} - ${folderData?.name}`,
 		stream: {
 			metrics: getMetrics(),

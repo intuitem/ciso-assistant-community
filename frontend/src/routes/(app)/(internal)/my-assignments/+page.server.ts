@@ -1,6 +1,6 @@
-import { BASE_API_URL } from '$lib/utils/constants';
+import { BASE_API_URL } from '#lib/utils/constants.js';
 import type { PageServerLoad } from './$types';
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 
 function buildMultiParam(key: string, values: string[]): string {
 	if (!values || values.length === 0) return '';
@@ -39,8 +39,8 @@ export const load: PageServerLoad = async ({ fetch, parent, url }) => {
 		findings: buildEndpoint('/findings', ownerParams, 'limit=1'),
 		organisationObjectives: buildEndpoint('/organisation-objectives', assignedToParams, 'limit=1'),
 		rightRequests: buildEndpoint('/privacy/right-requests', ownerParams, 'limit=1'),
-		validationFlows: `/validation-flows?approver=${user.id}&limit=1`,
-		riskAcceptances: `/risk-acceptances?approver=${user.id}&state=submitted&limit=1`,
+		validationFlows: `/validation-flows?approver=${user?.id}&limit=1`,
+		riskAcceptances: `/risk-acceptances?approver=${user?.id}&state=submitted&limit=1`,
 		metricInstances: buildEndpoint('/metrology/metric-instances', ownerParams, 'limit=1')
 	};
 

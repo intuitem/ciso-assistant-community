@@ -1,37 +1,37 @@
 <script lang="ts">
-	import ExportModal, { type ExportGroup } from '$lib/components/Modals/ExportModal.svelte';
+	import ExportModal, { type ExportGroup } from '#lib/components/Modals/ExportModal.svelte';
 	import { page } from '$app/state';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
-	import { URL_MODEL_MAP, getModelInfo } from '$lib/utils/crud';
-	import { listViewFields } from '$lib/utils/table';
-	import type { ListViewFilterConfig } from '$lib/utils/table';
-	import type { RiskMatrixJsonDefinition, RiskScenario } from '$lib/utils/types';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
-	import RiskScenarioItem from '$lib/components/RiskMatrix/RiskScenarioItem.svelte';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
-	import { canPerformActionOnObject } from '$lib/utils/access-control';
-	import { formatDate } from '$lib/utils/datetime';
-	import { getLocale } from '$paraglide/runtime';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
+	import RiskMatrix from '#lib/components/RiskMatrix/RiskMatrix.svelte';
+	import { URL_MODEL_MAP, getModelInfo } from '#lib/utils/crud.js';
+	import { listViewFields } from '#lib/utils/table.js';
+	import type { ListViewFilterConfig } from '#lib/utils/table.js';
+	import type { RiskMatrixJsonDefinition, RiskScenario } from '#lib/utils/types.js';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import AuditTrailButton from '#lib/components/AuditTrail/AuditTrailButton.svelte';
+	import RiskScenarioItem from '#lib/components/RiskMatrix/RiskScenarioItem.svelte';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
+	import { canPerformActionOnObject } from '#lib/utils/access-control.js';
+	import { formatDate } from '#lib/utils/datetime.js';
+	import { getLocale } from '#paraglide/runtime.js';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 	import { Progress } from '@skeletonlabs/skeleton-svelte';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import List from '$lib/components/List/List.svelte';
-	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
-	import SyncToActionsRiskModal from '$lib/components/Modals/SyncToActionsRiskModal.svelte';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import List from '#lib/components/List/List.svelte';
+	import ConfirmModal from '#lib/components/Modals/ConfirmModal.svelte';
+	import SyncToActionsRiskModal from '#lib/components/Modals/SyncToActionsRiskModal.svelte';
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
-	import ValidationFlowsSection from '$lib/components/ValidationFlows/ValidationFlowsSection.svelte';
-	import { invalidateAll } from '$app/navigation';
+	import ValidationFlowsSection from '#lib/components/ValidationFlows/ValidationFlowsSection.svelte';
+	import { refreshAll } from '$app/navigation';
 
 	let { data, form } = $props();
 
@@ -113,7 +113,7 @@
 				invalidateAll: true,
 				formAction: '/validation-flows?/create',
 				onConfirm: async () => {
-					await invalidateAll();
+					await refreshAll();
 				}
 			}
 		};
@@ -417,6 +417,12 @@
 					href="/risk-assessments/{risk_assessment.id}/analytics"
 					class="btn preset-filled-primary-500"
 					><i class="fa-solid fa-chart-line mr-2"></i>{m.analytics()}</Anchor
+				>
+				<Anchor
+					label={m.riskTrajectory()}
+					href="/risk-assessments/{risk_assessment.id}/trajectory"
+					class="btn preset-filled-primary-500"
+					><i class="fa-solid fa-route mr-2"></i>{m.riskTrajectory()}</Anchor
 				>
 				<span class="pt-4 font-light text-sm">{m.powerUps()}</span>
 				<button

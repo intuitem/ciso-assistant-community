@@ -14,16 +14,20 @@ from core.views import (
     escape_excel_formula,
 )
 from django_filters.rest_framework import DjangoFilterBackend
+from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponse
+from django.utils.translation import gettext as _
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.db.models import Count, Prefetch
+from django.db import transaction
+from django.db.models import Case, Count, F, Prefetch, Q, When
 from itertools import chain
 from collections import defaultdict
 
 from core.utils import camel_case
 from iam.models import Folder, RoleAssignment
+from tprm.models import Entity
 
 from .models import (
     Purpose,
@@ -35,10 +39,14 @@ from .models import (
     Processing,
     RightRequest,
     DataBreach,
+    DpiaRequirementChange,
+    DpiaRequirementSource,
     ART6_LAWFUL_BASIS_CHOICES,
     ART9_SPECIAL_CATEGORY_CONDITION_CHOICES,
     TRANSFER_MECHANISM_CHOICES,
 )
+
+DPIA_OVERVIEW_PAGE = 50
 
 EU_COUNTRIES_SET = {
     "AT",
@@ -328,27 +336,33 @@ def agg_countries(viewable_data_transfers, viewable_data_contractors):
 
 class ProcessingViewSet(ExportMixin, BaseModelViewSet):
     model = Processing
+    permission_overrides = {"import_pia": "add_quickformresponse"}
 
     filterset_fields = [
         "folder",
         "nature",
         "status",
+        "role",
+        "controllers",
         "filtering_labels",
         "assigned_to",
         "perimeters",
         "personal_data__category",
         "data_subjects__category",
+        "dpia_required",
+        "dpia_required_source",
     ]
 
     def get_queryset(self):
         return (
             super()
             .get_queryset()
-            .select_related("folder")
+            .select_related("folder", "dpia_screening")
             .prefetch_related(
                 "personal_data__category",
                 "data_subjects",
                 "nature",
+                "controllers",
                 "associated_controls",
                 actor_prefetch("assigned_to"),
                 "evidences",
@@ -372,6 +386,14 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
                 "escape": True,
             },
             "status": {"source": "get_status_display", "label": "status"},
+            "role": {"source": "get_role_display", "label": "role"},
+            "controllers": {
+                "source": "controllers",
+                "label": "controllers",
+                "format": lambda qs: "\n".join(
+                    escape_excel_formula(e.name) for e in qs.all()
+                ),
+            },
             "nature": {
                 "source": "nature",
                 "label": "processing_nature",
@@ -400,10 +422,23 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
                 "label": "dpia_reference",
                 "escape": True,
             },
+            "associated_controls": {
+                "source": "associated_controls",
+                "label": "security_measures",
+                "format": lambda qs: ",".join(
+                    escape_excel_formula(c.name) for c in qs.all()
+                ),
+            },
         },
         "filename": "processings_export",
         "select_related": ["folder"],
-        "prefetch_related": ["filtering_labels", "nature", "assigned_to"],
+        "prefetch_related": [
+            "filtering_labels",
+            "nature",
+            "assigned_to",
+            "controllers",
+            "associated_controls",
+        ],
     }
 
     @action(
@@ -425,6 +460,7 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
                 "description": txt(processing.description or ""),
                 "domain": txt(processing.folder.name),
                 "status": processing.status,
+                "role": processing.get_role_display(),
                 "processing_nature": ",".join(
                     txt(n.name) for n in processing.nature.all()
                 ),
@@ -442,8 +478,34 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
             }
         ]
 
+        # Contacts only for entities the reader can see; names come with the link
+        viewable_entities = {
+            str(pk)
+            for pk in RoleAssignment.get_viewable_object_ids(request.user, Entity)
+        }
+
+        def contacts(entity):
+            if str(entity.id) not in viewable_entities:
+                return ""
+            emails = {r.email.strip() for r in entity.representatives.all() if r.email}
+            return ",".join(txt(e) for e in sorted(emails))
+
         sheets = [
             ("Processing", list(processing_rows[0].keys()), processing_rows),
+            (
+                "Controllers",
+                ["name", "country", "contacts"],
+                [
+                    {
+                        "name": txt(entity.name),
+                        "country": entity.country or "",
+                        "contacts": contacts(entity),
+                    }
+                    for entity in processing.controllers.prefetch_related(
+                        "representatives"
+                    )
+                ],
+            ),
             (
                 "Purposes",
                 ["name", "description", "legal_basis", "article_9_condition"],
@@ -559,6 +621,19 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
                     for transfer in processing.data_transfers.select_related("entity")
                 ],
             ),
+            (
+                "Security measures",
+                ["name", "description", "category", "status"],
+                [
+                    {
+                        "name": txt(control.name),
+                        "description": txt(control.description or ""),
+                        "category": control.get_category_display() or "",
+                        "status": control.get_status_display() or "",
+                    }
+                    for control in processing.associated_controls.all()
+                ],
+            ),
         ]
 
         buffer = io.BytesIO()
@@ -585,6 +660,10 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
     def status(self, request):
         return Response(dict(Processing.STATUS_CHOICES))
 
+    @action(detail=False, name="Get role choices")
+    def role(self, request):
+        return Response(dict(Processing.ROLE_CHOICES))
+
     @action(detail=False, name="Get all processing assigned_to actors")
     def assigned_to(self, request):
         return Response(
@@ -592,6 +671,251 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
                 Actor.objects.filter(assigned_processings__isnull=False).distinct(),
                 many=True,
             ).data
+        )
+
+    @action(detail=False, name="Get DPIA requirement choices")
+    def dpia_required(self, request):
+        return Response({"true": _("DPIA required"), "false": _("No DPIA required")})
+
+    @action(detail=False, name="Get DPIA requirement source choices")
+    def dpia_required_source(self, request):
+        return Response(dict(DpiaRequirementSource.choices))
+
+    @action(detail=False, url_path="dpia-screening-forms", name="DPIA screening forms")
+    def dpia_screening_forms(self, request):
+        """Forms the caller can see whose accepted responses set a processing's
+        DPIA requirement, with what keeps them from applying."""
+        from core.models import QuickForm
+        from core.quick_form_apply import on_accept_health
+
+        viewable = RoleAssignment.get_viewable_object_ids(request.user, QuickForm)
+        rows = []
+        cache: dict = {}
+        for quick_form in (
+            QuickForm.objects.filter(id__in=viewable)
+            .exclude(on_accept=[])
+            .select_related("library")
+            .order_by("name")
+        ):
+            health = next(
+                (
+                    h
+                    for h in on_accept_health(quick_form, cache)
+                    if h["target"] == "processing.dpia_required"
+                ),
+                None,
+            )
+            if health is None:
+                continue
+            rows.append(
+                {
+                    "id": str(quick_form.id),
+                    "name": quick_form.get_name_translated,
+                    "library": quick_form.library.name if quick_form.library else None,
+                    "problems": health["problems"],
+                }
+            )
+        return Response(rows)
+
+    @action(
+        detail=True, methods=["post"], url_path="import-pia", name="Import a CNIL PIA"
+    )
+    def import_pia(self, request, pk):
+        """Start a draft DPIA of this processing through `quick_form`, filled from
+        an export of the CNIL PIA software (`pia`, the parsed .json file). Optional
+        `labels`: the words the import adds to the answers, in the caller's language
+        (see pia_import.DEFAULT_LABELS)."""
+        from core.models import QuickForm
+        from core.object_references import ReferenceError_
+        from core.quick_form_apply import targets_of
+        from core.views import QuickFormViewSet, start_quick_form_response
+        from django.contrib.auth.models import Permission
+
+        from .pia_import import PiaImportError, import_pia, parse_export, parse_labels
+
+        processing = self.get_object()
+        try:
+            form_id = uuid.UUID(str(request.data.get("quick_form")))
+        except ValueError:
+            form_id = None
+        quick_form = QuickForm.objects.filter(
+            pk=form_id,
+            id__in=RoleAssignment.get_viewable_object_ids(request.user, QuickForm),
+        ).first()
+        if quick_form is None or "processing.dpia" not in targets_of(quick_form):
+            return Response(
+                {"error": "invalidRequest"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        found = QuickFormViewSet._assessable(request, "processing.dpia", processing.pk)
+        may_add_controls = RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_appliedcontrol"),
+            folder=processing.folder,
+        )
+        if found is None or not found[2] or not may_add_controls:
+            return Response(
+                {"error": "permissionDenied"}, status=status.HTTP_403_FORBIDDEN
+            )
+        try:
+            data = parse_export(request.data.get("pia"))
+            labels = parse_labels(request.data.get("labels"))
+            with transaction.atomic():
+                response, resumed = start_quick_form_response(
+                    request.user,
+                    subject_id=processing.pk,
+                    quick_form=quick_form,
+                    folder=processing.folder,
+                )
+                # Never write over a draft someone is filling.
+                if resumed:
+                    return Response(
+                        {
+                            "error": "dpiaDraftExists",
+                            "redirect": f"/quick-form-responses/{response.id}",
+                        },
+                        status=status.HTTP_409_CONFLICT,
+                    )
+                summary = import_pia(
+                    response, processing, data, request.user, labels=labels
+                )
+        except (PiaImportError, ReferenceError_) as e:
+            return Response({"error": e.code}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"redirect": f"/quick-form-responses/{response.id}", **summary},
+            status=status.HTTP_201_CREATED,
+        )
+
+    @action(detail=False, url_path="dpia-overview", name="DPIA overview")
+    def dpia_overview(self, request):
+        """Where the processings the caller can see stand on DPIAs: a count per
+        state, and one page of processings (`state`, `search`, `offset`), each
+        with its DPIA and any screening awaiting review. Processor processings
+        are left out: their DPIA is the controller's."""
+        from core.models import QuickFormResponse
+        from core.quick_form_apply import forms_with_target
+
+        viewable = Processing.objects.filter(
+            id__in=RoleAssignment.get_viewable_object_ids(request.user, Processing),
+            role__in=Processing.DPIA_ROLES,
+        )
+        open_statuses = [
+            QuickFormResponse.Status.DRAFT,
+            QuickFormResponse.Status.SUBMITTED,
+            QuickFormResponse.Status.IN_REVIEW,
+        ]
+        on_processings = QuickFormResponse.objects.filter(
+            subject_content_type=ContentType.objects.get_for_model(Processing)
+        )
+        required = viewable.filter(dpia_required=True)
+        # Under way: a DPIA still open. A rejected one is no DPIA.
+        open_dpias = on_processings.filter(
+            quick_form__in=forms_with_target("processing.dpia"),
+            status__in=open_statuses,
+        )
+        open_ids = open_dpias.values("subject_object_id")
+        not_required = viewable.filter(dpia_required=False)
+        # Screenings waiting on a reviewer, whatever form they came from.
+        pending_screenings = on_processings.filter(
+            quick_form__in=forms_with_target("processing.dpia_required"),
+            status__in=[
+                QuickFormResponse.Status.SUBMITTED,
+                QuickFormResponse.Status.IN_REVIEW,
+            ],
+        )
+        by_state = {
+            # The to-do list: required, no DPIA of record and none under way.
+            "required_without_dpia": required.filter(dpia__isnull=True).exclude(
+                id__in=open_ids
+            ),
+            "required_dpia_in_progress": required.filter(
+                dpia__isnull=True, id__in=open_ids
+            ),
+            # Done: an accepted DPIA is the processing's DPIA of record.
+            "required_dpia_done": required.filter(dpia__isnull=False),
+            "not_required": not_required.exclude(dpia_required_source=""),
+            # Never set by a screening or by hand: the default `False`.
+            "not_assessed": not_required.filter(dpia_required_source=""),
+            "awaiting_review": viewable.filter(
+                id__in=pending_screenings.values("subject_object_id")
+            ),
+        }
+        counts = {key: rows.count() for key, rows in by_state.items()}
+
+        rows = by_state.get(request.query_params.get("state", ""), viewable)
+        search = request.query_params.get("search", "").strip()
+        if search:
+            rows = rows.filter(Q(name__icontains=search) | Q(ref_id__icontains=search))
+        # Most urgent first; oldest requirement first, never dated (backfilled) leading.
+        rows = rows.select_related("folder", "dpia").order_by(
+            Case(
+                When(dpia_required=True, dpia__isnull=True, then=0),
+                When(dpia_required=True, then=1),
+                When(dpia_required_source="", then=3),
+                default=2,
+            ),
+            F("dpia_required_set_at").asc(nulls_first=True),
+            "name",
+        )
+        try:
+            offset = max(int(request.query_params.get("offset", 0)), 0)
+        except ValueError:
+            offset = 0
+        page = list(rows[offset : offset + DPIA_OVERVIEW_PAGE])
+
+        # The responses each row links to, only those the caller may open.
+        readable = set(
+            RoleAssignment.get_viewable_object_ids(request.user, QuickFormResponse)
+        )
+        ids = [p.id for p in page]
+        latest_open = {
+            str(r.subject_object_id): r
+            for r in open_dpias.filter(subject_object_id__in=ids).order_by("updated_at")
+        }
+        pending = {
+            str(r.subject_object_id): r
+            for r in pending_screenings.filter(subject_object_id__in=ids).order_by(
+                "updated_at"
+            )
+        }
+
+        def link(response):
+            if response is None or response.id not in readable:
+                return None
+            return {
+                "id": str(response.id),
+                "ref_id": response.ref_id,
+                "status": response.status,
+                "resolution": response.resolution,
+            }
+
+        def state_of(p):
+            if not p.dpia_required:
+                return "not_required" if p.dpia_required_source else "not_assessed"
+            if p.dpia_id:
+                return "required_dpia_done"
+            if str(p.id) in latest_open:
+                return "required_dpia_in_progress"
+            return "required_without_dpia"
+
+        return Response(
+            {
+                "total": viewable.count(),
+                **counts,
+                "rows_count": rows.count(),
+                "rows": [
+                    {
+                        "id": str(p.id),
+                        "ref_id": p.ref_id,
+                        "name": p.name,
+                        "folder": p.folder.name,
+                        "state": state_of(p),
+                        "set_at": p.dpia_required_set_at,
+                        "dpia": link(p.dpia or latest_open.get(str(p.id))),
+                        "pending_screening": link(pending.get(str(p.id))),
+                    }
+                    for p in page
+                ],
+            }
         )
 
     @action(detail=False, name="processing metrics")
@@ -813,6 +1137,7 @@ class RightRequestViewSet(BaseModelViewSet):
         "status",
         "processings",
         "folder",
+        "due_date",
     ]
 
     @action(detail=False, name="Get request type choices")
@@ -849,6 +1174,8 @@ class DataBreachViewSet(BaseModelViewSet):
         "affected_processings",
         "incident",
         "evidences",
+        "discovered_on",
+        "authority_notified_on",
     ]
 
     def get_queryset(self):
@@ -866,6 +1193,60 @@ class DataBreachViewSet(BaseModelViewSet):
             )
         )
 
+    def _process_incident(self, request) -> None:
+        """Turn a name typed into the incident picker into an incident.
+
+        Like the responsibility matrix of an EBIOS RM study: reuse an incident of
+        that name the user can see in the breach's domain, otherwise create one
+        there through its write serializer (add permission checked).
+        """
+        value = request.data.get("incident")
+        if not value or not isinstance(value, str):
+            return
+        try:
+            uuid.UUID(value)
+            return
+        except ValueError:
+            pass
+        from core.models import Incident
+        from core.serializers import IncidentWriteSerializer
+
+        folder_id = request.data.get("folder")
+        if not folder_id and self.kwargs.get("pk"):
+            folder_id = self.get_object().folder_id
+        try:
+            folder_id = uuid.UUID(str(folder_id))
+        except ValueError:
+            return
+        folder = Folder.objects.filter(id=folder_id).first()
+        if folder is None:
+            return
+        incident = Incident.objects.filter(
+            name=value,
+            folder=folder,
+            id__in=RoleAssignment.get_viewable_object_ids(request.user, Incident),
+        ).first()
+        if incident is None:
+            serializer = IncidentWriteSerializer(
+                data={"name": value, "folder": str(folder.id)},
+                context={"request": request},
+            )
+            serializer.is_valid(raise_exception=True)
+            incident = serializer.save()
+        if hasattr(request.data, "_mutable"):
+            request.data._mutable = True
+        request.data["incident"] = str(incident.id)
+
+    def create(self, request, *args, **kwargs):
+        with transaction.atomic():
+            self._process_incident(request)
+            return super().create(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        with transaction.atomic():
+            self._process_incident(request)
+            return super().update(request, *args, **kwargs)
+
     @action(detail=False, name="Get breach type choices")
     def breach_type(self, request):
         return Response(dict(DataBreach.BREACH_TYPE_CHOICES))
@@ -877,3 +1258,23 @@ class DataBreachViewSet(BaseModelViewSet):
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(DataBreach.STATUS_CHOICES))
+
+
+class DpiaRequirementChangeViewSet(BaseModelViewSet):
+    """History of DPIA requirement changes. Written only by `set_dpia_required`."""
+
+    model = DpiaRequirementChange
+    http_method_names = ["get", "head", "options"]
+    filterset_fields = ["processing", "dpia_required", "source", "changed_by", "folder"]
+    ordering = ["-created_at"]
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related("processing", "response", "changed_by", "folder")
+        )
+
+    @action(detail=False, name="Get source choices")
+    def source(self, request):
+        return Response(dict(DpiaRequirementSource.choices))

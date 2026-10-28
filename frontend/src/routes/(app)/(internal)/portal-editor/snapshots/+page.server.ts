@@ -1,14 +1,14 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { fetchAllPages } from '$lib/utils/pagination';
-import { del, patchJSON, postJSON } from '$lib/utils/portalApi';
-import { SnapshotCreateSchema, SnapshotEditSchema } from '$lib/utils/schemas';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { fetchAllPages } from '#lib/utils/pagination.js';
+import { del, patchJSON, postJSON } from '#lib/utils/portalApi.js';
+import { SnapshotCreateSchema, SnapshotEditSchema } from '#lib/utils/schemas.js';
 import { error, fail, redirect, type Actions } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch, locals }) => {
-	if (!locals.featureflags?.custom_portals) redirect(302, '/');
+	if (!(await locals.getFeatureFlags())?.custom_portals) redirect(302, '/');
 	const [snapshots, audits, frameworks] = await Promise.all([
 		fetchAllPages(fetch, `${BASE_API_URL}/framework-snapshots/`),
 		fetchAllPages(fetch, `${BASE_API_URL}/compliance-assessments/`),

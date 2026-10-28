@@ -1,17 +1,17 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { fetchAllPages } from '$lib/utils/pagination';
-import { tableSourceMapper } from '$lib/utils/table';
-import { getModelInfo } from '$lib/utils/crud';
-import { loadValidationFlowFormData, formatSelectFieldData } from '$lib/utils/load';
-import { modelSchema } from '$lib/utils/schemas';
-import { type TableSource } from '@skeletonlabs/skeleton-svelte';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { fetchAllPages } from '#lib/utils/pagination.js';
+import { tableSourceMapper } from '#lib/utils/table.js';
+import { getModelInfo } from '#lib/utils/crud.js';
+import { loadValidationFlowFormData, formatSelectFieldData } from '#lib/utils/load.js';
+import { modelSchema } from '#lib/utils/schemas.js';
+import { type TableSource } from '#lib/components/ModelTable/types.js';
 import { superValidate } from 'sveltekit-superforms';
 import { z } from 'zod';
 import type { LayoutServerLoad } from './$types';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { error, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 
 export const load: LayoutServerLoad = async ({ fetch, params, cookies, locals }) => {
 	const endpoint = `${BASE_API_URL}/risk-assessments/${params.id}/`;
@@ -21,7 +21,7 @@ export const load: LayoutServerLoad = async ({ fetch, params, cookies, locals })
 		if (res.status === 404) {
 			// Check if focus mode is active
 			const focusFolderId = cookies.get('focus_folder_id');
-			const focusModeEnabled = locals.featureflags?.focus_mode ?? false;
+			const focusModeEnabled = (await locals.getFeatureFlags())?.focus_mode ?? false;
 			const isFocusModeActive = focusFolderId && focusModeEnabled;
 
 			const message = isFocusModeActive

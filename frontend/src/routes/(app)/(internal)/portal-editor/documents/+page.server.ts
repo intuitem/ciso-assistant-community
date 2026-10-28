@@ -1,11 +1,11 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { fetchAllPages } from '$lib/utils/pagination';
-import { del } from '$lib/utils/portalApi';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { fetchAllPages } from '#lib/utils/pagination.js';
+import { del } from '#lib/utils/portalApi.js';
 import { error, fail, redirect, type Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch, locals }) => {
-	if (!locals.featureflags?.custom_portals) redirect(302, '/');
+	if (!(await locals.getFeatureFlags())?.custom_portals) redirect(302, '/');
 	// FolderTreeSelect on the page fetches its own org tree, so we only need the documents.
 	const documents = await fetchAllPages(fetch, `${BASE_API_URL}/public-documents/`).catch((e) => {
 		error(e?.status ?? 500, 'Failed to load documents');

@@ -3,9 +3,9 @@
 
 	import { setContext, onDestroy } from 'svelte';
 
-	import SuperForm from '$lib/components/Forms/Form.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
+	import SuperForm from '#lib/components/Forms/Form.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
 	import FolderTreeSelect from './FolderTreeSelect.svelte';
 	import LoadingSpinner from '../utils/LoadingSpinner.svelte';
 
@@ -13,6 +13,8 @@
 	import PerimeterForm from './ModelForm/PerimeterForm.svelte';
 	import ThreatForm from './ModelForm/ThreatForm.svelte';
 	import SecurityAdvisoryForm from './ModelForm/SecurityAdvisoryForm.svelte';
+	import QuickFormResponseForm from './ModelForm/QuickFormResponseForm.svelte';
+	import QuickFormPublicationForm from './ModelForm/QuickFormPublicationForm.svelte';
 	import CWEForm from './ModelForm/CWEForm.svelte';
 	import RiskScenarioForm from './ModelForm/RiskScenarioForm.svelte';
 	import AppliedControlsPoliciesForm from './ModelForm/AppliedControlPolicyForm.svelte';
@@ -30,6 +32,7 @@
 	import ContractsForm from './ModelForm/ContractForm.svelte';
 	import RepresentativesForm from './ModelForm/RepresentativeForm.svelte';
 	import EntityScoreForm from './ModelForm/EntityScoreForm.svelte';
+	import TierForm from './ModelForm/TierForm.svelte';
 	import FrameworksForm from './ModelForm/FrameworkForm.svelte';
 	import UsersForm from './ModelForm/UserForm.svelte';
 	import TeamForm from './ModelForm/TeamForm.svelte';
@@ -103,21 +106,21 @@
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
-	import { modelSchema } from '$lib/utils/schemas';
-	import type { ModelInfo, urlModel, CacheLock } from '$lib/utils/types';
+	import { modelSchema } from '#lib/utils/schemas.js';
+	import type { ModelInfo, urlModel, CacheLock } from '#lib/utils/types.js';
 	import { superForm, superValidate, type SuperValidated } from 'sveltekit-superforms';
-	import type { FormDataShape } from '$lib/utils/schemas';
-	import { browser } from '$app/environment';
-	import { page } from '$app/stores';
-	import { m } from '$paraglide/messages';
+	import type { FormDataShape } from '#lib/utils/schemas.js';
+	import { browser } from '$app/env';
+	import { page } from '$app/state';
+	import { m } from '#paraglide/messages.js';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
-	import { getSecureRedirect } from '$lib/utils/helpers';
-	import { createModalCache } from '$lib/utils/stores';
+	import { getSecureRedirect } from '#lib/utils/helpers.js';
+	import { createModalCache } from '#lib/utils/stores.js';
 	import FilteringLabelForm from './ModelForm/FilteringLabelForm.svelte';
 	import OperationalScenarioForm from './ModelForm/OperationalScenarioForm.svelte';
 	import StrategicScenarioForm from './ModelForm/StrategicScenarioForm.svelte';
-	import { goto } from '$lib/utils/breadcrumbs';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { goto } from '#lib/utils/breadcrumbs.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 
 	interface Props {
 		form: SuperValidated<FormDataShape>;
@@ -253,8 +256,8 @@
 	let urlModelFromPage = $state();
 
 	run(() => {
-		if ($page) {
-			urlModelFromPage = `${$page.url}`.replace(/^.*:\/\/[^/]+/, '');
+		if (page) {
+			urlModelFromPage = `${page.url}`.replace(/^.*:\/\/[^/]+/, '');
 			createModalCache.setModelName(urlModelFromPage);
 			if (caching) {
 				const currentCache = createModalCache.data[model.urlModel];
@@ -455,7 +458,7 @@
 				data-focusindex="1"
 			/>
 		{/if}
-		{#if shape.folder && !customFolder && !['validation-flows', 'findings', 'entity-assessments'].includes(URLModel)}
+		{#if shape.folder && !customFolder && !['validation-flows', 'findings', 'entity-assessments', 'quick-form-publications'].includes(URLModel)}
 			{#key folderKey}
 				<FolderTreeSelect
 					{form}
@@ -586,7 +589,7 @@
 				{formDataCache}
 				{object}
 				{initialData}
-				{$page}
+				$page={page}
 				{...rest}
 			/>
 		{:else if URLModel === 'validation-flows'}
@@ -661,7 +664,7 @@
 				{...rest}
 			/>
 		{:else if URLModel === 'solutions'}
-			<SolutionsForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
+			<SolutionsForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} {...rest} />
 		{:else if URLModel === 'contracts'}
 			<ContractsForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
 		{:else if URLModel === 'entity-scores'}
@@ -674,6 +677,8 @@
 				{object}
 				{...rest}
 			/>
+		{:else if URLModel === 'tiers'}
+			<TierForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
 		{:else if URLModel === 'representatives'}
 			<RepresentativesForm
 				{form}
@@ -736,7 +741,15 @@
 				{...rest}
 			/>
 		{:else if URLModel === 'processings'}
-			<ProcessingForm {form} {model} {cacheLocks} {formDataCache} {context} {...rest} />
+			<ProcessingForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				initialData={{ ...initialData, ...additionalInitialData }}
+				{context}
+				{...rest}
+			/>
 		{:else if URLModel === 'purposes'}
 			<PurposeForm {form} {model} {cacheLocks} {formDataCache} {context} {initialData} {...rest} />
 		{:else if URLModel === 'personal-data'}
@@ -810,7 +823,7 @@
 				{...rest}
 			/>
 		{:else if URLModel === 'ebios-rm'}
-			<EbiosRmForm {form} {model} {cacheLocks} {formDataCache} {context} {...rest} />
+			<EbiosRmForm {form} {model} {cacheLocks} {formDataCache} {context} {object} {...rest} />
 		{:else if URLModel === 'feared-events'}
 			<FearedEventForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
 		{:else if URLModel === 'ro-to'}
@@ -839,6 +852,27 @@
 			/>
 		{:else if URLModel === 'operational-scenarios'}
 			<OperationalScenarioForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{context}
+				{object}
+				{...rest}
+			/>
+		{:else if URLModel === 'quick-form-publications'}
+			<QuickFormPublicationForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{context}
+				{...rest}
+			/>
+		{:else if URLModel === 'quick-form-responses'}
+			<QuickFormResponseForm
 				{form}
 				{model}
 				{cacheLocks}
@@ -933,6 +967,7 @@
 				{formDataCache}
 				initialData={model.initialData}
 				{context}
+				{object}
 				{...rest}
 			/>
 		{:else if URLModel === 'kill-chains'}
@@ -1076,6 +1111,7 @@
 				{formDataCache}
 				{initialData}
 				{data}
+				{object}
 				{...rest}
 			/>
 		{:else if URLModel === 'metric-instances'}
@@ -1086,6 +1122,7 @@
 				{formDataCache}
 				initialData={{ ...initialData, ...additionalInitialData }}
 				{data}
+				{object}
 				{...rest}
 			/>
 		{:else if URLModel === 'custom-metric-samples'}
@@ -1171,8 +1208,13 @@
 
 						isLoading = true;
 					}}
-					>{#if isLoading}{m.loading()} <LoadingSpinner />{:else}{m.save()}{/if}</button
 				>
+					{#if isLoading}
+						{m.loading()} <LoadingSpinner />
+					{:else}
+						{m.save()}
+					{/if}
+				</button>
 			{:else}
 				{#if cancelButton}
 					<button

@@ -13,7 +13,9 @@ Covered:
 """
 
 from pathlib import Path
+from uuid import uuid4
 
+import copy
 import pytest
 import yaml
 from django.urls import reverse
@@ -488,7 +490,7 @@ def app_config(db):
 
 @pytest.fixture
 def admin_client(app_config):
-    admin = User.objects.create_superuser("admin@builder-tests.com", is_published=True)
+    admin = User.objects.create_superuser("admin@builder-tests.com")
     admin_group = UserGroup.objects.get(name="BI-UG-ADM")
     admin.folder = admin_group.folder
     admin.save()
@@ -597,8 +599,6 @@ def test_check_identity_requires_draft_creation_permission(app_config):
     """Any authenticated account without library permissions (e.g. a
     third-party respondent) must not be able to probe the corpus."""
     user = User.objects.create_user("nobody@builder-tests.com")
-    user.is_published = True
-    user.save()
     client = APIClient()
     _auth_token = AuthToken.objects.create(user=user)
     client.credentials(HTTP_AUTHORIZATION=f"Token {_auth_token[1]}")
@@ -808,6 +808,80 @@ def test_publish_refuses_a_draft_with_unresolved_references(admin_client):
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert response.data["error"] == "draftValidationFailed"
     assert not StoredLibrary.objects.filter(urn="urn:me:risk:library:mylib").exists()
+
+
+@pytest.mark.django_db
+def test_node_fields_survive_publish_and_export(admin_client):
+    """A first load keeps the node's visibility expression, importance and
+    score scale; both the draft export and the live serialization carry
+    them."""
+    from library import live
+
+    fields = {
+        "visibility_expression": 'requirements["r1"].score > 1',
+        "importance": "mandatory",
+        "min_score": 0,
+        "max_score": 5,
+        "scores_definition_ref": "six-step",
+        "target_score": 3.5,
+    }
+    six_step = [{"score": score, "name": f"Step {score}"} for score in range(6)]
+    draft = _create_draft(
+        admin_client,
+        content={
+            "frameworks": [
+                {
+                    "urn": "urn:me:risk:framework:mylib",
+                    "ref_id": "MYFW",
+                    "name": "My framework",
+                    "scores_definition": {"alternatives": {"six-step": six_step}},
+                    "requirement_nodes": [
+                        {
+                            "urn": "urn:me:risk:req_node:mylib:r1",
+                            "ref_id": "R1",
+                            "assessable": True,
+                            "depth": 1,
+                        },
+                        {
+                            "urn": "urn:me:risk:req_node:mylib:r2",
+                            "ref_id": "R2",
+                            "assessable": True,
+                            "depth": 1,
+                            **fields,
+                        },
+                    ],
+                }
+            ],
+        },
+    )
+    response = admin_client.post(
+        reverse("library-drafts-publish", args=[draft["id"]]), {}, format="json"
+    )
+    assert response.status_code == status.HTTP_200_OK, response.content
+
+    node = RequirementNode.objects.get(urn="urn:me:risk:req_node:mylib:r2")
+    assert {name: getattr(node, name) for name in fields} == fields
+    plain = RequirementNode.objects.get(urn="urn:me:risk:req_node:mylib:r1")
+    assert plain.importance == RequirementNode.Importance.UNDEFINED
+    assert plain.target_score is None
+
+    exported = yaml.safe_load(
+        admin_client.get(reverse("library-drafts-export", args=[draft["id"]])).content
+    )
+    nodes = exported["objects"]["frameworks"][0]["requirement_nodes"]
+    assert {name: nodes[1].get(name) for name in fields} == fields
+
+    serialized = live.live_framework_to_object(node.framework)
+    nodes = {n["urn"]: n for n in serialized["requirement_nodes"]}
+    assert {name: nodes[node.urn].get(name) for name in fields} == fields
+    defaults_omitted = {
+        "importance",
+        "min_score",
+        "max_score",
+        "scores_definition_ref",
+        "target_score",
+    }
+    assert not defaults_omitted & nodes[plain.urn].keys()
 
 
 @pytest.mark.django_db
@@ -1800,8 +1874,6 @@ def builder_only_client(app_config):
     folder-scoped read checks protect against.
     """
     user = User.objects.create_user("builder-only@builder-tests.com")
-    user.is_published = True
-    user.save()
     role = Role.objects.create(name="BuilderOnly", folder=Folder.get_root_folder())
     role.permissions.set(
         Permission.objects.filter(
@@ -1844,8 +1916,7 @@ def test_framework_editor_audits_are_rbac_scoped(app_config):
 
     admin = User.objects.create_superuser("audit-admin@builder-tests.com")
     builder = User.objects.create_user("nobody@builder-tests.com")
-    builder.is_published = True
-    builder.save()
+
     role = Role.objects.create(name="NoAudit", folder=root)
     role.permissions.set(Permission.objects.filter(codename="view_folder"))
     group = UserGroup.objects.create(name="no-audit-group", folder=root)
@@ -1926,6 +1997,123 @@ def test_stored_library_reads_stay_open_for_standard_roles(admin_client):
     assert detail.status_code == status.HTTP_200_OK
     content = admin_client.get(reverse("stored-libraries-content", args=[source_urn]))
     assert content.status_code == status.HTTP_200_OK
+
+
+def _store_mapping_fixture():
+    """A mapping set plus the two frameworks it spans, stored as libraries."""
+    root = Folder.get_root_folder()
+    common = {"folder": root, "locale": "en", "version": 1, "packager": "tests"}
+
+    def framework(slug, ref_id):
+        return StoredLibrary.objects.create(
+            urn=f"urn:tests:risk:library:{slug}",
+            name=slug,
+            ref_id=slug,
+            hash_checksum=slug,
+            content={
+                "framework": {
+                    "urn": f"urn:tests:risk:framework:{slug}",
+                    "name": slug,
+                    "requirement_nodes": [
+                        {
+                            "urn": f"urn:tests:risk:req_node:{slug}:r1",
+                            "ref_id": ref_id,
+                            "name": f"{ref_id} requirement",
+                            "assessable": True,
+                        }
+                    ],
+                }
+            },
+            **common,
+        )
+
+    framework("mapsrc", "S.1")
+    framework("maptgt", "T.1")
+
+    return StoredLibrary.objects.create(
+        urn="urn:tests:risk:library:mapset",
+        name="mapset",
+        ref_id="mapset",
+        hash_checksum="mapset",
+        content={
+            "requirement_mapping_sets": [
+                {
+                    "urn": "urn:tests:risk:req_mapping_set:mapset",
+                    "source_framework_urn": "urn:tests:risk:framework:mapsrc",
+                    "target_framework_urn": "urn:tests:risk:framework:maptgt",
+                    "requirement_mappings": [
+                        {
+                            "source_requirement_urn": "urn:tests:risk:req_node:mapsrc:r1",
+                            "target_requirement_urn": "urn:tests:risk:req_node:maptgt:r1",
+                            "relationship": "equal",
+                        }
+                    ],
+                }
+            ]
+        },
+        **common,
+    )
+
+
+MAPPING_DATA_ROUTES = (
+    "requirement-mapping-sets-graph-data",
+    "requirement-mapping-sets-table-data",
+)
+
+
+@pytest.mark.django_db
+def test_mapping_data_reads_respect_rbac(builder_only_client):
+    """A user without view_storedlibrary gets a 404, never the mapping content."""
+    mapping_set = _store_mapping_fixture()
+
+    for route in MAPPING_DATA_ROUTES:
+        response = builder_only_client.get(reverse(route, args=[mapping_set.pk]))
+        assert response.status_code == status.HTTP_404_NOT_FOUND, route
+
+
+@pytest.mark.django_db
+def test_mapping_data_reads_stay_open_for_standard_roles(admin_client):
+    """Sanity: the RBAC lookup changes nothing for a role that may read libraries."""
+    mapping_set = _store_mapping_fixture()
+
+    for route in MAPPING_DATA_ROUTES:
+        response = admin_client.get(reverse(route, args=[mapping_set.pk]))
+        assert response.status_code == status.HTTP_200_OK, route
+
+    table = admin_client.get(
+        reverse("requirement-mapping-sets-table-data", args=[mapping_set.pk])
+    )
+    assert [row["source_ref_id"] for row in table.data["rows"]] == ["S.1"]
+    assert [row["target_ref_id"] for row in table.data["rows"]] == ["T.1"]
+
+
+@pytest.mark.django_db
+def test_mapping_data_reads_404_on_unknown_id(admin_client):
+    """An unknown id is a 404, not a 500 from StoredLibrary.DoesNotExist."""
+    unknown = uuid4()
+
+    for route in MAPPING_DATA_ROUTES:
+        response = admin_client.get(reverse(route, args=[unknown]))
+        assert response.status_code == status.HTTP_404_NOT_FOUND, route
+
+
+@pytest.mark.django_db
+def test_mapping_table_data_indexes_every_row(admin_client):
+    """Rows carry an index: libraries may list the same link twice, and the client keys on it."""
+    mapping_set = _store_mapping_fixture()
+    content = mapping_set.content
+    link = content["requirement_mapping_sets"][0]["requirement_mappings"][0]
+    content["requirement_mapping_sets"][0]["requirement_mappings"] = [link, dict(link)]
+    mapping_set.content = content
+    mapping_set.save()
+
+    response = admin_client.get(
+        reverse("requirement-mapping-sets-table-data", args=[mapping_set.pk])
+    )
+    rows = response.data["rows"]
+
+    assert len(rows) == 2
+    assert [row["index"] for row in rows] == [0, 1]
 
 
 @pytest.mark.django_db
@@ -2951,3 +3139,182 @@ def test_republishing_preset_refreshes_steps_used_by_new_journeys(admin_client):
         "step-2",
         "step-3",
     ]
+
+
+def test_framework_rules_written_before_the_first_save_follow_the_ids():
+    """Requirements, questions and choices added in the editor are stored under
+    canonical ids: framework rules and conditions naming the editor's ids
+    follow, as quick-form rules do."""
+    from core.utils import extract_node_id
+    from library import framework_editor as fw_editor
+
+    original = builder.normalize_objects(SOURCE_LIBRARY["objects"])["frameworks"][0]
+    doc = fw_editor.framework_to_editor_doc(original, locale="en")
+    node_urn = "urn:custom:risk:req_node:whatever:b-draft"
+    question_urn = f"{node_urn}:question:q7"
+    choice_urn = f"{question_urn}:choice:c3"
+    doc["nodes"].append(
+        {
+            "id": "tmp-node-1",
+            "urn": node_urn,
+            "ref_id": "B",
+            "name": "New requirement",
+            "parent_urn": "urn:acme:risk:req_node:source-lib:a",
+            "assessable": True,
+            "order_id": 2,
+            "visibility_expression": 'answers["b-draft:question:q7"].answered',
+        }
+    )
+    doc["questions"].append(
+        {
+            "id": "tmp-q-1",
+            "urn": question_urn,
+            "ref_id": "q7",
+            "text": "New question?",
+            "type": "unique_choice",
+            "order": 0,
+            "requirement_node_id": "tmp-node-1",
+        }
+    )
+    doc["choices"].append(
+        {
+            "id": "tmp-c-1",
+            "urn": choice_urn,
+            "value": "Yes",
+            "order": 0,
+            "question_id": "tmp-q-1",
+        }
+    )
+    doc["framework_meta"]["outcomes_definition"] = [
+        {
+            "ref_id": "ok",
+            "expression": 'requirements["b-draft"].score > 1 && '
+            '"b-draft:question:q7:choice:c3" in '
+            'answers["b-draft:question:q7"].selected_choices',
+        },
+        {
+            "ref_id": "literal",
+            "expression": 'answers["b-draft:question:q7"].value == "b-draft"',
+        },
+    ]
+
+    urn_map: dict = {}
+    rebuilt = fw_editor.editor_doc_to_framework_object(
+        doc, existing=original, urn_map_out=urn_map
+    )
+    node_id = extract_node_id(urn_map[node_urn])
+    question_id = extract_node_id(urn_map[question_urn])
+    choice_id = extract_node_id(urn_map[choice_urn])
+    assert (node_id, question_id) != ("b-draft", "b-draft:question:q7")
+
+    rules = {r["ref_id"]: r["expression"] for r in rebuilt["outcomes_definition"]}
+    assert rules["ok"] == (
+        f'requirements["{node_id}"].score > 1 && "{choice_id}" in '
+        f'answers["{question_id}"].selected_choices'
+    )
+    # A plain value that happens to equal an old id is left alone.
+    assert rules["literal"] == f'answers["{question_id}"].value == "b-draft"'
+    new_node = next(n for n in rebuilt["requirement_nodes"] if n["ref_id"] == "B")
+    assert new_node["visibility_expression"] == f'answers["{question_id}"].answered'
+
+
+def _source_framework(**patch):
+    framework = copy.deepcopy(
+        builder.normalize_objects(SOURCE_LIBRARY["objects"])["frameworks"][0]
+    )
+    framework.update(patch)
+    return framework
+
+
+@pytest.mark.parametrize(
+    "expression,error",
+    [
+        ('requirements["a.1"].score > 1', None),
+        ('"x" in answers["a.1:question:1"].selected_choices', None),
+        ("assessment.score_sum > 0 && size(hidden_requirements) == 0", None),
+        ('requirements["nope"].score > 1', "No requirement 'nope' in this framework"),
+        ('answers["nope"].score > 1', "No answer 'nope' in this framework"),
+        # The quick-form root does not exist for audits.
+        ("response.score > 1", ""),
+    ],
+)
+def test_framework_rules_are_checked_against_the_audit_context(expression, error):
+    from core.cel_service import validate_framework_expressions
+
+    errors = validate_framework_expressions(
+        _source_framework(
+            outcomes_definition=[{"ref_id": "r", "expression": expression}]
+        )
+    )
+    if error == "":
+        assert errors and errors[0]["where"] == "outcome"
+    elif error is None:
+        assert errors == []
+    else:
+        assert errors[0]["error"].startswith(error)
+        assert "a.1" in errors[0]["error"]
+
+
+def test_framework_visibility_cannot_read_hidden_requirements():
+    from core.cel_service import validate_framework_expressions
+
+    framework = _source_framework()
+    framework["requirement_nodes"][1]["visibility_expression"] = (
+        "size(hidden_requirements) == 0"
+    )
+    errors = validate_framework_expressions(framework)
+    assert [e["where"] for e in errors] == ["requirement_visibility"]
+
+
+@pytest.mark.django_db
+def test_framework_editor_refuses_rules_that_cannot_evaluate(admin_client):
+    draft = _create_draft(
+        admin_client, content=dict(SOURCE_LIBRARY["objects"]), packager="me"
+    )
+    url = reverse("library-drafts-framework-editor", args=[draft["id"]])
+    doc = admin_client.get(url).data["editing_draft"]
+
+    doc["framework_meta"]["outcomes_definition"] = [
+        {"ref_id": "bad", "expression": 'requirements["typo"].score > 1'}
+    ]
+    refused = admin_client.put(url, {"editing_draft": doc}, format="json")
+    assert refused.status_code == status.HTTP_400_BAD_REQUEST
+    assert refused.data["error"] == "invalidExpressions"
+    assert refused.data["details"][0]["ref_id"] == "bad"
+
+    doc["framework_meta"]["outcomes_definition"] = [
+        {"ref_id": "good", "expression": 'requirements["a.1"].score > 1'}
+    ]
+    assert (
+        admin_client.put(url, {"editing_draft": doc}, format="json").status_code == 200
+    )
+
+
+def test_a_new_choice_without_text_is_not_saved():
+    """Clicking the empty "choice text" row adds a choice: saved as is, it
+    becomes an empty option. An existing choice emptied by the author stays,
+    since answers may point at it."""
+    from library import framework_editor as fw_editor
+
+    original = builder.normalize_objects(SOURCE_LIBRARY["objects"])["frameworks"][0]
+    doc = fw_editor.framework_to_editor_doc(original, locale="en")
+    question_id = doc["questions"][0]["id"]
+    doc["choices"].append(
+        {
+            "id": "tmp-empty",
+            "urn": None,
+            "value": "  ",
+            "order": 9,
+            "question_id": question_id,
+        }
+    )
+    rebuilt = fw_editor.editor_doc_to_framework_object(doc, existing=original)
+    node = next(n for n in rebuilt["requirement_nodes"] if n["ref_id"] == "A.1")
+    choices = next(iter(node["questions"].values()))["choices"]
+    assert [c["value"] for c in choices] == ["Yes"]
+
+    doc["choices"] = [c for c in doc["choices"] if c["id"] != "tmp-empty"]
+    doc["choices"][0]["value"] = ""
+    rebuilt = fw_editor.editor_doc_to_framework_object(doc, existing=original)
+    node = next(n for n in rebuilt["requirement_nodes"] if n["ref_id"] == "A.1")
+    assert len(next(iter(node["questions"].values()))["choices"]) == 1

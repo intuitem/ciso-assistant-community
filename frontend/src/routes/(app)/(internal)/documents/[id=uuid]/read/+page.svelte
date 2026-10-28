@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
-	import { LOCALE_MAP } from '$lib/utils/locales';
-	import { documentTypeLabel, documentTypeIcon } from '$lib/utils/documentTypes';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import ClassificationBadge from '$lib/components/ClassificationBadge.svelte';
-	import DocumentReferencesPanel from '$lib/components/DocumentEditor/DocumentReferencesPanel.svelte';
+	import { m } from '#paraglide/messages.js';
+	import { LOCALE_MAP } from '#lib/utils/locales.js';
+	import { documentTypeLabel, documentTypeIcon } from '#lib/utils/documentTypes.js';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import ClassificationBadge from '#lib/components/ClassificationBadge.svelte';
+	import DocumentReferencesPanel from '#lib/components/DocumentEditor/DocumentReferencesPanel.svelte';
+	import PdfPreview from '#lib/components/AttachmentPreview/PdfPreview.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -149,11 +150,7 @@
 				<i class="fa-solid fa-download mr-2"></i>{m.download()}
 			</a>
 			{#if isPdf}
-				<iframe
-					src={fileUrl}
-					title={data.container?.name}
-					class="h-[75vh] w-full rounded-xl border border-surface-200-800 shadow-sm"
-				></iframe>
+				<PdfPreview src={fileUrl} title={data.container?.name} class="h-[75vh] w-full shadow-sm" />
 			{/if}
 		</div>
 	{:else if data.content}

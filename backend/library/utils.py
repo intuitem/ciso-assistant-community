@@ -4,9 +4,14 @@ import time
 from .helpers import get_referential_translation
 from typing import List, Union
 
+from core.object_references import subject_question_error
+from core.quick_form_scoring import PAGE_AGGREGATIONS, normalize_page_aggregation
+
 # interesting thread: https://stackoverflow.com/questions/27743711/can-i-speedup-yaml
 from core.models import (
     Framework,
+    QuickForm,
+    QuickFormPage,
     Preset,
     Question,
     QuestionChoice,
@@ -100,6 +105,20 @@ def preview_library(framework: dict) -> dict[str, list]:
     return preview
 
 
+def outcome_rule_id_error(data: dict) -> str | None:
+    """The first outcome rule whose ref_id cannot be used, as a load error."""
+    from core.cel_service import RULE_ID_MESSAGES, outcome_rule_id_errors
+
+    rules = data.get("outcomes_definition") or []
+    if errors := outcome_rule_id_errors(rules):
+        first = errors[0]
+        return (
+            f"Outcome rule {first['index'] + 1} ({first['ref_id'] or 'no ID'}): "
+            f"{RULE_ID_MESSAGES[first['error']]}"
+        )
+    return None
+
+
 class RequirementNodeImporter:
     REQUIRED_FIELDS = {"urn"}
 
@@ -147,16 +166,25 @@ class RequirementNodeImporter:
                     "implementation_groups"
                 ),
                 display_mode=display_mode,
-                weight=self.requirement_data.get("weight", 1),
+                visibility_expression=self.requirement_data.get(
+                    "visibility_expression"
+                ),
+                weight=(
+                    1
+                    if self.requirement_data.get("weight") is None
+                    else self.requirement_data["weight"]
+                ),
+                importance=self.requirement_data.get("importance")
+                or RequirementNode.Importance.UNDEFINED,
                 min_score=self.requirement_data.get("min_score"),
                 max_score=self.requirement_data.get("max_score"),
                 scores_definition_ref=self.requirement_data.get(
                     "scores_definition_ref"
                 ),
+                target_score=self.requirement_data.get("target_score"),
                 locale=framework_object.locale,
                 default_locale=framework_object.default_locale,
                 translations=self.requirement_data.get("translations", {}),
-                is_published=True,
             ),
         )
         requirement_node.clean()
@@ -374,6 +402,17 @@ class FrameworkImporter:
                 ", ".join(detected_object_fields)
             )
 
+        if error := outcome_rule_id_error(self.framework_data):
+            return error
+        from core.cel_service import validate_framework_expressions
+
+        if errors := validate_framework_expressions(self.framework_data):
+            first = errors[0]
+            return (
+                f"[FRAMEWORK_ERROR] {first['where']} {first['ref_id']}: "
+                f"{first['error']}"
+            )
+
         if "requirement_nodes" in self.framework_data:
             requirement_node_data = self.framework_data["requirement_nodes"]
             if (
@@ -401,6 +440,26 @@ class FrameworkImporter:
         scores_definition = self.framework_data.get("scores_definition")
         if isinstance(scores_definition, list):
             scores_definition = {"scale": scores_definition}
+
+        score_calculation_method = self.framework_data.get(
+            "score_calculation_method", "average"
+        )
+        Framework.validate_score_calculation_method(score_calculation_method)
+        result_aggregation = self.framework_data.get(
+            "result_aggregation", Framework.ResultAggregation.PER_ANSWER
+        )
+        Framework.validate_result_aggregation(result_aggregation)
+        Framework.validate_scoring_defaults(
+            min_score=min_score,
+            max_score=max_score,
+            anchor_na_to_target=bool(
+                self.framework_data.get("anchor_na_to_target", False)
+            ),
+            target_score=self.framework_data.get("target_score"),
+            implementation_groups_definition=self.framework_data.get(
+                "implementation_groups_definition"
+            ),
+        )
 
         # update_or_create: identical to create() for normal loads (no row
         # exists yet) and adopts a pre-existing library-less framework in
@@ -431,17 +490,25 @@ class FrameworkImporter:
                 annotation=self.framework_data.get("annotation"),
                 min_score=min_score,
                 max_score=max_score,
+                result_aggregation=result_aggregation,
                 scores_definition=scores_definition,
                 implementation_groups_definition=self.framework_data.get(
                     "implementation_groups_definition"
                 ),
                 outcomes_definition=self.framework_data.get("outcomes_definition", []),
                 field_visibility=self.framework_data.get("field_visibility") or {},
+                score_scale_locked=bool(
+                    self.framework_data.get("score_scale_locked", False)
+                ),
+                score_calculation_method=score_calculation_method,
+                anchor_na_to_target=bool(
+                    self.framework_data.get("anchor_na_to_target", False)
+                ),
+                target_score=self.framework_data.get("target_score"),
                 provider=library_object.provider,
                 locale=library_object.locale,
                 default_locale=library_object.default_locale,
                 translations=self.framework_data.get("translations", {}),
-                is_published=True,
             ),
         )
         for requirement_node in self._requirement_nodes:
@@ -456,8 +523,161 @@ class FrameworkImporter:
             ).delete()
 
 
-class ReferentialImporterMixin:
+class QuickFormPageImporter:
+    REQUIRED_FIELDS = {"urn"}
+
+    def __init__(self, page_data: dict, index: int):
+        self.page_data = page_data
+        self.index = index
+
+    def is_valid(self) -> Union[str, None]:
+        if missing_fields := self.REQUIRED_FIELDS - set(self.page_data.keys()):
+            return "Missing the following fields : {}".format(", ".join(missing_fields))
+        questions = self.page_data.get("questions")
+        if questions is not None and not isinstance(questions, dict):
+            return "questions must be an object keyed by URN"
+        aggregation = self.page_data.get("aggregation")
+        if aggregation is not None and aggregation not in PAGE_AGGREGATIONS:
+            return "aggregation must be one of {}".format(", ".join(PAGE_AGGREGATIONS))
+        from core.quick_form_facts import facts_error
+
+        return facts_error([self.page_data])
+
+    def import_page(self, quick_form: QuickForm):
+        # update_or_create scoped to the form: create on fresh loads, in-place
+        # update when the form row was adopted.
+        page, _ = QuickFormPage.objects.update_or_create(
+            quick_form=quick_form,
+            urn=self.page_data["urn"].lower(),
+            defaults=dict(
+                folder=Folder.get_root_folder(),
+                ref_id=self.page_data.get("ref_id"),
+                name=self.page_data.get("name"),
+                description=self.page_data.get("description"),
+                annotation=self.page_data.get("annotation"),
+                provider=quick_form.provider,
+                order=self.index,
+                visibility_expression=self.page_data.get("visibility_expression"),
+                aggregation=normalize_page_aggregation(
+                    self.page_data.get("aggregation")
+                ),
+                facts=self.page_data.get("facts") or [],
+                locale=quick_form.locale,
+                default_locale=quick_form.default_locale,
+                translations=self.page_data.get("translations", {}),
+            ),
+        )
+        questions_data = self.page_data.get("questions")
+        _sync_questions_from_data(
+            page, questions_data if isinstance(questions_data, dict) else {}
+        )
+
+
+class QuickFormImporter:
     REQUIRED_FIELDS = {"ref_id", "urn"}
+
+    def __init__(self, quick_form_data: dict):
+        from core.quick_form_ratings import expand_scales, scales_error
+
+        # Checked first: expanding malformed scales would raise instead of answering.
+        self._scales_error = scales_error(quick_form_data)
+        # Questions on a scale get its levels as choices before any page is read.
+        self.quick_form_data = (
+            quick_form_data if self._scales_error else expand_scales(quick_form_data)
+        )
+        self._pages: List[QuickFormPageImporter] = []
+
+    def init(self) -> Union[str, None]:
+        if self._scales_error:
+            return f"[QUICK_FORM_ERROR] {self._scales_error}"
+        if missing_fields := self.REQUIRED_FIELDS - set(self.quick_form_data.keys()):
+            return "Missing the following fields : {}".format(", ".join(missing_fields))
+        pages = self.quick_form_data.get("pages")
+        if not isinstance(pages, list) or not pages:
+            return "A quick form must define at least one page"
+        errors = []
+        for index, page_data in enumerate(pages):
+            if not isinstance(page_data, dict):
+                errors.append((index, "must be an object"))
+                continue
+            importer = QuickFormPageImporter(page_data, index)
+            self._pages.append(importer)
+            if (error := importer.is_valid()) is not None:
+                errors.append((index, error))
+        if errors:
+            index, error = errors[0]
+            return (
+                f"[QUICK_FORM_ERROR] {len(errors)} invalid page"
+                f"{'s' if len(errors) > 1 else ''} detected, page {index + 1} "
+                f"has the following error : {error}"
+            )
+        if (error := subject_question_error(self.quick_form_data)) is not None:
+            return f"[QUICK_FORM_ERROR] {error}"
+        if error := outcome_rule_id_error(self.quick_form_data):
+            return f"[QUICK_FORM_ERROR] {error}"
+        from core.quick_form_apply import validate_on_accept_document
+
+        if errors := validate_on_accept_document(self.quick_form_data):
+            first = errors[0]
+            return f"[QUICK_FORM_ERROR] on_accept {first['ref_id']}: {first['error']}"
+        return None
+
+    def import_quick_form(self, library_object: LoadedLibrary):
+        urn = self.quick_form_data["urn"].lower()
+        existing = QuickForm.objects.filter(urn=urn).first()
+        if existing is not None and (
+            existing.library_id is not None or existing.locale != library_object.locale
+        ):
+            raise IntegrityError(
+                f"Quick form {urn} already exists and belongs to a library; "
+                f"cannot be adopted by {library_object.urn}"
+            )
+        quick_form, created = QuickForm.objects.update_or_create(
+            urn=urn,
+            defaults=dict(
+                folder=Folder.get_root_folder(),
+                library=library_object,
+                ref_id=self.quick_form_data["ref_id"],
+                name=self.quick_form_data.get("name"),
+                description=self.quick_form_data.get("description"),
+                annotation=self.quick_form_data.get("annotation"),
+                # Carried here as well as in `update_quick_forms`: a field honoured on
+                # re-import but dropped on first load silently works only for authors
+                # who happened to publish twice.
+                ref_id_prefix=self.quick_form_data.get("ref_id_prefix") or "",
+                title_question_urn=str(
+                    self.quick_form_data.get("title_question_urn") or ""
+                ).lower(),
+                subject_question_urn=str(
+                    self.quick_form_data.get("subject_question_urn") or ""
+                ).lower(),
+                on_accept=self.quick_form_data.get("on_accept") or [],
+                outcomes_definition=self.quick_form_data.get("outcomes_definition")
+                or [],
+                scores_definition=self.quick_form_data.get("scores_definition"),
+                scales_definition=self.quick_form_data.get("scales_definition") or [],
+                urn_namespace=urn.split(":")[1] if urn.startswith("urn:") else "custom",
+                provider=library_object.provider,
+                locale=library_object.locale,
+                default_locale=library_object.default_locale,
+                translations=self.quick_form_data.get("translations", {}),
+            ),
+        )
+        if created and self.quick_form_data.get("always_review"):
+            # First load only: re-imports keep what the instance chose.
+            quick_form.always_review = True
+            quick_form.save(update_fields=["always_review"])
+        for page in self._pages:
+            page.import_page(quick_form)
+        if not created:
+            QuickFormPage.objects.filter(quick_form=quick_form).exclude(
+                urn__in=[p.page_data["urn"].lower() for p in self._pages]
+            ).delete()
+
+
+class ReferentialImporterMixin:
+    # ref_id is optional: some publishers (e.g. ANSSI fiches méthode) number nothing.
+    REQUIRED_FIELDS = {"urn"}
 
     def __init__(self, data: dict, index: int = 0):
         self.data = data
@@ -472,12 +692,11 @@ class ReferentialImporterMixin:
         return dict(
             library=library_object,
             urn=self.data["urn"].lower(),
-            ref_id=self.data["ref_id"],
+            ref_id=self.data.get("ref_id"),
             name=self.data.get("name"),
             description=self.data.get("description"),
             annotation=self.data.get("annotation"),
             provider=library_object.provider,
-            is_published=True,
             locale=library_object.locale,
             translations=self.data.get("translations", {}),
             default_locale=library_object.default_locale,
@@ -506,7 +725,7 @@ class TTPCatalogImporter(ReferentialImporterMixin):
 
 
 class TacticImporter(ReferentialImporterMixin):
-    REQUIRED_FIELDS = {"ref_id", "urn", "catalog_urn"}
+    REQUIRED_FIELDS = {"urn", "catalog_urn"}
 
     def import_object(self, library_object: LoadedLibrary):
         self._object = Tactic.objects.create(
@@ -572,7 +791,6 @@ class ThreatImporter:
             description=self.threat_data.get("description"),
             annotation=self.threat_data.get("annotation"),
             provider=library_object.provider,
-            is_published=True,
             locale=library_object.locale,
             translations=self.threat_data.get("translations", {}),
             default_locale=library_object.default_locale,  # Change this in the future ?
@@ -622,7 +840,6 @@ class ReferenceControlImporter:
             typical_evidence=self.reference_control_data.get("typical_evidence"),
             category=self.reference_control_data.get("category"),
             csf_function=self.reference_control_data.get("csf_function"),
-            is_published=True,
             locale=library_object.locale,
             translations=self.reference_control_data.get("translations", {}),
             default_locale=library_object.default_locale,  # Change this in the future ?
@@ -633,14 +850,33 @@ class MetricDefinitionImporter:
     REQUIRED_FIELDS = {"ref_id", "urn"}
     CATEGORIES = set(_category[0] for _category in MetricDefinition.Category.choices)
 
-    def __init__(self, metric_definition_data: dict):
+    def __init__(self, metric_definition_data: dict, shipped: dict | None = None):
         self.metric_definition_data = metric_definition_data
+        # Every definition of the library by URN: a formula may read one that
+        # is imported after it.
+        self.shipped = shipped or {}
 
     def is_valid(self) -> Union[str, None]:
+        from metrology.derived import validate_formula
+
         if missing_fields := self.REQUIRED_FIELDS - set(
             self.metric_definition_data.keys()
         ):
             return "Missing the following fields : {}".format(", ".join(missing_fields))
+
+        # A shipped formula is held to the same checks as one typed in: the
+        # sampler would otherwise fail on it at every tick.
+        formula_errors = validate_formula(
+            self.metric_definition_data.get("datasets"),
+            self.metric_definition_data.get("expression") or "",
+            self.metric_definition_data.get("inputs"),
+            shipped=self.shipped,
+            own_urn=self.metric_definition_data.get("urn"),
+        )
+        if formula_errors:
+            return "Invalid formula: {}".format(
+                "; ".join(message for _code, message in formula_errors)
+            )
 
         if (category := self.metric_definition_data.get("category")) is not None:
             if category not in MetricDefinitionImporter.CATEGORIES:
@@ -674,7 +910,11 @@ class MetricDefinitionImporter:
             choices_definition=self.metric_definition_data.get("choices_definition"),
             higher_is_better=self.metric_definition_data.get("higher_is_better", True),
             default_target=self.metric_definition_data.get("default_target"),
-            is_published=True,
+            # A formula ships with its definition. Inputs name other
+            # definitions by URN, resolved when an instance computes.
+            datasets=self.metric_definition_data.get("datasets"),
+            expression=self.metric_definition_data.get("expression") or "",
+            inputs=self.metric_definition_data.get("inputs"),
             locale=library_object.locale,
             translations=self.metric_definition_data.get("translations", {}),
             default_locale=library_object.default_locale,
@@ -684,7 +924,14 @@ class MetricDefinitionImporter:
 # The couple (URN, locale) is unique. ===> Check this in the future
 class RiskMatrixImporter:
     REQUIRED_FIELDS = {"ref_id", "urn", "json_definition"}
-    MATRIX_FIELDS = {"probability", "impact", "risk", "grid", "strength_of_knowledge"}
+    MATRIX_FIELDS = {
+        "probability",
+        "impact",
+        "risk",
+        "grid",
+        "strength_of_knowledge",
+        "ebios_rm",
+    }
 
     def __init__(self, risk_matrix_data: dict):
         self.risk_matrix_data = risk_matrix_data
@@ -740,7 +987,6 @@ class RiskMatrixImporter:
                 locale=library_object.locale,
                 default_locale=library_object.default_locale,  # Change this in the future ?
                 translations=self.risk_matrix_data.get("translations", {}),
-                is_published=True,
             ),
         )
         logger.info(
@@ -765,6 +1011,7 @@ class LibraryImporter:
         "risk_matrices",
         "framework",  # This field name is deprecated
         "frameworks",
+        "quick_forms",
         "requirement_mapping_set",  # This field name is deprecated
         "requirement_mapping_sets",
         "preset",
@@ -779,6 +1026,7 @@ class LibraryImporter:
     def __init__(self, library: StoredLibrary):
         self._library = library
         self._frameworks = []
+        self._quick_forms = []
         self._ttp_catalogs = []
         self._tactics = []
         self._techniques = []
@@ -894,9 +1142,14 @@ class LibraryImporter:
     ) -> Union[str, None]:
         metric_definition_importers = []
         import_errors = []
+        shipped = {
+            str(data["urn"]).lower(): data
+            for data in metric_definitions
+            if isinstance(data, dict) and data.get("urn")
+        }
         for index, metric_definition_data in enumerate(metric_definitions):
             metric_definition_importer = MetricDefinitionImporter(
-                metric_definition_data
+                metric_definition_data, shipped
             )
             metric_definition_importers.append(metric_definition_importer)
             if (
@@ -995,6 +1248,28 @@ class LibraryImporter:
                 invalid_framework_error,
             )
 
+    def init_quick_forms(self, quick_forms: List[dict]) -> Union[str, None]:
+        importers = []
+        import_errors = []
+        for index, quick_form_data in enumerate(quick_forms):
+            if not isinstance(quick_form_data, dict):
+                import_errors.append((index, "must be an object"))
+                continue
+            importer = QuickFormImporter(quick_form_data)
+            importers.append(importer)
+            if (error := importer.init()) is not None:
+                import_errors.append((index, error))
+        self._quick_forms = importers
+        if import_errors:
+            index, error = import_errors[0]
+            ordinal = {1: "st", 2: "nd", 3: "rd"}.get(index + 1, "th")
+            return (
+                f"[QUICK_FORM_ERROR] {len(import_errors)} invalid quick form"
+                f"{'s' if len(import_errors) > 1 else ''} detected, the "
+                f"{index + 1}{ordinal} quick form has the following error : {error}"
+            )
+        return None
+
     def init(self) -> Union[str, None]:
         """missing_fields = self.REQUIRED_FIELDS - set(self._library_data.keys())
         if missing_fields:
@@ -1039,6 +1314,16 @@ class LibraryImporter:
             ) is not None:
                 logger.error("Framework import error", error=framework_import_error)
                 return framework_import_error
+
+        if "quick_forms" in library_objects:
+            quick_forms_data = library_objects["quick_forms"]
+            if isinstance(quick_forms_data, dict):
+                quick_forms_data = [quick_forms_data]
+            if not isinstance(quick_forms_data, list):
+                return "[QUICK_FORM_ERROR] The 'quick_forms' field must be a list."
+            if (error := self.init_quick_forms(quick_forms_data)) is not None:
+                logger.error("Quick form import error", error=error)
+                return error
 
         if (
             "requirement_mapping_set" in library_objects
@@ -1182,7 +1467,6 @@ class LibraryImporter:
                 "publication_date": self._library.publication_date,
                 "copyright": self._library.copyright,
                 "folder": Folder.get_root_folder(),  # TODO: make this configurable,
-                "is_published": True,
                 "builtin": self._library.builtin,
                 "objects_meta": self._library.objects_meta,
                 "translations": self._library.translations,
@@ -1222,6 +1506,9 @@ class LibraryImporter:
 
         for framework in self._frameworks:
             framework.import_framework(library_object)
+
+        for quick_form in self._quick_forms:
+            quick_form.import_quick_form(library_object)
 
         for requirement_mapping_set in self._requirement_mapping_sets:
             requirement_mapping_set.load(library_object)

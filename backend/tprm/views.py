@@ -1,5 +1,6 @@
 import io
 import re
+import uuid
 
 import django_filters as df
 from django.db import transaction
@@ -11,28 +12,53 @@ from rest_framework.status import (
     HTTP_201_CREATED,
     HTTP_400_BAD_REQUEST,
     HTTP_403_FORBIDDEN,
+    HTTP_409_CONFLICT,
 )
-from iam.models import Folder, Permission, RoleAssignment
+from iam.models import Folder, Permission, RoleAssignment, User
 from core.views import (
     BaseModelViewSet as AbstractBaseModelViewSet,
+    ComplianceAssessmentViewSet,
     ExportMixin,
     GenericFilterSet,
+    NullableModelChoiceFilter,
+    actor_prefetch,
     escape_excel_formula,
 )
 from core.models import (
     Asset,
     ComplianceAssessment,
+    Question,
     RequirementAssessment,
     RequirementAssignment,
     Terminology,
 )
-from core.utils import compute_respondent_progress
-from django.db.models import Case, IntegerField, OuterRef, Q, Subquery, Value, When
+from core.utils import (
+    assessable_requirement_assessments,
+    compliance_overviews,
+    compute_respondent_progress,
+    viewable_audit_ids,
+)
+from django.db.models import (
+    Case,
+    Count,
+    Exists,
+    IntegerField,
+    OuterRef,
+    Q,
+    Subquery,
+    Value,
+    When,
+)
 from tprm.models import (
     Entity,
     EntityScore,
+    EntityTierChange,
+    Tier,
+    TierSource,
     Representative,
     Solution,
+    SolutionSubcontractor,
+    SolutionTierChange,
     EntityAssessment,
     Contract,
 )
@@ -84,6 +110,14 @@ DORA_ROI_PERMISSIONS = (
 )
 
 
+def _join_lines(values) -> str:
+    return "\n".join(v for v in values if v)
+
+
+def _iso_datetime(value) -> str:
+    return value.isoformat(timespec="seconds") if value else ""
+
+
 def has_dora_roi_access(user) -> bool:
     root_folder = Folder.get_root_folder()
     return all(
@@ -121,12 +155,16 @@ ENTITY_FILTERSET_FIELDS = [
     "default_penetration",
     "default_maturity",
     "default_trust",
+    "tier",
+    "tier_source",
 ]
 
 
 class EntityFilterSet(GenericFilterSet):
     """`last_assessment_status` is annotated, so the auto-built FilterSet misses it."""
 
+    # "--" lists the vendors not tiered yet.
+    tier = NullableModelChoiceFilter(queryset=Tier.objects.all())
     last_assessment_status = df.MultipleChoiceFilter(
         choices=lambda: (
             list(EntityAssessment.Status.choices)
@@ -175,24 +213,24 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
             "maturity": {"source": "default_maturity", "label": "maturity"},
             "trust": {"source": "default_trust", "label": "trust"},
             "lei": {
-                "source": "legal_identifiers",
+                "source": "legal_identifiers_dict",
                 "label": "lei",
-                "format": lambda v: (v or {}).get("LEI", ""),
+                "format": lambda v: v.get("LEI", ""),
             },
             "euid": {
-                "source": "legal_identifiers",
+                "source": "legal_identifiers_dict",
                 "label": "euid",
-                "format": lambda v: (v or {}).get("EUID", ""),
+                "format": lambda v: v.get("EUID", ""),
             },
             "duns": {
-                "source": "legal_identifiers",
+                "source": "legal_identifiers_dict",
                 "label": "duns",
-                "format": lambda v: (v or {}).get("DUNS", ""),
+                "format": lambda v: v.get("DUNS", ""),
             },
             "vat": {
-                "source": "legal_identifiers",
+                "source": "legal_identifiers_dict",
                 "label": "vat",
-                "format": lambda v: (v or {}).get("VAT", ""),
+                "format": lambda v: v.get("VAT", ""),
             },
             "parent_entity_ref_id": {
                 "source": "parent_entity.ref_id",
@@ -207,8 +245,11 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
     filterset_class = EntityFilterSet
     search_fields = ["name", "description", "legal_identifiers_text"]
     # The column shows the status; chronology is what makes it sortable.
-    ordering_remap = {"last_assessment_status": "last_assessment_date"}
-    ordering_nulls_last = ("last_assessment_date",)
+    ordering_remap = {
+        "last_assessment_status": "last_assessment_date",
+        "tier": "tier__rank",
+    }
+    ordering_nulls_last = ("last_assessment_date", "tier__rank")
 
     @action(detail=False, name="Get last assessment status choices")
     def last_assessment_status(self, request):
@@ -270,6 +311,7 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
                 "folder",
                 "folder__parent_folder",
                 "parent_entity",
+                "tier",
             )
         )
 
@@ -814,7 +856,7 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
         # --- Entities sheet ---
         entities_rows = []
         for entity in entities:
-            legal = entity.legal_identifiers or {}
+            legal = entity.legal_identifiers_dict
             entities_rows.append(
                 {
                     "ref_id": esc(entity.ref_id),
@@ -1142,12 +1184,133 @@ class EntityViewSet(ExportMixin, BaseModelViewSet):
             )
 
 
-class EntityAssessmentViewSet(BaseModelViewSet):
+class EntityAssessmentViewSet(ExportMixin, BaseModelViewSet):
     """
     API endpoint that allows entity assessments to be viewed or edited.
     """
 
     model = EntityAssessment
+    export_config = {
+        "filename": "entity_assessments_export",
+        "fields": {
+            "name": {"source": "name", "label": "name", "escape": True},
+            "version": {"source": "version", "label": "version", "escape": True},
+            "description": {
+                "source": "description",
+                "label": "description",
+                "escape": True,
+            },
+            "entity_ref_id": {
+                "source": "_export_entity.ref_id",
+                "label": "entity_ref_id",
+                "escape": True,
+            },
+            "entity": {
+                "source": "_export_entity.name",
+                "label": "entity",
+                "escape": True,
+            },
+            "solution_ref_id": {
+                "source": "_export_solutions",
+                "label": "solution_ref_id",
+                "format": lambda objs: _join_lines(s.ref_id for s in objs),
+                "escape": True,
+            },
+            "solution": {
+                "source": "_export_solutions",
+                "label": "solution",
+                "format": lambda objs: _join_lines(s.name for s in objs),
+                "escape": True,
+            },
+            "compliance_assessment": {
+                "source": "_export_compliance_assessment.name",
+                "label": "questionnaire",
+                "escape": True,
+            },
+            "framework": {
+                "source": "_export_compliance_assessment.framework.name",
+                "label": "framework",
+                "escape": True,
+            },
+            "status": {"source": "status", "label": "status"},
+            "assignment_status": {
+                "source": "_export_assignment_status",
+                "label": "assignment_status",
+            },
+            "completion": {"source": "_export_completion", "label": "completion"},
+            "review_progress": {
+                "source": "_export_review_progress",
+                "label": "review_progress",
+            },
+            "eta": {"source": "eta", "label": "eta"},
+            "due_date": {"source": "due_date", "label": "due_date"},
+            "expiry_date": {"source": "expiry_date", "label": "expiry_date"},
+            "criticality": {"source": "criticality", "label": "criticality"},
+            "conclusion": {"source": "conclusion", "label": "conclusion"},
+            "observation": {
+                "source": "observation",
+                "label": "observation",
+                "escape": True,
+            },
+            "author": {
+                "source": "_export_authors",
+                "label": "author",
+                "format": lambda objs: _join_lines(str(a) for a in objs),
+                "escape": True,
+            },
+            "reviewer": {
+                "source": "_export_reviewers",
+                "label": "reviewer",
+                "format": lambda objs: _join_lines(str(a) for a in objs),
+                "escape": True,
+            },
+            "representative_email": {
+                "source": "_export_representatives",
+                "label": "representative_email",
+                "format": lambda objs: _join_lines(u.email for u in objs),
+                "escape": True,
+            },
+            "representative": {
+                "source": "_export_representatives",
+                "label": "representative",
+                "format": lambda objs: _join_lines(str(u) for u in objs),
+                "escape": True,
+            },
+            "domain": {
+                "source": "_export_folder.name",
+                "label": "domain",
+                "escape": True,
+            },
+            "perimeter": {
+                "source": "_export_perimeter.name",
+                "label": "perimeter",
+                "escape": True,
+            },
+            "reference_link": {
+                "source": "reference_link",
+                "label": "reference_link",
+                "escape": True,
+            },
+            "created_at": {
+                "source": "created_at",
+                "label": "created_at",
+                "format": _iso_datetime,
+            },
+            "updated_at": {
+                "source": "updated_at",
+                "label": "updated_at",
+                "format": _iso_datetime,
+            },
+        },
+        "select_related": [
+            "folder",
+            "perimeter",
+            "entity",
+            "compliance_assessment__framework",
+        ],
+        "prefetch_related": ["solutions", "representatives"],
+        "wrap_columns": ["name", "description", "observation"],
+    }
     filterset_fields = [
         "name",
         "status",
@@ -1161,6 +1324,9 @@ class EntityAssessmentViewSet(BaseModelViewSet):
         "genericcollection",
         # A third-party campaign owns the questionnaire; the assessment hangs off it.
         "compliance_assessment__campaign",
+        "due_date",
+        "expiry_date",
+        "filtering_labels",
     ]
 
     # Ordering the raw string would be alphabetical; the annotation ranks it by
@@ -1188,27 +1354,7 @@ class EntityAssessmentViewSet(BaseModelViewSet):
         )
         return qs.annotate(assignment_status_rank=Subquery(least_advanced))
 
-    @staticmethod
-    def _prefetched_requirement_assessments(audit):
-        """Same selection rules as `get_requirement_assessments`, read off what is in memory:
-
-        calling it would bypass the page-level prefetch and re-query per row.
-        """
-        rows = [
-            ra
-            for ra in audit.requirement_assessments.all()
-            if ra.requirement.assessable
-        ]
-        selected = set(audit.selected_implementation_groups or [])
-        if not selected:
-            return rows
-        return [
-            ra
-            for ra in rows
-            if selected & set(ra.requirement.implementation_groups or [])
-        ]
-
-    def _get_optimized_object_data(self, queryset):
+    def _get_optimized_object_data(self, queryset, with_compliance=True):
         """Answering progress and assignment state for the whole page at once: per row the walk is a query storm."""
         data = super()._get_optimized_object_data(queryset)
 
@@ -1240,11 +1386,25 @@ class EntityAssessmentViewSet(BaseModelViewSet):
         )
         data["completion"] = {
             audit.id: compute_respondent_progress(
-                audit, self._prefetched_requirement_assessments(audit)
+                audit, assessable_requirement_assessments(audit)
             )
             for audit in audits
         }
-        data["review_progress"] = {audit.id: audit.progress for audit in audits}
+        totals, assessed = ComplianceAssessmentViewSet.get_requirement_counts(
+            list(audit_ids)
+        )
+        data["review_progress"] = {
+            audit.id: int(assessed.get(audit.id, 0) / totals[audit.id] * 100)
+            if totals.get(audit.id)
+            else 0
+            for audit in audits
+        }
+
+        if with_compliance:
+            data["viewable_audits"] = viewable_audit_ids(self.request.user, audit_ids)
+            data["compliance_overview"] = compliance_overviews(
+                audit for audit in audits if audit.id in data["viewable_audits"]
+            )
 
         statuses: dict = {}
         for audit_id, status_value in RequirementAssignment.objects.filter(
@@ -1255,40 +1415,119 @@ class EntityAssessmentViewSet(BaseModelViewSet):
 
         return data
 
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        if instance.compliance_assessment:
-            audit = instance.compliance_assessment
-            folder = audit.folder
-            if folder.content_type == Folder.ContentType.ENCLAVE:
-                # Revisions share the enclave: it is the vendor's workspace, not this
-                # round's. Only the last audit takes the folder down with it.
-                shared = (
-                    ComplianceAssessment.objects.filter(folder=folder)
-                    .exclude(pk=audit.pk)
-                    .exists()
-                )
-                if shared:
-                    logger.info(
-                        "deleting_audit_keeping_shared_enclave",
-                        audit_id=str(audit.pk),
-                        folder_id=str(folder.id),
+    EXPORT_BATCH_SIZE = 200
+
+    def _get_export_queryset(self):
+        queryset = (
+            super()
+            ._get_export_queryset()
+            .prefetch_related(actor_prefetch("authors"), actor_prefetch("reviewers"))
+        )
+        return self._iter_export_rows(queryset)
+
+    def _iter_export_rows(self, queryset):
+        """Yield rows batch by batch, related objects masked as in `list`."""
+        from tprm.serializers import EntityAssessmentReadSerializer
+
+        field_models = self._get_fieldsrelated_map(EntityAssessmentReadSerializer())
+        allowed = self._get_accessible_ids_map(set(field_models.values()))
+        user_id = str(self.request.user.pk)
+
+        def visible(obj, model):
+            ids = allowed.get(model)
+            return (
+                ids is None
+                or str(obj.pk) in ids
+                or (model is User and str(obj.pk) == user_id)
+            )
+
+        ids = list(dict.fromkeys(queryset.values_list("pk", flat=True)))
+        for start in range(0, len(ids), self.EXPORT_BATCH_SIZE):
+            batch = ids[start : start + self.EXPORT_BATCH_SIZE]
+            by_id = {ea.pk: ea for ea in queryset.filter(pk__in=batch)}
+            rows = [by_id[pk] for pk in batch if pk in by_id]
+            serializer = EntityAssessmentReadSerializer(
+                context={
+                    "optimized_data": self._get_optimized_object_data(
+                        rows, with_compliance=False
                     )
-                    audit.delete()
-                else:
+                }
+            )
+            for ea in rows:
+                ea._export_completion = serializer.get_completion(ea)
+                ea._export_review_progress = serializer.get_review_progress(ea)
+                ea._export_assignment_status = serializer.get_assignment_status(ea)
+                for field in ("entity", "folder", "perimeter", "compliance_assessment"):
+                    obj = getattr(ea, field)
+                    setattr(
+                        ea,
+                        f"_export_{field}",
+                        obj if obj and visible(obj, field_models[field]) else None,
+                    )
+                for field in ("solutions", "authors", "reviewers", "representatives"):
+                    setattr(
+                        ea,
+                        f"_export_{field}",
+                        [
+                            obj
+                            for obj in getattr(ea, field).all()
+                            if visible(obj, field_models[field])
+                        ],
+                    )
+                yield ea
+
+    def _owned_audit_deletion(self, instance):
+        """What deleting this assessment takes down with it: the linked audit when
+        its enclave is shared by other rounds, the whole enclave folder when this is
+        the last audit in it, nothing when the audit lives outside an enclave.
+        """
+        audit = instance.compliance_assessment
+        if not audit:
+            return None
+        folder = audit.folder
+        if folder.content_type != Folder.ContentType.ENCLAVE:
+            return None
+        # Revisions share the enclave: it is the vendor's workspace, not this
+        # round's. Only the last audit takes the folder down with it.
+        shared = (
+            ComplianceAssessment.objects.filter(folder=folder)
+            .exclude(pk=audit.pk)
+            .exists()
+        )
+        return audit if shared else folder
+
+    def cascade_extra_deletions(self, instance):
+        target = self._owned_audit_deletion(instance)
+        return [target] if target is not None else []
+
+    def perform_destroy(self, instance):
+        # Here rather than in destroy() so batch deletes take the same path.
+        with transaction.atomic():
+            if instance.compliance_assessment:
+                audit = instance.compliance_assessment
+                target = self._owned_audit_deletion(instance)
+                if target is None:
+                    logger.warning(
+                        "Compliance assessment folder is not an Enclave, skipping deletion",
+                        folder=audit.folder,
+                    )
+                elif isinstance(target, Folder):
                     logger.info(
                         "deleting_compliance_assessment_folder",
-                        folder_id=str(folder.id),
-                        content_type=str(folder.content_type),
+                        folder_id=str(target.id),
+                        content_type=str(target.content_type),
                     )
-                    folder.delete()
-            else:
-                logger.warning(
-                    "Compliance assessment folder is not an Enclave, skipping deletion",
-                    folder=folder,
-                )
-
-        return super().destroy(request, *args, **kwargs)
+                    target.delete()
+                    instance.compliance_assessment = None
+                else:
+                    logger.info(
+                        "deleting_audit_keeping_shared_enclave",
+                        audit_id=str(target.pk),
+                        folder_id=str(target.folder_id),
+                    )
+                    target.delete()
+                    instance.compliance_assessment = None
+            super().perform_destroy(instance)
 
     @action(detail=True, methods=["post"], name="Clone as a new revision")
     def clone(self, request, pk=None):
@@ -1393,16 +1632,51 @@ class EntityAssessmentViewSet(BaseModelViewSet):
                 ),
             )
         }
+        # Same page-level pass as the completion figures: the rows are already
+        # in memory, and the framework trees are primed in one query.
+        viewable_audits = viewable_audit_ids(request.user, audits_by_id)
+        overviews = compliance_overviews(
+            audit for audit in audits_by_id.values() if audit.id in viewable_audits
+        )
 
-        for ea in EntityAssessment.objects.filter(id__in=viewable_items).select_related(
-            "folder", "entity"
+        # `has_questions` and `progress` query per audit when read off the model.
+        frameworks_with_questions = set(
+            Question.objects.filter(
+                requirement_node__framework_id__in={
+                    audit.framework_id for audit in audits_by_id.values()
+                }
+            )
+            .values_list("requirement_node__framework_id", flat=True)
+            .distinct()
+        )
+        for audit in audits_by_id.values():
+            audit._has_questions = audit.framework_id in frameworks_with_questions
+        totals, assessed = ComplianceAssessmentViewSet.get_requirement_counts(
+            list(audits_by_id)
+        )
+
+        for ea in (
+            EntityAssessment.objects.filter(id__in=viewable_items)
+            .select_related("folder", "entity", "entity__tier")
+            .prefetch_related("solutions", "reviewers")
         ):
             audit = audits_by_id.get(ea.compliance_assessment_id)
             # Use entity assessment's folder for grouping
             folder = ea.folder
             entry = {
                 "entity_assessment_id": ea.id,
+                "entity_id": str(ea.entity_id),
                 "provider": ea.entity.name,
+                # The vendor's criticality, for context: the assessment itself
+                # measures posture, not criticality.
+                "tier": {
+                    "id": str(ea.entity.tier.id),
+                    "name": ea.entity.tier.name,
+                    "hexcolor": ea.entity.tier.hexcolor,
+                    "rank": ea.entity.tier.rank,
+                }
+                if ea.entity.tier_id
+                else None,
                 "folder_id": str(folder.id) if folder else None,
                 "folder_name": folder.name if folder else None,
                 "solutions": ",".join([sol.name for sol in ea.solutions.all()])
@@ -1434,18 +1708,274 @@ class EntityAssessmentViewSet(BaseModelViewSet):
             # `answers_progress` counted questions only: a framework without any read 0%.
             completion = (
                 compute_respondent_progress(
-                    audit, self._prefetched_requirement_assessments(audit)
+                    audit, assessable_requirement_assessments(audit)
                 )
                 if audit
                 else 0
             )
             entry.update({"completion": completion})
 
-            review_progress = audit.progress if audit else 0
+            review_progress = (
+                int(assessed.get(audit.id, 0) / totals[audit.id] * 100)
+                if audit and totals.get(audit.id)
+                else 0
+            )
             entry.update({"review_progress": review_progress})
+
+            # None, not an empty donut: no questionnaire, or one out of reach,
+            # is not a result.
+            entry["compliance_overview"] = (
+                overviews.get(ea.compliance_assessment_id)
+                if ea.compliance_assessment_id in viewable_audits
+                else None
+            )
             assessments_data.append(entry)
 
         return Response(assessments_data)
+
+
+class TierFedByMixin:
+    @action(detail=False, url_path="fed-by", name="Forms that set tiers")
+    def fed_by(self, request):
+        """Forms the caller can see whose accepted responses set a tier
+        (`?target=`, entity.tier by default), with what keeps them from
+        applying on this scale."""
+        from core.models import QuickForm
+        from core.quick_form_apply import on_accept_health
+        from iam.models import RoleAssignment
+
+        target = request.query_params.get("target") or "entity.tier"
+        viewable = RoleAssignment.get_viewable_object_ids(request.user, QuickForm)
+        rows = []
+        cache: dict = {}
+        for quick_form in (
+            QuickForm.objects.filter(id__in=viewable)
+            .exclude(on_accept=[])
+            .select_related("library")
+            .order_by("name")
+        ):
+            health = next(
+                (
+                    h
+                    for h in on_accept_health(quick_form, cache)
+                    if h["target"] == target
+                ),
+                None,
+            )
+            if health is None:
+                continue
+            rows.append(
+                {
+                    "id": str(quick_form.id),
+                    "name": quick_form.get_name_translated,
+                    "library": quick_form.library.name if quick_form.library else None,
+                    "problems": health["problems"],
+                }
+            )
+        return Response(rows)
+
+
+class TierViewSet(TierFedByMixin, BaseModelViewSet):
+    """The organisation's vendor tier scale, highest rank first."""
+
+    model = Tier
+    filterset_fields = ["is_visible", "builtin"]
+    search_fields = ["name", "description"]
+    ordering = ["-rank"]
+
+    def get_queryset(self):
+        # Counts cover what the viewer may read: the scale itself is global,
+        # the entities on it are not.
+        visible = RoleAssignment.get_viewable_object_ids(self.request.user, Entity)
+        qs = (
+            super()
+            .get_queryset()
+            .annotate(
+                entities_count=Count(
+                    "entities", filter=Q(entities__id__in=visible), distinct=True
+                ),
+                solutions_count=Count(
+                    "solutions",
+                    filter=Q(solutions__provider_entity_id__in=visible),
+                    distinct=True,
+                ),
+                # The history keeps a hard link to every tier it names: such a
+                # tier can be hidden, never deleted.
+                in_history=Exists(
+                    EntityTierChange.objects.filter(
+                        Q(tier=OuterRef("pk")) | Q(previous_tier=OuterRef("pk"))
+                    )
+                )
+                | Exists(
+                    SolutionTierChange.objects.filter(
+                        Q(tier=OuterRef("pk")) | Q(previous_tier=OuterRef("pk"))
+                    )
+                ),
+            )
+        )
+        # `?selectable=<tier id>`: what a picker may offer for an entity whose
+        # current tier is that one — the visible tiers plus the current tier even
+        # when hidden, so opening and saving the entity does not clear it.
+        if (selectable := self.request.query_params.get("selectable")) is not None:
+            try:
+                current = uuid.UUID(selectable) if selectable else None
+            except ValueError:
+                current = None
+            qs = qs.filter(Q(is_visible=True) | Q(id=current))
+        return qs
+
+    def destroy(self, request, *args, **kwargs):
+        """Say why a tier cannot go, instead of a bare integrity conflict.
+        Built-in tiers are refused by the base class (403) as before."""
+        tier = self.get_object()
+        if not tier.builtin:
+            # Not the annotated counts: those only cover what the caller sees.
+            if tier.entities.exists() or tier.solutions.exists():
+                return Response(
+                    {"error": "tierInUseCannotDelete"}, status=HTTP_409_CONFLICT
+                )
+            if tier.in_history:
+                return Response(
+                    {"error": "tierInHistoryCannotDelete"}, status=HTTP_409_CONFLICT
+                )
+        return super().destroy(request, *args, **kwargs)
+
+    @action(detail=False, methods=["post"], name="Reorder tiers")
+    def reorder(self, request):
+        """Takes every tier id, most critical first, and renumbers the ranks in
+        one transaction. Partial lists are refused: a rank left out would
+        collide with the renumbered ones."""
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="change_tier"),
+            folder=Folder.get_root_folder(),
+        ):
+            raise PermissionDenied()
+        raw_ids = request.data.get("ids")
+        if not isinstance(raw_ids, list):
+            return Response(
+                {"error": "idsMustListEveryTier"}, status=HTTP_400_BAD_REQUEST
+            )
+        ids = [str(i) for i in raw_ids]
+        existing = {str(pk) for pk in Tier.objects.values_list("id", flat=True)}
+        if len(ids) != len(set(ids)) or set(ids) != existing:
+            return Response(
+                {"error": "idsMustListEveryTier"}, status=HTTP_400_BAD_REQUEST
+            )
+        with transaction.atomic():
+            tiers = {str(t.id): t for t in Tier.objects.select_for_update()}
+            # Park every rank above the current maximum first, so no
+            # intermediate state violates the unique constraint (SQLite cannot
+            # defer it).
+            # `default`: an empty scale (or one emptied meanwhile) has no maximum.
+            offset = max((t.rank for t in tiers.values()), default=0) + len(ids)
+            for position, tier_id in enumerate(ids):
+                Tier.objects.filter(pk=tier_id).update(rank=offset + position + 1)
+            for position, tier_id in enumerate(ids):
+                Tier.objects.filter(pk=tier_id).update(rank=len(ids) - position)
+        from tprm.serializers import TierReadSerializer
+
+        return Response(
+            TierReadSerializer(
+                self.get_queryset().order_by("-rank"),
+                many=True,
+                context=self.get_serializer_context(),
+            ).data
+        )
+
+    @action(detail=False, methods=["get", "put"], name="Tier propagation")
+    def propagation(self, request):
+        """How solution tiers reach their provider: off, suggest or floor."""
+        from global_settings.models import GlobalSettings
+        from tprm.tiers import (
+            Propagation,
+            entities_below_floor,
+            propagation_mode,
+            raise_all_to_floor,
+        )
+
+        raised = 0
+        can_change = all(
+            RoleAssignment.is_access_allowed(
+                user=request.user,
+                perm=Permission.objects.get(codename=codename),
+                folder=Folder.get_root_folder(),
+            )
+            for codename in ("change_tier", "change_entity")
+        )
+        if request.method == "PUT":
+            if not can_change:
+                raise PermissionDenied()
+            mode = request.data.get("mode")
+            if mode not in Propagation.MODES:
+                return Response(
+                    {"error": "invalidPropagationMode"}, status=HTTP_400_BAD_REQUEST
+                )
+            row, _ = GlobalSettings.objects.get_or_create(
+                name=GlobalSettings.Names.TPRM,
+                defaults={"folder": Folder.get_root_folder()},
+            )
+            previous = propagation_mode()
+            with transaction.atomic():
+                row.value = {**(row.value or {}), "tier_propagation": mode}
+                row.save(update_fields=["value", "updated_at"])
+                # Switching the floor on raises the vendors already below it.
+                if mode == Propagation.FLOOR and previous != Propagation.FLOOR:
+                    raised = raise_all_to_floor(request.user)
+        # Counts every vendor: only for those who may switch the mode.
+        return Response(
+            {
+                "mode": propagation_mode(),
+                "below_floor": entities_below_floor().count() if can_change else None,
+                "raised": raised,
+            }
+        )
+
+
+class EntityTierChangeViewSet(BaseModelViewSet):
+    """History of tier changes. Written only by `set_entity_tier`."""
+
+    model = EntityTierChange
+    http_method_names = ["get", "head", "options"]
+    filterset_fields = ["entity", "tier", "source", "changed_by"]
+    ordering = ["-created_at"]
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                "entity__folder", "tier", "previous_tier", "changed_by", "response"
+            )
+        )
+
+    @action(detail=False, name="Get source choices")
+    def source(self, request):
+        return Response(dict(TierSource.choices))
+
+
+class SolutionTierChangeViewSet(BaseModelViewSet):
+    model = SolutionTierChange
+    http_method_names = ["get", "head", "options"]
+    filterset_fields = ["solution", "tier", "source", "changed_by"]
+    ordering = ["-created_at"]
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                "solution__provider_entity__folder",
+                "tier",
+                "previous_tier",
+                "changed_by",
+                "response",
+            )
+        )
+
+    @action(detail=False, name="Get source choices")
+    def source(self, request):
+        return Response(dict(TierSource.choices))
 
 
 class EntityScoreViewSet(BaseModelViewSet):
@@ -1539,12 +2069,49 @@ class RepresentativeViewSet(ExportMixin, BaseModelViewSet):
         return super().get_queryset().select_related("entity__folder")
 
 
+SOLUTION_FILTERSET_FIELDS = [
+    "name",
+    "ref_id",
+    "is_active",
+    "provider_entity",
+    "assets",
+    "criticality",
+    "tier",
+    "tier_source",
+    "contracts",
+    "owner",
+    "dora_ict_service_type",
+    "storage_of_data",
+    "data_location_storage",
+    "data_location_processing",
+    "dora_data_sensitiveness",
+    "dora_reliance_level",
+    "dora_substitutability",
+    "dora_non_substitutability_reason",
+    "dora_has_exit_plan",
+    "dora_reintegration_possibility",
+    "dora_discontinuing_impact",
+    "dora_alternative_providers_identified",
+    "filtering_labels",
+]
+
+
+class SolutionFilterSet(GenericFilterSet):
+    # "--" lists the solutions not tiered yet.
+    tier = NullableModelChoiceFilter(queryset=Tier.objects.all())
+
+    class Meta:
+        model = Solution
+        fields = SOLUTION_FILTERSET_FIELDS
+
+
 class SolutionViewSet(ExportMixin, BaseModelViewSet):
     """
     API endpoint that allows solutions to be viewed or edited.
     """
 
     model = Solution
+
     export_config = {
         "filename": "solutions_export",
         "fields": {
@@ -1570,33 +2137,43 @@ class SolutionViewSet(ExportMixin, BaseModelViewSet):
         "select_related": ["provider_entity"],
         "wrap_columns": ["name", "description"],
     }
-    filterset_fields = [
-        "name",
-        "ref_id",
-        "is_active",
-        "provider_entity",
-        "assets",
-        "criticality",
-        "contracts",
-        "owner",
-        "dora_ict_service_type",
-        "storage_of_data",
-        "data_location_storage",
-        "data_location_processing",
-        "dora_data_sensitiveness",
-        "dora_reliance_level",
-        "dora_substitutability",
-        "dora_non_substitutability_reason",
-        "dora_has_exit_plan",
-        "dora_reintegration_possibility",
-        "dora_discontinuing_impact",
-        "dora_alternative_providers_identified",
-        "filtering_labels",
-    ]
+    filterset_class = SolutionFilterSet
+    filterset_fields = SOLUTION_FILTERSET_FIELDS
+    ordering_remap = {
+        "provider_entity": "provider_entity__name",
+        "tier": "tier__rank",
+    }
+    ordering_nulls_last = ("tier__rank",)
+
+    def get_autocomplete_serializer_class(self):
+        from tprm.serializers import SolutionAutocompleteSerializer
+
+        return SolutionAutocompleteSerializer
 
     def get_queryset(self):
         # folder is serialized via source="provider_entity.folder"; pull it in one join
-        return super().get_queryset().select_related("provider_entity__folder")
+        if self.action == "autocomplete":
+            return super().get_queryset().select_related("provider_entity__folder")
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                "provider_entity__folder", "recipient_entity", "tier", "tier_response"
+            )
+            .prefetch_related(
+                "assets",
+                "contracts",
+                actor_prefetch("owner"),
+                # The nested serializer reads subcontractor and recipient on every
+                # chain row: join them in the prefetch query.
+                Prefetch(
+                    "subcontracting_chain",
+                    queryset=SolutionSubcontractor.objects.select_related(
+                        "subcontractor", "recipient"
+                    ),
+                ),
+            )
+        )
 
     @action(detail=False, name="Get data location storage choices")
     def data_location_storage(self, request):
@@ -1715,6 +2292,8 @@ class ContractViewSet(ExportMixin, BaseModelViewSet):
         "notice_period_entity",
         "notice_period_provider",
         "end_date",
+        "start_date",
+        "filtering_labels",
     ]
 
     @action(detail=False, name="Get status choices")

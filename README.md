@@ -103,14 +103,14 @@ The docker compose file can be adjusted to pass extra parameters to suit your se
 
 <!-- FEATURES:START -->
 <details>
-<summary><strong>📋 Full feature list</strong> — click to expand (searchable, 59 features)</summary>
+<summary><strong>📋 Full feature list</strong> — click to expand (searchable, 73 features)</summary>
 
 **Compliance & frameworks**
 - Audit and campaigns management
 - Automatic mapping
 - Mapping explorer
 - Custom frameworks supported
-- +200 frameworks included
+- +220 frameworks included
 - Policies management
 - Document management
 - Evidence management
@@ -118,14 +118,21 @@ The docker compose file can be adjusted to pass extra parameters to suit your se
 **Risk management**
 - Risk assessments and registers
 - EBIOS RM module
+- Threat modeling
 - Risk acceptance workflows
 - Business Impact Analysis
 - Cyber Risk Quantification
+- Risk trajectory & projection
 - Vulnerability management
 - Vulnerability enrichment
+- Security advisories & CWE
+- TTP catalogs
 
 **Third-party risk**
 - Third-party risk management
+- Contracts management
+- DORA register of information
+- External security ratings
 
 **Operations & remediation**
 - Action plan tracking and prioritization
@@ -138,6 +145,7 @@ The docker compose file can be adjusted to pass extra parameters to suit your se
 - Technical posture management
 - Exceptions tracking
 - Incidents management
+- DORA incident reporting
 - Validation & approval flows
 - Email reminders
 
@@ -147,19 +155,25 @@ The docker compose file can be adjusted to pass extra parameters to suit your se
 - Automated quality checks
 - Advanced insights
 - Custom metrics tracking
+- Power BI connector
 
 **Collaboration & productivity**
 - Assignments & respondent mode
+- Requests management
+- Quick forms
 - Comments & collaboration
 - Universal search
 - Command palette
+- In-app notifications center
 
 **Automation & integrations**
+- Workflow automation
 - Comprehensive REST API
 - CLI for automation
 - Data import wizard
 - Kafka integration
 - MCP support
+- AI assistant with RAG
 - Outgoing webhooks
 - Jira & ServiceNow integrations
 - Consultant features (e.g. single-domain export/import)
@@ -184,7 +198,7 @@ The docker compose file can be adjusted to pass extra parameters to suit your se
 - Multi-level domains
 - Kubernetes (Helm) deployment
 - Open Source
-- Available in +26 languages
+- Available in +27 languages
 
 </details>
 <!-- FEATURES:END -->
@@ -241,7 +255,7 @@ Read more here: [AI engine](backend/chat/README.md)
 7. CMMC v2 🇺🇸
 8. PSPF 🇦🇺
 9. General Data Protection Regulation (GDPR): Full text and checklist from GDPR.EU 🇪🇺
-10. Essential Eight 🇦🇺
+10. Essential Eight (Maturity Model, November 2023) 🇦🇺
 11. NYDFS 500 with 2023-11 amendments 🇺🇸
 12. DORA (Act, RTS, ITS and GL) 🇪🇺
 13. NIST AI Risk Management Framework 🇺🇸🤖
@@ -279,7 +293,7 @@ Read more here: [AI engine](backend/chat/README.md)
 45. EU AI Act 🇪🇺🤖
 46. FBI CJIS 🇺🇸👮
 47. Operational Technology Cybersecurity Controls (OTCC) 🇸🇦
-48. Secure Controls Framework (SCF) 🇺🇸🌐
+48. Secure Controls Framework (SCF) 2026.3 🇺🇸🌐
 49. NCSC - Cyber Assessment Framework (CAF) v3.2 🇬🇧
 50. California Consumer Privacy Act (CCPA) 🇺🇸
 51. California Consumer Privacy Act Regulations 🇺🇸
@@ -290,7 +304,7 @@ Read more here: [AI engine](backend/chat/README.md)
 56. Korea ISA ISMS-P 🇰🇷
 57. Swiss ICT minimum standard 🇨🇭
 58. Adobe Common Controls Framework (CCF) v5 🌐
-59. BSI Cloud Computing Compliance Criteria Catalogue (C5) 🇩🇪
+59. BSI Cloud Computing Compliance Criteria Catalogue (C5) 2020 and 2026 🇩🇪
 60. Référentiel d’Audit de la Sécurité des Systèmes d’Information, ANCS Tunisie 🇹🇳
 61. ECB Cyber resilience oversight expectations for financial market infrastructures 🇪🇺
 62. Mindeststandard-des-BSI-zur-Nutzung-externer-Cloud-Dienste (Version 2.1) 🇩🇪
@@ -358,6 +372,10 @@ Read more here: [AI engine](backend/chat/README.md)
 124. ISO 27701:2025 outline - Privacy Information Management System, including Annex A 🌐
 125. Plumber CI/CD Security Checks 🖥️
 126. UNESCO AI Maturity Framework 🤖🌐
+127. OWASP Top 10 for Agentic Applications 2026 🐝🤖
+128. Personal Information Protection Law (PIPL) 🇨🇳
+129. Personal Information Protection Compliance Audit Measures and Guideline (CAC) 🇨🇳
+130. OWASP Software Assurance Maturity Model (SAMM) v2.2 🐝🖥️
 
 ### Community contributions
 
@@ -399,6 +417,9 @@ Read more here: [AI engine](backend/chat/README.md)
 36. NCA NCNICC-1:2025 🇸🇦
 37. NCA ECC-2:2024 🇸🇦
 38. NCA CCC-1:2020 🇸🇦
+39. Hungarian NIS2 audit requirements – elementary requirements of 1/2025. (I. 31.) SZTFH rendelet, structured by the 7/2024. (VI. 24.) MK rendelet protective measures 🇭🇺
+40. Hungarian NIS2 threat catalogue (7/2024. (VI. 24.) MK rendelet, annex 3) 🇭🇺
+41. Hungarian NIS2 protective measures catalogue (7/2024. (VI. 24.) MK rendelet, annex 2) 🇭🇺
 
 <br/>
 
@@ -412,7 +433,6 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 ### Coming soon
 
 - Indonesia PDP 🇮🇩
-- OWASP SAMM
 - COBAC R-2024/01
 - ICO Data protection self-assessment 🇬🇧
 - ASD ISM 🇦🇺
@@ -563,7 +583,7 @@ export DJANGO_DEBUG=True
 # Default url is set to http://localhost:5173 but you can change it, e.g. to use https with a caddy proxy
 export CISO_ASSISTANT_URL=https://localhost:8443
 
-# Setup a development mailer with Mailhog for example
+# Setup a development mailer with Mailpit for example
 export EMAIL_HOST_USER=''
 export EMAIL_HOST_PASSWORD=''
 export DEFAULT_FROM_EMAIL=ciso-assistant@ciso-assistantcloud.com
@@ -868,7 +888,7 @@ The following recommendations apply for production:
   - `/api/accounts/saml/0/acs/`
   - `/api/accounts/saml/0/acs/finish/`
   - `/api/accounts/oidc/openid_connect/login/callback/`
-  - `/api/iam/sso/logout/`
+  - `/api/accounts/saml/0/sls/` (only with SAML single logout enabled)
 - Use non-root deployment, as explained below.
 - Use a valid certificate for the reverse proxy
 - If the reverse proxy is not running on the same host as the backend and frontend, use a VPN like wireguard between the nodes.
@@ -907,18 +927,29 @@ Reference is `en.json`; coverage = share of reference keys present in each local
 
 ## Built With 💜
 
-- [Django](https://www.djangoproject.com/) - Python Web Development Framework
-- [SvelteKit](https://kit.svelte.dev/) - Frontend Framework
-- [eCharts](https://echarts.apache.org) - Charting library
-- [unovis](https://unovis.dev) - Complementary charting library
-- [Gunicorn](https://gunicorn.org/) - Python WSGI HTTP Server for UNIX
 - [Caddy](https://caddyserver.com) - The coolest reverse Proxy
-- [Gitbook](https://www.gitbook.com) - Documentation platform
-- [PostgreSQL](https://www.postgresql.org/) - Open Source RDBMS
-- [SQLite](https://www.sqlite.org/index.html) - Open Source RDBMS
+- [Django](https://www.djangoproject.com/) - Python Web Development Framework
+- [Django REST Framework](https://www.django-rest-framework.org/) - Toolkit for building Web APIs
+- [django-allauth](https://allauth.org/) - Authentication, MFA and SSO
 - [Docker](https://www.docker.com/) - Container Engine
-- [inlang](https://inlang.com/) - The ecosystem to globalize your software
+- [eCharts](https://echarts.apache.org) - Charting library
+- [Font Awesome](https://fontawesome.com) - Icons
+- [Gitbook](https://www.gitbook.com) - Documentation platform
+- [Gunicorn](https://gunicorn.org/) - Python WSGI HTTP Server for UNIX
 - [Huey](https://huey.readthedocs.io/en/latest/) - A lightweight task queue
+- [inlang](https://inlang.com/) - The ecosystem to globalize your software
+- [PostgreSQL](https://www.postgresql.org/) - Open Source RDBMS
+- [Qdrant](https://qdrant.tech) - Vector database powering the AI features
+- [Sentence Transformers](https://sbert.net) - Embeddings for semantic search
+- [Skeleton](https://www.skeleton.dev) - UI toolkit for Svelte and Tailwind
+- [SQLite](https://www.sqlite.org/index.html) - Open Source RDBMS
+- [Svelte](https://svelte.dev) & [SvelteKit](https://svelte.dev/docs/kit) - Frontend Framework
+- [Svelte Flow](https://svelteflow.dev) - Node-based graph editors
+- [Tailwind CSS](https://tailwindcss.com) - Utility-first CSS framework
+- [Typst](https://typst.app) - The new foundation for documents
+- [unovis](https://unovis.dev) - Complementary charting library
+- [Vite](https://vite.dev) - Frontend build tool
+- [WeasyPrint](https://weasyprint.org/) - HTML to PDF rendering
 
 ## Security
 

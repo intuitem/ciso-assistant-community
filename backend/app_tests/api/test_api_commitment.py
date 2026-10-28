@@ -10,6 +10,7 @@ from core.models import (
     Commitment,
     Finding,
     FindingsAssessment,
+    TaskNode,
     TaskTemplate,
 )
 from global_settings.models import GlobalSettings
@@ -600,6 +601,13 @@ class TestTaskAnalytics:
         task = TaskTemplate.objects.create(
             name="Retest", folder=setup["domain"], task_date="2020-01-01"
         )
+        # The occurrence the editor creates with a one-time task, still open.
+        TaskNode.objects.create(
+            task_template=task,
+            due_date="2020-01-01",
+            scheduled_date="2020-01-01",
+            folder=setup["domain"],
+        )
         task.findings_assessment.set([binder])
         task.assigned_to.set([setup["owner_actor"]])
         TaskTemplate.objects.create(name="Elsewhere", folder=setup["domain"])
@@ -729,8 +737,8 @@ class TestRegister:
         `transition_commitment` that was refused here got a panel claiming
         "not started" next to a commitment row saying otherwise.
 
-        On a task template rather than a control: `is_published` is False there, so
-        the permission layer does not short-circuit GET to a readability check.
+        Uses a task template rather than a control so the read is decided by the
+        caller's own role on the domain, not by any ambient visibility.
         """
         domain = setup["domain"]
         task = TaskTemplate.objects.create(name="Read me", folder=domain)

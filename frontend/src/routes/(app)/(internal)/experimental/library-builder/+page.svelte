@@ -1,9 +1,13 @@
 <script lang="ts">
-	import { pageTitle } from '$lib/utils/stores';
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { pageTitle } from '#lib/utils/stores.js';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { defaultMatrixObject, identitySlug } from './builder-helpers';
-	import { getToastStore } from '$lib/components/Toast/stores';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import { defaults, superForm } from 'sveltekit-superforms';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
+	import { z } from 'zod';
 
 	$pageTitle = m.lbListLibraryBuilder();
 
@@ -98,6 +102,31 @@
 
 	// --- Adopt -------------------------------------------------------------
 	let adoptSource = $state('');
+	const adoptSchema = z.object({ source: z.string().optional() });
+	const adoptForm = superForm(defaults(zod(adoptSchema)), {
+		SPA: true,
+		validators: zod(adoptSchema),
+		dataType: 'json',
+		invalidateAll: false,
+		applyAction: false,
+		resetForm: false,
+		taintedMessage: false
+	});
+	const adoptOptions = [
+		...customLibraries.map((library) => ({
+			label: `${library.name} (v${library.version})`,
+			value: 'library:' + library.id
+		})),
+		...orphanFrameworks.map((framework) => ({
+			label: framework.name,
+			value: 'framework:' + framework.id,
+			infoString: {
+				string: m.framework(),
+				position: 'suffix' as const,
+				classes: 'text-surface-500'
+			}
+		}))
+	];
 	let adopting = $state(false);
 
 	async function adoptLibrary() {
@@ -137,7 +166,30 @@
 	// name and deduped against the corpus. The wrapping library is minted
 	// behind the scenes and the user lands straight in the object's editor.
 	const PACKAGER_KEY = 'library-builder:packager';
-	let quickKind: 'framework' | 'matrix' | null = $state(null);
+	type QuickKind = 'framework' | 'matrix' | 'quick_form';
+	// The kind also *is* the URN type token (see URN_TYPE_TOKENS in library/builder.py),
+	// so the preview below can interpolate it directly.
+	const QUICK_COPY: Record<
+		QuickKind,
+		{ label: () => string; placeholder: () => string; help: () => string }
+	> = {
+		framework: {
+			label: m.lbListFrameworkName,
+			placeholder: m.lbListFrameworkNamePlaceholder,
+			help: m.lbListQuickHelpFramework
+		},
+		matrix: {
+			label: m.lbListMatrixName,
+			placeholder: m.lbListMatrixNamePlaceholder,
+			help: m.lbListQuickHelpMatrix
+		},
+		quick_form: {
+			label: m.lbListQuickFormName,
+			placeholder: m.lbListQuickFormNamePlaceholder,
+			help: m.lbListQuickHelpQuickForm
+		}
+	};
+	let quickKind: QuickKind | null = $state(null);
 	let quickName = $state('');
 	let quickPackager = $state('');
 	let quickCreating = $state(false);
@@ -158,7 +210,7 @@
 		}
 	}
 
-	function openQuick(kind: 'framework' | 'matrix') {
+	function openQuick(kind: QuickKind) {
 		quickKind = quickKind === kind ? null : kind;
 		showCreate = false;
 		if (!quickPackager) quickPackager = rememberedPackager() || data.defaultPackager;
@@ -200,7 +252,19 @@
 				throw new Error(created.error ? safeTranslate(created.error) : JSON.stringify(created));
 			const draftBase = `/experimental/library-builder/${created.id}`;
 
-			if (kind === 'framework') {
+			if (kind === 'quick_form') {
+				const res = await fetch(draftBase, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ action: 'add-quick-form', name: quickName, ref_id: refId })
+				});
+				const result = await res.json();
+				if (!res.ok)
+					throw new Error(result.error ? safeTranslate(result.error) : JSON.stringify(result));
+				window.location.href = `${draftBase}/quick-form?quick_form_urn=${encodeURIComponent(
+					result.quick_form_urn
+				)}`;
+			} else if (kind === 'framework') {
 				const res = await fetch(draftBase, {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
@@ -256,7 +320,8 @@
 		risk_matrices: m.lbCountRiskMatrices,
 		requirement_mapping_sets: m.lbCountRequirementMappingSets,
 		metric_definitions: m.lbCountMetricDefinitions,
-		preset: m.lbCountPreset
+		preset: m.lbCountPreset,
+		quick_forms: m.lbCountQuickForms
 	};
 
 	function objectsSummary(draft: any): string {
@@ -278,7 +343,7 @@
 			{m.lbListIntro()}
 		</p>
 		<div class="flex flex-wrap items-center justify-between gap-4">
-			<div class="flex items-center gap-2">
+			<div class="flex flex-wrap items-center gap-2">
 				<button
 					type="button"
 					class="btn btn-sm bg-primary-500 text-white hover:bg-primary-600 transition-colors"
@@ -294,6 +359,14 @@
 				>
 					<i class="fa-solid fa-table-cells mr-1"></i>
 					{m.lbListNewMatrix()}
+				</button>
+				<button
+					type="button"
+					class="btn btn-sm bg-primary-500 text-white hover:bg-primary-600 transition-colors"
+					onclick={() => openQuick('quick_form')}
+				>
+					<i class="fa-solid fa-clipboard-question mr-1"></i>
+					{m.lbListNewQuickForm()}
 				</button>
 				<button
 					type="button"
@@ -326,25 +399,17 @@
 					/>
 				</label>
 				{#if customLibraries.length > 0 || orphanFrameworks.length > 0}
-					<select class="select w-64 text-sm" bind:value={adoptSource}>
-						<option value="">{m.lbListAdoptPlaceholder()}</option>
-						{#if customLibraries.length > 0}
-							<optgroup label={m.lbListCustomLibraries()}>
-								{#each customLibraries as library}
-									<option value={'library:' + library.id}>
-										{library.name} (v{library.version})
-									</option>
-								{/each}
-							</optgroup>
-						{/if}
-						{#if orphanFrameworks.length > 0}
-							<optgroup label={m.lbListCustomFrameworksNoLibrary()}>
-								{#each orphanFrameworks as framework}
-									<option value={'framework:' + framework.id}>{framework.name}</option>
-								{/each}
-							</optgroup>
-						{/if}
-					</select>
+					<div class="w-full sm:w-[28rem]">
+						<AutocompleteSelect
+							form={adoptForm}
+							field="source"
+							options={adoptOptions}
+							translateOptions={false}
+							placeholder={m.lbListAdoptPlaceholder()}
+							portalDropdown={true}
+							onChange={(value) => (adoptSource = value ?? '')}
+						/>
+					</div>
 					<button
 						type="button"
 						class="btn btn-sm preset-outlined-primary-500"
@@ -365,15 +430,13 @@
 		{#if quickKind}
 			<div class="mt-4 border-t border-surface-200-800 pt-4 grid grid-cols-1 md:grid-cols-4 gap-3">
 				<label class="label text-sm">
-					<span>{quickKind === 'framework' ? m.lbListFrameworkName() : m.lbListMatrixName()}</span>
+					<span>{QUICK_COPY[quickKind].label()}</span>
 					<!-- svelte-ignore a11y_autofocus -->
 					<input
 						class="input placeholder:text-surface-500"
 						type="text"
 						bind:value={quickName}
-						placeholder={quickKind === 'framework'
-							? m.lbListFrameworkNamePlaceholder()
-							: m.lbListMatrixNamePlaceholder()}
+						placeholder={QUICK_COPY[quickKind].placeholder()}
 						autofocus
 						onkeydown={(e) => e.key === 'Enter' && createQuick()}
 					/>
@@ -415,7 +478,7 @@
 						</p>
 					{/if}
 					<p class="text-surface-500">
-						{quickKind === 'framework' ? m.lbListQuickHelpFramework() : m.lbListQuickHelpMatrix()}
+						{QUICK_COPY[quickKind].help()}
 					</p>
 				</div>
 			</div>
@@ -513,7 +576,7 @@
 							<th>{m.version()}</th>
 							<th>{m.lbListContents()}</th>
 							<th>{m.status()}</th>
-							<th class="w-40"></th>
+							<th></th>
 						</tr>
 					</thead>
 					<tbody>
@@ -544,22 +607,24 @@
 										</span>
 									{/if}
 								</td>
-								<td class="space-x-1">
-									<a
-										href="/experimental/library-builder/{draft.id}"
-										class="btn btn-sm preset-filled-primary-500"
-									>
-										<i class="fa-solid fa-pen-to-square mr-1"></i>
-										{m.edit()}
-									</a>
-									<button
-										type="button"
-										class="btn btn-sm preset-outlined-error-500"
-										onclick={() => deleteDraft(draft)}
-										aria-label={m.lbListDeleteDraft()}
-									>
-										<i class="fa-solid fa-trash"></i>
-									</button>
+								<td>
+									<div class="flex items-center justify-end gap-1 whitespace-nowrap">
+										<a
+											href="/experimental/library-builder/{draft.id}"
+											class="btn btn-sm preset-filled-primary-500"
+										>
+											<i class="fa-solid fa-pen-to-square mr-1"></i>
+											{m.edit()}
+										</a>
+										<button
+											type="button"
+											class="btn btn-sm preset-outlined-error-500 text-error-500 hover:preset-filled-error-500"
+											onclick={() => deleteDraft(draft)}
+											aria-label={m.lbListDeleteDraft()}
+										>
+											<i class="fa-solid fa-trash"></i>
+										</button>
+									</div>
 								</td>
 							</tr>
 						{/each}

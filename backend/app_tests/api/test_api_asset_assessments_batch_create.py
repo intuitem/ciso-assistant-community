@@ -15,7 +15,7 @@ BATCH_ACTION_URL = "/api/resilience/asset-assessments/batch-action/"
 
 
 def client_for(email, group_name, folder):
-    user = User.objects.create_user(email, is_published=True)
+    user = User.objects.create_user(email)
     group = UserGroup.objects.get(name=group_name, folder=folder)
     user.folder = group.folder
     user.save()
@@ -32,7 +32,7 @@ def client_with_role(email, folder, codenames):
     Include "view_folder": the IAM walk skipped (in the past) assignments whose role can't see
     folders at all.
     """
-    user = User.objects.create_user(email, is_published=True)
+    user = User.objects.create_user(email)
     role = Role.objects.create(name=f"role-{email}", folder=Folder.get_root_folder())
     role.permissions.set(Permission.objects.filter(codename__in=codenames))
     ra = RoleAssignment.objects.create(

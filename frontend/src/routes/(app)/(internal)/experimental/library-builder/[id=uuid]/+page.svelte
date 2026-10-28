@@ -1,12 +1,16 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { pageTitle } from '$lib/utils/stores';
+	import { pageTitle } from '#lib/utils/stores.js';
 	import { defaultMatrixObject } from '../builder-helpers';
 	import TranslationsEditor from '../TranslationsEditor.svelte';
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { createCopyHandler } from '$lib/components/FrameworkBuilder/builder-utils.svelte';
-	import { getToastStore } from '$lib/components/Toast/stores';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { createCopyHandler } from '#lib/components/FrameworkBuilder/builder-utils.svelte.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import { defaults, superForm } from 'sveltekit-superforms';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
+	import { z } from 'zod';
 
 	const toastStore = getToastStore();
 
@@ -19,6 +23,7 @@
 
 	const OBJECT_TYPES = [
 		'frameworks',
+		'quick_forms',
 		'threats',
 		'reference_controls',
 		'risk_matrices',
@@ -31,6 +36,7 @@
 	// by the message). Unknown keys fall back to the raw key.
 	const OBJECT_LABELS: Record<string, (args: { count: number }) => string> = {
 		frameworks: m.lbCountFrameworks,
+		quick_forms: m.lbCountQuickForms,
 		threats: m.lbCountThreats,
 		reference_controls: m.lbCountReferenceControls,
 		risk_matrices: m.lbCountRiskMatrices,
@@ -41,6 +47,7 @@
 
 	const OBJECT_ICONS: Record<string, string> = {
 		frameworks: 'fa-sitemap',
+		quick_forms: 'fa-clipboard-question',
 		threats: 'fa-bolt',
 		reference_controls: 'fa-shield-halved',
 		risk_matrices: 'fa-table-cells',
@@ -190,6 +197,30 @@
 
 	// --- Import objects (clone / selective extraction) ----------------------
 	let importSource = $state('');
+	const importSchema = z.object({ source: z.string().optional() });
+	const importForm = superForm(defaults(zod(importSchema)), {
+		SPA: true,
+		validators: zod(importSchema),
+		dataType: 'json',
+		invalidateAll: false,
+		applyAction: false,
+		resetForm: false,
+		taintedMessage: false
+	});
+	const importOptions = [
+		...storedLibraries.map((library) => ({
+			label: `${library.name} (v${library.version})`,
+			value: library.id,
+			infoString: library.builtin
+				? { string: m.builtin(), position: 'suffix' as const, classes: 'text-surface-500' }
+				: undefined
+		})),
+		...otherDrafts.map((other) => ({
+			label: other.name,
+			value: 'draft:' + other.id,
+			infoString: { string: m.draft(), position: 'suffix' as const, classes: 'text-surface-500' }
+		}))
+	];
 	let importTypes: string[] = $state([]);
 	let importPolicy = $state('strip');
 	let importOverwrite = $state(false);
@@ -400,7 +431,7 @@
 	}
 
 	// Kinds the builder allows at most one of per library.
-	const SINGLE_KINDS = ['frameworks', 'risk_matrices', 'preset'];
+	const SINGLE_KINDS = ['frameworks', 'quick_forms', 'risk_matrices', 'preset'];
 	function singleKindFull(type: string): boolean {
 		return SINGLE_KINDS.includes(type) && objectCount(type) > 0;
 	}
@@ -415,6 +446,7 @@
 		const populated = OBJECT_TYPES.filter((type) => objectCount(type) > 0);
 		if (populated.length !== 1) return null;
 		if (populated[0] === 'frameworks' && objectCount('frameworks') === 1) return 'framework';
+		if (populated[0] === 'quick_forms' && objectCount('quick_forms') === 1) return 'quick_form';
 		if (populated[0] === 'risk_matrices' && objectCount('risk_matrices') === 1) return 'matrix';
 		return null;
 	});
@@ -430,6 +462,8 @@
 
 	// --- Visual framework editor -----------------------------------------------
 	let frameworks = $derived((draft.content?.frameworks ?? []) as any[]);
+	let quickForms = $derived((draft.content?.quick_forms ?? []) as any[]);
+	let addingQuickForm = $state(false);
 	let addingFramework = $state(false);
 
 	// --- Leaf object editors (threats, reference controls) ----------------------
@@ -473,7 +507,7 @@
 						}
 					: {})
 			},
-			translations: { ...(item?.translations ?? {}) }
+			translations: { ...item?.translations }
 		};
 	}
 
@@ -602,6 +636,29 @@
 		return `/experimental/library-builder/${draft.id}/framework?framework_urn=${encodeURIComponent(
 			framework.urn
 		)}`;
+	}
+
+	function quickFormEditorHref(quickForm: any): string {
+		return `/experimental/library-builder/${draft.id}/quick-form?quick_form_urn=${encodeURIComponent(
+			quickForm.urn
+		)}`;
+	}
+
+	async function addQuickForm() {
+		addingQuickForm = true;
+		try {
+			const res = await fetch(base(), {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ action: 'add-quick-form' })
+			});
+			const result = await res.json();
+			if (!res.ok) throw new Error(result.error || JSON.stringify(result));
+			window.location.href = quickFormEditorHref({ urn: result.quick_form_urn });
+		} catch (e: any) {
+			setStatus(safeTranslate(e.message), 'error');
+			addingQuickForm = false;
+		}
 	}
 
 	async function addFramework() {
@@ -956,27 +1013,15 @@
 					<p class="text-xs text-surface-500">
 						{m.lbDraftImportObjectsHelp()}
 					</p>
-					<select class="select text-sm" bind:value={importSource}>
-						<option value="">{m.lbDraftSourceLibrary()}</option>
-						{#if storedLibraries.length > 0}
-							<optgroup label={m.lbDraftStoredLibraries()}>
-								{#each storedLibraries as library}
-									<option value={library.id}>
-										{library.name} (v{library.version}){library.builtin
-											? m.lbDraftBuiltinSuffix()
-											: ''}
-									</option>
-								{/each}
-							</optgroup>
-						{/if}
-						{#if otherDrafts.length > 0}
-							<optgroup label={m.lbDraftYourDrafts()}>
-								{#each otherDrafts as other}
-									<option value={'draft:' + other.id}>{other.name}</option>
-								{/each}
-							</optgroup>
-						{/if}
-					</select>
+					<AutocompleteSelect
+						form={importForm}
+						field="source"
+						options={importOptions}
+						translateOptions={false}
+						placeholder={m.lbDraftSourceLibrary()}
+						portalDropdown={true}
+						onChange={(value) => (importSource = value ?? '')}
+					/>
 					<div class="flex flex-wrap gap-3 text-sm">
 						{#each OBJECT_TYPES as type}
 							{@const atLimit = singleKindFull(type)}
@@ -1117,6 +1162,78 @@
 						{#if addingFramework}<i class="fa-solid fa-spinner fa-spin mr-1" aria-hidden="true"
 							></i>{:else}<i class="fa-solid fa-plus mr-1" aria-hidden="true"></i>{/if}
 						{m.addFramework()}
+					</button>
+				</div>
+			{/if}
+		</div>
+	{/if}
+
+	<!-- Quick forms: visual editor entry points -->
+	{#if view === 'full' || primaryKind === 'quick_form'}
+		<div class="card p-4 space-y-3">
+			<h3
+				class="text-xs font-semibold uppercase tracking-wider text-surface-500 flex items-center gap-1.5"
+			>
+				<i class="fa-solid fa-clipboard-question" aria-hidden="true"></i>{m.quickForm()}
+			</h3>
+			{#if quickForms.length > 0}
+				<ul class="space-y-2">
+					{#each quickForms as quickForm}
+						<li
+							class="flex items-center justify-between gap-3 p-3 rounded-lg border border-surface-200-800 hover:border-primary-300 dark:hover:border-primary-500/50 transition-colors"
+						>
+							<div class="flex items-center gap-3 min-w-0">
+								<span
+									class="shrink-0 w-9 h-9 rounded-lg bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-400 flex items-center justify-center"
+								>
+									<i class="fa-solid fa-clipboard-question" aria-hidden="true"></i>
+								</span>
+								<div class="min-w-0">
+									<p class="font-medium truncate">{quickForm.name || quickForm.ref_id}</p>
+									<p class="text-xs font-mono text-surface-500 truncate">{quickForm.urn}</p>
+									<p class="text-xs text-surface-500">
+										{m.lbDraftPageCount({ count: (quickForm.pages ?? []).length })}
+									</p>
+								</div>
+							</div>
+							<div class="flex items-center gap-1 shrink-0">
+								<a
+									href={quickFormEditorHref(quickForm)}
+									class="btn btn-sm preset-filled-primary-500"
+								>
+									<i class="fa-solid fa-pen-to-square mr-1" aria-hidden="true"></i>
+									{m.lbDraftEditVisually()}
+								</a>
+								<button
+									type="button"
+									class="btn btn-sm preset-outlined-error-500"
+									onclick={() => deleteObject(quickForm)}
+									aria-label={m.delete()}
+								>
+									<i class="fa-solid fa-trash"></i>
+								</button>
+							</div>
+						</li>
+					{/each}
+				</ul>
+			{:else}
+				<div
+					class="border border-dashed border-surface-300-700 rounded-lg py-8 px-4 flex flex-col items-center gap-3 text-center"
+				>
+					<i class="fa-solid fa-clipboard-question text-2xl text-surface-300-700" aria-hidden="true"
+					></i>
+					<p class="text-sm text-surface-500 max-w-md">
+						{m.lbDraftNoQuickForm()}
+					</p>
+					<button
+						type="button"
+						class="btn btn-sm preset-filled-primary-500"
+						onclick={addQuickForm}
+						disabled={addingQuickForm}
+					>
+						{#if addingQuickForm}<i class="fa-solid fa-spinner fa-spin mr-1" aria-hidden="true"
+							></i>{:else}<i class="fa-solid fa-plus mr-1" aria-hidden="true"></i>{/if}
+						{m.addQuickForm()}
 					</button>
 				</div>
 			{/if}
@@ -1503,7 +1620,9 @@
 		<p class="text-xs text-surface-500 text-center">
 			{primaryKind === 'framework'
 				? m.lbDraftSimpleViewPackagedFramework({ urn: draft.urn })
-				: m.lbDraftSimpleViewPackagedMatrix({ urn: draft.urn })}
+				: primaryKind === 'quick_form'
+					? m.lbDraftSimpleViewPackagedQuickForm({ urn: draft.urn })
+					: m.lbDraftSimpleViewPackagedMatrix({ urn: draft.urn })}
 		</p>
 	{/if}
 </div>

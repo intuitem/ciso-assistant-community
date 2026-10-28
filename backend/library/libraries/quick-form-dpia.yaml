@@ -1,0 +1,992 @@
+urn: urn:intuitem:risk:library:dpia
+locale: en
+ref_id: dpia
+name: Data protection impact assessment (DPIA)
+description: 'A DPIA following the structure of the CNIL PIA method: context, core principles, risks to
+  data subjects and validation. Accepting a response records it as the processing''s DPIA and adds the
+  measures it picks to the processing.'
+copyright: © intuitem
+version: 8
+publication_date: '2026-10-28'
+provider: intuitem
+packager: intuitem
+objects:
+  quick_forms:
+  - urn: urn:intuitem:risk:quick_form:dpia
+    ref_id: dpia
+    name: DPIA
+    description: Data protection impact assessment of a processing.
+    ref_id_prefix: DPIA
+    subject_question_urn: urn:intuitem:risk:qf_page:dpia:overview:question:processing
+    on_accept:
+    - target: processing.dpia
+      config: {}
+    - target: processing.controls
+      config: {}
+    scales_definition:
+    - ref_id: severity
+      label: Severity
+      translations:
+        fr:
+          label: Gravité
+        it:
+          label: 'Gravità'
+      levels:
+      - ref_id: negligible
+        label: Negligible
+        description: Data subjects are not affected, or face minor inconveniences they overcome without
+          difficulty.
+        translations:
+          fr:
+            label: Négligeable
+            description: Les personnes ne sont pas impactées ou subissent des désagréments mineurs qu'elles
+              surmontent sans difficulté.
+          it:
+            label: 'Trascurabile'
+            description: 'Gli interessati non subiscono conseguenze oppure affrontano disagi di lieve entità, superabili senza difficoltà.'
+      - ref_id: limited
+        label: Limited
+        description: Data subjects face significant inconveniences they overcome despite some difficulty.
+        translations:
+          fr:
+            label: Limitée
+            description: Les personnes subissent des désagréments significatifs qu'elles surmontent malgré
+              quelques difficultés.
+          it:
+            label: 'Limitata'
+            description: 'Gli interessati subiscono disagi significativi, che riescono a superare con qualche difficoltà.'
+      - ref_id: significant
+        label: Significant
+        description: Data subjects face significant consequences they overcome only with serious difficulty.
+        translations:
+          fr:
+            label: Importante
+            description: Les personnes subissent des conséquences significatives qu'elles ne surmontent
+              qu'avec de sérieuses difficultés.
+          it:
+            label: 'Significativa'
+            description: 'Gli interessati subiscono conseguenze significative, superabili soltanto con gravi difficoltà.'
+      - ref_id: maximum
+        label: Maximum
+        description: Data subjects face significant, possibly irreversible consequences they may not overcome.
+        translations:
+          fr:
+            label: Maximale
+            description: Les personnes subissent des conséquences significatives, voire irrémédiables,
+              qu'elles pourraient ne pas surmonter.
+          it:
+            label: 'Massima'
+            description: 'Gli interessati subiscono conseguenze significative, potenzialmente irreversibili, che potrebbero non riuscire a superare.'
+    - ref_id: likelihood
+      label: Likelihood
+      translations:
+        fr:
+          label: Vraisemblance
+        it:
+          label: 'Probabilità'
+      levels:
+      - ref_id: negligible
+        label: Negligible
+        description: The feared event does not seem possible given the properties of the supporting assets.
+        translations:
+          fr:
+            label: Négligeable
+            description: L'événement redouté ne semble pas pouvoir se produire compte tenu des propriétés
+              des supports.
+          it:
+            label: 'Trascurabile'
+            description: 'L’evento temuto non sembra potersi verificare, considerate le caratteristiche degli asset di supporto.'
+      - ref_id: limited
+        label: Limited
+        description: The feared event seems difficult to bring about given the properties of the supporting
+          assets.
+        translations:
+          fr:
+            label: Limitée
+            description: L'événement redouté semble difficile à provoquer compte tenu des propriétés des
+              supports.
+          it:
+            label: 'Limitata'
+            description: 'L’evento temuto sembra difficile da provocare, considerate le caratteristiche degli asset di supporto.'
+      - ref_id: significant
+        label: Significant
+        description: The feared event seems possible given the properties of the supporting assets.
+        translations:
+          fr:
+            label: Importante
+            description: L'événement redouté semble possible compte tenu des propriétés des supports.
+          it:
+            label: 'Significativa'
+            description: 'L’evento temuto sembra potersi verificare, considerate le caratteristiche degli asset di supporto.'
+      - ref_id: maximum
+        label: Maximum
+        description: The feared event seems easy to bring about given the properties of the supporting
+          assets.
+        translations:
+          fr:
+            label: Maximale
+            description: L'événement redouté semble facile à provoquer compte tenu des propriétés des
+              supports.
+          it:
+            label: 'Massima'
+            description: 'L’evento temuto sembra facile da provocare, considerate le caratteristiche degli asset di supporto.'
+    outcomes_definition:
+    - ref_id: privacy_risk
+      kind: rating
+      label: Privacy risk
+      translations:
+        fr:
+          label: Risque vie privée
+        it:
+          label: 'Rischio per i diritti e le libertà degli interessati'
+      dimensions:
+      - severity
+      - likelihood
+      levels:
+      - ref_id: acceptable
+        label: Acceptable
+        description: The risk can be accepted with the measures in place.
+        translations:
+          fr:
+            label: Acceptable
+            description: Le risque peut être accepté avec les mesures en place.
+          it:
+            label: 'Accettabile'
+            description: 'Il rischio può essere accettato tenuto conto delle misure in essere.'
+        color: '#BBF7D0'
+      - ref_id: to_reduce
+        label: To reduce
+        description: Additional measures should reduce the risk before the processing goes ahead.
+        translations:
+          fr:
+            label: À réduire
+            description: Des mesures complémentaires doivent réduire le risque avant la mise en œuvre
+              du traitement.
+          it:
+            label: 'Da ridurre'
+            description: 'Prima di avviare il trattamento, occorre ridurre il rischio mediante misure aggiuntive.'
+        color: '#FEF08A'
+      - ref_id: unacceptable
+        label: Unacceptable
+        description: The risk is not acceptable. Reduce it or consult the supervisory authority.
+        translations:
+          fr:
+            label: Inacceptable
+            description: Le risque n'est pas acceptable. Le réduire ou consulter l'autorité de contrôle.
+          it:
+            label: 'Inaccettabile'
+            description: 'Il rischio non è accettabile. È necessario ridurlo o consultare l’autorità di controllo.'
+        color: '#FCA5A5'
+      grid:
+      - - acceptable
+        - acceptable
+        - acceptable
+        - to_reduce
+      - - acceptable
+        - to_reduce
+        - to_reduce
+        - to_reduce
+      - - to_reduce
+        - to_reduce
+        - unacceptable
+        - unacceptable
+      - - unacceptable
+        - unacceptable
+        - unacceptable
+        - unacceptable
+    - ref_id: residual_risk_unacceptable
+      label: 'Residual risk unacceptable: consult the supervisory authority'
+      description: A risk stays unacceptable once the planned measures are in place. Article 36 GDPR requires
+        prior consultation of the supervisory authority.
+      color: '#dc2626'
+      expression: has(values.privacy_risk_residual) && values.privacy_risk_residual >= 3.0
+      translations:
+        fr:
+          label: 'Risque résiduel inacceptable : consulter l''autorité de contrôle'
+          description: Un risque reste inacceptable une fois les mesures prévues en place. L'article 36
+            du RGPD impose de consulter l'autorité de contrôle au préalable.
+        it:
+          label: 'Rischio residuo inaccettabile: consultare l’autorità di controllo'
+          description: 'Il rischio rimane inaccettabile anche dopo l’attuazione delle misure previste. L’articolo 36 del GDPR richiede la consultazione preventiva dell’autorità di controllo.'
+    pages:
+    - urn: urn:intuitem:risk:qf_page:dpia:overview
+      ref_id: overview
+      name: 'Context: overview'
+      description: 'Identify the processing under study. Its purposes, data, parties and measures come
+        from its record: the following pages show them for you to assess.
+
+
+        Keep the completed response as the record of the assessment: Article 35 GDPR requires it.'
+      questions:
+        urn:intuitem:risk:qf_page:dpia:overview:question:processing:
+          type: object_reference
+          text: Processing
+          config:
+            model: processing
+          translations:
+            fr:
+              text: Traitement
+            it:
+              text: 'Trattamento'
+        urn:intuitem:risk:qf_page:dpia:overview:question:benefits:
+          type: text
+          text: What benefits are expected from the processing, and in what context is it used?
+          translations:
+            fr:
+              text: Quels bénéfices attend-on du traitement, et dans quel contexte est-il utilisé ?
+            it:
+              text: 'Quali benefici si prevedono dal trattamento e in quale contesto viene svolto?'
+        urn:intuitem:risk:qf_page:dpia:overview:question:standards:
+          type: text
+          text: Which standards apply to the processing? (approved codes of conduct, certifications…)
+          required: false
+          translations:
+            fr:
+              text: Quels référentiels s'appliquent au traitement ? (codes de conduite approuvés, certifications…)
+            it:
+              text: 'Quali standard si applicano al trattamento? (codici di condotta approvati, certificazioni…)'
+      translations:
+        fr:
+          name: 'Contexte : vue d''ensemble'
+          description: 'Identifiez le traitement étudié. Ses finalités, ses données, les parties prenantes
+            et ses mesures viennent de sa fiche : les pages suivantes les présentent pour que vous les
+            évaluiez.
+
+
+            Conservez la réponse complétée comme trace de l''analyse : l''article 35 du RGPD l''exige.'
+        it:
+          name: 'Contesto: panoramica'
+          description: |-
+            Identificare il trattamento oggetto della valutazione. Le finalità, i dati, i soggetti coinvolti e le misure sono ricavati dalla relativa scheda: le pagine successive li presentano ai fini della valutazione.
+
+            Conservare la risposta compilata come evidenza documentale della valutazione, ai sensi dell’articolo 35 del GDPR.
+    - urn: urn:intuitem:risk:qf_page:dpia:data
+      ref_id: data
+      name: 'Context: data, processes and supports'
+      description: 'The data processed, about whom and for whom. Shown from the processing''s record.
+        To correct it, edit the processing: submitting this form keeps a copy of what was assessed.'
+      facts:
+      - processing.personal_data
+      - processing.data_subjects
+      - processing.recipients
+      questions:
+        urn:intuitem:risk:qf_page:dpia:data:question:access:
+          type: text
+          text: Who can access the data, beyond the recipients listed?
+          translations:
+            fr:
+              text: Qui peut accéder aux données, au-delà des destinataires listés ?
+            it:
+              text: 'Chi può accedere ai dati, oltre ai destinatari già elencati?'
+        urn:intuitem:risk:qf_page:dpia:data:question:lifecycle:
+          type: text
+          text: How does the data lifecycle unfold, from collection to deletion?
+          translations:
+            fr:
+              text: Comment se déroule le cycle de vie des données, de la collecte à l'effacement ?
+            it:
+              text: 'Come si articola il ciclo di vita dei dati, dalla raccolta alla cancellazione?'
+        urn:intuitem:risk:qf_page:dpia:data:question:supports:
+          type: text
+          text: What else does the data rely on, beyond the assets listed? (people, paper…)
+          required: false
+          translations:
+            fr:
+              text: Sur quoi d'autre les données reposent-elles, au-delà des actifs listés ? (personnes,
+                papier…)
+            it:
+              text: 'Su quali ulteriori risorse si basa il trattamento dei dati, oltre agli asset elencati? (persone, supporti cartacei…)'
+      translations:
+        fr:
+          name: 'Contexte : données, processus et supports'
+          description: 'Les données traitées, sur qui et pour qui. Repris de la fiche du traitement. Pour
+            le corriger, modifiez le traitement : la soumission de ce formulaire conserve une copie de
+            ce qui a été évalué.'
+        it:
+          name: 'Contesto: dati, processi e supporti'
+          description: 'I dati trattati, gli interessati e i destinatari sono riportati nella scheda del trattamento. Per correggere tali informazioni, modificare la scheda del trattamento: l’invio del presente modulo conserva una copia delle informazioni valutate.'
+    - urn: urn:intuitem:risk:qf_page:dpia:proportionality
+      ref_id: proportionality
+      name: 'Core principles: proportionality and necessity'
+      description: 'Show that the processing complies with the core data protection principles. Shown
+        from the processing''s record. To correct it, edit the processing: submitting this form keeps
+        a copy of what was assessed.'
+      facts:
+      - processing.purposes
+      questions:
+        urn:intuitem:risk:qf_page:dpia:proportionality:question:purposes:
+          type: text
+          text: Are these purposes specified, explicit and legitimate, and does each rest on the right
+            legal basis?
+          translations:
+            fr:
+              text: Ces finalités sont-elles déterminées, explicites et légitimes, et chacune repose-t-elle
+                sur la bonne base légale ?
+            it:
+              text: 'Le finalità sono determinate, esplicite e legittime e ciascuna è fondata su una base giuridica appropriata?'
+        urn:intuitem:risk:qf_page:dpia:proportionality:question:minimisation:
+          type: text
+          text: Is the data adequate, relevant and limited to what is necessary for the purposes?
+          translations:
+            fr:
+              text: Les données sont-elles adéquates, pertinentes et limitées à ce qui est nécessaire
+                aux finalités ?
+            it:
+              text: 'I dati sono adeguati, pertinenti e limitati a quanto necessario rispetto alle finalità perseguite?'
+        urn:intuitem:risk:qf_page:dpia:proportionality:question:accuracy:
+          type: text
+          text: Is the data accurate and kept up to date?
+          translations:
+            fr:
+              text: Les données sont-elles exactes et tenues à jour ?
+            it:
+              text: 'I dati sono esatti e mantenuti aggiornati?'
+        urn:intuitem:risk:qf_page:dpia:proportionality:question:retention:
+          type: text
+          text: Why are the retention periods recorded for each kind of data necessary?
+          translations:
+            fr:
+              text: Pourquoi les durées de conservation indiquées pour chaque type de données sont-elles
+                nécessaires ?
+            it:
+              text: 'Perché i periodi di conservazione previsti per ciascuna categoria di dati sono necessari?'
+      translations:
+        fr:
+          name: 'Principes fondamentaux : proportionnalité et nécessité'
+          description: 'Montrez que le traitement respecte les principes fondamentaux de la protection
+            des données. Repris de la fiche du traitement. Pour le corriger, modifiez le traitement :
+            la soumission de ce formulaire conserve une copie de ce qui a été évalué.'
+        it:
+          name: 'Principi fondamentali: proporzionalità e necessità'
+          description: 'Dimostrare che il trattamento rispetta i principi fondamentali in materia di protezione dei dati personali. Le informazioni sono ricavate dalla scheda del trattamento. Per correggerle, modificare la scheda: l’invio del modulo conserva una copia delle informazioni valutate.'
+    - urn: urn:intuitem:risk:qf_page:dpia:rights
+      ref_id: rights
+      name: 'Core principles: measures protecting data subjects'' rights'
+      description: 'Show how data subjects can exercise their rights. Shown from the processing''s record.
+        To correct it, edit the processing: submitting this form keeps a copy of what was assessed.'
+      facts:
+      - processing.contractors
+      - processing.transfers
+      questions:
+        urn:intuitem:risk:qf_page:dpia:rights:question:information:
+          type: text
+          text: How are data subjects informed about the processing?
+          translations:
+            fr:
+              text: Comment les personnes concernées sont-elles informées du traitement ?
+            it:
+              text: 'Come sono informati gli interessati in merito al trattamento?'
+        urn:intuitem:risk:qf_page:dpia:rights:question:consent:
+          type: text
+          text: If applicable, how is the data subjects' consent obtained?
+          required: false
+          translations:
+            fr:
+              text: Le cas échéant, comment le consentement des personnes concernées est-il recueilli
+                ?
+            it:
+              text: 'Ove applicabile, come viene raccolto il consenso degli interessati?'
+        urn:intuitem:risk:qf_page:dpia:rights:question:access_portability:
+          type: text
+          text: How can data subjects exercise their rights of access and to data portability?
+          translations:
+            fr:
+              text: Comment les personnes concernées peuvent-elles exercer leurs droits d'accès et à la
+                portabilité ?
+            it:
+              text: 'Come possono gli interessati esercitare il diritto di accesso e il diritto alla portabilità dei dati?'
+        urn:intuitem:risk:qf_page:dpia:rights:question:rectification_erasure:
+          type: text
+          text: How can data subjects exercise their rights to rectification and erasure?
+          translations:
+            fr:
+              text: Comment les personnes concernées peuvent-elles exercer leurs droits de rectification
+                et d'effacement ?
+            it:
+              text: 'Come possono gli interessati esercitare i diritti di rettifica e di cancellazione dei dati?'
+        urn:intuitem:risk:qf_page:dpia:rights:question:restriction_objection:
+          type: text
+          text: How can data subjects exercise their rights to restriction and to object?
+          translations:
+            fr:
+              text: Comment les personnes concernées peuvent-elles exercer leurs droits à la limitation
+                et d'opposition ?
+            it:
+              text: 'Come possono gli interessati esercitare i diritti di limitazione del trattamento e di opposizione?'
+        urn:intuitem:risk:qf_page:dpia:rights:question:processors:
+          type: text
+          text: Is a contract setting out their obligations in place with each of these parties?
+          translations:
+            fr:
+              text: Un contrat précisant leurs obligations est-il en place avec chacune de ces parties
+                ?
+            it:
+              text: 'È presente un contratto che definisce gli obblighi di ciascuno dei soggetti indicati?'
+        urn:intuitem:risk:qf_page:dpia:rights:question:transfers:
+          type: text
+          text: Do the safeguards listed protect the data transferred outside the EU adequately?
+          required: false
+          translations:
+            fr:
+              text: Les garanties listées protègent-elles suffisamment les données transférées hors de
+                l'UE ?
+            it:
+              text: 'Le garanzie elencate assicurano un’adeguata protezione dei dati trasferiti al di fuori dell’Unione europea?'
+      translations:
+        fr:
+          name: 'Principes fondamentaux : mesures protégeant les droits des personnes'
+          description: 'Montrez comment les personnes concernées peuvent exercer leurs droits. Repris
+            de la fiche du traitement. Pour le corriger, modifiez le traitement : la soumission de ce
+            formulaire conserve une copie de ce qui a été évalué.'
+        it:
+          name: 'Principi fondamentali: misure a tutela dei diritti degli interessati'
+          description: 'Descrivere in che modo gli interessati possono esercitare i propri diritti. Le informazioni sono ricavate dalla scheda del trattamento. Per correggerle, modificare la scheda: l’invio del modulo conserva una copia delle informazioni valutate.'
+    - urn: urn:intuitem:risk:qf_page:dpia:measures
+      ref_id: measures
+      name: 'Risks: existing or planned measures'
+      description: The measures the processing already has, existing or planned. Each is an applied control,
+        so its owner, due date and status are tracked like any other. Measures picked in this form join
+        the processing once the DPIA is accepted.
+      facts:
+      - processing.controls
+      questions:
+        urn:intuitem:risk:qf_page:dpia:measures:question:measures:
+          type: object_reference
+          text: Which measures should the processing add?
+          config:
+            model: applied_control
+            multiple: true
+            subject_field: associated_controls
+          required: false
+          translations:
+            fr:
+              text: Quelles mesures le traitement doit-il ajouter ?
+            it:
+              text: 'Quali ulteriori misure devono essere associate al trattamento?'
+        urn:intuitem:risk:qf_page:dpia:measures:question:notes:
+          type: text
+          text: Anything to add about these measures?
+          required: false
+          translations:
+            fr:
+              text: Quelque chose à ajouter sur ces mesures ?
+            it:
+              text: 'Ci sono ulteriori osservazioni sulle misure indicate?'
+      translations:
+        fr:
+          name: 'Risques : mesures existantes ou prévues'
+          description: 'Les mesures dont le traitement dispose déjà, existantes ou prévues. Chacune est
+            une mesure appliquée : son responsable, son échéance et son statut sont suivis comme les autres.
+            Les mesures retenues dans ce formulaire rejoignent le traitement une fois l''AIPD acceptée.'
+        it:
+          name: 'Rischi: misure esistenti o pianificate'
+          description: 'Le misure associate al trattamento, già attuate o pianificate. Ogni misura è un controllo applicato, di cui vengono monitorati il responsabile, la scadenza e lo stato. Le misure selezionate in questo modulo saranno associate al trattamento una volta accettata la DPIA.'
+    - urn: urn:intuitem:risk:qf_page:dpia:illegitimate_access
+      ref_id: illegitimate_access
+      name: 'Risks: illegitimate access to data'
+      description: Analyse the causes and consequences of an illegitimate access to data, then estimate
+        its severity and likelihood given the measures in place. Then estimate them again as they will
+        stand once the planned measures are implemented.
+      questions:
+        urn:intuitem:risk:qf_page:dpia:illegitimate_access:question:impacts:
+          type: text
+          text: What would the main impacts on the data subjects be if this happened?
+          translations:
+            fr:
+              text: Quels seraient les principaux impacts sur les personnes concernées si cela se produisait
+                ?
+            it:
+              text: 'Quali sarebbero le principali conseguenze per gli interessati se l’evento si verificasse?'
+        urn:intuitem:risk:qf_page:dpia:illegitimate_access:question:threats:
+          type: text
+          text: What are the main threats that could make it happen?
+          translations:
+            fr:
+              text: Quelles sont les principales menaces qui pourraient le provoquer ?
+            it:
+              text: 'Quali sono le principali minacce che potrebbero causare l’evento?'
+        urn:intuitem:risk:qf_page:dpia:illegitimate_access:question:sources:
+          type: text
+          text: Which risk sources could be behind it (internal or external people, non-human sources)?
+          translations:
+            fr:
+              text: Quelles sources de risques pourraient en être à l'origine (personnes internes ou externes,
+                sources non humaines) ?
+            it:
+              text: 'Quali fonti di rischio potrebbero causare l’evento (soggetti interni o esterni, fattori non umani)?'
+        urn:intuitem:risk:qf_page:dpia:illegitimate_access:question:measures:
+          type: object_reference
+          text: Which measures treat this risk?
+          config:
+            model: applied_control
+            multiple: true
+            subject_field: associated_controls
+          required: false
+          translations:
+            fr:
+              text: Quelles mesures traitent ce risque ?
+            it:
+              text: 'Quali misure trattano questo rischio?'
+        urn:intuitem:risk:qf_page:dpia:illegitimate_access:question:severity:
+          type: unique_choice
+          text: How severe is the risk, given the potential impacts and the measures in place?
+          config:
+            widget: slider
+            scale: severity
+          translations:
+            fr:
+              text: Quelle est la gravité du risque, compte tenu des impacts potentiels et des mesures
+                en place ?
+            it:
+              text: 'Qual è la gravità del rischio, considerando le potenziali conseguenze per gli interessati e le misure in essere?'
+        urn:intuitem:risk:qf_page:dpia:illegitimate_access:question:severity_justification:
+          type: text
+          text: Justify the severity
+          translations:
+            fr:
+              text: Justifiez la gravité
+            it:
+              text: 'Motivare la valutazione della gravità'
+        urn:intuitem:risk:qf_page:dpia:illegitimate_access:question:likelihood:
+          type: unique_choice
+          text: How likely is the risk, given the threats, the risk sources and the measures in place?
+          config:
+            widget: slider
+            scale: likelihood
+          translations:
+            fr:
+              text: Quelle est la vraisemblance du risque, compte tenu des menaces, des sources de risques
+                et des mesures en place ?
+            it:
+              text: 'Qual è la probabilità del rischio, considerando le minacce, le fonti di rischio e le misure in essere?'
+        urn:intuitem:risk:qf_page:dpia:illegitimate_access:question:likelihood_justification:
+          type: text
+          text: Justify the likelihood
+          translations:
+            fr:
+              text: Justifiez la vraisemblance
+            it:
+              text: 'Motivare la valutazione della probabilità'
+        urn:intuitem:risk:qf_page:dpia:illegitimate_access:question:residual_severity:
+          type: unique_choice
+          text: Severity once the planned measures are implemented
+          config:
+            widget: slider
+            scale: severity
+            stage: residual
+          required: false
+          translations:
+            fr:
+              text: Gravité une fois les mesures prévues mises en œuvre
+            it:
+              text: 'Gravità dopo l’attuazione delle misure pianificate'
+        urn:intuitem:risk:qf_page:dpia:illegitimate_access:question:residual_likelihood:
+          type: unique_choice
+          text: Likelihood once the planned measures are implemented
+          config:
+            widget: slider
+            scale: likelihood
+            stage: residual
+          required: false
+          translations:
+            fr:
+              text: Vraisemblance une fois les mesures prévues mises en œuvre
+            it:
+              text: 'Probabilità dopo l’attuazione delle misure pianificate'
+      translations:
+        fr:
+          name: 'Risques : accès illégitime à des données'
+          description: Analysez les causes et les conséquences d'un accès illégitime à des données, puis
+            estimez sa gravité et sa vraisemblance compte tenu des mesures en place. Estimez-les ensuite
+            de nouveau telles qu'elles seront une fois les mesures prévues mises en œuvre.
+        it:
+          name: 'Rischi: accesso illegittimo ai dati'
+          description: 'Analizzare le cause e le conseguenze di un accesso illegittimo ai dati, quindi stimarne la gravità e la probabilità tenendo conto delle misure in essere. Ripetere la valutazione considerando l’attuazione delle misure pianificate.'
+    - urn: urn:intuitem:risk:qf_page:dpia:unwanted_modification
+      ref_id: unwanted_modification
+      name: 'Risks: unwanted modification of data'
+      description: Analyse the causes and consequences of an unwanted modification of data, then estimate
+        its severity and likelihood given the measures in place. Then estimate them again as they will
+        stand once the planned measures are implemented.
+      questions:
+        urn:intuitem:risk:qf_page:dpia:unwanted_modification:question:impacts:
+          type: text
+          text: What would the main impacts on the data subjects be if this happened?
+          translations:
+            fr:
+              text: Quels seraient les principaux impacts sur les personnes concernées si cela se produisait
+                ?
+            it:
+              text: 'Quali sarebbero le principali conseguenze per gli interessati se l’evento si verificasse?'
+        urn:intuitem:risk:qf_page:dpia:unwanted_modification:question:threats:
+          type: text
+          text: What are the main threats that could make it happen?
+          translations:
+            fr:
+              text: Quelles sont les principales menaces qui pourraient le provoquer ?
+            it:
+              text: 'Quali sono le principali minacce che potrebbero causare l’evento?'
+        urn:intuitem:risk:qf_page:dpia:unwanted_modification:question:sources:
+          type: text
+          text: Which risk sources could be behind it (internal or external people, non-human sources)?
+          translations:
+            fr:
+              text: Quelles sources de risques pourraient en être à l'origine (personnes internes ou externes,
+                sources non humaines) ?
+            it:
+              text: 'Quali fonti di rischio potrebbero causare l’evento (soggetti interni o esterni, fattori non umani)?'
+        urn:intuitem:risk:qf_page:dpia:unwanted_modification:question:measures:
+          type: object_reference
+          text: Which measures treat this risk?
+          config:
+            model: applied_control
+            multiple: true
+            subject_field: associated_controls
+          required: false
+          translations:
+            fr:
+              text: Quelles mesures traitent ce risque ?
+            it:
+              text: 'Quali misure trattano questo rischio?'
+        urn:intuitem:risk:qf_page:dpia:unwanted_modification:question:severity:
+          type: unique_choice
+          text: How severe is the risk, given the potential impacts and the measures in place?
+          config:
+            widget: slider
+            scale: severity
+          translations:
+            fr:
+              text: Quelle est la gravité du risque, compte tenu des impacts potentiels et des mesures
+                en place ?
+            it:
+              text: 'Qual è la gravità del rischio, considerando le potenziali conseguenze per gli interessati e le misure in essere?'
+        urn:intuitem:risk:qf_page:dpia:unwanted_modification:question:severity_justification:
+          type: text
+          text: Justify the severity
+          translations:
+            fr:
+              text: Justifiez la gravité
+            it:
+              text: 'Motivare la valutazione della gravità'
+        urn:intuitem:risk:qf_page:dpia:unwanted_modification:question:likelihood:
+          type: unique_choice
+          text: How likely is the risk, given the threats, the risk sources and the measures in place?
+          config:
+            widget: slider
+            scale: likelihood
+          translations:
+            fr:
+              text: Quelle est la vraisemblance du risque, compte tenu des menaces, des sources de risques
+                et des mesures en place ?
+            it:
+              text: 'Qual è la probabilità del rischio, considerando le minacce, le fonti di rischio e le misure in essere?'
+        urn:intuitem:risk:qf_page:dpia:unwanted_modification:question:likelihood_justification:
+          type: text
+          text: Justify the likelihood
+          translations:
+            fr:
+              text: Justifiez la vraisemblance
+            it:
+              text: 'Motivare la valutazione della probabilità'
+        urn:intuitem:risk:qf_page:dpia:unwanted_modification:question:residual_severity:
+          type: unique_choice
+          text: Severity once the planned measures are implemented
+          config:
+            widget: slider
+            scale: severity
+            stage: residual
+          required: false
+          translations:
+            fr:
+              text: Gravité une fois les mesures prévues mises en œuvre
+            it:
+              text: 'Gravità dopo l’attuazione delle misure pianificate'
+        urn:intuitem:risk:qf_page:dpia:unwanted_modification:question:residual_likelihood:
+          type: unique_choice
+          text: Likelihood once the planned measures are implemented
+          config:
+            widget: slider
+            scale: likelihood
+            stage: residual
+          required: false
+          translations:
+            fr:
+              text: Vraisemblance une fois les mesures prévues mises en œuvre
+            it:
+              text: 'Probabilità dopo l’attuazione delle misure pianificate'
+      translations:
+        fr:
+          name: 'Risques : modification non désirée de données'
+          description: Analysez les causes et les conséquences d'une modification non désirée de données,
+            puis estimez sa gravité et sa vraisemblance compte tenu des mesures en place. Estimez-les
+            ensuite de nouveau telles qu'elles seront une fois les mesures prévues mises en œuvre.
+        it:
+          name: 'Rischi: modifica indesiderata dei dati'
+          description: 'Analizzare le cause e le conseguenze di una modifica indesiderata dei dati, quindi stimarne la gravità e la probabilità tenendo conto delle misure in essere. Ripetere la valutazione considerando l’attuazione delle misure pianificate.'
+    - urn: urn:intuitem:risk:qf_page:dpia:disappearance
+      ref_id: disappearance
+      name: 'Risks: disappearance of data'
+      description: Analyse the causes and consequences of a disappearance of data, then estimate its severity
+        and likelihood given the measures in place. Then estimate them again as they will stand once the
+        planned measures are implemented.
+      questions:
+        urn:intuitem:risk:qf_page:dpia:disappearance:question:impacts:
+          type: text
+          text: What would the main impacts on the data subjects be if this happened?
+          translations:
+            fr:
+              text: Quels seraient les principaux impacts sur les personnes concernées si cela se produisait
+                ?
+            it:
+              text: 'Quali sarebbero le principali conseguenze per gli interessati se l’evento si verificasse?'
+        urn:intuitem:risk:qf_page:dpia:disappearance:question:threats:
+          type: text
+          text: What are the main threats that could make it happen?
+          translations:
+            fr:
+              text: Quelles sont les principales menaces qui pourraient le provoquer ?
+            it:
+              text: 'Quali sono le principali minacce che potrebbero causare l’evento?'
+        urn:intuitem:risk:qf_page:dpia:disappearance:question:sources:
+          type: text
+          text: Which risk sources could be behind it (internal or external people, non-human sources)?
+          translations:
+            fr:
+              text: Quelles sources de risques pourraient en être à l'origine (personnes internes ou externes,
+                sources non humaines) ?
+            it:
+              text: 'Quali fonti di rischio potrebbero causare l’evento (soggetti interni o esterni, fattori non umani)?'
+        urn:intuitem:risk:qf_page:dpia:disappearance:question:measures:
+          type: object_reference
+          text: Which measures treat this risk?
+          config:
+            model: applied_control
+            multiple: true
+            subject_field: associated_controls
+          required: false
+          translations:
+            fr:
+              text: Quelles mesures traitent ce risque ?
+            it:
+              text: 'Quali misure trattano questo rischio?'
+        urn:intuitem:risk:qf_page:dpia:disappearance:question:severity:
+          type: unique_choice
+          text: How severe is the risk, given the potential impacts and the measures in place?
+          config:
+            widget: slider
+            scale: severity
+          translations:
+            fr:
+              text: Quelle est la gravité du risque, compte tenu des impacts potentiels et des mesures
+                en place ?
+            it:
+              text: 'Qual è la gravità del rischio, considerando le potenziali conseguenze per gli interessati e le misure in essere?'
+        urn:intuitem:risk:qf_page:dpia:disappearance:question:severity_justification:
+          type: text
+          text: Justify the severity
+          translations:
+            fr:
+              text: Justifiez la gravité
+            it:
+              text: 'Motivare la valutazione della gravità'
+        urn:intuitem:risk:qf_page:dpia:disappearance:question:likelihood:
+          type: unique_choice
+          text: How likely is the risk, given the threats, the risk sources and the measures in place?
+          config:
+            widget: slider
+            scale: likelihood
+          translations:
+            fr:
+              text: Quelle est la vraisemblance du risque, compte tenu des menaces, des sources de risques
+                et des mesures en place ?
+            it:
+              text: 'Qual è la probabilità del rischio, considerando le minacce, le fonti di rischio e le misure in essere?'
+        urn:intuitem:risk:qf_page:dpia:disappearance:question:likelihood_justification:
+          type: text
+          text: Justify the likelihood
+          translations:
+            fr:
+              text: Justifiez la vraisemblance
+            it:
+              text: 'Motivare la valutazione della probabilità'
+        urn:intuitem:risk:qf_page:dpia:disappearance:question:residual_severity:
+          type: unique_choice
+          text: Severity once the planned measures are implemented
+          config:
+            widget: slider
+            scale: severity
+            stage: residual
+          required: false
+          translations:
+            fr:
+              text: Gravité une fois les mesures prévues mises en œuvre
+            it:
+              text: 'Gravità dopo l’attuazione delle misure pianificate'
+        urn:intuitem:risk:qf_page:dpia:disappearance:question:residual_likelihood:
+          type: unique_choice
+          text: Likelihood once the planned measures are implemented
+          config:
+            widget: slider
+            scale: likelihood
+            stage: residual
+          required: false
+          translations:
+            fr:
+              text: Vraisemblance une fois les mesures prévues mises en œuvre
+            it:
+              text: 'Probabilità dopo l’attuazione delle misure pianificate'
+      translations:
+        fr:
+          name: 'Risques : disparition de données'
+          description: Analysez les causes et les conséquences d'une disparition de données, puis estimez
+            sa gravité et sa vraisemblance compte tenu des mesures en place. Estimez-les ensuite de nouveau
+            telles qu'elles seront une fois les mesures prévues mises en œuvre.
+        it:
+          name: 'Rischi: perdita dei dati'
+          description: 'Analizzare le cause e le conseguenze della perdita dei dati, quindi stimarne la gravità e la probabilità tenendo conto delle misure in essere. Ripetere la valutazione considerando l’attuazione delle misure pianificate.'
+    - urn: urn:intuitem:risk:qf_page:dpia:by_design
+      ref_id: by_design
+      name: 'Risks: by-design risks'
+      description: Risks the processing creates for data subjects even when everything works as intended
+        (profiling, excessive monitoring, unfair automated decisions…), beyond security incidents.
+      questions:
+        urn:intuitem:risk:qf_page:dpia:by_design:question:risks:
+          type: text
+          text: Which risks does the processing create by design?
+          required: false
+          translations:
+            fr:
+              text: Quels risques le traitement crée-t-il par sa conception même ?
+            it:
+              text: 'Quali rischi per gli interessati derivano dalla progettazione stessa del trattamento?'
+        urn:intuitem:risk:qf_page:dpia:by_design:question:measures:
+          type: object_reference
+          text: Which measures treat them?
+          config:
+            model: applied_control
+            multiple: true
+            subject_field: associated_controls
+          required: false
+          translations:
+            fr:
+              text: Quelles mesures les traitent ?
+            it:
+              text: 'Quali misure sono previste per trattare tali rischi?'
+      translations:
+        fr:
+          name: 'Risques : risques inhérents au traitement'
+          description: Les risques que le traitement fait peser sur les personnes concernées même lorsque
+            tout fonctionne comme prévu (profilage, surveillance excessive, décisions automatisées inéquitables…),
+            au-delà des incidents de sécurité.
+        it:
+          name: 'Rischi: rischi intrinseci al trattamento'
+          description: 'Rischi che il trattamento comporta per gli interessati anche quando opera come previsto (profilazione, monitoraggio eccessivo, decisioni automatizzate non eque…), indipendentemente dagli incidenti di sicurezza.'
+    - urn: urn:intuitem:risk:qf_page:dpia:validation
+      ref_id: validation
+      name: Validation
+      description: Record the opinions sought and the decision on the processing.
+      questions:
+        urn:intuitem:risk:qf_page:dpia:validation:question:dpo_opinion:
+          type: text
+          text: What is the DPO's opinion?
+          translations:
+            fr:
+              text: Quel est l'avis du DPD ?
+            it:
+              text: 'Qual è il parere del Responsabile della protezione dei dati (RPD/DPO)?'
+        urn:intuitem:risk:qf_page:dpia:validation:question:dpo_advice_applied:
+          type: text
+          text: How was the DPO's advice applied, or why not?
+          required: false
+          translations:
+            fr:
+              text: Comment l'avis du DPD a-t-il été suivi, ou pourquoi ne l'a-t-il pas été ?
+            it:
+              text: 'In che modo sono state recepite le indicazioni del RPD/DPO o, in caso contrario, perché non sono state seguite?'
+        urn:intuitem:risk:qf_page:dpia:validation:question:data_subject_views:
+          type: text
+          text: What are the views of the data subjects or their representatives?
+          required: false
+          translations:
+            fr:
+              text: Quel est l'avis des personnes concernées ou de leurs représentants ?
+            it:
+              text: 'Qual è il parere degli interessati o dei loro rappresentanti?'
+        urn:intuitem:risk:qf_page:dpia:validation:question:views_not_sought_reason:
+          type: text
+          text: If their views were not sought, why not?
+          required: false
+          translations:
+            fr:
+              text: Si leur avis n'a pas été recueilli, pourquoi ?
+            it:
+              text: 'Se il loro parere non è stato richiesto, per quale motivo?'
+        urn:intuitem:risk:qf_page:dpia:validation:question:decision:
+          type: unique_choice
+          text: Decision
+          choices:
+          - urn: urn:intuitem:risk:qf_page:dpia:validation:question:decision:choice:proceed
+            value: Proceed
+            translations:
+              fr:
+                value: Mettre en œuvre
+              it:
+                value: 'Procedere con il trattamento'
+          - urn: urn:intuitem:risk:qf_page:dpia:validation:question:decision:choice:proceed_conditionally
+            value: Proceed with conditions
+            translations:
+              fr:
+                value: Mettre en œuvre sous conditions
+              it:
+                value: 'Procedere a determinate condizioni'
+          - urn: urn:intuitem:risk:qf_page:dpia:validation:question:decision:choice:consult_sa
+            value: Consult the supervisory authority
+            translations:
+              fr:
+                value: Consulter l'autorité de contrôle
+              it:
+                value: 'Consultare l’autorità di controllo'
+          - urn: urn:intuitem:risk:qf_page:dpia:validation:question:decision:choice:abandon
+            value: Abandon
+            translations:
+              fr:
+                value: Abandonner
+              it:
+                value: 'Abbandonare il trattamento'
+          translations:
+            fr:
+              text: Décision
+            it:
+              text: 'Decisione'
+        urn:intuitem:risk:qf_page:dpia:validation:question:conditions:
+          type: text
+          text: Conditions and action plan
+          required: false
+          translations:
+            fr:
+              text: Conditions et plan d'action
+            it:
+              text: 'Condizioni e piano d’azione'
+      translations:
+        fr:
+          name: Validation
+          description: Consignez les avis recueillis et la décision sur le traitement.
+        it:
+          name: 'Validazione'
+          description: 'Registrare i pareri acquisiti e la decisione relativa al trattamento.'
+    translations:
+      fr:
+        name: AIPD
+        description: Analyse d'impact d'un traitement sur la protection des données.
+      it:
+        name: 'DPIA'
+        description: 'Valutazione d’impatto sulla protezione dei dati relativa a un trattamento.'
+translations:
+  fr:
+    name: Analyse d'impact relative à la protection des données (AIPD)
+    description: 'Une AIPD suivant la structure de la méthode PIA de la CNIL : contexte, principes fondamentaux,
+      risques pour les personnes concernées et validation. Accepter une réponse en fait l''AIPD du traitement
+      et ajoute au traitement les mesures retenues.'
+  it:
+    name: 'Valutazione d’impatto sulla protezione dei dati (DPIA)'
+    description: 'Una valutazione d’impatto sulla protezione dei dati (DPIA) strutturata secondo il metodo PIA della CNIL: contesto, principi fondamentali, rischi per i diritti e le libertà degli interessati e validazione. L’accettazione della risposta la registra come DPIA del trattamento e associa al trattamento le misure selezionate.'

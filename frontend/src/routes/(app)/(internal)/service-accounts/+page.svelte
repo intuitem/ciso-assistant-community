@@ -1,20 +1,21 @@
 <script lang="ts">
 	import { page } from '$app/state';
 
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
-	import ServiceAccountSecretModal from '$lib/components/Modals/ServiceAccountSecretModal.svelte';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
+	import DeleteConfirmModal from '#lib/components/Modals/DeleteConfirmModal.svelte';
+	import ServiceAccountSecretModal from '#lib/components/Modals/ServiceAccountSecretModal.svelte';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import type { ActionData, PageData } from './$types';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
+	import { consumeCreateIntent } from '#lib/utils/create-intent.js';
 
 	interface Props {
 		data: PageData;
@@ -42,6 +43,11 @@
 		};
 		modalStore.trigger(modal);
 	}
+
+	$effect(() => {
+		if (!isAdmin) return;
+		consumeCreateIntent({ urlModel: URLModel, modelName: data.model.name, open: modalCreateForm });
+	});
 
 	function modalSecret(object: Record<string, any>): void {
 		const modalComponent: ModalComponent = {

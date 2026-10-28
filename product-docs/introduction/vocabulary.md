@@ -41,6 +41,8 @@ A glossary of the terms used in CISO Assistant. Where a user-facing term differs
 - **Data transfer** — A record of cross-border or cross-entity movement of personal data, with destination, legal basis, and safeguards.
 - **Document revision** — A single revision of a [Managed document](#m). Carries a version number and a lifecycle status (draft → in review → change requested → validated → published → deprecated).
 - **Domain** — The top-level container in CISO Assistant: a business unit, subsidiary, project, or any boundary used for organising work and isolating permissions via role-based access control. Sub-domains nest underneath. Internally a `Folder`. _Demo_ and _Starter_ are reserved for internal features.
+- **DPIA** — Data protection impact assessment (GDPR Art. 35): the analysis of a processing likely to result in a high risk to people's rights. Carried out as a quick form on the processing; once accepted, it is the processing's DPIA of record. See [DPIA and screening](../concepts/dpia.md).
+- **DPIA screening** — The short check, also called pre-DPIA, that decides whether a processing needs a DPIA. Once accepted, it sets the processing's **DPIA required** flag.
 
 ## E
 
@@ -106,8 +108,9 @@ A glossary of the terms used in CISO Assistant. Where a user-facing term differs
 - **Personal data** — In a privacy register, any data referring to an identified or identifiable individual.
 - **Policy** — A specific type of applied control: a document describing what is expected from some part of your stakeholders. Lives in CISO Assistant so its lifecycle can be managed alongside the rest of your controls.
 - **Preset** — A reusable template describing a guided workflow: a set of starter objects to scaffold (audit, risk assessment, etc.) plus an ordered list of steps to follow. Library-backed or authored locally; applied to a domain to produce a [Journey](#j).
-- **Processing** — In a privacy register, an activity that operates on personal data (collection, storage, transfer, deletion). Captures purpose, lawful basis, recipients, and retention.
+- **Processing** — In a privacy register, an activity that operates on personal data (collection, storage, transfer, deletion). Captures purpose, lawful basis, recipients, and retention. Its **GDPR role** (controller, joint controller or data processor) puts it in the controller or the processor register.
 - **Processing nature** — A catalogued type of processing operation (collection, storage, transfer, disclosure, deletion, …) used to characterise a processing.
+- **Processor register** — The record of processings carried out on behalf of clients (GDPR Art. 30(2)): processings whose GDPR role is data processor, with the clients they serve. The controller register (Art. 30(1)) holds the rest. See [Privacy register](../concepts/privacy-register.md#controller-and-processor-registers).
 - **Project** — In the project-management module, a planned initiative with deliverables and milestones. Distinct from the legacy meaning of "project" in older CISO Assistant documentation — see **Perimeter**.
 - **Purpose** — In a privacy register, the lawful reason for which personal data is processed.
 
@@ -119,6 +122,7 @@ A glossary of the terms used in CISO Assistant. Where a user-facing term differs
 
 ## R
 
+- **Rating** — A quick form outcome rule that classifies the answers to its scales into named levels, through a grid or rules: a DPIA's privacy risk crosses severity and likelihood. See [Scales and ratings](../concepts/quick-forms.md#scales-and-ratings).
 - **Recap** — The roll-up view of a business impact analysis, aggregating asset assessments and their escalation thresholds into a single readout.
 - **Recovery target** — A documented commitment for restoring an asset after disruption, typically a Recovery Time Objective (RTO) or Recovery Point Objective (RPO). Tracked on an asset assessment as "documented", "tested", and "targets met" flags.
 - **Reference control** — A template for an applied control. Provided by frameworks via libraries, or defined locally. Optional but recommended for keeping applied controls consistent across the organisation.
@@ -145,7 +149,7 @@ A glossary of the terms used in CISO Assistant. Where a user-facing term differs
 ## S
 
 - **Security advisory** — A catalogued security warning published by a vendor or CERT (e.g. CVE entries). Linked to vulnerabilities and affected assets.
-- **Security exception** — A documented, time-bound deviation from a control or policy, approved through a workflow and tracked for review.
+- **Security exception** — A documented, time-bound deviation from a requirement, control or risk treatment, with owners and an expiration date. See [Security exceptions](../concepts/security-exceptions.md).
 - **Severity** — The shared ordinal scale used to qualify vulnerabilities, incidents, and findings: undefined / info / low / medium / high / critical. Drives SLA escalation and visual emphasis in dashboards.
 - **Solution** — A product or service provided by an entity.
 - **Stakeholder** — In EBIOS RM, an internal or external party with a relationship to the studied system. Evaluated for trust level and dependency.

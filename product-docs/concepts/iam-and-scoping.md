@@ -1,5 +1,5 @@
 ---
-description: How IAM, the domain hierarchy, publication, and cross-domain visibility shape what each user sees
+description: How IAM, the domain hierarchy, default roles, and cross-domain visibility shape what each user sees
 ---
 
 # IAM and scoping
@@ -8,7 +8,7 @@ This page is the **mental model** for how access and visibility work in CISO Ass
 
 1. Almost everything is bound to a **domain**.
 2. Permissions are inherited **down the domain tree**.
-3. Some objects are **published** — visible across the tree — and assessments are not.
+3. Some permissions are granted by a domain **default role**.
 
 The combination of these three is what produces the most common "why am I seeing items from another domain here?" moment, which the last two sections explain and resolve.
 
@@ -37,26 +37,27 @@ Permissions only flow **downward**: a role on a sub-domain does _not_ grant any 
 
 ### The one exception: third-party workspaces
 
-A **third-party workspace** — the folder holding a vendor's questionnaire, an *enclave* internally — is the one place where the tree deliberately stops conducting. Access granted there does not reach up: a representative with view rights on their workspace sees their questionnaire and nothing published in the domains above it. That containment is what makes it safe to give an external party an account on your instance at all.
+A **third-party workspace** — the folder holding a vendor's questionnaire, an *enclave* internally — is the one place where the tree deliberately stops conducting. Access granted there does not reach up: a representative with view rights on their workspace sees their questionnaire and nothing the domains above it share. That containment is what makes it safe to give an external party an account on your instance at all.
 
 Each third party gets one workspace per domain. See [third-party risk](third-party-risk.md#the-third-party-workspace).
 
 The same inheritance also drives reporting: most dashboards and analytics roll up across a domain _and_ its descendants, so a leadership-level view on the parent domain is automatically the consolidated view across its sub-tree.
 
-## Publication — why catalogues appear across all domains
+## Domain default role — why catalogues appear across all domains
 
-Some objects exist to be **shared**. Frameworks, threats, risk matrices, reference controls, and other catalogue-style items wouldn't be useful if they were trapped in a single domain — every team needs to be able to pull from the same shared library.
+Every domain has **members**: the people its own and its sub-domains' IAM groups grant roles to. A domain can carry a **default role** — and the default role is what the domain grants its members, **on the domain itself** (and only there: the grant is never recursive).
 
-CISO Assistant models this through a built-in flag — **`is_published`** — that any object can carry. An object marked as published is visible inside every sub-domain of its own domain, _as if it had been attached to each one_. Publication is a **visibility** mechanism only; it does not let users in other domains create, update, or delete the object.
+For example: if the **EMEA** domain has the _Baseline reader_ default role, then a user granted any role on **EMEA** or **EMEA/France** through the IAM groups is a member of EMEA, and can view EMEA's catalog objects. The grant never extends downward: EMEA's default role gives nothing on **EMEA/France** — what members see there comes from their own roles.
 
-By default:
+By default, the global domain (the root) carries the **Baseline reader** default role, which grants view access to catalog objects. Everyone in the organization is a member under the root, so everyone can read the root-level catalog.
 
-- **Catalogue-style objects** (frameworks, threats, matrices, reference controls, libraries, terminologies, …) are published — they live "above" individual domains and are intended to be reused.
-- **Assessments** (audits, risk assessments, BIAs, entity assessments) are **not published** — they belong to a specific domain and stay there.
+Some objects exist to be **shared**. Frameworks, threats, risk matrices, reference controls, and other catalogue-style items wouldn't be useful if they were trapped in a single domain — every team needs to be able to pull from the same shared library. That's why catalog objects (usually stored in the root domain) are viewable by everyone in the organization.
 
-The most common surprise this creates is when a user opens the platform and sees a library of frameworks or threats they "shouldn't" have access to. They aren't seeing them through a permissions hole — they're seeing them because the catalogue is published from a domain that sits above theirs.
+Who is *not* a member, and why: third parties hold their grants inside third-party workspaces, which are not the domain's groups; service accounts hold direct assignments — no group grants them anything, so they read exactly what their own assignment names. Neither ever receives anything from a default role.
 
-If you want to keep a specific object _out_ of the published view, the simplest trick is to attach it to a leaf sub-domain (a domain with no children) — nothing inherits from a leaf.
+The default role is a dial, not a law. In the enterprise edition, each domain's default role can be **tuned**: replaced by a narrower view-only role (a custom role listing exactly the object types this domain shares), or **removed entirely** — a domain with no default role shares nothing ambiently, and its members see exactly what their own roles grant. Removing the *root* domain's default role goes all the way: the instance then runs an **explicit-grant policy**, where nothing is ambient — even the catalog is visible only to those whose roles name it. It's one field on the domain, so tightening takes effect immediately and is just as easy to revert.
+
+Configuring default roles is an **enterprise** capability. In the community edition, the default role exists only on the root domain, fixed to _Baseline reader_ — it cannot be changed, and no other domain carries one.
 
 ## Why you sometimes see items from other domains
 
@@ -65,7 +66,7 @@ Assessments routinely _compose_ objects across the tree. Risk assessments refere
 When you're working inside one assessment, the platform's selectors and pickers don't just show you what's in the assessment's own domain — they show you **everything you have access to**. So a risk scenario authored inside the _France_ domain can pull in:
 
 - A shared applied control attached to the _EMEA_ parent domain (you can see it because of inheritance).
-- A threat from the global library (you can see it because it's published).
+- A threat from the global library (you can see it because the root domain usually has a "baseline reader" default role).
 - An asset attached to a sibling _Germany_ domain (if your role gives you access there).
 
 This is by design — composing across the organisation is the whole point of a centralised GRC platform — but it can be disorienting on day one. The rule is consistent: you see what you have access to, regardless of which domain you started on.

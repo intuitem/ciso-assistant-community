@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { invalidateAll } from '$app/navigation';
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { refreshAll } from '$app/navigation';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 
 	interface Transition {
 		value: string;
@@ -164,14 +164,14 @@
 			}
 			payload = await res.json();
 			picked = null;
-			await invalidateAll();
+			await refreshAll();
 		} finally {
 			submitting = false;
 		}
 	}
 </script>
 
-<div class="card bg-white p-4 shadow-lg space-y-3">
+<div class="card bg-surface-50-950 p-4 shadow-lg space-y-3">
 	<div class="flex items-center justify-between flex-wrap gap-2">
 		<span class="font-semibold">{m.commitment()}</span>
 		<span class="badge preset-tonal-surface">

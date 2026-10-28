@@ -29,6 +29,7 @@ from rest_framework.status import (
 from django.conf import settings
 
 from global_settings.models import GlobalSettings
+from core import mailer
 from core.models import Actor
 from core.utils import RoleCodename
 from .models import (
@@ -236,12 +237,20 @@ class CurrentUserView(views.APIView):
             content_type=Folder.ContentType.DOMAIN,
         ).values_list("id", flat=True)
 
-        domain_permissions = RoleAssignment.get_permissions_per_folder(
+        # Most folders share the same codenames (a recursive grant covers a whole
+        # subtree), so each distinct set is sent once and folders point to it by
+        # index: sending the sets inline cost O(folders x codenames) bytes.
+        permission_sets: list[list[str]] = []
+        set_indexes: dict[frozenset[str], int] = {}
+        domain_permissions: dict[str, int] = {}
+        for folder_id, codenames in RoleAssignment.get_permissions_per_folder(
             principal=request.user, is_recursive=True
-        )
-        domain_permissions = {
-            k: list(v) for k, v in domain_permissions.items()
-        }  # this what matters
+        ).items():
+            key = frozenset(codenames)
+            if key not in set_indexes:
+                set_indexes[key] = len(permission_sets)
+                permission_sets.append(sorted(key))
+            domain_permissions[folder_id] = set_indexes[key]
 
         res_data = {
             "id": request.user.id,
@@ -260,9 +269,10 @@ class CurrentUserView(views.APIView):
             "is_local": request.user.is_local,
             "is_sso": request.user.is_sso,
             "accessible_domains": [str(f) for f in accessible_domains],
+            "permission_sets": permission_sets,
             "domain_permissions": domain_permissions,
             "root_folder_id": Folder.get_root_folder().id,
-            "preferences": request.user.preferences,
+            "preferences": request.user.get_preferences(),
             "has_mfa_enabled": request.user.has_mfa_enabled(),
             "is_superuser": request.user.is_superuser,
         }
@@ -291,6 +301,9 @@ class SessionTokenView(views.APIView):
         # Log the user in and get the session token
         # This token is used for allauth's authentication flows
         login(request, user)
+        # Same-hostname deployments forward the browser cookies here, so this
+        # may be the callback session and its short TTL must not be inherited.
+        request.session.set_expiry(None)
         copy_slo_state_from_session_key(
             request, request.META.get("HTTP_X_SSO_SESSION_KEY")
         )
@@ -305,7 +318,7 @@ class PasswordResetView(views.APIView):
     def post(self, request):
         email = request.data["email"]  # type: ignore
         associated_user = User.objects.filter(email__iexact=email).first()
-        if settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE:
+        if mailer.mailing_enabled():
             if associated_user is not None and associated_user.is_local:
                 try:
                     logger.info(
@@ -647,7 +660,7 @@ class ServiceAccountViewSet(viewsets.ModelViewSet):
     def get_write_serializer_class(self):
         """Resolve the write serializer by name through MODULE_PATHS, like
         BaseModelViewSet does — the seam the enterprise build uses to layer
-        license rules (seat quota) on top without any license code here."""
+        its license rules on top without any license code here."""
         # Deferred import: core.serializers circles into iam at import time.
         from core.serializers import SerializerFactory
 

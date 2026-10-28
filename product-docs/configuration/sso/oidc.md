@@ -23,8 +23,9 @@ Once you've retrieved the **Client ID**, the **Client Secret** and the **Issuer 
 
     <figure><img src="../../.gitbook/assets/image (6) (1).png" alt=""><figcaption></figcaption></figure>
 7. Enter the **Server URL**
-8. And that's it! Don't forget to **click the 'Save' button**
-9. You should now be able to see the **Login with SSO** button
+8. If your identity provider requires other OAuth scopes, open **Advanced settings** and enter them as a comma-separated list in **Additional scopes**. They are appended to the default `openid`, `profile`, and `email` scopes.
+9. And that's it! Don't forget to **click the 'Save' button**
+10. You should now be able to see the **Login with SSO** button
 
 <div align="left" data-full-width="false"><figure><img src="../../.gitbook/assets/image (8).png" alt="" width="375"><figcaption></figcaption></figure></div>
 

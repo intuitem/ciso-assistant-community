@@ -1,11 +1,11 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { fetchAllPages } from '$lib/utils/pagination';
-import { del, postJSON } from '$lib/utils/portalApi';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { fetchAllPages } from '#lib/utils/pagination.js';
+import { del, postJSON } from '#lib/utils/portalApi.js';
 import { error, fail, redirect, type Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch, locals }) => {
-	if (!locals.featureflags?.custom_portals) redirect(302, '/');
+	if (!(await locals.getFeatureFlags())?.custom_portals) redirect(302, '/');
 	const [portals, presets] = await Promise.all([
 		fetchAllPages(fetch, `${BASE_API_URL}/portals/`),
 		fetchAllPages(fetch, `${BASE_API_URL}/portal-presets/`)
