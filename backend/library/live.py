@@ -204,6 +204,10 @@ def live_framework_to_object(framework) -> dict:
                 "typical_evidence": node.typical_evidence,
                 "implementation_groups": node.implementation_groups,
                 "visibility_expression": node.visibility_expression,
+                "min_score": node.min_score,
+                "max_score": node.max_score,
+                "scores_definition_ref": node.scores_definition_ref,
+                "target_score": node.target_score,
                 "translations": node.translations or None,
             }
         )
@@ -327,6 +331,7 @@ def live_framework_to_object(framework) -> dict:
             "score_calculation_method": framework.score_calculation_method,
             "anchor_na_to_target": framework.anchor_na_to_target,
             "target_score": framework.target_score,
+            "result_aggregation": framework.result_aggregation,
             "translations": framework.translations or None,
             "requirement_nodes": requirement_nodes,
         }

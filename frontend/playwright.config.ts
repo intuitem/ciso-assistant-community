@@ -5,7 +5,8 @@ const config: PlaywrightTestConfig = {
 	webServer: {
 		command: process.env.COMPOSE_TEST
 			? 'echo "The docker compose frontend server didn\'t start correctly"'
-			: 'pnpm run preview',
+			: // not `pnpm run`: pnpm 12 puts scripts in their own process group, so Playwright's teardown kill misses vite and hangs
+				'./node_modules/.bin/vite preview',
 		port: process.env.COMPOSE_TEST ? 3000 : 4173,
 		timeout: 120 * 1000,
 		reuseExistingServer: !process.env.CI

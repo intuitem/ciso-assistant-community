@@ -8,7 +8,7 @@ from typing import Protocol, Iterator
 import json
 import structlog
 
-from chat.embedding_models import DEFAULT_EMBEDDING_MODEL
+from chat.embedding_models import DEFAULT_EMBEDDING_MODEL, INFERENCE_LOCK
 from chat.memory import (
     SESSION_SUMMARY_NOTE,
     strip_framing_markers,
@@ -284,7 +284,8 @@ class SentenceTransformerEmbedder:
     def __init__(self, model_name: str = DEFAULT_EMBEDDING_MODEL):
         from sentence_transformers import SentenceTransformer
 
-        self.model = SentenceTransformer(model_name)
+        with INFERENCE_LOCK:  # loading moves weights onto the shared device too
+            self.model = SentenceTransformer(model_name)
         self._dimensions = self.model.get_sentence_embedding_dimension()
 
     @property
@@ -292,7 +293,8 @@ class SentenceTransformerEmbedder:
         return self._dimensions
 
     def embed(self, texts: list[str]) -> list[list[float]]:
-        embeddings = self.model.encode(texts, convert_to_numpy=True)
+        with INFERENCE_LOCK:
+            embeddings = self.model.encode(texts, convert_to_numpy=True)
         return embeddings.tolist()
 
     def embed_query(self, text: str) -> list[float]:

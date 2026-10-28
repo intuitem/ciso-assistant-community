@@ -3,9 +3,9 @@
 
 	import { setContext, onDestroy } from 'svelte';
 
-	import SuperForm from '$lib/components/Forms/Form.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
+	import SuperForm from '#lib/components/Forms/Form.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
 	import FolderTreeSelect from './FolderTreeSelect.svelte';
 	import LoadingSpinner from '../utils/LoadingSpinner.svelte';
 
@@ -106,21 +106,21 @@
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
-	import { modelSchema } from '$lib/utils/schemas';
-	import type { ModelInfo, urlModel, CacheLock } from '$lib/utils/types';
+	import { modelSchema } from '#lib/utils/schemas.js';
+	import type { ModelInfo, urlModel, CacheLock } from '#lib/utils/types.js';
 	import { superForm, superValidate, type SuperValidated } from 'sveltekit-superforms';
-	import type { FormDataShape } from '$lib/utils/schemas';
-	import { browser } from '$app/environment';
-	import { page } from '$app/stores';
-	import { m } from '$paraglide/messages';
+	import type { FormDataShape } from '#lib/utils/schemas.js';
+	import { browser } from '$app/env';
+	import { page } from '$app/state';
+	import { m } from '#paraglide/messages.js';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
-	import { getSecureRedirect } from '$lib/utils/helpers';
-	import { createModalCache } from '$lib/utils/stores';
+	import { getSecureRedirect } from '#lib/utils/helpers.js';
+	import { createModalCache } from '#lib/utils/stores.js';
 	import FilteringLabelForm from './ModelForm/FilteringLabelForm.svelte';
 	import OperationalScenarioForm from './ModelForm/OperationalScenarioForm.svelte';
 	import StrategicScenarioForm from './ModelForm/StrategicScenarioForm.svelte';
-	import { goto } from '$lib/utils/breadcrumbs';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { goto } from '#lib/utils/breadcrumbs.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 
 	interface Props {
 		form: SuperValidated<FormDataShape>;
@@ -256,8 +256,8 @@
 	let urlModelFromPage = $state();
 
 	run(() => {
-		if ($page) {
-			urlModelFromPage = `${$page.url}`.replace(/^.*:\/\/[^/]+/, '');
+		if (page) {
+			urlModelFromPage = `${page.url}`.replace(/^.*:\/\/[^/]+/, '');
 			createModalCache.setModelName(urlModelFromPage);
 			if (caching) {
 				const currentCache = createModalCache.data[model.urlModel];
@@ -589,7 +589,7 @@
 				{formDataCache}
 				{object}
 				{initialData}
-				{$page}
+				$page={page}
 				{...rest}
 			/>
 		{:else if URLModel === 'validation-flows'}
@@ -741,7 +741,15 @@
 				{...rest}
 			/>
 		{:else if URLModel === 'processings'}
-			<ProcessingForm {form} {model} {cacheLocks} {formDataCache} {context} {...rest} />
+			<ProcessingForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				initialData={{ ...initialData, ...additionalInitialData }}
+				{context}
+				{...rest}
+			/>
 		{:else if URLModel === 'purposes'}
 			<PurposeForm {form} {model} {cacheLocks} {formDataCache} {context} {initialData} {...rest} />
 		{:else if URLModel === 'personal-data'}
@@ -1103,6 +1111,7 @@
 				{formDataCache}
 				{initialData}
 				{data}
+				{object}
 				{...rest}
 			/>
 		{:else if URLModel === 'metric-instances'}
@@ -1113,6 +1122,7 @@
 				{formDataCache}
 				initialData={{ ...initialData, ...additionalInitialData }}
 				{data}
+				{object}
 				{...rest}
 			/>
 		{:else if URLModel === 'custom-metric-samples'}
@@ -1198,8 +1208,13 @@
 
 						isLoading = true;
 					}}
-					>{#if isLoading}{m.loading()} <LoadingSpinner />{:else}{m.save()}{/if}</button
 				>
+					{#if isLoading}
+						{m.loading()} <LoadingSpinner />
+					{:else}
+						{m.save()}
+					{/if}
+				</button>
 			{:else}
 				{#if cancelButton}
 					<button

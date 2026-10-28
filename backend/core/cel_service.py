@@ -2,17 +2,28 @@
 
 from __future__ import annotations
 
+import copy
 import re
 
 import celpy
 import celpy.celtypes as celtypes
 import structlog
 
+from core.quick_form_ratings import (
+    cel_ratings,
+    evaluate_ratings,
+    expand_scales,
+    probe_ratings,
+    scales_error,
+    value_names,
+)
+
 from core.quick_form_scoring import (
     aggregate_form,
     aggregate_page,
     clamp,
     normalize_form_aggregation,
+    project_sum,
     score_bounds,
 )
 
@@ -61,8 +72,10 @@ def _build_answer_data(ca, in_scope_node_ids) -> dict[str, dict]:
     for answer in answers:
         q = answer.question
         selected = list(answer.selected_choices.all())
+        # A negative weight has no defined meaning; treat it as 0.
+        weight = max(q.weight, 0)
         score = sum(
-            (c.add_score or 0) * q.weight for c in selected if c.add_score is not None
+            (c.add_score or 0) * weight for c in selected if c.add_score is not None
         )
         entry = {
             "value": answer.value,
@@ -70,7 +83,7 @@ def _build_answer_data(ca, in_scope_node_ids) -> dict[str, dict]:
             "selected_choices": [
                 extract_node_id(c.urn) for c in selected if extract_node_id(c.urn)
             ],
-            "weight": q.weight,
+            "weight": weight,
             "type": q.type,
         }
         q_node_id = extract_node_id(q.urn)
@@ -175,12 +188,32 @@ def _build_context_dict(
     return ctx
 
 
+def _with_descendants(framework, urns: set[str]) -> set[str]:
+    """`urns` plus every requirement node below one of them."""
+    from core.models import RequirementNode
+
+    children: dict[str, list[str]] = {}
+    for urn, parent_urn in RequirementNode.objects.filter(
+        framework=framework, parent_urn__isnull=False
+    ).values_list("urn", "parent_urn"):
+        children.setdefault(parent_urn, []).append(urn)
+    result, pending = set(urns), list(urns)
+    while pending:
+        for child in children.get(pending.pop(), ()):
+            if child not in result:
+                result.add(child)
+                pending.append(child)
+    return result
+
+
 def build_cel_context(compliance_assessment) -> tuple[dict, set[str]]:
     """Build the evaluation context dict from a ComplianceAssessment.
 
     Returns (context_dict, hidden_urns) where hidden_urns contains URNs of
-    requirements whose visibility_expression evaluated to false.
-    Hidden URNs may include both assessable and non-assessable (splash screen) nodes.
+    requirements whose visibility_expression evaluated to false, and of every
+    node below one of them: a hidden section hides its whole subtree.
+    Hidden URNs may include both assessable and non-assessable (section, splash
+    screen) nodes.
     """
     from core.models import RequirementAssessment, RequirementNode
     from core.utils import extract_node_id
@@ -290,26 +323,23 @@ def build_cel_context(compliance_assessment) -> tuple[dict, set[str]]:
                 )
                 # Fail-open: keep requirement visible on error
 
+    # A hidden node hides its descendants, whatever their own expressions say
+    if hidden_urns:
+        hidden_urns = _with_descendants(framework, hidden_urns)
+
     # Phase 3: rebuild context excluding hidden assessable requirements
     hidden_assessable = hidden_urns & {n["urn"] for n in in_scope}
     if hidden_assessable:
         visible_scope = [n for n in in_scope if n["urn"] not in hidden_assessable]
         visible_urns = {n["urn"] for n in visible_scope}
-        visible_answer_data = {
-            k: v
-            for k, v in answer_data.items()
-            if k in {extract_node_id(u) for u in visible_urns if extract_node_id(u)}
-        }
+        visible_answer_data = _build_answer_data(ca, [n["id"] for n in visible_scope])
         visible_ra_rows = {k: v for k, v in ra_rows.items() if k in visible_urns}
-        visible_outcomes = (
-            {k: v for k, v in computed_outcomes.items()} if computed_outcomes else {}
-        )
         final_context = _build_context_dict(
             visible_scope,
             visible_ra_rows,
             visible_answer_data,
             max_score,
-            visible_outcomes,
+            computed_outcomes,
             **scale,
         )
         final_context["hidden_requirements"] = [
@@ -527,8 +557,10 @@ def evaluate_outcomes(compliance_assessment) -> None:
 def _question_max_score(question) -> int:
     """Best achievable score on a choice question: the top choice for a
     unique choice, every positive choice for a multiple choice."""
+    # A negative weight has no defined meaning; treat it as 0.
+    weight = max(question.weight, 0)
     scores = [
-        (c.add_score or 0) * question.weight
+        (c.add_score or 0) * weight
         for c in question.choices.all()
         if c.add_score is not None
     ]
@@ -546,7 +578,11 @@ def _quick_form_snapshot(response) -> dict:
     computation need, keyed to avoid a second round of queries.
     """
     from core.models import Answer, Question, QuickFormPage
-    from core.utils import _build_answer_context, _is_question_visible
+    from core.utils import (
+        _build_answer_context,
+        _is_question_visible,
+        question_score_bounds,
+    )
 
     pages = list(
         QuickFormPage.objects.filter(quick_form_id=response.quick_form_id)
@@ -577,11 +613,19 @@ def _quick_form_snapshot(response) -> dict:
         visible = _is_question_visible(question, answers_by_urn, questions_by_urn)
         answer = answers_by_qid.get(question.id)
         selected = list(answer.selected_choices.all()) if answer else []
+        # A negative weight has no defined meaning; treat it as 0.
+        weight = max(question.weight, 0)
         score = sum(
-            (c.add_score or 0) * question.weight
-            for c in selected
-            if c.add_score is not None
+            (c.add_score or 0) * weight for c in selected if c.add_score is not None
         )
+        choices = list(question.choices.all())
+        scores = [c.add_score for c in choices if c.add_score is not None]
+        lo, hi = question_score_bounds(
+            [c.add_score or 0 for c in choices], question.type == "multiple_choice"
+        )
+        if not question.required:
+            # A question that can be skipped contributes 0.
+            lo, hi = min(lo, 0), max(hi, 0)
         per_question[question.id] = {
             "question": question,
             "page_id": question.page_id,
@@ -590,9 +634,13 @@ def _quick_form_snapshot(response) -> dict:
             "answer": answer,
             "selected": selected,
             "score": score,
+            "weight": weight,
+            # Unweighted reachable range: the scale a weighted SUM is projected onto.
+            "lo": lo,
+            "hi": hi,
             "max_score": _question_max_score(question),
             "scorable": question.type in ("unique_choice", "multiple_choice")
-            and any(c.add_score is not None for c in question.choices.all()),
+            and bool(scores),
         }
     form = response.quick_form
     return {
@@ -631,8 +679,10 @@ def _quick_form_context(snapshot, hidden_page_ids, computed_outcomes) -> dict:
                 {
                     "score": entry["score"],
                     "max_score": entry["max_score"],
-                    "weight": question.weight,
+                    "weight": entry["weight"],
                     "answered": entry["answered"],
+                    "lo": entry["lo"],
+                    "hi": entry["hi"],
                 }
             )
         stats["total_count"] += 1
@@ -658,7 +708,7 @@ def _quick_form_context(snapshot, hidden_page_ids, computed_outcomes) -> dict:
                     for c in entry["selected"]
                     if extract_node_id(c.urn)
                 ],
-                "weight": question.weight,
+                "weight": entry["weight"],
                 "type": question.type,
                 "answered": entry["answered"],
             }
@@ -689,8 +739,8 @@ def _quick_form_context(snapshot, hidden_page_ids, computed_outcomes) -> dict:
     return {
         "response": {
             "score": score,
-            "score_sum": score_sum,
-            "score_max": score_max,
+            "score_sum": project_sum(score_sum, items),
+            "score_max": project_sum(score_max, items),
             "answered_count": answered_count,
             "total_count": total_count,
             "complete": required_missing == 0,
@@ -781,7 +831,7 @@ def _as_number(result) -> float | None:
 _NOT_PASSED_ON = ("expression", "ref_id", "implementation_groups")
 
 
-def _evaluate_rules(env, rules, context: dict, **log_fields):
+def _evaluate_rules(env, rules, context: dict, seed_values=None, **log_fields):
     """Run outcome rules against `context`, in their order.
 
     Number rules (`kind: number`) run first, each seeing the values computed
@@ -791,7 +841,7 @@ def _evaluate_rules(env, rules, context: dict, **log_fields):
     with their pass-through attributes, and {ref_id: float}. Fail-open per rule:
     an expression error or a non-number result is logged and skipped.
     """
-    values: dict[str, float] = {}
+    values: dict[str, float] = dict(seed_values or {})
     fired: dict[str, dict] = {}
     rules = [r for r in rules or [] if r.get("expression") and r.get("ref_id")]
     base = {
@@ -898,13 +948,19 @@ def _quick_form_probe(quick_form: dict) -> dict:
         "computed_outcomes": {
             str(rule.get("ref_id")): {}
             for rule in quick_form.get("outcomes_definition") or []
-            if rule.get("ref_id") and not is_numeric_rule(rule)
+            if rule.get("ref_id")
+            and not is_numeric_rule(rule)
+            and rule.get("kind") != "rating"
         },
         "values": {
-            str(rule.get("ref_id")): 1.0
-            for rule in quick_form.get("outcomes_definition") or []
-            if rule.get("ref_id") and is_numeric_rule(rule)
+            **{
+                str(rule.get("ref_id")): 1.0
+                for rule in quick_form.get("outcomes_definition") or []
+                if rule.get("ref_id") and is_numeric_rule(rule)
+            },
+            **{name: 1.0 for name in value_names(quick_form)},
         },
+        "ratings": probe_ratings(quick_form),
         "hidden_pages": [],
     }
 
@@ -1060,19 +1116,21 @@ _OUTCOME_REF = re.compile(
 )
 
 
-def _check_rules(rules, probe: dict, check, error) -> None:
+def _check_rules(rules, probe: dict, check, error, rating_values=()) -> None:
     """Check outcome rules in the order they run: a number rule reads the
     number rules above it, a yes/no rule every number rule and the yes/no
     rules above it."""
     for rule in rules:
         kind = rule.get("kind")
-        if kind not in (None, "", "boolean", "number"):
+        if kind not in (None, "", "boolean", "number", "rating"):
             error(
                 str(rule.get("ref_id") or ""),
                 str(rule.get("expression") or ""),
-                f"Unknown rule kind '{kind}': use 'number' or leave it empty",
+                f"Unknown rule kind '{kind}': use 'number', 'rating' or leave it empty",
             )
-    values: dict[str, float] = {}
+    # Rating outcomes are computed before any rule, from their scales.
+    values: dict[str, float] = {name: 1.0 for name in rating_values}
+    rules = [r for r in rules if r.get("kind") != "rating"]
     for rule in [r for r in rules if is_numeric_rule(r)]:
         ref_id = str(rule.get("ref_id") or "")
         expression = str(rule.get("expression") or "")
@@ -1237,7 +1295,10 @@ def validate_quick_form_expressions(quick_form: dict) -> list[dict]:
         )
 
     # Visibility is resolved before any rule runs, so it cannot read `values`.
-    visibility_probe = {k: v for k, v in raw_probe.items() if k != "values"}
+    # Visibility runs before any value or rating is computed.
+    visibility_probe = {
+        k: v for k, v in raw_probe.items() if k not in ("values", "ratings")
+    }
     for page in quick_form.get("pages") or []:
         _check(
             "page_visibility",
@@ -1254,6 +1315,7 @@ def validate_quick_form_expressions(quick_form: dict) -> list[dict]:
         lambda ref_id, expression, message: _error(
             "outcome", ref_id, expression, message
         ),
+        rating_values=value_names(quick_form),
     )
     return errors
 
@@ -1304,9 +1366,17 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
     visibility and outcomes go through the same CEL programs as a filled response —
     so a preview cannot quietly disagree with what respondents will get.
     """
-    from core.utils import _is_question_visible, extract_node_id
+    from core.utils import (
+        _is_question_visible,
+        extract_node_id,
+        question_score_bounds,
+    )
 
     answers = answers or {}
+    # A draft names its scales; the choices they stand for exist only once imported.
+    quick_form = copy.deepcopy(quick_form)
+    if scales_error(quick_form) is None:
+        expand_scales(quick_form)
     pages = []
     questions_by_urn = {}
     for page in quick_form.get("pages") or []:
@@ -1336,8 +1406,28 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
         value = answers.get(entry["urn"])
         return value is not None and value != ""
 
+    def weight_of(entry):
+        # A negative weight has no defined meaning; treat it as 0.
+        raw = entry.get("weight")
+        return max(int(1 if raw is None else raw), 0)
+
+    def has_score(entry):
+        return any(
+            choice.get("add_score") is not None for choice in entry.get("choices") or []
+        )
+
+    def bounds_of(entry):
+        scores = [
+            int(choice.get("add_score") or 0) for choice in entry.get("choices") or []
+        ]
+        lo, hi = question_score_bounds(scores, entry.get("type") == "multiple_choice")
+        if entry.get("required", True) is False:
+            # A question that can be skipped contributes 0.
+            return min(lo, 0), max(hi, 0)
+        return lo, hi
+
     def score_of(entry):
-        weight = int(entry.get("weight") or 1)
+        weight = weight_of(entry)
         chosen = set(selected_of(entry))
         return sum(
             int(choice.get("add_score") or 0) * weight
@@ -1346,7 +1436,7 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
         )
 
     def max_score_of(entry):
-        weight = int(entry.get("weight") or 1)
+        weight = weight_of(entry)
         scores = [
             int(choice.get("add_score") or 0) * weight
             for choice in entry.get("choices") or []
@@ -1395,17 +1485,17 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
                     totals["max"] += max_score_of(entry)
                     if answered:
                         totals["sum"] += score_of(entry)
-                        totals["weight"] += int(entry.get("weight") or 1)
-                    if any(
-                        c.get("add_score") is not None
-                        for c in entry.get("choices") or []
-                    ):
+                        totals["weight"] += weight_of(entry)
+                    if has_score(entry):
+                        lo, hi = bounds_of(entry)
                         page_items.append(
                             {
                                 "score": score_of(entry),
                                 "max_score": max_score_of(entry),
-                                "weight": int(entry.get("weight") or 1),
+                                "weight": weight_of(entry),
                                 "answered": answered,
+                                "lo": lo,
+                                "hi": hi,
                             }
                         )
                 q_node_id = extract_node_id(entry["urn"])
@@ -1418,7 +1508,7 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
                             for u in selected_of(entry)
                             if extract_node_id(u)
                         ],
-                        "weight": int(entry.get("weight") or 1),
+                        "weight": weight_of(entry),
                         "type": entry.get("type") or "text",
                         "answered": answered,
                     }
@@ -1445,8 +1535,8 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
         return {
             "response": {
                 "score": score,
-                "score_sum": totals["sum"],
-                "score_max": totals["max"],
+                "score_sum": project_sum(totals["sum"], items),
+                "score_max": project_sum(totals["max"], items),
                 "score_weight": totals["weight"],
                 "answered_count": totals["answered"],
                 "total_count": totals["total"],
@@ -1474,8 +1564,29 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
             logger.warning("preview_visibility_error", expression=expression)
 
     context = build_context(hidden, {}) if hidden else initial
+    rating_values, ratings = evaluate_ratings(
+        quick_form,
+        [
+            {
+                "urn": page.get("urn"),
+                "answers": [
+                    (entry.get("config") or {}, (selected_of(entry) or [None])[0])
+                    for entry in page["_questions"]
+                    if _is_question_visible(entry, answers, questions_by_urn)
+                ],
+            }
+            for page in pages
+            if page.get("urn") not in hidden
+        ],
+    )
+    context["ratings"] = cel_ratings(ratings)
+    context["hidden_pages"] = sorted(u for u in hidden if u)
     computed, values = _evaluate_rules(
-        env, quick_form.get("outcomes_definition"), context, preview=True
+        env,
+        quick_form.get("outcomes_definition"),
+        context,
+        seed_values=rating_values,
+        preview=True,
     )
     context["values"] = values
 
@@ -1503,7 +1614,10 @@ def evaluate_quick_form_document(quick_form: dict, answers: dict | None = None) 
         "score": score,
         "computed_outcome": computed,
         "computed_values": values,
+        "ratings": ratings,
         "context": context,
+        # The form as evaluated: scale questions with their levels as choices.
+        "quick_form": quick_form,
     }
 
 
@@ -1557,15 +1671,37 @@ def evaluate_quick_form(response, persist: bool = True) -> dict:
     )
     context["hidden_pages"] = sorted(hidden_page_urns)
 
+    rating_values, ratings = evaluate_ratings(
+        form,
+        [
+            {
+                "urn": page["urn"],
+                "answers": [
+                    (
+                        entry["question"].config or {},
+                        entry["selected"][0].urn if entry["selected"] else None,
+                    )
+                    for entry in snapshot["per_question"].values()
+                    if entry["page_id"] == page["id"] and entry["visible"]
+                ],
+            }
+            for page in snapshot["pages"]
+            if page["id"] not in hidden_page_ids
+        ],
+    )
+    context["ratings"] = cel_ratings(ratings)
     computed, values = _evaluate_rules(
         env,
         form.outcomes_definition,
         context,
+        seed_values=rating_values,
         quick_form_response_id=str(response.pk),
     )
     context["values"] = values
     has_rules = bool(form.outcomes_definition)
-    has_numeric = any(is_numeric_rule(r) for r in form.outcomes_definition or [])
+    has_numeric = bool(rating_values) or any(
+        is_numeric_rule(r) for r in form.outcomes_definition or []
+    )
     computed_outcome = computed if has_rules else None
     computed_values = values if has_numeric else None
 
@@ -1616,4 +1752,5 @@ def evaluate_quick_form(response, persist: bool = True) -> dict:
         "score": score,
         "computed_outcome": computed_outcome,
         "computed_values": computed_values,
+        "ratings": ratings,
     }

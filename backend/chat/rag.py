@@ -12,7 +12,7 @@ from typing import Optional, Any
 from django.contrib.auth.models import Permission
 
 from iam.models import Folder, RoleAssignment
-from chat.embedding_models import RERANKER_MODEL as _RERANKER_MODEL
+from chat.embedding_models import INFERENCE_LOCK, RERANKER_MODEL as _RERANKER_MODEL
 from qdrant_client.models import Filter, FieldCondition, MatchAny, MatchValue
 
 logger = structlog.get_logger(__name__)
@@ -28,13 +28,16 @@ def _get_reranker():
     """Get the cross-encoder re-ranker, loading on first use."""
     global _reranker
     if _reranker is None:
-        try:
-            from sentence_transformers import CrossEncoder
+        with INFERENCE_LOCK:
+            if _reranker is not None:
+                return _reranker
+            try:
+                from sentence_transformers import CrossEncoder
 
-            _reranker = CrossEncoder(_RERANKER_MODEL)
-            logger.info("reranker_loaded", model=_RERANKER_MODEL)
-        except Exception as e:
-            logger.warning("reranker_load_failed", error=e)
+                _reranker = CrossEncoder(_RERANKER_MODEL)
+                logger.info("reranker_loaded", model=_RERANKER_MODEL)
+            except Exception as e:
+                logger.warning("reranker_load_failed", error=e)
     return _reranker
 
 
@@ -203,7 +206,8 @@ def search(
         t0 = time.time()
         pairs = [(query, r.payload.get("text", "")[:512]) for r in merged]
         try:
-            scores = reranker.predict(pairs)
+            with INFERENCE_LOCK:
+                scores = reranker.predict(pairs)
             ranked = sorted(zip(scores, merged), key=lambda x: x[0], reverse=True)
             merged = [r for _, r in ranked[:top_k]]
             logger.info(

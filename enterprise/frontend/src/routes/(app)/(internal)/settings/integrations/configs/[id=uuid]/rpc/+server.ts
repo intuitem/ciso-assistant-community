@@ -1,6 +1,6 @@
-import { error, json } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { BASE_API_URL } from '$lib/utils/constants';
+import { BASE_API_URL } from '#lib/utils/constants.js';
 
 export const POST: RequestHandler = async ({ params, request, fetch, locals }) => {
 	const { id } = params;
@@ -40,7 +40,7 @@ export const POST: RequestHandler = async ({ params, request, fetch, locals }) =
 			return error(response.status, data.error || 'Upstream RPC failure');
 		}
 
-		return json(data);
+		return Response.json(data);
 	} catch (err) {
 		console.error('RPC Network Error:', err);
 		return error(502, 'Failed to reach integration backend');

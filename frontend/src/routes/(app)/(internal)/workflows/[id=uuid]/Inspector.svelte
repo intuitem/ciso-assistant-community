@@ -10,14 +10,14 @@
 </script>
 
 <script lang="ts">
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { fetchHookSecret, publicHookUrl } from './hook-url';
 	import { postOps } from './ops';
 	import DataBrowser from './DataBrowser.svelte';
-	import CelInput from './CelInput.svelte';
-	import type { Scope as CelScope } from './compute-assist';
-	import { dig, renderTemplate } from './expressions';
+	import CelInput from '#lib/components/Cel/CelInput.svelte';
+	import type { Scope as CelScope } from '#lib/components/Cel/compute-assist.js';
+	import { dig, renderTemplate } from '#lib/components/Cel/expressions.js';
 	import { TRIGGER_ICONS } from './nodes/TriggerNode.svelte';
 	import {
 		newCondition,
@@ -25,8 +25,15 @@
 		groupsToTree,
 		FILTER_OPS,
 		type Condition
-	} from './filter-dnf';
+	} from '#lib/utils/filter-dnf.js';
 	import { VARIABLE_TYPES } from './builder-constants';
+	import {
+		READ_ROW_DEFAULTS,
+		aggregateRowsOf,
+		applyActionDefaults,
+		ensureAggregateRows,
+		type AggregateRow
+	} from './read-config';
 
 	interface Option {
 		id: string;
@@ -59,7 +66,21 @@
 		subprocessCandidates: Option[];
 		creatableModels?: any[];
 		updatableModels?: any[];
-		readableModels?: { key: string; fields: string[]; includable?: string[] }[];
+		readableModels?: {
+			key: string;
+			fields: string[];
+			kinds?: Record<string, string>;
+			annotations?: string[];
+			computed?: string[];
+			includable?: string[];
+			aggregates?: {
+				name: string;
+				engine: string;
+				needs_field: boolean;
+				accepts: string[];
+				params: string[];
+			}[];
+		}[];
 		fkOptions?: Record<string, Option[]>;
 		workflowId: string;
 		versionId?: string | null;
@@ -165,6 +186,7 @@
 	// buffering); the engine still executes it for graphs that carry it.
 	const ACTION_TYPES = [
 		'create_object',
+		'upsert_objects',
 		'update_object',
 		'attach_evidence',
 		'record_measurement',
@@ -213,6 +235,7 @@
 		date_offset: { base: '', days: 30, weeks: 0, output: '' },
 		compute: { expressions: [] },
 		create_object: { model: 'applied_control', fields: { name: '' }, upsert: false },
+		upsert_objects: { model: 'asset', items: '', fields: { name: '' }, on_item_error: 'continue' },
 		update_object: { model: 'applied_control', id: '', fields: {}, m2m: {} },
 		attach_evidence: {
 			evidence: '',
@@ -326,19 +349,35 @@
 		onChange();
 	}
 
+	const upsertableModels = $derived(creatableModels.filter((entry) => entry.upsert !== false));
+
+	function togglePaginate(on: boolean) {
+		if (on)
+			actionConfig.paginate = {
+				items: '',
+				next: '',
+				cursor_param: '',
+				offset_param: '',
+				count_only: false,
+				max_pages: 10
+			};
+		else delete actionConfig.paginate;
+		onChange();
+	}
+
+	function toggleOauth(on: boolean) {
+		if (on) actionConfig.oauth = { token_url: '', client_id: '', client_secret: '', scope: '' };
+		else delete actionConfig.oauth;
+		onChange();
+	}
+
 	function resetCreateFields() {
 		actionConfig.fields = { name: actionConfig.fields?.name ?? '' };
 		onChange();
 	}
 
 	function initActionConfig() {
-		const type = actionConfig.type;
-		const defaults: any = ACTION_CONFIG_DEFAULTS[type] ?? {};
-		for (const [key, value] of Object.entries(defaults)) {
-			// Clone: the nested literals are shared, and bindings mutate them in
-			// place, so two nodes of the same type would edit one object.
-			if (actionConfig[key] === undefined) actionConfig[key] = structuredClone(value);
-		}
+		applyActionDefaults(actionConfig, ACTION_CONFIG_DEFAULTS[actionConfig.type] ?? {});
 		onChange();
 	}
 
@@ -347,12 +386,7 @@
 	// the template reads it.
 	$effect(() => {
 		if (nodeDomain?.type === 'action' && actionConfig?.type) {
-			const defaults: any = ACTION_CONFIG_DEFAULTS[actionConfig.type] ?? {};
-			for (const [key, value] of Object.entries(defaults)) {
-				// Clone: the nested literals are shared, so two nodes of one
-				// type would otherwise edit the same object.
-				if (actionConfig[key] === undefined) actionConfig[key] = structuredClone(value);
-			}
+			applyActionDefaults(actionConfig, ACTION_CONFIG_DEFAULTS[actionConfig.type] ?? {});
 		}
 		if (nodeDomain?.type === 'trigger') {
 			nodeDomain.trigger_config ??= { type: 'manual' };
@@ -372,6 +406,7 @@
 	const OUTPUT_EXAMPLES: Record<string, string> = {
 		http_request: 'body.summary',
 		create_object: 'created_object_id',
+		upsert_objects: 'created',
 		update_object: 'object_id',
 		create_audit: 'created_object_id',
 		attach_evidence: 'filename',
@@ -614,6 +649,77 @@
 	function toggleReadInclude(name: string, checked: boolean) {
 		const current = readIncludeList(actionConfig.include);
 		actionConfig.include = checked ? [...current, name] : current.filter((entry) => entry !== name);
+		onChange();
+	}
+
+	function setReadMode(mode: string) {
+		actionConfig.mode = mode;
+		if (mode === 'aggregate') {
+			for (const key of Object.keys(READ_ROW_DEFAULTS)) delete actionConfig[key];
+			if (!Array.isArray(actionConfig.aggregates) || !actionConfig.aggregates.length)
+				actionConfig.aggregates = [{ fn: 'count' }];
+		} else {
+			delete actionConfig.aggregates;
+			for (const [key, value] of Object.entries(READ_ROW_DEFAULTS))
+				if (actionConfig[key] === undefined) actionConfig[key] = structuredClone(value);
+		}
+		onChange();
+	}
+
+	const aggregateFunctions = $derived(readableEntry?.aggregates ?? []);
+	function aggregateFn(name: string) {
+		return aggregateFunctions.find((fn) => fn.name === name);
+	}
+	// Columns and annotations a function may run on, by the kind each holds,
+	// then the computed values (always worker-side).
+	function aggregateFieldChoices(
+		fnName: string
+	): { value: string; label: string; worker: boolean }[] {
+		const fn = aggregateFn(fnName);
+		if (!fn || !fn.needs_field || !readableEntry) return [];
+		const kinds = readableEntry.kinds ?? {};
+		const columns = readableEntry.fields
+			.filter((field) => fn.accepts.includes(kinds[field] ?? ''))
+			.map((field) => ({ value: field, label: field, worker: false }));
+		if (fn.name === 'count_distinct') return columns;
+		// A computed value that shadows a column only reshapes its output; the
+		// column is what an aggregate runs on.
+		const computed = (readableEntry.computed ?? [])
+			.filter((name) => !readableEntry.fields.includes(name))
+			.map((name) => ({
+				value: name,
+				label: `${name} (${m.aggregateComputedValue()})`,
+				worker: true
+			}));
+		return [...columns, ...computed];
+	}
+	function aggregateGroupChoices(): string[] {
+		if (!readableEntry) return [];
+		const annotations = new Set(readableEntry.annotations ?? []);
+		return readableEntry.fields.filter((field) => !annotations.has(field));
+	}
+	function aggregateRunsInWorker(row: AggregateRow): boolean {
+		const fn = aggregateFn(row.fn);
+		if (!fn) return false;
+		if (fn.engine === 'python') return true;
+		return !!row.field && !readableEntry?.fields.includes(row.field);
+	}
+	function aggregateRows(): AggregateRow[] {
+		return aggregateRowsOf(actionConfig);
+	}
+	function setAggregateFn(row: AggregateRow, name: string) {
+		row.fn = name;
+		const fn = aggregateFn(name);
+		if (!fn?.needs_field) delete row.field;
+		else if (row.field && !aggregateFieldChoices(name).some((c) => c.value === row.field))
+			delete row.field;
+		if (!fn?.params.includes('p')) delete row.p;
+		else if (row.p === undefined) row.p = 90;
+		onChange();
+	}
+	function setAggregateKey(row: AggregateRow, key: 'field' | 'group_by' | 'as', value: string) {
+		if (value) row[key] = value;
+		else delete row[key];
 		onChange();
 	}
 
@@ -1745,6 +1851,73 @@
 							</select>
 						</label>
 					{/each}
+				{:else if actionConfig.type === 'upsert_objects' && actionConfig.fields}
+					<label>
+						{@render fieldLabel(m.objectToCreate())}
+						<select
+							class="select w-full text-sm"
+							bind:value={actionConfig.model}
+							onchange={resetCreateFields}
+						>
+							{#each upsertableModels as entry (entry.key)}
+								<option value={entry.key}>{safeTranslate(entry.key)}</option>
+							{/each}
+						</select>
+						{#if creatableEntry?.match_on}
+							<span class="text-[10px] text-surface-500">(match on {creatableEntry.match_on})</span>
+						{/if}
+					</label>
+					<label>
+						{@render fieldLabel(m.upsertItems())}
+						<input
+							type="text"
+							class="input w-full text-sm font-mono"
+							placeholder={'{{nodes.list.items}}'}
+							bind:value={actionConfig.items}
+							oninput={onChange}
+						/>
+						<span class="text-[10px] text-surface-500">{m.upsertItemsHint()}</span>
+					</label>
+					{#each [...(creatableEntry?.fields ?? []), ...Object.keys(creatableEntry?.fk_fields ?? {})] as field (field)}
+						{@const narrowed = creatableEntry?.allowed_values?.[field]}
+						<label>
+							{@render fieldLabel(
+								safeTranslate(field) +
+									(field === 'name' || creatableEntry?.required_fields?.includes(field) ? ' *' : '')
+							)}
+							{#if narrowed?.length}
+								<select
+									class="select w-full text-sm"
+									bind:value={actionConfig.fields[field]}
+									onchange={onChange}
+								>
+									<option value={''}>—</option>
+									{#each narrowed as choice (choice)}
+										<option value={choice}>{safeTranslate(choice)}</option>
+									{/each}
+								</select>
+							{:else}
+								<input
+									type="text"
+									class="input w-full text-sm"
+									placeholder={field === 'name' ? '{{item.name}}' : ''}
+									bind:value={actionConfig.fields[field]}
+									oninput={onChange}
+								/>
+							{/if}
+						</label>
+					{/each}
+					<label>
+						{@render fieldLabel(m.onItemFailure())}
+						<select
+							class="select w-full text-sm"
+							bind:value={actionConfig.on_item_error}
+							onchange={onChange}
+						>
+							<option value="continue">{m.continueCollectErrors()}</option>
+							<option value="stop">{m.stopTheRun()}</option>
+						</select>
+					</label>
 				{:else if actionConfig.type === 'update_object'}
 					<label>
 						{@render fieldLabel(m.objectToUpdate())}
@@ -2104,15 +2277,109 @@
 						{@render fieldLabel(m.readMode())}
 						<select
 							class="select w-full text-sm"
-							bind:value={actionConfig.mode}
-							onchange={onChange}
+							value={actionConfig.mode ?? 'list'}
+							onchange={(e) => setReadMode(e.currentTarget.value)}
 						>
 							<option value="list">{m.readModeList()}</option>
 							<option value="first">{m.readModeFirst()}</option>
+							<option value="aggregate">{m.readModeAggregate()}</option>
 						</select>
 					</label>
 
-					{#if readableEntry?.includable?.length}
+					{#if actionConfig.mode === 'aggregate'}
+						{@render fieldLabel(m.readAggregates())}
+						<p class="text-[10px] text-surface-500">{m.readAggregatesHelpText()}</p>
+						<div class="flex flex-col gap-2">
+							{#each aggregateRows() as row, rowIndex (rowIndex)}
+								<div
+									class="flex flex-col gap-1.5 rounded-base border border-surface-200-800 bg-surface-50-950 p-2"
+								>
+									<div class="flex items-center gap-1">
+										<select
+											class="select text-xs flex-1 min-w-0"
+											value={row.fn}
+											onchange={(e) => setAggregateFn(row, e.currentTarget.value)}
+										>
+											{#each aggregateFunctions as fn (fn.name)}
+												<option value={fn.name}>{safeTranslate(`aggregate_${fn.name}`)}</option>
+											{/each}
+										</select>
+										{#if aggregateFn(row.fn)?.needs_field}
+											<select
+												class="select text-xs flex-1 min-w-0"
+												value={row.field ?? ''}
+												onchange={(e) => setAggregateKey(row, 'field', e.currentTarget.value)}
+											>
+												<option value="">—</option>
+												{#each aggregateFieldChoices(row.fn) as choice (choice.value)}
+													<option value={choice.value}>{choice.label}</option>
+												{/each}
+											</select>
+										{/if}
+										<button
+											type="button"
+											title={m.delete()}
+											aria-label={m.delete()}
+											class="btn-icon preset-tonal w-5 h-5 text-[9px] shrink-0 hover:preset-filled-error-500"
+											onclick={() => {
+												aggregateRows().splice(rowIndex, 1);
+												onChange();
+											}}
+										>
+											<i class="fa-solid fa-xmark"></i>
+										</button>
+									</div>
+									<div class="flex items-center gap-1">
+										<select
+											class="select text-xs flex-1 min-w-0"
+											title={m.aggregateGroupBy()}
+											value={row.group_by ?? ''}
+											onchange={(e) => setAggregateKey(row, 'group_by', e.currentTarget.value)}
+										>
+											<option value="">{m.aggregateNoGroup()}</option>
+											{#each aggregateGroupChoices() as field (field)}
+												<option value={field}>{m.aggregateGroupBy()}: {field}</option>
+											{/each}
+										</select>
+										{#if aggregateFn(row.fn)?.params.includes('p')}
+											<input
+												type="number"
+												min="0"
+												max="100"
+												class="input text-xs w-16 shrink-0"
+												title={m.aggregatePercentile()}
+												bind:value={row.p}
+												oninput={onChange}
+											/>
+										{/if}
+										<input
+											type="text"
+											class="input text-xs w-28 shrink-0 font-mono"
+											placeholder={m.aggregateAlias()}
+											value={row.as ?? ''}
+											oninput={(e) => setAggregateKey(row, 'as', e.currentTarget.value)}
+										/>
+									</div>
+									{#if aggregateRunsInWorker(row)}
+										<span class="text-[10px] text-warning-600-400">{m.aggregateRunsInWorker()}</span
+										>
+									{/if}
+								</div>
+							{/each}
+							<button
+								type="button"
+								class="btn preset-tonal text-[10px] self-start"
+								onclick={() => {
+									ensureAggregateRows(actionConfig).push({ fn: 'count' });
+									onChange();
+								}}
+							>
+								<i class="fa-solid fa-plus mr-1"></i>{m.addAggregate()}
+							</button>
+						</div>
+					{/if}
+
+					{#if readableEntry?.includable?.length && actionConfig.mode !== 'aggregate'}
 						{@render fieldLabel(m.readInclude())}
 						<p class="text-[10px] text-surface-500">{m.readIncludeHelpText()}</p>
 						<div class="flex flex-col gap-1">
@@ -2247,51 +2514,53 @@
 						</div>
 					{/if}
 
-					<div class="flex items-end gap-2">
-						<label class="flex-1 min-w-0">
-							{@render fieldLabel(m.orderBy())}
-							<select
-								class="select w-full text-sm"
-								value={readOrderField}
-								onchange={(e) => setReadOrder(e.currentTarget.value, readOrderDesc)}
-							>
-								{#each readableEntry?.fields ?? [] as field (field)}
-									<option value={field}>{field}</option>
-								{/each}
-							</select>
+					{#if actionConfig.mode !== 'aggregate'}
+						<div class="flex items-end gap-2">
+							<label class="flex-1 min-w-0">
+								{@render fieldLabel(m.orderBy())}
+								<select
+									class="select w-full text-sm"
+									value={readOrderField}
+									onchange={(e) => setReadOrder(e.currentTarget.value, readOrderDesc)}
+								>
+									{#each readableEntry?.fields ?? [] as field (field)}
+										<option value={field}>{field}</option>
+									{/each}
+								</select>
+							</label>
+							{#if actionConfig.mode === 'list'}
+								<label class="w-24 shrink-0">
+									{@render fieldLabel(m.resultLimit())}
+									<input
+										type="number"
+										min="1"
+										class="input w-full text-sm"
+										bind:value={actionConfig.limit}
+										oninput={onChange}
+									/>
+								</label>
+								<label class="w-24 shrink-0">
+									{@render fieldLabel(m.startAt())}
+									<input
+										type="text"
+										class="input w-full text-sm"
+										placeholder="0"
+										bind:value={actionConfig.offset}
+										oninput={onChange}
+									/>
+								</label>
+							{/if}
+						</div>
+						<label class="flex items-center gap-1.5 text-xs text-surface-700-300 cursor-pointer">
+							<input
+								type="checkbox"
+								class="checkbox scale-75"
+								checked={readOrderDesc}
+								onchange={(e) => setReadOrder(readOrderField, e.currentTarget.checked)}
+							/>
+							{m.descending()}
 						</label>
-						{#if actionConfig.mode === 'list'}
-							<label class="w-24 shrink-0">
-								{@render fieldLabel(m.resultLimit())}
-								<input
-									type="number"
-									min="1"
-									class="input w-full text-sm"
-									bind:value={actionConfig.limit}
-									oninput={onChange}
-								/>
-							</label>
-							<label class="w-24 shrink-0">
-								{@render fieldLabel(m.startAt())}
-								<input
-									type="text"
-									class="input w-full text-sm"
-									placeholder="0"
-									bind:value={actionConfig.offset}
-									oninput={onChange}
-								/>
-							</label>
-						{/if}
-					</div>
-					<label class="flex items-center gap-1.5 text-xs text-surface-700-300 cursor-pointer">
-						<input
-							type="checkbox"
-							class="checkbox scale-75"
-							checked={readOrderDesc}
-							onchange={(e) => setReadOrder(readOrderField, e.currentTarget.checked)}
-						/>
-						{m.descending()}
-					</label>
+					{/if}
 				{:else if actionConfig.type === 'http_request'}
 					<label>
 						{@render fieldLabel(m.httpMethod())}
@@ -2391,6 +2660,147 @@
 						{m.httpAllowConnectionError()}
 					</label>
 					<span class="text-[10px] text-surface-500">{m.httpErrorHandlingHint()}</span>
+					<label class="flex items-center gap-1.5 text-xs text-surface-700-300 cursor-pointer">
+						<input
+							type="checkbox"
+							class="checkbox scale-75"
+							checked={!!actionConfig.paginate}
+							onchange={(e) => togglePaginate(e.currentTarget.checked)}
+						/>
+						{m.httpPaginate()}
+					</label>
+					{#if actionConfig.paginate}
+						<label>
+							{@render fieldLabel(m.httpPaginateItems())}
+							<input
+								type="text"
+								class="input w-full text-sm font-mono"
+								placeholder="value"
+								bind:value={actionConfig.paginate.items}
+								oninput={onChange}
+							/>
+						</label>
+						<label>
+							{@render fieldLabel(m.httpPaginateNext())}
+							<input
+								type="text"
+								class="input w-full text-sm font-mono"
+								placeholder="@odata.nextLink"
+								bind:value={actionConfig.paginate.next}
+								oninput={onChange}
+							/>
+						</label>
+						<label>
+							{@render fieldLabel(m.httpPaginateCursorParam())}
+							<input
+								type="text"
+								class="input w-full text-sm font-mono"
+								placeholder="cursor"
+								bind:value={actionConfig.paginate.cursor_param}
+								oninput={onChange}
+							/>
+						</label>
+						<label>
+							{@render fieldLabel(m.httpPaginateOffsetParam())}
+							<input
+								type="text"
+								class="input w-full text-sm font-mono"
+								placeholder="$skip"
+								bind:value={actionConfig.paginate.offset_param}
+								oninput={onChange}
+							/>
+						</label>
+						<label>
+							{@render fieldLabel(m.httpPaginateKeep())}
+							<input
+								type="text"
+								class="input w-full text-sm font-mono"
+								placeholder="id, name"
+								value={(actionConfig.paginate.keep ?? []).join(', ')}
+								oninput={(e) => {
+									const keys = e.currentTarget.value
+										.split(',')
+										.map((key) => key.trim())
+										.filter(Boolean);
+									if (keys.length) actionConfig.paginate.keep = keys;
+									else delete actionConfig.paginate.keep;
+									onChange();
+								}}
+							/>
+							<span class="text-[10px] text-surface-500">{m.httpPaginateKeepHint()}</span>
+						</label>
+						<label class="flex items-center gap-1.5 text-xs text-surface-700-300 cursor-pointer">
+							<input
+								type="checkbox"
+								class="checkbox scale-75"
+								bind:checked={actionConfig.paginate.count_only}
+								onchange={onChange}
+							/>
+							{m.httpPaginateCountOnly()}
+						</label>
+						<label>
+							{@render fieldLabel(m.httpPaginateMaxPages())}
+							<input
+								type="number"
+								class="input w-full text-sm"
+								min="1"
+								max="50"
+								bind:value={actionConfig.paginate.max_pages}
+								oninput={onChange}
+							/>
+						</label>
+						<span class="text-[10px] text-surface-500">{m.httpPaginateHint()}</span>
+					{/if}
+					<label class="flex items-center gap-1.5 text-xs text-surface-700-300 cursor-pointer">
+						<input
+							type="checkbox"
+							class="checkbox scale-75"
+							checked={!!actionConfig.oauth}
+							onchange={(e) => toggleOauth(e.currentTarget.checked)}
+						/>
+						{m.httpOauth()}
+					</label>
+					{#if actionConfig.oauth}
+						<label>
+							{@render fieldLabel(m.httpOauthTokenUrl())}
+							<input
+								type="text"
+								class="input w-full text-sm font-mono"
+								placeholder="https://login.microsoftonline.com/tenant-id/oauth2/v2.0/token"
+								bind:value={actionConfig.oauth.token_url}
+								oninput={onChange}
+							/>
+						</label>
+						<label>
+							{@render fieldLabel(m.httpOauthClientId())}
+							<input
+								type="text"
+								class="input w-full text-sm font-mono"
+								bind:value={actionConfig.oauth.client_id}
+								oninput={onChange}
+							/>
+						</label>
+						<label>
+							{@render fieldLabel(m.httpOauthClientSecret())}
+							<input
+								type="text"
+								class="input w-full text-sm font-mono"
+								placeholder={'{{secrets.client_secret}}'}
+								bind:value={actionConfig.oauth.client_secret}
+								oninput={onChange}
+							/>
+						</label>
+						<label>
+							{@render fieldLabel(m.httpOauthScope())}
+							<input
+								type="text"
+								class="input w-full text-sm font-mono"
+								placeholder="https://graph.microsoft.com/.default"
+								bind:value={actionConfig.oauth.scope}
+								oninput={onChange}
+							/>
+						</label>
+					{/if}
 					<p class="text-[10px] text-surface-500 leading-relaxed">
 						<i class="fa-solid fa-key mr-1"></i>{m.secretsHint({ syntax: '{{secrets.name}}' })}
 					</p>

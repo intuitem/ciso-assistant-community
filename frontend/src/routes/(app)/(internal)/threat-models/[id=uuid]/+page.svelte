@@ -1,10 +1,10 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import DetailView from '$lib/components/DetailView/DetailView.svelte';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import DetailView from '#lib/components/DetailView/DetailView.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 	import { SvelteFlowProvider } from '@xyflow/svelte';
 	import ThreatModelGraph from './graph/ThreatModelGraph.svelte';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { page } from '$app/state';
 
 	interface Props {

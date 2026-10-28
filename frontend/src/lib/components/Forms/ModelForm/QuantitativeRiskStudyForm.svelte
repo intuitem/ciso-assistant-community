@@ -1,13 +1,13 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import NumberField from '$lib/components/Forms/NumberField.svelte';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import NumberField from '#lib/components/Forms/NumberField.svelte';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
 	import Select from '../Select.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import { m } from '$paraglide/messages';
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import { m } from '#paraglide/messages.js';
+	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 
@@ -110,6 +110,7 @@
 	{form}
 	multiple
 	optionsEndpoint="actors"
+	lazy
 	optionsLabelField="str"
 	optionsInfoFields={{
 		fields: [{ field: 'type', translate: true }],
@@ -234,6 +235,7 @@
 			{form}
 			multiple
 			optionsEndpoint="actors"
+			lazy
 			optionsLabelField="str"
 			optionsInfoFields={{
 				fields: [{ field: 'type', translate: true }],
@@ -243,6 +245,18 @@
 			cacheLock={cacheLocks['reviewers']}
 			bind:cachedValue={formDataCache['reviewers']}
 			label={m.reviewers()}
+		/>
+		<AutocompleteSelect
+			multiple
+			{form}
+			createFromSelection={true}
+			optionsEndpoint="filtering-labels"
+			optionsLabelField="label"
+			translateOptions={false}
+			field="filtering_labels"
+			helpText={m.labelsHelpText()}
+			label={m.labels()}
+			allowUserOptions="append"
 		/>
 
 		<TextField

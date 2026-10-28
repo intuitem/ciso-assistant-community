@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { getModalStore, type ModalStore } from './stores';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { fetchAllPages } from '$lib/utils/pagination';
-	import { invalidateAll } from '$app/navigation';
-	import { getToastStore } from '$lib/components/Toast/stores';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { fetchAllPages } from '#lib/utils/pagination.js';
+	import { refreshAll } from '$app/navigation';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
 	import { onMount } from 'svelte';
 
 	const modalStore: ModalStore = getModalStore();
@@ -243,7 +243,7 @@
 					messages.push(`${data.errors.length} error(s)`);
 				}
 				toastStore.trigger({ message: messages.join(', ') });
-				await invalidateAll();
+				await refreshAll();
 				parent.onClose();
 			} else {
 				toastStore.trigger({

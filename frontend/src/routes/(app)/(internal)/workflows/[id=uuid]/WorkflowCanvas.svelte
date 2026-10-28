@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
-	import { invalidateAll, goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { m } from '#paraglide/messages.js';
+	import { refreshAll, goto } from '$app/navigation';
+	import { page } from '$app/state';
 	import { getFlash } from 'sveltekit-flash-message';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { Switch } from '@skeletonlabs/skeleton-svelte';
 	import { setContext } from 'svelte';
-	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
+	import { getModalStore, type ModalStore } from '#lib/components/Modals/stores.js';
 	import {
 		SvelteFlow,
 		useSvelteFlow,
@@ -127,6 +127,7 @@
 					taskTemplates.find((t) => t.id === domain.task_template)?.name ??
 					null
 				);
+
 			case 'action': {
 				const config = domain.action_config ?? {};
 				switch (config.type) {
@@ -158,6 +159,7 @@
 					subprocessCandidates.find((w) => w.id === domain.subprocess_workflow)?.name ??
 					null
 				);
+
 			case 'event':
 				return domain.event_key || null;
 			case 'loop': {
@@ -542,15 +544,27 @@
 	let referenceRun = $state<any | null>(null);
 	let referencePinned = $state(false);
 	let referenceFetchInFlight = false;
+	let referenceRequest = 0;
 
 	function pickReference(runs: any[]) {
 		return (
-			runs.find(
-				(run: any) => run.status === 'completed' && Object.keys(run.node_outputs ?? {}).length
-			) ??
-			runs.find((run: any) => Object.keys(run.node_outputs ?? {}).length) ??
+			runs.find((run: any) => run.status === 'completed' && run.has_outputs) ??
+			runs.find((run: any) => run.has_outputs) ??
 			null
 		);
+	}
+
+	async function loadRun(run: any) {
+		const request = ++referenceRequest;
+		const res = await fetch(opsUrl('get-instance'), {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ instance: run.id })
+		});
+		const loaded = res.ok ? await res.json() : null;
+		if (!loaded || request !== referenceRequest) return false;
+		referenceRun = loaded;
+		return true;
 	}
 
 	async function ensureReferenceRun() {
@@ -564,7 +578,8 @@
 			});
 			if (!res.ok) return;
 			const data = await res.json();
-			referenceRun = pickReference(data.results ?? data);
+			const candidate = pickReference(data.results ?? data);
+			if (candidate && !referencePinned) await loadRun(candidate);
 		} finally {
 			// Deliberately no "already attempted" latch: while no run has data
 			// yet, every node selection retries, and the runs-panel poll below
@@ -573,25 +588,32 @@
 		}
 	}
 
-	function pinReference(run: any) {
-		referencePinned = true;
-		referenceRun = run;
+	async function pinReference(run: any) {
+		if (await loadRun(run)) referencePinned = true;
 	}
 
 	// Runs-panel polling feeds this: without an explicit pin, the reference
 	// follows the latest run with data, so the browser populates live.
-	function handleRunsRefreshed(runs: any[]) {
-		if (referencePinned) return;
+	async function handleRunsRefreshed(runs: any[]) {
+		if (referencePinned || referenceFetchInFlight) return;
 		const candidate = pickReference(runs);
-		if (candidate && candidate.id !== referenceRun?.id) {
-			referenceRun = candidate;
+		if (
+			candidate &&
+			(candidate.id !== referenceRun?.id || candidate.status !== referenceRun?.status)
+		) {
+			referenceFetchInFlight = true;
+			try {
+				await loadRun(candidate);
+			} finally {
+				referenceFetchInFlight = false;
+			}
 		}
 	}
 
 	// Node selected → the data browser needs it; data panel open → it shows
 	// per-variable reference values.
 	$effect(() => {
-		if ((selectedNodeId || dataOpen) && !readonly) ensureReferenceRun();
+		if ((selectedNodeId || openPane === 'data') && !readonly) ensureReferenceRun();
 	});
 
 	// Upstream nodes only: data available TO the selected node.
@@ -883,7 +905,7 @@
 			versionGone = true;
 			saveError = m.draftNoLongerExists();
 			saveState = 'error';
-			await invalidateAll();
+			await refreshAll();
 			return false;
 		}
 		if (!res.ok) {
@@ -957,7 +979,7 @@
 		});
 		if (res.ok) {
 			await refreshRegistrations();
-			await invalidateAll();
+			await refreshAll();
 			return;
 		}
 		const body = await res.json().catch(() => ({}));
@@ -1002,7 +1024,7 @@
 			if (res.ok || res.status === 404) {
 				versionGone = true;
 				if (saveTimer) clearTimeout(saveTimer);
-				await invalidateAll();
+				await refreshAll();
 				// Force the remount: when this draft was auto-drafted in-session,
 				// page data (still the published version) is unchanged by the
 				// reload, so the page's {#key} alone would never fire.
@@ -1145,13 +1167,16 @@
 		if (lastSnapshot) lastSnapshot = remapDoc(lastSnapshot);
 	}
 
-	let runsOpen = $state(false);
 	let runsPanel = $state<RunsPanel | null>(null);
-	let triggersOpen = $state(false);
+
+	type BottomPane = 'triggers' | 'runs' | 'data' | 'versions';
+	// One at a time: independent toggles stacked, and enough of them buried the
+	// canvas with no way back except hunting down each button that opened one.
 	// Props are per-mount constants (the page remounts the canvas via {#key}),
 	// so capturing their initial values is correct.
 	// svelte-ignore state_referenced_locally
-	let versionsOpen = $state(versionPinned);
+	let openPane = $state<BottomPane | null>(versionPinned ? 'versions' : null);
+	const togglePane = (pane: BottomPane) => (openPane = openPane === pane ? null : pane);
 
 	// Master switch: gates automatic execution; manual runs keep
 	// working, so the builder stays fully usable while paused.
@@ -1218,7 +1243,7 @@
 		// Flush pending edits like startRun does, or navigating away drops them.
 		const pending = saveState === 'dirty' || saveState === 'saving' || saveState === 'error';
 		if (!readonly && pending && !(await save())) return;
-		await goto(`/workflows/${workflowId}?version=${version.id}`, { invalidateAll: true });
+		await goto(`/workflows/${workflowId}?version=${version.id}`, { refreshAll: true });
 	}
 
 	async function restoreVersion(version: any) {
@@ -1233,7 +1258,7 @@
 			});
 			if (res.ok) {
 				// The new draft becomes the default active version.
-				await goto(`/workflows/${workflowId}`, { invalidateAll: true });
+				await goto(`/workflows/${workflowId}`, { refreshAll: true });
 				return;
 			}
 			const body = await res.json().catch(() => ({}));
@@ -1242,7 +1267,6 @@
 			versionsError = String(error);
 		}
 	}
-	let dataOpen = $state(false);
 	let running = $state(false);
 	let runPickerOpen = $state(false);
 	// Run-with-variables: raw form values + touched tracking so
@@ -1278,7 +1302,7 @@
 				})
 			});
 			if (res.ok) {
-				runsOpen = true;
+				openPane = 'runs';
 				await runsPanel?.refresh();
 				return true;
 			}
@@ -1302,7 +1326,9 @@
 		const manual = triggerNodes.find(
 			(n) => (n.data.domain as any)?.trigger_config?.type === 'manual'
 		);
+
 		if (manual) return ((manual.data.domain as any).ref as string) ?? null;
+
 		if (triggerNodes.length <= 1) {
 			return ((triggerNodes[0]?.data.domain as any)?.ref as string) ?? null;
 		}
@@ -1594,6 +1620,7 @@
 			.filter((b: any) => !b.is_default)
 			.sort((a: any, b: any) => (a.order ?? 0) - (b.order ?? 0))
 			.forEach((b: any, index: number) => (b.order = index));
+
 		// A wired branch drops its edge; the default keeps its guaranteed slot.
 		edges = edges.filter((e) => (e.data?.domain as any)?.source_branch !== branchId);
 		refreshVisuals();
@@ -2061,8 +2088,8 @@
 							<button
 								type="button"
 								class="btn preset-tonal text-sm"
-								class:preset-filled-secondary-500={triggersOpen}
-								onclick={() => (triggersOpen = !triggersOpen)}
+								class:preset-filled-secondary-500={openPane === 'triggers'}
+								onclick={() => togglePane('triggers')}
 								data-testid="toggle-triggers"
 							>
 								<i class="fa-solid fa-bolt mr-1"></i>
@@ -2071,8 +2098,8 @@
 							<button
 								type="button"
 								class="btn preset-tonal text-sm"
-								class:preset-filled-secondary-500={runsOpen}
-								onclick={() => (runsOpen = !runsOpen)}
+								class:preset-filled-secondary-500={openPane === 'runs'}
+								onclick={() => togglePane('runs')}
 								data-testid="toggle-runs"
 							>
 								<i class="fa-solid fa-list-check mr-1"></i>
@@ -2081,8 +2108,8 @@
 							<button
 								type="button"
 								class="btn preset-tonal text-sm"
-								class:preset-filled-secondary-500={dataOpen}
-								onclick={() => (dataOpen = !dataOpen)}
+								class:preset-filled-secondary-500={openPane === 'data'}
+								onclick={() => togglePane('data')}
 								data-testid="toggle-data"
 							>
 								<i class="fa-solid fa-cube mr-1"></i>
@@ -2091,8 +2118,8 @@
 							<button
 								type="button"
 								class="btn preset-tonal text-sm"
-								class:preset-filled-secondary-500={versionsOpen}
-								onclick={() => (versionsOpen = !versionsOpen)}
+								class:preset-filled-secondary-500={openPane === 'versions'}
+								onclick={() => togglePane('versions')}
 								data-testid="toggle-versions"
 							>
 								<i class="fa-solid fa-code-commit mr-1"></i>
@@ -2236,10 +2263,9 @@
 												<button
 													type="button"
 													class="btn preset-tonal text-xs"
-													onclick={() => (runVarsOpen = false)}
+													onclick={() => (runVarsOpen = false)}>{m.cancel()}</button
 												>
-													{m.cancel()}
-												</button>
+
 												<button
 													type="button"
 													class="btn preset-filled-primary-500 text-xs"
@@ -2346,61 +2372,78 @@
 				</SvelteFlow>
 			</div>
 
-			{#if triggersOpen}
-				<TriggersPanel {registrations} {workflowId} onRefresh={refreshRegistrations} />
-			{/if}
-
-			{#if versionsOpen}
-				{#if versionsError}
-					<div
-						class="text-xs text-error-500 px-4 py-1 border-t border-surface-200-800"
-						data-testid="versions-error"
+			{#if openPane}
+				<!-- pt-6 reserves a strip for the collapse control: the panes are
+				     full-width and their own top-right controls would sit under it.
+				     Carries the panes' own surface so the strip reads as part of them. -->
+				<div class="relative border-t border-surface-200-800 bg-surface-100-900 pt-6">
+					<button
+						type="button"
+						class="btn-icon btn-icon-sm absolute right-2 top-1 z-10 text-surface-600-400 hover:text-surface-700-300"
+						onclick={() => (openPane = null)}
+						data-testid="collapse-pane"
+						aria-label={m.collapse()}
+						title={m.collapse()}
 					>
-						{versionsError}
-					</div>
-				{/if}
-				<VersionsPanel
-					{versions}
-					{activeVersionId}
-					onSelect={selectVersion}
-					onRestore={restoreVersion}
-				/>
-			{/if}
+						<i class="fa-solid fa-minus"></i>
+					</button>
+					{#if openPane === 'triggers'}
+						<TriggersPanel {registrations} {workflowId} onRefresh={refreshRegistrations} />
+					{/if}
 
-			{#if dataOpen}
-				<aside
-					class="h-60 shrink-0 border-t border-surface-200-800 bg-surface-100-900 overflow-y-auto"
-					data-testid="data-panel"
-				>
-					<div class="p-3 max-w-3xl">
-						<WorkflowDataPanel
-							{variables}
-							{secrets}
-							{referenceVariables}
-							{readonly}
-							columns
-							onAddVariable={addVariable}
-							onRemoveVariable={removeVariable}
-							onUpdateVariableDefault={updateVariableDefault}
-							bind:defaultDrafts={variableDefaultDrafts}
-							onAddSecret={addSecret}
-							onRemoveSecret={removeSecret}
+					{#if openPane === 'versions'}
+						{#if versionsError}
+							<div
+								class="text-xs text-error-500 px-4 py-1 border-t border-surface-200-800"
+								data-testid="versions-error"
+							>
+								{versionsError}
+							</div>
+						{/if}
+						<VersionsPanel
+							{versions}
+							{activeVersionId}
+							onSelect={selectVersion}
+							onRestore={restoreVersion}
 						/>
-					</div>
-				</aside>
-			{/if}
+					{/if}
 
-			{#if runsOpen}
-				<RunsPanel
-					bind:this={runsPanel}
-					{workflowId}
-					onShowRun={showRun}
-					onReplayRun={replayRun}
-					onPinReference={pinReference}
-					onRunsRefreshed={handleRunsRefreshed}
-					referenceRunId={referenceRun?.id ?? null}
-					filterVersionId={versionPinned ? activeVersionId : null}
-				/>
+					{#if openPane === 'data'}
+						<aside
+							class="h-60 shrink-0 bg-surface-100-900 overflow-y-auto"
+							data-testid="data-panel"
+						>
+							<div class="p-3 max-w-3xl">
+								<WorkflowDataPanel
+									{variables}
+									{secrets}
+									{referenceVariables}
+									{readonly}
+									columns
+									onAddVariable={addVariable}
+									onRemoveVariable={removeVariable}
+									onUpdateVariableDefault={updateVariableDefault}
+									bind:defaultDrafts={variableDefaultDrafts}
+									onAddSecret={addSecret}
+									onRemoveSecret={removeSecret}
+								/>
+							</div>
+						</aside>
+					{/if}
+
+					{#if openPane === 'runs'}
+						<RunsPanel
+							bind:this={runsPanel}
+							{workflowId}
+							onShowRun={showRun}
+							onReplayRun={replayRun}
+							onPinReference={pinReference}
+							onRunsRefreshed={handleRunsRefreshed}
+							referenceRunId={referenceRun?.id ?? null}
+							filterVersionId={versionPinned ? activeVersionId : null}
+						/>
+					{/if}
+				</div>
 			{/if}
 		</div>
 

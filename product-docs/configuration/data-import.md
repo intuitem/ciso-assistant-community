@@ -325,9 +325,19 @@ Controls are created on picked based on the perimeter's domain. Line breaks are 
   * `transfer`
 * **assets**\
   Newline-, semicolon- or comma-separated asset names or ref\_ids. Missing assets are auto-created in the domain folder with the default type Support, provided you may add assets there — otherwise the name is reported as a warning on the row.
+* **threats**\
+  Pipe-, newline-, semicolon- or comma-separated threat ref\_ids or names (ref\_id first, then name), matched among the threats you can view in the risk assessment's domain and its parent domains, up to the global domain where library threats live. Threats are only linked, never created: an unknown threat is reported as a warning on the row. `threat` is accepted as an alias.
 * **justification**: String
 
 1: The string must be the name of a level of the chosen risk matrix, or one of its translations. Matching ignores case and surrounding spaces. Use `--` to mark a level as not rated. An empty cell leaves the level untouched. A value that matches no level is reported as a warning on the row and leaves the level untouched. Untouched levels are unrated on a new scenario and keep their current rating when updating an existing one.
+
+### Special considerations
+
+* When the same threat ref\_id or name exists at several levels, the threat of the nearest domain wins. Several matches within the same domain are ambiguous: none of them is linked and the row is reported as a warning.
+* Threats from other domains, sibling or sub-domains, are not matched.
+* On update, a filled `threats` cell replaces the threats linked to the scenario with the ones it resolves; a blank cell, or one where no threat resolves, leaves them untouched.
+* The risk assessment's CSV and XLSX exports write threats as ref\_ids (the name when a threat has none), so the `threats` column can be re-imported as is. Give a ref\_id to any threat whose name contains a pipe, a semicolon or a comma: its name would be split on re-import.
+* The template's threats (`ICT-001` to `ICT-003`) come from the INTUITEM Common Catalog library, which must be loaded for them to be linked.
 
 
 
@@ -663,6 +673,11 @@ The multi-sheet workbook is the same format produced by the **Export XLSX** butt
 * processing\_nature - comma-separated processing nature names
 * information\_channel
 * usage\_channel
+* role - GDPR role, raw key (e.g. `privacy_data_processor`) or label; `Controller` when blank
+  * Controller
+  * Joint Controller
+  * Data Processor
+* controllers - names of existing third-party entities, one per line or comma-separated: the co-controllers of a joint controller processing, or the clients of a processor one
 * assigned\_to - comma-separated user emails
 * labels - comma-separated label names (created if missing)
 * dpia\_required
@@ -680,6 +695,8 @@ The multi-sheet workbook is the same format produced by the **Export XLSX** butt
 {% file src="../.gitbook/assets/sample_processing_workbook.xlsx" %}
 
 The workbook contains a **Processing** sheet (same columns as the flat list, one row) plus one optional sheet per sub-object type: **Purposes**, **Personal data**, **Data subjects**, **Data recipients**, **Contractors** and **Transfers**. Sheet names are matched case-insensitively; empty sheets are simply skipped.
+
+An export also carries a **Controllers** sheet (each client's name, country and contacts) and a **Security measures** sheet (the processing's applied controls). Both are there to be read, and the import ignores them.
 
 Every choice column accepts either the raw key (e.g. `privacy_contract`) or its English label (e.g. `Performance of a Contract`), case-insensitively.
 
@@ -822,25 +839,38 @@ Every choice column accepts either the raw key (e.g. `privacy_contract`) or its 
 
 ### Supported fields
 
-* ref\_id
-* name\*
-* description
-* status
-  * Potential
-  * Exploitable
-  * Mitigated
-  * Not exploitable
-  * Fixed
-  * Unaffected
-* severity
-  * Information
-  * Low
-  * Medium
-  * High
-  * Critical
-* assets (newline-separated list of the name of the assets)
-* applied\_controls (newline-separated of the names)
-* security\_exceptions (newline-separated of the names)
+* **ref\_id** - e.g. a CVE identifier
+* **name**<mark style="color:red;">\*</mark>
+* **description**
+* **observation** - how the vulnerability is handled (Markdown)
+* **status** - case-insensitive; any other value reads as undefined
+  * `potential`
+  * `exploitable`
+  * `mitigated`
+  * `fixed`
+  * `not exploitable`
+  * `unaffected`
+* **severity** - case-insensitive, or the number `0`–`4`; any other value reads as undefined
+  * `info`
+  * `low`
+  * `medium`
+  * `high`
+  * `critical`
+* **detected\_at** - detection date (YYYY-MM-DD). Left empty, it is set to the import day while the [vulnerability SLA](settings/vulnerability-sla.md) is on
+* **due\_date** - due date (YYYY-MM-DD). Left empty, it is computed from the [vulnerability SLA policy](settings/vulnerability-sla.md) while the SLA is on
+* **remediated\_at** - remediation date (YYYY-MM-DD). Left empty, a resolved status (mitigated, fixed, not exploitable, unaffected) sets it to the import day
+* **owner**\
+  Semicolon-separated list of user emails and/or team names, shown as **Assigned to**. Resolved case-insensitively: first by user email, then by team name. Unresolved entries are skipped with a warning and will not block the import. This column isn't in the template: add it when you need it.
+* **assets**\
+  Names or ref\_ids separated by `|`, commas or new lines, looked up in the domain folder. A name that matches nothing rejects the row.
+* **applied\_controls**\
+  Names or ref\_ids separated by `|`, commas or new lines, looked up in the domain folder. A name that matches nothing rejects the row.
+* **security\_exceptions**\
+  Names or ref\_ids separated by `|`, commas or new lines, looked up in the domain folder. A name that matches nothing rejects the row.
+* **filtering\_labels**\
+  Label names separated by `|`, commas or new lines; missing labels are created.
+
+In update mode, an existing vulnerability is matched by **ref\_id**, then by **name**, in the domain folder. Empty cells leave its fields as they are, except **owner**: an empty owner cell removes the owners.
 
 
 
@@ -850,9 +880,12 @@ Folders (domains) are the top-level organisational units in CISO Assistant. Impo
 
 #### Supported fields
 
+* `internal_id` - id of an existing folder, filled in by the domains export; used to match the row in update mode, even if the folder was renamed
 * `name`\*
 * `description`
 * `domain` - name of the parent folder, must match exactly one existing folder name (case-insensitive)
+* `labels` - pipe- or comma-separated label names (created if missing); also accepted as `label` or `filtering_labels`
+* `create_iam_groups` - whether the domain gets its IAM groups (true/false, yes/no or 1/0)
 
 ### Template
 
@@ -860,9 +893,12 @@ Folders (domains) are the top-level organisational units in CISO Assistant. Impo
 
 #### Special considerations
 
-* Conflict detection is performed by `name` + parent folder.
+* Conflict detection is performed by `internal_id` when present, otherwise by `name` + parent folder.
 * When `domain` is left blank the folder is attached to the root of the tenant.
-* An error is returned if `domain` matches more than one folder name.
+* `domain` is looked up among domains and the root folder (enclaves and personal folders are ignored). An error is returned if it matches more than one, unless the row's `internal_id` points to a domain whose current parent has that name.
+* Label names may only contain letters, digits, `_` or `-` (36 characters at most); a row with an invalid label is rejected. Creating a label that does not exist yet requires the permission to add labels.
+* Setting `create_iam_groups` to true creates the domain's IAM groups. Setting it to false on an existing domain removes them, which is refused while users are assigned to them.
+* The domains list can be exported to Excel or CSV with the same columns, so an export can be edited and re-imported with the **Update** strategy. In update mode, a blank cell leaves the field untouched.
 
 ***
 

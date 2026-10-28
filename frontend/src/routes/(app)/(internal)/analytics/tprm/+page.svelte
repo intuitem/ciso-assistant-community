@@ -1,8 +1,9 @@
 <script lang="ts">
 	import FlippableCard from './FlippableCard.svelte';
-	import TierBadge from '$lib/components/ModelTable/field/TierBadge.svelte';
+	import TierBadge from '#lib/components/ModelTable/field/TierBadge.svelte';
 	import type { PageData } from './$types';
-	import { m } from '$paraglide/messages';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		data: PageData;
@@ -53,6 +54,24 @@
 			})),
 		{ key: NO_TIER, tier: null, count: vendorsPerTier[NO_TIER]?.size ?? 0 }
 	]);
+
+	// One key for every card's compliance bar, limited to the statuses on screen.
+	const complianceLegend = $derived.by(() => {
+		const statuses = new Map<string, { localName: string; color: string }>();
+		for (const assessment of visible) {
+			const overview = assessment.compliance_overview;
+			if (!overview?.show_result) continue;
+			for (const slice of overview.donut.values) {
+				if (slice.value > 0 && !statuses.has(slice.name)) {
+					statuses.set(slice.name, {
+						localName: slice.localName,
+						color: slice.itemStyle.color
+					});
+				}
+			}
+		}
+		return [...statuses.values()];
+	});
 
 	function toggle(key: string) {
 		selectedTiers = selectedTiers.includes(key)
@@ -127,6 +146,26 @@
 				data-testid="tprm-search"
 			/>
 		</label>
+	</div>
+{/if}
+
+{#if complianceLegend.length}
+	<div
+		class="px-6 pt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-surface-600-400"
+		data-testid="compliance-legend"
+	>
+		<span class="text-xs font-semibold uppercase tracking-wider text-surface-500">
+			{m.compliance()}
+		</span>
+		{#each complianceLegend as status (status.localName)}
+			<span class="flex items-center gap-1.5">
+				<span
+					class="size-2.5 shrink-0 rounded-full ring-1 ring-surface-400-600"
+					style="background-color: {status.color}"
+				></span>
+				{safeTranslate(status.localName)}
+			</span>
+		{/each}
 	</div>
 {/if}
 

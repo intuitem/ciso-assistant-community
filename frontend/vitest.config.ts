@@ -12,14 +12,13 @@ export default defineConfig({
 	},
 	resolve: {
 		alias: {
-			$lib: path.resolve(__dirname, 'src/lib'),
-			$paraglide: path.resolve(__dirname, 'src/paraglide'),
-			'$app/environment': path.resolve(__dirname, 'vitest-mocks/app-environment.ts'),
+			// before '$app/env': string aliases also match as path prefixes
+			'$app/env/public': path.resolve(__dirname, 'vitest-mocks/app-env-public.ts'),
+			'$app/env': path.resolve(__dirname, 'vitest-mocks/app-env.ts'),
 			'$app/navigation': path.resolve(__dirname, 'vitest-mocks/app-navigation.ts'),
+			'$app/paths': path.resolve(__dirname, 'vitest-mocks/app-paths.ts'),
 			'$app/forms': path.resolve(__dirname, 'vitest-mocks/app-forms.ts'),
-			'$app/state': path.resolve(__dirname, 'vitest-mocks/app-state.ts'),
-			'$app/stores': path.resolve(__dirname, 'vitest-mocks/app-stores.ts'),
-			'$env/dynamic/public': path.resolve(__dirname, 'vitest-mocks/env-dynamic-public.ts')
+			'$app/state': path.resolve(__dirname, 'vitest-mocks/app-state.ts')
 		}
 	}
 });

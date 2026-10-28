@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { goto } from '$lib/utils/breadcrumbs';
+	import { goto } from '#lib/utils/breadcrumbs.js';
 
 	interface Props {
 		count?: number;

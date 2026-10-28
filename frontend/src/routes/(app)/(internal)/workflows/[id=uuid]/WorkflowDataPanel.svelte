@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { VARIABLE_TYPES } from './builder-constants';
 	import SecretInlineForm from './SecretInlineForm.svelte';
 	import { formatVariableValue, parseVariableValue } from './variable-values';

@@ -55,7 +55,13 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
     API endpoint that allows ebios rm studies to be viewed or edited.
     """
 
-    filterset_fields = ["folder", "assets", "genericcollection", "classification"]
+    filterset_fields = [
+        "folder",
+        "assets",
+        "genericcollection",
+        "classification",
+        "filtering_labels",
+    ]
 
     model = EbiosRMStudy
 
@@ -390,6 +396,12 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         # Get action plans from compliance assessments
         from core.serializers import AppliedControlReadSerializer
         from core.models import AppliedControl
+        from iam.models import RoleAssignment
+
+        # Study access doesn't imply access to every linked control
+        viewable_controls = AppliedControl.objects.filter(
+            id__in=RoleAssignment.get_viewable_object_ids(request.user, AppliedControl)
+        )
 
         compliance_action_plans = []
         for assessment in study.compliance_assessments.all():
@@ -397,7 +409,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 include_non_assessable=False
             )
             applied_controls = (
-                AppliedControl.objects.filter(
+                viewable_controls.filter(
                     requirement_assessments__in=requirement_assessments
                 )
                 .distinct()
@@ -422,7 +434,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         if study.last_risk_assessment:
             risk_scenarios = study.last_risk_assessment.risk_scenarios.all()
             risk_applied_controls = (
-                AppliedControl.objects.filter(risk_scenarios__in=risk_scenarios)
+                viewable_controls.filter(risk_scenarios__in=risk_scenarios)
                 .distinct()
                 .order_by("eta")
             )
@@ -468,12 +480,36 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 key=lambda a: (0 if a.get("type") == "PR" else 1, a.get("str", "")),
             )
 
+        # Full control details (priority, status, owner, eta) for the treatment plan
+        stakeholders_data = StakeholderReadSerializer(stakeholders, many=True).data
+        controls_by_id = {
+            str(c["id"]): c
+            for c in AppliedControlReadSerializer(
+                viewable_controls.filter(stakeholders__in=stakeholders).distinct(),
+                many=True,
+            ).data
+        }
+        links = Stakeholder.applied_controls.through.objects.filter(
+            stakeholder__in=stakeholders
+        ).values_list("stakeholder_id", "appliedcontrol_id")
+        controls_by_stakeholder = {}
+        for sh_id, ac_id in links:
+            if str(ac_id) not in controls_by_id:
+                continue
+            controls_by_stakeholder.setdefault(str(sh_id), []).append(
+                controls_by_id[str(ac_id)]
+            )
+        for sh_data in stakeholders_data:
+            sh_data["applied_controls"] = controls_by_stakeholder.get(
+                str(sh_data["id"]), []
+            )
+
         # Build comprehensive report data
         report_data = {
             "study": study_data,
             "feared_events": FearedEventReadSerializer(feared_events, many=True).data,
             "ro_to_couples": RoToReadSerializer(ro_to_couples, many=True).data,
-            "stakeholders": StakeholderReadSerializer(stakeholders, many=True).data,
+            "stakeholders": stakeholders_data,
             "strategic_scenarios": strategic_scenarios_data,
             "attack_paths": AttackPathReadSerializer(attack_paths, many=True).data,
             "operational_scenarios": operational_scenarios_data,

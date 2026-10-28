@@ -1,6 +1,6 @@
 # ciso-assistant
 
-![Version: 0.13.2](https://img.shields.io/badge/Version-0.13.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v4.1.0](https://img.shields.io/badge/AppVersion-v4.1.0-informational?style=flat-square)
+![Version: 0.13.6](https://img.shields.io/badge/Version-0.13.6-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v4.1.3](https://img.shields.io/badge/AppVersion-v4.1.3-informational?style=flat-square)
 
 A Helm chart for CISO Assistant k8s's deployment
 
@@ -149,7 +149,7 @@ breaks verification between them. Always set `existingSecret` or `privateKey` in
 | backend.name | string | `"backend"` | Backend container name |
 | backend.nodeSelector | object | `{}` | Default node selector for backend |
 | backend.persistence.localStorage.accessMode | string | `"ReadWriteOnce"` | Local Storage persistant volume accessMode |
-| backend.persistence.localStorage.enabled | bool | `false` | Enable Local Storage persistence |
+| backend.persistence.localStorage.enabled | bool | `true` | Enable Local Storage persistence |
 | backend.persistence.localStorage.existingClaim | string | `""` | Name of an existing PersistentVolumeClaim for local storage. Must be different from sqlite PVC |
 | backend.persistence.localStorage.size | string | `"5Gi"` | Local Storage persistant volume size |
 | backend.persistence.localStorage.storageClass | string | `""` | Local Storage persistant volume storageClass |

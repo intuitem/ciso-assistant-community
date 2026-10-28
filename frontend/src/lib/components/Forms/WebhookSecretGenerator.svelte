@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { copy } from '@svelte-put/copy';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 	import TextField from './TextField.svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
 	import { getFlash } from 'sveltekit-flash-message';
 	const flash = getFlash(page);

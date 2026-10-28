@@ -1,6 +1,6 @@
 import { redirect, type Cookies } from '@sveltejs/kit';
-import { ALLAUTH_API_URL, BASE_API_URL } from '$lib/utils/constants';
-import { logger } from '$lib/server/logger';
+import { ALLAUTH_API_URL, BASE_API_URL } from '#lib/utils/constants.js';
+import { logger } from '#lib/server/logger.js';
 
 type Fetch = typeof globalThis.fetch;
 
@@ -103,5 +103,5 @@ export const POST = async ({ fetch, cookies, locals }) => {
 	logger.info('User logged out', { user_id: (await locals.getUser())?.id });
 
 	// eslint-disable-next-line eslint-plugin-intuitem-sveltekit/secure-redirect -- backend-issued IdP URL
-	redirect(302, target);
+	redirect(302, target, { external: true });
 };

@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { pageTitle } from '$lib/utils/stores';
+	import { pageTitle } from '#lib/utils/stores.js';
 	import { defaultMatrixObject } from '../builder-helpers';
 	import TranslationsEditor from '../TranslationsEditor.svelte';
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { createCopyHandler } from '$lib/components/FrameworkBuilder/builder-utils.svelte';
-	import { getToastStore } from '$lib/components/Toast/stores';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { createCopyHandler } from '#lib/components/FrameworkBuilder/builder-utils.svelte.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';

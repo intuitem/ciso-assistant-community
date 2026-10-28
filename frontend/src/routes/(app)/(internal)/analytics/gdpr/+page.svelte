@@ -1,9 +1,9 @@
 <script lang="ts">
-	import WorldMap from '$lib/components/DataViz/WorldMap.svelte';
-	import TreemapChart from '$lib/components/Chart/TreemapChart.svelte';
-	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
-	import GDPRSankeyChart from '$lib/components/Chart/GDPRSankeyChart.svelte';
-	import { m } from '$paraglide/messages';
+	import WorldMap from '#lib/components/DataViz/WorldMap.svelte';
+	import TreemapChart from '#lib/components/Chart/TreemapChart.svelte';
+	import DonutChart from '#lib/components/Chart/DonutChart.svelte';
+	import GDPRSankeyChart from '#lib/components/Chart/GDPRSankeyChart.svelte';
+	import { m } from '#paraglide/messages.js';
 	import Card from './Card.svelte';
 	import type { PageData } from './$types';
 	interface Props {

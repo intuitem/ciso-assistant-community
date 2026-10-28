@@ -1,14 +1,14 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import Checkbox from '../Checkbox.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import TextArea from '$lib/components/Forms/TextArea.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import TextArea from '#lib/components/Forms/TextArea.svelte';
 	import Select from '../Select.svelte';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import * as m from '$paraglide/messages.js';
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import * as m from '#paraglide/messages.js';
+	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -31,6 +31,7 @@
 	{form}
 	multiple
 	optionsEndpoint="actors?user__is_third_party=False"
+	lazy
 	optionsLabelField="str"
 	optionsInfoFields={{
 		fields: [{ field: 'type', translate: true }],

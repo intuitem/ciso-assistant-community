@@ -10,6 +10,7 @@ from core.models import (
     Commitment,
     Finding,
     FindingsAssessment,
+    TaskNode,
     TaskTemplate,
 )
 from global_settings.models import GlobalSettings
@@ -599,6 +600,13 @@ class TestTaskAnalytics:
         binder = FindingsAssessment.objects.create(name="Plan", folder=setup["domain"])
         task = TaskTemplate.objects.create(
             name="Retest", folder=setup["domain"], task_date="2020-01-01"
+        )
+        # The occurrence the editor creates with a one-time task, still open.
+        TaskNode.objects.create(
+            task_template=task,
+            due_date="2020-01-01",
+            scheduled_date="2020-01-01",
+            folder=setup["domain"],
         )
         task.findings_assessment.set([binder])
         task.assigned_to.set([setup["owner_actor"]])

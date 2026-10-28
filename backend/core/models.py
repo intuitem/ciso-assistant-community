@@ -57,6 +57,7 @@ from library.helpers import (
 )
 
 from core.utils import format_currency as _fmt_currency
+from core.utils import get_global_currency
 from core.quick_form_scoring import (
     normalize_form_aggregation,
     normalize_page_aggregation,
@@ -74,8 +75,12 @@ from .base_models import (
 )
 from .utils import (
     aggregate_compute_results,
+    aggregate_tiered_results,
     camel_case,
+    project_weighted_sum,
+    question_score_bounds,
     resolve_compute_result,
+    resolve_result_tier,
     sha256,
     update_selected_implementation_groups,
     yaml_safe_load,
@@ -1078,6 +1083,26 @@ class StoredLibrary(LibraryMixin):
             value["hash_checksum"] for value in cls.objects.values("hash_checksum")
         )
 
+    @staticmethod
+    def framework_of(content: dict) -> Optional[dict]:
+        """First framework of a library content, singular or plural field."""
+        content = content or {}
+        framework = content.get("framework") or content.get("frameworks")
+        if isinstance(framework, list):
+            framework = framework[0] if framework else None
+        return framework or None
+
+    @classmethod
+    def framework_libraries(cls, urns) -> QuerySet:
+        """Framework (non-mapping) stored libraries whose framework URN is in urns."""
+        urns = list(urns)
+        return cls.objects.filter(
+            Q(content__framework__urn__in=urns)
+            | Q(content__frameworks__0__urn__in=urns),
+            content__requirement_mapping_set__isnull=True,
+            content__requirement_mapping_sets__isnull=True,
+        )
+
     @classmethod
     def store_library_content(
         cls, library_content: bytes, builtin: bool = False, dry_run: bool = False
@@ -1782,6 +1807,13 @@ class LibraryUpdater:
                     framework_dict["outcomes_definition"] = []
                 # An omitted IG definition means that the framework no longer defines implementation groups.
                 framework_dict.setdefault("implementation_groups_definition", None)
+                # Same for the result rule: dropping the key reverts to the default.
+                framework_dict.setdefault(
+                    "result_aggregation", Framework.ResultAggregation.PER_ANSWER
+                )
+                Framework.validate_result_aggregation(
+                    framework_dict["result_aggregation"]
+                )
                 # Same for the scoring properties: omitted means back to the defaults.
                 framework_dict.setdefault("score_scale_locked", False)
                 framework_dict.setdefault("score_calculation_method", "average")
@@ -1804,6 +1836,7 @@ class LibraryUpdater:
                 prev_max = getattr(prev_fw, "max_score", None)
                 prev_def = getattr(prev_fw, "scores_definition", None)
                 had_outcomes = bool(getattr(prev_fw, "outcomes_definition", None))
+                prev_aggregation = getattr(prev_fw, "result_aggregation", None)
 
                 new_framework, _ = Framework.objects.update_or_create(
                     urn=framework_dict["urn"],
@@ -1814,6 +1847,11 @@ class LibraryUpdater:
                         **framework_dict,
                         "library": self.old_library,
                     },
+                )
+
+                aggregation_changed = (
+                    prev_fw is not None
+                    and prev_aggregation != new_framework.result_aggregation
                 )
 
                 # update requirement_nodes
@@ -1867,10 +1905,15 @@ class LibraryUpdater:
                     rn.urn.lower(): rn
                     for rn in RequirementNode.objects.filter(framework=new_framework)
                 }
+                question_urns_by_node_id = defaultdict(set)
+                for node_id, question_urn in Question.objects.filter(
+                    requirement_node__framework=new_framework
+                ).values_list("requirement_node_id", "urn"):
+                    question_urns_by_node_id[node_id].add(question_urn)
                 existing_requirement_assessment_objects = defaultdict(list)
                 for ra in RequirementAssessment.objects.filter(
                     requirement__framework=new_framework
-                ).select_related("compliance_assessment"):
+                ).select_related("compliance_assessment", "requirement__framework"):
                     existing_requirement_assessment_objects[
                         ra.requirement.urn.lower()
                     ].append(ra)
@@ -1884,6 +1927,7 @@ class LibraryUpdater:
                 order_id = 0
                 all_fields_to_update = set()
                 # Omitting one of these nullable fields in a new version must clear its previous value.
+                # min_score/max_score are kept: existing scores were recorded on that scale.
                 clearable_requirement_node_fields = (
                     "ref_id",
                     "name",
@@ -1892,7 +1936,14 @@ class LibraryUpdater:
                     "typical_evidence",
                     "visibility_expression",
                     "implementation_groups",
+                    "scores_definition_ref",
+                    "target_score",
                 )
+                requirement_node_defaults = {
+                    "weight": 1,
+                    "importance": RequirementNode.Importance.UNDEFINED,
+                    "display_mode": RequirementNode.DisplayMode.DEFAULT,
+                }
 
                 # Check if score boundaries changed (triggers warning + strategy prompt)
                 score_boundaries_changed = (
@@ -2031,6 +2082,10 @@ class LibraryUpdater:
                         ].lower()
                     requirement_node_dict["order_id"] = order_id
                     order_id += 1
+                    # Omitted or explicit null falls back to the default.
+                    for field, default in requirement_node_defaults.items():
+                        if requirement_node_dict.get(field) is None:
+                            requirement_node_dict[field] = default
 
                     if urn in existing_requirement_node_objects:
                         requirement_node_object = existing_requirement_node_objects[urn]
@@ -2069,6 +2124,17 @@ class LibraryUpdater:
                                 )
                             )
 
+                    # A node that lost all its questions omits the key.
+                    if (
+                        questions is None
+                        and requirement_node_object.pk in question_urns_by_node_id
+                    ):
+                        questions = {}
+
+                    previous_question_urns = question_urns_by_node_id.get(
+                        requirement_node_object.pk, set()
+                    )
+
                     # Sync questions for both new and existing nodes
                     if questions is not None:
                         _sync_questions_from_data(requirement_node_object, questions)
@@ -2082,6 +2148,10 @@ class LibraryUpdater:
                         )
                         if questions is not None
                         else []
+                    )
+                    # Pruned questions cascade-delete their answers before the RA loop.
+                    questions_removed = bool(
+                        previous_question_urns - {q.urn for q in _cached_new_questions}
                     )
 
                     # update answers or score for each ra for the current requirement_node, when relevant
@@ -2199,7 +2269,9 @@ class LibraryUpdater:
                         }
                         new_questions = _cached_new_questions
 
-                        ra_changed = False
+                        ra_changed = questions_removed or aggregation_changed
+                        if questions_removed:
+                            answers_changed_ca_ids.add(ra.compliance_assessment_id)
                         for q in new_questions:
                             if q.urn not in existing_answers:
                                 # New question: create empty answer
@@ -2358,8 +2430,11 @@ class LibraryUpdater:
         """Upsert quick forms, pages and questions by URN, prune what the new
         version dropped, then reconcile every live response: seed answers for
         new questions, drop selections that no longer exist, re-evaluate."""
+        from core.quick_form_ratings import expand_scales
+
         for new_quick_form in self.new_quick_forms:
             with transaction.atomic():
+                new_quick_form = expand_scales(new_quick_form)
                 pages = new_quick_form.get("pages") or []
                 urn = new_quick_form["urn"].lower()
                 form_fields = {
@@ -2372,6 +2447,7 @@ class LibraryUpdater:
                     "outcomes_definition": new_quick_form.get("outcomes_definition")
                     or [],
                     "scores_definition": new_quick_form.get("scores_definition"),
+                    "scales_definition": new_quick_form.get("scales_definition") or [],
                     "ref_id_prefix": new_quick_form.get("ref_id_prefix") or "",
                     "title_question_urn": (
                         new_quick_form.get("title_question_urn") or ""
@@ -2392,6 +2468,7 @@ class LibraryUpdater:
                         **self.i18n_object_dict,
                         **form_fields,
                         "library": self.old_library,
+                        "always_review": bool(new_quick_form.get("always_review")),
                     },
                 )
 
@@ -2405,17 +2482,28 @@ class LibraryUpdater:
                     .exclude(response__status=QuickFormResponse.Status.DRAFT)
                     .values_list("question__urn", flat=True)
                 )
+                # Choices any response selected, drafts included: a renamed level
+                # must not empty a draft's answers.
                 decided_choice_urns = set(
                     QuestionChoice.objects.filter(
                         choice_answers__response__quick_form=quick_form
-                    )
-                    .exclude(
-                        choice_answers__response__status=(
-                            QuickFormResponse.Status.DRAFT
-                        )
-                    )
-                    .values_list("urn", flat=True)
+                    ).values_list("urn", flat=True)
                 )
+                # A draft is no record, but it can be weeks of writing (a DPIA):
+                # questions it answered are kept too, with their pages.
+                decided_question_urns |= {
+                    answer.question.urn
+                    for answer in Answer.objects.filter(
+                        response__quick_form=quick_form,
+                        question__page__quick_form=quick_form,
+                        response__status=QuickFormResponse.Status.DRAFT,
+                    )
+                    .select_related("question")
+                    .prefetch_related("selected_choices", "attachments")
+                    if answer.value not in (None, "", [])
+                    or answer.selected_choices.all()
+                    or answer.attachments.all()
+                }
 
                 incoming_page_urns = set()
                 for order, page in enumerate(pages):
@@ -2432,6 +2520,7 @@ class LibraryUpdater:
                         "aggregation": normalize_page_aggregation(
                             page.get("aggregation")
                         ),
+                        "facts": page.get("facts") or [],
                     }
                     page_object, _ = QuickFormPage.objects.update_or_create(
                         quick_form=quick_form,
@@ -2613,6 +2702,21 @@ class LibraryUpdater:
                     **requirement_mapping_dict,
                 )
 
+    def quick_forms_error(self) -> str | None:
+        """Why a new quick form's scales, ratings or page facts cannot work, before
+        anything is written: expanding malformed scales would raise mid-update."""
+        from core.quick_form_facts import facts_error
+        from core.quick_form_ratings import scales_error
+
+        for quick_form in self.new_quick_forms or []:
+            if not isinstance(quick_form, dict):
+                return "[QUICK_FORM_ERROR] a quick form must be an object"
+            if error := scales_error(quick_form) or facts_error(
+                quick_form.get("pages")
+            ):
+                return f"[QUICK_FORM_ERROR] {error}"
+        return None
+
     def framework_rules_error(self) -> str | None:
         """The checks library import runs on outcome rules and visibility
         expressions, so an update cannot bring in what a load refuses."""
@@ -2633,6 +2737,8 @@ class LibraryUpdater:
     # We should create a LibraryVerifier class in the future that check if the library is valid and use it for a better error handling.
     def update_library(self) -> Union[str, None]:
         if (error_msg := self.framework_rules_error()) is not None:
+            return error_msg
+        if (error_msg := self.quick_forms_error()) is not None:
             return error_msg
         if (error_msg := self.update_dependencies()) is not None:
             return error_msg
@@ -3772,8 +3878,24 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
 
 
 class Framework(ReferentialObjectMixin, I18nObjectMixin):
+    class ResultAggregation(models.TextChoices):
+        PER_ANSWER = "per_answer", _("Per answer")
+        TIERED_ALL = "tiered_all", _("Tiered, all statements of a tier must hold")
+
     min_score = models.IntegerField(default=0, verbose_name=_("Minimum score"))
     max_score = models.IntegerField(default=100, verbose_name=_("Maximum score"))
+    result_aggregation = models.CharField(
+        max_length=20,
+        choices=ResultAggregation.choices,
+        default=ResultAggregation.PER_ANSWER,
+        verbose_name=_("Result aggregation"),
+        help_text=_(
+            "How questionnaire answers combine into a requirement result. "
+            "'per_answer' lets each answer stand on its own, so answers that "
+            "disagree land on partially compliant; 'tiered_all' groups the "
+            "statements into tiers and awards a tier only when all of it holds."
+        ),
+    )
     scores_definition = models.JSONField(
         blank=True, null=True, verbose_name=_("Score definition")
     )
@@ -3941,6 +4063,14 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
         return self.score_scale_locked or any(
             qs.exists() for qs in self.scale_bound_querysets(self)
         )
+
+    @staticmethod
+    def validate_result_aggregation(value):
+        if value not in Framework.ResultAggregation.values:
+            raise ValueError(
+                f"invalid result_aggregation {value!r}: expected one of "
+                f"{', '.join(Framework.ResultAggregation.values)}"
+            )
 
     @staticmethod
     def validate_score_calculation_method(method):
@@ -4320,6 +4450,10 @@ class QuickForm(ReferentialObjectMixin, I18nObjectMixin):
     scores_definition = models.JSONField(
         blank=True, null=True, verbose_name=_("Scores definition")
     )
+    # Ordered levels questions share (`config.scale`), see core.quick_form_ratings.
+    scales_definition = models.JSONField(
+        default=list, blank=True, verbose_name=_("Scales definition")
+    )
     title_question_urn = models.CharField(
         max_length=255,
         blank=True,
@@ -4346,6 +4480,16 @@ class QuickForm(ReferentialObjectMixin, I18nObjectMixin):
     # never by instance ids.
     on_accept = models.JSONField(
         default=list, blank=True, verbose_name=_("Apply on accept")
+    )
+    # Off: a submitter who could make every on-accept change by hand gets it applied
+    # on submit. The library sets it on first load only: an update keeps the choice.
+    always_review = models.BooleanField(
+        default=False,
+        verbose_name=_("Always require review"),
+        help_text=_(
+            "Even when the person submitting could make the change themselves, "
+            "an accepted review is needed before anything is written."
+        ),
     )
     ref_id_prefix = models.CharField(
         max_length=8,
@@ -4420,6 +4564,12 @@ class QuickFormPage(ReferentialObjectMixin, I18nObjectMixin):
         default=Aggregation.SUM,
         verbose_name=_("Aggregation"),
         help_text=_("How the page's question scores combine into the page score"),
+    )
+    facts = models.JSONField(
+        default=list,
+        blank=True,
+        verbose_name=_("Facts"),
+        help_text=_("The subject's records the page shows (see core.quick_form_facts)"),
     )
 
     fields_to_check = ["urn"]
@@ -6600,6 +6750,12 @@ class Incident(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         verbose_name="Assets",
         blank=True,
     )
+    vulnerabilities = models.ManyToManyField(
+        "core.Vulnerability",
+        related_name="incidents",
+        verbose_name="Vulnerabilities",
+        blank=True,
+    )
     qualifications = models.ManyToManyField(
         Terminology,
         verbose_name="Qualifications",
@@ -7039,7 +7195,6 @@ class CommitmentMixin(models.Model):
 
 def _get_default_applied_control_cost():
     return {
-        "currency": "€",
         "amortization_period": 1,
         "build": {"fixed_cost": 0, "people_days": 0},
         "run": {"fixed_cost": 0, "people_days": 0},
@@ -7118,6 +7273,12 @@ class AppliedControl(
         Evidence,
         blank=True,
         verbose_name=_("Evidences"),
+        related_name="applied_controls",
+    )
+    metric_instances = models.ManyToManyField(
+        "metrology.MetricInstance",
+        blank=True,
+        verbose_name=_("Metric instances"),
         related_name="applied_controls",
     )
 
@@ -7272,6 +7433,8 @@ class AppliedControl(
             self.csf_function = self.reference_control.csf_function
         if self.status == "active":
             self.progress_field = 100
+        if isinstance(self.cost, dict) and not self.cost.get("currency"):
+            self.cost["currency"] = get_global_currency()
 
         # Save first. _state.adding, not `pk is None`: the UUID pk is defaulted
         # at instantiation, so pk is never None even for unsaved rows.
@@ -7642,6 +7805,12 @@ class Vulnerability(
         NOTEXPLOITABLE = "not_exploitable", _("Not exploitable")
         UNAFFECTED = "unaffected", _("Unaffected")
 
+    # Statuses that close a vulnerability: no SLA clock, and reaching one fills in
+    # an empty remediation date.
+    RESOLVED_STATUSES = frozenset(
+        {Status.MITIGATED, Status.FIXED, Status.NOTEXPLOITABLE, Status.UNAFFECTED}
+    )
+
     ref_id = models.CharField(
         max_length=100, blank=True, verbose_name=_("Reference ID")
     )
@@ -7654,10 +7823,22 @@ class Vulnerability(
     severity = models.SmallIntegerField(
         verbose_name="Severity", choices=Severity.choices, default=Severity.UNDEFINED
     )
+    owner = models.ManyToManyField(
+        "core.Actor",
+        blank=True,
+        verbose_name=_("Owner"),
+        related_name="vulnerabilities",
+    )
     applied_controls = models.ManyToManyField(
         AppliedControl,
         blank=True,
         verbose_name=_("Applied controls"),
+        related_name="vulnerabilities",
+    )
+    evidences = models.ManyToManyField(
+        Evidence,
+        blank=True,
+        verbose_name=_("Evidences"),
         related_name="vulnerabilities",
     )
     assets = models.ManyToManyField(
@@ -7690,6 +7871,10 @@ class Vulnerability(
     published_date = models.DateField(
         null=True, blank=True, verbose_name=_("Publication date")
     )
+    remediated_at = models.DateField(
+        null=True, blank=True, verbose_name=_("Remediation date")
+    )
+    observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
 
     fields_to_check = ["ref_id", "name"]
 
@@ -7702,12 +7887,31 @@ class Vulnerability(
 
         is_new = self._state.adding
         severity_changed = False
+        was_resolved = False
         if not is_new:
-            old = Vulnerability.objects.filter(pk=self.pk).values("severity").first()
+            old = (
+                Vulnerability.objects.filter(pk=self.pk)
+                .values("severity", "status")
+                .first()
+            )
             if old and old["severity"] != self.severity:
                 severity_changed = True
-        # Default detected_at to today on creation
-        if is_new and not self.detected_at:
+            was_resolved = bool(old) and old["status"] in self.RESOLVED_STATUSES
+        # The remediation date is the user's: when the status becomes resolved
+        # without one, it is today; it is never cleared, reopening included.
+        if (
+            self.status in self.RESOLVED_STATUSES
+            and not was_resolved
+            and not self.remediated_at
+        ):
+            self.remediated_at = date.today()
+            if update_fields is not None:
+                update_fields.add("remediated_at")
+        sla_policy = (
+            self.get_active_sla_policy() if is_new or severity_changed else None
+        )
+        # Default detected_at to today on creation, when an SLA applies
+        if is_new and not self.detected_at and sla_policy is not None:
             self.detected_at = date.today()
             if update_fields is not None:
                 update_fields.add("detected_at")
@@ -7715,34 +7919,135 @@ class Vulnerability(
         # (from the wizard or manual input) are preserved; the bulk
         # refresh-due-dates action is the sole path that overrides them.
         if (is_new or severity_changed) and not self.due_date:
-            self._apply_sla_policy()
+            self._apply_sla_policy(sla_policy)
             if update_fields is not None:
                 update_fields.add("due_date")
         if update_fields is not None:
             kwargs["update_fields"] = list(update_fields)
         super().save(*args, **kwargs)
 
-    def _apply_sla_policy(self):
+    @staticmethod
+    def get_active_sla_policy():
+        """The vulnerability SLA policy, or None when no SLA applies: the
+        vulnerability_sla feature flag is off, or no policy is configured."""
+        from global_settings.models import GlobalSettings
+        from global_settings.utils import ff_is_enabled
+
+        if not ff_is_enabled("vulnerability_sla"):
+            return None
+        sla_settings = GlobalSettings.objects.filter(name="vulnerability-sla").first()
+        sla_policy = sla_settings.value if sla_settings is not None else None
+        if not isinstance(sla_policy, dict) or not sla_policy:
+            return None
+        return sla_policy
+
+    def _apply_sla_policy(self, sla_policy):
         from datetime import date, timedelta
 
-        from global_settings.models import GlobalSettings
-
-        try:
-            sla_settings = GlobalSettings.objects.get(name="vulnerability-sla")
-            sla_policy = (
-                sla_settings.value if isinstance(sla_settings.value, dict) else {}
-            )
-        except GlobalSettings.DoesNotExist:
+        if sla_policy is None:
             return
+        sla_anchor = sla_policy.get("sla_anchor", "detected_at")
         severity_label = self.get_severity_display()
         days = sla_policy.get(severity_label)
         if days is not None:
-            sla_anchor = sla_policy.get("sla_anchor", "detected_at")
             if sla_anchor == "published_date" and self.published_date:
                 anchor = self.published_date
             else:
                 anchor = self.detected_at or date.today()
             self.due_date = anchor + timedelta(days=int(days))
+
+    # SLA states, most urgent first; the order ranks the SLA column.
+    SLA_STATES = ("overdue", "today", "caution", "on track", "excepted", "resolved")
+    SLA_STATE_COLORS = {
+        "overdue": "#f87171",
+        "today": "#f97316",
+        "caution": "#fbbf24",
+        "on track": "#93c5fd",
+        "excepted": "#c4b5fd",
+        "resolved": "#86efac",
+    }
+
+    @classmethod
+    def sla_state_annotations(cls, today=None) -> dict:
+        """The SLA state as query expressions, so lists show, filter and sort it from
+        one definition: sla_state (a name of SLA_STATES, or None without a due date),
+        sla_rank (its position in SLA_STATES) and sla_until (when the exception that
+        makes it "excepted" ends; None when open-ended)."""
+        from datetime import timedelta
+
+        today = today or date.today()
+        # An approved exception that hasn't expired takes it off the clock.
+        active_exceptions = SecurityException.objects.filter(
+            vulnerabilities=OuterRef("pk"),
+            status=SecurityException.Status.APPROVED,
+        ).filter(Q(expiration_date__isnull=True) | Q(expiration_date__gte=today))
+
+        # Caution: less than half of the severity's SLA window left. In whole days,
+        # remaining < days / 2 means a due date before today + ceil(days / 2).
+        caution = None
+        sla_policy = cls.get_active_sla_policy() or {}
+        for severity, label in Severity.choices:
+            try:
+                days = int(sla_policy.get(label, 0)) or None
+            except TypeError, ValueError:
+                days = None
+            if days:
+                late = Q(
+                    severity=severity,
+                    due_date__lt=today + timedelta(days=math.ceil(days / 2)),
+                )
+                caution = late if caution is None else caution | late
+
+        conditions = [
+            (Q(status__in=cls.RESOLVED_STATUSES), "resolved"),
+            (Exists(active_exceptions), "excepted"),
+            (Q(due_date__isnull=True), None),
+            (Q(due_date__lt=today), "overdue"),
+            (Q(due_date=today), "today"),
+        ]
+        if caution is not None:
+            conditions.append((caution, "caution"))
+
+        def case(value_of, default, output_field):
+            return models.Case(
+                *(
+                    models.When(condition, then=Value(value_of(state)))
+                    for condition, state in conditions
+                ),
+                default=Value(default),
+                output_field=output_field,
+            )
+
+        return {
+            "sla_state": case(lambda s: s, "on track", models.CharField()),
+            "sla_rank": case(
+                lambda s: None if s is None else cls.SLA_STATES.index(s),
+                cls.SLA_STATES.index("on track"),
+                models.IntegerField(),
+            ),
+            "sla_until": models.Case(
+                models.When(
+                    Exists(active_exceptions.filter(expiration_date__isnull=True)),
+                    then=Value(None),
+                ),
+                default=Subquery(
+                    active_exceptions.order_by("-expiration_date").values(
+                        "expiration_date"
+                    )[:1]
+                ),
+                output_field=models.DateField(),
+            ),
+        }
+
+    @classmethod
+    def overdue_q(cls):
+        """Q filter for the "overdue" SLA state on querysets without the
+        annotations: due date passed, neither resolved nor excepted."""
+        return Q(
+            pk__in=cls.objects.alias(**cls.sla_state_annotations())
+            .filter(sla_state="overdue")
+            .values("pk")
+        )
 
 
 # historical data
@@ -7841,7 +8146,7 @@ class Assessment(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         return super().save(*args, **kwargs)
 
 
-class RiskAssessment(Assessment):
+class RiskAssessment(Assessment, FilteringLabelMixin):
     risk_matrix = models.ForeignKey(
         RiskMatrix,
         on_delete=models.PROTECT,
@@ -8554,7 +8859,11 @@ class RiskScenario(NameDescriptionMixin, FilteringLabelMixin, FolderMixin):
     @classmethod
     def get_default_ref_id(cls, risk_assessment: RiskAssessment):
         """return associated risk assessment id"""
-        scenarios_ref_ids = [x.ref_id for x in risk_assessment.risk_scenarios.all()]
+        scenarios_ref_ids = list(
+            cls.objects.filter(risk_assessment=risk_assessment).values_list(
+                "ref_id", flat=True
+            )
+        )
         nb_scenarios = len(scenarios_ref_ids) + 1
         candidates = [f"R.{i:02d}" for i in range(1, nb_scenarios + 1)]
         return next(x for x in candidates if x not in scenarios_ref_ids)
@@ -8885,7 +9194,7 @@ def rescale_score(value, old_range, new_range, integer=True):
     return float(exact.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
 
 
-class ComplianceAssessment(Assessment):
+class ComplianceAssessment(Assessment, FilteringLabelMixin):
     class CalculationMethod(models.TextChoices):
         AVG = "average", "Average"
         SUM = "sum", "Sum"
@@ -9656,13 +9965,8 @@ class ComplianceAssessment(Assessment):
         avg_ratio = total_ratio_weighted / total_weight
         return ca_min + avg_ratio * ca_range
 
-    @cached_property
-    def framework_node_tree(self):
-        """(children, weights, roots) of the framework's nodes by URN, built
-        once per instance: the radar scores each section separately."""
-        all_nodes = RequirementNode.objects.filter(
-            framework=self.framework
-        ).values_list("urn", "parent_urn", "weight")
+    @staticmethod
+    def _node_tree(all_nodes):
         children_map = defaultdict(list)
         node_weights = {}
         roots = []
@@ -9677,6 +9981,70 @@ class ComplianceAssessment(Assessment):
                 # Orphan or root: keep reachable as a tree root.
                 roots.append(urn)
         return children_map, node_weights, roots
+
+    @cached_property
+    def framework_node_tree(self):
+        """(children, weights, roots) of the framework's nodes by URN, built
+        once per instance: the radar scores each section separately."""
+        return self._node_tree(
+            RequirementNode.objects.filter(framework=self.framework).values_list(
+                "urn", "parent_urn", "weight"
+            )
+        )
+
+    @classmethod
+    def framework_node_trees(cls, framework_ids) -> dict:
+        """`framework_node_tree` for several frameworks in one query, keyed by
+        framework id, so a page of audits primes it instead of querying per row."""
+        rows_by_framework = defaultdict(list)
+        for framework_id, urn, parent_urn, weight in RequirementNode.objects.filter(
+            framework_id__in=framework_ids
+        ).values_list("framework_id", "urn", "parent_urn", "weight"):
+            rows_by_framework[framework_id].append((urn, parent_urn, weight))
+        return {
+            framework_id: cls._node_tree(rows)
+            for framework_id, rows in rows_by_framework.items()
+        }
+
+    def _scored_requirement_assessments(
+        self, prefetched_requirements: Optional[list[RequirementAssessment]] = None
+    ) -> list[RequirementAssessment]:
+        if prefetched_requirements is not None:
+            # Caller supplied an in-memory list (e.g. the /recap action) — filter in Python.
+            if self.anchor_na_to_target:
+                return [
+                    requirement
+                    for requirement in prefetched_requirements
+                    if requirement.result == RequirementAssessment.Result.NOT_APPLICABLE
+                    or (requirement.is_scored and requirement.score is not None)
+                ]
+            else:
+                return [
+                    requirement
+                    for requirement in prefetched_requirements
+                    if requirement.is_scored
+                    and requirement.score is not None
+                    and requirement.result
+                    != RequirementAssessment.Result.NOT_APPLICABLE
+                ]
+        else:
+            qs = (
+                RequirementAssessment.objects.filter(compliance_assessment=self)
+                .select_related("requirement", "compliance_assessment")
+                .exclude(requirement__assessable=False)
+            )
+            if self.anchor_na_to_target:
+                # Keep N/A items (they'll be anchored to target), but still
+                # exclude non-N/A items that aren't actually scored.
+                qs = qs.filter(
+                    Q(result=RequirementAssessment.Result.NOT_APPLICABLE)
+                    | (Q(is_scored=True) & Q(score__isnull=False))
+                )
+            else:
+                qs = qs.filter(is_scored=True, score__isnull=False).exclude(
+                    result=RequirementAssessment.Result.NOT_APPLICABLE
+                )
+            return list(qs)
 
     def get_global_score(
         self, prefetched_requirements: Optional[list[RequirementAssessment]] = None
@@ -9702,42 +10070,9 @@ class ComplianceAssessment(Assessment):
 
         **WARNING:** If provided `prefetched_requirements` **MUST** be a list of `RequirementAssessment` `req` WHERE `req.compliance_assessment == self` AND `req.requirement.assessable is True`.
         """
-        if prefetched_requirements is not None:
-            # Caller supplied an in-memory list (e.g. the /recap action) — filter in Python.
-            if self.anchor_na_to_target:
-                requirement_assessments_scored = [
-                    requirement
-                    for requirement in prefetched_requirements
-                    if requirement.result == RequirementAssessment.Result.NOT_APPLICABLE
-                    or (requirement.is_scored and requirement.score is not None)
-                ]
-            else:
-                requirement_assessments_scored = [
-                    requirement
-                    for requirement in prefetched_requirements
-                    if requirement.is_scored
-                    and requirement.score is not None
-                    and requirement.result
-                    != RequirementAssessment.Result.NOT_APPLICABLE
-                ]
-        else:
-            qs = (
-                RequirementAssessment.objects.filter(compliance_assessment=self)
-                .select_related("requirement", "compliance_assessment")
-                .exclude(requirement__assessable=False)
-            )
-            if self.anchor_na_to_target:
-                # Keep N/A items (they'll be anchored to target), but still
-                # exclude non-N/A items that aren't actually scored.
-                qs = qs.filter(
-                    Q(result=RequirementAssessment.Result.NOT_APPLICABLE)
-                    | (Q(is_scored=True) & Q(score__isnull=False))
-                )
-            else:
-                qs = qs.filter(is_scored=True, score__isnull=False).exclude(
-                    result=RequirementAssessment.Result.NOT_APPLICABLE
-                )
-            requirement_assessments_scored = list(qs)
+        requirement_assessments_scored = self._scored_requirement_assessments(
+            prefetched_requirements
+        )
 
         ig = (
             set(self.selected_implementation_groups)
@@ -9812,7 +10147,9 @@ class ComplianceAssessment(Assessment):
             "total_weight": sum(ra.requirement.weight or 1 for ra in scored),
         }
 
-    def get_total_max_score(self):
+    def get_total_max_score(
+        self, prefetched_requirements: Optional[list[RequirementAssessment]] = None
+    ):
         """
         Calculate the theoretical total maximum score based on the score_calculation_method.
 
@@ -9821,6 +10158,8 @@ class ComplianceAssessment(Assessment):
         For SUM: Returns Σ(resolved_max × weight) so per-requirement scale
         overrides contribute their own ceiling — a binary requirement adds 1,
         not the CA's max — keeping 100% achievable when every RA is at its max.
+
+        **WARNING:** If provided `prefetched_requirements` **MUST** be a list of `RequirementAssessment` `req` WHERE `req.compliance_assessment == self` AND `req.requirement.assessable is True`.
         """
         if self.score_calculation_method == self.CalculationMethod.SUM:
             # Keep this set aligned with get_global_score's numerator: rows the
@@ -9829,20 +10168,9 @@ class ComplianceAssessment(Assessment):
             # is on, N/A items contribute on the numerator side (anchored to
             # target), so they stay in the max too, otherwise the displayed
             # ratio can exceed 100%.
-            qs = RequirementAssessment.objects.filter(
-                compliance_assessment=self,
-                requirement__assessable=True,
-            ).select_related("requirement")
-            if self.anchor_na_to_target:
-                qs = qs.filter(
-                    Q(result=RequirementAssessment.Result.NOT_APPLICABLE)
-                    | (Q(is_scored=True) & Q(score__isnull=False))
-                )
-            else:
-                qs = qs.filter(is_scored=True, score__isnull=False).exclude(
-                    result=RequirementAssessment.Result.NOT_APPLICABLE
-                )
-            requirement_assessments_scored = qs
+            requirement_assessments_scored = self._scored_requirement_assessments(
+                prefetched_requirements
+            )
             ig = (
                 set(self.selected_implementation_groups)
                 if self.selected_implementation_groups
@@ -11183,10 +11511,15 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
 
         total_score = 0
         total_weight = 0
+        # Reachable range of the visible scored questions, weighted and not: the
+        # weighted SUM is projected from the former onto the latter.
+        weighted_lo = weighted_hi = 0
+        unweighted_lo = unweighted_hi = 0
         scoring = self.get_resolved_scoring()
         min_score = scoring["min_score"] if scoring["min_score"] is not None else 0
         max_score = scoring["max_score"] if scoring["max_score"] is not None else 100
         results = []
+        question_results = []
         visible_questions = 0
         answered_visible_questions = 0
         is_score_computed = False
@@ -11212,10 +11545,11 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                 aggregation = "mean"
 
         for question in questions_qs:
+            choices = list(question.choices.all())
             # Detect result-driven capability across ALL choices (selection /
             # visibility agnostic). Short-circuits across questions once set.
             if not is_result_driven:
-                for choice in question.choices.all():
+                for choice in choices:
                     if choice.compute_result is None:
                         continue
                     if resolve_compute_result(choice.compute_result) is not None:
@@ -11232,23 +11566,48 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                 continue
 
             visible_questions += 1
+
+            # A negative weight has no defined meaning; treat it as 0.
+            weight = max(question.weight, 0)
+            scores = [c.add_score for c in choices if c.add_score is not None]
+            if scores:
+                lo, hi = question_score_bounds(
+                    [c.add_score or 0 for c in choices],
+                    question.type == Question.Type.MULTIPLE_CHOICE,
+                )
+                unweighted_lo += lo
+                unweighted_hi += hi
+                weighted_lo += lo * weight
+                weighted_hi += hi * weight
+
             if not has_answer_by_qid.get(question.id):
                 continue
 
             answered_visible_questions += 1
 
             selected_pks = selected_choice_pks_by_qid.get(question.id, set())
-            for choice in question.choices.all():
+            selected_results = []
+            choice_results = []
+            for choice in choices:
+                choice_results.append(choice.compute_result)
                 if choice.id in selected_pks:
                     if choice.add_score is not None:
                         is_score_computed = True
-                        total_score += choice.add_score * question.weight
-                        total_weight += question.weight
+                        total_score += choice.add_score * weight
+                        total_weight += weight
 
                     if choice.compute_result is not None:
                         resolved_cr = resolve_compute_result(choice.compute_result)
                         if resolved_cr is not None:
                             results.append(resolved_cr)
+                            selected_results.append(resolved_cr)
+
+            # Tiered aggregation needs to know which tier the question states,
+            # not just what was answered, so it can tell "every Achieved
+            # statement holds" from "some of them do".
+            question_results.append(
+                (resolve_result_tier(choice_results), selected_results)
+            )
 
         # A score is only committed once every visible question has an answer:
         # a committed score marks the RA as assessed in the progress cascade,
@@ -11259,6 +11618,10 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         if is_score_computed and questionnaire_complete:
             if aggregation == "mean" and total_weight > 0:
                 computed_score = total_score / total_weight
+            elif aggregation == "sum":
+                computed_score = project_weighted_sum(
+                    total_score, weighted_lo, weighted_hi, unweighted_lo, unweighted_hi
+                )
             else:
                 computed_score = total_score
             new_score = max(min(int(computed_score), max_score), min_score)
@@ -11273,14 +11636,21 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         # reset to NOT_ASSESSED on every recompute.
         new_result = self.result
         if is_result_driven:
+            tiered = (
+                self.requirement.framework.result_aggregation
+                == Framework.ResultAggregation.TIERED_ALL
+            )
             if visible_questions == 0:
                 new_result = self.Result.NOT_APPLICABLE
             elif answered_visible_questions < visible_questions:
                 new_result = self.Result.NOT_ASSESSED
-            elif not results:
+            elif not results and not tiered:
                 new_result = self.Result.NOT_ASSESSED
             else:
-                aggregated = aggregate_compute_results(results)
+                if tiered:
+                    aggregated = aggregate_tiered_results(question_results)
+                else:
+                    aggregated = aggregate_compute_results(results)
                 result_map = {
                     "compliant": self.Result.COMPLIANT,
                     "partially_compliant": self.Result.PARTIALLY_COMPLIANT,
@@ -11653,6 +12023,10 @@ class QuickFormResponse(
     # `computed_outcome`, whose every key reads as a classification that fired.
     computed_values = models.JSONField(
         blank=True, null=True, verbose_name=_("Computed values")
+    )
+    # The facts the pages showed, frozen on submit; null while live.
+    facts_snapshot = models.JSONField(
+        blank=True, null=True, verbose_name=_("Facts snapshot")
     )
     # What the response is about, read from the form's subject question. Generic
     # because entity is the first subject type, not the only one.
@@ -12623,15 +12997,15 @@ class RiskAcceptance(NameDescriptionMixin, FolderMixin):
         with transaction.atomic():
             self.state = state
             if state == "accepted":
-                self.accepted_at = datetime.now()
+                self.accepted_at = timezone.now()
                 # iterate over the risk scenarios to set their treatment to accepted
                 for scenario in self.risk_scenarios.all():
                     scenario.treatment = "accept"
                     scenario.save()
             if state == "rejected":
-                self.rejected_at = datetime.now()
+                self.rejected_at = timezone.now()
             elif state == "revoked":
-                self.revoked_at = datetime.now()
+                self.revoked_at = timezone.now()
                 # revert the treatment set on acceptance, leaving scenarios that have
                 # since moved to another treatment, or are still covered by another
                 # accepted acceptance, untouched
@@ -12802,6 +13176,13 @@ class TaskTemplate(
         help_text="Findings related to the task",
         related_name="task_templates",
     )
+    vulnerabilities = models.ManyToManyField(
+        Vulnerability,
+        verbose_name="Vulnerabilities",
+        blank=True,
+        help_text="Vulnerabilities related to the task",
+        related_name="task_templates",
+    )
 
     link = models.URLField(
         blank=True,
@@ -12905,6 +13286,7 @@ class TaskNode(AbstractBaseModel, FolderMixin):
         ("completed", "Completed"),
         ("cancelled", "Cancelled"),
     ]
+    OPEN_STATUSES = ("pending", "in_progress")
 
     due_date = models.DateField(null=True, blank=True, verbose_name="Due date")
     scheduled_date = models.DateField(
@@ -13504,11 +13886,12 @@ auditlog.register(
 )
 auditlog.register(
     Vulnerability,
+    m2m_fields={"owner", "evidences"},
     exclude_fields=common_exclude,
 )
 auditlog.register(
     Incident,
-    m2m_fields={"applied_controls", "task_templates"},
+    m2m_fields={"applied_controls", "task_templates", "vulnerabilities"},
     exclude_fields=common_exclude,
 )
 auditlog.register(
@@ -13680,6 +14063,26 @@ class CustomDocHtmlTemplate(AbstractBaseModel, FolderMixin):
 
     def __str__(self):
         return f"{self.template_key} ({self.language})"
+
+
+class DemoManifest(models.Model):
+    """What the demo seeder created in a domain, so it can be told apart from
+    user data. Deleted with its domain."""
+
+    domain = models.OneToOneField(
+        Folder, on_delete=models.CASCADE, related_name="demo_manifest"
+    )
+    version = models.PositiveIntegerField()
+    anchor = models.DateField()
+    contents = models.JSONField(default=list, help_text="[model label, pk] pairs")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    # Internal bookkeeping with no API: never resolved through IAM.
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
+
+    def __str__(self):
+        return f"demo v{self.version} in {self.domain}"
 
 
 # actions - 0: create, 1: update, 2: delete

@@ -1,21 +1,21 @@
 <script lang="ts">
-	import ExportModal, { type ExportGroup } from '$lib/components/Modals/ExportModal.svelte';
+	import ExportModal, { type ExportGroup } from '#lib/components/Modals/ExportModal.svelte';
 	import type { PageData, ActionData } from './$types';
-	import DetailView from '$lib/components/DetailView/DetailView.svelte';
+	import DetailView from '#lib/components/DetailView/DetailView.svelte';
 	import { page } from '$app/state';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import { m } from '$paraglide/messages';
-	import HalfDonutChart from '$lib/components/Chart/HalfDonutChart.svelte';
-	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import { m } from '#paraglide/messages.js';
+	import HalfDonutChart from '#lib/components/Chart/HalfDonutChart.svelte';
+	import DonutChart from '#lib/components/Chart/DonutChart.svelte';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
-	import ValidationFlowsSection from '$lib/components/ValidationFlows/ValidationFlowsSection.svelte';
-	import { invalidateAll } from '$app/navigation';
+	} from '#lib/components/Modals/stores.js';
+	import ValidationFlowsSection from '#lib/components/ValidationFlows/ValidationFlowsSection.svelte';
+	import { refreshAll } from '$app/navigation';
 
 	interface Props {
 		data: PageData;
@@ -36,7 +36,7 @@
 				invalidateAll: true,
 				formAction: '/validation-flows?/create',
 				onConfirm: async () => {
-					await invalidateAll();
+					await refreshAll();
 				}
 			}
 		};

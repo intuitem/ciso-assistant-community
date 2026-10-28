@@ -373,6 +373,9 @@ Read more here: [AI engine](backend/chat/README.md)
 125. Plumber CI/CD Security Checks 🖥️
 126. UNESCO AI Maturity Framework 🤖🌐
 127. OWASP Top 10 for Agentic Applications 2026 🐝🤖
+128. Personal Information Protection Law (PIPL) 🇨🇳
+129. Personal Information Protection Compliance Audit Measures and Guideline (CAC) 🇨🇳
+130. OWASP Software Assurance Maturity Model (SAMM) v2.2 🐝🖥️
 
 ### Community contributions
 
@@ -414,6 +417,9 @@ Read more here: [AI engine](backend/chat/README.md)
 36. NCA NCNICC-1:2025 🇸🇦
 37. NCA ECC-2:2024 🇸🇦
 38. NCA CCC-1:2020 🇸🇦
+39. Hungarian NIS2 audit requirements – elementary requirements of 1/2025. (I. 31.) SZTFH rendelet, structured by the 7/2024. (VI. 24.) MK rendelet protective measures 🇭🇺
+40. Hungarian NIS2 threat catalogue (7/2024. (VI. 24.) MK rendelet, annex 3) 🇭🇺
+41. Hungarian NIS2 protective measures catalogue (7/2024. (VI. 24.) MK rendelet, annex 2) 🇭🇺
 
 <br/>
 
@@ -427,7 +433,6 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 ### Coming soon
 
 - Indonesia PDP 🇮🇩
-- OWASP SAMM
 - COBAC R-2024/01
 - ICO Data protection self-assessment 🇬🇧
 - ASD ISM 🇦🇺

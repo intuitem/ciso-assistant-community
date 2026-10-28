@@ -13,6 +13,12 @@ REFERENCEABLE = {
     "vulnerability": {"model": "core.Vulnerability", "label": "name"},
     "perimeter": {"model": "core.Perimeter", "label": "name"},
     "entity": {"model": "tprm.Entity", "label": "name"},
+    "solution": {
+        "model": "tprm.Solution",
+        "label": "name",
+        "folder": "provider_entity__folder",
+    },
+    "processing": {"model": "privacy.Processing", "label": "name"},
 }
 
 
@@ -41,31 +47,50 @@ def _queryset(entry, folder, user=None):
     from iam.models import RoleAssignment
 
     model = apps.get_model(entry["model"])
+    path = entry.get("folder", "folder")
     ancestors = [folder] + list(folder.get_parent_folders())
-    qs = model.objects.filter(folder__in=ancestors)
+    qs = model.objects.filter(**{f"{path}__in": ancestors})
+    if path != "folder":
+        qs = qs.select_related(path)
     if user is None:
         return qs
     viewable = RoleAssignment.get_viewable_object_ids(user, model)
-    return qs.filter(Q(id__in=viewable) | Q(folder=folder))
+    return qs.filter(Q(id__in=viewable) | Q(**{path: folder}))
 
 
-def options_for(question, folder, search="", limit=50, user=None):
+def options_for(question, folder, search="", limit=50, user=None, subject=None):
+    """`config.subject_field` names the subject's relation holding objects of this
+    model (a processing's `associated_controls`): those come first, flagged."""
     key, entry, _multiple = config_for(question)
     qs = _queryset(entry, folder, user)
     label_field = entry["label"]
     if search:
         qs = qs.filter(**{f"{label_field}__icontains": search})
-    rows = qs.order_by(label_field)[:limit]
-    return {"model": key, "results": [_row(o, label_field) for o in rows]}
+    config = question.config if isinstance(question.config, dict) else {}
+    related = getattr(subject, config.get("subject_field") or "", None)
+    # Only a relation to this very model: the name comes from the library.
+    ours = (
+        qs.filter(pk__in=related.all())
+        if getattr(related, "model", None) is qs.model
+        else qs.none()
+    )
+    first = list(ours.order_by(label_field)[:limit])
+    rest = qs.exclude(pk__in=[o.pk for o in first]).order_by(label_field)
+    results = [{**_row(o, entry), "on_subject": True} for o in first]
+    results += [_row(o, entry) for o in rest[: limit - len(first)]]
+    return {"model": key, "results": results}
 
 
-def _row(obj, label_field):
+def _row(obj, entry):
     ref_id = getattr(obj, "ref_id", None)
-    label = getattr(obj, label_field, "") or str(obj)
+    label = getattr(obj, entry["label"], "") or str(obj)
+    folder = obj
+    for part in entry.get("folder", "folder").split("__"):
+        folder = getattr(folder, part, None)
     return {
         "id": str(obj.id),
         "label": f"{ref_id} - {label}" if ref_id else label,
-        "folder": obj.folder.name if getattr(obj, "folder_id", None) else None,
+        "folder": folder.name if folder else None,
     }
 
 
@@ -110,12 +135,9 @@ def labels_for(question, folder, ids, user=None):
     if not ids:
         return []
     _key, entry, _multiple = config_for(question)
-    label_field = entry["label"]
     by_id = {str(o.id): o for o in _queryset(entry, folder, user).filter(id__in=ids)}
     return [
-        _row(by_id[i], label_field)
-        if i in by_id
-        else {"id": i, "label": i, "folder": None}
+        _row(by_id[i], entry) if i in by_id else {"id": i, "label": i, "folder": None}
         for i in ids
     ]
 
