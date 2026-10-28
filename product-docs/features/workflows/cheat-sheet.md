@@ -4,7 +4,7 @@ description: "Exhaustive reference card for workflows: lifecycle, triggers, step
 
 # Cheat sheet
 
-Every rule and subtlety of the workflow builder, grouped by topic. Each section links to the full page.
+Every rule and subtlety of the workflow builder, grouped by topic. Each section links to the full page. For what workflows are, see [Workflows](../../concepts/workflows.md). For the canvas itself, see [Workflow builder](README.md).
 
 ## 1. Prerequisites
 
