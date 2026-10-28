@@ -1,34 +1,34 @@
-import { m } from '$paraglide/messages';
-import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-import DateFilter from '$lib/components/Forms/DateFilter.svelte';
+import { m } from '#paraglide/messages.js';
+import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+import DateFilter from '#lib/components/Forms/DateFilter.svelte';
 import type { ComponentType } from 'svelte';
 import type { Option } from 'svelte-multiselect';
 import type { urlModel } from './types';
 
-import ChangeStatus from '$lib/components/ContextMenu/applied-controls/ChangeStatus.svelte';
-import ChangeImpact from '$lib/components/ContextMenu/applied-controls/ChangeImpact.svelte';
-import ChangeEffort from '$lib/components/ContextMenu/applied-controls/ChangeEffort.svelte';
-import ChangeCsfFunction from '$lib/components/ContextMenu/applied-controls/ChangeCsfFunction.svelte';
-import EvidenceChangeStatus from '$lib/components/ContextMenu/evidences/ChangeStatus.svelte';
-import WorkflowToggleActive from '$lib/components/ContextMenu/workflows/ToggleActive.svelte';
-import TaskNodeChangeStatus from '$lib/components/ContextMenu/task-nodes/ChangeStatus.svelte';
+import ChangeStatus from '#lib/components/ContextMenu/applied-controls/ChangeStatus.svelte';
+import ChangeImpact from '#lib/components/ContextMenu/applied-controls/ChangeImpact.svelte';
+import ChangeEffort from '#lib/components/ContextMenu/applied-controls/ChangeEffort.svelte';
+import ChangeCsfFunction from '#lib/components/ContextMenu/applied-controls/ChangeCsfFunction.svelte';
+import EvidenceChangeStatus from '#lib/components/ContextMenu/evidences/ChangeStatus.svelte';
+import WorkflowToggleActive from '#lib/components/ContextMenu/workflows/ToggleActive.svelte';
+import TaskNodeChangeStatus from '#lib/components/ContextMenu/task-nodes/ChangeStatus.svelte';
 import { getModelInfo, isFieldFlagEnabled } from './crud';
-import { folderBatchActions } from '$lib/utils/folder-batch-actions';
+import { folderBatchActions } from '#lib/utils/folder-batch-actions.js';
 import { toCamelCase } from './locales';
-import SelectObject from '$lib/components/ContextMenu/ebios-rm/SelectObject.svelte';
-import ChangePriority from '$lib/components/ContextMenu/applied-controls/ChangePriority.svelte';
-import ReplaceWith from '$lib/components/ContextMenu/applied-controls/ReplaceWith.svelte';
-import ChangeAttackStage from '$lib/components/ContextMenu/elementary-actions/ChangeAttackStage.svelte';
-import VulnerabilityChangeStatus from '$lib/components/ContextMenu/vulnerabilities/ChangeStatus.svelte';
-import VulnerabilityChangeSeverity from '$lib/components/ContextMenu/vulnerabilities/ChangeSeverity.svelte';
-import AssessTier from '$lib/components/ContextMenu/AssessTier.svelte';
-import ChangeTier from '$lib/components/ContextMenu/ChangeTier.svelte';
-import ProcessingScreenDpia from '$lib/components/ContextMenu/processings/ScreenDpia.svelte';
-import ProcessingChangeDpiaRequired from '$lib/components/ContextMenu/processings/ChangeDpiaRequired.svelte';
-import ChangeChoiceField from '$lib/components/ContextMenu/ChangeChoiceField.svelte';
-import ToggleBooleanField from '$lib/components/ContextMenu/ToggleBooleanField.svelte';
-import ToggleRecoveryFlags from '$lib/components/ContextMenu/asset-assessments/ToggleRecoveryFlags.svelte';
-import MetricInstanceEditValue from '$lib/components/ContextMenu/metric-instances/EditValue.svelte';
+import SelectObject from '#lib/components/ContextMenu/ebios-rm/SelectObject.svelte';
+import ChangePriority from '#lib/components/ContextMenu/applied-controls/ChangePriority.svelte';
+import ReplaceWith from '#lib/components/ContextMenu/applied-controls/ReplaceWith.svelte';
+import ChangeAttackStage from '#lib/components/ContextMenu/elementary-actions/ChangeAttackStage.svelte';
+import VulnerabilityChangeStatus from '#lib/components/ContextMenu/vulnerabilities/ChangeStatus.svelte';
+import VulnerabilityChangeSeverity from '#lib/components/ContextMenu/vulnerabilities/ChangeSeverity.svelte';
+import AssessTier from '#lib/components/ContextMenu/AssessTier.svelte';
+import ChangeTier from '#lib/components/ContextMenu/ChangeTier.svelte';
+import ProcessingScreenDpia from '#lib/components/ContextMenu/processings/ScreenDpia.svelte';
+import ProcessingChangeDpiaRequired from '#lib/components/ContextMenu/processings/ChangeDpiaRequired.svelte';
+import ChangeChoiceField from '#lib/components/ContextMenu/ChangeChoiceField.svelte';
+import ToggleBooleanField from '#lib/components/ContextMenu/ToggleBooleanField.svelte';
+import ToggleRecoveryFlags from '#lib/components/ContextMenu/asset-assessments/ToggleRecoveryFlags.svelte';
+import MetricInstanceEditValue from '#lib/components/ContextMenu/metric-instances/EditValue.svelte';
 
 export function tableSourceMapper(source: any[], keys: string[]): any[] {
 	return source.map((row) => {
@@ -1752,6 +1752,25 @@ export const VULNERABILITY_SEVERITY_FILTER: ListViewFilterConfig = {
 	}
 };
 
+// Values of Vulnerability.SLA_STATES, most urgent first.
+export const VULNERABILITY_SLA_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		options: [
+			{ label: 'overdue', value: 'overdue' },
+			{ label: 'today', value: 'today' },
+			{ label: 'caution', value: 'caution' },
+			{ label: 'onTrack', value: 'on track' },
+			{ label: 'excepted', value: 'excepted' },
+			{ label: 'resolved', value: 'resolved' }
+		],
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'sla',
+		multiple: true
+	}
+};
+
 export const SECURITY_ADVISORY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1838,6 +1857,7 @@ export const listViewFields = {
 			'severity',
 			'sla',
 			'dueDate',
+			'owner',
 			'applied_controls',
 			'folder',
 			'labels'
@@ -1849,6 +1869,7 @@ export const listViewFields = {
 			'severity',
 			'state',
 			'due_date',
+			'owner',
 			'applied_controls',
 			'folder',
 			'filtering_labels'
@@ -1858,6 +1879,8 @@ export const listViewFields = {
 			filtering_labels: LABELS_FILTER,
 			status: VULNERABILITY_STATUS_FILTER,
 			severity: VULNERABILITY_SEVERITY_FILTER,
+			state: VULNERABILITY_SLA_FILTER,
+			owner: OWNER_FILTER,
 			assets: ASSET_FILTER,
 			security_advisories: SECURITY_ADVISORY_FILTER,
 			cwes: CWE_FILTER,

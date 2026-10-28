@@ -1,11 +1,13 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { getModalStore, type ModalStore } from './stores';
-	import { safeTranslate, unsafeTranslate } from '$lib/utils/i18n';
-	import { fetchAllPages } from '$lib/utils/pagination';
-	import { nestedIds, subtreeIds } from '$lib/utils/tree';
-	import type { urlModel } from '$lib/utils/types';
-	import CascadePreview, { type CascadeInfo } from '$lib/components/Modals/CascadePreview.svelte';
+	import { safeTranslate, unsafeTranslate } from '#lib/utils/i18n.js';
+	import { fetchAllPages } from '#lib/utils/pagination.js';
+	import { nestedIds, subtreeIds } from '#lib/utils/tree.js';
+	import type { urlModel } from '#lib/utils/types.js';
+	import BatchMovePreview, {
+		type BatchMovePreviewInfo
+	} from '#lib/components/Modals/BatchMovePreview.svelte';
 	import { onMount } from 'svelte';
 
 	function translateOption(option: { label: string; value: string }): string {
@@ -58,11 +60,10 @@
 		onConfirm
 	}: Props = $props();
 
-	const showsMovePreview =
-		actionType !== 'delete' && URLModel !== undefined && movePreviewIds.length > 0;
-	let cascadeInfo: CascadeInfo | null = $state(null);
-	let cascadeLoading = $state(false);
-	let cascadeError = $state(false);
+	const showsMovePreview = URLModel !== undefined && movePreviewIds.length > 0;
+	let movePreview: BatchMovePreviewInfo | null = $state(null);
+	let movePreviewLoading = $state(false);
+	let movePreviewError = $state(false);
 	let flattenedNames: string[] = $state([]);
 
 	let options: { label: string; value: string }[] = $state([]);
@@ -113,7 +114,7 @@
 	}
 
 	async function loadMovePreview(): Promise<void> {
-		cascadeLoading = true;
+		movePreviewLoading = true;
 		try {
 			const res = await fetch(`/fe-api/batch-cascade-info/${URLModel}`, {
 				method: 'POST',
@@ -121,12 +122,12 @@
 				body: JSON.stringify({ ids: movePreviewIds })
 			});
 			if (!res.ok) throw new Error(`HTTP ${res.status}`);
-			cascadeInfo = await res.json();
+			movePreview = await res.json();
 		} catch (e) {
-			cascadeError = true;
-			console.error('Failed to fetch the cascade preview', e);
+			movePreviewError = true;
+			console.error('Failed to fetch the move preview', e);
 		} finally {
-			cascadeLoading = false;
+			movePreviewLoading = false;
 		}
 	}
 
@@ -189,13 +190,14 @@
 	}
 
 	const canConfirm = $derived(
-		actionType === 'delete'
-			? !!deleteConfirmInput && deleteConfirmInput.trim().toLowerCase() === yes
-			: fixedValue !== undefined
-				? true
-				: multiSelect
-					? selectedValues.length > 0
-					: selectedValue !== ''
+		(!showsMovePreview || movePreview !== null) &&
+			(actionType === 'delete'
+				? !!deleteConfirmInput && deleteConfirmInput.trim().toLowerCase() === yes
+				: fixedValue !== undefined
+					? true
+					: multiSelect
+						? selectedValues.length > 0
+						: selectedValue !== '')
 	);
 </script>
 
@@ -240,14 +242,14 @@
 					{m.batchMoveFlattenWarning({ names: flattenedNames.join(', ') })}
 				</p>
 			{/if}
-			{#if cascadeLoading}
+			{#if movePreviewLoading}
 				<div class="text-sm text-surface-600-400">{m.loading()}</div>
-			{:else if cascadeError}
+			{:else if movePreviewError}
 				<div class="p-4 bg-error-50-950 text-error-900-100 text-sm">
 					{m.errorFetching()}
 				</div>
-			{:else if cascadeInfo}
-				<CascadePreview {cascadeInfo} mode="move" />
+			{:else if movePreview}
+				<BatchMovePreview preview={movePreview} />
 			{/if}
 
 			{#if !needsSelection}

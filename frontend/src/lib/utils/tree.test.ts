@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { nestedIds, subtreeIds, type TreeRow } from '$lib/utils/tree';
+import { nestedIds, subtreeIds, type TreeRow } from '#lib/utils/tree.js';
 
 const rows: TreeRow[] = [
 	{ id: 'root', parent_folder: null },

@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { getModalStore, type ModalStore } from './stores';
 	import { superForm } from 'sveltekit-superforms';
-	import SuperForm from '$lib/components/Forms/Form.svelte';
+	import SuperForm from '#lib/components/Forms/Form.svelte';
 	import { Tooltip } from '@skeletonlabs/skeleton-svelte';
 
 	interface Choice {

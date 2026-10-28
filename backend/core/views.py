@@ -65,7 +65,6 @@ import random
 from django.db.models.functions import Lower
 
 from docxtpl import DocxTemplate
-from jinja2.sandbox import SandboxedEnvironment
 from integrations.models import SyncMapping
 from integrations.tasks import sync_object_to_integrations
 from webhooks.service import dispatch_webhook_event
@@ -77,7 +76,12 @@ from .generators import (
     risk_assessment_context,
     audit_context_for_typst,
     gen_audit_context,
-    inline_charts_for_docx,
+    render_docx_report,
+    render_docx_report_bounded,
+    DocxRenderCrash,
+    DocxRenderError,
+    DocxRenderTimeout,
+    DocxTemplateError,
 )
 from .typst_render import localized_template, render_pdf
 from .serializer_fields import FieldsRelatedField, PathField
@@ -941,10 +945,13 @@ class SmartOrderingFilter(filters.OrderingFilter):
         def resolved(term):
             descending = term.startswith("-")
             field = term[1:] if descending else term
-            target = remap.get(field, field)
-            return f"-{target}" if descending else target
+            targets = remap.get(field, field)
+            # A column can sort on several keys in turn (e.g. a rank, then a date).
+            if isinstance(targets, str):
+                targets = [targets]
+            return [f"-{target}" if descending else target for target in targets]
 
-        ordering = [resolved(f) for f in ordering]
+        ordering = [target for term in ordering for target in resolved(term)]
         # Offset pagination is only lossless over a total order: without a
         # unique tiebreaker, rows tied on the sort key can swap between the
         # separate queries that back each page, silently skipping or
@@ -2111,12 +2118,12 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
     ) -> dict:
         """Deleted, affected and blocked buckets for deleting `subjects` together.
 
-        Objects lie in domains the user may not view when a role is not recursive;
-        each bucket names only the viewable ones and counts the rest in
-        `hidden_count`. With `carried_only`, the deleted bucket keeps only what is filed under the
-        subjects, which is what moving them carries along: deleting them also
-        cascades onto objects of other domains, which a move leaves in place.
-        Callers check their own permission on each subject beforehand.
+        With `carried_only`, the deleted bucket instead lists what moving the
+        subjects carries along: their sub-domains and what is filed under them, not
+        what deleting them would cascade onto in other domains. Objects in domains
+        the user may not view (a role is not always recursive) are then counted in
+        `hidden_count` rather than named. Callers check their own permission on
+        each subject beforehand.
         """
         using = router.db_for_write(subjects[0])
         collector = NestedObjects(using=using)
@@ -2124,9 +2131,11 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
 
         subject_keys = {(type(s), str(s.pk)) for s in subjects}
         subject_types = tuple({type(s) for s in subjects})
-        # Hidden as collateral elsewhere, but a domain's sub-domains are what deleting
-        # it most destroys.
-        show_deleted_folders = any(isinstance(s, Folder) for s in subjects)
+        # Hidden as collateral elsewhere, but a domain's sub-domains are the first
+        # thing moving it carries along.
+        show_deleted_folders = carried_only and any(
+            isinstance(s, Folder) for s in subjects
+        )
 
         subject_folder_ids = set()
         in_scope_folder_ids = set()
@@ -2142,13 +2151,14 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
         viewable_folder_ids = {
             str(fid) for fid in RoleAssignment.get_viewable_object_ids(user, Folder)
         }
+        visible_folder_ids = subject_folder_ids if carried_only else in_scope_folder_ids
 
         def is_visible(obj):
             folder = Folder.get_folder(obj)
             if folder is None:
                 return True
             folder_id = str(folder.id)
-            return folder_id in subject_folder_ids or folder_id in viewable_folder_ids
+            return folder_id in visible_folder_ids or folder_id in viewable_folder_ids
 
         def is_outside_subjects(obj):
             folder = Folder.get_folder(obj)
@@ -2215,7 +2225,8 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
             key = model.__name__
             pk = str(getattr(obj, "pk", "")) or ""
             if not is_visible(obj):
-                bucket["_hidden"].add((key, pk))
+                if carried_only:
+                    bucket["_hidden"].add((key, pk))
                 return
             if (key, pk) in bucket["_seen"]:
                 return
@@ -2276,7 +2287,7 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
         # 0) PROTECT/RESTRICT references: NestedObjects.collect() swallows the
         # ProtectedError and parks the blockers here.
         for obj in getattr(collector, "protected", ()):
-            if is_hidden_model(type(obj)):
+            if is_hidden_model(type(obj)) or not is_visible(obj):
                 continue
             if (type(obj).__name__, str(getattr(obj, "pk", ""))) in precleared_index:
                 continue
@@ -2424,7 +2435,6 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
         payload = {
             "deleted": {
                 "count": deleted_count,
-                "hidden_count": len(deleted_bucket["_hidden"]),
                 "grouped_objects": deleted_groups,
                 "related_objects": flatten(deleted_groups),
                 "message": "The following objects will be permanently deleted.",
@@ -2432,7 +2442,6 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
             },
             "affected": {
                 "count": affected_count,
-                "hidden_count": len(affected_bucket["_hidden"]),
                 "grouped_objects": affected_groups,
                 "related_objects": flatten(affected_groups),
                 "message": "These objects will NOT be deleted but will lose one or more relationships.",
@@ -2440,13 +2449,14 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
             },
             "blocked": {
                 "count": blocked_count,
-                "hidden_count": len(blocked_bucket["_hidden"]),
                 "grouped_objects": blocked_groups,
                 "related_objects": flatten(blocked_groups),
                 "message": "Deletion is blocked while these objects still reference this one.",
                 "level": "error",
             },
         }
+        if carried_only:
+            payload["deleted"]["hidden_count"] = len(deleted_bucket["_hidden"])
         return payload
 
     def _get_optimized_object_data(self, queryset):
@@ -4072,38 +4082,77 @@ class RiskMatrixViewSet(BaseModelViewSet):
         return errors
 
 
+class VulnerabilityFilterSet(GenericFilterSet):
+    # The SLA state is computed, not stored: filter on the same expression the
+    # serializer shows (Vulnerability.sla_state_annotations).
+    state = df.MultipleChoiceFilter(
+        choices=[(state, state) for state in Vulnerability.SLA_STATES],
+        method="filter_state",
+        label="SLA",
+    )
+
+    def filter_state(self, queryset, name, values):
+        if "sla_state" not in queryset.query.annotations:
+            queryset = queryset.annotate(**Vulnerability.sla_state_annotations())
+        return queryset.filter(sla_state__in=values)
+
+    class Meta:
+        model = Vulnerability
+        fields = {
+            "folder": ["exact"],
+            "owner": ["exact"],
+            "assets": ["exact"],
+            "status": ["exact"],
+            "severity": ["exact"],
+            "risk_scenarios": ["exact"],
+            "applied_controls": ["exact"],
+            "security_exceptions": ["exact"],
+            "evidences": ["exact"],
+            "incidents": ["exact"],
+            "task_templates": ["exact"],
+            "filtering_labels": ["exact"],
+            "findings": ["exact"],
+            "security_advisories": ["exact"],
+            "cwes": ["exact"],
+            "created_at": ["gte", "lt"],
+            "updated_at": ["gte", "lt"],
+            "due_date": ["exact"],
+        }
+
+
 class VulnerabilityViewSet(BaseModelViewSet):
     """
     API endpoint that allows vulnerabilities to be viewed or edited.
     """
 
     model = Vulnerability
-    filterset_fields = {
-        "folder": ["exact"],
-        "assets": ["exact"],
-        "status": ["exact"],
-        "severity": ["exact"],
-        "risk_scenarios": ["exact"],
-        "applied_controls": ["exact"],
-        "security_exceptions": ["exact"],
-        "filtering_labels": ["exact"],
-        "findings": ["exact"],
-        "security_advisories": ["exact"],
-        "cwes": ["exact"],
-        "created_at": ["gte", "lt"],
-        "updated_at": ["gte", "lt"],
-        "due_date": ["exact"],
-    }
+    filterset_class = VulnerabilityFilterSet
     search_fields = ["name", "description", "ref_id"]
+    # The SLA column sorts by urgency: the state's rank, then the due date (most
+    # days late, or fewest left, first); vulnerabilities without either last.
+    # The date goes through its own alias so that nulls-last rule stays off the
+    # Due date column, which keeps the database's order.
+    ordering_remap = {"state": ["sla_rank", "sla_due_date"]}
+    ordering_nulls_last = ("sla_rank", "sla_due_date")
 
     autocomplete_serializer_class = VulnerabilityAutocompleteSerializer
 
     def get_queryset(self):
         qs = super().get_queryset()
+        # Any action sorting by SLA needs the annotations, autocomplete included.
+        if (
+            self.action in READ_HEAVY_ACTIONS
+            or "state" in self.request.query_params.get("ordering", "")
+        ):
+            qs = qs.annotate(
+                **Vulnerability.sla_state_annotations(), sla_due_date=F("due_date")
+            )
         if self.action == "autocomplete":
             return qs
         return qs.prefetch_related(
+            actor_prefetch("owner"),
             "applied_controls",
+            "evidences",
             "assets",
             "security_exceptions",
             "security_advisories",
@@ -4129,18 +4178,9 @@ class VulnerabilityViewSet(BaseModelViewSet):
         from django.db.models import F
         from django.db.models.functions import Cast
 
-        from global_settings.models import GlobalSettings
-
-        try:
-            sla_settings = GlobalSettings.objects.get(name="vulnerability-sla")
-            sla_policy = (
-                sla_settings.value if isinstance(sla_settings.value, dict) else {}
-            )
-        except GlobalSettings.DoesNotExist:
-            return Response({"error": "No SLA policy configured"}, status=400)
-
-        if not sla_policy:
-            return Response({"error": "SLA policy is empty"}, status=400)
+        sla_policy = Vulnerability.get_active_sla_policy()
+        if sla_policy is None:
+            return Response({"error": "vulnerabilitySlaDisabledHint"}, status=400)
 
         sla_anchor = sla_policy.get("sla_anchor", "detected_at")
 
@@ -5996,6 +6036,7 @@ class AppliedControlFilterSet(GenericFilterSet):
             "owner": ["exact"],
             "findings": ["exact"],
             "incidents": ["exact"],
+            "vulnerabilities": ["exact"],
             "eta": ["exact", "lte", "gte", "lt", "gt", "month", "year"],
             "start_date": ["exact"],
             "expiry_date": ["exact"],
@@ -9400,11 +9441,17 @@ class RoleAssignmentViewSet(BaseModelViewSet):
 
 class FolderFilter(GenericFilterSet):
     parent_folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
+    # ref_id is unique across folders: an exact lookup returns one folder at most.
+    # Not stripped here: filter_by_ref_id trims exactly as the unique index does.
+    ref_id = df.CharFilter(method="filter_ref_id", strip=False)
 
     owned = df.BooleanFilter(method="get_owned_folders", label="owned")
     content_type = df.MultipleChoiceFilter(
         choices=Folder.ContentType, lookup_expr="icontains"
     )
+
+    def filter_ref_id(self, queryset, name, value):
+        return Folder.filter_by_ref_id(queryset, value)
 
     def get_owned_folders(self, queryset, name, value):
         owned_folders_id = []
@@ -9490,7 +9537,7 @@ class FolderViewSet(ExportMixin, BaseModelViewSet):
         perm = Permission.objects.get(codename="change_folder")
         subjects = [
             obj
-            for obj in self.get_queryset().filter(id__in=ids)
+            for obj in self.get_queryset().filter(id__in=ids, builtin=False)
             if RoleAssignment.is_access_allowed(
                 user=request.user, perm=perm, folder=Folder.get_folder(obj)
             )
@@ -11606,6 +11653,7 @@ class EvidenceFilterSet(GenericFilterSet):
             "processings",
             "data_breaches",
             "security_exceptions",
+            "vulnerabilities",
         ]
 
 
@@ -13582,30 +13630,6 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         """
         user_lang = request.user.preferences.get("lang") or "en"
 
-        # Custom overrides support any language; auto-generated strings only en/fr.
-        doc = None
-        try:
-            custom = CustomWordTemplate.objects.filter(
-                template_key="audit_report",
-                language=user_lang,
-                is_active=True,
-            ).first()
-            if custom and custom.file:
-                custom.file.open("rb")
-                doc = DocxTemplate(io.BytesIO(custom.file.read()))
-        except Exception as e:
-            logger.warning(
-                "Failed to load custom Word template, falling back to default",
-                exc_info=e,
-            )
-
-        if doc is None:
-            core_templates = Path(__file__).resolve().parent / "templates" / "core"
-            template_path = core_templates / f"audit_report_template_{user_lang}.docx"
-            if not template_path.exists():
-                template_path = core_templates / "audit_report_template_en.docx"
-            doc = DocxTemplate(template_path)
-
         audit_obj = self.get_object()
         _framework = audit_obj.framework
         tree = get_sorted_requirement_nodes(
@@ -13625,15 +13649,51 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         filter_graph_by_implementation_groups(tree, implementation_groups)
         annotate_tree_with_aggregated_scores(tree, audit_obj)
         context = gen_audit_context(pk, tree, user_lang)
-        doc.render(
-            inline_charts_for_docx(context, doc), jinja_env=SandboxedEnvironment()
-        )
-        buffer_doc = io.BytesIO()
-        doc.save(buffer_doc)
-        buffer_doc.seek(0)
+
+        # Custom overrides support any language; auto-generated strings only en/fr.
+        custom_template = None
+        try:
+            custom = CustomWordTemplate.objects.filter(
+                template_key="audit_report",
+                language=user_lang,
+                is_active=True,
+            ).first()
+            if custom and custom.file:
+                custom.file.open("rb")
+                custom_template = DocxTemplate(io.BytesIO(custom.file.read()))
+        except Exception as e:
+            logger.warning(
+                "Failed to load custom Word template, falling back to default",
+                exc_info=e,
+            )
+
+        if custom_template is not None:
+            try:
+                report = render_docx_report_bounded(custom_template, context)
+            except DocxRenderError as e:
+                logger.warning("Failed to render custom Word template", exc_info=e)
+                if isinstance(e, DocxRenderTimeout):
+                    failure = {"error": "customWordTemplateTimedOut"}
+                elif isinstance(e, DocxRenderCrash):
+                    failure = {"error": "customWordTemplateCrashed"}
+                elif isinstance(e, DocxTemplateError):
+                    failure = {"error": "invalidCustomWordTemplate", "detail": str(e)}
+                else:
+                    failure = {"error": "customWordTemplateFailed"}
+                return Response(failure, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            core_templates = Path(__file__).resolve().parent / "templates" / "core"
+            template_path = core_templates / f"audit_report_template_{user_lang}.docx"
+            if not template_path.exists():
+                template_path = core_templates / "audit_report_template_en.docx"
+            doc = DocxTemplate(template_path)
+            render_docx_report(doc, context)
+            buffer_doc = io.BytesIO()
+            doc.save(buffer_doc)
+            report = buffer_doc.getvalue()
 
         response = StreamingHttpResponse(
-            FileWrapper(buffer_doc),
+            FileWrapper(io.BytesIO(report)),
             content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         )
         response["Content-Disposition"] = "attachment; filename=exec_report.docx"
@@ -17441,6 +17501,7 @@ class SecurityExceptionViewSet(ExportMixin, BaseModelViewSet):
         "name": ["exact"],
         "requirement_assessments": ["exact"],
         "risk_scenarios": ["exact"],
+        "vulnerabilities": ["exact"],
         "evidences": ["exact"],
         "owners": ["exact"],
         "approver": ["exact"],
@@ -18264,6 +18325,7 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
         "owners": ["exact"],
         "entities": ["exact"],
         "assets": ["exact"],
+        "vulnerabilities": ["exact"],
         "applied_controls": ["exact"],
         "task_templates": ["exact"],
         "risk_scenarios": ["exact"],
@@ -18282,6 +18344,7 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
                 "threats",
                 actor_prefetch("owners"),
                 "assets",
+                "vulnerabilities",
                 "qualifications",
                 "entities",
                 "applied_controls",
@@ -18955,6 +19018,7 @@ class TaskTemplateFilter(GenericFilterSet):
             "objectives",
             "incidents",
             "findings",
+            "vulnerabilities",
             "requirement_assessments",
             "filtering_labels",
             "task_date",
@@ -19450,6 +19514,7 @@ class TaskTemplateViewSet(CommitmentActionsMixin, ExportMixin, BaseModelViewSet)
                 "risk_assessments",
                 actor_prefetch("assigned_to"),
                 "findings_assessment",
+                "vulnerabilities",
                 "commitments__committed_by",
                 # Stands in for a plain "findings": same lookup, binder-scoped.
                 scoped_findings_prefetch(self.request),

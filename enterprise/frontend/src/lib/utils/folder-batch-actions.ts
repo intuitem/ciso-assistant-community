@@ -1,4 +1,4 @@
-import type { BatchActionConfig } from '$lib/utils/table';
+import type { BatchActionConfig } from '#lib/utils/table.js';
 
 /** Overlays the community stub: this edition allows nested domains, so a domain
  * can be reparented. Each selected domain is reparented on its own, so selecting

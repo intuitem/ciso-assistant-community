@@ -1,7 +1,7 @@
-import { getModelInfo } from '$lib/utils/crud';
-import { loadDetail } from '$lib/utils/load';
-import { BASE_API_URL } from '$lib/utils/constants';
-import { fetchAllPages } from '$lib/utils/pagination';
+import { getModelInfo } from '#lib/utils/crud.js';
+import { loadDetail } from '#lib/utils/load.js';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { fetchAllPages } from '#lib/utils/pagination.js';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async (event) => {

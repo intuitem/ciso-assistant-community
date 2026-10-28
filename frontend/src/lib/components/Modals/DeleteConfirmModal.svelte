@@ -1,14 +1,10 @@
 <script lang="ts">
-	import type { urlModel } from '$lib/utils/types';
-	import { m } from '$paraglide/messages';
+	import type { urlModel } from '#lib/utils/types.js';
+	import { m } from '#paraglide/messages.js';
 	import SuperDebug from 'sveltekit-superforms';
 	import { getModalStore, type ModalStore } from './stores';
 	import { superForm } from 'sveltekit-superforms';
 	import { onMount } from 'svelte';
-	import CascadePreview, {
-		isCascadeBlocked,
-		type CascadeInfo
-	} from '$lib/components/Modals/CascadePreview.svelte';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -38,11 +34,36 @@
 
 	const { form, enhance } = superForm(_form, { invalidateAll });
 
-	let cascadeInfo: CascadeInfo | null = $state(null);
+	type Obj = { id: string; name: string };
+	type Group = { model: string; verbose_name?: string; objects: Obj[] };
+	type Bucket = {
+		count: number;
+		grouped_objects: Group[];
+		related_objects?: Obj[];
+		message?: string;
+		level?: string;
+	};
+
+	type BucketName = 'deleted' | 'affected' | 'blocked';
+
+	let cascadeInfo: { deleted: Bucket; affected: Bucket; blocked?: Bucket } | null = $state(null);
 	let loading = $state(true);
 	let errorMsg = $state<string | null>(null);
 
-	const isBlocked = $derived(isCascadeBlocked(cascadeInfo));
+	// PROTECT/RESTRICT references make the delete fail server-side.
+	const isBlocked = $derived((cascadeInfo?.blocked?.count ?? 0) > 0);
+
+	// expand/collapse state per-group (buckets share keys, so prefix)
+	let expanded = $state<Set<string>>(new Set());
+	function keyFor(bucket: BucketName, groupKey: string) {
+		return `${bucket}:${groupKey}`;
+	}
+	function toggle(bucket: BucketName, groupKey: string) {
+		const k = keyFor(bucket, groupKey);
+		if (expanded.has(k)) expanded.delete(k);
+		else expanded.add(k);
+		expanded = new Set(expanded); // trigger reactivity
+	}
 
 	onMount(async () => {
 		try {
@@ -78,10 +99,144 @@
 				{errorMsg}
 			</div>
 		{:else if cascadeInfo}
-			<CascadePreview {cascadeInfo} />
+			{#if isBlocked && cascadeInfo.blocked}
+				<div class="p-4 bg-error-50 dark:bg-error-500/15 border-l-2 border-error-500">
+					<div class="text-sm font-medium text-surface-950-50 mb-3">
+						{m.cascadeBlockedWarning({ count: cascadeInfo.blocked.count })}
+					</div>
+
+					<div class="max-h-64 overflow-y-auto space-y-1">
+						{#each cascadeInfo.blocked.grouped_objects as group (group.model)}
+							<section class="border-t border-surface-200-800">
+								<button
+									type="button"
+									class="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-surface-50-950 text-sm"
+									aria-controls={`blk-${group.model}`}
+									aria-expanded={expanded.has(keyFor('blocked', group.model))}
+									onclick={() => toggle('blocked', group.model)}
+								>
+									<span class="font-medium text-surface-950-50"
+										>{group.verbose_name ?? group.model}</span
+									>
+									<span class="text-xs text-surface-600-400">
+										{group.objects.length}
+									</span>
+								</button>
+
+								{#if expanded.has(keyFor('blocked', group.model))}
+									<ul
+										id={`blk-${group.model}`}
+										class="px-3 pb-2 text-sm space-y-0.5 bg-surface-50-950"
+									>
+										{#each group.objects as o (o.id)}
+											<li class="flex items-center justify-between py-1">
+												<span class="truncate text-surface-700-300" title={o.name}>{o.name}</span>
+											</li>
+										{/each}
+									</ul>
+								{/if}
+							</section>
+						{/each}
+					</div>
+				</div>
+			{/if}
+
+			{#if !isBlocked && cascadeInfo.deleted?.count > 0}
+				<div class="p-4 bg-orange-50 dark:bg-orange-500/15 border-l-2 border-orange-400">
+					<div class="text-sm font-medium text-surface-950-50 mb-3">
+						{m.cascadeDeleteWarning({ count: cascadeInfo.deleted.count })}
+					</div>
+
+					<div class="max-h-64 overflow-y-auto space-y-1">
+						{#each cascadeInfo.deleted.grouped_objects as group (group.model)}
+							<section class="border-t border-surface-200-800">
+								<button
+									type="button"
+									class="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-surface-50-950 text-sm"
+									aria-controls={`del-${group.model}`}
+									aria-expanded={expanded.has(keyFor('deleted', group.model))}
+									onclick={() => toggle('deleted', group.model)}
+								>
+									<span class="font-medium text-surface-950-50"
+										>{group.verbose_name ?? group.model}</span
+									>
+									<span class="text-xs text-surface-600-400">
+										{group.objects.length}
+									</span>
+								</button>
+
+								{#if expanded.has(keyFor('deleted', group.model))}
+									<ul
+										id={`del-${group.model}`}
+										class="px-3 pb-2 text-sm space-y-0.5 bg-surface-50-950"
+									>
+										{#each group.objects as o (o.id)}
+											<li class="flex items-center justify-between py-1">
+												<span class="truncate text-surface-700-300" title={o.name}>{o.name}</span>
+											</li>
+										{/each}
+									</ul>
+								{/if}
+							</section>
+						{/each}
+					</div>
+				</div>
+			{/if}
+
+			{#if !isBlocked && cascadeInfo.affected?.count > 0}
+				<div class="p-4 bg-blue-50 dark:bg-blue-500/15 border-l-2 border-blue-400">
+					<div class="text-sm font-medium text-surface-950-50 mb-1">
+						{m.cascadeAffectedNotice({ count: cascadeInfo.affected.count })}
+					</div>
+					<p class="text-xs text-surface-600-400 mb-3">
+						{m.cascadeAffectedHint()}
+					</p>
+
+					<div class="max-h-64 overflow-y-auto space-y-1">
+						{#each cascadeInfo.affected.grouped_objects as group (group.model)}
+							<section class="border-t border-surface-200-800">
+								<button
+									type="button"
+									class="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-surface-50-950 text-sm"
+									aria-controls={`aff-${group.model}`}
+									aria-expanded={expanded.has(keyFor('affected', group.model))}
+									onclick={() => toggle('affected', group.model)}
+								>
+									<span class="font-medium text-surface-950-50"
+										>{group.verbose_name ?? group.model}</span
+									>
+									<span class="text-xs text-surface-600-400">
+										{group.objects.length}
+									</span>
+								</button>
+
+								{#if expanded.has(keyFor('affected', group.model))}
+									<ul
+										id={`aff-${group.model}`}
+										class="px-3 pb-2 text-sm space-y-0.5 bg-surface-50-950"
+									>
+										{#each group.objects as o (o.id)}
+											<li class="flex items-center justify-between py-1">
+												<span class="truncate text-surface-700-300" title={o.name}>{o.name}</span>
+											</li>
+										{/each}
+									</ul>
+								{/if}
+							</section>
+						{/each}
+					</div>
+				</div>
+			{/if}
 		{/if}
 
-		<form method="POST" action={formAction} use:enhance class="modal-form {cForm}">
+		<form
+			method="POST"
+			action={formAction}
+			use:enhance={() =>
+				({ update }) =>
+					update({ navigate: false })}
+			class="modal-form {cForm}"
+		>
 			<footer class="flex gap-3 justify-end pt-4 border-t border-surface-200-800">
 				<button
 					type="button"

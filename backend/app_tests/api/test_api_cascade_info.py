@@ -1,9 +1,10 @@
 import pytest
+from django.contrib.auth.models import Permission
 from knox.models import AuthToken
 from rest_framework.test import APIClient
 
 from core.apps import startup
-from core.models import Asset
+from core.models import AppliedControl, Asset, ReferenceControl
 from iam.models import Folder, Role, RoleAssignment, User, UserGroup
 
 
@@ -237,15 +238,25 @@ def domain_tree(target_folder: Folder) -> dict[str, Folder]:
 BATCH_URL = "/api/folders/batch-cascade-info/"
 
 
-def test_folder_preview_lists_its_sub_domains_as_deleted(
-    admin_client: APIClient, domain_tree: dict[str, Folder]
+def test_single_delete_preview_still_names_what_a_non_recursive_role_destroys(
+    app_ready: Folder, domain_tree: dict[str, Folder]
 ) -> None:
-    res = admin_client.get(_url(domain_tree["target"]))
+    """The move preview hides sub-domain content from a non-recursive role; deleting
+    a domain must keep naming it, as the delete modal shows no hidden count."""
+    client = _scoped_client(
+        "non-recursive-delete@cascade.test",
+        "BI-RL-DMA",
+        domain_tree["target"],
+        app_ready,
+        is_recursive=False,
+    )
 
-    assert res.status_code == 200
-    deleted = _bucket_names(res.json()["deleted"])
-    assert {"SUB-DOMAIN", "SUB-SUB-DOMAIN"} <= deleted
-    assert "Target" not in deleted
+    res = client.get(_url(domain_tree["target"]))
+
+    assert res.status_code == 200, res.content
+    deleted = res.json()["deleted"]
+    assert {"SUB-ASSET", "SUB-SUB-ASSET"} <= _bucket_names(deleted)
+    assert "hidden_count" not in deleted
 
 
 def test_batch_preview_lists_sub_domains_and_their_content_once(
@@ -314,9 +325,11 @@ def test_sub_domains_are_grouped_as_domains_and_enclaves_are_left_out(
         content_type=Folder.ContentType.ENCLAVE,
     )
 
-    res = admin_client.get(_url(domain_tree["target"]))
+    res = admin_client.post(
+        BATCH_URL, {"ids": [str(domain_tree["target"].id)]}, format="json"
+    )
 
-    assert res.status_code == 200
+    assert res.status_code == 200, res.content
     group = _folder_group(res.json()["deleted"])
     assert group["verbose_name"] == "Domain"
     assert {o["name"] for o in group["objects"]} == {"SUB-DOMAIN", "SUB-SUB-DOMAIN"}
@@ -325,8 +338,6 @@ def test_sub_domains_are_grouped_as_domains_and_enclaves_are_left_out(
 def test_batch_preview_needs_the_change_permission_not_the_delete_one(
     app_ready: Folder, domain_tree: dict[str, Folder]
 ) -> None:
-    from django.contrib.auth.models import Permission
-
     mover = Role.objects.create(name="MOVER", folder=app_ready)
     mover.permissions.set(
         Permission.objects.filter(
@@ -346,8 +357,6 @@ def test_batch_preview_needs_the_change_permission_not_the_delete_one(
 def test_batch_preview_leaves_out_what_stays_in_other_domains(
     admin_client: APIClient, app_ready: Folder, target_folder: Folder
 ) -> None:
-    from core.models import AppliedControl, ReferenceControl
-
     elsewhere = Folder.objects.create(
         name="ELSEWHERE",
         parent_folder=app_ready,
@@ -391,3 +400,11 @@ def test_batch_preview_only_names_what_the_caller_may_view(
     assert "CANARY-ASSET" in names
     assert not {"SUB-DOMAIN", "SUB-SUB-DOMAIN", "SUB-ASSET", "SUB-SUB-ASSET"} & names
     assert deleted["hidden_count"] == 4
+
+
+def test_batch_preview_refuses_builtin_domains(
+    admin_client: APIClient, app_ready: Folder
+) -> None:
+    res = admin_client.post(BATCH_URL, {"ids": [str(app_ready.id)]}, format="json")
+
+    assert res.status_code == 403

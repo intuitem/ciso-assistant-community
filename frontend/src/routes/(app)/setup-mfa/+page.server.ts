@@ -1,11 +1,11 @@
-import { ALLAUTH_API_URL, BASE_API_URL } from '$lib/utils/constants';
+import { ALLAUTH_API_URL, BASE_API_URL } from '#lib/utils/constants.js';
 import { fail, redirect, isRedirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { activateTOTPSchema, registerWebAuthnSchema } from '$lib/utils/schemas';
+import { activateTOTPSchema, registerWebAuthnSchema } from '#lib/utils/schemas.js';
 import { setError, superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
-import { safeTranslate } from '$lib/utils/i18n';
-import { m } from '$paraglide/messages';
+import { safeTranslate } from '#lib/utils/i18n.js';
+import { m } from '#paraglide/messages.js';
 import { setFlash } from 'sveltekit-flash-message/server';
 
 export const load: PageServerLoad = async (event) => {

@@ -1,4 +1,4 @@
-import type { BatchActionConfig } from '$lib/utils/table';
+import type { BatchActionConfig } from '#lib/utils/table.js';
 
 /** Batch actions on domains that only an edition allowing nested domains offers.
  * Community domains all sit directly under the root, so reparenting has no target

@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { isDark } from '$lib/utils/helpers';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { isDark } from '#lib/utils/helpers.js';
 
 	interface RatingLevel {
 		name: string;

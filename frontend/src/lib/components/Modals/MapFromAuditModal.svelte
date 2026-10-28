@@ -4,7 +4,7 @@
 	import { getModalStore, type ModalStore } from './stores';
 	import { superForm } from 'sveltekit-superforms';
 	import { z } from 'zod';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 
 	const modalStore: ModalStore = getModalStore();
