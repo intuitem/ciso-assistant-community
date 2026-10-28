@@ -125,20 +125,36 @@ def test_ignores_stale_empty_stored_keys():
     assert "password" not in data["credentials"]
 
 
-def test_accepts_new_secret_when_another_stored_key_is_backfilled():
-    # Only keys the stored row holds pin the connection; a key the row lacks
-    # must not be compared against the missing value and refused.
+def test_refuses_replay_when_a_submitted_key_is_not_stored():
+    # A key the stored row lacks still pins the replay: nothing stored can
+    # vouch for it, so the secret must be re-entered.
     class StaleConfig(StubConfig):
         credentials = {**STORED, "password": None}
 
-    data = _validate(
-        {
-            "server_url": STORED["server_url"],
-            "email": STORED["email"],
-            "api_token": "",
-            "password": "rotated",
-        },
-        config=StaleConfig(),
-    )
-    assert data["credentials"]["api_token"] == "s3cret"
-    assert data["credentials"]["password"] == "rotated"
+    with pytest.raises(serializers.ValidationError):
+        _validate(
+            {
+                "server_url": STORED["server_url"],
+                "email": STORED["email"],
+                "api_token": "",
+                "password": "rotated",
+            },
+            config=StaleConfig(),
+        )
+
+
+def test_refuses_replay_when_the_stored_host_is_empty():
+    # Rows with an empty host (not producible from the UI, possible via PATCH)
+    # must not let the stored token be replayed to an arbitrary host.
+    class EmptyHostConfig(StubConfig):
+        credentials = {**STORED, "server_url": ""}
+
+    with pytest.raises(serializers.ValidationError):
+        _validate(
+            {
+                "server_url": "https://attacker.example",
+                "email": STORED["email"],
+                "api_token": "",
+            },
+            config=EmptyHostConfig(),
+        )

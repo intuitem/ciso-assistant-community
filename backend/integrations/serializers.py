@@ -66,12 +66,15 @@ class ConnectionTestSerializer(serializers.Serializer):
             # Empty stored values (e.g. a stale ``password: null`` written by
             # older saves) are not secrets to replay and must not pin the test.
             stored = {k: v for k, v in (config.credentials or {}).items() if v}
-            # a stored secret is only replayable to the connection it was stored for
+            # a stored secret is only replayable to the connection it was stored
+            # for: every submitted key must match what is stored, including keys
+            # the row lacks or stores empty, otherwise an empty stored host would
+            # let the stored secret be replayed to any host.
             backfilled = {k for k in stored if not credentials.get(k)}
             if backfilled and any(
                 v != stored.get(k)
                 for k, v in credentials.items()
-                if k in stored and k not in backfilled
+                if k not in backfilled
             ):
                 raise serializers.ValidationError(
                     {"credentials": "reenterSecretToTestModifiedConnection"}
