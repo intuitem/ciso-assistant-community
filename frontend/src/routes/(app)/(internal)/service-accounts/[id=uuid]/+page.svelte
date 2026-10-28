@@ -1,19 +1,19 @@
 <script lang="ts">
-	import DetailView from '$lib/components/DetailView/DetailView.svelte';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import ServiceAccountSecretModal from '$lib/components/Modals/ServiceAccountSecretModal.svelte';
-	import ServiceAccountRotateSecretModal from '$lib/components/Modals/ServiceAccountRotateSecretModal.svelte';
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import DetailView from '#lib/components/DetailView/DetailView.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import ServiceAccountSecretModal from '#lib/components/Modals/ServiceAccountSecretModal.svelte';
+	import ServiceAccountRotateSecretModal from '#lib/components/Modals/ServiceAccountRotateSecretModal.svelte';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { page } from '$app/state';
-	import { goto, invalidateAll } from '$app/navigation';
-	import { getToastStore } from '$lib/components/Toast/stores';
+	import { goto, refreshAll } from '$app/navigation';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
+	} from '#lib/components/Modals/stores.js';
 	import type { PageData } from './$types';
 
 	interface Props {
@@ -55,7 +55,7 @@
 			});
 			if (res.ok) {
 				const result = await res.json();
-				await invalidateAll();
+				await refreshAll();
 				setTimeout(() => modalSecret(result), 0);
 			} else {
 				toastStore.trigger({ message: m.anErrorOccurred(), preset: 'error' });
@@ -89,7 +89,7 @@
 				body: JSON.stringify({ is_active: isActive })
 			});
 			if (res.ok) {
-				await invalidateAll();
+				await refreshAll();
 			} else {
 				toastStore.trigger({ message: await extractErrorMessage(res), preset: 'error' });
 			}
@@ -141,7 +141,7 @@
 				try {
 					const res = await fetch(`/service-accounts/${data.data.id}`, { method: 'DELETE' });
 					if (res.ok) {
-						await goto('/service-accounts', { invalidateAll: true });
+						await goto('/service-accounts', { refreshAll: true });
 					} else {
 						toastStore.trigger({ message: m.anErrorOccurred(), preset: 'error' });
 					}

@@ -15,6 +15,7 @@ from core.models import (
     TaskNode,
     TaskTemplate,
     ValidationFlow,
+    Vulnerability,
 )
 from iam.models import ServiceAccount, User
 from core import mailer
@@ -1110,6 +1111,49 @@ def send_security_exception_assignment_notification(exception_id, assigned_user_
         if email and check_email_configuration(email, [security_exception]):
             rendered = render_email_template(
                 "security_exception_assignment", context, recipient_email=email
+            )
+            if rendered:
+                send_notification_email(
+                    rendered["subject"],
+                    rendered["body"],
+                    email,
+                    rendered.get("html_body"),
+                )
+
+
+@task()
+def send_vulnerability_assignment_notification(vulnerability_id, assigned_user_emails):
+    """Send notification when a Vulnerability is assigned to owners"""
+    if not assigned_user_emails:
+        return
+
+    try:
+        vulnerability = Vulnerability.objects.get(id=vulnerability_id)
+    except Vulnerability.DoesNotExist:
+        logger.error(f"Vulnerability with id {vulnerability_id} not found")
+        return
+
+    from .email_utils import render_email_template
+
+    context = {
+        "vulnerability_name": vulnerability.name,
+        "vulnerability_description": vulnerability.description
+        or "No description provided",
+        "vulnerability_ref_id": vulnerability.ref_id or "N/A",
+        "vulnerability_severity": vulnerability.get_severity_display(),
+        "vulnerability_status": vulnerability.get_status_display(),
+        "due_date": vulnerability.due_date.strftime("%Y-%m-%d")
+        if vulnerability.due_date
+        else "Not set",
+        "folder_name": vulnerability.folder.name if vulnerability.folder else "Default",
+    }
+
+    notify("vulnerability_assignment", assigned_user_emails, vulnerability, context)
+
+    for email in assigned_user_emails:
+        if email and check_email_configuration(email, [vulnerability]):
+            rendered = render_email_template(
+                "vulnerability_assignment", context, recipient_email=email
             )
             if rendered:
                 send_notification_email(

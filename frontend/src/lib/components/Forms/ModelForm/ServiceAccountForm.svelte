@@ -7,8 +7,8 @@
 	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import type { SuperForm } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import { m } from '$paraglide/messages';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		form: SuperForm<any, any>;

@@ -1,16 +1,16 @@
 <script lang="ts">
 	import type { ActionData, PageData } from './$types';
-	import DetailView from '$lib/components/DetailView/DetailView.svelte';
+	import DetailView from '#lib/components/DetailView/DetailView.svelte';
 	import { page } from '$app/state';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import { m } from '$paraglide/messages';
-	import LossExceedanceCurve from '$lib/components/Chart/LossExceedanceCurve.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import { m } from '#paraglide/messages.js';
+	import LossExceedanceCurve from '#lib/components/Chart/LossExceedanceCurve.svelte';
 	import { Progress } from '@skeletonlabs/skeleton-svelte';
 	import { enhance } from '$app/forms';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import { run } from 'svelte/legacy';
-	import { getToastStore } from '$lib/components/Toast/stores.ts';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { getToastStore } from '#lib/components/Toast/stores.ts';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 
 	interface Props {
 		data: PageData;
@@ -26,7 +26,7 @@
 		if (form?.message?.simulationsComplete) {
 			// Add a small delay to ensure database transaction is committed
 			setTimeout(() => {
-				invalidateAll();
+				refreshAll();
 			}, 100);
 		}
 	});
@@ -62,7 +62,7 @@
 				use:enhance={() => {
 					retriggerIsLoading = true;
 					return async ({ result, update }) => {
-						await update();
+						await update({ navigate: false });
 						retriggerIsLoading = false;
 
 						// Handle responses immediately in the enhance callback

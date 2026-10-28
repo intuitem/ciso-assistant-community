@@ -1502,12 +1502,58 @@
 	"syncAppliedControlsMessage": "De anvendte kontroller, der bruger denne referencekontrol, vil blive synkroniseret med den. Bemærk venligst, at dette ikke kan fortrydes.",
 	"syncToAppliedControl": "Synkroniser med anvendt kontrol",
 	"syncToReferenceControl": "Synkroniser med referencekontrol",
-	"vulnerabilitySlaPolicyHelpText": "Angiv det maksimale antal dage til at udbedre en sårbarhed baseret på alvorlighed.",
+	"vulnerabilitySlaPolicyHelpText": "Angiv det maksimale antal dage til at udbedre en sårbarhed baseret på alvorlighed. For at slå SLA helt fra skal du deaktivere funktionsflaget SLA for sårbarheder.",
 	"slaAnchor": "SLA startdato",
 	"slaAnchorHelpText": "Vælg hvornår SLA starter.",
 	"slaDaysHelpText": "Antal dage til udbedring",
 	"resetToDefaults": "Nulstil",
+	"vulnerabilitySlaDisabledHint": "SLA for sårbarheder er slået fra i funktionsflagene, så forfaldsdatoer beregnes ikke",
 	"detectedAt": "Detektionsdato",
+	"detectedAtHelpText": "Hvornår sårbarheden blev opdaget. Standard er i dag, medmindre SLA er slået fra. Bruges som SLA-anker, når politikken er sat til detektionsdato.",
+	"remediatedAt": "Udbedringsdato",
+	"remediatedAtHelpText": "Sættes til den dag, sårbarheden løses (afbødet, rettet, ikke udnyttelig eller ikke berørt), medmindre du selv angiver en. Bevares, når den genåbnes.",
+	"vulnerabilityOpenForDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Åben i {count} dag siden detektion",
+				"countPlural=other": "Åben i {count} dage siden detektion"
+			}
+		}
+	],
+	"vulnerabilityRemediatedInDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Udbedret {count} dag efter detektion",
+				"countPlural=other": "Udbedret {count} dage efter detektion"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLeft": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} dag tilbage",
+				"countPlural=other": "{count} dage tilbage"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} dag for sent",
+				"countPlural=other": "{count} dage for sent"
+			}
+		}
+	],
+	"excepted": "Undtaget",
+	"exceptionEnds": "Undtagelsen udløber",
 	"publishedDate": "Publiceringsdato",
 	"vulnerabilitySlaPolicy": "SLA for sårbarheder",
 	"secIntelFeeds": "Sårbarhedsfeeds",
@@ -2003,7 +2049,10 @@
 	"templateSaved": "Skabelonen blev gemt",
 	"templateReset": "Skabelonen blev nulstillet til standard",
 	"confirmResetTemplate": "Er du sikker på, at du vil nulstille denne skabelon til standard? Din tilpasning går tabt.",
+	"templateVulnerabilityAssignmentName": "Tildeling af sårbarhed",
+	"templateVulnerabilityAssignmentDescription": "Sendes, når en sårbarhed tildeles",
 	"readAt": "Læst den",
+	"notificationTitleVulnerabilityAssignment": "Du er blevet tildelt sårbarheden '{vulnerability_name}'",
 	"notification": "Notifikation",
 	"notifications": "Notifikationer",
 	"read": "Læst",
@@ -2258,6 +2307,7 @@
 	"events": "Begivenheder",
 	"reports": "Rapporter",
 	"annualExpense": "Årlig udgift",
+	"vulnerabilitySlaDescription": "Beregn forfaldsdatoer for sårbarheder ud fra deres alvorlighed, og vis hvor tæt hver enkelt er på sin frist",
 	"targetDomains": "Måldomæner",
 	"vulnerability": "Sårbarhed",
 	"sla": "SLA",
@@ -2366,5 +2416,7 @@
 	"dpiaRequiredNo": "Ingen DPIA påkrævet",
 	"dpiaRequirementChange": "Ændring af DPIA-krav",
 	"dpiaRequirementChanges": "Historik over DPIA-krav",
-	"previously": "Tidligere"
+	"previously": "Tidligere",
+	"vulnerabilityOpenWithRemediationDate": "Åben sårbarhed har en udbedringsdato",
+	"vulnerabilityResolvedWithoutRemediationDate": "Løst sårbarhed har ingen udbedringsdato"
 }

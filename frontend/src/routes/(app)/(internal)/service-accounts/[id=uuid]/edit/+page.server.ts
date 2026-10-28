@@ -1,15 +1,16 @@
-import { handleErrorResponse, normalizeServiceAccountAuthorization } from '$lib/utils/actions';
-import { BASE_API_URL } from '$lib/utils/constants';
-import { getModelInfo } from '$lib/utils/crud';
-import { getSecureRedirect } from '$lib/utils/helpers';
-import { safeTranslate } from '$lib/utils/i18n';
-import { modelSchema } from '$lib/utils/schemas';
-import { m } from '$paraglide/messages';
-import { error, fail, redirect, type Actions, type NumericRange } from '@sveltejs/kit';
+import { handleErrorResponse, normalizeServiceAccountAuthorization } from '#lib/utils/actions.js';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { getModelInfo } from '#lib/utils/crud.js';
+import { getSecureRedirect } from '#lib/utils/helpers.js';
+import { safeTranslate } from '#lib/utils/i18n.js';
+import { modelSchema } from '#lib/utils/schemas.js';
+import { m } from '#paraglide/messages.js';
+import { fail, redirect, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { message, superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
+import { errorFromBody } from '#lib/utils/errors.js';
 
 const URLModel = 'service-accounts';
 
@@ -20,7 +21,7 @@ export const load: PageServerLoad = async (event) => {
 	const endpoint = `${BASE_API_URL}/${model.endpointUrl}/${event.params.id}/`;
 	const res = await event.fetch(endpoint);
 	if (!res.ok) {
-		error(res.status as NumericRange<400, 599>, await res.json());
+		errorFromBody(res.status, await res.json());
 	}
 	const serviceAccount = await res.json();
 	const object = {

@@ -1,10 +1,10 @@
 <script lang="ts">
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import { m } from '$paraglide/messages';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import Checkbox from '#lib/components/Forms/Checkbox.svelte';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import { m } from '#paraglide/messages.js';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
 	import Select from '../Select.svelte';
 	import { page } from '$app/state';
 	import TextField from '../TextField.svelte';

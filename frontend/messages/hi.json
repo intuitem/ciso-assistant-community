@@ -1196,12 +1196,58 @@
 	"syncToAppliedControl": "लागू नियंत्रण के साथ सिंक करें",
 	"syncToReferenceControl": "संदर्भ नियंत्रण के साथ सिंक करें",
 	"expirationDate": "समाप्ति तिथि",
-	"vulnerabilitySlaPolicyHelpText": "गंभीरता के आधार पर किसी कमजोरी को ठीक करने के लिए अधिकतम दिनों की संख्या निर्धारित करें।",
+	"vulnerabilitySlaPolicyHelpText": "गंभीरता के आधार पर किसी कमजोरी को ठीक करने के लिए अधिकतम दिनों की संख्या निर्धारित करें। SLA को पूरी तरह बंद करने के लिए, भेद्यता SLA फ़ीचर फ़्लैग को अक्षम करें।",
 	"slaAnchor": "SLA प्रारंभ तिथि",
 	"slaAnchorHelpText": "चुनें कि SLA कब शुरू होगा।",
 	"slaDaysHelpText": "सुधार के लिए दिनों की संख्या",
 	"resetToDefaults": "डिफ़ॉल्ट पर रीसेट करें",
+	"vulnerabilitySlaDisabledHint": "फ़ीचर फ़्लैग में भेद्यता SLA बंद है, इसलिए नियत तारीखों की गणना नहीं की जाती",
 	"detectedAt": "पता लगाने की तिथि",
+	"detectedAtHelpText": "भेद्यता का पता कब चला। डिफ़ॉल्ट रूप से आज, जब तक कि SLA बंद न हो। जब नीति पता लगाने की तिथि पर सेट हो, तो SLA के आधार के रूप में उपयोग होती है।",
+	"remediatedAt": "निवारण तिथि",
+	"remediatedAtHelpText": "भेद्यता के हल होने (कम की गई, ठीक की गई, शोषण योग्य नहीं या अप्रभावित) के दिन पर सेट होती है, जब तक कि आप स्वयं कोई तिथि दर्ज न करें। दोबारा खोलने पर बनी रहती है।",
+	"vulnerabilityOpenForDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "पता चलने से {count} दिन से खुली",
+				"countPlural=other": "पता चलने से {count} दिनों से खुली"
+			}
+		}
+	],
+	"vulnerabilityRemediatedInDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "पता चलने के {count} दिन बाद निवारण किया गया",
+				"countPlural=other": "पता चलने के {count} दिनों बाद निवारण किया गया"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLeft": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} दिन शेष",
+				"countPlural=other": "{count} दिन शेष"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} दिन की देरी",
+				"countPlural=other": "{count} दिन की देरी"
+			}
+		}
+	],
+	"excepted": "अपवाद में",
+	"exceptionEnds": "अपवाद समाप्ति",
 	"publishedDate": "प्रकाशन तिथि",
 	"vulnerabilitySlaPolicy": "भेद्यता SLA",
 	"secIntelFeeds": "भेद्यता फ़ीड्स",
@@ -1682,7 +1728,10 @@
 	"templateSaved": "टेम्पलेट सफलतापूर्वक सहेजा गया",
 	"templateReset": "टेम्पलेट डिफ़ॉल्ट पर रीसेट किया गया",
 	"confirmResetTemplate": "क्या आप वाकई इस टेम्पलेट को डिफ़ॉल्ट पर रीसेट करना चाहते हैं? आपके अनुकूलन खो जाएँगे।",
+	"templateVulnerabilityAssignmentName": "भेद्यता असाइनमेंट",
+	"templateVulnerabilityAssignmentDescription": "किसी भेद्यता के असाइन होने पर भेजा जाता है",
 	"readAt": "पढ़ने का समय",
+	"notificationTitleVulnerabilityAssignment": "आपको भेद्यता '{vulnerability_name}' असाइन की गई है",
 	"notification": "सूचना",
 	"notifications": "सूचनाएँ",
 	"read": "पढ़ा गया",
@@ -1999,6 +2048,7 @@
 	"events": "इवेंट",
 	"reports": "रिपोर्टें",
 	"annualExpense": "वार्षिक व्यय",
+	"vulnerabilitySlaDescription": "गंभीरता के आधार पर भेद्यताओं की नियत तारीखों की गणना करें और दिखाएँ कि प्रत्येक अपनी समय-सीमा के कितने करीब है",
 	"targetDomains": "लक्षित डोमेन",
 	"vulnerability": "भेद्यता",
 	"sla": "SLA",
@@ -2107,5 +2157,7 @@
 	"dpiaRequiredNo": "DPIA आवश्यक नहीं",
 	"dpiaRequirementChange": "DPIA आवश्यकता में बदलाव",
 	"dpiaRequirementChanges": "DPIA आवश्यकता का इतिहास",
-	"previously": "पहले"
+	"previously": "पहले",
+	"vulnerabilityOpenWithRemediationDate": "खुली भेद्यता की निवारण तिथि है",
+	"vulnerabilityResolvedWithoutRemediationDate": "हल हो चुकी भेद्यता की कोई निवारण तिथि नहीं है"
 }

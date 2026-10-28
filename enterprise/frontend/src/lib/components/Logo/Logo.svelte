@@ -1,5 +1,5 @@
 <script lang="ts">
-	import ciso from '$lib/assets/ciso.svg';
+	import ciso from '#lib/assets/ciso.svg';
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
 	import { persisted } from 'svelte-persisted-store';

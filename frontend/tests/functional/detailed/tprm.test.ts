@@ -2,7 +2,7 @@ import type { Locator } from '@playwright/test';
 import { LoginPage } from '../../utils/login-page.js';
 import { PageContent } from '../../utils/page-content.js';
 import { TestContent, test, expect } from '../../utils/test-utils.js';
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 import { SideBar } from '../../utils/sidebar.js';
 
 let vars = TestContent.generateTestVars();
