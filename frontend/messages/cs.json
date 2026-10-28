@@ -1200,7 +1200,7 @@
 	"syncToAppliedControl": "Synchronizovat související aplikovaná opatření",
 	"syncToReferenceControl": "Synchronizovat s referenčním opatřením",
 	"expirationDate": "Datum vypršení platnosti",
-	"vulnerabilitySlaPolicyHelpText": "Definujte maximální počet dní pro opravu zranitelnosti podle její závažnosti. Nechte prázdné pro vypnutí automatického výpočtu.",
+	"vulnerabilitySlaPolicyHelpText": "Definujte maximální počet dní pro opravu zranitelnosti podle její závažnosti. Nechte prázdné pro vypnutí automatického výpočtu. Chcete-li SLA úplně vypnout, deaktivujte příznak funkce SLA zranitelností.",
 	"slaAnchor": "Počátek SLA",
 	"slaAnchorHelpText": "Zvolte, kdy začíná SLA.",
 	"slaDaysHelpText": "Počet dní pro opravu",
@@ -3366,10 +3366,63 @@
 	"replacing": "Nahrazuji",
 	"replaceWithConfirmTitle": "Potvrdit nahrazení",
 	"changeSeverity": "Změnit závažnost",
-	"detectedAtHelpText": "Kdy byla zranitelnost odhalena. Výchozí je dnes. Slouží jako kotva pro SLA, když jsou zásady nastaveny na datum detekce.",
+	"detectedAtHelpText": "Kdy byla zranitelnost odhalena. Výchozí je dnes, pokud není SLA vypnuté. Slouží jako kotva pro SLA, když jsou zásady nastaveny na datum detekce.",
+	"remediatedAt": "Datum nápravy",
+	"remediatedAtHelpText": "Nastaví se na den, kdy je zranitelnost vyřešena (zmírněná, opravená, nezneužitelná nebo nedotčená), pokud datum nezadáte sami. Při opětovném otevření se zachová.",
+	"vulnerabilityOpenForDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Otevřeno {count} den od zjištění",
+				"countPlural=few": "Otevřeno {count} dny od zjištění",
+				"countPlural=many": "Otevřeno {count} dní od zjištění",
+				"countPlural=other": "Otevřeno {count} dní od zjištění"
+			}
+		}
+	],
+	"vulnerabilityRemediatedInDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Napraveno {count} den po zjištění",
+				"countPlural=few": "Napraveno {count} dny po zjištění",
+				"countPlural=many": "Napraveno {count} dní po zjištění",
+				"countPlural=other": "Napraveno {count} dní po zjištění"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLeft": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Zbývá {count} den",
+				"countPlural=few": "Zbývají {count} dny",
+				"countPlural=many": "Zbývá {count} dní",
+				"countPlural=other": "Zbývá {count} dní"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} den po termínu",
+				"countPlural=few": "{count} dny po termínu",
+				"countPlural=many": "{count} dní po termínu",
+				"countPlural=other": "{count} dní po termínu"
+			}
+		}
+	],
+	"excepted": "S výjimkou",
+	"exceptionEnds": "Konec výjimky",
 	"refreshDueDates": "Obnovit termíny SLA (due dates)",
 	"refreshDueDatesConfirm": "Tím se přepočítají všechny termíny odevzdání na základě aktuálních zásad SLA. Stávající termíny budou přepsány. Pokračovat?",
 	"refreshDueDatesFailed": "Nepodařilo se obnovit termíny",
+	"vulnerabilitySlaDisabledHint": "SLA zranitelností je v příznacích funkcí vypnuté, termíny se proto nepočítají",
 	"changeTreatment": "Změnit ošetření (Treatment)",
 	"changeAssignee": "Změnit řešitele",
 	"changeResult": "Změnit výsledek",
@@ -4380,6 +4433,7 @@
 	"complianceAssessmentsDescription": "Hodnoťte svou shodu (Compliance) s regulačními rámci a standardy.",
 	"threatsDescription": "Potenciální hrozby namířené proti vaší organizaci.",
 	"vulnerabilitiesDescription": "Známé zranitelnosti a bezpečnostní slabiny.",
+	"vulnerabilitySlaDescription": "Počítat termíny zranitelností podle jejich závažnosti a ukazovat, jak blízko je každá ke svému termínu",
 	"riskScenariosDescription": "Registr rizik obsahující scénáře a jejich ošetření.",
 	"requirementMappingSetsDescription": "Sady mapování a vazby mezi různými standardy/rámci.",
 	"riskMatricesDescription": "Matice pro stanovení pravděpodobnosti a dopadu.",
@@ -5739,6 +5793,8 @@
 	"templateQuickFormSubmittedDescription": "Odesláno schvalovateli po odeslání odpovědi z rychlého formuláře",
 	"templateSecurityExceptionAssignmentName": "Přiřazení výjimky",
 	"templateSecurityExceptionAssignmentDescription": "Odesláno při přiřazení bezpečnostní výjimky",
+	"templateVulnerabilityAssignmentName": "Přiřazení zranitelnosti",
+	"templateVulnerabilityAssignmentDescription": "Odesláno při přiřazení zranitelnosti",
 	"templateSecurityExceptionExpiringSoonName": "Výjimka brzy vyprší",
 	"templateSecurityExceptionExpiringSoonDescription": "Odesláno před vypršením platnosti bezpečnostních výjimek",
 	"templateSecurityExceptionStatusChangedName": "Stav výjimky změněn",
@@ -5766,6 +5822,7 @@
 	"notificationTitleQuickFormSubmitted": "Rychlý formulář '{response_name}' čeká na vaši kontrolu",
 	"notificationTitleRiskScenarioAssignment": "Byli jste přiřazeni ke scénáři rizika '{scenario_name}'",
 	"notificationTitleSecurityExceptionAssignment": "Byli jste přiřazeni k výjimce '{exception_name}'",
+	"notificationTitleVulnerabilityAssignment": "Byli jste přiřazeni ke zranitelnosti '{vulnerability_name}'",
 	"notificationTitleSecurityExceptionExpiringSoon": "Výjimka '{exception_name}' vyprší za {days_remaining} dny/dní",
 	"notificationTitleSecurityExceptionStatusChanged": "Výjimka '{exception_name}' je nyní {new_status}",
 	"notificationTitleTaskNodeDueSoon": "Úkol '{task_name}' má termín za {days_remaining} dny/dní",
@@ -6791,5 +6848,7 @@
 	"dpiaRequiredNo": "DPIA se nevyžaduje",
 	"dpiaRequirementChange": "Změna požadavku na DPIA",
 	"dpiaRequirementChanges": "Historie požadavku na DPIA",
-	"previously": "Dříve"
+	"previously": "Dříve",
+	"vulnerabilityOpenWithRemediationDate": "Otevřená zranitelnost má datum nápravy",
+	"vulnerabilityResolvedWithoutRemediationDate": "Vyřešená zranitelnost nemá datum nápravy"
 }
