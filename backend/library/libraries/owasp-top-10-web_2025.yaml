@@ -15,7 +15,7 @@ copyright: "Copyright \xA9 2003-2025 The OWASP&reg; Foundation, Inc. This docume
   \ any reuse or distribution, you must make it clear to others the license terms\
   \ of this work."
 version: 1
-publication_date: 2026-10-27
+publication_date: 2026-10-28
 provider: OWASP
 packager: intuitem
 translations:
@@ -90,7 +90,7 @@ translations:
       \u3002\n\n\u4F86\u6E90: https://top10.owasp.org/2025/zh-Hant/0x00_2025-Introduction/"
 objects:
   threats:
-  - urn: urn:intuitem:risk:owasp-top-10-web_2025:a01:2025
+  - urn: urn:intuitem:risk:threat:owasp-top-10-web_2025:a01
     ref_id: A01:2025
     name: Broken Access Control
     description: 'Access control enforces policy such that users cannot act outside
@@ -1226,7 +1226,7 @@ objects:
           \u6267\u884C\uFF1A\n\n```\n$ curl https://example.com/app/admin_getappInfo\n\
           ```\n\n\n\u6709\u95DC\u53C3\u8003\u8CC7\u6599\u53CA\u5DF2\u5C0D\u61C9 CWE\
           \ \u6E05\u55AE\u7684\u66F4\u591A\u8CC7\u8A0A\uFF1A https://top10.owasp.org/2025/zh-Hant/A01_2025-Broken_Access_Control/"
-  - urn: urn:intuitem:risk:owasp-top-10-web_2025:a02:2025
+  - urn: urn:intuitem:risk:threat:owasp-top-10-web_2025:a02
     ref_id: A02:2025
     name: Security Misconfiguration
     description: 'Security misconfiguration is when a system, application, or cloud
@@ -2375,7 +2375,7 @@ objects:
           \u88AB\u8BBF\u95EE\u3002\n\n\n\u6709\u95DC\u53C3\u8003\u8CC7\u6599\u53CA\
           \u5DF2\u5C0D\u61C9 CWE \u6E05\u55AE\u7684\u66F4\u591A\u8CC7\u8A0A\uFF1A\
           \ https://top10.owasp.org/2025/zh-Hant/A02_2025-Security_Misconfiguration/"
-  - urn: urn:intuitem:risk:owasp-top-10-web_2025:a03:2025
+  - urn: urn:intuitem:risk:threat:owasp-top-10-web_2025:a03
     ref_id: A03:2025
     name: Software Supply Chain Failures
     description: 'Software supply chain failures are breakdowns or other compromises
@@ -4064,7 +4064,7 @@ objects:
           \u653B\u51FB\u6D3B\u52A8\u6709\u5173\u3002\n\n\n\u6709\u95DC\u53C3\u8003\
           \u8CC7\u6599\u53CA\u5DF2\u5C0D\u61C9 CWE \u6E05\u55AE\u7684\u66F4\u591A\u8CC7\
           \u8A0A\uFF1A https://top10.owasp.org/2025/zh-Hant/A03_2025-Software_Supply_Chain_Failures/"
-  - urn: urn:intuitem:risk:owasp-top-10-web_2025:a04:2025
+  - urn: urn:intuitem:risk:threat:owasp-top-10-web_2025:a04
     ref_id: A04:2025
     name: Cryptographic Failures
     description: "Generally speaking, all data in transit should be encrypted at the\
@@ -5686,7 +5686,7 @@ objects:
           \u76D0\uFF0C\u4E5F\u53EF\u80FD\u88AB GPU \u7834\u89E3\u3002\n\n\n\u6709\u95DC\
           \u53C3\u8003\u8CC7\u6599\u53CA\u5DF2\u5C0D\u61C9 CWE \u6E05\u55AE\u7684\u66F4\
           \u591A\u8CC7\u8A0A\uFF1A https://top10.owasp.org/2025/zh-Hant/A04_2025-Cryptographic_Failures/"
-  - urn: urn:intuitem:risk:owasp-top-10-web_2025:a05:2025
+  - urn: urn:intuitem:risk:threat:owasp-top-10-web_2025:a05
     ref_id: A05:2025
     name: Injection
     description: "An injection vulnerability is an application flaw that allows untrusted\
@@ -6782,7 +6782,7 @@ objects:
           \u884C\u4EFB\u610F\u547D\u4EE4\u3002\n\n\n\u6709\u95DC\u53C3\u8003\u8CC7\
           \u6599\u53CA\u5DF2\u5C0D\u61C9 CWE \u6E05\u55AE\u7684\u66F4\u591A\u8CC7\u8A0A\
           \uFF1A https://top10.owasp.org/2025/zh-Hant/A05_2025-Injection/"
-  - urn: urn:intuitem:risk:owasp-top-10-web_2025:a06:2025
+  - urn: urn:intuitem:risk:threat:owasp-top-10-web_2025:a06
     ref_id: A06:2025
     name: Insecure Design
     description: "Insecure design is a broad category representing different weaknesses,\
@@ -8217,7 +8217,7 @@ objects:
           \u771F\u5B9E\u8D2D\u4E70\u5E76\u62D2\u7EDD\u6B64\u7C7B\u4EA4\u6613\u3002\
           \n\n\n\u6709\u95DC\u53C3\u8003\u8CC7\u6599\u53CA\u5DF2\u5C0D\u61C9 CWE \u6E05\
           \u55AE\u7684\u66F4\u591A\u8CC7\u8A0A\uFF1A https://top10.owasp.org/2025/zh-Hant/A06_2025-Insecure_Design/"
-  - urn: urn:intuitem:risk:owasp-top-10-web_2025:a07:2025
+  - urn: urn:intuitem:risk:threat:owasp-top-10-web_2025:a07
     ref_id: A07:2025
     name: Authentication Failures
     description: "When an attacker is able to trick a system into recognizing an invalid\
@@ -9740,7 +9740,7 @@ objects:
           \u7684\u7535\u8111\u3002\n\n\n\u6709\u95DC\u53C3\u8003\u8CC7\u6599\u53CA\
           \u5DF2\u5C0D\u61C9 CWE \u6E05\u55AE\u7684\u66F4\u591A\u8CC7\u8A0A\uFF1A\
           \ https://top10.owasp.org/2025/zh-Hant/A07_2025-Authentication_Failures/"
-  - urn: urn:intuitem:risk:owasp-top-10-web_2025:a08:2025
+  - urn: urn:intuitem:risk:threat:owasp-top-10-web_2025:a08
     ref_id: A08:2025
     name: Software or Data Integrity Failures
     description: "Software and data integrity failures relate to code and infrastructure\
@@ -10797,7 +10797,7 @@ objects:
           \u7801\u6267\u884C\u3002\n\n\n\u6709\u95DC\u53C3\u8003\u8CC7\u6599\u53CA\
           \u5DF2\u5C0D\u61C9 CWE \u6E05\u55AE\u7684\u66F4\u591A\u8CC7\u8A0A\uFF1A\
           \ https://top10.owasp.org/2025/zh-Hant/A08_2025-Software_or_Data_Integrity_Failures/"
-  - urn: urn:intuitem:risk:owasp-top-10-web_2025:a09:2025
+  - urn: urn:intuitem:risk:threat:owasp-top-10-web_2025:a09
     ref_id: A09:2025
     name: Security Logging & Alerting Failures
     description: "Without logging and monitoring, attacks and breaches cannot be detected,\
@@ -12288,7 +12288,7 @@ objects:
           \u9690\u79C1\u76D1\u7BA1\u673A\u6784\u7F5A\u6B3E 2000 \u4E07\u82F1\u9551\
           \u3002\n\n\n\u6709\u95DC\u53C3\u8003\u8CC7\u6599\u53CA\u5DF2\u5C0D\u61C9\
           \ CWE \u6E05\u55AE\u7684\u66F4\u591A\u8CC7\u8A0A\uFF1A https://top10.owasp.org/2025/zh-Hant/A09_2025-Security_Logging_and_Alerting_Failures/"
-  - urn: urn:intuitem:risk:owasp-top-10-web_2025:a10:2025
+  - urn: urn:intuitem:risk:threat:owasp-top-10-web_2025:a10
     ref_id: A10:2025
     name: Mishandling of Exceptional Conditions
     description: "Mishandling exceptional conditions in software happens when programs\
