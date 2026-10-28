@@ -23,6 +23,7 @@ from drf_spectacular.views import (
 )
 from core.views import metrics_view
 from django.conf import settings
+from iam.oauth_views import CISOAuthorizationView
 
 # beware of the order of url patterns, this can change de behavior in case of multiple matches and avoid giving identical paths that could cause conflicts
 urlpatterns = [
@@ -40,6 +41,11 @@ urlpatterns = [
     ),
     path("api/integrations/", include("integrations.urls", namespace="integrations")),
     path("api/scim/v2/", include("iam.scim.urls")),
+    path(
+        "api/identity/o/authorize",
+        CISOAuthorizationView.as_view(),
+        name="ciso-oidc-authorize",
+    ),
     path("api/", include("allauth.idp.urls")),
     path("api/", include("core.urls")),
     path("serdes/", include("serdes.urls")),

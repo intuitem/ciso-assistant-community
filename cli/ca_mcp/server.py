@@ -4,6 +4,7 @@ import asyncio
 import contextvars
 import functools
 import logging
+from urllib.parse import urlsplit
 
 import anyio.to_thread
 from mcp.server.mcpserver import MCPServer
@@ -302,6 +303,9 @@ LOOPBACK_ORIGINS = ["http://127.0.0.1:*", "http://localhost:*", "http://[::1]:*"
 
 _registered = False
 
+READ_SCOPE = "mcp:read"
+WRITE_SCOPE = "mcp:write"
+
 
 def _annotations(fn, is_read):
     """Behaviour hints so a client can gate destructive calls. Annotations are
@@ -349,18 +353,26 @@ def _offload(fn):
     return runner
 
 
+def _register_on(server, read_only, guard_write=None):
+    for tool in READ_TOOLS:
+        server.tool(annotations=_annotations(tool, is_read=True))(_offload(tool))
+    if read_only:
+        return
+    for tool in WRITE_TOOLS:
+        if config.IS_HTTP and tool is create_evidence:
+            continue
+        runner = _offload(tool)
+        if guard_write:
+            runner = guard_write(runner)
+        server.tool(annotations=_annotations(tool, is_read=False))(runner)
+
+
 def register_tools(read_only: bool = False):
     """Register tools with the MCP server, optionally omitting writes."""
     global _registered
     if _registered:
         return
-    for tool in READ_TOOLS:
-        mcp.tool(annotations=_annotations(tool, is_read=True))(_offload(tool))
-    if not read_only:
-        for tool in WRITE_TOOLS:
-            if config.IS_HTTP and tool is create_evidence:
-                continue
-            mcp.tool(annotations=_annotations(tool, is_read=False))(_offload(tool))
+    _register_on(mcp, read_only)
     _registered = True
 
 
@@ -381,11 +393,8 @@ def run_server():
     mcp.run(transport="stdio")
 
 
-def build_http_app():
-    """Streamable HTTP ASGI app, configured from the environment."""
+def _transport_security():
     from mcp.server.transport_security import TransportSecuritySettings
-
-    register_tools(read_only=config.READ_ONLY)
 
     if config.ALLOWED_HOSTS == ["*"]:
         security = TransportSecuritySettings(enable_dns_rebinding_protection=False)
@@ -418,6 +427,13 @@ def build_http_app():
             "CA_MCP_ALLOWED_HOSTS unset: only loopback hosts are accepted. "
             "Set it to the public hostname before exposing this server."
         )
+    return security
+
+
+def build_http_app():
+    """Streamable HTTP ASGI app, configured from the environment."""
+    register_tools(read_only=config.READ_ONLY)
+    security = _transport_security()
 
     _log_startup(
         f"MCP Streamable HTTP on {config.HTTP_HOST}:{config.HTTP_PORT}{config.HTTP_PATH}"
@@ -435,6 +451,72 @@ def build_http_app():
         transport_security=security,
         host=config.HTTP_HOST,
     )
+
+
+def _require_write_scope(runner):
+    from mcp.server.auth.middleware.auth_context import get_access_token
+
+    @functools.wraps(runner)
+    async def guarded(*args, **kwargs):
+        access = get_access_token()
+        if access is None or WRITE_SCOPE not in access.scopes:
+            return (
+                f"Error: this tool changes data and needs the '{WRITE_SCOPE}' scope. "
+                "Reconnect and grant write access to use it."
+            )
+        return await runner(*args, **kwargs)
+
+    return guarded
+
+
+def build_oauth_http_app(token_verifier, issuer_url, resource_url):
+    """Streamable HTTP app for a host that authenticates callers with OAuth."""
+    from mcp.server.auth.settings import AuthSettings
+    from starlette.responses import JSONResponse
+
+    read_only = config.READ_ONLY
+    server = MCPServer(
+        "ciso-assistant",
+        token_verifier=token_verifier,
+        auth=AuthSettings(
+            issuer_url=issuer_url,
+            resource_server_url=resource_url,
+            required_scopes=[READ_SCOPE],
+            validate_token_resource=True,
+        ),
+    )
+    _register_on(server, read_only, guard_write=_require_write_scope)
+    _log_startup(
+        f"MCP Streamable HTTP (OAuth) on {config.HTTP_HOST}:{config.HTTP_PORT}{config.HTTP_PATH}"
+    )
+    app = server.streamable_http_app(
+        streamable_http_path=config.HTTP_PATH,
+        json_response=config.JSON_RESPONSE,
+        stateless_http=config.STATELESS,
+        transport_security=_transport_security(),
+        host=config.HTTP_HOST,
+    )
+
+    metadata_path = (
+        "/.well-known/oauth-protected-resource" + urlsplit(resource_url).path
+    )
+    metadata = {
+        "resource": resource_url,
+        "authorization_servers": [issuer_url],
+        "scopes_supported": [READ_SCOPE] if read_only else [READ_SCOPE, WRITE_SCOPE],
+        "bearer_methods_supported": ["header"],
+    }
+
+    async def with_metadata(scope, receive, send):
+        if scope["type"] == "http" and scope["path"] == metadata_path:
+            response = JSONResponse(
+                metadata, headers={"Access-Control-Allow-Origin": "*"}
+            )
+            await response(scope, receive, send)
+            return
+        await app(scope, receive, send)
+
+    return with_metadata
 
 
 def run_http():

@@ -1,6 +1,7 @@
 import knox.views as knox_views  # type: ignore[import-untyped]
 from django.urls import include, path
 
+from .connected_apps import ConnectedAppDetailView, ConnectedAppsView
 from .views import (
     AuthTokenDetailView,
     PersonalAccessTokenViewSet,
@@ -42,6 +43,12 @@ urlpatterns = [
         "auth-tokens/<str:pk>/",
         AuthTokenDetailView.as_view(),
         name="auth-token-detail",
+    ),
+    path("connected-apps/", ConnectedAppsView.as_view(), name="connected-apps"),
+    path(
+        "connected-apps/<str:pk>/",
+        ConnectedAppDetailView.as_view(),
+        name="connected-app-detail",
     ),
     path(
         "service-accounts/",

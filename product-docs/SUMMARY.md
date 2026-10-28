@@ -245,6 +245,7 @@
 * [Microsoft Sentinel](integrations/sentinel.md)
 * [Hosted AI providers](integrations/ai-providers.md)
 * [MCP setup guide](integrations/mcp.md)
+  * [MCP sign-in with OAuth](integrations/mcp-oauth.md)
 * [Power BI connector](integrations/powerbi.md)
 * [n8n node](integrations/n8n.md)
 * [Third-party integrations](integrations/third-party/README.md)

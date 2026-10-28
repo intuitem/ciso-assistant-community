@@ -8,14 +8,16 @@ services:
         PYTHON_IMAGE: ${PYTHON_IMAGE:-ghcr.io/intuitem/ciso-assistant-community/mirror/dhi-python:3.14-dev}
     restart: always
     environment:
-      - ALLOWED_HOSTS=backend,localhost
-      - CISO_ASSISTANT_URL=https://localhost:8443
+      - ALLOWED_HOSTS=backend,localhost,${PUBLIC_HOST:-localhost}
+      - CISO_ASSISTANT_URL=${PUBLIC_URL:-https://localhost:8443}
       - DJANGO_DEBUG=True
       - HOME=/tmp
       - XDG_CACHE_HOME=/tmp/.cache
       - XDG_CONFIG_HOME=/tmp/.config
       - XDG_DATA_HOME=/tmp/.local/share
       - QDRANT_URL=http://qdrant:6333
+      - GUNICORN_WORKERS=1
+      - OAUTH_DCR_ENABLED=true
 
     read_only: true
     cap_drop:
@@ -39,8 +41,8 @@ services:
       - backend
     restart: always
     environment:
-      - ALLOWED_HOSTS=backend,localhost
-      - CISO_ASSISTANT_URL=https://localhost:8443
+      - ALLOWED_HOSTS=backend,localhost,${PUBLIC_HOST:-localhost}
+      - CISO_ASSISTANT_URL=${PUBLIC_URL:-https://localhost:8443}
       - DJANGO_DEBUG=False
       - HOME=/tmp
       - XDG_CACHE_HOME=/tmp/.cache
@@ -68,7 +70,7 @@ services:
     container_name: frontend
     environment:
       - PUBLIC_BACKEND_API_URL=http://backend:8000/api
-      - PUBLIC_BACKEND_API_EXPOSED_URL=https://localhost:8443/api
+      - PUBLIC_BACKEND_API_EXPOSED_URL=${PUBLIC_URL:-https://localhost:8443}/api
       - PROTOCOL_HEADER=x-forwarded-proto
       - HOST_HEADER=x-forwarded-host
     read_only: true
@@ -98,30 +100,31 @@ services:
     ports:
       - 127.0.0.1:6333:6333
 
-  # see docker-compose.yml for the profile / no-ports / read-only rationale
-  mcp:
-    container_name: mcp
+  # MCP server with OAuth, run from the backend image as its own process. Opt-in:
+  # `--profile mcp`. No `ports:`: reachable only through caddy at /mcp.
+  backend-mcp:
+    container_name: backend-mcp
     build:
-      context: ./cli
-      dockerfile: Dockerfile
-      # DHI via the GHCR mirror; see cli/Dockerfile for why not dhi.io
-      args:
-        PYTHON_BUILD_IMAGE: ${PYTHON_BUILD_IMAGE:-ghcr.io/intuitem/ciso-assistant-community/mirror/dhi-python:3.14-dev}
-        PYTHON_RUNTIME_IMAGE: ${PYTHON_RUNTIME_IMAGE:-ghcr.io/intuitem/ciso-assistant-community/mirror/dhi-python:3.14}
+      context: ./backend
+      dockerfile: Dockerfile.mcp
+      additional_contexts:
+        backend: service:backend
+        cli: ./cli
     profiles:
       - mcp
     depends_on:
+      # this file's backend has no healthcheck; the database is only touched per request
       backend:
-        condition: service_healthy
+        condition: service_started
     restart: unless-stopped
     environment:
-      - API_URL=http://backend:8000/api
-      - CA_MCP_TRANSPORT=streamable-http
-      - CA_MCP_HOST=0.0.0.0
-      - CA_MCP_PORT=8001
-      - CA_MCP_READ_ONLY=true
-      - CA_MCP_ALLOWED_HOSTS=localhost:8443
-      - CA_MCP_ALLOW_ENV_TOKEN=false
+      # must match the backend: same database, same public URL
+      - ALLOWED_HOSTS=backend,localhost,${PUBLIC_HOST:-localhost}
+      - CISO_ASSISTANT_URL=${PUBLIC_URL:-https://localhost:8443}
+      # serves the RFC 8414 copy of the OAuth metadata: OAuth settings must match too
+      - OAUTH_DCR_ENABLED=true
+      - CA_MCP_READ_ONLY=false
+      - CA_MCP_ALLOWED_HOSTS=localhost:8443,${PUBLIC_HOST:-localhost:8443}
       - HOME=/tmp
       - XDG_CACHE_HOME=/tmp/.cache
       - XDG_CONFIG_HOME=/tmp/.config
@@ -133,6 +136,8 @@ services:
       - no-new-privileges:true
     tmpfs:
       - /tmp:rw,noexec,nosuid,nodev
+    volumes:
+      - ./db:/code/db
     user: "1001:1001"
 
   caddy:
@@ -143,14 +148,43 @@ services:
     restart: unless-stopped
     ports:
       - 127.0.0.1:8443:8443
+      # plain HTTP entry for a tunnel that terminates TLS itself (dev only)
+      - 127.0.0.1:8480:8480
     volumes:
       - ./db/caddy:/data/caddy
     command: |
-      sh -c 'echo $$CISO_ASSISTANT_URL "{
-      reverse_proxy /api/* backend:8000
-      reverse_proxy /mcp* mcp:8001
-      reverse_proxy /* frontend:3000
-      }" > Caddyfile && caddy run'
+      sh -c 'cat > Caddyfile <<EOF
+      $$CISO_ASSISTANT_URL {
+        reverse_proxy /api/* backend:8000
+        reverse_proxy /mcp* backend-mcp:8001
+        reverse_proxy /.well-known/oauth-protected-resource* backend-mcp:8001
+        reverse_proxy /.well-known/oauth-authorization-server* backend-mcp:8001
+        reverse_proxy /* frontend:3000
+      }
+      # the tunnel is HTTPS on the public side: say so, or Django and SvelteKit
+      # build http:// URLs and refuse the secure cookies
+      http://:8480 {
+        reverse_proxy /api/* backend:8000 {
+          header_up X-Forwarded-Proto https
+        }
+        reverse_proxy /mcp* backend-mcp:8001 {
+          header_up X-Forwarded-Proto https
+        }
+        reverse_proxy /.well-known/oauth-protected-resource* backend-mcp:8001 {
+          header_up X-Forwarded-Proto https
+        }
+        reverse_proxy /.well-known/oauth-authorization-server* backend-mcp:8001 {
+          header_up X-Forwarded-Proto https
+        }
+        reverse_proxy /* frontend:3000 {
+          header_up X-Forwarded-Proto https
+          # SvelteKit preload hints exceed the 4 KB header buffer of the
+          # tunnel nginx (502); they are only a performance hint
+          header_down -Link
+        }
+      }
+      EOF
+      caddy run'
 
 volumes:
   qdrant_data:

@@ -2441,6 +2441,41 @@ class ServiceAccount(AbstractBaseModel):
         return self.name
 
 
+class ConnectedAppUse(models.Model):
+    """When a user's OAuth tokens for an app were last accepted.
+
+    Kept apart from allauth's Token rows: access tokens are replaced every hour,
+    and the date would go with them.
+    """
+
+    THROTTLE = timedelta(minutes=1)
+
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="connected_app_uses"
+    )
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name="+")
+    last_used_at = models.DateTimeField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "client"], name="unique_connected_app_use"
+            )
+        ]
+
+    @classmethod
+    def record(cls, user_id, client_id) -> None:
+        # at most one write per app and user per THROTTLE: this runs on every call
+        now = timezone.now()
+        updated = cls.objects.filter(
+            user_id=user_id, client_id=client_id, last_used_at__lt=now - cls.THROTTLE
+        ).update(last_used_at=now)
+        if not updated:
+            cls.objects.get_or_create(
+                user_id=user_id, client_id=client_id, defaults={"last_used_at": now}
+            )
+
+
 common_exclude = ["created_at", "updated_at"]
 # `preferences` is personal UI state (language, theme, date format, hidden
 # modules) with no security meaning, and every toggle would otherwise log the

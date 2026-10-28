@@ -76,6 +76,11 @@ export const load: PageServerLoad = async (event) => {
 		personalAccessTokens = await personalAccessTokensResponse.json();
 	}
 
+	const connectedApps = await event
+		.fetch(`${BASE_API_URL}/iam/connected-apps/`)
+		.then((res) => (res.ok ? res.json() : []))
+		.catch(() => []);
+
 	// Third parties get the same narrow nav whatever the flags say, so there is
 	// nothing for them to personalise — same reasoning as `patAllowed`.
 	// Null on failure rather than throwing: the modules section just doesn't
@@ -100,6 +105,7 @@ export const load: PageServerLoad = async (event) => {
 		personalAccessTokens,
 		personalAccessTokenCreateForm,
 		personalAccessTokenDeleteForm,
+		connectedApps,
 		title: m.settings()
 	};
 };
@@ -327,6 +333,24 @@ export const actions: Actions = {
 		}
 
 		setFlash({ type: 'success', message: m.successfullyDeletedPersonalAccessToken() }, event);
+		return message(form, { status: response.status });
+	},
+	revokeConnectedApp: async (event) => {
+		const formData = await event.request.formData();
+		if (!formData) return fail(400, { error: 'No form data' });
+
+		const form = await superValidate(formData, zod(z.object({ id: z.string() })));
+		if (!form.valid) return fail(400, { form });
+
+		const endpoint = `${BASE_API_URL}/iam/connected-apps/${encodeURIComponent(form.data.id)}/`;
+		const response = await event.fetch(endpoint, { method: 'DELETE' });
+
+		if (!response.ok) {
+			console.error('Could not revoke connected app');
+			return fail(response.status, { form });
+		}
+
+		setFlash({ type: 'success', message: m.connectedAppRevoked() }, event);
 		return message(form, { status: response.status });
 	}
 };

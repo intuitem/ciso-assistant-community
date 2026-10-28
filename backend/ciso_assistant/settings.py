@@ -894,6 +894,24 @@ if not IDP_OIDC_PRIVATE_KEY:
                 "could not persist the OIDC signing key, keeping it in memory: %s", exc
             )
 
+IDP_OIDC_ADAPTER = "iam.oidc_adapter.CISOOIDCAdapter"
+
+# OAuth Dynamic Client Registration (RFC 7591), for MCP clients such as Copilot
+# Studio. Off by default: once on, anyone can register a client.
+OAUTH_DCR_ENABLED = os.environ.get("OAUTH_DCR_ENABLED", "False").lower() in (
+    "true",
+    "1",
+    "yes",
+)
+IDP_OIDC_DCR_ENABLED = OAUTH_DCR_ENABLED
+# Copilot Studio cannot present an initial access token.
+IDP_OIDC_DCR_REQUIRES_INITIAL_ACCESS_TOKEN = False
+OAUTH_DCR_ALLOWED_REDIRECT_HOSTS = [
+    host.strip().lower()
+    for host in os.environ.get("OAUTH_DCR_ALLOWED_REDIRECT_HOSTS", "").split(",")
+    if host.strip()
+]
+
 # MFA / WebAuthn settings
 MFA_SUPPORTED_TYPES = ["recovery_codes", "totp", "webauthn"]
 MFA_WEBAUTHN_ALLOW_INSECURE_ORIGIN = DEBUG  # Allow http://localhost in dev
