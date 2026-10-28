@@ -4011,8 +4011,6 @@
 	"docHtmlTemplatesDescription": "Personalizza il layout HTML/CSS utilizzato per l'esportazione dei documenti in PDF, inclusi copertina, intestazioni, piè di pagina ed elementi grafici. Carica un modello personalizzato per sostituire quello predefinito.",
 	"docHtmlTemplateUploadHelp": "Carica un file .html che utilizzi la sintassi dei template Django e le stesse variabili del modello predefinito. Scarica prima il modello predefinito per utilizzarlo come punto di partenza.",
 	"docHtmlTemplateSyntaxHelp": "I modelli utilizzano la sintassi dei template Django e vengono elaborati tramite WeasyPrint. Inserisci il CSS in un tag <style> e utilizza le variabili riportate di seguito per comporre il layout.",
-	"wordTemplates": "Modelli di report Word",
-	"wordTemplatesDescription": "Personalizza i modelli Word (.docx) utilizzati per la generazione dei report. Carica modelli personalizzati per sostituire quelli predefiniti.",
 	"uploadTemplate": "Carica modello",
 	"wordTemplateUploadHelp": "Carica un file .docx che utilizzi le stesse variabili del modello predefinito. Scarica prima il modello predefinito per utilizzarlo come punto di partenza.",
 	"downloadDefaultTemplate": "Scarica modello predefinito",

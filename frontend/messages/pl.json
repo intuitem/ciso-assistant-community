@@ -1523,8 +1523,6 @@
 	"docHtmlTemplatesDescription": "Dostosuj układ HTML/CSS używany przy eksporcie dokumentów do PDF (strona tytułowa, nagłówki, stopki, identyfikacja wizualna). Prześlij własny szablon, aby zastąpić wbudowany szablon domyślny.",
 	"docHtmlTemplateUploadHelp": "Prześlij plik .html (składnia szablonów Django) z tymi samymi zmiennymi co szablon domyślny. Najpierw pobierz szablon domyślny i użyj go jako punktu wyjścia.",
 	"docHtmlTemplateSyntaxHelp": "Szablony używają składni szablonów Django renderowanej przez WeasyPrint. Osadź CSS w znaczniku <style> i użyj poniższych zmiennych, aby skomponować układ.",
-	"wordTemplates": "Szablony raportów Word",
-	"wordTemplatesDescription": "Dostosuj szablony raportów Word (.docx) używane do generowania raportów. Prześlij własne szablony, aby zastąpić wbudowane szablony domyślne.",
 	"wordTemplatesWarning": "Przed użyciem dokładnie sprawdź zawartość szablonu i upewnij się, że jest zgodna z politykami bezpieczeństwa i zgodności obowiązującymi w Twojej organizacji.",
 	"uploadTemplate": "Prześlij szablon",
 	"wordTemplateUploadHelp": "Prześlij plik .docx z tymi samymi zmiennymi szablonu co szablon domyślny. Najpierw pobierz szablon domyślny i użyj go jako punktu wyjścia.",
