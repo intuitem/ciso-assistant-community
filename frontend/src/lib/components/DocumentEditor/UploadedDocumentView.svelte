@@ -106,7 +106,7 @@
 			if (res.ok) await refreshAll();
 			else {
 				const data = await res.json().catch(() => null);
-				notifyError(data?.detail || data?.error || m.error());
+				notifyError(data?.detail || (data?.error && safeTranslate(data.error)) || m.error());
 			}
 			return res;
 		} finally {

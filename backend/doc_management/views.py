@@ -106,6 +106,48 @@ from .serializers import DocumentContainerReadSerializer
 logger = structlog.get_logger(__name__)
 
 
+def _review_reserved():
+    # Message key, translated by the document editor.
+    return Response(
+        {"error": "documentReviewReservedToReviewers"},
+        status=status.HTTP_403_FORBIDDEN,
+    )
+
+
+def _queue_review_notification(request, revision):
+    """After commit: a submit asks the container's reviewers, a decision (validated,
+    change requested, published) tells the revision's author."""
+    try:
+        from core.tasks import (
+            send_document_review_requested_notification,
+            send_document_revision_reviewed_notification,
+        )
+
+        user = request.user
+        actor_name = f"{user.first_name} {user.last_name}".strip() or user.email
+        revision_id, state = revision.id, str(revision.status)
+        if state == DocumentRevision.Status.IN_REVIEW:
+            transaction.on_commit(
+                lambda: send_document_review_requested_notification(
+                    revision_id, actor_name, user.email
+                ),
+                robust=True,
+            )
+        elif revision.author_id and revision.author_id != user.id:
+            transaction.on_commit(
+                lambda: send_document_revision_reviewed_notification(
+                    revision_id, state, actor_name
+                ),
+                robust=True,
+            )
+    except Exception as e:
+        logger.error(
+            "Failed to queue document review notification",
+            revision_id=revision.id,
+            error=e,
+        )
+
+
 def _get_user_lang(request):
     """Get the user's preferred language from their preferences."""
     if hasattr(request, "user") and hasattr(request.user, "get_preferences"):
@@ -239,6 +281,7 @@ class DocumentContainerViewSet(BaseModelViewSet):
                 "task_templates",
                 "processings",
                 "assets",
+                "reviewers",
                 models.Prefetch(
                     "documents",
                     # `revisions` feeds pending_revision in the serializer;
@@ -1163,6 +1206,7 @@ class DocumentRevisionViewSet(BaseModelViewSet):
             )
         revision.status = DocumentRevision.Status.IN_REVIEW
         revision.save()
+        _queue_review_notification(request, revision)
         return Response({"status": "in_review"})
 
     @action(detail=True, methods=["post"])
@@ -1174,7 +1218,10 @@ class DocumentRevisionViewSet(BaseModelViewSet):
                 {"error": "Only in-review revisions can be approved."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        if not revision.document.container.may_review(request.user):
+            return _review_reserved()
         revision.validate(reviewer=request.user)
+        _queue_review_notification(request, revision)
         return Response({"status": "validated"})
 
     @action(detail=True, methods=["post"])
@@ -1187,6 +1234,7 @@ class DocumentRevisionViewSet(BaseModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         revision.publish()
+        _queue_review_notification(request, revision)
 
         # Uploaded revisions ARE the artifact (a file) — no markdown to snapshot.
         if revision.source == DocumentRevision.Source.AUTHORED:
@@ -1206,11 +1254,14 @@ class DocumentRevisionViewSet(BaseModelViewSet):
                 {"error": "Only in-review revisions can have changes requested."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        if not revision.document.container.may_review(request.user):
+            return _review_reserved()
 
         revision.mark_change_requested(
             reviewer=request.user,
             comments=request.data.get("reviewer_comments", ""),
         )
+        _queue_review_notification(request, revision)
         return Response({"status": "change_requested"})
 
     @action(

@@ -23,6 +23,7 @@
 	import { getToastStore } from '#lib/components/Toast/stores.js';
 	import { page } from '$app/state';
 	import { canPerformActionOnObject } from '#lib/utils/access-control.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 
 	interface Props {
 		parent: any;
@@ -166,7 +167,9 @@
 			.clone()
 			.json()
 			.catch(() => null);
-		notifyError(data?.detail || data?.error || data?.message || m.error());
+		notifyError(
+			data?.detail || (data?.error && safeTranslate(data.error)) || data?.message || m.error()
+		);
 	}
 
 	// Callers only branch on res.ok, so a refused transition would fail silently.
