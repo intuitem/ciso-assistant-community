@@ -1,6 +1,6 @@
-import { error, type NumericRange } from '@sveltejs/kit';
-import { BASE_API_URL } from '$lib/utils/constants';
-import { m } from '$paraglide/messages';
+import { error } from '@sveltejs/kit';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { m } from '#paraglide/messages.js';
 import type { PageServerLoad } from './$types';
 
 const getQualityCheckData = async (fetch: any) => {
@@ -11,7 +11,7 @@ const getQualityCheckData = async (fetch: any) => {
 		// `error()` and not `throw new Error()`: a streamed rejection goes through
 		// `handleError`, which replaces a plain error's message with SvelteKit's
 		// generic one. Only an HttpError body reaches the page as written.
-		error(res.status as NumericRange<400, 599>, `${res.status} ${res.statusText}`);
+		error(res.status, `${res.status} ${res.statusText}`);
 	}
 	const json = await res.json();
 	return json.results;

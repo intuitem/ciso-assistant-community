@@ -1,28 +1,28 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { onMount, onDestroy } from 'svelte';
-	import DiffViewer from '$lib/components/PolicyEditor/DiffViewer.svelte';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import DiffViewer from '#lib/components/PolicyEditor/DiffViewer.svelte';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
 	import DocumentReferencesPanel from './DocumentReferencesPanel.svelte';
 	import DocumentLinkModal from './DocumentLinkModal.svelte';
-	import { documentTypeLabel } from '$lib/utils/documentTypes';
-	import { fetchAllPages } from '$lib/utils/pagination';
+	import { documentTypeLabel } from '#lib/utils/documentTypes.js';
+	import { fetchAllPages } from '#lib/utils/pagination.js';
 	import {
 		pickWorkingRevision,
 		pickInForceRevisionToShow,
 		APPROVED_REVISION_STATUSES
-	} from '$lib/utils/documentRevisions';
-	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
+	} from '#lib/utils/documentRevisions.js';
+	import PromptConfirmModal from '#lib/components/Modals/PromptConfirmModal.svelte';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
-	import { LOCALE_MAP } from '$lib/utils/locales';
-	import { getToastStore } from '$lib/components/Toast/stores';
+	} from '#lib/components/Modals/stores.js';
+	import { LOCALE_MAP } from '#lib/utils/locales.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
 	import { page } from '$app/state';
-	import { canPerformActionOnObject } from '$lib/utils/access-control';
+	import { canPerformActionOnObject } from '#lib/utils/access-control.js';
 
 	interface Props {
 		parent: any;

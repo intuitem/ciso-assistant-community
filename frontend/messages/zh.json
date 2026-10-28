@@ -2708,6 +2708,7 @@
 	"assetsDescription": "业务流程和功能（主要），应用程序或技术组件（支持）",
 	"threatsDescription": "对您组织的潜在威胁",
 	"vulnerabilitiesDescription": "已知漏洞和弱点",
+	"vulnerabilitySlaDescription": "根据严重程度计算漏洞截止日期，并显示每个漏洞距其截止日期有多近",
 	"riskScenariosDescription": "具有场景及其处置的风险登记册",
 	"referenceControlsDescription": "典型安全控制措施的模板",
 	"requirementMappingSetsDescription": "不同框架和标准之间的映射",
@@ -3263,12 +3264,54 @@
 	"syncAppliedControlsMessage": "使用此参考控制措施的已应用控制措施将与其同步。请注意，此操作无法撤销。",
 	"syncToAppliedControl": "同步到已实施控制措施",
 	"syncToReferenceControl": "与参考控制措施同步",
-	"vulnerabilitySlaPolicyHelpText": "根据严重程度定义修复漏洞允许的最大天数。",
+	"vulnerabilitySlaPolicyHelpText": "根据严重程度定义修复漏洞允许的最大天数。 如需完全关闭SLA，请禁用“漏洞SLA”功能开关。",
 	"slaAnchor": "SLA开始日期",
 	"slaAnchorHelpText": "选择SLA开始时间。",
 	"slaDaysHelpText": "修复天数",
 	"resetToDefaults": "恢复默认",
+	"vulnerabilitySlaDisabledHint": "漏洞SLA已在功能开关中关闭，因此不计算截止日期",
 	"detectedAt": "发现日期",
+	"detectedAtHelpText": "漏洞被发现的时间。除非关闭了SLA，否则默认为今天。当策略设置为发现日期时，用作SLA的起算点。",
+	"remediatedAt": "修复日期",
+	"remediatedAtHelpText": "设为漏洞被解决（已缓解、已修复、不可利用或未受影响）的日期，除非您自行填写。重新打开时保留。",
+	"vulnerabilityOpenForDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=other": "自发现起已开放 {count} 天"
+			}
+		}
+	],
+	"vulnerabilityRemediatedInDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=other": "发现后 {count} 天修复"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLeft": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=other": "剩余 {count} 天"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=other": "已逾期 {count} 天"
+			}
+		}
+	],
+	"excepted": "已例外",
+	"exceptionEnds": "例外结束",
 	"publishedDate": "发布日期",
 	"vulnerabilitySlaPolicy": "漏洞SLA",
 	"secIntelFeeds": "漏洞数据源",
@@ -3716,7 +3759,10 @@
 	"templateSaved": "模板保存成功",
 	"templateReset": "模板已重置为默认值",
 	"confirmResetTemplate": "确定要将此模板重置为默认值吗？您的自定义内容将丢失。",
+	"templateVulnerabilityAssignmentName": "漏洞分配",
+	"templateVulnerabilityAssignmentDescription": "分配漏洞时发送",
 	"readAt": "阅读时间",
+	"notificationTitleVulnerabilityAssignment": "您已被分配到漏洞“{vulnerability_name}”",
 	"notification": "通知",
 	"read": "已读",
 	"uploading": "上传中...",
@@ -3869,5 +3915,7 @@
 	"dpiaRequiredNo": "无需 DPIA",
 	"dpiaRequirementChange": "DPIA 要求变更",
 	"dpiaRequirementChanges": "DPIA 要求历史",
-	"previously": "此前"
+	"previously": "此前",
+	"vulnerabilityOpenWithRemediationDate": "未关闭的漏洞有修复日期",
+	"vulnerabilityResolvedWithoutRemediationDate": "已解决的漏洞没有修复日期"
 }

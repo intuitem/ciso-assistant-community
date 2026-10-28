@@ -1,5 +1,5 @@
 <script lang="ts">
-	import List from '$lib/components/List/List.svelte';
+	import List from '#lib/components/List/List.svelte';
 	type NestedArray<T> = Array<T | NestedArray<T>>;
 	interface Props {
 		items: NestedArray<Record<string, string> | string>;

@@ -4,7 +4,7 @@
 	import { goto } from '$app/navigation';
 	import ComposeMetricEditor, {
 		type Saved
-	} from '$lib/components/Metrology/ComposeMetricEditor.svelte';
+	} from '#lib/components/Metrology/ComposeMetricEditor.svelte';
 	import { getModalStore, type ModalStore } from './stores';
 
 	interface Props {

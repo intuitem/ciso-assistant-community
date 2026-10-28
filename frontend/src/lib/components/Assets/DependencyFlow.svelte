@@ -1,6 +1,6 @@
 <script lang="ts">
 	import dagre from '@dagrejs/dagre';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { STATUS_CLASS, closure, type DependencyGraph } from './dependency-graph';
 
 	interface Props {

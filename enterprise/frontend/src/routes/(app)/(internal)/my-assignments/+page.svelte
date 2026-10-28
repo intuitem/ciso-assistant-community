@@ -1,13 +1,13 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { goto } from '$app/navigation';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import ActivityTracker from '$lib/components/DataViz/ActivityTracker.svelte';
-	import LoadingSpinner from '$lib/components/utils/LoadingSpinner.svelte';
-	import { listViewFields } from '$lib/utils/table';
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
+	import ActivityTracker from '#lib/components/DataViz/ActivityTracker.svelte';
+	import LoadingSpinner from '#lib/components/utils/LoadingSpinner.svelte';
+	import { listViewFields } from '#lib/utils/table.js';
+	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
 	import { defaults } from 'sveltekit-superforms';
 	import { superForm } from 'sveltekit-superforms/client';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
@@ -71,7 +71,7 @@
 		if (filterMode === 'filter' && selectedActorIds.length > 0) {
 			selectedActorIds.forEach((id) => params.append('actor', id));
 		}
-		goto(`/my-assignments?${params.toString()}`, { invalidateAll: true });
+		goto(`/my-assignments?${params.toString()}`, { refreshAll: true });
 	}
 
 	function applyFilter() {
@@ -80,7 +80,7 @@
 		if (filterMode === 'filter' && selectedActorIds.length > 0) {
 			selectedActorIds.forEach((id) => params.append('actor', id));
 		}
-		goto(`/my-assignments?${params.toString()}`, { invalidateAll: true });
+		goto(`/my-assignments?${params.toString()}`, { refreshAll: true });
 	}
 
 	function handleFilterModeChange(mode: FilterMode) {

@@ -2480,11 +2480,64 @@
 	"replaceWithConfirmTitle": "Potvrďte výmenu",
 	"changeSeverity": "Zmeňte závažnosť",
 	"detectedAt": "Dátum detekcie",
-	"detectedAtHelpText": "Dátum zistenia zraniteľnosti. Predvolene je nastavený na dnešný deň. Používa sa ako referenčný dátum SLA, ak je politika nastavená na dátum zistenia.",
+	"detectedAtHelpText": "Dátum zistenia zraniteľnosti. Predvolene je nastavený na dnešný deň, pokiaľ nie je SLA vypnuté. Používa sa ako referenčný dátum SLA, ak je politika nastavená na dátum zistenia.",
+	"remediatedAt": "Dátum nápravy",
+	"remediatedAtHelpText": "Nastaví sa na deň, keď je zraniteľnosť vyriešená (zmiernená, opravená, nezneužiteľná alebo neovplyvnená), pokiaľ dátum nezadáte sami. Pri opätovnom otvorení sa zachová.",
+	"vulnerabilityOpenForDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Otvorená {count} deň od zistenia",
+				"countPlural=few": "Otvorená {count} dni od zistenia",
+				"countPlural=many": "Otvorená {count} dní od zistenia",
+				"countPlural=other": "Otvorená {count} dní od zistenia"
+			}
+		}
+	],
+	"vulnerabilityRemediatedInDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Napravená {count} deň po zistení",
+				"countPlural=few": "Napravená {count} dni po zistení",
+				"countPlural=many": "Napravená {count} dní po zistení",
+				"countPlural=other": "Napravená {count} dní po zistení"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLeft": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Zostáva {count} deň",
+				"countPlural=few": "Zostávajú {count} dni",
+				"countPlural=many": "Zostáva {count} dní",
+				"countPlural=other": "Zostáva {count} dní"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} deň po termíne",
+				"countPlural=few": "{count} dni po termíne",
+				"countPlural=many": "{count} dní po termíne",
+				"countPlural=other": "{count} dní po termíne"
+			}
+		}
+	],
+	"excepted": "S výnimkou",
+	"exceptionEnds": "Koniec výnimky",
 	"refreshDueDates": "Prepočítať termíny SLA",
 	"refreshDueDatesConfirm": "Prepočítajú sa všetky termíny SLA podľa aktuálnej politiky SLA. Existujúce termíny budú prepísané. Chcete pokračovať?",
 	"resetToDefaults": "Obnoviť predvolené nastavenia",
 	"refreshDueDatesFailed": "Obnovenie termínov zlyhalo",
+	"vulnerabilitySlaDisabledHint": "SLA zraniteľností je v príznakoch funkcií vypnuté, preto sa termíny nepočítajú",
 	"changeTreatment": "Zmeniť spôsob ošetrenia",
 	"changeAssignee": "Zmeniť príjemcu",
 	"changeResult": "Zmeniť výsledok",
@@ -3747,6 +3800,7 @@
 	"assetsDescription": "Obchodné procesy a funkcie (primárne), aplikácie alebo technické komponenty (podporné)",
 	"threatsDescription": "Potenciálne hrozby pre vašu organizáciu",
 	"vulnerabilitiesDescription": "Známe zraniteľnosti a slabé miesta",
+	"vulnerabilitySlaDescription": "Počítať termíny zraniteľností podľa ich závažnosti a zobrazovať, ako blízko je každá k svojmu termínu",
 	"riskScenariosDescription": "Register rizík so scenármi a ich ošetrením",
 	"referenceControlsDescription": "Šablóna typických referenčných opatrení",
 	"requirementMappingSetsDescription": "Mapovania medzi rôznymi rámcami a štandardmi",
@@ -3850,7 +3904,7 @@
 	"syncCweCatalogFailed": "Vytiahnutie katalógu CWE zlyhalo",
 	"vulnerability": "Zraniteľnosť",
 	"vulnerabilitySlaPolicy": "Zraniteľnosť SLA",
-	"vulnerabilitySlaPolicyHelpText": "Definujte maximálny počet dní povolených na nápravu zraniteľnosti na základe jej závažnosti. Ak chcete deaktivovať automatický výpočet pre danú úroveň závažnosti, nechajte prázdne. Po nastavení sa dátum dokončenia automaticky vypočíta pri vytvorení zraniteľnosti alebo zmene závažnosti.",
+	"vulnerabilitySlaPolicyHelpText": "Definujte maximálny počet dní povolených na nápravu zraniteľnosti na základe jej závažnosti. Ak chcete deaktivovať automatický výpočet pre danú úroveň závažnosti, nechajte prázdne. Po nastavení sa dátum dokončenia automaticky vypočíta pri vytvorení zraniteľnosti alebo zmene závažnosti. Ak chcete SLA úplne vypnúť, deaktivujte príznak funkcie „Zraniteľnosť SLA“.",
 	"sla": "SLA",
 	"caution": "Zvýšená opatrnosť",
 	"slaAnchor": "Dátum začiatku SLA",
@@ -5289,6 +5343,8 @@
 	"submitForApprovalHelpText": "Odošle žiadosť schvaľovateľovi okamžite namiesto jej uloženia ako návrhu.",
 	"templateDocumentPdfName": "PDF šablóna dokumentov",
 	"templateDocumentPdfDescription": "Šablóna rozloženia PDF dokumentov (titulná strana, hlavičky a päty)",
+	"templateVulnerabilityAssignmentName": "Priradenie zraniteľnosti",
+	"templateVulnerabilityAssignmentDescription": "Odoslané, keď je priradená zraniteľnosť",
 	"docHtmlTemplates": "PDF šablóny dokumentov",
 	"docHtmlTemplatesDescription": "Prispôsobte HTML/CSS šablónu používanú pri exporte dokumentov do PDF (titulná strana, hlavičky, päty a firemná identita). Nahrajte vlastnú šablónu, ktorá nahradí predvolenú.",
 	"docHtmlTemplateUploadHelp": "Nahrajte súbor vo formáte .html (šablóna Django) využívajúci rovnaké premenné ako predvolená šablóna. Odporúčame najprv stiahnuť predvolenú šablónu a použiť ju ako východisko.",
@@ -5758,6 +5814,7 @@
 	"hide": "Skryť",
 	"approvedBy": "Schválil",
 	"readAt": "Prečítané dňa",
+	"notificationTitleVulnerabilityAssignment": "Boli ste priradení k zraniteľnosti '{vulnerability_name}'",
 	"notification": "Upozornenie",
 	"notifications": "Upozornenia",
 	"read": "Prečítané",
@@ -5840,5 +5897,7 @@
 	"dpiaRequiredNo": "DPIA nie je potrebné",
 	"dpiaRequirementChange": "Zmena požiadavky na DPIA",
 	"dpiaRequirementChanges": "História požiadaviek na DPIA",
-	"previously": "Predtým"
+	"previously": "Predtým",
+	"vulnerabilityOpenWithRemediationDate": "Otvorená zraniteľnosť má dátum nápravy",
+	"vulnerabilityResolvedWithoutRemediationDate": "Vyriešená zraniteľnosť nemá dátum nápravy"
 }
