@@ -184,3 +184,49 @@ def test_a_superseded_decision_is_not_delivered(acceptance):
         )
 
     notify.assert_not_called()
+
+
+@pytest.mark.parametrize("visible", [True, False])
+def test_decision_email_lists_only_visible_scenarios(
+    acceptance, approver, visible, django_capture_on_commit_callbacks
+):
+    with (
+        patch("iam.models.RoleAssignment.is_access_allowed", return_value=visible),
+        _producer(django_capture_on_commit_callbacks) as (_notify, send_email),
+    ):
+        _transition(acceptance, "accepted", approver)
+
+    body = send_email.call_args.args[1]
+    assert ("Ransomware" in body) is visible
+
+
+def test_approver_change_on_a_submitted_acceptance_asks_the_new_approver(
+    acceptance, approver, owner, django_capture_on_commit_callbacks
+):
+    from notifications.models import Notification
+
+    acceptance.set_state("submitted")
+    Notification.objects.create(
+        recipient=approver, type="risk_acceptance_submitted", target=acceptance
+    )
+    new_approver = User.objects.create(email="new-approver@test.local")
+
+    def save():
+        acceptance.approver = new_approver
+        acceptance.save()
+        return acceptance
+
+    view = RiskAcceptanceViewSet()
+    view.request = SimpleNamespace(user=owner)
+    serializer = SimpleNamespace(instance=acceptance, save=save)
+    with (
+        _producer(django_capture_on_commit_callbacks) as (notify, _send_email),
+        patch("core.views.dispatch_webhook_event"),
+    ):
+        view.perform_update(serializer)
+
+    assert notify.call_args.args[:2] == (
+        "risk_acceptance_submitted",
+        [new_approver.email],
+    )
+    assert not Notification.objects.filter(recipient=approver).exists()

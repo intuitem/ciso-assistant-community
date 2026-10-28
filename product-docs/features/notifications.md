@@ -150,7 +150,7 @@ You receive an email whenever something is assigned to you.
 | **EBIOS RM study** | **Authors** / **Reviewers** | You are added as an author or a reviewer |
 | **Business Impact Analysis** | **Authors** / **Reviewers** | You are added as an author or a reviewer |
 | **CRQ Study** | **Authors** / **Reviewers** | You are added as an author or a reviewer |
-| **Technical posture** | **Authors** / **Reviewers** | You are added as an author or a reviewer |
+| **Technical posture** | **Authors** | You are added as an author |
 | **Document** | **Reviewers** | You are added as a reviewer |
 | **Vulnerability**         | **Assigned to** | You are added as an assignee |
 

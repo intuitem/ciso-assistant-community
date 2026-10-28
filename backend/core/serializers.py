@@ -7564,16 +7564,15 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
             from core.tasks import send_validation_flow_created_notification
             from notifications.models import Notification
 
-            if old_approver_id:
+            def hand_over():
+                send_validation_flow_created_notification(validation_flow)
                 Notification.objects.filter(
                     recipient_id=old_approver_id,
                     type="validation_flow_created",
                     object_id=validation_flow.id,
                 ).delete()
-            transaction.on_commit(
-                lambda: send_validation_flow_created_notification(validation_flow),
-                robust=True,
-            )
+
+            transaction.on_commit(hand_over, robust=True)
         except Exception as e:
             logger.error(
                 "Failed to notify the new validation flow approver",

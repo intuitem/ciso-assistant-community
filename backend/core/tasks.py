@@ -987,7 +987,7 @@ def send_risk_acceptance_decided_notification(acceptance_id, decision, actor_nam
     """Tell the owners of the covered risk scenarios that the approver decided."""
     acceptance = (
         RiskAcceptance.objects.select_related("folder")
-        .prefetch_related("risk_scenarios__owner")
+        .prefetch_related("risk_scenarios__owner", "risk_scenarios__risk_assessment")
         .filter(id=acceptance_id)
         .first()
     )
@@ -1010,15 +1010,31 @@ def send_risk_acceptance_decided_notification(acceptance_id, decision, actor_nam
         {"acceptance_name": acceptance.name, "decision_key": decision},
     )
 
+    from django.contrib.auth.models import Permission
+
+    from iam.models import RoleAssignment
+
     from .email_utils import get_locale_for_email, localize_state
 
+    view_perm = Permission.objects.get(codename="view_riskscenario")
+    users = {u.email: u for u in User.objects.filter(email__in=emails)}
     for email in emails:
         if check_email_configuration(email):
+            user = users.get(email)
+            visible = [
+                str(s)
+                for s in acceptance.risk_scenarios.all()
+                if user
+                and RoleAssignment.is_access_allowed(
+                    user, view_perm, s.risk_assessment.folder
+                )
+            ]
             locale = get_locale_for_email(email)
             _send_rendered(
                 "risk_acceptance_decided",
                 {
                     **context,
+                    "risk_scenarios": ", ".join(visible) or "-",
                     "decision": localize_state(decision, locale),
                 },
                 email,
@@ -1486,7 +1502,7 @@ def send_vulnerability_assignment_notification(vulnerability_id, assigned_user_e
     notify("vulnerability_assignment", assigned_user_emails, vulnerability, context)
 
     for email in assigned_user_emails:
-        if email and check_email_configuration(email, [vulnerability]):
+        if email and check_email_configuration(email):
             rendered = render_email_template(
                 "vulnerability_assignment", context, recipient_email=email
             )

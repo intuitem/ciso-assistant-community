@@ -8379,6 +8379,20 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
             self._notify_state(self.request, instance, "submitted")
         return instance
 
+    def perform_update(self, serializer):
+        old_approver_id = serializer.instance.approver_id
+        instance = super().perform_update(serializer)
+        if instance.state == "submitted" and instance.approver_id != old_approver_id:
+            from notifications.models import Notification
+
+            Notification.objects.filter(
+                recipient_id=old_approver_id,
+                type="risk_acceptance_submitted",
+                object_id=instance.id,
+            ).delete()
+            self._notify_state(self.request, instance, "submitted")
+        return instance
+
     def _get_justification(self, request):
         raw_justification = request.data.get("justification", "")
         if not isinstance(raw_justification, str):
