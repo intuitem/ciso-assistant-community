@@ -7,7 +7,7 @@
 	import { m } from '#paraglide/messages.js';
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 	import { page } from '$app/state';
-	import { replaceState } from '$app/navigation';
+	import { goto } from '$app/navigation';
 
 	interface Props {
 		data: PageData;
@@ -25,7 +25,7 @@
 		tab = value;
 		const url = new URL(page.url.href);
 		url.searchParams.set('tab', value);
-		replaceState(url, {});
+		goto(url, { shallow: true, replace: true, state: page.state });
 	}
 
 	const assessments = $derived((data.data ?? []) as any[]);
