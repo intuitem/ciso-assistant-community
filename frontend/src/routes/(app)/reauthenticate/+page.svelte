@@ -5,7 +5,7 @@
 	import OTPInput from '#lib/components/Forms/OTP/OTPInput.svelte';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import type { SuperForm as SuperFormApi } from 'sveltekit-superforms';
-	import { reauthenticateSchema } from '$lib/utils/schemas';
+	import { reauthenticateSchema } from '#lib/utils/schemas.js';
 	import { startAuthentication } from '@simplewebauthn/browser';
 	import { tick } from 'svelte';
 
