@@ -891,6 +891,7 @@ class CustomWordTemplateViewSet(BaseModelViewSet):
                 {
                     "template_key": key,
                     "description": meta["description"],
+                    "format": meta.get("format", "docx"),
                     "default_languages": meta["default_languages"],
                     "variables": meta.get("variables", []),
                     "overrides": [
@@ -921,24 +922,36 @@ class CustomWordTemplateViewSet(BaseModelViewSet):
         try:
             template = CustomWordTemplate.objects.get(id=pk)
             uploaded = request.FILES["file"]
+            is_typst = (
+                WORD_TEMPLATE_REGISTRY.get(template.template_key, {}).get("format")
+                == "typst"
+            )
 
-            if not uploaded.name.endswith(".docx"):
+            if not uploaded.name.endswith(".typ" if is_typst else ".docx"):
                 return Response(
                     {"file": "invalidFileType"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            # Validate the docx can be parsed by docxtpl
+            # Typst errors only surface against real data, at render time; a
+            # failing override falls back to the default there.
             try:
-                from docxtpl import DocxTemplate
-                import io
-
                 uploaded.seek(0)
-                DocxTemplate(io.BytesIO(uploaded.read()))
+                if is_typst:
+                    uploaded.read().decode("utf-8")
+                else:
+                    from docxtpl import DocxTemplate
+                    import io
+
+                    DocxTemplate(io.BytesIO(uploaded.read()))
                 uploaded.seek(0)
             except Exception:
                 return Response(
-                    {"file": "invalidDocxTemplate"},
+                    {
+                        "file": "invalidTypstTemplate"
+                        if is_typst
+                        else "invalidDocxTemplate"
+                    },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
@@ -975,12 +988,15 @@ class CustomWordTemplateViewSet(BaseModelViewSet):
 
             from django.http import FileResponse
 
+            ext = template.file.name.rsplit(".", 1)[-1]
             template.file.open("rb")
             return FileResponse(
                 template.file,
-                content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                content_type="text/plain"
+                if ext == "typ"
+                else "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                 as_attachment=True,
-                filename=f"{template.template_key}_{template.language}.docx",
+                filename=f"{template.template_key}_{template.language}.{ext}",
             )
         except CustomWordTemplate.DoesNotExist:
             return Response(
@@ -1005,6 +1021,18 @@ class CustomWordTemplateViewSet(BaseModelViewSet):
 
         from django.http import FileResponse
         import core as core_module
+
+        meta = WORD_TEMPLATE_REGISTRY[template_key]
+        if meta.get("format") == "typst":
+            from core.typst_render import TEMPLATE_DIR, localized_template
+
+            name = localized_template(meta["default_template"], language)
+            return FileResponse(
+                open(TEMPLATE_DIR / name, "rb"),
+                content_type="text/plain",
+                as_attachment=True,
+                filename=name,
+            )
 
         core_dir = Path(core_module.__file__).resolve().parent
 

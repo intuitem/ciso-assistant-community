@@ -84,14 +84,21 @@ export const loginSchema = z
 	})
 	.required();
 
-export const reauthenticateSchema = z.object({
-	password: z.string().optional(),
-	code: z
-		.string()
-		.regex(/^\d{6,8}$/)
-		.optional(),
-	credential: z.string().optional()
-});
+export const reauthenticateSchema = z
+	.object({
+		mode: z.enum(['password', 'webauthn', 'totp', 'recovery_codes']).optional(),
+		password: z.string().optional(),
+		code: z
+			.string()
+			.regex(/^(\d{6,8})?$/, { error: 'incorrectCode' })
+			.optional(),
+		credential: z.string().optional()
+	})
+	// An empty code is fine in the other modes (a leftover from switching), not in a code mode.
+	.refine((data) => !(data.mode === 'totp' || data.mode === 'recovery_codes') || !!data.code, {
+		error: 'incorrectCode',
+		path: ['code']
+	});
 
 export const emailSchema = z
 	.object({

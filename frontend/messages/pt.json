@@ -1522,8 +1522,6 @@
 	"docHtmlTemplatesDescription": "Personalize o layout HTML/CSS usado quando os documentos são exportados para PDF (capa, cabeçalhos, rodapés, identidade visual). Envie seu próprio modelo para substituir o padrão integrado.",
 	"docHtmlTemplateUploadHelp": "Envie um arquivo .html (sintaxe de template Django) usando as mesmas variáveis do padrão. Baixe primeiro o padrão para usá-lo como ponto de partida.",
 	"docHtmlTemplateSyntaxHelp": "Os modelos usam a sintaxe de templates do Django renderizada pelo WeasyPrint. Incorpore CSS em uma tag <style> e use as variáveis abaixo para compor o layout.",
-	"wordTemplates": "Modelos de relatório Word",
-	"wordTemplatesDescription": "Personalize os modelos de relatório do Word (.docx) usados na geração de relatórios. Envie seus próprios modelos para substituir os padrões integrados.",
 	"wordTemplatesWarning": "Revise cuidadosamente o conteúdo do modelo antes do uso e certifique-se de que ele esteja em conformidade com as políticas de segurança e conformidade da sua organização.",
 	"uploadTemplate": "Enviar modelo",
 	"wordTemplateUploadHelp": "Envie um arquivo .docx usando as mesmas variáveis de modelo do padrão. Baixe primeiro o modelo padrão para usá-lo como ponto de partida.",

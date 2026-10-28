@@ -3,6 +3,91 @@ Registry of overridable templates with their metadata.
 Used by the API to document available templates and validate overrides.
 """
 
+# Payload of `core.generators.audit_context_for_typst`, read as `d` in the template.
+TYPST_AUDIT_VARIABLES = [
+    {
+        "name": "audit",
+        "type": "object",
+        "description": "The compliance assessment (name, description, framework, version, status, ...)",
+    },
+    {
+        "name": "date",
+        "type": "string",
+        "description": "Export date formatted as DD/MM/YYYY",
+    },
+    {
+        "name": "generated_at",
+        "type": "string",
+        "description": "Full generation timestamp",
+    },
+    {
+        "name": "contributors",
+        "type": "string",
+        "description": "Authors and reviewers",
+    },
+    {
+        "name": "requirement_assessments",
+        "type": "list",
+        "description": "Requirement rows: {ref_id, name, description, result, result_key, status, score, max_score, observation, answers, evidences, task_templates, applied_controls}; fields hidden from the reader are absent",
+    },
+    {
+        "name": "hidden_fields",
+        "type": "list",
+        "description": "Requirement fields withheld from this reader; test with `key not in d.hidden_fields`",
+    },
+    {
+        "name": "sections",
+        "type": "list",
+        "description": "Sections this profile includes (summary, charts, scope, requirements, commitments, tasks, signatures, ...)",
+    },
+    {
+        "name": "charts",
+        "type": "list",
+        "description": "Chart image filenames available to `image()` (compliance_donut.png, completion_bar.png, ...)",
+    },
+    {
+        "name": "commitments",
+        "type": "list",
+        "description": "Commitments linked to the requirements, when the profile includes them",
+    },
+    {
+        "name": "tasks",
+        "type": "list",
+        "description": "Tasks linked to the requirements, when the profile includes them",
+    },
+    {
+        "name": "counterparty",
+        "type": "object",
+        "description": "Third-party entity and representatives, or none for an internal audit",
+    },
+    {
+        "name": "req",
+        "type": "object",
+        "description": "Aggregated result counts (as in the Word report), when visibility allows them",
+    },
+    {
+        "name": "category_scores",
+        "type": "object",
+        "description": "Per-category score details, when the profile includes categories",
+    },
+    {
+        "name": "drifts_per_domain",
+        "type": "list",
+        "description": "List of {name, drift_count} per top-level domain",
+    },
+    {
+        "name": "p1_controls",
+        "type": "list",
+        "description": "P1 priority controls: {name, description, status, category, coverage}",
+    },
+    {
+        "name": "full_controls",
+        "type": "list",
+        "description": "All applied controls: {name, description, prio, status, eta, category, coverage}",
+    },
+]
+
+
 WORD_TEMPLATE_REGISTRY = {
     "audit_report": {
         "description": "Compliance assessment Word report",
@@ -94,6 +179,20 @@ WORD_TEMPLATE_REGISTRY = {
                 "description": "Total number of assessable requirement assessments",
             },
         ],
+    },
+    "audit_posture": {
+        "description": "Compliance assessment posture PDF",
+        "format": "typst",
+        "default_template": "audit_report",
+        "default_languages": ["en", "fr"],
+        "variables": TYPST_AUDIT_VARIABLES,
+    },
+    "audit_attestation": {
+        "description": "Compliance assessment attestation PDF",
+        "format": "typst",
+        "default_template": "attestation",
+        "default_languages": ["en", "fr"],
+        "variables": TYPST_AUDIT_VARIABLES,
     },
 }
 
