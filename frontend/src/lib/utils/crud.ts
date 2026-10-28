@@ -14,6 +14,7 @@ import TierBadge from '#lib/components/ModelTable/field/TierBadge.svelte';
 import TierSource from '#lib/components/ModelTable/field/TierSource.svelte';
 import DpiaRequirementSource from '#lib/components/ModelTable/field/DpiaRequirementSource.svelte';
 import DpiaRequiredBadge from '#lib/components/ModelTable/field/DpiaRequiredBadge.svelte';
+import VulnerabilitySlaState from '#lib/components/ModelTable/field/VulnerabilitySlaState.svelte';
 import { listViewFields } from './table';
 import type { TableBatchAction } from './table';
 import type { urlModel } from './types';
@@ -716,11 +717,24 @@ export const URL_MODEL_MAP: ModelMap = {
 			},
 			{
 				field: 'applied_controls',
+				urlModel: 'vulnerabilities',
+				disableDelete: true
+			},
+			{
+				field: 'applied_controls',
 				urlModel: 'incidents',
 				disableDelete: true,
 				addExisting: {
 					parentField: 'incidents'
 				}
+			},
+			{
+				// Linked through the threat model's graph nodes, so edited there.
+				field: 'applied_controls',
+				urlModel: 'threat-models',
+				featureFlag: 'threat_modeling',
+				disableCreate: true,
+				disableDelete: true
 			}
 		],
 		selectFields: [
@@ -842,8 +856,31 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'vulnerabilities',
 		verboseName: 'Vulnerability',
 		verboseNamePlural: 'Vulnerabilities',
+		flaggedFields: { state: 'vulnerability_sla' },
+		detailViewFields: [
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
+			{ field: 'severity' },
+			{ field: 'status' },
+			{ field: 'state' },
+			{ field: 'owner' },
+			{ field: 'folder' },
+			{ field: 'observation' },
+			{ field: 'detected_at', type: 'date' },
+			{ field: 'due_date', type: 'date' },
+			{ field: 'eta', type: 'date' },
+			{ field: 'remediated_at', type: 'date' },
+			{ field: 'published_date', type: 'date' },
+			{ field: 'security_advisories' },
+			{ field: 'cwes' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' }
+		],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
+			{ field: 'owner', urlModel: 'actors' },
 			{ field: 'assets', urlModel: 'assets' },
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
@@ -852,7 +889,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'cwes', urlModel: 'cwes' },
 			{ field: 'detected_at', type: 'date' },
 			{ field: 'eta', type: 'date' },
-			{ field: 'due_date', type: 'date' }
+			{ field: 'due_date', type: 'date' },
+			{ field: 'remediated_at', type: 'date' }
 		],
 		selectFields: [{ field: 'severity', valueType: 'number' }, { field: 'status' }],
 		filters: [
@@ -865,12 +903,69 @@ export const URL_MODEL_MAP: ModelMap = {
 			{
 				field: 'vulnerabilities',
 				urlModel: 'assets',
+				disableDelete: true,
+				addExisting: {
+					parentField: 'assets'
+				}
+			},
+			{
+				field: 'vulnerabilities',
+				urlModel: 'applied-controls',
+				disableDelete: true,
+				addExisting: {
+					parentField: 'applied_controls'
+				}
+			},
+			{
+				field: 'vulnerabilities',
+				urlModel: 'security-exceptions',
+				disableDelete: true,
+				addExisting: {
+					parentField: 'security_exceptions'
+				}
+			},
+			{
+				field: 'vulnerabilities',
+				urlModel: 'evidences',
+				disableDelete: true,
+				addExisting: {
+					parentField: 'evidences'
+				}
+			},
+			{
+				field: 'vulnerabilities',
+				urlModel: 'task-templates',
+				disableDelete: true,
+				addExisting: {
+					parentField: 'task_templates'
+				}
+			},
+			{
+				field: 'vulnerabilities',
+				urlModel: 'incidents',
+				disableDelete: true,
+				addExisting: {
+					parentField: 'incidents'
+				}
+			},
+			{
+				field: 'vulnerabilities',
+				urlModel: 'risk-scenarios',
 				disableCreate: true,
 				disableDelete: true
 			},
 			{
 				field: 'vulnerabilities',
-				urlModel: 'risk-scenarios',
+				urlModel: 'quantitative-risk-scenarios',
+				endpointUrl: 'crq/quantitative-risk-scenarios',
+				disableCreate: true,
+				disableDelete: true
+			},
+			{
+				// Linked through the threat model's graph nodes, so edited there.
+				field: 'vulnerabilities',
+				urlModel: 'threat-models',
+				featureFlag: 'threat_modeling',
 				disableCreate: true,
 				disableDelete: true
 			},
@@ -1111,6 +1206,14 @@ export const URL_MODEL_MAP: ModelMap = {
 						position: 'prefix'
 					}
 				}
+			},
+			{
+				// Linked through the threat model's graph nodes, so edited there.
+				field: 'assets',
+				urlModel: 'threat-models',
+				featureFlag: 'threat_modeling',
+				disableCreate: true,
+				disableDelete: true
 			}
 		],
 		foreignKeyFields: [
@@ -1444,7 +1547,8 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'security-exceptions',
 				disableCreate: true,
 				disableDelete: true
-			}
+			},
+			{ field: 'evidences', urlModel: 'vulnerabilities', disableCreate: true, disableDelete: true }
 		],
 		selectFields: [{ field: 'status' }],
 		detailViewFields: [
@@ -3155,6 +3259,15 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'risk-scenarios',
 				disableCreate: true,
 				disableDelete: true
+			},
+			{
+				field: 'incidents',
+				urlModel: 'vulnerabilities',
+				disableCreate: true,
+				disableDelete: true,
+				addExisting: {
+					parentField: 'vulnerabilities'
+				}
 			}
 		],
 		selectFields: [
@@ -3286,6 +3399,12 @@ export const URL_MODEL_MAP: ModelMap = {
 			{
 				field: 'task_templates',
 				urlModel: 'findings',
+				disableCreate: true,
+				disableDelete: true
+			},
+			{
+				field: 'task_templates',
+				urlModel: 'vulnerabilities',
 				disableCreate: true,
 				disableDelete: true
 			}
@@ -3555,6 +3674,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'status' },
 			{ field: 'assets' },
 			{ field: 'threats' },
+			{ field: 'vulnerabilities' },
 			{ field: 'qualifications' },
 			{ field: 'folder' },
 			{ field: 'observation' },
@@ -4275,6 +4395,9 @@ const FIELD_COMPONENT_MAP = {
 	},
 	processings: {
 		dpia_required: DpiaRequiredBadge
+	},
+	vulnerabilities: {
+		state: VulnerabilitySlaState
 	},
 	'dpia-requirement-changes': {
 		dpia_required: DpiaRequiredBadge,

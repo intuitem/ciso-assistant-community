@@ -266,6 +266,51 @@ class BaseModelSerializer(serializers.ModelSerializer):
                         }
                     )
 
+    def _check_reverse_m2m_change(self, validated_data: dict) -> None:
+        """A reverse many-to-many (declared on the other model) edits the objects
+        on that side: adding or removing one needs change permission on it, not
+        just the visibility _check_m2m_visibility asks for."""
+        request = self.context.get("request")
+        if not request or not request.user.is_authenticated:
+            return
+        model = self.Meta.model
+        for field_name, value in validated_data.items():
+            if not isinstance(value, list):
+                continue
+            try:
+                field = model._meta.get_field(field_name)
+            except FieldDoesNotExist:
+                continue
+            if not (field.many_to_many and field.auto_created and not field.concrete):
+                continue
+            current_ids: set = set()
+            if self.instance is not None and not isinstance(self.instance, list):
+                current_ids = {
+                    str(pk)
+                    for pk in getattr(self.instance, field_name).values_list(
+                        "pk", flat=True
+                    )
+                }
+            touched = {str(item.pk) for item in value} ^ current_ids
+            if not touched:
+                continue
+            related_model = field.related_model
+            try:
+                changeable = {
+                    str(pk)
+                    for pk in RoleAssignment.get_changeable_object_ids(
+                        request.user, related_model
+                    )
+                }
+            except NotImplementedError, Permission.DoesNotExist:
+                continue
+            if touched - changeable:
+                raise PermissionDenied(
+                    {
+                        field_name: f"You do not have permission to change this {related_model._meta.model_name}"
+                    }
+                )
+
     def validate(self, data):
         data = super().validate(data)
         self._check_m2m_visibility(data)
@@ -434,10 +479,39 @@ class RiskMatrixImportExportSerializer(BaseModelSerializer):
         ]
 
 
+def _attach_sla_states(vulnerabilities) -> None:
+    """Give vulnerabilities the viewset didn't annotate their SLA state, all in one
+    query, so the column, its filter and its sort share one definition."""
+    missing = [v for v in vulnerabilities if not hasattr(v, "sla_state")]
+    if not missing:
+        return
+    rows = (
+        Vulnerability.objects.filter(pk__in=[v.pk for v in missing])
+        .annotate(**Vulnerability.sla_state_annotations())
+        .values("pk", "sla_state", "sla_until")
+    )
+    by_pk = {row["pk"]: row for row in rows}
+    for vulnerability in missing:
+        row = by_pk.get(vulnerability.pk, {})
+        vulnerability.sla_state = row.get("sla_state")
+        vulnerability.sla_until = row.get("sla_until")
+
+
+class VulnerabilityListSerializer(serializers.ListSerializer):
+    def to_representation(self, data):
+        items = list(
+            data.all() if isinstance(data, models.manager.BaseManager) else data
+        )
+        _attach_sla_states(items)
+        return super().to_representation(items)
+
+
 class VulnerabilityReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
+    owner = FieldsRelatedField(many=True)
     applied_controls = FieldsRelatedField(many=True)
+    evidences = FieldsRelatedField(many=True)
     assets = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     security_exceptions = FieldsRelatedField(many=True)
@@ -446,61 +520,85 @@ class VulnerabilityReadSerializer(BaseModelSerializer):
     severity = serializers.CharField(source="get_severity_display")
     state = serializers.SerializerMethodField()
 
-    RESOLVED_STATUSES = {"mitigated", "fixed", "not_exploitable", "unaffected"}
-
-    def _get_sla_policy(self):
-        """Per-instance cache — one DB query per serializer instantiation."""
-        if not hasattr(self, "_sla_policy"):
-            from global_settings.models import GlobalSettings
-
-            try:
-                sla_settings = GlobalSettings.objects.get(name="vulnerability-sla")
-                self._sla_policy = (
-                    sla_settings.value if isinstance(sla_settings.value, dict) else {}
-                )
-            except GlobalSettings.DoesNotExist:
-                self._sla_policy = {}
-        return self._sla_policy
-
     def get_state(self, obj):
-        from datetime import date
-
-        if obj.status in self.RESOLVED_STATUSES:
-            return {"name": "resolved", "hexcolor": "#86efac"}
-
-        if not obj.due_date:
+        _attach_sla_states([obj])
+        if obj.sla_state is None:
             return None
-
-        today = date.today()
-
-        if obj.due_date < today:
-            return {"name": "overdue", "hexcolor": "#f87171"}
-        if obj.due_date == today:
-            return {"name": "today", "hexcolor": "#f97316"}
-
-        # Check if we're in the caution zone (past 50% of the SLA window)
-        sla_policy = self._get_sla_policy()
-        severity_label = obj.get_severity_display()
-        try:
-            sla_days = int(sla_policy.get(severity_label, 0)) or None
-        except TypeError, ValueError:
-            sla_days = None
-        if sla_days is not None:
-            remaining = (obj.due_date - today).days
-            if remaining < sla_days * 0.5:
-                return {"name": "caution", "hexcolor": "#fbbf24"}
-
-        return {"name": "on track", "hexcolor": "#93c5fd"}
+        state = {
+            "name": obj.sla_state,
+            "hexcolor": Vulnerability.SLA_STATE_COLORS[obj.sla_state],
+        }
+        if obj.sla_state == "excepted":
+            state["until"] = obj.sla_until.isoformat() if obj.sla_until else None
+        return state
 
     class Meta:
         model = Vulnerability
         fields = "__all__"
+        list_serializer_class = VulnerabilityListSerializer
 
 
 class VulnerabilityWriteSerializer(BaseModelSerializer):
     findings = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=Finding.objects.all()
     )
+    # Reverse M2M (declared on Incident and TaskTemplate): DRF does not pick them up from Meta.
+    incidents = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=Incident.objects.all()
+    )
+    task_templates = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=TaskTemplate.objects.all()
+    )
+
+    def validate(self, data):
+        data = super().validate(data)
+        self._check_reverse_m2m_change(data)
+        return data
+
+    def create(self, validated_data):
+        owner_data = validated_data.get("owner", [])
+        vulnerability = super().create(validated_data)
+        if owner_data:
+            self._send_assignment_notifications(
+                vulnerability, [actor.id for actor in owner_data]
+            )
+        return vulnerability
+
+    def update(self, instance, validated_data):
+        old_owner_ids = set(instance.owner.values_list("id", flat=True))
+        vulnerability = super().update(instance, validated_data)
+        # Notify only newly assigned owners
+        newly_assigned_ids = (
+            set(vulnerability.owner.values_list("id", flat=True)) - old_owner_ids
+        )
+        if newly_assigned_ids:
+            self._send_assignment_notifications(vulnerability, list(newly_assigned_ids))
+        return vulnerability
+
+    def _send_assignment_notifications(self, vulnerability, owner_ids):
+        """Send assignment notifications to the specified owners"""
+        try:
+            from core.models import Actor
+            from .tasks import send_vulnerability_assignment_notification
+
+            assigned_emails = []
+            for actor in Actor.objects.filter(id__in=owner_ids):
+                assigned_emails.extend(actor.get_emails())
+
+            # Dedupe (several actors can resolve to the same email) and defer until
+            # the transaction commits, so a rollback doesn't send spurious emails.
+            unique_emails = list(dict.fromkeys(filter(None, assigned_emails)))
+            if unique_emails:
+                vulnerability_id = vulnerability.id
+                transaction.on_commit(
+                    lambda: send_vulnerability_assignment_notification(
+                        vulnerability_id, unique_emails
+                    )
+                )
+        except Exception as e:
+            logger.error(
+                f"Failed to send Vulnerability assignment notification: {str(e)}"
+            )
 
     class Meta:
         model = Vulnerability
@@ -510,6 +608,14 @@ class VulnerabilityWriteSerializer(BaseModelSerializer):
 class VulnerabilityImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
     applied_controls = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    assets = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    evidences = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    # Catalog entries don't travel with a domain: the import matches the target
+    # instance's own by ref_id.
+    security_advisories = serializers.SlugRelatedField(
+        slug_field="ref_id", read_only=True, many=True
+    )
+    cwes = serializers.SlugRelatedField(slug_field="ref_id", read_only=True, many=True)
 
     class Meta:
         model = Vulnerability
@@ -520,7 +626,17 @@ class VulnerabilityImportExportSerializer(BaseModelSerializer):
             "folder",
             "status",
             "severity",
+            "detected_at",
+            "published_date",
+            "eta",
+            "due_date",
+            "remediated_at",
             "applied_controls",
+            "assets",
+            "evidences",
+            "security_advisories",
+            "cwes",
+            "observation",
             "created_at",
             "updated_at",
         ]
@@ -1689,6 +1805,9 @@ class AppliedControlWriteSerializer(
     )
     incidents = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=Incident.objects.all()
+    )
+    vulnerabilities = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=Vulnerability.objects.all()
     )
     control_documents = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=DocumentContainer.objects.all()
@@ -3484,6 +3603,9 @@ class EvidenceWriteSerializer(AssignmentNotificationMixin, BaseModelSerializer):
     # Reverse M2M (declared on TaskTemplate): DRF does not pick it up from Meta.
     task_templates = serializers.PrimaryKeyRelatedField(
         many=True, queryset=TaskTemplate.objects.all(), required=False
+    )
+    vulnerabilities = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Vulnerability.objects.all(), required=False
     )
     genericcollection = serializers.PrimaryKeyRelatedField(
         source="genericcollection_set",
@@ -5700,6 +5822,7 @@ class IncidentImportExportSerializer(BaseModelSerializer):
     threats = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
     assets = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
     entities = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    vulnerabilities = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
 
     class Meta:
         model = Incident
@@ -5720,6 +5843,7 @@ class IncidentImportExportSerializer(BaseModelSerializer):
             "threats",
             "assets",
             "entities",
+            "vulnerabilities",
             "created_at",
             "updated_at",
         ]
@@ -5768,6 +5892,7 @@ class TaskTemplateImportExportSerializer(BaseModelSerializer):
     findings_assessment = HashSlugRelatedField(
         slug_field="pk", read_only=True, many=True
     )
+    vulnerabilities = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
 
     class Meta:
         model = TaskTemplate
@@ -5788,6 +5913,7 @@ class TaskTemplateImportExportSerializer(BaseModelSerializer):
             "requirement_assessments",
             "risk_assessments",
             "findings_assessment",
+            "vulnerabilities",
             "created_at",
             "updated_at",
         ]
@@ -5938,6 +6064,9 @@ class SecurityExceptionWriteSerializer(
     )
     assets = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Asset.objects.all(), required=False
+    )
+    vulnerabilities = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Vulnerability.objects.all(), required=False
     )
     evidences = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Evidence.objects.all(), required=False
@@ -6772,6 +6901,7 @@ class IncidentReadSerializer(IncidentWriteSerializer):
     threats = FieldsRelatedField(many=True)
     owners = FieldsRelatedField(many=True)
     assets = FieldsRelatedField(many=True)
+    vulnerabilities = FieldsRelatedField(many=True)
     qualifications = FieldsRelatedField(many=True)
     entities = FieldsRelatedField(many=True)
     applied_controls = FieldsRelatedField(many=True)
@@ -6805,6 +6935,7 @@ class TaskTemplateReadSerializer(CommitmentSerializerMixin, BaseModelSerializer)
     assigned_to = FieldsRelatedField(many=True)
     findings_assessment = FieldsRelatedField(many=True)
     findings = FieldsRelatedField(many=True)
+    vulnerabilities = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
 
     next_occurrence = serializers.ReadOnlyField(source="get_next_occurrence")

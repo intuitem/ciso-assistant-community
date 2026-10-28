@@ -27,6 +27,7 @@
 	"estonian": "Estonščina",
 	"slovak": "Slovaščina",
 	"slovenian": "Slovenščina",
+	"norwegian": "Norveščina",
 	"addThreat": "Dodaj grožnjo",
 	"addVulnerability": "Dodaj ranljivost",
 	"addReferenceControl": "Dodaj referenčni ukrep",
@@ -1302,6 +1303,8 @@
 	"templateAuditReportDescription": "Revizijsko poročilo v Wordu",
 	"templateDocumentPdfName": "Postavitev dokumenta PDF",
 	"templateDocumentPdfDescription": "Postavitev PDF-ja za dokumente (naslovna stran, glave in noge)",
+	"templateVulnerabilityAssignmentName": "Dodelitev ranljivosti",
+	"templateVulnerabilityAssignmentDescription": "Poslano, ko je ranljivost dodeljena",
 	"docHtmlTemplates": "Postavitve PDF dokumentov",
 	"docHtmlTemplatesDescription": "Prilagodite postavitev HTML/CSS, ki se uporablja pri izvozu dokumentov v PDF (naslovna stran, glave, noge, blagovna znamka). Naložite svojo predlogo, da prepišete vgrajeno privzeto.",
 	"docHtmlTemplateUploadHelp": "Naložite datoteko .html (sintaksa predloge Django) z uporabo istih spremenljivk kot privzeta. Prenesite privzeto predlogo kot izhodiščno točko.",
@@ -2661,11 +2664,64 @@
 	"replaceWithConfirmTitle": "Potrdi zamenjavo",
 	"changeSeverity": "Spremeni resnost",
 	"detectedAt": "Datum zaznave",
-	"detectedAtHelpText": "Kdaj je bila ranljivost odkrita. Privzeto je nastavljeno na danes. Uporablja se kot sidro SLA, ko je politika nastavljena na datum zaznave.",
+	"detectedAtHelpText": "Kdaj je bila ranljivost odkrita. Privzeto je nastavljeno na danes, razen če je SLA izklopljen. Uporablja se kot sidro SLA, ko je politika nastavljena na datum zaznave.",
+	"remediatedAt": "Datum odprave",
+	"remediatedAtHelpText": "Nastavi se na dan, ko je ranljivost razrešena (ublažena, popravljena, ni izkoriščevalna ali neprizadeta), razen če datum vnesete sami. Ob ponovnem odprtju se ohrani.",
+	"vulnerabilityOpenForDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Odprta {count} dan od zaznave",
+				"countPlural=two": "Odprta {count} dneva od zaznave",
+				"countPlural=few": "Odprta {count} dni od zaznave",
+				"countPlural=other": "Odprta {count} dni od zaznave"
+			}
+		}
+	],
+	"vulnerabilityRemediatedInDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Odpravljena {count} dan po zaznavi",
+				"countPlural=two": "Odpravljena {count} dneva po zaznavi",
+				"countPlural=few": "Odpravljena {count} dni po zaznavi",
+				"countPlural=other": "Odpravljena {count} dni po zaznavi"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLeft": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Še {count} dan",
+				"countPlural=two": "Še {count} dneva",
+				"countPlural=few": "Še {count} dnevi",
+				"countPlural=other": "Še {count} dni"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} dan zamude",
+				"countPlural=two": "{count} dneva zamude",
+				"countPlural=few": "{count} dni zamude",
+				"countPlural=other": "{count} dni zamude"
+			}
+		}
+	],
+	"excepted": "Z izjemo",
+	"exceptionEnds": "Konec izjeme",
 	"refreshDueDates": "Osveži roke SLA",
 	"refreshDueDatesConfirm": "To bo ponovno izračunalo vse roke na podlagi trenutne politike SLA. Obstoječi roki bodo prepisani. Želite nadaljevati?",
 	"resetToDefaults": "Ponastavi na privzeto",
 	"refreshDueDatesFailed": "Osveževanje rokov SLA ni uspelo",
+	"vulnerabilitySlaDisabledHint": "SLA za ranljivosti je izklopljen v funkcionalnih zastavicah, zato se roki ne izračunavajo",
 	"changeTreatment": "Spremeni obravnavo",
 	"changeAssignee": "Spremeni zadolženo osebo",
 	"changeResult": "Spremeni rezultat",
@@ -4168,6 +4224,7 @@
 	"assetsDescription": "Poslovni procesi in funkcije (primarna), aplikacije ali tehnične komponente (podporna sredstva)",
 	"threatsDescription": "Potencialne grožnje vaši organizaciji",
 	"vulnerabilitiesDescription": "Znane ranljivosti in slabosti",
+	"vulnerabilitySlaDescription": "Izračunaj roke ranljivosti glede na njihovo resnost in prikaži, kako blizu roka je vsaka",
 	"riskScenariosDescription": "Register tveganj s scenariji in njihovimi obravnavami",
 	"referenceControlsDescription": "Predloga tipičnih varnostnih ukrepov",
 	"requirementMappingSetsDescription": "Kartiranja med različnimi okviri in standardi",
@@ -4271,7 +4328,7 @@
 	"syncCweCatalogFailed": "Prenos kataloga CWE ni uspel",
 	"vulnerability": "Ranljivost",
 	"vulnerabilitySlaPolicy": "SLA za ranljivosti",
-	"vulnerabilitySlaPolicyHelpText": "Določite največje dopustno število dni za odpravo ranljivosti glede na njeno resnost. Pustite prazno, da onemogočite samodejni izračun za to raven resnosti. Ko je nastavljeno, bo rok samodejno izračunan ob ustvarjanju ranljivosti ali spremembi resnosti.",
+	"vulnerabilitySlaPolicyHelpText": "Določite največje dopustno število dni za odpravo ranljivosti glede na njeno resnost. Pustite prazno, da onemogočite samodejni izračun za to raven resnosti. Ko je nastavljeno, bo rok samodejno izračunan ob ustvarjanju ranljivosti ali spremembi resnosti. Če želite SLA povsem izklopiti, onemogočite funkcionalno zastavico SLA za ranljivosti.",
 	"sla": "SLA",
 	"caution": "Opozorilo",
 	"slaAnchor": "Začetek SLA roka",
@@ -5656,6 +5713,7 @@
 	"hide": "Skrij",
 	"approvedBy": "Odobril",
 	"readAt": "Prebrano",
+	"notificationTitleVulnerabilityAssignment": "Dodeljena vam je bila ranljivost '{vulnerability_name}'",
 	"notification": "Obvestilo",
 	"notifications": "Obvestila",
 	"read": "Prebrano",
@@ -5744,5 +5802,7 @@
 	"dpiaRequiredNo": "DPIA ni zahtevana",
 	"dpiaRequirementChange": "Sprememba zahteve za DPIA",
 	"dpiaRequirementChanges": "Zgodovina zahtev za DPIA",
-	"previously": "Prej"
+	"previously": "Prej",
+	"vulnerabilityOpenWithRemediationDate": "Odprta ranljivost ima datum odprave",
+	"vulnerabilityResolvedWithoutRemediationDate": "Razrešena ranljivost nima datuma odprave"
 }

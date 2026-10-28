@@ -274,6 +274,13 @@ NOTIFICATION_REGISTRY = {
         "email_template": "validation_flow_updated",
         "context": ["new_status", "validation_ref_id"],
     },
+    "vulnerability_assignment": {
+        "category": "assignments",
+        "mode": "event",
+        "channels": ["in_app", "email"],
+        "email_template": "vulnerability_assignment",
+        "context": ["vulnerability_name"],
+    },
     "welcome": {
         "category": "account",
         "mode": "event",
