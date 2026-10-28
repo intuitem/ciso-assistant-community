@@ -23,6 +23,7 @@ from core.models import (
     Severity,
     TaskNode,
     TaskTemplate,
+    Vulnerability,
 )
 from core.views import ComplianceAssessmentViewSet, FolderViewSet
 from test_fixtures import RISK_MATRIX_JSON_DEFINITION
@@ -227,6 +228,31 @@ def test_applied_control_rules(domain, admin):
     assert _flagged(
         domain, admin, "operations", "warnings", "appliedControlNoStatus"
     ) == {blank.id}
+
+
+@pytest.mark.django_db
+def test_vulnerability_remediation_date_rules(domain, admin):
+    def vulnerability(name, status, remediated_at):
+        created = Vulnerability.objects.create(name=name, folder=domain, status=status)
+        # Pin the date past save(), which fills it in on resolution.
+        Vulnerability.objects.filter(pk=created.pk).update(remediated_at=remediated_at)
+        return created
+
+    reopened = vulnerability("reopened", "exploitable", PAST)
+    vulnerability("open", "exploitable", None)
+    undated = vulnerability("undated", "fixed", None)
+    vulnerability("remediated", "fixed", PAST)
+
+    assert _flagged(
+        domain, admin, "operations", "warnings", "vulnerabilityOpenWithRemediationDate"
+    ) == {reopened.id}
+    assert _flagged(
+        domain,
+        admin,
+        "operations",
+        "info",
+        "vulnerabilityResolvedWithoutRemediationDate",
+    ) == {undated.id}
 
 
 @pytest.mark.django_db
