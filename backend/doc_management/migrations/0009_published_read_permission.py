@@ -5,7 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("doc_management", "0007_documentcontainer_assets"),
+        ("doc_management", "0008_documentcontainer_reviewers"),
     ]
 
     operations = [
