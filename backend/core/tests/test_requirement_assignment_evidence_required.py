@@ -3,6 +3,7 @@
 from uuid import uuid4
 
 import pytest
+from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework.test import APIClient
 from knox.models import AuthToken
 
@@ -52,6 +53,7 @@ def evidence_fixture(app_config):
     )
 
     def node(key, **kwargs):
+        kwargs.setdefault("implementation_groups", ["in"])
         return RequirementNode.objects.create(
             framework=framework,
             urn=f"urn:test:risk:req_node:evidence-gate:{key}",
@@ -148,12 +150,22 @@ class TestEvidenceGate:
         assert response.status_code == 400
         assert response.data["missing_evidence"][0]["id"] == str(ra.id)
 
-    def test_link_satisfies_the_requirement(self, evidence_fixture):
+    @pytest.mark.parametrize(
+        "make_revision",
+        [
+            lambda: {"link": "https://example.com/policy"},
+            lambda: {"attachment": SimpleUploadedFile("policy.txt", b"policy")},
+        ],
+        ids=["link", "attachment"],
+    )
+    def test_file_or_link_satisfies_the_requirement(
+        self, evidence_fixture, make_revision
+    ):
         assignment = evidence_fixture["assignment"]
         _attach(
             evidence_fixture["ras"]["flagged"],
             evidence_fixture["folder"],
-            {"link": "https://example.com/policy"},
+            make_revision(),
         )
 
         response = _submit(evidence_fixture["client"], assignment)

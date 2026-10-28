@@ -10274,15 +10274,19 @@ class ComplianceAssessment(Assessment, FilteringLabelMixin):
         include_non_assessable: bool,
         lightweight: bool = False,
         skip_ig_filter: bool = False,
+        assignment: "RequirementAssignment | None" = None,
     ):
         """
         Returns sorted assessable requirement assessments based on the selected implementation groups.
         If include_non_assessable is True, it returns all requirements regardless of their assessable status.
         If lightweight is True, only prefetch answers/questions (for tree view), skip controls/evidences.
+        If assignment is given, only its requirement assessments are returned.
         """
         base_queryset = RequirementAssessment.objects.filter(
             compliance_assessment=self
         ).select_related("requirement", "requirement__framework")
+        if assignment is not None:
+            base_queryset = base_queryset.filter(assignments=assignment)
 
         if not lightweight:
             base_queryset = base_queryset.select_related(
@@ -11790,13 +11794,12 @@ class RequirementAssignment(AbstractBaseModel, FolderMixin):
             from core.cel_service import build_cel_context
 
             _ctx, hidden_urns = build_cel_context(self.compliance_assessment)
-        assigned_ids = set(self.requirement_assessments.values_list("id", flat=True))
         return [
             ra
             for ra in self.compliance_assessment.get_requirement_assessments(
-                include_non_assessable=True, lightweight=lightweight
+                include_non_assessable=True, lightweight=lightweight, assignment=self
             )
-            if ra.id in assigned_ids and ra.requirement.urn not in hidden_urns
+            if ra.requirement.urn not in hidden_urns
         ]
 
 

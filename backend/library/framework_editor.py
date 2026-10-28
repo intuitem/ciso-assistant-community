@@ -510,8 +510,6 @@ def editor_doc_to_framework_object(
                 "translations": node.get("translations"),
             }
         )
-        if node.get("evidence_required"):
-            node_dict["evidence_required"] = True
         weight = node.get("weight")
         if weight is not None and weight != 1:
             node_dict["weight"] = weight
@@ -533,6 +531,13 @@ def editor_doc_to_framework_object(
             )
         if aggregation and aggregation != "sum":
             node_dict["aggregation"] = aggregation
+        evidence_required = (
+            node.get("evidence_required")
+            if "evidence_required" in node
+            else (previous or {}).get("evidence_required")
+        )
+        if evidence_required is True:
+            node_dict["evidence_required"] = True
         node_questions = questions_by_node.get(canonical)
         if node_questions:
             node_dict["questions"] = node_questions
