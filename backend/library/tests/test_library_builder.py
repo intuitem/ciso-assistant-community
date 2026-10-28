@@ -37,7 +37,11 @@ from core.models import (
     Threat,
 )
 from iam.models import Folder, Permission, Role, RoleAssignment, User, UserGroup
+from django.core.files.uploadedfile import SimpleUploadedFile
+from rest_framework import serializers as drf_serializers
+
 from library import builder
+from library.serializers import LibraryDraftWriteSerializer
 
 LIBRARIES_DIR = Path(__file__).resolve().parent.parent / "libraries"
 
@@ -532,6 +536,72 @@ def test_create_draft_rejects_non_urn_safe_identity(admin_client):
         format="json",
     )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+@pytest.mark.django_db
+def test_create_draft_rejects_overlong_packager(admin_client):
+    # The packager is the URN namespace (RFC 8141 NID), capped at 32 characters.
+    response = admin_client.post(
+        reverse("library-drafts-list"),
+        {"name": "Too long", "packager": "p" * 33, "ref_id": "ok"},
+        format="json",
+    )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.data["packager"] == ["packagerTooLong"]
+
+
+@pytest.mark.django_db
+def test_update_draft_rejects_overlong_packager(admin_client):
+    draft = _create_draft(admin_client)
+    response = admin_client.patch(
+        reverse("library-drafts-detail", args=[draft["id"]]),
+        {"packager": "p" * 33},
+        format="json",
+    )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.data["packager"] == ["packagerTooLong"]
+
+
+@pytest.mark.django_db
+def test_import_yaml_rejects_overlong_packager(admin_client):
+    # A hand-crafted file could carry a packager the builder itself refuses;
+    # import must apply the same cap (ADR: library-builder-urn-scheme).
+    document = {
+        "name": "Imported",
+        "packager": "p" * 40,
+        "ref_id": "mylib",
+        "objects": {
+            "threats": [
+                {
+                    "urn": "urn:me:risk:threat:mylib:t1",
+                    "ref_id": "T1",
+                    "name": "My threat",
+                }
+            ]
+        },
+    }
+    upload = SimpleUploadedFile(
+        "lib.yaml", yaml.safe_dump(document).encode(), content_type="application/x-yaml"
+    )
+    response = admin_client.post(
+        reverse("library-drafts-import-yaml"), {"file": upload}, format="multipart"
+    )
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY, (
+        response.content
+    )
+    assert response.data["error"] == "packagerTooLong"
+
+
+@pytest.mark.django_db
+def test_draft_packager_predating_the_cap_keeps_saving_when_unchanged():
+    # A draft created before the cap holds a >32 packager; the serializer keeps
+    # accepting it while it is resubmitted unchanged (the edit form does that),
+    # but refuses a change to another over-long value.
+    draft = LibraryDraft(name="legacy", packager="p" * 40, ref_id="legacy")
+    serializer = LibraryDraftWriteSerializer(instance=draft)
+    serializer.validate({"packager": "p" * 40})  # unchanged → no raise
+    with pytest.raises(drf_serializers.ValidationError):
+        serializer.validate({"packager": "q" * 40})
 
 
 @pytest.mark.django_db

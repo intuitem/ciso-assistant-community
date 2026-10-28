@@ -102,6 +102,10 @@ describe('computeRefId', () => {
 		expect(computeRefId(['headcount', '2'], '2.1', 'question')).toBe('3');
 	});
 
+	it('skips a named question ending in digits ("iso-27001")', () => {
+		expect(computeRefId(['iso-27001', '2'], '2.1', 'question')).toBe('3');
+	});
+
 	it('computes choice ref_id', () => {
 		expect(computeRefId(['2.1-q1-c1'], '2.1-q1', 'choice')).toBe('2.1-q1-c2');
 	});

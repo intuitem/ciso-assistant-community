@@ -236,8 +236,9 @@ export function computeRefId(
 		if (!refId) continue;
 		let lastPart: string;
 		if (type === 'question') {
-			// New default ("3") or legacy ("2.1-q3", "q3"); named questions are skipped.
-			const match = refId.match(/(?:^|-)q?(\d+)$/);
+			// Only count the new default ("3"), or legacy "q3" / "<parent>-q3";
+			// a named question is skipped even when it ends in digits ("iso-27001").
+			const match = refId.match(/(?:^q?|-q)(\d+)$/);
 			if (match) nums.push(parseInt(match[1], 10));
 			continue;
 		} else if (type === 'choice') {
