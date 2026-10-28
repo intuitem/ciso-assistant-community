@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 
 	interface Props {
 		// `key` distinguishes entries that share a label (and so a visibility flag).

@@ -1,13 +1,13 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { ruleLabel } from '$lib/components/QuickForms/rule-label';
+	import { ruleLabel } from '#lib/components/QuickForms/rule-label.js';
 	import { deserialize } from '$app/forms';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import Question from '$lib/components/Forms/Question.svelte';
-	import ProjectionCard from '$lib/components/QuickForms/ProjectionCard.svelte';
-	import RatingOutcomes from '$lib/components/QuickForms/RatingOutcomes.svelte';
-	import { m } from '$paraglide/messages';
-	import { isDark } from '$lib/utils/helpers';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import Question from '#lib/components/Forms/Question.svelte';
+	import ProjectionCard from '#lib/components/QuickForms/ProjectionCard.svelte';
+	import RatingOutcomes from '#lib/components/QuickForms/RatingOutcomes.svelte';
+	import { m } from '#paraglide/messages.js';
+	import { isDark } from '#lib/utils/helpers.js';
 
 	// A quick form answered with trial answers, nothing stored: the library builder's
 	// draft and a loaded form both show it, through their own `?/evaluate` action

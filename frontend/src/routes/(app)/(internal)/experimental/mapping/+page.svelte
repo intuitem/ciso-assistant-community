@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
 	import type { PageData } from './$types';
 	interface Props {
 		data: PageData;

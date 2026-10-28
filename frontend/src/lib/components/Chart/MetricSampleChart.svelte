@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { sampleMoment } from '$lib/utils/derived-metrics';
-	import { escapeHtml } from '$lib/utils/helpers';
+	import { sampleMoment } from '#lib/utils/derived-metrics.js';
+	import { escapeHtml } from '#lib/utils/helpers.js';
 	import { onMount } from 'svelte';
 
-	import { mountThemeAwareChart } from '$lib/utils/echartsTheme';
-	import { m } from '$paraglide/messages';
+	import { mountThemeAwareChart } from '#lib/utils/echartsTheme.js';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		samples?: any[];

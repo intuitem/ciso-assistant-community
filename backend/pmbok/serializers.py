@@ -296,6 +296,10 @@ class ResponsibilityMatrixActivityWriteSerializer(BaseModelSerializer):
         model = ResponsibilityMatrixActivity
         fields = "__all__"
 
+    def validate_matrix(self, value):
+        self._ensure_immutable("matrix", value)
+        return value
+
 
 class ResponsibilityMatrixActorReadSerializer(BaseModelSerializer):
     matrix = FieldsRelatedField()
@@ -310,6 +314,10 @@ class ResponsibilityMatrixActorWriteSerializer(BaseModelSerializer):
     class Meta:
         model = ResponsibilityMatrixActor
         fields = "__all__"
+
+    def validate_matrix(self, value):
+        self._ensure_immutable("matrix", value)
+        return value
 
 
 class ResponsibilityAssignmentReadSerializer(BaseModelSerializer):

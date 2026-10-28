@@ -2,7 +2,7 @@
 	// Inline "add a secret" name/value form, shared by the data browser and the
 	// workflow data panel. Owns its own draft state; hands the trimmed name and
 	// raw value to the parent on submit.
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		onAdd: (name: string, value: string) => void;

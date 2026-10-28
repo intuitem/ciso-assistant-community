@@ -1,5 +1,5 @@
 import { writable, derived } from 'svelte/store';
-import { browser } from '$app/environment';
+import { browser } from '$app/env';
 import { persisted, type Persisted } from 'svelte-persisted-store';
 import type { Driver } from 'driver.js';
 import { DataHandler } from '@vincjo/datatables/remote';
@@ -31,6 +31,7 @@ export function clearFocusMode() {
 export const showNotification = writable(
 	(browser && localStorage.getItem('showNotification')) || 'false'
 );
+
 showNotification.subscribe((val) => {
 	if (browser) return (localStorage.showNotification = val);
 });

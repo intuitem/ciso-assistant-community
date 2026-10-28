@@ -1,5 +1,5 @@
-import { getListViewFields, tableSourceMapper } from '$lib/utils/table';
-import type { urlModel } from '$lib/utils/types';
+import { getListViewFields, tableSourceMapper } from '#lib/utils/table.js';
+import type { urlModel } from '#lib/utils/types.js';
 import type { State } from '@vincjo/datatables/remote';
 import type { TableSource } from './types';
 
