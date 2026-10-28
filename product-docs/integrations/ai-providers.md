@@ -28,7 +28,7 @@ You also need administrator rights — the settings page requires the permission
 
 In the sidebar, open **Extra** → **Settings**, then expand the **Chat / AI assistant** section.
 
-Set **LLM provider** to `OpenAI-compatible (LM Studio, vLLM, llama.cpp...)`. Despite the name listing local servers, this is the correct choice for any hosted OpenAI-compatible service, including both providers below. Three fields then appear:
+Set **LLM provider** to `OpenAI-compatible (hosted gateway or local server)`. Three fields then appear:
 
 | Field | What to enter |
 | --- | --- |
@@ -41,7 +41,7 @@ Set **LLM provider** to `OpenAI-compatible (LM Studio, vLLM, llama.cpp...)`. Des
 {% endhint %}
 
 {% hint style="warning" %}
-**Model name is required here.** Its help text says you may leave it empty to use the server's default loaded model. That applies to local single-model servers. Hosted providers serve many models at once and will reject a request that does not name one.
+**Model name is required here.** Hosted providers serve many models at once and will reject a request that does not name one. Leaving it empty only works on a local single-model server.
 {% endhint %}
 
 Save the form. Saving stores the settings and drops the cached connection so the next question picks them up — it does not contact the provider, so a wrong key or model name surfaces on the first question rather than here. Use the `curl` commands below to check the values before you paste them.
@@ -124,6 +124,10 @@ curl https://openrouter.ai/api/v1/chat/completions \
 
 A reply containing `choices[0].message.content` confirms the key and the model identifier for a plain completion. It does not exercise tool calling or streaming, so a model that passes here can still fail once the assistant asks it to choose a query — see [Checking it works](#checking-it-works).
 
+## Other gateways
+
+Any other service that meets the requirements above is configured the same way. For example, [OrcaRouter](https://www.orcarouter.ai) takes `https://api.orcarouter.ai/v1` as **API base URL** and `orcarouter/auto` as **Model name**. We have not exercised it against the assistant, so check tool calling with a question that reads your data, as described in [Checking it works](#checking-it-works).
+
 ## What stays on your own infrastructure
 
 Choosing a hosted provider sends **chat prompts** there — the question, the conversation history, and the retrieved context that answers it. That context contains your data, so treat the choice of provider as a data-processing decision.
@@ -181,8 +185,13 @@ Both providers bill per token consumed, against the account as a whole — there
 
 Most of what a question costs is not the question. The assistant's fixed instructions, the conversation history, the retrieved records and the extra context added on an audit or risk assessment page dominate the input, so a short question on a busy page costs far more than a long one on an empty page. Expect a few thousand input tokens for a simple exchange and a multiple of that where the page carries a lot of context, against several hundred output tokens. Measure your own traffic before budgeting: model, context size and provider pricing all move the figure. Published rates change often, so check [OVHcloud's pricing](https://www.ovhcloud.com/fr/public-cloud/ai-endpoints/) or [OpenRouter's model list](https://openrouter.ai/models) for current figures.
 
+## What else uses this provider
+
+The chat assistant is not the only caller. The **Ask AI for values** and **Ask AI for text** workflow steps appear in the palette when the `chat_mode` feature flag is on, and they read the provider configured here rather than one of their own — so the tokens they spend land on the same bill. A workflow running on a schedule spends without anyone watching, which is the case for setting a limit at the provider. See [AI steps](../features/workflows/actions.md#ai-steps).
+
 ## Related pages
 
 - [General settings](../configuration/settings/general.md) — every field in the **Chat / AI assistant** section
 - [Feature flags](../configuration/settings/feature-flags.md) — turning `chat_mode` on
 - [Helm chart](../installation/helm-chart.md) — enabling chat and Qdrant on Kubernetes
+- [Action reference](../features/workflows/actions.md#ai-steps) — the two workflow steps that call a model
