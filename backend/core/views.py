@@ -13666,14 +13666,27 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             context, audit, role, lang, profile, assessments=assessments
         )
 
-        response = HttpResponse(
-            render_pdf(
-                localized_template(REPORT_PROFILES[profile]["template"], lang),
-                payload,
-                images=images,
-            ),
-            content_type="application/pdf",
-        )
+        template = localized_template(REPORT_PROFILES[profile]["template"], lang)
+        pdf = None
+        custom = CustomWordTemplate.objects.filter(
+            template_key=REPORT_PROFILES[profile]["override_key"],
+            language=lang,
+            is_active=True,
+        ).first()
+        if custom and custom.file:
+            try:
+                with custom.file.open("rb") as f:
+                    pdf = render_pdf(template, payload, images=images, source=f.read())
+            except Exception as e:
+                logger.warning(
+                    "Custom Typst template failed, falling back to default",
+                    template_key=custom.template_key,
+                    error=e,
+                )
+        if pdf is None:
+            pdf = render_pdf(template, payload, images=images)
+
+        response = HttpResponse(pdf, content_type="application/pdf")
         safe_name = slugify(audit.name) or "audit"
         response["Content-Disposition"] = (
             f'attachment; filename="{safe_name}_{profile}.pdf"'

@@ -91,6 +91,7 @@ from .validators import (
     sanitize_file_name,
     validate_file_name,
     validate_html_template_file_name,
+    validate_report_template_file_name,
     validate_file_size,
     JSONSchemaInstanceValidator,
 )
@@ -14005,11 +14006,11 @@ class CustomWordTemplate(AbstractBaseModel, FolderMixin):
     file = models.FileField(
         upload_to="custom_word_templates/",
         validators=[
-            FileExtensionValidator(["docx"]),
+            FileExtensionValidator(["docx", "typ"]),
             validate_file_size,
-            validate_file_name,
+            validate_report_template_file_name,
         ],
-        help_text=_("Custom .docx template file"),
+        help_text=_("Custom .docx or .typ template file"),
     )
     is_active = models.BooleanField(default=True)
 
