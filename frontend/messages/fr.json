@@ -6115,6 +6115,8 @@
 	"lbListMatrixNamePlaceholder": "Ma matrice 4x4",
 	"lbListCreateAndEdit": "Créer et éditer",
 	"lbListPackagerPattern": "Le packager doit correspondre à [a-z0-9_-]{1,32}",
+	"packagerTooLong": "Le packager ne peut pas dépasser 32 caractères.",
+	"identityFrozenAfterPublication": "L'identité est figée après la première publication.",
 	"lbListQuickHelpFramework": "Le nom et le packager déterminent chaque URN du référentiel. Le packager est mémorisé pour la prochaine fois ; la bibliothèque englobante reste discrète et modifiable dans la vue complète du brouillon jusqu'à la première publication.",
 	"lbListQuickHelpMatrix": "Le nom et le packager déterminent chaque URN de la matrice. Le packager est mémorisé pour la prochaine fois ; la bibliothèque englobante reste discrète et modifiable dans la vue complète du brouillon jusqu'à la première publication.",
 	"lbListReferenceId": "Identifiant de référence",
