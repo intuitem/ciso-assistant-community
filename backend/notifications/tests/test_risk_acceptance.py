@@ -106,6 +106,30 @@ def test_submit_asks_the_approver(
     assert "Ransomware" in body
 
 
+@pytest.mark.parametrize("submit", [True, False])
+def test_create_with_submit_asks_the_approver(
+    acceptance, approver, owner, submit, django_capture_on_commit_callbacks
+):
+    if submit:
+        acceptance.set_state("submitted")
+    view = RiskAcceptanceViewSet()
+    view.request = SimpleNamespace(user=owner)
+    serializer = SimpleNamespace(save=lambda: acceptance)
+    with (
+        _producer(django_capture_on_commit_callbacks) as (notify, _send_email),
+        patch("core.views.dispatch_webhook_event"),
+    ):
+        view.perform_create(serializer)
+
+    if submit:
+        assert notify.call_args.args[:2] == (
+            "risk_acceptance_submitted",
+            [approver.email],
+        )
+    else:
+        notify.assert_not_called()
+
+
 def test_submit_cancelled_before_the_task_runs_sends_nothing(
     acceptance, owner, django_capture_on_commit_callbacks
 ):
