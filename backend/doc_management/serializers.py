@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 from core.models import Policy
 from core.serializer_fields import FieldsRelatedField
-from core.serializers import BaseModelSerializer
+from core.serializers import AssignmentNotificationMixin, BaseModelSerializer
 from iam.models import Folder, RoleAssignment
 
 from .access import has_full_view
@@ -22,6 +22,7 @@ class DocumentContainerReadSerializer(BaseModelSerializer):
     task_templates = FieldsRelatedField(many=True)
     processings = FieldsRelatedField(many=True)
     assets = FieldsRelatedField(many=True)
+    reviewers = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     classification = serializers.SerializerMethodField()
     document_count = serializers.SerializerMethodField()
@@ -143,7 +144,11 @@ class DocumentContainerReadSerializer(BaseModelSerializer):
         return {"version_number": rev.version_number, "status": rev.status}
 
 
-class DocumentContainerWriteSerializer(BaseModelSerializer):
+class DocumentContainerWriteSerializer(
+    AssignmentNotificationMixin, BaseModelSerializer
+):
+    assignment_notifications = {"reviewers": "object_review_assignment"}
+
     class Meta:
         model = DocumentContainer
         fields = "__all__"

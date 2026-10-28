@@ -66,6 +66,14 @@ class DocumentContainer(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
         "privacy.Processing", blank=True, related_name="documents"
     )
     assets = models.ManyToManyField("core.Asset", blank=True, related_name="documents")
+    # When set, only these actors may approve or request changes on a revision, and
+    # they are the ones asked when one is submitted for review.
+    reviewers = models.ManyToManyField(
+        "core.Actor",
+        blank=True,
+        related_name="reviewed_document_containers",
+        verbose_name=_("Reviewers"),
+    )
 
     fields_to_check = ["name"]
 
@@ -102,6 +110,16 @@ class DocumentContainer(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
 
     def __str__(self):
         return self.name or str(self.id)
+
+    def may_review(self, user) -> bool:
+        """With no reviewers set, review is open to anyone the permissions allow."""
+        if not self.reviewers.exists():
+            return True
+        from core.models import Actor
+
+        return self.reviewers.filter(
+            id__in=[a.id for a in Actor.get_all_for_user(user)]
+        ).exists()
 
 
 class ManagedDocument(AbstractBaseModel, FolderMixin, I18nObjectMixin):
