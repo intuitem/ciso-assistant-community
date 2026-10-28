@@ -91,6 +91,7 @@ from .validators import (
     sanitize_file_name,
     validate_file_name,
     validate_html_template_file_name,
+    validate_report_template_file_name,
     validate_file_size,
     JSONSchemaInstanceValidator,
 )
@@ -6764,6 +6765,12 @@ class Incident(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         verbose_name="Assets",
         blank=True,
     )
+    vulnerabilities = models.ManyToManyField(
+        "core.Vulnerability",
+        related_name="incidents",
+        verbose_name="Vulnerabilities",
+        blank=True,
+    )
     qualifications = models.ManyToManyField(
         Terminology,
         verbose_name="Qualifications",
@@ -7813,6 +7820,12 @@ class Vulnerability(
         NOTEXPLOITABLE = "not_exploitable", _("Not exploitable")
         UNAFFECTED = "unaffected", _("Unaffected")
 
+    # Statuses that close a vulnerability: no SLA clock, and reaching one fills in
+    # an empty remediation date.
+    RESOLVED_STATUSES = frozenset(
+        {Status.MITIGATED, Status.FIXED, Status.NOTEXPLOITABLE, Status.UNAFFECTED}
+    )
+
     ref_id = models.CharField(
         max_length=100, blank=True, verbose_name=_("Reference ID")
     )
@@ -7825,10 +7838,22 @@ class Vulnerability(
     severity = models.SmallIntegerField(
         verbose_name="Severity", choices=Severity.choices, default=Severity.UNDEFINED
     )
+    owner = models.ManyToManyField(
+        "core.Actor",
+        blank=True,
+        verbose_name=_("Owner"),
+        related_name="vulnerabilities",
+    )
     applied_controls = models.ManyToManyField(
         AppliedControl,
         blank=True,
         verbose_name=_("Applied controls"),
+        related_name="vulnerabilities",
+    )
+    evidences = models.ManyToManyField(
+        Evidence,
+        blank=True,
+        verbose_name=_("Evidences"),
         related_name="vulnerabilities",
     )
     assets = models.ManyToManyField(
@@ -7861,6 +7886,10 @@ class Vulnerability(
     published_date = models.DateField(
         null=True, blank=True, verbose_name=_("Publication date")
     )
+    remediated_at = models.DateField(
+        null=True, blank=True, verbose_name=_("Remediation date")
+    )
+    observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
 
     fields_to_check = ["ref_id", "name"]
 
@@ -7873,12 +7902,31 @@ class Vulnerability(
 
         is_new = self._state.adding
         severity_changed = False
+        was_resolved = False
         if not is_new:
-            old = Vulnerability.objects.filter(pk=self.pk).values("severity").first()
+            old = (
+                Vulnerability.objects.filter(pk=self.pk)
+                .values("severity", "status")
+                .first()
+            )
             if old and old["severity"] != self.severity:
                 severity_changed = True
-        # Default detected_at to today on creation
-        if is_new and not self.detected_at:
+            was_resolved = bool(old) and old["status"] in self.RESOLVED_STATUSES
+        # The remediation date is the user's: when the status becomes resolved
+        # without one, it is today; it is never cleared, reopening included.
+        if (
+            self.status in self.RESOLVED_STATUSES
+            and not was_resolved
+            and not self.remediated_at
+        ):
+            self.remediated_at = date.today()
+            if update_fields is not None:
+                update_fields.add("remediated_at")
+        sla_policy = (
+            self.get_active_sla_policy() if is_new or severity_changed else None
+        )
+        # Default detected_at to today on creation, when an SLA applies
+        if is_new and not self.detected_at and sla_policy is not None:
             self.detected_at = date.today()
             if update_fields is not None:
                 update_fields.add("detected_at")
@@ -7886,34 +7934,135 @@ class Vulnerability(
         # (from the wizard or manual input) are preserved; the bulk
         # refresh-due-dates action is the sole path that overrides them.
         if (is_new or severity_changed) and not self.due_date:
-            self._apply_sla_policy()
+            self._apply_sla_policy(sla_policy)
             if update_fields is not None:
                 update_fields.add("due_date")
         if update_fields is not None:
             kwargs["update_fields"] = list(update_fields)
         super().save(*args, **kwargs)
 
-    def _apply_sla_policy(self):
+    @staticmethod
+    def get_active_sla_policy():
+        """The vulnerability SLA policy, or None when no SLA applies: the
+        vulnerability_sla feature flag is off, or no policy is configured."""
+        from global_settings.models import GlobalSettings
+        from global_settings.utils import ff_is_enabled
+
+        if not ff_is_enabled("vulnerability_sla"):
+            return None
+        sla_settings = GlobalSettings.objects.filter(name="vulnerability-sla").first()
+        sla_policy = sla_settings.value if sla_settings is not None else None
+        if not isinstance(sla_policy, dict) or not sla_policy:
+            return None
+        return sla_policy
+
+    def _apply_sla_policy(self, sla_policy):
         from datetime import date, timedelta
 
-        from global_settings.models import GlobalSettings
-
-        try:
-            sla_settings = GlobalSettings.objects.get(name="vulnerability-sla")
-            sla_policy = (
-                sla_settings.value if isinstance(sla_settings.value, dict) else {}
-            )
-        except GlobalSettings.DoesNotExist:
+        if sla_policy is None:
             return
+        sla_anchor = sla_policy.get("sla_anchor", "detected_at")
         severity_label = self.get_severity_display()
         days = sla_policy.get(severity_label)
         if days is not None:
-            sla_anchor = sla_policy.get("sla_anchor", "detected_at")
             if sla_anchor == "published_date" and self.published_date:
                 anchor = self.published_date
             else:
                 anchor = self.detected_at or date.today()
             self.due_date = anchor + timedelta(days=int(days))
+
+    # SLA states, most urgent first; the order ranks the SLA column.
+    SLA_STATES = ("overdue", "today", "caution", "on track", "excepted", "resolved")
+    SLA_STATE_COLORS = {
+        "overdue": "#f87171",
+        "today": "#f97316",
+        "caution": "#fbbf24",
+        "on track": "#93c5fd",
+        "excepted": "#c4b5fd",
+        "resolved": "#86efac",
+    }
+
+    @classmethod
+    def sla_state_annotations(cls, today=None) -> dict:
+        """The SLA state as query expressions, so lists show, filter and sort it from
+        one definition: sla_state (a name of SLA_STATES, or None without a due date),
+        sla_rank (its position in SLA_STATES) and sla_until (when the exception that
+        makes it "excepted" ends; None when open-ended)."""
+        from datetime import timedelta
+
+        today = today or date.today()
+        # An approved exception that hasn't expired takes it off the clock.
+        active_exceptions = SecurityException.objects.filter(
+            vulnerabilities=OuterRef("pk"),
+            status=SecurityException.Status.APPROVED,
+        ).filter(Q(expiration_date__isnull=True) | Q(expiration_date__gte=today))
+
+        # Caution: less than half of the severity's SLA window left. In whole days,
+        # remaining < days / 2 means a due date before today + ceil(days / 2).
+        caution = None
+        sla_policy = cls.get_active_sla_policy() or {}
+        for severity, label in Severity.choices:
+            try:
+                days = int(sla_policy.get(label, 0)) or None
+            except TypeError, ValueError:
+                days = None
+            if days:
+                late = Q(
+                    severity=severity,
+                    due_date__lt=today + timedelta(days=math.ceil(days / 2)),
+                )
+                caution = late if caution is None else caution | late
+
+        conditions = [
+            (Q(status__in=cls.RESOLVED_STATUSES), "resolved"),
+            (Exists(active_exceptions), "excepted"),
+            (Q(due_date__isnull=True), None),
+            (Q(due_date__lt=today), "overdue"),
+            (Q(due_date=today), "today"),
+        ]
+        if caution is not None:
+            conditions.append((caution, "caution"))
+
+        def case(value_of, default, output_field):
+            return models.Case(
+                *(
+                    models.When(condition, then=Value(value_of(state)))
+                    for condition, state in conditions
+                ),
+                default=Value(default),
+                output_field=output_field,
+            )
+
+        return {
+            "sla_state": case(lambda s: s, "on track", models.CharField()),
+            "sla_rank": case(
+                lambda s: None if s is None else cls.SLA_STATES.index(s),
+                cls.SLA_STATES.index("on track"),
+                models.IntegerField(),
+            ),
+            "sla_until": models.Case(
+                models.When(
+                    Exists(active_exceptions.filter(expiration_date__isnull=True)),
+                    then=Value(None),
+                ),
+                default=Subquery(
+                    active_exceptions.order_by("-expiration_date").values(
+                        "expiration_date"
+                    )[:1]
+                ),
+                output_field=models.DateField(),
+            ),
+        }
+
+    @classmethod
+    def overdue_q(cls):
+        """Q filter for the "overdue" SLA state on querysets without the
+        annotations: due date passed, neither resolved nor excepted."""
+        return Q(
+            pk__in=cls.objects.alias(**cls.sla_state_annotations())
+            .filter(sla_state="overdue")
+            .values("pk")
+        )
 
 
 # historical data
@@ -13054,6 +13203,13 @@ class TaskTemplate(
         help_text="Findings related to the task",
         related_name="task_templates",
     )
+    vulnerabilities = models.ManyToManyField(
+        Vulnerability,
+        verbose_name="Vulnerabilities",
+        blank=True,
+        help_text="Vulnerabilities related to the task",
+        related_name="task_templates",
+    )
 
     link = models.URLField(
         blank=True,
@@ -13757,11 +13913,12 @@ auditlog.register(
 )
 auditlog.register(
     Vulnerability,
+    m2m_fields={"owner", "evidences"},
     exclude_fields=common_exclude,
 )
 auditlog.register(
     Incident,
-    m2m_fields={"applied_controls", "task_templates"},
+    m2m_fields={"applied_controls", "task_templates", "vulnerabilities"},
     exclude_fields=common_exclude,
 )
 auditlog.register(
@@ -13879,11 +14036,11 @@ class CustomWordTemplate(AbstractBaseModel, FolderMixin):
     file = models.FileField(
         upload_to="custom_word_templates/",
         validators=[
-            FileExtensionValidator(["docx"]),
+            FileExtensionValidator(["docx", "typ"]),
             validate_file_size,
-            validate_file_name,
+            validate_report_template_file_name,
         ],
-        help_text=_("Custom .docx template file"),
+        help_text=_("Custom .docx or .typ template file"),
     )
     is_active = models.BooleanField(default=True)
 
