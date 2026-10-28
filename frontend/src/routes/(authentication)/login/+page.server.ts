@@ -26,11 +26,12 @@ interface AuthenticationFlow {
 	types: ('totp' | 'recovery_codes' | 'webauthn')[];
 }
 
-export const load: PageServerLoad = async ({ fetch, request, locals }) => {
+export const load: PageServerLoad = async ({ fetch, request, locals, url }) => {
 	// redirect user if already logged in
 	const user = await locals.getUser();
 	if (user) {
-		redirect(302, user.is_auditee ? '/auditee-dashboard' : '/analytics');
+		const next = getSecureRedirect(url.searchParams.get('next'));
+		redirect(302, next || (user.is_auditee ? '/auditee-dashboard' : '/analytics'));
 	}
 
 	const form = await superValidate(request, zod(loginSchema));

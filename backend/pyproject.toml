@@ -58,6 +58,8 @@ dependencies = [
     "rapidfuzz>=3.14.3,<4",
     "cronsim>=2.6,<3",
     "typst>=0.15.0",
+    "mcp>=2.3.0,<3",
+    "uvicorn>=0.30.0,<1",
 ]
 
 [dependency-groups]

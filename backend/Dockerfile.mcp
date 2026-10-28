@@ -1,0 +1,17 @@
+# backend-mcp: the backend image plus the MCP tool layer from cli/, run as its
+# own process. Build with two named contexts: `backend` (the backend image) and
+# `cli` (the cli/ directory); see the backend-mcp service in the compose files.
+FROM backend
+
+COPY --from=cli ca_mcp /code/ca_mcp
+
+ENV CA_MCP_TRANSPORT=streamable-http \
+  CA_MCP_HOST=0.0.0.0 \
+  CA_MCP_PORT=8001
+
+EXPOSE 8001
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+  CMD ["python", "-c", "import socket,os; s=socket.create_connection(('127.0.0.1', int(os.environ.get('CA_MCP_PORT','8001'))), 3); s.close()"]
+
+ENTRYPOINT ["python", "-m", "mcp_server"]

@@ -534,6 +534,11 @@ Tunnel, which reaches a private or on-premises server without a public listener.
 
 #### Each user brings their own token
 
+{% hint style="info" %}
+Users can also sign in with their CISO Assistant account instead of pasting a
+token. See [MCP sign-in with OAuth](mcp-oauth.md).
+{% endhint %}
+
 By default the server holds **no** credential of its own in HTTP mode. Every
 request must carry the caller's Personal Access Token, and the call runs with
 exactly that user's permissions and domain scope. A request without a token is

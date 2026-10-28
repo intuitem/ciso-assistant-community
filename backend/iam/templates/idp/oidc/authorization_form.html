@@ -1,0 +1,44 @@
+{% load i18n %}{% get_current_language as LANG %}<!DOCTYPE html>
+<html lang="{{ LANG }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% translate "Authorize access" %} - CISO Assistant</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #f4f4f7; color: #1f2937; margin: 0; }
+    .card { max-width: 480px; margin: 8vh auto; background: #fff; border-radius: 12px;
+            padding: 2rem; box-shadow: 0 4px 24px rgba(0,0,0,.08); }
+    h1 { font-size: 1.25rem; margin: 0 0 .5rem; }
+    .who { color: #6b7280; margin: 0 0 1.5rem; }
+    .warning { background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px;
+               padding: .75rem 1rem; margin-bottom: 1.5rem; font-size: .9rem; }
+    .warning ul { margin: .5rem 0 0; padding-left: 1.2rem; word-break: break-all; }
+    form ul { list-style: none; padding: 0; }
+    .actions { display: flex; gap: .75rem; justify-content: flex-end; margin-top: 1.5rem; }
+    button { border-radius: 8px; padding: .6rem 1.2rem; font-size: 1rem; cursor: pointer; }
+    .primary { background: #7c3aed; color: #fff; border: none; }
+    .secondary { background: #fff; color: #374151; border: 1px solid #d1d5db; }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>{% blocktranslate with name=client.name %}{{ name }} wants to access CISO Assistant{% endblocktranslate %}</h1>
+    <p class="who">{% blocktranslate with email=request.user.email %}Signed in as {{ email }}{% endblocktranslate %}</p>
+    {% if client.data.dcr %}
+      <div class="warning">
+        <strong>{% translate "This app registered itself." %}</strong>
+        {% translate "Your administrator has not checked it. Only continue if you started this connection and you trust where it sends you back:" %}
+        <ul>{% for uri in client.get_redirect_uris %}<li><code>{{ uri }}</code></li>{% endfor %}</ul>
+      </div>
+    {% endif %}
+    <form method="post" action="{% url 'idp:oidc:authorization' %}">
+      {% csrf_token %}
+      {{ form }}
+      <div class="actions">
+        <button type="submit" name="action" value="cancel" class="secondary">{% translate "Cancel" %}</button>
+        <button type="submit" name="action" value="grant" class="primary">{% translate "Authorize" %}</button>
+      </div>
+    </form>
+  </main>
+</body>
+</html>
