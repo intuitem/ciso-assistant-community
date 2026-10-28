@@ -6,6 +6,8 @@ description: "Action, Condition, Loop and Stop run: what each step does and how 
 
 Four kinds of step do the work between a trigger and the end of a run.
 
+Quick reference: [cheat sheet](cheat-sheet.md#steps-and-wiring).
+
 | Step | Purpose |
 |---|---|
 | **Action** | Does one thing |

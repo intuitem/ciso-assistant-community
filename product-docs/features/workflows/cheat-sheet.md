@@ -6,7 +6,7 @@ description: "Exhaustive reference card for workflows: lifecycle, triggers, step
 
 Every rule and subtlety of the workflow builder, grouped by topic. Each section links to the full page. For what workflows are, see [Workflows](../../concepts/workflows.md). For the canvas itself, see [Workflow builder](README.md).
 
-## 1. Prerequisites
+## Prerequisites
 
 | Requirement | Without it |
 |---|---|
@@ -17,24 +17,23 @@ Every rule and subtlety of the workflow builder, grouped by topic. Each section 
 | AI provider configured (**Settings > Chat / AI assistant**) | AI steps fail with `no AI provider is reachable` |
 | Inbound webhooks allowed on the instance | Every webhook URL answers `404` |
 
-## 2. Lifecycle and versions
+See [Permissions and security](permissions-and-security.md#deployment-requirements) and [Troubleshooting](troubleshooting.md#the-workflows-entry-is-not-in-the-sidebar).
 
-| Stage | Rule |
+## Lifecycle pitfalls
+
+| Rule | Consequence |
 |---|---|
-| Draft | Autosaved, no save button. Can be saved in any state |
-| Editing a published version | The first change creates a new draft. The published version keeps running untouched |
-| **Discard draft** | Deletes the draft, shows the published version again |
-| **Publish** | Runs the [publish checks](publish-checks.md), then lists the permissions the workflow will use in your name |
-| Run identity | The publisher. Checked live at each step. Republishing makes the new publisher the run identity |
+| Editing a published version creates a new draft | The published version keeps running until the draft is published |
+| The publisher is the run identity | Republishing switches every automatic run to the new publisher's permissions |
 | Publisher deleted | Amber **No run-as user** badge, automatic triggers stop. Republish |
-| **Restore as a new draft** | From the **Workflow versions** panel. Blocked while a draft exists |
-| **Enabled** switch (header) | Master switch for every automatic trigger. Rows keep their own state. Manual runs still work |
-| **Time limit** (header) | Per run, `0` = none. Checked every minute, applies to runs already in flight |
-| Undo / Redo | 50 steps. Edits within one second coalesce |
+| **Execute** ignores publication, trigger state and the **Enabled** switch | A paused workflow stays testable. Automatic triggers need all three |
+| Pausing keeps each trigger row's own state | Re-enabling brings back exactly what was on. Schedule occurrences during the pause are skipped |
+| **Time limit** applies to runs already in flight | Lowering it can stop a running run |
+| **Restore as a new draft** is blocked while a draft exists | Publish or discard the draft first |
 
-See [Workflow builder](README.md).
+See [Workflow builder](README.md#the-header).
 
-## 3. Triggers
+## Triggers
 
 ### Overview
 
@@ -68,6 +67,8 @@ https://<instance>/api/workflows/hooks/<workflow id>/<trigger ref>/<secret>/
 - Secret: 64 random characters. **Rotate secret** kills the old URL immediately.
 - Disabling the row makes the URL answer `404` without rotating.
 
+See [Webhook](triggers.md#webhook).
+
 ### Schedule
 
 | Expression | Fires |
@@ -84,6 +85,8 @@ https://<instance>/api/workflows/hooks/<workflow id>/<trigger ref>/<secret>/
 - An occurrence falling while the workflow is paused is skipped.
 - A new expression applies at the next publish, the row keeps its state.
 
+See [Schedule](triggers.md#schedule).
+
 ### On event
 
 - Any audited object: controls, findings, vulnerabilities, audits, requirement assessments, risk acceptances, validation flows, entities, users, tokens, and more.
@@ -94,6 +97,8 @@ https://<instance>/api/workflows/hooks/<workflow id>/<trigger ref>/<secret>/
 - One user action on one object = one run per trigger (**Coalesced**). A bulk edit still gives one run per object.
 - Runs can trigger other runs up to 5 levels deep, then **Skipped (too many chained triggers)**.
 - Starts typically within a second.
+
+See [On event](triggers.md#on-event).
 
 ### Triggers panel results
 
@@ -108,9 +113,11 @@ https://<instance>/api/workflows/hooks/<workflow id>/<trigger ref>/<secret>/
 
 Rows are keyed by step ref. Same ref and kind across publishes = state, secret and history kept. On the canvas: pulsing green dot = enabled, grey = disabled.
 
+See [The Triggers panel](triggers.md#the-triggers-panel).
+
 See [Triggers](triggers.md).
 
-## 4. Steps and wiring
+## Steps and wiring
 
 | Step | Rule |
 |---|---|
@@ -130,6 +137,8 @@ See [Triggers](triggers.md).
 - **otherwise** cannot be deleted or reordered. Every branch must be wired.
 - Comparison follows the variable type (§7).
 
+See [Condition](steps.md#condition).
+
 ### Loop
 
 | Setting | Rule |
@@ -145,9 +154,11 @@ See [Triggers](triggers.md).
 - Caps: 500 items, 20 pages, then stops cleanly with the reason in `errors`.
 - Over 100 rows, let the loop read its own pages: a referenced Read objects result keeps only 100 entries.
 
+See [Loop](steps.md#loop).
+
 See [Steps](steps.md).
 
-## 5. Actions
+## Actions
 
 ### Summary
 
@@ -193,6 +204,8 @@ See [Steps](steps.md).
 
 **Numbers about the matches**: Count, Count distinct, Sum, Average, Minimum, Maximum run in the database. Median, Percentile (`p` 0 to 100), Standard deviation, and anything over a computed value (an audit's `progress`) run in the worker, up to 10 000 rows, and fail beyond. **Group by** gives a map per value, every choice listed with zeroes, empty values under `null`. No page, order or extra data. A Loop cannot page an aggregate read. Default aliases: `count`, `avg_priority`, `by_status`.
 
+See [Read objects](actions.md#read-objects).
+
 ### Create object
 
 - Created in the workflow's domain. Some objects live in their parent's domain: purpose, risk scenario, external rating.
@@ -206,11 +219,15 @@ See [Steps](steps.md).
 - `validation_flow`: the requester is the run identity.
 - `right_request`: opens in **New**.
 
+See [Create object](actions.md#create-object).
+
 ### Create or update in bulk
 
 - One step for a whole list (`{{item.<path>}}` per entry). Use it after a paged HTTP request: a loop costs two steps per entry.
 - Every entry is upserted. A failing entry rolls back alone.
 - Up to 10 000 entries by default, beyond that `truncated` is true.
+
+See [Create or update in bulk](actions.md#create-or-update-in-bulk).
 
 ### Update object
 
@@ -226,6 +243,8 @@ See [Steps](steps.md).
 | Requirement assessment | Status, dates, observation. Never result or score |
 | Document revision | Content and change summary while still a draft |
 
+See [Update object](actions.md#update-object).
+
 ### Attach a file to an evidence
 
 - Source **Text** (rendered content) or **URL** (download, secrets allowed).
@@ -235,11 +254,15 @@ See [Steps](steps.md).
 - **Continue when the answer is an error** / **when the tool cannot be reached**: nothing filed, `attached` = `false`. Branch on `attached`, not `status`. Unreachable = `status` `0`.
 - Respects size limit and extension allowlist. No redirects.
 
+See [Attach a file to an evidence](actions.md#attach-a-file-to-an-evidence).
+
 ### Record a measurement
 
 - Quantitative metric: the number. Qualitative: option index from 1.
 - Refused: index past the last option, non-number, future timestamp, computed metric.
 - Empty timestamp = run time. Nothing changes on the metric instance itself.
+
+See [Record a measurement](actions.md#record-a-measurement).
 
 ### Post scan results
 
@@ -248,11 +271,15 @@ See [Steps](steps.md).
 - Same **Run id** patches the same run (idempotent retries). Empty = new run each time.
 - An asset not yet in scope is added.
 
+See [Post scan results](actions.md#post-scan-results).
+
 ### Send email
 
 - Comma-separated recipients, `Name <address>` accepted. Plain text body.
 - One message per recipient. Any failed address fails the step.
 - Sent through the worker, the step waits. Ignores the platform's digest mute toggle.
+
+See [Send email](actions.md#send-email).
 
 ### HTTP request
 
@@ -264,6 +291,8 @@ See [Steps](steps.md).
 - Output mapping keys may contain dots: `body.@odata.count`.
 - No redirects, private addresses refused. Secret, `Authorization` header or OAuth require `https`. Errors show the host only.
 
+See [HTTP request](actions.md#http-request).
+
 ### Identity steps
 
 | Step | Rule |
@@ -271,6 +300,8 @@ See [Steps](steps.md).
 | Provision domain | Finds or creates by name under the parent. Parent must be in the subtree. Optional default access groups |
 | Provision user | Matched by email, case-insensitive. Names overwrite only when non-empty. **Active** omitted = left alone, so a sync never re-activates an offboarded user |
 | Manage group membership | Reader, Approver, Analyst, Domain manager, Respondent. Domain in the subtree. Removing the last global admin is refused |
+
+See [Identity steps](actions.md#identity-steps).
 
 ### AI steps
 
@@ -281,9 +312,11 @@ See [Steps](steps.md).
 - An AI answer can never be written to a choice field (status, severity, result), even through a variable. Branch on it and write a fixed value per branch.
 - 50 AI steps per run by default (`WORKFLOW_AI_MAX_CALLS_PER_RUN`).
 
+See [AI steps](actions.md#ai-steps).
+
 See [Action reference](actions.md).
 
-## 6. Expressions
+## Expressions
 
 | Expression | Value | Where |
 |---|---|---|
@@ -313,13 +346,17 @@ See [Action reference](actions.md).
 | `new_values.<field>` | New value |
 | `folder_id`, `actor_email`, `timestamp` | Domain, author when known, when |
 
+See [Payloads](expressions.md#payloads).
+
 ### Stored output caps
 
 Text over 1000 characters is cut, lists and objects keep 100 entries, about 32 KB per run. The builder previews 50 entries of a list, steps read the full list.
 
+See [Limits worth knowing](expressions.md#limits-worth-knowing).
+
 See [Expressions](expressions.md).
 
-## 7. Variables and secrets
+## Variables and secrets
 
 | Type | Compared as |
 |---|---|
@@ -337,7 +374,7 @@ See [Expressions](expressions.md).
 
 See [Variables and secrets](variables-and-secrets.md).
 
-## 8. Compute (CEL)
+## Compute (CEL)
 
 | Example | |
 |---|---|
@@ -358,7 +395,9 @@ See [Variables and secrets](variables-and-secrets.md).
 - Syntax errors fail at publish. Type errors, missing fields, division by zero fail at run time, no retry.
 - Each row previews its result against the reference run, or the defaults before any run.
 
-## 9. Permissions and scope
+See [Compute](actions.md#compute).
+
+## Permissions and scope
 
 | Operation | Reach |
 |---|---|
@@ -376,7 +415,7 @@ See [Variables and secrets](variables-and-secrets.md).
 
 See [Permissions and security](permissions-and-security.md).
 
-## 10. Runs
+## Runs
 
 | Start | Runs as | Conditions |
 |---|---|---|
@@ -404,7 +443,7 @@ See [Permissions and security](permissions-and-security.md).
 
 See [Runs](runs.md).
 
-## 11. Export, import and templates
+## Export, import and templates
 
 - **Export** takes the draft if any, else the published version. Carries variables, steps, wires and secret **names**. Not: secret values, webhook URLs, run history, trigger states, positions.
 - **Import** asks for a domain and the required secrets. Arrives as a draft, automatic triggers disabled, layout recomputed. Missing references are warnings. Importing twice gives `(2)`.
@@ -415,7 +454,7 @@ See [Runs](runs.md).
 
 See [Sharing workflows](sharing.md) and [Template catalog](templates.md).
 
-## 12. Limits
+## Limits
 
 | Limit | Default | Setting |
 |---|---|---|
@@ -435,7 +474,9 @@ See [Sharing workflows](sharing.md) and [Template catalog](templates.md).
 | AI input / output | 20 000 characters | |
 | Email wait | 15 minutes | |
 
-## 13. Quick fixes
+See [Loop limits](steps.md#limits), [Paging and OAuth](actions.md#paging-and-oauth), [AI steps](actions.md#ai-steps) and [Deployment requirements](permissions-and-security.md#deployment-requirements).
+
+## Quick fixes
 
 | Symptom | Cause | Fix |
 |---|---|---|
@@ -460,15 +501,3 @@ See [Sharing workflows](sharing.md) and [Template catalog](templates.md).
 | "This draft no longer exists" | Draft discarded elsewhere | Last edit lost, redo it |
 
 See [Troubleshooting](troubleshooting.md) and [Publish checks](publish-checks.md).
-
-## 14. Keyboard shortcuts
-
-| Keys | Effect |
-|---|---|
-| ⌘Z, Ctrl+Z | Undo |
-| ⇧⌘Z, Ctrl+Shift+Z, Ctrl+Y | Redo |
-| Delete, Backspace | Delete selected steps or wires |
-| Enter, Escape | Confirm or cancel the inline variable creator |
-| C (list page) | New workflow |
-
-Undo and redo are suppressed while a text field has focus.
