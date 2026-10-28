@@ -4508,7 +4508,16 @@
 	"lbDraftNoQuickForm": "Questa libreria non contiene ancora alcun Quick Form. Aggiungine uno per configurare pagine e domande nell'editor visuale.",
 	"addQuickForm": "Aggiungi Quick Form",
 	"lbQuickFormPageTitle": "Editor delle librerie - {name}",
-	"lbCountQuickForms": [{"declarations": ["input count", "local countPlural = count: plural"], "selectors": ["countPlural"], "match": {"countPlural=one": "{count} Quick Form", "countPlural=other": "{count} Quick Form"}}],
+	"lbCountQuickForms": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} Quick Form",
+				"countPlural=other": "{count} Quick Form"
+			}
+		}
+	],
 	"lbDraftSimpleViewPackagedQuickForm": "Questo Quick Form è incluso nella libreria {urn}. Passa alla vista completa per visualizzare metadati, dipendenze, importazioni e altri tipi di contenuto.",
 	"tierHelpText": "Livello di criticità della terza parte secondo la scala di classificazione dell'organizzazione",
 	"solutionTierHelpText": "Livello di criticità della soluzione secondo la scala di classificazione dell'organizzazione",
