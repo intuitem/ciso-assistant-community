@@ -67,8 +67,6 @@ export const load: PageServerLoad = async ({ params, fetch, locals }) => {
 		},
 		zod(PortalSettingsSchema)
 	);
-	// The author's catalog: published documents only, but it can include domain documents
-	// the portal audience cannot open (they get a 404; hiding such tiles is a follow-up).
 	const documentCatalog: { id: string; name: string; ref_id: string; document_type: string }[] =
 		catalogRes?.ok
 			? (await catalogRes.json()).map((c: any) => ({

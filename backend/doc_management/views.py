@@ -35,7 +35,13 @@ from core.validators import validate_file_name, validate_file_size
 from core.views import BaseModelViewSet, GenericFilterSet
 from iam.models import RoleAssignment, Folder
 
-from .access import DocumentRBACPermissions, PublishedReadMixin, readable_ids
+from .access import (
+    DocumentRBACPermissions,
+    PublishedReadMixin,
+    full_view_ids,
+    has_full_view,
+    readable_ids,
+)
 from .models import (
     DocumentAttachment,
     DocumentContainer,
@@ -244,20 +250,36 @@ class DocumentContainerFilter(GenericFilterSet):
             "assets",
         ]
 
+    def _visible_state(self, queryset):
+        ids = full_view_ids(self.request, DocumentContainer)
+        if ids is None:
+            return queryset
+        return queryset.filter(
+            models.Q(id__in=ids)
+            | models.Q(
+                documents__default_locale=True,
+                documents__current_revision__status=DocumentRevision.Status.PUBLISHED,
+            )
+        )
+
     def filter_status(self, queryset, name, value):
         if not value:
             return queryset
-        return queryset.filter(
-            documents__default_locale=True,
-            documents__current_revision__status__in=value,
+        return self._visible_state(
+            queryset.filter(
+                documents__default_locale=True,
+                documents__current_revision__status__in=value,
+            )
         ).distinct()
 
     def filter_source(self, queryset, name, value):
         if not value:
             return queryset
-        return queryset.filter(
-            documents__default_locale=True,
-            documents__current_revision__source__in=value,
+        return self._visible_state(
+            queryset.filter(
+                documents__default_locale=True,
+                documents__current_revision__source__in=value,
+            )
         ).distinct()
 
 
@@ -335,15 +357,28 @@ class DocumentContainerViewSet(PublishedReadMixin, BaseModelViewSet):
         to) and incoming (linked from)."""
         container = self.get_object()
         accessible = readable_ids(request.user, DocumentContainer)
+
+        def shown(src_id, tgt_id):
+            if src_id not in accessible:
+                return False
+            if has_full_view(request, DocumentContainer, src_id):
+                return True
+            return DocumentRevision.objects.filter(
+                document__container_id=src_id,
+                status=DocumentRevision.Status.PUBLISHED,
+                content__contains=f"document:{tgt_id}",
+            ).exists()
+
         outgoing = [
             {"id": str(r.target_container_id), "str": r.target_container.name}
             for r in container.outgoing_references.select_related("target_container")
             if r.target_container_id in accessible
+            and shown(container.id, r.target_container_id)
         ]
         incoming = [
             {"id": str(r.source_container_id), "str": r.source_container.name}
             for r in container.incoming_references.select_related("source_container")
-            if r.source_container_id in accessible
+            if shown(r.source_container_id, container.id)
         ]
         return Response({"references": outgoing, "referenced_by": incoming})
 
@@ -948,6 +983,15 @@ class DocumentAttachmentViewSet(PublishedReadMixin, BaseModelViewSet):
         if pk_uuid not in object_ids_view:
             return Response(status=status.HTTP_403_FORBIDDEN)
         attachment = self.get_object()
+        if (
+            not has_full_view(request, DocumentAttachment, attachment.id)
+            and not DocumentRevision.objects.filter(
+                document_id=attachment.document_id,
+                status=DocumentRevision.Status.PUBLISHED,
+                content__contains=str(attachment.id),
+            ).exists()
+        ):
+            return Response(status=status.HTTP_403_FORBIDDEN)
         if not attachment.file or not attachment.file.storage.exists(
             attachment.file.name
         ):

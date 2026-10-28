@@ -51,13 +51,25 @@ def readable_ids(user, model) -> set:
     )
 
 
-def has_full_view(request, model, obj_id) -> bool:
-    """Whether the requester sees `obj_id` beyond its revision in force; the
-    full-view id set is computed once per request."""
+def full_view_ids(request, model):
+    """IDs the requester fully sees, or None when they see every object; computed
+    once per request."""
     cache = request.__dict__.setdefault("_doc_full_view_ids", {})
     if model not in cache:
-        cache[model] = set(RoleAssignment.get_viewable_object_ids(request.user, model))
-    return obj_id in cache[model]
+        view = (getattr(request, "parser_context", None) or {}).get("view")
+        if hasattr(view, "_user_can_view_all") and view._user_can_view_all(model):
+            cache[model] = None
+        else:
+            cache[model] = set(
+                RoleAssignment.get_viewable_object_ids(request.user, model)
+            )
+    return cache[model]
+
+
+def has_full_view(request, model, obj_id) -> bool:
+    """Whether the requester sees `obj_id` beyond its revision in force."""
+    ids = full_view_ids(request, model)
+    return ids is None or obj_id in ids
 
 
 class PublishedReadMixin:

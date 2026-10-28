@@ -8,7 +8,12 @@ from knox.models import AuthToken
 from rest_framework.test import APIClient
 
 from core.startup import startup
-from doc_management.models import DocumentAttachment, DocumentRevision, ManagedDocument
+from doc_management.models import (
+    DocumentAttachment,
+    DocumentRevision,
+    ManagedDocument,
+    recompute_references,
+)
 from doc_management.serializers import ManagedDocumentWriteSerializer
 from iam.models import Folder, User, UserGroup, UserGroupCodename
 
@@ -146,6 +151,50 @@ class TestPublishedOnlyReader:
         assert resp.status_code == 200
         body = resp.json()
         assert (body["status"], body["progress"], body["source"]) == (None, None, None)
+
+    def test_status_filter_does_not_reveal_draft_default_locale(self, setup):
+        en = _document(setup["root"], "Bilingual", published=False)
+        fr = ManagedDocument.objects.create(
+            container=en.container, locale="fr", default_locale=False, name="Bilingue"
+        )
+        DocumentRevision.objects.create(document=fr, content="fr").publish()
+        client, base = setup["employee"], "/api/document-containers/"
+        assert _ids(client.get(f"{base}?status=draft")) == set()
+        assert _ids(client.get(f"{base}?source=authored")) == {
+            str(setup["charter"].container_id)
+        }
+
+    def test_images_dropped_before_publication_stay_hidden(self, setup):
+        doc = _document(setup["root"], "Illustrated", published=False)
+        kept, dropped = (
+            DocumentAttachment.objects.create(
+                document=doc, file=SimpleUploadedFile(f"{n}.png", b"\x89PNG\r\n")
+            )
+            for n in ("kept", "dropped")
+        )
+        rev = doc.revisions.first()
+        rev.content = f"![](/document-attachments/{kept.id}/file/)"
+        rev.save()
+        rev.publish()
+        client, base = setup["employee"], "/api/document-attachments"
+        assert client.get(f"{base}/{kept.id}/file/").status_code == 200
+        assert client.get(f"{base}/{dropped.id}/file/").status_code == 403
+
+    def test_references_come_from_published_content(self, setup):
+        charter, target = setup["charter"], _document(setup["root"], "Target")
+        draft = charter.revisions.get(status=DocumentRevision.Status.DRAFT)
+        draft.content = f"[see](document:{target.container_id})"
+        draft.save()
+        recompute_references(charter.container)
+        client = setup["employee"]
+        url = f"/api/document-containers/{charter.container_id}/references/"
+        assert client.get(url).json()["references"] == []
+        assert (
+            setup["hr_reader"]
+            .get(f"/api/document-containers/{target.container_id}/references/")
+            .json()["referenced_by"]
+            == []
+        )
 
     def test_cannot_change_a_published_document(self, setup):
         client, container_id = setup["employee"], setup["charter"].container_id
