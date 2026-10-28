@@ -3,7 +3,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0200_complianceassessment_filtering_labels_and_more"),
+        ("core", "0202_custom_word_template_typst"),
     ]
 
     operations = [
