@@ -1,0 +1,13 @@
+subject: "CISO Assistant: Als Gutachter hinzugefügt: ${object_type} '${object_name}'"
+body: |
+  Hallo,
+
+  Sie wurden als Gutachter für folgendes Element hinzugefügt:
+
+  - Typ: ${object_type}
+  - Name: ${object_name}
+  - Bereich: ${folder_name}
+
+  Melden Sie sich in Ihrem CISO-Assistant-Portal an, um es zu prüfen: [CISO Assistant öffnen](${ciso_assistant_url})
+
+  Vielen Dank.

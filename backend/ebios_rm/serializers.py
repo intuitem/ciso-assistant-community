@@ -1,4 +1,5 @@
 from core.serializers import (
+    AssignmentNotificationMixin,
     BaseModelSerializer,
 )
 from core.serializer_fields import FieldsRelatedField, HashSlugRelatedField
@@ -19,7 +20,12 @@ from .models import (
 from rest_framework import serializers
 
 
-class EbiosRMStudyWriteSerializer(BaseModelSerializer):
+class EbiosRMStudyWriteSerializer(AssignmentNotificationMixin, BaseModelSerializer):
+    assignment_notifications = {
+        "authors": "object_assignment",
+        "reviewers": "object_review_assignment",
+    }
+
     genericcollection = serializers.PrimaryKeyRelatedField(
         source="genericcollection_set",
         many=True,

@@ -1,0 +1,12 @@
+subject: "CISO Assistant: Uw opdracht voor '${assessment_name}' is heropend voor bewerking"
+body: |
+  Hallo,
+
+  Uw opdracht voor de volgende audit is gepauzeerd:
+
+  - Audit: ${assessment_name}
+  ${reviewer_observation}
+
+  Neem voor meer informatie contact op met het betrokken team.
+
+  Bedankt.

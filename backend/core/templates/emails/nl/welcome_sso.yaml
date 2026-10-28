@@ -1,0 +1,21 @@
+subject: "Welkom bij CISO Assistant!"
+body: |
+  <img src="https://intuitem.com/ciso-assistant.png" alt="CISO Assistant" width="200">
+
+  ## Welkom bij CISO Assistant!
+
+  **Uw alles-in-één GRC-beheerplatform**
+
+  U hebt toegang gekregen tot CISO Assistant. Maak verbinding via de onderstaande link en meld u aan met SSO:
+
+  [Verbinden met CISO Assistant](${ciso_assistant_url})
+
+  Werkt de link niet, kopieer dan de volgende URL en plak deze in uw browser:
+  ${ciso_assistant_url}
+
+  Hebt u of uw organisatie dit verzoek niet gedaan, dan kunt u deze e-mail negeren.
+
+  Meer informatie over CISO Assistant vindt u [hier](https://intuitem.com/).
+
+  Met vriendelijke groet,
+  Het CISO Assistant-team
