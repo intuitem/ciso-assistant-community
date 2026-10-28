@@ -2932,6 +2932,7 @@
 	"estonian": "Estnisch",
 	"slovak": "Slowakisch",
 	"slovenian": "Slowenisch",
+	"norwegian": "Norwegisch",
 	"unaffected": "Nicht betroffen",
 	"uniqueControl": "Eindeutige Maßnahme",
 	"uniqueControls": "Eindeutige Maßnahmen",
@@ -3047,6 +3048,7 @@
 	"visualizeButton": "Schwachstellen visualisieren",
 	"visualizeRequirements": "Alle Anforderungen über alle Audits visualisieren",
 	"vulnerabilitiesDescription": "Bekannte Schwachstellen und Schwächen",
+	"vulnerabilitySlaDescription": "Fälligkeitsdaten von Schwachstellen aus ihrem Schweregrad berechnen und anzeigen, wie nah jede an ihrer Frist ist",
 	"vulnerability": "Schwachstelle",
 	"vulnerabilityDistribution": "Schwachstellenverteilung",
 	"vulnerabilityTreemap": "Schwachstellen-Treemap",
@@ -3120,7 +3122,7 @@
 	"syncAppliedControlsMessage": "Die angewendeten Maßnahmen, die diese Referenzmaßnahme verwenden, werden mit ihr synchronisiert. Bitte beachten Sie, dass dies nicht rückgängig gemacht werden kann.",
 	"syncToAppliedControl": "Mit angewendeter Maßnahme synchronisieren",
 	"syncToReferenceControl": "Mit Referenzmaßnahme synchronisieren",
-	"vulnerabilitySlaPolicyHelpText": "Maximale Behebungsfrist in Tagen je Schweregrad festlegen. Leer lassen, um die automatische Berechnung für diesen Schweregrad zu deaktivieren. Andernfalls wird die Fälligkeit beim Anlegen einer Schwachstelle oder beim Ändern ihres Schweregrads automatisch berechnet.",
+	"vulnerabilitySlaPolicyHelpText": "Maximale Behebungsfrist in Tagen je Schweregrad festlegen. Leer lassen, um die automatische Berechnung für diesen Schweregrad zu deaktivieren. Andernfalls wird die Fälligkeit beim Anlegen einer Schwachstelle oder beim Ändern ihres Schweregrads automatisch berechnet. Um das SLA vollständig abzuschalten, deaktivieren Sie das Feature-Flag „Schwachstellen-SLA“.",
 	"slaAnchor": "SLA-Startdatum",
 	"slaAnchorHelpText": "Beginn der SLA-Frist wählen. Erkennungsdatum: Zeitpunkt der Entdeckung durch Ihre Organisation. Veröffentlichungsdatum: Zeitpunkt der öffentlichen Bekanntgabe der Sicherheitswarnung. Fehlt das Veröffentlichungsdatum, wird das Erkennungsdatum verwendet.",
 	"slaDaysHelpText": "Tage zur Behebung",
@@ -3902,8 +3904,6 @@
 	"docHtmlTemplatesDescription": "Passen Sie das HTML/CSS-Layout an, das beim Exportieren von Dokumenten in PDF verwendet wird (Deckblatt, Kopf- und Fußzeilen, Branding). Laden Sie Ihre eigene Vorlage hoch, um die integrierte Standardeinstellung zu überschreiben.",
 	"docHtmlTemplateUploadHelp": "Laden Sie eine .html-Datei (Django-Vorlagensyntax) hoch und verwenden Sie dabei dieselben Variablen wie standardmäßig. Laden Sie zunächst die Standardversion herunter, um sie als Ausgangspunkt zu verwenden.",
 	"docHtmlTemplateSyntaxHelp": "Vorlagen verwenden die von WeasyPrint gerenderte Django-Vorlagensyntax. Betten Sie CSS in ein <style>-Tag ein und verwenden Sie die folgenden Variablen, um das Layout zu erstellen.",
-	"wordTemplates": "Word-Berichtsvorlagen",
-	"wordTemplatesDescription": "Passen Sie Word-Berichtsvorlagen (.docx) an, die für die Berichtserstellung verwendet werden. Laden Sie Ihre eigenen Vorlagen hoch, um die integrierten Standardeinstellungen zu überschreiben.",
 	"uploadTemplate": "Vorlage hochladen",
 	"wordTemplateUploadHelp": "Laden Sie eine .docx-Datei mit denselben Vorlagenvariablen wie standardmäßig hoch. Laden Sie zunächst die Standardversion herunter, um sie als Ausgangspunkt zu verwenden.",
 	"downloadDefaultTemplate": "Laden Sie die Standardvorlage herunter",
@@ -4373,10 +4373,55 @@
 	"replaceWithConfirmTitle": "Bestätigen Sie den Austausch",
 	"changeSeverity": "... Schwere",
 	"batchChangeSeverity": "Schweregrad ändern",
-	"detectedAtHelpText": "Als die Sicherheitslücke entdeckt wurde. Der Standardwert ist heute. Wird als SLA-Anker verwendet, wenn die Richtlinie auf das Erkennungsdatum eingestellt ist.",
+	"detectedAtHelpText": "Als die Sicherheitslücke entdeckt wurde. Der Standardwert ist heute, sofern das SLA nicht deaktiviert ist. Wird als SLA-Anker verwendet, wenn die Richtlinie auf das Erkennungsdatum eingestellt ist.",
+	"remediatedAt": "Behebungsdatum",
+	"remediatedAtHelpText": "Wird auf den Tag gesetzt, an dem die Schwachstelle gelöst wird (gemindert, behoben, nicht ausnutzbar oder nicht betroffen), sofern Sie kein Datum eingeben. Bleibt beim erneuten Öffnen erhalten.",
+	"vulnerabilityOpenForDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Seit der Erkennung {count} Tag offen",
+				"countPlural=other": "Seit der Erkennung {count} Tage offen"
+			}
+		}
+	],
+	"vulnerabilityRemediatedInDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} Tag nach der Erkennung behoben",
+				"countPlural=other": "{count} Tage nach der Erkennung behoben"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLeft": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Noch {count} Tag",
+				"countPlural=other": "Noch {count} Tage"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} Tag überfällig",
+				"countPlural=other": "{count} Tage überfällig"
+			}
+		}
+	],
+	"excepted": "Ausgenommen",
+	"exceptionEnds": "Ausnahme endet",
 	"refreshDueDates": "SLA-Fälligkeitstermine aktualisieren",
 	"refreshDueDatesConfirm": "Dadurch werden alle Fälligkeitstermine basierend auf der aktuellen SLA-Richtlinie neu berechnet. Bestehende Fälligkeitstermine werden überschrieben. Weitermachen?",
 	"refreshDueDatesFailed": "Fälligkeitstermine konnten nicht aktualisiert werden",
+	"vulnerabilitySlaDisabledHint": "Das Schwachstellen-SLA ist in den Feature-Flags deaktiviert, daher werden keine Fälligkeitsdaten berechnet",
 	"changeTreatment": "Behandlung ändern",
 	"changeAssignee": "Beauftragten ändern",
 	"changeResult": "Ergebnis ändern",
@@ -6381,6 +6426,8 @@
 	"appliedControlNoStatus": "Maßnahme hat keinen Status",
 	"taskTemplateNoAssignee": "Aufgabe hat keine zuständige Person",
 	"taskNodeOverdue": "Das Fälligkeitsdatum der Aufgabe ist überschritten",
+	"vulnerabilityOpenWithRemediationDate": "Offene Schwachstelle hat ein Behebungsdatum",
+	"vulnerabilityResolvedWithoutRemediationDate": "Gelöste Schwachstelle hat kein Behebungsdatum",
 	"customFieldsLoadError": "Benutzerdefinierte Felder konnten nicht geladen werden. Bereich erneut auswählen oder Formular erneut öffnen.",
 	"templateAssignmentReopenedName": "Zuweisung wieder geöffnet",
 	"templateAssignmentReopenedDescription": "Wird an einen Befragten gesendet, wenn seine Audit-Zuweisung erneut zur Bearbeitung geöffnet wird",
@@ -6394,6 +6441,8 @@
 	"templateQuickFormSubmittedDescription": "Wird an einen Prüfer gesendet, wenn eine Schnellformularantwort eingereicht wird",
 	"templateSecurityExceptionAssignmentName": "Ausnahmezuweisung",
 	"templateSecurityExceptionAssignmentDescription": "Wird gesendet, wenn eine Sicherheitsausnahme zugewiesen wird",
+	"templateVulnerabilityAssignmentName": "Schwachstellenzuweisung",
+	"templateVulnerabilityAssignmentDescription": "Wird gesendet, wenn eine Schwachstelle zugewiesen wird",
 	"templateSecurityExceptionExpiringSoonName": "Ausnahme läuft bald ab",
 	"templateSecurityExceptionExpiringSoonDescription": "Wird gesendet, wenn Sicherheitsausnahmen bald ablaufen",
 	"templateSecurityExceptionStatusChangedName": "Ausnahmestatus geändert",
@@ -6421,6 +6470,7 @@
 	"notificationTitleQuickFormSubmitted": "Schnellformular „{response_name}“ wartet auf Ihre Prüfung",
 	"notificationTitleRiskScenarioAssignment": "Ihnen wurde das Risikoszenario „{scenario_name}“ zugewiesen",
 	"notificationTitleSecurityExceptionAssignment": "Ihnen wurde die Ausnahme „{exception_name}“ zugewiesen",
+	"notificationTitleVulnerabilityAssignment": "Ihnen wurde die Schwachstelle „{vulnerability_name}“ zugewiesen",
 	"notificationTitleSecurityExceptionExpiringSoon": "Die Ausnahme „{exception_name}“ läuft in {days_remaining} Tag(en) ab.",
 	"notificationTitleSecurityExceptionStatusChanged": "Ausnahme „{exception_name}“ hat nun den Status {new_status}",
 	"notificationTitleTaskNodeDueSoon": "Aufgabe „{task_name}“ ist in {days_remaining} Tag(en) fällig",
