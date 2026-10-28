@@ -1981,12 +1981,58 @@
 	"syncAppliedControlsMessage": "Bu referans kontrolü kullanan uygulanan kontroller onunla senkronize edilecektir. Lütfen bunun geri alınamayacağını unutmayın.",
 	"syncToAppliedControl": "Uygulanan kontrol ile senkronize et",
 	"syncToReferenceControl": "Referans kontrol ile senkronize et",
-	"vulnerabilitySlaPolicyHelpText": "Bir güvenlik açığını ciddiyetine göre düzeltmek için izin verilen maksimum gün sayısını tanımlayın.",
+	"vulnerabilitySlaPolicyHelpText": "Bir güvenlik açığını ciddiyetine göre düzeltmek için izin verilen maksimum gün sayısını tanımlayın. SLA'yı tamamen kapatmak için Güvenlik açığı SLA özellik bayrağını devre dışı bırakın.",
 	"slaAnchor": "SLA başlangıç tarihi",
 	"slaAnchorHelpText": "SLA'nın ne zaman başlayacağını seçin.",
 	"slaDaysHelpText": "Düzeltme için gün sayısı",
 	"resetToDefaults": "Varsayılana sıfırla",
+	"vulnerabilitySlaDisabledHint": "Zafiyet SLA'sı özellik bayraklarında kapalı olduğundan son tarihler hesaplanmıyor",
 	"detectedAt": "Tespit tarihi",
+	"detectedAtHelpText": "Zafiyetin keşfedildiği zaman. SLA kapalı değilse varsayılan olarak bugündür. Politika tespit tarihine ayarlandığında SLA başlangıç noktası olarak kullanılır.",
+	"remediatedAt": "Giderme tarihi",
+	"remediatedAtHelpText": "Zafiyetin çözüldüğü güne (hafifletilmiş, düzeltilmiş, istismar edilemez veya etkilenmemiş) ayarlanır; bir tarih girerseniz o kullanılır. Yeniden açıldığında korunur.",
+	"vulnerabilityOpenForDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Tespitten bu yana {count} gündür açık",
+				"countPlural=other": "Tespitten bu yana {count} gündür açık"
+			}
+		}
+	],
+	"vulnerabilityRemediatedInDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Tespitten {count} gün sonra giderildi",
+				"countPlural=other": "Tespitten {count} gün sonra giderildi"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLeft": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} gün kaldı",
+				"countPlural=other": "{count} gün kaldı"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} gün gecikti",
+				"countPlural=other": "{count} gün gecikti"
+			}
+		}
+	],
+	"excepted": "İstisna kapsamında",
+	"exceptionEnds": "İstisna bitişi",
 	"publishedDate": "Yayın tarihi",
 	"vulnerabilitySlaPolicy": "Güvenlik açığı SLA",
 	"secIntelFeeds": "Güvenlik açığı akışları",
@@ -2435,7 +2481,10 @@
 	"templateSaved": "Şablon başarıyla kaydedildi",
 	"templateReset": "Şablon varsayılana sıfırlandı",
 	"confirmResetTemplate": "Bu şablonu varsayılana sıfırlamak istediğinizden emin misiniz? Özelleştirmeniz kaybolacaktır.",
+	"templateVulnerabilityAssignmentName": "Zafiyet ataması",
+	"templateVulnerabilityAssignmentDescription": "Bir zafiyet atandığında gönderilir",
 	"readAt": "Okunma zamanı",
+	"notificationTitleVulnerabilityAssignment": "'{vulnerability_name}' zafiyetine atandınız",
 	"notification": "Bildirim",
 	"notifications": "Bildirimler",
 	"read": "Okundu",
@@ -2631,6 +2680,7 @@
 	"events": "Olaylar",
 	"reports": "Raporlar",
 	"annualExpense": "Yıllık gider",
+	"vulnerabilitySlaDescription": "Zafiyetlerin son tarihlerini önem derecelerine göre hesapla ve her birinin son tarihine ne kadar yakın olduğunu göster",
 	"targetDomains": "Hedef etki alanları",
 	"vulnerability": "Zafiyet",
 	"sla": "SLA",
@@ -2739,5 +2789,7 @@
 	"dpiaRequiredNo": "DPIA gerekmez",
 	"dpiaRequirementChange": "DPIA gerekliliği değişikliği",
 	"dpiaRequirementChanges": "DPIA gerekliliği geçmişi",
-	"previously": "Önceden"
+	"previously": "Önceden",
+	"vulnerabilityOpenWithRemediationDate": "Açık zafiyetin giderme tarihi var",
+	"vulnerabilityResolvedWithoutRemediationDate": "Çözülmüş zafiyetin giderme tarihi yok"
 }

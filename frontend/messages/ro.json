@@ -1220,12 +1220,62 @@
 	"syncToAppliedControl": "Sincronizează cu controlul aplicat",
 	"syncToReferenceControl": "Sincronizează cu controlul de referință",
 	"expirationDate": "Data expirării",
-	"vulnerabilitySlaPolicyHelpText": "Definiți numărul maxim de zile pentru remedierea unei vulnerabilități în funcție de severitate.",
+	"vulnerabilitySlaPolicyHelpText": "Definiți numărul maxim de zile pentru remedierea unei vulnerabilități în funcție de severitate. Pentru a opri complet SLA-ul, dezactivați indicatorul de funcționalitate SLA vulnerabilități.",
 	"slaAnchor": "Data de început SLA",
 	"slaAnchorHelpText": "Alegeți când începe SLA.",
 	"slaDaysHelpText": "Zile pentru remediere",
 	"resetToDefaults": "Resetare",
+	"vulnerabilitySlaDisabledHint": "SLA-ul pentru vulnerabilități este dezactivat în indicatorii de funcționalități, așa că datele scadenței nu sunt calculate",
 	"detectedAt": "Data detectării",
+	"detectedAtHelpText": "Când a fost descoperită vulnerabilitatea. Implicit astăzi, cu excepția cazului în care SLA-ul este dezactivat. Folosită ca punct de referință pentru SLA când politica este setată pe data detectării.",
+	"remediatedAt": "Data remedierii",
+	"remediatedAtHelpText": "Se setează la ziua în care vulnerabilitatea este rezolvată (atenuată, remediată, neexploatabilă sau neafectată), dacă nu introduceți una. Se păstrează la redeschidere.",
+	"vulnerabilityOpenForDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Deschisă de {count} zi de la detectare",
+				"countPlural=few": "Deschisă de {count} zile de la detectare",
+				"countPlural=other": "Deschisă de {count} de zile de la detectare"
+			}
+		}
+	],
+	"vulnerabilityRemediatedInDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Remediată la {count} zi după detectare",
+				"countPlural=few": "Remediată la {count} zile după detectare",
+				"countPlural=other": "Remediată la {count} de zile după detectare"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLeft": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "A mai rămas {count} zi",
+				"countPlural=few": "Au mai rămas {count} zile",
+				"countPlural=other": "Au mai rămas {count} de zile"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} zi de întârziere",
+				"countPlural=few": "{count} zile de întârziere",
+				"countPlural=other": "{count} de zile de întârziere"
+			}
+		}
+	],
+	"excepted": "Exceptată",
+	"exceptionEnds": "Sfârșitul excepției",
 	"publishedDate": "Data publicării",
 	"vulnerabilitySlaPolicy": "SLA vulnerabilități",
 	"secIntelFeeds": "Fluxuri vulnerabilități",
@@ -1722,7 +1772,10 @@
 	"templateSaved": "Șablon salvat cu succes",
 	"templateReset": "Șablon resetat la valorile implicite",
 	"confirmResetTemplate": "Sigur doriți să resetați acest șablon la valorile implicite? Personalizarea dvs. va fi pierdută.",
+	"templateVulnerabilityAssignmentName": "Atribuire vulnerabilitate",
+	"templateVulnerabilityAssignmentDescription": "Trimis când este atribuită o vulnerabilitate",
 	"readAt": "Citit la",
+	"notificationTitleVulnerabilityAssignment": "Vi s-a atribuit vulnerabilitatea '{vulnerability_name}'",
 	"notification": "Notificare",
 	"notifications": "Notificări",
 	"read": "Citit",
@@ -2028,6 +2081,7 @@
 	"events": "Evenimente",
 	"reports": "Rapoarte",
 	"annualExpense": "Cheltuială anuală",
+	"vulnerabilitySlaDescription": "Calculează datele scadenței vulnerabilităților în funcție de severitate și arată cât de aproape este fiecare de termenul său",
 	"targetDomains": "Domenii țintă",
 	"vulnerability": "Vulnerabilitate",
 	"sla": "SLA",
@@ -2136,5 +2190,7 @@
 	"dpiaRequiredNo": "DPIA nu este necesară",
 	"dpiaRequirementChange": "Modificarea cerinței DPIA",
 	"dpiaRequirementChanges": "Istoricul cerinței DPIA",
-	"previously": "Anterior"
+	"previously": "Anterior",
+	"vulnerabilityOpenWithRemediationDate": "Vulnerabilitate deschisă cu dată de remediere",
+	"vulnerabilityResolvedWithoutRemediationDate": "Vulnerabilitate rezolvată fără dată de remediere"
 }

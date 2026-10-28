@@ -1941,12 +1941,58 @@
 	"confirmModalMessagePlural": "Είστε σίγουροι; Αυτή η ενέργεια θα επηρεάσει μόνιμα τα ακόλουθα αντικείμενα",
 	"syncAppliedControlsMessage": "Οι εφαρμοσμένοι έλεγχοι που χρησιμοποιούν αυτόν τον πρότυπο έλεγχο θα συγχρονιστούν με αυτόν. Λάβετε υπόψη ότι αυτή η ενέργεια δεν μπορεί να αναιρεθεί.",
 	"syncToAppliedControl": "Συγχρονισμός συνδεδεμένων εφαρμοσμένων ελέγχων",
-	"vulnerabilitySlaPolicyHelpText": "Ορίστε τον μέγιστο αριθμό ημερών για διόρθωση ευπάθειας.",
+	"vulnerabilitySlaPolicyHelpText": "Ορίστε τον μέγιστο αριθμό ημερών για διόρθωση ευπάθειας. Για να απενεργοποιήσετε πλήρως το SLA, απενεργοποιήστε τον διακόπτη λειτουργίας «SLA ευπαθειών».",
 	"slaAnchor": "Έναρξη SLA",
 	"slaAnchorHelpText": "Επιλέξτε πότε ξεκινά το SLA.",
 	"slaDaysHelpText": "Ημέρες αποκατάστασης",
 	"resetToDefaults": "Επαναφορά",
+	"vulnerabilitySlaDisabledHint": "Το SLA ευπαθειών είναι απενεργοποιημένο στους διακόπτες λειτουργιών, οπότε οι ημερομηνίες λήξης δεν υπολογίζονται",
 	"detectedAt": "Ημερομηνία εντοπισμού",
+	"detectedAtHelpText": "Πότε εντοπίστηκε η ευπάθεια. Προεπιλογή η σημερινή ημέρα, εκτός αν το SLA είναι απενεργοποιημένο. Χρησιμοποιείται ως σημείο αναφοράς του SLA όταν η πολιτική έχει οριστεί στην ημερομηνία εντοπισμού.",
+	"remediatedAt": "Ημερομηνία αποκατάστασης",
+	"remediatedAtHelpText": "Ορίζεται στην ημέρα επίλυσης της ευπάθειας (μετριασμένη, διορθωμένη, μη εκμεταλλεύσιμη ή μη επηρεαζόμενη), εκτός αν εισαγάγετε μία. Διατηρείται όταν ανοίξει ξανά.",
+	"vulnerabilityOpenForDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Ανοιχτή για {count} ημέρα από τον εντοπισμό",
+				"countPlural=other": "Ανοιχτή για {count} ημέρες από τον εντοπισμό"
+			}
+		}
+	],
+	"vulnerabilityRemediatedInDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Αποκαταστάθηκε {count} ημέρα μετά τον εντοπισμό",
+				"countPlural=other": "Αποκαταστάθηκε {count} ημέρες μετά τον εντοπισμό"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLeft": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Απομένει {count} ημέρα",
+				"countPlural=other": "Απομένουν {count} ημέρες"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} ημέρα καθυστέρηση",
+				"countPlural=other": "{count} ημέρες καθυστέρηση"
+			}
+		}
+	],
+	"excepted": "Σε εξαίρεση",
+	"exceptionEnds": "Λήξη εξαίρεσης",
 	"publishedDate": "Ημερομηνία δημοσίευσης",
 	"vulnerabilitySlaPolicy": "SLA ευπαθειών",
 	"secIntelFeeds": "Ροές ευπαθειών",
@@ -2388,7 +2434,10 @@
 	"templateSaved": "Το πρότυπο αποθηκεύτηκε με επιτυχία",
 	"templateReset": "Το πρότυπο επαναφέρθηκε στις προεπιλογές",
 	"confirmResetTemplate": "Είστε βέβαιοι ότι θέλετε να επαναφέρετε αυτό το πρότυπο στις προεπιλογές; Η προσαρμογή σας θα χαθεί.",
+	"templateVulnerabilityAssignmentName": "Ανάθεση ευπάθειας",
+	"templateVulnerabilityAssignmentDescription": "Αποστέλλεται όταν ανατίθεται μια ευπάθεια",
 	"readAt": "Ανάγνωση στις",
+	"notificationTitleVulnerabilityAssignment": "Σας ανατέθηκε η ευπάθεια '{vulnerability_name}'",
 	"notification": "Ειδοποίηση",
 	"notifications": "Ειδοποιήσεις",
 	"read": "Αναγνωσμένο",
@@ -2589,6 +2638,7 @@
 	"events": "Συμβάντα",
 	"reports": "Αναφορές",
 	"annualExpense": "Ετήσια δαπάνη",
+	"vulnerabilitySlaDescription": "Υπολογισμός ημερομηνιών λήξης ευπαθειών βάσει σοβαρότητας και εμφάνιση του πόσο κοντά είναι η καθεμία στην προθεσμία της",
 	"targetDomains": "Τομείς-στόχοι",
 	"vulnerability": "Ευπάθεια",
 	"sla": "SLA",
@@ -2697,5 +2747,7 @@
 	"dpiaRequiredNo": "Δεν απαιτείται DPIA",
 	"dpiaRequirementChange": "Αλλαγή απαίτησης DPIA",
 	"dpiaRequirementChanges": "Ιστορικό απαίτησης DPIA",
-	"previously": "Προηγουμένως"
+	"previously": "Προηγουμένως",
+	"vulnerabilityOpenWithRemediationDate": "Ανοιχτή ευπάθεια έχει ημερομηνία αποκατάστασης",
+	"vulnerabilityResolvedWithoutRemediationDate": "Επιλυμένη ευπάθεια δεν έχει ημερομηνία αποκατάστασης"
 }

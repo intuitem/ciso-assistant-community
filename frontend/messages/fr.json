@@ -442,10 +442,55 @@
 	"anchorNaToTargetHelpText": "Lorsque cette option est activée, les exigences marquées comme Non Applicable sont incluses dans le scoring avec leurs scores remplacés par le score cible, au lieu d'être exclues.",
 	"changeSeverity": "... la gravité",
 	"batchChangeSeverity": "Modifier la gravité",
-	"detectedAtHelpText": "Date de découverte de la vulnérabilité. Aujourd'hui par défaut. Utilisée comme point d'ancrage SLA lorsque la politique est basée sur la date de détection.",
+	"detectedAtHelpText": "Date de découverte de la vulnérabilité. Aujourd'hui par défaut, sauf si le SLA est désactivé. Utilisée comme point d'ancrage SLA lorsque la politique est basée sur la date de détection.",
+	"remediatedAt": "Date de remédiation",
+	"remediatedAtHelpText": "Renseignée le jour où la vulnérabilité est résolue (atténuée, corrigée, non exploitable ou non affectée), sauf si vous en saisissez une. Conservée si elle est rouverte.",
+	"vulnerabilityOpenForDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Détectée il y a {count} jour, toujours ouverte",
+				"countPlural=other": "Détectée il y a {count} jours, toujours ouverte"
+			}
+		}
+	],
+	"vulnerabilityRemediatedInDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Remédiée {count} jour après sa détection",
+				"countPlural=other": "Remédiée {count} jours après sa détection"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLeft": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} jour restant",
+				"countPlural=other": "{count} jours restants"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} jour de retard",
+				"countPlural=other": "{count} jours de retard"
+			}
+		}
+	],
+	"excepted": "Sous exception",
+	"exceptionEnds": "Fin de l'exception",
 	"refreshDueDates": "Recalculer les échéances SLA",
 	"refreshDueDatesConfirm": "Cette action recalculera toutes les échéances selon la politique SLA en vigueur. Les échéances existantes seront écrasées. Continuer ?",
 	"refreshDueDatesFailed": "Échec du recalcul des échéances",
+	"vulnerabilitySlaDisabledHint": "Le SLA de vulnérabilité est désactivé dans les fonctionnalités : les échéances ne sont pas calculées",
 	"assessmentInReview": "Audit en revue",
 	"metricUnit": "Unité de la métrique",
 	"showInferences": "Afficher les inférences",
@@ -1255,6 +1300,8 @@
 	"appliedControlNoStatus": "La mesure appliquée n'a pas de statut",
 	"taskTemplateNoAssignee": "La tâche n'est assignée à personne",
 	"taskNodeOverdue": "L'occurrence de tâche a dépassé son échéance",
+	"vulnerabilityOpenWithRemediationDate": "Vulnérabilité ouverte avec une date de remédiation",
+	"vulnerabilityResolvedWithoutRemediationDate": "Vulnérabilité résolue sans date de remédiation",
 	"evidenceNoFile": "Aucun fichier n'a été téléchargé pour les preuves",
 	"requirementAppliedControlHelpText": "Les preuves liées aux mesures sélectionnées seront automatiquement associées à l'exigence.",
 	"requirementEvidenceHelpText": "Cet onglet vous permet d'ajouter des preuves supplémentaires à l'exigence.",
@@ -1490,6 +1537,8 @@
 	"templateQuickFormSubmittedDescription": "Envoyé à un relecteur lorsqu'une réponse de formulaire rapide est soumise",
 	"templateSecurityExceptionAssignmentName": "Attribution d'exception",
 	"templateSecurityExceptionAssignmentDescription": "Envoyé lorsqu'une exception est attribuée à un utilisateur",
+	"templateVulnerabilityAssignmentName": "Attribution de vulnérabilité",
+	"templateVulnerabilityAssignmentDescription": "Envoyé lorsqu'une vulnérabilité est attribuée",
 	"templateSecurityExceptionExpiringSoonName": "Exception expirant bientôt",
 	"templateSecurityExceptionExpiringSoonDescription": "Envoyé lorsque des exceptions sont sur le point d'expirer",
 	"templateSecurityExceptionStatusChangedName": "Statut d'exception modifié",
@@ -1517,6 +1566,7 @@
 	"notificationTitleQuickFormSubmitted": "Le formulaire « {response_name} » attend votre revue",
 	"notificationTitleRiskScenarioAssignment": "Le scénario de risque « {scenario_name} » vous a été attribué",
 	"notificationTitleSecurityExceptionAssignment": "L'exception « {exception_name} » vous a été attribuée",
+	"notificationTitleVulnerabilityAssignment": "La vulnérabilité « {vulnerability_name} » vous a été attribuée",
 	"notificationTitleSecurityExceptionExpiringSoon": "L'exception « {exception_name} » expire dans {days_remaining} jour(s)",
 	"notificationTitleSecurityExceptionStatusChanged": "L'exception « {exception_name} » est désormais {new_status}",
 	"notificationTitleTaskNodeDueSoon": "La tâche « {task_name} » est à faire dans {days_remaining} jour(s)",
@@ -4673,6 +4723,7 @@
 	"assetsDescription": "Processus et fonctions métiers (primaires), applications ou composants techniques (support)",
 	"threatsDescription": "Menaces potentielles pour votre organisation",
 	"vulnerabilitiesDescription": "Vulnérabilités et faiblesses connues",
+	"vulnerabilitySlaDescription": "Calcule l'échéance des vulnérabilités selon leur gravité et indique où chacune en est par rapport à cette échéance",
 	"riskScenariosDescription": "Registre des scénarios de risque et leurs traitements",
 	"referenceControlsDescription": "Bibliothèque de mesures de sécurité de référence",
 	"requirementMappingSetsDescription": "Correspondances entre différents référentiels et normes",
@@ -5478,7 +5529,7 @@
 	"editDashboard": "Modifier le tableau de bord",
 	"requiresChangeGlobalSettings": "Nécessite la permission de modifier les paramètres globaux.",
 	"clearDefault": "Effacer la valeur par défaut",
-	"vulnerabilitySlaPolicyHelpText": "Définir le nombre maximal de jours autorisés pour corriger une vulnérabilité en fonction de sa gravité. Laisser vide pour désactiver le calcul automatique pour ce niveau de gravité. Lorsqu'il est défini, la date d'échéance est calculée automatiquement lors de la création de la vulnérabilité ou lors d'un changement de gravité.",
+	"vulnerabilitySlaPolicyHelpText": "Définir le nombre maximal de jours autorisés pour corriger une vulnérabilité en fonction de sa gravité. Laisser vide pour désactiver le calcul automatique pour ce niveau de gravité. Lorsqu'il est défini, la date d'échéance est calculée automatiquement lors de la création de la vulnérabilité ou lors d'un changement de gravité. Pour désactiver complètement le SLA, désactivez la fonctionnalité SLA de vulnérabilité.",
 	"slaAnchor": "Date de début du SLA",
 	"slaAnchorHelpText": "Choisissez quand le délai du SLA commence. Date de détection : lorsque la vulnérabilité a été découverte par votre organisation. Date de publication : lorsque l'avis a été rendu public. Utilise la date de détection par défaut si aucune date de publication n'est disponible.",
 	"slaDaysHelpText": "Nombre de jours autorisés pour la remédiation",
