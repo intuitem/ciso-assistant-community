@@ -38,6 +38,8 @@
 			quick_form?: string;
 			// Either wiring will do; a publication carries its own form and target folder.
 			publication?: string;
+			document_types?: string[];
+			document?: string;
 		};
 	}
 
@@ -111,11 +113,21 @@
 		modalStore.trigger(modal);
 	}
 
+	const typeQuery = (types?: string[]) =>
+		types?.length ? `?${types.map((t) => `type=${encodeURIComponent(t)}`).join('&')}` : '';
+	// No ?doc=: the reader opens the default language and offers the others.
+	const navigateHref = (t: PortalItem['target']) =>
+		t.model !== 'documents'
+			? `/${t.model}`
+			: t.document
+				? `/documents/${t.document}/read`
+				: `/documents${typeQuery(t.document_types)}`;
+
 	function trigger(item: PortalItem) {
 		if (openPortalExternal(item)) return;
 		if (item.kind === 'create' && item.target.model) openCreate(item.target.model, item.title);
 		else if (item.kind === 'navigate' && item.target.model)
-			breadcrumbGoto(`/${item.target.model}`, {
+			breadcrumbGoto(navigateHref(item.target), {
 				label: URL_MODEL_MAP[item.target.model]?.localNamePlural ?? item.title,
 				breadcrumbAction: 'replace'
 			});
