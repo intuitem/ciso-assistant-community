@@ -1793,6 +1793,8 @@ class TestUserAccountFieldsVisibility:
         target.keep_local_login = True
         target.observation = "contractor, leaves in January"
         target.save()
+        # Users live in Global, which is where a custom user manager role applies.
+        assert target.folder_id == Folder.get_root_folder().id
 
         # The Auditee role holds no user permission: its view_user is ambient.
         ambient = User.objects.create_user("ambient@tests.com")
@@ -1809,10 +1811,14 @@ class TestUserAccountFieldsVisibility:
         creator = User.objects.create_user("creator@tests.com")
         UserGroup.objects.get(name="BI-UG-GUC").user_set.add(creator)
 
+        # Not a superuser: its account access comes from change_user alone.
+        manager = _make_user_manager("manager@tests.com", ["view_user", "change_user"])
+
         users = {"ambient": ambient, "reader": reader, "creator": creator}
         return SimpleNamespace(
             target=target,
             admin_client=authenticated_client,
+            admins={"superuser": authenticated_client, "manager": _client_for(manager)},
             clients={name: _client_for(user) for name, user in users.items()},
             users=users,
         )
@@ -1844,8 +1850,9 @@ class TestUserAccountFieldsVisibility:
         write = self._payloads(env.clients[viewer], env.target)[2]
         assert "user_groups" not in write and "is_local" not in write
 
-    def test_admin_gets_account_fields(self, env):
-        payloads = self._payloads(env.admin_client, env.target)
+    @pytest.mark.parametrize("admin", ["superuser", "manager"])
+    def test_admin_gets_account_fields(self, env, admin):
+        payloads = self._payloads(env.admins[admin], env.target)
         assert "is_local" in payloads[2] and "user_groups" in payloads[2]
         for payload in payloads:
             assert self.ACCOUNT_FIELDS <= set(payload)
@@ -1878,8 +1885,19 @@ class TestUserAccountFieldsVisibility:
         assert env.target.email not in {
             row["email"] for row in self._rows(env.clients[viewer].get(url))
         }
-        assert env.target.email in {
-            row["email"] for row in self._rows(env.admin_client.get(url))
+        for admin_client in env.admins.values():
+            assert env.target.email in {
+                row["email"] for row in self._rows(admin_client.get(url))
+            }
+
+    @pytest.mark.parametrize("viewer", VIEWERS)
+    def test_account_filter_matches_own_record(self, env, viewer):
+        user = env.users[viewer]
+        user.keep_local_login = True
+        user.save()
+        url = f"{reverse(API_ENDPOINT)}?keep_local_login=true"
+        assert user.email in {
+            row["email"] for row in self._rows(env.clients[viewer].get(url))
         }
 
     @pytest.mark.parametrize("viewer", VIEWERS)
