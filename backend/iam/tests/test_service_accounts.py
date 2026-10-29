@@ -514,6 +514,31 @@ class TestServiceAccountExclusions:
         assert str(new_folder.id) in folder_ids
         assert str(domain_folder.id) not in folder_ids
 
+    def test_update_tolerates_held_permissions_no_longer_selectable(
+        self, admin_client, domain_folder
+    ):
+        payload = _create_sa(admin_client, domain_folder)
+        sa = ServiceAccount.objects.get(id=payload["id"])
+        # Granted before add_actor left the catalog
+        sa.role.permissions.add(Permission.objects.get(codename="add_actor"))
+        held_ids = [
+            p["id"]
+            for p in admin_client.get(f"{SA_ENDPOINT}{sa.id}/").json()["permissions"]
+        ]
+
+        response = admin_client.patch(
+            f"{SA_ENDPOINT}{sa.id}/", {"permissions": held_ids}, format="json"
+        )
+        assert response.status_code == 200, response.content
+        assert not sa.role.permissions.filter(codename="add_actor").exists()
+
+        response = admin_client.patch(
+            f"{SA_ENDPOINT}{sa.id}/",
+            {"permissions": [Permission.objects.get(codename="add_actor").id]},
+            format="json",
+        )
+        assert response.status_code == 400
+
     def test_update_permissions_to_empty_is_allowed(self, admin_client, domain_folder):
         # Note: the root folder's default_role is deliberately left in place — service
         # accounts hold direct role assignments and no group membership, so nothing

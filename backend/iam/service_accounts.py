@@ -33,9 +33,11 @@ def get_selectable_permissions():
     )
 
 
-def _validated_permissions(permission_ids):
-    permissions = list(get_selectable_permissions().filter(id__in=permission_ids))
-    if len(permissions) != len(set(permission_ids)):
+def _validated_permissions(permission_ids, held_ids=()):
+    requested = set(permission_ids)
+    permissions = list(get_selectable_permissions().filter(id__in=requested))
+    # Held-but-no-longer-selectable ids are dropped, not rejected, so GET→PUT round-trips keep working
+    if requested - {p.id for p in permissions} - set(held_ids):
         raise ValidationError("Invalid permission selection.")
     return permissions
 
@@ -125,12 +127,12 @@ def _switch_role(service_account: ServiceAccount, new_role: Role) -> None:
 
 
 def _detach_to_dedicated_role(
-    service_account: ServiceAccount, permission_ids: list[int]
+    service_account: ServiceAccount, permission_ids: list[int], held_ids=()
 ) -> None:
     new_role = Role.objects.create(
         name=f"SA-{service_account.client_id}", folder=Folder.get_root_folder()
     )
-    new_role.permissions.set(_validated_permissions(permission_ids))
+    new_role.permissions.set(_validated_permissions(permission_ids, held_ids))
     _switch_role(service_account, new_role)
 
 
@@ -160,15 +162,17 @@ def update_service_account(
             if new_role.id != service_account.role_id:
                 _switch_role(service_account, new_role)
         elif permission_ids is not None:
+            current_ids = set(
+                service_account.role.permissions.values_list("id", flat=True)
+            )
             if service_account.role.builtin:
-                current_ids = set(
-                    service_account.role.permissions.values_list("id", flat=True)
-                )
                 if set(permission_ids) != current_ids:
-                    _detach_to_dedicated_role(service_account, permission_ids)
+                    _detach_to_dedicated_role(
+                        service_account, permission_ids, current_ids
+                    )
             else:
                 service_account.role.permissions.set(
-                    _validated_permissions(permission_ids)
+                    _validated_permissions(permission_ids, current_ids)
                 )
         role_assignment = service_account.role_assignment
         if role_assignment is not None:
