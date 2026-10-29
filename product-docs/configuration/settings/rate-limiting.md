@@ -22,12 +22,12 @@ The rate limiting settings are on the **Settings** page. The page has three fiel
 | **Max failed login attempts** | Failed logins allowed per IP address and per time window before it is banned. | 20 | 5 to 1000 |
 | **Time window size (minutes)** | Failed logins are counted per time window of this size. | 5 | 1 to 15 |
 
-## Behaviour when rate limiting is enabled
+## Behavior when rate limiting is enabled
 
 - CISO Assistant alone decides on IP-based bans, using the settings described above.
 - At most 15 attempts per account. (for every 5 minutes as we still use `allauth` for this).
 
-## Behaviour when rate limiting is disabled
+## Behavior when rate limiting is disabled
 
 - At most 90 login attempts per IP can made (for every minute).
 - At most 30 failed logins per IP can be made (for every minute)
