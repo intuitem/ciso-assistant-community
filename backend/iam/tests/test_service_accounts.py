@@ -204,6 +204,14 @@ class TestServiceAccountProvisioning:
         assert "viewFolder" in {entry["normalized_codename"] for entry in entries}
         assert not any(entry["codename"].endswith("_role") for entry in entries)
         assert not any("serviceaccount" in entry["codename"] for entry in entries)
+        assert not any(entry["codename"] == "view_flowevent" for entry in entries)
+        by_codename = {entry["codename"]: entry for entry in entries}
+        assert by_codename["view_folder"]["action_label"] == "permissionView"
+        full = by_codename["view_compliance_assessment_full"]
+        assert full["normalized_codename"] == "viewComplianceAssessmentFull"
+        assert full["action_label"] == "viewComplianceAssessmentFull"
+        normalized = [entry["normalized_codename"] for entry in entries]
+        assert len(normalized) == len(set(normalized))
 
     def test_builtin_roles_lists_selectable_permissions_only(self, admin_client):
         response = admin_client.get(f"{SA_ENDPOINT}roles/")

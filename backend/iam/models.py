@@ -77,6 +77,18 @@ IGNORED_PERMISSION_MODELS = (
     "idpgroup",
     "scimtoken",
     "serviceaccount",
+    # Internal: access is gated through the parent object, never by these permissions
+    "answerattachment",
+    "demomanifest",
+    "flowevent",
+    "producedobjectlink",
+    "quickformapplication",
+    "quickformoutcome",
+    "requirementassignmentevent",
+    "requirementnodeattachment",
+    # Stale content types of removed models
+    "cacheversion",
+    "processingnature",
 )
 
 type NativePermissionPrefix = Literal["view", "add", "change", "delete"]
