@@ -103,15 +103,17 @@
 	let cameFrom = $state<string | null>(null);
 	afterNavigate(({ from, to, type }) => {
 		const key = `assignmentBack:${to?.params?.id}`;
+		const origin =
+			type !== 'popstate' && from?.url && from.url.pathname !== to?.url.pathname
+				? from.url.pathname + from.url.search
+				: null;
 		try {
-			if (type !== 'popstate' && from?.url && from.url.pathname !== to?.url.pathname) {
-				cameFrom = from.url.pathname + from.url.search;
-				sessionStorage.setItem(key, cameFrom);
-			} else {
-				cameFrom ??= sessionStorage.getItem(key);
-			}
+			// The first origin wins, so links back here keep it.
+			const stored = sessionStorage.getItem(key);
+			if (!stored && origin) sessionStorage.setItem(key, origin);
+			cameFrom = stored ?? origin ?? cameFrom;
 		} catch {
-			// Storage unavailable: backHref falls back below.
+			cameFrom ??= origin;
 		}
 	});
 	const backHref = $derived(

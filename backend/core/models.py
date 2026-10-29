@@ -6613,6 +6613,16 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
         models.Q(link__isnull=False) & ~models.Q(link="")
     )
 
+    @classmethod
+    def current_with_content(cls):
+        """Newest revision of each evidence, kept only if it has a file or link."""
+        newest = (
+            cls.objects.filter(evidence=OuterRef("evidence"))
+            .order_by("-version")
+            .values("pk")[:1]
+        )
+        return cls.objects.filter(pk=Subquery(newest)).filter(cls.HAS_CONTENT)
+
     class Meta:
         verbose_name = _("Evidence Revision")
         verbose_name_plural = _("Evidence Revisions")
@@ -10727,11 +10737,10 @@ class ComplianceAssessment(Assessment, FilteringLabelMixin):
             )
             | models.Q(requirement_assessments__compliance_assessment=self)
         )
-        # Evidences holding at least one revision with a file or a link, resolved
-        # in a single query instead of two per evidence.
+        # Evidences whose newest revision has a file or a link, in one query.
         evidence_ids_with_content = set(
-            EvidenceRevision.objects.filter(evidence__in=evidences)
-            .filter(EvidenceRevision.HAS_CONTENT)
+            EvidenceRevision.current_with_content()
+            .filter(evidence__in=evidences)
             .values_list("evidence_id", flat=True)
         )
 

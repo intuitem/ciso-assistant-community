@@ -20399,19 +20399,10 @@ class ClassificationLevelViewSet(BaseModelViewSet):
 
 
 def _ra_ids_with_usable_evidence(ra_ids) -> set[str]:
-    # Only the newest revision is the evidence's current content.
-    newest_revision = (
-        EvidenceRevision.objects.filter(evidence=OuterRef("evidence"))
-        .order_by("-version")
-        .values("pk")[:1]
-    )
     return {
         str(ra_id)
-        for ra_id in EvidenceRevision.objects.filter(
-            evidence__requirement_assessments__in=ra_ids,
-            pk=Subquery(newest_revision),
-        )
-        .filter(EvidenceRevision.HAS_CONTENT)
+        for ra_id in EvidenceRevision.current_with_content()
+        .filter(evidence__requirement_assessments__in=ra_ids)
         .values_list("evidence__requirement_assessments", flat=True)
     }
 
