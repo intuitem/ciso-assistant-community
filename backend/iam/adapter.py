@@ -134,6 +134,9 @@ class AccountAdapter(DefaultAccountAdapter):
             if is_banned:
                 raise ImmediateHttpResponse(self._make_rate_limit_response(request))
 
+        # We still want to keep the default allauth per-account rate limiting for now (so we call it here).
+        self.pre_authenticate(request, **credentials)
+
         email = credentials.get("email")
 
         try:
@@ -151,6 +154,8 @@ class AccountAdapter(DefaultAccountAdapter):
                     "This user is not allowed to use local login."
                 )
 
+            # Prevent a successfull login from incrementing the per-account rate limit count.
+            self._rollback_login_failed_rl_usage()
             return user
         except Exception:
             # Failed login: bad credentials, invalid input or non-local user
