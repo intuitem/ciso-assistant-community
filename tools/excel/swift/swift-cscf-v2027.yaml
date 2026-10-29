@@ -4,13 +4,16 @@ urn: urn:intuitem:risk:library:swift-cscf-v2027
 locale: en
 ref_id: swift-cscf-v2027
 name: Swift Customer Security Controls Framework (CSCF) v2027 [10 July 2026] - Outline
-description: This document establishes a set of mandatory and advisory security controls
+description: 'This document establishes a set of mandatory and advisory security controls
   for the operating environment of Swift users. Mandatory security controls build
   on existing guidance and establish a security baseline for the entire user community.
   Advisory controls are optional best practices that Swift recommends each user to
   implement in the operating environment. This document must be read in conjunction
   with the [CSP FAQ](https://www2.swift.com/kb/#/tip/5021823) Knowledge Base article
   5021823 which provides additional valuable information.
+
+
+  Source: https://www2.swift.com/knowledgecentre/rest/v1/publications/cscf_dd/76.0/CSCF_v2027_20260710.pdf?logDownload=true'
 copyright: SWIFT
 version: 1
 publication_date: 2026-10-29
@@ -22,13 +25,16 @@ objects:
     ref_id: swift-cscf-v2027
     name: Swift Customer Security Controls Framework (CSCF) v2027 [10 July 2026] -
       Outline
-    description: This document establishes a set of mandatory and advisory security
+    description: 'This document establishes a set of mandatory and advisory security
       controls for the operating environment of Swift users. Mandatory security controls
       build on existing guidance and establish a security baseline for the entire
       user community. Advisory controls are optional best practices that Swift recommends
       each user to implement in the operating environment. This document must be read
       in conjunction with the [CSP FAQ](https://www2.swift.com/kb/#/tip/5021823) Knowledge
       Base article 5021823 which provides additional valuable information.
+
+
+      Source: https://www2.swift.com/knowledgecentre/rest/v1/publications/cscf_dd/76.0/CSCF_v2027_20260710.pdf?logDownload=true'
     implementation_groups_definition:
     - ref_id: A
       name: Advisory Controls
