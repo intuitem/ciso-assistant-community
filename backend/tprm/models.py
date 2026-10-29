@@ -71,6 +71,14 @@ class Tier(NameDescriptionMixin, FolderMixin):
     )
     builtin = models.BooleanField(default=False, verbose_name=_("Built-in"))
     is_visible = models.BooleanField(default=True, verbose_name=_("Is visible"))
+    # Compliance share (%) a vendor of this tier is expected to reach; a score
+    # target would be a separate field, the two are not comparable.
+    compliance_target = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        validators=[MaxValueValidator(100)],
+        verbose_name=_("Compliance target"),
+    )
     translations = models.JSONField(
         default=dict, blank=True, null=True, verbose_name=_("Translations")
     )

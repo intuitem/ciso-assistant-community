@@ -35,6 +35,7 @@ _DAY_UNITS = {
     "de": ("Tag", "Tagen"),
     "en": ("day", "days"),
     "fr": ("jour", "jours"),
+    "nl": ("dag", "dagen"),
 }
 
 _ASSIGNMENT_DECISIONS = {
@@ -52,6 +53,141 @@ _ASSIGNMENT_DECISIONS = {
         "closed": "clôturée",
         "reopened": "rouverte",
         "changes_requested": "renvoyée avec des modifications demandées",
+    },
+    "nl": {
+        "closed": "gesloten",
+        "reopened": "heropend",
+        "changes_requested": "teruggestuurd met gevraagde wijzigingen",
+    },
+}
+
+# shortcut: state labels copied from the paraglide catalogs (same keys), drop once the
+# backend can read frontend/messages.
+_STATE_LABELS = {
+    "de": {
+        "accepted": "Akzeptiert",
+        "approved": "Genehmigt",
+        "rejected": "Abgelehnt",
+        "revoked": "Widerrufen",
+        "change_requested": "Änderung angefordert",
+        "published": "Veröffentlicht",
+        "validated": "Validiert",
+    },
+    "en": {
+        "accepted": "Accepted",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "revoked": "Revoked",
+        "change_requested": "Change requested",
+        "published": "Published",
+        "validated": "Validated",
+    },
+    "fr": {
+        "accepted": "Accepté",
+        "approved": "Approuvé",
+        "rejected": "Rejeté",
+        "revoked": "Révoqué",
+        "change_requested": "Modification demandée",
+        "published": "Publiée",
+        "validated": "Validé",
+    },
+    "nl": {
+        "accepted": "Geaccepteerd",
+        "approved": "Goedgekeurd",
+        "rejected": "Afgewezen",
+        "revoked": "Ingetrokken",
+        "change_requested": "Wijziging aangevraagd",
+        "published": "Gepubliceerd",
+        "validated": "Gevalideerd",
+    },
+}
+
+# shortcut: model names copied from the paraglide catalogs (same keys), drop once the
+# backend can read frontend/messages. test_object_assignment checks they still match.
+_MODEL_LABELS = {
+    "de": {
+        "asset": "Asset",
+        "businessImpactAnalysis": "BIA",
+        "contract": "Vertrag",
+        "dataBreach": "Datenpanne",
+        "ebiosRmStudy": "EBIOS RM-Studie",
+        "documentContainer": "Dokument",
+        "entityAssessment": "Entitätsbewertung",
+        "evidence": "Nachweis",
+        "finding": "Feststellung",
+        "findingsAssessment": "Prüfmappe",
+        "metricInstance": "Messwert",
+        "organisationObjective": "Ziel",
+        "postureAssessment": "Sicherheitsstatus",
+        "processing": "Verarbeitung",
+        "quantitativeRiskScenario": "CRQ-Szenario",
+        "quantitativeRiskStudy": "CRQ-Studie",
+        "riskAssessment": "Risikobewertung",
+        "rightRequest": "Anfrage",
+        "solution": "Lösung",
+    },
+    "en": {
+        "asset": "Asset",
+        "businessImpactAnalysis": "Business Impact Analysis",
+        "contract": "Contract",
+        "dataBreach": "Data Breach",
+        "ebiosRmStudy": "EBIOS RM study",
+        "documentContainer": "Document",
+        "entityAssessment": "Entity assessment",
+        "evidence": "Evidence",
+        "finding": "Finding",
+        "findingsAssessment": "Findings binder",
+        "metricInstance": "Metric Instance",
+        "organisationObjective": "Objective",
+        "postureAssessment": "Technical posture",
+        "processing": "Processing",
+        "quantitativeRiskScenario": "CRQ scenario",
+        "quantitativeRiskStudy": "CRQ Study",
+        "riskAssessment": "Risk assessment",
+        "rightRequest": "Right Request",
+        "solution": "Solution",
+    },
+    "fr": {
+        "asset": "Actif",
+        "businessImpactAnalysis": "Bilan d'Impact sur l'Activité",
+        "contract": "Contrat",
+        "dataBreach": "Violation de données",
+        "ebiosRmStudy": "Étude EBIOS RM",
+        "documentContainer": "Document",
+        "entityAssessment": "Évaluation de l'entité",
+        "evidence": "Preuve",
+        "finding": "Constat",
+        "findingsAssessment": "Classeur de constats",
+        "metricInstance": "Instance de métrique",
+        "organisationObjective": "Objectif",
+        "postureAssessment": "Posture technique",
+        "processing": "Traitement",
+        "quantitativeRiskScenario": "CRQ - Scénario",
+        "quantitativeRiskStudy": "CRQ - Étude",
+        "riskAssessment": "Analyse de risque",
+        "rightRequest": "Exercice de droit",
+        "solution": "Solution",
+    },
+    "nl": {
+        "asset": "Middel",
+        "businessImpactAnalysis": "Bedrijfsimpactanalyse",
+        "contract": "Contract",
+        "dataBreach": "Datalek",
+        "ebiosRmStudy": "EBIOS RM-studie",
+        "documentContainer": "Document",
+        "entityAssessment": "Entiteitsbeoordeling",
+        "evidence": "Bewijs",
+        "finding": "Bevinding",
+        "findingsAssessment": "Follow-up",
+        "metricInstance": "Metriek instantie",
+        "organisationObjective": "Doelstelling",
+        "postureAssessment": "Technische staat",
+        "processing": "Verwerking",
+        "quantitativeRiskScenario": "KRB-scenario",
+        "quantitativeRiskStudy": "KRB-studie",
+        "riskAssessment": "Risicobeoordeling",
+        "rightRequest": "Verzoek",
+        "solution": "Oplossing",
     },
 }
 
@@ -74,6 +210,12 @@ _TASK_LIST_LABELS = {
         "not_set": "Non définie",
         "unknown": "Inconnue",
     },
+    "nl": {
+        "due": "Vervaldatum",
+        "status": "Status",
+        "not_set": "Niet ingesteld",
+        "unknown": "Onbekend",
+    },
 }
 
 _TASK_STATUSES = {
@@ -94,6 +236,12 @@ _TASK_STATUSES = {
         "in_progress": "En cours",
         "completed": "Terminé",
         "cancelled": "Annulé",
+    },
+    "nl": {
+        "pending": "In behandeling",
+        "in_progress": "In uitvoering",
+        "completed": "Voltooid",
+        "cancelled": "Geannuleerd",
     },
 }
 
@@ -116,6 +264,22 @@ def localize_assignment_decision(decision: str, locale: Optional[str]) -> str:
     return _ASSIGNMENT_DECISIONS[language].get(
         decision, decision.replace("_", " ").lower()
     )
+
+
+def localize_state(state: str, locale: Optional[str]) -> str:
+    """A state as the UI labels it (paraglide key == state value)."""
+    return _STATE_LABELS[_language_code(locale)].get(state, state)
+
+
+def paraglide_model_key(model) -> str:
+    """The catalog key naming *model* in the UI, matched case-insensitively against
+    the model name (EbiosRMStudy -> ebiosRmStudy)."""
+    name = model._meta.model_name
+    return next((k for k in _MODEL_LABELS["en"] if k.lower() == name), name)
+
+
+def localize_model_name(key: str, locale: Optional[str]) -> str:
+    return _MODEL_LABELS[_language_code(locale)].get(key, key)
 
 
 def get_email_preferences(email: str) -> tuple[str, str]:
@@ -162,7 +326,7 @@ def format_email_date(value, locale: Optional[str], preference: str = "auto") ->
     if preference == "mmddyyyy":
         return value.strftime("%m/%d/%Y")
 
-    # Same de/en/fr fallback as labels and templates, so an email never mixes languages.
+    # Same de/en/fr/nl fallback as labels and templates, so an email never mixes languages.
     with override(_language_code(locale)):
         if preference == "long_dmy":
             return django_date_format(value, "j F Y")
@@ -620,7 +784,7 @@ def send_templated_notification(
     """
     from .tasks import check_email_configuration, send_notification_email
 
-    if not check_email_configuration(recipient_email, []):
+    if not check_email_configuration(recipient_email):
         return False
 
     rendered = render_email_template(

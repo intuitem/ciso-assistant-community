@@ -1,0 +1,12 @@
+subject: "CISO Assistant: Verlopen beheersmaatregelen (${control_count})"
+body: |
+  Hallo,
+
+  De volgende beheersmaatregelen zijn verlopen:
+
+  ${control_list}
+
+  Deze herinnering stopt zodra de beheersmaatregel als actief is gemarkeerd of de ETA is bijgewerkt.
+  Meld u aan op uw CISO Assistant-portaal en open 'Mijn opdrachten' om direct naar uw beheersmaatregelen te gaan: [Naar CISO Assistant](${ciso_assistant_url})
+
+  Bedankt.

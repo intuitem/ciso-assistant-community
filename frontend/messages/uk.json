@@ -753,6 +753,8 @@
 	"appliedControlNoStatus": "Застосований контроль не має статусу",
 	"taskTemplateNoAssignee": "Завдання не має виконавця",
 	"taskNodeOverdue": "Термін виконання екземпляра завдання минув",
+	"vulnerabilityOpenWithRemediationDate": "Відкрита вразливість має дату усунення",
+	"vulnerabilityResolvedWithoutRemediationDate": "Вирішена вразливість не має дати усунення",
 	"evidenceNoFile": "Докази не мають завантаженого файлу",
 	"requirementAppliedControlHelpText": "Докази, пов'язані з вибраними заходами, будуть автоматично пов'язані з вимогою.",
 	"requirementEvidenceHelpText": "Ця вкладка дозволяє додавати додаткові докази до вимоги.",
@@ -1887,7 +1889,7 @@
 	"syncAppliedControlsMessage": "Застосовані контролі, що використовують цей типовий контроль, будуть синхронізовані з ним. Зверніть увагу, що цю дію неможливо скасувати.",
 	"syncToAppliedControl": "Синхронізувати із застосованим контролем",
 	"syncToReferenceControl": "Синхронізувати з типовим контролем",
-	"vulnerabilitySlaPolicyHelpText": "Визначте максимальну кількість днів для усунення вразливості залежно від її критичності.",
+	"vulnerabilitySlaPolicyHelpText": "Визначте максимальну кількість днів для усунення вразливості залежно від її критичності. Щоб повністю вимкнути SLA, вимкніть перемикач функції «SLA вразливостей».",
 	"slaAnchor": "Дата початку SLA",
 	"slaAnchorHelpText": "Виберіть коли починається SLA.",
 	"slaDaysHelpText": "Кількість днів на усунення",
@@ -2848,8 +2850,6 @@
 	"templateValidationFlowUpdatedDescription": "Надсилається, коли статус процесу погодження змінюється",
 	"templateAuditReportName": "Звіт аудиту",
 	"templateAuditReportDescription": "Word-звіт аудиту",
-	"wordTemplates": "Шаблони звітів Word",
-	"wordTemplatesDescription": "Налаштуйте шаблони звітів Word (.docx), що використовуються для генерування звітів. Завантажте власні шаблони, щоб замінити вбудовані значення за замовчуванням.",
 	"uploadTemplate": "Завантажити шаблон",
 	"wordTemplateUploadHelp": "Завантажте файл .docx з тими самими змінними шаблону, що й типовий. Спочатку завантажте типовий шаблон, щоб використати його як основу.",
 	"downloadDefaultTemplate": "Завантажити типовий шаблон",
@@ -3616,10 +3616,63 @@
 	"replaceWithConfirmTitle": "Підтвердити заміну",
 	"changeSeverity": "Змінити тяжкість",
 	"batchChangeSeverity": "Змінити серйозність",
-	"detectedAtHelpText": "Коли вразливість було виявлено. За замовчуванням — сьогодні. Використовується як прив'язка SLA, коли політика встановлена на дату виявлення.",
+	"detectedAtHelpText": "Коли вразливість було виявлено. За замовчуванням — сьогодні, якщо SLA не вимкнено. Використовується як прив'язка SLA, коли політика встановлена на дату виявлення.",
+	"remediatedAt": "Дата усунення",
+	"remediatedAtHelpText": "Встановлюється на день, коли вразливість вирішено (пом'якшено, виправлено, неможливо використати або не зачеплено), якщо ви не введете дату самі. Зберігається після повторного відкриття.",
+	"vulnerabilityOpenForDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Відкрита {count} день від виявлення",
+				"countPlural=few": "Відкрита {count} дні від виявлення",
+				"countPlural=many": "Відкрита {count} днів від виявлення",
+				"countPlural=other": "Відкрита {count} дня від виявлення"
+			}
+		}
+	],
+	"vulnerabilityRemediatedInDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Усунено через {count} день після виявлення",
+				"countPlural=few": "Усунено через {count} дні після виявлення",
+				"countPlural=many": "Усунено через {count} днів після виявлення",
+				"countPlural=other": "Усунено через {count} дня після виявлення"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLeft": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Залишився {count} день",
+				"countPlural=few": "Залишилося {count} дні",
+				"countPlural=many": "Залишилося {count} днів",
+				"countPlural=other": "Залишилося {count} дня"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} день прострочення",
+				"countPlural=few": "{count} дні прострочення",
+				"countPlural=many": "{count} днів прострочення",
+				"countPlural=other": "{count} дня прострочення"
+			}
+		}
+	],
+	"excepted": "Із винятком",
+	"exceptionEnds": "Кінець винятку",
 	"refreshDueDates": "Оновити терміни SLA",
 	"refreshDueDatesConfirm": "Це перерахує всі терміни на основі поточної політики SLA. Наявні терміни буде перезаписано. Продовжити?",
 	"refreshDueDatesFailed": "Не вдалося оновити терміни",
+	"vulnerabilitySlaDisabledHint": "SLA вразливостей вимкнено в перемикачах функцій, тому дати виконання не обчислюються",
 	"changeTreatment": "Змінити обробку",
 	"changeAssignee": "Змінити відповідального",
 	"changeResult": "Змінити результат",
@@ -5037,6 +5090,7 @@
 	"assetsDescription": "Бізнес-процеси та функції (основні), застосунки чи технічні компоненти (допоміжні)",
 	"threatsDescription": "Потенційні загрози для вашої організації",
 	"vulnerabilitiesDescription": "Відомі вразливості та слабкі місця",
+	"vulnerabilitySlaDescription": "Обчислювати дати виконання вразливостей за їхньою серйозністю та показувати, наскільки кожна близька до свого терміну",
 	"riskScenariosDescription": "Реєстр ризиків зі сценаріями та їхньою обробкою",
 	"referenceControlsDescription": "Шаблон типових заходів безпеки",
 	"requirementMappingSetsDescription": "Зіставлення між різними фреймворками та стандартами",
@@ -5713,6 +5767,7 @@
 	"removeFromGroup": "Видалити з групи",
 	"slovak": "Словацька",
 	"slovenian": "Словенська",
+	"norwegian": "Норвезька",
 	"documentContainer": "Документ",
 	"container": "Документ",
 	"templateUsed": "Шаблон",
@@ -5788,6 +5843,8 @@
 	"templateQuickFormSubmittedDescription": "Надсилається рецензенту, коли надіслано відповідь у швидкій формі",
 	"templateSecurityExceptionAssignmentName": "Призначення винятку",
 	"templateSecurityExceptionAssignmentDescription": "Надсилається, коли призначено виняток безпеки",
+	"templateVulnerabilityAssignmentName": "Призначення вразливості",
+	"templateVulnerabilityAssignmentDescription": "Надсилається, коли призначено вразливість",
 	"templateSecurityExceptionExpiringSoonName": "Термін дії винятку незабаром мине",
 	"templateSecurityExceptionExpiringSoonDescription": "Надсилається, коли термін дії винятків безпеки ось-ось мине",
 	"templateSecurityExceptionStatusChangedName": "Статус винятку змінено",
@@ -5815,6 +5872,7 @@
 	"notificationTitleQuickFormSubmitted": "Швидка форма '{response_name}' очікує на вашу перевірку",
 	"notificationTitleRiskScenarioAssignment": "Вас призначено до сценарію ризику '{scenario_name}'",
 	"notificationTitleSecurityExceptionAssignment": "Вас призначено до винятку '{exception_name}'",
+	"notificationTitleVulnerabilityAssignment": "Вас призначено до вразливості '{vulnerability_name}'",
 	"notificationTitleSecurityExceptionExpiringSoon": "Термін дії винятку '{exception_name}' спливає через {days_remaining} дн.",
 	"notificationTitleSecurityExceptionStatusChanged": "Новий статус винятку '{exception_name}': {new_status}",
 	"notificationTitleTaskNodeDueSoon": "Термін завдання '{task_name}' спливає через {days_remaining} дн.",

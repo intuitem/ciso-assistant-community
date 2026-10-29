@@ -18,7 +18,7 @@ from core.models import (
     Terminology,
 )
 from core.serializer_fields import FieldsRelatedField, HashSlugRelatedField
-from core.serializers import BaseModelSerializer
+from core.serializers import AssignmentNotificationMixin, BaseModelSerializer
 from custom_fields.serializers import CustomFieldsSerializerMixin
 from core.utils import RoleCodename, UserGroupCodename
 from iam.models import Folder, Role, RoleAssignment, UserGroup
@@ -546,7 +546,14 @@ class EntityAssessmentReadSerializer(CustomFieldsSerializerMixin, BaseModelSeria
         exclude = ["penetration", "dependency", "maturity", "trust"]
 
 
-class EntityAssessmentWriteSerializer(CustomFieldsSerializerMixin, BaseModelSerializer):
+class EntityAssessmentWriteSerializer(
+    CustomFieldsSerializerMixin, AssignmentNotificationMixin, BaseModelSerializer
+):
+    assignment_notifications = {
+        "authors": "object_assignment",
+        "reviewers": "object_review_assignment",
+    }
+
     genericcollection = serializers.PrimaryKeyRelatedField(
         source="genericcollection_set",
         many=True,
@@ -1177,7 +1184,9 @@ class SolutionReadSerializer(BaseModelSerializer):
         exclude = []
 
 
-class SolutionWriteSerializer(BaseModelSerializer):
+class SolutionWriteSerializer(AssignmentNotificationMixin, BaseModelSerializer):
+    assignment_notifications = {"owner": "object_assignment"}
+
     # The chain is handled manually in create()/update() below. Declared here
     # so that `initial_data.get("subcontracting_chain")` is the surface we
     # inspect.
@@ -1438,7 +1447,9 @@ class ContractReadSerializer(BaseModelSerializer):
         exclude = []
 
 
-class ContractWriteSerializer(BaseModelSerializer):
+class ContractWriteSerializer(AssignmentNotificationMixin, BaseModelSerializer):
+    assignment_notifications = {"owner": "object_assignment"}
+
     class Meta:
         model = Contract
         exclude = []

@@ -1,0 +1,11 @@
+subject: "CISO Assistant: Uitzondering verlopen sinds ${expired_since} ${expired_since_unit}"
+body: |
+  Hallo,
+
+  ${exception_count} uitzondering(en) zijn verlopen sinds ${expired_since} ${expired_since_unit}:
+
+  ${exception_list}
+
+  Meld u aan op uw CISO Assistant-portaal om deze uitzonderingen te controleren en bij te werken: [Naar CISO Assistant](${ciso_assistant_url})
+
+  Bedankt.

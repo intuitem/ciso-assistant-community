@@ -1,4 +1,4 @@
-from core.serializers import BaseModelSerializer
+from core.serializers import AssignmentNotificationMixin, BaseModelSerializer
 from django.db import transaction
 from django.utils.translation import gettext as _
 from rest_framework import serializers
@@ -119,7 +119,9 @@ class DataTransferReadSerializer(BaseModelSerializer):
 
 
 # Processing Serializers
-class ProcessingWriteSerializer(BaseModelSerializer):
+class ProcessingWriteSerializer(AssignmentNotificationMixin, BaseModelSerializer):
+    assignment_notifications = {"assigned_to": "object_assignment"}
+
     # Not a model field: the reason given for a DPIA requirement change, kept
     # on its history row.
     dpia_required_note = serializers.CharField(
@@ -240,7 +242,9 @@ class ProcessingReadSerializer(BaseModelSerializer):
 
 
 # RightRequest Serializers
-class RightRequestWriteSerializer(BaseModelSerializer):
+class RightRequestWriteSerializer(AssignmentNotificationMixin, BaseModelSerializer):
+    assignment_notifications = {"owner": "object_assignment"}
+
     class Meta:
         model = RightRequest
         fields = "__all__"
@@ -257,7 +261,9 @@ class RightRequestReadSerializer(BaseModelSerializer):
 
 
 # DataBreach Serializers
-class DataBreachWriteSerializer(BaseModelSerializer):
+class DataBreachWriteSerializer(AssignmentNotificationMixin, BaseModelSerializer):
+    assignment_notifications = {"assigned_to": "object_assignment"}
+
     class Meta:
         model = DataBreach
         fields = "__all__"

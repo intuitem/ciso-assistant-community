@@ -48,6 +48,7 @@
 		applied_controls: z.array(z.string()).optional().default(boundIds('applied_controls')),
 		task_templates: z.array(z.string()).optional().default(boundIds('task_templates')),
 		processings: z.array(z.string()).optional().default(boundIds('processings')),
+		reviewers: z.array(z.string()).optional().default([]),
 		filtering_labels: z.array(z.string()).optional().default([])
 	});
 	const _form = superForm(defaults(zod(schema)), {
@@ -98,6 +99,7 @@
 				'applied_controls',
 				'task_templates',
 				'processings',
+				'reviewers',
 				'filtering_labels'
 			] as const) {
 				for (const id of $form[f] ?? []) fd.append(f, id);
@@ -147,6 +149,20 @@
 		optionsLabelField="label"
 		label={m.classification()}
 		nullable
+	/>
+
+	<AutocompleteSelect
+		form={_form}
+		multiple
+		optionsEndpoint="actors?is_third_party=false"
+		optionsLabelField="str"
+		optionsInfoFields={{
+			fields: [{ field: 'type', translate: true }],
+			position: 'prefix'
+		}}
+		field="reviewers"
+		helpText={m.documentReviewersHelpText()}
+		label={m.reviewers()}
 	/>
 
 	<!-- Content source: the same document, provided three ways -->

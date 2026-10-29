@@ -1751,6 +1751,25 @@ export const VULNERABILITY_SEVERITY_FILTER: ListViewFilterConfig = {
 	}
 };
 
+// Values of Vulnerability.SLA_STATES, most urgent first.
+export const VULNERABILITY_SLA_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		options: [
+			{ label: 'overdue', value: 'overdue' },
+			{ label: 'today', value: 'today' },
+			{ label: 'caution', value: 'caution' },
+			{ label: 'onTrack', value: 'on track' },
+			{ label: 'excepted', value: 'excepted' },
+			{ label: 'resolved', value: 'resolved' }
+		],
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'sla',
+		multiple: true
+	}
+};
+
 export const SECURITY_ADVISORY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -1837,6 +1856,7 @@ export const listViewFields = {
 			'severity',
 			'sla',
 			'dueDate',
+			'owner',
 			'applied_controls',
 			'folder',
 			'labels'
@@ -1848,6 +1868,7 @@ export const listViewFields = {
 			'severity',
 			'state',
 			'due_date',
+			'owner',
 			'applied_controls',
 			'folder',
 			'filtering_labels'
@@ -1857,6 +1878,8 @@ export const listViewFields = {
 			filtering_labels: LABELS_FILTER,
 			status: VULNERABILITY_STATUS_FILTER,
 			severity: VULNERABILITY_SEVERITY_FILTER,
+			state: VULNERABILITY_SLA_FILTER,
+			owner: OWNER_FILTER,
 			assets: ASSET_FILTER,
 			security_advisories: SECURITY_ADVISORY_FILTER,
 			cwes: CWE_FILTER,

@@ -1,0 +1,16 @@
+subject: "CISO Assistant: U bent toegewezen aan '${scenario_name}'"
+body: |
+  Hallo,
+
+  U bent toegewezen aan het volgende risicoscenario:
+
+  - Naam: ${scenario_name}
+  - Beschrijving: ${scenario_description}
+  - Ref ID: ${scenario_ref_id}
+  - Risicobeoordeling: ${risk_assessment_name}
+  - Behandeling: ${scenario_treatment}
+  - Domein: ${folder_name}
+
+  Meld u aan op uw CISO Assistant-portaal om dit risicoscenario te bekijken en te beheren: [Naar CISO Assistant](${ciso_assistant_url})
+
+  Bedankt.

@@ -1,0 +1,15 @@
+subject: "CISO Assistant: You have been assigned to '${incident_name}'"
+body: |
+  Hello,
+
+  You have been assigned to the following Incident:
+
+  - Name: ${incident_name}
+  - Reference ID: ${incident_ref_id}
+  - Severity: ${incident_severity}
+  - Status: ${incident_status}
+  - Domain: ${folder_name}
+
+  Log in to your CISO Assistant portal to view and manage this incident: [Go to CISO Assistant](${ciso_assistant_url})
+
+  Thank you.
