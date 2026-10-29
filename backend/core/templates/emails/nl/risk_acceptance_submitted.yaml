@@ -1,0 +1,14 @@
+subject: "CISO Assistant: Risicoacceptatie '${acceptance_name}' wacht op uw beslissing"
+body: |
+  Hallo,
+
+  ${actor_name} heeft de volgende risicoacceptatie ter goedkeuring ingediend:
+
+  - Naam: ${acceptance_name}
+  - Risicoscenario's: ${risk_scenarios}
+  - Vervaldatum: ${expiry_date}
+  - Domein: ${folder_name}
+
+  Meld u aan op uw CISO Assistant-portaal om deze te accepteren of af te wijzen: [Naar CISO Assistant](${ciso_assistant_url})
+
+  Bedankt.
