@@ -1,0 +1,13 @@
+subject: "CISO Assistant: Assigned to you: ${object_type} '${object_name}'"
+body: |
+  Hello,
+
+  You have been assigned to the following item:
+
+  - Type: ${object_type}
+  - Name: ${object_name}
+  - Domain: ${folder_name}
+
+  Log in to your CISO Assistant portal to view it: [Go to CISO Assistant](${ciso_assistant_url})
+
+  Thank you.
