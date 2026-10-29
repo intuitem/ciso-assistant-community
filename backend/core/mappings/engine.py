@@ -32,6 +32,15 @@ LINK_FACTS: dict[tuple[str, str], frozenset[str]] = {
     ("intersect", "non_compliant"): frozenset({"some_unmet"}),
 }
 
+# Results from most to least restrictive.
+RESULT_ORDER = [
+    "non_compliant",
+    "partially_compliant",
+    "not_assessed",
+    "compliant",
+    "not_applicable",
+]
+
 
 class MappingEngine:
     def __init__(self):
@@ -413,10 +422,14 @@ class MappingEngine:
 
         # Per target: the facts its links prove (LINK_FACTS), the facts its
         # full-coverage links prove alone, and the most restrictive result of
-        # the latter, for inputs that contradict themselves.
+        # the latter, for inputs that contradict themselves. Its full-coverage
+        # and partial links, as (source urn, source assessment, own scale,
+        # copy_scores), supply its other fields after the loop.
         target_facts: defaultdict[str, set[str]] = defaultdict(set)
         full_facts: defaultdict[str, set[str]] = defaultdict(set)
         full_results: dict[str, Optional[str]] = {}
+        full_links: defaultdict[str, list[tuple]] = defaultdict(list)
+        partial_links: defaultdict[str, list[tuple]] = defaultdict(list)
 
         for mapping in requirement_mapping_set["requirement_mappings"]:
             src = mapping["source_requirement_urn"]
@@ -440,7 +453,8 @@ class MappingEngine:
                 # Scores are copied when both sides are comparable: converted
                 # into the target audit's range, or kept as-is on a requirement
                 # scale shared by source and target. Otherwise only non-score
-                # fields are copied, to avoid misrepresenting scores.
+                # fields are copied, to avoid misrepresenting scores. The
+                # mapped fields themselves are set after the loop.
                 if copy_scores:
                     # Fix 2: Use .get() for collision detection instead of
                     # defaultdict auto-creation.  An empty dict {} (from a
@@ -458,21 +472,13 @@ class MappingEngine:
                         # copying the source's would share one dict between
                         # every target of that source (hop 2 and beyond).
                         target_audit["requirement_assessments"][dst] = {
-                            k: scaled(k, v, own_scale)
+                            k: v
                             for k, v in src_assessment.items()
-                            if k != "mapping_inference"
+                            if k != "mapping_inference" and k not in self.fields_to_map
                         }
                     mapped = True
                 else:
                     target_assessment = target_audit["requirement_assessments"][dst]
-                    for field in self.fields_to_map:
-                        if field not in [
-                            "result",
-                            "score",
-                            "is_scored",
-                            "documentation_score",
-                        ]:
-                            target_assessment[field] = src_assessment.get(field)
 
                     # Merge m2m fields for collisions
                     for m2m_field in self.m2m_fields:
@@ -518,20 +524,6 @@ class MappingEngine:
                             target_assessment[m2m_field] = list(existing | new_values)
                         else:
                             target_assessment[m2m_field] = src_values
-
-                # Copy score fields (converted if needed) when comparable
-                if copy_scores:
-                    for score_field in [
-                        "score",
-                        "is_scored",
-                        "documentation_score",
-                    ]:
-                        if score_field in src_assessment:
-                            target_assessment[score_field] = scaled(
-                                score_field,
-                                src_assessment.get(score_field),
-                                own_scale,
-                            )
                 mapped = True
 
             # Fix 3: Only build mapping_inference for recognized relationships
@@ -549,11 +541,15 @@ class MappingEngine:
                 (rel, src_assessment.get("result")), frozenset()
             )
             target_facts[dst] |= link_facts
+            link = (src, src_assessment, own_scale, copy_scores)
             if rel in ("equal", "superset"):
                 full_facts[dst] |= link_facts
                 full_results[dst] = self._most_restrictive_result(
                     full_results.get(dst), src_assessment.get("result")
                 )
+                full_links[dst].append(link)
+            else:
+                partial_links[dst].append(link)
 
             mapping_set_info = {
                 k: v
@@ -682,7 +678,50 @@ class MappingEngine:
             target_assessment["result"] = result
             target_assessment["mapping_inference"]["result"] = result
 
+            # Status and observation come from the full-coverage links, scores
+            # from those whose scores are comparable, or else from the partial
+            # links whose scores are. One link supplies each group
+            # (_decisive_link), so the order of the links doesn't matter.
+            status_link = self._decisive_link(full_links[dst])
+            if status_link is not None:
+                _, src_assessment, _, _ = status_link
+                for field in ("status", "observation"):
+                    if field in src_assessment:
+                        target_assessment[field] = src_assessment[field]
+            score_link = self._decisive_link(
+                [link for link in full_links[dst] if link[3]]
+            ) or self._decisive_link([link for link in partial_links[dst] if link[3]])
+            if score_link is not None:
+                _, src_assessment, own_scale, _ = score_link
+                for field in ("score", "is_scored", "documentation_score"):
+                    if field in src_assessment:
+                        target_assessment[field] = scaled(
+                            field, src_assessment[field], own_scale
+                        )
+
         return target_audit
+
+    def _decisive_link(self, links):
+        """Returns the link that supplies a target's fields among several, the
+        same whatever their order: the most restrictive result, then the
+        lowest score, then the first source urn. None when there is none."""
+        return min(
+            links,
+            key=lambda link: (
+                self._result_rank(link[1].get("result")),
+                link[1].get("score") is None,
+                link[1].get("score") or 0,
+                link[0],
+            ),
+            default=None,
+        )
+
+    def _result_rank(self, result):
+        """Position of a result in RESULT_ORDER, unknown results last."""
+        try:
+            return RESULT_ORDER.index(result)
+        except ValueError:
+            return len(RESULT_ORDER)
 
     def _facts_contradict(self, facts):
         """Whether facts about one requirement contradict each other: all of
@@ -719,27 +758,9 @@ class MappingEngine:
             return result2
         if result2 is None:
             return result1
-
-        # Order from most to least restrictive
-        result_order = [
-            "non_compliant",
-            "partially_compliant",
-            "not_assessed",
-            "compliant",
-            "not_applicable",
-        ]
-
-        try:
-            idx1 = result_order.index(result1)
-        except ValueError:
-            idx1 = len(result_order)
-
-        try:
-            idx2 = result_order.index(result2)
-        except ValueError:
-            idx2 = len(result_order)
-
-        return result1 if idx1 < idx2 else result2
+        if self._result_rank(result1) < self._result_rank(result2):
+            return result1
+        return result2
 
     def best_mapping_inferences(
         self,

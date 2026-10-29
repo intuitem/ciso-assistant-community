@@ -444,9 +444,21 @@ RESULTS = [
 ]
 
 
+MAPPED_FIELDS = (
+    "result",
+    "status",
+    "observation",
+    "score",
+    "is_scored",
+    "documentation_score",
+)
+
+
 class TestLinkOrderIndependence:
-    def _target_result(self, links, scores_compatible=True):
-        """Map one source requirement per (relationship, result) link onto B1."""
+    def _target(self, links, scores_compatible=True, *, reverse=False):
+        """Map one source requirement per (relationship, result, fields) link
+        onto B1, fields overriding the source's defaults. reverse sends the
+        same links, with the same source requirements, in reverse order."""
         engine = _make_engine(
             frameworks={
                 "urn:fw:A": {"min_score": 0, "max_score": 100},
@@ -471,27 +483,37 @@ class TestLinkOrderIndependence:
                     "name": f"RA-src-{i}",
                     "id": f"ra-{i}-id",
                     "source_framework": {"id": "fw-a-id", "name": "Framework A"},
+                    **fields,
                 }
-                for i, (_, result) in enumerate(links)
+                for i, (_, result, fields) in enumerate(links)
             }
         )
-        rms = _rms(
-            requirement_mappings=[
-                {
-                    "source_requirement_urn": f"urn:req:A{i}",
-                    "target_requirement_urn": "urn:req:B1",
-                    "relationship": rel,
-                }
-                for i, (rel, _) in enumerate(links)
-            ]
-        )
+        requirement_mappings = [
+            {
+                "source_requirement_urn": f"urn:req:A{i}",
+                "target_requirement_urn": "urn:req:B1",
+                "relationship": rel,
+            }
+            for i, (rel, _, _) in enumerate(links)
+        ]
+        if reverse:
+            requirement_mappings.reverse()
         result = engine.map_audit_results(
-            source, rms, hop_index=1, path=["urn:fw:A", "urn:fw:B"]
+            source,
+            _rms(requirement_mappings=requirement_mappings),
+            hop_index=1,
+            path=["urn:fw:A", "urn:fw:B"],
         )
         target = result["requirement_assessments"]["urn:req:B1"]
         # The inference shown to the user always matches the result
         assert target["mapping_inference"]["result"] == target.get("result")
-        return target.get("result")
+        return target
+
+    def _target_result(self, links, scores_compatible=True):
+        """Map one source requirement per (relationship, result) link onto B1."""
+        return self._target(
+            [(rel, result, {}) for rel, result in links], scores_compatible
+        ).get("result")
 
     # What one link proves about its target, per the ADR's table
     # (documentation/architecture/decisions/mapping-inference-proven-facts.md).
@@ -598,20 +620,104 @@ class TestLinkOrderIndependence:
         assert self._target_result(links, scores_compatible) == expected
         assert self._target_result(links[::-1], scores_compatible) == expected
 
+    # From review: equal (score 90, done) + intersect (score 20, in progress)
+    # gave score 20 in both orders, and no status when the intersect link came
+    # first.
+    @pytest.mark.parametrize("reverse", [False, True])
     @pytest.mark.parametrize("scores_compatible", [True, False])
-    def test_any_pair_of_links_gives_the_same_result_in_both_orders(
-        self, scores_compatible
+    def test_full_coverage_link_supplies_scores_and_status(
+        self, scores_compatible, reverse
+    ):
+        target = self._target(
+            [
+                ("equal", "compliant", {"score": 90, "observation": "full"}),
+                (
+                    "intersect",
+                    "compliant",
+                    {"score": 20, "status": "in_progress", "observation": "part"},
+                ),
+            ],
+            scores_compatible,
+            reverse=reverse,
+        )
+        assert (target["status"], target["observation"]) == ("done", "full")
+        assert target.get("score") == (90 if scores_compatible else None)
+
+    # Among several links, the one with the most restrictive result supplies
+    # the fields, whatever the order.
+    @pytest.mark.parametrize("reverse", [False, True])
+    def test_most_restrictive_full_link_supplies_the_fields(self, reverse):
+        target = self._target(
+            [
+                ("equal", "compliant", {"score": 80, "observation": "first"}),
+                (
+                    "equal",
+                    "non_compliant",
+                    {"score": 20, "status": "in_progress", "observation": "second"},
+                ),
+            ],
+            reverse=reverse,
+        )
+        assert [target[f] for f in MAPPED_FIELDS] == [
+            "non_compliant",
+            "in_progress",
+            "second",
+            20,
+            True,
+            0,
+        ]
+
+    # Partial links supply scores only when no full-coverage link does, and
+    # never status or observation.
+    @pytest.mark.parametrize("reverse", [False, True])
+    def test_partial_links_supply_scores_only(self, reverse):
+        target = self._target(
+            [
+                ("subset", "compliant", {"score": 70}),
+                ("intersect", "compliant", {"score": 30}),
+            ],
+            reverse=reverse,
+        )
+        assert target["score"] == 30
+        assert "status" not in target and "observation" not in target
+
+    @pytest.mark.parametrize("second_score", [20, 80])
+    @pytest.mark.parametrize("scores_compatible", [True, False])
+    def test_any_pair_of_links_gives_the_same_fields_in_both_orders(
+        self, scores_compatible, second_score
     ):
         mismatches = []
         for rel1, rel2 in product(
             ("equal", "superset", "subset", "intersect"), repeat=2
         ):
             for res1, res2 in product(RESULTS, repeat=2):
-                first, second = (rel1, res1), (rel2, res2)
-                forward = self._target_result([first, second], scores_compatible)
-                backward = self._target_result([second, first], scores_compatible)
+                links = [
+                    (
+                        rel1,
+                        res1,
+                        {
+                            "score": 80,
+                            "observation": "first",
+                            "documentation_score": 70,
+                        },
+                    ),
+                    (
+                        rel2,
+                        res2,
+                        {
+                            "score": second_score,
+                            "status": "in_progress",
+                            "observation": "second",
+                            "documentation_score": 10,
+                        },
+                    ),
+                ]
+                forward = self._target(links, scores_compatible)
+                backward = self._target(links, scores_compatible, reverse=True)
+                forward = {f: forward.get(f) for f in MAPPED_FIELDS}
+                backward = {f: backward.get(f) for f in MAPPED_FIELDS}
                 if forward != backward:
-                    mismatches.append((first, second, forward, backward))
+                    mismatches.append((links, forward, backward))
         assert mismatches == []
 
 
