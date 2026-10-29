@@ -52,10 +52,9 @@ export const load: PageServerLoad = async ({ fetch }) => {
 				.catch(() => [])
 		: [];
 
-	// Can be `null` if the `ENABLE_CUSTOM_LOGIN_RATE_LIMITING` is `False` in the backend.
-	const rateLimitingSettings = await fetch(`${BASE_API_URL}/settings/rate-limiting/`)
-		.then((res) => (res.ok ? res.json() : null))
-		.catch(() => null);
+	const rateLimitingSettings = await fetch(`${BASE_API_URL}/settings/rate-limiting/`).then((res) =>
+		res.json()
+	);
 
 	const selectOptions: Record<string, any> = {};
 
@@ -132,11 +131,9 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	const secIntelFeedsForm = await superValidate(secIntelFeedsSettings, zod(SecIntelFeedsSchema), {
 		errors: false
 	});
-	const rateLimitingForm = await superValidate(
-		rateLimitingSettings ?? {},
-		zod(RateLimitingSchema),
-		{ errors: false }
-	);
+	const rateLimitingForm = await superValidate(rateLimitingSettings, zod(RateLimitingSchema), {
+		errors: false
+	});
 	const webhookEndpointCreateForm = await superValidate(zod(webhookEndpointSchema), {
 		errors: false
 	});

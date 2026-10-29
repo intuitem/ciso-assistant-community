@@ -1,12 +1,11 @@
 <script lang="ts">
+	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import NumberField from '../NumberField.svelte';
 	import { m } from '$paraglide/messages';
 	import {
 		MIN_MAX_FAILED_LOGIN_ATTEMPTS,
 		MAX_MAX_FAILED_LOGIN_ATTEMPTS,
-		MAX_TIME_WINDOW_SIZE,
-		MAX_BAN_TIME,
-		MAX_ABSOLUTE_BAN_TIME
+		MAX_TIME_WINDOW_SIZE
 	} from '$lib/utils/schemas';
 	import type { ModelInfo } from '$lib/utils/types';
 	import type { SuperForm } from 'sveltekit-superforms';
@@ -20,6 +19,12 @@
 </script>
 
 <div class="flex flex-col gap-4 max-w-md">
+	<Checkbox
+		{form}
+		field="enabled"
+		label={m.rateLimitingEnabled()}
+		helpText={m.rateLimitingEnabledHelpText()}
+	/>
 	<NumberField
 		{form}
 		field="max_failed_login_attempts"
@@ -32,19 +37,10 @@
 	<NumberField
 		{form}
 		field="time_window_size"
-		label={m.timeWindowSize()}
-		helpText={m.timeWindowSizeHelpText()}
+		label={m.observationWindowSize()}
+		helpText={m.observationWindowSizeHelpText()}
 		min={1}
 		max={MAX_TIME_WINDOW_SIZE}
-		step={1}
-	/>
-	<NumberField
-		{form}
-		field="ban_time"
-		label={m.banTime()}
-		helpText={m.banTimeHelpText({ max: MAX_ABSOLUTE_BAN_TIME })}
-		min={1}
-		max={MAX_BAN_TIME}
 		step={1}
 	/>
 </div>

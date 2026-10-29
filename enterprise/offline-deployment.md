@@ -261,6 +261,8 @@ Environment="NODE_ENV=production"
 Environment="BODY_SIZE_LIMIT=50000000"
 Environment="ORIGIN=http://localhost:3000"
 Environment="PUBLIC_BACKEND_API_URL=http://localhost:8000/api"
+Environment="HOST=127.0.0.1"
+Environment="XFF_DEPTH=1"
 ExecStart=/usr/bin/node server
 
 [Install]
@@ -270,6 +272,8 @@ WantedBy=multi-user.target
 **Important environment variables:**
 - `ORIGIN`: Must match the URL users will access in their browser. The default is `http://localhost:3000`. For production with a reverse proxy, change this to your actual domain (e.g., `https://your-domain` or `https://your-domain:8443`). Pay attention to the protocol (http/https) and port.
 - `PUBLIC_BACKEND_API_URL`: Points to the backend API. Use `http://localhost:8000/api` for internal communication between frontend and backend services.
+- `HOST`: Set to `127.0.0.1` so the frontend only accepts connections from the reverse proxy on the same host.
+- `XFF_DEPTH`: Number of reverse proxies in front of the frontend. Keep it at `1` for the examples below (one proxy). See [Configure Reverse Proxy](#configure-reverse-proxy).
 
 ### Start Services
 
@@ -291,6 +295,8 @@ sudo systemctl status ciso-assistant-frontend
 
 ### Configure Reverse Proxy
 
+The reverse proxy must add the client address to `X-Forwarded-For`. Caddy, Traefik and Apache do this by default.
+
 **Option 1: Caddy (Recommended)**
 
 Create `/etc/caddy/Caddyfile`:
@@ -298,6 +304,7 @@ Create `/etc/caddy/Caddyfile`:
 ```caddy
 your-domain {
     # Proxy API requests to backend
+    # Caddy appends the client address to X-Forwarded-For by default
     reverse_proxy /api/* 127.0.0.1:8000
 
     # Proxy all other requests to frontend (SvelteKit SSR)
@@ -366,6 +373,8 @@ Create `/etc/apache2/sites-available/ciso-assistant.conf`:
 
     # Proxy API requests to backend
     ProxyPreserveHost On
+    # Append the client address to X-Forwarded-For (this is the default, kept explicit)
+    ProxyAddHeaders On
     ProxyPass /api/ http://127.0.0.1:8000/api/
     ProxyPassReverse /api/ http://127.0.0.1:8000/api/
 

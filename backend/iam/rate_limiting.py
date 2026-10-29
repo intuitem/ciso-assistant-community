@@ -11,6 +11,7 @@ import os
 import stat
 import selectors
 import socket
+import heapq
 import fcntl
 import struct
 import time
@@ -24,9 +25,6 @@ from global_settings.models import GlobalSettings
 from global_settings.serializers import RateLimitingConfigSerializer
 
 logger = structlog.get_logger(__name__)
-
-TIME_WINDOW_UNIT: Final[int] = 60
-"""Granularity of the time window (in seconds) (for now time windows have a 1-minute time granularity)."""
 
 
 @dataclass
@@ -65,7 +63,6 @@ class Settings:
 
     max_failed_login_attempts: int = 15
     time_window_size: int = 1
-    ban_time: int = 5  # 5*60(ban_time*time_window_size*TIME_WINDOWS_UNIT) = 300 (the ban time is of 300 seconds).
 
     def replace_with(self, new_settings: Settings) -> bool:
         """Return `true` if the settings actually changed (if any value changed)."""
@@ -74,13 +71,16 @@ class Settings:
 
         self.max_failed_login_attempts = new_settings.max_failed_login_attempts
         self.time_window_size = new_settings.time_window_size
-        self.ban_time = new_settings.ban_time
         return True
 
     @staticmethod
-    def from_rate_limiting_settings(rate_limiting_settings: Optional[GlobalSettings]) -> Settings:
+    def from_rate_limiting_settings(
+        rate_limiting_settings: Optional[GlobalSettings],
+    ) -> Settings:
         if rate_limiting_settings is not None:
-            rate_limiting_config = dict(RateLimitingConfigSerializer(rate_limiting_settings).data)
+            rate_limiting_config = dict(
+                RateLimitingConfigSerializer(rate_limiting_settings).data
+            )
         else:
             rate_limiting_config = {}
 
@@ -91,9 +91,8 @@ class Settings:
         time_window_size = rate_limiting_config.get(
             "time_window_size", RateLimitingConfigSerializer.DEFAULT_TIME_WINDOW_SIZE
         )
-        ban_time = rate_limiting_config.get("ban_time", RateLimitingConfigSerializer.DEFAULT_BAN_TIME)
 
-        return Settings(max_failed_login_attempts, time_window_size, ban_time)
+        return Settings(max_failed_login_attempts, time_window_size)
 
     @staticmethod
     def create() -> Settings:
@@ -115,50 +114,6 @@ class Settings:
 
 # Defaults settings (modified by `_leader_thread` a leader thread is elected.).
 SETTINGS = Settings.from_rate_limiting_settings(None)
-
-
-@dataclass
-class BanInfo:
-    timestamp_window: int
-    fail_count: int
-    ban_until: Optional[int]
-
-    @staticmethod
-    def _get_timestamp_window() -> int:
-        return int(time.monotonic() / (TIME_WINDOW_UNIT * SETTINGS.time_window_size))
-
-    @staticmethod
-    def create():
-        timestamp_window = BanInfo._get_timestamp_window()
-        ban_info = BanInfo(timestamp_window, 0, None)
-        return ban_info
-
-    def reset(self, new_timestamp_window: int):
-        self.timestamp_window = new_timestamp_window
-        self.fail_count = 0
-        self.ban_until = None
-
-    def is_banned(self, current_timestamp_window: int) -> bool:
-        return self.ban_until is not None and self.ban_until >= current_timestamp_window
-
-    def check_is_banned(self, *, increment_fail_count: bool) -> tuple[bool, bool]:
-        """Return a tuple (`is_banned`, `is_newly_banned`)."""
-        current_timestamp_window = BanInfo._get_timestamp_window()
-
-        if self.is_banned(current_timestamp_window):
-            return True, False
-
-        elif self.timestamp_window < current_timestamp_window:
-            self.reset(current_timestamp_window)
-
-        if increment_fail_count:
-            self.fail_count += 1
-            if self.fail_count >= SETTINGS.max_failed_login_attempts:
-                self.ban_until = current_timestamp_window + SETTINGS.ban_time
-
-        is_banned = self.ban_until is not None
-        is_newly_banned = is_banned
-        return is_banned, is_newly_banned
 
 
 @dataclass(frozen=True)
@@ -373,33 +328,28 @@ class RequestRefreshSettings(Request):
 
     max_failed_login_attempts: int
     time_window_size: int
-    ban_time: int
 
     @staticmethod
     def from_settings(settings: Settings) -> RequestRefreshSettings:
         return RequestRefreshSettings(
             settings.max_failed_login_attempts,
             settings.time_window_size,
-            settings.ban_time,
         )
 
     def to_settings(self) -> Settings:
-        return Settings(
-            self.max_failed_login_attempts, self.time_window_size, self.ban_time
-        )
+        return Settings(self.max_failed_login_attempts, self.time_window_size)
 
     def _to_json_params(self) -> dict:
         return {
             "max_failed_login_attempts": self.max_failed_login_attempts,
             "time_window_size": self.time_window_size,
-            "ban_time": self.ban_time,
         }
 
     @staticmethod
     def _from_json_params(params: dict) -> Optional[RequestRefreshSettings]:
         values: list[Optional[int]] = [
             params.get(name)
-            for name in ["max_failed_login_attempts", "time_window_size", "ban_time"]
+            for name in ["max_failed_login_attempts", "time_window_size"]
         ]
 
         if not all(isinstance(value, int) for value in values):
@@ -637,7 +587,8 @@ RUNTIME_DIR: Final[Path] = Path(
 
 
 class _BanCache:
-    ENTRY_LIMIT: Final[int] = 65536
+    # TODO: Remove `ENTRY_LIMIT` references from the whole file.
+    # ENTRY_LIMIT: Final[int] = 65536
     HEALTH_CHECK_INTERVAL: Final[float] = 1.0
 
     def __init__(self):
@@ -645,8 +596,21 @@ class _BanCache:
         self._lock_file_path = runtime_dir / "leader_election.lock"
         self._socket_file_path = runtime_dir / "cache.socket"
 
-        self.ip_to_ban_info: dict[str, BanInfo] = {}
-        self.eviction_cache: dict[int, set[str]] = defaultdict(set)
+        self.banned_ips: set[str] = set()
+        """`hashmap(ip_address-str => ban_until(float))` (evicted by popping the `self.eviction_queue` min-heap)"""
+        self.ip_to_fail_count: dict[
+            str, int
+        ] = {}  # hahsmap(ip => fail_count(int)) (reset for each new window)
+        """`hahsmap(ip_address(str) => failed_login_count(int))` (all entries are flushed each time we enter a new time window)."""
+        self.eviction_queue: list[tuple[float, str]] = []
+        """min_heap(tuple[ban_until, ip])."""
+        self.current_time_window = 0
+        """Current time window (for `self.ip_to_fail_count`) (corresponds to: `time.monotonic() // (time_window_size*60)`)."""
+
+        # TODO: (Also remove the `BanInfo` class now that it's useless)
+        # TODO: REMOVE THE 2 FOLLOWING ATTRIBUTES FROM THIS CLASS:
+        # self.ip_to_ban_info: dict[str, BanInfo] = {}
+        # self.eviction_cache: dict[int, set[str]] = defaultdict(set)
         """`hashmap(time_window => set[ip_address])`"""
 
         self._lock_file_mutex = threading.Lock()
@@ -782,28 +746,20 @@ class _BanCache:
 
     def _flush_all_entries(self):
         """Flush out all the cache data (reset the cache)."""
-        self.ip_to_ban_info.clear()
-        self.eviction_cache.clear()
+        self.banned_ips.clear()
+        self.ip_to_fail_count.clear()
+        self.eviction_queue.clear()
 
-    def _clean_stale_cache_entries(self, current_timestamp_window: int):
-        timestamp_windows = list(self.eviction_cache.keys())
+    def _clean_stale_cache_entries(self):
+        current_time = time.monotonic()
 
-        for timestamp_window in timestamp_windows:
-            if timestamp_window + SETTINGS.ban_time < current_timestamp_window:
-                ip_address_set = self.eviction_cache.pop(timestamp_window)
-
-                for ip_address in ip_address_set:
-                    ban_info = self.ip_to_ban_info.get(ip_address)
-                    if ban_info is not None:
-                        if ban_info.timestamp_window < current_timestamp_window:
-                            if not ban_info.is_banned(current_timestamp_window):
-                                # Unban the IP address.
-                                self.ip_to_ban_info.pop(ip_address, None)
-                                continue
-
-                        # The IP is still banned.
-                        # (so we re-scheduled to the next window, as we don't want it to be forgotten by the eviction process).
-                        self.eviction_cache[current_timestamp_window].add(ip_address)
+        while len(self.eviction_queue) > 0:
+            ban_until, ip_address = self.eviction_queue[0]
+            if ban_until < current_time:
+                heapq.heappop(self.eviction_queue)
+                self.banned_ips.discard(ip_address)
+            else:
+                break
 
     @staticmethod
     def _normalize_ip_address(ip_address: str) -> str:
@@ -815,22 +771,6 @@ class _BanCache:
             return str(ipaddress.ip_network(f"{addr}/64", strict=False).network_address)
         return str(addr)
 
-    def _evict_one_ip_address(self):
-        ip_address_to_evict = next(iter(self.ip_to_ban_info.keys()), "")
-        self.ip_to_ban_info.pop(ip_address_to_evict, None)
-
-        eviction_cache_evictions: list[int] = []
-
-        for time_window, ip_address_set in self.eviction_cache.items():
-            if ip_address_to_evict in ip_address_set:
-                eviction_cache_evictions.append(time_window)
-
-        eviction_cache_evictions.sort()
-
-        for time_window in eviction_cache_evictions[:-1]:
-            ip_address_set = self.eviction_cache.get(time_window, set())
-            ip_address_set.discard(ip_address_to_evict)
-
     def _check_is_banned(
         self, request: RequestIsBanned | RequestRegisterFailedLogin
     ) -> tuple[bool, bool]:
@@ -840,25 +780,39 @@ class _BanCache:
         - `is_banned` is `True` if the `ip_address` of the `Request` is banned or `False` otherwise.
         - `create_audit_log` is `True` is failed login `LogEntry`(audit log) IP-ban should be created by the caller (RPC caller).
         """
-        current_timestamp_window = BanInfo._get_timestamp_window()
 
-        self._clean_stale_cache_entries(current_timestamp_window)
+        self._clean_stale_cache_entries()
+
+        current_time = time.monotonic()
+        # The time window has a 1-minute granularity.
+        time_window = SETTINGS.time_window_size * 60
+        new_time_window = current_time // time_window
+
+        if new_time_window > self.current_time_window:
+            self.ip_to_fail_count.clear()
+            self.current_time_window = new_time_window
 
         ip_address = self._normalize_ip_address(request.ip_address)
-        ban_info = self.ip_to_ban_info.get(ip_address)
 
-        if ban_info is None:
-            ban_info = BanInfo.create()
-            self.ip_to_ban_info[ip_address] = ban_info
-            self.eviction_cache[current_timestamp_window].add(ip_address)
+        is_banned = ip_address in self.banned_ips
+        is_newly_banned = False
 
-            if len(self.ip_to_ban_info) > _BanCache.ENTRY_LIMIT:
-                self._evict_one_ip_address()
+        if not is_banned:
+            fail_count = self.ip_to_fail_count.get(ip_address, 0)
+            increment_fail_count = request.METHOD == RequestMethod.REGISTER_FAILED_LOGIN
 
-        increment_fail_count = request.METHOD == RequestMethod.REGISTER_FAILED_LOGIN
-        is_banned, is_newly_banned = ban_info.check_is_banned(
-            increment_fail_count=increment_fail_count
-        )
+            if increment_fail_count:
+                fail_count += 1
+                self.ip_to_fail_count[ip_address] = fail_count
+
+            if fail_count >= SETTINGS.max_failed_login_attempts:
+                self.banned_ips.add(ip_address)
+                unban_time = (
+                    current_time + time_window
+                )  # The ban duration is of `time_window` (for now).
+                heapq.heappush(self.eviction_queue, (unban_time, ip_address))
+                is_banned = True
+                is_newly_banned = True
 
         create_audit_log = (
             is_newly_banned

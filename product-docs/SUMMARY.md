@@ -94,6 +94,7 @@
   * [Vulnerability SLA policy](configuration/settings/vulnerability-sla.md)
   * [Security intelligence feeds](configuration/settings/sec-intel-feeds.md)
   * [Allowed IP whitelist](configuration/settings/infra-config-allowed-ip.md)
+  * [Rate limiting](configuration/settings/rate-limiting.md)
   * [Branding](configuration/settings/branding.md)
   * [Custom templates](configuration/settings/custom-templates.md)
   * [API pagination](configuration/settings/api-pagination.md)

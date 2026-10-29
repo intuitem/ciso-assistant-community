@@ -14,9 +14,6 @@ from iam.models import Folder, Role, RoleAssignment, User, UserGroup
 ENABLE_INFRA_CONFIG_MANAGEMENT: Final[bool] = getattr(
     settings, "ENABLE_INFRA_CONFIG_MANAGEMENT", False
 )
-ENABLE_CUSTOM_LOGIN_RATE_LIMITING: Final[bool] = getattr(
-    settings, "ENABLE_CUSTOM_LOGIN_RATE_LIMITING", False
-)
 
 
 @dataclass(frozen=True)
@@ -255,32 +252,32 @@ NON_ADMIN_EXPECTED_RESPONSES: Final[list[ExpectedResponse]] = [
     ExpectedResponse(
         "GET",
         "/api/settings/rate-limiting/",
-        403 if ENABLE_CUSTOM_LOGIN_RATE_LIMITING else 404,
+        403,
         Reason.SENSITIVE_SETTINGS,
     ),
     # `IsGlobalAdmin` rejects non-admins before DRF checks whether the HTTP verb is allowed (hence 403 instead of 405).
     ExpectedResponse(
         "POST",
         "/api/settings/rate-limiting/",
-        403 if ENABLE_CUSTOM_LOGIN_RATE_LIMITING else 404,
+        403,
         Reason.SETTINGS_ARE_NOT_CREATABLE,
     ),
     ExpectedResponse(
         "PUT",
         "/api/settings/rate-limiting/",
-        403 if ENABLE_CUSTOM_LOGIN_RATE_LIMITING else 404,
+        403,
         Reason.NON_ADMIN_SHALL_NOT_CHANGE_SETTINGS,
     ),
     ExpectedResponse(
         "PATCH",
         "/api/settings/rate-limiting/",
-        403 if ENABLE_CUSTOM_LOGIN_RATE_LIMITING else 404,
+        403,
         Reason.NON_ADMIN_SHALL_NOT_CHANGE_SETTINGS,
     ),
     ExpectedResponse(
         "DELETE",
         "/api/settings/rate-limiting/",
-        403 if ENABLE_CUSTOM_LOGIN_RATE_LIMITING else 404,
+        403,
         Reason.SETTINGS_ARE_NOT_DELETABLE,
     ),
     ExpectedResponse("GET", "/api/settings/sso/", 403, Reason.SENSITIVE_SETTINGS),
@@ -396,33 +393,33 @@ ADMIN_OVERWRITE_EXPECTED_RESPONSES: Final[list[ExpectedResponse]] = [
     ExpectedResponse(
         "GET",
         "/api/settings/rate-limiting/",
-        200 if ENABLE_CUSTOM_LOGIN_RATE_LIMITING else 404,
+        200,
         Reason.SENSITIVE_SETTINGS,
     ),
     ExpectedResponse(
         "POST",
         "/api/settings/rate-limiting/",
-        405 if ENABLE_CUSTOM_LOGIN_RATE_LIMITING else 404,
+        405,
         Reason.SETTINGS_ARE_NOT_CREATABLE,
     ),
     ExpectedResponse(
         "PUT",
         "/api/settings/rate-limiting/",
-        200 if ENABLE_CUSTOM_LOGIN_RATE_LIMITING else 404,
+        200,
         Reason.NON_ADMIN_SHALL_NOT_CHANGE_SETTINGS,
-        data={"time_window_size": 5, "ban_time": 1, "max_failed_login_attempts": 20},
+        data={"time_window_size": 5, "max_failed_login_attempts": 20},
     ),
     ExpectedResponse(
         "PATCH",
         "/api/settings/rate-limiting/",
-        200 if ENABLE_CUSTOM_LOGIN_RATE_LIMITING else 404,
+        200,
         Reason.NON_ADMIN_SHALL_NOT_CHANGE_SETTINGS,
         data={"max_failed_login_attempts": 30},
     ),
     ExpectedResponse(
         "DELETE",
         "/api/settings/rate-limiting/",
-        405 if ENABLE_CUSTOM_LOGIN_RATE_LIMITING else 404,
+        405,
         Reason.SETTINGS_ARE_NOT_DELETABLE,
     ),
     ExpectedResponse("GET", "/api/settings/sso/", 200, Reason.SENSITIVE_SETTINGS),

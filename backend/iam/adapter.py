@@ -2,7 +2,7 @@ from urllib.parse import urlparse
 import ipaddress
 import structlog
 import time
-from typing import Optional
+from typing import Optional, cast
 
 from allauth.account.adapter import DefaultAccountAdapter
 from allauth.core.exceptions import ImmediateHttpResponse
@@ -32,81 +32,15 @@ from auditlog.cid import get_cid
 from auditlog.context import set_actor
 
 from iam.rate_limiting import get_ban_cache
+from iam.rate_limiting_allauth import is_custom_rate_limiting_enabled
 from global_settings.models import GlobalSettings
-from global_settings.serializers import InfraConfigSerializer
+from core.custom_middleware import resolve_client_ip
 
 logger = structlog.get_logger(__name__)
 
 User = get_user_model()
 
 DEFAULT_ATTRIBUTE_MAPPING_GROUPS = ["groups"]
-
-
-def parse_ip(
-    ip_address: str,
-) -> Optional[ipaddress.IPv4Address | ipaddress.IPv6Address]:
-    """
-    Parse an IP address (which may come from the `X-Forwarded-For` HTTP header).
-
-    Accepts:
-    - `1.2.3.4`, `1.2.3.4:5678`, `2001:db8::1`, `[2001:db8::1]` and `[2001:db8::1]:443`.
-    - IPv4-mapped IPv6 addresses (`::ffff:1.2.3.4`) are converted to IPv4.
-
-    Return `None` if `ip_address` is not a valid IP address.
-    """
-    ip_address = (ip_address or "").strip()
-    if ip_address.startswith("["):
-        ip_address = ip_address[1:].split("]", 1)[0]
-    elif ip_address.count(":") == 1:
-        ip_address = ip_address.split(":", 1)[0]
-
-    try:
-        parsed_ip = ipaddress.ip_address(ip_address)
-    except ValueError:
-        return
-
-    if isinstance(parsed_ip, ipaddress.IPv6Address) and parsed_ip.ipv4_mapped:
-        return parsed_ip.ipv4_mapped
-    return parsed_ip
-
-
-def is_in_network(
-    target_ip: str | ipaddress.IPv4Address | ipaddress.IPv6Address,
-    ip_network: ipaddress.IPv4Network | ipaddress.IPv6Network,
-) -> bool:
-    """Return `True` if the `target_ip` match the IP/CIDR Range in `ip_network`, return `False` otherwise."""
-    ip = target_ip if not isinstance(target_ip, str) else parse_ip(target_ip)
-    if ip is None:
-        return False
-
-    return ip_network.version == ip.version and ip in ip_network
-
-
-def resolve_client_ip(
-    request: Optional[HttpRequest], proxy_ip: Optional[ipaddress.IPv4Network | ipaddress.IPv6Network]
-) -> Optional[str]:
-    """Return the real client IP address from which the `request` originates (`None` if it can't be determined)."""
-    if request is None:
-        return
-
-    client_ip = parse_ip(request.META.get("REMOTE_ADDR", ""))
-    if client_ip is None:
-        return
-
-    def is_trusted_proxy(ip) -> bool:
-        is_proxy = (proxy_ip is not None and is_in_network(ip, proxy_ip))
-        return ip.is_loopback or is_proxy
-
-    if is_trusted_proxy(client_ip):
-        x_forwarded_ip_entry = request.headers.get("X-Forwarded-For", "").split(",")[-1]
-        x_forwarded_ip = parse_ip(x_forwarded_ip_entry)
-        if x_forwarded_ip is None:
-            # Malformed entry (nothing on its left can be trusted).
-            return str(client_ip)
-
-        return str(x_forwarded_ip)
-    else:
-        return str(client_ip)
 
 
 AUDIT_LOG_COUNT_TIME_UNIT = 86400
@@ -183,22 +117,16 @@ class AccountAdapter(DefaultAccountAdapter):
         return False
 
     def authenticate(self, request: HttpRequest, **credentials):
-        is_rate_limit_activated = getattr(settings, "ENABLE_CUSTOM_LOGIN_RATE_LIMITING", False)
-        proxy_ip = getattr(settings, "CUSTOM_RATE_LIMITING_PROXY_IP", None)
+        is_rate_limit_activated = is_custom_rate_limiting_enabled()
 
-        ip_address = resolve_client_ip(request, proxy_ip)
+        ip_address = resolve_client_ip(request)
 
-        # IPs inside the proxy network are exempt: neither ban-checked nor counted.
-        is_rate_limited = (
-            is_rate_limit_activated
-            and ip_address is not None
-            and (proxy_ip is None or not is_in_network(ip_address, proxy_ip))
-        )
+        # The rate-limiting isn't used if the `ip_address` couldn't be resolved (if it's `None`).
+        is_rate_limited = is_rate_limit_activated and ip_address is not None
 
-        # Outside the try below, otherwise `except Exception` would swallow it
         if is_rate_limited:
             try:
-                is_banned = get_ban_cache().is_banned(ip_address)
+                is_banned = get_ban_cache().is_banned(cast(str, ip_address))
             except Exception as e:
                 logger.error("Failed to to check if an IP was banned", exc_info=e)
                 is_banned = False

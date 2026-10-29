@@ -45,11 +45,9 @@
 		{#if data.mailerSettings}
 			<Tabs.Trigger value="mailer"><i class="fa-solid fa-envelope"></i> {m.mailer()}</Tabs.Trigger>
 		{/if}
-		{#if data.rateLimitingSettings}
-			<Tabs.Trigger value="rateLimiting"
-				><i class="fa-solid fa-gauge-high"></i> {m.rateLimiting()}</Tabs.Trigger
-			>
-		{/if}
+		<Tabs.Trigger value="rateLimiting"
+			><i class="fa-solid fa-gauge-high"></i> {m.rateLimiting()}</Tabs.Trigger
+		>
 		{#if page.data?.featureflags?.outgoing_webhooks}
 			<Tabs.Trigger value="webhooks"
 				><span class="flex flex-row gap-2 items-center ml-0"
@@ -98,11 +96,9 @@
 			<MailerSettings {data} />
 		</Tabs.Content>
 	{/if}
-	{#if data.rateLimitingSettings}
-		<Tabs.Content value="rateLimiting">
-			<RateLimitingSettings {data} />
-		</Tabs.Content>
-	{/if}
+	<Tabs.Content value="rateLimiting">
+		<RateLimitingSettings {data} />
+	</Tabs.Content>
 	<Tabs.Content value="secIntelFeeds">
 		<SecIntelFeedsSettings {data} />
 	</Tabs.Content>

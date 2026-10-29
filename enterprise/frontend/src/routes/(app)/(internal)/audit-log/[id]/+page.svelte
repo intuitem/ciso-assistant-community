@@ -16,7 +16,7 @@
 <main class="flex flex-col space-y-4">
 	<DetailView
 		data={detailData}
-		fields={['actor', 'action', 'object_repr', 'timestamp', 'folder']}
+		fields={['actor', 'action', 'object_repr', 'timestamp', 'folder', 'remote_addr']}
 	/>
 
 	{#if Object.keys(data.log.changes ?? {}).length > 0}

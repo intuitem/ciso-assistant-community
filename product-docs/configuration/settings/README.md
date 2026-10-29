@@ -10,6 +10,7 @@ Settings are grouped into the following categories:
 - **[Security intelligence feeds](sec-intel-feeds.md)** — switches for the optional external feeds (KEV, EPSS, NVD enrichment) and the network timeout the platform uses when reaching them.
 - **[Branding](branding.md)** _(PRO)_ — replace the default logo, favicon, and client name with your organisation's identity.
 - **[Custom templates](custom-templates.md)** _(PRO)_ — override the subject and body of system emails, and the `.docx` templates used for document exports.
+- **[Rate limiting](rate-limiting.md)** — ban IP addresses after too many failed logins, and the per-account login limit.
 
 ## Permissions
 

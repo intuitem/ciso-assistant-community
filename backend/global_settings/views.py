@@ -461,6 +461,7 @@ class SecIntelFeedsViewSet(viewsets.ModelViewSet):
         self.check_object_permissions(self.request, obj)
         return obj
 
+
 class RateLimitingConfigViewSet(viewsets.ModelViewSet):
     model = GlobalSettings
     serializer_class = RateLimitingConfigSerializer
@@ -487,6 +488,7 @@ class RateLimitingConfigViewSet(viewsets.ModelViewSet):
         )
         self.check_object_permissions(self.request, obj)
         return obj
+
 
 class InfraConfigViewSet(viewsets.ModelViewSet):
     """Singleton GET/PUT for infrastructure configuration settings (stored as a

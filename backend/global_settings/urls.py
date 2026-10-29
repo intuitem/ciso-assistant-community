@@ -46,13 +46,11 @@ settings_router.register(
     basename="sec-intel-feeds",
 )
 
-# The frontend shows the rate-limiting settings tab only when this endpoint exists.
-if getattr(settings, "ENABLE_CUSTOM_LOGIN_RATE_LIMITING", False):
-    settings_router.register(
-        r"rate-limiting",
-        RateLimitingConfigViewSet,
-        basename="rate-limiting",
-    )
+settings_router.register(
+    r"rate-limiting",
+    RateLimitingConfigViewSet,
+    basename="rate-limiting",
+)
 
 if getattr(settings, "ENABLE_CUSTOM_MAILER", False):
     settings_router.register(
