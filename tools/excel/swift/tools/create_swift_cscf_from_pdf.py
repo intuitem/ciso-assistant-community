@@ -123,13 +123,18 @@ def row_label(
     words: Iterable[tuple[float, float, float, float, str, int, int, int]],
     row_y: float,
     reference_end: float,
+    next_reference_y: float,
+    allow_column_overflow: bool,
 ) -> str:
     """Read the text in the left-most cell of a summary-table row."""
     label_words = [
         word
         for word in words
-        if row_y - 1 <= word[1] <= row_y + 2
-        and reference_end < word[0] < 354
+        # Some long principle labels wrap in the summary table.  Their second
+        # line remains in the same table row, before the next numbered entry.
+        if row_y - 1 <= word[1] < next_reference_y - 1
+        and reference_end < word[0]
+        and (allow_column_overflow or word[0] < 354)
     ]
     label = " ".join(word[4] for word in sorted(label_words, key=lambda word: word[0]))
     if not label:
@@ -183,12 +188,21 @@ def extract_summary_rows(page: pymupdf.Page) -> list[SummaryRow]:
     ]
 
     rows = []
-    for ref_id, _reference_start, reference_end, row_y in references:
+    for index, (ref_id, _reference_start, reference_end, row_y) in enumerate(references):
+        next_reference_y = (
+            references[index + 1][3] if index + 1 < len(references) else 740
+        )
         depth = 2 if "." in ref_id else 1
         rows.append(
             SummaryRow(
                 ref_id=ref_id,
-                label=row_label(words, row_y, reference_end),
+                label=row_label(
+                    words,
+                    row_y,
+                    reference_end,
+                    next_reference_y,
+                    allow_column_overflow=depth == 1,
+                ),
                 depth=depth,
                 architectures=architectures_for_row(words, row_y),
                 grey_columns=grey_columns_for_row(grey_rectangles, row_y),
@@ -384,7 +398,7 @@ def build_workbook(
     )
     for row in rows:
         if row.depth == 1:
-            measures_content.append((None, 1, row.ref_id, row.label, None, None))
+            measures_content.append((None, 1, int(row.ref_id), row.label, None, None))
         elif subsections := subsections_by_control[row.ref_id]:
             measures_content.append((None, 2, row.ref_id, None, row.label, None))
             groups = ",".join(implementation_groups(row))
