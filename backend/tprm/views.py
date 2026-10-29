@@ -1687,6 +1687,8 @@ class EntityAssessmentViewSet(ExportMixin, BaseModelViewSet):
                 "last_update": ea.updated_at.strftime("%Y-%m-%d")
                 if ea.updated_at
                 else "-",
+                # Full precision: picks a vendor's latest assessment.
+                "updated_at": ea.updated_at.isoformat() if ea.updated_at else "",
                 "conclusion": ea.conclusion if ea.conclusion else "ongoing",
                 "compliance_assessment_id": audit.id if audit else "#",
                 "reviewers": ",".join([str(re.specific) for re in ea.reviewers.all()])

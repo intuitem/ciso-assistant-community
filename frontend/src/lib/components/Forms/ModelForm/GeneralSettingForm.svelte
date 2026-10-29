@@ -801,10 +801,7 @@
 						field="llm_provider"
 						options={[
 							{ label: 'Ollama', value: 'ollama' },
-							{
-								label: 'OpenAI-compatible (LM Studio, vLLM, llama.cpp...)',
-								value: 'openai_compatible'
-							}
+							{ label: m.llmProviderOpenaiCompatible(), value: 'openai_compatible' }
 						]}
 						label={m.llmProvider()}
 						helpText={m.llmProviderHelpText()}

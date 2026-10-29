@@ -927,12 +927,10 @@ def gen_audit_context(
     # Calculate category scores
     category_scores = aggregate_category_scores(tree)
 
-    max_score = 100  # default
-    for node in tree.values():
-        if node.get("max_score") is not None:
-            max_score = node["max_score"]
-            break
-    print(category_scores)
+    max_score = next(
+        (s for s in (audit.max_score, audit.framework.max_score) if s is not None),
+        100,
+    )
 
     for key, content in tree.items():
         total = sum(result_counts[content["urn"]].values())
@@ -1397,6 +1395,8 @@ REPORT_PROFILES = {
         # Each profile has its own self-contained template per locale, so
         # customising one cannot affect the others.
         "template": "audit_report",
+        # `CustomWordTemplate.template_key` of the PRO override.
+        "override_key": "audit_posture",
         # The reader's own role still applies on top; this is the ceiling.
         "role": "auditor",
         "discloses": (),
@@ -1415,6 +1415,7 @@ REPORT_PROFILES = {
     },
     "attestation": {
         "template": "attestation",
+        "override_key": "audit_attestation",
         "role": "respondent",
         # The questionnaire deliberately withholds the auditor's verdict while the
         # respondent is answering (THIRD_PARTY_VISIBILITY marks `result` auditor-only).

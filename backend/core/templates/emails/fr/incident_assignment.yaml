@@ -1,0 +1,15 @@
+subject: "CISO Assistant: Vous avez été affecté à '${incident_name}'"
+body: |
+  Bonjour,
+
+  Vous avez été affecté à l'incident suivant :
+
+  - Nom : ${incident_name}
+  - ID : ${incident_ref_id}
+  - Sévérité : ${incident_severity}
+  - Statut : ${incident_status}
+  - Domaine : ${folder_name}
+
+  Connectez-vous à votre portail CISO Assistant pour consulter et gérer cet incident : [Accéder à CISO Assistant](${ciso_assistant_url})
+
+  Merci.

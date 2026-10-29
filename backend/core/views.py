@@ -2712,6 +2712,7 @@ class AssetFilter(GenericFilterSet):
 
 class AssetCapabilityViewSet(BaseModelViewSet):
     model = AssetCapability
+    http_method_names = ["get", "head", "options"]
     search_fields = ["name"]
 
 
@@ -8380,6 +8381,26 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
     filterset_class = RiskAcceptanceFilterSet
     search_fields = ["name", "description", "justification"]
 
+    def perform_create(self, serializer):
+        instance = super().perform_create(serializer)
+        if instance.state == "submitted":
+            self._notify_state(self.request, instance, "submitted")
+        return instance
+
+    def perform_update(self, serializer):
+        old_approver_id = serializer.instance.approver_id
+        instance = super().perform_update(serializer)
+        if instance.state == "submitted" and instance.approver_id != old_approver_id:
+            from notifications.models import Notification
+
+            Notification.objects.filter(
+                recipient_id=old_approver_id,
+                type="risk_acceptance_submitted",
+                object_id=instance.id,
+            ).delete()
+            self._notify_state(self.request, instance, "submitted")
+        return instance
+
     def _get_justification(self, request):
         raw_justification = request.data.get("justification", "")
         if not isinstance(raw_justification, str):
@@ -8424,10 +8445,44 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
 
         return Response({"results": acceptances})
 
+    @staticmethod
+    def _notify_state(request, risk_acceptance, state):
+        from .tasks import (
+            send_risk_acceptance_decided_notification,
+            send_risk_acceptance_submitted_notification,
+        )
+
+        user = request.user
+        actor_name = f"{user.first_name} {user.last_name}".strip() or user.email
+        acceptance_id = risk_acceptance.id
+        try:
+            if state == "submitted":
+                transaction.on_commit(
+                    lambda: send_risk_acceptance_submitted_notification(
+                        acceptance_id, actor_name
+                    ),
+                    robust=True,
+                )
+            else:
+                transaction.on_commit(
+                    lambda: send_risk_acceptance_decided_notification(
+                        acceptance_id, state, actor_name
+                    ),
+                    robust=True,
+                )
+        except Exception as e:
+            logger.error(
+                "Failed to queue risk acceptance notification",
+                risk_acceptance_id=acceptance_id,
+                error=e,
+            )
+
     @action(detail=True, methods=["post"], name="Submit risk acceptance")
     def submit(self, request, pk):
         if self.get_object().approver:
-            self.get_object().set_state("submitted")
+            risk_acceptance = self.get_object()
+            risk_acceptance.set_state("submitted")
+            self._notify_state(request, risk_acceptance, "submitted")
             return Response({"results": "state updated to submitted"})
         else:
             return Response(
@@ -8458,6 +8513,7 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
         risk_acceptance = self.get_object()
         risk_acceptance.justification = justification
         risk_acceptance.set_state("accepted")
+        self._notify_state(request, risk_acceptance, "accepted")
         return Response({"results": "state updated to accepted"})
 
     @action(detail=True, methods=["post"], name="Reject risk acceptance")
@@ -8478,6 +8534,7 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
         risk_acceptance = self.get_object()
         risk_acceptance.justification = justification
         risk_acceptance.set_state("rejected")
+        self._notify_state(request, risk_acceptance, "rejected")
         return Response({"results": "state updated to rejected"})
 
     @action(detail=True, methods=["post"], name="Revoke risk acceptance")
@@ -8497,6 +8554,7 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
         risk_acceptance = self.get_object()
         risk_acceptance.justification = justification
         risk_acceptance.set_state("revoked")
+        self._notify_state(request, risk_acceptance, "revoked")
         return Response({"results": "state updated to revoked"})
 
     @action(detail=False, methods=["get"], name="Get waiting risk acceptances")
@@ -13678,14 +13736,27 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
             context, audit, role, lang, profile, assessments=assessments
         )
 
-        response = HttpResponse(
-            render_pdf(
-                localized_template(REPORT_PROFILES[profile]["template"], lang),
-                payload,
-                images=images,
-            ),
-            content_type="application/pdf",
-        )
+        template = localized_template(REPORT_PROFILES[profile]["template"], lang)
+        pdf = None
+        custom = CustomWordTemplate.objects.filter(
+            template_key=REPORT_PROFILES[profile]["override_key"],
+            language=lang,
+            is_active=True,
+        ).first()
+        if custom and custom.file:
+            try:
+                with custom.file.open("rb") as f:
+                    pdf = render_pdf(template, payload, images=images, source=f.read())
+            except Exception as e:
+                logger.warning(
+                    "Custom Typst template failed, falling back to default",
+                    template_key=custom.template_key,
+                    error=e,
+                )
+        if pdf is None:
+            pdf = render_pdf(template, payload, images=images)
+
+        response = HttpResponse(pdf, content_type="application/pdf")
         safe_name = slugify(audit.name) or "audit"
         response["Content-Disposition"] = (
             f'attachment; filename="{safe_name}_{profile}.pdf"'
