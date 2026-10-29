@@ -7680,7 +7680,7 @@
 	"permissionTransition": "Change status",
 	"backup": "Back up",
 	"restore": "Restore",
-	"viewComplianceAssessmentFull": "View full auditor view",
+	"viewComplianceAssessmentFull": "See all requirements (auditor view)",
 	"viewCentralAuditlog": "View central audit log",
 	"viewObjectAudittrail": "View object audit trail",
 	"customDocHtmlTemplate": "Document template (HTML)",

@@ -205,6 +205,12 @@ class TestServiceAccountProvisioning:
         assert not any(entry["codename"].endswith("_role") for entry in entries)
         assert not any("serviceaccount" in entry["codename"] for entry in entries)
         assert not any(entry["codename"] == "view_flowevent" for entry in entries)
+        commitment = {
+            entry["codename"]
+            for entry in entries
+            if entry["content_type"]["model"] == "commitment"
+        }
+        assert commitment == {"view_commitment", "transition_commitment"}
         by_codename = {entry["codename"]: entry for entry in entries}
         assert by_codename["view_folder"]["action_label"] == "permissionView"
         full = by_codename["view_compliance_assessment_full"]

@@ -7680,7 +7680,7 @@
 	"permissionTransition": "Changer le statut",
 	"backup": "Sauvegarder",
 	"restore": "Restaurer",
-	"viewComplianceAssessmentFull": "Consulter la vue auditeur complète",
+	"viewComplianceAssessmentFull": "Voir toutes les exigences (vue auditeur)",
 	"viewCentralAuditlog": "Consulter le journal d'audit central",
 	"viewObjectAudittrail": "Consulter l'historique des objets",
 	"customDocHtmlTemplate": "Modèle de document (HTML)",

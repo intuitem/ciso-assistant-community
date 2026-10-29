@@ -9,7 +9,7 @@ from allauth.idp.oidc.models import Client
 
 from iam.models import (
     ALLOWED_PERMISSION_APPS,
-    IGNORED_PERMISSION_MODELS,
+    IGNORED_PERMISSIONS,
     Folder,
     Role,
     RoleAssignment,
@@ -27,7 +27,7 @@ def get_selectable_permissions():
     """Permissions a service account may be granted — same catalog RBAC uses."""
     return (
         Permission.objects.filter(content_type__app_label__in=ALLOWED_PERMISSION_APPS)
-        .exclude(content_type__model__in=IGNORED_PERMISSION_MODELS)
+        .exclude(IGNORED_PERMISSIONS)
         .select_related("content_type")
         .order_by("content_type__app_label", "content_type__model", "codename")
     )
