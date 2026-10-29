@@ -194,7 +194,7 @@ from core.models import (
     Team,
 )
 from core.pagination import CustomLimitOffsetPagination
-from core.serializers import ComplianceAssessmentReadSerializer
+from core.serializers import ComplianceAssessmentReadSerializer, user_admin_folder_ids
 from core.utils import (
     build_answers_dict,
     escape_excel_formula,
@@ -8581,6 +8581,18 @@ class UserFilter(GenericFilterSet):
     )
     # Add-only member pickers: drop users already in the given group.
     exclude_user_groups = df.UUIDFilter(method="filter_exclude_user_groups")
+    keep_local_login = df.BooleanFilter(method="filter_account_field")
+    expiry_date = df.DateFilter(method="filter_account_field")
+
+    def filter_account_field(self, queryset, name, value):
+        # Account fields are only serialized to the user's administrators (see
+        # USER_ACCOUNT_FIELDS); matching on them for anyone else would give the
+        # values away, so other rows never match.
+        return queryset.filter(
+            Q(folder_id__in=user_admin_folder_ids(self.request))
+            | Q(pk=self.request.user.pk),
+            **{name: value},
+        )
 
     def filter_exclude_user_groups(self, queryset, name, value):
         # Only honour the exclusion for a group the caller can actually read, so
@@ -8944,10 +8956,64 @@ class UserViewSet(BaseModelViewSet):
     """
 
     model = User
-    ordering = ["-is_active", "-is_superuser", "email", "id"]
     filterset_class = UserFilter
     search_fields = ["email", "first_name", "last_name"]
     autocomplete_fields = ["first_name", "last_name", "email", "is_active"]
+
+    # Sorting on an account field (or listing superusers first) gives its values
+    # away, so it is only offered to whoever administers every listed user.
+    DIRECTORY_ORDERING_FIELDS = [
+        "id",
+        "created_at",
+        "updated_at",
+        "folder",
+        "email",
+        "first_name",
+        "last_name",
+        "is_active",
+        "is_third_party",
+        "date_joined",
+    ]
+
+    def _administers_all_users(self) -> bool:
+        if getattr(self, "request", None) is None:
+            # Schema generation introspects the ordering without a request.
+            return True
+        if not hasattr(self, "_all_users_administered"):
+            user = self.request.user
+            self._all_users_administered = (
+                not User.objects.filter(
+                    id__in=RoleAssignment.get_viewable_object_ids(user, User)
+                )
+                .exclude(service_account__isnull=False)
+                .exclude(folder_id__in=user_admin_folder_ids(self.request))
+                .exclude(pk=user.pk)
+                .exists()
+            )
+        return self._all_users_administered
+
+    @property
+    def ordering(self):
+        if self._administers_all_users():
+            return ["-is_active", "-is_superuser", "email", "id"]
+        return ["-is_active", "email", "id"]
+
+    @property
+    def ordering_fields(self):
+        if self._administers_all_users():
+            return "__all__"
+        return self.DIRECTORY_ORDERING_FIELDS
+
+    @action(detail=True, name="Get write data")
+    def object(self, request, pk):
+        # The base action builds the serializer without context; the account
+        # fields need the request to decide what this requester may see.
+        serializer_class = self.get_serializer_class(action="update")
+        return Response(
+            serializer_class(
+                self.get_object(), context=self.get_serializer_context()
+            ).data
+        )
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get language choices")
