@@ -1,4 +1,4 @@
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 
 type Tile = { kind: string; target?: Record<string, any> };
 

@@ -1,21 +1,21 @@
 <script lang="ts">
-	import { ruleLabel } from '$lib/components/QuickForms/rule-label';
+	import { ruleLabel } from '#lib/components/QuickForms/rule-label.js';
 	import { deserialize } from '$app/forms';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import { page } from '$app/state';
 	import { tick } from 'svelte';
-	import Question from '$lib/components/Forms/Question.svelte';
-	import RatingOutcomes from '$lib/components/QuickForms/RatingOutcomes.svelte';
-	import SubjectFacts from '$lib/components/QuickForms/SubjectFacts.svelte';
-	import ProjectionCard from '$lib/components/QuickForms/ProjectionCard.svelte';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import { getToastStore } from '$lib/components/Toast/stores';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { isDark } from '$lib/utils/helpers';
-	import { m } from '$paraglide/messages';
-	import { getLocale } from '$paraglide/runtime';
-	import { canPerformActionOnObject } from '$lib/utils/access-control';
-	import { urlModelForDjangoName, localNameForDjangoName } from '$lib/utils/crud';
+	import Question from '#lib/components/Forms/Question.svelte';
+	import RatingOutcomes from '#lib/components/QuickForms/RatingOutcomes.svelte';
+	import SubjectFacts from '#lib/components/QuickForms/SubjectFacts.svelte';
+	import ProjectionCard from '#lib/components/QuickForms/ProjectionCard.svelte';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { isDark } from '#lib/utils/helpers.js';
+	import { m } from '#paraglide/messages.js';
+	import { getLocale } from '#paraglide/runtime.js';
+	import { canPerformActionOnObject } from '#lib/utils/access-control.js';
+	import { urlModelForDjangoName, localNameForDjangoName } from '#lib/utils/crud.js';
 	import type { PageData } from './$types';
 
 	// Referenceable models (core/object_references.py REFERENCEABLE) to their routes.
@@ -225,7 +225,7 @@
 					background: 'preset-filled-error-500'
 				});
 			}
-			await invalidateAll();
+			await refreshAll();
 		} finally {
 			busy = false;
 		}
@@ -254,7 +254,7 @@
 		const result: any = deserialize(await res.text());
 		const failure = actionError(result);
 		if (failure) throw new Error(failure);
-		await invalidateAll();
+		await refreshAll();
 	}
 
 	async function removeAttachment(_urn: string, attachmentId: string) {

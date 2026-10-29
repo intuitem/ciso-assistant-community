@@ -1,7 +1,7 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { getModelInfo } from '$lib/utils/crud';
-import { error, type NumericRange } from '@sveltejs/kit';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { getModelInfo } from '#lib/utils/crud.js';
 import type { RequestHandler } from './$types';
+import { errorFromBody } from '#lib/utils/errors.js';
 
 // ebios-rm is left out of URL_MODEL, so the generic [model=urlmodel] proxy never matches it.
 export const GET: RequestHandler = async ({ fetch, url }) => {
@@ -10,7 +10,7 @@ export const GET: RequestHandler = async ({ fetch, url }) => {
 
 	const res = await fetch(endpoint);
 	if (!res.ok) {
-		error(res.status as NumericRange<400, 599>, await res.json());
+		errorFromBody(res.status, await res.json());
 	}
 	return new Response(res.body, {
 		status: res.status,

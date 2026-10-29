@@ -213,7 +213,7 @@ export const navData = {
 					name: 'documents',
 					fa_icon: 'fa-solid fa-file-lines',
 					href: '/documents',
-					permissions: ['view_documentcontainer']
+					permissions: ['view_documentcontainer', 'view_published_documentcontainer']
 				},
 				{
 					name: 'calendar',

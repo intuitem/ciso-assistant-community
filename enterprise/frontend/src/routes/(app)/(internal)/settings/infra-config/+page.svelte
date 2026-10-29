@@ -1,17 +1,17 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
-	import { page } from '$app/stores';
+	import { m } from '#paraglide/messages.js';
+	import { page } from '$app/state';
 	import {
 		InfraConfigSchema,
 		isIpOrCidr,
 		normalizeIpForCompare,
 		IP_INPUT_MAXLENGTH,
 		MAX_ALLOWED_IPS
-	} from '$lib/utils/infra-config';
+	} from '#lib/utils/infra-config.js';
 	import { superForm } from 'sveltekit-superforms/client';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { getFlash } from 'sveltekit-flash-message';
-	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
+	import { getModalStore, type ModalStore } from '#lib/components/Modals/stores.js';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();

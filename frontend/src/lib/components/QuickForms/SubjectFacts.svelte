@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
 
 	// The subject's own records a page shows, read-only (backend core.quick_form_facts):
 	// live while the response is a draft, as they stood at submission after.

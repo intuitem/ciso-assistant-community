@@ -3,9 +3,10 @@ from rest_framework import serializers
 
 from core.models import Policy
 from core.serializer_fields import FieldsRelatedField
-from core.serializers import BaseModelSerializer
+from core.serializers import AssignmentNotificationMixin, BaseModelSerializer
 from iam.models import Folder, RoleAssignment
 
+from .access import has_full_view
 from .models import (
     DocumentContainer,
     DocumentRevision,
@@ -21,6 +22,7 @@ class DocumentContainerReadSerializer(BaseModelSerializer):
     task_templates = FieldsRelatedField(many=True)
     processings = FieldsRelatedField(many=True)
     assets = FieldsRelatedField(many=True)
+    reviewers = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     classification = serializers.SerializerMethodField()
     document_count = serializers.SerializerMethodField()
@@ -53,7 +55,12 @@ class DocumentContainerReadSerializer(BaseModelSerializer):
     def get_source(self, obj):
         doc = self._default_doc(obj)
         if doc and doc.current_revision_id:
-            return doc.current_revision.source
+            rev = doc.current_revision
+            if rev.status != DocumentRevision.Status.PUBLISHED and self._published_only(
+                obj
+            ):
+                return None
+            return rev.source
         return None
 
     def get_classification(self, obj):
@@ -69,7 +76,14 @@ class DocumentContainerReadSerializer(BaseModelSerializer):
             "hexcolor": lvl.hexcolor,
         }
 
+    def _published_only(self, obj):
+        request = self.context.get("request")
+        return bool(request) and not has_full_view(request, DocumentContainer, obj.id)
+
     def get_document_count(self, obj):
+        # Counts unpublished locales too, so it would reveal them.
+        if self._published_only(obj):
+            return None
         return len(obj.documents.all())
 
     def get_status(self, obj):
@@ -77,14 +91,26 @@ class DocumentContainerReadSerializer(BaseModelSerializer):
         document's current revision (falls back to any document)."""
         doc = self._default_doc(obj)
         if doc and doc.current_revision_id:
-            return doc.current_revision.status
+            status = doc.current_revision.status
+            # Published-only readers may reach a container through another locale
+            # while the default one is still a draft: never report draft state to them.
+            if status != DocumentRevision.Status.PUBLISHED and self._published_only(
+                obj
+            ):
+                return None
+            return status
         return None
 
     def get_progress(self, obj):
         """Rough completion percentage derived from the workflow status."""
         doc = self._default_doc(obj)
         if doc and doc.current_revision_id:
-            return self.STATUS_PROGRESS.get(doc.current_revision.status)
+            status = doc.current_revision.status
+            if status != DocumentRevision.Status.PUBLISHED and self._published_only(
+                obj
+            ):
+                return None
+            return self.STATUS_PROGRESS.get(status)
         return None
 
     def get_pending_revision(self, obj):
@@ -96,6 +122,9 @@ class DocumentContainerReadSerializer(BaseModelSerializer):
         a new document points current_revision at its own draft, and reporting
         it here would show the same revision twice.
         """
+        request = self.context.get("request")
+        if request and not has_full_view(request, DocumentContainer, obj.id):
+            return None
         doc = self._default_doc(obj)
         if not doc:
             return None
@@ -115,7 +144,11 @@ class DocumentContainerReadSerializer(BaseModelSerializer):
         return {"version_number": rev.version_number, "status": rev.status}
 
 
-class DocumentContainerWriteSerializer(BaseModelSerializer):
+class DocumentContainerWriteSerializer(
+    AssignmentNotificationMixin, BaseModelSerializer
+):
+    assignment_notifications = {"reviewers": "object_review_assignment"}
+
     class Meta:
         model = DocumentContainer
         fields = "__all__"
@@ -285,9 +318,15 @@ class ManagedDocumentReadSerializer(BaseModelSerializer):
         return obj.container.document_type if obj.container_id else None
 
     def get_revision_count(self, obj):
+        request = self.context.get("request")
+        if request and not has_full_view(request, ManagedDocument, obj.id):
+            return None
         return obj.revisions.count()
 
     def get_latest_draft(self, obj):
+        request = self.context.get("request")
+        if request and not has_full_view(request, ManagedDocument, obj.id):
+            return None
         draft = obj.revisions.filter(status=DocumentRevision.Status.DRAFT).first()
         return str(draft.id) if draft else None
 
@@ -336,3 +375,11 @@ class DocumentRevisionReadSerializer(BaseModelSerializer):
     class Meta:
         model = DocumentRevision
         fields = "__all__"
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        request = self.context.get("request")
+        if request and not has_full_view(request, DocumentRevision, instance.id):
+            for field in ("reviewer_comments", "editing_user", "editing_since"):
+                data.pop(field, None)
+        return data

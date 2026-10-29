@@ -1,6 +1,6 @@
 <script lang="ts">
-	import LossExceedanceCurve from '$lib/components/Chart/LossExceedanceCurve.svelte';
-	import { pageTitle } from '$lib/utils/stores';
+	import LossExceedanceCurve from '#lib/components/Chart/LossExceedanceCurve.svelte';
+	import { pageTitle } from '#lib/utils/stores.js';
 
 	$pageTitle = 'Loss Exceedance Curve';
 

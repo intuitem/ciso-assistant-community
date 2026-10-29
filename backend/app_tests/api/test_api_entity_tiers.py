@@ -73,6 +73,27 @@ class TestTierScale:
         high.refresh_from_db()
         assert (high.name, high.hexcolor) == ("Important", "#000000")
 
+    def test_compliance_target_is_a_percentage_or_empty(self, authenticated_client):
+        high = _tier("high")
+        url = f"{TIERS_URL}{high.id}/"
+        response = authenticated_client.patch(
+            url, {"compliance_target": 70}, format="json"
+        )
+        assert response.status_code == status.HTTP_200_OK, response.json()
+        assert response.json()["compliance_target"] == 70
+
+        response = authenticated_client.patch(
+            url, {"compliance_target": 101}, format="json"
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+        response = authenticated_client.patch(
+            url, {"compliance_target": None}, format="json"
+        )
+        assert response.status_code == status.HTTP_200_OK, response.json()
+        high.refresh_from_db()
+        assert high.compliance_target is None
+
     def test_new_tiers_go_to_the_bottom_in_entry_order(self, authenticated_client):
         for name in ("Tier A", "Tier B"):
             response = authenticated_client.post(
