@@ -1269,6 +1269,20 @@ objects:
             \ dont elle a la gestion, s\u2019il est raisonnable de croire, dans les\
             \ circonstances, que l\u2019atteinte pr\xE9sente un risque r\xE9el de\
             \ pr\xE9judice grave \xE0 l\u2019endroit d\u2019un individu."
+    - urn: urn:intuitem:risk:req_node:pipeda:10.1-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pipeda:10.1
+      ref_id: 10.1-2
+      description: The report shall contain the prescribed information and shall be
+        made in the prescribed form and manner as soon as feasible after the organization
+        determines that the breach has occurred.
+      translations:
+        fr:
+          description: "La d\xE9claration contient les renseignements pr\xE9vus par\
+            \ r\xE8glement et est faite, selon les modalit\xE9s r\xE9glementaires,\
+            \ le plus t\xF4t possible apr\xE8s que l\u2019organisation a conclu qu\u2019\
+            il y a eu atteinte."
     - urn: urn:intuitem:risk:req_node:pipeda:10.1-3
       assessable: true
       depth: 3
@@ -1305,6 +1319,21 @@ objects:
             \ mesures pour r\xE9duire le risque de pr\xE9judice qui pourrait en r\xE9\
             sulter ou pour att\xE9nuer un tel pr\xE9judice. Il contient aussi tout\
             \ autre renseignement r\xE9glementaire."
+    - urn: urn:intuitem:risk:req_node:pipeda:10.1-5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pipeda:10.1
+      ref_id: 10.1-5
+      description: The notification shall be conspicuous and shall be given directly
+        to the individual in the prescribed form and manner, except in prescribed
+        circumstances, in which case it shall be given indirectly in the prescribed
+        form and manner.
+      translations:
+        fr:
+          description: "L\u2019avis est manifeste et est donn\xE9 \xE0 l\u2019int\xE9\
+            ress\xE9 directement, selon les modalit\xE9s r\xE9glementaires. Dans les\
+            \ circonstances pr\xE9vues par r\xE8glement, il est donn\xE9 indirectement,\
+            \ selon les modalit\xE9s r\xE9glementaires."
     - urn: urn:intuitem:risk:req_node:pipeda:10.1-6
       assessable: true
       depth: 3
@@ -1348,6 +1377,17 @@ objects:
             \ r\xE9sulter de l\u2019atteinte ou d\u2019att\xE9nuer ce pr\xE9judice,\
             \ ou s\u2019il est satisfait \xE0 des conditions pr\xE9cis\xE9es par r\xE8\
             glement."
+    - urn: urn:intuitem:risk:req_node:pipeda:10.2-2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:pipeda:10.2
+      ref_id: 10.2-2
+      description: The notification shall be given as soon as feasible after the organization
+        determines that the breach has occurred.
+      translations:
+        fr:
+          description: "Elle le fait le plus t\xF4t possible apr\xE8s avoir conclu\
+            \ qu\u2019il y a eu atteinte."
     - urn: urn:intuitem:risk:req_node:pipeda:10.3
       assessable: false
       depth: 2
