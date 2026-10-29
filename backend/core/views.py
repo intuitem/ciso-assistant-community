@@ -8,6 +8,7 @@ import json
 import mimetypes
 import re
 from django_filters.filterset import filterset_factory
+from django_filters.constants import EMPTY_VALUES
 from django_filters.utils import try_dbfield
 from django import forms
 from django_filters.widgets import QueryArrayWidget
@@ -194,7 +195,11 @@ from core.models import (
     Team,
 )
 from core.pagination import CustomLimitOffsetPagination
-from core.serializers import ComplianceAssessmentReadSerializer, user_admin_folder_ids
+from core.serializers import (
+    USER_ACCOUNT_FIELDS,
+    ComplianceAssessmentReadSerializer,
+    user_admin_folder_ids,
+)
 from core.utils import (
     build_answers_dict,
     escape_excel_formula,
@@ -8582,18 +8587,21 @@ class UserFilter(GenericFilterSet):
     )
     # Add-only member pickers: drop users already in the given group.
     exclude_user_groups = df.UUIDFilter(method="filter_exclude_user_groups")
-    keep_local_login = df.BooleanFilter(method="filter_account_field")
-    expiry_date = df.DateFilter(method="filter_account_field")
 
-    def filter_account_field(self, queryset, name, value):
+    def filter_queryset(self, queryset):
         # Account fields are only serialized to the user's administrators (see
         # USER_ACCOUNT_FIELDS); matching on them for anyone else would give the
-        # values away, so other rows never match.
-        return queryset.filter(
-            Q(folder_id__in=user_admin_folder_ids(self.request))
-            | Q(pk=self.request.user.pk),
-            **{name: value},
-        )
+        # values away, so while any of their lookups is set, other rows never match.
+        if any(
+            self.form.cleaned_data.get(name) not in EMPTY_VALUES
+            for name, f in self.filters.items()
+            if f.field_name in USER_ACCOUNT_FIELDS
+        ):
+            queryset = queryset.filter(
+                Q(folder_id__in=user_admin_folder_ids(self.request))
+                | Q(pk=self.request.user.pk)
+            )
+        return super().filter_queryset(queryset)
 
     def filter_exclude_user_groups(self, queryset, name, value):
         # Only honour the exclusion for a group the caller can actually read, so
