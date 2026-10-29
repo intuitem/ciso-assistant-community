@@ -15,7 +15,16 @@ from django.utils import timezone
 from global_settings import utils as ff_utils
 from global_settings.models import GlobalSettings
 from global_settings.utils import clear_feature_flags_cache
-from iam.models import Folder, Role, RoleAssignment, ServiceAccount, User, UserGroup
+from iam.models import (
+    IGNORED_PERMISSION_MODELS,
+    READ_ONLY_PERMISSION_MODELS,
+    Folder,
+    Role,
+    RoleAssignment,
+    ServiceAccount,
+    User,
+    UserGroup,
+)
 from iam.service_accounts import get_selectable_permissions
 
 TOKEN_ENDPOINT = "/api/identity/o/api/token"
@@ -204,7 +213,15 @@ class TestServiceAccountProvisioning:
         assert "viewFolder" in {entry["normalized_codename"] for entry in entries}
         assert not any(entry["codename"].endswith("_role") for entry in entries)
         assert not any("serviceaccount" in entry["codename"] for entry in entries)
-        assert not any(entry["codename"] == "view_flowevent" for entry in entries)
+        assert not any(
+            entry["content_type"]["model"] in IGNORED_PERMISSION_MODELS
+            for entry in entries
+        )
+        assert not any(
+            entry["content_type"]["model"] in READ_ONLY_PERMISSION_MODELS
+            and entry["codename"].split("_")[0] in ("add", "change", "delete")
+            for entry in entries
+        )
         commitment = {
             entry["codename"]
             for entry in entries
