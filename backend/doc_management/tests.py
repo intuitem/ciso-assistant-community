@@ -19,7 +19,7 @@ from doc_management.serializers import (
     DocumentContainerReadSerializer,
     ManagedDocumentWriteSerializer,
 )
-from core.views import BaseModelViewSet
+from doc_management.access import PublishedReadMixin
 from doc_management.views import (
     DocumentContainerViewSet,
     DocumentRevisionViewSet,
@@ -499,7 +499,7 @@ class TestCatalogQueryCount:
             folder__name__startswith=f"CAT-{batch}"
         )
         view = DocumentContainerViewSet()
-        with patch.object(BaseModelViewSet, "get_queryset", return_value=scoped):
+        with patch.object(PublishedReadMixin, "get_queryset", return_value=scoped):
             with CaptureQueriesContext(connection) as ctx:
                 response = view.catalog(request=None)
         assert len(response.data) == count

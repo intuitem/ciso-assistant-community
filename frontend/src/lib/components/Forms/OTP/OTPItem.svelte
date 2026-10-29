@@ -98,7 +98,7 @@
 </script>
 
 <input
-	class="{className} input w-24 h-24 text-4xl text-center"
+	class="{className} input w-24 min-w-0 aspect-square p-0 text-4xl text-center"
 	bind:this={input}
 	onkeydown={keyDownHandler}
 	onkeyup={keyUpHandler}
