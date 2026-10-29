@@ -18,10 +18,13 @@ from core.models import (
     Terminology,
 )
 from core.serializer_fields import FieldsRelatedField, HashSlugRelatedField
-from core.serializers import AssignmentNotificationMixin, BaseModelSerializer
+from core.serializers import (
+    CollectionMembershipMixin,
+    AssignmentNotificationMixin,
+    BaseModelSerializer,
+)
 from core.utils import RoleCodename, UserGroupCodename
 from iam.models import Folder, Role, RoleAssignment, UserGroup
-from pmbok.models import GenericCollection
 from tprm.models import (
     Contract,
     Entity,
@@ -545,18 +548,14 @@ class EntityAssessmentReadSerializer(BaseModelSerializer):
         exclude = ["penetration", "dependency", "maturity", "trust"]
 
 
-class EntityAssessmentWriteSerializer(AssignmentNotificationMixin, BaseModelSerializer):
+class EntityAssessmentWriteSerializer(
+    CollectionMembershipMixin, AssignmentNotificationMixin, BaseModelSerializer
+):
     assignment_notifications = {
         "authors": "object_assignment",
         "reviewers": "object_review_assignment",
     }
 
-    genericcollection = serializers.PrimaryKeyRelatedField(
-        source="genericcollection_set",
-        many=True,
-        required=False,
-        queryset=GenericCollection.objects.all(),
-    )
     create_audit = serializers.BooleanField(default=False)
     framework = serializers.PrimaryKeyRelatedField(
         queryset=Framework.objects.all(), required=False

@@ -2,13 +2,13 @@ from django.db import transaction
 from rest_framework import serializers
 from core.serializer_fields import FieldsRelatedField
 from core.serializers import (
+    CollectionMembershipMixin,
     AssignmentNotificationMixin,
     BaseModelSerializer,
     ActionPlanSerializer,
 )
 from core.models import AppliedControl
 from core.utils import get_global_currency
-from pmbok.models import GenericCollection
 from threat_modeling.models import ThreatModel
 
 from .models import (
@@ -81,19 +81,12 @@ class ImpactField(serializers.Field):
 
 
 class QuantitativeRiskStudyWriteSerializer(
-    AssignmentNotificationMixin, BaseModelSerializer
+    CollectionMembershipMixin, AssignmentNotificationMixin, BaseModelSerializer
 ):
     assignment_notifications = {
         "authors": "object_assignment",
         "reviewers": "object_review_assignment",
     }
-
-    genericcollection = serializers.PrimaryKeyRelatedField(
-        source="genericcollection_set",
-        many=True,
-        required=False,
-        queryset=GenericCollection.objects.all(),
-    )
 
     class Meta:
         model = QuantitativeRiskStudy

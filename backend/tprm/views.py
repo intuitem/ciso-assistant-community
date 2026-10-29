@@ -1321,7 +1321,6 @@ class EntityAssessmentViewSet(ExportMixin, BaseModelViewSet):
         "entity",
         "criticality",
         "conclusion",
-        "genericcollection",
         # A third-party campaign owns the questionnaire; the assessment hangs off it.
         "compliance_assessment__campaign",
         "due_date",
