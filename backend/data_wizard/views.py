@@ -8,7 +8,7 @@ import structlog
 import re
 from abc import ABC, abstractmethod
 from collections import defaultdict
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import date, datetime
 from functools import cached_property
 from pathlib import Path
@@ -110,7 +110,7 @@ from ebios_rm.serializers import (
     EbiosRMStudyWriteSerializer,
     ElementaryActionWriteSerializer,
 )
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import APIException, PermissionDenied
 
 from core.views import check_folder_add_permission
 from iam.models import Permission, RoleAssignment, User
@@ -165,6 +165,12 @@ from .egerie_xml_helpers import (
 from .egerie_xml_helpers import (
     process_xml_file as process_egerie_xml,
 )
+from metrology.models import MetricDefinition, MetricInstance
+from metrology.serializers import (
+    CustomMetricSampleWriteSerializer,
+    MetricInstanceWriteSerializer,
+)
+
 from .serializers import LoadFileSerializer
 
 logger = structlog.get_logger(__name__)
@@ -268,7 +274,21 @@ def read_csv_file(file: io.BytesIO) -> pd.DataFrame:
         sep = csv.Sniffer().sniff(sample, delimiters=",;\t|").delimiter
     except csv.Error:
         sep = ","
-    return pd.read_csv(file, sep=sep, encoding="utf-8-sig").fillna("")
+    # Keep ref_ids as text: parsed as floats, "X.10" collapses onto "X.1".
+    header = pd.read_csv(io.StringIO(sample), sep=sep, nrows=0).columns
+    dtype = {c: str for c in header if str(c).strip().lower().endswith("ref_id")}
+    return pd.read_csv(file, sep=sep, encoding="utf-8-sig", dtype=dtype).fillna("")
+
+
+def read_excel_sheet(file: io.BytesIO, sheet_name=0) -> pd.DataFrame:
+    """Read a sheet keeping text cells as text (pandas would turn "1.10" into 1.1),
+    while numeric, boolean and date cells keep their inferred dtypes.
+    ref_id columns are always text, even when typed as numbers in Excel."""
+    df = pd.read_excel(file, sheet_name=sheet_name, dtype=object)
+    for c in df.columns:
+        if str(c).strip().lower().endswith("ref_id"):
+            df[c] = df[c].map(lambda v: v if pd.isna(v) else str(v))
+    return df.infer_objects()
 
 
 def normalize_datetime_columns(df: pd.DataFrame) -> pd.DataFrame:
@@ -468,11 +488,12 @@ def _resolve_filtering_labels(value: Any) -> list[UUID]:
     return label_ids
 
 
-def _resolve_actors(value: Any) -> list[UUID]:
+def _resolve_actors(value: Any, unresolved: list[str] | None = None) -> list[UUID]:
     """Resolve separated user emails or team names to Actor IDs.
 
     Each entry is matched as a user email first, then as a team name; entries that
     match neither are skipped, since a typo must not silently become a new actor.
+    Skipped entries are added to *unresolved* when given, to warn the importer.
     """
     if not isinstance(value, str):
         return []
@@ -489,6 +510,8 @@ def _resolve_actors(value: Any) -> list[UUID]:
         if actor is not None:
             actor_ids.append(actor.id)
         else:
+            if unresolved is not None:
+                unresolved.append(entry)
             # Masked: owner entries are emails, which have no place in the logs.
             logger.warning(
                 "Import: could not resolve owner entry (masked: %s***); skipping.",
@@ -557,11 +580,14 @@ def _resolve_named_objects(
     model_class,
     serializer_class,
     extra_create_data: Optional[dict] = None,
+    linked=None,
 ) -> SideObjects:
     """Resolve object names on a row to ids in *folder*, by ref_id then name.
 
-    Misses are created through the write serializer, and only when the user may
-    add that model there; otherwise the token comes back in `failed`.
+    The *linked* objects (already on the record, wherever they live) are
+    matched first, so re-importing an export does not duplicate them. Misses
+    are created through the write serializer, and only when the user may add
+    that model there; otherwise the token comes back in `failed`.
     """
     resolved = SideObjects()
     tokens = _split_multi_separator(value)
@@ -570,10 +596,20 @@ def _resolve_named_objects(
 
     may_create: Optional[bool] = None
     model_name = model_class._meta.model_name
+    scopes = [model_class.objects.filter(folder=folder)]
+    if linked is not None:
+        scopes.insert(0, linked)
     for token in tokens:
-        obj = (
-            model_class.objects.filter(ref_id=token, folder=folder).first()
-            or model_class.objects.filter(name__iexact=token, folder=folder).first()
+        obj = next(
+            (
+                found
+                for scope in scopes
+                if (
+                    found := scope.filter(ref_id=token).first()
+                    or scope.filter(name__iexact=token).first()
+                )
+            ),
+            None,
         )
         if obj is None:
             if may_create is None:
@@ -615,7 +651,9 @@ def _resolve_assets(value: Any, folder: "Folder", request) -> SideObjects:
     )
 
 
-def _resolve_applied_controls(value: Any, folder: "Folder", request) -> SideObjects:
+def _resolve_applied_controls(
+    value: Any, folder: "Folder", request, linked=None
+) -> SideObjects:
     return _resolve_named_objects(
         value,
         folder,
@@ -623,6 +661,7 @@ def _resolve_applied_controls(value: Any, folder: "Folder", request) -> SideObje
         AppliedControl,
         AppliedControlWriteSerializer,
         extra_create_data={"status": "to_do"},
+        linked=linked,
     )
 
 
@@ -684,32 +723,21 @@ def _resolve_threats(value: Any, lookup: ThreatLookup) -> SideObjects:
     return resolved
 
 
-def _resolve_owners(value: Any) -> list[UUID]:
-    """Resolve semicolon-separated user emails or team names to Actor IDs.
+def _resolve_owners(value: Any, unresolved: list[str] | None = None) -> list[UUID]:
+    """Owners: user emails or team names separated like any actor list, each
+    actor kept once."""
+    return list(dict.fromkeys(_resolve_actors(value, unresolved)))
 
-    Each entry is matched first as a user email, then as a team name.
-    Unresolvable entries are silently skipped.
-    """
-    if not isinstance(value, str):
-        return []
 
-    entries = set(entry.strip() for entry in value.split(";"))
-    actor_ids = []
-
-    for entry in entries:
-        # Try matching as user email first
-        actor = Actor.objects.filter(user__email__iexact=entry).first()
-        if actor is None:
-            # Try matching as team name
-            actor = Actor.objects.filter(team__name__iexact=entry).first()
-        if actor is not None:
-            actor_ids.append(actor.id)
-        else:
-            logger.warning(
-                "Could not resolve an owner reference to a user email or team name during import; skipping."
-            )
-
-    return actor_ids
+def _owner_warning(record: dict, unresolved: list[str]) -> Optional["Error"]:
+    """The row is still imported, without the owners nobody could be found for."""
+    if not unresolved:
+        return None
+    return Error(
+        record=record,
+        error=f"owner: no user or team found for {', '.join(sorted(unresolved))}",
+        is_warning=True,
+    )
 
 
 def build_matrix_mappings(risk_matrix: RiskMatrix) -> dict:
@@ -813,6 +841,8 @@ class ModelType(enum.StrEnum):
     TASK_TEMPLATE = "TaskTemplate"
     VULNERABILITY = "Vulnerability"
     BUSINESS_IMPACT_ANALYSIS = "BusinessImpactAnalysis"
+    METRIC_INSTANCE = "MetricInstance"
+    METRIC_SAMPLE = "CustomMetricSample"
 
     @staticmethod
     def from_string(model_type: str) -> Optional["ModelType"]:
@@ -857,6 +887,8 @@ IMPORT_TEMPLATES: dict[ModelType, str] = {
     ModelType.BUSINESS_IMPACT_ANALYSIS: "business_impact_analysis_template.xlsx",
     ModelType.TASK_TEMPLATE: "tasks_template.xlsx",
     ModelType.EVIDENCE: "evidences_template.xlsx",
+    ModelType.METRIC_INSTANCE: "metric_instances_template.xlsx",
+    ModelType.METRIC_SAMPLE: "metric_samples_template.xlsx",
 }
 
 
@@ -883,6 +915,32 @@ class Error:
 
     def to_dict(self) -> dict:
         return {"record": self.record, "error": self.error}
+
+
+def readable_error(error: Any) -> str:
+    """'field: message' text for a validation error, whatever its shape, instead
+    of the repr of DRF's ErrorDetail objects."""
+    if isinstance(error, APIException):
+        error = error.detail
+    elif isinstance(error, ValidationError):
+        error = getattr(error, "message_dict", None) or error.messages
+    elif isinstance(error, Exception):
+        # Any other exception may carry database or code internals.
+        logger.error("Unexpected import error", error=error)
+        return "Unexpected error, see the server logs"
+    if isinstance(error, dict):
+        # "a: x; b: y", without the ".;" a period-ending message would leave.
+        return "; ".join(
+            (
+                readable_error(v)
+                if k == "non_field_errors"
+                else f"{k}: {readable_error(v)}"
+            ).rstrip(".")
+            for k, v in error.items()
+        )
+    if isinstance(error, (list, tuple)):
+        return " ".join(readable_error(v) for v in error)
+    return str(error)
 
 
 class FolderScopeError(ValueError):
@@ -1092,8 +1150,12 @@ class RecordConsumer[Context = None](ABC):
                 continue
             source_keys = self.SOURCE_KEY_MAP.get(key, [key])
             # For M2M owner, propagate even when blank so UPDATE mode clears stale owners.
+            # Names that resolved to nobody are not a blank: keep the owners (the
+            # row's warning reports the names).
             if key == "owner" and any(sk in record for sk in source_keys):
-                update_data[key] = value
+                blank = all(not str(record.get(sk) or "").strip() for sk in source_keys)
+                if value or blank:
+                    update_data[key] = value
                 continue
             if any(record.get(sk) not in (None, "") for sk in source_keys):
                 update_data[key] = value
@@ -1220,12 +1282,12 @@ class RecordConsumer[Context = None](ABC):
                 )
                 if not serializer.is_valid():
                     transaction.set_rollback(True)
-                    return str(serializer.errors)
+                    return readable_error(serializer.errors)
                 saved = serializer.save()
                 self.after_write(saved, created=instance is None)
             except Exception as e:
                 transaction.set_rollback(True)
-                return str(e)
+                return readable_error(e)
         return None
 
     def _record_side_effects(self, key: str, resolved: SideObjects) -> None:
@@ -1585,10 +1647,11 @@ class AppliedControlRecordConsumer(RecordConsumer[AppliedControlContext]):
         # Resolve owner field (semicolon-separated user emails or team names).
         # Always set data["owner"] when the column is present, even if blank,
         # so that UPDATE mode can clear the M2M instead of silently preserving it.
+        unresolved: list[str] = []
         if "owner" in record:
-            data["owner"] = _resolve_owners(record.get("owner"))
+            data["owner"] = _resolve_owners(record.get("owner"), unresolved)
 
-        return data, None
+        return data, _owner_warning(record, unresolved)
 
 
 class EvidenceRecordConsumer(RecordConsumer):
@@ -1664,10 +1727,11 @@ class EvidenceRecordConsumer(RecordConsumer):
             data["filtering_labels"] = filtering_labels
 
         # Present-but-blank has to reach the serializer so UPDATE mode can clear it.
+        unresolved: list[str] = []
         if "owner" in record:
-            data["owner"] = _resolve_actors(record.get("owner"))
+            data["owner"] = _resolve_actors(record.get("owner"), unresolved)
 
-        return data, None
+        return data, _owner_warning(record, unresolved)
 
 
 class UserRecordConsumer(RecordConsumer):
@@ -1691,8 +1755,9 @@ class UserRecordConsumer(RecordConsumer):
 
         return {
             "email": email,
-            "first_name": record.get("first_name"),
-            "last_name": record.get("last_name"),
+            # Optional columns: absent ones must not reach the serializer as null.
+            "first_name": record.get("first_name") or "",
+            "last_name": record.get("last_name") or "",
         }, None
 
 
@@ -1821,6 +1886,142 @@ class ThreatRecordConsumer(RecordConsumer):
             "description": record.get("description", ""),
             "folder": domain,
             "ref_id": record.get("ref_id", ""),
+        }, None
+
+
+def _find_one(records, wanted: str, fields: tuple[str, ...], folder_id, label: str):
+    """The record a cell names, trying *fields* in order. Names repeat across
+    domains: several matches resolve to the one in the import's domain, or not
+    at all. Returns (record, error)."""
+    noun = label.replace("_", " ")
+    for name in fields:
+        matches = list(records.filter(**{f"{name}__iexact": wanted})[:50])
+        if len(matches) > 1:
+            matches = [m for m in matches if str(m.folder_id) == str(folder_id)]
+            if len(matches) != 1:
+                return None, (
+                    f"{label}: several {noun}s are named '{wanted}'; choose the"
+                    f" domain the right one is in"
+                )
+        if matches:
+            return matches[0], None
+    return None, f"{label}: no {noun} '{wanted}'"
+
+
+class MetricInstanceRecordConsumer(RecordConsumer):
+    """Metric instances, each tied to a metric definition of the library or the
+    instance, found by ref_id, urn or name."""
+
+    SERIALIZER_CLASS = MetricInstanceWriteSerializer
+
+    def create_context(self):
+        viewable = RoleAssignment.get_viewable_object_ids(
+            self.request.user, MetricDefinition
+        )
+        return MetricDefinition.objects.filter(id__in=viewable), None
+
+    def prepare_create(self, record: dict, definitions) -> tuple[dict, Optional[Error]]:
+        name = record.get("name")
+        if not name:
+            return {}, Error(record=record, error="name: this field is mandatory")
+        wanted = str(record.get("metric_definition") or "").strip()
+        if not wanted:
+            return {}, Error(
+                record=record, error="metric_definition: this field is mandatory"
+            )
+        domain = self.folder_id
+        if record.get("domain"):
+            domain = self.folders_map.get(str(record["domain"]).lower(), domain)
+        definition, error = _find_one(
+            definitions, wanted, ("ref_id", "urn", "name"), domain, "metric_definition"
+        )
+        if definition is None:
+            return {}, Error(record=record, error=error)
+        data = {
+            "name": name,
+            "ref_id": record.get("ref_id") or "",
+            "description": record.get("description") or "",
+            "metric_definition": definition.id,
+            "folder": domain,
+        }
+        for key in ("status", "collection_frequency"):
+            if record.get(key) not in (None, ""):
+                data[key] = record[key]
+        if record.get("target_value") not in (None, ""):
+            data["target_value"] = record["target_value"]
+        unresolved: list[str] = []
+        if "owner" in record:
+            data["owner"] = _resolve_owners(record.get("owner"), unresolved)
+        return data, _owner_warning(record, unresolved)
+
+
+class MetricSampleRecordConsumer(RecordConsumer):
+    """Values of metric instances over time. A number for a quantitative metric;
+    for a qualitative one, a level's name or its 1-based position. A sample for
+    a metric and second that already holds one replaces it."""
+
+    SERIALIZER_CLASS = CustomMetricSampleWriteSerializer
+
+    def create_context(self):
+        viewable = RoleAssignment.get_viewable_object_ids(
+            self.request.user, MetricInstance
+        )
+        return MetricInstance.objects.filter(id__in=viewable).select_related(
+            "metric_definition"
+        ), None
+
+    @staticmethod
+    def _value(raw, definition) -> tuple[Optional[dict], Optional[str]]:
+        if definition.category == MetricDefinition.Category.QUALITATIVE:
+            levels = [
+                str(c.get("name", "")).strip().lower()
+                for c in definition.choices_definition or []
+            ]
+            text = str(raw).strip()
+            if text.lower() in levels:
+                return {"choice_index": levels.index(text.lower()) + 1}, None
+            if text.isdigit() and 1 <= int(text) <= len(levels):
+                return {"choice_index": int(text)}, None
+            return None, f"value: '{raw}' is none of {', '.join(levels)}"
+        try:
+            number = float(str(raw).replace(",", ".").strip())
+        except ValueError:
+            number = math.nan
+        if not math.isfinite(number):
+            return None, f"value: '{raw}' is not a number"
+        return {"result": number}, None
+
+    def prepare_create(self, record: dict, instances) -> tuple[dict, Optional[Error]]:
+        wanted = str(record.get("metric_instance") or "").strip()
+        if not wanted:
+            return {}, Error(
+                record=record, error="metric_instance: this field is mandatory"
+            )
+        instance, error = _find_one(
+            instances, wanted, ("ref_id", "name"), self.folder_id, "metric_instance"
+        )
+        if instance is None:
+            return {}, Error(record=record, error=error)
+        if record.get("value") in (None, ""):
+            return {}, Error(record=record, error="value: this field is mandatory")
+        value, error = self._value(record["value"], instance.metric_definition)
+        if error:
+            return {}, Error(record=record, error=error)
+        timestamp = _parse_datetime(record.get("timestamp"))
+        if not timestamp:
+            return {}, Error(record=record, error="timestamp: this field is mandatory")
+        if not isinstance(timestamp, str):
+            return {}, Error(
+                record=record, error=f"timestamp: '{timestamp}' is not a date"
+            )
+        if len(timestamp) == 10:
+            # A date alone: the sample stands for that day.
+            timestamp = f"{timestamp}T00:00:00"
+        return {
+            "metric_instance": instance.id,
+            "timestamp": timestamp,
+            "value": value,
+            "observation": record.get("observation") or "",
         }, None
 
 
@@ -1971,7 +2172,9 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
                     findings_assessment=findings_assessment,
                     folder=folder,
                 ), None
-            return None, Error(record=assessment_data, error=str(serializer.errors))
+            return None, Error(
+                record=assessment_data, error=readable_error(serializer.errors)
+            )
 
         except Exception as e:
             return None, Error(record={}, error=str(e))
@@ -2091,10 +2294,15 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
         # Always set finding_data["owner"] when the column is present, even if
         # blank, so that UPDATE mode can clear the M2M instead of silently
         # preserving it.
+        unresolved_owners: list[str] = []
         if "owner" in record:
-            finding_data["owner"] = _resolve_owners(record.get("owner"))
+            finding_data["owner"] = _resolve_owners(
+                record.get("owner"), unresolved_owners
+            )
 
         unresolved = []
+        if warning := _owner_warning(record, unresolved_owners):
+            unresolved.append(warning.error)
         if failed_vulnerabilities:
             unresolved.append(
                 f"Could not resolve vulnerabilities: {', '.join(failed_vulnerabilities)}"
@@ -2209,7 +2417,8 @@ class RiskAssessmentRecordConsumer(RecordConsumer[RiskAssessmentContext]):
                 )
                 if not serializer.is_valid():
                     return None, Error(
-                        record=assessment_data, error=str(serializer.errors)
+                        record=assessment_data,
+                        error=readable_error(serializer.errors),
                     )
                 risk_assessment = serializer.save()
                 logger.info(
@@ -2406,7 +2615,12 @@ class PolicyRecordConsumer(RecordConsumer):
         if filtering_labels:
             data["filtering_labels"] = filtering_labels
 
-        return data, None
+        # Present-but-blank has to reach the serializer so UPDATE mode can clear it.
+        unresolved: list[str] = []
+        if "owner" in record:
+            data["owner"] = _resolve_owners(record.get("owner"), unresolved)
+
+        return data, _owner_warning(record, unresolved)
 
 
 class SecurityExceptionRecordConsumer(RecordConsumer):
@@ -3005,6 +3219,7 @@ class FolderRecordConsumer(RecordConsumer):
             return {}, error
 
         data = {
+            "ref_id": record.get("ref_id", ""),
             "name": name,
             "description": record.get("description", ""),
             "parent_folder": parent_folder_id,
@@ -3198,6 +3413,7 @@ class VulnerabilityRecordConsumer(RecordConsumer[None]):
             "ref_id": record.get("ref_id", ""),
             "name": name,
             "description": record.get("description", ""),
+            "observation": record.get("observation", ""),
             "status": status,
             "severity": severity,
             "folder": folder_id,
@@ -3214,11 +3430,20 @@ class VulnerabilityRecordConsumer(RecordConsumer[None]):
         if due_date:
             data["due_date"] = due_date
 
+        remediated_at = _parse_date(record.get("remediated_at"))
+        if remediated_at:
+            data["remediated_at"] = remediated_at
+
         filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"))
         if filtering_labels:
             data["filtering_labels"] = filtering_labels
 
-        return data, None
+        # Present-but-blank still sets it, so UPDATE mode can clear the owners.
+        unresolved: list[str] = []
+        if "owner" in record:
+            data["owner"] = _resolve_owners(record.get("owner"), unresolved)
+
+        return data, _owner_warning(record, unresolved)
 
 
 class ElementaryActionRecordConsumer(RecordConsumer):
@@ -4345,6 +4570,33 @@ def normalize_df_columns(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+@dataclass(frozen=True)
+class ImportOptions:
+    model_type: Optional[str]
+    folder_id: Optional[str] = None
+    perimeter_id: Optional[str] = None
+    framework_id: Optional[str] = None
+    matrix_id: Optional[str] = None
+    target_id: Optional[str] = None
+    on_conflict: str = ConflictMode.STOP
+    # Name of the container a single-container import creates (an audit, a
+    # risk assessment...); None falls back to the X-Name header, then a timestamp.
+    container_name: Optional[str] = None
+
+    @classmethod
+    def from_headers(cls, meta) -> "ImportOptions":
+        # Empty header -> None, so a blank optional selector never reaches get(id="").
+        return cls(
+            model_type=meta.get("HTTP_X_MODEL_TYPE"),
+            folder_id=meta.get("HTTP_X_FOLDER_ID") or None,
+            perimeter_id=meta.get("HTTP_X_PERIMETER_ID") or None,
+            framework_id=meta.get("HTTP_X_FRAMEWORK_ID") or None,
+            matrix_id=meta.get("HTTP_X_MATRIX_ID") or None,
+            target_id=meta.get("HTTP_X_TARGET_ID") or None,
+            on_conflict=meta.get("HTTP_X_ON_CONFLICT", ConflictMode.STOP),
+        )
+
+
 class LoadFileView(APIView):
     parser_classes = (FileUploadParser,)
     serializer_class = LoadFileSerializer
@@ -4356,18 +4608,23 @@ class LoadFileView(APIView):
             folder_id,
         )
 
-    def process_excel_file(self, request, record_file: io.BytesIO) -> Response:
-        model_type_string = request.META.get("HTTP_X_MODEL_TYPE")
+    def process_excel_file(
+        self,
+        request,
+        record_file: io.BytesIO,
+        options: Optional[ImportOptions] = None,
+    ) -> Response:
+        options = options or ImportOptions.from_headers(request.META)
+        model_type_string = options.model_type
         model_type = ModelType.from_string(model_type_string)
-        folder_id = request.META.get("HTTP_X_FOLDER_ID") or None
-        # Empty header -> None, so a blank optional selector never reaches get(id="").
-        perimeter_id = request.META.get("HTTP_X_PERIMETER_ID") or None
-        framework_id = request.META.get("HTTP_X_FRAMEWORK_ID") or None
-        matrix_id = request.META.get("HTTP_X_MATRIX_ID") or None
-        target_id = request.META.get("HTTP_X_TARGET_ID") or None
-        on_conflict_str = request.META.get("HTTP_X_ON_CONFLICT", "stop")
+        folder_id = options.folder_id
+        perimeter_id = options.perimeter_id
+        framework_id = options.framework_id
+        matrix_id = options.matrix_id
+        target_id = options.target_id
+        container_name = options.container_name
         try:
-            on_conflict = ConflictMode(on_conflict_str)
+            on_conflict = ConflictMode(options.on_conflict)
         except ValueError:
             on_conflict = ConflictMode.STOP
         logger.info(
@@ -4518,7 +4775,7 @@ class LoadFileView(APIView):
                     is_excel = is_excel_file(record_file)
                     if is_excel:
                         df = normalize_datetime_columns(
-                            pd.read_excel(record_file)
+                            read_excel_sheet(record_file)
                         ).fillna("")
                     else:
                         file_type = RecordFileType.CSV
@@ -4545,6 +4802,7 @@ class LoadFileView(APIView):
                         framework_id=framework_id,
                         on_conflict=on_conflict,
                         target_id=target_id,
+                        container_name=container_name,
                     )
                     records = df.to_dict(orient="records")
 
@@ -4645,6 +4903,18 @@ class LoadFileView(APIView):
                                 .process_records(records)
                                 .to_dict()
                             )
+                        case ModelType.METRIC_INSTANCE:
+                            res = (
+                                MetricInstanceRecordConsumer(base_context)
+                                .process_records(records)
+                                .to_dict()
+                            )
+                        case ModelType.METRIC_SAMPLE:
+                            res = (
+                                MetricSampleRecordConsumer(base_context)
+                                .process_records(records)
+                                .to_dict()
+                            )
                         case _:
                             res = self.process_data(
                                 request,
@@ -4656,6 +4926,7 @@ class LoadFileView(APIView):
                                 matrix_id,
                                 on_conflict,
                                 target_id,
+                                container_name,
                             )
 
         except Exception as e:
@@ -4681,6 +4952,7 @@ class LoadFileView(APIView):
         matrix_id=None,
         on_conflict=ConflictMode.STOP,
         target_id=None,
+        container_name=None,
     ):
         # Dispatch to appropriate handler
         match model_type:
@@ -4693,6 +4965,7 @@ class LoadFileView(APIView):
                     framework_id,
                     on_conflict,
                     target_id,
+                    container_name,
                 )
             case _:
                 return {
@@ -4710,6 +4983,7 @@ class LoadFileView(APIView):
         framework_id,
         on_conflict=ConflictMode.STOP,
         target_id=None,
+        container_name=None,
     ):
         results = {"successful": 0, "failed": 0, "errors": []}
         try:
@@ -4747,7 +5021,9 @@ class LoadFileView(APIView):
                 )
                 return results
 
-            assessment_name = resolve_container_name(request, "Assessment")
+            assessment_name = resolve_container_name(
+                request, "Assessment", container_name
+            )
 
             # Prepare data for serializer
             assessment_data = {
@@ -4776,17 +5052,25 @@ class LoadFileView(APIView):
                     request, records, compliance_assessment, framework_id, results
                 )
 
+        # Results, not a Response: the caller nests them in its own payload.
         except Perimeter.DoesNotExist:
             logger.error(f"Perimeter with ID {perimeter_id} does not exist")
-            return Response(
-                {"error": f"Perimeter with ID {perimeter_id} does not exist"},
-                status=status.HTTP_400_BAD_REQUEST,
+            results["failed"] += 1
+            results["errors"].append(
+                {"error": f"Perimeter with ID {perimeter_id} does not exist"}
+            )
+        except (APIException, ValidationError) as e:
+            results["failed"] += 1
+            results["errors"].append(
+                {
+                    "error": f"Failed to create compliance assessment: {readable_error(e)}"
+                }
             )
         except Exception as e:
-            logger.error(f"Error creating compliance assessment: {str(e)}")
-            return Response(
-                {"error": f"Failed to create compliance assessment: {str(e)}"},
-                status=status.HTTP_400_BAD_REQUEST,
+            logger.error("Error creating compliance assessment", error=e)
+            results["failed"] += 1
+            results["errors"].append(
+                {"error": "Failed to create compliance assessment"}
             )
 
         return results
@@ -4936,7 +5220,7 @@ class LoadFileView(APIView):
 
             summary_df = normalize_df_columns(
                 normalize_datetime_columns(
-                    pd.read_excel(excel_data, sheet_name=summary_sheet)
+                    read_excel_sheet(excel_data, sheet_name=summary_sheet)
                 )
             ).fillna("")
             summary_records = summary_df.to_dict(orient="records")
@@ -5083,7 +5367,7 @@ class LoadFileView(APIView):
 
             sheet_df = normalize_df_columns(
                 normalize_datetime_columns(
-                    pd.read_excel(excel_data, sheet_name=sheet_name)
+                    read_excel_sheet(excel_data, sheet_name=sheet_name)
                 )
             ).fillna("")
 
@@ -5283,7 +5567,10 @@ class LoadFileView(APIView):
                         )
                         if controls_cell not in (None, ""):
                             controls = _resolve_applied_controls(
-                                controls_cell, compliance_assessment.folder, request
+                                controls_cell,
+                                compliance_assessment.folder,
+                                request,
+                                linked=requirement_assessment.applied_controls.all(),
                             )
                             row_controls.extend(controls.created)
                             requirement_data["applied_controls"] = controls.ids
@@ -5377,14 +5664,18 @@ class LoadFileView(APIView):
                         else:
                             results["failed"] += 1
                             results["errors"].append(
-                                {"record": record, "errors": req_serializer.errors}
+                                {
+                                    "record": record,
+                                    "error": readable_error(req_serializer.errors),
+                                }
                             )
                     else:
                         results["failed"] += 1
                         results["errors"].append(
                             {
                                 "record": record,
-                                "error": f"No matching requirement found with ref_id '{ref_id}' or urn '{urn}'",
+                                "error": f"No matching requirement found with ref_id '{ref_id}'"
+                                + (f" or urn '{urn}'" if urn else ""),
                             }
                         )
             except Exception as e:
@@ -5422,7 +5713,7 @@ class LoadFileView(APIView):
             if len(sheet_names) == 1:
                 # Single-sheet file: treat it as a Summary-only import.
                 df = normalize_datetime_columns(
-                    pd.read_excel(excel_file, sheet_name=sheet_names[0])
+                    read_excel_sheet(excel_file, sheet_name=sheet_names[0])
                 ).fillna("")
                 records = df.to_dict(orient="records")
                 base_context = BaseContext(
@@ -5455,7 +5746,7 @@ class LoadFileView(APIView):
             }
 
             summary_df = normalize_datetime_columns(
-                pd.read_excel(excel_file, sheet_name="Summary")
+                read_excel_sheet(excel_file, sheet_name="Summary")
             ).fillna("")
             summary_records = summary_df.to_dict(orient="records")
 
@@ -5496,7 +5787,7 @@ class LoadFileView(APIView):
                 )
 
                 sheet_df = normalize_datetime_columns(
-                    pd.read_excel(excel_file, sheet_name=sheet_name)
+                    read_excel_sheet(excel_file, sheet_name=sheet_name)
                 ).fillna("")
                 sheet_records = sheet_df.to_dict(orient="records")
 
@@ -5583,7 +5874,7 @@ class LoadFileView(APIView):
             if parent_sheet is None and not has_child_sheets:
                 # Flat list of processings (legacy single-sheet format)
                 df = normalize_df_columns(
-                    normalize_datetime_columns(pd.read_excel(excel_file)).fillna("")
+                    normalize_datetime_columns(read_excel_sheet(excel_file)).fillna("")
                 )
                 return (
                     ProcessingRecordConsumer(base_context)
@@ -5601,7 +5892,7 @@ class LoadFileView(APIView):
 
             parent_df = normalize_df_columns(
                 normalize_datetime_columns(
-                    pd.read_excel(excel_file, sheet_name=parent_sheet)
+                    read_excel_sheet(excel_file, sheet_name=parent_sheet)
                 ).fillna("")
             )
             parent_records = parent_df.to_dict(orient="records")
@@ -5653,7 +5944,7 @@ class LoadFileView(APIView):
                 result_key, consumer_class = PROCESSING_CHILD_SHEETS[key]
                 sheet_df = normalize_df_columns(
                     normalize_datetime_columns(
-                        pd.read_excel(excel_file, sheet_name=sheet_name)
+                        read_excel_sheet(excel_file, sheet_name=sheet_name)
                     ).fillna("")
                 )
                 sheet_records = sheet_df.to_dict(orient="records")
@@ -5712,7 +6003,7 @@ class LoadFileView(APIView):
             if "Entities" in excel_data.sheet_names:
                 logger.info("Processing Entities sheet")
                 entities_df = normalize_datetime_columns(
-                    pd.read_excel(excel_file, sheet_name="Entities")
+                    read_excel_sheet(excel_file, sheet_name="Entities")
                 ).fillna("")
                 entities_records = entities_df.to_dict(orient="records")
                 entities_result, entity_ref_map, entity_name_map = (
@@ -5730,7 +6021,7 @@ class LoadFileView(APIView):
             if "Solutions" in excel_data.sheet_names:
                 logger.info("Processing Solutions sheet")
                 solutions_df = normalize_datetime_columns(
-                    pd.read_excel(excel_file, sheet_name="Solutions")
+                    read_excel_sheet(excel_file, sheet_name="Solutions")
                 ).fillna("")
                 solutions_records = solutions_df.to_dict(orient="records")
                 solutions_result, solution_ref_map = self._process_solutions(
@@ -5750,7 +6041,7 @@ class LoadFileView(APIView):
             if "EntityAssessments" in excel_data.sheet_names:
                 logger.info("Processing EntityAssessments sheet")
                 entity_assessments_df = normalize_datetime_columns(
-                    pd.read_excel(excel_file, sheet_name="EntityAssessments")
+                    read_excel_sheet(excel_file, sheet_name="EntityAssessments")
                 ).fillna("")
                 entity_assessments_records = entity_assessments_df.to_dict(
                     orient="records"
@@ -5775,7 +6066,7 @@ class LoadFileView(APIView):
             if "Contracts" in excel_data.sheet_names:
                 logger.info("Processing Contracts sheet")
                 contracts_df = normalize_datetime_columns(
-                    pd.read_excel(excel_file, sheet_name="Contracts")
+                    read_excel_sheet(excel_file, sheet_name="Contracts")
                 ).fillna("")
                 contracts_records = contracts_df.to_dict(orient="records")
                 contracts_result = self._process_contracts(
@@ -5798,7 +6089,7 @@ class LoadFileView(APIView):
             if "Representatives" in excel_data.sheet_names:
                 logger.info("Processing Representatives sheet")
                 representatives_df = normalize_datetime_columns(
-                    pd.read_excel(excel_file, sheet_name="Representatives")
+                    read_excel_sheet(excel_file, sheet_name="Representatives")
                 ).fillna("")
                 representatives_records = representatives_df.to_dict(orient="records")
                 representatives_result = self._process_representatives(
@@ -5934,7 +6225,7 @@ class LoadFileView(APIView):
                 if not serializer.is_valid():
                     results["failed"] += 1
                     results["errors"].append(
-                        {"record": record, "errors": serializer.errors}
+                        {"record": record, "error": readable_error(serializer.errors)}
                     )
                     return "failed"
                 updated_instance = serializer.save()
@@ -6055,7 +6346,7 @@ class LoadFileView(APIView):
 
             except Exception as e:
                 logger.warning(f"Error creating entity: {str(e)}")
-                self._add_tprm_record_error(results, record, str(e))
+                self._add_tprm_record_error(results, record, readable_error(e))
 
         # Second pass: handle parent_entity relationships
         for record in records:
@@ -6179,7 +6470,7 @@ class LoadFileView(APIView):
 
             except Exception as e:
                 logger.warning(f"Error creating solution: {str(e)}")
-                self._add_tprm_record_error(results, record, str(e))
+                self._add_tprm_record_error(results, record, readable_error(e))
 
         self._log_tprm_import_results("Solution", results)
         return results, ref_id_map
@@ -6365,7 +6656,7 @@ class LoadFileView(APIView):
 
             except Exception as e:
                 logger.warning(f"Error creating entity assessment: {str(e)}")
-                self._add_tprm_record_error(results, record, str(e))
+                self._add_tprm_record_error(results, record, readable_error(e))
 
         self._log_tprm_import_results("Entity assessment", results)
         return results
@@ -6521,7 +6812,7 @@ class LoadFileView(APIView):
 
             except Exception as e:
                 logger.warning(f"Error creating contract: {str(e)}")
-                self._add_tprm_record_error(results, record, str(e))
+                self._add_tprm_record_error(results, record, readable_error(e))
 
         self._log_tprm_import_results("Contract", results)
         return results
@@ -6607,7 +6898,7 @@ class LoadFileView(APIView):
 
             except Exception as e:
                 logger.warning(f"Error creating representative: {str(e)}")
-                self._add_tprm_record_error(results, record, str(e))
+                self._add_tprm_record_error(results, record, readable_error(e))
 
         self._log_tprm_import_results("Representative", results)
         return results
@@ -8618,8 +8909,68 @@ class LoadFileView(APIView):
                                 )
                         results["details"]["operating_modes_created"] += 1
 
-                if not stopped:
-                    results["successful"] = 1
+                if stopped:
+                    return results
+
+                # Workshop 5: risk assessment, security measures, then scenarios
+                ra_data = data.get("risk_assessment") or {}
+                if ra_data or data.get("risk_scenarios"):
+                    ra_serializer = RiskAssessmentWriteSerializer(
+                        data={
+                            "name": ra_data.get("name") or study.name,
+                            "ref_id": ra_data.get("ref_id", ""),
+                            "version": ra_data.get("version", ""),
+                            "description": ra_data.get("description", ""),
+                            "folder": str(folder.id),
+                            "risk_matrix": str(study.risk_matrix_id),
+                            "ebios_rm_study": str(study.id),
+                        },
+                        context={"request": request},
+                    )
+                    if not ra_serializer.is_valid():
+                        results["errors"].append(
+                            {
+                                "risk_assessment": ra_data.get("name", ""),
+                                "error": readable_error(ra_serializer.errors),
+                            }
+                        )
+                        return results
+                    risk_assessment = ra_serializer.save()
+                    results["details"]["risk_assessment"] = str(risk_assessment.id)
+
+                    base_context = BaseContext(
+                        request, folder_id=str(folder.id), on_conflict=on_conflict
+                    )
+                    for key, consumer, records, context in (
+                        (
+                            "security_measures",
+                            AppliedControlRecordConsumer,
+                            data.get("security_measures", []),
+                            base_context,
+                        ),
+                        (
+                            "risk_scenarios",
+                            RiskAssessmentRecordConsumer,
+                            data.get("risk_scenarios", []),
+                            replace(base_context, target_id=str(risk_assessment.id)),
+                        ),
+                    ):
+                        res = consumer(context).process_records(records).to_dict()
+                        results["details"][key] = res
+                        results["errors"].extend(res["errors"])
+                        if res["stopped"]:
+                            return results
+
+                    for rs_data in data.get("risk_scenarios", []):
+                        op_scenario = op_scenario_lookup.get(
+                            rs_data.get("operational_scenario")
+                        )
+                        if op_scenario:
+                            risk_assessment.risk_scenarios.filter(
+                                name__iexact=rs_data.get("name")
+                            ).update(operational_scenario=op_scenario)
+
+                results["successful"] = 1
 
             else:
                 results["failed"] = 1

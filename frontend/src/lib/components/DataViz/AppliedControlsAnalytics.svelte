@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
-	import BarChart from '$lib/components/Chart/BarChart.svelte';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import DonutChart from '#lib/components/Chart/DonutChart.svelte';
+	import BarChart from '#lib/components/Chart/BarChart.svelte';
 	import SimpleCard from './SimpleCard.svelte';
 
 	interface Bucket {

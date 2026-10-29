@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { breadcrumbs } from '$lib/utils/breadcrumbs';
-	import { LOCALE_MAP, language, defaultLangLabels } from '$lib/utils/locales';
-	import { m } from '$paraglide/messages';
-	import { getLocale, locales, setLocale } from '$paraglide/runtime';
+	import { breadcrumbs } from '#lib/utils/breadcrumbs.js';
+	import { LOCALE_MAP, language, defaultLangLabels } from '#lib/utils/locales.js';
+	import { m } from '#paraglide/messages.js';
+	import { getLocale, locales, setLocale } from '#paraglide/runtime.js';
 
-	import { getModalStore, type ModalSettings } from '$lib/components/Modals/stores';
+	import { getModalStore, type ModalSettings } from '#lib/components/Modals/stores.js';
 	import { createEventDispatcher, onMount } from 'svelte';
 	const dispatch = createEventDispatcher();
 

@@ -1,25 +1,25 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { invalidateAll } from '$app/navigation';
+	import { refreshAll } from '$app/navigation';
 	import { applyAction, deserialize } from '$app/forms';
 	import { setContext } from 'svelte';
 	import { writable } from 'svelte/store';
-	import RecursiveTreeView from '$lib/components/TreeView/RecursiveTreeView.svelte';
+	import RecursiveTreeView from '#lib/components/TreeView/RecursiveTreeView.svelte';
 	import { Popover } from '@skeletonlabs/skeleton-svelte';
-	import type { TreeViewNode } from '$lib/components/TreeView/types';
+	import type { TreeViewNode } from '#lib/components/TreeView/types.js';
 	import type { PageData } from './$types';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import { m } from '$paraglide/messages';
-	import { getLocale } from '$paraglide/runtime';
-	import { formatDate } from '$lib/utils/datetime';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import { m } from '#paraglide/messages.js';
+	import { getLocale } from '#paraglide/runtime.js';
+	import { formatDate } from '#lib/utils/datetime.js';
 	import TreeViewItemContentSimple from './TreeViewItemContentSimple.svelte';
 	import TreeViewItemLeadSimple from './TreeViewItemLeadSimple.svelte';
-	import { complianceResultColorMap } from '$lib/utils/constants';
-	import TreeExpandCollapseToggle from '$lib/components/TreeView/TreeExpandCollapseToggle.svelte';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import { complianceResultColorMap } from '#lib/utils/constants.js';
+	import TreeExpandCollapseToggle from '#lib/components/TreeView/TreeExpandCollapseToggle.svelte';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
 	import { superForm } from 'sveltekit-superforms';
-	import { getToastStore } from '$lib/components/Toast/stores';
-	import { getModalStore, type ModalSettings } from '$lib/components/Modals/stores';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import { getModalStore, type ModalSettings } from '#lib/components/Modals/stores.js';
 
 	interface Props {
 		data: PageData;
@@ -367,7 +367,7 @@
 				$checkedNodesStore = new Set();
 				// Apply the action result and refresh page data
 				await applyAction(result);
-				await invalidateAll();
+				await refreshAll();
 				toastStore.trigger({
 					message: m.assignmentCreated(),
 					background: 'preset-filled-success-500',
@@ -420,7 +420,7 @@
 			if (result.type === 'success' && result.data?.status === 204) {
 				// Apply the action result and refresh page data
 				await applyAction(result);
-				await invalidateAll();
+				await refreshAll();
 				toastStore.trigger({
 					message: m.assignmentDeleted(),
 					background: 'preset-filled-success-500',
@@ -485,7 +485,7 @@
 				// Reset edit state
 				cancelEdit();
 				await applyAction(result);
-				await invalidateAll();
+				await refreshAll();
 				toastStore.trigger({
 					message: m.assignmentUpdated(),
 					background: 'preset-filled-success-500',
@@ -625,7 +625,7 @@
 			const result = deserialize(await response.text());
 			if (result.type === 'success' && result.data?.status === 200) {
 				await applyAction(result);
-				await invalidateAll();
+				await refreshAll();
 				toastStore.trigger({
 					message: m.statusUpdatedSuccessfully(),
 					background: 'preset-filled-success-500',
@@ -840,6 +840,7 @@
 							<AutocompleteSelect
 								form={assignmentSuperForm}
 								optionsEndpoint="actors"
+								lazy
 								optionsDetailedUrlParameters={[['include_third_parties', 'true']]}
 								optionsLabelField="str"
 								optionsInfoFields={{

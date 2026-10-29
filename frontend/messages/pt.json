@@ -27,6 +27,7 @@
 	"estonian": "Estoniano",
 	"slovak": "Eslovaco",
 	"slovenian": "Esloveno",
+	"norwegian": "Norueguês",
 	"addThreat": "Adicionar ameaça",
 	"addVulnerability": "Adicionar vulnerabilidade",
 	"addReferenceControl": "Adicionar controle de referência",
@@ -257,6 +258,8 @@
 	"dropNotes": "Descartar notas",
 	"resubmissionNotes": "Notas de reenvio",
 	"requestChanges": "Solicitar alterações",
+	"flagForChangeRequest": "Sinalizar para alterações",
+	"removeChangeRequestFlag": "Remover marcação",
 	"reviewChangesRequested": "Alterações solicitadas",
 	"noFlaggedItemsHint": "Nenhum requisito está sinalizado. O respondente receberá apenas a nota abaixo — sinalize os itens a corrigir no questionário para indicar o que precisa de ajustes.",
 	"itemsNeedingChanges": [
@@ -1196,6 +1199,8 @@
 	"appliedControlNoStatus": "O controle aplicado não tem status",
 	"taskTemplateNoAssignee": "A tarefa não tem responsável",
 	"taskNodeOverdue": "A ocorrência da tarefa passou do prazo",
+	"vulnerabilityOpenWithRemediationDate": "Vulnerabilidade aberta tem data de remediação",
+	"vulnerabilityResolvedWithoutRemediationDate": "Vulnerabilidade resolvida sem data de remediação",
 	"evidenceNoFile": "A evidência não tem nenhum arquivo carregado",
 	"requirementAppliedControlHelpText": "As evidências vinculadas às medidas selecionadas serão automaticamente associadas ao requisito.",
 	"requirementEvidenceHelpText": "Esta aba permite adicionar evidências extras ao requisito.",
@@ -1453,6 +1458,8 @@
 	"templateQuickFormSubmittedDescription": "Enviado a um revisor quando uma resposta de formulário rápido é enviada",
 	"templateSecurityExceptionAssignmentName": "Atribuição de exceção",
 	"templateSecurityExceptionAssignmentDescription": "Enviado quando uma exceção de segurança é atribuída",
+	"templateVulnerabilityAssignmentName": "Atribuição de vulnerabilidade",
+	"templateVulnerabilityAssignmentDescription": "Enviado quando uma vulnerabilidade é atribuída",
 	"templateSecurityExceptionExpiringSoonName": "Exceção prestes a expirar",
 	"templateSecurityExceptionExpiringSoonDescription": "Enviado quando exceções de segurança estão prestes a expirar",
 	"templateSecurityExceptionStatusChangedName": "Status da exceção alterado",
@@ -1480,6 +1487,7 @@
 	"notificationTitleQuickFormSubmitted": "O formulário rápido '{response_name}' aguarda sua revisão",
 	"notificationTitleRiskScenarioAssignment": "Você foi designado ao cenário de risco '{scenario_name}'",
 	"notificationTitleSecurityExceptionAssignment": "Você foi atribuído à exceção '{exception_name}'",
+	"notificationTitleVulnerabilityAssignment": "Você foi atribuído à vulnerabilidade '{vulnerability_name}'",
 	"notificationTitleSecurityExceptionExpiringSoon": "A exceção '{exception_name}' expira em {days_remaining} dia(s)",
 	"notificationTitleSecurityExceptionStatusChanged": "A exceção '{exception_name}' agora está {new_status}",
 	"notificationTitleTaskNodeDueSoon": "A tarefa '{task_name}' vence em {days_remaining} dia(s)",
@@ -1514,8 +1522,6 @@
 	"docHtmlTemplatesDescription": "Personalize o layout HTML/CSS usado quando os documentos são exportados para PDF (capa, cabeçalhos, rodapés, identidade visual). Envie seu próprio modelo para substituir o padrão integrado.",
 	"docHtmlTemplateUploadHelp": "Envie um arquivo .html (sintaxe de template Django) usando as mesmas variáveis do padrão. Baixe primeiro o padrão para usá-lo como ponto de partida.",
 	"docHtmlTemplateSyntaxHelp": "Os modelos usam a sintaxe de templates do Django renderizada pelo WeasyPrint. Incorpore CSS em uma tag <style> e use as variáveis abaixo para compor o layout.",
-	"wordTemplates": "Modelos de relatório Word",
-	"wordTemplatesDescription": "Personalize os modelos de relatório do Word (.docx) usados na geração de relatórios. Envie seus próprios modelos para substituir os padrões integrados.",
 	"wordTemplatesWarning": "Revise cuidadosamente o conteúdo do modelo antes do uso e certifique-se de que ele esteja em conformidade com as políticas de segurança e conformidade da sua organização.",
 	"uploadTemplate": "Enviar modelo",
 	"wordTemplateUploadHelp": "Envie um arquivo .docx usando as mesmas variáveis de modelo do padrão. Baixe primeiro o modelo padrão para usá-lo como ponto de partida.",
@@ -2360,6 +2366,12 @@
 	"objectsTotal": "objetos no total",
 	"inDomain": "no domínio",
 	"studyDescription": "Descrição do estudo",
+	"notDefinedYet": "Ainda não definido",
+	"describeStudy": "Descrever o estudo",
+	"studyDescriptionMissing": "Este estudo ainda não foi descrito. Delimitar o seu âmbito é o primeiro passo da oficina 1.",
+	"studyDescriptionHelpText": "Finalidade do estudo, âmbito de negócio e técnico, partes interessadas e horizonte temporal",
+	"studyObjectivesHelpText": "Resultados esperados do estudo (ex.: acreditação, estratégia de segurança, plano de tratamento de riscos)",
+	"constraintsHypothesesHelpText": "Pressupostos e restrições que enquadram o estudo (orçamento, prazos, âmbito excluído, etc.)",
 	"confirmImport": "Confirmar importação",
 	"riskOrigin": "Origem do risco",
 	"riskOrigins": "Origens de risco",
@@ -3058,11 +3070,60 @@
 	"changeSeverity": "Alterar severidade",
 	"batchChangeSeverity": "Alterar severidade",
 	"detectedAt": "Data de deteção",
-	"detectedAtHelpText": "Quando a vulnerabilidade foi descoberta. O padrão é hoje. Usado como âncora do SLA quando a política está definida para data de detecção.",
+	"detectedAtHelpText": "Quando a vulnerabilidade foi descoberta. O padrão é hoje, a menos que o SLA esteja desativado. Usado como âncora do SLA quando a política está definida para data de detecção.",
+	"remediatedAt": "Data de remediação",
+	"remediatedAtHelpText": "Definida para o dia em que a vulnerabilidade é resolvida (mitigada, corrigida, não explorável ou não afetada), a menos que você informe uma. Mantida quando ela é reaberta.",
+	"vulnerabilityOpenForDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Em aberto há {count} dia desde a deteção",
+				"countPlural=many": "Em aberto há {count} dias desde a deteção",
+				"countPlural=other": "Em aberto há {count} dias desde a deteção"
+			}
+		}
+	],
+	"vulnerabilityRemediatedInDays": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Remediada {count} dia após a deteção",
+				"countPlural=many": "Remediada {count} dias após a deteção",
+				"countPlural=other": "Remediada {count} dias após a deteção"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLeft": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "Falta {count} dia",
+				"countPlural=many": "Faltam {count} dias",
+				"countPlural=other": "Faltam {count} dias"
+			}
+		}
+	],
+	"vulnerabilitySlaDaysLate": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} dia de atraso",
+				"countPlural=many": "{count} dias de atraso",
+				"countPlural=other": "{count} dias de atraso"
+			}
+		}
+	],
+	"excepted": "Com exceção",
+	"exceptionEnds": "Fim da exceção",
 	"refreshDueDates": "Atualizar prazos de SLA",
 	"refreshDueDatesConfirm": "Isso recalculará todos os prazos com base na política de SLA atual. Os prazos existentes serão sobrescritos. Continuar?",
 	"resetToDefaults": "Restaurar padrões",
 	"refreshDueDatesFailed": "Falha ao atualizar as datas de vencimento",
+	"vulnerabilitySlaDisabledHint": "O SLA de vulnerabilidades está desativado nos sinalizadores de funcionalidades, por isso as datas de vencimento não são calculadas",
 	"changeTreatment": "Alterar tratamento",
 	"changeAssignee": "Alterar responsável pela atribuição",
 	"changeResult": "Alterar resultado",
@@ -4745,6 +4806,7 @@
 	"assetsDescription": "Processos e funções de negócio (primários), aplicações ou componentes técnicos (de suporte)",
 	"threatsDescription": "Ameaças potenciais à sua organização",
 	"vulnerabilitiesDescription": "Vulnerabilidades e fraquezas conhecidas",
+	"vulnerabilitySlaDescription": "Calcular as datas de vencimento das vulnerabilidades a partir da gravidade e mostrar o quão perto cada uma está do seu prazo",
 	"riskScenariosDescription": "Registro de riscos com cenários e seus tratamentos",
 	"referenceControlsDescription": "Modelo de controles de segurança típicos",
 	"requirementMappingSetsDescription": "Mapeamentos entre diferentes frameworks e normas",
@@ -4787,7 +4849,7 @@
 	"rightRequestsDescription": "Solicitações de direitos dos titulares de dados (LGPD/GDPR)",
 	"dataBreachesDescription": "Incidentes e notificações de violação de dados",
 	"gdpr": "LGPD / GDPR / Privacidade",
-	"gdprDescription": "Recursos de proteção de dados e gestão de privacidade (conformidade com a GDPR)",
+	"gdprDescription": "Recursos de proteção de dados e gestão de privacidade (conformidade com a LGPD/GDPR)",
 	"orderedEntryListAddNewEntry": "Adicionar nova entrada",
 	"orderedEntryListRefIdPlaceholder": "ID de ref.",
 	"orderedEntryListNamePlaceholder": "Nome",
@@ -4848,7 +4910,7 @@
 	"syncCweCatalogFailed": "Erro CWE",
 	"vulnerability": "Vulnerabilidade",
 	"vulnerabilitySlaPolicy": "SLA de vulnerabilidades",
-	"vulnerabilitySlaPolicyHelpText": "Defina o número máximo de dias para corrigir uma vulnerabilidade com base na sua gravidade.",
+	"vulnerabilitySlaPolicyHelpText": "Defina o número máximo de dias para corrigir uma vulnerabilidade com base na sua gravidade. Para desligar o SLA por completo, desative o sinalizador de funcionalidade SLA de vulnerabilidades.",
 	"sla": "SLA",
 	"caution": "Atenção",
 	"slaAnchor": "Data de início do SLA",
@@ -7171,7 +7233,7 @@
 	"mappingMalformed": "Uma linha de regra não tem nível",
 	"tierBands": "A partir da pontuação do formulário",
 	"projectionFromScore": "a partir da pontuação do formulário {value}",
-	"tierBandsNoPoints": "Nenhuma pergunta deste formulário atribui pontos ainda: todo fornecedor pontuaria 0 e cairia na última faixa. Atribua uma pontuação às opções ou use uma regra numérica em Das regras.",
+	"tierBandsNoPoints": "Nenhuma pergunta deste formulário atribui pontos ainda: toda resposta pontuaria 0 e cairia na última faixa. Atribua uma pontuação às opções ou use uma regra numérica em Das regras.",
 	"tierBandsNumberRules": "Regras numéricas",
 	"tierBandsFrom": "de",
 	"tierBandsRest": "tudo abaixo",
@@ -7181,7 +7243,7 @@
 	"bandsReadTheScore": "As faixas de pontuação leem apenas a pontuação do formulário: coloque faixas em uma regra numérica em Das regras",
 	"tierMappingYesNoRules": "Regras de sim/não",
 	"tierMappingAdd": "Usar uma regra",
-	"tierMappingHelpText": "Uma regra sim/não confere no mínimo a sua camada quando disparada, p. ex. uma eliminatória para Crítica. Uma regra numérica posiciona o fornecedor em faixas, como a pontuação do formulário.",
+	"tierMappingHelpText": "Uma regra sim/não confere no mínimo a sua camada quando disparada, p. ex. uma eliminatória para Crítica. Uma regra numérica posiciona o objeto avaliado em faixas, como a pontuação do formulário.",
 	"tierHighestWins": "Quando vários se aplicam, prevalece o nível mais alto.",
 	"tierValue": "Pontuação que definiu o nível",
 	"tierAssessment": "Avaliação",
@@ -7292,5 +7354,14 @@
 	"keepEditing": "Continuar editando",
 	"pickOutsideDomain": "{domain} não contém todas as métricas escolhidas: escolha métricas dentro dele ou mova esta métrica para um domínio superior primeiro.",
 	"instancesNotVisible": "{count} que você não pode ver;",
-	"useInFormula": "Usar em uma fórmula"
+	"useInFormula": "Usar em uma fórmula",
+	"dpias": "RIPDs",
+	"dpiaScreeningStart": "Iniciar triagem de RIPD",
+	"processingRole": "Papel na LGPD/GDPR",
+	"processingControllers": "Clientes (controladores ou operadores)",
+	"dpiaRequiredYes": "RIPD necessário",
+	"dpiaRequiredNo": "RIPD não necessário",
+	"dpiaRequirementChange": "Alteração da exigência de RIPD",
+	"dpiaRequirementChanges": "Histórico da exigência de RIPD",
+	"previously": "Anteriormente"
 }

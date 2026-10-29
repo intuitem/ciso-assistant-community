@@ -24,9 +24,9 @@
 		createHandleGatedDragHandlers,
 		REFERENCEABLE_MODELS
 	} from './builder-utils.svelte';
-	import { locales as supportedLocales } from '$paraglide/runtime';
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { locales as supportedLocales } from '#paraglide/runtime.js';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { installKeyboardHandlers } from './keyboard';
 	import {
 		createCollapsedStore,
@@ -44,7 +44,7 @@
 	import { buildCelCatalog, setCelCatalogContext } from './cel-complete';
 	import OnAcceptEditor from './OnAcceptEditor.svelte';
 	import ImplementationGroupsEditor from './ImplementationGroupsEditor.svelte';
-	import VisibilityEditor from '$lib/components/ComplianceAssessment/VisibilityEditor.svelte';
+	import VisibilityEditor from '#lib/components/ComplianceAssessment/VisibilityEditor.svelte';
 	import { initReferentialCatalog } from './referential-catalog';
 
 	interface Props {
@@ -388,6 +388,7 @@
 	// the library-draft document is the persisted state (publishing is a
 	// separate, library-level concern).
 	beforeNavigate((navigation) => {
+		if (navigation.shallow && navigation.type === 'goto') return;
 		if (navigation.to?.route?.id === navigation.from?.route?.id) return;
 		let hasUnsaved = false;
 		unsavedStore.subscribe((v) => (hasUnsaved = v))();
@@ -410,8 +411,10 @@
 		)) {
 			return () => {};
 		}
+
 		const caret =
 			el instanceof HTMLSelectElement ? null : ([el.selectionStart, el.selectionEnd] as const);
+
 		el.blur();
 		return () => {
 			el.focus();
@@ -663,11 +666,11 @@
 									? 'fa-chevron-down'
 									: 'fa-chevron-right'} text-[10px] text-surface-500"
 							></i>
-							<span class="text-xs font-semibold text-surface-600-400 uppercase tracking-wider"
-								>{mode === 'quick_form'
-									? m.builderFormSettings()
-									: m.builderFrameworkSettings()}</span
-							>
+
+							<span class="text-xs font-semibold text-surface-600-400 uppercase tracking-wider">
+								{mode === 'quick_form' ? m.builderFormSettings() : m.builderFrameworkSettings()}
+							</span>
+
 							{#if !showSettings}
 								<span class="text-xs text-surface-500">{settingsSummary}</span>
 							{/if}
@@ -1101,7 +1104,7 @@
 										value={($frameworkStore.on_accept ?? []) as any[]}
 										rules={$frameworkStore.outcomes_definition ?? []}
 										{subjectModel}
-										onaddvendorsubject={() => addSubjectQuestion('entity')}
+										onaddsubject={addSubjectQuestion}
 										scored={formGivesPoints}
 										onupdate={(on_accept) => builder.updateFramework({ on_accept })}
 									/>

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
-	import type { CacheLock } from '$lib/utils/types';
+	import type { CacheLock } from '#lib/utils/types.js';
 
 	interface Props {
 		possibleOptions: { id: string; label: string }[];
