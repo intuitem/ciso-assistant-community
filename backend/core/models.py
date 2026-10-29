@@ -222,7 +222,7 @@ class RequirementAssessmentQualityContext:
     controls: dict
     # ra_id -> {evidence_id: (status, expiry_date)}, both attachment paths merged
     evidences: dict
-    # evidence_id -> (something is attached, newest revision's updated_at)
+    # evidence_id -> (newest revision has a file or link, latest updated_at)
     evidence_revisions: dict
 
 
@@ -308,17 +308,15 @@ def _build_requirement_assessment_quality_context(
     evidence_ids = {eid for per_ra in evidences.values() for eid in per_ra}
     if evidence_ids:
         EvidenceRevision = apps.get_model("core", "EvidenceRevision")
-        for (
-            evidence_id,
-            attachment,
-            link,
-            updated_at,
-        ) in EvidenceRevision.objects.filter(evidence_id__in=evidence_ids).values_list(
-            "evidence_id", "attachment", "link", "updated_at"
+        # Ascending versions: the newest revision decides what is attached.
+        for evidence_id, attachment, link, updated_at in (
+            EvidenceRevision.objects.filter(evidence_id__in=evidence_ids)
+            .order_by("version")
+            .values_list("evidence_id", "attachment", "link", "updated_at")
         ):
-            attached, latest = evidence_revisions.get(evidence_id, (False, None))
+            _attached, latest = evidence_revisions.get(evidence_id, (False, None))
             evidence_revisions[evidence_id] = (
-                attached or bool(attachment) or bool(link),
+                bool(attachment) or bool(link),
                 updated_at if latest is None else max(latest, updated_at),
             )
 
