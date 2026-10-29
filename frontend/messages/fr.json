@@ -4602,6 +4602,7 @@
 	"configureIntegrations": "Configurer les intégrations avec des services tiers.",
 	"conflict": "Conflit",
 	"connectionFailed": "Échec de la connexion",
+	"reenterSecretToTestModifiedConnection": "Saisissez à nouveau le secret pour tester une connexion modifiée",
 	"connectionSuccessful": "Connexion réussie",
 	"createRemoteObject": "Créer un objet distant",
 	"createRemoteObjectHelpText": "Lorsqu'activé, un objet correspondant sera créé dans le service tiers lors de la création de cet élément.",
