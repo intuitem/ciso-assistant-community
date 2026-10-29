@@ -2710,6 +2710,7 @@ class AssetFilter(GenericFilterSet):
 
 class AssetCapabilityViewSet(BaseModelViewSet):
     model = AssetCapability
+    http_method_names = ["get", "head", "options"]
     search_fields = ["name"]
 
 
