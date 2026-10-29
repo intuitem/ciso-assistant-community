@@ -15,7 +15,16 @@ from django.utils import timezone
 from global_settings import utils as ff_utils
 from global_settings.models import GlobalSettings
 from global_settings.utils import clear_feature_flags_cache
-from iam.models import Folder, Role, RoleAssignment, ServiceAccount, User, UserGroup
+from iam.models import (
+    IGNORED_PERMISSION_MODELS,
+    READ_ONLY_PERMISSION_MODELS,
+    Folder,
+    Role,
+    RoleAssignment,
+    ServiceAccount,
+    User,
+    UserGroup,
+)
 from iam.service_accounts import get_selectable_permissions
 
 TOKEN_ENDPOINT = "/api/identity/o/api/token"
@@ -204,6 +213,28 @@ class TestServiceAccountProvisioning:
         assert "viewFolder" in {entry["normalized_codename"] for entry in entries}
         assert not any(entry["codename"].endswith("_role") for entry in entries)
         assert not any("serviceaccount" in entry["codename"] for entry in entries)
+        assert not any(
+            entry["content_type"]["model"] in IGNORED_PERMISSION_MODELS
+            for entry in entries
+        )
+        assert not any(
+            entry["content_type"]["model"] in READ_ONLY_PERMISSION_MODELS
+            and entry["codename"].split("_")[0] in ("add", "change", "delete")
+            for entry in entries
+        )
+        commitment = {
+            entry["codename"]
+            for entry in entries
+            if entry["content_type"]["model"] == "commitment"
+        }
+        assert commitment == {"view_commitment", "transition_commitment"}
+        by_codename = {entry["codename"]: entry for entry in entries}
+        assert by_codename["view_folder"]["action_label"] == "permissionView"
+        full = by_codename["view_compliance_assessment_full"]
+        assert full["normalized_codename"] == "viewComplianceAssessmentFull"
+        assert full["action_label"] == "viewComplianceAssessmentFull"
+        normalized = [entry["normalized_codename"] for entry in entries]
+        assert len(normalized) == len(set(normalized))
 
     def test_builtin_roles_lists_selectable_permissions_only(self, admin_client):
         response = admin_client.get(f"{SA_ENDPOINT}roles/")
@@ -482,6 +513,31 @@ class TestServiceAccountExclusions:
         folder_ids = {row["id"] for row in response.json()["results"]}
         assert str(new_folder.id) in folder_ids
         assert str(domain_folder.id) not in folder_ids
+
+    def test_update_tolerates_held_permissions_no_longer_selectable(
+        self, admin_client, domain_folder
+    ):
+        payload = _create_sa(admin_client, domain_folder)
+        sa = ServiceAccount.objects.get(id=payload["id"])
+        # Granted before add_actor left the catalog
+        sa.role.permissions.add(Permission.objects.get(codename="add_actor"))
+        held_ids = [
+            p["id"]
+            for p in admin_client.get(f"{SA_ENDPOINT}{sa.id}/").json()["permissions"]
+        ]
+
+        response = admin_client.patch(
+            f"{SA_ENDPOINT}{sa.id}/", {"permissions": held_ids}, format="json"
+        )
+        assert response.status_code == 200, response.content
+        assert not sa.role.permissions.filter(codename="add_actor").exists()
+
+        response = admin_client.patch(
+            f"{SA_ENDPOINT}{sa.id}/",
+            {"permissions": [Permission.objects.get(codename="add_actor").id]},
+            format="json",
+        )
+        assert response.status_code == 400
 
     def test_update_permissions_to_empty_is_allowed(self, admin_client, domain_folder):
         # Note: the root folder's default_role is deliberately left in place — service
