@@ -76,8 +76,9 @@
 		}
 	}
 
+	// Derived so the effect reruns on a perimeter change, not on every keystroke in the form.
+	const perimeterId = $derived($formData.perimeter);
 	$effect(() => {
-		const perimeterId = $formData.perimeter;
 		const folder = $folderId;
 		if (perimeterId && folder) followPerimeterFolder(perimeterId, folder);
 	});
