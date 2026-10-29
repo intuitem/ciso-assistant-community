@@ -65,7 +65,8 @@ objects:
       assessable: false
       depth: 1
       ref_id: '1'
-      name: Restrict Internet Access and Protect Critical Systems from General
+      name: Restrict Internet Access and Protect Critical Systems from General IT
+        Environment
     - urn: urn:intuitem:risk:req_node:swift-cscf-v2026:1.1
       assessable: false
       depth: 2
