@@ -60,6 +60,8 @@ from .tools.library_tools import (
     get_stored_libraries,
     get_loaded_libraries,
     import_stored_library,
+    find_requirements,
+    get_requirement_mappings,
 )
 
 from .tools.write_tools import (
@@ -80,10 +82,16 @@ from .tools.write_tools import (
     refresh_quantitative_risk_study_simulations,
     create_task_template,
     create_vulnerability,
+    create_evidence,
+    create_incident,
+    create_timeline_entry,
 )
 
 from .tools.update_tools import (
     update_team,
+    update_folder,
+    update_user,
+    update_evidence,
     update_asset,
     update_risk_scenario,
     update_applied_control,
@@ -98,6 +106,8 @@ from .tools.update_tools import (
     delete_task_template,
     update_vulnerability,
     delete_vulnerability,
+    update_incident,
+    update_timeline_entry,
 )
 
 from .tools.tprm_tools import (
@@ -158,6 +168,8 @@ from .tools.ebios_rm_tools import (
 )
 
 READ_TOOLS = [
+    find_requirements,
+    get_requirement_mappings,
     count_objects,
     list_objects,
     get_object,
@@ -214,8 +226,10 @@ READ_TOOLS = [
 WRITE_TOOLS = [
     import_stored_library,
     create_folder,
+    update_folder,
     create_team,
     update_team,
+    update_user,
     create_perimeter,
     create_asset,
     create_threat,
@@ -233,6 +247,12 @@ WRITE_TOOLS = [
     create_vulnerability,
     update_vulnerability,
     delete_vulnerability,
+    create_evidence,
+    update_evidence,
+    create_incident,
+    update_incident,
+    create_timeline_entry,
+    update_timeline_entry,
     update_asset,
     update_risk_scenario,
     update_applied_control,
@@ -338,6 +358,8 @@ def register_tools(read_only: bool = False):
         mcp.tool(annotations=_annotations(tool, is_read=True))(_offload(tool))
     if not read_only:
         for tool in WRITE_TOOLS:
+            if config.IS_HTTP and tool is create_evidence:
+                continue
             mcp.tool(annotations=_annotations(tool, is_read=False))(_offload(tool))
     _registered = True
 

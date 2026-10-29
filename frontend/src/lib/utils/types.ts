@@ -95,6 +95,7 @@ export const URL_MODEL = [
 	'entity-scores',
 	'tiers',
 	'entity-tier-changes',
+	'solution-tier-changes',
 	'representatives',
 	'vulnerabilities',
 	'security-advisories',
@@ -121,6 +122,7 @@ export const URL_MODEL = [
 	'processings',
 	'right-requests',
 	'data-breaches',
+	'dpia-requirement-changes',
 	'purposes',
 	'personal-data',
 	'data-subjects',
@@ -295,3 +297,24 @@ export interface CacheLock {
 export type SvelteEvent<E extends Event = Event, T extends EventTarget = Element> = E & {
 	currentTarget: EventTarget & T;
 };
+
+/** The questionnaire's compliance split and global score, as the audit page shows them. */
+export interface ComplianceOverview {
+	donut: {
+		values: {
+			name: string;
+			localName: string;
+			value: number;
+			itemStyle: { color: string };
+		}[];
+	};
+	global_score: {
+		maturity_score: number;
+		min_score: number | null;
+		max_score: number | null;
+		total_max_score: number | null;
+		score_calculation_method: string;
+	};
+	show_result: boolean;
+	show_score: boolean;
+}

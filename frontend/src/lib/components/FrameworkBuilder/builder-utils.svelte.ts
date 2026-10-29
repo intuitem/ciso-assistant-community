@@ -1,5 +1,5 @@
-import { LOCALE_MAP, language, defaultLangLabels } from '$lib/utils/locales';
-import { m } from '$paraglide/messages';
+import { LOCALE_MAP, language, defaultLangLabels } from '#lib/utils/locales.js';
+import { m } from '#paraglide/messages.js';
 
 // ----- locale helpers (F1) -----
 
@@ -182,7 +182,9 @@ export const REFERENCEABLE_MODELS = [
 	'risk_scenario',
 	'vulnerability',
 	'perimeter',
-	'entity'
+	'entity',
+	'solution',
+	'processing'
 ] as const;
 
 /** Map from composite value to Font Awesome icon class. */

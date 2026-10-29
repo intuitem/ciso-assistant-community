@@ -5,21 +5,30 @@ Scoped with ``RoleAssignment.get_viewable_object_ids`` — the primitive
 """
 
 import re
+from collections import Counter
 
 from automation.models import PostureAssessment
-from crq.models import QuantitativeRiskScenario, QuantitativeRiskStudy
-from django.db.models import Q, TextField
-from django.db.models.functions import Cast
+from automation.workflows.models import Workflow
+from crq.models import (
+    QuantitativeRiskHypothesis,
+    QuantitativeRiskScenario,
+    QuantitativeRiskStudy,
+)
+from django.db.models import CharField, Q, TextField, Value
+from django.db.models.functions import Cast, Coalesce, Concat, NullIf, Trim
+from doc_management.models import DocumentContainer
 from ebios_rm.models import AttackPath, EbiosRMStudy, FearedEvent, StrategicScenario
 from iam.models import Folder, RoleAssignment
-from pmbok.models import Accreditation
+from metrology.models import Dashboard, MetricDefinition, MetricInstance
+from pmbok.models import Accreditation, GenericCollection, Project, ResponsibilityMatrix
 from privacy.models import DataBreach, Processing, RightRequest
 from resilience.models import BusinessImpactAnalysis
 from rest_framework import permissions
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
+from sec_intel.models import CWE, SecurityAdvisory, Technique
 from threat_modeling.models import ThreatModel
-from tprm.models import Contract, Entity, EntityAssessment, Solution
+from tprm.models import Contract, Entity, EntityAssessment, Representative, Solution
 
 from core.models import (
     Actor,
@@ -32,6 +41,8 @@ from core.models import (
     FindingsAssessment,
     Framework,
     Incident,
+    OrganisationIssue,
+    OrganisationObjective,
     Perimeter,
     Policy,
     ReferenceControl,
@@ -48,13 +59,16 @@ from core.models import (
 from core.utils import get_respondent_scoped_folder_ids
 
 
-def _search_entry(model, slug, *, ref_id=False, limit=200, extra_search=None):
+def _search_entry(
+    model, slug, *, ref_id=False, limit=200, extra_search=None, name=None
+):
     """Helper to build a search config entry."""
     return {
         "model": model,
         "slug": slug,
         "ref_id": ref_id,
         "limit": limit,
+        "name": name,
         # Additional fields to search on (icontains) beyond name/description/ref_id.
         # These are ORM lookup paths, e.g. "framework__name" for a FK join.
         "extra_search": extra_search or [],
@@ -66,12 +80,15 @@ SEARCHABLE_MODELS = [
     # ReferenceControl) get a tighter limit to avoid starving smaller models.
     # extra_search: additional fields to query via icontains for this model.
     # --- Organization ---
-    _search_entry(Folder, "folders"),
+    _search_entry(Folder, "folders", ref_id=True),
     _search_entry(Perimeter, "perimeters", ref_id=True),
     # --- Catalog ---
     _search_entry(Framework, "frameworks", ref_id=True),
     _search_entry(Threat, "threats", ref_id=True, limit=100, extra_search=["provider"]),
     _search_entry(ReferenceControl, "reference-controls", ref_id=True, limit=100),
+    _search_entry(Technique, "techniques", ref_id=True, limit=50),
+    _search_entry(CWE, "cwes", ref_id=True, limit=50),
+    _search_entry(SecurityAdvisory, "security-advisories", ref_id=True, limit=100),
     _search_entry(RiskMatrix, "risk-matrices", ref_id=True, limit=50),
     _search_entry(RequirementNode, "requirement-nodes", ref_id=True, limit=100),
     # --- Assets ---
@@ -85,10 +102,21 @@ SEARCHABLE_MODELS = [
     _search_entry(SecurityException, "security-exceptions", ref_id=True),
     _search_entry(TaskTemplate, "task-templates", ref_id=True, limit=100),
     _search_entry(Evidence, "evidences"),
+    # The container holds the document's name; its per-locale ManagedDocuments usually don't.
+    _search_entry(DocumentContainer, "document-containers", ref_id=True),
     # --- Governance ---
     _search_entry(RiskAcceptance, "risk-acceptances"),
     _search_entry(Campaign, "campaigns"),
     _search_entry(Accreditation, "accreditations", ref_id=True),
+    _search_entry(Project, "projects", ref_id=True),
+    _search_entry(OrganisationObjective, "organisation-objectives", ref_id=True),
+    _search_entry(OrganisationIssue, "organisation-issues", ref_id=True),
+    _search_entry(MetricInstance, "metric-instances", ref_id=True),
+    _search_entry(MetricDefinition, "metric-definitions", ref_id=True),
+    _search_entry(Dashboard, "dashboards", ref_id=True),
+    _search_entry(GenericCollection, "generic-collections", ref_id=True),
+    _search_entry(ResponsibilityMatrix, "responsibility-matrices", ref_id=True),
+    _search_entry(Workflow, "workflows", ref_id=True),
     # --- Risk ---
     _search_entry(RiskAssessment, "risk-assessments", ref_id=True),
     _search_entry(
@@ -103,6 +131,12 @@ SEARCHABLE_MODELS = [
         "quantitative-risk-scenarios",
         ref_id=True,
         extra_search=["quantitative_risk_study__name"],
+    ),
+    _search_entry(
+        QuantitativeRiskHypothesis,
+        "quantitative-risk-hypotheses",
+        ref_id=True,
+        extra_search=["quantitative_risk_scenario__name"],
     ),
     _search_entry(ThreatModel, "threat-models", ref_id=True),
     # --- Compliance ---
@@ -120,6 +154,17 @@ SEARCHABLE_MODELS = [
         Solution, "solutions", ref_id=True, extra_search=["provider_entity__name"]
     ),
     _search_entry(Contract, "contracts", ref_id=True),
+    _search_entry(
+        Representative,
+        "representatives",
+        ref_id=True,
+        extra_search=["email", "entity__name"],
+        name=Coalesce(
+            NullIf(Trim(Concat("first_name", Value(" "), "last_name")), Value("")),
+            "email",
+            output_field=CharField(),
+        ),
+    ),
     _search_entry(
         EntityAssessment, "entity-assessments", extra_search=["entity__name"]
     ),
@@ -203,6 +248,8 @@ def global_search(request):
             request.user, model_class
         )
         qs = model_class.objects.filter(id__in=accessible_ids)
+        if entry["name"] is not None:
+            qs = qs.annotate(name=entry["name"])
 
         # ComplianceAssessment has extra respondent scoping: users who lack the
         # full auditor view (view_compliance_assessment_full) in a folder can only see
@@ -325,14 +372,25 @@ def global_search(request):
         candidate["score"] = max(name_score, ref_score, desc_score, substring_bonus)
 
     # Sort by score descending, return top 50
-    candidates.sort(key=lambda c: c["score"], reverse=True)
-    top_results = candidates[:50]
+    # Ties (e.g. many substring hits) go to the shorter, closer name
+    candidates.sort(key=lambda c: (-c["score"], len(c["name"])))
+    # Up to 10 per type first, then the overflow, so one flooding type can't
+    # push the others out of the top 50
+    per_type = Counter()
+    head, overflow = [], []
+    for c in candidates:
+        per_type[c["type"]] += 1
+        (head if per_type[c["type"]] <= 10 else overflow).append(c)
+    top_results = (head + overflow)[:50]
 
     # Build final response: add URLs and truncate descriptions for the wire
     for r in top_results:
         if r["type"] == "requirement-nodes" and r.get("framework_id"):
             # Link to parent framework (no standalone requirement detail page yet)
             r["url"] = f"/frameworks/{r['framework_id']}"
+        elif r["type"] == "document-containers":
+            # Read mode picks the default-locale document when no ?doc= is given
+            r["url"] = f"/documents/{r['id']}/read"
         else:
             r["url"] = f"/{r['type']}/{r['id']}"
         r["description"] = r["description"][:200]

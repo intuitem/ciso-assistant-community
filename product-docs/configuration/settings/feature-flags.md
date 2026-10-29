@@ -40,6 +40,7 @@ The flags set here are the ceiling. Each user can hide modules they don't need f
 - **ebiosrm** — the EBIOS RM module.
 - **scoring_assistant** — the OWASP-based scoring assistant.
 - **vulnerabilities** — vulnerability tracking.
+- **vulnerability_sla** — labelled **Vulnerability SLA**: the [vulnerability SLA policy](vulnerability-sla.md), which gives vulnerabilities a due date from their severity and shows their SLA status. Turned off, no detection or due date is filled in automatically, **Refresh SLA due dates** is greyed out, and the **SLA** column, the SLA badge on a vulnerability's page and the settings tab are hidden; the policy is kept. Runs on vulnerabilities, so turning it on also turns on **vulnerabilities**.
 - **quantitative_risk_studies** — Monte-Carlo quantitative risk.
 - **inherent_risk** — surface inherent-risk columns alongside residual risk on assessments. _Default off._
 - **threat_modeling** — [threat models](../../concepts/ttps-and-threat-models.md#threat-models): attack graphs built from TTP catalog techniques. Needs `ttps` on as well. _Default off._
@@ -67,6 +68,7 @@ The flags set here are the ceiling. Each user can hide modules they don't need f
 - **purposes** — purposes register.
 - **right_requests** — data-subject right requests.
 - **data_breaches** — data-breach tracking.
+- **dpias** — labelled **DPIAs**: [DPIA screening and data protection impact assessments](../../concepts/dpia.md) on the processing register, and the **DPIAs** page. Runs on quick forms, so turning it on also turns on **quick_forms**. _Default off._
 
 ## Catalog
 

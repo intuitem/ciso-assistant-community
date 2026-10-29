@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { RESULT_BY_KEY } from '$lib/utils/portalResults';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { RESULT_BY_KEY } from '#lib/utils/portalResults.js';
 
 	let {
 		node,

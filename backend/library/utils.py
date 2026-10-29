@@ -445,6 +445,10 @@ class FrameworkImporter:
             "score_calculation_method", "average"
         )
         Framework.validate_score_calculation_method(score_calculation_method)
+        result_aggregation = self.framework_data.get(
+            "result_aggregation", Framework.ResultAggregation.PER_ANSWER
+        )
+        Framework.validate_result_aggregation(result_aggregation)
         Framework.validate_scoring_defaults(
             min_score=min_score,
             max_score=max_score,
@@ -486,6 +490,7 @@ class FrameworkImporter:
                 annotation=self.framework_data.get("annotation"),
                 min_score=min_score,
                 max_score=max_score,
+                result_aggregation=result_aggregation,
                 scores_definition=scores_definition,
                 implementation_groups_definition=self.framework_data.get(
                     "implementation_groups_definition"
@@ -534,7 +539,9 @@ class QuickFormPageImporter:
         aggregation = self.page_data.get("aggregation")
         if aggregation is not None and aggregation not in PAGE_AGGREGATIONS:
             return "aggregation must be one of {}".format(", ".join(PAGE_AGGREGATIONS))
-        return None
+        from core.quick_form_facts import facts_error
+
+        return facts_error([self.page_data])
 
     def import_page(self, quick_form: QuickForm):
         # update_or_create scoped to the form: create on fresh loads, in-place
@@ -554,6 +561,7 @@ class QuickFormPageImporter:
                 aggregation=normalize_page_aggregation(
                     self.page_data.get("aggregation")
                 ),
+                facts=self.page_data.get("facts") or [],
                 locale=quick_form.locale,
                 default_locale=quick_form.default_locale,
                 translations=self.page_data.get("translations", {}),
@@ -569,10 +577,19 @@ class QuickFormImporter:
     REQUIRED_FIELDS = {"ref_id", "urn"}
 
     def __init__(self, quick_form_data: dict):
-        self.quick_form_data = quick_form_data
+        from core.quick_form_ratings import expand_scales, scales_error
+
+        # Checked first: expanding malformed scales would raise instead of answering.
+        self._scales_error = scales_error(quick_form_data)
+        # Questions on a scale get its levels as choices before any page is read.
+        self.quick_form_data = (
+            quick_form_data if self._scales_error else expand_scales(quick_form_data)
+        )
         self._pages: List[QuickFormPageImporter] = []
 
     def init(self) -> Union[str, None]:
+        if self._scales_error:
+            return f"[QUICK_FORM_ERROR] {self._scales_error}"
         if missing_fields := self.REQUIRED_FIELDS - set(self.quick_form_data.keys()):
             return "Missing the following fields : {}".format(", ".join(missing_fields))
         pages = self.quick_form_data.get("pages")
@@ -638,6 +655,7 @@ class QuickFormImporter:
                 outcomes_definition=self.quick_form_data.get("outcomes_definition")
                 or [],
                 scores_definition=self.quick_form_data.get("scores_definition"),
+                scales_definition=self.quick_form_data.get("scales_definition") or [],
                 urn_namespace=urn.split(":")[1] if urn.startswith("urn:") else "custom",
                 provider=library_object.provider,
                 locale=library_object.locale,
@@ -645,6 +663,10 @@ class QuickFormImporter:
                 translations=self.quick_form_data.get("translations", {}),
             ),
         )
+        if created and self.quick_form_data.get("always_review"):
+            # First load only: re-imports keep what the instance chose.
+            quick_form.always_review = True
+            quick_form.save(update_fields=["always_review"])
         for page in self._pages:
             page.import_page(quick_form)
         if not created:
@@ -828,14 +850,33 @@ class MetricDefinitionImporter:
     REQUIRED_FIELDS = {"ref_id", "urn"}
     CATEGORIES = set(_category[0] for _category in MetricDefinition.Category.choices)
 
-    def __init__(self, metric_definition_data: dict):
+    def __init__(self, metric_definition_data: dict, shipped: dict | None = None):
         self.metric_definition_data = metric_definition_data
+        # Every definition of the library by URN: a formula may read one that
+        # is imported after it.
+        self.shipped = shipped or {}
 
     def is_valid(self) -> Union[str, None]:
+        from metrology.derived import validate_formula
+
         if missing_fields := self.REQUIRED_FIELDS - set(
             self.metric_definition_data.keys()
         ):
             return "Missing the following fields : {}".format(", ".join(missing_fields))
+
+        # A shipped formula is held to the same checks as one typed in: the
+        # sampler would otherwise fail on it at every tick.
+        formula_errors = validate_formula(
+            self.metric_definition_data.get("datasets"),
+            self.metric_definition_data.get("expression") or "",
+            self.metric_definition_data.get("inputs"),
+            shipped=self.shipped,
+            own_urn=self.metric_definition_data.get("urn"),
+        )
+        if formula_errors:
+            return "Invalid formula: {}".format(
+                "; ".join(message for _code, message in formula_errors)
+            )
 
         if (category := self.metric_definition_data.get("category")) is not None:
             if category not in MetricDefinitionImporter.CATEGORIES:
@@ -869,6 +910,11 @@ class MetricDefinitionImporter:
             choices_definition=self.metric_definition_data.get("choices_definition"),
             higher_is_better=self.metric_definition_data.get("higher_is_better", True),
             default_target=self.metric_definition_data.get("default_target"),
+            # A formula ships with its definition. Inputs name other
+            # definitions by URN, resolved when an instance computes.
+            datasets=self.metric_definition_data.get("datasets"),
+            expression=self.metric_definition_data.get("expression") or "",
+            inputs=self.metric_definition_data.get("inputs"),
             locale=library_object.locale,
             translations=self.metric_definition_data.get("translations", {}),
             default_locale=library_object.default_locale,
@@ -1096,9 +1142,14 @@ class LibraryImporter:
     ) -> Union[str, None]:
         metric_definition_importers = []
         import_errors = []
+        shipped = {
+            str(data["urn"]).lower(): data
+            for data in metric_definitions
+            if isinstance(data, dict) and data.get("urn")
+        }
         for index, metric_definition_data in enumerate(metric_definitions):
             metric_definition_importer = MetricDefinitionImporter(
-                metric_definition_data
+                metric_definition_data, shipped
             )
             metric_definition_importers.append(metric_definition_importer)
             if (

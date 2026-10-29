@@ -1,6 +1,13 @@
 """Write/Create MCP tools for CISO Assistant"""
 
-from ..client import make_post_request, make_get_request
+from pathlib import Path
+
+from ..client import (
+    make_post_request,
+    make_get_request,
+    make_upload_request,
+    make_delete_request,
+)
 from ..resolvers import (
     resolve_ebios_rm_study_id,
     resolve_folder_id,
@@ -14,7 +21,13 @@ from ..resolvers import (
     resolve_reference_control_id,
     resolve_qualification_ids,
     resolve_risk_level_index,
+    resolve_threat_id,
+    resolve_entity_id,
+    resolve_incident_id,
+    resolve_task_template_id,
+    resolve_in_folder_or_global,
     parse_duration,
+    resolve_vulnerability_id,
 )
 from ..config import GLOBAL_FOLDER_ID
 from ..utils.response_formatter import (
@@ -749,7 +762,6 @@ async def create_risk_scenario(
     description: str = "",
     risk_assessment_id: str = None,
     folder_id: str = None,
-    existing_controls: str = "",
     current_proba: int = None,
     current_impact: int = None,
     assets: list = None,
@@ -774,7 +786,6 @@ async def create_risk_scenario(
         description: Description
         risk_assessment_id: Risk assessment ID/name
         folder_id: Folder ID/name
-        existing_controls: Existing controls description
         current_proba: Probability 0-4 (0=very low, 4=very high)
         current_impact: Impact 0-4 (0=very low, 4=very high)
         assets: List of asset IDs/names
@@ -817,9 +828,6 @@ async def create_risk_scenario(
 
         if risk_assessment_id:
             payload["risk_assessment"] = risk_assessment_id
-
-        if existing_controls:
-            payload["existing_controls"] = existing_controls
 
         if current_proba is not None:
             payload["current_proba"] = current_proba
@@ -1427,6 +1435,7 @@ async def create_task_template(
     link: str = None,
     assigned_to: list = None,
     assets: list = None,
+    vulnerabilities: list = None,
     applied_controls: list = None,
     compliance_assessments: list = None,
     risk_assessments: list = None,
@@ -1449,6 +1458,7 @@ async def create_task_template(
         link: Link to evidence (e.g. Jira ticket)
         assigned_to: List of assignees as actor UUIDs, emails or names
         assets: List of asset IDs/names
+        vulnerabilities: List of vulnerability IDs/names
         applied_controls: List of applied control IDs/names
         compliance_assessments: Array of compliance assessment UUIDs
         risk_assessments: Array of risk assessment UUIDs
@@ -1506,6 +1516,11 @@ async def create_task_template(
         if findings_assessment is not None:
             payload["findings_assessment"] = findings_assessment
 
+        if vulnerabilities:
+            payload["vulnerabilities"] = [
+                resolve_vulnerability_id(v) for v in vulnerabilities
+            ]
+
         res = make_post_request("/task-templates/", payload)
 
         if res.status_code == 201:
@@ -1520,6 +1535,8 @@ async def create_task_template(
 async def create_vulnerability(
     name: str,
     description: str = None,
+    observation: str = None,
+    owner: list = None,
     ref_id: str = None,
     status: str = "--",
     severity: int = -1,
@@ -1528,12 +1545,22 @@ async def create_vulnerability(
     applied_controls: list = None,
     assets: list = None,
     security_exceptions: list = None,
+    evidences: list = None,
+    incidents: list = None,
+    task_templates: list = None,
+    detected_at: str = None,
+    published_date: str = None,
+    due_date: str = None,
+    eta: str = None,
+    remediated_at: str = None,
 ) -> str:
     """Create a new vulnerability
 
     Args:
         name: Vulnerability name (required)
         description: Description
+        observation: How the vulnerability is handled (markdown)
+        owner: List of owners as actor UUIDs, emails or names (users, teams, entities)
         ref_id: Reference ID (e.g. CVE identifier)
         status: -- | potential | exploitable | mitigated | fixed | not_exploitable | unaffected
         severity: -1 (undefined) | 0 (info) | 1 (low) | 2 (medium) | 3 (high) | 4 (critical)
@@ -1542,9 +1569,23 @@ async def create_vulnerability(
         applied_controls: List of applied control IDs/names
         assets: List of asset IDs/names
         security_exceptions: List of security exception UUIDs
+        evidences: List of evidence IDs/names
+        incidents: List of incident IDs/names
+        task_templates: List of task IDs/names
+        detected_at: Detection date (YYYY-MM-DD)
+        published_date: Publication date of the advisory (YYYY-MM-DD)
+        due_date: Due date (YYYY-MM-DD); computed from the SLA policy when left empty
+        eta: Expected resolution date (YYYY-MM-DD)
+        remediated_at: Remediation date (YYYY-MM-DD); kept whatever the status, and set to today when the status becomes resolved without one
     """
     try:
-        from ..resolvers import resolve_asset_id, resolve_applied_control_id
+        from ..resolvers import (
+            resolve_applied_control_id,
+            resolve_asset_id,
+            resolve_evidence_id,
+            resolve_incident_id,
+            resolve_task_template_id,
+        )
 
         if not folder_id and GLOBAL_FOLDER_ID:
             folder_id = GLOBAL_FOLDER_ID
@@ -1553,6 +1594,10 @@ async def create_vulnerability(
 
         if description is not None:
             payload["description"] = description
+        if observation is not None:
+            payload["observation"] = observation
+        if owner is not None:
+            payload["owner"] = resolve_actor_ids(owner)
         if ref_id is not None:
             payload["ref_id"] = ref_id
         if status is not None:
@@ -1580,6 +1625,24 @@ async def create_vulnerability(
 
         if security_exceptions:
             payload["security_exceptions"] = security_exceptions
+        if evidences is not None:
+            payload["evidences"] = [resolve_evidence_id(x) for x in evidences]
+        if incidents is not None:
+            payload["incidents"] = [resolve_incident_id(x) for x in incidents]
+        if task_templates is not None:
+            payload["task_templates"] = [
+                resolve_task_template_id(x) for x in task_templates
+            ]
+        if detected_at is not None:
+            payload["detected_at"] = detected_at
+        if published_date is not None:
+            payload["published_date"] = published_date
+        if due_date is not None:
+            payload["due_date"] = due_date
+        if eta is not None:
+            payload["eta"] = eta
+        if remediated_at is not None:
+            payload["remediated_at"] = remediated_at
 
         res = make_post_request("/vulnerabilities/", payload)
 
@@ -1590,3 +1653,319 @@ async def create_vulnerability(
             return f"Error creating vulnerability: {res.status_code} - {res.text}"
     except Exception as e:
         return f"Error in create_vulnerability: {str(e)}"
+
+
+def _human_size(num_bytes: int) -> str:
+    """Decimal units, matching the backend's ATTACHMENT_MAX_SIZE_MB check."""
+    if num_bytes < 1000:
+        return f"{num_bytes} B"
+    if num_bytes < 1000**2:
+        return f"{num_bytes / 1000:.1f} KB"
+    return f"{num_bytes / 1000**2:.1f} MB"
+
+
+def _delete_evidence_quietly(evidence_id) -> bool:
+    """Roll back a just-created evidence; never raises, True on a 2xx."""
+    try:
+        res = make_delete_request(f"/evidences/{evidence_id}/")
+        return 200 <= res.status_code < 300
+    except Exception:
+        return False
+
+
+def _attachment_stored(evidence_id):
+    """True/False if the server says whether the file was stored, None when
+    that cannot be checked."""
+    try:
+        res = make_get_request(f"/evidences/{evidence_id}/")
+        if res.status_code != 200:
+            return None
+        return bool(res.json().get("attachment"))
+    except Exception:
+        return None
+
+
+def _rollback_note(evidence_id) -> str:
+    if _delete_evidence_quietly(evidence_id):
+        return ""
+    return f" (could not delete empty evidence {evidence_id}, remove it manually)"
+
+
+async def create_evidence(
+    file_path: str,
+    name: str = None,
+    description: str = None,
+    folder_id: str = None,
+) -> str:
+    """Create a new evidence with one attachment read from a local file
+
+    One file per call: call again to attach several files (one evidence each).
+    Only available with the local stdio transport.
+    The returned evidence ID can then be linked through the `evidences`
+    parameter of other tools (e.g. task templates).
+
+    The file must exist on the user's disk. Screenshots pasted into the chat
+    work only when the client saved them locally and shows their path (Claude
+    Code does, e.g. "[Image: source: <path>]"): pass that path. Clients that
+    keep pasted images only in the conversation (e.g. Claude Desktop) give no
+    path: ask the user to save the file and give its path.
+
+    Args:
+        file_path: Local path to the file (~ is expanded); not inside a
+            hidden directory. The server checks the file type and size
+        name: Evidence name (defaults to the file name)
+        description: Description
+        folder_id: Folder ID/name
+    """
+    try:
+        path = Path(file_path).expanduser().resolve()
+        if any(part.startswith(".") for part in path.parts):
+            return f"Error: refusing a hidden file or directory: {file_path}"
+        if not path.is_file():
+            return f"Error: file not found: {file_path}"
+        size = path.stat().st_size
+        if not size:
+            return f"Error: file is empty: {file_path}"
+        filename = path.name
+
+        # Opened before creating the evidence: an unreadable file leaves no record.
+        with path.open("rb") as f:
+            if not folder_id and GLOBAL_FOLDER_ID:
+                folder_id = GLOBAL_FOLDER_ID
+
+            payload = {"name": name or filename}
+            if folder_id:
+                payload["folder"] = resolve_folder_id(folder_id)
+            if description is not None:
+                payload["description"] = description
+
+            res = make_post_request("/evidences/", payload)
+            if res.status_code != 201:
+                return f"Error creating evidence: {res.status_code} - {res.text}"
+
+            evidence = res.json()
+            evidence_id = evidence.get("id")
+
+            created = (
+                f"Created evidence: {evidence.get('name')} (ID: {evidence_id}) "
+                f"with attachment {filename} ({_human_size(size)})"
+            )
+
+            try:
+                upload = make_upload_request(
+                    f"/evidences/{evidence_id}/upload/", filename, f
+                )
+            except Exception as e:
+                if _attachment_stored(evidence_id):
+                    return created
+                return (
+                    f"Error uploading attachment, outcome unknown: {e} "
+                    f"(evidence {evidence_id} kept: check it before retrying)"
+                )
+
+            if upload.status_code != 200:
+                return (
+                    f"Error uploading attachment: {upload.status_code} - {upload.text}"
+                    f"{_rollback_note(evidence_id)}"
+                )
+            if _attachment_stored(evidence_id) is False:
+                return (
+                    "Error uploading attachment: the server stored no file"
+                    f"{_rollback_note(evidence_id)}"
+                )
+
+            return created
+    except Exception as e:
+        return f"Error in create_evidence: {str(e)}"
+
+
+async def create_incident(
+    name: str,
+    description: str = None,
+    ref_id: str = None,
+    status: str = None,
+    severity: int = None,
+    detection: str = None,
+    reported_at: str = None,
+    occurred_at: str = None,
+    resolved_at: str = None,
+    resolution: str = None,
+    is_bcp_activated: bool = None,
+    link: str = None,
+    folder_id: str = None,
+    threats: list = None,
+    owners: list = None,
+    assets: list = None,
+    vulnerabilities: list = None,
+    qualifications: list = None,
+    entities: list = None,
+    applied_controls: list = None,
+    task_templates: list = None,
+    filtering_labels: list = None,
+) -> str:
+    """Create a new incident
+
+    Args:
+        name: Incident name (required)
+        description: Description
+        ref_id: Reference ID
+        status: new | ongoing | resolved | closed | dismissed (default: new)
+        severity: 1 (critical) | 2 (major) | 3 (moderate) | 4 (minor) | 5 (low) | 6 (unknown) (default: 3)
+        detection: internally_detected | externally_detected
+        reported_at: Reported date/time (ISO 8601, defaults to now)
+        occurred_at: Occurrence date/time (ISO 8601, must not be after reported_at)
+        resolved_at: Resolution date/time (ISO 8601, must not be before occurred_at or reported_at)
+        resolution: Resolution notes
+        is_bcp_activated: Whether the business continuity plan was activated
+        link: External link (e.g. ticket URL)
+        folder_id: Folder ID/name (default: Global)
+        threats: List of threat IDs/names (resolved within the incident's folder, then Global)
+        owners: List of owners as actor UUIDs, emails or names
+        assets: List of asset IDs/names (resolved within the incident's folder, then Global)
+        vulnerabilities: List of vulnerability IDs/names
+        qualifications: List of qualifications: letters C/I/A/T, names or UUIDs
+        entities: List of third-party entity IDs/names
+        applied_controls: List of applied control IDs/names (resolved within the incident's folder, then Global)
+        task_templates: List of tasks (task templates) to link, as IDs/names (resolved within the incident's folder, then Global)
+        filtering_labels: List of label UUIDs
+    """
+    try:
+        scope_folder = resolve_folder_id(folder_id) if folder_id else None
+        folder = scope_folder or GLOBAL_FOLDER_ID
+
+        payload = {"name": name}
+        if folder:
+            payload["folder"] = folder
+
+        scalars = {
+            "description": description,
+            "ref_id": ref_id,
+            "status": status,
+            "severity": severity,
+            "detection": detection,
+            "reported_at": reported_at,
+            "occurred_at": occurred_at,
+            "resolved_at": resolved_at,
+            "resolution": resolution,
+            "is_bcp_activated": is_bcp_activated,
+            "link": link,
+        }
+        payload.update({k: v for k, v in scalars.items() if v is not None})
+
+        if threats:
+            payload["threats"] = [
+                resolve_in_folder_or_global(resolve_threat_id, t, scope_folder)
+                for t in threats
+            ]
+        if owners:
+            payload["owners"] = resolve_actor_ids(owners)
+        if assets:
+            payload["assets"] = [
+                resolve_in_folder_or_global(resolve_asset_id, a, scope_folder)
+                for a in assets
+            ]
+        if qualifications:
+            payload["qualifications"] = resolve_qualification_ids(qualifications)
+        if entities:
+            payload["entities"] = [resolve_entity_id(e) for e in entities]
+        if applied_controls:
+            payload["applied_controls"] = [
+                resolve_in_folder_or_global(resolve_applied_control_id, c, scope_folder)
+                for c in applied_controls
+            ]
+        if task_templates:
+            payload["task_templates"] = [
+                resolve_in_folder_or_global(resolve_task_template_id, t, scope_folder)
+                for t in task_templates
+            ]
+        if filtering_labels:
+            payload["filtering_labels"] = filtering_labels
+
+        if vulnerabilities:
+            payload["vulnerabilities"] = [
+                resolve_vulnerability_id(v) for v in vulnerabilities
+            ]
+
+        res = make_post_request("/incidents/", payload)
+
+        if res.status_code == 201:
+            incident = res.json()
+            return (
+                f"Created incident: {incident.get('name')} (ID: {incident.get('id')})"
+            )
+        else:
+            return f"Error creating incident: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in create_incident: {str(e)}"
+
+
+# Backend TimelineEntry.EntryType.get_manual_entry_types(); severity_changed and
+# status_changed are system-generated history and never accepted as input.
+MANUAL_TIMELINE_ENTRY_TYPES = ("detection", "mitigation", "observation")
+INVALID_TIMELINE_ENTRY_TYPE_ERROR = (
+    f"Error: entry_type must be one of {', '.join(MANUAL_TIMELINE_ENTRY_TYPES)}"
+)
+
+
+async def create_timeline_entry(
+    incident_id: str,
+    entry: str,
+    entry_type: str = None,
+    timestamp: str = None,
+    observation: str = None,
+    evidences: list = None,
+) -> str:
+    """Add an entry to an incident's timeline (detection, mitigation or observation)
+
+    The author is the API user and the folder is the incident's folder.
+
+    Args:
+        incident_id: Incident UUID or name (required)
+        entry: Short entry text, max 200 characters (required)
+        entry_type: detection | mitigation | observation (default: observation)
+        timestamp: Date/time of the event (ISO 8601 with timezone, e.g. 2026-01-01T10:00:00Z; defaults to now, must not be in the future)
+        observation: Detailed observation notes
+        evidences: List of evidence UUIDs
+    """
+    if entry_type is not None and entry_type not in MANUAL_TIMELINE_ENTRY_TYPES:
+        return INVALID_TIMELINE_ENTRY_TYPE_ERROR
+    try:
+        resolved_incident = resolve_incident_id(incident_id)
+
+        # Send the incident's folder so the backend RBAC add check is scoped to
+        # the incident's domain (it falls back to the root folder otherwise).
+        incident_res = make_get_request(f"/incidents/{resolved_incident}/")
+        if incident_res.status_code != 200:
+            return (
+                f"Error creating timeline entry: {incident_res.status_code} - "
+                f"{incident_res.text}"
+            )
+        folder = incident_res.json().get("folder")
+        if isinstance(folder, dict):
+            folder = folder.get("id")
+
+        payload = {"incident": resolved_incident, "entry": entry}
+        if folder:
+            payload["folder"] = folder
+
+        scalars = {
+            "entry_type": entry_type,
+            "timestamp": timestamp,
+            "observation": observation,
+        }
+        payload.update({k: v for k, v in scalars.items() if v is not None})
+        if evidences is not None:
+            payload["evidences"] = evidences
+
+        res = make_post_request("/timeline-entries/", payload)
+
+        if res.status_code == 201:
+            created = res.json()
+            return (
+                f"Created timeline entry: {created.get('entry')} "
+                f"(ID: {created.get('id')})"
+            )
+        else:
+            return f"Error creating timeline entry: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in create_timeline_entry: {str(e)}"

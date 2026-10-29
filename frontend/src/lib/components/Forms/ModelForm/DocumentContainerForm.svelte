@@ -2,11 +2,11 @@
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import Select from '../Select.svelte';
 	import TextField from '../TextField.svelte';
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
-	import type { CacheLock, ModelInfo } from '$lib/utils/types';
+	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
+	import type { CacheLock, ModelInfo } from '#lib/utils/types.js';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import { m } from '$paraglide/messages';
-	import { DOCUMENT_TYPES } from '$lib/utils/documentTypes';
+	import { m } from '#paraglide/messages.js';
+	import { DOCUMENT_TYPES } from '#lib/utils/documentTypes.js';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -74,6 +74,22 @@
 	nullable
 	cacheLock={cacheLocks['classification']}
 	bind:cachedValue={formDataCache['classification']}
+/>
+
+<AutocompleteSelect
+	{form}
+	multiple
+	optionsEndpoint="actors?is_third_party=false"
+	optionsLabelField="str"
+	optionsInfoFields={{
+		fields: [{ field: 'type', translate: true }],
+		position: 'prefix'
+	}}
+	field="reviewers"
+	helpText={m.documentReviewersHelpText()}
+	label={m.reviewers()}
+	cacheLock={cacheLocks['reviewers']}
+	bind:cachedValue={formDataCache['reviewers']}
 />
 
 <Dropdown

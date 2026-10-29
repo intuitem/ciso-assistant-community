@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { page } from '$app/stores';
-	import { m } from '$paraglide/messages';
+	import { page } from '$app/state';
+	import { m } from '#paraglide/messages.js';
 
 	interface PaletteItem {
 		type: string;
@@ -20,14 +20,27 @@
 	// the TaskNode integration; subprocess needs its mapping UI + recursion
 	// guard). The engine still executes them for graphs that carry them.
 	const TRIGGER_ITEMS = $derived<PaletteItem[]>([
-		{ type: 'trigger', triggerType: 'manual', icon: 'fa-hand-pointer', label: m.triggerManual() },
+		{
+			type: 'trigger',
+			triggerType: 'manual',
+			icon: 'fa-hand-pointer',
+			label: m.triggerManual()
+		},
+
 		{
 			type: 'trigger',
 			triggerType: 'webhook',
 			icon: 'fa-satellite-dish',
 			label: m.triggerWebhook()
 		},
-		{ type: 'trigger', triggerType: 'schedule', icon: 'fa-clock', label: m.triggerSchedule() },
+
+		{
+			type: 'trigger',
+			triggerType: 'schedule',
+			icon: 'fa-clock',
+			label: m.triggerSchedule()
+		},
+
 		{
 			type: 'trigger',
 			triggerType: 'internal_event',
@@ -43,7 +56,7 @@
 	]);
 	// `featureflags` is the backend payload; `featureFlags` is an unrelated
 	// client-side registry (lib/feature-flags.ts) that never carries these.
-	const aiEnabled = $derived(Boolean($page.data?.featureflags?.chat_mode));
+	const aiEnabled = $derived(Boolean(page.data?.featureflags?.chat_mode));
 
 	const AI_ITEMS = $derived<PaletteItem[]>([
 		{

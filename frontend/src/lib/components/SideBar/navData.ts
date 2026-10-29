@@ -213,7 +213,7 @@ export const navData = {
 					name: 'documents',
 					fa_icon: 'fa-solid fa-file-lines',
 					href: '/documents',
-					permissions: ['view_documentcontainer']
+					permissions: ['view_documentcontainer', 'view_published_documentcontainer']
 				},
 				{
 					name: 'calendar',
@@ -495,6 +495,12 @@ export const navData = {
 					fa_icon: 'fa-solid fa-triangle-exclamation',
 					href: '/data-breaches',
 					permissions: ['view_databreach']
+				},
+				{
+					name: 'dpias',
+					fa_icon: 'fa-solid fa-scale-balanced',
+					href: '/dpias',
+					permissions: ['view_processing']
 				}
 			]
 		},

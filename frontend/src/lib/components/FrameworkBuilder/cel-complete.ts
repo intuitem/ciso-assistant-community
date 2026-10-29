@@ -1,5 +1,5 @@
 import { getContext, setContext } from 'svelte';
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 import { extractNodeId, type BuilderNode, type OutcomeRule, type Question } from './builder-state';
 import FIELDS from './cel-fields.json';
 
@@ -130,6 +130,7 @@ function fieldDetails(mode: CelMode): Record<string, Record<string, string>> {
 				pages: m.builderCelGroupPages(),
 				answers: m.builderCelGroupAnswers(),
 				values: m.builderCelValues(),
+				ratings: m.builderCelGroupRatings(),
 				computed_outcomes: m.builderCelComputedOutcomes(),
 				hidden_pages: m.builderCelHiddenPages()
 			},

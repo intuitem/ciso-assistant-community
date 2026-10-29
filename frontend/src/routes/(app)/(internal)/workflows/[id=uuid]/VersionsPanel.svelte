@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
-	import { getLocale } from '$paraglide/runtime';
-	import { formatDateOrDateTime } from '$lib/utils/datetime';
+	import { m } from '#paraglide/messages.js';
+	import { getLocale } from '#paraglide/runtime.js';
+	import { formatDateOrDateTime } from '#lib/utils/datetime.js';
 	import { STATUS_BADGE } from './builder-constants';
 
 	interface VersionRow {

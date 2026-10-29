@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { postOps } from './ops';
 
 	interface Props {
@@ -90,10 +90,7 @@
 	}
 </script>
 
-<div
-	class="h-60 shrink-0 border-t border-surface-200-800 bg-surface-100-900 overflow-y-auto"
-	data-testid="runs-panel"
->
+<div class="h-60 shrink-0 bg-surface-100-900 overflow-y-auto" data-testid="runs-panel">
 	{#if loading}
 		<p class="p-4 text-xs text-surface-500">
 			<i class="fa-solid fa-spinner fa-spin mr-1"></i>

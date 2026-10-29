@@ -1,24 +1,24 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import Select from '../Select.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
 	import type { SuperForm } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import * as m from '$paraglide/messages';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import * as m from '#paraglide/messages.js';
 	import Checkbox from '../Checkbox.svelte';
-	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
+	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
 	import { page } from '$app/state';
-	import FrameworkResultSnippet from '$lib/components/Snippets/AutocompleteSelect/FrameworkResultSnippet.svelte';
-	import VisibilityEditor from '$lib/components/ComplianceAssessment/VisibilityEditor.svelte';
-	import ScoreScalePicker from '$lib/components/ComplianceAssessment/ScoreScalePicker.svelte';
+	import FrameworkResultSnippet from '#lib/components/Snippets/AutocompleteSelect/FrameworkResultSnippet.svelte';
+	import VisibilityEditor from '#lib/components/ComplianceAssessment/VisibilityEditor.svelte';
+	import ScoreScalePicker from '#lib/components/ComplianceAssessment/ScoreScalePicker.svelte';
 	import {
 		scaleLevels,
 		scaleOptions,
 		type FrameworkScale,
 		type ScaleOption,
 		type ScoreScaleValue
-	} from '$lib/utils/score-scales';
+	} from '#lib/utils/score-scales.js';
 	import { untrack } from 'svelte';
 
 	interface Props {
@@ -597,6 +597,7 @@
 		multiple
 		{form}
 		optionsEndpoint="evidences"
+		lazy
 		optionsLabelField="auto"
 		optionsExtraFields={[['folder', 'str']]}
 		field="evidences"
@@ -606,6 +607,7 @@
 		{form}
 		multiple
 		optionsEndpoint="actors"
+		lazy
 		optionsLabelField="str"
 		optionsInfoFields={{
 			fields: [{ field: 'type', translate: true }],
@@ -620,6 +622,7 @@
 		{form}
 		multiple
 		optionsEndpoint="actors"
+		lazy
 		optionsLabelField="str"
 		optionsInfoFields={{
 			fields: [{ field: 'type', translate: true }],
@@ -629,6 +632,18 @@
 		cacheLock={cacheLocks['reviewers']}
 		bind:cachedValue={formDataCache['reviewers']}
 		label={m.reviewers()}
+	/>
+	<AutocompleteSelect
+		multiple
+		{form}
+		createFromSelection={true}
+		optionsEndpoint="filtering-labels"
+		optionsLabelField="label"
+		translateOptions={false}
+		field="filtering_labels"
+		helpText={m.labelsHelpText()}
+		label={m.labels()}
+		allowUserOptions="append"
 	/>
 	<TextField
 		type="date"

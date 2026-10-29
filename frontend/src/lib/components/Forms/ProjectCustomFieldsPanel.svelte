@@ -2,12 +2,12 @@
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { page } from '$app/state';
-	import { fetchAllPages } from '$lib/utils/pagination';
+	import { fetchAllPages } from '#lib/utils/pagination.js';
 	import CustomFieldsSection from './CustomFieldsSection.svelte';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import { isURL } from '$lib/utils/helpers';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import { isURL } from '#lib/utils/helpers.js';
 
 	interface Choice {
 		value: string;

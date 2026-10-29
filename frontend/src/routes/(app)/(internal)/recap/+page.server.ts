@@ -1,6 +1,6 @@
-import { BASE_API_URL } from '$lib/utils/constants';
+import { BASE_API_URL } from '#lib/utils/constants.js';
 import type { PageServerLoad } from './$types';
-import { m } from '$paraglide/messages';
+import { m } from '#paraglide/messages.js';
 
 const REQUIREMENT_ASSESSMENT_STATUS = [
 	'compliant',

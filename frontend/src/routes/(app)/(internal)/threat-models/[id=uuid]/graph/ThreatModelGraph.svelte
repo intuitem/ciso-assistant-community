@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { setContext, tick, untrack } from 'svelte';
 	import {
 		SvelteFlow,

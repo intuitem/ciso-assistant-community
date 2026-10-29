@@ -1,5 +1,5 @@
-import { complianceResultColorMap } from '$lib/utils/constants';
-import { m } from '$paraglide/messages';
+import { complianceResultColorMap } from '#lib/utils/constants.js';
+import { m } from '#paraglide/messages.js';
 
 export function formatStringToDate(inputString: string, locale = 'en') {
 	const date = new Date(inputString);
@@ -88,6 +88,26 @@ export function getScoreHexColor(
 		if (percentage < 75) return colors.yellow300;
 		return colors.green300;
 	}
+}
+
+/**
+ * `getScoreHexColor`'s bands as text classes. Its hexes are chart fills: on a
+ * light surface, yellow-300 on white is barely legible as a figure.
+ */
+const SCORE_TEXT_CLASSES: Record<string, string> = {
+	'#f87171': 'text-red-600 dark:text-red-400',
+	'#fb923c': 'text-orange-600 dark:text-orange-400',
+	'#fde047': 'text-yellow-600 dark:text-yellow-300',
+	'#86efac': 'text-green-600 dark:text-green-400'
+};
+
+export function getScoreTextClass(
+	value: number | null,
+	max_score: number,
+	inversedColors = false,
+	min_score = 0
+) {
+	return SCORE_TEXT_CLASSES[getScoreHexColor(value, max_score, inversedColors, min_score)];
 }
 
 /**
@@ -313,6 +333,47 @@ export function isQuestionVisible(
 	return false;
 }
 
+/**
+ * Lowest and highest total a completed choice question can reach (mirrors
+ * core.utils.question_score_bounds). `scores` is the contribution of every
+ * selectable choice, an unscored one counting as 0. A unique choice reaches
+ * exactly one score, a multiple choice every positive (or every negative) one.
+ */
+export function questionScoreBounds(scores: number[], multiple: boolean): [number, number] {
+	if (scores.length === 0) return [0, 0];
+	if (multiple) {
+		const positives = scores.filter((s) => s > 0);
+		const negatives = scores.filter((s) => s < 0);
+		const hi = positives.length ? positives.reduce((a, b) => a + b, 0) : Math.max(...scores);
+		const lo = negatives.length ? negatives.reduce((a, b) => a + b, 0) : Math.min(...scores);
+		return [lo, hi];
+	}
+	return [Math.min(...scores), Math.max(...scores)];
+}
+
+/**
+ * Map a weighted SUM total back onto the unweighted scale of the same questions
+ * (mirrors core.utils.project_weighted_sum). When the total can reach 0, each
+ * side of it is scaled on its own, so a choice worth 0 stays neutral. When 0
+ * sits outside the reachable range, the whole range is mapped onto the
+ * unweighted one. With every weight at 1 the two ranges coincide and the total
+ * comes back unchanged.
+ */
+export function projectWeightedSum(
+	total: number,
+	weightedLo: number,
+	weightedHi: number,
+	lo: number,
+	hi: number
+): number {
+	if (weightedLo > 0 || weightedHi < 0) {
+		const span = weightedHi - weightedLo;
+		return span <= 0 ? total : lo + ((total - weightedLo) * (hi - lo)) / span;
+	}
+	if (total >= 0) return weightedHi > 0 ? (total * hi) / weightedHi : total;
+	return weightedLo < 0 ? (total * lo) / weightedLo : total;
+}
+
 export function computeRequirementScoreAndResult(requirementAssessment: any, answers: any) {
 	const questions = requirementAssessment.requirement.questions;
 
@@ -337,8 +398,16 @@ export function computeRequirementScoreAndResult(requirementAssessment: any, ans
 	let totalWeight = 0;
 	let isScoreComputed = false;
 	const results: string[] = [];
+	const questionResults: { tier: string | null; selected: string[] }[] = [];
 	let visibleCount = 0;
 	let answeredVisibleCount = 0;
+	// Reachable range of the visible scored questions, weighted and not: the
+	// weighted SUM is projected from the former onto the latter (mirrors
+	// RequirementAssessment.recompute_assessment).
+	let weightedLo = 0;
+	let weightedHi = 0;
+	let unweightedLo = 0;
+	let unweightedHi = 0;
 
 	for (const [q_urn, question] of Object.entries<any>(questions)) {
 		if (!isQuestionVisible(question, answers, questions)) continue;
@@ -349,6 +418,22 @@ export function computeRequirementScoreAndResult(requirementAssessment: any, ans
 		if (question.type === 'text') continue;
 
 		visibleCount++;
+
+		// A negative weight has no defined meaning; treat it as 0.
+		const questionWeight = Math.max(typeof question.weight === 'number' ? question.weight : 1, 0);
+		const choices: any[] = Array.isArray(question.choices) ? question.choices : [];
+		const choiceScores: number[] = choices
+			.map((choice: any) => choice.add_score)
+			.filter((s: any) => s !== undefined && s !== null);
+		if (choiceScores.length > 0) {
+			// An unscored choice is selectable and contributes 0.
+			const reachable = choices.map((choice: any) => choice.add_score ?? 0);
+			const [lo, hi] = questionScoreBounds(reachable, question.type === 'multiple_choice');
+			unweightedLo += lo;
+			unweightedHi += hi;
+			weightedLo += lo * questionWeight;
+			weightedHi += hi * questionWeight;
+		}
 
 		const selectedChoiceURNs = answers?.[q_urn];
 		const hasAnswer =
@@ -367,7 +452,7 @@ export function computeRequirementScoreAndResult(requirementAssessment: any, ans
 
 		if (!question.choices || !Array.isArray(question.choices)) continue;
 
-		const weight = typeof question.weight === 'number' ? question.weight : 1;
+		const selected: string[] = [];
 
 		for (const urn of choiceURNs) {
 			const selectedChoice = question.choices.find((choice: any) => choice.urn === urn);
@@ -375,20 +460,35 @@ export function computeRequirementScoreAndResult(requirementAssessment: any, ans
 
 			if (selectedChoice.add_score !== undefined && selectedChoice.add_score !== null) {
 				isScoreComputed = true;
-				totalScore += selectedChoice.add_score * weight;
-				totalWeight += weight;
+				totalScore += selectedChoice.add_score * questionWeight;
+				totalWeight += questionWeight;
 			}
 
 			if (selectedChoice.compute_result !== undefined && selectedChoice.compute_result !== null) {
 				const resolved = resolveComputeResult(selectedChoice.compute_result);
-				if (resolved !== null) results.push(resolved);
+				if (resolved !== null) {
+					results.push(resolved);
+					selected.push(resolved);
+				}
 			}
 		}
+
+		questionResults.push({
+			tier: resolveResultTier(question.choices.map((choice: any) => choice.compute_result)),
+			selected
+		});
 	}
 
 	let score: number | null;
 	if (isScoreComputed) {
-		const raw = aggregation === 'mean' && totalWeight > 0 ? totalScore / totalWeight : totalScore;
+		let raw: number;
+		if (aggregation === 'mean' && totalWeight > 0) {
+			raw = totalScore / totalWeight;
+		} else if (aggregation === 'sum') {
+			raw = projectWeightedSum(totalScore, weightedLo, weightedHi, unweightedLo, unweightedHi);
+		} else {
+			raw = totalScore;
+		}
 		score = Math.max(min_score, Math.min(max_score, Math.trunc(raw)));
 	} else {
 		score = null;
@@ -399,15 +499,18 @@ export function computeRequirementScoreAndResult(requirementAssessment: any, ans
 	// result=null so the edit page falls back to the manual result select.
 	const isResultDriven = hasComputedResult(questions);
 
+	const tiered = ca.framework?.result_aggregation === 'tiered_all';
 	let result: string | null;
 	if (!isResultDriven) {
 		result = null;
 	} else if (visibleCount === 0) {
 		result = 'not_applicable';
-	} else if (answeredVisibleCount < visibleCount || results.length === 0) {
+	} else if (answeredVisibleCount < visibleCount || (results.length === 0 && !tiered)) {
 		result = 'not_assessed';
 	} else {
-		const aggregated = aggregateComputeResults(results);
+		const aggregated = tiered
+			? aggregateTieredResults(questionResults)
+			: aggregateComputeResults(results);
 		result = aggregated ?? 'not_assessed';
 	}
 
@@ -429,7 +532,64 @@ export function resolveComputeResult(value: unknown): string | null {
 	return null;
 }
 
-/** Aggregate resolved compute_result values: not_applicable is neutral, else worst-wins. */
+/**
+ * The tier a question states, read from the results its choices can set.
+ * Mirrors `resolve_result_tier` in backend/core/utils.py.
+ */
+export function resolveResultTier(computeResults: unknown[]): string | null {
+	const resolved = new Set(computeResults.map((value) => resolveComputeResult(value)));
+	if (resolved.has('compliant')) return 'compliant';
+	if (resolved.has('partially_compliant')) return 'partially_compliant';
+	if (resolved.has('non_compliant')) return 'blocking';
+	return null;
+}
+
+/**
+ * Aggregate answers where a tier is earned only if all of it holds.
+ * Mirrors `aggregate_tiered_results` in backend/core/utils.py - keep the two in step.
+ */
+export function aggregateTieredResults(
+	questionResults: { tier: string | null; selected: string[] }[]
+): string | null {
+	const answered = questionResults.filter((entry) => entry.tier);
+	if (answered.length === 0) return null;
+
+	// not_applicable is neutral, as in aggregateComputeResults: on a multiple
+	// choice answer it drops out of the selection rather than failing the tier,
+	// and a question answered entirely not_applicable stops contributing.
+	const contributing: { tier: string | null; selected: string[] }[] = [];
+	for (const { tier, selected } of answered) {
+		const effective = selected.filter((r) => r !== 'not_applicable');
+		if (selected.length > 0 && effective.length === 0) continue;
+		contributing.push({ tier, selected: effective });
+	}
+	if (contributing.length === 0) return 'not_applicable';
+
+	const holdsByTier: Record<string, boolean[]> = { compliant: [], partially_compliant: [] };
+	for (const { tier, selected } of contributing) {
+		if (tier === 'blocking') {
+			if (selected.some((r) => r === 'non_compliant')) return 'non_compliant';
+			continue;
+		}
+		holdsByTier[tier as string].push(selected.length > 0 && selected.every((r) => r === tier));
+	}
+
+	for (const tier of ['compliant', 'partially_compliant']) {
+		if (holdsByTier[tier].length > 0 && holdsByTier[tier].every(Boolean)) return tier;
+	}
+
+	// Nothing states a tier - only blocking statements, none of them triggered.
+	if (holdsByTier.compliant.length === 0 && holdsByTier.partially_compliant.length === 0) {
+		return 'compliant';
+	}
+	return 'non_compliant';
+}
+
+/**
+ * Aggregate resolved compute_result values, each answer standing on its own:
+ * not_applicable is neutral, unanimous answers carry, and answers that disagree
+ * land on partially_compliant.
+ */
 function aggregateComputeResults(resolved: string[]): string | null {
 	const contributing = resolved.filter((r) => r !== null && r !== undefined);
 	if (contributing.length === 0) return null;

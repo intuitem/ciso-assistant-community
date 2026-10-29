@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import TileEditor from './TileEditor.svelte';
 
 	type Item = {
@@ -39,33 +39,49 @@
 	} = $props();
 </script>
 
-<section class="card bg-surface-50-950 p-5 space-y-4">
-	<div class="flex items-center gap-2">
-		<i class="fa-solid fa-layer-group text-surface-400"></i>
+<section
+	class="rounded-xl border border-l-4 border-surface-200-800 border-l-primary-500 bg-surface-50-950 shadow-sm"
+>
+	<header
+		class="flex items-center gap-3 rounded-tr-xl border-b border-surface-200-800 bg-surface-50-950 px-4 py-3"
+	>
+		<span
+			class="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-primary-500/10 text-primary-500"
+		>
+			<i class="fa-solid fa-layer-group text-sm"></i>
+		</span>
 		<input
 			bind:value={section.title}
 			placeholder={m.groupTitle()}
-			class="grow rounded-md border border-transparent bg-transparent px-2 py-1 text-base font-semibold hover:bg-surface-100-900 focus:border-surface-300-700 focus:bg-surface-100-900 focus:outline-none"
+			aria-label={m.groupTitle()}
+			class="min-w-0 grow rounded-md border border-transparent bg-transparent px-2 py-1 text-base font-semibold hover:bg-surface-100-900 focus:border-surface-300-700 focus:bg-surface-100-900 focus:outline-none"
 		/>
-		<button
-			onclick={() => onMoveSection(-1)}
-			class="btn-icon btn-sm preset-tonal"
-			aria-label={m.moveGroupUp()}><i class="fa-solid fa-chevron-up"></i></button
+		<span
+			class="rounded-full bg-surface-200-800 px-2 py-0.5 text-xs font-medium tabular-nums text-surface-600-400"
+			>{section.items.length}</span
 		>
-		<button
-			onclick={() => onMoveSection(1)}
-			class="btn-icon btn-sm preset-tonal"
-			aria-label={m.moveGroupDown()}><i class="fa-solid fa-chevron-down"></i></button
-		>
-		<button
-			onclick={onRemoveSection}
-			class="btn-icon btn-sm preset-tonal-error"
-			aria-label={m.delete()}
-			title={m.delete()}><i class="fa-solid fa-trash"></i></button
-		>
-	</div>
+		<div class="flex gap-1">
+			<button
+				onclick={() => onMoveSection(-1)}
+				class="btn-icon btn-sm preset-tonal"
+				aria-label={m.moveGroupUp()}><i class="fa-solid fa-chevron-up"></i></button
+			>
+			<button
+				onclick={() => onMoveSection(1)}
+				class="btn-icon btn-sm preset-tonal"
+				aria-label={m.moveGroupDown()}><i class="fa-solid fa-chevron-down"></i></button
+			>
+			<button
+				onclick={onRemoveSection}
+				class="btn-icon btn-sm preset-tonal-error"
+				aria-label={m.delete()}
+				title={m.delete()}><i class="fa-solid fa-trash"></i></button
+			>
+		</div>
+	</header>
 
-	<div class="space-y-3 pl-6">
+	<!-- Tinted well: tiles read as cards nested inside the group. -->
+	<div class="space-y-3 rounded-br-xl bg-surface-200-800/50 p-4">
 		<!-- Keyed on the object: ids are optional, and unkeyed the per-tile form state
 		     would land on a neighbour when reordering. -->
 		{#each section.items as item, ii (item)}
@@ -81,8 +97,11 @@
 				{onUpload}
 			/>
 		{/each}
-		<button onclick={onAddItem} class="btn btn-sm preset-tonal">
-			<i class="fa-solid fa-plus mr-1"></i>{m.addItem()}
+		<button
+			onclick={onAddItem}
+			class="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-surface-300-700 py-3 text-sm font-medium text-surface-600-400 transition-colors hover:border-primary-400 hover:text-primary-500"
+		>
+			<i class="fa-solid fa-plus"></i>{m.addItem()}
 		</button>
 	</div>
 </section>

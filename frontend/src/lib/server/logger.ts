@@ -11,7 +11,7 @@
  *
  * This module is under $lib/server so it is never bundled into the client.
  */
-import { env } from '$env/dynamic/private';
+import { LOG_FORMAT, LOG_LEVEL } from '$app/env/private';
 
 type Level = 'debug' | 'info' | 'warning' | 'error' | 'critical';
 
@@ -43,11 +43,11 @@ const LEVEL_SEVERITY: Record<Level, number> = {
 };
 
 function jsonEnabled(): boolean {
-	return (env.LOG_FORMAT ?? 'plain').toLowerCase() === 'json';
+	return (LOG_FORMAT ?? 'plain').toLowerCase() === 'json';
 }
 
 function thresholdSeverity(): number {
-	const name = (env.LOG_LEVEL ?? 'INFO').toLowerCase() as Level;
+	const name = (LOG_LEVEL ?? 'INFO').toLowerCase() as Level;
 	return LEVEL_SEVERITY[name] ?? LEVEL_SEVERITY.info;
 }
 

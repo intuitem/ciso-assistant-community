@@ -211,6 +211,43 @@ def test_expired_controls_single_sweep_writes_and_clears(folder, owner, control)
     )
 
 
+def test_task_overdue_sweep_reports_open_occurrences_of_enabled_tasks(folder, owner):
+    """Same rule as the task list's `overdue` filter: in progress is still late."""
+    from core.models import TaskNode, TaskTemplate
+    from core.tasks import check_task_nodes_overdue
+
+    past = date.today() - timedelta(days=3)
+    late = set()
+    for status, enabled in (
+        ("pending", True),
+        ("in_progress", True),
+        ("completed", True),
+        ("cancelled", True),
+        ("pending", False),
+    ):
+        task = TaskTemplate.objects.create(
+            name=f"{status}-{enabled}", folder=folder, task_date=past, enabled=enabled
+        )
+        _assign(task, owner, field="assigned_to")
+        node = TaskNode.objects.create(
+            task_template=task,
+            due_date=past,
+            scheduled_date=past,
+            folder=folder,
+            status=status,
+        )
+        if enabled and status in TaskNode.OPEN_STATUSES:
+            late.add(node.id)
+
+    with patch("core.tasks.send_task_node_overdue_notification") as send:
+        check_task_nodes_overdue.call_local()
+
+    rows = Notification.objects.filter(type="task_node_overdue")
+    assert set(rows.values_list("object_id", flat=True)) == late
+    emailed = {node.id for call in send.call_args_list for node in call.args[1]}
+    assert emailed == late
+
+
 def _sweep():
     from core.tasks import check_evidences_expiring_soon
 

@@ -11,8 +11,12 @@
 		type Framework,
 		type BuilderNode,
 		type RequirementNode,
-		type Question
+		type Question,
+		remapGrid,
+		type OutcomeRule,
+		type Scale
 	} from './builder-state';
+	import ScalesEditor from './ScalesEditor.svelte';
 	import type { DraftJSON } from './builder-api';
 	import {
 		localeLabel,
@@ -20,9 +24,9 @@
 		createHandleGatedDragHandlers,
 		REFERENCEABLE_MODELS
 	} from './builder-utils.svelte';
-	import { locales as supportedLocales } from '$paraglide/runtime';
-	import { m } from '$paraglide/messages';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { locales as supportedLocales } from '#paraglide/runtime.js';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { installKeyboardHandlers } from './keyboard';
 	import {
 		createCollapsedStore,
@@ -40,7 +44,7 @@
 	import { buildCelCatalog, setCelCatalogContext } from './cel-complete';
 	import OnAcceptEditor from './OnAcceptEditor.svelte';
 	import ImplementationGroupsEditor from './ImplementationGroupsEditor.svelte';
-	import VisibilityEditor from '$lib/components/ComplianceAssessment/VisibilityEditor.svelte';
+	import VisibilityEditor from '#lib/components/ComplianceAssessment/VisibilityEditor.svelte';
 	import { initReferentialCatalog } from './referential-catalog';
 
 	interface Props {
@@ -201,6 +205,32 @@
 		}
 	}
 
+	// Scales questions or ratings use: deleting one would break them.
+	let measuredScales = $derived(
+		$rootNodesStore
+			.flatMap((bn) =>
+				bn.questions.map((bq) => (bq.question.config as { scale?: string } | null)?.scale ?? '')
+			)
+			.filter(Boolean)
+	);
+	let usedScales = $derived(
+		[
+			...measuredScales,
+			...($frameworkStore.outcomes_definition ?? []).flatMap((r) =>
+				r.kind === 'rating' ? (r.dimensions ?? []) : []
+			)
+		].filter(Boolean)
+	);
+
+	// A scale that gains or loses levels resizes the grids that cross it.
+	function updateScales(scales: Scale[]) {
+		const before = ($frameworkStore.scales_definition ?? []) as Scale[];
+		const outcomes = ($frameworkStore.outcomes_definition ?? []).map((r: OutcomeRule) =>
+			r.kind === 'rating' && r.grid ? { ...r, grid: remapGrid(r, before, scales) } : r
+		);
+		builder.updateFramework({ scales_definition: scales, outcomes_definition: outcomes });
+	}
+
 	// Single-object reference questions that can name what a response is about.
 	// Only saved questions (with a URN) can be picked.
 	let subjectCandidates = $derived(
@@ -358,6 +388,7 @@
 	// the library-draft document is the persisted state (publishing is a
 	// separate, library-level concern).
 	beforeNavigate((navigation) => {
+		if (navigation.shallow && navigation.type === 'goto') return;
 		if (navigation.to?.route?.id === navigation.from?.route?.id) return;
 		let hasUnsaved = false;
 		unsavedStore.subscribe((v) => (hasUnsaved = v))();
@@ -380,8 +411,10 @@
 		)) {
 			return () => {};
 		}
+
 		const caret =
 			el instanceof HTMLSelectElement ? null : ([el.selectionStart, el.selectionEnd] as const);
+
 		el.blur();
 		return () => {
 			el.focus();
@@ -633,11 +666,11 @@
 									? 'fa-chevron-down'
 									: 'fa-chevron-right'} text-[10px] text-surface-500"
 							></i>
-							<span class="text-xs font-semibold text-surface-600-400 uppercase tracking-wider"
-								>{mode === 'quick_form'
-									? m.builderFormSettings()
-									: m.builderFrameworkSettings()}</span
-							>
+
+							<span class="text-xs font-semibold text-surface-600-400 uppercase tracking-wider">
+								{mode === 'quick_form' ? m.builderFormSettings() : m.builderFrameworkSettings()}
+							</span>
+
 							{#if !showSettings}
 								<span class="text-xs text-surface-500">{settingsSummary}</span>
 							{/if}
@@ -675,7 +708,7 @@
 											type="text"
 											value={$frameworkStore.urn_namespace ?? 'custom'}
 											placeholder="custom"
-											pattern="[a-zA-Z0-9_-]+"
+											pattern="[a-zA-Z0-9_\-]+"
 											class="mt-1 w-48 text-sm font-mono border border-surface-200-800 rounded bg-surface-100-900 px-2 py-1 text-surface-950-50 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 {lockUrnEdits
 												? 'text-surface-500 cursor-not-allowed'
 												: ''}"
@@ -696,7 +729,7 @@
 											type="text"
 											value={$frameworkStore.ref_id ?? ''}
 											placeholder="my-framework"
-											pattern="[a-zA-Z0-9_-]+"
+											pattern="[a-zA-Z0-9_\-]+"
 											class="mt-1 w-48 text-sm font-mono border border-surface-200-800 rounded bg-surface-100-900 px-2 py-1 text-surface-950-50 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 {lockUrnEdits
 												? 'text-surface-500 cursor-not-allowed'
 												: ''}"
@@ -1035,6 +1068,16 @@
 									{/if}
 								</div>
 							{/if}
+							{#if mode === 'quick_form'}
+								<div class={SECTION_CARD}>
+									<ScalesEditor
+										scales={$frameworkStore.scales_definition ?? []}
+										used={usedScales}
+										activeLanguage={$activeLanguageStore}
+										onupdate={updateScales}
+									/>
+								</div>
+							{/if}
 							<!-- Outcome rules -->
 							<div class={SECTION_CARD}>
 								<OutcomesEditor
@@ -1045,6 +1088,13 @@
 									pages={rulePages}
 									catalog={celCatalog}
 									groups={ruleGroups}
+									scales={$frameworkStore.scales_definition ?? []}
+									measured={measuredScales}
+									onaddscales={(added) =>
+										updateScales([
+											...(($frameworkStore.scales_definition ?? []) as Scale[]),
+											...added
+										])}
 								/>
 							</div>
 
@@ -1054,7 +1104,7 @@
 										value={($frameworkStore.on_accept ?? []) as any[]}
 										rules={$frameworkStore.outcomes_definition ?? []}
 										{subjectModel}
-										onaddvendorsubject={() => addSubjectQuestion('entity')}
+										onaddsubject={addSubjectQuestion}
 										scored={formGivesPoints}
 										onupdate={(on_accept) => builder.updateFramework({ on_accept })}
 									/>

@@ -45,6 +45,7 @@ class TierSource(models.TextChoices):
     ASSESSMENT = "assessment", _("Assessment")
     OVERRIDE = "override", _("Override")
     MANUAL = "manual", _("Manual")
+    ROLLUP = "rollup", _("Solution rollup")
 
 
 class Tier(NameDescriptionMixin, FolderMixin):
@@ -69,6 +70,14 @@ class Tier(NameDescriptionMixin, FolderMixin):
     )
     builtin = models.BooleanField(default=False, verbose_name=_("Built-in"))
     is_visible = models.BooleanField(default=True, verbose_name=_("Is visible"))
+    # Compliance share (%) a vendor of this tier is expected to reach; a score
+    # target would be a separate field, the two are not comparable.
+    compliance_target = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        validators=[MaxValueValidator(100)],
+        verbose_name=_("Compliance target"),
+    )
     translations = models.JSONField(
         default=dict, blank=True, null=True, verbose_name=_("Translations")
     )
@@ -304,12 +313,18 @@ class Entity(
             .first()
         )
 
+    @property
+    def legal_identifiers_dict(self) -> dict:
+        # legacy rows may hold a non-dict value written before validation existed
+        v = self.legal_identifiers
+        return v if isinstance(v, dict) else {}
+
     def get_emails(self) -> list[str]:
         emails = self.representatives.exclude(email="").values_list("email", flat=True)
         return sorted({e.strip() for e in emails if e and e.strip()})
 
 
-class EntityAssessment(Assessment):
+class EntityAssessment(Assessment, FilteringLabelMixin):
     class Conclusion(models.TextChoices):
         BLOCKER = "blocker", _("Blocker")
         WARNING = "warning", _("Warning")
@@ -429,6 +444,26 @@ class Solution(NameDescriptionMixin, FilteringLabelMixin):
         blank=True,
         related_name="solutions",
         verbose_name=_("Tier"),
+    )
+    tier_source = models.CharField(
+        max_length=20,
+        choices=TierSource.choices,
+        blank=True,
+        default="",
+        verbose_name=_("Tier source"),
+    )
+    tier_set_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("Tier set at")
+    )
+    tier_value = models.FloatField(null=True, blank=True, verbose_name=_("Tier value"))
+    tier_response = models.ForeignKey(
+        "core.QuickFormResponse",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name=_("Tier assessment"),
+        help_text=_("The accepted response the current tier came from"),
     )
     owner = models.ManyToManyField(
         Actor,
@@ -862,9 +897,11 @@ class EntityScore(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
         super().save(*args, **kwargs)
 
 
-class EntityTierChange(AbstractBaseModel, FolderMixin):
+class EntityTierChange(AbstractBaseModel):
     """One change of an entity's tier, whatever the path (form, API, batch,
     accepted response). Append-only; `created_at` is when it happened."""
+
+    IAM_SCOPE_FIELD = "entity"
 
     entity = models.ForeignKey(
         Entity,
@@ -919,11 +956,62 @@ class EntityTierChange(AbstractBaseModel, FolderMixin):
     def __str__(self) -> str:
         return f"{self.entity}: {self.previous_tier} → {self.tier}"
 
-    def save(self, *args, **kwargs):
-        # As visible as the entity it is about.
-        if self.entity_id:
-            self.folder = self.entity.folder
-        super().save(*args, **kwargs)
+
+class SolutionTierChange(AbstractBaseModel):
+    IAM_SCOPE_FIELD = "solution"
+
+    solution = models.ForeignKey(
+        Solution,
+        on_delete=models.CASCADE,
+        related_name="tier_changes",
+        verbose_name=_("Solution"),
+    )
+    tier = models.ForeignKey(
+        Tier,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="solution_changes",
+        verbose_name=_("Tier"),
+        help_text=_("Empty when the tier was cleared"),
+    )
+    previous_tier = models.ForeignKey(
+        Tier,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name=_("Previous tier"),
+    )
+    source = models.CharField(
+        max_length=20, choices=TierSource.choices, verbose_name=_("Source")
+    )
+    value = models.FloatField(null=True, blank=True, verbose_name=_("Value"))
+    response = models.ForeignKey(
+        "core.QuickFormResponse",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name=_("Assessment"),
+    )
+    changed_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="solution_tier_changes",
+        verbose_name=_("Changed by"),
+    )
+    note = models.TextField(blank=True, default="", verbose_name=_("Note"))
+
+    class Meta:
+        verbose_name = _("Solution tier change")
+        verbose_name_plural = _("Solution tier changes")
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        return f"{self.solution}: {self.previous_tier} → {self.tier}"
 
 
 common_exclude = ["created_at", "updated_at"]

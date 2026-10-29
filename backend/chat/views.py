@@ -4,6 +4,7 @@ import structlog
 import time
 
 from django.apps import apps
+from django.conf import settings as django_settings
 from django.contrib.contenttypes.models import ContentType
 from django.db import transaction
 from django.http import StreamingHttpResponse
@@ -17,7 +18,7 @@ from rest_framework.throttling import UserRateThrottle
 
 
 class ChatMessageThrottle(UserRateThrottle):
-    rate = "120/hour"
+    rate = django_settings.CHAT_MESSAGE_THROTTLE_RATE
 
 
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
@@ -369,6 +370,42 @@ class ChatSessionViewSet(BaseModelViewSet):
             )
             logger.info("tool_dispatch_complete", duration=round(time.time() - t1, 2))
 
+            # One correction round: the chat routes once, so a filter value that
+            # matches no stored value ("open", "inactive") would be answered as
+            # "none". The result's note lists the valid values for the model to map onto.
+            if (
+                not pre_routed_workflow
+                and isinstance(query_result, dict)
+                and query_result.get("note")
+                and any(
+                    f.endswith("(unknown)")
+                    for f in query_result.get("filters_applied", [])
+                )
+            ):
+                retry = llm.tool_call(
+                    f"{tool_prompt}\n\nYour previous call "
+                    f"{tool_response['name']}({json.dumps(tool_response.get('arguments', {}))}) "
+                    f"matched nothing: {query_result['note']} "
+                    "Call the tool again, choosing the valid values that mean what the user asked.",
+                    all_tools,
+                    history=history_for_tool,
+                )
+                if retry and retry.get("name") == tool_response["name"]:
+                    logger.info(
+                        "Tool call: %s(%s)",
+                        retry["name"],
+                        retry.get("arguments", {}),
+                    )
+                    retried = dispatch_tool_call(
+                        retry["name"],
+                        retry.get("arguments", {}),
+                        scope,
+                        parsed_context,
+                        user_message=user_content,
+                    )
+                    if retried:
+                        tool_response, query_result = retry, retried
+
             # Only query_objects/search_library have the right shape;
             # other tools fall through to build_replay_payload returning None
             if query_result:
@@ -631,7 +668,17 @@ class ChatSessionViewSet(BaseModelViewSet):
             if not enrichment:
                 enrichment = _enrich_context(parsed_context, scope)
             if enrichment:
-                ctx_builder.add("enrichment", enrichment, priority=5)
+                # "this audit" / "this assessment" means the page's object
+                ctx_builder.add(
+                    "enrichment",
+                    "CURRENT PAGE (the object the user calls 'this'). Items are "
+                    "markdown links: keep them as-is when you cite an item.\n"
+                    f"{enrichment}",
+                    # the user's own page outranks generic framework knowledge
+                    priority=10
+                    if query_result and query_result.get("type") == "search_library"
+                    else 5,
+                )
 
         context = ctx_builder.build()
 
@@ -2143,6 +2190,18 @@ def _build_context_prompt(page_context: dict, parsed_context) -> str:
     return "\n".join(parts) + "\n"
 
 
+def _page_link(label: str, model_key: str, object_id) -> str:
+    """A markdown link to the object's page, as query results give them."""
+    from django.conf import settings
+
+    from .tools import MODEL_MAP
+
+    base_url = getattr(settings, "CISO_ASSISTANT_URL", "").rstrip("/")
+    if not base_url:
+        return label
+    return f"[{label}]({base_url}/{MODEL_MAP[model_key][3]}/{object_id})"
+
+
 def _enrich_context(parsed_context, scope) -> str:
     """
     Enrich the LLM context with domain objects relevant to the current page.
@@ -2168,14 +2227,28 @@ def _enrich_context(parsed_context, scope) -> str:
         if scale:
             parts.append(f"RISK MATRIX LEVELS (lowest to highest): {scale}")
 
+        from django.db.models import Prefetch
+
         RiskScenario = apps.get_model("core", "RiskScenario")
-        scenarios = scope.queryset(RiskScenario).filter(
-            risk_assessment_id=parent_obj.id
-        )[:20]
+        readable_controls = scope.queryset(apps.get_model("core", "AppliedControl"))
+        scenarios = (
+            scope.queryset(RiskScenario)
+            .filter(risk_assessment_id=parent_obj.id)
+            .prefetch_related(
+                *(
+                    Prefetch(field, queryset=readable_controls)
+                    for field in ("existing_applied_controls", "applied_controls")
+                )
+            )[:20]
+        )
         if scenarios:
             parts.append("\nEXISTING RISK SCENARIOS (already identified):")
             for s in scenarios:
-                line = f"  - {s.name}"
+                line = "  - " + _page_link(
+                    f"[{s.ref_id}] {s.name}" if s.ref_id else s.name,
+                    "risk_scenario",
+                    s.id,
+                )
                 extras = []
                 for level_scope, level_field in LEVEL_FIELDS.items():
                     level = getattr(s, level_field, None)
@@ -2183,6 +2256,23 @@ def _enrich_context(parsed_context, scope) -> str:
                         extras.append(f"{level_scope}={level_label(matrix, level)}")
                 if s.treatment:
                     extras.append(f"treatment={s.get_treatment_display()}")
+                # questions about a scenario's treatment need its controls
+                for label, controls in (
+                    ("existing controls", s.existing_applied_controls.all()),
+                    ("additional controls", s.applied_controls.all()),
+                ):
+                    if controls:
+                        extras.append(
+                            f"{label}: "
+                            + "; ".join(
+                                _page_link(
+                                    f"[{c.ref_id}] {c.name}" if c.ref_id else c.name,
+                                    "applied_control",
+                                    c.id,
+                                )
+                                for c in controls
+                            )
+                        )
                 if extras:
                     line += f" ({', '.join(extras)})"
                 parts.append(line)
@@ -2192,7 +2282,7 @@ def _enrich_context(parsed_context, scope) -> str:
         if assets:
             parts.append("\nASSETS IN THIS DOMAIN:")
             for asset in assets:
-                line = f"  - {asset.name}"
+                line = f"  - {_page_link(asset.name, 'asset', asset.id)}"
                 extras = []
                 if hasattr(asset, "type") and asset.type:
                     extras.append(
@@ -2217,33 +2307,47 @@ def _enrich_context(parsed_context, scope) -> str:
         if framework:
             header += f" — framework: {framework.name}"
         parts.append(header)
-        parts.append(f"Progress: {parent_obj.progress}%")
-
         # The model's own accessor, so these agree with the figures on the page
         # (assessable requirements only, narrowed to the selected groups).
+        counts = parent_obj.get_requirements_result_count()
+        total = sum(count for count, _ in counts)
+        not_assessed = sum(
+            count for count, result in counts if result == Result.NOT_ASSESSED
+        )
+        parts.append(
+            f"Progress: {parent_obj.progress}% ({total - not_assessed} of {total} "
+            f"requirements assessed, {not_assessed} not assessed)"
+        )
         breakdown = ", ".join(
-            f"{Result(result).label}={count}"
-            for count, result in parent_obj.get_requirements_result_count()
+            f"{Result(result).label}={count}" for count, result in counts
         )
         if breakdown:
             parts.append(f"Requirement results: {breakdown}")
 
-        gaps = (
-            scope.queryset(RequirementAssessment)
-            .filter(
-                compliance_assessment=parent_obj,
-                requirement__assessable=True,
-                result__in=[Result.NON_COMPLIANT, Result.PARTIALLY_COMPLIANT],
+        # non-compliant first and complete: a cap shared with partial results cut
+        # non-compliant requirements out of "which requirements are non-compliant?"
+        for result, cap in (
+            (Result.NON_COMPLIANT, 40),
+            (Result.PARTIALLY_COMPLIANT, 25),
+        ):
+            gaps = (
+                scope.queryset(RequirementAssessment)
+                .filter(
+                    compliance_assessment=parent_obj,
+                    requirement__assessable=True,
+                    result=result,
+                )
+                .select_related("requirement")[:cap]
             )
-            .select_related("requirement")[:25]
-        )
-        if gaps:
-            parts.append("\nREQUIREMENTS NOT FULLY MET:")
+            if gaps:
+                parts.append(f"\n{Result(result).label.upper()} REQUIREMENTS:")
             for ra in gaps:
                 ref_id = getattr(ra.requirement, "ref_id", "") or ""
                 name = ra.requirement.name or ra.requirement.description or ""
                 label = f"[{ref_id}] {name}".strip() if ref_id else name
-                parts.append(f"  - {label[:160]} ({Result(ra.result).label})")
+                parts.append(
+                    f"  - {_page_link(label[:160], 'requirement_assessment', ra.id)}"
+                )
 
     elif parsed_context.model_key == "findings_assessment":
         from django.db.models import Count
@@ -2288,7 +2392,7 @@ def _enrich_context(parsed_context, scope) -> str:
                 )
             )
             for f in findings:
-                line = f"  - {f.name} (severity={f.get_severity_display()}, status={f.get_status_display()}"
+                line = f"  - {_page_link(f.name, 'finding', f.id)} (severity={f.get_severity_display()}, status={f.get_status_display()}"
                 if f.priority:
                     line += f", priority=P{f.priority}"
                 if f.eta:

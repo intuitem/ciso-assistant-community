@@ -1,20 +1,23 @@
 <script lang="ts">
-	import { m } from '$paraglide/messages';
-	import { invalidateAll } from '$app/navigation';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { getToastStore } from '$lib/components/Toast/stores';
+	import { m } from '#paraglide/messages.js';
+	import { refreshAll } from '$app/navigation';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
 	import {
 		getModalStore,
 		type ModalStore,
 		type ModalComponent,
 		type ModalSettings
-	} from '$lib/components/Modals/stores';
-	import BatchActionModal from '$lib/components/Modals/BatchActionModal.svelte';
-	import { applyUnreadCount } from '$lib/utils/stores';
-	import MergeAppliedControlsModal from '$lib/components/Modals/MergeAppliedControlsModal.svelte';
-	import type { BatchActionConfig, TableBatchAction } from '$lib/utils/table';
-	import type { urlModel } from '$lib/utils/types';
+	} from '#lib/components/Modals/stores.js';
+	import BatchActionModal from '#lib/components/Modals/BatchActionModal.svelte';
+	import { applyUnreadCount } from '#lib/utils/stores.js';
+	import MergeAppliedControlsModal from '#lib/components/Modals/MergeAppliedControlsModal.svelte';
+	import MergeLabelsModal from '#lib/components/Modals/MergeLabelsModal.svelte';
+	import ComposeMetricModal from '#lib/components/Modals/ComposeMetricModal.svelte';
+	import type { BatchActionConfig, TableBatchAction } from '#lib/utils/table.js';
+	import type { urlModel } from '#lib/utils/types.js';
 	import type { DataHandler } from '@vincjo/datatables/remote';
+	import { get } from 'svelte/store';
 
 	interface Props {
 		selectedIds: Set<string>;
@@ -77,7 +80,7 @@
 							background: 'preset-filled-success-500'
 						});
 						handler.invalidate();
-						await invalidateAll();
+						await refreshAll();
 						onClearSelection();
 					} catch (e) {
 						console.error('Parent batch action failed', e);
@@ -87,6 +90,21 @@
 						});
 					}
 				}
+			});
+			return;
+		}
+
+		if (action.type === 'compose') {
+			if (action.maxSelection !== undefined && count > action.maxSelection) {
+				toastStore.trigger({
+					message: m.composeMaxSelection({ n: action.maxSelection }),
+					background: 'preset-filled-warning-500'
+				});
+				return;
+			}
+			modalStore.trigger({
+				type: 'component',
+				component: { ref: ComposeMetricModal, props: { instanceIds: ids } }
 			});
 			return;
 		}
@@ -105,6 +123,22 @@
 				toastStore.trigger({
 					message: m.mergeMaxSelection({ n: maxSel }),
 					background: 'preset-filled-warning-500'
+				});
+				return;
+			}
+			if (URLModel === 'filtering-labels') {
+				modalStore.trigger({
+					type: 'component',
+					component: {
+						ref: MergeLabelsModal,
+						props: {
+							labels: get(handler.getRows())
+								.map((r: any) => r.meta)
+								.filter((row: any) => selectedIds.has(row?.id)),
+							handler,
+							onClearSelection
+						}
+					}
 				});
 				return;
 			}
@@ -184,7 +218,7 @@
 						}
 
 						handler.invalidate();
-						await invalidateAll();
+						await refreshAll();
 						onClearSelection();
 					} catch (e) {
 						console.error('Batch action failed', e);

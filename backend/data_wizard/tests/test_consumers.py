@@ -882,6 +882,48 @@ class TestVulnerabilityConsumer:
             record_data, _ = consumer.prepare_create({"name": "X", "status": raw}, None)
             assert record_data["status"] == expected
 
+    def test_owner_resolved_by_email(self, base_context, admin_user):
+        actor, _ = Actor.objects.get_or_create(user=admin_user)
+        consumer = VulnerabilityRecordConsumer(base_context)
+        record_data, error = consumer.prepare_create(
+            {"name": "Log4Shell", "owner": admin_user.email.upper()}, None
+        )
+        assert error is None
+        assert record_data["owner"] == [actor.id]
+
+    def test_remediation_date_is_normalized(self, base_context):
+        consumer = VulnerabilityRecordConsumer(base_context)
+        record_data, _ = consumer.prepare_create(
+            {"name": "Log4Shell", "remediated_at": date(2026, 3, 1)}, None
+        )
+        assert record_data["remediated_at"] == "2026-03-01"
+
+    def test_owner_column_present_but_blank_clears_the_m2m(self, base_context):
+        consumer = VulnerabilityRecordConsumer(base_context)
+        record = {"name": "Log4Shell", "owner": ""}
+        record_data, _ = consumer.prepare_create(record, None)
+        assert consumer._build_update_data(record, record_data)["owner"] == []
+
+    def test_unresolved_owner_names_keep_the_owners(self, base_context):
+        # Not a blank cell: clearing the owners would contradict the row's warning.
+        consumer = VulnerabilityRecordConsumer(base_context)
+        record = {"name": "Log4Shell", "owner": "nobody@example.com"}
+        record_data, warning = consumer.prepare_create(record, None)
+
+        assert warning is not None and warning.is_warning
+        assert "owner" not in consumer._build_update_data(record, record_data)
+
+    def test_update_keeps_observation_when_column_absent(self, base_context):
+        consumer = VulnerabilityRecordConsumer(base_context)
+        record = {"name": "Log4Shell", "status": "fixed"}
+        record_data, _ = consumer.prepare_create(record, None)
+        assert "observation" not in consumer._build_update_data(record, record_data)
+
+        record = {"name": "Log4Shell", "observation": "Patched in 2.17.1"}
+        record_data, _ = consumer.prepare_create(record, None)
+        update_data = consumer._build_update_data(record, record_data)
+        assert update_data["observation"] == "Patched in 2.17.1"
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # PolicyRecordConsumer
@@ -961,6 +1003,67 @@ class TestProcessingConsumer:
         )
         assert error is None
         assert record_data["name"] == "HR Payroll Processing"
+        assert record_data["role"] == "privacy_controller"
+
+    def test_role_and_controllers_from_export(self, base_context, domain_folder):
+        from tprm.models import Entity
+
+        client = Entity.objects.create(name="Client A", folder=domain_folder)
+        consumer = ProcessingRecordConsumer(base_context)
+        record_data, error = consumer.prepare_create(
+            {"name": "Hosting", "role": "Data Processor", "controllers": "Client A"},
+            None,
+        )
+        assert error is None
+        assert record_data["role"] == "privacy_data_processor"
+        assert record_data["controllers"] == [client.id]
+
+    def test_role_is_trimmed_and_unknown_role_rejected(self, base_context):
+        consumer = ProcessingRecordConsumer(base_context)
+        record_data, error = consumer.prepare_create(
+            {"name": "Hosting", "role": "Data Processor "}, None
+        )
+        assert error is None
+        assert record_data["role"] == "privacy_data_processor"
+        _, error = consumer.prepare_create(
+            {"name": "Hosting", "role": "Processor"}, None
+        )
+        assert "Processor" in error.error
+
+    def test_controllers_with_commas_and_unknown_names(
+        self, base_context, domain_folder
+    ):
+        from tprm.models import Entity
+
+        acme = Entity.objects.create(name="Acme, Inc.", folder=domain_folder)
+        beta = Entity.objects.create(name="Beta", folder=domain_folder)
+        gamma = Entity.objects.create(name="Gamma", folder=domain_folder)
+        consumer = ProcessingRecordConsumer(base_context)
+
+        for cell, expected in [
+            ("Acme, Inc.", {acme.id}),
+            ("Acme, Inc.\nBeta", {acme.id, beta.id}),
+            ("Beta, Gamma", {beta.id, gamma.id}),
+        ]:
+            record_data, error = consumer.prepare_create(
+                {"name": "Hosting", "controllers": cell}, None
+            )
+            assert error is None
+            assert set(record_data["controllers"]) == expected
+
+        _, error = consumer.prepare_create(
+            {"name": "Hosting", "controllers": "Beta\nNobody"}, None
+        )
+        assert "Nobody" in error.error
+
+    def test_empty_controllers_cell_clears_on_update(self, base_context, domain_folder):
+        consumer = ProcessingRecordConsumer(base_context)
+        record = {"name": "Hosting", "controllers": ""}
+        record_data, _ = consumer.prepare_create(record, None)
+        assert consumer._build_update_data(record, record_data)["controllers"] == []
+        assert "controllers" not in consumer._build_update_data(
+            {"name": "Hosting"}, record_data
+        )
 
     def test_find_existing_by_ref_id(self, base_context, domain_folder):
         from privacy.models import Processing
