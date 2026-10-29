@@ -150,6 +150,19 @@ class TestEvidenceGate:
         assert response.status_code == 400
         assert response.data["missing_evidence"][0]["id"] == str(ra.id)
 
+    def test_only_the_newest_revision_counts(self, evidence_fixture):
+        ra = evidence_fixture["ras"]["flagged"]
+        folder = evidence_fixture["folder"]
+        evidence = _attach(ra, folder, {"link": "https://example.com/old"})
+        EvidenceRevision.objects.create(
+            evidence=evidence, folder=folder, version=2, observation="replaced"
+        )
+
+        response = _submit(evidence_fixture["client"], evidence_fixture["assignment"])
+
+        assert response.status_code == 400
+        assert response.data["missing_evidence"][0]["id"] == str(ra.id)
+
     @pytest.mark.parametrize(
         "make_revision",
         [
