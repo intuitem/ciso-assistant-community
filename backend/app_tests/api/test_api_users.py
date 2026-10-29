@@ -7,7 +7,7 @@ from django.urls import reverse
 from knox.models import AuthToken
 from rest_framework import status
 from rest_framework.test import APIClient
-from core.serializers import USER_ACCOUNT_FIELDS, UserWriteSerializer
+from core.serializers import UserWriteSerializer
 from core.startup import ensure_user_creator_group
 from iam.models import Folder, Role, RoleAssignment, User, UserGroup
 
@@ -1763,6 +1763,19 @@ class TestUserAccountFieldsVisibility:
     directory fields."""
 
     TARGET_EXPIRY = "2030-01-01"
+    # Spelled out rather than imported, so dropping a field from the serializer's
+    # list fails here.
+    ACCOUNT_FIELDS = {
+        "is_superuser",
+        "has_mfa_enabled",
+        "expiry_date",
+        "keep_local_login",
+        "is_scim_managed",
+        "is_jit_provisioned",
+        "observation",
+    }
+    # Creator holds add_user and view_user on Global, but not change_user.
+    VIEWERS = ["ambient", "reader", "creator"]
 
     @pytest.fixture
     def env(self, authenticated_client):
@@ -1792,11 +1805,16 @@ class TestUserAccountFieldsVisibility:
         reader = User.objects.create_user("reader@tests.com")
         UserGroup.objects.get(name="BI-UG-AUD", folder=domain).user_set.add(reader)
 
+        ensure_user_creator_group()
+        creator = User.objects.create_user("creator@tests.com")
+        UserGroup.objects.get(name="BI-UG-GUC").user_set.add(creator)
+
+        users = {"ambient": ambient, "reader": reader, "creator": creator}
         return SimpleNamespace(
             target=target,
             admin_client=authenticated_client,
-            clients={"ambient": _client_for(ambient), "reader": _client_for(reader)},
-            users={"ambient": ambient, "reader": reader},
+            clients={name: _client_for(user) for name, user in users.items()},
+            users=users,
         )
 
     @staticmethod
@@ -1816,12 +1834,12 @@ class TestUserAccountFieldsVisibility:
         assert write.status_code == status.HTTP_200_OK, write.content
         return [listed[user.email], detail.data, write.data]
 
-    @pytest.mark.parametrize("viewer", ["ambient", "reader"])
+    @pytest.mark.parametrize("viewer", VIEWERS)
     def test_viewer_gets_directory_fields_only(self, env, viewer):
         for payload in self._payloads(env.clients[viewer], env.target):
             assert payload["email"] == env.target.email
             assert payload["is_active"] is True
-            assert not set(USER_ACCOUNT_FIELDS) & set(payload)
+            assert not self.ACCOUNT_FIELDS & set(payload)
 
         write = self._payloads(env.clients[viewer], env.target)[2]
         assert "user_groups" not in write and "is_local" not in write
@@ -1830,23 +1848,30 @@ class TestUserAccountFieldsVisibility:
         payloads = self._payloads(env.admin_client, env.target)
         assert "is_local" in payloads[2] and "user_groups" in payloads[2]
         for payload in payloads:
-            assert set(USER_ACCOUNT_FIELDS) <= set(payload)
+            assert self.ACCOUNT_FIELDS <= set(payload)
             assert payload["expiry_date"] == self.TARGET_EXPIRY
             assert payload["keep_local_login"] is True
             assert payload["observation"] == "contractor, leaves in January"
             assert payload["is_superuser"] is False
 
-    @pytest.mark.parametrize("viewer", ["ambient", "reader"])
+    @pytest.mark.parametrize("viewer", VIEWERS)
     def test_self_gets_own_account_fields(self, env, viewer):
         user = env.users[viewer]
         payloads = self._payloads(env.clients[viewer], user)
         assert "is_local" in payloads[2] and "user_groups" in payloads[2]
         for payload in payloads:
-            assert set(USER_ACCOUNT_FIELDS) <= set(payload)
+            assert self.ACCOUNT_FIELDS <= set(payload)
 
-    @pytest.mark.parametrize("viewer", ["ambient", "reader"])
+    @pytest.mark.parametrize("viewer", VIEWERS)
     @pytest.mark.parametrize(
-        "query", ["keep_local_login=true", f"expiry_date={TARGET_EXPIRY}"]
+        "query",
+        [
+            "keep_local_login=true",
+            f"expiry_date={TARGET_EXPIRY}",
+            "expiry_date__gte=2029-12-31",
+            "expiry_date__lt=2031-01-01",
+            "expiry_date__isnull=false",
+        ],
     )
     def test_account_filters_match_administered_users_only(self, env, viewer, query):
         url = f"{reverse(API_ENDPOINT)}?{query}"
@@ -1857,7 +1882,7 @@ class TestUserAccountFieldsVisibility:
             row["email"] for row in self._rows(env.admin_client.get(url))
         }
 
-    @pytest.mark.parametrize("viewer", ["ambient", "reader"])
+    @pytest.mark.parametrize("viewer", VIEWERS)
     def test_viewer_order_reveals_no_account_field(self, env, viewer):
         client = env.clients[viewer]
 
