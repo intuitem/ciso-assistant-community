@@ -587,8 +587,6 @@ RUNTIME_DIR: Final[Path] = Path(
 
 
 class _BanCache:
-    # TODO: Remove `ENTRY_LIMIT` references from the whole file.
-    # ENTRY_LIMIT: Final[int] = 65536
     HEALTH_CHECK_INTERVAL: Final[float] = 1.0
 
     def __init__(self):
@@ -606,12 +604,6 @@ class _BanCache:
         """min_heap(tuple[ban_until, ip])."""
         self.current_time_window = 0
         """Current time window (for `self.ip_to_fail_count`) (corresponds to: `time.monotonic() // (time_window_size*60)`)."""
-
-        # TODO: (Also remove the `BanInfo` class now that it's useless)
-        # TODO: REMOVE THE 2 FOLLOWING ATTRIBUTES FROM THIS CLASS:
-        # self.ip_to_ban_info: dict[str, BanInfo] = {}
-        # self.eviction_cache: dict[int, set[str]] = defaultdict(set)
-        """`hashmap(time_window => set[ip_address])`"""
 
         self._lock_file_mutex = threading.Lock()
         """Mutex used to access `self._lock_file` (as we don't want the main/leader threads to have concurrent access to it)."""
