@@ -1628,6 +1628,13 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseName: 'Vulnerability Feeds',
 		verboseNamePlural: 'Vulnerability Feeds'
 	},
+	'rate-limiting': {
+		name: 'rateLimiting',
+		localName: 'rateLimiting',
+		localNamePlural: 'rateLimiting',
+		verboseName: 'Rate limiting',
+		verboseNamePlural: 'Rate limiting'
+	},
 	'requirement-mapping-sets': {
 		name: 'requirementmappingset',
 		localName: 'requirementMappingSet',

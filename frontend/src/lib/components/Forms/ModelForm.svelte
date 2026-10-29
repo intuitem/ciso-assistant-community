@@ -44,6 +44,7 @@
 	import FeatureFlagsSettingForm from './ModelForm/FeatureFlagsSettingForm.svelte';
 	import VulnerabilitySlaSettingForm from './ModelForm/VulnerabilitySlaSettingForm.svelte';
 	import SecIntelFeedsSettingForm from './ModelForm/SecIntelFeedsSettingForm.svelte';
+	import RateLimitingSettingForm from './ModelForm/RateLimitingSettingForm.svelte';
 	import ProcessingForm from './ModelForm/ProcessingForm.svelte';
 	import PurposeForm from './ModelForm/PurposeForm.svelte';
 	import PersonalDataForm from './ModelForm/PersonalDataForm.svelte';
@@ -705,6 +706,8 @@
 			<VulnerabilitySlaSettingForm {form} {model} />
 		{:else if URLModel === 'sec-intel-feeds'}
 			<SecIntelFeedsSettingForm {form} {model} />
+		{:else if URLModel === 'rate-limiting'}
+			<RateLimitingSettingForm {form} {model} />
 		{:else if URLModel === 'filtering-labels'}
 			<FilteringLabelForm {form} {model} {cacheLocks} {formDataCache} {...rest} />
 		{:else if URLModel === 'business-impact-analysis'}

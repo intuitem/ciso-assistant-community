@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from typing import Final, Literal
+from unittest import mock
 import json
 
 import pytest
@@ -12,6 +13,9 @@ from iam.models import Folder, Role, RoleAssignment, User, UserGroup
 
 ENABLE_INFRA_CONFIG_MANAGEMENT: Final[bool] = getattr(
     settings, "ENABLE_INFRA_CONFIG_MANAGEMENT", False
+)
+ENABLE_CUSTOM_LOGIN_RATE_LIMITING: Final[bool] = getattr(
+    settings, "ENABLE_CUSTOM_LOGIN_RATE_LIMITING", False
 )
 
 
@@ -248,6 +252,37 @@ NON_ADMIN_EXPECTED_RESPONSES: Final[list[ExpectedResponse]] = [
         405 if ENABLE_INFRA_CONFIG_MANAGEMENT else 404,
         Reason.SETTINGS_ARE_NOT_DELETABLE,
     ),
+    ExpectedResponse(
+        "GET",
+        "/api/settings/rate-limiting/",
+        403 if ENABLE_CUSTOM_LOGIN_RATE_LIMITING else 404,
+        Reason.SENSITIVE_SETTINGS,
+    ),
+    # `IsGlobalAdmin` rejects non-admins before DRF checks whether the HTTP verb is allowed (hence 403 instead of 405).
+    ExpectedResponse(
+        "POST",
+        "/api/settings/rate-limiting/",
+        403 if ENABLE_CUSTOM_LOGIN_RATE_LIMITING else 404,
+        Reason.SETTINGS_ARE_NOT_CREATABLE,
+    ),
+    ExpectedResponse(
+        "PUT",
+        "/api/settings/rate-limiting/",
+        403 if ENABLE_CUSTOM_LOGIN_RATE_LIMITING else 404,
+        Reason.NON_ADMIN_SHALL_NOT_CHANGE_SETTINGS,
+    ),
+    ExpectedResponse(
+        "PATCH",
+        "/api/settings/rate-limiting/",
+        403 if ENABLE_CUSTOM_LOGIN_RATE_LIMITING else 404,
+        Reason.NON_ADMIN_SHALL_NOT_CHANGE_SETTINGS,
+    ),
+    ExpectedResponse(
+        "DELETE",
+        "/api/settings/rate-limiting/",
+        403 if ENABLE_CUSTOM_LOGIN_RATE_LIMITING else 404,
+        Reason.SETTINGS_ARE_NOT_DELETABLE,
+    ),
     ExpectedResponse("GET", "/api/settings/sso/", 403, Reason.SENSITIVE_SETTINGS),
     ExpectedResponse(
         "POST", "/api/settings/sso/", 405, Reason.SETTINGS_ARE_NOT_CREATABLE
@@ -358,6 +393,38 @@ ADMIN_OVERWRITE_EXPECTED_RESPONSES: Final[list[ExpectedResponse]] = [
         200 if ENABLE_INFRA_CONFIG_MANAGEMENT else 404,
         Reason.NON_ADMIN_SHALL_NOT_CHANGE_SETTINGS,
     ),
+    ExpectedResponse(
+        "GET",
+        "/api/settings/rate-limiting/",
+        200 if ENABLE_CUSTOM_LOGIN_RATE_LIMITING else 404,
+        Reason.SENSITIVE_SETTINGS,
+    ),
+    ExpectedResponse(
+        "POST",
+        "/api/settings/rate-limiting/",
+        405 if ENABLE_CUSTOM_LOGIN_RATE_LIMITING else 404,
+        Reason.SETTINGS_ARE_NOT_CREATABLE,
+    ),
+    ExpectedResponse(
+        "PUT",
+        "/api/settings/rate-limiting/",
+        200 if ENABLE_CUSTOM_LOGIN_RATE_LIMITING else 404,
+        Reason.NON_ADMIN_SHALL_NOT_CHANGE_SETTINGS,
+        data={"time_window_size": 5, "ban_time": 1, "max_failed_login_attempts": 20},
+    ),
+    ExpectedResponse(
+        "PATCH",
+        "/api/settings/rate-limiting/",
+        200 if ENABLE_CUSTOM_LOGIN_RATE_LIMITING else 404,
+        Reason.NON_ADMIN_SHALL_NOT_CHANGE_SETTINGS,
+        data={"max_failed_login_attempts": 30},
+    ),
+    ExpectedResponse(
+        "DELETE",
+        "/api/settings/rate-limiting/",
+        405 if ENABLE_CUSTOM_LOGIN_RATE_LIMITING else 404,
+        Reason.SETTINGS_ARE_NOT_DELETABLE,
+    ),
     ExpectedResponse("GET", "/api/settings/sso/", 200, Reason.SENSITIVE_SETTINGS),
     ExpectedResponse(
         "PUT",
@@ -399,6 +466,13 @@ def app_config():
     startup(sender=None, **{})
 
 
+@pytest.fixture(autouse=True)
+def ban_cache():
+    """Mock the rate-limiting ban cache: its runtime directory is shared machine-wide, so the real one could push settings to a running dev server."""
+    with mock.patch("iam.rate_limiting.get_ban_cache") as mocked_get_ban_cache:
+        yield mocked_get_ban_cache.return_value
+
+
 def create_api_client_from_role(role: Role, folder: Folder) -> APIClient:
     user = User.objects.create_user(email=f"{role.name}@wow.com")
     group = UserGroup.objects.create(name=f"global_settings{role.name}", folder=folder)
@@ -410,7 +484,10 @@ def create_api_client_from_role(role: Role, folder: Folder) -> APIClient:
     )
     assignment.perimeter_folders.add(folder)
     group.user_set.add(user)
+    return create_api_client(user)
 
+
+def create_api_client(user: User) -> APIClient:
     client = APIClient()
     token = AuthToken.objects.create(user=user)
     client.credentials(HTTP_AUTHORIZATION=f"Token {token[1]}")
@@ -440,8 +517,10 @@ def domain_manager_client(domain):
 
 @pytest.fixture
 def admin_client(app_config):
-    role = Role.objects.get(name="BI-RL-ADM")
-    return create_api_client_from_role(role, Folder.get_root_folder())
+    # Admins are the members of the built-in admin group: `IsGlobalAdmin` (`User.is_admin`) doesn't trust users holding the admin role through another group.
+    user = User.objects.create_user(email="admin@wow.com")
+    UserGroup.objects.get(name="BI-UG-ADM").user_set.add(user)
+    return create_api_client(user)
 
 
 @pytest.mark.django_db

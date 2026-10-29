@@ -26,6 +26,7 @@ from .serializers import (
     FeatureFlagsSerializer,
     VulnerabilitySlaSerializer,
     SecIntelFeedsSerializer,
+    RateLimitingConfigSerializer,
     InfraConfigSerializer,
 )
 from django.db import transaction
@@ -460,6 +461,32 @@ class SecIntelFeedsViewSet(viewsets.ModelViewSet):
         self.check_object_permissions(self.request, obj)
         return obj
 
+class RateLimitingConfigViewSet(viewsets.ModelViewSet):
+    model = GlobalSettings
+    serializer_class = RateLimitingConfigSerializer
+    queryset = GlobalSettings.objects.filter(name=GlobalSettings.Names.RATE_LIMITING)
+    permission_classes = [IsAuthenticated, IsGlobalAdmin]
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
+    def update(self, request, *args, **kwargs):
+        # "partial" is `True` for `PATCH` requests (or `False` otherwise).
+        partial = kwargs.pop("partial", False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+    def get_object(self):
+        obj, _ = self.model.objects.get_or_create(
+            name=GlobalSettings.Names.RATE_LIMITING
+        )
+        self.check_object_permissions(self.request, obj)
+        return obj
 
 class InfraConfigViewSet(viewsets.ModelViewSet):
     """Singleton GET/PUT for infrastructure configuration settings (stored as a
@@ -508,9 +535,8 @@ def infra_config_view(request):
     data = dict(InfraConfigSerializer(obj).data)
 
     # The stored JSON isn't schema-checked (admin/migration/import can write anything).
-    for key in ("allowed_ips", "not_rate_limited_ips", "proxy_ips"):
-        if not isinstance(data.get(key), list):
-            data[key] = []
+    if not isinstance(data.get("allowed_ips"), list):
+        data["allowed_ips"] = []
 
     return JsonResponse(data)
 

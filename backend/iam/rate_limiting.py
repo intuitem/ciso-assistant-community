@@ -21,7 +21,7 @@ import structlog
 from django.db import close_old_connections
 
 from global_settings.models import GlobalSettings
-from global_settings.serializers import InfraConfigSerializer
+from global_settings.serializers import RateLimitingConfigSerializer
 
 logger = structlog.get_logger(__name__)
 
@@ -78,20 +78,20 @@ class Settings:
         return True
 
     @staticmethod
-    def from_infra_settings(infra_settings: Optional[GlobalSettings]) -> Settings:
-        if infra_settings is not None:
-            infra_config = dict(InfraConfigSerializer(infra_settings).data)
+    def from_rate_limiting_settings(rate_limiting_settings: Optional[GlobalSettings]) -> Settings:
+        if rate_limiting_settings is not None:
+            rate_limiting_config = dict(RateLimitingConfigSerializer(rate_limiting_settings).data)
         else:
-            infra_config = {}
+            rate_limiting_config = {}
 
-        max_failed_login_attempts = infra_config.get(
+        max_failed_login_attempts = rate_limiting_config.get(
             "max_failed_login_attempts",
-            InfraConfigSerializer.DEFAULT_MAX_FAILED_LOGIN_ATTEMPT,
+            RateLimitingConfigSerializer.DEFAULT_MAX_FAILED_LOGIN_ATTEMPT,
         )
-        time_window_size = infra_config.get(
-            "time_window_size", InfraConfigSerializer.DEFAULT_TIME_WINDOW_SIZE
+        time_window_size = rate_limiting_config.get(
+            "time_window_size", RateLimitingConfigSerializer.DEFAULT_TIME_WINDOW_SIZE
         )
-        ban_time = infra_config.get("ban_time", InfraConfigSerializer.DEFAULT_BAN_TIME)
+        ban_time = rate_limiting_config.get("ban_time", RateLimitingConfigSerializer.DEFAULT_BAN_TIME)
 
         return Settings(max_failed_login_attempts, time_window_size, ban_time)
 
@@ -102,19 +102,19 @@ class Settings:
         # Without this we may keep a broken connection to the DB after a DB failure.
         close_old_connections()
         try:
-            infra_settings = GlobalSettings.objects.filter(
-                name=GlobalSettings.Names.INFRA_CONFIG
+            rate_limiting_settings = GlobalSettings.objects.filter(
+                name=GlobalSettings.Names.RATE_LIMITING
             ).first()
         except Exception:
             # The table may not exist yet.
-            infra_settings = None
+            rate_limiting_settings = None
         finally:
             close_old_connections()
-        return Settings.from_infra_settings(infra_settings)
+        return Settings.from_rate_limiting_settings(rate_limiting_settings)
 
 
 # Defaults settings (modified by `_leader_thread` a leader thread is elected.).
-SETTINGS = Settings.from_infra_settings(None)
+SETTINGS = Settings.from_rate_limiting_settings(None)
 
 
 @dataclass
@@ -782,8 +782,8 @@ class _BanCache:
 
     def _flush_all_entries(self):
         """Flush out all the cache data (reset the cache)."""
-        self.ip_to_ban_info = {}
-        self.eviction_cache = defaultdict(set)
+        self.ip_to_ban_info.clear()
+        self.eviction_cache.clear()
 
     def _clean_stale_cache_entries(self, current_timestamp_window: int):
         timestamp_windows = list(self.eviction_cache.keys())

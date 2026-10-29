@@ -10,6 +10,7 @@
 	import VulnerabilitySlaSettings from '$lib/components/Settings/VulnerabilitySlaSettings.svelte';
 	import SecIntelFeedsSettings from '$lib/components/Settings/SecIntelFeedsSettings.svelte';
 	import MailerSettings from '$lib/components/Settings/MailerSettings.svelte';
+	import RateLimitingSettings from '$lib/components/Settings/RateLimitingSettings.svelte';
 
 	import { goto } from '$app/navigation';
 
@@ -43,6 +44,11 @@
 		>
 		{#if data.mailerSettings}
 			<Tabs.Trigger value="mailer"><i class="fa-solid fa-envelope"></i> {m.mailer()}</Tabs.Trigger>
+		{/if}
+		{#if data.rateLimitingSettings}
+			<Tabs.Trigger value="rateLimiting"
+				><i class="fa-solid fa-gauge-high"></i> {m.rateLimiting()}</Tabs.Trigger
+			>
 		{/if}
 		{#if page.data?.featureflags?.outgoing_webhooks}
 			<Tabs.Trigger value="webhooks"
@@ -90,6 +96,11 @@
 	{#if data.mailerSettings}
 		<Tabs.Content value="mailer">
 			<MailerSettings {data} />
+		</Tabs.Content>
+	{/if}
+	{#if data.rateLimitingSettings}
+		<Tabs.Content value="rateLimiting">
+			<RateLimitingSettings {data} />
 		</Tabs.Content>
 	{/if}
 	<Tabs.Content value="secIntelFeeds">

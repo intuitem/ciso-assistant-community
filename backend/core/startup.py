@@ -2604,6 +2604,22 @@ def startup(sender=None, **kwargs):
     except Exception as e:
         logger.error(f"Failed to create sec-intel-feeds settings: {e}")
 
+    rate_limiting_defaults = {
+        "time_window_size": 5,
+        "ban_time": 1,
+        "max_failed_login_attempts": 20,
+    }
+    # {"time_window_size": 5,"ban_time": 1,"max_failed_login_attempts": 20}
+    try:
+        rate_limiting_settings, created = GlobalSettings.objects.get_or_create(
+            name=GlobalSettings.Names.RATE_LIMITING, defaults={"value": rate_limiting_defaults}
+        )
+        if not created and not rate_limiting_settings.value:
+            rate_limiting_settings.value = rate_limiting_defaults
+            rate_limiting_settings.save(update_fields=["value"])
+    except Exception as e:
+        logger.error(f"Failed to create rate-limiting settings: {e}")
+
     # Pre-warm the chat knowledge graph (reads YAML files, no DB needed)
     if getattr(settings, "ENABLE_CHAT", False):
         try:

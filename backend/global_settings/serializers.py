@@ -782,40 +782,15 @@ class VulnerabilitySlaSerializer(serializers.ModelSerializer):
         return instance
 
 
-class InfraConfigSerializer(serializers.ModelSerializer):
-    """
-    Serializer for infrastructure configuration settings, stored as a JSON object
-    in the 'value' field of a GlobalSettings instance (singleton). Currently holds
-    the list of IPs/CIDRs allowed to reach the backend API; new keys can be added
-    over time without a schema change.
-    """
-
-    MAX_ALLOWED_IPS: Final[int] = 50
-    """Maximum number of IPs/CIDR ranges allowed in the IP whitelist AND the rate-limiting (proxy/exclude) lists."""
+class RateLimitingConfigSerializer(serializers.ModelSerializer):
     MAX_ABSOLUTE_BAN_TIME: Final[int] = 60
     """Maximum number of minutes an IP can be banned with rate-limiting."""
     MAX_TIME_WINDOW_SIZE: Final[int] = 15
     MAX_BAN_TIME: Final[int] = 60
     DEFAULT_MAX_FAILED_LOGIN_ATTEMPT: Final[int] = 20
     DEFAULT_TIME_WINDOW_SIZE: Final[int] = 5
-    DEFAULT_BAN_TIME: Final[int] = 4
-    DEFAULT_PROXY_IPS: Final[list[str]] = [
-        "10.0.0.0/8",
-        "172.16.0.0/12",
-        "192.168.0.0/16",
-    ]
-    """Private ranges trusted as reverse proxies by default (which covers all private network ranges to ensure docker-compose setups support)."""
+    DEFAULT_BAN_TIME: Final[int] = 1
 
-    allowed_ips = serializers.ListField(
-        child=serializers.CharField(),
-        source="value.allowed_ips",
-        required=False,
-        default=list,
-    )
-
-    is_rate_limit_activated = serializers.BooleanField(
-        default=False, required=False, source="value.is_rate_limit_activated"
-    )
     time_window_size = serializers.IntegerField(
         min_value=1,
         max_value=MAX_TIME_WINDOW_SIZE,
@@ -843,21 +818,6 @@ class InfraConfigSerializer(serializers.ModelSerializer):
         required=False,
         source="value.max_failed_login_attempts",
     )
-    """Number of failed login attempt allowed per IP per time window."""
-    not_rate_limited_ips = serializers.ListField(
-        child=serializers.CharField(),
-        source="value.not_rate_limited_ips",
-        required=False,
-        default=list,
-    )
-    """IPs/CIDR ranges excluded from the rate-limiting algorithm."""
-    proxy_ips = serializers.ListField(
-        child=serializers.CharField(),
-        source="value.proxy_ips",
-        required=False,
-        default=lambda: list(InfraConfigSerializer.DEFAULT_PROXY_IPS),
-    )
-    """IPs from which the backend will look for the `X-Forwarded-For` header to get the real client's IP."""
 
     class Meta:
         model = GlobalSettings
@@ -871,37 +831,75 @@ class InfraConfigSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["name"]
 
-    def _validate_ip_addresses(self, ip_addresses: list[str]) -> list[str]:
-        """Validate a list of ip addresses/CIDR ranges."""
-        cleaned_ips = []
-        seen_ips = set()
-        errors = []
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        value = attrs.get("value", {})
 
-        for ip_address in ip_addresses:
-            try:
-                canonical = canonical_ip_or_cidr(ip_address)
-                if canonical not in seen_ips:
-                    seen_ips.add(canonical)
-                    cleaned_ips.append(canonical)
-            except DjangoValidationError as exc:
-                errors.extend(exc.messages)
-                continue
+        # On a PATCH a field may be absent: fall back to the stored value, then to the field default.
+        stored = (
+            self.instance.value
+            if self.instance and isinstance(self.instance.value, dict)
+            else {}
+        )
+        time_window_size = value.get(
+            "time_window_size",
+            stored.get("time_window_size", self.DEFAULT_TIME_WINDOW_SIZE),
+        )
+        ban_time = value.get("ban_time", stored.get("ban_time", self.DEFAULT_BAN_TIME))
 
-        if len(errors) > 0:
-            raise serializers.ValidationError(errors)
-
-        if len(cleaned_ips) > self.MAX_ALLOWED_IPS:
+        if ban_time * time_window_size > RateLimitingConfigSerializer.MAX_ABSOLUTE_BAN_TIME:
             raise serializers.ValidationError(
-                f"You can add at most {self.MAX_ALLOWED_IPS} IP addresses."
+                {
+                    "ban_time": f"ban_time * time_window_size MUST be <= {self.MAX_ABSOLUTE_BAN_TIME} (got {ban_time * time_window_size})."
+                }
             )
+        return attrs
 
-        return cleaned_ips
+    def update(self, instance, validated_data):
+        from iam.rate_limiting import Settings as RateLimitSettings, get_ban_cache
 
-    def validate_not_rate_limited_ips(self, ip_addresses: list[str]) -> list[str]:
-        return self._validate_ip_addresses(ip_addresses)
+        # Merge into the stored dict: on a PATCH, fields absent from the request must keep their stored value.
+        current_value = instance.value if isinstance(instance.value, dict) else {}
+        instance.value = {**current_value, **validated_data.get("value", {})}
+        instance.save(update_fields=["value"])
 
-    def validate_proxy_ips(self, ip_addresses: list[str]) -> list[str]:
-        return self._validate_ip_addresses(ip_addresses)
+        try:
+            get_ban_cache().refresh_settings(
+                RateLimitSettings.from_rate_limiting_settings(instance)
+            )
+        except Exception as e:
+            logger.error("Failed to refresh cached settings", exc_info=e)
+
+        return instance
+
+class InfraConfigSerializer(serializers.ModelSerializer):
+    """
+    Serializer for infrastructure configuration settings, stored as a JSON object
+    in the 'value' field of a GlobalSettings instance (singleton). Currently holds
+    the list of IPs/CIDRs allowed to reach the backend API; new keys can be added
+    over time without a schema change.
+    """
+
+    MAX_ALLOWED_IPS = 50
+
+    allowed_ips = serializers.ListField(
+        child=serializers.CharField(),
+        source="value.allowed_ips",
+        required=False,
+        default=list,
+    )
+
+    class Meta:
+        model = GlobalSettings
+        exclude = [
+            "id",
+            "created_at",
+            "updated_at",
+            "name",
+            "value",
+            "folder",
+        ]
+        read_only_fields = ["name"]
 
     def validate_allowed_ips(self, value):
         cleaned = []
@@ -930,33 +928,7 @@ class InfraConfigSerializer(serializers.ModelSerializer):
             )
         return cleaned
 
-    def validate(self, attrs):
-        attrs = super().validate(attrs)
-        value = attrs.get("value", {})
-
-        # On a PATCH a field may be absent: fall back to the stored value, then to the field default.
-        stored = (
-            self.instance.value
-            if self.instance and isinstance(self.instance.value, dict)
-            else {}
-        )
-        time_window_size = value.get(
-            "time_window_size",
-            stored.get("time_window_size", self.DEFAULT_TIME_WINDOW_SIZE),
-        )
-        ban_time = value.get("ban_time", stored.get("ban_time", self.DEFAULT_BAN_TIME))
-
-        if ban_time * time_window_size > InfraConfigSerializer.MAX_ABSOLUTE_BAN_TIME:
-            raise serializers.ValidationError(
-                {
-                    "ban_time": f"ban_time * time_window_size MUST be <= {self.MAX_ABSOLUTE_BAN_TIME} (got {ban_time * time_window_size})."
-                }
-            )
-        return attrs
-
     def update(self, instance, validated_data):
-        from iam.rate_limiting import Settings as RateLimitSettings, get_ban_cache
-
         current_value_dict = instance.value if isinstance(instance.value, dict) else {}
         new_value_dict = validated_data.get("value", {})
         value_changed = False
@@ -978,13 +950,6 @@ class InfraConfigSerializer(serializers.ModelSerializer):
         if value_changed:
             instance.value = current_value_dict
             instance.save(update_fields=["value"])
-
-        try:
-            get_ban_cache().refresh_settings(
-                RateLimitSettings.from_infra_settings(instance)
-            )
-        except Exception as e:
-            logger.error("Failed to refresh cached settings", exc_info=e)
 
         return instance
 

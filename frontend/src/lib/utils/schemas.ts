@@ -757,6 +757,38 @@ export const SecIntelFeedsSchema = z.object({
 	network_timeout: z.number().int().min(5).max(120).optional()
 });
 
+// Rate-limiting bounds and defaults (kept in sync with `RateLimitingConfigSerializer` in the backend).
+export const MIN_MAX_FAILED_LOGIN_ATTEMPTS = 5;
+export const MAX_MAX_FAILED_LOGIN_ATTEMPTS = 1000;
+export const MAX_TIME_WINDOW_SIZE = 15;
+export const MAX_BAN_TIME = 60;
+// The real ban duration is `ban_time * time_window_size` (in minutes).
+export const MAX_ABSOLUTE_BAN_TIME = 60;
+export const DEFAULT_MAX_FAILED_LOGIN_ATTEMPTS = 20;
+export const DEFAULT_TIME_WINDOW_SIZE = 5;
+export const DEFAULT_BAN_TIME = 1;
+
+export const RateLimitingSchema = z
+	.object({
+		time_window_size: z
+			.number()
+			.int()
+			.min(1)
+			.max(MAX_TIME_WINDOW_SIZE)
+			.default(DEFAULT_TIME_WINDOW_SIZE),
+		ban_time: z.number().int().min(1).max(MAX_BAN_TIME).default(DEFAULT_BAN_TIME),
+		max_failed_login_attempts: z
+			.number()
+			.int()
+			.min(MIN_MAX_FAILED_LOGIN_ATTEMPTS)
+			.max(MAX_MAX_FAILED_LOGIN_ATTEMPTS)
+			.default(DEFAULT_MAX_FAILED_LOGIN_ATTEMPTS)
+	})
+	.refine((config) => config.ban_time * config.time_window_size <= MAX_ABSOLUTE_BAN_TIME, {
+		error: () => m.banTimeTooLong({ max: MAX_ABSOLUTE_BAN_TIME }),
+		path: ['ban_time']
+	});
+
 export const VulnerabilitySlaSchema = z.object({
 	sla_anchor: z.string().optional(),
 	critical: z.coerce.number().int().min(0).optional().nullable(),
@@ -2252,6 +2284,7 @@ const SCHEMA_MAP: Record<string, ZodSchema> = {
 	'feature-flags': FeatureFlagsSchema,
 	'vulnerability-sla': VulnerabilitySlaSchema,
 	'sec-intel-feeds': SecIntelFeedsSchema,
+	'rate-limiting': RateLimitingSchema,
 	entities: EntitiesSchema,
 	'entity-assessments': EntityAssessmentSchema,
 	representatives: representativeSchema,

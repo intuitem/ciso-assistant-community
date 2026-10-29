@@ -10,6 +10,7 @@ else it is sqlite, and no env variable is required
 """
 
 from pathlib import Path
+import ipaddress
 import os
 from dotenv import load_dotenv
 from datetime import timedelta
@@ -878,6 +879,16 @@ MFA_WEBAUTHN_ALLOW_INSECURE_ORIGIN = DEBUG  # Allow http://localhost in dev
 MFA_PASSKEY_LOGIN_ENABLED = False
 MFA_PASSKEY_SIGNUP_ENABLED = False
 MFA_ADAPTER = "iam.adapter.MFAAdapter"
+
+# Custom(homemade) rate-limiting settings.
+ENABLE_CUSTOM_LOGIN_RATE_LIMITING = os.environ.get(
+    "ENABLE_CUSTOM_LOGIN_RATE_LIMITING", "False"
+).lower() in ("true", "1", "yes")
+
+_CUSTOM_RATE_LIMITING_PROXY_IP = os.environ.get("CUSTOM_RATE_LIMITING_PROXY_IP", None)
+CUSTOM_RATE_LIMITING_PROXY_IP = ipaddress.ip_network(_CUSTOM_RATE_LIMITING_PROXY_IP) if _CUSTOM_RATE_LIMITING_PROXY_IP is not None else None
+
+ALLAUTH_SETTING_GETTER = "iam.rate_limiting_allauth._get_allauth_setting"
 
 if MAIL_DEBUG:
     DEFAULT_FROM_EMAIL = "noreply@ciso.assistant"

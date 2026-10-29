@@ -26,6 +26,7 @@ from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.response import Response
 from rest_framework.status import HTTP_401_UNAUTHORIZED, HTTP_429_TOO_MANY_REQUESTS
 from django.contrib.contenttypes.models import ContentType
+from django.conf import settings
 from auditlog.models import LogEntry
 from auditlog.cid import get_cid
 from auditlog.context import set_actor
@@ -69,33 +70,20 @@ def parse_ip(
     return parsed_ip
 
 
-def is_in_networks(
+def is_in_network(
     target_ip: str | ipaddress.IPv4Address | ipaddress.IPv6Address,
-    ip_networks: list[str],
+    ip_network: ipaddress.IPv4Network | ipaddress.IPv6Network,
 ) -> bool:
-    """
-    Return `True` if the `target_ip` match one of the IP/CIDR Range in `ip_networks`, return `False` otherwise.
-
-    Invalid `target_ip` and invalid `ip_networks` entries never raise (they do not match anything).
-    """
+    """Return `True` if the `target_ip` match the IP/CIDR Range in `ip_network`, return `False` otherwise."""
     ip = target_ip if not isinstance(target_ip, str) else parse_ip(target_ip)
     if ip is None:
         return False
 
-    for raw_network in ip_networks:
-        try:
-            network = ipaddress.ip_network(str(raw_network).strip(), strict=False)
-        except ValueError:
-            continue
-
-        if network.version == ip.version and ip in network:
-            return True
-
-    return False
+    return ip_network.version == ip.version and ip in ip_network
 
 
 def resolve_client_ip(
-    request: Optional[HttpRequest], proxy_ips: list[str]
+    request: Optional[HttpRequest], proxy_ip: Optional[ipaddress.IPv4Network | ipaddress.IPv6Network]
 ) -> Optional[str]:
     """Return the real client IP address from which the `request` originates (`None` if it can't be determined)."""
     if request is None:
@@ -106,7 +94,8 @@ def resolve_client_ip(
         return
 
     def is_trusted_proxy(ip) -> bool:
-        return ip.is_loopback or is_in_networks(ip, proxy_ips)
+        is_proxy = (proxy_ip is not None and is_in_network(ip, proxy_ip))
+        return ip.is_loopback or is_proxy
 
     if is_trusted_proxy(client_ip):
         x_forwarded_ip_entry = request.headers.get("X-Forwarded-For", "").split(",")[-1]
@@ -194,33 +183,28 @@ class AccountAdapter(DefaultAccountAdapter):
         return False
 
     def authenticate(self, request: HttpRequest, **credentials):
-        infra_settings_obj = GlobalSettings.objects.filter(
-            name=GlobalSettings.Names.INFRA_CONFIG
-        ).first()
-        infra_settings = infra_settings_obj.value if infra_settings_obj else {}
+        is_rate_limit_activated = getattr(settings, "ENABLE_CUSTOM_LOGIN_RATE_LIMITING", False)
+        proxy_ip = getattr(settings, "CUSTOM_RATE_LIMITING_PROXY_IP", None)
 
-        is_rate_limit_activated = infra_settings.get("is_rate_limit_activated", False)
+        ip_address = resolve_client_ip(request, proxy_ip)
 
-        proxy_ips = infra_settings.get(
-            "proxy_ips", list(InfraConfigSerializer.DEFAULT_PROXY_IPS)
+        # IPs inside the proxy network are exempt: neither ban-checked nor counted.
+        is_rate_limited = (
+            is_rate_limit_activated
+            and ip_address is not None
+            and (proxy_ip is None or not is_in_network(ip_address, proxy_ip))
         )
-        not_rate_limited_ips = infra_settings.get("not_rate_limited_ips", [])
-
-        ip_address = resolve_client_ip(request, proxy_ips)
 
         # Outside the try below, otherwise `except Exception` would swallow it
-        if is_rate_limit_activated and ip_address is not None:
-            is_rate_limited = not is_in_networks(ip_address, not_rate_limited_ips)
+        if is_rate_limited:
+            try:
+                is_banned = get_ban_cache().is_banned(ip_address)
+            except Exception as e:
+                logger.error("Failed to to check if an IP was banned", exc_info=e)
+                is_banned = False
 
-            if is_rate_limited:
-                try:
-                    is_banned = get_ban_cache().is_banned(ip_address)
-                except Exception as e:
-                    logger.error("Failed to to check if an IP was banned", exc_info=e)
-                    is_banned = False
-
-                if is_banned:
-                    raise ImmediateHttpResponse(self._make_rate_limit_response(request))
+            if is_banned:
+                raise ImmediateHttpResponse(self._make_rate_limit_response(request))
 
         email = credentials.get("email")
 
@@ -242,7 +226,7 @@ class AccountAdapter(DefaultAccountAdapter):
             return user
         except Exception:
             # Failed login: bad credentials, invalid input or non-local user
-            if is_rate_limit_activated and ip_address is not None:
+            if is_rate_limited:
                 try:
                     create_audit_log = get_ban_cache().register_failed_login(
                         ip_address, email

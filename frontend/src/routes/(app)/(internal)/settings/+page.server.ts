@@ -11,6 +11,7 @@ import {
 	SSOSettingsSchema,
 	VulnerabilitySlaSchema,
 	SecIntelFeedsSchema,
+	RateLimitingSchema,
 	webhookEndpointSchema,
 	auditSinkSchema
 } from '$lib/utils/schemas';
@@ -51,6 +52,11 @@ export const load: PageServerLoad = async ({ fetch }) => {
 				.catch(() => [])
 		: [];
 
+	// Can be `null` if the `ENABLE_CUSTOM_LOGIN_RATE_LIMITING` is `False` in the backend.
+	const rateLimitingSettings = await fetch(`${BASE_API_URL}/settings/rate-limiting/`)
+		.then((res) => (res.ok ? res.json() : null))
+		.catch(() => null);
+
 	const selectOptions: Record<string, any> = {};
 
 	const ssoModel = getModelInfo('sso-settings');
@@ -58,6 +64,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	const featureFlagModel = getModelInfo('feature-flags');
 	const vulnerabilitySlaModel = getModelInfo('vulnerability-sla');
 	const secIntelFeedsModel = getModelInfo('sec-intel-feeds');
+	const rateLimitingModel = getModelInfo('rate-limiting');
 
 	if (ssoModel.selectFields) {
 		for (const selectField of ssoModel.selectFields) {
@@ -125,6 +132,11 @@ export const load: PageServerLoad = async ({ fetch }) => {
 	const secIntelFeedsForm = await superValidate(secIntelFeedsSettings, zod(SecIntelFeedsSchema), {
 		errors: false
 	});
+	const rateLimitingForm = await superValidate(
+		rateLimitingSettings ?? {},
+		zod(RateLimitingSchema),
+		{ errors: false }
+	);
 	const webhookEndpointCreateForm = await superValidate(zod(webhookEndpointSchema), {
 		errors: false
 	});
@@ -157,6 +169,9 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		secIntelFeedsSettings,
 		secIntelFeedsForm,
 		secIntelFeedsModel,
+		rateLimitingSettings,
+		rateLimitingForm,
+		rateLimitingModel,
 		webhookEndpoints,
 		webhookEndpointCreateForm,
 		auditSinks,
@@ -346,6 +361,35 @@ export const actions: Actions = {
 		if (!response.ok) return handleErrorResponse({ event, response, form });
 
 		setFlash({ type: 'success', message: m.secIntelFeedsSettingsUpdated() }, event);
+
+		return { form };
+	},
+	rateLimiting: async (event) => {
+		const formData = await event.request.formData();
+
+		if (!formData) {
+			return fail(400, { form: null });
+		}
+
+		const schema = RateLimitingSchema;
+		const form = await superValidate(formData, zod(schema));
+
+		if (!form.valid) {
+			return fail(400, { form });
+		}
+
+		const endpoint = `${BASE_API_URL}/settings/rate-limiting/`;
+
+		const requestInitOptions: RequestInit = {
+			method: 'PUT',
+			body: JSON.stringify(form.data)
+		};
+
+		const response = await event.fetch(endpoint, requestInitOptions);
+
+		if (!response.ok) return handleErrorResponse({ event, response, form });
+
+		setFlash({ type: 'success', message: m.rateLimitingSettingsUpdated() }, event);
 
 		return { form };
 	},

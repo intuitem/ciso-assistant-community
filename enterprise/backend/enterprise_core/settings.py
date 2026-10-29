@@ -54,8 +54,6 @@ MODULES["enterprise_core"] = {  # noqa: F405
 
 INSTALLED_APPS.append("enterprise_core")  # noqa: F405
 
-ALLAUTH_SETTING_GETTER = "iam.rate_limiting_allauth._get_allauth_setting"
-
 CONFIGURABLE_DEFAULT_ROLE = True
 """
 If set to `True`, `Folder.default_role` is editable by users (folder form and API),

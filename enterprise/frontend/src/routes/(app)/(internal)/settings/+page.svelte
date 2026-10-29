@@ -19,6 +19,7 @@
 	import DocHtmlTemplatesSettings from '$lib/components/Settings/DocHtmlTemplatesSettings.svelte';
 	import AuditLogForwardingSettings from '$lib/components/Settings/AuditLogForwardingSettings.svelte';
 	import MailerSettings from '$lib/components/Settings/MailerSettings.svelte';
+	import RateLimitingSettings from '$lib/components/Settings/RateLimitingSettings.svelte';
 
 	// Tabs whose content lives in a dedicated sub-route and is preloaded into
 	// page.state instead of being loaded by the main settings page.
@@ -51,6 +52,7 @@
 		'vulnerabilitySla',
 		'secIntelFeeds',
 		'mailer',
+		'rateLimiting',
 		'webhooks',
 		'auditLogForwarding',
 		'emailTemplates',
@@ -64,6 +66,8 @@
 		// Loaded only when the backend runs with ENABLE_CUSTOM_MAILER and the
 		// user may view it (see the community +page.server.ts).
 		if (tab === 'mailer') return Boolean(page.data?.mailerSettings);
+		// Only display the tab if the `ENABLE_CUSTOM_LOGIN_RATE_LIMITING` setting is `True` in the backend.
+		if (tab === 'rateLimiting') return Boolean(page.data?.rateLimitingSettings);
 		const flag = FLAG_GATED_TABS[tab];
 		return flag ? Boolean(page.data?.featureflags?.[flag]) : true;
 	}
@@ -155,6 +159,11 @@
 		{#if data.mailerSettings}
 			<Tabs.Trigger value="mailer"><i class="fa-solid fa-envelope"></i> {m.mailer()}</Tabs.Trigger>
 		{/if}
+		{#if data.rateLimitingSettings}
+			<Tabs.Trigger value="rateLimiting"
+				><i class="fa-solid fa-gauge-high"></i> {m.rateLimiting()}</Tabs.Trigger
+			>
+		{/if}
 		{#if page.data?.featureflags?.outgoing_webhooks}
 			<Tabs.Trigger value="webhooks"
 				><span class="flex flex-row gap-2 items-center ml-0"
@@ -225,6 +234,11 @@
 	{#if data.mailerSettings}
 		<Tabs.Content value="mailer">
 			<MailerSettings {data} />
+		</Tabs.Content>
+	{/if}
+	{#if data.rateLimitingSettings}
+		<Tabs.Content value="rateLimiting">
+			<RateLimitingSettings {data} />
 		</Tabs.Content>
 	{/if}
 	<Tabs.Content value="webhooks">
