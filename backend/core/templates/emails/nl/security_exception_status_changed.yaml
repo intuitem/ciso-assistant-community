@@ -1,0 +1,15 @@
+subject: "CISO Assistant: Uitzondering '${exception_name}' heeft nu de status ${new_status}"
+body: |
+  Hallo,
+
+  De status van de volgende uitzondering is gewijzigd:
+
+  - Naam: ${exception_name}
+  - Ref ID: ${exception_ref_id}
+  - Nieuwe status: ${new_status}
+  - Bijgewerkt door: ${actor_name}
+  - Domein: ${folder_name}
+
+  Meld u aan op uw CISO Assistant-portaal om deze uitzondering te bekijken: [Naar CISO Assistant](${ciso_assistant_url})
+
+  Bedankt.

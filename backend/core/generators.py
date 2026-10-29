@@ -1389,6 +1389,8 @@ REPORT_PROFILES = {
         # Each profile has its own self-contained template per locale, so
         # customising one cannot affect the others.
         "template": "audit_report",
+        # `CustomWordTemplate.template_key` of the PRO override.
+        "override_key": "audit_posture",
         # The reader's own role still applies on top; this is the ceiling.
         "role": "auditor",
         "discloses": (),
@@ -1407,6 +1409,7 @@ REPORT_PROFILES = {
     },
     "attestation": {
         "template": "attestation",
+        "override_key": "audit_attestation",
         "role": "respondent",
         # The questionnaire deliberately withholds the auditor's verdict while the
         # respondent is answering (THIRD_PARTY_VISIBILITY marks `result` auditor-only).
