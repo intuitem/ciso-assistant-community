@@ -15,7 +15,7 @@ copyright: "Copyright \xA9 2003-2025 The OWASP&reg; Foundation, Inc. This docume
   \ any reuse or distribution, you must make it clear to others the license terms\
   \ of this work."
 version: 1
-publication_date: 2026-10-28
+publication_date: 2026-10-29
 provider: OWASP
 packager: intuitem
 translations:
@@ -1282,22 +1282,21 @@ objects:
       \ without any unnecessary features, components, documentation, or samples. Remove\
       \ or do not install unused features and frameworks.\n* A task to review and\
       \ update the configurations appropriate to all security notes, updates, and\
-      \ patches as part of the patch management process (see [A03 Software Supply\
-      \ Chain Failures](A03_2025-Software_Supply_Chain_Failures.md)). Review cloud\
-      \ storage permissions (e.g., S3 bucket permissions).\n* A segmented application\
-      \ architecture provides effective and secure separation between components or\
-      \ tenants, with segmentation, containerization, or cloud security groups (ACLs).\n\
-      * Sending security directives to clients, e.g., Security Headers.\n* An automated\
-      \ process to verify the effectiveness of the configurations and settings in\
-      \ all environments.\n* Proactively add a central configuration to intercept\
-      \ excessive error messages as a backup.\n* If these verifications are not automated,\
-      \ they should be manually verified annually at a minimum.\n* Use identity federation,\
-      \ short-lived credentials, or role-based access mechanisms provided by the underlying\
-      \ platform instead of embedding static keys or secrets in code, configuration\
-      \ files, or pipelines.\n\n\n## Example attack scenarios\n\n**Scenario #1:**\
-      \ The application server comes with sample applications not removed from the\
-      \ production server. These sample applications have known security flaws that\
-      \ attackers use to compromise the server. Suppose one of these applications\
+      \ patches as part of the patch management process (see **A03 Software Supply\
+      \ Chain Failures**). Review cloud storage permissions (e.g., S3 bucket permissions).\n\
+      * A segmented application architecture provides effective and secure separation\
+      \ between components or tenants, with segmentation, containerization, or cloud\
+      \ security groups (ACLs).\n* Sending security directives to clients, e.g., Security\
+      \ Headers.\n* An automated process to verify the effectiveness of the configurations\
+      \ and settings in all environments.\n* Proactively add a central configuration\
+      \ to intercept excessive error messages as a backup.\n* If these verifications\
+      \ are not automated, they should be manually verified annually at a minimum.\n\
+      * Use identity federation, short-lived credentials, or role-based access mechanisms\
+      \ provided by the underlying platform instead of embedding static keys or secrets\
+      \ in code, configuration files, or pipelines.\n\n\n## Example attack scenarios\n\
+      \n**Scenario #1:** The application server comes with sample applications not\
+      \ removed from the production server. These sample applications have known security\
+      \ flaws that attackers use to compromise the server. Suppose one of these applications\
       \ is the admin console, and default accounts weren't changed. In that case,\
       \ the attacker logs in with the default password and takes over.\n\n**Scenario\
       \ #2:** Directory listing is not disabled on the server. An attacker discovers\
@@ -1363,47 +1362,46 @@ objects:
           \ les fonctionnalit\xE9s et frameworks inutilis\xE9s. \n* Une t\xE2che visant\
           \ \xE0 revoir et mettre \xE0 jour les configurations appropri\xE9es \xE0\
           \ toutes les notes de s\xE9curit\xE9, mises \xE0 jour et correctifs dans\
-          \ le cadre du processus de gestion des correctifs (voir [A03 D\xE9faillances\
-          \ de la cha\xEEne d\u2019approvisionnement logicielle](A03_2025-Software_Supply_Chain_Failures.md)).\
-          \ Revoir les permissions de stockage cloud (par exemple, les permissions\
-          \ de bucket S3). \n* Une architecture d\u2019application segment\xE9e offre\
-          \ une s\xE9paration efficace et s\xE9curis\xE9e entre composants ou locataires,\
-          \ avec segmentation, conteneurisation ou groupes de s\xE9curit\xE9 cloud\
-          \ (ACL). \n* Envoi de directives de s\xE9curit\xE9 aux clients, par exemple,\
-          \ les en-t\xEAtes de s\xE9curit\xE9. \n* Un processus automatis\xE9 pour\
-          \ v\xE9rifier l\u2019efficacit\xE9 des configurations et des r\xE9glages\
-          \ dans tous les environnements. \n* Ajouter proactivement une configuration\
-          \ centrale pour intercepter les messages d\u2019erreur excessifs en tant\
-          \ que sauvegarde. \n* Si ces v\xE9rifications ne sont pas automatis\xE9\
-          es, elles doivent \xEAtre v\xE9rifi\xE9es manuellement au minimum chaque\
-          \ ann\xE9e. \n* Utiliser la f\xE9d\xE9ration d\u2019identit\xE9, des identifiants\
-          \ de courte dur\xE9e ou des m\xE9canismes d\u2019acc\xE8s bas\xE9s sur des\
-          \ r\xF4les fournis par la plateforme sous-jacente au lieu d\u2019int\xE9\
-          grer des cl\xE9s statiques ou des secrets dans le code, les fichiers de\
-          \ configuration ou les pipelines.\n\n## Exemples de sc\xE9narios d\u2019\
-          attaque\n\n**Sc\xE9nario #1 :** Le serveur d\u2019applications d\u2019applications\
-          \ d\u2019exemple n\u2019est pas supprim\xE9 du serveur de production. Ces\
-          \ applications d\u2019exemple pr\xE9sentent des failles de s\xE9curit\xE9\
-          \ connues que les attaquants utilisent pour compromettre le serveur. Supposons\
-          \ que l\u2019une de ces applications soit la console d\u2019administration,\
-          \ et que les comptes par d\xE9faut n\u2019aient pas \xE9t\xE9 modifi\xE9\
-          s. Dans ce cas, l\u2019attaquant se connecte avec le mot de passe par d\xE9\
-          faut et prend le relais. \n\n**Sc\xE9nario #2 :** La liste des r\xE9pertoires\
-          \ n\u2019est pas d\xE9sactiv\xE9e sur le serveur. Un attaquant d\xE9couvre\
-          \ qu\u2019il peut simplement lister les r\xE9pertoires. L\u2019attaquant\
-          \ trouve et t\xE9l\xE9charge les classes Java compil\xE9es, qu\u2019il d\xE9\
-          compile et r\xE9tro-ing\xE9nierie pour visualiser le code. L\u2019attaquant\
-          \ d\xE9couvre alors une grave faille de contr\xF4le d\u2019acc\xE8s dans\
-          \ l\u2019application. \n\n**Sc\xE9nario #3 :** La configuration du serveur\
-          \ d\u2019applications permet de renvoyer des messages d\u2019erreur d\xE9\
-          taill\xE9s, tels que des traces de pile. Cela expose potentiellement des\
-          \ informations sensibles ou des failles sous-jacentes, comme des versions\
-          \ de composants connues pour \xEAtre vuln\xE9rables. \n\n**Sc\xE9nario #4\
-          \ :** Un fournisseur de services cloud (CSP) a par d\xE9faut des permissions\
-          \ de partage ouvertes \xE0 Internet. Cela permet d\u2019acc\xE9der aux donn\xE9\
-          es sensibles stock\xE9es dans le stockage cloud. \n\n\nPour plus d\u2019\
-          informations sur les r\xE9f\xE9rences et la liste des CWE cartographi\xE9\
-          es : https://top10.owasp.org/2025/A02_2025-Security_Misconfiguration/"
+          \ le cadre du processus de gestion des correctifs (voir **A03 D\xE9faillances\
+          \ de la cha\xEEne d\u2019approvisionnement logicielle**). Revoir les permissions\
+          \ de stockage cloud (par exemple, les permissions de bucket S3). \n* Une\
+          \ architecture d\u2019application segment\xE9e offre une s\xE9paration efficace\
+          \ et s\xE9curis\xE9e entre composants ou locataires, avec segmentation,\
+          \ conteneurisation ou groupes de s\xE9curit\xE9 cloud (ACL). \n* Envoi de\
+          \ directives de s\xE9curit\xE9 aux clients, par exemple, les en-t\xEAtes\
+          \ de s\xE9curit\xE9. \n* Un processus automatis\xE9 pour v\xE9rifier l\u2019\
+          efficacit\xE9 des configurations et des r\xE9glages dans tous les environnements.\
+          \ \n* Ajouter proactivement une configuration centrale pour intercepter\
+          \ les messages d\u2019erreur excessifs en tant que sauvegarde. \n* Si ces\
+          \ v\xE9rifications ne sont pas automatis\xE9es, elles doivent \xEAtre v\xE9\
+          rifi\xE9es manuellement au minimum chaque ann\xE9e. \n* Utiliser la f\xE9\
+          d\xE9ration d\u2019identit\xE9, des identifiants de courte dur\xE9e ou des\
+          \ m\xE9canismes d\u2019acc\xE8s bas\xE9s sur des r\xF4les fournis par la\
+          \ plateforme sous-jacente au lieu d\u2019int\xE9grer des cl\xE9s statiques\
+          \ ou des secrets dans le code, les fichiers de configuration ou les pipelines.\n\
+          \n## Exemples de sc\xE9narios d\u2019attaque\n\n**Sc\xE9nario #1 :** Le\
+          \ serveur d\u2019applications d\u2019applications d\u2019exemple n\u2019\
+          est pas supprim\xE9 du serveur de production. Ces applications d\u2019exemple\
+          \ pr\xE9sentent des failles de s\xE9curit\xE9 connues que les attaquants\
+          \ utilisent pour compromettre le serveur. Supposons que l\u2019une de ces\
+          \ applications soit la console d\u2019administration, et que les comptes\
+          \ par d\xE9faut n\u2019aient pas \xE9t\xE9 modifi\xE9s. Dans ce cas, l\u2019\
+          attaquant se connecte avec le mot de passe par d\xE9faut et prend le relais.\
+          \ \n\n**Sc\xE9nario #2 :** La liste des r\xE9pertoires n\u2019est pas d\xE9\
+          sactiv\xE9e sur le serveur. Un attaquant d\xE9couvre qu\u2019il peut simplement\
+          \ lister les r\xE9pertoires. L\u2019attaquant trouve et t\xE9l\xE9charge\
+          \ les classes Java compil\xE9es, qu\u2019il d\xE9compile et r\xE9tro-ing\xE9\
+          nierie pour visualiser le code. L\u2019attaquant d\xE9couvre alors une grave\
+          \ faille de contr\xF4le d\u2019acc\xE8s dans l\u2019application. \n\n**Sc\xE9\
+          nario #3 :** La configuration du serveur d\u2019applications permet de renvoyer\
+          \ des messages d\u2019erreur d\xE9taill\xE9s, tels que des traces de pile.\
+          \ Cela expose potentiellement des informations sensibles ou des failles\
+          \ sous-jacentes, comme des versions de composants connues pour \xEAtre vuln\xE9\
+          rables. \n\n**Sc\xE9nario #4 :** Un fournisseur de services cloud (CSP)\
+          \ a par d\xE9faut des permissions de partage ouvertes \xE0 Internet. Cela\
+          \ permet d\u2019acc\xE9der aux donn\xE9es sensibles stock\xE9es dans le\
+          \ stockage cloud. \n\n\nPour plus d\u2019informations sur les r\xE9f\xE9\
+          rences et la liste des CWE cartographi\xE9es : https://top10.owasp.org/2025/A02_2025-Security_Misconfiguration/"
       cs:
         name: "Chybn\xE1 bezpe\u010Dnostn\xED konfigurace (Security Misconfiguration)"
         description: "Chybn\xE1 bezpe\u010Dnostn\xED konfigurace znamen\xE1, \u017E\
@@ -1458,7 +1456,7 @@ objects:
           \ neinstalujte nepou\u017E\xEDvan\xE9 funkce a frameworky.\n* Revize a aktualizace\
           \ konfigurac\xED v n\xE1vaznosti na v\u0161echna bezpe\u010Dnostn\xED upozorn\u011B\
           n\xED, aktualizace a z\xE1platy jako sou\u010D\xE1st procesu spr\xE1vy z\xE1\
-          plat (viz [A03:2025 Selh\xE1n\xED dodavatelsk\xE9ho \u0159et\u011Bzce softwaru](A03_2025-Software_Supply_Chain_Failures.md)).\
+          plat (viz **A03:2025 Selh\xE1n\xED dodavatelsk\xE9ho \u0159et\u011Bzce softwaru**).\
           \ Kontrola opr\xE1vn\u011Bn\xED cloudov\xFDch \xFAlo\u017Ei\u0161\u0165\
           \ (nap\u0159. opr\xE1vn\u011Bn\xED S3 bucket\u016F).\n* Segmentovanou architekturu\
           \ aplikace, kter\xE1 zaji\u0161\u0165uje \xFA\u010Dinn\xE9 a bezpe\u010D\
@@ -1517,10 +1515,10 @@ objects:
           \ Anwendungsservern und -frameworks (z. B. Struts, Spring, ASP.NET), Bibliotheken,\
           \ Datenbanken etc. sind nicht auf sichere Werte gesetzt.\n* Der Server sendet\
           \ keine Sicherheits-Header oder -Direktiven, bzw. diese sind nicht sicher\
-          \ konfiguriert.\n* Die Software ist veraltet oder verwundbar (siehe [A06:2025-Unsichere\
-          \ oder veraltete Komponenten](A06_2025-Vulnerable_and_Outdated_Components.md)).\n\
-          \nOhne einen abgestimmten und reproduzierbaren Prozess zur sicheren Konfiguration\
-          \ sind Systeme einem h\xF6heren Risiko ausgesetzt!"
+          \ konfiguriert.\n* Die Software ist veraltet oder verwundbar (siehe **A06:2025-Unsichere\
+          \ oder veraltete Komponenten**).\n\nOhne einen abgestimmten und reproduzierbaren\
+          \ Prozess zur sicheren Konfiguration sind Systeme einem h\xF6heren Risiko\
+          \ ausgesetzt!"
         annotation: "## Score table\n\n<table>\n<tr>\n\_\_\_<td>Zugeordnete CWEs\n\
           \_\_\_</td>\n\_\_\_<td>Max. H\xE4ufigkeit\n\_\_\_</td>\n\_\_\_<td>Durchschn.\
           \ H\xE4ufigkeit\n\_\_\_</td>\n\_\_\_<td>Max. Abdeckung\n\_\_\_</td>\n\_\_\
@@ -1543,7 +1541,7 @@ objects:
           \ Frameworks die Sie nicht verwenden oder installieren Sie diese erst gar\
           \ nicht.\n* \xDCberpr\xFCfen und Aktualisieren der Konfigurationen, die\
           \ f\xFCr alle Sicherheitshinweise, Updates und Patches im Rahmen des Patch-Verwaltungsprozesses\
-          \ geeignet sind (siehe [A03:2025 \u2013 Schwachstellen in der Software-Lieferkette](A03_2025-Software_Supply_Chain_Failures.md)).\
+          \ geeignet sind (siehe **A03:2025 \u2013 Schwachstellen in der Software-Lieferkette**).\
           \ \xDCberpr\xFCfen Sie die Cloud-Speicherberechtigungen (z. B. S3-Bucket-Berechtigungen).\n\
           \n\n## Example attack scenarios\n\n**Szenario Nr. 1:** Der Anwendungsserver\
           \ wird mit Beispielanwendungen geliefert, die nicht vom Produktionsserver\
@@ -1610,18 +1608,18 @@ objects:
           \ documentaci\xF3n o ejemplos innecesarios. Elimine o no instale funciones\
           \ y frameworks que no utilice.\n* Una tarea para revisar y actualizar las\
           \ configuraciones de acuerdo con todas las notas de seguridad, actualizaciones\
-          \ y parches como parte del proceso de gesti\xF3n de parches (consulte [A03\
-          \ Fallas en la Cadena de Suministro de Software](A03_2025-Software_Supply_Chain_Failures.md)).\
-          \ Revise los permisos de almacenamiento en la nube (por ejemplo, los permisos\
-          \ de los buckets S3).\n* Una arquitectura de aplicaci\xF3n segmentada que\
-          \ proporcione una separaci\xF3n efectiva y segura entre componentes o inquilinos\
-          \ (tenants), con segmentaci\xF3n, contenedorizaci\xF3n o grupos de seguridad\
-          \ en la nube (ACLs).\n* Env\xEDo de directivas de seguridad a los clientes,\
-          \ por ejemplo, Cabeceras de Seguridad (Security Headers).\n* Un proceso\
-          \ automatizado para verificar la eficacia de las configuraciones y ajustes\
-          \ en todos los entornos.\n* A\xF1adir proactivamente una configuraci\xF3\
-          n central para interceptar mensajes de error excesivos como medida de respaldo.\n\
-          * Si estas verificaciones no est\xE1n automatizadas, deben verificarse manualmente\
+          \ y parches como parte del proceso de gesti\xF3n de parches (consulte **A03\
+          \ Fallas en la Cadena de Suministro de Software**). Revise los permisos\
+          \ de almacenamiento en la nube (por ejemplo, los permisos de los buckets\
+          \ S3).\n* Una arquitectura de aplicaci\xF3n segmentada que proporcione una\
+          \ separaci\xF3n efectiva y segura entre componentes o inquilinos (tenants),\
+          \ con segmentaci\xF3n, contenedorizaci\xF3n o grupos de seguridad en la\
+          \ nube (ACLs).\n* Env\xEDo de directivas de seguridad a los clientes, por\
+          \ ejemplo, Cabeceras de Seguridad (Security Headers).\n* Un proceso automatizado\
+          \ para verificar la eficacia de las configuraciones y ajustes en todos los\
+          \ entornos.\n* A\xF1adir proactivamente una configuraci\xF3n central para\
+          \ interceptar mensajes de error excesivos como medida de respaldo.\n* Si\
+          \ estas verificaciones no est\xE1n automatizadas, deben verificarse manualmente\
           \ al menos una vez al a\xF1o.\n* Utilizar federaci\xF3n de identidades,\
           \ credenciales de corta duraci\xF3n o mecanismos de acceso basados en roles\
           \ proporcionados por la plataforma subyacente en lugar de incrustar claves\
@@ -1832,39 +1830,39 @@ objects:
           \ funzionalit\xE0 e framework non utilizzati.\n* Un'attivit\xE0 di revisione\
           \ e aggiornamento delle configurazioni appropriate a tutte le note di sicurezza,\
           \ aggiornamenti e patch come parte del processo di gestione delle patch\
-          \ (vedi [A03 Software Supply Chain Failures](A03_2025-Software_Supply_Chain_Failures.md)).\
-          \ Revisionare i permessi dello storage cloud (es. permessi dei bucket S3).\n\
-          * Un'architettura applicativa segmentata che fornisca una separazione efficace\
-          \ e sicura tra componenti o tenant, con segmentazione, containerizzazione\
-          \ o gruppi di sicurezza cloud (ACL).\n* Invio di direttive di sicurezza\
-          \ ai client, es. Security Headers.\n* Un processo automatizzato per verificare\
-          \ l'efficacia delle configurazioni e delle impostazioni in tutti gli ambienti.\n\
-          * Aggiungere proattivamente una configurazione centrale per intercettare\
-          \ messaggi di errore eccessivi come backup.\n* Se queste verifiche non sono\
-          \ automatizzate, devono essere verificate manualmente almeno annualmente.\n\
-          * Utilizzare la federazione di identit\xE0, credenziali di breve durata\
-          \ o meccanismi di accesso basati sui ruoli forniti dalla piattaforma sottostante\
-          \ anzich\xE9 incorporare chiavi o segreti statici nel codice, nei file di\
-          \ configurazione o nelle pipeline.\n\n\n## Example attack scenarios\n\n\
-          **Scenario #1:** Il server applicativo include applicazioni di esempio non\
-          \ rimosse dal server di produzione. Queste applicazioni di esempio hanno\
-          \ falle di sicurezza note che gli attaccanti utilizzano per compromettere\
-          \ il server. Supponiamo che una di queste applicazioni sia la console di\
-          \ amministrazione e che le credenziali predefinite non siano state cambiate.\
-          \ In tal caso, l'attaccante accede con la password predefinita e prende\
-          \ il controllo.\n\n**Scenario #2:** Il directory listing non \xE8 disabilitato\
-          \ sul server. Un attaccante scopre che pu\xF2 semplicemente elencare le\
-          \ directory. L'attaccante trova e scarica le classi Java compilate, che\
-          \ decompila e fa reverse engineering per visualizzare il codice. L'attaccante\
-          \ trova quindi una grave falla nel controllo degli accessi nell'applicazione.\n\
-          \n**Scenario #3:** La configurazione del server applicativo consente la\
-          \ restituzione di messaggi di errore dettagliati, come stack trace, agli\
-          \ utenti. Ci\xF2 potrebbe esporre informazioni sensibili o falle sottostanti,\
-          \ come le versioni dei componenti note per essere vulnerabili.\n\n**Scenario\
-          \ #4:** Un cloud service provider (CSP) ha come default i permessi di condivisione\
-          \ aperti a Internet. Ci\xF2 consente l'accesso ai dati sensibili archiviati\
-          \ nello storage cloud.\n\n\nPer maggiori informazioni sui riferimenti e\
-          \ sull'elenco delle CWE mappate: https://top10.owasp.org/2025/it/A02_2025-Security_Misconfiguration/"
+          \ (vedi **A03 Software Supply Chain Failures**). Revisionare i permessi\
+          \ dello storage cloud (es. permessi dei bucket S3).\n* Un'architettura applicativa\
+          \ segmentata che fornisca una separazione efficace e sicura tra componenti\
+          \ o tenant, con segmentazione, containerizzazione o gruppi di sicurezza\
+          \ cloud (ACL).\n* Invio di direttive di sicurezza ai client, es. Security\
+          \ Headers.\n* Un processo automatizzato per verificare l'efficacia delle\
+          \ configurazioni e delle impostazioni in tutti gli ambienti.\n* Aggiungere\
+          \ proattivamente una configurazione centrale per intercettare messaggi di\
+          \ errore eccessivi come backup.\n* Se queste verifiche non sono automatizzate,\
+          \ devono essere verificate manualmente almeno annualmente.\n* Utilizzare\
+          \ la federazione di identit\xE0, credenziali di breve durata o meccanismi\
+          \ di accesso basati sui ruoli forniti dalla piattaforma sottostante anzich\xE9\
+          \ incorporare chiavi o segreti statici nel codice, nei file di configurazione\
+          \ o nelle pipeline.\n\n\n## Example attack scenarios\n\n**Scenario #1:**\
+          \ Il server applicativo include applicazioni di esempio non rimosse dal\
+          \ server di produzione. Queste applicazioni di esempio hanno falle di sicurezza\
+          \ note che gli attaccanti utilizzano per compromettere il server. Supponiamo\
+          \ che una di queste applicazioni sia la console di amministrazione e che\
+          \ le credenziali predefinite non siano state cambiate. In tal caso, l'attaccante\
+          \ accede con la password predefinita e prende il controllo.\n\n**Scenario\
+          \ #2:** Il directory listing non \xE8 disabilitato sul server. Un attaccante\
+          \ scopre che pu\xF2 semplicemente elencare le directory. L'attaccante trova\
+          \ e scarica le classi Java compilate, che decompila e fa reverse engineering\
+          \ per visualizzare il codice. L'attaccante trova quindi una grave falla\
+          \ nel controllo degli accessi nell'applicazione.\n\n**Scenario #3:** La\
+          \ configurazione del server applicativo consente la restituzione di messaggi\
+          \ di errore dettagliati, come stack trace, agli utenti. Ci\xF2 potrebbe\
+          \ esporre informazioni sensibili o falle sottostanti, come le versioni dei\
+          \ componenti note per essere vulnerabili.\n\n**Scenario #4:** Un cloud service\
+          \ provider (CSP) ha come default i permessi di condivisione aperti a Internet.\
+          \ Ci\xF2 consente l'accesso ai dati sensibili archiviati nello storage cloud.\n\
+          \n\nPer maggiori informazioni sui riferimenti e sull'elenco delle CWE mappate:\
+          \ https://top10.owasp.org/2025/it/A02_2025-Security_Misconfiguration/"
       ja:
         name: "\u30BB\u30AD\u30E5\u30EA\u30C6\u30A3\u8A2D\u5B9A\u306E\u4E0D\u5099\
           \ (Security Misconfiguration)"
@@ -1956,94 +1954,93 @@ objects:
           \u4E00\u74B0\u3068\u3057\u3066\u3001\u30BB\u30AD\u30E5\u30EA\u30C6\u30A3\
           \u30CE\u30FC\u30C8\u3084\u30A2\u30C3\u30D7\u30C7\u30FC\u30C8\u3001\u30D1\
           \u30C3\u30C1\u306B\u57FA\u3065\u304D\u8A2D\u5B9A\u3092\u30EC\u30D3\u30E5\
-          \u30FC\u30FB\u66F4\u65B0\u3057\u3066\u304F\u3060\u3055\u3044\uFF08[A03 \u30BD\
-          \u30D5\u30C8\u30A6\u30A7\u30A2\u30B5\u30D7\u30E9\u30A4\u30C1\u30A7\u30FC\
-          \u30F3\u306E\u4E0D\u5099](A03_2025-Software_Supply_Chain_Failures.md) \u3092\
-          \u53C2\u7167\uFF09\u3002\u30AF\u30E9\u30A6\u30C9\u30B9\u30C8\u30EC\u30FC\
-          \u30B8\uFF08S3 \u30D0\u30B1\u30C3\u30C8\u7B49\uFF09\u306E\u6A29\u9650\u8A2D\
-          \u5B9A\u3082\u5B9A\u671F\u7684\u306B\u30EC\u30D3\u30E5\u30FC\u3057\u3066\
-          \u304F\u3060\u3055\u3044\u3002\n* **\u30BB\u30B0\u30E1\u30F3\u30C8\u5316\
-          \u3055\u308C\u305F\u30A2\u30FC\u30AD\u30C6\u30AF\u30C1\u30E3\uFF1A** \u30B3\
-          \u30F3\u30C6\u30CA\u5316\u3001\u30BB\u30B0\u30E1\u30F3\u30C6\u30FC\u30B7\
-          \u30E7\u30F3\u3001\u3042\u308B\u3044\u306F\u30AF\u30E9\u30A6\u30C9\u306E\
-          \u30BB\u30AD\u30E5\u30EA\u30C6\u30A3\u30B0\u30EB\u30FC\u30D7 (ACL) \u3092\
-          \u6D3B\u7528\u3057\u3001\u30B3\u30F3\u30DD\u30FC\u30CD\u30F3\u30C8\u9593\
-          \u3084\u30C6\u30CA\u30F3\u30C8\u9593\u3092\u5B89\u5168\u306B\u5206\u96E2\
-          \u3057\u3066\u304F\u3060\u3055\u3044\u3002\n* **\u30BB\u30AD\u30E5\u30EA\
-          \u30C6\u30A3\u30C7\u30A3\u30EC\u30AF\u30C6\u30A3\u30D6\u306E\u9001\u4FE1\
-          \uFF1A** \u30BB\u30AD\u30E5\u30EA\u30C6\u30A3\u30D8\u30C3\u30C0\u30FC\u306A\
-          \u3069\u306E\u30C7\u30A3\u30EC\u30AF\u30C6\u30A3\u30D6\u3092\u30AF\u30E9\
-          \u30A4\u30A2\u30F3\u30C8\u3078\u9001\u4FE1\u3057\u3066\u304F\u3060\u3055\
-          \u3044\u3002\n* **\u81EA\u52D5\u691C\u8A3C\u30D7\u30ED\u30BB\u30B9\uFF1A\
-          ** \u3059\u3079\u3066\u306E\u74B0\u5883\u306B\u304A\u3044\u3066\u3001\u8A2D\
-          \u5B9A\u306E\u6709\u52B9\u6027\u3092\u81EA\u52D5\u3067\u691C\u8A3C\u3059\
-          \u308B\u30D7\u30ED\u30BB\u30B9\u3092\u5C0E\u5165\u3057\u3066\u304F\u3060\
-          \u3055\u3044\u3002\n* **\u4E2D\u592E\u96C6\u4E2D\u578B\u306E\u30A8\u30E9\
-          \u30FC\u7BA1\u7406\uFF1A** \u904E\u5270\u306A\u30A8\u30E9\u30FC\u30E1\u30C3\
-          \u30BB\u30FC\u30B8\u3092\u30A4\u30F3\u30BF\u30FC\u30BB\u30D7\u30C8\u3059\
-          \u308B\u4E2D\u592E\u8A2D\u5B9A\u3092\u3001\u30D0\u30C3\u30AF\u30A2\u30C3\
-          \u30D7\u3068\u3057\u3066\u4E8B\u524D\u306B\u5C0E\u5165\u3057\u3066\u304F\
-          \u3060\u3055\u3044\u3002\n* **\u624B\u52D5\u691C\u8A3C\u306E\u5B9F\u65BD\
-          \uFF1A** \u691C\u8A3C\u304C\u81EA\u52D5\u5316\u3055\u308C\u3066\u3044\u306A\
-          \u3044\u5834\u5408\u306F\u3001\u5C11\u306A\u304F\u3068\u3082\u5E74\u306B\
-          \u4E00\u5EA6\u306F\u624B\u52D5\u3067\u691C\u8A3C\u3092\u5B9F\u65BD\u3057\
-          \u3066\u304F\u3060\u3055\u3044\u3002\n* **\u30D7\u30E9\u30C3\u30C8\u30D5\
-          \u30A9\u30FC\u30E0\u6A5F\u80FD\u306E\u6D3B\u7528\uFF1A** \u30B3\u30FC\u30C9\
-          \u3084\u8A2D\u5B9A\u30D5\u30A1\u30A4\u30EB\u3001\u30D1\u30A4\u30D7\u30E9\
-          \u30A4\u30F3\u306B\u9759\u7684\u306A\u30AD\u30FC\u3084\u30B7\u30FC\u30AF\
-          \u30EC\u30C3\u30C8\u3092\u57CB\u3081\u8FBC\u3080\u306E\u3067\u306F\u306A\
-          \u304F\u3001\u30D7\u30E9\u30C3\u30C8\u30D5\u30A9\u30FC\u30E0\u304C\u63D0\
-          \u4F9B\u3059\u308B\u30A2\u30A4\u30C7\u30F3\u30C6\u30A3\u30C6\u30A3\u9023\
-          \u643A (Identity Federation)\u3001\u77ED\u547D\u306A\u8A8D\u8A3C\u60C5\u5831\
-          \ (Short-lived Credentials)\u3001\u307E\u305F\u306F\u30ED\u30FC\u30EB\u30D9\
-          \u30FC\u30B9\u306E\u30A2\u30AF\u30BB\u30B9\u5236\u5FA1\u3092\u6D3B\u7528\
-          \u3057\u3066\u304F\u3060\u3055\u3044\u3002\n\n\n## Example attack scenarios\n\
-          \n**\u30B7\u30CA\u30EA\u30AA #1\uFF1A** \u672C\u756A\u30B5\u30FC\u30D0\u30FC\
-          \u304B\u3089\u30B5\u30F3\u30D7\u30EB\u30A2\u30D7\u30EA\u30B1\u30FC\u30B7\
-          \u30E7\u30F3\u304C\u524A\u9664\u3055\u308C\u3066\u3044\u306A\u304B\u3063\
-          \u305F\u3002\u653B\u6483\u8005\u306F\u3001\u3053\u308C\u3089\u306E\u30B5\
-          \u30F3\u30D7\u30EB\u306B\u542B\u307E\u308C\u308B\u65E2\u77E5\u306E\u8106\
-          \u5F31\u6027\u3092\u60AA\u7528\u3057\u3066\u30B5\u30FC\u30D0\u30FC\u3092\
-          \u4FB5\u5BB3\u3057\u305F\u3002\u3055\u3089\u306B\u3001\u7BA1\u7406\u30B3\
-          \u30F3\u30BD\u30FC\u30EB\u306E\u30C7\u30D5\u30A9\u30EB\u30C8\u30D1\u30B9\
-          \u30EF\u30FC\u30C9\u304C\u5909\u66F4\u3055\u308C\u3066\u3044\u306A\u304B\
-          \u3063\u305F\u305F\u3081\u3001\u653B\u6483\u8005\u306F\u7BA1\u7406\u8005\
-          \u3068\u3057\u3066\u30ED\u30B0\u30A4\u30F3\u3057\u3001\u30B7\u30B9\u30C6\
-          \u30E0\u3092\u5B8C\u5168\u306B\u4E57\u3063\u53D6\u3063\u305F\u3002\n\n**\u30B7\
-          \u30CA\u30EA\u30AA #2\uFF1A** \u30B5\u30FC\u30D0\u30FC\u306E\u30C7\u30A3\
-          \u30EC\u30AF\u30C8\u30EA\u4E00\u89A7\u8868\u793A\u304C\u7121\u52B9\u5316\
-          \u3055\u308C\u3066\u3044\u306A\u304B\u3063\u305F\u3002\u653B\u6483\u8005\
-          \u306F\u30C7\u30A3\u30EC\u30AF\u30C8\u30EA\u69CB\u9020\u3092\u628A\u63E1\
-          \u3057\u3001\u30B3\u30F3\u30D1\u30A4\u30EB\u6E08\u307F\u306E Java \u30AF\
-          \u30E9\u30B9\u30D5\u30A1\u30A4\u30EB\u3092\u30C0\u30A6\u30F3\u30ED\u30FC\
-          \u30C9\u3057\u305F\u3002\u3053\u308C\u3092\u30C7\u30B3\u30F3\u30D1\u30A4\
-          \u30EB\u3057\u3066\u30BD\u30FC\u30B9\u30B3\u30FC\u30C9\u3092\u30EA\u30D0\
-          \u30FC\u30B9\u30A8\u30F3\u30B8\u30CB\u30A2\u30EA\u30F3\u30B0\u3057\u305F\
-          \u7D50\u679C\u3001\u30A2\u30D7\u30EA\u30B1\u30FC\u30B7\u30E7\u30F3\u306B\
-          \u91CD\u5927\u306A\u30A2\u30AF\u30BB\u30B9\u5236\u5FA1\u306E\u6B20\u9665\
-          \u304C\u3042\u308B\u3053\u3068\u3092\u7A81\u304D\u6B62\u3081\u305F\u3002\
-          \n\n**\u30B7\u30CA\u30EA\u30AA #3\uFF1A** \u30A2\u30D7\u30EA\u30B1\u30FC\
-          \u30B7\u30E7\u30F3\u30B5\u30FC\u30D0\u30FC\u306E\u8A2D\u5B9A\u306B\u3088\
-          \u308A\u3001\u30B9\u30BF\u30C3\u30AF\u30C8\u30EC\u30FC\u30B9\u3092\u542B\
-          \u3080\u8A73\u7D30\u306A\u30A8\u30E9\u30FC\u30E1\u30C3\u30BB\u30FC\u30B8\
-          \u304C\u30E6\u30FC\u30B6\u30FC\u306B\u8FD4\u3055\u308C\u3066\u3044\u305F\
-          \u3002\u3053\u308C\u306B\u3088\u308A\u3001\u6A5F\u5BC6\u60C5\u5831\u3084\
-          \u3001\u4F7F\u7528\u3055\u308C\u3066\u3044\u308B\u30B3\u30F3\u30DD\u30FC\
-          \u30CD\u30F3\u30C8\u306E\u30D0\u30FC\u30B8\u30E7\u30F3\uFF08\u8106\u5F31\
-          \u6027\u304C\u65E2\u77E5\u306E\u3082\u306E\u3092\u542B\u3080\uFF09\u3068\
-          \u3044\u3063\u305F\u5185\u90E8\u60C5\u5831\u304C\u653B\u6483\u8005\u306B\
-          \u9732\u5448\u3057\u305F\u3002\n\n**\u30B7\u30CA\u30EA\u30AA #4\uFF1A**\
-          \ \u30AF\u30E9\u30A6\u30C9\u30B5\u30FC\u30D3\u30B9\u30D7\u30ED\u30D0\u30A4\
-          \u30C0\u30FC (CSP) \u306E\u30C7\u30D5\u30A9\u30EB\u30C8\u8A2D\u5B9A\u306B\
-          \u3088\u308A\u3001\u5171\u6709\u6A29\u9650\u304C\u30A4\u30F3\u30BF\u30FC\
-          \u30CD\u30C3\u30C8\u306B\u516C\u958B\u3055\u308C\u3066\u3044\u305F\u3002\
-          \u3053\u308C\u306B\u3088\u308A\u3001\u30AF\u30E9\u30A6\u30C9\u30B9\u30C8\
-          \u30EC\u30FC\u30B8\u5185\u306B\u4FDD\u5B58\u3055\u308C\u3066\u3044\u305F\
-          \u6A5F\u5BC6\u30C7\u30FC\u30BF\u304C\u7B2C\u4E09\u8005\u306B\u596A\u53D6\
-          \u3055\u308C\u305F\u3002\n\n\n\u53C2\u8003\u8CC7\u6599\u304A\u3088\u3073\
-          \u30DE\u30C3\u30D4\u30F3\u30B0\u3055\u308C\u305FCWE\u306E\u4E00\u89A7\u306B\
-          \u3064\u3044\u3066\u3001\u8A73\u3057\u304F\u306F\u3053\u3061\u3089\uFF1A\
-          \ https://top10.owasp.org/2025/ja/A02_2025-Security_Misconfiguration/"
+          \u30FC\u30FB\u66F4\u65B0\u3057\u3066\u304F\u3060\u3055\u3044\uFF08**A03\
+          \ \u30BD\u30D5\u30C8\u30A6\u30A7\u30A2\u30B5\u30D7\u30E9\u30A4\u30C1\u30A7\
+          \u30FC\u30F3\u306E\u4E0D\u5099** \u3092\u53C2\u7167\uFF09\u3002\u30AF\u30E9\
+          \u30A6\u30C9\u30B9\u30C8\u30EC\u30FC\u30B8\uFF08S3 \u30D0\u30B1\u30C3\u30C8\
+          \u7B49\uFF09\u306E\u6A29\u9650\u8A2D\u5B9A\u3082\u5B9A\u671F\u7684\u306B\
+          \u30EC\u30D3\u30E5\u30FC\u3057\u3066\u304F\u3060\u3055\u3044\u3002\n* **\u30BB\
+          \u30B0\u30E1\u30F3\u30C8\u5316\u3055\u308C\u305F\u30A2\u30FC\u30AD\u30C6\
+          \u30AF\u30C1\u30E3\uFF1A** \u30B3\u30F3\u30C6\u30CA\u5316\u3001\u30BB\u30B0\
+          \u30E1\u30F3\u30C6\u30FC\u30B7\u30E7\u30F3\u3001\u3042\u308B\u3044\u306F\
+          \u30AF\u30E9\u30A6\u30C9\u306E\u30BB\u30AD\u30E5\u30EA\u30C6\u30A3\u30B0\
+          \u30EB\u30FC\u30D7 (ACL) \u3092\u6D3B\u7528\u3057\u3001\u30B3\u30F3\u30DD\
+          \u30FC\u30CD\u30F3\u30C8\u9593\u3084\u30C6\u30CA\u30F3\u30C8\u9593\u3092\
+          \u5B89\u5168\u306B\u5206\u96E2\u3057\u3066\u304F\u3060\u3055\u3044\u3002\
+          \n* **\u30BB\u30AD\u30E5\u30EA\u30C6\u30A3\u30C7\u30A3\u30EC\u30AF\u30C6\
+          \u30A3\u30D6\u306E\u9001\u4FE1\uFF1A** \u30BB\u30AD\u30E5\u30EA\u30C6\u30A3\
+          \u30D8\u30C3\u30C0\u30FC\u306A\u3069\u306E\u30C7\u30A3\u30EC\u30AF\u30C6\
+          \u30A3\u30D6\u3092\u30AF\u30E9\u30A4\u30A2\u30F3\u30C8\u3078\u9001\u4FE1\
+          \u3057\u3066\u304F\u3060\u3055\u3044\u3002\n* **\u81EA\u52D5\u691C\u8A3C\
+          \u30D7\u30ED\u30BB\u30B9\uFF1A** \u3059\u3079\u3066\u306E\u74B0\u5883\u306B\
+          \u304A\u3044\u3066\u3001\u8A2D\u5B9A\u306E\u6709\u52B9\u6027\u3092\u81EA\
+          \u52D5\u3067\u691C\u8A3C\u3059\u308B\u30D7\u30ED\u30BB\u30B9\u3092\u5C0E\
+          \u5165\u3057\u3066\u304F\u3060\u3055\u3044\u3002\n* **\u4E2D\u592E\u96C6\
+          \u4E2D\u578B\u306E\u30A8\u30E9\u30FC\u7BA1\u7406\uFF1A** \u904E\u5270\u306A\
+          \u30A8\u30E9\u30FC\u30E1\u30C3\u30BB\u30FC\u30B8\u3092\u30A4\u30F3\u30BF\
+          \u30FC\u30BB\u30D7\u30C8\u3059\u308B\u4E2D\u592E\u8A2D\u5B9A\u3092\u3001\
+          \u30D0\u30C3\u30AF\u30A2\u30C3\u30D7\u3068\u3057\u3066\u4E8B\u524D\u306B\
+          \u5C0E\u5165\u3057\u3066\u304F\u3060\u3055\u3044\u3002\n* **\u624B\u52D5\
+          \u691C\u8A3C\u306E\u5B9F\u65BD\uFF1A** \u691C\u8A3C\u304C\u81EA\u52D5\u5316\
+          \u3055\u308C\u3066\u3044\u306A\u3044\u5834\u5408\u306F\u3001\u5C11\u306A\
+          \u304F\u3068\u3082\u5E74\u306B\u4E00\u5EA6\u306F\u624B\u52D5\u3067\u691C\
+          \u8A3C\u3092\u5B9F\u65BD\u3057\u3066\u304F\u3060\u3055\u3044\u3002\n* **\u30D7\
+          \u30E9\u30C3\u30C8\u30D5\u30A9\u30FC\u30E0\u6A5F\u80FD\u306E\u6D3B\u7528\
+          \uFF1A** \u30B3\u30FC\u30C9\u3084\u8A2D\u5B9A\u30D5\u30A1\u30A4\u30EB\u3001\
+          \u30D1\u30A4\u30D7\u30E9\u30A4\u30F3\u306B\u9759\u7684\u306A\u30AD\u30FC\
+          \u3084\u30B7\u30FC\u30AF\u30EC\u30C3\u30C8\u3092\u57CB\u3081\u8FBC\u3080\
+          \u306E\u3067\u306F\u306A\u304F\u3001\u30D7\u30E9\u30C3\u30C8\u30D5\u30A9\
+          \u30FC\u30E0\u304C\u63D0\u4F9B\u3059\u308B\u30A2\u30A4\u30C7\u30F3\u30C6\
+          \u30A3\u30C6\u30A3\u9023\u643A (Identity Federation)\u3001\u77ED\u547D\u306A\
+          \u8A8D\u8A3C\u60C5\u5831 (Short-lived Credentials)\u3001\u307E\u305F\u306F\
+          \u30ED\u30FC\u30EB\u30D9\u30FC\u30B9\u306E\u30A2\u30AF\u30BB\u30B9\u5236\
+          \u5FA1\u3092\u6D3B\u7528\u3057\u3066\u304F\u3060\u3055\u3044\u3002\n\n\n\
+          ## Example attack scenarios\n\n**\u30B7\u30CA\u30EA\u30AA #1\uFF1A** \u672C\
+          \u756A\u30B5\u30FC\u30D0\u30FC\u304B\u3089\u30B5\u30F3\u30D7\u30EB\u30A2\
+          \u30D7\u30EA\u30B1\u30FC\u30B7\u30E7\u30F3\u304C\u524A\u9664\u3055\u308C\
+          \u3066\u3044\u306A\u304B\u3063\u305F\u3002\u653B\u6483\u8005\u306F\u3001\
+          \u3053\u308C\u3089\u306E\u30B5\u30F3\u30D7\u30EB\u306B\u542B\u307E\u308C\
+          \u308B\u65E2\u77E5\u306E\u8106\u5F31\u6027\u3092\u60AA\u7528\u3057\u3066\
+          \u30B5\u30FC\u30D0\u30FC\u3092\u4FB5\u5BB3\u3057\u305F\u3002\u3055\u3089\
+          \u306B\u3001\u7BA1\u7406\u30B3\u30F3\u30BD\u30FC\u30EB\u306E\u30C7\u30D5\
+          \u30A9\u30EB\u30C8\u30D1\u30B9\u30EF\u30FC\u30C9\u304C\u5909\u66F4\u3055\
+          \u308C\u3066\u3044\u306A\u304B\u3063\u305F\u305F\u3081\u3001\u653B\u6483\
+          \u8005\u306F\u7BA1\u7406\u8005\u3068\u3057\u3066\u30ED\u30B0\u30A4\u30F3\
+          \u3057\u3001\u30B7\u30B9\u30C6\u30E0\u3092\u5B8C\u5168\u306B\u4E57\u3063\
+          \u53D6\u3063\u305F\u3002\n\n**\u30B7\u30CA\u30EA\u30AA #2\uFF1A** \u30B5\
+          \u30FC\u30D0\u30FC\u306E\u30C7\u30A3\u30EC\u30AF\u30C8\u30EA\u4E00\u89A7\
+          \u8868\u793A\u304C\u7121\u52B9\u5316\u3055\u308C\u3066\u3044\u306A\u304B\
+          \u3063\u305F\u3002\u653B\u6483\u8005\u306F\u30C7\u30A3\u30EC\u30AF\u30C8\
+          \u30EA\u69CB\u9020\u3092\u628A\u63E1\u3057\u3001\u30B3\u30F3\u30D1\u30A4\
+          \u30EB\u6E08\u307F\u306E Java \u30AF\u30E9\u30B9\u30D5\u30A1\u30A4\u30EB\
+          \u3092\u30C0\u30A6\u30F3\u30ED\u30FC\u30C9\u3057\u305F\u3002\u3053\u308C\
+          \u3092\u30C7\u30B3\u30F3\u30D1\u30A4\u30EB\u3057\u3066\u30BD\u30FC\u30B9\
+          \u30B3\u30FC\u30C9\u3092\u30EA\u30D0\u30FC\u30B9\u30A8\u30F3\u30B8\u30CB\
+          \u30A2\u30EA\u30F3\u30B0\u3057\u305F\u7D50\u679C\u3001\u30A2\u30D7\u30EA\
+          \u30B1\u30FC\u30B7\u30E7\u30F3\u306B\u91CD\u5927\u306A\u30A2\u30AF\u30BB\
+          \u30B9\u5236\u5FA1\u306E\u6B20\u9665\u304C\u3042\u308B\u3053\u3068\u3092\
+          \u7A81\u304D\u6B62\u3081\u305F\u3002\n\n**\u30B7\u30CA\u30EA\u30AA #3\uFF1A\
+          ** \u30A2\u30D7\u30EA\u30B1\u30FC\u30B7\u30E7\u30F3\u30B5\u30FC\u30D0\u30FC\
+          \u306E\u8A2D\u5B9A\u306B\u3088\u308A\u3001\u30B9\u30BF\u30C3\u30AF\u30C8\
+          \u30EC\u30FC\u30B9\u3092\u542B\u3080\u8A73\u7D30\u306A\u30A8\u30E9\u30FC\
+          \u30E1\u30C3\u30BB\u30FC\u30B8\u304C\u30E6\u30FC\u30B6\u30FC\u306B\u8FD4\
+          \u3055\u308C\u3066\u3044\u305F\u3002\u3053\u308C\u306B\u3088\u308A\u3001\
+          \u6A5F\u5BC6\u60C5\u5831\u3084\u3001\u4F7F\u7528\u3055\u308C\u3066\u3044\
+          \u308B\u30B3\u30F3\u30DD\u30FC\u30CD\u30F3\u30C8\u306E\u30D0\u30FC\u30B8\
+          \u30E7\u30F3\uFF08\u8106\u5F31\u6027\u304C\u65E2\u77E5\u306E\u3082\u306E\
+          \u3092\u542B\u3080\uFF09\u3068\u3044\u3063\u305F\u5185\u90E8\u60C5\u5831\
+          \u304C\u653B\u6483\u8005\u306B\u9732\u5448\u3057\u305F\u3002\n\n**\u30B7\
+          \u30CA\u30EA\u30AA #4\uFF1A** \u30AF\u30E9\u30A6\u30C9\u30B5\u30FC\u30D3\
+          \u30B9\u30D7\u30ED\u30D0\u30A4\u30C0\u30FC (CSP) \u306E\u30C7\u30D5\u30A9\
+          \u30EB\u30C8\u8A2D\u5B9A\u306B\u3088\u308A\u3001\u5171\u6709\u6A29\u9650\
+          \u304C\u30A4\u30F3\u30BF\u30FC\u30CD\u30C3\u30C8\u306B\u516C\u958B\u3055\
+          \u308C\u3066\u3044\u305F\u3002\u3053\u308C\u306B\u3088\u308A\u3001\u30AF\
+          \u30E9\u30A6\u30C9\u30B9\u30C8\u30EC\u30FC\u30B8\u5185\u306B\u4FDD\u5B58\
+          \u3055\u308C\u3066\u3044\u305F\u6A5F\u5BC6\u30C7\u30FC\u30BF\u304C\u7B2C\
+          \u4E09\u8005\u306B\u596A\u53D6\u3055\u308C\u305F\u3002\n\n\n\u53C2\u8003\
+          \u8CC7\u6599\u304A\u3088\u3073\u30DE\u30C3\u30D4\u30F3\u30B0\u3055\u308C\
+          \u305FCWE\u306E\u4E00\u89A7\u306B\u3064\u3044\u3066\u3001\u8A73\u3057\u304F\
+          \u306F\u3053\u3061\u3089\uFF1A https://top10.owasp.org/2025/ja/A02_2025-Security_Misconfiguration/"
       ko:
         name: "\uBCF4\uC548 \uC124\uC815 \uC624\uB958"
         description: "\uBCF4\uC548 \uC124\uC815 \uC624\uB958\uC740 \uBCF4\uC548 \uAD00\
@@ -2118,66 +2115,66 @@ objects:
           \uD55C\uB2E4. \uC0AC\uC6A9\uD558\uC9C0 \uC54A\uB294 \uAE30\uB2A5\uACFC \uD504\
           \uB808\uC784\uC6CC\uD06C\uB294 \uC0AD\uC81C\uD558\uAC70\uB098 \uC124\uCE58\
           \uB418\uC9C0 \uC54A\uC544\uC57C \uD55C\uB2E4.\n* \uD328\uCE58 \uAD00\uB9AC\
-          \ \uD504\uB85C\uC138\uC2A4(\uCC38\uACE0: [A03 \uC18C\uD504\uD2B8\uC6E8\uC5B4\
-          \ \uACF5\uAE09\uB9DD \uCCB4\uC778 \uC2E4\uD328](A03_2025-Software_Supply_Chain_Failures.md))\
-          \ \uC218\uD589 \uC2DC \uBAA8\uB4E0 \uBCF4\uC548 \uACF5\uC9C0, \uC5C5\uB370\
-          \uC774\uD2B8, \uD328\uCE58\uC5D0 \uB530\uB978 \uC801\uC808\uD55C \uAC80\uD1A0\
-          \ \uBC0F \uC5C5\uB370\uC774\uD2B8\uB97C \uD55C\uB2E4. \uB610\uD55C, \uD074\
-          \uB77C\uC6B0\uB4DC \uC2A4\uD1A0\uB9AC\uC9C0 \uAD8C\uD55C(\uC608: S3 \uBC84\
-          \uD0B7 \uAD8C\uD55C)\uC744 \uC810\uAC80\uD55C\uB2E4.\n* \uAD6C\uC131 \uC694\
-          \uC18C \uAC04 \uB610\uB294 \uD14C\uB10C\uD2B8 \uAC04 \uD6A8\uACFC\uC801\uC73C\
-          \uB85C \uACA9\uB9AC\uD560 \uC218 \uC788\uB3C4\uB85D \uC138\uBD84\uD654,\
-          \ \uCEE8\uD14C\uC774\uB108\uD654, \uD074\uB77C\uC6B0\uB4DC \uBCF4\uC548\
-          \ \uADF8\uB8F9(ACL)\uC744 \uD65C\uC6A9\uD574 \uC560\uD50C\uB9AC\uCF00\uC774\
-          \uC158 \uC544\uD0A4\uD14D\uCCD0\uB97C \uC124\uACC4\uD568\uC73C\uB85C\uC368\
-          \ \uD6A8\uACFC\uC801\uC774\uACE0 \uC548\uC804\uD55C \uBD84\uB9AC \uAD6C\uC870\
-          \uB97C \uBCF4\uC7A5\uD55C\uB2E4.\n* \uBCF4\uC548 \uC9C0\uC2DC\uBB38\uC744\
-          \ \uD074\uB77C\uC774\uC5B8\uD2B8\uB85C \uBCF4\uB0B4\uC57C \uD55C\uB2E4.\
-          \ (\uC608: \uBCF4\uC548 \uD5E4\uB354)\n* \uC790\uB3D9\uD654\uB41C \uD504\
-          \uB85C\uC138\uC2A4\uB97C \uAD6C\uCD95\uD558\uC5EC \uBAA8\uB4E0 \uD658\uACBD\
-          \uC5D0\uC11C \uD574\uB2F9 \uC124\uC815\uB4E4\uC758 \uC548\uC804\uC131\uC744\
-          \ \uAC80\uC99D\uD55C\uB2E4.\n* \uB9CC\uC77C\uC758 \uACBD\uC6B0\uB97C \uB300\
-          \uBE44\uD574, \uACFC\uB3C4\uD55C \uC5D0\uB7EC \uBA54\uC2DC\uC9C0\uAC00 \uC0AC\
-          \uC6A9\uC790\uC5D0\uAC8C \uB178\uCD9C\uB418\uC9C0 \uC54A\uB3C4\uB85D \uACF5\
-          \uD1B5 \uC124\uC815\uC744 \uC0AC\uC804\uC5D0 \uAD6C\uC131\uD55C\uB2E4.\n\
-          * \uB9CC\uC57D \uC774\uB7F0 \uAC80\uC99D\uC0AC\uD56D\uB4E4\uC774 \uC790\uB3D9\
-          \uD654\uB418\uC9C0 \uC54A\uC558\uB2E4\uBA74, \uCD5C\uC18C\uD55C \uB9E4\uB144\
-          \ 1\uD68C\uB294 \uC218\uB3D9\uC73C\uB85C \uAC80\uC99D\uD55C\uB2E4.\n* \uCF54\
-          \uB4DC, \uC124\uC815 \uD30C\uC77C, \uD30C\uC774\uD504 \uB77C\uC778 \uB0B4\
-          \ \uC815\uC801\uC778 \uD0A4\uB098 \uC2DC\uD06C\uB9BF\uC744 \uC800\uC7A5\uD558\
-          \uB294 \uB300\uC2E0 \uD50C\uB7AB\uD3FC\uC5D0\uC11C \uC81C\uACF5\uD558\uB294\
-          \ \uC544\uC774\uB374\uD2F0\uD2F0 \uD398\uB354\uB808\uC774\uC158, \uB2E8\uAE30\
-          \ \uC720\uD6A8 \uC790\uACA9 \uC99D\uBA85, \uB610\uB294 \uC5ED\uD560 \uAE30\
-          \uBC18 \uC811\uADFC \uB9E4\uCEE4\uB2C8\uC998\uC744 \uC0AC\uC6A9\uD55C\uB2E4\
-          .\n\n\n## Example attack scenarios\n\n**\uC2DC\uB098\uB9AC\uC624 1:** \uC6B4\
-          \uC601 \uC11C\uBC84\uC5D0\uC11C \uD14C\uC2A4\uD2B8\uC6A9 \uC560\uD50C\uB9AC\
-          \uCF00\uC774\uC158\uC774 \uC9C0\uC6CC\uC9C0\uC9C0 \uC54A\uC558\uB2E4. \uD14C\
-          \uC2A4\uD2B8\uC6A9 \uC560\uD50C\uB9AC\uCF00\uC774\uC158\uC740 \uACF5\uACA9\
-          \uC790\uAC00 \uD574\uB2F9 \uC11C\uBC84\uB97C \uACF5\uACA9\uD560 \uC218 \uC788\
-          \uB294 \uBCF4\uC548 \uCDE8\uC57D\uC810\uC774 \uC874\uC7AC\uD55C\uB2E4\uACE0\
-          \ \uC54C\uB824\uC838 \uC788\uC73C\uBA70, \uADF8\uC911 \uD558\uB098\uC758\
-          \ \uC560\uD50C\uB9AC\uCF00\uC774\uC158\uC740 \uAD00\uB9AC\uC790\uC6A9 \uCF58\
-          \uC194\uC774\uB77C \uAC00\uC815\uD574 \uBCF4\uACA0\uB2E4. \uADF8\uB9AC\uACE0\
-          \ \uAE30\uBCF8 \uACC4\uC815\uC740 \uBCC0\uACBD\uB418\uC9C0 \uC54A\uC558\uB2E4\
-          . \uC774\uB7F0 \uACBD\uC6B0 \uACF5\uACA9\uC790\uB294 \uAE30\uBCF8 \uACC4\
-          \uC815\uC73C\uB85C \uB85C\uADF8\uC778 \uD55C \uB4A4 \uC2DC\uC2A4\uD15C \uC7A5\
-          \uC545\uC774 \uAC00\uB2A5\uD558\uB2E4.\n\n**\uC2DC\uB098\uB9AC\uC624 2:**\
-          \ \uC11C\uBC84\uC5D0\uC11C \uB514\uB809\uD1A0\uB9AC \uB9AC\uC2A4\uD305\uC774\
-          \ \uD65C\uC131\uD654 \uB418\uC5C8\uC744 \uB54C \uACF5\uACA9\uC790\uB294\
-          \ \uB2E8\uC21C\uD558\uAC8C \uB514\uB809\uD1A0\uB9AC \uBAA9\uB85D\uC744 \uD0D0\
-          \uC0C9\uD560 \uC218 \uC788\uB2E4. \uACF5\uACA9\uC790\uB294 \uCEF4\uD30C\uC77C\
-          \uB41C \uC790\uBC14 \uD074\uB798\uC2A4\uB4E4\uC744 \uCC3E\uAC70\uB098 \uB2E4\
-          \uC6B4\uB85C\uB4DC \uD560 \uC218 \uC788\uACE0, \uC774\uB7F0 \uD074\uB798\
-          \uC2A4\uB4E4\uC744 \uB514\uCEF4\uD30C\uC77C \uD558\uAC70\uB098 \uB9AC\uBC84\
-          \uC2F1 \uC5D4\uC9C0\uB2C8\uC5B4\uB9C1\uC744 \uD1B5\uD574 \uCF54\uB4DC\uB97C\
-          \ \uBCFC \uC218 \uC788\uB2E4. \uADF8 \uB4A4 \uACF5\uACA9\uC790\uB294 \uC560\
-          \uD50C\uB9AC\uCF00\uC774\uC158 \uB0B4\uC5D0\uC11C \uC11C\uBC84 \uC811\uADFC\
-          \ \uC81C\uC5B4 \uCDE8\uC57D\uC810\uC744 \uCC3E\uC740 \uB4A4 \uC545\uC6A9\
-          \ \uAC00\uB2A5\uD558\uB2E4.\n\n**\uC2DC\uB098\uB9AC\uC624 3:** \uC0AC\uC6A9\
-          \uC790\uC5D0\uAC8C \uBC18\uD658\uB418\uB294 \uC2A4\uD0DD \uD2B8\uB808\uC774\
-          \uC2A4(Stack trace) \uAC19\uC740 \uC790\uC138\uD55C \uC5D0\uB7EC \uBA54\uC2DC\
-          \uC9C0\uAC00 \uD45C\uC2DC\uB418\uB3C4\uB85D \uC124\uC815\uB418\uC5B4 \uC788\
-          \uB294 \uACBD\uC6B0 \uBBFC\uAC10\uD55C \uC815\uBCF4\uB098 \uD574\uB2F9 \uCEF4\
+          \ \uD504\uB85C\uC138\uC2A4(\uCC38\uACE0: **A03 \uC18C\uD504\uD2B8\uC6E8\uC5B4\
+          \ \uACF5\uAE09\uB9DD \uCCB4\uC778 \uC2E4\uD328**) \uC218\uD589 \uC2DC \uBAA8\
+          \uB4E0 \uBCF4\uC548 \uACF5\uC9C0, \uC5C5\uB370\uC774\uD2B8, \uD328\uCE58\
+          \uC5D0 \uB530\uB978 \uC801\uC808\uD55C \uAC80\uD1A0 \uBC0F \uC5C5\uB370\uC774\
+          \uD2B8\uB97C \uD55C\uB2E4. \uB610\uD55C, \uD074\uB77C\uC6B0\uB4DC \uC2A4\
+          \uD1A0\uB9AC\uC9C0 \uAD8C\uD55C(\uC608: S3 \uBC84\uD0B7 \uAD8C\uD55C)\uC744\
+          \ \uC810\uAC80\uD55C\uB2E4.\n* \uAD6C\uC131 \uC694\uC18C \uAC04 \uB610\uB294\
+          \ \uD14C\uB10C\uD2B8 \uAC04 \uD6A8\uACFC\uC801\uC73C\uB85C \uACA9\uB9AC\uD560\
+          \ \uC218 \uC788\uB3C4\uB85D \uC138\uBD84\uD654, \uCEE8\uD14C\uC774\uB108\
+          \uD654, \uD074\uB77C\uC6B0\uB4DC \uBCF4\uC548 \uADF8\uB8F9(ACL)\uC744 \uD65C\
+          \uC6A9\uD574 \uC560\uD50C\uB9AC\uCF00\uC774\uC158 \uC544\uD0A4\uD14D\uCCD0\
+          \uB97C \uC124\uACC4\uD568\uC73C\uB85C\uC368 \uD6A8\uACFC\uC801\uC774\uACE0\
+          \ \uC548\uC804\uD55C \uBD84\uB9AC \uAD6C\uC870\uB97C \uBCF4\uC7A5\uD55C\uB2E4\
+          .\n* \uBCF4\uC548 \uC9C0\uC2DC\uBB38\uC744 \uD074\uB77C\uC774\uC5B8\uD2B8\
+          \uB85C \uBCF4\uB0B4\uC57C \uD55C\uB2E4. (\uC608: \uBCF4\uC548 \uD5E4\uB354\
+          )\n* \uC790\uB3D9\uD654\uB41C \uD504\uB85C\uC138\uC2A4\uB97C \uAD6C\uCD95\
+          \uD558\uC5EC \uBAA8\uB4E0 \uD658\uACBD\uC5D0\uC11C \uD574\uB2F9 \uC124\uC815\
+          \uB4E4\uC758 \uC548\uC804\uC131\uC744 \uAC80\uC99D\uD55C\uB2E4.\n* \uB9CC\
+          \uC77C\uC758 \uACBD\uC6B0\uB97C \uB300\uBE44\uD574, \uACFC\uB3C4\uD55C \uC5D0\
+          \uB7EC \uBA54\uC2DC\uC9C0\uAC00 \uC0AC\uC6A9\uC790\uC5D0\uAC8C \uB178\uCD9C\
+          \uB418\uC9C0 \uC54A\uB3C4\uB85D \uACF5\uD1B5 \uC124\uC815\uC744 \uC0AC\uC804\
+          \uC5D0 \uAD6C\uC131\uD55C\uB2E4.\n* \uB9CC\uC57D \uC774\uB7F0 \uAC80\uC99D\
+          \uC0AC\uD56D\uB4E4\uC774 \uC790\uB3D9\uD654\uB418\uC9C0 \uC54A\uC558\uB2E4\
+          \uBA74, \uCD5C\uC18C\uD55C \uB9E4\uB144 1\uD68C\uB294 \uC218\uB3D9\uC73C\
+          \uB85C \uAC80\uC99D\uD55C\uB2E4.\n* \uCF54\uB4DC, \uC124\uC815 \uD30C\uC77C\
+          , \uD30C\uC774\uD504 \uB77C\uC778 \uB0B4 \uC815\uC801\uC778 \uD0A4\uB098\
+          \ \uC2DC\uD06C\uB9BF\uC744 \uC800\uC7A5\uD558\uB294 \uB300\uC2E0 \uD50C\uB7AB\
+          \uD3FC\uC5D0\uC11C \uC81C\uACF5\uD558\uB294 \uC544\uC774\uB374\uD2F0\uD2F0\
+          \ \uD398\uB354\uB808\uC774\uC158, \uB2E8\uAE30 \uC720\uD6A8 \uC790\uACA9\
+          \ \uC99D\uBA85, \uB610\uB294 \uC5ED\uD560 \uAE30\uBC18 \uC811\uADFC \uB9E4\
+          \uCEE4\uB2C8\uC998\uC744 \uC0AC\uC6A9\uD55C\uB2E4.\n\n\n## Example attack\
+          \ scenarios\n\n**\uC2DC\uB098\uB9AC\uC624 1:** \uC6B4\uC601 \uC11C\uBC84\
+          \uC5D0\uC11C \uD14C\uC2A4\uD2B8\uC6A9 \uC560\uD50C\uB9AC\uCF00\uC774\uC158\
+          \uC774 \uC9C0\uC6CC\uC9C0\uC9C0 \uC54A\uC558\uB2E4. \uD14C\uC2A4\uD2B8\uC6A9\
+          \ \uC560\uD50C\uB9AC\uCF00\uC774\uC158\uC740 \uACF5\uACA9\uC790\uAC00 \uD574\
+          \uB2F9 \uC11C\uBC84\uB97C \uACF5\uACA9\uD560 \uC218 \uC788\uB294 \uBCF4\uC548\
+          \ \uCDE8\uC57D\uC810\uC774 \uC874\uC7AC\uD55C\uB2E4\uACE0 \uC54C\uB824\uC838\
+          \ \uC788\uC73C\uBA70, \uADF8\uC911 \uD558\uB098\uC758 \uC560\uD50C\uB9AC\
+          \uCF00\uC774\uC158\uC740 \uAD00\uB9AC\uC790\uC6A9 \uCF58\uC194\uC774\uB77C\
+          \ \uAC00\uC815\uD574 \uBCF4\uACA0\uB2E4. \uADF8\uB9AC\uACE0 \uAE30\uBCF8\
+          \ \uACC4\uC815\uC740 \uBCC0\uACBD\uB418\uC9C0 \uC54A\uC558\uB2E4. \uC774\
+          \uB7F0 \uACBD\uC6B0 \uACF5\uACA9\uC790\uB294 \uAE30\uBCF8 \uACC4\uC815\uC73C\
+          \uB85C \uB85C\uADF8\uC778 \uD55C \uB4A4 \uC2DC\uC2A4\uD15C \uC7A5\uC545\uC774\
+          \ \uAC00\uB2A5\uD558\uB2E4.\n\n**\uC2DC\uB098\uB9AC\uC624 2:** \uC11C\uBC84\
+          \uC5D0\uC11C \uB514\uB809\uD1A0\uB9AC \uB9AC\uC2A4\uD305\uC774 \uD65C\uC131\
+          \uD654 \uB418\uC5C8\uC744 \uB54C \uACF5\uACA9\uC790\uB294 \uB2E8\uC21C\uD558\
+          \uAC8C \uB514\uB809\uD1A0\uB9AC \uBAA9\uB85D\uC744 \uD0D0\uC0C9\uD560 \uC218\
+          \ \uC788\uB2E4. \uACF5\uACA9\uC790\uB294 \uCEF4\uD30C\uC77C\uB41C \uC790\
+          \uBC14 \uD074\uB798\uC2A4\uB4E4\uC744 \uCC3E\uAC70\uB098 \uB2E4\uC6B4\uB85C\
+          \uB4DC \uD560 \uC218 \uC788\uACE0, \uC774\uB7F0 \uD074\uB798\uC2A4\uB4E4\
+          \uC744 \uB514\uCEF4\uD30C\uC77C \uD558\uAC70\uB098 \uB9AC\uBC84\uC2F1 \uC5D4\
+          \uC9C0\uB2C8\uC5B4\uB9C1\uC744 \uD1B5\uD574 \uCF54\uB4DC\uB97C \uBCFC \uC218\
+          \ \uC788\uB2E4. \uADF8 \uB4A4 \uACF5\uACA9\uC790\uB294 \uC560\uD50C\uB9AC\
+          \uCF00\uC774\uC158 \uB0B4\uC5D0\uC11C \uC11C\uBC84 \uC811\uADFC \uC81C\uC5B4\
+          \ \uCDE8\uC57D\uC810\uC744 \uCC3E\uC740 \uB4A4 \uC545\uC6A9 \uAC00\uB2A5\
+          \uD558\uB2E4.\n\n**\uC2DC\uB098\uB9AC\uC624 3:** \uC0AC\uC6A9\uC790\uC5D0\
+          \uAC8C \uBC18\uD658\uB418\uB294 \uC2A4\uD0DD \uD2B8\uB808\uC774\uC2A4(Stack\
+          \ trace) \uAC19\uC740 \uC790\uC138\uD55C \uC5D0\uB7EC \uBA54\uC2DC\uC9C0\
+          \uAC00 \uD45C\uC2DC\uB418\uB3C4\uB85D \uC124\uC815\uB418\uC5B4 \uC788\uB294\
+          \ \uACBD\uC6B0 \uBBFC\uAC10\uD55C \uC815\uBCF4\uB098 \uD574\uB2F9 \uCEF4\
           \uD3EC\uB10C\uD2B8 \uBC84\uC804\uC5D0 \uC54C\uB824\uC9C4 \uCDE8\uC57D\uC810\
           \ \uAC19\uC740 \uADFC\uBCF8\uC801 \uCDE8\uC57D\uC810\uC774 \uB178\uCD9C\uB420\
           \ \uAC00\uB2A5\uC131\uC774 \uC788\uB2E4.\n\n**\uC2DC\uB098\uB9AC\uC624 4:**\
@@ -2236,7 +2233,7 @@ objects:
           \ recursos e **frameworks** n\xE3o utilizados.\n- Uma tarefa para revisar\
           \ e atualizar as configura\xE7\xF5es de acordo com todas as notas de seguran\xE7\
           a, atualiza\xE7\xF5es e **patches** como parte do processo de gerenciamento\
-          \ de **patches** (veja [A03 Falhas na Cadeia de Suprimentos de Software](A03_2025-Software_Supply_Chain_Failures.md)).\
+          \ de **patches** (veja **A03 Falhas na Cadeia de Suprimentos de Software**).\
           \ Revise as permiss\xF5es de armazenamento em nuvem (ex: permiss\xF5es de\
           \ buckets S3).\n- Uma arquitetura de aplica\xE7\xE3o segmentada que forne\xE7\
           a separa\xE7\xE3o eficaz e segura entre componentes ou usu\xE1rios (_tenants_),\
@@ -2329,52 +2326,51 @@ objects:
           \u67E5\u548C\u66F4\u65B0\u914D\u7F6E\u4F5C\u4E3A\u8865\u4E01\u7BA1\u7406\
           \u6D41\u7A0B\u7684\u4E00\u90E8\u5206\uFF0C\u786E\u4FDD\u914D\u7F6E\u7B26\
           \u5408\u6240\u6709\u5B89\u5168\u516C\u544A\u3001\u66F4\u65B0\u548C\u8865\
-          \u4E01\u8981\u6C42\uFF08\u53C2\u89C1 [A03 \u8F6F\u4EF6\u4F9B\u5E94\u94FE\
-          \u5931\u6548](A03_2025-Software_Supply_Chain_Failures.md)\uFF09\u3002\u5BA1\
-          \u67E5\u4E91\u5B58\u50A8\u6743\u9650\uFF08\u4F8B\u5982 S3 bucket \u6743\u9650\
-          \uFF09\u3002\n* \u91C7\u7528\u5206\u6BB5\u5E94\u7528\u67B6\u6784\uFF0C\u901A\
-          \u8FC7\u5206\u6BB5\u3001\u5BB9\u5668\u5316\u6216\u4E91\u5B89\u5168\u7EC4\
-          \uFF08ACL\uFF09\u5728\u7EC4\u4EF6\u6216\u79DF\u6237\u4E4B\u95F4\u5B9E\u73B0\
-          \u6709\u6548\u4E14\u5B89\u5168\u7684\u9694\u79BB\u3002\n* \u5411\u5BA2\u6237\
-          \u7AEF\u53D1\u9001\u5B89\u5168\u6307\u4EE4\uFF0C\u4F8B\u5982\u5B89\u5168\
-          \u5934\u3002\n* \u5EFA\u7ACB\u81EA\u52A8\u5316\u6D41\u7A0B\uFF0C\u9A8C\u8BC1\
-          \u6240\u6709\u73AF\u5883\u4E2D\u7684\u914D\u7F6E\u548C\u8BBE\u7F6E\u662F\
-          \u5426\u6709\u6548\u3002\n* \u4E3B\u52A8\u589E\u52A0\u96C6\u4E2D\u914D\u7F6E\
-          \uFF0C\u4F5C\u4E3A\u62E6\u622A\u8FC7\u591A\u9519\u8BEF\u6D88\u606F\u7684\
-          \u5907\u7528\u63AA\u65BD\u3002\n* \u5982\u679C\u8FD9\u4E9B\u9A8C\u8BC1\u6CA1\
-          \u6709\u81EA\u52A8\u5316\uFF0C\u81F3\u5C11\u5E94\u6BCF\u5E74\u624B\u52A8\
-          \u9A8C\u8BC1\u4E00\u6B21\u3002\n* \u4F7F\u7528\u5E95\u5C42\u5E73\u53F0\u63D0\
-          \u4F9B\u7684\u8EAB\u4EFD\u8054\u5408\u3001\u77ED\u671F\u51ED\u636E\u6216\
-          \u57FA\u4E8E\u89D2\u8272\u7684\u8BBF\u95EE\u673A\u5236\uFF0C\u800C\u4E0D\
-          \u662F\u5728\u4EE3\u7801\u3001\u914D\u7F6E\u6587\u4EF6\u6216\u6D41\u6C34\
-          \u7EBF\u4E2D\u5D4C\u5165\u9759\u6001\u5BC6\u94A5\u6216 secret\u3002\n\n\n\
-          ## Example attack scenarios\n\n**\u573A\u666F #1\uFF1A** \u5E94\u7528\u670D\
-          \u52A1\u5668\u9644\u5E26\u7684\u793A\u4F8B\u5E94\u7528\u6CA1\u6709\u4ECE\
-          \u751F\u4EA7\u670D\u52A1\u5668\u4E2D\u79FB\u9664\u3002\u8FD9\u4E9B\u793A\
-          \u4F8B\u5E94\u7528\u5B58\u5728\u5DF2\u77E5\u5B89\u5168\u7F3A\u9677\uFF0C\
-          \u653B\u51FB\u8005\u53EF\u5229\u7528\u5B83\u4EEC\u653B\u9677\u670D\u52A1\
-          \u5668\u3002\u5047\u8BBE\u5176\u4E2D\u4E00\u4E2A\u793A\u4F8B\u5E94\u7528\
-          \u662F\u7BA1\u7406\u63A7\u5236\u53F0\uFF0C\u4E14\u9ED8\u8BA4\u8D26\u6237\
-          \u6CA1\u6709\u4FEE\u6539\u3002\u653B\u51FB\u8005\u5C31\u80FD\u4F7F\u7528\
-          \u9ED8\u8BA4\u5BC6\u7801\u767B\u5F55\u5E76\u63A5\u7BA1\u7CFB\u7EDF\u3002\
-          \n\n**\u573A\u666F #2\uFF1A** \u670D\u52A1\u5668\u672A\u7981\u7528\u76EE\
-          \u5F55\u5217\u8868\u3002\u653B\u51FB\u8005\u53D1\u73B0\u53EF\u4EE5\u76F4\
-          \u63A5\u5217\u51FA\u76EE\u5F55\u3002\u4ED6\u627E\u5230\u5E76\u4E0B\u8F7D\
-          \u7F16\u8BD1\u540E\u7684 Java \u7C7B\u6587\u4EF6\uFF0C\u53CD\u7F16\u8BD1\
-          \u5E76\u9006\u5411\u5DE5\u7A0B\u67E5\u770B\u4EE3\u7801\u3002\u968F\u540E\
-          \u653B\u51FB\u8005\u5728\u5E94\u7528\u4E2D\u53D1\u73B0\u4E25\u91CD\u8BBF\
-          \u95EE\u63A7\u5236\u7F3A\u9677\u3002\n\n**\u573A\u666F #3\uFF1A** \u5E94\
-          \u7528\u670D\u52A1\u5668\u914D\u7F6E\u5141\u8BB8\u5411\u7528\u6237\u8FD4\
-          \u56DE\u8BE6\u7EC6\u9519\u8BEF\u6D88\u606F\uFF0C\u4F8B\u5982\u5806\u6808\
-          \u8DDF\u8E2A\u3002\u8FD9\u53EF\u80FD\u66B4\u9732\u654F\u611F\u4FE1\u606F\
-          \u6216\u5E95\u5C42\u7F3A\u9677\uFF0C\u4F8B\u5982\u5DF2\u77E5\u6613\u53D7\
-          \u653B\u51FB\u7684\u7EC4\u4EF6\u7248\u672C\u3002\n\n**\u573A\u666F #4\uFF1A\
-          ** \u4E91\u670D\u52A1\u63D0\u4F9B\u5546\uFF08CSP\uFF09\u9ED8\u8BA4\u5C06\
-          \u5171\u4EAB\u6743\u9650\u5F00\u653E\u5230\u4E92\u8054\u7F51\u3002\u8FD9\
-          \u4F1A\u5141\u8BB8\u4E91\u5B58\u50A8\u4E2D\u7684\u654F\u611F\u6570\u636E\
-          \u88AB\u8BBF\u95EE\u3002\n\n\n\u6709\u95DC\u53C3\u8003\u8CC7\u6599\u53CA\
-          \u5DF2\u5C0D\u61C9 CWE \u6E05\u55AE\u7684\u66F4\u591A\u8CC7\u8A0A\uFF1A\
-          \ https://top10.owasp.org/2025/zh-Hant/A02_2025-Security_Misconfiguration/"
+          \u4E01\u8981\u6C42\uFF08\u53C2\u89C1 **A03 \u8F6F\u4EF6\u4F9B\u5E94\u94FE\
+          \u5931\u6548**\uFF09\u3002\u5BA1\u67E5\u4E91\u5B58\u50A8\u6743\u9650\uFF08\
+          \u4F8B\u5982 S3 bucket \u6743\u9650\uFF09\u3002\n* \u91C7\u7528\u5206\u6BB5\
+          \u5E94\u7528\u67B6\u6784\uFF0C\u901A\u8FC7\u5206\u6BB5\u3001\u5BB9\u5668\
+          \u5316\u6216\u4E91\u5B89\u5168\u7EC4\uFF08ACL\uFF09\u5728\u7EC4\u4EF6\u6216\
+          \u79DF\u6237\u4E4B\u95F4\u5B9E\u73B0\u6709\u6548\u4E14\u5B89\u5168\u7684\
+          \u9694\u79BB\u3002\n* \u5411\u5BA2\u6237\u7AEF\u53D1\u9001\u5B89\u5168\u6307\
+          \u4EE4\uFF0C\u4F8B\u5982\u5B89\u5168\u5934\u3002\n* \u5EFA\u7ACB\u81EA\u52A8\
+          \u5316\u6D41\u7A0B\uFF0C\u9A8C\u8BC1\u6240\u6709\u73AF\u5883\u4E2D\u7684\
+          \u914D\u7F6E\u548C\u8BBE\u7F6E\u662F\u5426\u6709\u6548\u3002\n* \u4E3B\u52A8\
+          \u589E\u52A0\u96C6\u4E2D\u914D\u7F6E\uFF0C\u4F5C\u4E3A\u62E6\u622A\u8FC7\
+          \u591A\u9519\u8BEF\u6D88\u606F\u7684\u5907\u7528\u63AA\u65BD\u3002\n* \u5982\
+          \u679C\u8FD9\u4E9B\u9A8C\u8BC1\u6CA1\u6709\u81EA\u52A8\u5316\uFF0C\u81F3\
+          \u5C11\u5E94\u6BCF\u5E74\u624B\u52A8\u9A8C\u8BC1\u4E00\u6B21\u3002\n* \u4F7F\
+          \u7528\u5E95\u5C42\u5E73\u53F0\u63D0\u4F9B\u7684\u8EAB\u4EFD\u8054\u5408\
+          \u3001\u77ED\u671F\u51ED\u636E\u6216\u57FA\u4E8E\u89D2\u8272\u7684\u8BBF\
+          \u95EE\u673A\u5236\uFF0C\u800C\u4E0D\u662F\u5728\u4EE3\u7801\u3001\u914D\
+          \u7F6E\u6587\u4EF6\u6216\u6D41\u6C34\u7EBF\u4E2D\u5D4C\u5165\u9759\u6001\
+          \u5BC6\u94A5\u6216 secret\u3002\n\n\n## Example attack scenarios\n\n**\u573A\
+          \u666F #1\uFF1A** \u5E94\u7528\u670D\u52A1\u5668\u9644\u5E26\u7684\u793A\
+          \u4F8B\u5E94\u7528\u6CA1\u6709\u4ECE\u751F\u4EA7\u670D\u52A1\u5668\u4E2D\
+          \u79FB\u9664\u3002\u8FD9\u4E9B\u793A\u4F8B\u5E94\u7528\u5B58\u5728\u5DF2\
+          \u77E5\u5B89\u5168\u7F3A\u9677\uFF0C\u653B\u51FB\u8005\u53EF\u5229\u7528\
+          \u5B83\u4EEC\u653B\u9677\u670D\u52A1\u5668\u3002\u5047\u8BBE\u5176\u4E2D\
+          \u4E00\u4E2A\u793A\u4F8B\u5E94\u7528\u662F\u7BA1\u7406\u63A7\u5236\u53F0\
+          \uFF0C\u4E14\u9ED8\u8BA4\u8D26\u6237\u6CA1\u6709\u4FEE\u6539\u3002\u653B\
+          \u51FB\u8005\u5C31\u80FD\u4F7F\u7528\u9ED8\u8BA4\u5BC6\u7801\u767B\u5F55\
+          \u5E76\u63A5\u7BA1\u7CFB\u7EDF\u3002\n\n**\u573A\u666F #2\uFF1A** \u670D\
+          \u52A1\u5668\u672A\u7981\u7528\u76EE\u5F55\u5217\u8868\u3002\u653B\u51FB\
+          \u8005\u53D1\u73B0\u53EF\u4EE5\u76F4\u63A5\u5217\u51FA\u76EE\u5F55\u3002\
+          \u4ED6\u627E\u5230\u5E76\u4E0B\u8F7D\u7F16\u8BD1\u540E\u7684 Java \u7C7B\
+          \u6587\u4EF6\uFF0C\u53CD\u7F16\u8BD1\u5E76\u9006\u5411\u5DE5\u7A0B\u67E5\
+          \u770B\u4EE3\u7801\u3002\u968F\u540E\u653B\u51FB\u8005\u5728\u5E94\u7528\
+          \u4E2D\u53D1\u73B0\u4E25\u91CD\u8BBF\u95EE\u63A7\u5236\u7F3A\u9677\u3002\
+          \n\n**\u573A\u666F #3\uFF1A** \u5E94\u7528\u670D\u52A1\u5668\u914D\u7F6E\
+          \u5141\u8BB8\u5411\u7528\u6237\u8FD4\u56DE\u8BE6\u7EC6\u9519\u8BEF\u6D88\
+          \u606F\uFF0C\u4F8B\u5982\u5806\u6808\u8DDF\u8E2A\u3002\u8FD9\u53EF\u80FD\
+          \u66B4\u9732\u654F\u611F\u4FE1\u606F\u6216\u5E95\u5C42\u7F3A\u9677\uFF0C\
+          \u4F8B\u5982\u5DF2\u77E5\u6613\u53D7\u653B\u51FB\u7684\u7EC4\u4EF6\u7248\
+          \u672C\u3002\n\n**\u573A\u666F #4\uFF1A** \u4E91\u670D\u52A1\u63D0\u4F9B\
+          \u5546\uFF08CSP\uFF09\u9ED8\u8BA4\u5C06\u5171\u4EAB\u6743\u9650\u5F00\u653E\
+          \u5230\u4E92\u8054\u7F51\u3002\u8FD9\u4F1A\u5141\u8BB8\u4E91\u5B58\u50A8\
+          \u4E2D\u7684\u654F\u611F\u6570\u636E\u88AB\u8BBF\u95EE\u3002\n\n\n\u6709\
+          \u95DC\u53C3\u8003\u8CC7\u6599\u53CA\u5DF2\u5C0D\u61C9 CWE \u6E05\u55AE\u7684\
+          \u66F4\u591A\u8CC7\u8A0A\uFF1A https://top10.owasp.org/2025/zh-Hant/A02_2025-Security_Misconfiguration/"
   - urn: urn:intuitem:risk:threat:owasp-top-10-web_2025:a03
     ref_id: A03:2025
     name: Software Supply Chain Failures
@@ -9130,26 +9126,26 @@ objects:
           \n* **\u4E0D\u5341\u5206\u306A\u30C7\u30FC\u30BF\u4FDD\u8B77\uFF1A** \u30D1\
           \u30B9\u30EF\u30FC\u30C9\u3092\u30D7\u30EC\u30FC\u30F3\u30C6\u30AD\u30B9\
           \u30C8\u3001\u3042\u308B\u3044\u306F\u8106\u5F31\u306A\u30CF\u30C3\u30B7\
-          \u30E5\u5F62\u5F0F\u3067\u4FDD\u5B58\u3057\u3066\u3044\u308B\uFF08[A04:2025\
-          \ \u6697\u53F7\u5316\u306E\u5931\u6557](A04_2025-Cryptographic_Failures.md)\
-          \ \u53C2\u7167\uFF09\u3002\n* **MFA \u306E\u6B20\u5982\uFF1A** \u591A\u8981\
-          \u7D20\u8A8D\u8A3C (MFA) \u304C\u5B9F\u88C5\u3055\u308C\u3066\u3044\u306A\
-          \u3044\u3001\u3042\u308B\u3044\u306F\u305D\u306E\u30D5\u30A9\u30FC\u30EB\
-          \u30D0\u30C3\u30AF\u624B\u6BB5\u304C\u8106\u5F31\u3067\u3042\u308B\u3002\
-          \n* **\u30BB\u30C3\u30B7\u30E7\u30F3\u7BA1\u7406\u306E\u4E0D\u5099\uFF1A\
-          ** URL \u3084\u5B89\u5168\u3067\u306A\u3044\u5834\u6240\u3078\u30BB\u30C3\
-          \u30B7\u30E7\u30F3 ID \u3092\u9732\u51FA\u3055\u305B\u3066\u3044\u308B\u3001\
-          \u3042\u308B\u3044\u306F\u30ED\u30B0\u30A4\u30F3\u5F8C\u306B\u30BB\u30C3\
-          \u30B7\u30E7\u30F3 ID \u3092\u518D\u5229\u7528\u3057\u3066\u3044\u308B\u3002\
-          \n* **\u4E0D\u5B8C\u5168\u306A\u30ED\u30B0\u30A2\u30A6\u30C8\uFF1A** \u30ED\
-          \u30B0\u30A2\u30A6\u30C8\u6642\u3084\u4E00\u5B9A\u6642\u9593\u306E\u7121\
-          \u6D3B\u52D5\u5F8C\u306B\u3001\u30BB\u30C3\u30B7\u30E7\u30F3\u3084\u8A8D\
-          \u8A3C\u30C8\u30FC\u30AF\u30F3\uFF08\u7279\u306B SSO \u30C8\u30FC\u30AF\u30F3\
-          \uFF09\u304C\u6B63\u3057\u304F\u7121\u52B9\u5316\u3055\u308C\u306A\u3044\
-          \u3002\n* **\u691C\u8A3C\u306E\u4E0D\u8DB3\uFF1A** \u63D0\u4F9B\u3055\u308C\
-          \u305F\u8CC7\u683C\u60C5\u5831\u306E\u9069\u7528\u7BC4\u56F2 (Scope) \u3084\
-          \u610F\u56F3\u3055\u308C\u305F\u5BFE\u8C61 (Audience) \u3092\u6B63\u3057\
-          \u304F\u691C\u8A3C\u3057\u3066\u3044\u306A\u3044\u3002"
+          \u30E5\u5F62\u5F0F\u3067\u4FDD\u5B58\u3057\u3066\u3044\u308B\uFF08**A04:2025\
+          \ \u6697\u53F7\u5316\u306E\u5931\u6557** \u53C2\u7167\uFF09\u3002\n* **MFA\
+          \ \u306E\u6B20\u5982\uFF1A** \u591A\u8981\u7D20\u8A8D\u8A3C (MFA) \u304C\
+          \u5B9F\u88C5\u3055\u308C\u3066\u3044\u306A\u3044\u3001\u3042\u308B\u3044\
+          \u306F\u305D\u306E\u30D5\u30A9\u30FC\u30EB\u30D0\u30C3\u30AF\u624B\u6BB5\
+          \u304C\u8106\u5F31\u3067\u3042\u308B\u3002\n* **\u30BB\u30C3\u30B7\u30E7\
+          \u30F3\u7BA1\u7406\u306E\u4E0D\u5099\uFF1A** URL \u3084\u5B89\u5168\u3067\
+          \u306A\u3044\u5834\u6240\u3078\u30BB\u30C3\u30B7\u30E7\u30F3 ID \u3092\u9732\
+          \u51FA\u3055\u305B\u3066\u3044\u308B\u3001\u3042\u308B\u3044\u306F\u30ED\
+          \u30B0\u30A4\u30F3\u5F8C\u306B\u30BB\u30C3\u30B7\u30E7\u30F3 ID \u3092\u518D\
+          \u5229\u7528\u3057\u3066\u3044\u308B\u3002\n* **\u4E0D\u5B8C\u5168\u306A\
+          \u30ED\u30B0\u30A2\u30A6\u30C8\uFF1A** \u30ED\u30B0\u30A2\u30A6\u30C8\u6642\
+          \u3084\u4E00\u5B9A\u6642\u9593\u306E\u7121\u6D3B\u52D5\u5F8C\u306B\u3001\
+          \u30BB\u30C3\u30B7\u30E7\u30F3\u3084\u8A8D\u8A3C\u30C8\u30FC\u30AF\u30F3\
+          \uFF08\u7279\u306B SSO \u30C8\u30FC\u30AF\u30F3\uFF09\u304C\u6B63\u3057\u304F\
+          \u7121\u52B9\u5316\u3055\u308C\u306A\u3044\u3002\n* **\u691C\u8A3C\u306E\
+          \u4E0D\u8DB3\uFF1A** \u63D0\u4F9B\u3055\u308C\u305F\u8CC7\u683C\u60C5\u5831\
+          \u306E\u9069\u7528\u7BC4\u56F2 (Scope) \u3084\u610F\u56F3\u3055\u308C\u305F\
+          \u5BFE\u8C61 (Audience) \u3092\u6B63\u3057\u304F\u691C\u8A3C\u3057\u3066\
+          \u3044\u306A\u3044\u3002"
         annotation: "## Score table\n\n<table>\n  <tr>\n   <td>\u7D10\u4ED8\u3051\u3089\
           \u308C\u305F CWE \u6570</td>\n   <td>\u6700\u5927\u51FA\u73FE\u7387</td>\n\
           \   <td>\u5E73\u5747\u51FA\u73FE\u7387</td>\n   <td>\u6700\u5927\u7DB2\u7F85\
@@ -10816,19 +10812,19 @@ objects:
       \ testing (DAST) tools (such as Burp or ZAP) do not trigger alerts.\n* The application\
       \ cannot detect, escalate, or alert for active attacks in real-time or near\
       \ real-time.\n* You are vulnerable to sensitive information leakage by making\
-      \ logging and alerting events visible to a user or an attacker (see [A01:2025-Broken\
-      \ Access Control](A01_2025-Broken_Access_Control.md)), or by logging sensitive\
-      \ information that should not be logged (such as PII or PHI).\n* You are vulnerable\
-      \ to injections or attacks on the logging or monitoring systems if log data\
-      \ is not correctly encoded.\n* The application is missing or mishandling errors\
-      \ and other exceptional conditions, such that the system is unaware there was\
-      \ an error, and is therefore unable to log there was a problem.\n* Adequate\
-      \ \u2018use cases\u2019 for issuing alerts are missing or outdated to recognize\
-      \ a special situation.\n* Too many false positive alerts make it impossible\
-      \ to distinguish important alerts from unimportant ones, resulting in them being\
-      \ recognized too late or not at all (physical overload of the SOC team).\n*\
-      \ Detected alerts cannot be processed correctly because the playbook for the\
-      \ use case is incomplete, out of date, or missing."
+      \ logging and alerting events visible to a user or an attacker (see **A01:2025-Broken\
+      \ Access Control**), or by logging sensitive information that should not be\
+      \ logged (such as PII or PHI).\n* You are vulnerable to injections or attacks\
+      \ on the logging or monitoring systems if log data is not correctly encoded.\n\
+      * The application is missing or mishandling errors and other exceptional conditions,\
+      \ such that the system is unaware there was an error, and is therefore unable\
+      \ to log there was a problem.\n* Adequate \u2018use cases\u2019 for issuing\
+      \ alerts are missing or outdated to recognize a special situation.\n* Too many\
+      \ false positive alerts make it impossible to distinguish important alerts from\
+      \ unimportant ones, resulting in them being recognized too late or not at all\
+      \ (physical overload of the SOC team).\n* Detected alerts cannot be processed\
+      \ correctly because the playbook for the use case is incomplete, out of date,\
+      \ or missing."
     annotation: "## Score table\n\n<table>\n  <tr>\n   <td>CWEs Mapped \n   </td>\n\
       \   <td>Max Incidence Rate\n   </td>\n   <td>Avg Incidence Rate\n   </td>\n\
       \   <td>Max Coverage\n   </td>\n   <td>Avg Coverage\n   </td>\n   <td>Avg Weighted\
@@ -10912,7 +10908,7 @@ objects:
           \ ou alerter pour des attaques actives en temps r\xE9el ou quasi-temps r\xE9\
           el. \n* Vous \xEAtes vuln\xE9rable \xE0 la fuite d\u2019informations sensibles\
           \ en rendant les \xE9v\xE9nements de journalisation et d\u2019alerte visibles\
-          \ pour un utilisateur ou un attaquant (voir [A01:2025-Broken Access Control](A01_2025-Broken_Access_Control.md)),\
+          \ pour un utilisateur ou un attaquant (voir **A01:2025-Broken Access Control**),\
           \ ou en enregistrant des informations sensibles qui ne devraient pas \xEA\
           tre enregistr\xE9es (comme les PII ou les informations PHI). \n* Vous \xEA\
           tes vuln\xE9rable aux injections ou attaques sur les syst\xE8mes de journalisation\
@@ -11040,26 +11036,26 @@ objects:
           \ v re\xE1ln\xE9m \u010Dase nebo t\xE9m\u011B\u0159 v re\xE1ln\xE9m \u010D\
           ase.\n* Jste zraniteln\xED v\u016F\u010Di \xFAniku citliv\xFDch informac\xED\
           \ t\xEDm, \u017Ee ud\xE1losti logov\xE1n\xED a upozor\u0148ov\xE1n\xED zp\u0159\
-          \xEDstupn\xEDte u\u017Eivateli nebo \xFAto\u010Dn\xEDkovi (viz [A01:2025\
+          \xEDstupn\xEDte u\u017Eivateli nebo \xFAto\u010Dn\xEDkovi (viz **A01:2025\
           \ Nedostate\u010Dn\xE9 \u0159\xEDzen\xED p\u0159\xEDstupu (Broken Access\
-          \ Control)](A01_2025-Broken_Access_Control.md)), nebo t\xEDm, \u017Ee logujete\
-          \ citliv\xE9 informace, kter\xE9 by logov\xE1ny b\xFDt nem\u011Bly (nap\u0159\
-          \xEDklad PII nebo PHI).\n* Pokud nejsou data v logu spr\xE1vn\u011B zak\xF3\
-          dov\xE1na, jste zraniteln\xED v\u016F\u010Di injekt\xE1\u017E\xEDm nebo\
-          \ \xFAtok\u016Fm na syst\xE9my logov\xE1n\xED \u010Di monitorov\xE1n\xED\
-          .\n* Aplikace opom\xEDj\xED chyby a jin\xE9 v\xFDjime\u010Dn\xE9 stavy nebo\
-          \ je zpracov\xE1v\xE1 nespr\xE1vn\u011B, tak\u017Ee syst\xE9m nev\xED, \u017E\
-          e k chyb\u011B do\u0161lo, a nen\xED proto schopen zaznamenat, \u017Ee nastal\
-          \ probl\xE9m.\n* Odpov\xEDdaj\xEDc\xED \u201Euse cases\u201C pro vyvol\xE1\
-          n\xED upozorn\u011Bn\xED chyb\u011Bj\xED nebo jsou zastaral\xE9, a proto\
-          \ nelze rozpoznat zvl\xE1\u0161tn\xED situaci.\n* P\u0159\xEDli\u0161 velk\xE9\
-          \ mno\u017Estv\xED fale\u0161n\u011B pozitivn\xEDch upozorn\u011Bn\xED znemo\u017E\
-          \u0148uje odli\u0161it d\u016Fle\u017Eit\xE1 upozorn\u011Bn\xED od ned\u016F\
-          le\u017Eit\xFDch, v d\u016Fsledku \u010Deho\u017E jsou rozpozn\xE1na p\u0159\
-          \xEDli\u0161 pozd\u011B, nebo v\u016Fbec ne (fyzick\xE9 p\u0159et\xED\u017E\
-          en\xED t\xFDmu SOC).\n* Zji\u0161t\u011Bn\xE1 upozorn\u011Bn\xED nelze spr\xE1\
-          vn\u011B zpracovat, proto\u017Ee playbook pro dan\xFD use case je ne\xFA\
-          pln\xFD, zastaral\xFD nebo chyb\xED."
+          \ Control)**), nebo t\xEDm, \u017Ee logujete citliv\xE9 informace, kter\xE9\
+          \ by logov\xE1ny b\xFDt nem\u011Bly (nap\u0159\xEDklad PII nebo PHI).\n\
+          * Pokud nejsou data v logu spr\xE1vn\u011B zak\xF3dov\xE1na, jste zraniteln\xED\
+          \ v\u016F\u010Di injekt\xE1\u017E\xEDm nebo \xFAtok\u016Fm na syst\xE9my\
+          \ logov\xE1n\xED \u010Di monitorov\xE1n\xED.\n* Aplikace opom\xEDj\xED chyby\
+          \ a jin\xE9 v\xFDjime\u010Dn\xE9 stavy nebo je zpracov\xE1v\xE1 nespr\xE1\
+          vn\u011B, tak\u017Ee syst\xE9m nev\xED, \u017Ee k chyb\u011B do\u0161lo,\
+          \ a nen\xED proto schopen zaznamenat, \u017Ee nastal probl\xE9m.\n* Odpov\xED\
+          daj\xEDc\xED \u201Euse cases\u201C pro vyvol\xE1n\xED upozorn\u011Bn\xED\
+          \ chyb\u011Bj\xED nebo jsou zastaral\xE9, a proto nelze rozpoznat zvl\xE1\
+          \u0161tn\xED situaci.\n* P\u0159\xEDli\u0161 velk\xE9 mno\u017Estv\xED fale\u0161\
+          n\u011B pozitivn\xEDch upozorn\u011Bn\xED znemo\u017E\u0148uje odli\u0161\
+          it d\u016Fle\u017Eit\xE1 upozorn\u011Bn\xED od ned\u016Fle\u017Eit\xFDch,\
+          \ v d\u016Fsledku \u010Deho\u017E jsou rozpozn\xE1na p\u0159\xEDli\u0161\
+          \ pozd\u011B, nebo v\u016Fbec ne (fyzick\xE9 p\u0159et\xED\u017Een\xED t\xFD\
+          mu SOC).\n* Zji\u0161t\u011Bn\xE1 upozorn\u011Bn\xED nelze spr\xE1vn\u011B\
+          \ zpracovat, proto\u017Ee playbook pro dan\xFD use case je ne\xFApln\xFD\
+          , zastaral\xFD nebo chyb\xED."
         annotation: "## Score table\n\n<table>\n  <tr>\n   <td>Po\u010Det mapovan\xFD\
           ch CWE \n   </td>\n   <td>Max m\xEDra v\xFDskytu\n   </td>\n   <td>Pr\u016F\
           m\u011Brn\xE1 m\xEDra v\xFDskytu\n   </td>\n   <td>Max pokryt\xED\n   </td>\n\
@@ -11173,7 +11169,7 @@ objects:
           \ noch nahezu in Echtzeit erkennen, eskalieren oder Alarm schlagen.\n* Sie\
           \ sind anf\xE4llig f\xFCr den Verlust sensibler Informationen, wenn Sie\
           \ Protokollierungs- und Warnereignisse f\xFCr eine:n Benutzer:in oder eine:n\
-          \ Angreifer:in sichtbar machen (siehe [A01:2025-Mangelhafte Zugriffskontrolle](A01_2025-Broken_Access_Control.md))\
+          \ Angreifer:in sichtbar machen (siehe **A01:2025-Mangelhafte Zugriffskontrolle**)\
           \ oder wenn Sie sensible Informationen protokollieren, die nicht protokolliert\
           \ werden sollten (wie z. B. personenbezogene Daten oder gesch\xFCtzte Gesundheitsdaten).\n\
           * Sie sind anf\xE4llig f\xFCr Injection oder Angriffe auf die Protokollierungs-\
@@ -11289,22 +11285,22 @@ objects:
           \ no activan alertas.\n* La aplicaci\xF3n no puede detectar, escalar o alertar\
           \ sobre ataques activos en tiempo real o casi en tiempo real.\n* Se es vulnerable\
           \ a la filtraci\xF3n de informaci\xF3n sensible al hacer visibles los eventos\
-          \ de registro y alerta para un usuario o un atacante (ver [A01:2025-P\xE9\
-          rdida de Control de Acceso](A01_2025-Broken_Access_Control.md)), o al registrar\
-          \ informaci\xF3n sensible que no deber\xEDa registrarse (como PII o PHI).\n\
-          * Se es vulnerable a inyecciones o ataques a los sistemas de registro o\
-          \ monitoreo si los datos de los registros no est\xE1n correctamente codificados.\n\
-          * La aplicaci\xF3n carece de errores u otras condiciones excepcionales,\
-          \ o los gestiona de forma inadecuada, de modo que el sistema no es consciente\
-          \ de que se ha producido un error y, por tanto, no puede registrar que ha\
-          \ habido un problema.\n* Faltan \"casos de uso\" adecuados para la emisi\xF3\
-          n de alertas o estos est\xE1n desactualizados para reconocer una situaci\xF3\
-          n especial.\n* Demasiadas alertas de falsos positivos hacen imposible distinguir\
-          \ las alertas importantes de las que no lo son, lo que provoca que se reconozcan\
-          \ demasiado tarde o no se reconozcan en absoluto (sobrecarga f\xEDsica del\
-          \ equipo del SOC).\n* Las alertas detectadas no pueden procesarse correctamente\
-          \ porque el manual de procedimientos (playbook) para el caso de uso es incompleto,\
-          \ est\xE1 desactualizado o no existe."
+          \ de registro y alerta para un usuario o un atacante (ver **A01:2025-P\xE9\
+          rdida de Control de Acceso**), o al registrar informaci\xF3n sensible que\
+          \ no deber\xEDa registrarse (como PII o PHI).\n* Se es vulnerable a inyecciones\
+          \ o ataques a los sistemas de registro o monitoreo si los datos de los registros\
+          \ no est\xE1n correctamente codificados.\n* La aplicaci\xF3n carece de errores\
+          \ u otras condiciones excepcionales, o los gestiona de forma inadecuada,\
+          \ de modo que el sistema no es consciente de que se ha producido un error\
+          \ y, por tanto, no puede registrar que ha habido un problema.\n* Faltan\
+          \ \"casos de uso\" adecuados para la emisi\xF3n de alertas o estos est\xE1\
+          n desactualizados para reconocer una situaci\xF3n especial.\n* Demasiadas\
+          \ alertas de falsos positivos hacen imposible distinguir las alertas importantes\
+          \ de las que no lo son, lo que provoca que se reconozcan demasiado tarde\
+          \ o no se reconozcan en absoluto (sobrecarga f\xEDsica del equipo del SOC).\n\
+          * Las alertas detectadas no pueden procesarse correctamente porque el manual\
+          \ de procedimientos (playbook) para el caso de uso es incompleto, est\xE1\
+          \ desactualizado o no existe."
         annotation: "## Score table\n\n<table>\n  <tr>\n   <td>CWEs Mapeadas\n   </td>\n\
           \   <td>Tasa M\xE1xima de Incidencia\n   </td>\n   <td>Tasa Promedio de\
           \ Incidencia\n   </td>\n   <td>Cobertura M\xE1xima\n   </td>\n   <td>Cobertura\
@@ -11565,21 +11561,20 @@ objects:
           \ alert.\n* L'applicazione non \xE8 in grado di rilevare, escalare o avvisare\
           \ per attacchi attivi in tempo reale o quasi in tempo reale.\n* Sei vulnerabile\
           \ alla fuga di informazioni sensibili rendendo visibili gli eventi di logging\
-          \ e alerting a un utente o a un attaccante (vedi [A01:2025-Broken Access\
-          \ Control](A01_2025-Broken_Access_Control.md)), o registrando informazioni\
-          \ sensibili che non dovrebbero essere registrate (come PII o PHI).\n* Sei\
-          \ vulnerabile a injection o attacchi ai sistemi di logging o monitoraggio\
-          \ se i dati dei log non sono correttamente codificati.\n* L'applicazione\
-          \ manca o gestisce male gli errori e altre condizioni eccezionali, in modo\
-          \ tale che il sistema non sia consapevole che si \xE8 verificato un errore\
-          \ e quindi non sia in grado di registrare che c'\xE8 stato un problema.\n\
-          * Mancano o sono obsoleti adeguati 'use case' per l'emissione di alert per\
-          \ riconoscere una situazione speciale.\n* Troppi alert falsi positivi rendono\
-          \ impossibile distinguere gli alert importanti da quelli non importanti,\
-          \ con il risultato che vengono riconosciuti troppo tardi o per niente (sovraccarico\
-          \ fisico del team SOC).\n* Gli alert rilevati non possono essere elaborati\
-          \ correttamente perch\xE9 il playbook per il caso d'uso \xE8 incompleto,\
-          \ obsoleto o mancante."
+          \ e alerting a un utente o a un attaccante (vedi **A01:2025-Broken Access\
+          \ Control**), o registrando informazioni sensibili che non dovrebbero essere\
+          \ registrate (come PII o PHI).\n* Sei vulnerabile a injection o attacchi\
+          \ ai sistemi di logging o monitoraggio se i dati dei log non sono correttamente\
+          \ codificati.\n* L'applicazione manca o gestisce male gli errori e altre\
+          \ condizioni eccezionali, in modo tale che il sistema non sia consapevole\
+          \ che si \xE8 verificato un errore e quindi non sia in grado di registrare\
+          \ che c'\xE8 stato un problema.\n* Mancano o sono obsoleti adeguati 'use\
+          \ case' per l'emissione di alert per riconoscere una situazione speciale.\n\
+          * Troppi alert falsi positivi rendono impossibile distinguere gli alert\
+          \ importanti da quelli non importanti, con il risultato che vengono riconosciuti\
+          \ troppo tardi o per niente (sovraccarico fisico del team SOC).\n* Gli alert\
+          \ rilevati non possono essere elaborati correttamente perch\xE9 il playbook\
+          \ per il caso d'uso \xE8 incompleto, obsoleto o mancante."
         annotation: "## Score table\n\n<table>\n  <tr>\n   <td>CWE Mappate \n   </td>\n\
           \   <td>Tasso Massimo di Incidenza\n   </td>\n   <td>Tasso Medio di Incidenza\n\
           \   </td>\n   <td>Copertura Massima\n   </td>\n   <td>Copertura Media\n\
@@ -11697,8 +11692,8 @@ objects:
           \u30EC\u30FC\u30B7\u30E7\u30F3\u3067\u304D\u306A\u3044\u3002\n* \u30ED\u30B0\
           \u3084\u30A2\u30E9\u30FC\u30C8\u306E\u5185\u5BB9\u304C\u30E6\u30FC\u30B6\
           \u30FC\u3084\u653B\u6483\u8005\u306B\u9732\u51FA\u3057\u3066\u3044\u308B\
-          \uFF08[A01:2025 \u30A2\u30AF\u30BB\u30B9\u5236\u5FA1\u306E\u4E0D\u5099](A01_2025-Broken_Access_Control.md)\
-          \ \u53C2\u7167\uFF09\u3001\u3042\u308B\u3044\u306F\u500B\u4EBA\u8B58\u5225\
+          \uFF08**A01:2025 \u30A2\u30AF\u30BB\u30B9\u5236\u5FA1\u306E\u4E0D\u5099\
+          ** \u53C2\u7167\uFF09\u3001\u3042\u308B\u3044\u306F\u500B\u4EBA\u8B58\u5225\
           \u60C5\u5831 (PII) \u3084\u5065\u5EB7\u60C5\u5831 (PHI) \u306A\u3069\u306E\
           \u8A18\u9332\u3059\u3079\u304D\u3067\u306A\u3044\u6A5F\u5BC6\u60C5\u5831\
           \u304C\u30ED\u30B0\u306B\u542B\u307E\u308C\u3066\u3044\u308B\u3002\n* \u30ED\
@@ -11883,37 +11878,37 @@ objects:
           \uB9BC\uC744 \uBC1C\uC0DD\uC2DC\uD0A4\uC9C0 \uBABB\uD558\uB294 \uACBD\uC6B0\
           .\n* \uB85C\uAE45 \uBC0F \uC54C\uB9BC \uC774\uBCA4\uD2B8\uB97C \uC0AC\uC6A9\
           \uC790 \uB610\uB294 \uACF5\uACA9\uC790\uC5D0\uAC8C \uB178\uCD9C \uD558\uAC70\
-          \uB098([A01:2025-\uC811\uADFC \uC81C\uC5B4 \uC2E4\uD328](A01_2025-Broken_Access_Control.md)\
-          \ \uCC38\uC870), \uB85C\uAE45\uB418\uBA74 \uC548 \uB418\uB294 \uBBFC\uAC10\
-          \uC815\uBCF4(\uC608: PII \uB610\uB294 PHI)\uB97C \uB85C\uAE45\uD568\uC73C\
-          \uB85C\uC368 \uBBFC\uAC10\uC815\uBCF4 \uC720\uCD9C\uC5D0 \uCDE8\uC57D\uD55C\
-          \ \uACBD\uC6B0.\n* \uB85C\uADF8 \uB370\uC774\uD130 \uC778\uCF54\uB529\uC774\
-          \ \uBD80\uC801\uC808\uD574 \uB85C\uAE45 \uB610\uB294 \uBAA8\uB2C8\uD130\uB9C1\
-          \ \uC2DC\uC2A4\uD15C \uC790\uCCB4\uAC00 \uC778\uC81D\uC158 \uB4F1 \uACF5\
-          \uACA9 \uB300\uC0C1\uC774 \uB418\uB294 \uACBD\uC6B0.\n* \uC560\uD50C\uB9AC\
-          \uCF00\uC774\uC158\uC774 \uC624\uB958 \uBC0F \uC608\uC678 \uCC98\uB9AC\uB97C\
-          \ \uB204\uB77D \uB610\uB294 \uC624\uCC98\uB9AC\uD558\uC5EC \uC2DC\uC2A4\uD15C\
-          \uC774 \uC624\uB958 \uBC1C\uC0DD \uC790\uCCB4\uB97C \uC778\uC9C0\uD558\uC9C0\
-          \ \uBABB\uD558\uACE0, \uACB0\uACFC\uC801\uC73C\uB85C \uBB38\uC81C\uB97C\
-          \ \uB85C\uADF8\uB85C \uB0A8\uAE38 \uC218 \uC5C6\uB294 \uACBD\uC6B0.\n* \uD2B9\
-          \uC218 \uC0C1\uD669\uC744 \uC2DD\uBCC4\uD558\uAE30 \uC704\uD55C \uC54C\uB9BC\
-          \ '\uC720\uC2A4\uCF00\uC774\uC2A4'\uAC00 \uC5C6\uAC70\uB098 \uC624\uB798\
-          \uB418\uC5B4 \uD604\uC7AC \uD658\uACBD\uC744 \uBC18\uC601\uD558\uC9C0 \uBABB\
-          \uD55C\uB2E4.\n* \uD2B9\uC815 \uC0C1\uD669\uC744 \uD0D0\uC9C0\uD574 \uC54C\
-          \uB9BC\uC744 \uBC1C\uC0DD\uC2DC\uD0A4\uAE30 \uC704\uD55C \uC778\uC2DC\uB358\
-          \uD2B8 \uC720\uC2A4\uCF00\uC774\uC2A4(use case)\uAC00 \uC5C6\uAC70\uB098\
-          , \uAC31\uC2E0\uC774 \uB418\uC9C0 \uC54A\uC544 \uD604\uD589 \uD658\uACBD\
-          \uC744 \uCDA9\uBD84\uD788 \uBC18\uC601\uD558\uC9C0 \uBABB\uD558\uB294 \uACBD\
-          \uC6B0.\n* \uB108\uBB34 \uB9CE\uC740 \uC624\uD0D0 \uC54C\uB9BC\uC73C\uB85C\
-          \ \uC778\uD574 \uC911\uC694\uD55C \uC54C\uB9BC\uACFC \uC911\uC694\uD558\uC9C0\
-          \ \uC54A\uC740 \uC54C\uB9BC\uC744 \uAD6C\uBD84\uD560 \uC218 \uC5C6\uAC8C\
-          \ \uB418\uC5B4, \uC54C\uB9BC\uC774 \uB108\uBB34 \uB2A6\uAC8C \uC778\uC9C0\
-          \uB418\uAC70\uB098 \uC804\uD600 \uC778\uC9C0\uB418\uC9C0 \uC54A\uB294 \uACBD\
-          \uC6B0(SOC \uD300\uC758 \uBB3C\uB9AC\uC801 \uACFC\uBD80\uD558).\n* \uC720\
-          \uC2A4\uCF00\uC774\uC2A4\uC5D0 \uB300\uD55C \uD50C\uB808\uC774\uBD81\uC774\
-          \ \uBD88\uC644\uC804\uD558\uAC70\uB098, \uCD5C\uC2E0\uC774 \uC544\uB2C8\uAC70\
-          \uB098, \uB204\uB77D\uB418\uC5B4 \uAC10\uC9C0\uB41C \uC54C\uB9BC\uC744 \uC62C\
-          \uBC14\uB974\uAC8C \uCC98\uB9AC\uD560 \uC218 \uC5C6\uB294 \uACBD\uC6B0."
+          \uB098(**A01:2025-\uC811\uADFC \uC81C\uC5B4 \uC2E4\uD328** \uCC38\uC870\
+          ), \uB85C\uAE45\uB418\uBA74 \uC548 \uB418\uB294 \uBBFC\uAC10\uC815\uBCF4\
+          (\uC608: PII \uB610\uB294 PHI)\uB97C \uB85C\uAE45\uD568\uC73C\uB85C\uC368\
+          \ \uBBFC\uAC10\uC815\uBCF4 \uC720\uCD9C\uC5D0 \uCDE8\uC57D\uD55C \uACBD\uC6B0\
+          .\n* \uB85C\uADF8 \uB370\uC774\uD130 \uC778\uCF54\uB529\uC774 \uBD80\uC801\
+          \uC808\uD574 \uB85C\uAE45 \uB610\uB294 \uBAA8\uB2C8\uD130\uB9C1 \uC2DC\uC2A4\
+          \uD15C \uC790\uCCB4\uAC00 \uC778\uC81D\uC158 \uB4F1 \uACF5\uACA9 \uB300\uC0C1\
+          \uC774 \uB418\uB294 \uACBD\uC6B0.\n* \uC560\uD50C\uB9AC\uCF00\uC774\uC158\
+          \uC774 \uC624\uB958 \uBC0F \uC608\uC678 \uCC98\uB9AC\uB97C \uB204\uB77D\
+          \ \uB610\uB294 \uC624\uCC98\uB9AC\uD558\uC5EC \uC2DC\uC2A4\uD15C\uC774 \uC624\
+          \uB958 \uBC1C\uC0DD \uC790\uCCB4\uB97C \uC778\uC9C0\uD558\uC9C0 \uBABB\uD558\
+          \uACE0, \uACB0\uACFC\uC801\uC73C\uB85C \uBB38\uC81C\uB97C \uB85C\uADF8\uB85C\
+          \ \uB0A8\uAE38 \uC218 \uC5C6\uB294 \uACBD\uC6B0.\n* \uD2B9\uC218 \uC0C1\uD669\
+          \uC744 \uC2DD\uBCC4\uD558\uAE30 \uC704\uD55C \uC54C\uB9BC '\uC720\uC2A4\uCF00\
+          \uC774\uC2A4'\uAC00 \uC5C6\uAC70\uB098 \uC624\uB798\uB418\uC5B4 \uD604\uC7AC\
+          \ \uD658\uACBD\uC744 \uBC18\uC601\uD558\uC9C0 \uBABB\uD55C\uB2E4.\n* \uD2B9\
+          \uC815 \uC0C1\uD669\uC744 \uD0D0\uC9C0\uD574 \uC54C\uB9BC\uC744 \uBC1C\uC0DD\
+          \uC2DC\uD0A4\uAE30 \uC704\uD55C \uC778\uC2DC\uB358\uD2B8 \uC720\uC2A4\uCF00\
+          \uC774\uC2A4(use case)\uAC00 \uC5C6\uAC70\uB098, \uAC31\uC2E0\uC774 \uB418\
+          \uC9C0 \uC54A\uC544 \uD604\uD589 \uD658\uACBD\uC744 \uCDA9\uBD84\uD788 \uBC18\
+          \uC601\uD558\uC9C0 \uBABB\uD558\uB294 \uACBD\uC6B0.\n* \uB108\uBB34 \uB9CE\
+          \uC740 \uC624\uD0D0 \uC54C\uB9BC\uC73C\uB85C \uC778\uD574 \uC911\uC694\uD55C\
+          \ \uC54C\uB9BC\uACFC \uC911\uC694\uD558\uC9C0 \uC54A\uC740 \uC54C\uB9BC\uC744\
+          \ \uAD6C\uBD84\uD560 \uC218 \uC5C6\uAC8C \uB418\uC5B4, \uC54C\uB9BC\uC774\
+          \ \uB108\uBB34 \uB2A6\uAC8C \uC778\uC9C0\uB418\uAC70\uB098 \uC804\uD600\
+          \ \uC778\uC9C0\uB418\uC9C0 \uC54A\uB294 \uACBD\uC6B0(SOC \uD300\uC758 \uBB3C\
+          \uB9AC\uC801 \uACFC\uBD80\uD558).\n* \uC720\uC2A4\uCF00\uC774\uC2A4\uC5D0\
+          \ \uB300\uD55C \uD50C\uB808\uC774\uBD81\uC774 \uBD88\uC644\uC804\uD558\uAC70\
+          \uB098, \uCD5C\uC2E0\uC774 \uC544\uB2C8\uAC70\uB098, \uB204\uB77D\uB418\uC5B4\
+          \ \uAC10\uC9C0\uB41C \uC54C\uB9BC\uC744 \uC62C\uBC14\uB974\uAC8C \uCC98\uB9AC\
+          \uD560 \uC218 \uC5C6\uB294 \uACBD\uC6B0."
         annotation: "## Score table\n\n<table>\n  <tr>\n   <td>\uD574\uB2F9\uB418\uB294\
           \ CWE \uAC1C\uC218\n   </td>\n   <td>\uCD5C\uB300 \uCDE8\uC57D\uC810 \uBC1C\
           \uC0DD\uB960\n   </td>\n   <td>\uD3C9\uADE0 \uCDE8\uC57D\uC810 \uBC1C\uC0DD\
@@ -12059,21 +12054,21 @@ objects:
           - A aplica\xE7\xE3o n\xE3o consegue detectar, escalar ou alertar sobre ataques\
           \ ativos em tempo real ou pr\xF3ximo ao tempo real.\n- Voc\xEA est\xE1 vulner\xE1\
           vel ao vazamento de informa\xE7\xF5es sens\xEDveis ao tornar eventos de\
-          \ registro e alerta vis\xEDveis para um usu\xE1rio ou atacante (veja [A01:2025-Controle\
-          \ de Acesso Quebrado](A01_2025-Broken_Access_Control.md)), ou ao registrar\
-          \ informa\xE7\xF5es sens\xEDveis que n\xE3o deveriam ser gravadas (como\
-          \ PII ou PHI).\n- Voc\xEA est\xE1 vulner\xE1vel a inje\xE7\xF5es ou ataques\
-          \ nos sistemas de registro ou monitoramento se os dados de _log_ n\xE3o\
-          \ forem codificados corretamente.\n- A aplica\xE7\xE3o omite ou trata incorretamente\
-          \ erros e outras condi\xE7\xF5es excepcionais, de modo que o sistema n\xE3\
-          o percebe que houve um erro e, portanto, n\xE3o consegue registrar que houve\
-          \ um problema.\n- \"Casos de uso\" adequados para emiss\xE3o de alertas\
-          \ est\xE3o ausentes ou desatualizados para reconhecer uma situa\xE7\xE3\
-          o especial.\n- O excesso de alertas falsos positivos impossibilita distinguir\
-          \ alertas importantes de irrelevantes, resultando em detec\xE7\xF5es tardias\
-          \ ou inexistentes (sobrecarga f\xEDsica da equipe do SOC).\n- Alertas detectados\
-          \ n\xE3o podem ser processados corretamente porque o _playbook_ para o caso\
-          \ de uso est\xE1 incompleto, desatualizado ou ausente."
+          \ registro e alerta vis\xEDveis para um usu\xE1rio ou atacante (veja **A01:2025-Controle\
+          \ de Acesso Quebrado**), ou ao registrar informa\xE7\xF5es sens\xEDveis\
+          \ que n\xE3o deveriam ser gravadas (como PII ou PHI).\n- Voc\xEA est\xE1\
+          \ vulner\xE1vel a inje\xE7\xF5es ou ataques nos sistemas de registro ou\
+          \ monitoramento se os dados de _log_ n\xE3o forem codificados corretamente.\n\
+          - A aplica\xE7\xE3o omite ou trata incorretamente erros e outras condi\xE7\
+          \xF5es excepcionais, de modo que o sistema n\xE3o percebe que houve um erro\
+          \ e, portanto, n\xE3o consegue registrar que houve um problema.\n- \"Casos\
+          \ de uso\" adequados para emiss\xE3o de alertas est\xE3o ausentes ou desatualizados\
+          \ para reconhecer uma situa\xE7\xE3o especial.\n- O excesso de alertas falsos\
+          \ positivos impossibilita distinguir alertas importantes de irrelevantes,\
+          \ resultando em detec\xE7\xF5es tardias ou inexistentes (sobrecarga f\xED\
+          sica da equipe do SOC).\n- Alertas detectados n\xE3o podem ser processados\
+          \ corretamente porque o _playbook_ para o caso de uso est\xE1 incompleto,\
+          \ desatualizado ou ausente."
         annotation: "## Score table\n\n<table>\n  <tr>\n   <td>CWEs Mapeadas \n  \
           \ </td>\n   <td>Taxa M\xE1x. de Incid\xEAncia\n   </td>\n   <td>Taxa M\xE9\
           dia de Incid\xEAncia\n   </td>\n   <td>Cobertura M\xE1xima\n   </td>\n \
@@ -12177,26 +12172,26 @@ objects:
           \u544A\u8B66\u6B63\u5728\u53D1\u751F\u7684\u653B\u51FB\u3002\n* \u901A\u8FC7\
           \u8BA9\u65E5\u5FD7\u8BB0\u5F55\u548C\u544A\u8B66\u4E8B\u4EF6\u5BF9\u7528\
           \u6237\u6216\u653B\u51FB\u8005\u53EF\u89C1\uFF0C\u5BB9\u6613\u5BFC\u81F4\
-          \u654F\u611F\u4FE1\u606F\u6CC4\u9732\uFF08\u53C2\u89C1 [A01:2025-\u5931\u6548\
-          \u7684\u8BBF\u95EE\u63A7\u5236](A01_2025-Broken_Access_Control.md)\uFF09\
-          \uFF0C\u6216\u8BB0\u5F55\u4E86\u4E0D\u5E94\u8BB0\u5F55\u7684\u654F\u611F\
-          \u4FE1\u606F\uFF08\u4F8B\u5982 PII \u6216 PHI\uFF09\u3002\n* \u5982\u679C\
-          \u65E5\u5FD7\u6570\u636E\u6CA1\u6709\u6B63\u786E\u7F16\u7801\uFF0C\u5C31\
-          \u5BB9\u6613\u53D7\u5230\u9488\u5BF9\u65E5\u5FD7\u6216\u76D1\u63A7\u7CFB\
-          \u7EDF\u7684\u6CE8\u5165\u6216\u653B\u51FB\u3002\n* \u5E94\u7528\u7F3A\u5931\
-          \u6216\u9519\u8BEF\u5904\u7406\u9519\u8BEF\u53CA\u5176\u4ED6\u5F02\u5E38\
-          \u6761\u4EF6\uFF0C\u5BFC\u81F4\u7CFB\u7EDF\u4E0D\u77E5\u9053\u53D1\u751F\
-          \u4E86\u9519\u8BEF\uFF0C\u56E0\u6B64\u65E0\u6CD5\u8BB0\u5F55\u95EE\u9898\
-          \u3002\n* \u7F3A\u5C11\u8DB3\u591F\u7684\u3001\u7528\u4E8E\u89E6\u53D1\u544A\
-          \u8B66\u7684\u201C\u7528\u4F8B\u201D\uFF0C\u6216\u7528\u4F8B\u5DF2\u7ECF\
-          \u8FC7\u65F6\uFF0C\u65E0\u6CD5\u8BC6\u522B\u7279\u6B8A\u60C5\u51B5\u3002\
-          \n* \u8FC7\u591A\u8BEF\u62A5\u8BA9\u4EBA\u65E0\u6CD5\u533A\u5206\u91CD\u8981\
-          \u544A\u8B66\u548C\u4E0D\u91CD\u8981\u544A\u8B66\uFF0C\u5BFC\u81F4\u91CD\
-          \u8981\u544A\u8B66\u88AB\u8FC7\u665A\u8BC6\u522B\u6216\u5B8C\u5168\u6CA1\
-          \u6709\u88AB\u8BC6\u522B\uFF08SOC \u56E2\u961F\u5B9E\u9645\u8FC7\u8F7D\uFF09\
-          \u3002\n* \u56E0\u4E3A\u8BE5\u7528\u4F8B\u7684\u5267\u672C\u4E0D\u5B8C\u6574\
-          \u3001\u8FC7\u65F6\u6216\u7F3A\u5931\uFF0C\u68C0\u6D4B\u5230\u7684\u544A\
-          \u8B66\u65E0\u6CD5\u88AB\u6B63\u786E\u5904\u7406\u3002"
+          \u654F\u611F\u4FE1\u606F\u6CC4\u9732\uFF08\u53C2\u89C1 **A01:2025-\u5931\
+          \u6548\u7684\u8BBF\u95EE\u63A7\u5236**\uFF09\uFF0C\u6216\u8BB0\u5F55\u4E86\
+          \u4E0D\u5E94\u8BB0\u5F55\u7684\u654F\u611F\u4FE1\u606F\uFF08\u4F8B\u5982\
+          \ PII \u6216 PHI\uFF09\u3002\n* \u5982\u679C\u65E5\u5FD7\u6570\u636E\u6CA1\
+          \u6709\u6B63\u786E\u7F16\u7801\uFF0C\u5C31\u5BB9\u6613\u53D7\u5230\u9488\
+          \u5BF9\u65E5\u5FD7\u6216\u76D1\u63A7\u7CFB\u7EDF\u7684\u6CE8\u5165\u6216\
+          \u653B\u51FB\u3002\n* \u5E94\u7528\u7F3A\u5931\u6216\u9519\u8BEF\u5904\u7406\
+          \u9519\u8BEF\u53CA\u5176\u4ED6\u5F02\u5E38\u6761\u4EF6\uFF0C\u5BFC\u81F4\
+          \u7CFB\u7EDF\u4E0D\u77E5\u9053\u53D1\u751F\u4E86\u9519\u8BEF\uFF0C\u56E0\
+          \u6B64\u65E0\u6CD5\u8BB0\u5F55\u95EE\u9898\u3002\n* \u7F3A\u5C11\u8DB3\u591F\
+          \u7684\u3001\u7528\u4E8E\u89E6\u53D1\u544A\u8B66\u7684\u201C\u7528\u4F8B\
+          \u201D\uFF0C\u6216\u7528\u4F8B\u5DF2\u7ECF\u8FC7\u65F6\uFF0C\u65E0\u6CD5\
+          \u8BC6\u522B\u7279\u6B8A\u60C5\u51B5\u3002\n* \u8FC7\u591A\u8BEF\u62A5\u8BA9\
+          \u4EBA\u65E0\u6CD5\u533A\u5206\u91CD\u8981\u544A\u8B66\u548C\u4E0D\u91CD\
+          \u8981\u544A\u8B66\uFF0C\u5BFC\u81F4\u91CD\u8981\u544A\u8B66\u88AB\u8FC7\
+          \u665A\u8BC6\u522B\u6216\u5B8C\u5168\u6CA1\u6709\u88AB\u8BC6\u522B\uFF08\
+          SOC \u56E2\u961F\u5B9E\u9645\u8FC7\u8F7D\uFF09\u3002\n* \u56E0\u4E3A\u8BE5\
+          \u7528\u4F8B\u7684\u5267\u672C\u4E0D\u5B8C\u6574\u3001\u8FC7\u65F6\u6216\
+          \u7F3A\u5931\uFF0C\u68C0\u6D4B\u5230\u7684\u544A\u8B66\u65E0\u6CD5\u88AB\
+          \u6B63\u786E\u5904\u7406\u3002"
         annotation: "## Score table\n\n<table>\n  <tr>\n   <td>\u6620\u5C04\u7684\
           \ CWE \u6570\u91CF\n   </td>\n   <td>\u6700\u5927\u53D1\u751F\u7387\n  \
           \ </td>\n   <td>\u5E73\u5747\u53D1\u751F\u7387\n   </td>\n   <td>\u6700\u5927\
@@ -12346,8 +12341,8 @@ objects:
       \ above a certain rate, should only be outputted as statistics showing how often\
       \ they have occurred and in what time frame. This information should be appended\
       \ to the original message so as not to interfere with automated logging and\
-      \ monitoring, see [A09:2025 Security Logging & Alerting Failures](A09_2025-Security_Logging_and_Alerting_Failures.md).\n\
-      \nOn top of this, we would want to include strict input validation (with sanitization\
+      \ monitoring, see **A09:2025 Security Logging & Alerting Failures**.\n\nOn top\
+      \ of this, we would want to include strict input validation (with sanitization\
       \ or escaping for potentially hazardous characters that we must accept), and\
       \ *centralized* error handling, logging, monitoring, and alerting, and a global\
       \ exception handler. One application should not multiple functions for handling\
@@ -12453,10 +12448,10 @@ objects:
           \ \xEAtre produites que sous forme de statistiques montrant la fr\xE9quence\
           \ et dans quel d\xE9lai ils se sont produits. Ces informations doivent \xEA\
           tre ajout\xE9es au message original afin de ne pas interf\xE9rer avec la\
-          \ journalisation et la surveillance automatis\xE9es, voir [A09:2025 D\xE9\
-          faillances de journalisation et alertes de s\xE9curit\xE9](A09_2025-Security_Logging_and_Alerting_Failures.md).\n\
-          \nEn plus de cela, nous voudrions inclure une validation stricte des entr\xE9\
-          es (avec nettoyage ou \xE9chappement pour les caract\xE8res potentiellement\
+          \ journalisation et la surveillance automatis\xE9es, voir **A09:2025 D\xE9\
+          faillances de journalisation et alertes de s\xE9curit\xE9**.\n\nEn plus\
+          \ de cela, nous voudrions inclure une validation stricte des entr\xE9es\
+          \ (avec nettoyage ou \xE9chappement pour les caract\xE8res potentiellement\
           \ dangereux que nous devons accepter), une gestion centralis\xE9e des erreurs,\
           \ la journalisation, la surveillance et l\u2019alerte, ainsi qu\u2019un\
           \ gestionnaire global d\u2019exceptions. Une application ne doit pas avoir\
@@ -12578,25 +12573,24 @@ objects:
           ny pouze jako statistiky ukazuj\xEDc\xED, jak \u010Dasto nastaly a v jak\xE9\
           m \u010Dasov\xE9m r\xE1mci. Tyto informace by m\u011Bly b\xFDt p\u0159ipojeny\
           \ k p\u016Fvodn\xED zpr\xE1v\u011B tak, aby nenaru\u0161ovaly automatizovan\xE9\
-          \ logov\xE1n\xED a monitorov\xE1n\xED, viz [A09:2025 Selh\xE1n\xED bezpe\u010D\
+          \ logov\xE1n\xED a monitorov\xE1n\xED, viz **A09:2025 Selh\xE1n\xED bezpe\u010D\
           nostn\xEDho logov\xE1n\xED a upozor\u0148ov\xE1n\xED (Security Logging &\
-          \ Alerting Failures)](A09_2025-Security_Logging_and_Alerting_Failures.md).\n\
-          \nKrom\u011B toho bychom cht\u011Bli zahrnout p\u0159\xEDsnou validaci vstup\u016F\
-          \ (se sanitizac\xED (o\u010Di\u0161t\u011Bn\xEDm) nebo escapov\xE1n\xED\
-          m potenci\xE1ln\u011B nebezpe\u010Dn\xFDch znak\u016F, kter\xE9 mus\xED\
-          me akceptovat), centralizovan\xE9 zpracov\xE1n\xED chyb, logov\xE1n\xED\
-          , monitorov\xE1n\xED a upozor\u0148ov\xE1n\xED a glob\xE1ln\xED obsluhu\
-          \ v\xFDjimek (global exception handler). Jedna aplikace by nem\u011Bla m\xED\
-          t v\xEDce funkc\xED pro zpracov\xE1n\xED v\xFDjime\u010Dn\xFDch stav\u016F\
-          ; m\u011Blo by se to prov\xE1d\u011Bt na jednom m\xEDst\u011B, poka\u017E\
-          d\xE9 stejn\xFDm zp\u016Fsobem. M\u011Bli bychom tak\xE9 vytvo\u0159it bezpe\u010D\
-          nostn\xED po\u017Eadavky projektu pro v\u0161echna doporu\u010Den\xED v\
-          \ t\xE9to \u010D\xE1sti, prov\xE9st threat modelling (modelov\xE1n\xED hrozeb)\
-          \ a/nebo aktivity secure design review (bezpe\u010Dnostn\xED posouzen\xED\
-          \ n\xE1vrhu) ve f\xE1zi n\xE1vrhu projekt\u016F, prov\xE9st code review\
-          \ (revizi k\xF3du) nebo statickou anal\xFDzu a tak\xE9 prov\xE9st z\xE1\
-          t\u011B\u017Eov\xE9, v\xFDkonnostn\xED a penetra\u010Dn\xED testov\xE1n\xED\
-          \ fin\xE1ln\xEDho syst\xE9mu.\n\n \n\nPokud je to mo\u017En\xE9, m\u011B\
+          \ Alerting Failures)**.\n\nKrom\u011B toho bychom cht\u011Bli zahrnout p\u0159\
+          \xEDsnou validaci vstup\u016F (se sanitizac\xED (o\u010Di\u0161t\u011Bn\xED\
+          m) nebo escapov\xE1n\xEDm potenci\xE1ln\u011B nebezpe\u010Dn\xFDch znak\u016F\
+          , kter\xE9 mus\xEDme akceptovat), centralizovan\xE9 zpracov\xE1n\xED chyb,\
+          \ logov\xE1n\xED, monitorov\xE1n\xED a upozor\u0148ov\xE1n\xED a glob\xE1\
+          ln\xED obsluhu v\xFDjimek (global exception handler). Jedna aplikace by\
+          \ nem\u011Bla m\xEDt v\xEDce funkc\xED pro zpracov\xE1n\xED v\xFDjime\u010D\
+          n\xFDch stav\u016F; m\u011Blo by se to prov\xE1d\u011Bt na jednom m\xED\
+          st\u011B, poka\u017Ed\xE9 stejn\xFDm zp\u016Fsobem. M\u011Bli bychom tak\xE9\
+          \ vytvo\u0159it bezpe\u010Dnostn\xED po\u017Eadavky projektu pro v\u0161\
+          echna doporu\u010Den\xED v t\xE9to \u010D\xE1sti, prov\xE9st threat modelling\
+          \ (modelov\xE1n\xED hrozeb) a/nebo aktivity secure design review (bezpe\u010D\
+          nostn\xED posouzen\xED n\xE1vrhu) ve f\xE1zi n\xE1vrhu projekt\u016F, prov\xE9\
+          st code review (revizi k\xF3du) nebo statickou anal\xFDzu a tak\xE9 prov\xE9\
+          st z\xE1t\u011B\u017Eov\xE9, v\xFDkonnostn\xED a penetra\u010Dn\xED testov\xE1\
+          n\xED fin\xE1ln\xEDho syst\xE9mu.\n\n \n\nPokud je to mo\u017En\xE9, m\u011B\
           la by cel\xE1 va\u0161e organizace zpracov\xE1vat v\xFDjime\u010Dn\xE9 stavy\
           \ stejn\xFDm zp\u016Fsobem, proto\u017Ee to usnad\u0148uje kontrolu a audit\
           \ k\xF3du z hlediska chyb v t\xE9to d\u016Fle\u017Eit\xE9 bezpe\u010Dnostn\xED\
@@ -12692,17 +12686,16 @@ objects:
           \ als Statistik ausgegeben werden sollten, die anzeigt, wie oft und in welchem\
           \ Zeitraum sie aufgetreten sind. Diese Information sollte an die urspr\xFC\
           ngliche Meldung angeh\xE4ngt werden, um automatisiertes Logging und Monitoring\
-          \ nicht zu beeintr\xE4chtigen, siehe [A09:2025 Unzureichendes Sicherheitslogging\
-          \ und Alarmierung](A09_2025-Security_Logging_and_Alerting_Failures.md).\n\
-          \nDar\xFCber hinaus sollten wir strikte Eingabevalidierung (mit Bereinigung\
-          \ oder Escaping potenziell gef\xE4hrlicher Zeichen, die wir akzeptieren\
-          \ m\xFCssen) sowie *zentralisierte* Fehlerbehandlung, Logging, Monitoring\
-          \ und Alerting mit einem globalen Exception-Handler einsetzen. Eine Anwendung\
-          \ sollte nicht mehrere Funktionen zur Behandlung von Ausnahmezust\xE4nden\
-          \ haben \u2013 dies sollte einheitlich an einer Stelle erfolgen. Wir sollten\
-          \ zudem Sicherheitsanforderungen f\xFCr alle Empfehlungen dieses Abschnitts\
-          \ definieren, Bedrohungsmodellierung und/oder sichere Design-Reviews in\
-          \ der Entwurfsphase durchf\xFChren, Code-Reviews oder statische Analysen\
+          \ nicht zu beeintr\xE4chtigen, siehe **A09:2025 Unzureichendes Sicherheitslogging\
+          \ und Alarmierung**.\n\nDar\xFCber hinaus sollten wir strikte Eingabevalidierung\
+          \ (mit Bereinigung oder Escaping potenziell gef\xE4hrlicher Zeichen, die\
+          \ wir akzeptieren m\xFCssen) sowie *zentralisierte* Fehlerbehandlung, Logging,\
+          \ Monitoring und Alerting mit einem globalen Exception-Handler einsetzen.\
+          \ Eine Anwendung sollte nicht mehrere Funktionen zur Behandlung von Ausnahmezust\xE4\
+          nden haben \u2013 dies sollte einheitlich an einer Stelle erfolgen. Wir\
+          \ sollten zudem Sicherheitsanforderungen f\xFCr alle Empfehlungen dieses\
+          \ Abschnitts definieren, Bedrohungsmodellierung und/oder sichere Design-Reviews\
+          \ in der Entwurfsphase durchf\xFChren, Code-Reviews oder statische Analysen\
           \ vornehmen sowie Stress-, Performance- und Penetrationstests am fertigen\
           \ System ausf\xFChren.\n\n \n\nWenn m\xF6glich, sollte die gesamte Organisation\
           \ Ausnahmezust\xE4nde einheitlich behandeln, da dies die \xDCberpr\xFCfung\
@@ -12796,12 +12789,11 @@ objects:
           nicamente como estad\xEDsticas que indiquen con qu\xE9 frecuencia han ocurrido\
           \ y en qu\xE9 intervalo de tiempo. Esta informaci\xF3n deber\xEDa a\xF1\
           adirse al mensaje original para no interferir con el registro y monitoreo\
-          \ automatizados, consulte [A09:2025-Fallas en el Registro, Alerta y Monitoreo\
-          \ de Seguridad](A09_2025-Security_Logging_and_Alerting_Failures.md).\n\n\
-          Adem\xE1s de esto, querr\xEDamos incluir una validaci\xF3n de entradas estricta\
-          \ (con saneamiento o escape para los caracteres potencialmente peligrosos\
-          \ que debamos aceptar), un manejo de errores, registro, monitoreo y alertas\
-          \ *centralizados*, y un manejador de excepciones global. Una aplicaci\xF3\
+          \ automatizados, consulte **A09:2025-Fallas en el Registro, Alerta y Monitoreo\
+          \ de Seguridad**.\n\nAdem\xE1s de esto, querr\xEDamos incluir una validaci\xF3\
+          n de entradas estricta (con saneamiento o escape para los caracteres potencialmente\
+          \ peligrosos que debamos aceptar), un manejo de errores, registro, monitoreo\
+          \ y alertas *centralizados*, y un manejador de excepciones global. Una aplicaci\xF3\
           n no deber\xEDa tener m\xFAltiples funciones para manejar condiciones excepcionales;\
           \ deber\xEDa realizarse en un solo lugar, de la misma manera cada vez. Tambi\xE9\
           n deber\xEDamos crear requisitos de seguridad del proyecto para todos los\
@@ -13034,35 +13026,35 @@ objects:
           \ con quale frequenza si sono verificati e in quale arco temporale. Queste\
           \ informazioni dovrebbero essere aggiunte al messaggio originale in modo\
           \ da non interferire con il logging e il monitoraggio automatizzati, vedere\
-          \ [A09:2025 Security Logging & Alerting Failures](A09_2025-Security_Logging_and_Alerting_Failures.md).\n\
-          \nOltre a questo, vorremmo includere una validazione rigorosa dell'input\
-          \ (con sanificazione o escaping per caratteri potenzialmente pericolosi\
-          \ che dobbiamo accettare), e gestione degli errori *centralizzata*, logging,\
-          \ monitoraggio e alerting, e un gestore globale delle eccezioni. Un'applicazione\
-          \ non dovrebbe avere pi\xF9 funzioni per la gestione delle condizioni eccezionali,\
-          \ dovrebbe essere eseguita in un unico posto, allo stesso modo ogni volta.\
-          \ Dovremmo anche creare requisiti di sicurezza del progetto per tutti i\
-          \ consigli in questa sezione, eseguire attivit\xE0 di threat modeling e/o\
-          \ revisione del design sicuro nella fase di progettazione dei nostri progetti,\
-          \ eseguire code review o analisi statica, nonch\xE9 eseguire test di stress,\
-          \ prestazioni e penetration testing del sistema finale.\n\nSe possibile,\
-          \ l'intera organizzazione dovrebbe gestire le condizioni eccezionali allo\
-          \ stesso modo, poich\xE9 rende pi\xF9 facile rivedere e verificare il codice\
-          \ per errori in questo importante controllo di sicurezza.\n\n\n## Example\
-          \ attack scenarios\n\n**Scenario #1:** L'esaurimento delle risorse dovuto\
-          \ alla gestione impropria delle condizioni eccezionali (Denial of Service)\
-          \ potrebbe essere causato se l'applicazione cattura le eccezioni quando\
-          \ i file vengono caricati, ma non rilascia correttamente le risorse dopo.\
-          \ Ogni nuova eccezione lascia risorse bloccate o altrimenti non disponibili,\
-          \ finch\xE9 tutte le risorse non sono esaurite.\n\n**Scenario #2:** L'esposizione\
-          \ di dati sensibili tramite la gestione impropria degli errori del database\
-          \ che rivela l'errore di sistema completo all'utente. L'attaccante continua\
-          \ a forzare errori al fine di utilizzare le informazioni di sistema sensibili\
-          \ per creare un attacco SQL injection migliore. I dati sensibili nei messaggi\
-          \ di errore all'utente sono ricognizione.\n\n**Scenario #3:** La corruzione\
-          \ dello stato nelle transazioni finanziarie potrebbe essere causata da un\
-          \ attaccante che interrompe una transazione multi-step tramite interruzioni\
-          \ di rete. Immaginate che l'ordine della transazione fosse: addebitare l'account\
+          \ **A09:2025 Security Logging & Alerting Failures**.\n\nOltre a questo,\
+          \ vorremmo includere una validazione rigorosa dell'input (con sanificazione\
+          \ o escaping per caratteri potenzialmente pericolosi che dobbiamo accettare),\
+          \ e gestione degli errori *centralizzata*, logging, monitoraggio e alerting,\
+          \ e un gestore globale delle eccezioni. Un'applicazione non dovrebbe avere\
+          \ pi\xF9 funzioni per la gestione delle condizioni eccezionali, dovrebbe\
+          \ essere eseguita in un unico posto, allo stesso modo ogni volta. Dovremmo\
+          \ anche creare requisiti di sicurezza del progetto per tutti i consigli\
+          \ in questa sezione, eseguire attivit\xE0 di threat modeling e/o revisione\
+          \ del design sicuro nella fase di progettazione dei nostri progetti, eseguire\
+          \ code review o analisi statica, nonch\xE9 eseguire test di stress, prestazioni\
+          \ e penetration testing del sistema finale.\n\nSe possibile, l'intera organizzazione\
+          \ dovrebbe gestire le condizioni eccezionali allo stesso modo, poich\xE9\
+          \ rende pi\xF9 facile rivedere e verificare il codice per errori in questo\
+          \ importante controllo di sicurezza.\n\n\n## Example attack scenarios\n\n\
+          **Scenario #1:** L'esaurimento delle risorse dovuto alla gestione impropria\
+          \ delle condizioni eccezionali (Denial of Service) potrebbe essere causato\
+          \ se l'applicazione cattura le eccezioni quando i file vengono caricati,\
+          \ ma non rilascia correttamente le risorse dopo. Ogni nuova eccezione lascia\
+          \ risorse bloccate o altrimenti non disponibili, finch\xE9 tutte le risorse\
+          \ non sono esaurite.\n\n**Scenario #2:** L'esposizione di dati sensibili\
+          \ tramite la gestione impropria degli errori del database che rivela l'errore\
+          \ di sistema completo all'utente. L'attaccante continua a forzare errori\
+          \ al fine di utilizzare le informazioni di sistema sensibili per creare\
+          \ un attacco SQL injection migliore. I dati sensibili nei messaggi di errore\
+          \ all'utente sono ricognizione.\n\n**Scenario #3:** La corruzione dello\
+          \ stato nelle transazioni finanziarie potrebbe essere causata da un attaccante\
+          \ che interrompe una transazione multi-step tramite interruzioni di rete.\
+          \ Immaginate che l'ordine della transazione fosse: addebitare l'account\
           \ utente, accreditare l'account di destinazione, registrare la transazione.\
           \ Se il sistema non esegue correttamente il rollback dell'intera transazione\
           \ (failing closed) quando si verifica un errore a met\xE0, l'attaccante\
@@ -13221,95 +13213,95 @@ objects:
           \u3055\u308C\u305F\u30ED\u30AE\u30F3\u30B0\u3084\u76E3\u8996\u3092\u59A8\
           \u3052\u306A\u3044\u3088\u3046\u306B\u3001\u5143\u306E\u30E1\u30C3\u30BB\
           \u30FC\u30B8\u306B\u8FFD\u52A0\u3055\u308C\u308B\u3079\u304D\u3067\u3059\
-          \uFF08[A09:2025 \u30BB\u30AD\u30E5\u30EA\u30C6\u30A3\u30ED\u30B0\u3068\u30A2\
-          \u30E9\u30FC\u30C8\u306E\u4E0D\u5099](A09_2025-Security_Logging_and_Alerting_Failures.md)\
-          \ \u53C2\u7167\uFF09\u3002\n\n\u3053\u308C\u306B\u52A0\u3048\u3066\u3001\
-          \u53B3\u683C\u306A\u5165\u529B\u691C\u8A3C\uFF08\u53D7\u3051\u5165\u308C\
-          \u306A\u3051\u308C\u3070\u306A\u3089\u306A\u3044\u6F5C\u5728\u7684\u306B\
-          \u5371\u967A\u306A\u6587\u5B57\u306B\u3064\u3044\u3066\u306F\u7121\u5BB3\
-          \u5316 (Sanitization) \u307E\u305F\u306F\u30A8\u30B9\u30B1\u30FC\u30D7\u3092\
-          \u884C\u3046\uFF09\u3001\u304A\u3088\u3073\u300C\u96C6\u7D04\u3055\u308C\
-          \u305F (Centralized)\u300D\u30A8\u30E9\u30FC\u51E6\u7406\u3001\u30ED\u30AE\
-          \u30F3\u30B0\u3001\u76E3\u8996\u3001\u30A2\u30E9\u30FC\u30C8\u3001\u306A\
-          \u3089\u3073\u306B\u30B0\u30ED\u30FC\u30D0\u30EB\u4F8B\u5916\u30CF\u30F3\
-          \u30C9\u30E9\u30FC\u3092\u542B\u3081\u308B\u3079\u304D\u3067\u3059\u3002\
-          \u4E00\u3064\u306E\u30A2\u30D7\u30EA\u30B1\u30FC\u30B7\u30E7\u30F3\u306B\
-          \u4F8B\u5916\u7684\u306A\u72B6\u6CC1\u3092\u51E6\u7406\u3059\u308B\u305F\
-          \u3081\u306E\u8907\u6570\u306E\u95A2\u6570\u3092\u6301\u305F\u305B\u308B\
-          \u3079\u304D\u3067\u306F\u306A\u304F\u3001\u4E00\u7B87\u6240\u3067\u3001\
-          \u6BCE\u56DE\u540C\u3058\u65B9\u6CD5\u3067\u5B9F\u884C\u3055\u308C\u308B\
-          \u3079\u304D\u3067\u3059\u3002\u307E\u305F\u3001\u3053\u306E\u30BB\u30AF\
-          \u30B7\u30E7\u30F3\u306E\u3059\u3079\u3066\u306E\u30A2\u30C9\u30D0\u30A4\
-          \u30B9\u306B\u3064\u3044\u3066\u30D7\u30ED\u30B8\u30A7\u30AF\u30C8\u306E\
-          \u30BB\u30AD\u30E5\u30EA\u30C6\u30A3\u8981\u4EF6\u3092\u4F5C\u6210\u3057\
-          \u3001\u30D7\u30ED\u30B8\u30A7\u30AF\u30C8\u306E\u8A2D\u8A08\u30D5\u30A7\
-          \u30FC\u30BA\u3067\u8105\u5A01\u30E2\u30C7\u30EA\u30F3\u30B0 (Threat modeling)\
-          \ \u3084\u5B89\u5168\u306A\u8A2D\u8A08\u30EC\u30D3\u30E5\u30FC\u3092\u5B9F\
-          \u65BD\u3057\u3001\u30B3\u30FC\u30C9\u30EC\u30D3\u30E5\u30FC\u3084\u9759\
-          \u7684\u89E3\u6790\u3092\u5B9F\u65BD\u3057\u3001\u6700\u7D42\u7684\u306A\
-          \u30B7\u30B9\u30C6\u30E0\u306B\u5BFE\u3057\u3066\u30B9\u30C8\u30EC\u30B9\
-          \u3001\u30D1\u30D5\u30A9\u30FC\u30DE\u30F3\u30B9\u3001\u304A\u3088\u3073\
-          \u30DA\u30CD\u30C8\u30EC\u30FC\u30B7\u30E7\u30F3\u30C6\u30B9\u30C8\u3092\
-          \u5B9F\u884C\u3059\u3079\u304D\u3067\u3059\u3002\n\n\u53EF\u80FD\u3067\u3042\
-          \u308C\u3070\u3001\u7D44\u7E54\u5168\u4F53\u3067\u4F8B\u5916\u7684\u306A\
-          \u72B6\u6CC1\u3092\u540C\u3058\u65B9\u6CD5\u3067\u51E6\u7406\u3059\u3079\
-          \u304D\u3067\u3059\u3002\u305D\u3046\u3059\u308B\u3053\u3068\u3067\u3001\
-          \u3053\u306E\u91CD\u8981\u306A\u30BB\u30AD\u30E5\u30EA\u30C6\u30A3\u5236\
-          \u5FA1\u306B\u304A\u3051\u308B\u30A8\u30E9\u30FC\u306E\u30B3\u30FC\u30C9\
-          \u30EC\u30D3\u30E5\u30FC\u3084\u76E3\u67FB\u304C\u5BB9\u6613\u306B\u306A\
-          \u308A\u307E\u3059\u3002\n\n\n## Example attack scenarios\n\n**\u30B7\u30CA\
-          \u30EA\u30AA #1\uFF1A\u4F8B\u5916\u7684\u306A\u72B6\u6CC1\u306E\u8AA4\u51E6\
-          \u7406\u306B\u3088\u308B\u30EA\u30BD\u30FC\u30B9\u306E\u67AF\u6E07 (\u30B5\
-          \u30FC\u30D3\u30B9\u62D2\u5426)** \u30A2\u30D7\u30EA\u30B1\u30FC\u30B7\u30E7\
-          \u30F3\u304C\u30D5\u30A1\u30A4\u30EB\u306E\u30A2\u30C3\u30D7\u30ED\u30FC\
-          \u30C9\u6642\u306B\u4F8B\u5916\u3092\u30AD\u30E3\u30C3\u30C1\u3059\u308B\
-          \u3082\u306E\u306E\u3001\u305D\u306E\u5F8C\u306B\u30EA\u30BD\u30FC\u30B9\
-          \u3092\u9069\u5207\u306B\u89E3\u653E\u3057\u306A\u3044\u5834\u5408\u306B\
-          \u767A\u751F\u3059\u308B\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\
-          \u3002\u65B0\u3057\u3044\u4F8B\u5916\u304C\u767A\u751F\u3059\u308B\u305F\
-          \u3073\u306B\u30EA\u30BD\u30FC\u30B9\u304C\u30ED\u30C3\u30AF\u3055\u308C\
-          \u308B\u304B\u5229\u7528\u4E0D\u53EF\u306E\u307E\u307E\u306B\u306A\u308A\
-          \u3001\u6700\u7D42\u7684\u306B\u3059\u3079\u3066\u306E\u30EA\u30BD\u30FC\
-          \u30B9\u304C\u4F7F\u3044\u679C\u305F\u3055\u308C\u307E\u3059\u3002\n\n**\u30B7\
-          \u30CA\u30EA\u30AA #2\uFF1A\u4E0D\u9069\u5207\u306A\u51E6\u7406\u307E\u305F\
-          \u306F\u30C7\u30FC\u30BF\u30D9\u30FC\u30B9\u30A8\u30E9\u30FC\u306B\u3088\
-          \u308B\u6A5F\u5BC6\u30C7\u30FC\u30BF\u306E\u9732\u51FA** \u30E6\u30FC\u30B6\
-          \u30FC\u306B\u30B7\u30B9\u30C6\u30E0\u306E\u5B8C\u5168\u306A\u30A8\u30E9\
-          \u30FC\u3092\u660E\u3089\u304B\u306B\u3057\u3066\u3057\u307E\u3046\u30B1\
-          \u30FC\u30B9\u3067\u3059\u3002\u653B\u6483\u8005\u306F\u3001\u6A5F\u5BC6\
-          \u6027\u306E\u9AD8\u3044\u30B7\u30B9\u30C6\u30E0\u60C5\u5831\u3092\u5229\
-          \u7528\u3057\u3066\u3088\u308A\u512A\u308C\u305F SQL \u30A4\u30F3\u30B8\u30A7\
-          \u30AF\u30B7\u30E7\u30F3\u653B\u6483\u3092\u4F5C\u6210\u3059\u308B\u305F\
-          \u3081\u306B\u3001\u610F\u56F3\u7684\u306B\u30A8\u30E9\u30FC\u3092\u767A\
-          \u751F\u3055\u305B\u7D9A\u3051\u307E\u3059\u3002\u30E6\u30FC\u30B6\u30FC\
-          \u3078\u306E\u30A8\u30E9\u30FC\u30E1\u30C3\u30BB\u30FC\u30B8\u306B\u542B\
-          \u307E\u308C\u308B\u6A5F\u5BC6\u30C7\u30FC\u30BF\u306F\u5075\u5BDF (Reconnaissance)\
-          \ \u6D3B\u52D5\u306B\u5229\u7528\u3055\u308C\u307E\u3059\u3002\n\n**\u30B7\
-          \u30CA\u30EA\u30AA #3\uFF1A\u91D1\u878D\u53D6\u5F15\u306B\u304A\u3051\u308B\
-          \u72B6\u614B\u306E\u7834\u640D** \u653B\u6483\u8005\u304C\u30CD\u30C3\u30C8\
-          \u30EF\u30FC\u30AF\u306E\u4E2D\u65AD\u3092\u4ECB\u3057\u3066\u591A\u6BB5\
-          \u968E\u306E\u30C8\u30E9\u30F3\u30B6\u30AF\u30B7\u30E7\u30F3\u3092\u59A8\
-          \u5BB3\u3059\u308B\u3053\u3068\u306B\u3088\u3063\u3066\u5F15\u304D\u8D77\
-          \u3053\u3055\u308C\u308B\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\
-          \u3002\u30C8\u30E9\u30F3\u30B6\u30AF\u30B7\u30E7\u30F3\u306E\u9806\u5E8F\
-          \u304C\u300C\u30E6\u30FC\u30B6\u30FC\u30A2\u30AB\u30A6\u30F3\u30C8\u306E\
-          \u5F15\u304D\u843D\u3068\u3057\u3001\u5B9B\u5148\u30A2\u30AB\u30A6\u30F3\
-          \u30C8\u3078\u306E\u5165\u91D1\u3001\u30C8\u30E9\u30F3\u30B6\u30AF\u30B7\
-          \u30E7\u30F3\u306E\u30ED\u30B0\u8A18\u9332\u300D\u3067\u3042\u3063\u305F\
-          \u3068\u4EEE\u5B9A\u3057\u307E\u3059\u3002\u9014\u4E2D\u3067\u30A8\u30E9\
-          \u30FC\u304C\u767A\u751F\u3057\u305F\u3068\u304D\u306B\u30B7\u30B9\u30C6\
-          \u30E0\u304C\u30C8\u30E9\u30F3\u30B6\u30AF\u30B7\u30E7\u30F3\u5168\u4F53\
-          \u3092\u9069\u5207\u306B\u30ED\u30FC\u30EB\u30D0\u30C3\u30AF\uFF08\u30D5\
-          \u30A7\u30A4\u30EB\u30AF\u30ED\u30FC\u30BA\uFF09\u3057\u306A\u3044\u5834\
-          \u5408\u3001\u653B\u6483\u8005\u306F\u30E6\u30FC\u30B6\u30FC\u306E\u30A2\
-          \u30AB\u30A6\u30F3\u30C8\u3092\u67AF\u6E07\u3055\u305B\u305F\u308A\u3001\
-          \u3042\u308B\u3044\u306F\u653B\u6483\u8005\u304C\u5B9B\u5148\u306B\u4F55\
-          \u5EA6\u3082\u9001\u91D1\u3067\u304D\u3066\u3057\u307E\u3046\u7AF6\u5408\
-          \u72B6\u614B\u304C\u767A\u751F\u3057\u305F\u308A\u3059\u308B\u53EF\u80FD\
-          \u6027\u304C\u3042\u308A\u307E\u3059\u3002\n\n\n\u53C2\u8003\u8CC7\u6599\
-          \u304A\u3088\u3073\u30DE\u30C3\u30D4\u30F3\u30B0\u3055\u308C\u305FCWE\u306E\
-          \u4E00\u89A7\u306B\u3064\u3044\u3066\u3001\u8A73\u3057\u304F\u306F\u3053\
-          \u3061\u3089\uFF1A https://top10.owasp.org/2025/ja/A10_2025-Mishandling_of_Exceptional_Conditions/"
+          \uFF08**A09:2025 \u30BB\u30AD\u30E5\u30EA\u30C6\u30A3\u30ED\u30B0\u3068\u30A2\
+          \u30E9\u30FC\u30C8\u306E\u4E0D\u5099** \u53C2\u7167\uFF09\u3002\n\n\u3053\
+          \u308C\u306B\u52A0\u3048\u3066\u3001\u53B3\u683C\u306A\u5165\u529B\u691C\
+          \u8A3C\uFF08\u53D7\u3051\u5165\u308C\u306A\u3051\u308C\u3070\u306A\u3089\
+          \u306A\u3044\u6F5C\u5728\u7684\u306B\u5371\u967A\u306A\u6587\u5B57\u306B\
+          \u3064\u3044\u3066\u306F\u7121\u5BB3\u5316 (Sanitization) \u307E\u305F\u306F\
+          \u30A8\u30B9\u30B1\u30FC\u30D7\u3092\u884C\u3046\uFF09\u3001\u304A\u3088\
+          \u3073\u300C\u96C6\u7D04\u3055\u308C\u305F (Centralized)\u300D\u30A8\u30E9\
+          \u30FC\u51E6\u7406\u3001\u30ED\u30AE\u30F3\u30B0\u3001\u76E3\u8996\u3001\
+          \u30A2\u30E9\u30FC\u30C8\u3001\u306A\u3089\u3073\u306B\u30B0\u30ED\u30FC\
+          \u30D0\u30EB\u4F8B\u5916\u30CF\u30F3\u30C9\u30E9\u30FC\u3092\u542B\u3081\
+          \u308B\u3079\u304D\u3067\u3059\u3002\u4E00\u3064\u306E\u30A2\u30D7\u30EA\
+          \u30B1\u30FC\u30B7\u30E7\u30F3\u306B\u4F8B\u5916\u7684\u306A\u72B6\u6CC1\
+          \u3092\u51E6\u7406\u3059\u308B\u305F\u3081\u306E\u8907\u6570\u306E\u95A2\
+          \u6570\u3092\u6301\u305F\u305B\u308B\u3079\u304D\u3067\u306F\u306A\u304F\
+          \u3001\u4E00\u7B87\u6240\u3067\u3001\u6BCE\u56DE\u540C\u3058\u65B9\u6CD5\
+          \u3067\u5B9F\u884C\u3055\u308C\u308B\u3079\u304D\u3067\u3059\u3002\u307E\
+          \u305F\u3001\u3053\u306E\u30BB\u30AF\u30B7\u30E7\u30F3\u306E\u3059\u3079\
+          \u3066\u306E\u30A2\u30C9\u30D0\u30A4\u30B9\u306B\u3064\u3044\u3066\u30D7\
+          \u30ED\u30B8\u30A7\u30AF\u30C8\u306E\u30BB\u30AD\u30E5\u30EA\u30C6\u30A3\
+          \u8981\u4EF6\u3092\u4F5C\u6210\u3057\u3001\u30D7\u30ED\u30B8\u30A7\u30AF\
+          \u30C8\u306E\u8A2D\u8A08\u30D5\u30A7\u30FC\u30BA\u3067\u8105\u5A01\u30E2\
+          \u30C7\u30EA\u30F3\u30B0 (Threat modeling) \u3084\u5B89\u5168\u306A\u8A2D\
+          \u8A08\u30EC\u30D3\u30E5\u30FC\u3092\u5B9F\u65BD\u3057\u3001\u30B3\u30FC\
+          \u30C9\u30EC\u30D3\u30E5\u30FC\u3084\u9759\u7684\u89E3\u6790\u3092\u5B9F\
+          \u65BD\u3057\u3001\u6700\u7D42\u7684\u306A\u30B7\u30B9\u30C6\u30E0\u306B\
+          \u5BFE\u3057\u3066\u30B9\u30C8\u30EC\u30B9\u3001\u30D1\u30D5\u30A9\u30FC\
+          \u30DE\u30F3\u30B9\u3001\u304A\u3088\u3073\u30DA\u30CD\u30C8\u30EC\u30FC\
+          \u30B7\u30E7\u30F3\u30C6\u30B9\u30C8\u3092\u5B9F\u884C\u3059\u3079\u304D\
+          \u3067\u3059\u3002\n\n\u53EF\u80FD\u3067\u3042\u308C\u3070\u3001\u7D44\u7E54\
+          \u5168\u4F53\u3067\u4F8B\u5916\u7684\u306A\u72B6\u6CC1\u3092\u540C\u3058\
+          \u65B9\u6CD5\u3067\u51E6\u7406\u3059\u3079\u304D\u3067\u3059\u3002\u305D\
+          \u3046\u3059\u308B\u3053\u3068\u3067\u3001\u3053\u306E\u91CD\u8981\u306A\
+          \u30BB\u30AD\u30E5\u30EA\u30C6\u30A3\u5236\u5FA1\u306B\u304A\u3051\u308B\
+          \u30A8\u30E9\u30FC\u306E\u30B3\u30FC\u30C9\u30EC\u30D3\u30E5\u30FC\u3084\
+          \u76E3\u67FB\u304C\u5BB9\u6613\u306B\u306A\u308A\u307E\u3059\u3002\n\n\n\
+          ## Example attack scenarios\n\n**\u30B7\u30CA\u30EA\u30AA #1\uFF1A\u4F8B\
+          \u5916\u7684\u306A\u72B6\u6CC1\u306E\u8AA4\u51E6\u7406\u306B\u3088\u308B\
+          \u30EA\u30BD\u30FC\u30B9\u306E\u67AF\u6E07 (\u30B5\u30FC\u30D3\u30B9\u62D2\
+          \u5426)** \u30A2\u30D7\u30EA\u30B1\u30FC\u30B7\u30E7\u30F3\u304C\u30D5\u30A1\
+          \u30A4\u30EB\u306E\u30A2\u30C3\u30D7\u30ED\u30FC\u30C9\u6642\u306B\u4F8B\
+          \u5916\u3092\u30AD\u30E3\u30C3\u30C1\u3059\u308B\u3082\u306E\u306E\u3001\
+          \u305D\u306E\u5F8C\u306B\u30EA\u30BD\u30FC\u30B9\u3092\u9069\u5207\u306B\
+          \u89E3\u653E\u3057\u306A\u3044\u5834\u5408\u306B\u767A\u751F\u3059\u308B\
+          \u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002\u65B0\u3057\u3044\
+          \u4F8B\u5916\u304C\u767A\u751F\u3059\u308B\u305F\u3073\u306B\u30EA\u30BD\
+          \u30FC\u30B9\u304C\u30ED\u30C3\u30AF\u3055\u308C\u308B\u304B\u5229\u7528\
+          \u4E0D\u53EF\u306E\u307E\u307E\u306B\u306A\u308A\u3001\u6700\u7D42\u7684\
+          \u306B\u3059\u3079\u3066\u306E\u30EA\u30BD\u30FC\u30B9\u304C\u4F7F\u3044\
+          \u679C\u305F\u3055\u308C\u307E\u3059\u3002\n\n**\u30B7\u30CA\u30EA\u30AA\
+          \ #2\uFF1A\u4E0D\u9069\u5207\u306A\u51E6\u7406\u307E\u305F\u306F\u30C7\u30FC\
+          \u30BF\u30D9\u30FC\u30B9\u30A8\u30E9\u30FC\u306B\u3088\u308B\u6A5F\u5BC6\
+          \u30C7\u30FC\u30BF\u306E\u9732\u51FA** \u30E6\u30FC\u30B6\u30FC\u306B\u30B7\
+          \u30B9\u30C6\u30E0\u306E\u5B8C\u5168\u306A\u30A8\u30E9\u30FC\u3092\u660E\
+          \u3089\u304B\u306B\u3057\u3066\u3057\u307E\u3046\u30B1\u30FC\u30B9\u3067\
+          \u3059\u3002\u653B\u6483\u8005\u306F\u3001\u6A5F\u5BC6\u6027\u306E\u9AD8\
+          \u3044\u30B7\u30B9\u30C6\u30E0\u60C5\u5831\u3092\u5229\u7528\u3057\u3066\
+          \u3088\u308A\u512A\u308C\u305F SQL \u30A4\u30F3\u30B8\u30A7\u30AF\u30B7\u30E7\
+          \u30F3\u653B\u6483\u3092\u4F5C\u6210\u3059\u308B\u305F\u3081\u306B\u3001\
+          \u610F\u56F3\u7684\u306B\u30A8\u30E9\u30FC\u3092\u767A\u751F\u3055\u305B\
+          \u7D9A\u3051\u307E\u3059\u3002\u30E6\u30FC\u30B6\u30FC\u3078\u306E\u30A8\
+          \u30E9\u30FC\u30E1\u30C3\u30BB\u30FC\u30B8\u306B\u542B\u307E\u308C\u308B\
+          \u6A5F\u5BC6\u30C7\u30FC\u30BF\u306F\u5075\u5BDF (Reconnaissance) \u6D3B\
+          \u52D5\u306B\u5229\u7528\u3055\u308C\u307E\u3059\u3002\n\n**\u30B7\u30CA\
+          \u30EA\u30AA #3\uFF1A\u91D1\u878D\u53D6\u5F15\u306B\u304A\u3051\u308B\u72B6\
+          \u614B\u306E\u7834\u640D** \u653B\u6483\u8005\u304C\u30CD\u30C3\u30C8\u30EF\
+          \u30FC\u30AF\u306E\u4E2D\u65AD\u3092\u4ECB\u3057\u3066\u591A\u6BB5\u968E\
+          \u306E\u30C8\u30E9\u30F3\u30B6\u30AF\u30B7\u30E7\u30F3\u3092\u59A8\u5BB3\
+          \u3059\u308B\u3053\u3068\u306B\u3088\u3063\u3066\u5F15\u304D\u8D77\u3053\
+          \u3055\u308C\u308B\u53EF\u80FD\u6027\u304C\u3042\u308A\u307E\u3059\u3002\
+          \u30C8\u30E9\u30F3\u30B6\u30AF\u30B7\u30E7\u30F3\u306E\u9806\u5E8F\u304C\
+          \u300C\u30E6\u30FC\u30B6\u30FC\u30A2\u30AB\u30A6\u30F3\u30C8\u306E\u5F15\
+          \u304D\u843D\u3068\u3057\u3001\u5B9B\u5148\u30A2\u30AB\u30A6\u30F3\u30C8\
+          \u3078\u306E\u5165\u91D1\u3001\u30C8\u30E9\u30F3\u30B6\u30AF\u30B7\u30E7\
+          \u30F3\u306E\u30ED\u30B0\u8A18\u9332\u300D\u3067\u3042\u3063\u305F\u3068\
+          \u4EEE\u5B9A\u3057\u307E\u3059\u3002\u9014\u4E2D\u3067\u30A8\u30E9\u30FC\
+          \u304C\u767A\u751F\u3057\u305F\u3068\u304D\u306B\u30B7\u30B9\u30C6\u30E0\
+          \u304C\u30C8\u30E9\u30F3\u30B6\u30AF\u30B7\u30E7\u30F3\u5168\u4F53\u3092\
+          \u9069\u5207\u306B\u30ED\u30FC\u30EB\u30D0\u30C3\u30AF\uFF08\u30D5\u30A7\
+          \u30A4\u30EB\u30AF\u30ED\u30FC\u30BA\uFF09\u3057\u306A\u3044\u5834\u5408\
+          \u3001\u653B\u6483\u8005\u306F\u30E6\u30FC\u30B6\u30FC\u306E\u30A2\u30AB\
+          \u30A6\u30F3\u30C8\u3092\u67AF\u6E07\u3055\u305B\u305F\u308A\u3001\u3042\
+          \u308B\u3044\u306F\u653B\u6483\u8005\u304C\u5B9B\u5148\u306B\u4F55\u5EA6\
+          \u3082\u9001\u91D1\u3067\u304D\u3066\u3057\u307E\u3046\u7AF6\u5408\u72B6\
+          \u614B\u304C\u767A\u751F\u3057\u305F\u308A\u3059\u308B\u53EF\u80FD\u6027\
+          \u304C\u3042\u308A\u307E\u3059\u3002\n\n\n\u53C2\u8003\u8CC7\u6599\u304A\
+          \u3088\u3073\u30DE\u30C3\u30D4\u30F3\u30B0\u3055\u308C\u305FCWE\u306E\u4E00\
+          \u89A7\u306B\u3064\u3044\u3066\u3001\u8A73\u3057\u304F\u306F\u3053\u3061\
+          \u3089\uFF1A https://top10.owasp.org/2025/ja/A10_2025-Mishandling_of_Exceptional_Conditions/"
       ko:
         name: "\uBD80\uC801\uC808\uD55C \uC608\uC678 \uCC98\uB9AC"
         description: "\uBD80\uC801\uC808\uD55C \uC608\uC678 \uCC98\uB9AC\uB294 \uD504\
@@ -13421,11 +13413,11 @@ objects:
           \uD558\uB77C. \uC774 \uC815\uBCF4\uB294 \uC790\uB3D9\uD654\uB41C \uB85C\uAE45\
           \ \uBC0F \uBAA8\uB2C8\uD130\uB9C1\uC744 \uBC29\uD574\uD558\uC9C0 \uC54A\uB3C4\
           \uB85D \uC6D0\uBCF8 \uBA54\uC2DC\uC9C0\uC5D0 \uCD94\uAC00\uD558\uB294 \uBC29\
-          \uC2DD\uC73C\uB85C \uCC98\uB9AC\uD574\uC57C \uD55C\uB2E4. [A09:2025 \uBCF4\
-          \uC548 \uB85C\uAE45 \uBC0F \uC54C\uB9BC \uC2E4\uD328](A09_2025-Security_Logging_and_Alerting_Failures.md)\uB97C\
-          \ \uCC38\uACE0\uD558\uB77C.\n\n\uC774 \uC678\uC5D0\uB3C4 \uB2E4\uC74C \uC0AC\
-          \uD56D\uC744 \uD3EC\uD568\uD574\uC57C \uD55C\uB2E4: \uC5C4\uACA9\uD55C \uC785\
-          \uB825 \uAC80\uC99D(\uD5C8\uC6A9\uD574\uC57C \uD558\uB294 \uC704\uD5D8 \uBB38\
+          \uC2DD\uC73C\uB85C \uCC98\uB9AC\uD574\uC57C \uD55C\uB2E4. **A09:2025 \uBCF4\
+          \uC548 \uB85C\uAE45 \uBC0F \uC54C\uB9BC \uC2E4\uD328**\uB97C \uCC38\uACE0\
+          \uD558\uB77C.\n\n\uC774 \uC678\uC5D0\uB3C4 \uB2E4\uC74C \uC0AC\uD56D\uC744\
+          \ \uD3EC\uD568\uD574\uC57C \uD55C\uB2E4: \uC5C4\uACA9\uD55C \uC785\uB825\
+          \ \uAC80\uC99D(\uD5C8\uC6A9\uD574\uC57C \uD558\uB294 \uC704\uD5D8 \uBB38\
           \uC790\uC5D0 \uB300\uD55C \uC0C8\uB2C8\uD0C0\uC774\uC9D5 \uB610\uB294 \uC774\
           \uC2A4\uCF00\uC774\uD504 \uCC98\uB9AC \uD3EC\uD568), \uC911\uC559 \uC9D1\
           \uC911\uD654\uB41C \uC624\uB958 \uCC98\uB9AC\xB7\uB85C\uAE45\xB7\uBAA8\uB2C8\
@@ -13546,44 +13538,44 @@ objects:
           \ estat\xEDsticas mostrando a frequ\xEAncia com que ocorreram e em qual\
           \ per\xEDodo. Esta informa\xE7\xE3o deve ser anexada \xE0 mensagem original\
           \ para n\xE3o interferir no registro e monitoramento automatizados, veja\
-          \ [A09:2025 Falhas de Registro e Monitoramento de Seguran\xE7a](A09_2025-Security_Logging_and_Alerting_Failures.md).\n\
-          \nAl\xE9m disso, queremos incluir uma valida\xE7\xE3o de entrada rigorosa\
-          \ (com sanitiza\xE7\xE3o ou _escaping_ para caracteres potencialmente perigosos\
-          \ que precisamos aceitar) e um tratamento de erros, registro, monitoramento\
-          \ e alerta _centralizados_, al\xE9m de um manipulador de exce\xE7\xF5es\
-          \ global. Uma aplica\xE7\xE3o n\xE3o deve ter m\xFAltiplas fun\xE7\xF5es\
-          \ para tratar condi\xE7\xF5es excepcionais; isso deve ser realizado em um\
-          \ \xFAnico lugar, da mesma forma todas as vezes. Tamb\xE9m devemos criar\
-          \ requisitos de seguran\xE7a de projeto para todos os conselhos desta se\xE7\
-          \xE3o, realizar atividades de modelagem de amea\xE7as e/ou revis\xE3o de\
-          \ design seguro na fase de design de nossos projetos, realizar revis\xE3\
-          o de c\xF3digo ou an\xE1lise est\xE1tica, bem como executar testes de estresse,\
-          \ desempenho e invas\xE3o do sistema final.\n\nSe poss\xEDvel, toda a sua\
-          \ organiza\xE7\xE3o deve tratar condi\xE7\xF5es excepcionais da mesma maneira,\
-          \ pois isso facilita a revis\xE3o e a auditoria de c\xF3digo em busca de\
-          \ erros neste importante controle de seguran\xE7a.\n\n\n## Example attack\
-          \ scenarios\n\n**Cen\xE1rio 1:** Exaust\xE3o de recursos via tratamento\
-          \ incorreto de condi\xE7\xF5es excepcionais (Nega\xE7\xE3o de Servi\xE7\
-          o) poderia ser causada se a aplica\xE7\xE3o captura exce\xE7\xF5es quando\
-          \ arquivos s\xE3o carregados, mas n\xE3o libera adequadamente os recursos\
-          \ depois. Cada nova exce\xE7\xE3o deixa recursos bloqueados ou indispon\xED\
-          veis, at\xE9 que todos os recursos sejam esgotados.\n\n**Cen\xE1rio 2:**\
-          \ Exposi\xE7\xE3o de dados sens\xEDveis via tratamento inadequado ou erros\
-          \ de banco de dados que revelam o erro completo do sistema ao usu\xE1rio.\
-          \ O atacante continua a for\xE7ar erros para usar as informa\xE7\xF5es sens\xED\
-          veis do sistema para criar um ataque de _SQL injection_ melhor. Os dados\
-          \ sens\xEDveis nas mensagens de erro do usu\xE1rio servem como reconhecimento\
-          \ (_reconnaissance_).\n\n**Cen\xE1rio 3:** Corrup\xE7\xE3o de estado em\
-          \ transa\xE7\xF5es financeiras poderia ser causada por um atacante interrompendo\
-          \ uma transa\xE7\xE3o de m\xFAltiplas etapas via interrup\xE7\xF5es de rede.\
-          \ Imagine que a ordem da transa\xE7\xE3o fosse: debitar conta do usu\xE1\
-          rio, creditar conta de destino, registrar transa\xE7\xE3o. Se o sistema\
-          \ n\xE3o realizar o _rollback_ adequadamente de toda a transa\xE7\xE3o (falha\
-          \ segura) quando houver um erro no meio do caminho, o atacante poderia potencialmente\
-          \ esvaziar a conta do usu\xE1rio, ou possivelmente gerar uma condi\xE7\xE3\
-          o de corrida que permita ao atacante enviar dinheiro para o destino v\xE1\
-          rias vezes.\n\n\nPara mais informa\xE7\xF5es sobre as refer\xEAncias e a\
-          \ lista de CWEs mapeadas: https://top10.owasp.org/2025/pt-BR/A10_2025-Mishandling_of_Exceptional_Conditions/"
+          \ **A09:2025 Falhas de Registro e Monitoramento de Seguran\xE7a**.\n\nAl\xE9\
+          m disso, queremos incluir uma valida\xE7\xE3o de entrada rigorosa (com sanitiza\xE7\
+          \xE3o ou _escaping_ para caracteres potencialmente perigosos que precisamos\
+          \ aceitar) e um tratamento de erros, registro, monitoramento e alerta _centralizados_,\
+          \ al\xE9m de um manipulador de exce\xE7\xF5es global. Uma aplica\xE7\xE3\
+          o n\xE3o deve ter m\xFAltiplas fun\xE7\xF5es para tratar condi\xE7\xF5es\
+          \ excepcionais; isso deve ser realizado em um \xFAnico lugar, da mesma forma\
+          \ todas as vezes. Tamb\xE9m devemos criar requisitos de seguran\xE7a de\
+          \ projeto para todos os conselhos desta se\xE7\xE3o, realizar atividades\
+          \ de modelagem de amea\xE7as e/ou revis\xE3o de design seguro na fase de\
+          \ design de nossos projetos, realizar revis\xE3o de c\xF3digo ou an\xE1\
+          lise est\xE1tica, bem como executar testes de estresse, desempenho e invas\xE3\
+          o do sistema final.\n\nSe poss\xEDvel, toda a sua organiza\xE7\xE3o deve\
+          \ tratar condi\xE7\xF5es excepcionais da mesma maneira, pois isso facilita\
+          \ a revis\xE3o e a auditoria de c\xF3digo em busca de erros neste importante\
+          \ controle de seguran\xE7a.\n\n\n## Example attack scenarios\n\n**Cen\xE1\
+          rio 1:** Exaust\xE3o de recursos via tratamento incorreto de condi\xE7\xF5\
+          es excepcionais (Nega\xE7\xE3o de Servi\xE7o) poderia ser causada se a aplica\xE7\
+          \xE3o captura exce\xE7\xF5es quando arquivos s\xE3o carregados, mas n\xE3\
+          o libera adequadamente os recursos depois. Cada nova exce\xE7\xE3o deixa\
+          \ recursos bloqueados ou indispon\xEDveis, at\xE9 que todos os recursos\
+          \ sejam esgotados.\n\n**Cen\xE1rio 2:** Exposi\xE7\xE3o de dados sens\xED\
+          veis via tratamento inadequado ou erros de banco de dados que revelam o\
+          \ erro completo do sistema ao usu\xE1rio. O atacante continua a for\xE7\
+          ar erros para usar as informa\xE7\xF5es sens\xEDveis do sistema para criar\
+          \ um ataque de _SQL injection_ melhor. Os dados sens\xEDveis nas mensagens\
+          \ de erro do usu\xE1rio servem como reconhecimento (_reconnaissance_).\n\
+          \n**Cen\xE1rio 3:** Corrup\xE7\xE3o de estado em transa\xE7\xF5es financeiras\
+          \ poderia ser causada por um atacante interrompendo uma transa\xE7\xE3o\
+          \ de m\xFAltiplas etapas via interrup\xE7\xF5es de rede. Imagine que a ordem\
+          \ da transa\xE7\xE3o fosse: debitar conta do usu\xE1rio, creditar conta\
+          \ de destino, registrar transa\xE7\xE3o. Se o sistema n\xE3o realizar o\
+          \ _rollback_ adequadamente de toda a transa\xE7\xE3o (falha segura) quando\
+          \ houver um erro no meio do caminho, o atacante poderia potencialmente esvaziar\
+          \ a conta do usu\xE1rio, ou possivelmente gerar uma condi\xE7\xE3o de corrida\
+          \ que permita ao atacante enviar dinheiro para o destino v\xE1rias vezes.\n\
+          \n\nPara mais informa\xE7\xF5es sobre as refer\xEAncias e a lista de CWEs\
+          \ mapeadas: https://top10.owasp.org/2025/pt-BR/A10_2025-Mishandling_of_Exceptional_Conditions/"
       zh:
         name: "\u5F02\u5E38\u6761\u4EF6\u5904\u7406\u4E0D\u5F53"
         description: "\u8F6F\u4EF6\u4E2D\u5F02\u5E38\u6761\u4EF6\u5904\u7406\u4E0D\
@@ -13677,50 +13669,50 @@ objects:
           \uFF0C\u663E\u793A\u53D1\u751F\u6B21\u6570\u548C\u65F6\u95F4\u8303\u56F4\
           \u3002\u8BE5\u4FE1\u606F\u5E94\u8FFD\u52A0\u5230\u539F\u59CB\u6D88\u606F\
           \u4E2D\uFF0C\u4EE5\u514D\u5E72\u6270\u81EA\u52A8\u5316\u65E5\u5FD7\u8BB0\
-          \u5F55\u548C\u76D1\u63A7\uFF0C\u53C2\u89C1 [A09:2025 \u5B89\u5168\u65E5\u5FD7\
-          \u8BB0\u5F55\u548C\u544A\u8B66\u5931\u6548](A09_2025-Security_Logging_and_Alerting_Failures.md)\u3002\
-          \n\n\u9664\u6B64\u4E4B\u5916\uFF0C\u6211\u4EEC\u8FD8\u5E0C\u671B\u52A0\u5165\
-          \u4E25\u683C\u8F93\u5165\u9A8C\u8BC1\uFF08\u5BF9\u5FC5\u987B\u63A5\u53D7\
-          \u7684\u6F5C\u5728\u5371\u9669\u5B57\u7B26\u8FDB\u884C\u6E05\u7406\u6216\
-          \u8F6C\u4E49\uFF09\uFF0C\u4EE5\u53CA*\u96C6\u4E2D\u5F0F*\u9519\u8BEF\u5904\
-          \u7406\u3001\u65E5\u5FD7\u8BB0\u5F55\u3001\u76D1\u63A7\u3001\u544A\u8B66\
-          \u548C\u5168\u5C40\u5F02\u5E38\u5904\u7406\u5668\u3002\u4E00\u4E2A\u5E94\
-          \u7528\u4E0D\u5E94\u6709\u591A\u4E2A\u5904\u7406\u5F02\u5E38\u6761\u4EF6\
-          \u7684\u51FD\u6570\uFF0C\u5E94\u5728\u4E00\u4E2A\u5730\u65B9\u4EE5\u76F8\
-          \u540C\u65B9\u5F0F\u6267\u884C\u3002\u6211\u4EEC\u8FD8\u5E94\u4E3A\u672C\
-          \u8282\u6240\u6709\u5EFA\u8BAE\u521B\u5EFA\u9879\u76EE\u5B89\u5168\u9700\
-          \u6C42\uFF0C\u5728\u9879\u76EE\u8BBE\u8BA1\u9636\u6BB5\u6267\u884C\u5A01\
-          \u80C1\u5EFA\u6A21\u548C/\u6216\u5B89\u5168\u8BBE\u8BA1\u5BA1\u67E5\u6D3B\
-          \u52A8\uFF0C\u6267\u884C\u4EE3\u7801\u5BA1\u67E5\u6216\u9759\u6001\u5206\
-          \u6790\uFF0C\u5E76\u5BF9\u6700\u7EC8\u7CFB\u7EDF\u6267\u884C\u538B\u529B\
-          \u3001\u6027\u80FD\u548C\u6E17\u900F\u6D4B\u8BD5\u3002\n\n\u5982\u679C\u53EF\
-          \u80FD\uFF0C\u6574\u4E2A\u7EC4\u7EC7\u5E94\u4EE5\u540C\u4E00\u79CD\u65B9\
-          \u5F0F\u5904\u7406\u5F02\u5E38\u6761\u4EF6\uFF0C\u56E0\u4E3A\u8FD9\u4F1A\
-          \u8BA9\u8FD9\u9879\u91CD\u8981\u5B89\u5168\u63A7\u5236\u7684\u4EE3\u7801\
-          \u5BA1\u67E5\u548C\u5BA1\u8BA1\u66F4\u5BB9\u6613\u3002\n\n\n## Example attack\
-          \ scenarios\n\n**\u573A\u666F #1\uFF1A** \u5F02\u5E38\u6761\u4EF6\u5904\u7406\
-          \u4E0D\u5F53\u5BFC\u81F4\u8D44\u6E90\u8017\u5C3D\uFF08\u62D2\u7EDD\u670D\
-          \u52A1\uFF09\u3002\u5982\u679C\u5E94\u7528\u5728\u4E0A\u4F20\u6587\u4EF6\
-          \u65F6\u6355\u83B7\u5F02\u5E38\uFF0C\u4F46\u4E8B\u540E\u6CA1\u6709\u6B63\
-          \u786E\u91CA\u653E\u8D44\u6E90\uFF0C\u6BCF\u6B21\u65B0\u5F02\u5E38\u90FD\
-          \u4F1A\u8BA9\u8D44\u6E90\u4FDD\u6301\u9501\u5B9A\u6216\u4E0D\u53EF\u7528\
-          \uFF0C\u76F4\u5230\u6240\u6709\u8D44\u6E90\u8017\u5C3D\u3002\n\n**\u573A\
-          \u666F #2\uFF1A** \u9519\u8BEF\u5904\u7406\u4E0D\u5F53\u6216\u6570\u636E\
-          \u5E93\u9519\u8BEF\u628A\u5B8C\u6574\u7CFB\u7EDF\u9519\u8BEF\u66B4\u9732\
-          \u7ED9\u7528\u6237\uFF0C\u5BFC\u81F4\u654F\u611F\u6570\u636E\u6CC4\u9732\
-          \u3002\u653B\u51FB\u8005\u6301\u7EED\u5236\u9020\u9519\u8BEF\uFF0C\u4EE5\
-          \u5229\u7528\u654F\u611F\u7CFB\u7EDF\u4FE1\u606F\u6784\u9020\u66F4\u597D\
-          \u7684 SQL \u6CE8\u5165\u653B\u51FB\u3002\u7528\u6237\u9519\u8BEF\u6D88\u606F\
-          \u4E2D\u7684\u654F\u611F\u6570\u636E\u6210\u4E3A\u4FA6\u5BDF\u4FE1\u606F\
-          \u3002\n\n**\u573A\u666F #3\uFF1A** \u653B\u51FB\u8005\u901A\u8FC7\u7F51\
-          \u7EDC\u4E2D\u65AD\u6253\u65AD\u591A\u6B65\u9AA4\u4EA4\u6613\uFF0C\u53EF\
-          \u80FD\u5BFC\u81F4\u91D1\u878D\u4EA4\u6613\u72B6\u6001\u635F\u574F\u3002\
-          \u5047\u8BBE\u4EA4\u6613\u987A\u5E8F\u4E3A\uFF1A\u6263\u51CF\u7528\u6237\
-          \u8D26\u6237\u3001\u589E\u52A0\u76EE\u6807\u8D26\u6237\u4F59\u989D\u3001\
-          \u8BB0\u5F55\u4EA4\u6613\u3002\u5982\u679C\u7CFB\u7EDF\u5728\u4E2D\u9014\
-          \u51FA\u9519\u65F6\u6CA1\u6709\u6B63\u786E\u56DE\u6EDA\u6574\u4E2A\u4EA4\
-          \u6613\uFF08\u6545\u969C\u5173\u95ED\uFF09\uFF0C\u653B\u51FB\u8005\u53EF\
-          \u80FD\u8017\u5C3D\u7528\u6237\u8D26\u6237\uFF0C\u6216\u53EF\u80FD\u5229\
-          \u7528\u7ADE\u4E89\u6761\u4EF6\u591A\u6B21\u5411\u76EE\u6807\u8D26\u6237\
-          \u8F6C\u8D26\u3002\n\n\n\u6709\u95DC\u53C3\u8003\u8CC7\u6599\u53CA\u5DF2\
-          \u5C0D\u61C9 CWE \u6E05\u55AE\u7684\u66F4\u591A\u8CC7\u8A0A\uFF1A https://top10.owasp.org/2025/zh-Hant/A10_2025-Mishandling_of_Exceptional_Conditions/"
+          \u5F55\u548C\u76D1\u63A7\uFF0C\u53C2\u89C1 **A09:2025 \u5B89\u5168\u65E5\
+          \u5FD7\u8BB0\u5F55\u548C\u544A\u8B66\u5931\u6548**\u3002\n\n\u9664\u6B64\
+          \u4E4B\u5916\uFF0C\u6211\u4EEC\u8FD8\u5E0C\u671B\u52A0\u5165\u4E25\u683C\
+          \u8F93\u5165\u9A8C\u8BC1\uFF08\u5BF9\u5FC5\u987B\u63A5\u53D7\u7684\u6F5C\
+          \u5728\u5371\u9669\u5B57\u7B26\u8FDB\u884C\u6E05\u7406\u6216\u8F6C\u4E49\
+          \uFF09\uFF0C\u4EE5\u53CA*\u96C6\u4E2D\u5F0F*\u9519\u8BEF\u5904\u7406\u3001\
+          \u65E5\u5FD7\u8BB0\u5F55\u3001\u76D1\u63A7\u3001\u544A\u8B66\u548C\u5168\
+          \u5C40\u5F02\u5E38\u5904\u7406\u5668\u3002\u4E00\u4E2A\u5E94\u7528\u4E0D\
+          \u5E94\u6709\u591A\u4E2A\u5904\u7406\u5F02\u5E38\u6761\u4EF6\u7684\u51FD\
+          \u6570\uFF0C\u5E94\u5728\u4E00\u4E2A\u5730\u65B9\u4EE5\u76F8\u540C\u65B9\
+          \u5F0F\u6267\u884C\u3002\u6211\u4EEC\u8FD8\u5E94\u4E3A\u672C\u8282\u6240\
+          \u6709\u5EFA\u8BAE\u521B\u5EFA\u9879\u76EE\u5B89\u5168\u9700\u6C42\uFF0C\
+          \u5728\u9879\u76EE\u8BBE\u8BA1\u9636\u6BB5\u6267\u884C\u5A01\u80C1\u5EFA\
+          \u6A21\u548C/\u6216\u5B89\u5168\u8BBE\u8BA1\u5BA1\u67E5\u6D3B\u52A8\uFF0C\
+          \u6267\u884C\u4EE3\u7801\u5BA1\u67E5\u6216\u9759\u6001\u5206\u6790\uFF0C\
+          \u5E76\u5BF9\u6700\u7EC8\u7CFB\u7EDF\u6267\u884C\u538B\u529B\u3001\u6027\
+          \u80FD\u548C\u6E17\u900F\u6D4B\u8BD5\u3002\n\n\u5982\u679C\u53EF\u80FD\uFF0C\
+          \u6574\u4E2A\u7EC4\u7EC7\u5E94\u4EE5\u540C\u4E00\u79CD\u65B9\u5F0F\u5904\
+          \u7406\u5F02\u5E38\u6761\u4EF6\uFF0C\u56E0\u4E3A\u8FD9\u4F1A\u8BA9\u8FD9\
+          \u9879\u91CD\u8981\u5B89\u5168\u63A7\u5236\u7684\u4EE3\u7801\u5BA1\u67E5\
+          \u548C\u5BA1\u8BA1\u66F4\u5BB9\u6613\u3002\n\n\n## Example attack scenarios\n\
+          \n**\u573A\u666F #1\uFF1A** \u5F02\u5E38\u6761\u4EF6\u5904\u7406\u4E0D\u5F53\
+          \u5BFC\u81F4\u8D44\u6E90\u8017\u5C3D\uFF08\u62D2\u7EDD\u670D\u52A1\uFF09\
+          \u3002\u5982\u679C\u5E94\u7528\u5728\u4E0A\u4F20\u6587\u4EF6\u65F6\u6355\
+          \u83B7\u5F02\u5E38\uFF0C\u4F46\u4E8B\u540E\u6CA1\u6709\u6B63\u786E\u91CA\
+          \u653E\u8D44\u6E90\uFF0C\u6BCF\u6B21\u65B0\u5F02\u5E38\u90FD\u4F1A\u8BA9\
+          \u8D44\u6E90\u4FDD\u6301\u9501\u5B9A\u6216\u4E0D\u53EF\u7528\uFF0C\u76F4\
+          \u5230\u6240\u6709\u8D44\u6E90\u8017\u5C3D\u3002\n\n**\u573A\u666F #2\uFF1A\
+          ** \u9519\u8BEF\u5904\u7406\u4E0D\u5F53\u6216\u6570\u636E\u5E93\u9519\u8BEF\
+          \u628A\u5B8C\u6574\u7CFB\u7EDF\u9519\u8BEF\u66B4\u9732\u7ED9\u7528\u6237\
+          \uFF0C\u5BFC\u81F4\u654F\u611F\u6570\u636E\u6CC4\u9732\u3002\u653B\u51FB\
+          \u8005\u6301\u7EED\u5236\u9020\u9519\u8BEF\uFF0C\u4EE5\u5229\u7528\u654F\
+          \u611F\u7CFB\u7EDF\u4FE1\u606F\u6784\u9020\u66F4\u597D\u7684 SQL \u6CE8\u5165\
+          \u653B\u51FB\u3002\u7528\u6237\u9519\u8BEF\u6D88\u606F\u4E2D\u7684\u654F\
+          \u611F\u6570\u636E\u6210\u4E3A\u4FA6\u5BDF\u4FE1\u606F\u3002\n\n**\u573A\
+          \u666F #3\uFF1A** \u653B\u51FB\u8005\u901A\u8FC7\u7F51\u7EDC\u4E2D\u65AD\
+          \u6253\u65AD\u591A\u6B65\u9AA4\u4EA4\u6613\uFF0C\u53EF\u80FD\u5BFC\u81F4\
+          \u91D1\u878D\u4EA4\u6613\u72B6\u6001\u635F\u574F\u3002\u5047\u8BBE\u4EA4\
+          \u6613\u987A\u5E8F\u4E3A\uFF1A\u6263\u51CF\u7528\u6237\u8D26\u6237\u3001\
+          \u589E\u52A0\u76EE\u6807\u8D26\u6237\u4F59\u989D\u3001\u8BB0\u5F55\u4EA4\
+          \u6613\u3002\u5982\u679C\u7CFB\u7EDF\u5728\u4E2D\u9014\u51FA\u9519\u65F6\
+          \u6CA1\u6709\u6B63\u786E\u56DE\u6EDA\u6574\u4E2A\u4EA4\u6613\uFF08\u6545\
+          \u969C\u5173\u95ED\uFF09\uFF0C\u653B\u51FB\u8005\u53EF\u80FD\u8017\u5C3D\
+          \u7528\u6237\u8D26\u6237\uFF0C\u6216\u53EF\u80FD\u5229\u7528\u7ADE\u4E89\
+          \u6761\u4EF6\u591A\u6B21\u5411\u76EE\u6807\u8D26\u6237\u8F6C\u8D26\u3002\
+          \n\n\n\u6709\u95DC\u53C3\u8003\u8CC7\u6599\u53CA\u5DF2\u5C0D\u61C9 CWE \u6E05\
+          \u55AE\u7684\u66F4\u591A\u8CC7\u8A0A\uFF1A https://top10.owasp.org/2025/zh-Hant/A10_2025-Mishandling_of_Exceptional_Conditions/"

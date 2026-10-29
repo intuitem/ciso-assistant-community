@@ -22,13 +22,26 @@ Build the 2021 release:
 .\.venv\Scripts\python.exe .\ciso-assistant-community\tools\excel\owasp\tools\owasp_top10_framework_builder.py -y 2021
 ```
 
+Generate a distinguishable Excel file without replacing an existing workbook:
+
+```powershell
+.\.venv\Scripts\python.exe .\ciso-assistant-community\tools\excel\owasp\tools\owasp_top10_framework_builder.py --output-suffix relative-links-fixed --skip-yaml
+```
+
+This produces, for example,
+`owasp-top-10-web-2025-relative-links-fixed.xlsx` while preserving
+`owasp-top-10-web-2025.xlsx`.
+
 Use an already extracted checkout:
 
 ```powershell
 .\.venv\Scripts\python.exe .\ciso-assistant-community\tools\excel\owasp\tools\owasp_top10_framework_builder.py --source-root C:\path\to\Top10-master
 ```
 
-The generated XLSX and YAML files are written to the parent `owasp` directory. The final summary reports the number and list of exported languages, the default language, English file fallbacks, and any languages that were skipped.
+The generated XLSX, YAML, and relative-link conversion log files are written to
+the parent `owasp` directory. The final summary reports the number and list of
+exported languages, the default language, English file fallbacks, any languages
+that were skipped, and the path to the detailed `.log` file.
 
 The console output follows the other framework builders: numbered step banners,
 emoji status markers, an aligned summary, explicit warnings, and cleanup messages.
@@ -51,6 +64,11 @@ emoji status markers, an aligned summary, explicit warnings, and cleanup message
 - Generated labels and sentences, including `Source` and the final references/CWE sentence, are translated for every exported language.
 - Generated links target the published OWASP Top 10 website. Markdown filenames map directly to page paths without the `.md` extension; English pages are at the year root, while translated pages retain their full source locale such as `pt-BR` or `zh-Hant`.
 - Markdown and embedded HTML tables are preserved.
+- Markdown links to repository-relative paths are replaced with bold link text;
+  absolute URLs and same-page anchors are preserved. The console summary shows
+  the conversion count and log path. The generated `*-relative-links.log` file
+  lists every removed relative target with its threat `ref_id`, locale, source
+  file, section, original link, and bold replacement.
 - Worksheet gridlines remain visible.
 - For 2021, the threat base URN is `urn:intuitem:risk:threat`.
 - For later releases, the threat base URN is derived from the year-specific library URN.

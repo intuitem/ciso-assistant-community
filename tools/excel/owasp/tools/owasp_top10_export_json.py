@@ -9,7 +9,7 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
-from urllib.parse import quote
+from urllib.parse import quote, urlsplit
 
 
 SOURCE_REPOSITORY = "https://github.com/OWASP/Top10"
@@ -22,6 +22,7 @@ H1_RE = re.compile(r"^#(?!#)\s*(.+?)\s*$")
 H2_RE = re.compile(r"^##\s+(.+?)\s*$")
 H2_OR_H3_RE = re.compile(r"^#{2,3}\s+(.+?)\s*$")
 MARKDOWN_IMAGE_RE = re.compile(r"!\[[^\]]*\]\([^)]*\)(?:\{[^}]*\})?")
+MARKDOWN_LINK_RE = re.compile(r"(?<!!)\[(?P<label>[^\]]+)\]\((?P<target>[^)]+)\)")
 JINJA_RE = re.compile(r"\{\{.*?\}\}")
 LOCALIZED_TEXT = {
     "ar": {
@@ -184,6 +185,44 @@ def clean_markdown_block(lines: list[str]) -> str:
     while end > start and not lines[end - 1].strip():
         end -= 1
     return "\n".join(lines[start:end])
+
+
+def markdown_link_target(raw_target: str) -> str:
+    """Extract the destination from an inline Markdown link target."""
+    value = raw_target.strip()
+    if value.startswith("<"):
+        closing = value.find(">")
+        if closing > 0:
+            return value[1:closing].strip()
+    return value.split(maxsplit=1)[0] if value else ""
+
+
+def is_relative_markdown_target(target: str) -> bool:
+    """Return True for repository-local Markdown targets, not URLs or anchors."""
+    value = target.strip()
+    if not value or value.startswith(("#", "//")):
+        return False
+    url_candidate = value.lstrip("(")
+    return not bool(urlsplit(url_candidate).scheme)
+
+
+def replace_relative_markdown_links(
+    markdown: str,
+) -> tuple[str, list[dict[str, str]]]:
+    """Replace repository-local Markdown links with bold link labels."""
+    replacements: list[dict[str, str]] = []
+
+    def replace(match: re.Match[str]) -> str:
+        label = match.group("label").strip()
+        target = markdown_link_target(match.group("target"))
+        if not is_relative_markdown_target(target):
+            return match.group(0)
+        replacements.append({"text": label, "path": target})
+        if label.startswith("**") and label.endswith("**"):
+            return label
+        return f"**{label}**"
+
+    return MARKDOWN_LINK_RE.sub(replace, markdown), replacements
 
 
 def is_image_only(line: str) -> bool:
@@ -356,6 +395,26 @@ def parse_category_page(path: Path, year: int, locale: str) -> dict[str, Any]:
                 end = len(source_lines)
             return clean_markdown_block(source_lines[start:end])
 
+    normalized_sections: dict[str, str | None] = {}
+    relative_links_removed: list[dict[str, str]] = []
+    for section_key in ("score_table", "description", "prevention", "examples"):
+        section = section_body(section_key)
+        if section is None:
+            normalized_sections[section_key] = None
+            continue
+        normalized, replacements = replace_relative_markdown_links(section)
+        normalized_sections[section_key] = normalized
+        relative_links_removed.extend(
+            {
+                "ref_id": ref_id,
+                "locale": locale,
+                "source_file": path.name,
+                "section": section_key,
+                **replacement,
+            }
+            for replacement in replacements
+        )
+
     source_url = published_page_url(year, locale, path.name)
     return {
         "ref_id": ref_id,
@@ -364,12 +423,8 @@ def parse_category_page(path: Path, year: int, locale: str) -> dict[str, Any]:
             if h1_match is not None
             else None
         ),
-        "sections": {
-            "score_table": section_body("score_table"),
-            "description": section_body("description"),
-            "prevention": section_body("prevention"),
-            "examples": section_body("examples"),
-        },
+        "sections": normalized_sections,
+        "relative_links_removed": relative_links_removed,
         "language": language_code(locale),
         "source_url": source_url,
         "source_file": path.name,
@@ -443,10 +498,16 @@ def complete_category(parsed: dict[str, Any]) -> dict[str, Any]:
         "sections": sections,
         "source_url": parsed["source_url"],
         "source_file": parsed["source_file"],
+        "relative_links_removed": parsed.get("relative_links_removed", []),
     }
 
 
-def extract_intro_description(path: Path, year: int, locale: str) -> str:
+def extract_intro_description(
+    path: Path,
+    year: int,
+    locale: str,
+    relative_links_removed: list[dict[str, str]] | None = None,
+) -> str:
     lines = read_text(path).splitlines()
     paragraphs: list[str] = []
     current: list[str] = []
@@ -477,9 +538,23 @@ def extract_intro_description(path: Path, year: int, locale: str) -> str:
         raise ValueError(
             f"Could not find the introductory paragraph in {path.name} for {locale}"
         )
+    paragraph, replacements = replace_relative_markdown_links(
+        paragraphs[paragraph_index]
+    )
+    if relative_links_removed is not None:
+        relative_links_removed.extend(
+            {
+                "ref_id": f"OWASP-top-10-Web_{year}",
+                "locale": locale,
+                "source_file": path.name,
+                "section": "library_description",
+                **replacement,
+            }
+            for replacement in replacements
+        )
     source_label = localized_text(locale)["source"]
     source_url = introduction_page_url(year, locale)
-    return f"{paragraphs[paragraph_index]}\n\n{source_label}: {source_url}"
+    return f"{paragraph}\n\n{source_label}: {source_url}"
 
 
 def localize_source_attribution(
@@ -497,7 +572,12 @@ def localize_source_attribution(
     return f"{body}\n\n{source_label}: {source_url}"
 
 
-def extract_copyright(path: Path) -> str:
+def extract_copyright(
+    path: Path,
+    year: int,
+    locale: str,
+    relative_links_removed: list[dict[str, str]] | None = None,
+) -> str:
     lines = read_text(path).splitlines()
     heading_indexes = [index for index, line in enumerate(lines) if H2_RE.match(line)]
     if not heading_indexes:
@@ -511,7 +591,19 @@ def extract_copyright(path: Path) -> str:
     result = clean_markdown_block(content)
     if not result:
         raise ValueError(f"The copyright section is empty in {path.name}")
-    return result
+    normalized, replacements = replace_relative_markdown_links(result)
+    if relative_links_removed is not None:
+        relative_links_removed.extend(
+            {
+                "ref_id": f"OWASP-top-10-Web_{year}",
+                "locale": locale,
+                "source_file": path.name,
+                "section": "copyright",
+                **replacement,
+            }
+            for replacement in replacements
+        )
+    return normalized
 
 
 def find_about_file(locale_dir: Path) -> Path | None:
@@ -532,6 +624,7 @@ def category_files(locale_dir: Path, year: int) -> dict[str, Path]:
 
 def extract_default_locale(locale_dir: Path, year: int) -> dict[str, Any]:
     locale = locale_dir.name
+    relative_links_removed: list[dict[str, str]] = []
     index_path = locale_dir / "index.md"
     if not index_path.exists():
         raise ValueError("index.md is missing")
@@ -553,10 +646,15 @@ def extract_default_locale(locale_dir: Path, year: int) -> dict[str, Any]:
         "locale": locale,
         "library": {
             "name": f"OWASP Top 10 Web - {year}",
-            "description": extract_intro_description(index_path, year, locale),
-            "copyright": extract_copyright(about_path),
+            "description": extract_intro_description(
+                index_path, year, locale, relative_links_removed
+            ),
+            "copyright": extract_copyright(
+                about_path, year, locale, relative_links_removed
+            ),
         },
         "categories": categories,
+        "relative_links_removed": relative_links_removed,
     }
 
 
@@ -588,10 +686,13 @@ def extract_locale_with_fallback(
     fallbacks: list[dict[str, Any]],
 ) -> dict[str, Any]:
     locale = locale_dir.name
+    relative_links_removed: list[dict[str, str]] = []
     index_path = locale_dir / "index.md"
     if index_path.exists():
         try:
-            description = extract_intro_description(index_path, year, locale)
+            description = extract_intro_description(
+                index_path, year, locale, relative_links_removed
+            )
         except (OSError, ValueError) as exc:
             description = localize_source_attribution(
                 english["library"]["description"], year, locale, output_locale
@@ -674,6 +775,7 @@ def extract_locale_with_fallback(
             "description": description,
         },
         "categories": categories,
+        "relative_links_removed": relative_links_removed,
     }
 
 
@@ -769,6 +871,41 @@ def export_owasp_top10_json(
             }
         )
 
+    relative_link_replacements: dict[tuple[str, ...], dict[str, str]] = {}
+    for locale_data in extracted.values():
+        reports = list(locale_data.get("relative_links_removed", []))
+        for category in locale_data["categories"]:
+            reports.extend(category.get("relative_links_removed", []))
+        for report in reports:
+            normalized_report = dict(report)
+            if re.fullmatch(r"A(?:0[1-9]|10)", normalized_report["ref_id"]):
+                normalized_report["ref_id"] = versioned_ref_id(
+                    normalized_report["ref_id"], year
+                )
+            key = tuple(
+                normalized_report[field]
+                for field in (
+                    "ref_id",
+                    "locale",
+                    "source_file",
+                    "section",
+                    "text",
+                    "path",
+                )
+            )
+            relative_link_replacements[key] = normalized_report
+
+    relative_links_removed = sorted(
+        relative_link_replacements.values(),
+        key=lambda item: (
+            item["ref_id"],
+            item["locale"].casefold(),
+            item["section"],
+            item["path"],
+            item["text"],
+        ),
+    )
+
     payload: dict[str, Any] = {
         "year": year,
         "source_repository": SOURCE_REPOSITORY,
@@ -777,6 +914,7 @@ def export_owasp_top10_json(
         "exported_locales": locales,
         "skipped_locales": skipped,
         "english_fallbacks": fallbacks,
+        "relative_links_removed": relative_links_removed,
         "library": {
             "copyright": extracted[default_language]["library"]["copyright"],
             "translations": {
@@ -813,6 +951,35 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def write_relative_links_log(
+    relative_links: list[dict[str, str]], output_path: Path
+) -> Path:
+    """Write the detailed relative-link conversion report as a UTF-8 log."""
+    lines = [
+        "OWASP Top 10 relative links converted to bold",
+        f"Count: {len(relative_links)}",
+        "",
+    ]
+
+    for link in relative_links:
+        lines.extend(
+            [
+                f"Ref ID: {link['ref_id']}",
+                f"Locale: {link['locale']}",
+                f"Section: {link['section']}",
+                f"Source file: {link['source_file']}",
+                f"Relative path: {link['path']}",
+                f"Original: [{link['text']}]({link['path']})",
+                f"Replacement: **{link['text']}**",
+                "",
+            ]
+        )
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text("\n".join(lines), encoding="utf-8")
+    return output_path
+
+
 def main() -> None:
     args = parse_args()
     payload = export_owasp_top10_json(
@@ -836,6 +1003,13 @@ def main() -> None:
         print("Skipped languages:")
         for locale, reason in payload["skipped_locales"].items():
             print(f"- {locale}: {reason}")
+    relative_links = payload["relative_links_removed"]
+    print(f"Relative Markdown links converted to bold: {len(relative_links)}")
+    relative_links_log = Path(args.output).with_name(
+        f"{Path(args.output).stem}-relative-links.log"
+    )
+    write_relative_links_log(relative_links, relative_links_log)
+    print(f"Relative link log: {relative_links_log}")
 
 
 if __name__ == "__main__":

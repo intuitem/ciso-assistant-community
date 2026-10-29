@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import re
 import shutil
 import sys
 import zipfile
@@ -13,7 +14,7 @@ from urllib.parse import urlparse
 import requests
 
 from owasp_top10_build_excel import build_excel_from_json
-from owasp_top10_export_json import export_owasp_top10_json
+from owasp_top10_export_json import export_owasp_top10_json, write_relative_links_log
 
 try:
     from tqdm import tqdm
@@ -33,6 +34,23 @@ from convert_library_v2 import create_library as convert_excel_to_yaml
 ZIP_URL = "https://github.com/OWASP/Top10/archive/refs/heads/master.zip"
 ZIP_PATH = SCRIPT_DIR / "owasp-top10-master.zip"
 EXTRACTED_ROOT = SCRIPT_DIR / "Top10-master"
+
+
+def output_suffix(value: str) -> str:
+    """Validate a filename suffix used for generated artifacts."""
+    suffix = value.strip()
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", suffix):
+        raise argparse.ArgumentTypeError(
+            "the output suffix must contain only letters, numbers, dots, "
+            "underscores, or hyphens"
+        )
+    return suffix
+
+
+def output_stem(year: int, suffix: str | None = None) -> str:
+    """Return the shared basename for generated OWASP artifacts."""
+    filename_suffix = f"-{suffix}" if suffix else ""
+    return f"owasp-top-10-web-{year}{filename_suffix}"
 
 
 def display_path(path: Path) -> str:
@@ -124,6 +142,14 @@ def parse_args() -> argparse.Namespace:
         help="Directory for the generated XLSX and YAML files",
     )
     parser.add_argument(
+        "--output-suffix",
+        type=output_suffix,
+        help=(
+            "Append a suffix to generated filenames, for example "
+            "'relative-links-fixed'"
+        ),
+    )
+    parser.add_argument(
         "--source-root",
         type=Path,
         help="Use an already extracted OWASP/Top10 repository instead of downloading it",
@@ -154,9 +180,11 @@ def parse_args() -> argparse.Namespace:
 def run_pipeline(args: argparse.Namespace) -> dict[str, object]:
     output_dir = args.output_dir.resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
-    json_path = SCRIPT_DIR / f"owasp-top-10-web-{args.year}.json"
-    excel_path = output_dir / f"owasp-top-10-web-{args.year}.xlsx"
-    yaml_path = output_dir / f"owasp-top-10-web-{args.year}.yaml"
+    artifact_stem = output_stem(args.year, args.output_suffix)
+    json_path = SCRIPT_DIR / f"{artifact_stem}.json"
+    excel_path = output_dir / f"{artifact_stem}.xlsx"
+    yaml_path = output_dir / f"{artifact_stem}.yaml"
+    relative_links_log_path = output_dir / f"{artifact_stem}-relative-links.log"
 
     manages_extracted_source = args.source_root is None
     source_root = args.source_root.resolve() if args.source_root else EXTRACTED_ROOT
@@ -229,12 +257,24 @@ def run_pipeline(args: argparse.Namespace) -> dict[str, object]:
             for locale, reason in skipped.items():
                 print(f"- {locale}: {reason}")
 
+        relative_links = payload.get("relative_links_removed", [])
+        write_relative_links_log(relative_links, relative_links_log_path)
+        print(
+            "- Relative Markdown links converted to bold: "
+            f"{len(relative_links)}"
+        )
+        print(
+            f'- Relative link log: "{display_path(relative_links_log_path)}"'
+        )
+
         return {
             "excel": excel_path,
             "yaml": None if args.skip_yaml else yaml_path,
             "languages": locales,
             "english_fallbacks": fallbacks,
             "skipped_languages": skipped,
+            "relative_links_removed": relative_links,
+            "relative_links_log": relative_links_log_path,
         }
     finally:
         print("\n🗑️  [INFO] Cleaning temporary files...")
