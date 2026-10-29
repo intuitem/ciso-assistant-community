@@ -5040,5 +5040,7 @@
 	"dpiaRequirementChanges": "Andmekaitsealase mõjuhinnangu nõude ajalugu",
 	"previously": "Varem",
 	"vulnerabilityOpenWithRemediationDate": "Avatud haavatavusel on parandamise kuupäev",
-	"vulnerabilityResolvedWithoutRemediationDate": "Lahendatud haavatavusel puudub parandamise kuupäev"
+	"vulnerabilityResolvedWithoutRemediationDate": "Lahendatud haavatavusel puudub parandamise kuupäev",
+	"reportTimezone": "Aruannete ajavöönd",
+	"reportTimezoneHelpText": "Piirkond, mida kasutatakse aruannetes ja eksportides näidatud kellaaegade jaoks. Iga kellaaeg näitab oma nihet UTC suhtes. Ekraanil kuvatavaid aegu see ei mõjuta."
 }

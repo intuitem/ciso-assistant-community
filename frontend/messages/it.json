@@ -4321,5 +4321,7 @@
 	"dpiaRequirementChanges": "Cronologia dei requisiti DPIA",
 	"previously": "In precedenza",
 	"vulnerabilityOpenWithRemediationDate": "Vulnerabilità aperta con data di correzione",
-	"vulnerabilityResolvedWithoutRemediationDate": "Vulnerabilità risolta senza data di correzione"
+	"vulnerabilityResolvedWithoutRemediationDate": "Vulnerabilità risolta senza data di correzione",
+	"reportTimezone": "Fuso orario dei report",
+	"reportTimezoneHelpText": "Regione usata per gli orari riportati nei report e nelle esportazioni. Ogni orario indica il proprio scostamento da UTC. Gli orari visualizzati a schermo non cambiano."
 }

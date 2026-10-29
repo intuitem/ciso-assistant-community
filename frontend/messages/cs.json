@@ -5711,6 +5711,8 @@
 	"dateFormatSettings": "Formát data",
 	"defaultDateFormat": "Výchozí formát data",
 	"defaultDateFormatHelpText": "Formát data aplikovaný na nové uživatele. Pomocí tlačítka níže jej vynutíte u všech stávajících uživatelů.",
+	"reportTimezone": "Časové pásmo sestav",
+	"reportTimezoneHelpText": "Oblast použitá pro časy uvedené v sestavách a exportech. Každý čas uvádí svůj posun vůči UTC. Časy na obrazovce nejsou ovlivněny.",
 	"forceDateFormatForAllUsers": "Vynutit formát data pro všechny",
 	"forceDateFormatHelpText": "Přepíše předvolbu formátu data u všech stávajících uživatelů výše uloženou výchozí hodnotou.",
 	"forceDateFormatConfirmTitle": "Vynutit formát data pro všechny uživatele",

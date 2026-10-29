@@ -2748,5 +2748,7 @@
 	"dpiaRequirementChanges": "Ιστορικό απαίτησης DPIA",
 	"previously": "Προηγουμένως",
 	"vulnerabilityOpenWithRemediationDate": "Ανοιχτή ευπάθεια έχει ημερομηνία αποκατάστασης",
-	"vulnerabilityResolvedWithoutRemediationDate": "Επιλυμένη ευπάθεια δεν έχει ημερομηνία αποκατάστασης"
+	"vulnerabilityResolvedWithoutRemediationDate": "Επιλυμένη ευπάθεια δεν έχει ημερομηνία αποκατάστασης",
+	"reportTimezone": "Ζώνη ώρας αναφορών",
+	"reportTimezoneHelpText": "Περιοχή που χρησιμοποιείται για τις ώρες στις αναφορές και τις εξαγωγές. Κάθε ώρα εμφανίζει τη διαφορά της από την UTC. Οι ώρες στην οθόνη δεν επηρεάζονται."
 }

@@ -475,6 +475,8 @@
 	"dateFormatSettings": "Dátumformátum",
 	"defaultDateFormat": "Alapértelmezett dátumformátum",
 	"defaultDateFormatHelpText": "Az új felhasználókra alkalmazott dátumformátum. Az alábbi gombbal minden meglévő felhasználóra alkalmazhatja.",
+	"reportTimezone": "Jelentések időzónája",
+	"reportTimezoneHelpText": "A jelentésekben és exportokban megjelenő időpontokhoz használt régió. Minden időpont mutatja az UTC-hez viszonyított eltolását. A képernyőn megjelenő időpontokat nem érinti.",
 	"forceDateFormatForAllUsers": "Dátumformátum kikényszerítése minden felhasználónál",
 	"forceDateFormatHelpText": "Minden meglévő felhasználó dátumformátum-beállításának felülírása a fent mentett alapértelmezéssel.",
 	"forceDateFormatConfirmTitle": "Dátumformátum kikényszerítése minden felhasználónál",

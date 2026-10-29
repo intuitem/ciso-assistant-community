@@ -4381,5 +4381,7 @@
 	"dpiaRequirementChanges": "Povijest zahtjeva za DPIA",
 	"previously": "Prethodno",
 	"vulnerabilityOpenWithRemediationDate": "Otvorena ranjivost ima datum otklanjanja",
-	"vulnerabilityResolvedWithoutRemediationDate": "Riješena ranjivost nema datum otklanjanja"
+	"vulnerabilityResolvedWithoutRemediationDate": "Riješena ranjivost nema datum otklanjanja",
+	"reportTimezone": "Vremenska zona izvješća",
+	"reportTimezoneHelpText": "Regija koja se koristi za vremena ispisana u izvješćima i izvozima. Svako vrijeme prikazuje svoj pomak u odnosu na UTC. Vremena na zaslonu nisu obuhvaćena."
 }

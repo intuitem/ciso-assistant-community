@@ -2159,5 +2159,7 @@
 	"dpiaRequirementChanges": "DPIA आवश्यकता का इतिहास",
 	"previously": "पहले",
 	"vulnerabilityOpenWithRemediationDate": "खुली भेद्यता की निवारण तिथि है",
-	"vulnerabilityResolvedWithoutRemediationDate": "हल हो चुकी भेद्यता की कोई निवारण तिथि नहीं है"
+	"vulnerabilityResolvedWithoutRemediationDate": "हल हो चुकी भेद्यता की कोई निवारण तिथि नहीं है",
+	"reportTimezone": "रिपोर्ट का समय क्षेत्र",
+	"reportTimezoneHelpText": "रिपोर्ट और निर्यात में छपे समय के लिए उपयोग किया जाने वाला क्षेत्र। हर समय UTC से अपना अंतर दिखाता है। स्क्रीन पर दिखने वाले समय प्रभावित नहीं होते।"
 }
