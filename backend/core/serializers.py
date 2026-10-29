@@ -3164,6 +3164,7 @@ class PermissionReadSerializer(BaseModelSerializer):
     content_type = FieldsRelatedField(fields=["id", "app_label", "model"])
     normalized_model = serializers.SerializerMethodField()
     normalized_codename = serializers.SerializerMethodField()
+    action_label = serializers.SerializerMethodField()
 
     class Meta:
         model = Permission
@@ -3176,11 +3177,18 @@ class PermissionReadSerializer(BaseModelSerializer):
         )
 
     def get_normalized_codename(self, obj):
-        model_class = obj.content_type.model_class()
-        model_name = (
-            model_class.__name__ if model_class else obj.content_type.model.capitalize()
-        )
-        return f"{obj.codename.split('_')[0]}{model_name}"
+        prefix, _, suffix = obj.codename.partition("_")
+        if suffix == obj.content_type.model:
+            return f"{prefix}{self.get_normalized_model(obj)}"
+        # Custom permissions (e.g. view_compliance_assessment_full) keep their own key
+        return prefix + "".join(part.capitalize() for part in suffix.split("_"))
+
+    def get_action_label(self, obj):
+        """i18n key naming the permission within its model group."""
+        prefix, _, suffix = obj.codename.partition("_")
+        if suffix == obj.content_type.model:
+            return f"permission{prefix.capitalize()}"
+        return self.get_normalized_codename(obj)
 
 
 class PermissionWriteSerializer(BaseModelSerializer):
