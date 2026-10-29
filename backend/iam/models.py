@@ -640,6 +640,7 @@ class Folder(NameDescriptionMixin):
             ["journey", "folder"],
             ["questionnaire_run", "folder"],
             ["agent_run", "folder"],
+            ["collection", "folder"],
         ]
 
         # Attempt to traverse each path until a valid folder is found or all paths are exhausted.

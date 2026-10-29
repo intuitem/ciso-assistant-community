@@ -139,6 +139,7 @@ class TestGenericCollectionItems:
             content_type=ContentType.objects.get_for_model(CollectionItem),
             action=LogEntry.Action.CREATE,
         ).exists()
+        assert Folder.get_folder(setup["collection"].items.get()) == setup["domain"]
 
     def test_deleting_an_object_drops_its_items(self, setup):
         evidence = Evidence.objects.create(name="Gone", folder=setup["domain"])

@@ -93,7 +93,7 @@
 		{
 			key: 'document_containers',
 			label: m.documentContainers(),
-			urlPattern: '/documents/',
+			urlPattern: '/document-containers/',
 			icon: 'fa-solid fa-file-lines'
 		},
 		{

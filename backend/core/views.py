@@ -44,6 +44,7 @@ from django.db.models import (
     Prefetch,
 )
 from django.db.models.functions import Coalesce, Concat
+from django.contrib.contenttypes.models import ContentType
 
 from collections import defaultdict, deque
 import pytz
@@ -850,7 +851,10 @@ class GenericFilterSet(df.FilterSet):
         )
         if allowed is None:
             return queryset.none()
-        items = CollectionItem.objects.filter(collection_id__in=value).filter(
+        items = CollectionItem.objects.filter(
+            collection_id__in=value,
+            content_type=ContentType.objects.get_for_model(queryset.model),
+        ).filter(
             collection_id__in=RoleAssignment.get_viewable_object_ids(
                 self.request.user, GenericCollection
             )

@@ -54,20 +54,31 @@ def copy_m2m_to_items(apps, schema_editor):
 
 def copy_items_to_m2m(apps, schema_editor):
     CollectionItem = apps.get_model("pmbok", "CollectionItem")
+    legacy_items = {}
     for name in ITEM_FIELDS:
         through, source, target, content_type = _field_parts(apps, name)
         related_model = through._meta.get_field(target[:-3]).related_model
         object_ids = related_model.objects.values("pk")
         if name == "policies":
             object_ids = object_ids.filter(category="policy")
+        legacy_items[name] = CollectionItem.objects.filter(
+            content_type=content_type, object_id__in=object_ids
+        )
+    if sum(items.count() for items in legacy_items.values()) != (
+        CollectionItem.objects.count()
+    ):
+        raise RuntimeError(
+            "Collections hold items that the previous schema cannot store; "
+            "remove them before rolling back this migration."
+        )
+    for name, items in legacy_items.items():
+        through, source, target, _ = _field_parts(apps, name)
         through.objects.bulk_create(
             [
                 through(**{source: collection_id, target: object_id})
-                for collection_id, object_id in CollectionItem.objects.filter(
-                    content_type=content_type, object_id__in=object_ids
-                )
-                .values_list("collection_id", "object_id")
-                .iterator()
+                for collection_id, object_id in items.values_list(
+                    "collection_id", "object_id"
+                ).iterator()
             ],
             batch_size=1000,
             ignore_conflicts=True,

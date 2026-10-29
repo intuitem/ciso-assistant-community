@@ -113,6 +113,8 @@ class CollectionItem(AbstractBaseModel):
     object_id = models.UUIDField()
     item = GenericForeignKey("content_type", "object_id")
 
+    IAM_SCOPE_FIELD = "collection"
+
     class Meta:
         constraints = [
             models.UniqueConstraint(

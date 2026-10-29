@@ -14,7 +14,7 @@ Collections live under the **Project management** module. If the sidebar doesn't
 
 ## What a collection holds
 
-A collection is a thin envelope around nine many-to-many relationships. Anything in CISO Assistant that can live in a project's scope can sit inside a collection:
+A collection is a thin envelope around twelve categories of related objects. Anything in CISO Assistant that can live in a project's scope can sit inside a collection:
 
 - **Audits** (`compliance_assessments`)
 - **Risk assessments**
@@ -48,7 +48,7 @@ Creating a project auto-creates a collection named after it, then links it as th
    - **ID** — optional short reference (e.g. `COL-2026-Q1`).
    - **Domain** — the folder this collection belongs to. Drives IAM scoping.
    - **Labels** — optional filtering labels.
-   - **Relationships** (dropdown) — pre-attach existing objects in any of the nine categories above. You can also defer this and add objects from the detail page once the collection exists.
+   - **Relationships** (dropdown) — pre-attach existing objects in any of the twelve categories above. You can also defer this and add objects from the detail page once the collection exists.
 4. **Save**.
 
 ## Curate from the detail page
