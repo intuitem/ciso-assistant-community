@@ -12,6 +12,26 @@ from typing import Optional
 import json
 import zlib
 
+# What a mapping link proves about its target, from its relationship (the
+# source compared with the target) and its source's result, reading compliant
+# as all of a requirement met, partially compliant as some of it met and some
+# not, and non-compliant as none of it met. A pair missing here proves nothing.
+# See documentation/architecture/decisions/mapping-inference-proven-facts.md.
+LINK_FACTS: dict[tuple[str, str], frozenset[str]] = {
+    ("equal", "compliant"): frozenset({"all_met"}),
+    ("equal", "partially_compliant"): frozenset({"some_met", "some_unmet"}),
+    ("equal", "non_compliant"): frozenset({"all_unmet"}),
+    ("equal", "not_applicable"): frozenset({"not_applicable"}),
+    ("superset", "compliant"): frozenset({"all_met"}),
+    ("superset", "non_compliant"): frozenset({"all_unmet"}),
+    ("superset", "not_applicable"): frozenset({"not_applicable"}),
+    ("subset", "compliant"): frozenset({"some_met"}),
+    ("subset", "partially_compliant"): frozenset({"some_met", "some_unmet"}),
+    ("subset", "non_compliant"): frozenset({"some_unmet"}),
+    ("intersect", "compliant"): frozenset({"some_met"}),
+    ("intersect", "non_compliant"): frozenset({"some_unmet"}),
+}
+
 
 class MappingEngine:
     def __init__(self):
@@ -391,12 +411,12 @@ class MappingEngine:
                 return rescale_score(value, source_range, target_range)
             return value
 
-        # Per target: the most restrictive result over its full-coverage links,
-        # over its partial links (capped), and over the gaps (non_compliant,
-        # not_assessed) its partial links report.
+        # Per target: the facts its links prove (LINK_FACTS), the facts its
+        # full-coverage links prove alone, and the most restrictive result of
+        # the latter, for inputs that contradict themselves.
+        target_facts: defaultdict[str, set[str]] = defaultdict(set)
+        full_facts: defaultdict[str, set[str]] = defaultdict(set)
         full_results: dict[str, Optional[str]] = {}
-        partial_results: dict[str, Optional[str]] = {}
-        partial_gaps: dict[str, Optional[str]] = {}
 
         for mapping in requirement_mapping_set["requirement_mappings"]:
             src = mapping["source_requirement_urn"]
@@ -434,9 +454,13 @@ class MappingEngine:
                                 new_values = set(src_assessment.get(m2m_field, []))
                                 existing_target[m2m_field] = list(existing | new_values)
                     else:
+                        # mapping_inference is built for this target below:
+                        # copying the source's would share one dict between
+                        # every target of that source (hop 2 and beyond).
                         target_audit["requirement_assessments"][dst] = {
                             k: scaled(k, v, own_scale)
                             for k, v in src_assessment.items()
+                            if k != "mapping_inference"
                         }
                     mapped = True
                 else:
@@ -517,32 +541,19 @@ class MappingEngine:
 
             target_assessment = target_audit["requirement_assessments"][dst]
 
-            # Result: full-coverage links decide. A partial link's cap only
-            # says that link can't vouch for the whole target, so it counts
-            # only for targets without a full-coverage result, while gaps from
-            # partial links always count. Each aggregate keeps the most
-            # restrictive result, so the order of the links doesn't matter.
+            # Result: what this link proves about the target, gathered over
+            # all its links. The target's result is read from the facts after
+            # the loop, once all its links are in, so their order doesn't
+            # matter.
+            link_facts = LINK_FACTS.get(
+                (rel, src_assessment.get("result")), frozenset()
+            )
+            target_facts[dst] |= link_facts
             if rel in ("equal", "superset"):
+                full_facts[dst] |= link_facts
                 full_results[dst] = self._most_restrictive_result(
                     full_results.get(dst), src_assessment.get("result")
                 )
-            else:
-                result = self._partial_link_result(src_assessment.get("result"))
-                partial_results[dst] = self._most_restrictive_result(
-                    partial_results.get(dst), result
-                )
-                if result in ("non_compliant", "not_assessed"):
-                    partial_gaps[dst] = self._most_restrictive_result(
-                        partial_gaps.get(dst), result
-                    )
-            if full_results.get(dst) is not None:
-                result = self._most_restrictive_result(
-                    full_results[dst], partial_gaps.get(dst)
-                )
-            else:
-                result = partial_results.get(dst)
-            if result is not None:
-                target_assessment["result"] = result
 
             mapping_set_info = {
                 k: v
@@ -561,7 +572,6 @@ class MappingEngine:
                 "source_requirement_assessments", {}
             )
 
-            mapping_inference["result"] = target_assessment.get("result", "")
             mapping_inference["used_path"] = path
             incoming_annotation = src_assessment.get("mapping_inference", {}).get(
                 "annotation", ""
@@ -657,22 +667,47 @@ class MappingEngine:
                     },
                 )
 
+        # Each target's result, now that all its links are in. No rule settles
+        # inputs that contradict themselves, so the full-coverage links are
+        # believed, and if they clash too, the most restrictive of their
+        # results.
+        for dst, facts in target_facts.items():
+            if self._facts_contradict(facts):
+                facts = full_facts[dst]
+            if self._facts_contradict(facts):
+                result = full_results[dst]
+            else:
+                result = self._result_from_facts(facts)
+            target_assessment = target_audit["requirement_assessments"][dst]
+            target_assessment["result"] = result
+            target_assessment["mapping_inference"]["result"] = result
+
         return target_audit
 
-    def _partial_link_result(self, result):
-        """Returns what a subset/intersect link can tell about its target.
+    def _facts_contradict(self, facts):
+        """Whether facts about one requirement contradict each other: all of
+        it met with a part unmet, or none of it met with a part met."""
+        return ("all_met" in facts and bool(facts & {"some_unmet", "all_unmet"})) or (
+            "all_unmet" in facts and bool(facts & {"some_met", "all_met"})
+        )
 
-        Such a link covers only part of the target, so on its own a compliant
-        or partially compliant source makes the target partially compliant at
-        best. not_assessed and non_compliant carry over as they are.
-        not_applicable says nothing about the rest of the target and is
-        dropped (None).
+    def _result_from_facts(self, facts):
+        """Returns the result that consistent facts prove, at its lowest.
+
+        Exact when the facts settle it: a met part and an unmet part make the
+        requirement partially compliant. Otherwise the lowest result they
+        allow, so the result never overstates what the links prove. Facts
+        that say nothing give not_assessed, the "no information" result.
         """
-        if result in ("compliant", "partially_compliant"):
+        if "all_met" in facts:
+            return "compliant"
+        if "some_met" in facts:
             return "partially_compliant"
-        if result in ("not_assessed", "non_compliant"):
-            return result
-        return None
+        if facts & {"some_unmet", "all_unmet"}:
+            return "non_compliant"
+        if "not_applicable" in facts:
+            return "not_applicable"
+        return "not_assessed"
 
     def _most_restrictive_result(self, result1, result2):
         """Returns the most restrictive result between two results.
