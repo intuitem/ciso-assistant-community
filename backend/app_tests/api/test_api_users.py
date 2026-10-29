@@ -7,7 +7,7 @@ from django.urls import reverse
 from knox.models import AuthToken
 from rest_framework import status
 from rest_framework.test import APIClient
-from core.serializers import UserWriteSerializer
+from core.serializers import USER_ACCOUNT_FIELDS, UserWriteSerializer
 from core.startup import ensure_user_creator_group
 from iam.models import Folder, Role, RoleAssignment, User, UserGroup
 
@@ -1753,3 +1753,134 @@ class TestGlobalUserCreatorGroup:
         )
         assert placed.status_code == status.HTTP_200_OK, placed.content
         assert analysts.user_set.filter(pk=recruit.pk).exists()
+
+
+@pytest.mark.django_db
+class TestUserAccountFieldsVisibility:
+    """`view_user` reaches every domain member through the root folder's default
+    role. Account and security fields stay with the user themself and with
+    holders of `change_user` on the user's folder; everyone else gets the
+    directory fields."""
+
+    TARGET_EXPIRY = "2030-01-01"
+
+    @pytest.fixture
+    def env(self, authenticated_client):
+        domain = Folder.objects.create(
+            name="account fields domain",
+            parent_folder=Folder.get_root_folder(),
+            content_type=Folder.ContentType.DOMAIN,
+            create_iam_groups=True,
+        )
+        Folder.create_default_ug_and_ra(domain)
+
+        # Sorts before admin@tests.com, so a superuser-first order is visible.
+        target = User.objects.create_user("aaron.target@tests.com")
+        target.expiry_date = self.TARGET_EXPIRY
+        target.keep_local_login = True
+        target.observation = "contractor, leaves in January"
+        target.save()
+
+        # The Auditee role holds no user permission: its view_user is ambient.
+        ambient = User.objects.create_user("ambient@tests.com")
+        auditees = UserGroup.objects.get(name="BI-UG-ADE", folder=domain)
+        assert not auditees.roleassignment_set.filter(
+            role__permissions__codename="view_user"
+        ).exists()
+        auditees.user_set.add(ambient)
+
+        reader = User.objects.create_user("reader@tests.com")
+        UserGroup.objects.get(name="BI-UG-AUD", folder=domain).user_set.add(reader)
+
+        return SimpleNamespace(
+            target=target,
+            admin_client=authenticated_client,
+            clients={"ambient": _client_for(ambient), "reader": _client_for(reader)},
+            users={"ambient": ambient, "reader": reader},
+        )
+
+    @staticmethod
+    def _rows(response):
+        assert response.status_code == status.HTTP_200_OK, response.content
+        data = response.data
+        return data["results"] if isinstance(data, dict) else data
+
+    def _payloads(self, client, user):
+        """The user as served by the list, the detail and the edit-form read."""
+        listed = {
+            row["email"]: row for row in self._rows(client.get(reverse(API_ENDPOINT)))
+        }
+        detail = client.get(reverse("users-detail", args=[user.id]))
+        write = client.get(reverse("users-object", args=[user.id]))
+        assert detail.status_code == status.HTTP_200_OK, detail.content
+        assert write.status_code == status.HTTP_200_OK, write.content
+        return [listed[user.email], detail.data, write.data]
+
+    @pytest.mark.parametrize("viewer", ["ambient", "reader"])
+    def test_viewer_gets_directory_fields_only(self, env, viewer):
+        for payload in self._payloads(env.clients[viewer], env.target):
+            assert payload["email"] == env.target.email
+            assert payload["is_active"] is True
+            assert not set(USER_ACCOUNT_FIELDS) & set(payload)
+
+        write = self._payloads(env.clients[viewer], env.target)[2]
+        assert "user_groups" not in write and "is_local" not in write
+
+    def test_admin_gets_account_fields(self, env):
+        payloads = self._payloads(env.admin_client, env.target)
+        assert "is_local" in payloads[2] and "user_groups" in payloads[2]
+        for payload in payloads:
+            assert set(USER_ACCOUNT_FIELDS) <= set(payload)
+            assert payload["expiry_date"] == self.TARGET_EXPIRY
+            assert payload["keep_local_login"] is True
+            assert payload["observation"] == "contractor, leaves in January"
+            assert payload["is_superuser"] is False
+
+    @pytest.mark.parametrize("viewer", ["ambient", "reader"])
+    def test_self_gets_own_account_fields(self, env, viewer):
+        user = env.users[viewer]
+        payloads = self._payloads(env.clients[viewer], user)
+        assert "is_local" in payloads[2] and "user_groups" in payloads[2]
+        for payload in payloads:
+            assert set(USER_ACCOUNT_FIELDS) <= set(payload)
+
+    @pytest.mark.parametrize("viewer", ["ambient", "reader"])
+    @pytest.mark.parametrize(
+        "query", ["keep_local_login=true", f"expiry_date={TARGET_EXPIRY}"]
+    )
+    def test_account_filters_match_administered_users_only(self, env, viewer, query):
+        url = f"{reverse(API_ENDPOINT)}?{query}"
+        assert env.target.email not in {
+            row["email"] for row in self._rows(env.clients[viewer].get(url))
+        }
+        assert env.target.email in {
+            row["email"] for row in self._rows(env.admin_client.get(url))
+        }
+
+    @pytest.mark.parametrize("viewer", ["ambient", "reader"])
+    def test_viewer_order_reveals_no_account_field(self, env, viewer):
+        client = env.clients[viewer]
+
+        def emails(query=""):
+            return [
+                row["email"]
+                for row in self._rows(client.get(f"{reverse(API_ENDPOINT)}?{query}"))
+            ]
+
+        default = emails()
+        assert default == sorted(default)  # superusers are not listed first
+        for field in ("is_superuser", "expiry_date", "keep_local_login"):
+            assert emails(f"ordering={field}") == default
+            assert emails(f"ordering=-{field}") == default
+
+    def test_admin_order_keeps_account_fields(self, env):
+        def emails(query=""):
+            return [
+                row["email"]
+                for row in self._rows(
+                    env.admin_client.get(f"{reverse(API_ENDPOINT)}?{query}")
+                )
+            ]
+
+        assert emails()[0] == "admin@tests.com"
+        assert emails("ordering=is_superuser")[-1] == "admin@tests.com"
