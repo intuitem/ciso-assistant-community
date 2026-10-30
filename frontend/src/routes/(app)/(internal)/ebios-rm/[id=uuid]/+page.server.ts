@@ -71,7 +71,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 	const ebiosRmStudyDuplicateForm = await superValidate(
 		{
-			name: data.name,
+			name: `${data.name} (copy)`,
 			description: data.description ?? '',
 			version: data.version ?? '',
 			ref_id: data.ref_id ?? ''

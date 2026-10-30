@@ -1143,7 +1143,9 @@ def duplicate_ebios_rm_study(
             target_objective_category=ro_to.target_objective_category,
         )
         new_ro_to.feared_events.set(
-            feared_events[fe.id] for fe in ro_to.feared_events.all()
+            feared_events[fe.id]
+            for fe in ro_to.feared_events.all()
+            if fe.id in feared_events
         )
         ro_tos[ro_to.id] = new_ro_to
 

@@ -181,9 +181,9 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         clone = duplicate_ebios_rm_study(
             source,
             name=data["name"],
-            description=data.get("description", ""),
-            ref_id=data.get("ref_id", ""),
-            version=data.get("version"),
+            description=data.get("description", source.description),
+            ref_id=data.get("ref_id", source.ref_id),
+            version=data.get("version", source.version),
         )
         return Response({"results": EbiosRMStudyReadSerializer(clone).data})
 

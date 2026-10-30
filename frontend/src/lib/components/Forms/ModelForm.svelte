@@ -298,6 +298,7 @@
 		createModalCache.garbageCollect();
 	});
 
+	let isLoading = $state(false);
 	const _form = superForm(form, {
 		dataType: shape?.attachment ? 'form' : 'json',
 		enctype: shape?.attachment ? 'multipart/form-data' : 'application/x-www-form-urlencoded',
@@ -308,6 +309,7 @@
 		taintedMessage,
 		validationMethod: 'auto',
 		onUpdated: async ({ form }) => {
+			isLoading = false;
 			if (form.message?.redirect) {
 				goto(getSecureRedirect(form.message.redirect));
 			}
@@ -320,7 +322,6 @@
 		}
 	});
 
-	let isLoading = $state(false);
 	let previousFormErrors = $derived('');
 	const { form: formData, errors } = _form;
 
