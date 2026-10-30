@@ -7,7 +7,7 @@ from django.urls import reverse
 from knox.models import AuthToken
 from rest_framework import status
 from rest_framework.test import APIClient
-from core.serializers import UserWriteSerializer
+from core.serializers import UserReadSerializer, UserWriteSerializer
 from core.startup import ensure_user_creator_group
 from iam.models import Folder, Role, RoleAssignment, User, UserGroup
 
@@ -1795,6 +1795,8 @@ class TestUserAccountFieldsVisibility:
         target.save()
         # Users live in Global, which is where a custom user manager role applies.
         assert target.folder_id == Folder.get_root_folder().id
+        # Sorts first by email, so an order that drops `-is_active` shows.
+        User.objects.create_user("aardvark.inactive@tests.com", is_active=False)
 
         # The Auditee role holds no user permission: its view_user is ambient.
         ambient = User.objects.create_user("ambient@tests.com")
@@ -1910,11 +1912,26 @@ class TestUserAccountFieldsVisibility:
                 for row in self._rows(client.get(f"{reverse(API_ENDPOINT)}?{query}"))
             ]
 
-        default = emails()
-        assert default == sorted(default)  # superusers are not listed first
+        rows = self._rows(client.get(reverse(API_ENDPOINT)))
+        default = [row["email"] for row in rows]
+        # Superusers are not listed first.
+        assert default == [
+            row["email"]
+            for row in sorted(rows, key=lambda r: (not r["is_active"], r["email"]))
+        ]
         for field in ("is_superuser", "expiry_date", "keep_local_login"):
             assert emails(f"ordering={field}") == default
             assert emails(f"ordering=-{field}") == default
+
+    @pytest.mark.parametrize(
+        "serializer_class", [UserReadSerializer, UserWriteSerializer]
+    )
+    def test_internal_use_needs_opt_in(self, env, serializer_class):
+        assert not self.ACCOUNT_FIELDS & set(serializer_class(env.target).data)
+        data = serializer_class(
+            env.target, context={"include_account_fields": True}
+        ).data
+        assert self.ACCOUNT_FIELDS <= set(data)
 
     def test_admin_order_keeps_account_fields(self, env):
         def emails(query=""):
