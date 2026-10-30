@@ -98,7 +98,7 @@ translations:
   zh:
     name: OWASP Top 10 Web - 2021
     description: "\u6B22\u8FCE\u4F86\u5230\u6700\u65B0\u7248\u672C\u7684 OWASP Top\
-      \ 10\uFF01! OWASP Top 10 2021 \u662F\u4E00\u4E2A\u5168\u65B0\u7684\u540D\u5355\
+      \ 10\uFF01 OWASP Top 10 2021 \u662F\u4E00\u4E2A\u5168\u65B0\u7684\u540D\u5355\
       \uFF0C\u5305\u542B\u4E86\u4F60\u53EF\u4EE5\u6253\u5370\u4E0B\u4F86\u7684\u65B0\
       \u56FE\u793A\u8BF4\u660E\uFF0C\u82E5\u6709\u9700\u8981\u7684\u8BDD\uFF0C\u4F60\
       \u53EF\u4EE5\u4ECE\u6211\u4EEC\u7684\u7F51\u9875\u4E0A\u9762\u4E0B\u8F7D\u3002\
@@ -663,9 +663,10 @@ objects:
           diizinkan.
 
 
-          Force browsing untuk mengakses authenticated pages sebagai unauthenticated
-          user atau mengakses privileged pages sebagai user standard. Mengakses API
-          yang tidak memiliki akses kontrol untuk POST, PUT, dan DELETE.'
+          Memaksa penjelajahan untuk mengakses halaman yang memerlukan otentikasi
+          sebagai pengguna yang tidak terotentikasi atau mengakses halaman dengan
+          hak istimewa sebagai pengguna standar. Mengakses API yang tidak memiliki
+          kontrol akses untuk metode POST, PUT, dan DELETE.'
         annotation: "## Faktor-Faktor\n\n| Klasifikasi CWE | Tingkat Kejadian Maksimum\
           \ | Rata - Rata Tingkat kejadian | Cakupan Maksimum | Rata - Rata Cakupan\
           \ | Rata-rata Bobot Eksploitasi | Rata - Rata Bobot Dampak | Total Kejadian\
@@ -689,11 +690,11 @@ objects:
           \ admin jika diperlukan (seperti adanya kegagalan yang terjadi berulang\
           \ - ulang).\n\n- Ukur batasan dari API dan akses ke kontroler untuk meminimalisir\
           \ kerusakan dari automated attack tooling.\n\n- JWT tokens harus langsung\
-          \ di hilangkan validasinya pada server setelah logout.\n\nDevelopers and\
-          \ QA staff should include functional access control unit and integration\
-          \ tests.\n\n\n## Contoh Skenario Penyerangan\n\n**Skenario #1:** Aplikasi\
-          \ menggunakan data yang belum diverifikasi pada sebuah pemanggilan SQL yang\
-          \ mengakses informasi akun\n\n> pstmt.setString(1, request.getParameter(\"\
+          \ di hilangkan validasinya pada server setelah logout.\n\nPengembang dan\
+          \ staf QA harus menyertakan pengujian fungsional terhadap unit kontrol akses\
+          \ serta pengujian integrasi.\n\n\n## Contoh Skenario Penyerangan\n\n**Skenario\
+          \ #1:** Aplikasi menggunakan data yang belum diverifikasi pada sebuah pemanggilan\
+          \ SQL yang mengakses informasi akun\n\n> pstmt.setString(1, request.getParameter(\"\
           acct\"));\n>\n> ResultSet results = pstmt.executeQuery( );\n\nPenyerang\
           \ hanya perlu untuk memodifikasi parameter \u2018acct\u2019 pada browser\
           \ untuk mengirim nomer akun mana yang diinginkan. Jika parameter tersebut\
@@ -999,7 +1000,7 @@ objects:
           \ uma falha.\n\n\nPara mais informa\xE7\xF5es sobre as refer\xEAncias e\
           \ a lista de CWEs mapeadas: https://top10.owasp.org/2021/pt-BR/A01_2021-Broken_Access_Control/"
       tr:
-        name: "Broken Access Control (K\u0131r\u0131k Eri\u015Fim Kontrol\xFC)"
+        name: "K\u0131r\u0131k Eri\u015Fim Kontrolleri"
         description: "Eri\u015Fim kontrol\xFC, kullan\u0131c\u0131lar\u0131n ama\xE7\
           lanan yetkilerinin d\u0131\u015F\u0131na \xE7\u0131kamamas\u0131 i\xE7in\
           \ politikay\u0131 uygular. Hatalar genellikle yetkisiz bilgi if\u015Fas\u0131\
@@ -1635,11 +1636,8 @@ objects:
           \ verwendet, wenn kryptografische Hash-Funktionen ben\xF6tigt werden?\n\n\
           - Werden veraltete kryptografische Padding Methoden verwendet, z. B. PKCS#1\
           \ v1.5?\n\n- Sind kryptografische Fehlermeldungen oder Seitenkan\xE4le ausnutzbar,\
-          \ beispielsweise in Form von Padding-Oracle-Angriffen?\n\nSiehe {{ osib_link(link=\"\
-          osib.owasp.asvs.4-0.6\", prefix=\"ASVS \", doc=\"\", osib=osib) }}, {{ osib_link(link=\
-          \ \"osib.owasp.asvs.4-0.8\", doc=\"\", osib=osib) }}, {{ osib_link(link=\
-          \ \"osib.owasp.asvs.4-0.9\", doc=\"\", osib=osib) }}<!-- ASVS Crypto (V7),\
-          \ Datenschutz (V9) und SSL/TLS (V10)-->"
+          \ beispielsweise in Form von Padding-Oracle-Angriffen?\n\nSiehe ASVS Crypto\
+          \ (V7), Datenschutz (V9) und SSL/TLS (V10)"
         annotation: "## Beurteilungskriterien\n\n| Zugeordnete CWEs | Maximale H\xE4\
           ufigkeit | Durchschn. H\xE4ufigkeit | Durchschn. Ausnutzbarkeit (gewichtet)\
           \ | Durchschn. Auswirkungen (gewichtet) | Maximale Abdeckung | Durchschnittliche\
@@ -2460,7 +2458,7 @@ objects:
           \ mesmo se forem saltadas.\n\n\nPara mais informa\xE7\xF5es sobre as refer\xEA\
           ncias e a lista de CWEs mapeadas: https://top10.owasp.org/2021/pt-BR/A02_2021-Cryptographic_Failures/"
       tr:
-        name: Cryptographic Failures
+        name: Kriptografik Hatalar
         description: "\u0130lk yap\u0131lacak \u015Fey, hem transit halinde hem de\
           \ at rest durumundaki verilerin korunma ihtiyac\u0131n\u0131 belirlemektir.\
           \ \xD6rne\u011Fin parolalar, kredi kart\u0131 numaralar\u0131, sa\u011F\
@@ -3496,7 +3494,7 @@ objects:
           \nPara mais informa\xE7\xF5es sobre as refer\xEAncias e a lista de CWEs\
           \ mapeadas: https://top10.owasp.org/2021/pt-BR/A03_2021-Injection/"
       tr:
-        name: Injection
+        name: Enjeksiyon
         description: "Bir uygulama \u015Fu durumlarda sald\u0131r\u0131ya a\xE7\u0131\
           k hale gelir:\n\n* Kullan\u0131c\u0131dan gelen veri uygulama taraf\u0131\
           ndan validate, filter veya sanitize edilmiyorsa.\n\n* Dynamic query\u2019\
@@ -4755,7 +4753,7 @@ objects:
           \ tais transa\xE7\xF5es.\n\n\nPara mais informa\xE7\xF5es sobre as refer\xEA\
           ncias e a lista de CWEs mapeadas: https://top10.owasp.org/2021/pt-BR/A04_2021-Insecure_Design/"
       tr:
-        name: Insecure Design
+        name: "G\xFCvensiz Tasar\u0131m"
         description: "Insecure design, \u201Ceksik veya etkisiz control design\u201D\
           \ olarak ifade edilen farkl\u0131 zay\u0131fl\u0131klar\u0131 kapsayan geni\u015F\
           \ bir kategoridir. Insecure design, di\u011Fer Top 10 risk kategorilerinin\
@@ -4769,7 +4767,7 @@ objects:
           rlerden biri, geli\u015Ftirilen yaz\u0131l\u0131m veya sistemin do\u011F\
           as\u0131nda bulunan business risk profiling eksikli\u011Fi ve buna ba\u011F\
           l\u0131 olarak hangi seviyede security design gerekti\u011Finin belirlenememesidir.\n\
-          \n### Requirements and Resource Management\n\nBir uygulama i\xE7in business\
+          \n### Gereksinimler ve Kaynak Y\xF6netimi\n\nBir uygulama i\xE7in business\
           \ gereksinimlerini, t\xFCm data asset\u2019lerinin gizlilik, b\xFCt\xFC\
           nl\xFCk, s\xFCreklilik (availability) ve do\u011Frulanabilirlik (authenticity)\
           \ koruma gereksinimleri ve beklenen business logic d\xE2hil olacak \u015F\
@@ -4780,29 +4778,30 @@ objects:
           hil teknik gereksinimleri derleyin. Design, build, testing ve operation\
           \ a\u015Famalar\u0131n\u0131n tamam\u0131n\u0131, security aktiviteleriyle\
           \ birlikte kapsayacak b\xFCt\xE7eyi planlay\u0131n ve m\xFCzakere edin.\n\
-          \n### Secure Design\n\nSecure design; tehditleri s\xFCrekli de\u011Ferlendiren\
-          \ ve kodu bilinen attack method\u2019lar\u0131na kar\u015F\u0131 sa\u011F\
-          lam olacak \u015Fekilde tasarlay\u0131p test eden bir k\xFClt\xFCr ve metodolojidir.\
-          \ Threat modeling, refinement session\u2019lar\u0131na (veya benzer aktivitelere)\
-          \ entegre edilmelidir; data flow\u2019lar ve access control veya di\u011F\
-          er security control\u2019lerdeki de\u011Fi\u015Fikliklere bak\u0131n. User\
-          \ story geli\u015Ftirme s\u0131ras\u0131nda do\u011Fru ak\u0131\u015F\u0131\
-          \ ve failure state\u2019lerini belirleyin; sorumlu ve etkilenen taraflarca\
-          \ iyi anla\u015F\u0131ld\u0131\u011F\u0131ndan ve \xFCzerinde mutab\u0131\
-          k kal\u0131nd\u0131\u011F\u0131ndan emin olun. Varsay\u0131mlar\u0131 ve\
-          \ ko\u015Fullar\u0131 hem beklenen hem de failure flow\u2019lar\u0131 i\xE7\
-          in analiz edin; h\xE2l\xE2 do\u011Fru ve arzu edilir olduklar\u0131n\u0131\
-          \ do\u011Frulay\u0131n. Varsay\u0131mlar\u0131n nas\u0131l validate edilece\u011F\
-          ini ve do\u011Fru davran\u0131\u015Flar i\xE7in gerekli ko\u015Fullar\u0131\
-          n nas\u0131l enforce edilece\u011Fini belirleyin. Sonu\xE7lar\u0131n user\
-          \ story i\xE7inde dok\xFCmante edilmesini sa\u011Flay\u0131n. Hatalardan\
-          \ \xF6\u011Frenin ve iyile\u015Ftirmeleri te\u015Fvik etmek i\xE7in pozitif\
-          \ te\u015Fvikler sunun. Secure design, yaz\u0131l\u0131ma sonradan eklenebilecek\
-          \ bir eklenti ya da bir tool de\u011Fildir.\n\n### Secure Development Lifecycle\n\
-          \nG\xFCvenli yaz\u0131l\u0131m, bir Secure Development Lifecycle, bir t\xFC\
-          r secure design pattern, paved road methodology, secured component library,\
-          \ tooling ve threat modeling gerektirir. Yaz\u0131l\u0131m projesinin en\
-          \ ba\u015F\u0131ndan t\xFCm proje ve bak\u0131m s\xFCreci boyunca security\
+          \n### G\xFCvenli Tasar\u0131m\n\nSecure design; tehditleri s\xFCrekli de\u011F\
+          erlendiren ve kodu bilinen attack method\u2019lar\u0131na kar\u015F\u0131\
+          \ sa\u011Flam olacak \u015Fekilde tasarlay\u0131p test eden bir k\xFClt\xFC\
+          r ve metodolojidir. Threat modeling, refinement session\u2019lar\u0131na\
+          \ (veya benzer aktivitelere) entegre edilmelidir; data flow\u2019lar ve\
+          \ access control veya di\u011Fer security control\u2019lerdeki de\u011F\
+          i\u015Fikliklere bak\u0131n. User story geli\u015Ftirme s\u0131ras\u0131\
+          nda do\u011Fru ak\u0131\u015F\u0131 ve failure state\u2019lerini belirleyin;\
+          \ sorumlu ve etkilenen taraflarca iyi anla\u015F\u0131ld\u0131\u011F\u0131\
+          ndan ve \xFCzerinde mutab\u0131k kal\u0131nd\u0131\u011F\u0131ndan emin\
+          \ olun. Varsay\u0131mlar\u0131 ve ko\u015Fullar\u0131 hem beklenen hem de\
+          \ failure flow\u2019lar\u0131 i\xE7in analiz edin; h\xE2l\xE2 do\u011Fru\
+          \ ve arzu edilir olduklar\u0131n\u0131 do\u011Frulay\u0131n. Varsay\u0131\
+          mlar\u0131n nas\u0131l validate edilece\u011Fini ve do\u011Fru davran\u0131\
+          \u015Flar i\xE7in gerekli ko\u015Fullar\u0131n nas\u0131l enforce edilece\u011F\
+          ini belirleyin. Sonu\xE7lar\u0131n user story i\xE7inde dok\xFCmante edilmesini\
+          \ sa\u011Flay\u0131n. Hatalardan \xF6\u011Frenin ve iyile\u015Ftirmeleri\
+          \ te\u015Fvik etmek i\xE7in pozitif te\u015Fvikler sunun. Secure design,\
+          \ yaz\u0131l\u0131ma sonradan eklenebilecek bir eklenti ya da bir tool de\u011F\
+          ildir.\n\n### G\xFCvenli Yaz\u0131l\u0131m Geli\u015Ftirme D\xF6ng\xFCs\xFC\
+          \n\nG\xFCvenli yaz\u0131l\u0131m, bir Secure Development Lifecycle, bir\
+          \ t\xFCr secure design pattern, paved road methodology, secured component\
+          \ library, tooling ve threat modeling gerektirir. Yaz\u0131l\u0131m projesinin\
+          \ en ba\u015F\u0131ndan t\xFCm proje ve bak\u0131m s\xFCreci boyunca security\
           \ specialist\u2019lerinize ula\u015F\u0131n. G\xFCvenli yaz\u0131l\u0131\
           m geli\u015Ftirme \xE7abalar\u0131n\u0131z\u0131 yap\u0131land\u0131rmaya\
           \ yard\u0131mc\u0131 olmas\u0131 i\xE7in [OWASP Software Assurance Maturity\
@@ -5946,7 +5945,7 @@ objects:
           \ sejam acessados.\n\n\nPara mais informa\xE7\xF5es sobre as refer\xEAncias\
           \ e a lista de CWEs mapeadas: https://top10.owasp.org/2021/pt-BR/A05_2021-Security_Misconfiguration/"
       tr:
-        name: Security Misconfiguration
+        name: "G\xFCvenlik Yap\u0131land\u0131rma Hatalar\u0131"
         description: "Uygulama a\u015Fa\u011F\u0131daki durumlarda zafiyete a\xE7\u0131\
           k olabilir:\n\n* Application stack\u2019in herhangi bir b\xF6l\xFCm\xFC\
           nde uygun security hardening eksikse veya cloud servislerinde izinler yanl\u0131\
@@ -6049,76 +6048,75 @@ objects:
           \u81F4\u6027\uFF0C\u53EF\u91CD\u590D\u7684\u7A0B\u5F0F\u5B89\u5168\u8BBE\
           \u5B9A\u6D41\u7A0B\u65F6\uFF0C\u7CFB\u7EDF\u5C06\u4F1A\u9762\u5BF9\u9AD8\
           \u98CE\u9669\u3002"
-        annotation: "## \u5F31\u70B9\u56E0\u7D20(Factors)\n\n| \u53EF\u5BF9\u7167\
-          \ CWEs \u6570\u91CF | \u6700\u5927\u53D1\u751F\u7387 | \u5E73\u5747\u53D1\
-          \u751F\u7387 | \u6700\u5927\u8986\u76D6\u8303\u56F4 | \u5E73\u5747\u8986\
-          \u76D6\u8303\u56F4 | \u5E73\u5747\u52A0\u6743\u6F0F\u6D1E | \u5E73\u5747\
-          \u52A0\u6743\u5F15\u54CD | \u51FA\u73B0\u6B21\u6570 | \u6240\u6709\u76F8\
-          \u5173 CVEs |\n| :--------------: | :--------: | :--------: | :----------:\
-          \ | :----------: | :----------: | :----------: | :------: | :-----------:\
-          \ |\n|        20        |   19.84%   |   4.51%    |    89.58%    |    44.84%\
-          \    |     8.12     |     6.56     | 208,387  |      789      |\n\n\n##\
-          \ \u5982\u4F55\u9884\u9632(How to Prevent)\n\n\u5B89\u5168\u7684\u5B89\u88C5\
-          \u6B65\u9AA4\u6D41\u7A0B\uFF0C\u5E94\u8BE5\u88AB\u5B9E\u9645\u5E03\u7F72\
-          \uFF0C\u5305\u542B\u4EE5\u4E0B\n\n- \u4E00\u4E2A\u53EF\u91CD\u590D\u7684\
-          \u5B89\u5168\u5F3A\u5316\u6D41\u7A0B\uFF0C\u5FC5\u9700\u53EF\u8FBE\u5230\
-          \u5FEB\u901F\u4E14\u7B80\u5355\u7684\u5E03\u7F72\uFF0C\u800C\u4E14\u80FD\
-          \u5728\u5206\u9694\u4E14\u5C01\u9501\u7684\u73AF\u5883\u4E0B\u6267\u884C\
-          \u3002\u5F00\u53D1\uFF0C\u54C1\u8D28\u7BA1\u7406\uFF0C\u4EE5\u53CA\u5B9E\
-          \u9645\u8425\u8FD0\u7684\u73AF\u5883\uFF0C\u90FD\u987B\u6709\u4E00\u81F4\
-          \u76F8\u540C\u7684\u8BBE\u5B9A\uFF0C\u5E76\u4E14\u4F7F\u7528\u4E0D\u540C\
-          \u7684\u8BA4\u8BC1\u8D44\u8BAF\u3002\u8FD9\u79CD\u6B65\u9AA4\u9700\u8981\
-          \u5C3D\u53EF\u80FD\u7684\u81EA\u52A8\u5316\uFF0C\u964D\u4F4E\u9700\u8981\
-          \u5EFA\u7ACB\u5B89\u5168\u73AF\u5883\u65F6\uFF0C\u6240\u9700\u8981\u7684\
-          \u6295\u5165\u3002\n\n- \u4E00\u4E2A\u6700\u7CBE\u7B80\u7684\u5E73\u53F0\
-          \uFF0C\u4E0A\u9762\u4E0D\u4F1A\u642D\u914D\u4EFB\u4F55\u4E0D\u9700\u8981\
-          \u7684\u529F\u80FD\uFF0C\u5957\u4EF6\uFF0C\u6863\u6848\uFF0C\u4EE5\u53CA\
-          \u8303\u672C\u3002\u79FB\u9664\u6216\u4E0D\u5B89\u88C5\u4EFB\u4F55\uFF0C\
-          \u4E0D\u987B\u4F7F\u7528\u7684\u529F\u80FD\u6216\u6846\u67B6\u3002\n\n-\
-          \ \u5728\u53D8\u66F4\u7BA1\u7406\u4E0B\uFF0C\u9700\u6709\u7279\u5B9A\u7684\
-          \u4EFB\u52A1\uFF0C\u4F9D\u636E\u5B89\u5168\u544A\u77E5\uFF0C\u76F8\u5173\
-          \u66F4\u65B0\uFF0C\u6765\u6267\u884C\u5B89\u5168\u5BA1\u89C6\u53CA\u66F4\
-          \u52A8(\u53EF\u53C2\u7167 A06:2021-\u6613\u53D7\u653B\u51FB\u548C\u5DF2\u6DD8\
-          \u6C70\u7684\u7EC4\u4EF6)\u3002\u5BA1\u89C6\u4E91\u7AEF\u50A8\u5B58\u7684\
-          \u6743\u9650(\u4F8B\u5982 S3 bucket \u7684\u6743\u9650)\n\n- \u4E00\u4E2A\
-          \u53EF\u5206\u5272\u7684\u7A0B\u5F0F\u67B6\u6784\uFF0C\u5BF9\u4E8E\u5404\
-          \u5143\u4EF6\uFF0C\u7528\u6237\uFF0C\u53EF\u900F\u8FC7\u5206\u79BB\uFF0C\
-          \u5BB9\u5668\u5316\uFF0C\u4E91\u7AEF\u5B89\u5168\u7FA4\u7EC4\u8BBE\u5B9A\
-          (ACLs)\uFF0C\u6765\u8FBE\u5230\u5206\u5272\u7684\u6548\u679C\u3002\u63D0\
-          \u4F9B\u6709\u6548\u4E14\u5B89\u5168\u7684\u5206\u79BB\u3002\n\n- \u5BC4\
-          \u9001\u5B89\u5168\u6307\u4EE4\u7ED9\u7528\u6237\u7AEF\uFF0C\u4F8B\u5982\
-          \ \u5B89\u5168\u6807\u5934\u3002\n\n- \u4E00\u4E2A\u81EA\u52A8\u5316\u7684\
-          \u6D41\u7A0B\uFF0C\u53EF\u4EE5\u786E\u8BA4\u73AF\u5883\u4E2D\u5404\u7C7B\
-          \u7684\u5B89\u5168\u8BBE\u5B9A\u3002\n\n\n## \u653B\u51FB\u60C5\u5883\u8303\
-          \u4F8B(Example Attack Scenarios)\n\n**\u60C5\u5883 #1:** \u8425\u8FD0\u7528\
-          \u7684\u7A0B\u5F0F\u670D\u52A1\u5668\uFF0C\u5E26\u6709\u9884\u8BBE\u7684\
-          \u6837\u672C\u7A0B\u5F0F\uFF0C\u5E76\u672A\u79FB\u9664\u3002\u8FD9\u4E2A\
-          \u6837\u672C\u7A0B\u5F0F\u5E26\u6709\u5DF2\u77E5\u7684\u5B89\u5168\u7F3A\
-          \u9677\uFF0C\u53EF\u88AB\u653B\u51FB\u8005\u5229\u7528\u5165\u4FB5\u670D\
-          \u52A1\u5668\u3002\u4F8B\u5982\uFF0C\u9884\u8BBE\u7684\u7A0B\u5F0F\u5E26\
-          \u6709\u7BA1\u7406\u8005\u754C\u9762\uFF0C\u5E76\u4E14\u6709\u672A\u53D8\
-          \u66F4\u7684\u5E10\u53F7\uFF0C\u653B\u51FB\u8005\u53EF\u4EE5\u900F\u8FC7\
-          \u9884\u8BBE\u7684\u5BC6\u7801\u767B\u5165\uFF0C\u5E76\u53D6\u5F97\u63A7\
-          \u5236\u6743\u3002\n\n**\u60C5\u5883 #2:** \u8D44\u6599\u76EE\u5F55\u6307\
-          \u4EE4\u5E76\u672A\u5728\u670D\u52A1\u5668\u4E0A\u5173\u95ED\u3002\u653B\
-          \u51FB\u8005\u53EF\u4EE5\u627E\u51FA\u5E76\u4E14\u4E0B\u8F7D\uFF0C\u5DF2\
-          \u7F16\u8BD1\u8FC7 Java \u6863\u6848\uFF0C\u5E76\u4E14\u900F\u8FC7\u53CD\
-          \u7F16\u8BD1\u4E0E\u9006\u5411\u5DE5\u7A0B\u7B49\u624B\u6CD5\uFF0C\u67E5\
-          \u770B\u539F\u59CB\u7801\u3002\u518D\u56E0\u6B64\u627E\u51FA\u7A0B\u5F0F\
-          \u4E2D\uFF0C\u4E25\u91CD\u7684\u5B58\u53D6\u63A7\u5236\u7F3A\u9677\u3002\
-          \n\n**\u60C5\u5883 #3:** \u7A0B\u5F0F\u670D\u52A1\u5668\u7684\u8BBE\u5B9A\
-          \uFF0C\u5141\u8BB8\u8F93\u51FA\u5E26\u6709\u8BE6\u7EC6\u5185\u5BB9\u7684\
-          \u9519\u8BEF\u8BAF\u606F\uFF0C\u4F8B\u5982\u5806\u53E0\u8FFD\u8E2A\uFF0C\
-          \u4F9B\u7528\u6237\u67E5\u770B\u3002\u8FD9\u6709\u53EF\u80FD\u5BFC\u81F4\
-          \u654F\u611F\u8BAF\u606F\u7684\u5916\u6CC4\uFF0C\u6216\u95F4\u63A5\u900F\
-          \u9732\u51FA\uFF0C\u4F7F\u7528\u4E2D\uFF0C\u5E76\u5E26\u6709\u8106\u5F31\
-          \u6027\u7684\u5143\u4EF6\u7248\u672C\u3002\n\n**\u60C5\u5883 #4:** \u4E00\
-          \u4E2A\u4E91\u7AEF\u670D\u52A1\u5668\uFF0C\u63D0\u4F9B\u4E86\u9884\u8BBE\
-          \u6743\u9650\u5206\u4EAB\uFF0C\u7ED9\u5176\u4ED6\u5728\u7F51\u9645\u7F51\
-          \u8DEF\u7684 CSP \u7528\u6237\u3002\u8FD9\u5C06\u5BFC\u81F4\u4E91\u7AEF\u50A8\
-          \u5B58\u7684\u654F\u611F\u8D44\u6599\u53EF\u4EE5\u88AB\u5B58\u53D6\u3002\
-          \n\n\n\u6709\u95DC\u53C3\u8003\u8CC7\u6599\u53CA\u5DF2\u5C0D\u61C9 CWE \u6E05\
-          \u55AE\u7684\u66F4\u591A\u8CC7\u8A0A\uFF1A https://top10.owasp.org/2021/zh-Hant/A05_2021-Security_Misconfiguration/"
+        annotation: "## \u5F31\u70B9\u56E0\u7D20\n\n| \u53EF\u5BF9\u7167 CWEs \u6570\
+          \u91CF | \u6700\u5927\u53D1\u751F\u7387 | \u5E73\u5747\u53D1\u751F\u7387\
+          \ | \u6700\u5927\u8986\u76D6\u8303\u56F4 | \u5E73\u5747\u8986\u76D6\u8303\
+          \u56F4 | \u5E73\u5747\u52A0\u6743\u6F0F\u6D1E | \u5E73\u5747\u52A0\u6743\
+          \u5F15\u54CD | \u51FA\u73B0\u6B21\u6570 | \u6240\u6709\u76F8\u5173 CVEs\
+          \ |\n| :--------------: | :--------: | :--------: | :----------: | :----------:\
+          \ | :----------: | :----------: | :------: | :-----------: |\n|        20\
+          \        |   19.84%   |   4.51%    |    89.58%    |    44.84%    |     8.12\
+          \     |     6.56     | 208,387  |      789      |\n\n\n## \u5982\u4F55\u9884\
+          \u9632\n\n\u5B89\u5168\u7684\u5B89\u88C5\u6B65\u9AA4\u6D41\u7A0B\uFF0C\u5E94\
+          \u8BE5\u88AB\u5B9E\u9645\u5E03\u7F72\uFF0C\u5305\u542B\u4EE5\u4E0B\n\n-\
+          \ \u4E00\u4E2A\u53EF\u91CD\u590D\u7684\u5B89\u5168\u5F3A\u5316\u6D41\u7A0B\
+          \uFF0C\u5FC5\u9700\u53EF\u8FBE\u5230\u5FEB\u901F\u4E14\u7B80\u5355\u7684\
+          \u5E03\u7F72\uFF0C\u800C\u4E14\u80FD\u5728\u5206\u9694\u4E14\u5C01\u9501\
+          \u7684\u73AF\u5883\u4E0B\u6267\u884C\u3002\u5F00\u53D1\uFF0C\u54C1\u8D28\
+          \u7BA1\u7406\uFF0C\u4EE5\u53CA\u5B9E\u9645\u8425\u8FD0\u7684\u73AF\u5883\
+          \uFF0C\u90FD\u987B\u6709\u4E00\u81F4\u76F8\u540C\u7684\u8BBE\u5B9A\uFF0C\
+          \u5E76\u4E14\u4F7F\u7528\u4E0D\u540C\u7684\u8BA4\u8BC1\u8D44\u8BAF\u3002\
+          \u8FD9\u79CD\u6B65\u9AA4\u9700\u8981\u5C3D\u53EF\u80FD\u7684\u81EA\u52A8\
+          \u5316\uFF0C\u964D\u4F4E\u9700\u8981\u5EFA\u7ACB\u5B89\u5168\u73AF\u5883\
+          \u65F6\uFF0C\u6240\u9700\u8981\u7684\u6295\u5165\u3002\n\n- \u4E00\u4E2A\
+          \u6700\u7CBE\u7B80\u7684\u5E73\u53F0\uFF0C\u4E0A\u9762\u4E0D\u4F1A\u642D\
+          \u914D\u4EFB\u4F55\u4E0D\u9700\u8981\u7684\u529F\u80FD\uFF0C\u5957\u4EF6\
+          \uFF0C\u6863\u6848\uFF0C\u4EE5\u53CA\u8303\u672C\u3002\u79FB\u9664\u6216\
+          \u4E0D\u5B89\u88C5\u4EFB\u4F55\uFF0C\u4E0D\u987B\u4F7F\u7528\u7684\u529F\
+          \u80FD\u6216\u6846\u67B6\u3002\n\n- \u5728\u53D8\u66F4\u7BA1\u7406\u4E0B\
+          \uFF0C\u9700\u6709\u7279\u5B9A\u7684\u4EFB\u52A1\uFF0C\u4F9D\u636E\u5B89\
+          \u5168\u544A\u77E5\uFF0C\u76F8\u5173\u66F4\u65B0\uFF0C\u6765\u6267\u884C\
+          \u5B89\u5168\u5BA1\u89C6\u53CA\u66F4\u52A8(\u53EF\u53C2\u7167 A06:2021-\u6613\
+          \u53D7\u653B\u51FB\u548C\u5DF2\u6DD8\u6C70\u7684\u7EC4\u4EF6)\u3002\u5BA1\
+          \u89C6\u4E91\u7AEF\u50A8\u5B58\u7684\u6743\u9650(\u4F8B\u5982 S3 bucket\
+          \ \u7684\u6743\u9650)\n\n- \u4E00\u4E2A\u53EF\u5206\u5272\u7684\u7A0B\u5F0F\
+          \u67B6\u6784\uFF0C\u5BF9\u4E8E\u5404\u5143\u4EF6\uFF0C\u7528\u6237\uFF0C\
+          \u53EF\u900F\u8FC7\u5206\u79BB\uFF0C\u5BB9\u5668\u5316\uFF0C\u4E91\u7AEF\
+          \u5B89\u5168\u7FA4\u7EC4\u8BBE\u5B9A(ACLs)\uFF0C\u6765\u8FBE\u5230\u5206\
+          \u5272\u7684\u6548\u679C\u3002\u63D0\u4F9B\u6709\u6548\u4E14\u5B89\u5168\
+          \u7684\u5206\u79BB\u3002\n\n- \u5BC4\u9001\u5B89\u5168\u6307\u4EE4\u7ED9\
+          \u7528\u6237\u7AEF\uFF0C\u4F8B\u5982 \u5B89\u5168\u6807\u5934\u3002\n\n\
+          - \u4E00\u4E2A\u81EA\u52A8\u5316\u7684\u6D41\u7A0B\uFF0C\u53EF\u4EE5\u786E\
+          \u8BA4\u73AF\u5883\u4E2D\u5404\u7C7B\u7684\u5B89\u5168\u8BBE\u5B9A\u3002\
+          \n\n\n## \u653B\u51FB\u60C5\u5883\u8303\u4F8B\n\n**\u60C5\u5883 #1:** \u8425\
+          \u8FD0\u7528\u7684\u7A0B\u5F0F\u670D\u52A1\u5668\uFF0C\u5E26\u6709\u9884\
+          \u8BBE\u7684\u6837\u672C\u7A0B\u5F0F\uFF0C\u5E76\u672A\u79FB\u9664\u3002\
+          \u8FD9\u4E2A\u6837\u672C\u7A0B\u5F0F\u5E26\u6709\u5DF2\u77E5\u7684\u5B89\
+          \u5168\u7F3A\u9677\uFF0C\u53EF\u88AB\u653B\u51FB\u8005\u5229\u7528\u5165\
+          \u4FB5\u670D\u52A1\u5668\u3002\u4F8B\u5982\uFF0C\u9884\u8BBE\u7684\u7A0B\
+          \u5F0F\u5E26\u6709\u7BA1\u7406\u8005\u754C\u9762\uFF0C\u5E76\u4E14\u6709\
+          \u672A\u53D8\u66F4\u7684\u5E10\u53F7\uFF0C\u653B\u51FB\u8005\u53EF\u4EE5\
+          \u900F\u8FC7\u9884\u8BBE\u7684\u5BC6\u7801\u767B\u5165\uFF0C\u5E76\u53D6\
+          \u5F97\u63A7\u5236\u6743\u3002\n\n**\u60C5\u5883 #2:** \u8D44\u6599\u76EE\
+          \u5F55\u6307\u4EE4\u5E76\u672A\u5728\u670D\u52A1\u5668\u4E0A\u5173\u95ED\
+          \u3002\u653B\u51FB\u8005\u53EF\u4EE5\u627E\u51FA\u5E76\u4E14\u4E0B\u8F7D\
+          \uFF0C\u5DF2\u7F16\u8BD1\u8FC7 Java \u6863\u6848\uFF0C\u5E76\u4E14\u900F\
+          \u8FC7\u53CD\u7F16\u8BD1\u4E0E\u9006\u5411\u5DE5\u7A0B\u7B49\u624B\u6CD5\
+          \uFF0C\u67E5\u770B\u539F\u59CB\u7801\u3002\u518D\u56E0\u6B64\u627E\u51FA\
+          \u7A0B\u5F0F\u4E2D\uFF0C\u4E25\u91CD\u7684\u5B58\u53D6\u63A7\u5236\u7F3A\
+          \u9677\u3002\n\n**\u60C5\u5883 #3:** \u7A0B\u5F0F\u670D\u52A1\u5668\u7684\
+          \u8BBE\u5B9A\uFF0C\u5141\u8BB8\u8F93\u51FA\u5E26\u6709\u8BE6\u7EC6\u5185\
+          \u5BB9\u7684\u9519\u8BEF\u8BAF\u606F\uFF0C\u4F8B\u5982\u5806\u53E0\u8FFD\
+          \u8E2A\uFF0C\u4F9B\u7528\u6237\u67E5\u770B\u3002\u8FD9\u6709\u53EF\u80FD\
+          \u5BFC\u81F4\u654F\u611F\u8BAF\u606F\u7684\u5916\u6CC4\uFF0C\u6216\u95F4\
+          \u63A5\u900F\u9732\u51FA\uFF0C\u4F7F\u7528\u4E2D\uFF0C\u5E76\u5E26\u6709\
+          \u8106\u5F31\u6027\u7684\u5143\u4EF6\u7248\u672C\u3002\n\n**\u60C5\u5883\
+          \ #4:** \u4E00\u4E2A\u4E91\u7AEF\u670D\u52A1\u5668\uFF0C\u63D0\u4F9B\u4E86\
+          \u9884\u8BBE\u6743\u9650\u5206\u4EAB\uFF0C\u7ED9\u5176\u4ED6\u5728\u7F51\
+          \u9645\u7F51\u8DEF\u7684 CSP \u7528\u6237\u3002\u8FD9\u5C06\u5BFC\u81F4\u4E91\
+          \u7AEF\u50A8\u5B58\u7684\u654F\u611F\u8D44\u6599\u53EF\u4EE5\u88AB\u5B58\
+          \u53D6\u3002\n\n\n\u6709\u95DC\u53C3\u8003\u8CC7\u6599\u53CA\u5DF2\u5C0D\
+          \u61C9 CWE \u6E05\u55AE\u7684\u66F4\u591A\u8CC7\u8A0A\uFF1A https://top10.owasp.org/2021/zh-Hant/A05_2021-Security_Misconfiguration/"
   - urn: urn:intuitem:risk:threat:a06
     ref_id: A06:2021
     name: Vulnerable and Outdated Components
@@ -6465,7 +6463,7 @@ objects:
           \ aus, f\xFCr die schon Patches existieren.\n\n- Softwareentwickler f\xFC\
           hren keine Kompatibilit\xE4ts-Tests der aktualisierten oder gepatchten Bibliotheken\
           \ durch.\n\n- Die Komponenten sind nicht sicher konfiguriert (siehe **A05:2021-Sicherheitsrelevante\
-          \ Fehlkonfiguration**).\n<!-- TODO OSIB Link -->"
+          \ Fehlkonfiguration**)."
         annotation: "## Beurteilungskriterien\n\n| Zugeordnete CWEs | Maximale H\xE4\
           ufigkeit | Durchschn. H\xE4ufigkeit | Durchschn. Ausnutzbarkeit (gewichtet)\
           \ | Durchschn. Auswirkungen (gewichtet) | Maximale Abdeckung | Durchschnittliche\
@@ -6989,7 +6987,8 @@ objects:
           \ em abril de 2014.\n\n\nPara mais informa\xE7\xF5es sobre as refer\xEA\
           ncias e a lista de CWEs mapeadas: https://top10.owasp.org/2021/pt-BR/A06_2021-Vulnerable_and_Outdated_Components/"
       tr:
-        name: Vulnerable and Outdated Components
+        name: "G\xFCvenlik A\xE7\u0131\u011F\u0131 Bulunan ve G\xFCncel Olmayan Bile\u015F\
+          enler"
         description: "A\u015Fa\u011F\u0131daki durumlarda muhtemelen savunmas\u0131\
           zs\u0131n\u0131z:\n\n* Kulland\u0131\u011F\u0131n\u0131z t\xFCm bile\u015F\
           enlerin (hem client-side hem de server-side) versiyonlar\u0131n\u0131 bilmiyorsan\u0131\
@@ -7010,20 +7009,21 @@ objects:
           \ uygulanm\u0131\u015F k\xFCt\xFCphanelerin uyumlulu\u011Funu test etmiyorsa.\n\
           * Bile\u015Fenlerin configuration\u2019lar\u0131n\u0131 g\xFCvence alt\u0131\
           na alm\u0131yorsan\u0131z (bkz. **A05:2021-Security Misconfiguration**)."
-        annotation: "## Fakt\xF6rler\n\n| CWEs Mapped | Max Incidence Rate | Avg Incidence\
-          \ Rate | Max Coverage | Avg Coverage | Avg Weighted Exploit | Avg Weighted\
-          \ Impact | Total Occurrences | Total CVEs |\n| :---------: | :----------------:\
-          \ | :----------------: | :----------: | :----------: | :------------------:\
-          \ | :-----------------: | :---------------: | :--------: |\n|      3   \
-          \   |       27.96%       |        8.77%       |    51.78%    |    22.47%\
-          \    |         5.00         |         5.00        |       30,457      |\
-          \      0     |\n\n\n## Nas\u0131l \xD6nlenir\n\nA\u015Fa\u011F\u0131dakileri\
-          \ kapsayan bir patch management s\xFCreci olmal\u0131d\u0131r:\n\n* Kullan\u0131\
-          lmayan dependency\u2019leri, gereksiz \xF6zellikleri, bile\u015Fenleri,\
-          \ dosyalar\u0131 ve dok\xFCmantasyonu kald\u0131r\u0131n.\n* Hem client-side\
-          \ hem de server-side bile\u015Fenlerin (\xF6rn. framework\u2019ler, k\xFC\
-          t\xFCphaneler) ve dependency\u2019lerinin versiyonlar\u0131n\u0131 s\xFC\
-          rekli olarak envanterleyin; versions, OWASP Dependency Check, retire.js\
+        annotation: "## Fakt\xF6rler\n\n| CWEs E\u015Fle\u015Ftirildi | Maks G\xF6\
+          r\xFClme Oran\u0131 | Ort. G\xF6r\xFClme Oran\u0131 | Ort. A\u011F\u0131\
+          rl\u0131kl\u0131 Exploit | Ort. A\u011F\u0131rl\u0131kl\u0131 Impact | Maks\
+          \ Coverage | Ort. Coverage | Toplam Olay | Toplam CVE |\n| :---------: |\
+          \ :----------------: | :----------------: | :----------: | :----------:\
+          \ | :------------------: | :-----------------: | :---------------: | :--------:\
+          \ |\n|      3      |       27.96%       |        8.77%       |    51.78%\
+          \    |    22.47%    |         5.00         |         5.00        |     \
+          \  30,457      |      0     |\n\n\n## Nas\u0131l \xD6nlenir\n\nA\u015Fa\u011F\
+          \u0131dakileri kapsayan bir patch management s\xFCreci olmal\u0131d\u0131\
+          r:\n\n* Kullan\u0131lmayan dependency\u2019leri, gereksiz \xF6zellikleri,\
+          \ bile\u015Fenleri, dosyalar\u0131 ve dok\xFCmantasyonu kald\u0131r\u0131\
+          n.\n* Hem client-side hem de server-side bile\u015Fenlerin (\xF6rn. framework\u2019\
+          ler, k\xFCt\xFCphaneler) ve dependency\u2019lerinin versiyonlar\u0131n\u0131\
+          \ s\xFCrekli olarak envanterleyin; versions, OWASP Dependency Check, retire.js\
           \ vb. ara\xE7lar\u0131 kullan\u0131n. Common Vulnerabilities and Exposures\
           \ (CVE) ve National Vulnerability Database (NVD) gibi kaynaklar\u0131 bile\u015F\
           enlerdeki zafiyetler i\xE7in s\xFCrekli izleyin. Bu s\xFCreci otomatikle\u015F\
@@ -7089,60 +7089,59 @@ objects:
           \u672A\u4FDD\u62A4\u7EC4\u4EF6\u7684\u8BBE\u5B9A\u6863\u6848\u3002 \uFF08\
           \u8BF7\u53C2\u9605 A05:2021 - \u5B89\u5168\u8BBE\u5B9A\u7F3A\u9677 Security\
           \ Misconfiguration\uFF09\u3002"
-        annotation: "## \u5F31\u70B9\u56E0\u7D20(Factors)\n\n| \u53EF\u5BF9\u7167\
-          \ CWEs \u6570\u91CF | \u6700\u5927\u53D1\u751F\u7387 | \u5E73\u5747\u53D1\
-          \u751F\u7387 | \u6700\u5927\u8986\u76D6\u8303\u56F4 | \u5E73\u5747\u8986\
-          \u76D6\u8303\u56F4 | \u5E73\u5747\u52A0\u6743\u6F0F\u6D1E | \u5E73\u5747\
-          \u52A0\u6743\u5F71\u54CD | \u51FA\u73B0\u6B21\u6570 | \u6240\u6709\u76F8\
-          \u5173 CVEs \u6570\u91CF |\n| :--------------: | :--------: | :--------:\
-          \ | :----------: | :----------: | :----------: | :----------: | :------:\
-          \ | :----------------: |\n|        3         |   27.96%   |   8.77%    |\
-          \    51.78%    |    22.47%    |     5.00     |     5.00     |  30,457  |\
-          \         0          |\n\n\n## \u5982\u4F55\u9884\u9632(How to Prevent)\n\
-          \n\u5E94\u8BE5\u8BBE\u7F6E\u4FEE\u8865\u7A0B\u5F0F\u7BA1\u7406\u6D41\u7A0B\
-          \u6765\uFF1A\n\n- \u5220\u9664\u672A\u4F7F\u7528\u7684\u76F8\u4F9D\u5957\
-          \u4EF6\u3001\u4E0D\u5FC5\u8981\u7684\u529F\u80FD\u3001\u7EC4\u4EF6\u3001\
-          \u6863\u6848\u53CA\u6587\u4EF6\u3002\n\n- \u6301\u7EED\u4F7F\u7528\u7248\
-          \u63A7\u5DE5\u5177\u6765\u76D8\u70B9\u5BA2\u6237\u7AEF\u548C\u4F3A\u670D\
-          \u5668\u7AEF\u7EC4\u4EF6\uFF08\u4F8B\u5982\u6846\u67B6\u3001\u7A0B\u5F0F\
-          \u5E93\uFF09\u53CA\u76F8\u4F9D\u7EC4\u4EF6\u7684\u7248\u672C\uFF0C\u5982\
-          \u7248\u63A7\u5DE5\u5177\u3001OWASP Dependency Check\u3001retire.js \u7B49\
-          \u3002\n  \u6301\u7EED\u76D1\u63A7 CVE \u548C NVD \u7B49\u7B49\u6765\u6E90\
-          \u6765\u786E\u8BA4\u662F\u7EC4\u4EF6\u662F\u5426\u5B58\u5728\u7684\u6F0F\
-          \u6D1E\u3002\u4F7F\u7528\u8F6F\u4F53\u7EC4\u5408\u5206\u6790\u5DE5\u5177\
-          \u6765\u81EA\u52A8\u5316\u8BE5\u6D41\u7A0B\u3002\n  \u8BA2\u9605\u60A8\u4F7F\
-          \u7528\u7684\u7EC4\u4EF6\u76F8\u5173\u7684\u5B89\u5168\u6F0F\u6D1E\u7684\
-          \u8D44\u5B89\u901A\u62A5\u3002\n- \u6301\u7EED\u76D8\u70B9\u5BA2\u6237\u7AEF\
-          \u548C\u4F3A\u670D\u5668\u7AEF\u7EC4\u4EF6\uFF08\u4F8B\u5982\u6846\u67B6\
-          \u3001\u7A0B\u5F0F\u5E93\uFF09\u53CA\u76F8\u4F9D\u7EC4\u4EF6\u7684\u7248\
-          \u672C\uFF0C\u5982\u7248\u63A7\u5DE5\u5177\u3001OWASP Dependency Check\u3001\
-          retire.js \u7B49\u3002\n  \u6301\u7EED\u76D1\u63A7 CVE \u548C NVD \u7B49\
-          \u7B49\u6765\u6E90\u6765\u786E\u8BA4\u662F\u7EC4\u4EF6\u662F\u5426\u5B58\
-          \u5728\u7684\u6F0F\u6D1E\u3002\n  \u4F7F\u7528\u8F6F\u4F53\u7EC4\u5408\u5206\
-          \u6790\u5DE5\u5177\u6765\u81EA\u52A8\u5316\u8BE5\u6D41\u7A0B\u3002\n  \u8BA2\
-          \u9605\u60A8\u4F7F\u7528\u7684\u7EC4\u4EF6\u76F8\u5173\u7684\u5B89\u5168\
-          \u6F0F\u6D1E\u7684\u8D44\u5B89\u901A\u62A5\u3002\n  \u4F7F\u7528\u8BF8\u5982\
-          \u7248\u63A7\u5DE5\u5177\u3001OWASP Dependency Check\u3001retire.js \u7B49\
-          \u5DE5\u5177\u6301\u7EED\u76D8\u70B9\u5BA2\u6237\u7AEF\u548C\u670D\u52A1\
-          \u5668\u7AEF\u7EC4\u4EF6\uFF08\u4F8B\u5982\u6846\u67B6\u3001\u7A0B\u5F0F\
-          \u5E93\uFF09\u53CA\u5176\u76F8\u4F9D\u7EC4\u4EF6\u7684\u7248\u672C\u3002\
-          \n- \u4EC5\u900F\u8FC7\u5B98\u65B9\u63D0\u4F9B\u7684\u5B89\u5168\u8FDE\u7ED3\
-          \u6765\u53D6\u5F97\u7EC4\u4EF6\u3002\n  \u4F18\u5148\u9009\u62E9\u5DF2\u7B7E\
-          \u7F72\u7684\u66F4\u65B0\u5305\uFF0C\u4EE5\u964D\u4F4E\u66F4\u65B0\u5305\
-          \u88AB\u52A0\u5165\u6076\u610F\u7EC4\u4EF6\u7684\u53EF\u80FD\u3002 \uFF08\
-          \u8BF7\u53C2\u9605 A08:2021-\u8F6F\u4F53\u53CA\u8D44\u6599\u5B8C\u6574\u6027\
-          \u5931\u6548\uFF09\u3002\n\n- \u76D1\u63A7\u672A\u7EF4\u62A4\u6216\u672A\
-          \u4E3A\u65E7\u7248\u672C\u521B\u5EFA\u5B89\u5168\u4FEE\u8865\u7A0B\u5F0F\
-          \u7684\u7A0B\u5F0F\u5E93\u548C\u7EC4\u4EF6\u3002\n  \u5982\u679C\u65E0\u6CD5\
-          \u4FEE\u8865\u7A0B\u5F0F\uFF0C\u8BF7\u8003\u8651\u90E8\u7F72\u865A\u62DF\
-          \u4FEE\u8865\u7A0B\u5F0F\u6765\u76D1\u63A7\u3001\u68C0\u6D4B\u6216\u9632\
-          \u5FA1\u5DF2\u53D1\u73B0\u7684\u7279\u5B9A\u5F31\u70B9\u3002\n\n\u6BCF\u4E2A\
-          \u7EC4\u7EC7\u90FD\u5FC5\u987B\u786E\u4FDD\u5728\u5E94\u7528\u7A0B\u5F0F\
-          \u6216\u5F00\u53D1\u4E13\u6848(portfolio)\u7684\u751F\u547D\u5468\u671F\u5185\
-          \u5236\u8BA2\u6301\u7EED\u76D1\u63A7\u3001\u9274\u522B\u5206\u7C7B(triaging)\
-          \ \u53CA \u7533\u8BF7\u66F4\u65B0 \u6216\u662F \u66F4\u6539\u914D\u7F6E\u7684\
-          \u8BA1\u5212\u3002\n\n\n## \u653B\u51FB\u60C5\u5883\u8303\u4F8B(Example\
-          \ Attack Scenarios)\n\n**\u60C5\u5883 #1\uFF1A** \u7EC4\u4EF6\u901A\u5E38\
+        annotation: "## \u5F31\u70B9\u56E0\u7D20\n\n| \u53EF\u5BF9\u7167 CWEs \u6570\
+          \u91CF | \u6700\u5927\u53D1\u751F\u7387 | \u5E73\u5747\u53D1\u751F\u7387\
+          \ | \u6700\u5927\u8986\u76D6\u8303\u56F4 | \u5E73\u5747\u8986\u76D6\u8303\
+          \u56F4 | \u5E73\u5747\u52A0\u6743\u6F0F\u6D1E | \u5E73\u5747\u52A0\u6743\
+          \u5F71\u54CD | \u51FA\u73B0\u6B21\u6570 | \u6240\u6709\u76F8\u5173 CVEs\
+          \ \u6570\u91CF |\n| :--------------: | :--------: | :--------: | :----------:\
+          \ | :----------: | :----------: | :----------: | :------: | :----------------:\
+          \ |\n|        3         |   27.96%   |   8.77%    |    51.78%    |    22.47%\
+          \    |     5.00     |     5.00     |  30,457  |         0          |\n\n\
+          \n## \u5982\u4F55\u9884\u9632\n\n\u5E94\u8BE5\u8BBE\u7F6E\u4FEE\u8865\u7A0B\
+          \u5F0F\u7BA1\u7406\u6D41\u7A0B\u6765\uFF1A\n\n- \u5220\u9664\u672A\u4F7F\
+          \u7528\u7684\u76F8\u4F9D\u5957\u4EF6\u3001\u4E0D\u5FC5\u8981\u7684\u529F\
+          \u80FD\u3001\u7EC4\u4EF6\u3001\u6863\u6848\u53CA\u6587\u4EF6\u3002\n\n-\
+          \ \u6301\u7EED\u4F7F\u7528\u7248\u63A7\u5DE5\u5177\u6765\u76D8\u70B9\u5BA2\
+          \u6237\u7AEF\u548C\u4F3A\u670D\u5668\u7AEF\u7EC4\u4EF6\uFF08\u4F8B\u5982\
+          \u6846\u67B6\u3001\u7A0B\u5F0F\u5E93\uFF09\u53CA\u76F8\u4F9D\u7EC4\u4EF6\
+          \u7684\u7248\u672C\uFF0C\u5982\u7248\u63A7\u5DE5\u5177\u3001OWASP Dependency\
+          \ Check\u3001retire.js \u7B49\u3002\n  \u6301\u7EED\u76D1\u63A7 CVE \u548C\
+          \ NVD \u7B49\u7B49\u6765\u6E90\u6765\u786E\u8BA4\u662F\u7EC4\u4EF6\u662F\
+          \u5426\u5B58\u5728\u7684\u6F0F\u6D1E\u3002\u4F7F\u7528\u8F6F\u4F53\u7EC4\
+          \u5408\u5206\u6790\u5DE5\u5177\u6765\u81EA\u52A8\u5316\u8BE5\u6D41\u7A0B\
+          \u3002\n  \u8BA2\u9605\u60A8\u4F7F\u7528\u7684\u7EC4\u4EF6\u76F8\u5173\u7684\
+          \u5B89\u5168\u6F0F\u6D1E\u7684\u8D44\u5B89\u901A\u62A5\u3002\n- \u6301\u7EED\
+          \u76D8\u70B9\u5BA2\u6237\u7AEF\u548C\u4F3A\u670D\u5668\u7AEF\u7EC4\u4EF6\
+          \uFF08\u4F8B\u5982\u6846\u67B6\u3001\u7A0B\u5F0F\u5E93\uFF09\u53CA\u76F8\
+          \u4F9D\u7EC4\u4EF6\u7684\u7248\u672C\uFF0C\u5982\u7248\u63A7\u5DE5\u5177\
+          \u3001OWASP Dependency Check\u3001retire.js \u7B49\u3002\n  \u6301\u7EED\
+          \u76D1\u63A7 CVE \u548C NVD \u7B49\u7B49\u6765\u6E90\u6765\u786E\u8BA4\u662F\
+          \u7EC4\u4EF6\u662F\u5426\u5B58\u5728\u7684\u6F0F\u6D1E\u3002\n  \u4F7F\u7528\
+          \u8F6F\u4F53\u7EC4\u5408\u5206\u6790\u5DE5\u5177\u6765\u81EA\u52A8\u5316\
+          \u8BE5\u6D41\u7A0B\u3002\n  \u8BA2\u9605\u60A8\u4F7F\u7528\u7684\u7EC4\u4EF6\
+          \u76F8\u5173\u7684\u5B89\u5168\u6F0F\u6D1E\u7684\u8D44\u5B89\u901A\u62A5\
+          \u3002\n  \u4F7F\u7528\u8BF8\u5982\u7248\u63A7\u5DE5\u5177\u3001OWASP Dependency\
+          \ Check\u3001retire.js \u7B49\u5DE5\u5177\u6301\u7EED\u76D8\u70B9\u5BA2\u6237\
+          \u7AEF\u548C\u670D\u52A1\u5668\u7AEF\u7EC4\u4EF6\uFF08\u4F8B\u5982\u6846\
+          \u67B6\u3001\u7A0B\u5F0F\u5E93\uFF09\u53CA\u5176\u76F8\u4F9D\u7EC4\u4EF6\
+          \u7684\u7248\u672C\u3002\n- \u4EC5\u900F\u8FC7\u5B98\u65B9\u63D0\u4F9B\u7684\
+          \u5B89\u5168\u8FDE\u7ED3\u6765\u53D6\u5F97\u7EC4\u4EF6\u3002\n  \u4F18\u5148\
+          \u9009\u62E9\u5DF2\u7B7E\u7F72\u7684\u66F4\u65B0\u5305\uFF0C\u4EE5\u964D\
+          \u4F4E\u66F4\u65B0\u5305\u88AB\u52A0\u5165\u6076\u610F\u7EC4\u4EF6\u7684\
+          \u53EF\u80FD\u3002 \uFF08\u8BF7\u53C2\u9605 A08:2021-\u8F6F\u4F53\u53CA\u8D44\
+          \u6599\u5B8C\u6574\u6027\u5931\u6548\uFF09\u3002\n\n- \u76D1\u63A7\u672A\
+          \u7EF4\u62A4\u6216\u672A\u4E3A\u65E7\u7248\u672C\u521B\u5EFA\u5B89\u5168\
+          \u4FEE\u8865\u7A0B\u5F0F\u7684\u7A0B\u5F0F\u5E93\u548C\u7EC4\u4EF6\u3002\
+          \n  \u5982\u679C\u65E0\u6CD5\u4FEE\u8865\u7A0B\u5F0F\uFF0C\u8BF7\u8003\u8651\
+          \u90E8\u7F72\u865A\u62DF\u4FEE\u8865\u7A0B\u5F0F\u6765\u76D1\u63A7\u3001\
+          \u68C0\u6D4B\u6216\u9632\u5FA1\u5DF2\u53D1\u73B0\u7684\u7279\u5B9A\u5F31\
+          \u70B9\u3002\n\n\u6BCF\u4E2A\u7EC4\u7EC7\u90FD\u5FC5\u987B\u786E\u4FDD\u5728\
+          \u5E94\u7528\u7A0B\u5F0F\u6216\u5F00\u53D1\u4E13\u6848(portfolio)\u7684\u751F\
+          \u547D\u5468\u671F\u5185\u5236\u8BA2\u6301\u7EED\u76D1\u63A7\u3001\u9274\
+          \u522B\u5206\u7C7B(triaging) \u53CA \u7533\u8BF7\u66F4\u65B0 \u6216\u662F\
+          \ \u66F4\u6539\u914D\u7F6E\u7684\u8BA1\u5212\u3002\n\n\n## \u653B\u51FB\u60C5\
+          \u5883\u8303\u4F8B\n\n**\u60C5\u5883 #1\uFF1A** \u7EC4\u4EF6\u901A\u5E38\
           \u4EE5\u4E0E\u5E94\u7528\u7A0B\u5F0F\u672C\u8EAB\u76F8\u540C\u7684\u6743\
           \u9650\u8FD0\u884C\uFF0C\u56E0\u6B64\u4EFB\u4F55\u7EC4\u4EF6\u4E2D\u7684\
           \u7F3A\u9677\u90FD\u53EF\u80FD\u5BFC\u81F4\u4E25\u91CD\u7684\u5F71\u54CD\
@@ -8171,7 +8170,7 @@ objects:
           \n\nPara mais informa\xE7\xF5es sobre as refer\xEAncias e a lista de CWEs\
           \ mapeadas: https://top10.owasp.org/2021/pt-BR/A07_2021-Identification_and_Authentication_Failures/"
       tr:
-        name: Identification and Authentication Failures
+        name: "Kimlik Do\u011Frulama Hatalar\u0131"
         description: "Kullan\u0131c\u0131n\u0131n kimli\u011Finin do\u011Frulanmas\u0131\
           , authentication ve session y\xF6netimi; authentication kaynakl\u0131 sald\u0131\
           r\u0131lara kar\u015F\u0131 korunmak i\xE7in kritiktir. A\u015Fa\u011F\u0131\
@@ -8194,9 +8193,10 @@ objects:
           \ veya authentication token\u2019lar\u0131 (\xF6zellikle single sign-on\
           \ (SSO) token\u2019lar\u0131) logout s\u0131ras\u0131nda veya belli bir\
           \ inactivity s\xFCresinden sonra d\xFCzg\xFCn bi\xE7imde invalid edilmiyorsa."
-        annotation: "## Fakt\xF6rler\n\n| CWEs Mapped | Max Incidence Rate | Avg Incidence\
-          \ Rate | Avg Weighted Exploit | Avg Weighted Impact | Max Coverage | Avg\
-          \ Coverage | Total Occurrences | Total CVEs |\n|:-------------:|:--------------------:|:--------------------:|:--------------:|:--------------:|:----------------------:|:---------------------:|:-------------------:|:------------:|\n\
+        annotation: "## Fakt\xF6rler\n\n| CWEs E\u015Fle\u015Ftirildi | Maks G\xF6\
+          r\xFClme Oran\u0131 | Ort. G\xF6r\xFClme Oran\u0131 | Ort. A\u011F\u0131\
+          rl\u0131kl\u0131 Exploit | Ort. A\u011F\u0131rl\u0131kl\u0131 Impact | Maks\
+          \ Coverage | Ort. Coverage | Toplam Olay | Toplam CVE |\n|:-------------:|:--------------------:|:--------------------:|:--------------:|:--------------:|:----------------------:|:---------------------:|:-------------------:|:------------:|\n\
           | 22          | 14.84%             | 2.55%              | 7.40         \
           \        | 6.50                | 79.51%       | 45.72%       | 132,195 \
           \          | 3,897      |\n\n\n## Nas\u0131l \xD6nlenir\n\n-   M\xFCmk\xFC\
@@ -9243,7 +9243,7 @@ objects:
           \ de c\xF3digo no servidor de aplica\xE7\xE3o.\n\n\nPara mais informa\xE7\
           \xF5es sobre as refer\xEAncias e a lista de CWEs mapeadas: https://top10.owasp.org/2021/pt-BR/A08_2021-Software_and_Data_Integrity_Failures/"
       tr:
-        name: Software and Data Integrity Failures
+        name: "Yaz\u0131l\u0131m ve Veri B\xFCt\xFCnl\xFC\u011F\xFC Hatalar\u0131"
         description: "Software ve data integrity hatalar\u0131; integrity ihlallerine\
           \ kar\u015F\u0131 koruma sa\u011Flamayan code ve infrastructure ile ilgilidir.\
           \ \xD6rne\u011Fin bir uygulaman\u0131n, g\xFCvenilmeyen kaynaklardan, repository\u2019\
@@ -9259,9 +9259,10 @@ objects:
           lerin veya verilerin attacker\u2019\u0131n g\xF6r\xFCp de\u011Fi\u015Ftirebilece\u011F\
           i bir yap\u0131ya encode veya serialize edilmesi; bu, insecure deserialization\u2019\
           a kar\u015F\u0131 savunmas\u0131zd\u0131r."
-        annotation: "## Fakt\xF6rler\n\n| CWEs Mapped | Max Incidence Rate | Avg Incidence\
-          \ Rate | Avg Weighted Exploit | Avg Weighted Impact | Max Coverage | Avg\
-          \ Coverage | Total Occurrences | Total CVEs |\n|:-------------:|:--------------------:|:--------------------:|:--------------:|:--------------:|:----------------------:|:---------------------:|:-------------------:|:------------:|\n\
+        annotation: "## Fakt\xF6rler\n\n| CWEs E\u015Fle\u015Ftirildi | Maks G\xF6\
+          r\xFClme Oran\u0131 | Ort. G\xF6r\xFClme Oran\u0131 | Ort. A\u011F\u0131\
+          rl\u0131kl\u0131 Exploit | Ort. A\u011F\u0131rl\u0131kl\u0131 Impact | Maks\
+          \ Coverage | Ort. Coverage | Toplam Olay | Toplam CVE |\n|:-------------:|:--------------------:|:--------------------:|:--------------:|:--------------:|:----------------------:|:---------------------:|:-------------------:|:------------:|\n\
           | 10          | 16.67%             | 2.05%              | 6.94         \
           \        | 7.94                | 75.04%       | 45.35%       | 47,972  \
           \          | 1,152      |\n\n\n## Nas\u0131l \xD6nlenir\n\n-   Software\
@@ -9334,66 +9335,65 @@ objects:
           \uFF0C\u66F4\u65B0\u6863\u6848\u5C06\u4F20\u64AD\u5230\u6240\u6709\u5DF2\
           \u5B89\u88C5\u4E4B\u5E94\u7528\u7A0B\u5F0F\u5E76\u5728\u8FD9\u4E9B\u5E94\
           \u7528\u7A0B\u5F0F\u4E0A\u6267\u884C\u3002"
-        annotation: "## \u5F31\u70B9\u7B80\u4ECB\n\n\u8FD9\u662F 2021 \u5E74\u7684\
-          \u65B0\u7C7B\u578B\uFF0C\u7740\u91CD\u5728\u8F6F\u4F53\u66F4\u65B0\uFF0C\
-          \u5173\u952E\u8D44\u6599\u53CA\u6301\u7EED\u6027\u6574\u5408/\u90E8\u7F72\
-          (CI/CD)\u6D41\u7A0B\u672A\u7ECF\u5B8C\u6574\u6027\u9A8C\u8BC1\u4E4B\u5047\
-          \u8BBE\u3002\u540C\u65F6\u5728 CVE/CVSS \u8D44\u6599\u52A0\u6743\u540E\u4E4B\
-          \u6700\u9AD8\u5F71\u54CD\u4E4B\u4E00\u3002\u503C\u5F97\u6CE8\u610F\u7684\
-          \ CWE \u5305\u542B CWE-502\uFF1A\u4E0D\u53D7\u4FE1\u4EFB\u8D44\u6599\u4E4B\
-          \u53CD\u5E8F\u5217\u5316\uFF0CCWE-829\uFF1A\u5305\u542B\u6765\u81EA\u4E0D\
-          \u53D7\u4FE1\u4EFB\u63A7\u5236\u9886\u57DF\u4E4B\u529F\u80FD\u53CA CWE-494\uFF1A\
-          \u4E0B\u8F7D\u672A\u7ECF\u5B8C\u6574\u6027\u9A8C\u8BC1\u4E4B\u7A0B\u5F0F\
-          \u7801\u3002\n\n\n## \u5F31\u70B9\u63CF\u8FF0\n\n- \u786E\u4FDD\u4E0D\u53D7\
-          \u4FE1\u4EFB\u4E4B\u5BA2\u6237\u7AEF\u4E0D\u4F1A\u6536\u5230\u672A\u7B7E\
-          \u7F72\u6216\u52A0\u5BC6\u4E4B\u5E8F\u5217\u5316\u8D44\u6599\u5E76\u5229\
-          \u7528\u5B8C\u6574\u6027\u68C0\u67E5\u6216\u6570\u4F4D\u7B7E\u7AE0\u6765\
-          \u4FA6\u6D4B\u7A9C\u6539\u6216\u91CD\u653E\u653B\u51FB\u3002\n\n- \u5229\
-          \u7528\u6570\u4F4D\u7B7E\u7AE0\u6216\u7C7B\u4F3C\u673A\u5236\u786E\u4FDD\
-          \u8F6F\u4F53\u6216\u8D44\u6599\u6765\u81EA\u9884\u671F\u4E4B\u63D0\u4F9B\
-          \u8005\n- \u786E\u4FDD\u51FD\u5F0F\u5E93\u53CA\u4ECE\u5C5E\u5957\u4EF6\uFF0C\
-          \u4F8B\u5982 npm \u6216 Maven\uFF0C\u662F\u4ECE\u53D7\u4FE1\u4EFB\u7684\u5178\
-          \u85CF\u5E93\u53D6\u5F97\u3002\n\n- \u4F7F\u7528\u8F6F\u4F53\u4F9B\u5E94\
-          \u94FE\u5B89\u5168\u5DE5\u5177(\u4F8B\u5982 OWASP Dependency Check \u6216\
-          \ OWASP CycloneDX)\u786E\u4FDD\u5143\u4EF6\u6CA1\u6709\u5DF2\u77E5\u5F31\
-          \u70B9\u3002\n- \u9002\u5F53\u5730\u8BBE\u5B9A\u6301\u7EED\u6027\u6574\u5408\
-          /\u90E8\u7F72(CI/CD)\u6D41\u7A0B\u7684\u7EC4\u6001\u53CA\u5B58\u53D6\u63A7\
-          \u5236\u4EE5\u786E\u4FDD\u7A0B\u5F0F\u7801\u5728\u7EC4\u5EFA\u53CA\u90E8\
-          \u7F72\u6D41\u7A0B\u4E2D\u7684\u5B8C\u6574\u6027\u3002\n\n\n## \u653B\u51FB\
-          \u60C5\u5883\u8303\u4F8B\n\n**\u60C5\u5883 1 \u4E0D\u5B89\u5168\u7684\u53CD\
-          \u5E8F\u5217\u5316**\uFF1A\u4E00\u4E2A\u53CD\u5E94\u5F0F\u5E94\u7528\u7A0B\
-          \u5F0F\u547C\u53EB Spring Boot \u5FAE\u670D\u52A1\u3002\u7A0B\u5F0F\u8BBE\
-          \u8BA1\u5E08\u4EEC\u8BD5\u56FE\u786E\u4FDD\u4ED6\u4EEC\u7684\u4EE3\u7801\
-          \u662F\u4E0D\u53EF\u53D8\u7684\u3002\u4ED6\u4EEC\u7684\u89E3\u51B3\u65B9\
-          \u6848\u662F\u5728\u53CC\u5411\u6240\u6709\u8BF7\u6C42\u8BAF\u606F\u4E2D\
-          \u5305\u542B\u5E8F\u5217\u5316\u7684\u7528\u6237\u72B6\u6001\u3002\u653B\
-          \u51FB\u8005\u6CE8\u610F\u5230\u201CR00\u201DJava \u7269\u4EF6\u7B7E\u7AE0\
-          \u5E76\u4F7F\u7528 Java Serial Killer \u5DE5\u5177(\u7528\u6765\u6267\u884C\
-          \ Java \u53CD\u5E8F\u5217\u5316\u653B\u51FB)\u5728\u5E94\u7528\u7A0B\u5F0F\
-          \u670D\u52A1\u5668\u8FDC\u7AEF\u6267\u884C\u7A0B\u5F0F\u7801\u3002\n\n**\u60C5\
-          \u5883 2 \u672A\u7B7E\u7F72\u4E4B\u66F4\u65B0**\uFF1A\u8BB8\u591A\u5BB6\u7528\
-          \u8DEF\u7531\u5668\u3001\u673A\u4E0A\u76D2\u3001\u88C5\u7F6E\u97E7\u4F53\
-          \u7B49\u672A\u4EE5\u901A\u8FC7\u7B7E\u7F72\u4E4B\u97E7\u4F53\u9A8C\u8BC1\
-          \u66F4\u65B0\u6863\u6848\u3002\u672A\u7B7E\u7F72\u97E7\u4F53\u662F\u8D8A\
-          \u6765\u8D8A\u591A\u653B\u51FB\u8005\u7684\u76EE\u6807\u4E14\u60C5\u51B5\
-          \u53EA\u4F1A\u53D8\u5F97\u66F4\u7CDF\u3002\u8FD9\u662F\u4E00\u4E2A\u4E3B\
-          \u8981\u95EE\u9898\uFF0C\u56E0\u4E3A\u53EA\u80FD\u4EE5\u65B0\u7248\u672C\
-          \u4FEE\u590D\u6B64\u673A\u5236\u5E76\u671F\u5F85\u65E7\u7248\u672C\u81EA\
-          \u7136\u6DD8\u6C70\uFF0C\u6CA1\u6709\u5176\u4ED6\u65B9\u6CD5\u3002\n\n**\u60C5\
-          \u5883 3 SolarWinds \u6076\u610F\u66F4\u65B0**\uFF1A\u4F17\u6240\u5468\u77E5\
-          \uFF0C\u67D0\u4E9B\u56FD\u5BB6\u4F1A\u653B\u51FB\u66F4\u65B0\u673A\u5236\
-          \uFF0C\u6700\u8FD1\u4E00\u6B21\u503C\u5F97\u6CE8\u610F\u7684\u662F\u5BF9\
-          \ SolarWinds Orion \u7684\u653B\u51FB\u3002\u8BE5\u8F6F\u4F53\u5F00\u53D1\
-          \u5546\u62E5\u6709\u5B89\u5168\u7EC4\u5EFA\u548C\u66F4\u65B0\u5B8C\u6574\
-          \u6027\u6D41\u7A0B\u3002\u5C3D\u7BA1\u5982\u6B64\uFF0C\u8FD9\u4E9B\u6D41\
-          \u7A0B\u4ECD\u88AB\u7834\u574F\u5E76\u5728\u51E0\u4E2A\u6708\u65F6\u95F4\
-          \u4E2D\u5411 18,000 \u591A\u4E2A\u7EC4\u7EC7\u9001\u51FA\u9AD8\u5EA6\u9488\
-          \u5BF9\u6027\u7684\u6076\u610F\u66F4\u65B0\uFF0C\u5176\u4E2D\u5927\u7EA6\
-          \ 100 \u4E2A\u7EC4\u7EC7\u53D7\u5230\u4E86\u5F71\u54CD\u3002\u8FD9\u662F\
-          \u5386\u53F2\u4E0A\u6B64\u7C7B\u6027\u8D28\u6700\u6DF1\u8FDC\u3001\u6700\
-          \u91CD\u5927\u7684\u8D44\u5B89\u4E8B\u4EF6\u4E4B\u4E00\u3002\n\n\n\u6709\
-          \u95DC\u53C3\u8003\u8CC7\u6599\u53CA\u5DF2\u5C0D\u61C9 CWE \u6E05\u55AE\u7684\
-          \u66F4\u591A\u8CC7\u8A0A\uFF1A https://top10.owasp.org/2021/zh-Hant/A08_2021-Software_and_Data_Integrity_Failures/"
+        annotation: "## \u5F31\u70B9\u56E0\u7D20\n\n| \u5BF9\u5E94\u7684 CWEs \u6570\
+          \u91CF | \u6700\u5927\u53D1\u751F\u7387 | \u5E73\u5747\u53D1\u751F\u7387\
+          \ | \u6700\u5927\u8986\u76D6\u8303\u56F4 | \u5E73\u5747\u8986\u76D6\u8303\
+          \u56F4 | \u5E73\u5747\u52A0\u6743\u6F0F\u6D1E | \u5E73\u5747\u52A0\u6743\
+          \u5F71\u54CD | \u51FA\u73B0\u6B21\u6570 | \u76F8\u5173 CVEs \u603B\u91CF\
+          \ |\n| :--------------: | :--------: | :--------: | :----------: | :----------:\
+          \ | :----------: | :----------: | :------: | :------------: |\n|       \
+          \ 10        |   16.67%   |   2.05%    |    75.04%    |    45.35%    |  \
+          \   6.94     |     7.94     |  47,972  |     1,152      |\n\n\n## \u5982\
+          \u4F55\u9884\u9632\n\n- \u786E\u4FDD\u4E0D\u53D7\u4FE1\u4EFB\u4E4B\u5BA2\
+          \u6237\u7AEF\u4E0D\u4F1A\u6536\u5230\u672A\u7B7E\u7F72\u6216\u52A0\u5BC6\
+          \u4E4B\u5E8F\u5217\u5316\u8D44\u6599\u5E76\u5229\u7528\u5B8C\u6574\u6027\
+          \u68C0\u67E5\u6216\u6570\u4F4D\u7B7E\u7AE0\u6765\u4FA6\u6D4B\u7A9C\u6539\
+          \u6216\u91CD\u653E\u653B\u51FB\u3002\n\n- \u5229\u7528\u6570\u4F4D\u7B7E\
+          \u7AE0\u6216\u7C7B\u4F3C\u673A\u5236\u786E\u4FDD\u8F6F\u4F53\u6216\u8D44\
+          \u6599\u6765\u81EA\u9884\u671F\u4E4B\u63D0\u4F9B\u8005\n- \u786E\u4FDD\u51FD\
+          \u5F0F\u5E93\u53CA\u4ECE\u5C5E\u5957\u4EF6\uFF0C\u4F8B\u5982 npm \u6216\
+          \ Maven\uFF0C\u662F\u4ECE\u53D7\u4FE1\u4EFB\u7684\u5178\u85CF\u5E93\u53D6\
+          \u5F97\u3002\n\n- \u4F7F\u7528\u8F6F\u4F53\u4F9B\u5E94\u94FE\u5B89\u5168\
+          \u5DE5\u5177(\u4F8B\u5982 OWASP Dependency Check \u6216 OWASP CycloneDX)\u786E\
+          \u4FDD\u5143\u4EF6\u6CA1\u6709\u5DF2\u77E5\u5F31\u70B9\u3002\n- \u9002\u5F53\
+          \u5730\u8BBE\u5B9A\u6301\u7EED\u6027\u6574\u5408/\u90E8\u7F72(CI/CD)\u6D41\
+          \u7A0B\u7684\u7EC4\u6001\u53CA\u5B58\u53D6\u63A7\u5236\u4EE5\u786E\u4FDD\
+          \u7A0B\u5F0F\u7801\u5728\u7EC4\u5EFA\u53CA\u90E8\u7F72\u6D41\u7A0B\u4E2D\
+          \u7684\u5B8C\u6574\u6027\u3002\n\n\n## \u653B\u51FB\u60C5\u5883\u8303\u4F8B\
+          \n\n**\u60C5\u5883 1 \u4E0D\u5B89\u5168\u7684\u53CD\u5E8F\u5217\u5316**\uFF1A\
+          \u4E00\u4E2A\u53CD\u5E94\u5F0F\u5E94\u7528\u7A0B\u5F0F\u547C\u53EB Spring\
+          \ Boot \u5FAE\u670D\u52A1\u3002\u7A0B\u5F0F\u8BBE\u8BA1\u5E08\u4EEC\u8BD5\
+          \u56FE\u786E\u4FDD\u4ED6\u4EEC\u7684\u4EE3\u7801\u662F\u4E0D\u53EF\u53D8\
+          \u7684\u3002\u4ED6\u4EEC\u7684\u89E3\u51B3\u65B9\u6848\u662F\u5728\u53CC\
+          \u5411\u6240\u6709\u8BF7\u6C42\u8BAF\u606F\u4E2D\u5305\u542B\u5E8F\u5217\
+          \u5316\u7684\u7528\u6237\u72B6\u6001\u3002\u653B\u51FB\u8005\u6CE8\u610F\
+          \u5230\u201CR00\u201DJava \u7269\u4EF6\u7B7E\u7AE0\u5E76\u4F7F\u7528 Java\
+          \ Serial Killer \u5DE5\u5177(\u7528\u6765\u6267\u884C Java \u53CD\u5E8F\u5217\
+          \u5316\u653B\u51FB)\u5728\u5E94\u7528\u7A0B\u5F0F\u670D\u52A1\u5668\u8FDC\
+          \u7AEF\u6267\u884C\u7A0B\u5F0F\u7801\u3002\n\n**\u60C5\u5883 2 \u672A\u7B7E\
+          \u7F72\u4E4B\u66F4\u65B0**\uFF1A\u8BB8\u591A\u5BB6\u7528\u8DEF\u7531\u5668\
+          \u3001\u673A\u4E0A\u76D2\u3001\u88C5\u7F6E\u97E7\u4F53\u7B49\u672A\u4EE5\
+          \u901A\u8FC7\u7B7E\u7F72\u4E4B\u97E7\u4F53\u9A8C\u8BC1\u66F4\u65B0\u6863\
+          \u6848\u3002\u672A\u7B7E\u7F72\u97E7\u4F53\u662F\u8D8A\u6765\u8D8A\u591A\
+          \u653B\u51FB\u8005\u7684\u76EE\u6807\u4E14\u60C5\u51B5\u53EA\u4F1A\u53D8\
+          \u5F97\u66F4\u7CDF\u3002\u8FD9\u662F\u4E00\u4E2A\u4E3B\u8981\u95EE\u9898\
+          \uFF0C\u56E0\u4E3A\u53EA\u80FD\u4EE5\u65B0\u7248\u672C\u4FEE\u590D\u6B64\
+          \u673A\u5236\u5E76\u671F\u5F85\u65E7\u7248\u672C\u81EA\u7136\u6DD8\u6C70\
+          \uFF0C\u6CA1\u6709\u5176\u4ED6\u65B9\u6CD5\u3002\n\n**\u60C5\u5883 3 SolarWinds\
+          \ \u6076\u610F\u66F4\u65B0**\uFF1A\u4F17\u6240\u5468\u77E5\uFF0C\u67D0\u4E9B\
+          \u56FD\u5BB6\u4F1A\u653B\u51FB\u66F4\u65B0\u673A\u5236\uFF0C\u6700\u8FD1\
+          \u4E00\u6B21\u503C\u5F97\u6CE8\u610F\u7684\u662F\u5BF9 SolarWinds Orion\
+          \ \u7684\u653B\u51FB\u3002\u8BE5\u8F6F\u4F53\u5F00\u53D1\u5546\u62E5\u6709\
+          \u5B89\u5168\u7EC4\u5EFA\u548C\u66F4\u65B0\u5B8C\u6574\u6027\u6D41\u7A0B\
+          \u3002\u5C3D\u7BA1\u5982\u6B64\uFF0C\u8FD9\u4E9B\u6D41\u7A0B\u4ECD\u88AB\
+          \u7834\u574F\u5E76\u5728\u51E0\u4E2A\u6708\u65F6\u95F4\u4E2D\u5411 18,000\
+          \ \u591A\u4E2A\u7EC4\u7EC7\u9001\u51FA\u9AD8\u5EA6\u9488\u5BF9\u6027\u7684\
+          \u6076\u610F\u66F4\u65B0\uFF0C\u5176\u4E2D\u5927\u7EA6 100 \u4E2A\u7EC4\u7EC7\
+          \u53D7\u5230\u4E86\u5F71\u54CD\u3002\u8FD9\u662F\u5386\u53F2\u4E0A\u6B64\
+          \u7C7B\u6027\u8D28\u6700\u6DF1\u8FDC\u3001\u6700\u91CD\u5927\u7684\u8D44\
+          \u5B89\u4E8B\u4EF6\u4E4B\u4E00\u3002\n\n\n\u6709\u95DC\u53C3\u8003\u8CC7\
+          \u6599\u53CA\u5DF2\u5C0D\u61C9 CWE \u6E05\u55AE\u7684\u66F4\u591A\u8CC7\u8A0A\
+          \uFF1A https://top10.owasp.org/2021/zh-Hant/A08_2021-Software_and_Data_Integrity_Failures/"
   - urn: urn:intuitem:risk:threat:a09
     ref_id: A09:2021
     name: Security Logging and Monitoring Failures
@@ -10358,7 +10358,7 @@ objects:
           \ de privacidade.\n\n\nPara mais informa\xE7\xF5es sobre as refer\xEAncias\
           \ e a lista de CWEs mapeadas: https://top10.owasp.org/2021/pt-BR/A09_2021-Security_Logging_and_Monitoring_Failures/"
       tr:
-        name: Security Logging and Monitoring Failures
+        name: "G\xFCvenlik Kay\u0131t ve \u0130zleme Hatalar\u0131"
         description: "OWASP Top 10 2021\u2019e geri d\xF6nen bu kategori, aktif ihlallerin\
           \ tespiti, y\xFCkseltilmesi (escalate) ve bunlara yan\u0131t verilmesine\
           \ yard\u0131mc\u0131 olur. Logging ve monitoring olmadan ihlaller tespit\
@@ -10381,59 +10381,60 @@ objects:
           \ Control**).\n* Log verisi do\u011Fru \u015Fekilde encode edilmezse logging\
           \ veya monitoring sistemlerine injection veya sald\u0131r\u0131lara a\xE7\
           \u0131k olunuyorsa."
-        annotation: "## Fakt\xF6rler\n\n| CWEs Mapped | Max Incidence Rate | Avg Incidence\
-          \ Rate | Avg Weighted Exploit | Avg Weighted Impact | Max Coverage | Avg\
-          \ Coverage | Total Occurrences | Total CVEs |\n| :---------: | :----------------:\
-          \ | :----------------: | :------------------: | :-----------------: | :----------:\
-          \ | :----------: | :---------------: | :--------: |\n|      4      |   \
-          \    19.23%       |        6.51%       |         6.87         |        \
-          \ 4.99        |    53.67%    |    39.97%    |       53,615      |     242\
-          \    |\n\n\n## Nas\u0131l \xD6nlenir\n\nUygulaman\u0131n riskine ba\u011F\
-          l\u0131 olarak geli\u015Ftiriciler a\u015Fa\u011F\u0131daki kontrollerin\
-          \ bir k\u0131sm\u0131n\u0131 veya tamam\u0131n\u0131 uygulamal\u0131d\u0131\
-          r:\n\n* T\xFCm login, access control ve server-side input validation hatalar\u0131\
-          n\u0131n; \u015F\xFCpheli veya k\xF6t\xFC niyetli hesaplar\u0131 tan\u0131\
-          mlayacak yeterli user context ile log\u2019lanmas\u0131n\u0131 ve gecikmeli\
-          \ adli analiz (forensic analysis) i\xE7in yeterince uzun s\xFCre tutulmas\u0131\
-          n\u0131 sa\u011Flay\u0131n.\n* Log\u2019lar\u0131n, log management \xE7\xF6\
-          z\xFCmlerinin kolayca t\xFCketebilece\u011Fi bir formatta \xFCretilmesini\
-          \ sa\u011Flay\u0131n.\n* Logging veya monitoring sistemlerine injection/sald\u0131\
-          r\u0131lar\u0131 \xF6nlemek i\xE7in log verisini do\u011Fru \u015Fekilde\
-          \ encode edin.\n* Y\xFCksek de\u011Ferli i\u015Flemler i\xE7in, kurcalamay\u0131\
-          \ (tampering) veya silmeyi \xF6nleyecek integrity kontrollerine sahip audit\
-          \ trail (\xF6r. append-only database tablolar\u0131) sa\u011Flay\u0131n.\n\
-          * DevSecOps ekipleri, \u015F\xFCpheli aktivitelerin h\u0131zl\u0131ca tespit\
-          \ edilip yan\u0131tlanaca\u011F\u0131 etkili monitoring ve alerting kurmal\u0131\
-          d\u0131r.\n* National Institute of Standards and Technology (NIST) 800-61r2\
-          \ veya daha yenisi gibi bir incident response ve recovery plan\u0131 olu\u015F\
-          turun veya benimseyin.\n\nOWASP ModSecurity Core Rule Set gibi ticari ve\
-          \ a\xE7\u0131k kaynak uygulama koruma framework\u2019leri ile Elasticsearch,\
-          \ Logstash, Kibana (ELK) stack gibi a\xE7\u0131k kaynak log korelasyon yaz\u0131\
-          l\u0131mlar\u0131; custom dashboard ve alerting \xF6zellikleri sunar.\n\n\
-          \n## \xD6rnek Sald\u0131r\u0131 Senaryolar\u0131\n\n**Senaryo #1:** Bir\
-          \ \xE7ocuk sa\u011Fl\u0131k plan\u0131 sa\u011Flay\u0131c\u0131s\u0131n\u0131\
-          n web sitesi i\u015Fletmecisi, monitoring ve logging eksikli\u011Fi nedeniyle\
-          \ bir ihlali tespit edemedi. Harici bir taraf, sald\u0131rgan\u0131n 3.5\
-          \ milyonun \xFCzerinde \xE7ocu\u011Fa ait binlerce hassas sa\u011Fl\u0131\
-          k kayd\u0131na eri\u015Fip bunlar\u0131 de\u011Fi\u015Ftirdi\u011Fini bildirdi.\
-          \ Olay sonras\u0131 incelemede, web sitesi geli\u015Ftiricilerinin \xF6\
-          nemli zafiyetleri ele almad\u0131\u011F\u0131 g\xF6r\xFCld\xFC. Sistem \xFC\
-          zerinde logging veya monitoring olmad\u0131\u011F\u0131ndan, veri ihlali\
-          \ 2013\u2019ten beri \u2014 yedi y\u0131l\u0131 a\u015Fk\u0131n bir s\xFC\
-          re \u2014 devam ediyor olabilirdi.\n\n**Senaryo #2:** B\xFCy\xFCk bir Hint\
-          \ havayolu \u015Firketi, milyonlarca yolcunun on y\u0131l\u0131 a\u015F\
-          k\u0131n ki\u015Fisel verilerini (pasaport ve kredi kart\u0131 verileri\
-          \ d\xE2hil) etkileyen bir veri ihlali ya\u015Fad\u0131. Veri ihlali, \xFC\
-          \xE7\xFCnc\xFC taraf bir cloud hosting sa\u011Flay\u0131c\u0131s\u0131nda\
-          \ meydana geldi ve ihlal bir s\xFCre sonra havayoluna bildirildi.\n\n**Senaryo\
-          \ #3:** B\xFCy\xFCk bir Avrupa havayolu \u015Firketi GDPR kapsam\u0131nda\
-          \ raporlanabilir bir ihlal ya\u015Fad\u0131. \u0130hlalin, sald\u0131rganlar\
-          \ taraf\u0131ndan istismar edilen payment application g\xFCvenlik zafiyetlerinden\
-          \ kaynakland\u0131\u011F\u0131 ve 400.000\u2019den fazla m\xFC\u015Fteri\
-          \ \xF6deme kayd\u0131n\u0131n topland\u0131\u011F\u0131 bildirildi. Havayolu,\
-          \ gizlilik d\xFCzenleyicisi taraf\u0131ndan 20 milyon pound para cezas\u0131\
-          na \xE7arpt\u0131r\u0131ld\u0131.\n\n\nReferanslar ve e\u015Flenen CWE listesi\
-          \ hakk\u0131nda daha fazla bilgi: https://top10.owasp.org/2021/tr/A09_2021-Security_Logging_and_Monitoring_Failures/"
+        annotation: "## Fakt\xF6rler\n\n| CWEs E\u015Fle\u015Ftirildi | Maks G\xF6\
+          r\xFClme Oran\u0131 | Ort. G\xF6r\xFClme Oran\u0131 | Ort. A\u011F\u0131\
+          rl\u0131kl\u0131 Exploit | Ort. A\u011F\u0131rl\u0131kl\u0131 Impact | Maks\
+          \ Coverage | Ort. Coverage | Toplam Olay | Toplam CVE |\n| :---------: |\
+          \ :----------------: | :----------------: | :------------------: | :-----------------:\
+          \ | :----------: | :----------: | :---------------: | :--------: |\n|  \
+          \    4      |       19.23%       |        6.51%       |         6.87   \
+          \      |         4.99        |    53.67%    |    39.97%    |       53,615\
+          \      |     242    |\n\n\n## Nas\u0131l \xD6nlenir\n\nUygulaman\u0131n\
+          \ riskine ba\u011Fl\u0131 olarak geli\u015Ftiriciler a\u015Fa\u011F\u0131\
+          daki kontrollerin bir k\u0131sm\u0131n\u0131 veya tamam\u0131n\u0131 uygulamal\u0131\
+          d\u0131r:\n\n* T\xFCm login, access control ve server-side input validation\
+          \ hatalar\u0131n\u0131n; \u015F\xFCpheli veya k\xF6t\xFC niyetli hesaplar\u0131\
+          \ tan\u0131mlayacak yeterli user context ile log\u2019lanmas\u0131n\u0131\
+          \ ve gecikmeli adli analiz (forensic analysis) i\xE7in yeterince uzun s\xFC\
+          re tutulmas\u0131n\u0131 sa\u011Flay\u0131n.\n* Log\u2019lar\u0131n, log\
+          \ management \xE7\xF6z\xFCmlerinin kolayca t\xFCketebilece\u011Fi bir formatta\
+          \ \xFCretilmesini sa\u011Flay\u0131n.\n* Logging veya monitoring sistemlerine\
+          \ injection/sald\u0131r\u0131lar\u0131 \xF6nlemek i\xE7in log verisini do\u011F\
+          ru \u015Fekilde encode edin.\n* Y\xFCksek de\u011Ferli i\u015Flemler i\xE7\
+          in, kurcalamay\u0131 (tampering) veya silmeyi \xF6nleyecek integrity kontrollerine\
+          \ sahip audit trail (\xF6r. append-only database tablolar\u0131) sa\u011F\
+          lay\u0131n.\n* DevSecOps ekipleri, \u015F\xFCpheli aktivitelerin h\u0131\
+          zl\u0131ca tespit edilip yan\u0131tlanaca\u011F\u0131 etkili monitoring\
+          \ ve alerting kurmal\u0131d\u0131r.\n* National Institute of Standards and\
+          \ Technology (NIST) 800-61r2 veya daha yenisi gibi bir incident response\
+          \ ve recovery plan\u0131 olu\u015Fturun veya benimseyin.\n\nOWASP ModSecurity\
+          \ Core Rule Set gibi ticari ve a\xE7\u0131k kaynak uygulama koruma framework\u2019\
+          leri ile Elasticsearch, Logstash, Kibana (ELK) stack gibi a\xE7\u0131k kaynak\
+          \ log korelasyon yaz\u0131l\u0131mlar\u0131; custom dashboard ve alerting\
+          \ \xF6zellikleri sunar.\n\n\n## \xD6rnek Sald\u0131r\u0131 Senaryolar\u0131\
+          \n\n**Senaryo #1:** Bir \xE7ocuk sa\u011Fl\u0131k plan\u0131 sa\u011Flay\u0131\
+          c\u0131s\u0131n\u0131n web sitesi i\u015Fletmecisi, monitoring ve logging\
+          \ eksikli\u011Fi nedeniyle bir ihlali tespit edemedi. Harici bir taraf,\
+          \ sald\u0131rgan\u0131n 3.5 milyonun \xFCzerinde \xE7ocu\u011Fa ait binlerce\
+          \ hassas sa\u011Fl\u0131k kayd\u0131na eri\u015Fip bunlar\u0131 de\u011F\
+          i\u015Ftirdi\u011Fini bildirdi. Olay sonras\u0131 incelemede, web sitesi\
+          \ geli\u015Ftiricilerinin \xF6nemli zafiyetleri ele almad\u0131\u011F\u0131\
+          \ g\xF6r\xFCld\xFC. Sistem \xFCzerinde logging veya monitoring olmad\u0131\
+          \u011F\u0131ndan, veri ihlali 2013\u2019ten beri \u2014 yedi y\u0131l\u0131\
+          \ a\u015Fk\u0131n bir s\xFCre \u2014 devam ediyor olabilirdi.\n\n**Senaryo\
+          \ #2:** B\xFCy\xFCk bir Hint havayolu \u015Firketi, milyonlarca yolcunun\
+          \ on y\u0131l\u0131 a\u015Fk\u0131n ki\u015Fisel verilerini (pasaport ve\
+          \ kredi kart\u0131 verileri d\xE2hil) etkileyen bir veri ihlali ya\u015F\
+          ad\u0131. Veri ihlali, \xFC\xE7\xFCnc\xFC taraf bir cloud hosting sa\u011F\
+          lay\u0131c\u0131s\u0131nda meydana geldi ve ihlal bir s\xFCre sonra havayoluna\
+          \ bildirildi.\n\n**Senaryo #3:** B\xFCy\xFCk bir Avrupa havayolu \u015F\
+          irketi GDPR kapsam\u0131nda raporlanabilir bir ihlal ya\u015Fad\u0131. \u0130\
+          hlalin, sald\u0131rganlar taraf\u0131ndan istismar edilen payment application\
+          \ g\xFCvenlik zafiyetlerinden kaynakland\u0131\u011F\u0131 ve 400.000\u2019\
+          den fazla m\xFC\u015Fteri \xF6deme kayd\u0131n\u0131n topland\u0131\u011F\
+          \u0131 bildirildi. Havayolu, gizlilik d\xFCzenleyicisi taraf\u0131ndan 20\
+          \ milyon pound para cezas\u0131na \xE7arpt\u0131r\u0131ld\u0131.\n\n\nReferanslar\
+          \ ve e\u015Flenen CWE listesi hakk\u0131nda daha fazla bilgi: https://top10.owasp.org/2021/tr/A09_2021-Security_Logging_and_Monitoring_Failures/"
       zh:
         name: Security Logging and Monitoring Failures
         description: "\u5728 2021 \u5E74 OWASP Top 10\uFF0C\u6B64\u7C7B\u578B\u6709\
@@ -10909,7 +10910,7 @@ objects:
           n o del tiempo transcurrido para conectar o rechazar las conexiones de payload\
           \ SSRF.\n\n**Escenario #2:** Exposici\xF3n de datos sensibles: los atacantes\
           \ pueden acceder a archivos locales como servicios internos para obtener\
-          \ informaci\xF3n confidencial como `file:///etc/passwd</span>` y `http://localhost:28017/`.\n\
+          \ informaci\xF3n confidencial como `file:///etc/passwd` y `http://localhost:28017/`.\n\
           \n**Escenario #3:** Acceso al almacenamiento de metadatos de los servicios\
           \ en la nube: la mayor\xEDa de los proveedores de la nube tienen almacenamiento\
           \ de metadatos como `http://169.254.169.254/`. Un atacante puede leer los\
@@ -11043,9 +11044,9 @@ objects:
           \ hasil koneksi, waktu yang dibutuhkan untuk melakukan koneksi atau waktu\
           \ yang dibutuhkan untuk menolak koneksi yang bermuatan _SSRF_.\n\n**Skenario\
           \ #2:** Kebocoran data sensitif. Penyerang dapat mengakses file lokal seperti\
-          \ `file:///etc/passwd</span>` dan `http://localhost:28017/`.\n\n**Skenario\
-          \ #3:** Akses penyimpanan metadata dari layanan cloud - Mayoritas penyedia\
-          \ layanan cloud memiliki penyimpanan metadata seperti `http://169/254.169.254/`.\
+          \ `file:///etc/passwd` dan `http://localhost:28017/`.\n\n**Skenario #3:**\
+          \ Akses penyimpanan metadata dari layanan cloud - Mayoritas penyedia layanan\
+          \ cloud memiliki penyimpanan metadata seperti `http://169/254.169.254/`.\
           \ Seorang penyerang dapat membaca metada tersebut untuk mendapatkan informasi\
           \ sensitif.\n\n**Skenario #4:** Penyusupan layanan internal - Penyerang\
           \ dapat menyalahgunakan layanan internal untuk melakukan serangan lebih\
@@ -11102,9 +11103,9 @@ objects:
           \ trascorso per accettare o rifiutare le connessioni del payload SSRF.\n\
           \n**Scenario #2:** Sensitive data exposure \u2013 Gli attaccanti possono\
           \ accedere a file locali o servizi interni per ottenere informazioni sensibili\
-          \ come `file:///etc/passwd</span>` e `http://localhost:28017/`.\n\n**Scenario\
-          \ #3:** Accedere allo storage dei metadati dei servizi cloud - La maggior\
-          \ parte dei provider hanno un metadata storage come `http://169.254.169.254/`.\
+          \ come `file:///etc/passwd` e `http://localhost:28017/`.\n\n**Scenario #3:**\
+          \ Accedere allo storage dei metadati dei servizi cloud - La maggior parte\
+          \ dei provider hanno un metadata storage come `http://169.254.169.254/`.\
           \ Un attaccante pu\xF2 leggere i metadati per ottenere informazioni sensibili.\n\
           \n**Scenario #4:** Compromettere i servizi interni - L'attaccante pu\xF2\
           \ abusare dei servizi interni per condurre ulteriori attacchi come Remote\
@@ -11231,7 +11232,7 @@ objects:
           \u30BA\u304B\u3092\u8ABF\u3079\u307E\u3059\u3002\n\n**\u30B7\u30CA\u30EA\
           \u30AA #2:** \u6A5F\u5FAE\u306A\u60C5\u5831\u306E\u9732\u51FA - \u653B\u6483\
           \u8005\u306F\u6A5F\u5FAE\u306A\u60C5\u5831\u3092\u53D6\u5F97\u3059\u308B\
-          \u305F\u3081\u306B\u3001`file:///etc/passwd</span>` \u3084 `http://localhost:28017/`\
+          \u305F\u3081\u306B\u3001`file:///etc/passwd` \u3084 `http://localhost:28017/`\
           \ \u306E\u3088\u3046\u306A\u30ED\u30FC\u30AB\u30EB\u30D5\u30A1\u30A4\u30EB\
           \u307E\u305F\u306F\u5185\u90E8\u30B5\u30FC\u30D0\u30FC\u306B\u30A2\u30AF\
           \u30BB\u30B9\u3057\u307E\u3059\u3002\n\n**\u30B7\u30CA\u30EA\u30AA #3:**\
@@ -11270,7 +11271,7 @@ objects:
           \ | Total de Ocorr\xEAncias | Total de CVEs |\n|:-------------:|:--------------------:|:--------------------:|:--------------:|:--------------:|:----------------------:|:---------------------:|:-------------------:|:------------:|\n\
           | 1           | 2.72%              | 2.72%              | 8.28         \
           \        | 6.72                | 67.72%       | 67.72%       | 9,503   \
-          \          | 385        |\n\n\n## Como Previnir\n\nOs desenvolvedores podem\
+          \          | 385        |\n\n\n## Como Prevenir\n\nOs desenvolvedores podem\
           \ evitar o SSRF implementando alguns ou todos os seguintes controles de\
           \ defesa em profundidade:\n\n### **Para a Camada de Rede**\n\n- Segmente\
           \ a funcionalidade de acesso a recursos remotos em redes separadas para\
@@ -11316,7 +11317,7 @@ objects:
           \ (DoS). \n\n\nPara mais informa\xE7\xF5es sobre as refer\xEAncias e a lista\
           \ de CWEs mapeadas: https://top10.owasp.org/2021/pt-BR/A10_2021-Server-Side_Request_Forgery_%28SSRF%29/"
       tr:
-        name: Server-Side Request Forgery (SSRF)
+        name: "Sunucu Tarafl\u0131 \u0130stek Sahtecili\u011Fi (SSRF)"
         description: "SSRF hatalar\u0131, bir web uygulamas\u0131 kullan\u0131c\u0131\
           \ taraf\u0131ndan sa\u011Flanan URL\u2019yi do\u011Frulamadan uzak bir kayna\u011F\
           \u0131 fetch etti\u011Finde ortaya \xE7\u0131kar. Bu, sald\u0131rgan\u0131\
@@ -11329,20 +11330,21 @@ objects:
           \ s\u0131kl\u0131\u011F\u0131 art\u0131yor. Ayr\u0131ca cloud servisleri\
           \ ve mimarilerin karma\u015F\u0131kl\u0131\u011F\u0131 nedeniyle SSRF\u2019\
           nin ciddiyeti de y\xFCkseliyor."
-        annotation: "## Fakt\xF6rler\n\n| CWEs Mapped | Max Incidence Rate | Avg Incidence\
-          \ Rate | Avg Weighted Exploit | Avg Weighted Impact | Max Coverage | Avg\
-          \ Coverage | Total Occurrences | Total CVEs |\n| :---------: | :----------------:\
-          \ | :----------------: | :------------------: | :-----------------: | :----------:\
-          \ | :----------: | :---------------: | :--------: |\n|      1      |   \
-          \     2.72%       |        2.72%       |         8.28         |        \
-          \ 6.72        |    67.72%    |    67.72%    |       9,503       |     385\
-          \    |\n\n\n## Nas\u0131l \xD6nlenir\n\nGeli\u015Ftiriciler, a\u015Fa\u011F\
-          \u0131daki defense-in-depth kontrollerinin bir k\u0131sm\u0131n\u0131 veya\
-          \ tamam\u0131n\u0131 uygulayarak SSRF\u2019yi \xF6nleyebilir:\n\n### **Network\
-          \ katman\u0131ndan**\n\n* Uzak kaynak eri\u015Fimi fonksiyonelli\u011Fini\
-          \ ayr\u0131 network\u2019lere ay\u0131r\u0131n; SSRF\u2019nin etkisini azalt\u0131\
-          n.\n* \u201CVarsay\u0131lan olarak reddet (deny by default)\u201D firewall\
-          \ policy\u2019leri veya network access control kurallar\u0131 uygulay\u0131\
+        annotation: "## Fakt\xF6rler\n\n| CWEs E\u015Fle\u015Ftirildi | Maks G\xF6\
+          r\xFClme Oran\u0131 | Ort. G\xF6r\xFClme Oran\u0131 | Ort. A\u011F\u0131\
+          rl\u0131kl\u0131 Exploit | Ort. A\u011F\u0131rl\u0131kl\u0131 Impact | Maks\
+          \ Coverage | Ort. Coverage | Toplam Olay | Toplam CVE |\n| :---------: |\
+          \ :----------------: | :----------------: | :------------------: | :-----------------:\
+          \ | :----------: | :----------: | :---------------: | :--------: |\n|  \
+          \    1      |        2.72%       |        2.72%       |         8.28   \
+          \      |         6.72        |    67.72%    |    67.72%    |       9,503\
+          \       |     385    |\n\n\n## Nas\u0131l \xD6nlenir\n\nGeli\u015Ftiriciler,\
+          \ a\u015Fa\u011F\u0131daki defense-in-depth kontrollerinin bir k\u0131sm\u0131\
+          n\u0131 veya tamam\u0131n\u0131 uygulayarak SSRF\u2019yi \xF6nleyebilir:\n\
+          \n### **Network katman\u0131ndan**\n\n* Uzak kaynak eri\u015Fimi fonksiyonelli\u011F\
+          ini ayr\u0131 network\u2019lere ay\u0131r\u0131n; SSRF\u2019nin etkisini\
+          \ azalt\u0131n.\n* \u201CVarsay\u0131lan olarak reddet (deny by default)\u201D\
+          \ firewall policy\u2019leri veya network access control kurallar\u0131 uygulay\u0131\
           n; temel intranet trafi\u011Fi d\u0131\u015F\u0131ndaki her \u015Feyi engelleyin.<br/>\n\
           \  *\u0130pu\xE7lar\u0131:*<br/>\n  \\~ Firewall kurallar\u0131 i\xE7in\
           \ uygulama bazl\u0131 sahiplik ve lifecycle olu\u015Fturun.<br/>\n  \\~\
@@ -11416,29 +11418,28 @@ objects:
           \u53D1\u8005\u53EF\u4EE5\u9884\u9632\u4F2A\u9020\u670D\u52A1\u7AEF\u8BF7\
           \u6C42\uFF0C\u900F\u8FC7\u5B9E\u65BD\u4E0B\u5217\u4E00\u90E8\u5206\u6216\
           \u5168\u90E8\u7684\u7EB5\u8EAB\u9632\u5FA1\u63A7\u5236\u63AA\u65BD\uFF1A\
-          \n\n## **From Network layer** (\u4ECE\u7F51\u8DEF\u5C42\u7740\u624B)\n\n\
-          - \u5C06\u8FDC\u7AEF\u8D44\u6E90\u5B58\u53D6\u529F\u80FD\u5207\u5272\u6210\
-          \u4E0D\u540C\u5B50\u7F51\u8DEF\u4EE5\u964D\u4F4E\u4F2A\u9020\u670D\u52A1\
-          \u7AEF\u8BF7\u6C42\u4E4B\u51B2\u51FB\n\n- \u4E8E\u9632\u706B\u5899\u653F\
-          \u7B56\u6216\u4E8E\u7F51\u8DEF\u5B58\u53D6\u63A7\u5236\u89C4\u5219\u5B9E\
-          \u65BD\"\u9884\u8BBE\u5168\u62D2\u7EDD(deny by default)\" \uFF0C\u4EE5\u5C01\
-          \u9501\u5168\u90E8\u6765\u81EA\u5916\u90E8\u4E4B\u7F51\u8DEF\u6D41\u91CF\
-          \n\n## **From Application layer:** (\u4ECE\u5E94\u7528\u5C42)\n\n- \u8FC7\
-          \u6EE4\u5E76\u9A8C\u8BC1\u6765\u81EA\u4E8E\u7528\u6237\u7AEF\u63D0\u4F9B\
-          \u4E4B\u5168\u90E8\u8F93\u5165\n\n- \u4EE5\u6B63\u9762\u8868\u5217\u65B9\
-          \u5F0F\u5217\u51FA URL\u3001port\u3001\u76EE\u7684\u5730\u6E05\u5355\n\n\
-          - \u4E0D\u4F20\u9001\u539F\u59CB\u56DE\u5E94\u7ED9\u7528\u6237\u7AEF\n\n\
-          - \u505C\u7528 HTTP \u91CD\u65B0\u5BFC\u5411\n\n- \u7559\u610F\u7F51\u5740\
-          \u4E4B\u4E00\u81F4\u6027\uFF0C\u4EE5\u907F\u514D\u4F8B\u5982 DNS rebinding\
-          \ \u653B\u51FB\u3001TOCTOU \u653B\u51FB\n\n\u522B\u900F\u8FC7\u62D2\u7EDD\
-          \u6E05\u5355\u6216\u6B63\u89C4\u8868\u793A\u5F0F\u6765\u51CF\u7F13\u4F2A\
-          \u9020\u670D\u52A1\u7AEF\u8BF7\u6C42\u3002\u653B\u51FB\u8005\u6709 payload\
-          \ \u6E05\u5355\u3001\u5DE5\u5177\u548C\u6280\u5DE7\u53EF\u4EE5\u7ED5\u8FC7\
-          \u8FD9\u4E9B\u62D2\u7EDD\u6E05\u5355\n\n\n## Example Attack Scenarios (\u653B\
-          \u51FB\u60C5\u5883\u8303\u4F8B)\n\n\u653B\u51FB\u8005\u53EF\u4EE5\u5229\u7528\
-          \u4F2A\u9020\u670D\u52A1\u7AEF\u8BF7\u6C42\u6765\u653B\u51FB\u5728 WAF\u3001\
-          \u9632\u706B\u5899\u3001\u6216\u7F51\u8DEF ACL \u540E\u9762\u7684\u7CFB\u7EDF\
-          \uFF0C\u53EF\u80FD\u91C7\u53D6\u4E4B\u60C5\u5883\u5982\u4E0B\uFF1A\n\n**\u60C5\
+          \n\n## \u4ECE\u7F51\u8DEF\u5C42\u7740\u624B\n\n- \u5C06\u8FDC\u7AEF\u8D44\
+          \u6E90\u5B58\u53D6\u529F\u80FD\u5207\u5272\u6210\u4E0D\u540C\u5B50\u7F51\
+          \u8DEF\u4EE5\u964D\u4F4E\u4F2A\u9020\u670D\u52A1\u7AEF\u8BF7\u6C42\u4E4B\
+          \u51B2\u51FB\n\n- \u4E8E\u9632\u706B\u5899\u653F\u7B56\u6216\u4E8E\u7F51\
+          \u8DEF\u5B58\u53D6\u63A7\u5236\u89C4\u5219\u5B9E\u65BD\"\u9884\u8BBE\u5168\
+          \u62D2\u7EDD(deny by default)\" \uFF0C\u4EE5\u5C01\u9501\u5168\u90E8\u6765\
+          \u81EA\u5916\u90E8\u4E4B\u7F51\u8DEF\u6D41\u91CF\n\n## \u4ECE\u5E94\u7528\
+          \u5C42\n\n- \u8FC7\u6EE4\u5E76\u9A8C\u8BC1\u6765\u81EA\u4E8E\u7528\u6237\
+          \u7AEF\u63D0\u4F9B\u4E4B\u5168\u90E8\u8F93\u5165\n\n- \u4EE5\u6B63\u9762\
+          \u8868\u5217\u65B9\u5F0F\u5217\u51FA URL\u3001port\u3001\u76EE\u7684\u5730\
+          \u6E05\u5355\n\n- \u4E0D\u4F20\u9001\u539F\u59CB\u56DE\u5E94\u7ED9\u7528\
+          \u6237\u7AEF\n\n- \u505C\u7528 HTTP \u91CD\u65B0\u5BFC\u5411\n\n- \u7559\
+          \u610F\u7F51\u5740\u4E4B\u4E00\u81F4\u6027\uFF0C\u4EE5\u907F\u514D\u4F8B\
+          \u5982 DNS rebinding \u653B\u51FB\u3001TOCTOU \u653B\u51FB\n\n\u522B\u900F\
+          \u8FC7\u62D2\u7EDD\u6E05\u5355\u6216\u6B63\u89C4\u8868\u793A\u5F0F\u6765\
+          \u51CF\u7F13\u4F2A\u9020\u670D\u52A1\u7AEF\u8BF7\u6C42\u3002\u653B\u51FB\
+          \u8005\u6709 payload \u6E05\u5355\u3001\u5DE5\u5177\u548C\u6280\u5DE7\u53EF\
+          \u4EE5\u7ED5\u8FC7\u8FD9\u4E9B\u62D2\u7EDD\u6E05\u5355\n\n\n## \u653B\u51FB\
+          \u60C5\u5883\u8303\u4F8B\n\n\u653B\u51FB\u8005\u53EF\u4EE5\u5229\u7528\u4F2A\
+          \u9020\u670D\u52A1\u7AEF\u8BF7\u6C42\u6765\u653B\u51FB\u5728 WAF\u3001\u9632\
+          \u706B\u5899\u3001\u6216\u7F51\u8DEF ACL \u540E\u9762\u7684\u7CFB\u7EDF\uFF0C\
+          \u53EF\u80FD\u91C7\u53D6\u4E4B\u60C5\u5883\u5982\u4E0B\uFF1A\n\n**\u60C5\
           \u5883\u4E00**\uFF1A\u5BF9\u5185\u90E8\u670D\u52A1\u5668 port scan\u3002\
           \u5982\u679C\u7F51\u8DEF\u67B6\u6784\u672A\u88AB\u5207\u5272\uFF0C\u653B\
           \u51FB\u8005\u53EF\u4EE5\u900F\u8FC7\u8FDE\u7EBF\u7ED3\u679C\u6216\u8FDE\
