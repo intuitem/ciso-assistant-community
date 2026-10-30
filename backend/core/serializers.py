@@ -2523,10 +2523,13 @@ class UserAccountFieldsMixin:
     account_fields = USER_ACCOUNT_FIELDS
 
     def hide_account_fields(self, instance, data: dict) -> dict:
-        """Drop the account fields for requesters who may not see them. Without a
-        request (internal use) the representation is left whole."""
+        """Drop the account fields unless the requester may see them. Internal
+        callers without a request opt in with `include_account_fields` in the
+        context."""
+        if self.context.get("include_account_fields"):
+            return data
         request = self.context.get("request")
-        if request is not None and not can_see_user_account(request, instance):
+        if request is None or not can_see_user_account(request, instance):
             for field in self.account_fields:
                 data.pop(field, None)
         return data

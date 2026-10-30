@@ -8984,22 +8984,22 @@ class UserViewSet(BaseModelViewSet):
         "date_joined",
     ]
 
+    def filter_queryset(self, queryset):
+        # Checked against the rows about to be listed. Single-object actions don't
+        # sort, so they skip the query and get the directory ordering.
+        if not self.detail:
+            self._all_users_administered = (
+                not queryset.exclude(folder_id__in=user_admin_folder_ids(self.request))
+                .exclude(pk=self.request.user.pk)
+                .exists()
+            )
+        return super().filter_queryset(queryset)
+
     def _administers_all_users(self) -> bool:
         if getattr(self, "request", None) is None:
             # Schema generation introspects the ordering without a request.
             return True
-        if not hasattr(self, "_all_users_administered"):
-            user = self.request.user
-            self._all_users_administered = (
-                not User.objects.filter(
-                    id__in=RoleAssignment.get_viewable_object_ids(user, User)
-                )
-                .exclude(service_account__isnull=False)
-                .exclude(folder_id__in=user_admin_folder_ids(self.request))
-                .exclude(pk=user.pk)
-                .exists()
-            )
-        return self._all_users_administered
+        return getattr(self, "_all_users_administered", False)
 
     @property
     def ordering(self):
