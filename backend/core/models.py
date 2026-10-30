@@ -3875,6 +3875,13 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
 
 
 class Framework(ReferentialObjectMixin, I18nObjectMixin):
+    # JSON fields holding per-language text, mapped to their translated
+    # accessor: FieldsRelatedField serves the accessor's output instead of the
+    # raw value, so a payload nesting the framework follows the request language.
+    translated_fields = {
+        "implementation_groups_definition": "get_implementation_groups_definition_translated",
+    }
+
     class ResultAggregation(models.TextChoices):
         PER_ANSWER = "per_answer", _("Per answer")
         TIERED_ALL = "tiered_all", _("Tiered, all statements of a tier must hold")
