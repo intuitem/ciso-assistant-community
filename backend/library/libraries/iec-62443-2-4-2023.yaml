@@ -16,7 +16,7 @@ description: "Outline of IEC 62443-2-4:2023 Edition 2 \u2014 Security for indust
   \ and 62443-2-1 Ed.2)."
 copyright: IEC - Purchase the standard for the full normative text and Annex A Table
   A.1.
-version: 1
+version: 2
 publication_date: 2026-04-28
 provider: IEC
 packager: intuitem
@@ -51,10 +51,6 @@ objects:
     - score: 5
       name: Optimizing
       description: Stable and flexible
-    implementation_groups_definition:
-    - ref_id: functional_areas
-      name: Functional Areas
-      description: 12 functional areas SP.01-SP.12 (Annex A Table A.1).
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:a
       assessable: false
@@ -74,8 +70,6 @@ objects:
         solutions are competent, screened, and have role-specific cybersecurity training.
         Asset owner asks: Background-check policy and records, cybersecurity training
         records, role-competency matrix mapping staff to engagement responsibilities.'
-      implementation_groups:
-      - functional_areas
     - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.02
       assessable: true
       depth: 2
@@ -86,8 +80,6 @@ objects:
         under documented assurance practices (quality, security, change control, defect
         tracking). Asset owner asks: Assurance documentation, internal-audit reports,
         defect-tracking metrics, certifications (e.g. ISASecure, ISO 9001/27001).'
-      implementation_groups:
-      - functional_areas
     - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.03
       assessable: true
       depth: 2
@@ -99,8 +91,6 @@ objects:
         and conduits, 62443-3-3 SL-T). Asset owner asks: Architecture-review records,
         evidence that the design honors the zone-and-conduit model and target Security
         Levels.'
-      implementation_groups:
-      - functional_areas
     - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.04
       assessable: true
       depth: 2
@@ -111,8 +101,6 @@ objects:
         under documented secure-wireless practices (authentication, encryption, segregation,
         rogue-AP detection). Asset owner asks: Wireless deployment standards and configurations;
         segmentation evidence; protocol/encryption choices.'
-      implementation_groups:
-      - functional_areas
     - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.05
       assessable: true
       depth: 2
@@ -127,8 +115,6 @@ objects:
         \ Asset owner asks: SIS-handling procedures with explicit dual-approval workflow,\
         \ SIL-aware separation evidence, change-control records, evidence of integration\
         \ with the asset owner's IEC 61511 MoC."
-      implementation_groups:
-      - functional_areas
     - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.06
       assessable: true
       depth: 2
@@ -139,8 +125,6 @@ objects:
         configuration management for delivered solutions (inventory, baselines, change
         control, version tracking). Asset owner asks: Configuration-management plans,
         baselines, change records, version-control evidence.'
-      implementation_groups:
-      - functional_areas
     - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.07
       assessable: true
       depth: 2
@@ -152,8 +136,6 @@ objects:
         recording, supervised access). Asset owner asks: Remote-access policy, approved-tool
         list, session logs, evidence of compliance with the asset owner''s remote-access
         rules.'
-      implementation_groups:
-      - functional_areas
     - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.08
       assessable: true
       depth: 2
@@ -167,8 +149,6 @@ objects:
         coordinating with the asset owner''s IR team. Asset owner asks: Event-management
         procedures, integration with asset-owner SOC if applicable, IR-handoff runbook
         with named contacts and contractual response SLAs, joint-exercise records.'
-      implementation_groups:
-      - functional_areas
     - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.09
       assessable: true
       depth: 2
@@ -180,8 +160,6 @@ objects:
         offboarding SLAs for service-provider personnel. Asset owner asks: Account-management
         procedures, vendor-account inventory, offboarding records, evidence that departed
         personnel lose access promptly.'
-      implementation_groups:
-      - functional_areas
     - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.10
       assessable: true
       depth: 2
@@ -192,8 +170,6 @@ objects:
         malware-protection capabilities are documented and operational on every component
         class. Asset owner asks: Malware-protection approach per component type, signature-update
         process, scan history.'
-      implementation_groups:
-      - functional_areas
     - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.11
       assessable: true
       depth: 2
@@ -205,8 +181,6 @@ objects:
         change-control. Asset owner asks: Patch-qualification procedure, patch-status
         reports, deferred-patch mitigation register, integration with the asset owner''s
         change-control.'
-      implementation_groups:
-      - functional_areas
     - urn: urn:intuitem:risk:req_node:iec-62443-2-4-2023:sp.12
       assessable: true
       depth: 2
@@ -217,5 +191,3 @@ objects:
         capabilities for delivered solutions, with documented scope, schedule, verification,
         and media protection. Asset owner asks: Backup scope and schedule, restoration
         test records, media handling and protection, recovery-time evidence.'
-      implementation_groups:
-      - functional_areas

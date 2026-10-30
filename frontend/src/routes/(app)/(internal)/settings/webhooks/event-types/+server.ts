@@ -1,13 +1,13 @@
-import { error, type NumericRange } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { BASE_API_URL } from '$lib/utils/constants';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { errorFromBody } from '#lib/utils/errors.js';
 
 export const GET: RequestHandler = async ({ fetch }) => {
 	const endpoint = `${BASE_API_URL}/webhooks/event-types/`;
 
 	const res = await fetch(endpoint);
 	if (!res.ok) {
-		error(res.status as NumericRange<400, 599>, await res.json());
+		errorFromBody(res.status, await res.json());
 	}
 	const optionsResponse = await res.json();
 

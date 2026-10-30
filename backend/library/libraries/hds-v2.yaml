@@ -1,3 +1,5 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
 urn: urn:intuitem:risk:library:hds-v2023-a
 locale: fr
 ref_id: HDS-v2.0
@@ -8,8 +10,8 @@ description: "R\xE9f\xE9rentiel de certification H\xE9bergeur de donn\xE9es de s
   \ certification et du r\xE9f\xE9rentiel de certification pour l'h\xE9bergement de\
   \ donn\xE9es de sant\xE9 \xE0 caract\xE8re personnel."
 copyright: "Loi fran\xE7aise et europ\xE9enne"
-version: 2
-publication_date: 2025-05-10
+version: 3
+publication_date: 2026-10-06
 provider: "Agence du Num\xE9rique en Sant\xE9"
 packager: intuitem
 objects:
@@ -34,8 +36,11 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-01]
       description: "Qu\u2019il ait mis en \u0153uvre un Syst\xE8me de Management de\
         \ la S\xE9curit\xE9 de l\u2019Information (SMSI) certifi\xE9 selon la norme\
-        \ ISO 27001, compl\xE9t\xE9e des exigences d\xE9finies au chapitre 5 (exigences\
-        \ 02 \xE0 16) ;"
+        \ ISO 27001, compl\xE9t\xE9e des exigences d\xE9finies au chapitre 5 ;"
+      annotation: "Les chapitres 4.4, 5, 6.1.1, 6.3, 7.1, 7.2, 7.5, 8.2, 9.2.2, 9.3\
+        \ et 10 de la norme ISO 27001 s\u2019appliquent sans compl\xE9ment ; les exigences\
+        \ 02 \xE0 16 compl\xE8tent les autres chapitres (chapitre 5 du r\xE9f\xE9\
+        rentiel HDS)."
     - urn: urn:intuitem:risk:req_node:hds-v2023-a:node5
       assessable: true
       depth: 2
@@ -48,13 +53,20 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-01]
       description: "Que les contrats conclus avec ses clients r\xE9pondent aux exigences\
-        \ d\xE9finies au chapitre 6 (exigences 17 \xE0 27) ;"
+        \ d\xE9finies au chapitre 6 ;"
+      annotation: "L\u2019H\xE9bergeur est tenu de fournir \xE0 son client un mod\xE8\
+        le de contrat conforme aux exigences r\xE8glementaires. NOTE - Il est ainsi\
+        \ notamment recommand\xE9 \xE0 l\u2019H\xE9bergeur, qui agit en tant que sous-traitant\
+        \ de son client, de se r\xE9f\xE9rer aux mod\xE8les des clauses contractuelles\
+        \ types propos\xE9s par la Commission europ\xE9enne pour inclure dans le contrat\
+        \ les clauses requises au titre de l\u2019article 28 du RGPD (d\xE9cision\
+        \ d\u2019ex\xE9cution (UE) 2021/915)."
     - urn: urn:intuitem:risk:req_node:hds-v2023-a:node9
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-01]
       description: "Qu\u2019il respecte les exigences relatives \xE0 la souverainet\xE9\
-        \ d\xE9finies au chapitre 7 (exigences 28 \xE0 31) ;"
+        \ d\xE9finies au chapitre 7 ;"
     - urn: urn:intuitem:risk:req_node:hds-v2023-a:node11
       assessable: true
       depth: 2
@@ -68,6 +80,8 @@ objects:
       description: "Dans la d\xE9termination de ses enjeux externes et internes, l\u2019\
         H\xE9bergeur doit prendre en compte le fait que sa mission lui impose la protection\
         \ des DSCP qui lui sont confi\xE9es par ses clients."
+      annotation: "Exigence compl\xE9mentaire au chapitre 4.1 de la norme ISO 27001\
+        \ (\xA75.4.1 du r\xE9f\xE9rentiel HDS)."
     - urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-03]
       assessable: true
       depth: 1
@@ -75,6 +89,8 @@ objects:
       description: "Dans la d\xE9termination des exigences des parties int\xE9ress\xE9\
         es, l\u2019H\xE9bergeur doit prendre en compte le cadre juridique applicable\
         \ en mati\xE8re de protection des DSCP."
+      annotation: "Exigence compl\xE9mentaire au chapitre 4.2 de la norme ISO 27001\
+        \ (\xA75.4.2 du r\xE9f\xE9rentiel HDS)."
     - urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-04]
       assessable: true
       depth: 1
@@ -83,12 +99,16 @@ objects:
         ensemble des traitements de DSCP assur\xE9s par l\u2019H\xE9bergeur. Il doit\
         \ couvrir tous les moyens et processus de traitement des DSCP, notamment les\
         \ sauvegardes et les transferts de supports mat\xE9riels de l\u2019information."
+      annotation: "Exigence compl\xE9mentaire au chapitre 4.3 de la norme ISO 27001\
+        \ (\xA75.4.3 du r\xE9f\xE9rentiel HDS)."
     - urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-05]
       assessable: false
       depth: 1
       ref_id: '[EXI 05]'
       description: "Lors de l\u2019appr\xE9ciation des risques, l\u2019H\xE9bergeur\
         \ doit a minima envisager les \xE9v\xE9nements suivants :"
+      annotation: "Exigence compl\xE9mentaire au chapitre 6.1.2 de la norme ISO 27001\
+        \ (\xA75.6.1.2 du r\xE9f\xE9rentiel HDS)."
     - urn: urn:intuitem:risk:req_node:hds-v2023-a:node16
       assessable: true
       depth: 2
@@ -110,13 +130,13 @@ objects:
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:hds-v2023-a:node17
-      description: "b. De mat\xE9rialisation (\xE9ventuelle) sous format documents\
-        \ papier ;"
+      description: "b. De mat\xE9rialisation \xE9ventuelle sous format documents papier\
+        \ ;"
     - urn: urn:intuitem:risk:req_node:hds-v2023-a:node22
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:hds-v2023-a:node17
-      description: "c. De r\xE9allocation des espaces de stockage. "
+      description: "c. De r\xE9allocation des espaces de stockage."
     - urn: urn:intuitem:risk:req_node:hds-v2023-a:node24
       assessable: true
       depth: 2
@@ -135,7 +155,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:hds-v2023-a:node25
       description: "a. Attribution, modification et retrait des droits d\u2019acc\xE8\
-        s ; "
+        s ;"
     - urn: urn:intuitem:risk:req_node:hds-v2023-a:node27
       assessable: true
       depth: 3
@@ -186,12 +206,16 @@ objects:
         \ doit s\u2019assurer qu\u2019il ma\xEEtrise les changements des mesures techniques\
         \ et organisationnelles de ses sous-traitants permettant de traiter les risques\
         \ identifi\xE9s."
+      annotation: "Exigence compl\xE9mentaire au chapitre 6.1.3 de la norme ISO 27001\
+        \ (\xA75.6.1.3 du r\xE9f\xE9rentiel HDS)."
     - urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-07]
       assessable: false
       depth: 1
       ref_id: '[EXI 07]'
       description: "Afin de r\xE9duire les risques d\u2019usage impr\xE9vu du syst\xE8\
         me, l\u2019H\xE9bergeur doit s\u2019assurer que :"
+      annotation: "Exigence compl\xE9mentaire au chapitre 6.1.3 de la norme ISO 27001\
+        \ (\xA75.6.1.3 du r\xE9f\xE9rentiel HDS)."
     - urn: urn:intuitem:risk:req_node:hds-v2023-a:node36
       assessable: true
       depth: 2
@@ -209,6 +233,8 @@ objects:
       ref_id: '[EXI 08]'
       description: "La d\xE9claration d\u2019applicabilit\xE9 doit \xEAtre disponible\
         \ en langue fran\xE7aise pour les auditeurs qui en feront la demande."
+      annotation: "Exigence compl\xE9mentaire au chapitre 6.1.3 de la norme ISO 27001\
+        \ (\xA75.6.1.3 du r\xE9f\xE9rentiel HDS)."
     - urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-09]
       assessable: true
       depth: 1
@@ -217,10 +243,14 @@ objects:
         \ par l\u2019H\xE9bergeur doivent int\xE9grer la protection des DSCP qui lui\
         \ sont confi\xE9es par ses clients et comporter le respect des obligations\
         \ du RGPD."
+      annotation: "Exigence compl\xE9mentaire au chapitre 6.2 de la norme ISO 27001\
+        \ (\xA75.6.2 du r\xE9f\xE9rentiel HDS)."
     - urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-10]
       assessable: false
       depth: 1
       ref_id: '[EXI 10]'
+      annotation: "Exigence compl\xE9mentaire au chapitre 7.3 de la norme ISO 27001\
+        \ (\xA75.7.3 du r\xE9f\xE9rentiel HDS)."
     - urn: urn:intuitem:risk:req_node:hds-v2023-a:node41
       assessable: true
       depth: 2
@@ -239,6 +269,8 @@ objects:
       depth: 1
       ref_id: '[EXI 11]'
       description: "L\u2019H\xE9bergeur doit :"
+      annotation: "Exigence compl\xE9mentaire au chapitre 7.4 de la norme ISO 27001\
+        \ (\xA75.7.4 du r\xE9f\xE9rentiel HDS)."
     - urn: urn:intuitem:risk:req_node:hds-v2023-a:node44
       assessable: true
       depth: 2
@@ -259,6 +291,8 @@ objects:
       depth: 1
       ref_id: '[EXI 12]'
       description: "L\u2019H\xE9bergeur doit communiquer \xE0 ses clients :"
+      annotation: "Exigence compl\xE9mentaire au chapitre 7.4 de la norme ISO 27001\
+        \ (\xA75.7.4 du r\xE9f\xE9rentiel HDS)."
     - urn: urn:intuitem:risk:req_node:hds-v2023-a:node47
       assessable: true
       depth: 2
@@ -279,6 +313,8 @@ objects:
       description: "L\u2019H\xE9bergeur doit planifier et contr\xF4ler la r\xE9partition\
         \ des responsabilit\xE9s en termes de s\xE9curit\xE9 de l\u2019information\
         \ entre l\u2019H\xE9bergeur et son client."
+      annotation: "Exigence compl\xE9mentaire au chapitre 8.1 de la norme ISO 27001\
+        \ (\xA75.8.1 du r\xE9f\xE9rentiel HDS)."
     - urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-14]
       assessable: true
       depth: 1
@@ -287,12 +323,16 @@ objects:
         alisation de tout ou partie du service d\u2019h\xE9bergement, l\u2019H\xE9\
         bergeur doit pr\xE9voir une proc\xE9dure permettant d\u2019encadrer le risque\
         \ de perte ou de suspension de la certification du sous-traitant."
+      annotation: "Exigence compl\xE9mentaire au chapitre 8.3 de la norme ISO 27001\
+        \ (\xA75.8.3 du r\xE9f\xE9rentiel HDS)."
     - urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-15]
       assessable: false
       depth: 1
       ref_id: '[EXI 15]'
       description: "L\u2019H\xE9bergeur doit permettre au client d\u2019effectuer\
         \ les v\xE9rifications suivantes du niveau de s\xE9curit\xE9 propos\xE9 :"
+      annotation: "Exigence compl\xE9mentaire au chapitre 9.1 de la norme ISO 27001\
+        \ (\xA75.9.1 du r\xE9f\xE9rentiel HDS)."
     - urn: urn:intuitem:risk:req_node:hds-v2023-a:node52
       assessable: true
       depth: 2
@@ -332,6 +372,8 @@ objects:
       ref_id: '[EXI 16]'
       description: "Les audits internes effectu\xE9s par l\u2019H\xE9bergeur doivent\
         \ comprendre a minima :"
+      annotation: "Exigence compl\xE9mentaire au chapitre 9.2.1 de la norme ISO 27001\
+        \ (\xA75.9.2.1 du r\xE9f\xE9rentiel HDS)."
     - urn: urn:intuitem:risk:req_node:hds-v2023-a:node57
       assessable: true
       depth: 2
@@ -430,7 +472,7 @@ objects:
         \ le contrat d\u2019h\xE9bergement doit pr\xE9ciser les obligations de l\u2019\
         H\xE9bergeur \xE0 l\u2019\xE9gard de son Client en cas de modifications ou\
         \ d'\xE9volutions techniques introduites par lui ou impos\xE9es par le cadre\
-        \ l\xE9gal applicable. "
+        \ l\xE9gal applicable."
     - urn: urn:intuitem:risk:req_node:hds-v2023-a:node68
       assessable: true
       depth: 2
@@ -515,9 +557,11 @@ objects:
         un de ses sous-traitants implique un acc\xE8s \xE0 distance depuis un pays\
         \ qui ne fait pas partie de l\u2019Espace Economique Europ\xE9en (EEE), cet\
         \ acc\xE8s doit \xEAtre fond\xE9 sur une d\xE9cision d\u2019ad\xE9quation\
-        \ de la Commission adopt\xE9e vertu de l\u2019article 45 du RGPD[1] ou, \xE0\
+        \ de la Commission adopt\xE9e vertu de l\u2019article 45 du RGPD ou, \xE0\
         \ d\xE9faut, sur l\u2019une des garanties appropri\xE9es pr\xE9vues \xE0 l\u2019\
         article 46 du r\xE8glement."
+      annotation: "La liste des pays assurant un niveau de protection ad\xE9quat est\
+        \ consultable sur le site de la CNIL : www.cnil.fr/fr/la-protection-des-donnees-dans-le-monde"
     - urn: urn:intuitem:risk:req_node:hds-v2023-a:node79
       assessable: true
       depth: 2
@@ -535,6 +579,12 @@ objects:
         \ mesure permettant d\u2019assurer un niveau de protection des donn\xE9es\
         \ \xE9quivalent \xE0 celui garanti par le droit de l\u2019Union Europ\xE9\
         enne."
+      annotation: "S\u2019agissant des mesures suppl\xE9mentaires mentionn\xE9es \xE0\
+        \ l\u2019exigence n\xB0 29, l\u2019h\xE9bergeur doit tenir compte des recommandations\
+        \ du comit\xE9 europ\xE9en de la protection des donn\xE9es 01/2020 sur les\
+        \ mesures qui compl\xE8tent les instruments de transfert destin\xE9s \xE0\
+        \ garantir le respect du niveau de protection des donn\xE9es \xE0 caract\xE8\
+        re personnel de l\u2019UE (version 2.0, adopt\xE9e le 18 juin 2021)."
     - urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-30]
       assessable: true
       depth: 1
@@ -550,7 +600,7 @@ objects:
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-30]
       description: "- La liste des r\xE9glementations extra-europ\xE9ennes en vertu\
-        \ desquelles l\u2019H\xE9bergeur, ou l\u2019un de ses soustraitants intervenant\
+        \ desquelles l\u2019H\xE9bergeur, ou l\u2019un de ses sous-traitants intervenant\
         \ dans la prestation d\u2019h\xE9bergement, serait tenu de permettre un acc\xE8\
         s non autoris\xE9 par le droit de l\u2019Union aux DSCP, au sens de l\u2019\
         article 48 du RGPD ;"
@@ -561,6 +611,13 @@ objects:
       description: "- Les mesures mises en \u0153uvre par l\u2019H\xE9bergeur pour\
         \ att\xE9nuer les risques d\u2019acc\xE8s non autoris\xE9 aux DSCP induits\
         \ par ces r\xE9glementations extra-europ\xE9ennes ;"
+      annotation: "S\u2019agissant de ces mesures mises en \u0153uvre pour att\xE9\
+        nuer les risques d\u2019acc\xE8s mentionn\xE9es \xE0 l\u2019exigence n\xB0\
+        \ 30, l\u2019h\xE9bergeur tient compte des lignes directrices du comit\xE9\
+        \ europ\xE9en de la protection des donn\xE9es 01/2020 sur les mesures qui\
+        \ compl\xE8tent les instruments de transfert destin\xE9s \xE0 garantir le\
+        \ respect du niveau de protection des donn\xE9es \xE0 caract\xE8re personnel\
+        \ de l\u2019UE (version 2.0, adopt\xE9e le 18 juin 2021)."
     - urn: urn:intuitem:risk:req_node:hds-v2023-a:node84
       assessable: true
       depth: 2
@@ -576,8 +633,8 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:hds-v2023-a:[exi-31]
-      description: "L\u2019H\xE9bergeur doit rendre publique et mettre \xE0 jour la\
-        \ cartographie des transferts des DSCP vers un pays n'appartenant pas \xE0\
+      description: "L\u2019H\xE9bergeur doit rendre publiques et mettre \xE0 jour\
+        \ la cartographie des transferts des DSCP vers un pays n'appartenant pas \xE0\
         \ l\u2019Espace Economique Europ\xE9en y compris les acc\xE8s distants \xE9\
         ventuels mentionn\xE9s \xE0 l\u2019exigence n\xB0 29 ainsi que la description\
         \ des risques d\u2019acc\xE8s non autoris\xE9 vis\xE9s par l\u2019exigence\
@@ -589,7 +646,7 @@ objects:
       parent_urn: urn:intuitem:risk:req_node:hds-v2023-a:node86
       description: "- Dans le cas o\xF9 l\u2019activit\xE9 certifi\xE9e b\xE9n\xE9\
         ficie d\u2019une qualification SecNumCloud (version 3.2), l'H\xE9bergeur doit\
-        \ communiquer l\u2019information suivante : \xAB aucun risque d\u2019acc\xE8\
+        \ communiquer l\u2019information suivante : \xAB Aucun risque d\u2019acc\xE8\
         s impos\xE9 par la l\xE9gislation d\u2019un pays tiers en violation du droit\
         \ de l\u2019Union \xBB"
     - urn: urn:intuitem:risk:req_node:hds-v2023-a:node88
@@ -600,7 +657,7 @@ objects:
         ficie pas d\u2019une qualification SecNumCloud (version 3.2) et ne comporte\
         \ pas de transfert de DSCP vers un pays n'appartenant pas \xE0 l\u2019Espace\
         \ Economique Europ\xE9en, l'H\xE9bergeur doit communiquer l\u2019information\
-        \ suivante : \xAB aucun transfert de donn\xE9es de sant\xE9 \xE0 caract\xE8\
+        \ suivante : \xAB Aucun transfert de donn\xE9es de sant\xE9 \xE0 caract\xE8\
         re personnel vers un pays tiers \xE0 l\u2019espace \xE9conomique europ\xE9\
         en \xBB;"
     - urn: urn:intuitem:risk:req_node:hds-v2023-a:node89

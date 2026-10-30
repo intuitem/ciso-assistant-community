@@ -132,7 +132,8 @@ def _get_library_mtime() -> float:
     lib_dir = _get_library_dir()
     if not lib_dir.exists():
         return 0.0
-    mtime = lib_dir.stat().st_mtime
+    # this module's mtime too, so a cache built by older parsing code is rebuilt
+    mtime = max(lib_dir.stat().st_mtime, Path(__file__).stat().st_mtime)
     for f in lib_dir.glob("*.yaml"):
         mtime = max(mtime, f.stat().st_mtime)
     return mtime
@@ -185,7 +186,8 @@ def _save_cache(graph: DiGraph) -> None:
 def _build_graph() -> DiGraph:
     """Parse all YAML library files and build the knowledge graph."""
     import time
-    import yaml
+
+    from core.utils import yaml_safe_load
 
     t0 = time.time()
     G = DiGraph()
@@ -201,7 +203,7 @@ def _build_graph() -> DiGraph:
     for filepath in yaml_files:
         try:
             with open(filepath, "r", encoding="utf-8") as f:
-                data = yaml.safe_load(f)
+                data = yaml_safe_load(f)
         except Exception as e:
             logger.warning("yaml_parse_failed", file=filepath.name, error=e)
             continue
@@ -222,6 +224,8 @@ def _build_graph() -> DiGraph:
 
 def _process_library(G: DiGraph, data: dict):
     """Process a single YAML library file into graph nodes and edges."""
+    from library.builder import normalize_objects
+
     library_urn = data.get("urn", "")
     library_name = data.get("name", "")
     library_ref_id = data.get("ref_id", "")
@@ -229,11 +233,13 @@ def _process_library(G: DiGraph, data: dict):
     provider = data.get("provider", "")
     description = data.get("description", "")
 
-    objects = data.get("objects", {})
+    # Both spellings are valid ("framework" is legacy): read the plural lists.
+    objects = normalize_objects(data.get("objects", {}))
 
-    # --- Framework and its requirement nodes ---
-    framework = objects.get("framework", {})
-    if isinstance(framework, dict) and framework:
+    # --- Frameworks and their requirement nodes ---
+    for framework in objects.get("frameworks") or []:
+        if not isinstance(framework, dict) or not framework:
+            continue
         fw_urn = framework.get("urn", library_urn)
         fw_name = framework.get("name", library_name)
         fw_ref_id = framework.get("ref_id", library_ref_id)
@@ -314,8 +320,9 @@ def _process_library(G: DiGraph, data: dict):
         )
 
     # --- Cross-framework mappings ---
-    mapping_set = objects.get("requirement_mapping_set", {})
-    if isinstance(mapping_set, dict) and mapping_set:
+    for mapping_set in objects.get("requirement_mapping_sets") or []:
+        if not isinstance(mapping_set, dict) or not mapping_set:
+            continue
         source_fw = mapping_set.get("source_framework_urn", "")
         target_fw = mapping_set.get("target_framework_urn", "")
 

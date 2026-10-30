@@ -1,0 +1,80 @@
+urn: urn:intuitem:risk:library:workflow-compliance-requirement-remediation
+locale: en
+ref_id: workflow-compliance-requirement-remediation
+name: Non-compliant requirement — open and link a remediation control
+description: When a requirement is assessed non-compliant, create an applied control for it, link the
+  control to that requirement, and tell the owner. The assessment result itself is never touched.
+copyright: © intuitem
+version: 1
+publication_date: 2026-08-28
+provider: intuitem
+packager: intuitem
+objects:
+  workflows:
+  - urn: urn:intuitem:risk:library:workflow-compliance-requirement-remediation:workflow:requirement-remediation
+    schema_version: 1
+    ref_id: requirement-remediation
+    name: Non-compliant requirement — open and link a remediation control
+    description: When a requirement is assessed non-compliant, create an applied control for it, link
+      the control to that requirement, and tell the owner. The assessment result itself is never touched.
+    graph:
+      variables:
+      - key: notify_emails
+        type: string
+        default_value: grc@example.com
+      nodes:
+      - ref: on_non_compliant
+        type: trigger
+        label: Requirement assessed non-compliant
+        trigger_config:
+          type: internal_event
+          event_key: requirementassessment.updated
+          filters:
+            operator: and
+            conditions:
+            - field: result
+              op: eq
+              value: non_compliant
+              changed: true
+      - ref: create_control
+        type: action
+        label: Open a remediation control
+        action_config:
+          type: create_object
+          model: applied_control
+          fields:
+            name: 'Remediation: {{payload.object_repr}}'
+            description: Opened automatically on {{today}} after the requirement was assessed non-compliant.
+      - ref: link_control
+        type: action
+        label: Link it to the requirement
+        action_config:
+          type: update_object
+          model: requirement_assessment
+          id: '{{payload.object_id}}'
+          fields:
+            status: in_progress
+          m2m:
+            applied_controls:
+              op: add
+              values: '{{nodes.create_control.created_object_id}}'
+      - ref: notify
+        type: action
+        label: Tell the owner
+        action_config:
+          type: send_email
+          recipients: '{{notify_emails}}'
+          subject: 'Remediation opened: {{payload.object_repr}}'
+          body: '{{payload.object_repr}} was assessed non-compliant. {{nodes.create_control.created_object_name}}
+            was opened and linked to it.'
+      - ref: done
+        type: end
+      edges:
+      - source: on_non_compliant
+        target: create_control
+      - source: create_control
+        target: link_control
+      - source: link_control
+        target: notify
+      - source: notify
+        target: done

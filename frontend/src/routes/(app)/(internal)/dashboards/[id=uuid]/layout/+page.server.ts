@@ -1,10 +1,11 @@
-import { getModelInfo, urlParamModelSelectFields } from '$lib/utils/crud';
-import { loadDetail, formatSelectFieldData } from '$lib/utils/load';
-import { BASE_API_URL } from '$lib/utils/constants';
-import { modelSchema } from '$lib/utils/schemas';
+import { getModelInfo, urlParamModelSelectFields } from '#lib/utils/crud.js';
+import { loadDetail, formatSelectFieldData } from '#lib/utils/load.js';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { fetchAllPages } from '#lib/utils/pagination.js';
+import { modelSchema } from '#lib/utils/schemas.js';
 import type { PageServerLoad } from './$types';
 import { type Actions, fail } from '@sveltejs/kit';
-import { nestedDeleteFormAction, nestedWriteFormAction } from '$lib/utils/actions';
+import { nestedDeleteFormAction, nestedWriteFormAction } from '#lib/utils/actions.js';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 
@@ -19,10 +20,7 @@ export const load: PageServerLoad = async (event) => {
 
 	// Fetch widgets for this dashboard
 	const widgetsEndpoint = `${BASE_API_URL}/metrology/dashboard-widgets/?dashboard=${event.params.id}`;
-	const widgetsResponse = await event.fetch(widgetsEndpoint);
-	const widgetsData = widgetsResponse.ok ? await widgetsResponse.json() : { results: [] };
-
-	const widgets = widgetsData.results || [];
+	const widgets = await fetchAllPages(event.fetch, widgetsEndpoint).catch(() => []);
 
 	// Calculate the first free row (after all existing widgets)
 	const firstFreeRow =

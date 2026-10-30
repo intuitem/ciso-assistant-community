@@ -13,7 +13,7 @@ It's the answer to _"who approved this, when, and on what evidence?"_ — the qu
 ```mermaid
 graph LR
   R[Requester] -->|submits| VF[Validation flow]
-  VF -->|bundles| OBJ[Audits / risk assessments / BIAs / follow-ups / policies / exceptions / processings / accreditations / contracts]
+  VF -->|bundles| OBJ[Audits / risk assessments / BIAs / findings binders / policies / exceptions / processings / accreditations / contracts]
   VF -->|routed to| A[Approver]
   A -->|decision| ST{Status}
   ST -.->|accepted| OK[Accepted]
@@ -36,10 +36,10 @@ A **requester** submits a validation flow for one or more objects in their domai
 
 There are two ways to start a flow, and they cover slightly different objects:
 
-- **From the Validations list** — click **+**, then expand the **More** section to attach objects. The picker offers **Audits**, **Risk assessments**, **Business impact analyses**, **Findings assessments** (follow-ups), **Security exceptions**, **Processings** (privacy), **Accreditations**, and **Contracts** (third-party). You can mix several types in one flow when they belong to the same approval decision (e.g. "approve this audit and the related exceptions").
-- **From an object's own page** — objects that carry a validation section let you submit the open object directly. This is the only way to route a **Policy** through a flow, and it's also available on audits, risk assessments, BIAs, follow-ups, exceptions, processings, accreditations, and contracts.
+- **From the Validations list** — click **+**, then expand the **More** section to attach objects. The picker offers **Audits**, **Risk assessments**, **Business impact analyses**, **Findings binders**, **Security exceptions**, **Processings** (privacy), **Accreditations**, and **Contracts** (third-party). You can mix several types in one flow when they belong to the same approval decision (e.g. "approve this audit and the related exceptions").
+- **From an object's own page** — objects that carry a validation section let you submit the open object directly. This is the only way to route a **Policy** through a flow, and it's also available on audits, risk assessments, BIAs, findings binders, exceptions, processings, accreditations, and contracts.
 
-So the full set of objects that can go through a validation flow is: audits, risk assessments, business impact analyses, follow-ups, policies, security exceptions, processings, accreditations, and contracts.
+So the full set of objects that can go through a validation flow is: audits, risk assessments, business impact analyses, findings binders, policies, security exceptions, processings, accreditations, and contracts.
 
 ## Status lifecycle
 
@@ -77,12 +77,12 @@ The pattern fits anywhere a decision needs **formal, traceable sign-off**:
 - A risk assessment's residual-risk acceptance — the formal capture required by ISO 27005 and most internal risk frameworks.
 - A third-party contract going through procurement sign-off.
 
-It is _not_ the right tool for casual review or peer feedback — for those, use comments, the requirement-assessment review status, or a [findings assessment](findings-assessments.md). Validation flows are explicitly heavy: they exist so that the approval is preserved as evidence.
+It is _not_ the right tool for casual review or peer feedback — for those, use comments, the requirement-assessment review status, or a [findings binder](findings-assessments.md). Validation flows are explicitly heavy: they exist so that the approval is preserved as evidence.
 
 ## Related
 
 - [Policies](policies.md) — typical objects routed through validation flows for publication
-- [Findings assessments](findings-assessments.md) — lighter-weight review/remediation tracking
+- [Findings binders](findings-assessments.md) — lighter-weight review/remediation tracking
 - [Risk assessments](risk-assessments.md) — formal risk acceptance is one of the most common reasons a validation flow is submitted
 - [My assignments](../features/my-assignments.md) — where approvers see flows queued for them
 - [Actors and teams](actors-and-teams.md) — explains why approver is a user, not an actor

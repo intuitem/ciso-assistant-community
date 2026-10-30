@@ -1,14 +1,17 @@
 <script lang="ts">
 	import { enhance, deserialize } from '$app/forms';
-	import { m } from '$paraglide/messages';
-	import { getToastStore } from '$lib/components/Toast/stores';
-	import PortalGrid from '$lib/components/PortalGrid/PortalGrid.svelte';
-	import SectionEditor from '$lib/components/PortalEditor/SectionEditor.svelte';
-	import PortalSettingsPanel from '$lib/components/PortalEditor/PortalSettingsPanel.svelte';
-	import { SCAFFOLDABLE_MODELS } from '$lib/utils/modelTargets';
-	import { urlParamModelVerboseName } from '$lib/utils/crud';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { savedToast, savedToastEnhance } from '$lib/utils/portalActions';
+	import { m } from '#paraglide/messages.js';
+	import { getToastStore } from '#lib/components/Toast/stores.js';
+	import PortalGrid from '#lib/components/PortalGrid/PortalGrid.svelte';
+	import SectionEditor from '#lib/components/PortalEditor/SectionEditor.svelte';
+	import { countIncompleteTiles } from '#lib/components/PortalEditor/tile-validation.js';
+	import PortalSettingsPanel from '#lib/components/PortalEditor/PortalSettingsPanel.svelte';
+	import { SCAFFOLDABLE_MODELS } from '#lib/utils/modelTargets.js';
+	import { navData } from '#lib/components/SideBar/navData.js';
+	import { getSidebarVisibleItems } from '#lib/utils/sidebar-config.js';
+	import { urlParamModelVerboseName } from '#lib/utils/crud.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { savedToast, savedToastEnhance } from '#lib/utils/portalActions.js';
 	import { superForm } from 'sveltekit-superforms';
 	import { page } from '$app/state';
 	import type { PageData } from './$types';
@@ -17,20 +20,39 @@
 		!!page.data?.settings?.personal_folders && !page.data?.settings?.personal_folders_parent
 	);
 
-	const modelOptions = SCAFFOLDABLE_MODELS.map((model) => ({
-		value: model,
-		label: safeTranslate(urlParamModelVerboseName(model))
-	})).sort((a, b) => a.label.localeCompare(b.label));
+	// A destination whose module is switched off leads nowhere: same flag rules as the sidebar.
+	const visibleNav: Record<string, boolean> = $derived(
+		getSidebarVisibleItems(page.data?.featureflags)
+	);
+	const moduleOff = (model: string) =>
+		(navData.items as { name?: string; items?: { name?: string; href?: string }[] }[]).some(
+			(section) =>
+				(section.items ?? []).some(
+					(i) =>
+						i.href === `/${model}` &&
+						(visibleNav[i.name ?? ''] === false || visibleNav[section.name ?? ''] === false)
+				)
+		);
+	const modelOptions = $derived(
+		SCAFFOLDABLE_MODELS.filter((model) => !moduleOff(model))
+			.map((model) => ({
+				value: model,
+				label: safeTranslate(urlParamModelVerboseName(model))
+			}))
+			.sort((a, b) => a.label.localeCompare(b.label))
+	);
+
+	let { data }: { data: PageData } = $props();
 
 	// Static in-app pages a 'navigate' tile can point at (no model behind them). The value
 	// is the route path minus the leading slash, so the viewer's goto(`/${target.model}`)
 	// reaches it unchanged.
-	const PAGE_DESTINATIONS = [
+	const PAGE_DESTINATIONS = $derived([
 		{ value: 'my-assignments', label: m.myAssignments() },
-		{ value: 'auditee-dashboard', label: m.auditDashboard() }
-	];
-
-	let { data }: { data: PageData } = $props();
+		{ value: 'auditee-dashboard', label: m.auditDashboard() },
+		...(data.quickFormsEnabled ? [{ value: 'my-requests', label: m.myRequests() }] : []),
+		...(data.documentsEnabled ? [{ value: 'documents', label: m.documents() }] : [])
+	]);
 	const toast = getToastStore();
 	let view = $state<'edit' | 'preview' | 'settings'>('edit');
 	let name = $state(data.portal.name);
@@ -103,7 +125,8 @@
 			| 'metric'
 			| 'certificationDocument'
 			| 'framework'
-			| 'assessment';
+			| 'assessment'
+			| 'quickForm';
 		target: Record<string, any>;
 	};
 	type Section = { title: string; description: string; items: Item[] };
@@ -128,7 +151,13 @@
 	const KINDS = $derived(
 		data.portal.is_public
 			? ['certificationDocument', 'framework', 'external']
-			: ['create', 'navigate', 'assessment', 'external']
+			: [
+					'create',
+					'navigate',
+					'assessment',
+					...(data.quickFormsEnabled ? ['quickForm'] : []),
+					'external'
+				]
 	);
 
 	const METRIC_SOURCES = [
@@ -144,14 +173,14 @@
 		metric: m.metric(),
 		certificationDocument: m.certificationDocument(),
 		framework: m.framework(),
-		assessment: m.questionnaire()
+		// The platform calls a ComplianceAssessment an Audit everywhere else, and this
+		// tile's own target field is already labelled "Audit setup". "Questionnaire" here
+		// only collided with the quick form below it.
+		assessment: m.complianceAssessment(),
+		quickForm: m.quickForm()
 	};
 
 	// Bundle the shared option lists / data once for the section + tile editors.
-	const personalFoldersEnabled = $derived(
-		!!page.data?.settings?.personal_folders && !!page.data?.settings?.personal_folders_parent
-	);
-
 	const ctx = $derived({
 		modelOptions,
 		pageDestinations: PAGE_DESTINATIONS,
@@ -160,12 +189,17 @@
 		kindLabels: KIND_LABELS,
 		snapshots: data.snapshots,
 		frameworks: data.frameworks,
-		folders: data.folders,
-		personalFoldersEnabled,
-		docs
+		quickForms: data.quickForms ?? [],
+		actors: data.actors ?? [],
+		publications: data.publications ?? [],
+		docs,
+		documentCatalog: data.documentCatalog ?? []
 	});
 
 	const payload = $derived(JSON.stringify({ sections }));
+	// A tile with no target 400s for every clicker, so saving one is never what the
+	// author meant. The backend rejects it too; this is what stops them getting there.
+	const incompleteTiles = $derived(countIncompleteTiles(sections));
 
 	// 'navigate' targets a model (mandatory) — backfill any tile that lacks one so the
 	// select is never silently empty. 'assessment' tiles need a stable id so a click can
@@ -175,7 +209,8 @@
 		for (const sec of sections)
 			for (const it of sec.items) {
 				if (it.kind === 'navigate' && !it.target.model && fallback) it.target.model = fallback;
-				if (it.kind === 'assessment' && !it.id) it.id = crypto.randomUUID();
+				if ((it.kind === 'assessment' || it.kind === 'quickForm') && !it.id)
+					it.id = crypto.randomUUID();
 			}
 	});
 
@@ -249,7 +284,8 @@
 			bind:value={name}
 			onblur={saveName}
 			aria-label={m.name()}
-			class="grow min-w-48 max-w-md rounded-md border border-transparent bg-transparent px-2 py-1 text-xl font-bold hover:bg-surface-100-900 focus:border-surface-300-700 focus:bg-surface-100-900 focus:outline-none"
+			size={Math.max(name.length, 8)}
+			class="field-sizing-content min-w-0 max-w-md rounded-md border border-transparent bg-transparent px-2 py-1 text-xl font-bold hover:bg-surface-100-900 focus:border-surface-300-700 focus:bg-surface-100-900 focus:outline-none"
 		/>
 		<span
 			class="shrink-0 text-[10px] uppercase rounded-full px-2 py-0.5 {data.portal.status ===
@@ -288,7 +324,13 @@
 					aria-label={m.openPortal()}><i class="fa-solid fa-arrow-up-right-from-square"></i></a
 				>
 			{/if}
-			<form method="POST" action="?/duplicate" use:enhance>
+			<form
+				method="POST"
+				action="?/duplicate"
+				use:enhance={() =>
+					({ update }) =>
+						update({ navigate: false })}
+			>
 				<button
 					class="btn-icon btn-sm preset-tonal"
 					aria-label={m.duplicate()}
@@ -342,6 +384,13 @@
 	<div
 		class="fixed bottom-0 right-0 left-64 flex items-center justify-end gap-3 border-t border-surface-200-800 bg-surface-50-950/90 px-8 py-3 backdrop-blur"
 	>
+		{#if incompleteTiles > 0}
+			<p class="mr-auto text-sm text-error-600 dark:text-error-400">
+				<i class="fa-solid fa-circle-exclamation mr-1"></i>{m.portalTileIncompleteCount({
+					count: incompleteTiles
+				})}
+			</p>
+		{/if}
 		<form method="POST" action="?/setStatus" use:enhance={savedToastEnhance(toast)}>
 			<input
 				type="hidden"
@@ -358,7 +407,13 @@
 			use:enhance={savedToastEnhance(toast, { reset: false })}
 		>
 			<input type="hidden" name="payload" value={payload} />
-			<button class="btn preset-filled-primary-500">
+			<button
+				class="btn preset-filled-primary-500"
+				disabled={incompleteTiles > 0}
+				title={incompleteTiles > 0
+					? m.portalTileIncompleteCount({ count: incompleteTiles })
+					: undefined}
+			>
 				<i class="fa-solid fa-floppy-disk mr-1"></i>{m.save()}
 			</button>
 		</form>

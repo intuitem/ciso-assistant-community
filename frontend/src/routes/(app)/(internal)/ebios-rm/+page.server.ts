@@ -1,20 +1,20 @@
-import { defaultDeleteFormAction, defaultWriteFormAction } from '$lib/utils/actions';
-import { BASE_API_URL } from '$lib/utils/constants';
+import { defaultDeleteFormAction, defaultWriteFormAction } from '#lib/utils/actions.js';
+import { BASE_API_URL } from '#lib/utils/constants.js';
 import {
 	getModelInfo,
 	urlParamModelForeignKeyFields,
 	urlParamModelSelectFields
-} from '$lib/utils/crud';
-import { formatSelectFieldData } from '$lib/utils/load';
-import { modelSchema } from '$lib/utils/schemas';
-import type { ModelInfo, urlModel } from '$lib/utils/types';
+} from '#lib/utils/crud.js';
+import { formatSelectFieldData } from '#lib/utils/load.js';
+import { modelSchema } from '#lib/utils/schemas.js';
+import type { ModelInfo, urlModel } from '#lib/utils/types.js';
 import { type Actions } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import type { PageServerLoad } from './$types';
-import { listViewFields } from '$lib/utils/table';
-import { type TableSource } from '@skeletonlabs/skeleton-svelte';
+import { listViewFields } from '#lib/utils/table.js';
+import { type TableSource } from '#lib/components/ModelTable/types.js';
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
 	const schema = z.object({ id: z.string().uuid() });
@@ -41,17 +41,15 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 
 	model['selectOptions'] = selectOptions;
 
-	const endpoint = `${BASE_API_URL}/${model.endpointUrl}/`;
-	const res = await fetch(endpoint);
-	const data = await res.json().then((res) => res.results);
-
-	const headData: Record<string, string> = listViewFields[URLModel as urlModel].body.reduce(
-		(obj, key, index) => {
-			obj[key] = listViewFields[URLModel as urlModel].head[index];
-			return obj;
-		},
-		{}
-	);
+	const fields = listViewFields[URLModel as urlModel];
+	const head = [...fields.head, ...(fields.optionalFields?.head ?? [])];
+	const headData: Record<string, string> = [
+		...fields.body,
+		...(fields.optionalFields?.body ?? [])
+	].reduce((obj, key, index) => {
+		obj[key] = head[index];
+		return obj;
+	}, {});
 
 	const table: TableSource = {
 		head: headData,

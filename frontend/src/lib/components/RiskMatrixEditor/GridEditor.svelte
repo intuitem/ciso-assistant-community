@@ -1,6 +1,8 @@
 <script lang="ts">
-	import { isDark } from '$lib/utils/helpers';
-	import { m } from '$paraglide/messages';
+	import { page } from '$app/state';
+	import { isDark } from '#lib/utils/helpers.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
 
 	interface Level {
 		id: number;
@@ -8,6 +10,7 @@
 		name: string;
 		description: string;
 		hexcolor: string;
+		translations?: Record<string, { name?: string; description?: string }>;
 	}
 
 	interface Props {
@@ -16,6 +19,13 @@
 		impactLevels: Level[];
 		riskLevels: Level[];
 		onchange: (grid: number[][]) => void;
+		/** When editing a translation, display level names in that language. */
+		activeLang?: string;
+		baseLang?: string;
+		// Axis configuration, mirroring the RiskMatrix preview component.
+		swapAxes?: boolean;
+		flipVertical?: boolean;
+		labelStandard?: string;
 	}
 
 	let {
@@ -23,79 +33,105 @@
 		probabilityLevels,
 		impactLevels,
 		riskLevels,
-		onchange
+		onchange,
+		activeLang,
+		baseLang,
+		swapAxes = page.data.settings?.risk_matrix_swap_axes ?? false,
+		flipVertical = page.data.settings?.risk_matrix_flip_vertical ?? false,
+		labelStandard = page.data.settings?.risk_matrix_labels ?? 'ISO'
 	}: Props = $props();
 
-	function cycleRiskLevel(rowIdx: number, colIdx: number) {
-		const current = grid[rowIdx][colIdx];
-		const next = (current + 1) % riskLevels.length;
-		grid = grid.map((row, ri) =>
-			ri === rowIdx ? row.map((cell, ci) => (ci === colIdx ? next : cell)) : row
-		);
-		onchange(grid);
+	// Translated display name with base-language fallback (abbreviations are
+	// not translated — the levels' translations carry name/description only).
+	function levelName(level: Level): string {
+		if (activeLang && activeLang !== baseLang) {
+			return level.translations?.[activeLang]?.name || level.name;
+		}
+		return level.name;
 	}
 
-	function setRiskLevel(rowIdx: number, colIdx: number, value: number) {
+	// The stored grid stays grid[probabilityIndex][impactIndex]; only the
+	// rendering is reoriented.
+	function toGridCoords(yIdx: number, xIdx: number): [number, number] {
+		return swapAxes ? [xIdx, yIdx] : [yIdx, xIdx];
+	}
+
+	function cycleRiskLevel(yIdx: number, xIdx: number) {
+		const [rowIdx, colIdx] = toGridCoords(yIdx, xIdx);
+		setRiskLevel(yIdx, xIdx, ((grid[rowIdx]?.[colIdx] ?? 0) + 1) % riskLevels.length);
+	}
+
+	function setRiskLevel(yIdx: number, xIdx: number, value: number) {
+		const [rowIdx, colIdx] = toGridCoords(yIdx, xIdx);
 		grid = grid.map((row, ri) =>
 			ri === rowIdx ? row.map((cell, ci) => (ci === colIdx ? value : cell)) : row
 		);
 		onchange(grid);
 	}
 
-	function getRiskLevel(index: number): Level | undefined {
-		return riskLevels[index];
+	function getRiskLevel(yIdx: number, xIdx: number): Level | undefined {
+		const [rowIdx, colIdx] = toGridCoords(yIdx, xIdx);
+		return riskLevels[grid[rowIdx]?.[colIdx] ?? 0];
 	}
 
-	// Display probability rows reversed (highest at top) to match the preview component
-	let displayRows = $derived(
-		probabilityLevels
-			.map((prob, idx) => ({ prob, gridRowIdx: idx }))
-			.slice()
-			.reverse()
+	let yLevels = $derived(swapAxes ? impactLevels : probabilityLevels);
+	let xLevels = $derived(swapAxes ? probabilityLevels : impactLevels);
+
+	let yAxisLabel = $derived(
+		safeTranslate(`${swapAxes ? 'impact' : 'probability'}${labelStandard}`)
 	);
+	let xAxisLabel = $derived(
+		safeTranslate(`${swapAxes ? 'probability' : 'impact'}${labelStandard}`)
+	);
+
+	// Highest level at the top, unless the origin is set to top-left.
+	let displayRows = $derived.by(() => {
+		const rows = yLevels.map((level, yIdx) => ({ level, yIdx }));
+		return flipVertical ? rows : rows.reverse();
+	});
 </script>
 
 <div class="space-y-3">
 	<div class="flex items-center">
 		<div class="flex font-semibold text-sm text-surface-600-400 -rotate-90 whitespace-nowrap mr-1">
-			← {m.probability()}
+			<!-- -rotate-90 turns → upward and ← downward; the arrow follows increasing level order. -->
+			{flipVertical ? `← ${yAxisLabel}` : `${yAxisLabel} →`}
 		</div>
 		<div class="overflow-x-auto flex-1">
 			<table class="table table-compact border-collapse">
 				<thead>
 					<tr>
 						<th class="bg-surface-100-900 border border-surface-300-700 text-center w-28"></th>
-						{#each impactLevels as impact}
+						{#each xLevels as xLevel}
 							<th
 								class="border border-surface-300-700 text-center p-2 min-w-20"
-								style="background-color: {impact.hexcolor}; color: {isDark(impact.hexcolor)
+								style="background-color: {xLevel.hexcolor}; color: {isDark(xLevel.hexcolor)
 									? 'white'
 									: 'black'}"
 							>
-								<span class="text-xs font-bold">{impact.abbreviation}</span>
+								<span class="text-xs font-bold">{xLevel.abbreviation}</span>
 								<br />
-								<span class="text-xs">{impact.name}</span>
+								<span class="text-xs">{levelName(xLevel)}</span>
 							</th>
 						{/each}
 					</tr>
 				</thead>
 				<tbody>
-					{#each displayRows as { prob, gridRowIdx }, displayIdx}
-						{@const rowIdx = gridRowIdx}
+					{#each displayRows as { level, yIdx }, displayIdx}
 						{@const isBottomHalf = displayIdx >= displayRows.length / 2}
 						<tr>
 							<td
 								class="border border-surface-300-700 text-center p-2 font-semibold"
-								style="background-color: {prob.hexcolor}; color: {isDark(prob.hexcolor)
+								style="background-color: {level.hexcolor}; color: {isDark(level.hexcolor)
 									? 'white'
 									: 'black'}"
 							>
-								<span class="text-xs font-bold">{prob.abbreviation}</span>
+								<span class="text-xs font-bold">{level.abbreviation}</span>
 								<br />
-								<span class="text-xs">{prob.name}</span>
+								<span class="text-xs">{levelName(level)}</span>
 							</td>
-							{#each impactLevels as _, colIdx}
-								{@const riskLevel = getRiskLevel(grid[rowIdx]?.[colIdx] ?? 0)}
+							{#each xLevels as _, xIdx}
+								{@const riskLevel = getRiskLevel(yIdx, xIdx)}
 								<td
 									class="border border-surface-300-700 text-center p-0 cursor-pointer hover:opacity-80 transition-opacity focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-1"
 									style="background-color: {riskLevel?.hexcolor ?? '#ccc'}; color: {isDark(
@@ -103,14 +139,14 @@
 									)
 										? 'white'
 										: 'black'}"
-									onclick={() => cycleRiskLevel(rowIdx, colIdx)}
+									onclick={() => cycleRiskLevel(yIdx, xIdx)}
 									title={m.clickToCycle()}
 									role="button"
 									tabindex="0"
 									onkeydown={(e) => {
 										if (e.key === 'Enter' || e.key === ' ') {
 											e.preventDefault();
-											cycleRiskLevel(rowIdx, colIdx);
+											cycleRiskLevel(yIdx, xIdx);
 										}
 									}}
 								>
@@ -133,10 +169,10 @@
 														: 'black'}"
 													onclick={(e) => {
 														e.stopPropagation();
-														setRiskLevel(rowIdx, colIdx, rIdx);
+														setRiskLevel(yIdx, xIdx, rIdx);
 													}}
 												>
-													{rl.abbreviation} - {rl.name}
+													{rl.abbreviation} - {levelName(rl)}
 												</button>
 											{/each}
 										</div>
@@ -150,7 +186,7 @@
 		</div>
 	</div>
 	<div class="flex justify-center text-sm font-semibold text-surface-600-400 mt-1">
-		{m.impact()} →
+		{xAxisLabel} →
 	</div>
 	<p class="text-xs text-surface-500 text-center mt-2">
 		<i class="fa-solid fa-circle-info mr-1"></i>{m.clickToCycle()}

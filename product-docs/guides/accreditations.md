@@ -60,7 +60,7 @@ Standard detail view with sidebar widgets:
 
 - Top: name, ID.
 - Two columns: **Description** and **Observation** (both Markdown).
-- **Associated objects** section: a grid of cards, one per category present in the linked collection — audits, risk assessments, CRQ studies, EBIOS RM studies, entity assessments, follow-ups, evidences, exceptions, policies. Each card shows item count, status chips, and a link to the underlying object.
+- **Associated objects** section: a grid of cards, one per category present in the linked collection — audits, risk assessments, CRQ studies, EBIOS RM studies, entity assessments, findings binders, evidences, exceptions, policies. Each card shows item count, status chips, and a link to the underlying object.
 
 If no collection is linked or the collection is empty, the section shows _"No associated objects in this collection."_
 

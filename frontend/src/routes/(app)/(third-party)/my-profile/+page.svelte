@@ -1,13 +1,17 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { m } from '$paraglide/messages';
-	import { toCamelCase } from '$lib/utils/locales';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { getLocale } from '$paraglide/runtime';
-	import { formatDate } from '$lib/utils/datetime';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import { canPerformAction } from '$lib/utils/access-control';
+	import { m } from '#paraglide/messages.js';
+	import { toCamelCase } from '#lib/utils/locales.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { getLocale } from '#paraglide/runtime.js';
+	import { formatDate } from '#lib/utils/datetime.js';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import { canPerformAction } from '#lib/utils/access-control.js';
 	import type { PageData } from './$types';
+
+	// leader / deputy / member -> teamLeader / teamDeputy / teamMember
+	const roleLabel = (role: string) =>
+		safeTranslate(`team${role.charAt(0).toUpperCase()}${role.slice(1)}`);
 
 	function filterUserData() {
 		const filtered = {};
@@ -74,19 +78,37 @@
 				</div>
 			{/each}
 		</div>
-		<div class="flex flex-col w-1/2 card bg-surface-50-950 p-2 space-y-4">
-			<h2 class="text-xl mb-1 font-semibold">{m.myUserGroups()}</h2>
-			<div class="overflow-auto space-y-2">
-				{#each data.currentUser.user_groups as group}
-					<div class="flex flex-row items-center">
-						{#if group.builtin}
-							<span class="badge preset-tonal-primary mr-2">{m.builtin()}</span>
-						{/if}
-						<p class="font-semibold text-sm">
-							{group.str}
-						</p>
-					</div>
-				{/each}
+		<div class="flex flex-col w-1/2 space-y-2">
+			<div class="flex flex-col card bg-surface-50-950 p-2 space-y-4">
+				<h2 class="text-xl mb-1 font-semibold">{m.myUserGroups()}</h2>
+				<div class="overflow-auto space-y-2">
+					{#each data.currentUser.user_groups as group}
+						<div class="flex flex-row items-center">
+							{#if group.builtin}
+								<span class="badge preset-tonal-primary mr-2">{m.builtin()}</span>
+							{/if}
+							<p class="font-semibold text-sm">
+								{group.str}
+							</p>
+						</div>
+					{/each}
+				</div>
+			</div>
+			<div class="flex flex-col card bg-surface-50-950 p-2 space-y-4">
+				<h2 class="text-xl mb-1 font-semibold">{m.myTeams()}</h2>
+				<div class="overflow-auto space-y-2">
+					{#each data.teams ?? [] as team}
+						<div class="flex flex-row items-center gap-2">
+							<span class="badge preset-tonal-secondary">{roleLabel(team.role)}</span>
+							<p class="font-semibold text-sm">{team.str}</p>
+							{#if team.folder}
+								<span class="text-xs text-surface-600-400">{team.folder.str}</span>
+							{/if}
+						</div>
+					{:else}
+						<p class="text-sm text-surface-600-400">{m.noTeams()}</p>
+					{/each}
+				</div>
 			</div>
 		</div>
 	</div>

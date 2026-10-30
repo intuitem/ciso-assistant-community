@@ -2,7 +2,8 @@
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import { onMount } from 'svelte';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
+	import { fetchAllPages } from '#lib/utils/pagination.js';
 
 	interface ChainRow {
 		subcontractor: string;
@@ -174,10 +175,7 @@
 
 	onMount(async () => {
 		try {
-			const res = await fetch('/entities?is_active=true');
-			if (!res.ok) return;
-			const data = await res.json();
-			const results = Array.isArray(data?.results) ? data.results : data;
+			const results = await fetchAllPages(fetch, '/entities?is_active=true');
 			const next = new Map(entityLabels);
 			for (const e of results) {
 				next.set(e.id as string, (e.name ?? e.str ?? e.id) as string);

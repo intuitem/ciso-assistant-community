@@ -1,0 +1,879 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:cis-benchmark-gcp-foundation
+locale: en
+ref_id: cis-benchmark-gcp-foundation
+name: CIS Google Cloud Platform Foundation Benchmark
+description: CIS Google Cloud Platform Foundation Benchmark v5.0.0
+copyright: "\xA9 CIS Security"
+version: 1
+publication_date: 2026-05-09
+provider: CIS
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:cis-benchmark-gcp-foundation
+    ref_id: cis-benchmark-gcp-foundation
+    name: CIS Google Cloud Platform Foundation Benchmark
+    description: CIS Google Cloud Platform Foundation Benchmark v5.0.0
+    implementation_groups_definition:
+    - ref_id: A
+      name: Automatic
+      description: null
+    - ref_id: M
+      name: Manual
+      description: null
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1
+      assessable: false
+      depth: 1
+      ref_id: '1'
+      name: Identity and Access Management
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1
+      ref_id: '1.1'
+      name: Organization Resource
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1.1
+      ref_id: 1.1.1
+      name: Ensure Super Admin Email Address Is Not Tied To A Single User
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1.1
+      ref_id: 1.1.2
+      name: Ensure Super Admin Account Is Not Used For Google Cloud Administration
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1.1
+      ref_id: 1.1.3
+      name: Ensure Folders Are Structured By Environment And Sensitivity
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1.1.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1.1
+      ref_id: 1.1.4
+      name: Ensure Organization Policies Are Configured For Centralized Constraints
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1
+      ref_id: '1.2'
+      name: Ensure that Corporate Login Credentials are Used
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1
+      ref_id: '1.3'
+      name: Ensure that Multi-Factor Authentication is 'Enabled' for All Non-Service
+        Accounts
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1
+      ref_id: '1.4'
+      name: Ensure that Security Key Enforcement is Enabled for All Admin Accounts
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1
+      ref_id: '1.5'
+      name: Ensure That There Are Only GCP-Managed Service Account Keys for Each Service
+        Account
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1
+      ref_id: '1.6'
+      name: Ensure That Service Account Has No Admin Privileges
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1
+      ref_id: '1.7'
+      name: Ensure That IAM Users Are Not Assigned the Service Account User or Service
+        Account Token Creator Roles at Project Level
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1
+      ref_id: '1.8'
+      name: Ensure User-Managed/External Keys for Service Accounts Are Rotated Every
+        90 Days or Fewer
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1
+      ref_id: '1.9'
+      name: Ensure That Separation of Duties Is Enforced While Assigning Service Account
+        Related Roles to Users
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1
+      ref_id: '1.10'
+      name: Ensure That Cloud KMS Cryptokeys Are Not Anonymously or Publicly Accessible
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1
+      ref_id: '1.11'
+      name: Ensure KMS Encryption Keys Are Rotated Within a Period of 90 Days
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1.12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1
+      ref_id: '1.12'
+      name: Ensure That Separation of Duties Is Enforced While Assigning KMS Related
+        Roles to Users
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1.13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1
+      ref_id: '1.13'
+      name: Ensure API Keys Only Exist for Active Services
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1.14
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1
+      ref_id: '1.14'
+      name: Ensure API Keys Are Restricted To Use by Only Specified Hosts and Apps
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1.15
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1
+      ref_id: '1.15'
+      name: Ensure API Keys Are Restricted to Only APIs That Application Needs Access
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1.16
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1
+      ref_id: '1.16'
+      name: Ensure API Keys Are Rotated Every 90 Days
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1.17
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1
+      ref_id: '1.17'
+      name: Ensure Essential Contacts is Configured for Organization
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1.18
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:1
+      ref_id: '1.18'
+      name: Ensure Secrets are Not Stored in Cloud Functions Environment Variables
+        by Using Secret Manager
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:2
+      assessable: false
+      depth: 1
+      ref_id: '2'
+      name: Logging and Monitoring
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:2.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:2
+      ref_id: '2.1'
+      name: Ensure That Cloud Audit Logging Is Configured Properly
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:2.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:2
+      ref_id: '2.2'
+      name: Ensure Google Workspace/Cloud Identity Data Sharing with Google Cloud
+        is Enabled for Admin Audit Logging
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:2.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:2
+      ref_id: '2.3'
+      name: Ensure That Sinks Are Configured for All Log Entries
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:2.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:2
+      ref_id: '2.4'
+      name: Ensure That Retention Policies on Cloud Storage Buckets Used for Exporting
+        Logs Are Configured Using Bucket Lock
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:2.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:2
+      ref_id: '2.5'
+      name: Ensure Log Metric Filter and Alerts Exist for Project Ownership Assignments/Changes
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:2.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:2
+      ref_id: '2.6'
+      name: Ensure That the Log Metric Filter and Alerts Exist for Audit Configuration
+        Changes
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:2.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:2
+      ref_id: '2.7'
+      name: Ensure That the Log Metric Filter and Alerts Exist for Custom Role Changes
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:2.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:2
+      ref_id: '2.8'
+      name: Ensure That the Log Metric Filter and Alerts Exist for VPC Network Firewall
+        Rule Changes
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:2.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:2
+      ref_id: '2.9'
+      name: Ensure That the Log Metric Filter and Alerts Exist for VPC Network Route
+        Changes
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:2.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:2
+      ref_id: '2.10'
+      name: Ensure That the Log Metric Filter and Alerts Exist for VPC Network Changes
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:2.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:2
+      ref_id: '2.11'
+      name: Ensure That the Log Metric Filter and Alerts Exist for Cloud Storage IAM
+        Permission Changes
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:2.12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:2
+      ref_id: '2.12'
+      name: Ensure That the Log Metric Filter and Alerts Exist for SQL Instance Configuration
+        Changes
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:2.13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:2
+      ref_id: '2.13'
+      name: Ensure That Cloud DNS Logging Is Enabled for All VPC Networks
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:2.14
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:2
+      ref_id: '2.14'
+      name: Ensure Cloud Asset Inventory Is Enabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:2.15
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:2
+      ref_id: '2.15'
+      name: Ensure 'Access Transparency' is 'Enabled'
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:2.16
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:2
+      ref_id: '2.16'
+      name: Ensure 'Access Approval' is 'Enabled'
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:2.17
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:2
+      ref_id: '2.17'
+      name: Ensure Logging is enabled for HTTP(S) Load Balancer
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:3
+      assessable: false
+      depth: 1
+      ref_id: '3'
+      name: Networking
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:3.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:3
+      ref_id: '3.1'
+      name: Ensure That the Default Network Does Not Exist in a Project
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:3.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:3
+      ref_id: '3.2'
+      name: Ensure Legacy Networks Do Not Exist for Older Projects
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:3.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:3
+      ref_id: '3.3'
+      name: Ensure That DNSSEC Is Enabled for Cloud DNS
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:3.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:3
+      ref_id: '3.4'
+      name: Ensure That RSASHA1 Is Not Used for the Key-Signing Key in Cloud DNS DNSSEC
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:3.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:3
+      ref_id: '3.5'
+      name: Ensure That RSASHA1 Is Not Used for the Zone-Signing Key in Cloud DNS
+        DNSSEC
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:3.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:3
+      ref_id: '3.6'
+      name: Ensure That SSH Access Is Restricted From the Internet
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:3.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:3
+      ref_id: '3.7'
+      name: Ensure That RDP Access Is Restricted From the Internet
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:3.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:3
+      ref_id: '3.8'
+      name: Ensure VPC Service Controls Is Enabled for Supported Google Cloud Services
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:3.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:3
+      ref_id: '3.9'
+      name: Ensure Private Service Connect is Used for Access to Google APIs
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:3.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:3
+      ref_id: '3.10'
+      name: Ensure that VPC Flow Logs is Enabled for Every Subnet in a VPC Network
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:3.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:3
+      ref_id: '3.11'
+      name: Ensure No HTTPS or SSL Proxy Load Balancers Permit SSL Policies With Weak
+        Cipher Suites
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:3.12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:3
+      ref_id: '3.12'
+      name: Use Identity Aware Proxy (IAP) to Ensure Only Traffic From Google IP Addresses
+        are 'Allowed'
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: Virtual Machines
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:4.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:4
+      ref_id: '4.1'
+      name: Ensure That Instances Are Not Configured To Use the Default Service Account
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:4.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:4
+      ref_id: '4.2'
+      name: Ensure That Instances Are Not Configured To Use the Default Service Account
+        With Full Access to All Cloud APIs
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:4.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:4
+      ref_id: '4.3'
+      name: "Ensure \u201CBlock Project-Wide SSH Keys\u201D Is Enabled for VM Instances"
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:4.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:4
+      ref_id: '4.4'
+      name: Ensure Oslogin Is Enabled for a Project
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:4.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:4
+      ref_id: '4.5'
+      name: "Ensure \u2018Enable Connecting to Serial Ports\u2019 Is Not Enabled for\
+        \ VM Instance"
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:4.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:4
+      ref_id: '4.6'
+      name: Ensure That IP Forwarding Is Not Enabled on Instances
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:4.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:4
+      ref_id: '4.7'
+      name: Ensure VM Disks for Critical VMs Are Encrypted With Customer-Supplied
+        Encryption Keys (CSEK)
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:4.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:4
+      ref_id: '4.8'
+      name: Ensure Compute Instances Are Launched With Shielded VM Enabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:4.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:4
+      ref_id: '4.9'
+      name: Ensure That Compute Instances Do Not Have Public IP Addresses
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:4.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:4
+      ref_id: '4.10'
+      name: Ensure That App Engine Applications Enforce HTTPS Connections
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:4.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:4
+      ref_id: '4.11'
+      name: Ensure That Compute Instances Have Confidential Computing Enabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:4.12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:4
+      ref_id: '4.12'
+      name: Ensure the Latest Operating System Updates Are Installed On Your Virtual
+        Machines in All Projects
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: Storage
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:5.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:5
+      ref_id: '5.1'
+      name: Ensure That Cloud Storage Bucket Is Not Anonymously or Publicly Accessible
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:5.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:5
+      ref_id: '5.2'
+      name: Ensure That Cloud Storage Buckets Have Uniform Bucket-Level Access Enabled
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6
+      assessable: false
+      depth: 1
+      ref_id: '6'
+      name: Cloud SQL Database Services
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6
+      ref_id: '6.1'
+      name: MySQL Database
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.1
+      ref_id: 6.1.1
+      name: Ensure That a MySQL Instance Does Not Allow Anyone To Connect With Administrative
+        Privileges
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.1
+      ref_id: 6.1.2
+      name: "Ensure \u2018Skip_show_database\u2019 Database Flag for Cloud SQL MySQL\
+        \ Instance Is Set to \u2018On\u2019"
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.1
+      ref_id: 6.1.3
+      name: "Ensure That the \u2018Local_infile\u2019 Database Flag for a Cloud SQL\
+        \ MySQL Instance Is Set to \u2018Off\u2019"
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6
+      ref_id: '6.2'
+      name: PostgreSQL Database
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.2
+      ref_id: 6.2.1
+      name: "Ensure \u2018Log_error_verbosity\u2019 Database Flag for Cloud SQL PostgreSQL\
+        \ Instance Is Set to \u2018DEFAULT\u2019 or Stricter"
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.2
+      ref_id: 6.2.2
+      name: "Ensure That the \u2018Log_connections\u2019 Database Flag for Cloud SQL\
+        \ PostgreSQL Instance Is Set to \u2018On\u2019"
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.2
+      ref_id: 6.2.3
+      name: "Ensure That the \u2018Log_disconnections\u2019 Database Flag for Cloud\
+        \ SQL PostgreSQL Instance Is Set to \u2018On\u2019"
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.2
+      ref_id: 6.2.4
+      name: "Ensure \u2018Log_statement\u2019 Database Flag for Cloud SQL PostgreSQL\
+        \ Instance Is Set Appropriately"
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.2.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.2
+      ref_id: 6.2.5
+      name: "Ensure that the \u2018Log_min_messages\u2019 Flag for a Cloud SQL PostgreSQL\
+        \ Instance is set at minimum to 'Warning'"
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.2.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.2
+      ref_id: 6.2.6
+      name: "Ensure \u2018Log_min_error_statement\u2019 Database Flag for Cloud SQL\
+        \ PostgreSQL Instance Is Set to \u2018Error\u2019 or Stricter"
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.2.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.2
+      ref_id: 6.2.7
+      name: "Ensure That the \u2018Log_min_duration_statement\u2019 Database Flag\
+        \ for Cloud SQL PostgreSQL Instance Is Set to '-1' (Disabled)"
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.2.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.2
+      ref_id: 6.2.8
+      name: Ensure That 'cloudsql.enable_pgaudit' Database Flag for each Cloud Sql
+        Postgresql Instance Is Set to 'on' For Centralized Logging
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6
+      ref_id: '6.3'
+      name: SQL Server
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.3
+      ref_id: 6.3.1
+      name: Ensure 'external scripts enabled' Database Flag for Cloud SQL SQL Server
+        Instance Is Set to 'off'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.3
+      ref_id: 6.3.2
+      name: Ensure 'cross db ownership chaining' Database Flag for Cloud SQL SQL Server
+        Instance Is Set to 'off'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.3
+      ref_id: 6.3.3
+      name: Ensure 'user Connections' Database Flag for Cloud SQL SQL Server Instance
+        Is Set to a Non-limiting Value
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.3.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.3
+      ref_id: 6.3.4
+      name: Ensure 'user options' Database Flag for Cloud SQL SQL Server Instance
+        Is Not Configured
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.3.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.3
+      ref_id: 6.3.5
+      name: Ensure 'remote access' Database Flag for Cloud SQL SQL Server Instance
+        Is Set to 'off'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.3.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.3
+      ref_id: 6.3.6
+      name: Ensure '3625 (trace flag)' Database Flag for all Cloud SQL SQL Server
+        Instances Is Set to 'on'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.3.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.3
+      ref_id: 6.3.7
+      name: Ensure 'contained database authentication' Database Flag for Cloud SQL
+        SQL Server Instance Is Set to 'off'
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6
+      ref_id: '6.4'
+      name: Ensure That the Cloud SQL Database Instance Requires All Incoming Connections
+        To Use SSL
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6
+      ref_id: '6.5'
+      name: Ensure That Cloud SQL Database Instances Do Not Implicitly Whitelist All
+        Public IP Addresses
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6
+      ref_id: '6.6'
+      name: Ensure Cloud SQL Database Instances Have IAM Database Authentication Enabled
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6
+      ref_id: '6.7'
+      name: Ensure That Cloud SQL Database Instances Do Not Have Public IPs
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6
+      ref_id: '6.8'
+      name: Ensure That Cloud SQL Database Instances Are Configured With Automated
+        Backups
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:6
+      ref_id: '6.9'
+      name: Ensure Cloud SQL Database Instances Have Deletion Protection Enabled
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:7
+      assessable: false
+      depth: 1
+      ref_id: '7'
+      name: BigQuery
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:7.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:7
+      ref_id: '7.1'
+      name: Ensure That BigQuery Datasets Are Not Anonymously or Publicly Accessible
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:7.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:7
+      ref_id: '7.2'
+      name: Ensure That All BigQuery Tables Are Encrypted With Customer-Managed Encryption
+        Key (CMEK)
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:7.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:7
+      ref_id: '7.3'
+      name: Ensure That a Default Customer-Managed Encryption Key (CMEK) Is Specified
+        for All BigQuery Data Sets
+      implementation_groups:
+      - A
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:7.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:7
+      ref_id: '7.4'
+      name: Ensure all data in BigQuery has been classified
+      implementation_groups:
+      - M
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:8
+      assessable: false
+      depth: 1
+      ref_id: '8'
+      name: Dataproc
+    - urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:8.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cis-benchmark-gcp-foundation:8
+      ref_id: '8.1'
+      name: Ensure that Dataproc Cluster is encrypted using Customer-Managed Encryption
+        Key
+      implementation_groups:
+      - A

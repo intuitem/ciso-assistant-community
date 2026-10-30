@@ -68,6 +68,9 @@ class SendMessageSerializer(serializers.Serializer):
 
     content = serializers.CharField(max_length=10000)
     page_context = serializers.DictField(required=False, default=dict)
+    document_ids = serializers.ListField(
+        child=serializers.UUIDField(), required=False, default=list, max_length=5
+    )
 
     def validate_page_context(self, value):
         """Whitelist page_context keys and sanitize values."""

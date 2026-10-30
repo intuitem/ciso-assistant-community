@@ -26,10 +26,11 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `Policy` | Single sheet CSV/Excel | **Supported** |
 | `SecurityException` | Single sheet CSV/Excel | **Supported** |
 | `Incident` | Single sheet CSV/Excel | **Supported** |
-| `TPRM` | Multi-sheet Excel (Entities, Solutions, Contracts) | **Supported** |
+| `TPRM` | Multi-sheet Excel (Entities, Solutions, EntityAssessments, Contracts, Representatives) | **Supported** |
 | `EbiosRMStudyARM` | Multi-sheet Excel (ARM format) | **Supported** |
 | `EbiosRMStudyExcel` | Multi-sheet Excel (Native export format) | **Supported** |
 | `BusinessImpactAnalysis` | Multi-sheet Excel (Summary, Assessments, Thresholds) | **Supported** |
+| `TaskTemplate` | Multi-sheet Excel (Summary + per-template node sheets) or CSV | **Supported** |
 
 ---
 
@@ -178,7 +179,6 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 |-------|------|----------|
 | `annotation` | TextField | Medium |
 | `provider` | CharField | Low |
-| `is_published` | BooleanField | Low |
 | i18n fields | Various | Low |
 
 ---
@@ -222,12 +222,14 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `priority` | No | Integer (1-4: P1-P4) |
 | `observation` | No | Free text |
 | `vulnerabilities` | No | Pipe- or comma-separated vulnerability names (created in the perimeter's folder if missing) |
+| `applied_controls` | No | Pipe-, newline-, semicolon- or comma-separated; matching controls are created or found in the domain (lookup by ref_id then name) |
+| `owner` | No | Semicolon-delimited list of user emails and/or team names. Resolved case-insensitively: first by user email, then by team name. Unresolved entries are skipped with a warning. |
+
+> **Note:** The `owner` field resolves entries against existing users (by email) and teams (by name). Ensure any referenced users and teams are created in CISO Assistant before importing. Unresolved entries will be skipped with a warning and will not block the import.
 
 **Missing Fields from Model:**
 | Field | Type | Priority |
 |-------|------|----------|
-| `owner` | M2M Actor | High |
-| `applied_controls` | M2M | Medium |
 | `evidences` | M2M | Medium |
 | `threats` | M2M | Medium |
 
@@ -243,6 +245,7 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `ref_id` or `urn` | **Yes** | Used to match requirements |
 | `assessable` | No | Skips non-assessable items |
 | `compliance_result` | No | Maps to `result` |
+| `extended_result` | No | Maps to `extended_result` |
 | `requirement_progress` | No | Maps to `status` |
 | `observations` | No | Maps to `observation` |
 | `implementation_score` | No | Maps to `score` |
@@ -366,6 +369,7 @@ For frameworks using dynamic questionnaires, the export/import supports flattene
 **Missing Fields from Model:**
 | Field | Type | Priority |
 |-------|------|----------|
+| `default_role` | FK Role | Medium |
 | `content_type` | CharField | Low |
 | `builtin` | BooleanField | Low |
 | `hide_in_selects` | BooleanField | Low |
@@ -425,7 +429,6 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | `requirement_assessments` | M2M | Medium |
 | `applied_controls` | M2M | Medium |
 | `assets` | M2M | Medium |
-| `is_published` | BooleanField | Low |
 
 ---
 
@@ -453,7 +456,6 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | `assets` | M2M | High |
 | `entities` | M2M | Medium |
 | `qualifications` | M2M Terminology | Medium |
-| `is_published` | BooleanField | Low |
 
 ---
 
@@ -464,7 +466,7 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 **Supported Fields:**
 | Field | Required | Notes |
 |-------|----------|-------|
-| `ref_id` | **Yes** | Reference ID |
+| `ref_id` | No | Reference ID; entities without one are matched/referenced by name downstream |
 | `name` | **Yes** | Entity name |
 | `description` | No | |
 | `mission` | No | |
@@ -499,7 +501,8 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | `ref_id` | **Yes** | Reference ID |
 | `name` | **Yes** | Solution name |
 | `description` | No | |
-| `provider_entity_ref_id` | **Yes** | Provider entity reference |
+| `provider_entity_ref_id` | Conditional | Provider entity reference; one of ref_id/name required |
+| `provider_entity_name` | Conditional | Lookup by entity name, used only when `provider_entity_ref_id` is not provided (a provided but unknown ref_id fails the row) |
 | `criticality` | No | |
 
 **Missing Solution Fields:**
@@ -514,6 +517,37 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | `filtering_labels` | M2M | Medium |
 | All other DORA fields | Various | Medium |
 
+#### EntityAssessments Sheet
+
+**Supported Fields:**
+| Field | Required | Notes |
+|-------|----------|-------|
+| `name` | **Yes** | Assessment name |
+| `entity_ref_id` | Conditional | Provider entity reference; one of ref_id/name required |
+| `entity_name` | Conditional | Lookup by entity name, used only when `entity_ref_id` is not provided (a provided but unknown ref_id fails the row) |
+| `description` | No | |
+| `domain` | No | Folder lookup, falls back to the form-selected folder |
+| `perimeter` / `perimeter_ref_id` | No | Perimeter lookup by id, then by ref_id |
+| `due_date` | No | Date (YYYY-MM-DD) |
+| `criticality` | No | Integer (1-4); invalid values skipped with a warning |
+| `solution_ref_id` | No | Newline/pipe/comma-separated solution ref_ids; unknown refs are reported as warnings |
+| `audit_ref_id` | No | Links to an existing `ComplianceAssessment`, resolved by ref_id, scoped to audits the importing user can access |
+| `audit_name` | No | Lookup by name, used only when `audit_ref_id` is not provided (a provided but unknown ref_id fails the row) |
+
+**Conflict detection:** by `entity` + `name` + `folder` (dedup is domain-scoped, matching Entities/Contracts).
+
+**Special considerations:** linking to an existing audit always re-parents it (`move`) into the entity assessment's dedicated enclave folder; its perimeter is cleared, since enclave audits carry no perimeter. Audits must pre-exist (typically imported first into a temporary domain); resolution is scoped to audits the importing user can change, and a provided but unknown `audit_ref_id` fails the row rather than falling back to the name.
+
+**Missing Fields from Model:**
+| Field | Type | Priority |
+|-------|------|----------|
+| `penetration`, `dependency`, `maturity`, `trust` | IntegerField | Medium |
+| `representatives` | M2M User | Medium (Representatives sheet creates standalone contacts, not linked to a specific assessment) |
+| `evidence` | FK | Low |
+| `conclusion` | CharField | Low |
+| `reference_link` | URLField | Low |
+| `authors`, `reviewers`, `status`, `version` | Various (inherited from `Assessment`) | Low |
+
 #### Contracts Sheet
 
 **Supported Fields:**
@@ -522,7 +556,8 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | `ref_id` | **Yes** | Reference ID |
 | `name` | **Yes** | Contract name |
 | `description` | No | |
-| `provider_entity_ref_id` | **Yes** | Provider entity reference |
+| `provider_entity_ref_id` | Conditional | Provider entity reference; one of ref_id/name required |
+| `provider_entity_name` | Conditional | Lookup by entity name, used only when `provider_entity_ref_id` is not provided (a provided but unknown ref_id fails the row) |
 | `domain` | No | Folder lookup |
 | `solution_ref_id` | No | Solution reference |
 | `status` | No | |
@@ -540,6 +575,28 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | `overarching_contract` | FK | Low |
 | All DORA-related fields | Various | Medium |
 | `filtering_labels` | M2M | Medium |
+
+#### Representatives Sheet
+
+**Supported Fields:**
+| Field | Required | Notes |
+|-------|----------|-------|
+| `email` | **Yes** | Unique identifier for the representative |
+| `provider_entity_ref_id` | Conditional | Entity reference; one of ref_id/name required |
+| `provider_entity_name` | Conditional | Lookup by entity name, used only when `provider_entity_ref_id` is not provided (a provided but unknown ref_id fails the row) |
+| `first_name` | No | |
+| `last_name` | No | |
+| `description` | No | |
+| `phone` | No | |
+| `role` | No | |
+
+**Conflict detection:** by `email`.
+
+**Missing Fields from Model:**
+| Field | Type | Priority |
+|-------|------|----------|
+| `ref_id` | CharField | Low |
+| `user` | FK User | Medium (no login account is created from the import; use the UI's "Create user" option for that) |
 
 ---
 
@@ -668,6 +725,74 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 
 ---
 
+### 21. TaskTemplate (Multi-sheet Import)
+
+**Behavior:** Creates `TaskTemplate` objects (and optionally imports past `TaskNode` occurrences) from the multi-sheet workbook produced by the task export, or from a flat CSV for template-only imports.
+
+**Sheet layout (Excel):**
+
+| Sheet | Purpose |
+|-------|---------|
+| `Summary` | One row per template — creates/updates `TaskTemplate` objects |
+| `{N}-{name}` | One row per past task node occurrence for template N |
+
+> Future task nodes (due_date > today) are skipped on import because they are regenerated from the schedule.
+
+#### Summary Sheet Fields
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| `ref_id` | No | Reference ID — used as primary lookup key when present |
+| `name` | **Yes** | Task template name |
+| `description` | No | |
+| `folder` | No | Folder name lookup (falls back to form-selected folder) |
+| `is_recurrent` | No | Boolean (`true`/`false`, `1`/`0`, `yes`/`no`) — defaults to `false` |
+| `enabled` | No | Boolean — defaults to `true` |
+| `link` | No | URL |
+| `assigned_to` | No | Comma/semicolon-separated user emails or team names |
+| `assets` | No | Comma-separated asset names or ref_ids |
+| `applied_controls` | No | Comma-separated control names or ref_ids |
+| `evidences` | No | Comma-separated evidence names |
+| `compliance_assessments` | No | Comma-separated assessment names or ref_ids |
+| `risk_assessments` | No | Comma-separated assessment names or ref_ids (supports the `"name - version"` format written by the export) |
+| `findings_assessment` | No | Comma-separated findings assessment names or ref_ids |
+| `schedule_frequency` | No | `DAILY`, `WEEKLY`, `MONTHLY`, or `YEARLY` — required together with `schedule_interval` |
+| `schedule_interval` | No | Integer — repeat every N periods — required together with `schedule_frequency` |
+| `schedule_days_of_week` | No | Comma-separated integers 1–7, Mon=1, Sun=7 (WEEKLY) |
+| `schedule_weeks_of_month` | No | Comma-separated integers -1–4 (1=first, -1=last) |
+| `schedule_months_of_year` | No | Comma-separated month numbers 1–12 (YEARLY) |
+| `schedule_end_date` | No | Date (YYYY-MM-DD) — schedule end |
+| `schedule_occurrences` | No | Integer — stop after N occurrences |
+| `schedule_overdue_behavior` | No | `DELAY_NEXT` or `NO_IMPACT` |
+| `task_date` | No | Due date for non-recurrent tasks (YYYY-MM-DD) |
+| `status` | No | `pending`, `in_progress`, `completed`, `cancelled` (non-recurrent only — sets the single node) |
+| `observation` | No | Free text (non-recurrent only — sets the single node) |
+
+#### Per-template Node Sheet Fields (`{N}-{template name}`)
+
+Each sheet imports past occurrences for one template. The sheet name is `"{counter}-{name}"` truncated to 31 characters, matching the export format.
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| `due_date` | **Yes** | Date (YYYY-MM-DD) — rows with future dates are skipped; unparsable dates are reported as errors |
+| `scheduled_date` | No | Date (YYYY-MM-DD) — defaults to `due_date` |
+| `status` | No | `pending`, `in_progress`, `completed`, `cancelled` |
+| `observation` | No | Free text |
+
+**Special considerations:**
+
+- **Linked-record resolution is folder-scoped:** `assets`, `applied_controls`, `evidences` and the assessment columns are matched by ref_id or name within the folders the importing user can access. An exact ref_id match wins, then an object in the row's own folder. Entries that cannot be resolved are skipped and reported as import warnings.
+- **M2M resolution for versioned models:** `risk_assessments` export as `"name - version"` (their `__str__`); the importer strips the version suffix, matches by name, then verifies `str(candidate) == entry`. Compliance and findings assessments export their plain name and are matched by name or ref_id.
+- **Empty M2M cells clear links in UPDATE mode:** when a linked-record column is present in the file but empty, an UPDATE-mode import removes the existing links for that field.
+- **PII protection:** Actor lookup warnings mask email addresses beyond the first 4 characters in server logs.
+- **on_conflict applies to nodes:** SKIP/STOP/UPDATE conflict mode applies to both templates and their task nodes. Node sheets belonging to a template created by the same import update the node auto-created from `task_date` instead of raising a conflict.
+- **Legacy exports:** files exported before sheet numbering was aligned with summary rows are re-matched by sheet name, with a warning when the counter and name disagree.
+- **Multi-folder imports:** Each summary row's `folder` column is used to resolve its folder independently — the form-selected folder is only the fallback.
+- **CSV mode:** When a CSV is uploaded instead of Excel, only `TaskTemplate` objects are created (no node sheets). All summary fields are supported. The delimiter is auto-detected among `, ; tab |` and a UTF-8 BOM is handled.
+- **Upcoming occurrences:** future task nodes for recurrent templates are not generated by the import itself; they are synchronized when the template is next opened or edited.
+
+---
+
 ## Models NOT Supported by Data Wizard
 
 ### Core App (`core/models.py`)
@@ -694,8 +819,8 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | HistoricalMetric | Not supported | Low |
 | Campaign | Not supported | Medium |
 | RiskAcceptance | **Not supported** | **High** |
-| TaskTemplate | Not supported | Medium |
-| TaskNode | Not supported | Low |
+| TaskTemplate | **Supported** (multi-sheet) | Done |
+| TaskNode | **Supported** (via TaskTemplate import) | Done |
 | ValidationFlow | Not supported | Low |
 | FlowEvent | Not supported | Low |
 | Team | Not supported | Medium |
@@ -730,8 +855,8 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | Model | Status | Priority to Add |
 |-------|--------|-----------------|
 | Entity | Yes (via TPRM import) | Done |
-| EntityAssessment | **Not supported** | **High** |
-| Representative | **Not supported** | **High** |
+| EntityAssessment | Yes (via TPRM import) | Done |
+| Representative | Yes (via TPRM import) | Done |
 | Solution | Yes (via TPRM import) | Done |
 | Contract | Yes (via TPRM import) | Done |
 
@@ -768,9 +893,9 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | Category | Count |
 |----------|-------|
 | **Total Models Identified** | ~70 |
-| **Models with Direct Import Support** | 19 |
-| **Models with Indirect Import Support** | ~12 (via EBIOS/TPRM) |
-| **Models NOT Supported** | ~42 |
+| **Models with Direct Import Support** | 21 |
+| **Models with Indirect Import Support** | ~14 (via EBIOS/TPRM) |
+| **Models NOT Supported** | ~38 |
 
 ---
 
@@ -786,8 +911,8 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 
 ### High Priority (TPRM Completion)
 
-6. **Representative** - Contact information for entities
-7. **EntityAssessment** - Third-party risk assessments
+6. ~~**Representative**~~ - ✅ Now supported
+7. ~~**EntityAssessment**~~ - ✅ Now supported, including linking to an existing audit
 
 ### High Priority (Privacy/GDPR Compliance)
 
@@ -802,6 +927,13 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 12. ~~**BusinessImpactAnalysis**~~ - ✅ Now supported (multi-sheet)
 13. ~~**AssetAssessment**~~ - ✅ Now supported (via BIA import)
 14. ~~**EscalationThreshold**~~ - ✅ Now supported (via BIA import)
+
+### Medium Priority (completed)
+
+- ~~**TaskTemplate**~~ - ✅ Now supported (multi-sheet Excel + CSV)
+
+### Low Priority (completed)
+- ~~**TaskNode**~~ - ✅ Now supported (via TaskTemplate import)
 
 ### Medium Priority
 

@@ -1,4 +1,4 @@
-import { m } from '$paraglide/messages.js';
+import { m } from '#paraglide/messages.js';
 import { FormContent, FormFieldType } from '../../utils/form-content.js';
 import { LoginPage } from '../../utils/login-page.js';
 import { PageContent } from '../../utils/page-content.js';
@@ -85,6 +85,8 @@ test('user can map iso27001-2022 audit to a new csf-1.1 audit', async ({
 			});
 		}
 		await page.getByTestId('visibility-score-everyone').click();
+		// New audits take the organisation scale (0-5); this test scores on 0-100.
+		await page.getByTestId('score-scale-0-100').click();
 		await page.getByTestId('save-button').click();
 
 		await page.waitForTimeout(5000);
@@ -215,6 +217,8 @@ test('user can map iso27001-2022 audit to a new csf-1.1 audit', async ({
 			});
 		}
 		await page.getByTestId('visibility-score-everyone').click();
+		// New audits take the organisation scale (0-5); this test scores on 0-100.
+		await page.getByTestId('score-scale-0-100').click();
 		await page.getByTestId('save-button').click();
 		await page.waitForTimeout(5000);
 	});

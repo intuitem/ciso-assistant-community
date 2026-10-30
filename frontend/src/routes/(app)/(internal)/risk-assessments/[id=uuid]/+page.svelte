@@ -1,40 +1,39 @@
 <script lang="ts">
+	import ExportModal, { type ExportGroup } from '#lib/components/Modals/ExportModal.svelte';
 	import { page } from '$app/state';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
-	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
-	import { URL_MODEL_MAP, getModelInfo } from '$lib/utils/crud';
-	import { listViewFields } from '$lib/utils/table';
-	import type { ListViewFilterConfig } from '$lib/utils/table';
-	import type { RiskMatrixJsonDefinition, RiskScenario } from '$lib/utils/types';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import AuditTrailButton from '$lib/components/AuditTrail/AuditTrailButton.svelte';
-	import RiskScenarioItem from '$lib/components/RiskMatrix/RiskScenarioItem.svelte';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
-	import { canPerformAction } from '$lib/utils/access-control';
-	import { formatDate } from '$lib/utils/datetime';
-	import { getLocale } from '$paraglide/runtime';
+	import CreateModal from '#lib/components/Modals/CreateModal.svelte';
+	import ModelTable from '#lib/components/ModelTable/ModelTable.svelte';
+	import RiskMatrix from '#lib/components/RiskMatrix/RiskMatrix.svelte';
+	import { URL_MODEL_MAP, getModelInfo } from '#lib/utils/crud.js';
+	import { listViewFields } from '#lib/utils/table.js';
+	import type { ListViewFilterConfig } from '#lib/utils/table.js';
+	import type { RiskMatrixJsonDefinition, RiskScenario } from '#lib/utils/types.js';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import AuditTrailButton from '#lib/components/AuditTrail/AuditTrailButton.svelte';
+	import RiskScenarioItem from '#lib/components/RiskMatrix/RiskScenarioItem.svelte';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
+	import { canPerformActionOnObject } from '#lib/utils/access-control.js';
+	import { formatDate } from '#lib/utils/datetime.js';
+	import { getLocale } from '#paraglide/runtime.js';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
-	import { Popover, Progress } from '@skeletonlabs/skeleton-svelte';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import List from '$lib/components/List/List.svelte';
-	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
-	import SyncToActionsRiskModal from '$lib/components/Modals/SyncToActionsRiskModal.svelte';
+	} from '#lib/components/Modals/stores.js';
+	import { Progress } from '@skeletonlabs/skeleton-svelte';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import List from '#lib/components/List/List.svelte';
+	import ConfirmModal from '#lib/components/Modals/ConfirmModal.svelte';
+	import SyncToActionsRiskModal from '#lib/components/Modals/SyncToActionsRiskModal.svelte';
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
-	import ValidationFlowsSection from '$lib/components/ValidationFlows/ValidationFlowsSection.svelte';
-	import { invalidateAll } from '$app/navigation';
+	import ValidationFlowsSection from '#lib/components/ValidationFlows/ValidationFlowsSection.svelte';
+	import { refreshAll } from '$app/navigation';
 
 	let { data, form } = $props();
-
-	let exportPopupOpen = $state(false);
 
 	const showRisks = true;
 	const useBubbles = data.useBubbles;
@@ -58,11 +57,11 @@
 
 	const user = page.data.user;
 	const model = URL_MODEL_MAP['risk-assessments'];
-	const canEditObject: boolean = canPerformAction({
+	const canEditObject: boolean = canPerformActionOnObject({
 		user,
 		action: 'change',
 		model: model.name,
-		domain: risk_assessment.folder.id
+		object: risk_assessment
 	});
 	function modalCreateForm(): void {
 		const modalComponent: ModalComponent = {
@@ -114,7 +113,7 @@
 				invalidateAll: true,
 				formAction: '/validation-flows?/create',
 				onConfirm: async () => {
-					await invalidateAll();
+					await refreshAll();
 				}
 			}
 		};
@@ -223,6 +222,65 @@
 		'applied_controls',
 		'residual_level'
 	];
+
+	function buildExportGroups(): ExportGroup[] {
+		const id = risk_assessment.id;
+		return [
+			{
+				titleKey: 'riskAssessment',
+				options: [
+					{
+						titleKey: 'exportRiskReport',
+						descriptionKey: 'exportRiskReportDesc',
+						format: 'PDF' as const,
+						href: `/risk-assessments/${id}/export/pdf`,
+						testId: 'export-option-pdf'
+					},
+					{
+						titleKey: 'exportRiskScenariosData',
+						descriptionKey: 'exportRiskScenariosDataDesc',
+						format: 'CSV' as const,
+						href: `/risk-assessments/${id}/export/csv`,
+						testId: 'export-option-csv'
+					},
+					{
+						titleKey: 'exportRiskScenariosWorkbook',
+						descriptionKey: 'exportRiskScenariosWorkbookDesc',
+						format: 'XLSX' as const,
+						href: `/risk-assessments/${id}/export/xlsx`,
+						testId: 'export-option-xlsx'
+					}
+				]
+			},
+			{
+				titleKey: 'actionPlan',
+				options: [
+					{
+						titleKey: 'exportStatusGroupedReport',
+						descriptionKey: 'exportStatusGroupedReportDesc',
+						format: 'PDF' as const,
+						href: `/risk-assessments/${id}/action-plan/export/pdf`,
+						testId: 'export-option-ap-pdf'
+					},
+					{
+						titleKey: 'exportControlsWorkbook',
+						descriptionKey: 'exportControlsWorkbookDesc',
+						format: 'XLSX' as const,
+						href: `/risk-assessments/${id}/action-plan/export/excel`,
+						testId: 'export-option-ap-xlsx'
+					}
+				]
+			}
+		];
+	}
+
+	function modalExport(): void {
+		const modalComponent: ModalComponent = {
+			ref: ExportModal,
+			props: { title: m.exportOptionsTitle(), groups: buildExportGroups() }
+		};
+		modalStore.trigger({ type: 'component', component: modalComponent });
+	}
 </script>
 
 <main class="grow main">
@@ -323,48 +381,14 @@
 			</div>
 			<div class="flex flex-col space-y-2 ml-4">
 				<div class="flex flex-row space-x-2">
-					<Popover open={exportPopupOpen} onOpenChange={(e) => (exportPopupOpen = e.open)}>
-						<Popover.Trigger class="btn preset-filled-primary-500 w-full">
-							<span data-testid="export-button">
-								<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
-							</span>
-						</Popover.Trigger>
-						<Popover.Positioner>
-							<Popover.Content>
-								<div
-									class="card whitespace-nowrap bg-surface-50-950 py-2 w-fit shadow-lg space-y-1"
-								>
-									<p class="block px-4 py-2 text-sm text-surface-950-50">{m.riskAssessment()}</p>
-									<a
-										href="/risk-assessments/{risk_assessment.id}/export/pdf"
-										class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
-										>... {m.asPDF()}</a
-									>
-									<a
-										href="/risk-assessments/{risk_assessment.id}/export/csv"
-										class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
-										>... {m.asCSV()}</a
-									>
-									<a
-										href="/risk-assessments/{risk_assessment.id}/export/xlsx"
-										class="block px-4 py-2 text-sm text-surface-950-50 border-b hover:bg-surface-200-800"
-										>... {m.asXLSX()}</a
-									>
-									<p class="block px-4 py-2 text-sm text-surface-950-50">{m.actionPlan()}</p>
-									<a
-										href="/risk-assessments/{risk_assessment.id}/action-plan/export/pdf"
-										class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
-										>... {m.asPDF()}</a
-									>
-									<a
-										href="/risk-assessments/{risk_assessment.id}/action-plan/export/excel"
-										class="block px-4 py-2 text-sm text-surface-950-50 border-b hover:bg-surface-200-800"
-										>... {m.asXLSX()}</a
-									>
-								</div>
-							</Popover.Content>
-						</Popover.Positioner>
-					</Popover>
+					<button
+						type="button"
+						class="btn preset-filled-primary-500 w-full"
+						onclick={modalExport}
+						data-testid="export-button"
+					>
+						<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
+					</button>
 					{#if canEditObject}
 						<Anchor
 							href="/risk-assessments/{risk_assessment.id}/edit?next=/risk-assessments/{risk_assessment.id}"
@@ -377,7 +401,11 @@
 						>
 					{/if}
 				</div>
-				<AuditTrailButton model="risk-assessments" objectId={risk_assessment.id} />
+				<AuditTrailButton
+					model="risk-assessments"
+					objectId={risk_assessment.id}
+					folderId={risk_assessment.folder?.id ?? user.root_folder_id}
+				/>
 				<Anchor
 					label={m.actionPlan()}
 					href="/risk-assessments/{risk_assessment.id}/action-plan"
@@ -389,6 +417,12 @@
 					href="/risk-assessments/{risk_assessment.id}/analytics"
 					class="btn preset-filled-primary-500"
 					><i class="fa-solid fa-chart-line mr-2"></i>{m.analytics()}</Anchor
+				>
+				<Anchor
+					label={m.riskTrajectory()}
+					href="/risk-assessments/{risk_assessment.id}/trajectory"
+					class="btn preset-filled-primary-500"
+					><i class="fa-solid fa-route mr-2"></i>{m.riskTrajectory()}</Anchor
 				>
 				<span class="pt-4 font-light text-sm">{m.powerUps()}</span>
 				<button

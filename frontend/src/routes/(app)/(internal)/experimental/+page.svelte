@@ -1,7 +1,8 @@
 <script lang="ts">
-	import Article from '$lib/components/DataViz/Article.svelte';
-	import { pageTitle } from '$lib/utils/stores';
-	import { m } from '$paraglide/messages';
+	import Article from '#lib/components/DataViz/Article.svelte';
+	import { pageTitle } from '#lib/utils/stores.js';
+	import { m } from '#paraglide/messages.js';
+	import { experimentalExtras } from '#lib/utils/experimental-extras.js';
 
 	$pageTitle = 'Experimental';
 </script>
@@ -14,28 +15,10 @@
 		tags={['analysis', 'audit']}
 	/>
 	<Article
-		title={m.findings()}
-		desc={m.findingsExplorer()}
-		link="/findings"
-		tags={['analysis', 'findings']}
-	/>
-	<Article
 		title="Batch Creation"
 		desc="Create multiple assets, entities, or feared events at once from a simple text list"
 		link="/experimental/batch-create"
 		tags={['assets', 'entities', 'ebios-rm', 'bulk']}
-	/>
-	<Article
-		title={m.matrixEditor()}
-		desc={m.matrixEditorDescription()}
-		link="/experimental/matrix-editor"
-		tags={['risk', 'matrix', 'editor']}
-	/>
-	<Article
-		title="Framework Builder"
-		desc="Create and edit compliance frameworks with a visual builder"
-		link="/experimental/framework-builder"
-		tags={['frameworks', 'builder', 'editor']}
 	/>
 	<Article
 		title="Bulk evidence upload"
@@ -44,10 +27,10 @@
 		tags={['evidences', 'bulk', 'upload']}
 	/>
 	<Article
-		title="Preset Editor"
-		desc="Author presets — scaffolds and steps. Create from scratch or fork a library preset."
-		link="/experimental/preset-editor"
-		tags={['presets', 'journey', 'editor']}
+		title="Data import"
+		desc="Drop any spreadsheet: header rows, target objects, column and value mappings are suggested per tab, then reviewed. Dry run before import."
+		link="/experimental/data-import"
+		tags={['import', 'xlsx', 'mapping', 'prototype']}
 	/>
 	<Article
 		title="Questionnaire Autopilot"
@@ -62,11 +45,26 @@
 		tags={['assets', 'graph', 'canvas', 'prototype']}
 	/>
 	<Article
+		title="Asset Dependency Map"
+		desc="Focus on one asset and see everything it depends on and everything depending on it, across domains. Link, unlink and create assets in place."
+		link="/experimental/asset-map"
+		tags={['assets', 'graph', 'dependencies', 'prototype']}
+	/>
+	<Article
 		title="Analytics Export"
 		desc="Export all analytics dashboard data as a multi-sheet Excel file (Summary, Risk Levels, Compliance, Controls, Incidents) — ready to use in Power BI or any reporting tool."
 		link="/experimental/analytics-export"
 		tags={['analytics', 'export', 'xlsx', 'reporting']}
 	/>
+	<Article
+		title="Domain compliance tree"
+		desc="One framework tracked across the domain tree: each domain shows its own audit and its branch average, filterable by implementation group and section. Pick a framework, or explore with generated data."
+		link="/experimental/domain-tree"
+		tags={['PRO', 'audit', 'domains', 'analytics', 'prototype']}
+	/>
+	{#each experimentalExtras as extra (extra.link)}
+		<Article title={extra.title} desc={extra.desc} link={extra.link} tags={extra.tags} />
+	{/each}
 	<!-- <Article -->
 	<!-- 	title="Multi-file evidence (UX prototype)" -->
 	<!-- 	desc="Imagine an evidence whose revisions hold multiple files at once. History timeline with file-level diff (added / removed / replaced / unchanged) and arbitrary revision compare. Static fake data, no backend." -->

@@ -1,19 +1,21 @@
 <script lang="ts">
-	import { complianceResultTailwindColorMap } from '$lib/utils/constants';
-	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
-	import Question from '$lib/components/Forms/Question.svelte';
-	import { m } from '$paraglide/messages';
+	import { complianceResultTailwindColorMap } from '#lib/utils/constants.js';
+	import RadioGroup from '#lib/components/Forms/RadioGroup.svelte';
+	import Question from '#lib/components/Forms/Question.svelte';
+	import { m } from '#paraglide/messages.js';
 	import type { PageData } from './$types';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
 	import {
 		getFieldVisibility,
 		hasComputedResult,
 		computeRequirementScoreAndResult,
 		resultBadgeStyle,
 		requirementResultOptions
-	} from '$lib/utils/helpers';
-	import { safeTranslate } from '$lib/utils/i18n';
+	} from '#lib/utils/helpers.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import { page } from '$app/state';
+	import { canPerformActionOnObject } from '#lib/utils/access-control.js';
+	import { URL_MODEL_MAP } from '#lib/utils/crud.js';
 
 	interface Props {
 		data: PageData;
@@ -21,12 +23,20 @@
 
 	let { data }: Props = $props();
 
+	const complianceAssessment = $derived(data.compliance_assessment);
+	const canEdit = $derived(
+		canPerformActionOnObject({
+			user: page.data.user,
+			action: 'change',
+			model: URL_MODEL_MAP['requirement-assessments'].name,
+			object: complianceAssessment
+		})
+	);
 	let isReadOnly = $derived(
-		data.compliance_assessment.is_locked || data.compliance_assessment.status === 'in_review'
+		complianceAssessment.is_locked || complianceAssessment.status === 'in_review' || !canEdit
 	);
 
 	// Field visibility for auditor role
-	const complianceAssessment = $derived(data.compliance_assessment);
 	const fieldVis = $derived(getFieldVisibility(complianceAssessment, 'auditor'));
 	const showAnswers = $derived(fieldVis.showAnswers);
 	const showResult = $derived(fieldVis.showResult);
@@ -55,7 +65,11 @@
 		| { type: 'assessment'; data: (typeof data.requirement_assessments)[0] }
 		| { type: 'splash'; data: Record<string, any> };
 
-	const assessmentItems: NavItem[] = data.requirement_assessments
+	const requirementAssessments = $state(
+		data.requirement_assessments.map((ra: Record<string, any>) => ({ ...ra }))
+	);
+
+	const assessmentItems: NavItem[] = requirementAssessments
 		.filter((ra: Record<string, any>) => ra.name || ra.description)
 		.map((ra: Record<string, any>) => ({ type: 'assessment' as const, data: ra }));
 
@@ -398,9 +412,11 @@
 				<div class="readonly-banner">
 					<i class="fa-solid fa-lock"></i>
 					<span>
-						{data.compliance_assessment.is_locked
+						{complianceAssessment.is_locked
 							? m.lockedAssessmentMessage()
-							: m.assessmentInReviewMessage()}
+							: complianceAssessment.status === 'in_review'
+								? m.assessmentInReviewMessage()
+								: m.readOnlyNoChangePermissionMessage()}
 					</span>
 				</div>
 			{/if}
@@ -832,7 +848,10 @@
 		line-height: 1.5;
 		border: 1px solid #e2e8f0;
 		border-radius: 0.5rem;
-		resize: none;
+		field-sizing: content;
+		resize: vertical;
+		min-height: 3.5rem;
+		max-height: 40vh;
 		background: #fff;
 		color: #334155;
 		transition:

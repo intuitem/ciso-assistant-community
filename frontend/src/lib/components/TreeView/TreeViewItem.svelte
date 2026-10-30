@@ -85,6 +85,7 @@
 	const cBase = 'space-y-1';
 	const cSummary = 'list-none [&::-webkit-details-marker]:hidden items-center cursor-pointer flex';
 	const cSymbol = 'fill-current w-3 text-center transition-transform duration-200';
+
 	const cChildren = 'space-y-1';
 	const cDisabled = 'opacity-50 cursor-not-allowed!';
 
@@ -118,12 +119,10 @@
 		if (checked) {
 			if (index < 0) {
 				group.push(value);
-				group = group;
 			}
 		} else {
 			if (index >= 0) {
 				group.splice(index, 1);
-				group = group;
 			}
 		}
 		if (!indeterminate) onParentChange();
@@ -149,7 +148,6 @@
 				indeterminate = true;
 				if (index >= 0) {
 					group.splice(index, 1);
-					group = group;
 				}
 			} else if (
 				childrenValues.every((c) => Array.isArray(childrenGroup) && childrenGroup.includes(c))
@@ -157,7 +155,6 @@
 				indeterminate = false;
 				if (index < 0) {
 					group.push(value);
-					group = group;
 				}
 			} else if (
 				childrenValues.some((c) => Array.isArray(childrenGroup) && childrenGroup.includes(c))
@@ -165,13 +162,11 @@
 				indeterminate = true;
 				if (index >= 0) {
 					group.splice(index, 1);
-					group = group;
 				}
 			} else {
 				indeterminate = false;
 				if (index >= 0) {
 					group.splice(index, 1);
-					group = group;
 				}
 			}
 		} else {

@@ -1,4 +1,4 @@
-import { assigned, author, m, owners, riskAssessment } from '$paraglide/messages.js';
+import { assigned, author, m, owners, riskAssessment } from '#paraglide/messages.js';
 import { version } from 'os';
 import { LoginPage } from '../../utils/login-page.js';
 import { PageContent } from '../../utils/page-content.js';

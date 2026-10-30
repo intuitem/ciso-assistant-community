@@ -1,14 +1,15 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { Accordion, Progress } from '@skeletonlabs/skeleton-svelte';
-	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import { complianceResultColorMap, complianceStatusColorMap } from '$lib/utils/constants';
-	import { safeTranslate } from '$lib/utils/i18n';
-	import * as m from '$paraglide/messages';
-	import { darkenColor } from '$lib/utils/helpers';
+	import Anchor from '#lib/components/Anchor/Anchor.svelte';
+	import { complianceResultColorMap, complianceStatusColorMap } from '#lib/utils/constants.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import * as m from '#paraglide/messages.js';
+	import { darkenColor } from '#lib/utils/helpers.js';
 	import { page } from '$app/state';
-	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import { displayScoreColor, formatScoreValue } from '#lib/utils/helpers.js';
+	import MarkdownRenderer from '#lib/components/MarkdownRenderer.svelte';
+	import ScorePair from '#lib/components/ComplianceAssessment/ScorePair.svelte';
 
 	interface Props {
 		data: PageData;
@@ -224,59 +225,71 @@
 
 												{#if requirementAssessment.is_scored}
 													<div class="flex flex-row space-x-2">
-														<div class="shrink-0 relative">
-															<Progress
-																value={formatScoreValue(
-																	requirementAssessment.score,
-																	assessment.max_score
-																)}
-																min={0}
-																max={100}
-															>
-																<Progress.Circle class="[--size:--spacing(10)]">
-																	<Progress.CircleTrack />
-																	<Progress.CircleRange
-																		class={displayScoreColor(
+														<ScorePair>
+															{#snippet implementation()}
+																<div
+																	class="shrink-0 relative"
+																	title={assessment.show_documentation_score
+																		? m.implementationScore()
+																		: m.score()}
+																>
+																	<Progress
+																		value={formatScoreValue(
 																			requirementAssessment.score,
 																			assessment.max_score
 																		)}
-																	/>
-																</Progress.Circle>
-																<div class="absolute inset-0 flex items-center justify-center">
-																	<span class="text-xs font-bold"
-																		>{requirementAssessment.score}</span
+																		min={0}
+																		max={100}
 																	>
+																		<Progress.Circle class="[--size:--spacing(10)]">
+																			<Progress.CircleTrack />
+																			<Progress.CircleRange
+																				class={displayScoreColor(
+																					requirementAssessment.score,
+																					assessment.max_score
+																				)}
+																			/>
+																		</Progress.Circle>
+																		<div class="absolute inset-0 flex items-center justify-center">
+																			<span class="text-xs font-bold"
+																				>{requirementAssessment.score}</span
+																			>
+																		</div>
+																	</Progress>
 																</div>
-															</Progress>
-														</div>
-
-														{#if assessment.show_documentation_score}
-															<div class="shrink-0 relative">
-																<Progress
-																	value={formatScoreValue(
-																		requirementAssessment.documentation_score,
-																		assessment.max_score
-																	)}
-																	min={0}
-																	max={100}
-																>
-																	<Progress.Circle class="[--size:--spacing(10)]">
-																		<Progress.CircleTrack />
-																		<Progress.CircleRange
-																			class={displayScoreColor(
+															{/snippet}
+															{#snippet documentation()}
+																{#if assessment.show_documentation_score}
+																	<div class="shrink-0 relative" title={m.documentationScore()}>
+																		<Progress
+																			value={formatScoreValue(
 																				requirementAssessment.documentation_score,
 																				assessment.max_score
 																			)}
-																		/>
-																	</Progress.Circle>
-																	<div class="absolute inset-0 flex items-center justify-center">
-																		<span class="text-xs font-bold"
-																			>{requirementAssessment.documentation_score}</span
+																			min={0}
+																			max={100}
 																		>
+																			<Progress.Circle class="[--size:--spacing(10)]">
+																				<Progress.CircleTrack />
+																				<Progress.CircleRange
+																					class={displayScoreColor(
+																						requirementAssessment.documentation_score,
+																						assessment.max_score
+																					)}
+																				/>
+																			</Progress.Circle>
+																			<div
+																				class="absolute inset-0 flex items-center justify-center"
+																			>
+																				<span class="text-xs font-bold"
+																					>{requirementAssessment.documentation_score}</span
+																				>
+																			</div>
+																		</Progress>
 																	</div>
-																</Progress>
-															</div>
-														{/if}
+																{/if}
+															{/snippet}
+														</ScorePair>
 													</div>
 												{/if}
 											</Anchor>

@@ -1,3 +1,5 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
 urn: urn:intuitem:risk:library:aircyber-v1.5.2
 locale: en
 ref_id: AirCyber-v1.5.2
@@ -15,14 +17,12 @@ description: 'AirCyber is the AeroSpace and Defense official standard for Cybers
   maturity progression. Being aware of the problems is the mandatory very first knowledge
   a company shall know to decide to launch a cybersecurity company program.
 
-  Source: https://boostaerospace.com/aircyber/
-
-  '
+  Source: https://boostaerospace.com/aircyber/'
 copyright: "\xA9 Boost Aerospace\nThis work is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike\
   \ 4.0 International License. Any commercial use of this work must be contracted\
-  \ with BoostAeroSpace.\nPermission given to include AirCyber in CISO Assistant.\n"
-version: 3
-publication_date: 2024-04-09
+  \ with BoostAeroSpace.\nPermission given to include AirCyber in CISO Assistant."
+version: 4
+publication_date: 2026-08-28
 provider: Boost Aerospace
 packager: intuitem
 objects:
@@ -44,9 +44,7 @@ objects:
       first knowledge a company shall know to decide to launch a cybersecurity company
       program.
 
-      Source: https://boostaerospace.com/aircyber/
-
-      '
+      Source: https://boostaerospace.com/aircyber/'
     implementation_groups_definition:
     - ref_id: Bronze
       name: Bronze
@@ -62,7 +60,7 @@ objects:
       assessable: true
       depth: 1
       ref_id: '1.1'
-      name: 'Secure access to building  '
+      name: Secure access to building
       description: Are access to your buildings, offices and IT facilities controlled
         and limited (e. g. through the use of locked doors, magnetic card readers,
         prevention, detection and intervention devices in the event of theft, etc.)?
@@ -91,7 +89,7 @@ objects:
       assessable: true
       depth: 1
       ref_id: '1.4'
-      name: 'Visitor escorting '
+      name: Visitor escorting
       description: Are visitors permanently accompanied on your premises?
       implementation_groups:
       - Bronze
@@ -126,7 +124,7 @@ objects:
       assessable: true
       depth: 1
       ref_id: '2.1'
-      name: 'Automatic HW inventory tool centralized '
+      name: Automatic HW inventory tool centralized
       description: 'Do you have an up-to-date inventory of your IT system? (servers,
         desktop PCs, laptops, printers, network devices, smartphones, etc.)
 
@@ -175,8 +173,8 @@ objects:
       assessable: true
       depth: 1
       ref_id: '2.3'
-      name: "Sufficient ICT security resources to manage ICT security of the company\
-        \ with respect to the number of IT users / devices / employees\_"
+      name: Sufficient ICT security resources to manage ICT security of the company
+        with respect to the number of IT users / devices / employees
       description: Is there a person or department assigned to the management the
         computer systems?
       implementation_groups:
@@ -204,7 +202,7 @@ objects:
       assessable: true
       depth: 1
       ref_id: '2.5'
-      name: 'Policy management for all PCs/Laptops. Standardized client setup. '
+      name: Policy management for all PCs/Laptops. Standardized client setup.
       description: Do you use a tool to ensure that all your workstations (servers,
         laptops, desk-top PCs) are secure in a consistent way (identical security
         policies between workstations, gap management, etc.)
@@ -219,7 +217,7 @@ objects:
         in a con-sistent way (identical security policies between them, gap management,
         etc.)
       implementation_groups:
-      - SIlver
+      - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:2.6
       assessable: true
       depth: 1
@@ -252,7 +250,7 @@ objects:
       assessable: true
       depth: 1
       ref_id: 2.8.1
-      name: 'Light smartphones security policy  '
+      name: Light smartphones security policy
       description: Do enterprise smartphones have a dedicated security policy?
       implementation_groups:
       - Bronze
@@ -270,8 +268,8 @@ objects:
       assessable: true
       depth: 1
       ref_id: '2.9'
-      name: 'Centralized secure log collection system from the different ICT sensitive
-        sources '
+      name: Centralized secure log collection system from the different ICT sensitive
+        sources
       description: Do you use a centralized solution to activate, keep for at least
         a year and configure the logs of the most important components like firewalls
         or internet access?
@@ -356,7 +354,7 @@ objects:
       assessable: true
       depth: 1
       ref_id: '3.1'
-      name: 'Individual identification to all users '
+      name: Individual identification to all users
       description: Does each employee have a nominative identifier on IT production
         environments?
       implementation_groups:
@@ -388,12 +386,10 @@ objects:
       depth: 1
       ref_id: '3.2'
       name: No admin rights on computers, servers, etc. with day to day user account
-      description: 'Do you confirm that  accounts delivered to users for day to day
+      description: Do you confirm that  accounts delivered to users for day to day
         access to the information system (computer, server, cloud) do not have administrative
         rights (administrators can change security settings, install software and
         devices and access all files on the computer)?
-
-        '
       implementation_groups:
       - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:3.3
@@ -468,7 +464,7 @@ objects:
       name: "Management of entry/exit of\_IT\_of all users"
       description: "Is there an entry and exit procedure for users and administrators?\
         \ \n(Creation of a specific identifier, signature of a user charter, account\
-        \ deactivation)?\n"
+        \ deactivation)?"
       implementation_groups:
       - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.2
@@ -486,9 +482,9 @@ objects:
       ref_id: '4.21'
       name: Centralized, monitored   active management of users (Active Directory)
         with security alerts
-      description: 'Do you have a centralized and secure management of user accounts
+      description: Do you have a centralized and secure management of user accounts
         capable of detecting abnormal behavior (theft of identifiers, use on non-standard
-        servers, attempt to discover the password...)?  '
+        servers, attempt to discover the password...)?
       implementation_groups:
       - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.3
@@ -522,7 +518,7 @@ objects:
       assessable: true
       depth: 1
       ref_id: '4.5'
-      name: 'Rules to update frequently SW and systems. '
+      name: Rules to update frequently SW and systems.
       description: Do you regularly update components (servers, desktop PCs, laptops,
         printers, network device, smartphones, etc.)?
       implementation_groups:
@@ -559,11 +555,9 @@ objects:
       ref_id: '4.7'
       name: 'CERT : Stay aware of cyberenvironment [CERT alert by ANSSI] / follow
         news from SW editors'
-      description: 'Do you follow at least every week a procedure of management of
+      description: Do you follow at least every week a procedure of management of
         security alerts and advisories of CERTs (Computer Emergency Response Teams)
         and software editors?
-
-        '
       implementation_groups:
       - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:4.8
@@ -660,8 +654,8 @@ objects:
       assessable: true
       depth: 1
       ref_id: '4.11'
-      name: 'Automatic vulnerability detection plus threat intelligence regarding
-        cyber threat, attacks and vulnerabilities from all sources '
+      name: Automatic vulnerability detection plus threat intelligence regarding cyber
+        threat, attacks and vulnerabilities from all sources
       description: Have you set up or contracted professional and customized security
         alert services for your company, its sector of activity, the IT devices you
         have deployed, etc. (professional or sectoral "CERT")?
@@ -671,7 +665,7 @@ objects:
       assessable: true
       depth: 1
       ref_id: '5.1'
-      name: "Identify the company's most sensitive servers\_"
+      name: Identify the company's most sensitive servers
       description: Do you know the most sensitive servers in your information system?
       implementation_groups:
       - Silver
@@ -729,17 +723,17 @@ objects:
       assessable: true
       depth: 1
       ref_id: '5.5'
-      name: ' Strong identification on critical services with alerts'
+      name: Strong identification on critical services with alerts
       description: 'Do you use strong authentication and monitor (alerts in case of
         failure) the connection to sensitive devices such as: IT device administration,
-        cloud ser-vices administration and websites?  '
+        cloud ser-vices administration and websites?'
       implementation_groups:
       - Gold
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.5.1
       assessable: true
       depth: 1
       ref_id: 5.5.1
-      name: 'Offer SSO for netw application or E-SSO password manager '
+      name: Offer SSO for netw application or E-SSO password manager
       description: Do you use SSO (single sign on) features for http or applications
         with an auto-mated password manager and auto fill?
       implementation_groups:
@@ -749,11 +743,9 @@ objects:
       depth: 1
       ref_id: '5.6'
       name: Dedicated and compartmentalized network for information system administration
-      description: 'Do you use a dedicated, segregated network (internet, user workstation)
+      description: Do you use a dedicated, segregated network (internet, user workstation)
         secured by protocol break (bouncing machine, bastion host, reverse proxy,
         etc.) for the administration of the information system?
-
-        '
       implementation_groups:
       - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.6.1
@@ -805,7 +797,7 @@ objects:
         used for both personal and professional and not encrypted
       description: "Do you have complete control over the professional usage of enterprise\
         \ appli-cations / data on mobile devices? \n(good separation  of personal\
-        \ and professional environments)\n"
+        \ and professional environments)"
       implementation_groups:
       - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.9
@@ -813,7 +805,7 @@ objects:
       depth: 1
       ref_id: '5.9'
       name: Internet access filtered (blacklist / categorized)
-      description: 'Are Internet accesses filtered by a proxy server? '
+      description: Are Internet accesses filtered by a proxy server?
       implementation_groups:
       - Silver
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:5.9.1
@@ -829,7 +821,7 @@ objects:
       assessable: true
       depth: 1
       ref_id: '5.10'
-      name: 'Internet traffic level NW monitoring with alerting '
+      name: Internet traffic level NW monitoring with alerting
       description: Is there Internet traffic monitoring with alerts but also indicators
         (KPIs) on the use of company data on the Internet?
       implementation_groups:
@@ -838,7 +830,7 @@ objects:
       assessable: true
       depth: 1
       ref_id: 5.10.1
-      name: 'Encryption for internet links between different sites '
+      name: Encryption for internet links between different sites
       description: Do you encrypt your connections between your various sites of your
         company and your partners?
       implementation_groups:
@@ -847,7 +839,7 @@ objects:
       assessable: true
       depth: 1
       ref_id: 5.10.2
-      name: 'secure internet access to non- categorized websites or personal '
+      name: secure internet access to non- categorized websites or personal
       description: If you have allowed browsing to non-professional websites, have
         you deployed a secure browsing solution for these sites that isolates it from
         the standard computer network?
@@ -857,7 +849,7 @@ objects:
       assessable: true
       depth: 1
       ref_id: '5.11'
-      name: 'Manage WI-Fi Guest access segregated '
+      name: Manage WI-Fi Guest access segregated
       description: Do you have a "visitor" Wifi isolated from the rest of the Company's
         network? (Specific connection, dedicated Wifi?)
       implementation_groups:
@@ -866,9 +858,7 @@ objects:
       assessable: true
       depth: 1
       ref_id: '5.12'
-      name: '
-
-        Manage Wi-Fi access segregated'
+      name: Manage Wi-Fi access segregated
       description: Do you have a secure Wifi access with a separation of uses? (staff,
         industrial, professional, visitor, etc.)
       implementation_groups:
@@ -877,8 +867,8 @@ objects:
       assessable: true
       depth: 1
       ref_id: '5.13'
-      name: 'Set an email filtering when associated attachments have dangerous extension
-        (.exe for example) or content '
+      name: Set an email filtering when associated attachments have dangerous extension
+        (.exe for example) or content
       description: Is there a system for filtering valid e-mails against malicious
         ones? (Anti-spam, removal of suspicious attached files, etc...)
       implementation_groups:
@@ -887,7 +877,7 @@ objects:
       assessable: true
       depth: 1
       ref_id: 5.13.1
-      name: 'Encrypt email content easily '
+      name: Encrypt email content easily
       description: Do you offer users the possibility to easily encrypt the content
         of e-mails?
       implementation_groups:
@@ -905,8 +895,8 @@ objects:
       assessable: true
       depth: 1
       ref_id: 5.14.1
-      name: ' Secure exchange platform access with suppliers and subcontractors to
-        exchange sensitive data'
+      name: Secure exchange platform access with suppliers and subcontractors to exchange
+        sensitive data
       description: Do you offer a secure exchange platform for your subcontractors
         and suppli-ers?
       implementation_groups:
@@ -926,7 +916,7 @@ objects:
       assessable: true
       depth: 1
       ref_id: '5.15'
-      name: ' Detect any new device connected to the network.'
+      name: Detect any new device connected to the network.
       description: Do you allow connection to the network only to devices identified
         and man-aged by the information system?
       implementation_groups:
@@ -954,9 +944,7 @@ objects:
       assessable: true
       depth: 1
       ref_id: '6.2'
-      name: 'Setup secure and distinct physical sites for backup storage
-
-        '
+      name: Setup secure and distinct physical sites for backup storage
       description: Are your backups protected in a secure room?
       implementation_groups:
       - Silver
@@ -964,7 +952,7 @@ objects:
       assessable: true
       depth: 1
       ref_id: '6.3'
-      name: "Setup secure backup storage on cloud system \n"
+      name: Setup secure backup storage on cloud system
       description: Do you use a centrally managed data storage and backup system,
         such as a cloud (AWS, O365 Sharepoint, OneDrive, google drive,...)?
       implementation_groups:
@@ -973,7 +961,7 @@ objects:
       assessable: true
       depth: 1
       ref_id: '6.4'
-      name: 'Hard Disk encryption on desktops '
+      name: Hard Disk encryption on desktops
       description: Do you encrypt computer, smartphones hard disks  without any user
         interaction (transparent automatic encryption)?
       implementation_groups:
@@ -982,8 +970,8 @@ objects:
       assessable: true
       depth: 1
       ref_id: '6.5'
-      name: 'data lost prevention solutions with central management of data confidentiality
-        solutions '
+      name: data lost prevention solutions with central management of data confidentiality
+        solutions
       description: Do you implement enterprise data protection management solutions
         (leak de-tection of confidential data, roles and responsibilities, etc.)?
       implementation_groups:
@@ -992,7 +980,7 @@ objects:
       assessable: true
       depth: 1
       ref_id: '6.6'
-      name: 'Proceed to regular controls of the SI and set corrective solution '
+      name: Proceed to regular controls of the SI and set corrective solution
       description: Do you carry out regular security audits (application, network,
         process), then apply the associated corrective actions?
       implementation_groups:
@@ -1009,7 +997,7 @@ objects:
       assessable: true
       depth: 1
       ref_id: 6.6.2
-      name: 'Optimize firewall rules management with regular audits '
+      name: Optimize firewall rules management with regular audits
       description: Do you regularly check the rules of your Firewalls?
       implementation_groups:
       - Silver
@@ -1143,9 +1131,7 @@ objects:
       assessable: true
       depth: 1
       ref_id: '7.3'
-      name: 'ICS : documented crisis management process ?
-
-        '
+      name: 'ICS : documented crisis management process ?'
       description: Is there a documented crisis management process? (such as, for
         example, disas-ter recovery after a system crash)
       implementation_groups:
@@ -1173,7 +1159,7 @@ objects:
       depth: 1
       ref_id: '7.6'
       name: 'Industrial IT : Have an IACS security awareness or training program for
-        employees and sub-contractors '
+        employees and sub-contractors'
       description: Is there an ICS security awareness or training program for employees
         and contractors?
       implementation_groups:
@@ -1199,7 +1185,7 @@ objects:
       assessable: true
       depth: 1
       ref_id: '7.9'
-      name: 'ICS :  dedicated and compartmentalized network for the administration  '
+      name: 'ICS :  dedicated and compartmentalized network for the administration'
       description: Do you use a dedicated and partitioned network for the administration
         of ICS?
       implementation_groups:
@@ -1216,7 +1202,7 @@ objects:
       assessable: true
       depth: 1
       ref_id: '7.11'
-      name: 'Industrial IT :  Audit the change processes, and dedicated IACS solutions '
+      name: 'Industrial IT :  Audit the change processes, and dedicated IACS solutions'
       description: Are ICS change processes and dedicated solutions audited annually?
       implementation_groups:
       - Silver
@@ -1224,7 +1210,7 @@ objects:
       assessable: true
       depth: 1
       ref_id: '7.12'
-      name: 'ICS :  process for monitoring threats and vulnerabilities   '
+      name: 'ICS :  process for monitoring threats and vulnerabilities'
       description: Are ICS components subject to a threat and vulnerability monitoring
         process?
       implementation_groups:
@@ -1233,7 +1219,7 @@ objects:
       assessable: true
       depth: 1
       ref_id: '7.13'
-      name: 'ICS : Have active monitoring of the IACS (SOC, NOC...) '
+      name: 'ICS : Have active monitoring of the IACS (SOC, NOC...)'
       description: Do you use a security monitoring centre  (SOC, NOC (Network Operations
         Centre), backup status...) of your network allowing detection of security
         incidents, back up issues and/or active monitoring of Industrial Information
@@ -1244,9 +1230,7 @@ objects:
       assessable: true
       depth: 1
       ref_id: '7.14'
-      name: 'Investigate after a security incident related to the industrial IT
-
-        '
+      name: Investigate after a security incident related to the industrial IT
       description: When an incident occurs in the production, do you investigate whether
         it could be caused by a malicious element?
       implementation_groups:
@@ -1255,7 +1239,7 @@ objects:
       assessable: true
       depth: 1
       ref_id: 9.7.1
-      name: 'Escalation and alerting process with Security hotline '
+      name: Escalation and alerting process with Security hotline
       description: Have you implemented, documented and tested, at least once a year,
         a security problem management procedure to ensure that you can react quickly
         and in-volve the right internal or external people?
@@ -1266,7 +1250,7 @@ objects:
       depth: 1
       ref_id: '9.8'
       name: Setup a risk analysis
-      description: 'Have you ever done a cyber-risk analysis on your company? '
+      description: Have you ever done a cyber-risk analysis on your company?
       implementation_groups:
       - Bronze
     - urn: urn:intuitem:risk:req_node:aircyber-v1.5.2:9.81
@@ -2423,7 +2407,7 @@ objects:
       depth: 1
       ref_id: Ext92
       name: Dev. Security infrastructure
-      description: ' Did you deploy security components on your customers development
+      description: 'Did you deploy security components on your customers development
         environments in order to ensure the security:
 
         - Defence in depth equipment (IDS, IPS)

@@ -1,0 +1,1243 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:iso27701-2025
+locale: en
+ref_id: iso27701-2025
+name: "ISO 27701-2025 \u2014 Privacy information management systems \u2014 Requirements\
+  \ and Controls outline"
+description: "Outline of ISO/IEC 27701:2025 \u2014 Privacy information management\
+  \ system (PIMS), with Annex A reference controls for PII controllers (A.1), PII\
+  \ processors (A.2) and the information security controls shared by both (A.3).\n\
+  You can purchase the standard for full details."
+copyright: ISO - You can purchase the standard for full details.
+version: 1
+publication_date: 2026-08-07
+provider: ISO
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:iso27701-2025
+    ref_id: iso27701-2025
+    name: "ISO 27701-2025 \u2014 Privacy information management systems \u2014 Requirements\
+      \ and Controls outline"
+    description: "Outline of ISO/IEC 27701:2025 \u2014 Privacy information management\
+      \ system (PIMS), with Annex A reference controls for PII controllers (A.1),\
+      \ PII processors (A.2) and the information security controls shared by both\
+      \ (A.3).\nYou can purchase the standard for full details."
+    min_score: 0
+    max_score: 5
+    scores_definition:
+    - score: 0
+      name: Incomplete
+      description: Ad hoc and unknown
+    - score: 1
+      name: Initial
+      description: Unpredictable and reactive
+    - score: 2
+      name: Managed
+      description: Managed on the project level
+    - score: 3
+      name: Defined
+      description: Proactive, rather than reactive
+    - score: 4
+      name: Quantitatively managed
+      description: Measured and controlled
+    - score: 5
+      name: Optimizing
+      description: Stable and flexible
+    implementation_groups_definition:
+    - ref_id: clauses
+      name: Clauses
+      description: PIMS requirements, clauses 4 to 10
+    - ref_id: controller
+      name: PII controller controls
+      description: Annex A, Table A.1
+    - ref_id: processor
+      name: PII processor controls
+      description: Annex A, Table A.2
+    - ref_id: shared
+      name: Shared information security controls
+      description: Annex A, Table A.3
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:4
+      assessable: false
+      depth: 1
+      ref_id: '4'
+      name: Context of the organization
+      description: Requirements for establishing the organizational context of the
+        PIMS.
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:4.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:4
+      ref_id: '4.1'
+      name: Understanding the organization and its context
+      description: Determine internal and external issues relevant to privacy, including
+        applicable privacy legislation, and whether climate change is a relevant issue.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:4.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:4
+      ref_id: '4.2'
+      name: Understanding the needs and expectations of interested parties
+      description: Identify interested parties and their privacy-related requirements,
+        including PII principals and regulators; these can include requirements related
+        to climate change.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:4.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:4
+      ref_id: '4.3'
+      name: Determining the scope of the privacy information management system
+      description: Define the boundaries and applicability of the PIMS, including
+        the roles of PII controller and PII processor.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:4.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:4
+      ref_id: '4.4'
+      name: Privacy information management system
+      description: Establish, implement, maintain and continually improve the PIMS.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:5
+      assessable: false
+      depth: 1
+      ref_id: '5'
+      name: Leadership
+      description: Requirements for top management commitment and direction of the
+        PIMS.
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:5.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:5
+      ref_id: '5.1'
+      name: Leadership and commitment
+      description: Demonstrate top management commitment to the PIMS and the protection
+        of PII.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:5.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:5
+      ref_id: '5.2'
+      name: Privacy policy
+      description: Establish, communicate and make available a privacy policy appropriate
+        to the organization.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:5.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:5
+      ref_id: '5.3'
+      name: Roles, responsibilities and authorities
+      description: Assign and communicate privacy roles, responsibilities and authorities.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:6
+      assessable: false
+      depth: 1
+      ref_id: '6'
+      name: Planning
+      description: Requirements for planning the PIMS.
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:6.1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:6
+      ref_id: '6.1'
+      name: Actions to address risks and opportunities
+      description: Requirements for addressing privacy risks and opportunities.
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:6.1.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:6.1
+      ref_id: 6.1.1
+      name: General
+      description: Consider issues and requirements when planning actions to address
+        risks and opportunities.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:6.1.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:6.1
+      ref_id: 6.1.2
+      name: Privacy risk assessment
+      description: Define and apply a privacy risk assessment process, including risks
+        to PII principals.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:6.1.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:6.1
+      ref_id: 6.1.3
+      name: Privacy risk treatment
+      description: Define and apply a privacy risk treatment process, select controls
+        and produce a Statement of Applicability against Annex A.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:6.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:6
+      ref_id: '6.2'
+      name: Privacy objectives and planning to achieve them
+      description: Establish measurable privacy objectives and plan how to achieve
+        them.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:6.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:6
+      ref_id: '6.3'
+      name: Planning of changes
+      description: Plan changes to the PIMS in a controlled manner.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:7
+      assessable: false
+      depth: 1
+      ref_id: '7'
+      name: Support
+      description: Requirements for the resources and support of the PIMS.
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:7.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:7
+      ref_id: '7.1'
+      name: Resources
+      description: Determine and provide the resources needed for the PIMS.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:7.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:7
+      ref_id: '7.2'
+      name: Competence
+      description: Ensure the competence of persons performing privacy-related work.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:7.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:7
+      ref_id: '7.3'
+      name: Awareness
+      description: Ensure awareness of the privacy policy, individual contributions
+        and consequences of nonconformity.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:7.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:7
+      ref_id: '7.4'
+      name: Communication
+      description: Determine internal and external communications relevant to the
+        PIMS.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:7.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:7
+      ref_id: '7.5'
+      name: Documented information
+      description: Requirements for documented information of the PIMS.
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:7.5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:7.5
+      ref_id: 7.5.1
+      name: General
+      description: Maintain the documented information required by the standard and
+        by the organization.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:7.5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:7.5
+      ref_id: 7.5.2
+      name: Creating and updating documented information
+      description: Ensure appropriate identification, format and review of documented
+        information.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:7.5.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:7.5
+      ref_id: 7.5.3
+      name: Control of documented information
+      description: Control documented information for availability, protection, distribution
+        and retention.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:8
+      assessable: false
+      depth: 1
+      ref_id: '8'
+      name: Operation
+      description: Requirements for operating the PIMS.
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:8.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:8
+      ref_id: '8.1'
+      name: Operational planning and control
+      description: Plan, implement and control the processes needed to meet PIMS requirements,
+        including outsourced processes.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:8.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:8
+      ref_id: '8.2'
+      name: Privacy risk assessment
+      description: Perform privacy risk assessments at planned intervals and upon
+        significant change, and retain the results.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:8.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:8
+      ref_id: '8.3'
+      name: Privacy risk treatment
+      description: Implement the privacy risk treatment plan and retain the results.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:9
+      assessable: false
+      depth: 1
+      ref_id: '9'
+      name: Performance evaluation
+      description: Requirements for evaluating PIMS performance.
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:9.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:9
+      ref_id: '9.1'
+      name: Monitoring, measurement, analysis and evaluation
+      description: Determine what to monitor and measure, and evaluate the performance
+        and effectiveness of the PIMS.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:9.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:9
+      ref_id: '9.2'
+      name: Internal audit
+      description: Requirements for internal audits of the PIMS.
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:9.2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:9.2
+      ref_id: 9.2.1
+      name: General
+      description: Conduct internal audits at planned intervals to verify conformity
+        and effective implementation.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:9.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:9.2
+      ref_id: 9.2.2
+      name: Internal audit programme
+      description: Plan, establish, implement and maintain an internal audit programme.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:9.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:9
+      ref_id: '9.3'
+      name: Management review
+      description: Requirements for management review of the PIMS.
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:9.3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:9.3
+      ref_id: 9.3.1
+      name: General
+      description: Review the PIMS at planned intervals to ensure continuing suitability,
+        adequacy and effectiveness.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:9.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:9.3
+      ref_id: 9.3.2
+      name: Management review inputs
+      description: Include the specified inputs in the management review.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:9.3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:9.3
+      ref_id: 9.3.3
+      name: Management review results
+      description: Record decisions and actions arising from the management review.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:10
+      assessable: false
+      depth: 1
+      ref_id: '10'
+      name: Improvement
+      description: Requirements for continual improvement of the PIMS.
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:10.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:10
+      ref_id: '10.1'
+      name: Continual improvement
+      description: Continually improve the suitability, adequacy and effectiveness
+        of the PIMS.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:10.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:10
+      ref_id: '10.2'
+      name: Nonconformity and corrective action
+      description: React to nonconformities, evaluate causes and take corrective action.
+      implementation_groups:
+      - clauses
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1
+      assessable: false
+      depth: 1
+      ref_id: A.1
+      name: PIMS reference control objectives and controls for PII controllers
+      description: "Annex A, Table A.1 \u2014 controls applicable to organizations\
+        \ acting as PII controllers."
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.1
+      ref_id: A.1.2
+      name: Conditions for collection and processing
+      description: Controls on the lawfulness and documentation of PII processing.
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.2
+      ref_id: A.1.2.2
+      name: Identify and document purpose
+      description: Identify and document the specific purposes for which PII is processed.
+      implementation_groups:
+      - controller
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.2
+      ref_id: A.1.2.3
+      name: Identify lawful basis
+      description: Determine, document and comply with the lawful basis for each processing
+        purpose.
+      implementation_groups:
+      - controller
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.2
+      ref_id: A.1.2.4
+      name: Determine when and how consent is to be obtained
+      description: Define the process for obtaining and recording consent from PII
+        principals.
+      implementation_groups:
+      - controller
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.2.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.2
+      ref_id: A.1.2.5
+      name: Obtain and record consent
+      description: Obtain and retain verifiable records of consent.
+      implementation_groups:
+      - controller
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.2.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.2
+      ref_id: A.1.2.6
+      name: Privacy impact assessment
+      description: Assess the privacy impact of processing and act on the outcome.
+      implementation_groups:
+      - controller
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.2.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.2
+      ref_id: A.1.2.7
+      name: Contracts with PII processors
+      description: Ensure contracts with PII processors address the controller's obligations.
+      implementation_groups:
+      - controller
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.2.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.2
+      ref_id: A.1.2.8
+      name: Joint PII controller
+      description: Determine and document respective roles and responsibilities with
+        joint controllers.
+      implementation_groups:
+      - controller
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.2.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.2
+      ref_id: A.1.2.9
+      name: Records related to processing PII
+      description: Maintain records of PII processing activities.
+      implementation_groups:
+      - controller
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.1
+      ref_id: A.1.3
+      name: Obligations to PII principals
+      description: Controls on informing PII principals and handling their requests.
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.3
+      ref_id: A.1.3.2
+      name: Determining and fulfilling obligations to PII principals
+      description: Determine and document the obligations owed to PII principals and
+        how they are met.
+      implementation_groups:
+      - controller
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.3
+      ref_id: A.1.3.3
+      name: Determining information for PII principals
+      description: Determine the information to be provided to PII principals and
+        when.
+      implementation_groups:
+      - controller
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.3.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.3
+      ref_id: A.1.3.4
+      name: Providing information to PII principals
+      description: Provide PII principals with clear and accessible privacy information.
+      implementation_groups:
+      - controller
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.3.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.3
+      ref_id: A.1.3.5
+      name: Providing mechanism to modify or withdraw consent
+      description: Offer a means for PII principals to modify or withdraw consent.
+      implementation_groups:
+      - controller
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.3.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.3
+      ref_id: A.1.3.6
+      name: Providing mechanism to object to PII processing
+      description: Offer a means for PII principals to object to processing.
+      implementation_groups:
+      - controller
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.3.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.3
+      ref_id: A.1.3.7
+      name: Access, correction or erasure
+      description: Enable access to, correction of and erasure of PII on request.
+      implementation_groups:
+      - controller
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.3.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.3
+      ref_id: A.1.3.8
+      name: PII controllers' obligations to inform third parties
+      description: Inform third parties of corrections, erasures or processing restrictions.
+      implementation_groups:
+      - controller
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.3.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.3
+      ref_id: A.1.3.9
+      name: Providing copy of PII processed
+      description: Provide a copy of the PII processed when requested.
+      implementation_groups:
+      - controller
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.3.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.3
+      ref_id: A.1.3.10
+      name: Handling requests
+      description: Define and operate a process for handling requests from PII principals.
+      implementation_groups:
+      - controller
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.3.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.3
+      ref_id: A.1.3.11
+      name: Automated decision making
+      description: Identify and address obligations relating to automated decision
+        making.
+      implementation_groups:
+      - controller
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.1
+      ref_id: A.1.4
+      name: Privacy by design and privacy by default
+      description: Controls limiting collection, processing, retention and disposal
+        of PII.
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.4
+      ref_id: A.1.4.2
+      name: Limit collection
+      description: Limit PII collection to what is relevant and necessary for the
+        identified purposes.
+      implementation_groups:
+      - controller
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.4
+      ref_id: A.1.4.3
+      name: Limit processing
+      description: Limit PII processing to what is adequate and necessary for the
+        identified purposes.
+      implementation_groups:
+      - controller
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.4.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.4
+      ref_id: A.1.4.4
+      name: Accuracy and quality
+      description: Ensure PII is accurate, complete and up to date for its purpose.
+      implementation_groups:
+      - controller
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.4.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.4
+      ref_id: A.1.4.5
+      name: PII minimization objectives
+      description: Define and document PII minimization objectives and the mechanisms
+        used.
+      implementation_groups:
+      - controller
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.4.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.4
+      ref_id: A.1.4.6
+      name: PII de-identification and deletion at the end of processing
+      description: De-identify or delete PII once the processing purpose is fulfilled.
+      implementation_groups:
+      - controller
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.4.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.4
+      ref_id: A.1.4.7
+      name: Temporary files
+      description: Manage and erase temporary files containing PII within defined
+        periods.
+      implementation_groups:
+      - controller
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.4.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.4
+      ref_id: A.1.4.8
+      name: Retention
+      description: Retain PII no longer than necessary for the identified purposes.
+      implementation_groups:
+      - controller
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.4.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.4
+      ref_id: A.1.4.9
+      name: Disposal
+      description: Dispose of PII securely using documented policies and procedures.
+      implementation_groups:
+      - controller
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.4.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.4
+      ref_id: A.1.4.10
+      name: PII transmission controls
+      description: Protect PII transmitted over data transmission networks.
+      implementation_groups:
+      - controller
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.1
+      ref_id: A.1.5
+      name: PII sharing, transfer and disclosure
+      description: Controls on cross-border transfers and disclosures of PII.
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.5
+      ref_id: A.1.5.2
+      name: Identify basis for PII transfer between jurisdictions
+      description: Identify and document the basis for transferring PII between jurisdictions.
+      implementation_groups:
+      - controller
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.5.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.5
+      ref_id: A.1.5.3
+      name: Countries and international organizations to which PII can be transferred
+      description: Document and make available the countries and international organizations
+        to which PII can be transferred.
+      implementation_groups:
+      - controller
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.5.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.5
+      ref_id: A.1.5.4
+      name: Records of transfer of PII
+      description: Record transfers of PII to or from third parties.
+      implementation_groups:
+      - controller
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.5.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.1.5
+      ref_id: A.1.5.5
+      name: Records of PII disclosure to third parties
+      description: Record disclosures of PII to third parties, including what was
+        disclosed and to whom.
+      implementation_groups:
+      - controller
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2
+      assessable: false
+      depth: 1
+      ref_id: A.2
+      name: PIMS reference control objectives and controls for PII processors
+      description: "Annex A, Table A.2 \u2014 controls applicable to organizations\
+        \ acting as PII processors."
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.2
+      ref_id: A.2.2
+      name: Conditions for collection and processing
+      description: Controls on processing PII strictly under customer instructions.
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.2
+      ref_id: A.2.2.2
+      name: Customer agreement
+      description: Agree with the customer the roles and obligations relating to PII
+        processing.
+      implementation_groups:
+      - processor
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.2
+      ref_id: A.2.2.3
+      name: Organization's purposes
+      description: Process PII only for the customer's documented purposes.
+      implementation_groups:
+      - processor
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.2
+      ref_id: A.2.2.4
+      name: Marketing and advertising use
+      description: Do not use PII for marketing or advertising without demonstrable
+        consent.
+      implementation_groups:
+      - processor
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.2.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.2
+      ref_id: A.2.2.5
+      name: Infringing instruction
+      description: Inform the customer when an instruction is considered to infringe
+        applicable legislation.
+      implementation_groups:
+      - processor
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.2.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.2
+      ref_id: A.2.2.6
+      name: Customer obligations
+      description: Provide the customer with the information needed to demonstrate
+        its own compliance.
+      implementation_groups:
+      - processor
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.2.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.2
+      ref_id: A.2.2.7
+      name: Records related to processing PII
+      description: Maintain records of PII processing carried out on behalf of customers.
+      implementation_groups:
+      - processor
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.2
+      ref_id: A.2.3
+      name: Obligations to PII principals
+      description: Controls supporting the customer's obligations to PII principals.
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.3
+      ref_id: A.2.3.2
+      name: Obligations to PII principals
+      description: Provide the customer with the means to fulfil its obligations to
+        PII principals.
+      implementation_groups:
+      - processor
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.2
+      ref_id: A.2.4
+      name: Privacy by design and privacy by default
+      description: Controls on temporary files, return and disposal, and transmission
+        of PII.
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.4
+      ref_id: A.2.4.2
+      name: Temporary files
+      description: Manage and erase temporary files containing PII within defined
+        periods.
+      implementation_groups:
+      - processor
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.4
+      ref_id: A.2.4.3
+      name: Return, transfer or disposal of PII
+      description: Define and document the return, transfer or disposal of PII at
+        the end of processing.
+      implementation_groups:
+      - processor
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.4.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.4
+      ref_id: A.2.4.4
+      name: PII transmission controls
+      description: Protect PII transmitted over data transmission networks.
+      implementation_groups:
+      - processor
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.2
+      ref_id: A.2.5
+      name: PII sharing, transfer and disclosure
+      description: Controls on transfers, disclosures and use of subcontractors.
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.5
+      ref_id: A.2.5.2
+      name: Basis for PII transfer between jurisdictions
+      description: Inform the customer of the basis for transferring PII between jurisdictions.
+      implementation_groups:
+      - processor
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.5.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.5
+      ref_id: A.2.5.3
+      name: Countries and international organizations to which PII can be transferred
+      description: Disclose the countries and international organizations in which
+        PII may be processed.
+      implementation_groups:
+      - processor
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.5.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.5
+      ref_id: A.2.5.4
+      name: Records of PII disclosure to third parties
+      description: Record disclosures of PII to third parties.
+      implementation_groups:
+      - processor
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.5.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.5
+      ref_id: A.2.5.5
+      name: Notification of PII disclosure requests
+      description: Notify the customer of legally binding requests for disclosure
+        of PII.
+      implementation_groups:
+      - processor
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.5.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.5
+      ref_id: A.2.5.6
+      name: Legally binding PII disclosures
+      description: Reject non-legally binding disclosure requests and consult the
+        customer where permitted.
+      implementation_groups:
+      - processor
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.5.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.5
+      ref_id: A.2.5.7
+      name: Disclosure of subcontractors used to process PII
+      description: Disclose the use of subcontractors to process PII before use.
+      implementation_groups:
+      - processor
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.5.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.5
+      ref_id: A.2.5.8
+      name: Engagement of a subcontractor to process PII
+      description: Engage subcontractors only under a written contract imposing equivalent
+        obligations.
+      implementation_groups:
+      - processor
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.5.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.2.5
+      ref_id: A.2.5.9
+      name: Change of subcontractor to process PII
+      description: Inform the customer of changes of subcontractor in time for it
+        to object.
+      implementation_groups:
+      - processor
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3
+      assessable: false
+      depth: 1
+      ref_id: A.3
+      name: Information security controls for PII controllers and PII processors
+      description: "Annex A, Table A.3 \u2014 information security controls applicable\
+        \ to both PII controllers and PII processors."
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.3
+      ref_id: A.3.3
+      name: Policies for information security
+      description: Define, approve, publish and review information security policies.
+      implementation_groups:
+      - shared
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.3
+      ref_id: A.3.4
+      name: Information security roles and responsibilities
+      description: Define and allocate information security roles and responsibilities.
+      implementation_groups:
+      - shared
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.3
+      ref_id: A.3.5
+      name: Classification of information
+      description: Classify information according to its protection needs.
+      implementation_groups:
+      - shared
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.3
+      ref_id: A.3.6
+      name: Labelling of information
+      description: Label information in accordance with the classification scheme.
+      implementation_groups:
+      - shared
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.3
+      ref_id: A.3.7
+      name: Information transfer
+      description: Protect information transferred within the organization and with
+        external parties.
+      implementation_groups:
+      - shared
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.3
+      ref_id: A.3.8
+      name: Identity management
+      description: Manage the full life cycle of identities.
+      implementation_groups:
+      - shared
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.3
+      ref_id: A.3.9
+      name: Access rights
+      description: Provision, review, modify and remove access rights to information
+        and assets.
+      implementation_groups:
+      - shared
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.3
+      ref_id: A.3.10
+      name: Addressing information security within supplier agreements
+      description: Establish and agree information security requirements with suppliers.
+      implementation_groups:
+      - shared
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.3
+      ref_id: A.3.11
+      name: Information security incident management planning and preparation
+      description: Plan and prepare the management of information security incidents.
+      implementation_groups:
+      - shared
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.3
+      ref_id: A.3.12
+      name: Response to information security incidents
+      description: Respond to information security incidents according to documented
+        procedures.
+      implementation_groups:
+      - shared
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.13
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.3
+      ref_id: A.3.13
+      name: Legal, statutory, regulatory and contractual requirements
+      description: Identify, document and keep up to date applicable legal and contractual
+        requirements.
+      implementation_groups:
+      - shared
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.14
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.3
+      ref_id: A.3.14
+      name: Protection of records
+      description: Protect records against loss, destruction, falsification and unauthorized
+        access.
+      implementation_groups:
+      - shared
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.15
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.3
+      ref_id: A.3.15
+      name: Independent review of information security
+      description: Review the approach to managing information security independently
+        at planned intervals.
+      implementation_groups:
+      - shared
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.16
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.3
+      ref_id: A.3.16
+      name: Compliance with policies, rules and standards for information security
+      description: Review compliance with information security policies, rules and
+        standards.
+      implementation_groups:
+      - shared
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.17
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.3
+      ref_id: A.3.17
+      name: Information security awareness, education and training
+      description: Provide awareness, education and training relevant to job roles.
+      implementation_groups:
+      - shared
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.18
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.3
+      ref_id: A.3.18
+      name: Confidentiality or non-disclosure agreements
+      description: Identify, document and review confidentiality or non-disclosure
+        agreements.
+      implementation_groups:
+      - shared
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.19
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.3
+      ref_id: A.3.19
+      name: Clear desk and clear screen
+      description: Define and enforce clear desk and clear screen rules.
+      implementation_groups:
+      - shared
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.20
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.3
+      ref_id: A.3.20
+      name: Storage media
+      description: Manage storage media through their life cycle of acquisition, use,
+        transport and disposal.
+      implementation_groups:
+      - shared
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.21
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.3
+      ref_id: A.3.21
+      name: Secure disposal or re-use of equipment
+      description: Verify removal of information before disposal or re-use of equipment.
+      implementation_groups:
+      - shared
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.22
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.3
+      ref_id: A.3.22
+      name: User endpoint devices
+      description: Protect information stored on, processed by or accessible via user
+        endpoint devices.
+      implementation_groups:
+      - shared
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.23
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.3
+      ref_id: A.3.23
+      name: Secure authentication
+      description: Implement secure authentication technologies and procedures.
+      implementation_groups:
+      - shared
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.24
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.3
+      ref_id: A.3.24
+      name: Information backup
+      description: Maintain and test backups in line with the agreed backup policy.
+      implementation_groups:
+      - shared
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.25
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.3
+      ref_id: A.3.25
+      name: Logging
+      description: Produce, store, protect and analyse logs of activities, exceptions
+        and events.
+      implementation_groups:
+      - shared
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.26
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.3
+      ref_id: A.3.26
+      name: Use of cryptography
+      description: Define and implement rules for the effective use of cryptography
+        and key management.
+      implementation_groups:
+      - shared
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.27
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.3
+      ref_id: A.3.27
+      name: Secure development life cycle
+      description: Establish and apply rules for the secure development of software
+        and systems.
+      implementation_groups:
+      - shared
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.28
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.3
+      ref_id: A.3.28
+      name: Application security requirements
+      description: Identify, specify and approve information security requirements
+        for applications.
+      implementation_groups:
+      - shared
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.29
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.3
+      ref_id: A.3.29
+      name: Secure system architecture and engineering principles
+      description: Establish and apply principles for engineering secure systems.
+      implementation_groups:
+      - shared
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.30
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.3
+      ref_id: A.3.30
+      name: Outsourced development
+      description: Direct, monitor and review outsourced system development activities.
+      implementation_groups:
+      - shared
+    - urn: urn:intuitem:risk:req_node:iso27701-2025:a.3.31
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:iso27701-2025:a.3
+      ref_id: A.3.31
+      name: Test information
+      description: Select, protect and manage test information appropriately.
+      implementation_groups:
+      - shared
