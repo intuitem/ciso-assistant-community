@@ -365,6 +365,35 @@ def test_turkish_template_does_not_drift_from_english(audit):
 
 
 @pytest.mark.django_db
+def test_turkish_requirement_status_values_are_localised(audit):
+    """Progress comes from `i18n_dict`, not from the template: without a `tr`
+    block it would fall back to English inside a Turkish document. The context is
+    built with `tr` here, as the views do from the user's language preference."""
+    for ra in RequirementAssessment.objects.filter(compliance_assessment=audit):
+        ra.status = "in_progress"
+        ra.result = "compliant"
+        ra.save()
+
+    context = gen_audit_context(audit.id, _tree(audit), "tr")
+    payload, images = audit_context_for_typst(context, audit, "auditor", "tr", "full")
+    statuses = {
+        ra["status"] for ra in payload["requirement_assessments"] if "status" in ra
+    }
+    assert statuses == {"Devam ediyor"}
+
+    pdf = render_pdf(localized_template("audit_report", "tr"), payload, images=images)
+    text = "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
+    assert "Devam ediyor" in text
+    assert "In progress" not in text, "status fell back to English"
+
+
+def test_turkish_commitment_states_cover_every_state():
+    from core.generators import _STATE_LABELS
+
+    assert set(_STATE_LABELS["tr"]) == set(_STATE_LABELS["en"])
+
+
+@pytest.mark.django_db
 def test_french_result_badges_are_singular(audit):
     """One badge qualifies one requirement. `i18n_dict` carries plurals because it
     was written for chart legends and aggregate counts, so the badge must not use it."""

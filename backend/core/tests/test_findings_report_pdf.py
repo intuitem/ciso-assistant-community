@@ -138,6 +138,15 @@ def test_locale_fallback_is_whole_document():
     assert localized_template("findings_report", "tr") == "findings_report_tr.typ"
 
 
+def test_turkish_status_label_names_the_undefined_marker():
+    """`Finding.Status.UNDEFINED` is stored as "--", so the status badge needs
+    that key, not only `undefined`."""
+    src = (TEMPLATE_DIR / "findings_report_tr.typ").read_text()
+    block = src[src.index("#let status-label = (") :]
+    block = block[: block.index("\n)")]
+    assert '"--":' in block
+
+
 def test_templates_avoid_auto_column_sizing():
     """`auto` overflows and overlaps once content is wider than the page."""
     for name in (
