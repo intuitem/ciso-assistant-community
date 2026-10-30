@@ -206,6 +206,7 @@
 		!!(
 			node.node.annotation ||
 			node.node.typical_evidence ||
+			node.node.evidence_required ||
 			node.node.visibility_expression ||
 			(node.node.translations &&
 				Object.values(node.node.translations).some((t) => t.annotation || t.typical_evidence))
@@ -838,6 +839,18 @@
 										onblur={(e) => saveField('typical_evidence', e.currentTarget.value || null)}
 									></textarea>
 								</div>
+								<label
+									class="flex items-center gap-1.5 text-xs text-surface-500 cursor-pointer hover:text-surface-600-400 transition-colors"
+									title={m.builderEvidenceRequiredHint()}
+								>
+									<input
+										type="checkbox"
+										checked={node.node.evidence_required}
+										onchange={(e) => saveField('evidence_required', e.currentTarget.checked)}
+										class="w-4 h-4 rounded border-surface-300-700 cursor-pointer"
+									/>
+									{m.builderEvidenceRequiredLabel()}
+								</label>
 							{/if}
 						</div>
 					{/if}
