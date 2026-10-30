@@ -3,7 +3,11 @@ from rest_framework import serializers
 
 from core.models import Policy
 from core.serializer_fields import FieldsRelatedField
-from core.serializers import AssignmentNotificationMixin, BaseModelSerializer
+from core.serializers import (
+    CollectionMembershipMixin,
+    AssignmentNotificationMixin,
+    BaseModelSerializer,
+)
 from iam.models import Folder, RoleAssignment
 
 from .access import has_full_view
@@ -145,7 +149,7 @@ class DocumentContainerReadSerializer(BaseModelSerializer):
 
 
 class DocumentContainerWriteSerializer(
-    AssignmentNotificationMixin, BaseModelSerializer
+    CollectionMembershipMixin, AssignmentNotificationMixin, BaseModelSerializer
 ):
     assignment_notifications = {"reviewers": "object_review_assignment"}
 
