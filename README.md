@@ -110,7 +110,7 @@ The docker compose file can be adjusted to pass extra parameters to suit your se
 - Automatic mapping
 - Mapping explorer
 - Custom frameworks supported
-- +220 frameworks included
+- 200+ frameworks included
 - Policies management
 - Document management
 - Evidence management
@@ -246,185 +246,191 @@ Read more here: [AI engine](backend/chat/README.md)
 
 ## Supported frameworks 🐙
 
-1. ISO 27001:2013 & 27001:2022 🌐
-2. NIST Cyber Security Framework (CSF) v1.1 🇺🇸
-3. NIST Cyber Security Framework (CSF) v2.0 🇺🇸
-4. NIS2 🇪🇺
-5. SOC2 🇺🇸
-6. PCI DSS 4.0.1 💳
-7. CMMC v2 🇺🇸
-8. PSPF 🇦🇺
-9. General Data Protection Regulation (GDPR): Full text and checklist from GDPR.EU 🇪🇺
-10. Essential Eight (Maturity Model, November 2023) 🇦🇺
-11. NYDFS 500 with 2023-11 amendments 🇺🇸
-12. DORA (Act, RTS, ITS and GL) 🇪🇺
-13. NIST AI Risk Management Framework 🇺🇸🤖
-14. NIST SP 800-53 rev5 🇺🇸
-15. Règles OIV - Secteur « Activités civiles de l'Etat » (2019) 🇫🇷
-16. CCB CyberFundamentals Framework 🇧🇪
-17. NIST SP-800-66 (HIPAA) 🏥
-18. HDS/HDH 🇫🇷
-19. OWASP Application Security Verification Standard (ASVS) 4 🐝🖥️
-20. RGS v2.0 🇫🇷
-21. AirCyber ✈️🌐
-22. Cyber Resilience Act (CRA) 🇪🇺
-23. TIBER-EU 🇪🇺
-24. NIST Privacy Framework 🇺🇸
-25. TISAX (VDA ISA) v5.1, v6.0 and v2027 🚘
-26. ANSSI hygiene guide 🇫🇷
-27. Essential Cybersecurity Controls (ECC) 🇸🇦
-28. CIS Controls v8\* 🌐
-29. CSA CCM (Cloud Controls Matrix)\* ☁️
-30. FADP (Federal Act on Data Protection) 🇨🇭
-31. NIST SP 800-171 rev2 (2021) 🇺🇸
-32. ANSSI : Recommandations de sécurité pour un système d'IA générative (v1.0) 🇫🇷🤖
-33. NIST SP 800-218: Secure Software Development Framework (SSDF) 🖥️
-34. GSA FedRAMP rev5 ☁️🇺🇸
-35. Cadre Conformité Cyber France (3CF) v1 (2021) ✈️🇫🇷
-36. ANSSI : SecNumCloud ☁️🇫🇷
-37. Cadre Conformité Cyber France (3CF) v2 (2024) ✈️🇫🇷
-38. ANSSI : outil d’autoévaluation de gestion de crise cyber 💥🇫🇷
-39. BSI: IT-Grundschutz-Kompendium 🇩🇪
-40. NIST SP 800-171 rev3 (2024) 🇺🇸
-41. ENISA: 5G Security Controls Matrix 🇪🇺
-42. OWASP Mobile Application Security Verification Standard (MASVS) 🐝📱
-43. Agile Security Framework (ASF) - baseline - by intuitem 🤗
-44. ISO 27001:2013 🌐 (For legacy and migration)
-45. EU AI Act 🇪🇺🤖
-46. FBI CJIS 🇺🇸👮
-47. Operational Technology Cybersecurity Controls (OTCC) 🇸🇦
-48. Secure Controls Framework (SCF) 2026.3 🇺🇸🌐
-49. NCSC - Cyber Assessment Framework (CAF) v3.2 🇬🇧
-50. California Consumer Privacy Act (CCPA) 🇺🇸
-51. California Consumer Privacy Act Regulations 🇺🇸
-52. NCSC Cyber Essentials 🇬🇧
-53. Directive Nationale de la Sécurité des Systèmes d'Information (DNSSI) Maroc 🇲🇦
-54. Part-IS (Consolidated 16-10-2025) ✈️🇪🇺
-55. ENS Esquema Nacional de seguridad 🇪🇸
-56. Korea ISA ISMS-P 🇰🇷
-57. Swiss ICT minimum standard 🇨🇭
-58. Adobe Common Controls Framework (CCF) v5 🌐
-59. BSI Cloud Computing Compliance Criteria Catalogue (C5) 2020 and 2026 🇩🇪
-60. Référentiel d’Audit de la Sécurité des Systèmes d’Information, ANCS Tunisie 🇹🇳
-61. ECB Cyber resilience oversight expectations for financial market infrastructures 🇪🇺
-62. Mindeststandard-des-BSI-zur-Nutzung-externer-Cloud-Dienste (Version 2.1) 🇩🇪
-63. Formulaire d'évaluation de la maturité - niveau fondamental (DGA) 🇫🇷
-64. NIS2 technical and methodological requirements 2024/2690 🇪🇺
-65. Saudi Arabian Monetary Authority (SAMA) Cybersecurity Framework 🇸🇦
-66. Guide de sécurité des données (CNIL) 🇫🇷
-67. International Traffic in Arms Regulations (ITAR) 🇺🇸
-68. Federal Trade Commission (FTC) Standards for Safeguarding Customer Information 🇺🇸
-69. OWASP's checklist for LLM governance and security 🌐
-70. ANSSI : Recommandations pour les architectures des systèmes d’information sensibles ou à diffusion restreinte (v1.2) 🇫🇷
-71. CIS Benchmarks — Kubernetes (v1.10, v2.0.1), AWS, Azure, GCP, Microsoft 365, Google Workspace, GitHub, GitLab, Debian 12/13, Ubuntu 24.04 LTS, Windows 11 🌐
-72. De tekniske minimumskrav for statslige myndigheder 🇩🇰
-73. Google SAIF framework 🤖
-74. ANSSI : Recommandations relatives à l'administration sécurisée des SI (v3.0) 🇫🇷
-75. Prudential Standard CPS 230 - Operational Risk Management (APRA) 🇦🇺
-76. Prudential Standard CPS 234 - Information Security (APRA) 🇦🇺
-77. Vehicle Cyber Security Audit (VCSA) v1.1 🚘
-78. Cisco Cloud Controls Framework (CCF) v3.0 ☁️🌐
-79. FINMA - Circular 2023/01 - Operational risks and resilience - Banks 🇨🇭
-80. Post-Quantum Cryptography (PQC) Migration Roadmap (May 2025) 🔐
-81. Cloud Sovereignty Framework - 1.2.1 - Oct 2025 🇪🇺
-82. ISO 22301:2019 outline - Business continuity management systems 🌐
-83. CCB CyberFundamentals Framework 2025 🇧🇪
-84. Prestataires de détection des incidents de sécurité (PDIS) - Référentiel d’exigences 🇫🇷
-85. Vendor Due Diligence - simple baseline - intuitem 🌐
-86. ANSSI : Points de contrôle Active Directory (AD) (Avril 2026) 🇫🇷
-87. ISO 42001:2023 outline - Artificial Intelligence Management System, including Annex A 🤖🌐
-88. India's Digital Personal Data Protection Act (DPDPA) - 2023 🇮🇳
-89. E-ITS (Estonia's national cyber security standard) - 2024 🇪🇪
-90. Microsoft cloud security benchmark v1 - ☁️🌐
-91. Baseline informatiebeveiliging Overheid 2 (BIO2) 🇳🇱
-92. ANSSI : Questionnaire MonAideCyber 🇫🇷
-93. ITSP.10.171 - Protecting specified information in non-Government of Canada systems and organizations 🇨🇦
-94. CISA Vendor Supply Chain Risk Management (SCRM) Template 🇺🇸
-95. European Sustainability Reporting Standards (ESRS) 🇪🇺
-96. ITIL 4 Management Practices 🌐
-97. NOREA - DORA in Control Framework v3.0 🇪🇺
-98. NIS-1 transposition FR 🇫🇷
-99. PSSI État 🇫🇷
-100. Checklist de dossier d'homologation 🇫🇷
-101. Cahier des charges Label EBIOS RM v3.1 🇫🇷
-102. SecNumCloud v3.2 Annexe 2 : Recommandations aux commanditaires ☁️🇫🇷
-103. CCB CyberFundamentals Small - Self assessment 🇧🇪
-104. Mitre ATT&CK v19.1 - Threats and Mitigations catalog 🌐
-105. Mitre D3FEND - Reference controls 🌐
-106. OWASP Top 10 Web - Threat catalog 🐝🌐
-107. OWASP MAS Threat Modelling Guide - Threat catalog 🐝📱
-108. CISA Cybersecurity Performance Goals (CPG) v2.0 🇺🇸
-109. ANSSI : Référentiel Cyber France pour la réglementation NIS2 (ReCyF) 🇫🇷
-110. Cadre Conformité Cyber France (3CF) v3.1 (2026) ✈️🇫🇷
-111. Règles OIV - Secteur « Transport aérien » (2016) ✈️🇫🇷
-112. IEC 62443 series — parts 2-1, 2-4, 3-2, 3-3, 4-1, 4-2 🏭🌐
-113. CER Directive (Critical Entities Resilience) 🇪🇺
-114. EUDI ARF — EU Digital Identity Wallet High-Level Requirements (Annex 2.02) 🇪🇺
-115. UK Defence Standard 05-138 Issue 4 🇬🇧
-116. Référentiel HAS - Certification des établissements de santé pour la qualité des soins 🇫🇷🏥
-117. Personal Data Protection Law (PDPL) 🇸🇦
-118. NCSC - Cyber Assessment Framework (CAF) v4.0 🇬🇧
-119. Algemene Beveiligingseisen voor Rijksoverheidsopdrachten (ABRO) 2026 🇳🇱
-120. Algemene Beveiligingseisen voor Defensieopdrachten (ABDO) 2019 🇳🇱
-121. ANSSI : Cybersécurité des systèmes industriels - Mesures détaillées 🇫🇷🏭
-122. Cbw (NIS2) Control Framework v1.2 🇳🇱
-123. ENISA SME Cyber Resilience Maturity Assessment (CRA) 🇪🇺
-124. ISO 27701:2025 outline - Privacy Information Management System, including Annex A 🌐
-125. Plumber CI/CD Security Checks 🖥️
-126. UNESCO AI Maturity Framework 🤖🌐
-127. OWASP Top 10 for Agentic Applications 2026 🐝🤖
-128. Personal Information Protection Law (PIPL) 🇨🇳
-129. Personal Information Protection Compliance Audit Measures and Guideline (CAC) 🇨🇳
-130. OWASP Software Assurance Maturity Model (SAMM) v2.2 🐝🖥️
+CISO Assistant ships 200+ frameworks, plus threat and TTP catalogs and reference control libraries. Versions and parts of the same standard share one line.
+
+### Frameworks
+
+1. ISO 27001:2022 and 27001:2013 (for legacy and migration) 🌐
+2. NIST Cyber Security Framework (CSF) v1.1 and v2.0 🇺🇸
+3. NIS2: directive and Implementing Regulation 2024/2690 technical and methodological requirements 🇪🇺
+4. SOC2 2017 Trust Services Criteria, original and 2022 revision 🇺🇸
+5. PCI DSS 4.0.1 💳
+6. CMMC v2 🇺🇸
+7. PSPF 🇦🇺
+8. General Data Protection Regulation (GDPR): full text and GDPR.EU checklist for data controllers 🇪🇺
+9. Essential Eight (Maturity Model, November 2023), current and legacy 🇦🇺
+10. NYDFS 500 with 2023-11 amendments 🇺🇸
+11. DORA: Act (Regulation (EU) 2022/2554), RTS (ICT risk management, incident classification, incident reporting, ICT third-party policy, TLPT, JET, oversight conduct), ITS on incident reporting and GL on costs and losses 🇪🇺
+12. NIST AI Risk Management Framework 1.0 🇺🇸🤖
+13. NIST SP 800-53 rev5 🇺🇸
+14. Règles OIV - « Activités civiles de l'Etat » (2019) and « Transport aérien » (2016) 🇫🇷
+15. CCB CyberFundamentals Framework 2023-03-01 and 2025, plus CyFun Small self-assessment 🇧🇪
+16. NIST SP-800-66 rev2 (HIPAA) 🏥
+17. HDS/HDH v2.0 🇫🇷
+18. OWASP Application Security Verification Standard (ASVS) 4.0.3 and 5.0.0 🐝🖥️
+19. RGS v2.0, including Annexe B2 🇫🇷
+20. AirCyber v1.5.2 ✈️🌐
+21. Cyber Resilience Act (CRA) - Annexes 🇪🇺
+22. TIBER-EU 🇪🇺
+23. NIST Privacy Framework 1.0 🇺🇸
+24. TISAX (VDA ISA) v5.1, v6.0.2 and v2027 🚘
+25. ANSSI hygiene guide, standard and detailed versions 🇫🇷
+26. NCA Essential Cybersecurity Controls ECC-1:2018 and ECC-2:2024 🇸🇦
+27. FADP (Federal Act on Data Protection) 🇨🇭
+28. NIST SP 800-171 rev2 (2021) and rev3 (2024) 🇺🇸
+29. ANSSI : Recommandations de sécurité pour un système d'IA générative (v1.0) 🇫🇷🤖
+30. NIST SP 800-218: Secure Software Development Framework (SSDF) 1.1 🖥️
+31. GSA FedRAMP rev5 ☁️🇺🇸
+32. Cadre Conformité Cyber France (3CF) v1 (2021), v2 (2024) and v3.1 (2026) ✈️🇫🇷
+33. ANSSI : SecNumCloud v3.2, including Annexe 2 (recommandations aux commanditaires) ☁️🇫🇷
+34. ANSSI : outil d’autoévaluation de gestion de crise cyber (v1.0.2) 💥🇫🇷
+35. BSI: IT-Grundschutz-Kompendium 2023 - ISMS, ORP, CON, OPS, DER, APP, SYS, IND, NET, INF modules 🇩🇪
+36. ENISA: 5G Security Controls Matrix v1.3 🇪🇺
+37. OWASP Mobile Application Security Verification Standard (MASVS) 2.1.0 🐝📱
+38. Agile Security Framework (ASF) - baseline - by intuitem 🤗
+39. EU AI Act 🇪🇺🤖
+40. FBI CJIS Security Policy 5.9.4 and 5.9.5 🇺🇸👮
+41. Operational Technology Cybersecurity Controls (OTCC) 🇸🇦
+42. Secure Controls Framework (SCF) 2024.2, 2025.2.2 and 2026.3 🇺🇸🌐
+43. NCSC - Cyber Assessment Framework (CAF) v3.2 and v4.0, plus v4.0 IGP questionnaire 🇬🇧
+44. California Consumer Privacy Act (CCPA) and its Regulations 🇺🇸
+45. NCSC Cyber Essentials v3.1 🇬🇧
+46. Directive Nationale de la Sécurité des Systèmes d'Information (DNSSI) Maroc 🇲🇦
+47. Part-IS (Consolidated 16-10-2025) ✈️🇪🇺
+48. ENS Esquema Nacional de seguridad (Real Decreto 311/2022) 🇪🇸
+49. Korea ISA ISMS-P 🇰🇷
+50. Swiss ICT minimum standard 🇨🇭
+51. Adobe Common Controls Framework (CCF) v5 🌐
+52. BSI Cloud Computing Compliance Criteria Catalogue (C5) 2020 and 2026 🇩🇪
+53. Référentiel d’Audit de la Sécurité des Systèmes d’Information, ANCS Tunisie 🇹🇳
+54. ECB Cyber resilience oversight expectations for financial market infrastructures 🇪🇺
+55. Mindeststandard-des-BSI-zur-Nutzung-externer-Cloud-Dienste (Version 2.1) 🇩🇪
+56. Formulaire d'évaluation de la maturité - niveau fondamental (DGA) 🇫🇷
+57. Saudi Arabian Monetary Authority (SAMA) Cybersecurity Framework 1.0 🇸🇦
+58. Guide de sécurité des données (CNIL) 🇫🇷
+59. International Traffic in Arms Regulations (ITAR) 🇺🇸
+60. Federal Trade Commission (FTC) Standards for Safeguarding Customer Information 🇺🇸
+61. OWASP's checklist for LLM governance and security 🌐
+62. ANSSI : Recommandations pour les architectures des systèmes d’information sensibles ou à diffusion restreinte (v1.2), plus OASIS tool 🇫🇷
+63. CIS Benchmarks - Server Software: Kubernetes v1.10.0 and v2.0.1 🌐
+64. CIS Benchmarks - Cloud Providers: AWS Foundations v7.0.0, Azure Foundations v6.0.0, GCP Foundation v5.0.0, Microsoft 365 Foundations v7.0.0, Google Workspace Foundations v1.3.0 🌐
+65. CIS Benchmarks - DevSecOps Tools: GitHub v1.2.0, GitLab v1.0.1 🌐
+66. CIS Benchmarks - Operating Systems: Debian 12 v2.0.0, Debian 13 v1.0.0, Ubuntu 24.04 LTS v2.0.0, Windows 11 Enterprise v5.0.1 🌐
+67. De tekniske minimumskrav for statslige myndigheder 🇩🇰
+68. Google SAIF framework 🤖
+69. ANSSI : Recommandations relatives à l'administration sécurisée des SI (v3.0) 🇫🇷
+70. APRA Prudential Standards CPS 230 (Operational Risk Management) and CPS 234 (Information Security) 🇦🇺
+71. Vehicle Cyber Security Audit (VCSA) v1.1 🚘
+72. Cisco Cloud Controls Framework (CCF) v3.0 ☁️🌐
+73. FINMA - Circular 2023/01 - Operational risks and resilience - Banks 🇨🇭
+74. Post-Quantum Cryptography (PQC) Migration Roadmap (May 2025) 🔐
+75. Cloud Sovereignty Framework - 1.2.1 - Oct 2025 🇪🇺
+76. ISO 22301:2019 outline - Business continuity management systems 🌐
+77. Prestataires de détection des incidents de sécurité (PDIS) - Référentiel d’exigences 🇫🇷
+78. Vendor Due Diligence - simple baseline - intuitem 🌐
+79. ANSSI : Points de contrôle Active Directory (AD) (Avril 2026) 🇫🇷
+80. ISO 42001:2023 outline - Artificial Intelligence Management System, including Annex A 🤖🌐
+81. India's Digital Personal Data Protection Act (DPDPA) - 2023 🇮🇳
+82. E-ITS (Estonia's national cyber security standard) - 2024 🇪🇪
+83. Microsoft cloud security benchmark v1 - ☁️🌐
+84. Baseline informatiebeveiliging Overheid 2 (BIO2) 🇳🇱
+85. ANSSI : Questionnaire MonAideCyber 🇫🇷
+86. ITSP.10.171 - Protecting specified information in non-Government of Canada systems and organizations 🇨🇦
+87. CISA Vendor Supply Chain Risk Management (SCRM) Template 🇺🇸
+88. European Sustainability Reporting Standards (ESRS): ESRS 1/2, E1 to E5, S1 to S4 and G1 🇪🇺
+89. ITIL 4 Management Practices 🌐
+90. NOREA - DORA in Control Framework v3.0 🇪🇺
+91. NIS-1 transposition FR 🇫🇷
+92. PSSI État 🇫🇷
+93. Checklist de dossier d'homologation 🇫🇷
+94. Cahier des charges Label EBIOS RM v3.1 🇫🇷
+95. CISA Cybersecurity Performance Goals (CPG) v2.0 🇺🇸
+96. ANSSI : Référentiel Cyber France pour la réglementation NIS2 (ReCyF) v2.5 🇫🇷
+97. IEC 62443 outlines: 2-1:2024, 2-4:2023, 3-2:2020, 3-3:2013, 4-1:2018, 4-2:2019 🏭🌐
+98. CER Directive (Critical Entities Resilience) 🇪🇺
+99. EUDI ARF — EU Digital Identity Wallet High-Level Requirements (Annex 2.02) 🇪🇺
+100. UK Defence Standard 05-138 Issue 4 🇬🇧
+101. Référentiel HAS - Certification des établissements de santé pour la qualité des soins 🇫🇷🏥
+102. Personal Data Protection Law (PDPL) 🇸🇦
+103. ABRO 2026 and ABDO 2019 (Algemene Beveiligingseisen voor Rijksoverheids- en Defensieopdrachten) 🇳🇱
+104. ANSSI : Cybersécurité des systèmes industriels - Mesures détaillées 🇫🇷🏭
+105. Cbw (NIS2) Control Framework v1.2 🇳🇱
+106. ENISA SME Cyber Resilience Maturity Assessment (CRA) 🇪🇺
+107. ISO 27701:2025 outline - Privacy Information Management System, including Annex A 🌐
+108. ISO/IEC 27090:2026 outline - Addressing security threats and compromises to AI systems 🤖🌐
+109. ANSSI : MonServiceSécurisé - référentiel de mesures V2 🇫🇷
+110. Personal Information Protection and Electronic Documents Act (PIPEDA) 🇨🇦
+111. Plumber CI/CD Security Checks 🖥️
+112. UNESCO AI Maturity Framework 🤖🌐
+113. OWASP Top 10 for Agentic Applications 2026 🐝🤖
+114. China: Personal Information Protection Law (PIPL) and CAC Personal Information Protection Compliance Audit Measures 🇨🇳
+115. OWASP Software Assurance Maturity Model (SAMM) v2.2 🐝🖥️
 
 ### Community contributions
 
-1. PGSSI-S (Politique Générale de Sécurité des Systèmes d'Information de Santé) 🇫🇷
+1. PGSSI-S v1.0 (Politique Générale de Sécurité des Systèmes d'Information de Santé) 🇫🇷
 2. ANSSI : Recommandations de configuration d'un système GNU/Linux (v2.0) 🇫🇷
-3. PSSI-MCAS (Politique de sécurité des systèmes d’information pour les ministères chargés des affaires sociales) 🇫🇷
+3. PSSI-MCAS v1.0 (Politique de sécurité des systèmes d’information pour les ministères chargés des affaires sociales) 🇫🇷
 4. ANSSI : Recommandations pour la protection des systèmes d'information essentiels (v1.0) 🇫🇷
 5. ANSSI : Recommandations de sécurité pour l'architecture d'un système de journalisation (v2.0) 🇫🇷
 6. ANSSI : Recommandations de sécurité relatives à TLS (v1.2) 🇫🇷
-7. New Zealand Information Security Manual (NZISM) 🇳🇿
-8. Clausier de sécurité numérique du Club RSSI Santé 🇫🇷
-9. Référentiel National de Sécurité de l’Information (RNSI), MPT Algérie 🇩🇿
+7. New Zealand Information Security Manual (NZISM) v3 🇳🇿
+8. Clausier de sécurité numérique du Club RSSI Santé v2024 🇫🇷
+9. Référentiel National de Sécurité de l’Information (RNSI), MPT Algérie - 2020 🇩🇿
 10. Misure minime di sicurezza ICT per le pubbliche amministrazioni, AGID Italia 🇮🇹
-11. Framework Nazionale CyberSecurity v2, FNCS Italia 🇮🇹
-12. Framework Nazionale per la Cybersecurity e la Data Protection, ACN Italia 🇮🇹
-13. PSSIE du Bénin, ANSSI Bénin 🇧🇯
-14. IGI 1300 / II 901 - Liste des exigences pour la mise en oeuvre d'un SI classifié (ANSSI) 🇫🇷
-15. Référentiel Général de Sécurité 2.0 - Annexe B2 🇫🇷
-16. ANSSI : Recommandations sur la sécurisation des systèmes de contrôle d'accès physique et de vidéoprotection (v2.2) 🇫🇷
-17. ANSSI : Recommandations pour un usage sécurisé d’(Open)SSH (v1.3) 🇫🇷
-18. ANSSI : Recommandations de sécurité relatives à IPsec pour la protection des flux réseau (v1.1) 🇫🇷
-19. ANSSI : Recommandations relatives à l'interconnexion d'un système d'information à internet (v3.0) 🇫🇷
-20. Guides des mécanismes cryptographiques 🇫🇷
-21. Swift Customer Security Controls Framework (CSCF) v2025 🏦🌐
-22. OWASP Application Security Verification Standard (ASVS) 5 🐝🖥️
-23. NIST 800-82 (OT) - appendix 🏭🤖
-24. RBI Master Direction 2023 - india 🏦🇮🇳
-25. Loi 05-20 relative à la cybersécurité (Maroc) 🇲🇦
-26. Lithuanian NIS2 Cybersecurity Law (Kibernetinio saugumo įstatymas) 🇱🇹
-27. Prestataire d'audit de sécurité des systèmes d'information (PASSI) 🇫🇷
-28. ANS Programme CaRE - Domaine 2 (Continuité et reprise d'activité, sauvegarde) 🇫🇷🏥
-29. ANS HospiConnect HOP'EN2 (Sécurisation de l'accès au SIH) 🇫🇷🏥
-30. Loi n° 09-08 relative à la protection des personnes physiques 🇲🇦
-31. Checklist des exigences de la Loi n° 09-08 🇲🇦
-32. Référentiel des exigences de qualification des prestataires de services cloud ☁️🇲🇦
-33. AI Defense Matrix 🤖🌐
-34. Zero Trust for Operational Technology (ZT OT) 🇺🇸🏭
-35. T.C. CBDDO Bilgi ve İletişim Güvenliği Rehberi (BİGR) 🇹🇷
-36. NCA NCNICC-1:2025 🇸🇦
-37. NCA ECC-2:2024 🇸🇦
-38. NCA CCC-1:2020 🇸🇦
-39. Hungarian NIS2 audit requirements – elementary requirements of 1/2025. (I. 31.) SZTFH rendelet, structured by the 7/2024. (VI. 24.) MK rendelet protective measures 🇭🇺
-40. Hungarian NIS2 threat catalogue (7/2024. (VI. 24.) MK rendelet, annex 3) 🇭🇺
-41. Hungarian NIS2 protective measures catalogue (7/2024. (VI. 24.) MK rendelet, annex 2) 🇭🇺
+11. Framework Nazionale per la Cybersecurity, FNCS v2 and FNCS e Data Protection (Ed. 2025, v2.1), ACN Italia 🇮🇹
+12. PSSIE du Bénin, ANSSI Bénin 🇧🇯
+13. IGI 1300 (SI classifiés) and II 901 (SI sensibles) - SGDSN/ANSSI 🇫🇷
+14. ANSSI : Recommandations sur la sécurisation des systèmes de contrôle d'accès physique et de vidéoprotection (v2.1 and v2.2) 🇫🇷
+15. ANSSI : Recommandations pour un usage sécurisé d’(Open)SSH (v1.3) 🇫🇷
+16. ANSSI : Recommandations de sécurité relatives à IPsec pour la protection des flux réseau (v1.1) 🇫🇷
+17. ANSSI : Recommandations relatives à l'interconnexion d'un système d'information à internet (v3.0) 🇫🇷
+18. Guides des mécanismes cryptographiques 🇫🇷
+19. Swift Customer Security Controls Framework (CSCF) v2025 🏦🌐
+20. NIST SP 800-82 (OT) - Annex F 🏭🤖
+21. RBI Master Direction 2023 - india 🏦🇮🇳
+22. Loi 05-20 relative à la cybersécurité (Maroc) 🇲🇦
+23. Lithuanian NIS2 Cybersecurity Law (Kibernetinio saugumo įstatymas) 🇱🇹
+24. Prestataire d'audit de sécurité des systèmes d'information (PASSI) 🇫🇷
+25. ANS Programme CaRE - Domaine 2 (Continuité et reprise d'activité, sauvegarde) 🇫🇷🏥
+26. ANS HospiConnect HOP'EN2 (Sécurisation de l'accès au SIH) 🇫🇷🏥
+27. Loi n° 09-08 relative à la protection des personnes physiques, with its requirements checklist 🇲🇦
+28. Référentiel des exigences de qualification des prestataires de services cloud ☁️🇲🇦
+29. AI Defense Matrix 🤖🌐
+30. Zero Trust for Operational Technology (ZT OT) 🇺🇸🏭
+31. T.C. CBDDO Bilgi ve İletişim Güvenliği Rehberi (BİGR) 🇹🇷
+32. NCA NCNICC-1:2025 and CCC-1:2020 🇸🇦
+33. Hungarian NIS2 audit requirements – elementary requirements of 1/2025. (I. 31.) SZTFH rendelet, structured by the 7/2024. (VI. 24.) MK rendelet protective measures 🇭🇺
+34. Hungarian NIS2 protective measures catalogue (7/2024. (VI. 24.) MK rendelet, annex 2) 🇭🇺
+35. BCCR–SINPE NT-RCS edition 7, categories 1 and 2 (Banco Central de Costa Rica) 🏦🇨🇷
+36. JM 181101-02 - Cybersecurity and Information Security Regulation (Junta Monetaria, Dominican Republic) 🏦🇩🇴
+37. R-CNMV-2024-08-MV - Cybersecurity and Information Security Regulation for the Securities Market (CNMV, Dominican Republic) 🏦🇩🇴
+38. Vyhláška 409/2025 Sb. (Czech cybersecurity decree) - compliance questionnaire 🇨🇿
+
+### Threat and TTP catalogs
+
+1. Mitre ATT&CK v19.1 (Enterprise) and v19.2 (ICS, Mobile) - Threats and Mitigations catalogs 🌐
+2. OWASP Top 10 Web (2021) - Threat catalog 🐝🌐
+3. OWASP Multi-Agentic System (MAS) Threat Modelling Guide - Threat catalog 🐝🤖
+4. Hungarian NIS2 threat catalogue (7/2024. (VI. 24.) MK rendelet, annex 3) 🇭🇺
+5. Mitre ATLAS v2026.07 - Threats and Mitigations catalog for AI systems 🤖🌐
+6. EBIOS RM typical attack sequence and elementary actions 🇫🇷
+7. intuitem Common Catalog - Threats 🌐
+
+### Reference controls
+
+1. Mitre D3FEND - Reference controls 🌐
+2. CISO Assistant Key Reference Controls - by intuitem 🌐
+
+### Bring your own license
+
+- CIS Controls v8\* 🌐
+- CSA CCM (Cloud Controls Matrix)\* ☁️
 
 <br/>
 
 > [!NOTE]
-> Frameworks with `*` require an extra manual step of getting the latest Excel sheet through their website as their license prevent direct usage. You can load the Excel sheet directly as a library.
+> Frameworks marked with `*` (CIS Controls v8 and CSA CCM) can't be bundled because of their licence terms. Download the official Excel file from CIS or CSA and upload it as-is from the Libraries page; CISO Assistant converts it on the fly (see the [CIS Controls and CCM guide](product-docs/configuration/libraries/special-cases/cis-controls-and-ccm.md)).
 
 <br/>
 
