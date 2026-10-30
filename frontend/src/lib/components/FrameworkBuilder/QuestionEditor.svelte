@@ -9,9 +9,15 @@
 	import TypeSelector from './TypeSelector.svelte';
 	import ChoiceListEditor from './ChoiceListEditor.svelte';
 	import DependsOnEditor from './DependsOnEditor.svelte';
-	import { QUESTION_TYPES, inferVariant, defaultConfigFor } from './builder-utils.svelte';
+	import {
+		QUESTION_TYPES,
+		inferVariant,
+		defaultConfigFor,
+		REFERENCEABLE_MODELS
+	} from './builder-utils.svelte';
 	import ConfirmAction from './ConfirmAction.svelte';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 
 	interface Props {
 		question: Question;
@@ -43,6 +49,46 @@
 	const sliderMin = $derived(Number((question.config as { min?: number } | null)?.min ?? 0));
 	const sliderMax = $derived(Number((question.config as { max?: number } | null)?.max ?? 100));
 	const sliderStep = $derived(Number((question.config as { step?: number } | null)?.step ?? 1));
+
+	const fileConfig = $derived((question.config as Record<string, unknown> | null) ?? {});
+	// A question on one of the form's scales gets its levels as choices on import.
+	const scale = $derived.by(() => {
+		const ref = (question.config as { scale?: string } | null)?.scale;
+		return ref
+			? (($frameworkStore.scales_definition ?? []).find((s) => s.ref_id === ref) ?? {
+					ref_id: ref,
+					levels: []
+				})
+			: null;
+	});
+	const stage = $derived((question.config as { stage?: string } | null)?.stage);
+	const scales = $derived($frameworkStore.scales_definition ?? []);
+
+	// A scale replaces the question's own choices: offered only while it has none.
+	function setScale(ref: string) {
+		const {
+			scale: _s,
+			stage: _st,
+			...rest
+		} = (question.config as Record<string, unknown> | null) ?? {};
+		saveField('config', ref ? { ...rest, scale: ref } : Object.keys(rest).length ? rest : null);
+	}
+
+	function setStage(value: string) {
+		const { stage: _st, ...rest } = (question.config as Record<string, unknown> | null) ?? {};
+		const next = value
+			.trim()
+			.toLowerCase()
+			.replace(/[^a-z0-9_]+/g, '_');
+		saveField('config', next && next !== 'current' ? { ...rest, stage: next } : rest);
+	}
+	const fileMultiple = $derived(!!fileConfig.multiple);
+	const fileMaxFiles = $derived(Number(fileConfig.max_files ?? 1));
+	const fileMaxSize = $derived(Number(fileConfig.max_size_mb ?? 10));
+	const fileAccept = $derived(String(fileConfig.accept ?? ''));
+
+	const refModel = $derived(String(fileConfig.model ?? 'applied_control'));
+	const refMultiple = $derived(!!fileConfig.multiple);
 
 	// Real-time mirror of the publish-time slider validation in `builder-state.ts`,
 	// so authors see the problem while editing instead of only when they click
@@ -98,6 +144,11 @@
 
 	function updateSliderConfig(patch: Record<string, number>) {
 		const current = (question.config as Record<string, unknown> | null) ?? { widget: 'slider' };
+		saveField('config', { ...current, ...patch });
+	}
+
+	function patchConfig(patch: Record<string, unknown>) {
+		const current = (question.config as Record<string, unknown> | null) ?? {};
 		saveField('config', { ...current, ...patch });
 	}
 </script>
@@ -211,6 +262,84 @@
 				</div>
 			{/if}
 
+			{#if currentVariant === 'file'}
+				<div class="flex flex-wrap items-center gap-3">
+					<label class="flex items-center gap-1.5">
+						<input
+							type="checkbox"
+							class="checkbox"
+							checked={fileMultiple}
+							onchange={(e) =>
+								patchConfig({
+									multiple: e.currentTarget.checked,
+									max_files: e.currentTarget.checked ? Math.max(fileMaxFiles, 2) : 1
+								})}
+						/>
+						<span class="text-xs text-surface-600-400">{m.builderFileMultiple()}</span>
+					</label>
+					{#if fileMultiple}
+						<label class="flex items-center gap-1.5">
+							<span class="text-xs text-surface-600-400">{m.builderFileMaxFiles()}</span>
+							<input
+								type="number"
+								min="1"
+								class="input w-20 text-xs"
+								value={fileMaxFiles}
+								onchange={(e) => patchConfig({ max_files: Number(e.currentTarget.value) })}
+							/>
+						</label>
+					{/if}
+					<label class="flex items-center gap-1.5">
+						<span class="text-xs text-surface-600-400">{m.builderFileMaxSize()}</span>
+						<input
+							type="number"
+							min="1"
+							class="input w-20 text-xs"
+							value={fileMaxSize}
+							onchange={(e) => patchConfig({ max_size_mb: Number(e.currentTarget.value) })}
+						/>
+					</label>
+					<label class="flex items-center gap-1.5">
+						<span class="text-xs text-surface-600-400">{m.builderFileAccept()}</span>
+						<input
+							type="text"
+							class="input w-40 text-xs"
+							placeholder=".pdf,.docx"
+							value={fileAccept}
+							onchange={(e) => patchConfig({ accept: e.currentTarget.value })}
+						/>
+					</label>
+				</div>
+				<p class="text-[10px] text-surface-500">{m.builderFileHint()}</p>
+			{/if}
+
+			{#if question.type === 'object_reference'}
+				<div class="flex flex-wrap items-center gap-3">
+					<label class="flex items-center gap-1.5">
+						<span class="text-xs text-surface-600-400">{m.builderReferenceModel()}</span>
+						<select
+							class="select text-xs"
+							value={refModel}
+							onchange={(e) => patchConfig({ model: e.currentTarget.value })}
+						>
+							{#each REFERENCEABLE_MODELS as model}
+								<option value={model}>{safeTranslate(model)}</option>
+							{/each}
+						</select>
+					</label>
+					<label class="flex items-center gap-1.5">
+						<input
+							type="checkbox"
+							class="checkbox"
+							checked={refMultiple}
+							onchange={(e) => patchConfig({ multiple: e.currentTarget.checked })}
+						/>
+						<span class="text-xs text-surface-600-400">{m.builderReferenceMultiple()}</span>
+					</label>
+				</div>
+				<p class="text-[10px] text-surface-500">{m.builderReferenceHint()}</p>
+			{/if}
+
 			{#if sliderConfigError}
 				<p class="text-xs text-amber-600">
 					<i class="fa-solid fa-triangle-exclamation mr-1"></i>
@@ -218,7 +347,7 @@
 				</p>
 			{/if}
 
-			{#if currentVariant === 'unique_choice:slider' && question.choices.length < 2}
+			{#if currentVariant === 'unique_choice:slider' && question.choices.length < 2 && !scale}
 				<p class="text-xs text-amber-600">
 					<i class="fa-solid fa-triangle-exclamation mr-1"></i>
 					{m.sliderNeedsAtLeastTwoChoices()}
@@ -286,6 +415,17 @@
 						}}
 					/>
 				</label>
+				{#if builder.mode === 'quick_form'}
+					<label class="flex items-center gap-2 pt-5 text-xs text-surface-600-400 cursor-pointer">
+						<input
+							type="checkbox"
+							checked={question.required ?? true}
+							class="w-4 h-4 rounded border-surface-300-700 cursor-pointer"
+							onchange={(e) => saveField('required', e.currentTarget.checked)}
+						/>
+						{m.builderRequired()}
+					</label>
+				{/if}
 				<label class="block">
 					<span class="text-xs text-surface-600-400">{m.annotation()}</span>
 					<input
@@ -300,8 +440,53 @@
 				</label>
 			</div>
 
-			<!-- Choice list for choice types -->
-			{#if isChoiceType}
+			<!-- Choice list for choice types; a scale's levels are its choices. -->
+			{#if isChoiceType && (scale || (!question.choices.length && scales.length))}
+				<div
+					class="rounded-base border border-surface-200-800 p-2 text-xs space-y-2"
+					data-testid="question-scale"
+				>
+					<label class="flex flex-wrap items-center gap-2">
+						<span class="font-semibold text-surface-700-300"
+							><i class="fa-solid fa-ruler-horizontal mr-1"></i>{m.builderUseScale()}</span
+						>
+						<select
+							class="select w-auto text-xs py-1"
+							value={scale?.ref_id ?? ''}
+							onchange={(e) => setScale(e.currentTarget.value)}
+						>
+							<option value="">{m.builderCustomChoices()}</option>
+							{#each scales as s, i (i)}
+								<option value={s.ref_id}>{s.label || s.ref_id}</option>
+							{/each}
+						</select>
+					</label>
+					{#if scale}
+						{#if scale.levels.length}
+							<ol class="flex flex-wrap gap-1">
+								{#each scale.levels as level, i (i)}
+									<li class="badge preset-tonal-surface" title={level.description}>
+										{level.label}
+									</li>
+								{/each}
+							</ol>
+						{:else}
+							<p class="text-error-600-400">{m.builderQuestionScaleMissing()}</p>
+						{/if}
+						<label class="flex flex-wrap items-center gap-2">
+							<span class="text-surface-600-400">{m.builderQuestionStage()}</span>
+							<input
+								class="input w-40 text-xs py-1"
+								value={stage ?? ''}
+								placeholder="current"
+								onblur={(e) => setStage(e.currentTarget.value)}
+							/>
+							<span class="text-surface-500">{m.builderQuestionStageHelp()}</span>
+						</label>
+					{/if}
+				</div>
+			{/if}
+			{#if isChoiceType && !scale}
 				<ChoiceListEditor
 					choices={question.choices}
 					{reqNodeId}

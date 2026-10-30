@@ -17,6 +17,7 @@ from django.utils import timezone
 from huey.contrib.djhuey import db_task
 
 from .constants import Verdict
+from .embedding_models import INFERENCE_LOCK
 from .text import (
     _build_object_text,
     _normalize_model_name,
@@ -745,7 +746,8 @@ def _search_folder_evidence(query: str, folder_id: str, top_k: int = 6) -> list[
             pairs = [
                 (query, (c.payload or {}).get("text", "")[:512]) for c in candidates
             ]
-            scores = reranker.predict(pairs)
+            with INFERENCE_LOCK:
+                scores = reranker.predict(pairs)
             candidates = [
                 p
                 for _, p in sorted(

@@ -2,12 +2,14 @@ from django.db import transaction
 from rest_framework import serializers
 from core.serializer_fields import FieldsRelatedField
 from core.serializers import (
+    AssignmentNotificationMixin,
     BaseModelSerializer,
     ActionPlanSerializer,
 )
 from core.models import AppliedControl
 from core.utils import get_global_currency
 from pmbok.models import GenericCollection
+from threat_modeling.models import ThreatModel
 
 from .models import (
     QuantitativeRiskHypothesis,
@@ -78,7 +80,14 @@ class ImpactField(serializers.Field):
         return data
 
 
-class QuantitativeRiskStudyWriteSerializer(BaseModelSerializer):
+class QuantitativeRiskStudyWriteSerializer(
+    AssignmentNotificationMixin, BaseModelSerializer
+):
+    assignment_notifications = {
+        "authors": "object_assignment",
+        "reviewers": "object_review_assignment",
+    }
+
     genericcollection = serializers.PrimaryKeyRelatedField(
         source="genericcollection_set",
         many=True,
@@ -115,6 +124,7 @@ class QuantitativeRiskStudyWriteSerializer(BaseModelSerializer):
 
 class QuantitativeRiskStudyReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
+    filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     authors = FieldsRelatedField(many=True)
     reviewers = FieldsRelatedField(many=True)
     risk_tolerance_display = serializers.CharField(
@@ -137,7 +147,17 @@ class QuantitativeRiskStudyReadSerializer(BaseModelSerializer):
         fields = "__all__"
 
 
-class QuantitativeRiskScenarioWriteSerializer(BaseModelSerializer):
+class QuantitativeRiskScenarioWriteSerializer(
+    AssignmentNotificationMixin, BaseModelSerializer
+):
+    assignment_notifications = {"owner": "object_assignment"}
+
+    FLAGGED_FIELDS = {"threat_models": "threat_modeling"}
+
+    threat_models = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=ThreatModel.objects.all()
+    )
+
     class Meta:
         model = QuantitativeRiskScenario
         exclude = ["created_at", "updated_at"]
@@ -173,10 +193,13 @@ class QuantitativeRiskScenarioWriteSerializer(BaseModelSerializer):
 
 
 class QuantitativeRiskScenarioReadSerializer(BaseModelSerializer):
+    FLAGGED_FIELDS = {"threat_models": "threat_modeling"}
+
     quantitative_risk_study = FieldsRelatedField()
     assets = FieldsRelatedField(many=True)
     owner = FieldsRelatedField(many=True)
     threats = FieldsRelatedField(many=True)
+    threat_models = FieldsRelatedField(many=True)
     vulnerabilities = FieldsRelatedField(many=True)
     qualifications = FieldsRelatedField(many=True)
     folder = FieldsRelatedField()

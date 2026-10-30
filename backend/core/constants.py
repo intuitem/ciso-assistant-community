@@ -420,3 +420,9 @@ CURRENCY_CHOICES = [
     ("XPF", "CFP Franc"),
     ("CNH", "Off-shore Yuan Renminbi"),
 ]
+
+
+# superseded by the TTP catalog; still linkable, but flagged in pickers
+LEGACY_TTP_LIBRARIES = {
+    "urn:intuitem:risk:library:mitre-attack",
+}

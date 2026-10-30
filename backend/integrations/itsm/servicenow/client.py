@@ -1,5 +1,7 @@
+import re
 from typing import Any, Dict, List
 import requests
+from django.core.exceptions import ObjectDoesNotExist
 from structlog import get_logger
 from integrations.models import SyncMapping
 from core.models import AppliedControl
@@ -9,10 +11,107 @@ from .mapper import ServiceNowFieldMapper
 
 logger = get_logger(__name__)
 
+# ServiceNow sys_ids are 32-char hex GUIDs; accept alphanumeric only so no
+# encoded-query metacharacter can pass through hydration.
+SYS_ID_PATTERN = re.compile(r"[0-9a-zA-Z]{1,64}")
+
+# Each hydration id is user-supplied; the picker only hydrates selected
+# values, so a handful is plenty.
+MAX_HYDRATION_IDS = 20
+
+# Ceiling on total rows scanned per list call while paging past
+# already-mapped records that get filtered out of the results.
+MAX_LIST_FETCH = 500
+
+# Rows requested per page while scanning.
+LIST_PAGE_SIZE = 100
+
+# Deterministic global ordering for offset pagination: newest first, with the
+# immutable sys_id as tiebreaker (sys_updated_on would reshuffle pages when a
+# record is touched mid-scan). ORDERBY tokens apply to the whole encoded
+# query wherever they appear, ^NQ branches included; an ORDERBY an admin put
+# in base_query simply becomes the primary sort with these as tiebreakers.
+LIST_ORDERING = "ORDERBYDESCsys_created_on^ORDERBYsys_id"
+
+# Rows requested per page when listing sys_db_object.
+TABLES_PAGE_SIZE = 1000
+
+# Ceiling on sys_db_object rows scanned when listing tables. Large instances
+# carry several thousand tables; this only guards against a runaway loop.
+MAX_TABLES_FETCH = 50000
+
+# Table name prefixes hidden from the table picker as noise:
+# sys_ (metadata), ts_ (text search), v_ (views), var_ (catalog variables),
+# wf_ (workflow contexts), pa_ (performance analytics), ecc_ (queue),
+# metric_ (metric definitions), and so on.
+# sn_ is deliberately absent: it is the namespace of every scoped Store app
+# (Customer Service, Security Incident Response, GRC/IRM, HR...). So is
+# cmn_, which holds reference tables like cmn_location or cmn_department.
+EXCLUDED_TABLE_PREFIXES = (
+    "sys_",
+    "sysevent",
+    "syslog",
+    "ts_",
+    "v_",
+    "var_",
+    "wf_",
+    "pa_",
+    "ecc_",
+    "metric_",
+    "ais_",
+    "protected_",
+    "ml_",
+    "expert_panel",
+    "ua_",
+    "usageanalytics_",
+    "automation_pipeline_",
+    "cdc_",
+    "cxs_",
+    "discovery_",
+    "hermes_",
+    "ip_",
+    "license_",
+    "licensing_",
+    "nlq_",
+    "nlu_",
+    "oauth_",
+    "oidc_",
+    "open_nlu_predict_",
+    "par_",
+    "proactive_analytics_",
+    "promin_",
+    "proposed_change_verification_",
+    "pwd_",
+    "qb_",
+    "sc_cart_",
+    "sc_cat_",
+    "sc_catalog_",
+    "sc_category_",
+    "sc_item_",
+    "sc_layout_",
+    "sc_service_",
+    "sc_wizard_",
+    "scan_log_",
+    "scan_mute_",
+    "sla_repair_",
+    "stagemgmt_",
+)
+
+
+# Matched anywhere in the name: link tables come as both m2m_* and *_m2m*,
+# and import sets as imp_*, u_imp_* or x_<scope>_imp_*.
+EXCLUDED_TABLE_SUBSTRINGS = ("m2m", "imp_")
+
+
+def is_excluded_table(name: str) -> bool:
+    return name.startswith(EXCLUDED_TABLE_PREFIXES) or any(
+        s in name for s in EXCLUDED_TABLE_SUBSTRINGS
+    )
+
 
 class ServiceNowClient(BaseIntegrationClient):
-    def __init__(self, configuration):
-        super().__init__(configuration)
+    def __init__(self, configuration, model_key="applied_control"):
+        super().__init__(configuration, model_key)
         self.base_url = self.credentials.get("instance_url", "").rstrip("/")
         try:
             check_integration_url(self.base_url, "ServiceNow instance_url")
@@ -22,9 +121,10 @@ class ServiceNowClient(BaseIntegrationClient):
         username = self.credentials.get("username", "")
         password = self.credentials.get("password", "")
         self.auth = (username, password)
-        # Default to 'incident' if not specified, but for AppliedControl likely 'sn_compliance_control' or custom
-        self.table = self.settings.get("table_name", "incident")
-        self.mapper = ServiceNowFieldMapper(configuration)
+        # Per-model target table (e.g. 'incident' for controls, a CMDB table for
+        # assets). Defaults to 'incident' when unset.
+        self.table = self.model_settings.get("table_name", "incident")
+        self.mapper = ServiceNowFieldMapper(configuration, model_key)
 
     def _get_headers(self):
         return {
@@ -128,165 +228,257 @@ class ServiceNowClient(BaseIntegrationClient):
             )
             raise
 
+    # Candidate fields the picker searches when the user types. Matches the
+    # display label sources in ``_display_label``; restricted per table by
+    # ``_searchable_fields`` since not every table has all three.
+    SEARCH_FIELDS = ("number", "short_description", "name")
+
+    @staticmethod
+    def _and_onto_branches(base_query: str, condition: str) -> str:
+        """AND ``condition`` onto every top-level ``^NQ`` branch of ``base_query``.
+
+        ``base_query`` is free-form admin config and may itself OR complete
+        subqueries with ``^NQ`` (ServiceNow's own filter UI emits it), so
+        appending the condition to the string as a whole would leave every
+        branch but the last unconstrained, matching its entire scope.
+        """
+        branches = base_query.split("^NQ")
+        return "^NQ".join(
+            f"{branch}^{condition}" if branch else condition for branch in branches
+        )
+
+    def _searchable_fields(self) -> tuple[str, ...]:
+        """``SEARCH_FIELDS`` restricted to columns of the configured table.
+
+        A ``^NQ`` branch on a nonexistent field either matches everything
+        (ServiceNow drops invalid conditions by default) or kills the whole
+        query (strict mode), so only emit branches for real columns. Resolved
+        against the DB-backed schema cache (warmed on startup and by the
+        FieldMapper); when the table's columns aren't cached yet, keep all
+        candidates, which is the previous behavior.
+        """
+        try:
+            columns = self.configuration.schema_cache.columns.get(self.table)
+        except ObjectDoesNotExist:
+            return self.SEARCH_FIELDS
+        if not columns:
+            return self.SEARCH_FIELDS
+        names = {c.get("name") for c in columns}
+        return tuple(f for f in self.SEARCH_FIELDS if f in names)
+
     def list_remote_objects(
         self, query_params: dict[str, Any] | None = None
     ) -> List[dict[str, Any]]:
+        """List records from the configured table.
+
+        ``query_params`` supports ``search`` (matched against number,
+        short_description and name), ``limit`` and ``id`` (comma-separated
+        sys_ids to hydrate).
+        """
         if query_params is None:
             query_params = {}
 
         # Build Encoded Query
         # Example: active=true^sys_updated_on>=2024-01-01
-        sysparm_query = self.settings.get("base_query", "active=true")
+        base_query = self.model_settings.get("base_query", "active=true")
+        sysparm_query = base_query
+
+        ids = str(query_params.get("id", "") or "")
+        search = str(query_params.get("search", "") or "")
+        if ids:
+            # sys_ids are alphanumeric; drop anything else so a crafted id
+            # can't inject encoded-query branches (^, ^NQ, ...) past
+            # base_query. Only the server-generated commas delimit the IN.
+            id_list = [
+                i.strip()
+                for i in ids.split(",")
+                if i.strip() and SYS_ID_PATTERN.fullmatch(i.strip())
+            ][:MAX_HYDRATION_IDS]
+            if not id_list:
+                return []
+            sysparm_query = self._and_onto_branches(
+                base_query, f"sys_idIN{','.join(id_list)}"
+            )
+        elif search:
+            # ^ and , are encoded-query metacharacters; LIKE has no escape
+            # syntax so strip them from the term.
+            term = search.strip().replace("^", "").replace(",", "")
+            if not term:
+                # The term sanitized down to nothing: it must match nothing,
+                # not fall through to the unfiltered base query.
+                return []
+            search_fields = self._searchable_fields()
+            if not search_fields:
+                # No searchable column on this table: returning the base
+                # query would present unrelated rows as search matches.
+                return []
+            # ^NQ ORs complete subqueries, so base_query is repeated in
+            # each branch; a plain ^OR would escape the base_query AND
+            # due to flat left-to-right precedence.
+            sysparm_query = "^NQ".join(
+                self._and_onto_branches(base_query, f"{field}LIKE{term}")
+                for field in search_fields
+            )
+
+        used_ids = set(
+            SyncMapping.objects.filter(configuration=self.configuration).values_list(
+                "remote_id", flat=True
+            )
+        )
+
+        limit = query_params.get("limit", 100)
 
         url = f"{self.base_url}/api/now/table/{self.table}"
-        params = {
-            "sysparm_query": sysparm_query,
-            "sysparm_fields": "sys_id,number,short_description,sys_updated_on",
-            "sysparm_limit": query_params.get("max_results", 100),
-        }
 
+        # Mapped records are filtered out client-side, so a single fetch
+        # cannot tell "few matches" from "page full of mapped records" — the
+        # latter would return a short page and silently flip the picker's
+        # lazy/eager probe to eager on a truncated list. Keep paging until
+        # the page fills or the source (or the MAX_LIST_FETCH scan budget)
+        # runs out. Records are deduplicated by sys_id since a row can match
+        # more than one ^NQ branch of the query.
+        results = []
+        seen = set()
+        offset = 0
         try:
-            used_ids = SyncMapping.objects.filter(
-                configuration=self.configuration
-            ).values_list("remote_id", flat=True)
+            while True:
+                params = {
+                    "sysparm_query": f"{sysparm_query}^{LIST_ORDERING}",
+                    # Superset of common display fields so labels work across tables
+                    # (incident uses number/short_description, CMDB/asset tables use name).
+                    "sysparm_fields": "sys_id,number,name,short_description,sys_updated_on",
+                    "sysparm_limit": LIST_PAGE_SIZE,
+                    "sysparm_offset": offset,
+                }
+                response = requests.get(
+                    url,
+                    auth=self.auth,
+                    headers=self._get_headers(),
+                    params=params,
+                    timeout=30,
+                    allow_redirects=False,
+                )
+                response.raise_for_status()
 
-            response = requests.get(
-                url,
-                auth=self.auth,
-                headers=self._get_headers(),
-                params=params,
-                timeout=30,
-                allow_redirects=False,
-            )
-            response.raise_for_status()
+                records = response.json().get("result", [])
+                for record in records:
+                    sys_id = record.get("sys_id")
+                    if not sys_id or sys_id in seen:
+                        continue
+                    seen.add(sys_id)
+                    # Hydration by id must return the record even when mapped.
+                    if ids or sys_id not in used_ids:
+                        results.append(
+                            {
+                                "key": sys_id,
+                                "id": sys_id,
+                                "summary": self._display_label(record, sys_id),
+                            }
+                        )
+                        if len(results) >= limit:
+                            return results
 
-            results = []
-            for record in response.json().get("result", []):
-                sys_id = record.get("sys_id")
-                if not sys_id:
-                    continue
-                if sys_id not in used_ids:
-                    results.append(
-                        {
-                            "key": sys_id,
-                            "id": sys_id,
-                            "summary": f"{record.get('number')} - {record.get('short_description')}",
-                        }
+                # ACLs drop rows after sysparm_limit is applied, so a short
+                # page does not mean the end: step by the requested size and
+                # let the Link header say whether another page exists. Fall
+                # back to the page length if something stripped the header.
+                offset += LIST_PAGE_SIZE
+                if response.links:
+                    has_next = "next" in response.links
+                else:
+                    has_next = len(records) >= LIST_PAGE_SIZE
+                if not has_next:
+                    return results
+                if offset >= MAX_LIST_FETCH:
+                    logger.warning(
+                        "ServiceNow picker scan budget exhausted before the page filled",
+                        scanned=offset,
+                        collected=len(results),
                     )
-            return results
+                    return results
 
         except requests.exceptions.RequestException:
             logger.error("Failed to search ServiceNow", exc_info=True)
             raise
 
+    @staticmethod
+    def _display_label(record: dict[str, Any], sys_id: str) -> str:
+        """Human-readable label for a remote row, working across table types.
+
+        Prefers incident-style ``number - short_description``, falls back to a
+        generic ``name`` (CMDB/asset tables), then the sys_id.
+        """
+        number = record.get("number")
+        short_description = record.get("short_description")
+        if number or short_description:
+            return f"{number or ''} - {short_description or ''}".strip(" -")
+        return record.get("name") or sys_id
+
     def get_available_tables(self) -> list[dict]:
         """
         Fetches 'user-facing' tables (Incidents, Controls, etc).
-        Aggressively filters out system internals, import sets, and link tables.
+        Filters out system internals, import sets, and link tables.
         """
-        # Noise filters:
-        # imp_  -> Import Sets (Temporary data buffers, usually hundreds of them)
-        # m2m_  -> Many-to-Many link tables (Internal relationship storage)
-        # sys_  -> System tables (Metadata)
-        # ts_   -> Text Search indices
-        # v_    -> Database Views
-        # var_  -> Variables (Service Catalog internals)
-        # wf_   -> Workflow contexts
-        # pa_   -> Performance Analytics
-        # ecc_  -> External Communication Channel (Queue)
-        # metric_ -> Metric definitions
-        # etc.
-
-        exclusions = [
-            "nameNOT LIKEsys_",
-            "nameNOT LIKEts_",
-            "nameNOT LIKEv_",
-            "nameNOT LIKEimp_",
-            "nameNOT LIKEm2m",  # Catch m2m_ and ..._m2m
-            "nameNOT LIKEvar_",
-            "nameNOT LIKEwf_",
-            "nameNOT LIKEpa_",
-            "nameNOT LIKEecc_",
-            "nameNOT LIKEmetric_",
-            "nameNOT LIKEais_",
-            "nameNOT LIKEsyslog_",
-            "nameNOT LIKEsysevent_",
-            "nameNOT LIKEsn_",
-            "nameNOT LIKEprotected_",
-            "nameNOT LIKEml_",
-            "nameNOT LIKEexpert_panel",
-            "nameNOT LIKEua_",
-            "nameNOT LIKEusageanalytics_",
-            "nameNOT LIKEautomation_pipeline_",
-            "nameNOT LIKEcdc_",
-            "nameNOT LIKEcmn_",
-            "nameNOT LIKEcxs_",
-            "nameNOT LIKEdiscovery_",
-            "nameNOT LIKEhermes_",
-            "nameNOT LIKEip_",
-            "nameNOT LIKElicense_",
-            "nameNOT LIKElicensing_",
-            "nameNOT LIKEnlq_",
-            "nameNOT LIKEnlu_",
-            "nameNOT LIKEoauth_",
-            "nameNOT LIKEoidc_",
-            "nameNOT LIKEopen_nlu_predict_",
-            "nameNOT LIKEpar_",
-            "nameNOT LIKEproactive_analytics_",
-            "nameNOT LIKEpromin_",
-            "nameNOT LIKEproposed_change_verification_",
-            "nameNOT LIKEpwd_",
-            "nameNOT LIKEqb_",
-            "nameNOT LIKEsc_cart_",
-            "nameNOT LIKEsc_cat_",
-            "nameNOT LIKEsc_catalog_",
-            "nameNOT LIKEsc_category_",
-            "nameNOT LIKEsc_item_",
-            "nameNOT LIKEsc_layout_",
-            "nameNOT LIKEsc_service_",
-            "nameNOT LIKEsc_wizard_",
-            "nameNOT LIKEscan_log_",
-            "nameNOT LIKEscan_mute_",
-            "nameNOT LIKEsla_repair_",
-            "nameNOT LIKEstagemgmt_",
-            "nameNOT LIKEsysevent",
-            "nameNOT LIKEsyslog",
-        ]
-
-        # Combine with OR operator logic if needed, but here we need AND logic (exclusion)
-        # In ServiceNow query syntax, separating with ^ acts as AND.
-
-        # 'sys_update_nameISNOTEMPTY' ensures the table is a tracked system object (excludes some temp tables)
-        base_query = "sys_update_nameISNOTEMPTY"
-
-        query = f"{base_query}^{'^'.join(exclusions)}"
-
+        # Prefixes are matched here rather than in the encoded query:
+        # ServiceNow's NOT LIKE means "does not contain", so a server-side
+        # "v_" or "ip_" also drops tables like cmdb_ci_hyper_v_server or
+        # cmdb_ci_ip_router, and there is no "does not start with" operator.
+        # 'sys_update_nameISNOTEMPTY' keeps tracked objects (drops some temp tables).
         url = f"{self.base_url}/api/now/table/sys_db_object"
-        params = {
-            "sysparm_query": query,
-            "sysparm_fields": "name,label",
-            "sysparm_limit": 5000,  # Safety limit
-            "sysparm_exclude_reference_link": "true",
-        }
-
+        tables = []
+        offset = 0
         try:
-            response = requests.get(
-                url,
-                auth=self.auth,
-                headers=self._get_headers(),
-                params=params,
-                timeout=30,
-                allow_redirects=False,
-            )
-            response.raise_for_status()
-            results = response.json().get("result", [])
+            while True:
+                params = {
+                    "sysparm_query": "^".join(
+                        [
+                            "sys_update_nameISNOTEMPTY",
+                            *(f"nameNOT LIKE{s}" for s in EXCLUDED_TABLE_SUBSTRINGS),
+                            "ORDERBYname",
+                        ]
+                    ),
+                    "sysparm_fields": "name,label",
+                    "sysparm_limit": TABLES_PAGE_SIZE,
+                    "sysparm_offset": offset,
+                    "sysparm_exclude_reference_link": "true",
+                }
+                response = requests.get(
+                    url,
+                    auth=self.auth,
+                    headers=self._get_headers(),
+                    params=params,
+                    timeout=30,
+                    allow_redirects=False,
+                )
+                response.raise_for_status()
+                records = response.json().get("result", [])
+                tables.extend(
+                    t for t in records if not is_excluded_table(t.get("name", ""))
+                )
 
-            # Sort by Label for UX
-            return sorted(results, key=lambda x: x.get("label", ""))
+                # ACLs drop rows after sysparm_limit is applied, so a short
+                # page does not mean the end: step by the requested size and
+                # let the Link header say whether another page exists. Fall
+                # back to the page length if something stripped the header.
+                offset += TABLES_PAGE_SIZE
+                if response.links:
+                    has_next = "next" in response.links
+                else:
+                    has_next = len(records) >= TABLES_PAGE_SIZE
+                if not has_next:
+                    break
+                if offset >= MAX_TABLES_FETCH:
+                    logger.warning(
+                        "ServiceNow table scan budget exhausted", scanned=offset
+                    )
+                    break
 
-        except requests.exceptions.RequestException as e:
+        except requests.exceptions.RequestException:
             logger.error("Failed to fetch tables", exc_info=True)
             raise
+
+        # Sort by Label for UX
+        return sorted(tables, key=lambda x: (x.get("label") or "").casefold())
 
     def get_table_columns(self, table_name: str) -> list[dict]:
         """

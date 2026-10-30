@@ -13,6 +13,8 @@ Architecture:
       adding a new relationship is a one-line addition.
 """
 
+import re
+
 import structlog
 
 from django.apps import apps
@@ -41,6 +43,13 @@ MODEL_MAP = {
         "ComplianceAssessment",
         "Compliance Assessments",
         "compliance-assessments",
+    ),
+    "finding": ("core", "Finding", "Findings", "findings"),
+    "findings_assessment": (
+        "core",
+        "FindingsAssessment",
+        "Findings Assessments",
+        "findings-assessments",
     ),
     "threat": ("core", "Threat", "Threats", "threats"),
     "evidence": ("core", "Evidence", "Evidences", "evidences"),
@@ -111,6 +120,7 @@ CREATABLE_MODELS = {
     "applied_control",
     "asset",
     "risk_scenario",
+    "finding",
     "threat",
     "evidence",
     "vulnerability",
@@ -130,13 +140,35 @@ CREATABLE_MODELS = {
 # --- Declarative relationship registries ---
 # Adding a new contextual relationship = one line here. No logic changes needed.
 
+# Filters that accept several values — one query answers "A or B" so the model
+# never has to add counts up itself.
+MULTI_VALUE_FILTERS = frozenset(
+    {
+        "status",
+        "exclude_status",
+        "treatment",
+        "result",
+        "priority",
+        "category",
+        "effort",
+        "severity",
+        "risk_level",
+    }
+)
+
 # Parent → children via FK.  parent_model_key → [(child_model_key, fk_field_on_child)]
+# Drives query scoping to the object on the current page. Creation is gated
+# separately by CREATABLE_MODELS — requirement_assessments are auto-created by
+# the framework, so they are queryable here but never proposed for creation.
 PARENT_CHILD_MAP: dict[str, list[tuple[str, str]]] = {
     "risk_assessment": [
         ("risk_scenario", "risk_assessment"),
     ],
+    "findings_assessment": [
+        ("finding", "findings_assessment"),
+    ],
     "compliance_assessment": [
-        # requirement_assessments are auto-created by the framework, not user-created
+        ("requirement_assessment", "compliance_assessment"),
     ],
     "ebios_rm_study": [
         ("feared_event", "ebios_rm_study"),
@@ -160,6 +192,15 @@ ATTACHABLE_RELATIONS: dict[str, list[tuple[str, str]]] = {
         ("asset", "assets"),
         ("vulnerability", "vulnerabilities"),
     ],
+    "finding": [
+        ("applied_control", "applied_controls"),
+        ("threat", "threats"),
+        ("vulnerability", "vulnerabilities"),
+        ("evidence", "evidences"),
+    ],
+    "findings_assessment": [
+        ("evidence", "evidences"),
+    ],
     "compliance_assessment": [
         ("asset", "assets"),
         ("evidence", "evidences"),
@@ -168,6 +209,26 @@ ATTACHABLE_RELATIONS: dict[str, list[tuple[str, str]]] = {
         ("evidence", "evidences"),
     ],
 }
+
+
+def resolve_context_object(parsed_context, scope):
+    """
+    Load the object the user's page points at. page_context comes from the
+    client, so its UUID is untrusted and resolves through the read scope.
+    """
+    if not parsed_context or not parsed_context.object_id:
+        return None
+
+    info = MODEL_MAP.get(parsed_context.model_key)
+    if not info:
+        return None
+
+    try:
+        model_class = apps.get_model(info[0], info[1])
+    except LookupError:
+        return None
+
+    return scope.queryset(model_class).filter(id=parsed_context.object_id).first()
 
 
 def _get_field_choices(
@@ -193,6 +254,7 @@ def _build_filter_properties() -> tuple[dict, dict]:
     valid_values = {
         "model": set(MODEL_MAP.keys()),
         "action": {"list", "count", "summary"},
+        "risk_level_scope": {"current", "residual", "inherent"},
         "date_filter": {
             "overdue",
             "due_this_month",
@@ -212,24 +274,27 @@ def _build_filter_properties() -> tuple[dict, dict]:
 
     if treatment_choices:
         properties["treatment"] = {
-            "type": "string",
-            "enum": treatment_choices,
-            "description": "Filter risk scenarios by treatment",
+            "type": "array",
+            "items": {"type": "string", "enum": treatment_choices},
+            "description": "Filter risk scenarios by treatment. Pass several to match any of them.",
         }
-        valid_values["treatment"] = set(treatment_choices)
 
     if result_choices:
         properties["result"] = {
-            "type": "string",
-            "enum": result_choices,
-            "description": "Filter requirement assessments by compliance result",
+            "type": "array",
+            "items": {"type": "string", "enum": result_choices},
+            "description": (
+                "Filter requirement assessments by compliance result. Pass SEVERAL "
+                "values to match any of them — 'non-compliant or partially compliant' "
+                "is result=['non_compliant','partially_compliant'] in ONE call, never "
+                "two calls you add up."
+            ),
         }
-        valid_values["result"] = set(result_choices)
 
     if category_choices:
         properties["category"] = {
-            "type": "string",
-            "enum": category_choices,
+            "type": "array",
+            "items": {"type": "string", "enum": category_choices},
             "description": (
                 "Filter applied controls by their category sub-type. "
                 "Only use this when the user explicitly asks to filter by category "
@@ -237,15 +302,13 @@ def _build_filter_properties() -> tuple[dict, dict]:
                 "the user says 'controls' — that refers to the model, not the category."
             ),
         }
-        valid_values["category"] = set(category_choices)
 
     if effort_choices:
         properties["effort"] = {
-            "type": "string",
-            "enum": effort_choices,
-            "description": "Filter applied controls by effort level",
+            "type": "array",
+            "items": {"type": "string", "enum": effort_choices},
+            "description": "Filter applied controls by effort level. Pass several to match any.",
         }
-        valid_values["effort"] = set(effort_choices)
 
     return properties, valid_values
 
@@ -265,6 +328,8 @@ def _build_tools() -> tuple[list[dict], dict]:
                 "'risk scenarios'/'scénarios de risque' → risk_scenario, "
                 "'risk assessments'/'analyses de risque' → risk_assessment, "
                 "'audits'/'compliance assessments' → compliance_assessment, "
+                "'findings'/'constats'/'observations'/'pentest findings' → finding, "
+                "'findings assessments'/'follow-ups'/'suivis de constats'/'pentests' → findings_assessment, "
                 "'threats'/'menaces' → threat, "
                 "'evidences'/'preuves' → evidence, "
                 "'vulnerabilities'/'vulnérabilités' → vulnerability, "
@@ -276,7 +341,7 @@ def _build_tools() -> tuple[list[dict], dict]:
                 "'entities'/'entités'/'third parties'/'tiers' → entity, "
                 "'solutions' → solution, "
                 "'contracts'/'contrats' → contract, "
-                "'entity assessments' → entity_assessment, "
+                "'entity assessments'/'vendor, supplier or third-party assessments' → entity_assessment, "
                 "'EBIOS RM studies'/'études EBIOS' → ebios_rm_study, "
                 "'feared events'/'événements redoutés' → feared_event, "
                 "'RoTo couples'/'couples SO/OV' → ro_to, "
@@ -299,20 +364,70 @@ def _build_tools() -> tuple[list[dict], dict]:
             "description": "Filter by domain/folder name (e.g. 'DEMO', 'Production')",
         },
         "status": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": (
+                "Filter by status (e.g. 'active', 'in_progress', 'to_do', 'done', "
+                "'draft'). Pass several to match any of them."
+            ),
+        },
+        "exclude_status": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": (
+                "Leave out objects with these statuses. Use it for negations: "
+                "'not active' → ['active']; 'not done', 'still open' → the finished "
+                "statuses (e.g. ['done', 'closed', 'resolved'])."
+            ),
+        },
+        "linked_to": {
             "type": "string",
-            "description": "Filter by status (e.g. 'active', 'in_progress', 'to_do', 'done', 'draft', 'open', 'closed')",
+            "description": (
+                "Name or ref_id of another object: keeps only objects related to it. "
+                "E.g. assets supporting 'Production line control', controls of risk "
+                "'RS.01', audits of entity 'Kestrava Cloud B.V.'."
+            ),
         },
         "priority": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 4,
-            "description": "Filter by priority (1=critical/P1, 2=high/P2, 3=medium/P3, 4=low/P4)",
+            "type": "array",
+            "items": {"type": "integer", "minimum": 1, "maximum": 4},
+            "description": (
+                "Filter by priority (1=critical/P1, 2=high/P2, 3=medium/P3, 4=low/P4). "
+                "Pass several to match any of them."
+            ),
         },
         "severity": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 6,
-            "description": "Filter by severity (1=critical, 2=major, 3=significant, 4=minor, 5=negligible, 6=unknown)",
+            "type": "array",
+            "items": {"type": "string"},
+            "description": (
+                "Filter by severity, several values to match any of them. "
+                "Pass the label as the user says it — "
+                "'critical', 'high', 'medium', 'low', 'info' for findings, "
+                "vulnerabilities and security exceptions; "
+                "'Critical', 'Major', 'Moderate', 'Minor', 'Low' for incidents. "
+                "The label is resolved against the model's own severity scale, "
+                "which is why a label is safer here than a number."
+            ),
+        },
+        "risk_level": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": (
+                "Filter risk scenarios by risk level, several values to match any of "
+                "them ('high or very high' is one call). Use the wording of the risk "
+                "matrix in use (e.g. 'High', 'Élevé', 'Very High', 'VH'). Use this "
+                "whenever the user asks how many risks are at a given level. "
+                "Pair with risk_level_scope to pick which level is meant."
+            ),
+        },
+        "risk_level_scope": {
+            "type": "string",
+            "enum": ["current", "residual", "inherent"],
+            "description": (
+                "Which risk level risk_level applies to. Default 'current' — use "
+                "'residual' when the user says residual/après traitement, "
+                "'inherent' when they say inherent/brut."
+            ),
         },
         "date_filter": {
             "type": "string",
@@ -426,6 +541,7 @@ def _build_tools() -> tuple[list[dict], dict]:
                             "The type of object to create. Same mapping as query_objects: "
                             "'controls' → applied_control, 'assets' → asset, "
                             "'risk scenarios' → risk_scenario, 'threats' → threat, "
+                            "'findings'/'constats' → finding, "
                             "'evidences' → evidence, 'vulnerabilities' → vulnerability, "
                             "'exceptions' → security_exception, 'incidents' → incident, "
                             "'entities'/'third parties' → entity, 'solutions' → solution, "
@@ -537,8 +653,11 @@ def _build_tools() -> tuple[list[dict], dict]:
                 "Use 'find_frameworks' to search/list frameworks by name or keyword.\n"
                 "Use 'get_framework_detail' to get the structure and metadata of a specific framework.\n"
                 "Use 'compare_frameworks' to compare two frameworks side by side.\n"
-                "Use 'search_requirements' to find specific requirements by keyword.\n"
-                "Use 'find_mappings' to find how requirements map between two frameworks.\n"
+                "Use 'search_requirements' to find requirements by reference (ref_id, e.g. 'A.5.1') "
+                "or by words, optionally within one framework.\n"
+                "Use 'requirement_mappings' for what ONE requirement maps to: pass its framework as "
+                "framework and its ref_id (or its urn as requirement), and the target framework as framework_b.\n"
+                "Use 'find_mappings' to find how requirements map between two whole frameworks.\n"
                 "Use 'find_controls_for_threat' to find what requirements/controls address a given threat.\n\n"
                 "DO NOT use this tool for questions about the user's own data (their controls, risk scenarios, "
                 "compliance assessments, etc.) — use query_objects for that."
@@ -553,6 +672,7 @@ def _build_tools() -> tuple[list[dict], dict]:
                             "get_framework_detail",
                             "compare_frameworks",
                             "search_requirements",
+                            "requirement_mappings",
                             "find_mappings",
                             "find_controls_for_threat",
                         ],
@@ -572,9 +692,17 @@ def _build_tools() -> tuple[list[dict], dict]:
                             "(for get_framework_detail, search_requirements, find_mappings source)."
                         ),
                     },
+                    "ref_id": {
+                        "type": "string",
+                        "description": "Exact requirement reference, e.g. 'A.5.1', 'GV.OC-01' (for search_requirements, requirement_mappings).",
+                    },
+                    "requirement": {
+                        "type": "string",
+                        "description": "Requirement urn (for requirement_mappings).",
+                    },
                     "framework_b": {
                         "type": "string",
-                        "description": "Second framework for compare_frameworks or find_mappings target.",
+                        "description": "Second framework for compare_frameworks, or target framework for find_mappings and requirement_mappings.",
                     },
                     "provider": {
                         "type": "string",
@@ -641,7 +769,27 @@ def _build_tools() -> tuple[list[dict], dict]:
                                         "enum": ["list", "count", "summary"],
                                     },
                                     "search": {"type": "string"},
-                                    "status": {"type": "string"},
+                                    "status": {
+                                        "type": "array",
+                                        "items": {"type": "string"},
+                                    },
+                                    "domain": {"type": "string"},
+                                    "severity": {
+                                        "type": "array",
+                                        "items": {"type": "string"},
+                                    },
+                                    "risk_level": {
+                                        "type": "array",
+                                        "items": {"type": "string"},
+                                    },
+                                    "result": {
+                                        "type": "array",
+                                        "items": {"type": "string"},
+                                    },
+                                    "risk_level_scope": {
+                                        "type": "string",
+                                        "enum": ["current", "residual", "inherent"],
+                                    },
                                     "has_no_related": {
                                         "type": "array",
                                         "items": {"type": "string"},
@@ -710,19 +858,35 @@ def _sanitize_arguments(arguments: dict) -> dict:
             if not isinstance(v, list) or not v:
                 continue
 
-        # Validate enum fields against model-derived allowed values
-        if k in valid_values and v not in valid_values[k]:
-            logger.info("Dropping invalid value for %s: %r", k, v)
-            continue
+        if k in MULTI_VALUE_FILTERS:
+            if isinstance(v, str):
+                v = [p.strip() for p in v.split(",") if p.strip()]
+            elif not isinstance(v, (list, tuple)):
+                v = [v]
+            if not v:
+                continue
+            v = list(v)
+
+        # Validate enum fields against model-derived allowed values.
+        # Multi-value filters keep whatever members are valid.
+        if k in valid_values:
+            if isinstance(v, (list, tuple)):
+                kept = [x for x in v if x in valid_values[k]]
+                if len(kept) != len(v):
+                    logger.info("Dropping invalid values for %s: %r", k, v)
+                if not kept:
+                    continue
+                v = kept
+            elif v not in valid_values[k]:
+                logger.info("Dropping invalid value for %s: %r", k, v)
+                continue
 
         cleaned[k] = v
 
     return cleaned
 
 
-def _build_create_proposal(
-    arguments: dict, accessible_folder_ids: list[str], parsed_context=None
-) -> dict | None:
+def _build_create_proposal(arguments: dict, scope, parsed_context=None) -> dict | None:
     """
     Build a structured creation proposal from LLM tool call arguments.
     Does NOT create anything — returns a proposal for the frontend to confirm.
@@ -745,11 +909,13 @@ def _build_create_proposal(
     parent_fk_field = None
     parent_id = None
 
-    # If the user is on a folder/domain page, use that folder directly
+    # If the user is on a folder/domain page, use that folder directly — but
+    # page_context is client-supplied, so only if they can actually reach it.
     if (
         parsed_context
         and parsed_context.object_id
         and parsed_context.model_key == "folder"
+        and str(parsed_context.object_id) in scope.folder_ids
     ):
         folder_id = parsed_context.object_id
 
@@ -761,19 +927,9 @@ def _build_create_proposal(
                 parent_id = parsed_context.object_id
                 # Inherit folder from parent object
                 if not folder_id:
-                    parent_info = MODEL_MAP.get(parsed_context.model_key)
-                    if parent_info:
-                        try:
-                            parent_model = apps.get_model(
-                                parent_info[0], parent_info[1]
-                            )
-                            parent_obj = parent_model.objects.filter(
-                                id=parent_id
-                            ).first()
-                            if parent_obj and hasattr(parent_obj, "folder_id"):
-                                folder_id = str(parent_obj.folder_id)
-                        except (LookupError, AttributeError) as e:
-                            logger.warning("parent_folder_lookup_failed", error=e)
+                    parent_obj = resolve_context_object(parsed_context, scope)
+                    if parent_obj and hasattr(parent_obj, "folder_id"):
+                        folder_id = str(parent_obj.folder_id)
                 break
 
     if not folder_id:
@@ -781,12 +937,12 @@ def _build_create_proposal(
         if domain:
             from .orm_query import _resolve_domain
 
-            folder_ids = _resolve_domain(domain, accessible_folder_ids)
+            folder_ids = _resolve_domain(domain, scope.folder_ids)
             if folder_ids:
                 folder_id = folder_ids[0]
 
-    if not folder_id and accessible_folder_ids:
-        folder_id = accessible_folder_ids[0]
+    if not folder_id and scope.folder_ids:
+        folder_id = scope.folder_ids[0]
 
     # Build proposal items — each gets name, description, folder, parent FK,
     # and any extra fields the LLM provided that match the model's actual fields.
@@ -798,7 +954,6 @@ def _build_create_proposal(
         "created_at",
         "updated_at",
         "folder",
-        "is_published",
         "urn",
         "ref_id",
         "locale",
@@ -837,7 +992,7 @@ def _build_create_proposal(
                 RiskMatrix = apps.get_model("core", "RiskMatrix")
                 matrix = RiskMatrix.objects.filter(
                     is_enabled=True,
-                    folder_id__in=accessible_folder_ids,
+                    folder_id__in=scope.folder_ids,
                 ).first()
                 if not matrix:
                     matrix = RiskMatrix.objects.filter(is_enabled=True).first()
@@ -863,7 +1018,7 @@ def _build_create_proposal(
     # Build list of available domain folders so the user can change the target
     available_folders = list(
         Folder.objects.filter(
-            id__in=accessible_folder_ids,
+            id__in=scope.folder_ids,
             content_type=Folder.ContentType.DOMAIN,
         )
         .order_by("name")
@@ -885,9 +1040,7 @@ def _build_create_proposal(
     }
 
 
-def _build_attach_proposal(
-    arguments: dict, accessible_folder_ids: list[str], parsed_context=None
-) -> dict | None:
+def _build_attach_proposal(arguments: dict, scope, parsed_context=None) -> dict | None:
     """
     Search for existing objects and propose attaching them to the current page's object.
     Returns a proposal dict with type="propose_attach".
@@ -932,17 +1085,12 @@ def _build_attach_proposal(
         and related_model_key == "applied_control"
     ):
         try:
-            parent_model = apps.get_model(parent_info[0], parent_info[1])
-            ra_obj = (
-                parent_model.objects.select_related("requirement")
-                .filter(id=parsed_context.object_id)
-                .first()
-            )
-            if ra_obj and hasattr(ra_obj, "requirement") and ra_obj.requirement:
-                req = ra_obj.requirement
+            ra_obj = resolve_context_object(parsed_context, scope)
+            req = getattr(ra_obj, "requirement", None)
+            if req:
                 # Use the requirement's description or name as search context
                 search = req.description[:200] if req.description else (req.name or "")
-        except (LookupError, AttributeError) as e:
+        except AttributeError as e:
             logger.warning("requirement_context_lookup_failed", error=e)
 
     query_args = {
@@ -952,22 +1100,21 @@ def _build_attach_proposal(
     if search:
         query_args["search"] = search
 
-    query_result = execute_tool_query(query_args, accessible_folder_ids)
+    query_result = execute_tool_query(query_args, scope)
     if not query_result or not query_result.get("objects"):
         return None
 
-    # Get already-attached IDs to exclude them
+    # Never offer to attach to a parent the user cannot read — the payload
+    # names it, and the follow-up PATCH would be rejected anyway.
+    parent_obj = resolve_context_object(parsed_context, scope)
+    if parent_obj is None:
+        return None
     try:
-        parent_model = apps.get_model(parent_info[0], parent_info[1])
-        parent_obj = parent_model.objects.filter(id=parsed_context.object_id).first()
-        if parent_obj:
-            existing_ids = set(
-                str(pk)
-                for pk in getattr(parent_obj, m2m_field).values_list("id", flat=True)
-            )
-        else:
-            existing_ids = set()
-    except (LookupError, AttributeError, TypeError) as e:
+        existing_ids = set(
+            str(pk)
+            for pk in getattr(parent_obj, m2m_field).values_list("id", flat=True)
+        )
+    except (AttributeError, TypeError) as e:
         logger.warning("existing_ids_lookup_failed", error=e)
         existing_ids = set()
 
@@ -1003,7 +1150,7 @@ REPLAYABLE_TOOLS: frozenset[str] = frozenset({"query_objects", "search_library"}
 def dispatch_tool_call(
     tool_name: str,
     arguments: dict,
-    accessible_folder_ids: list[str],
+    scope,
     parsed_context=None,
     user_message: str = "",
 ) -> dict | None:
@@ -1014,31 +1161,31 @@ def dispatch_tool_call(
     """
     # search_library has its own parameter space — skip query_objects sanitization
     if tool_name == "search_library":
-        return _dispatch_search_library(arguments, user_message=user_message)
+        return _dispatch_search_library(
+            arguments, user_message=user_message, user=scope.user
+        )
 
     cleaned = _sanitize_arguments(arguments)
 
     if tool_name == "query_objects":
         from .orm_query import execute_tool_query
 
-        return execute_tool_query(cleaned, accessible_folder_ids, parsed_context)
+        return execute_tool_query(cleaned, scope, parsed_context)
 
     if tool_name == "propose_create":
-        return _build_create_proposal(cleaned, accessible_folder_ids, parsed_context)
+        return _build_create_proposal(cleaned, scope, parsed_context)
 
     if tool_name == "attach_existing":
-        return _build_attach_proposal(cleaned, accessible_folder_ids, parsed_context)
+        return _build_attach_proposal(cleaned, scope, parsed_context)
 
     if tool_name == "multi_query":
-        return _execute_multi_query(arguments, accessible_folder_ids, parsed_context)
+        return _execute_multi_query(arguments, scope, parsed_context)
 
     logger.warning("Unknown tool: %s", tool_name)
     return None
 
 
-def _execute_multi_query(
-    arguments: dict, accessible_folder_ids: list[str], parsed_context=None
-) -> dict | None:
+def _execute_multi_query(arguments: dict, scope, parsed_context=None) -> dict | None:
     """Execute multiple ORM queries and return combined results."""
     from .orm_query import execute_tool_query, format_query_result
 
@@ -1049,7 +1196,7 @@ def _execute_multi_query(
     results = []
     for q in queries[:3]:  # Max 3 sub-queries
         cleaned = _sanitize_arguments(q)
-        result = execute_tool_query(cleaned, accessible_folder_ids, parsed_context)
+        result = execute_tool_query(cleaned, scope, parsed_context)
         if result:
             results.append(result)
 
@@ -1062,13 +1209,14 @@ def _execute_multi_query(
     }
 
 
-def _dispatch_search_library(arguments: dict, user_message: str = "") -> dict | None:
+def _dispatch_search_library(
+    arguments: dict, user_message: str = "", user=None
+) -> dict | None:
     """Dispatch a search_library tool call to the knowledge graph."""
     from .knowledge_graph import (
         find_frameworks,
         get_framework_detail,
         compare_frameworks,
-        search_requirements,
         find_mappings,
         find_controls_for_threat,
         format_graph_result,
@@ -1081,11 +1229,32 @@ def _dispatch_search_library(arguments: dict, user_message: str = "") -> dict | 
     provider = arguments.get("provider", "")
     locale = arguments.get("locale", "")
 
+    # small models keep picking an overview action for a question about one
+    # requirement, with its ref_id in the arguments or only in the question;
+    # the chat routes once and cannot retry
+    explicit = arguments.get("ref_id") or arguments.get("requirement")
+    if explicit or (
+        framework
+        and action in ("get_framework_detail", "find_mappings")
+        and _ref_like(user_message)
+    ):
+        knowledge_action = action
+        if action != "requirement_mappings":
+            knowledge_action = (
+                "requirement_mappings" if framework_b else "search_requirements"
+            )
+        out, found = _dispatch_requirement_knowledge(
+            knowledge_action, arguments, user, user_message
+        )
+        if found or explicit:
+            return out
+
     # Auto-upgrade to compare_frameworks when 2+ frameworks are detected
     # in the user message, regardless of what action the LLM picked.
     # The LLM is unreliable at choosing compare_frameworks vs get_framework_detail
     # vs find_frameworks — the graph detection is deterministic.
-    if action != "compare_frameworks":
+    # only for overview actions: a mapping or requirement question names two frameworks too
+    if action in ("find_frameworks", "get_framework_detail"):
         detected = _detect_framework_names(user_message or query)
         if len(detected) >= 2:
             logger.info(
@@ -1111,8 +1280,8 @@ def _dispatch_search_library(arguments: dict, user_message: str = "") -> dict | 
                 "text": "Please specify two frameworks to compare.",
             }
         data = compare_frameworks(fw_a, fw_b)
-    elif action == "search_requirements":
-        data = search_requirements(query=query, framework=framework)
+    elif action in ("search_requirements", "requirement_mappings"):
+        return _dispatch_requirement_knowledge(action, arguments, user, user_message)[0]
     elif action == "find_mappings":
         if not framework:
             return {
@@ -1126,6 +1295,128 @@ def _dispatch_search_library(arguments: dict, user_message: str = "") -> dict | 
         return {"type": "search_library", "text": f"Unknown action: {action}"}
 
     return {"type": "search_library", "text": format_graph_result(data)}
+
+
+def _ref_like(text: str) -> list[str]:
+    """Words of a question that could be requirement references: they hold a digit."""
+    words = (w.strip("?!.,;:()'\"*") for w in (text or "").split())
+    return [w for w in words if re.search(r"\d", w)]
+
+
+def _requirement_knowledge(action: str, arguments: dict, user):
+    from library.knowledge import find_requirements, requirement_mappings
+
+    if action == "search_requirements":
+        return find_requirements(
+            user,
+            framework=arguments.get("framework", ""),
+            ref_id=arguments.get("ref_id"),
+            search=arguments.get("query"),
+        )
+    return requirement_mappings(
+        user,
+        arguments.get("requirement"),
+        arguments.get("framework_b", ""),
+        source_framework=arguments.get("framework", ""),
+        ref_id=arguments.get("ref_id"),
+    )
+
+
+def _in_named_frameworks(data, arguments: dict) -> bool:
+    """The answer is about a framework the question named, not a ref_id that also exists elsewhere."""
+    from library.knowledge import framework_matches
+
+    if not data:
+        return False
+    rows = data.get("requirements") or data.get("ambiguous") or [data.get("source")]
+    named = [arguments.get("framework"), arguments.get("framework_b")]
+    return any(
+        r and framework_matches(n, r["framework"], r["framework_ref_id"])
+        for r in rows
+        for n in named
+        if n
+    )
+
+
+def _requirement_line(
+    r: dict, relationship: bool = False, limit: int | None = 200
+) -> str:
+    text = r.get("name") or (r.get("description") or "")[:limit]
+    line = (
+        f"- {r.get('framework_ref_id') or r.get('framework')} {r.get('ref_id')}: {text}"
+    )
+    return line + (f" ({r['relationship']})" if relationship else "")
+
+
+def _compact_knowledge(data: dict | None, arguments: dict) -> str:
+    """One line per requirement: small models report a short list in full but
+    drop rows or answer "none" from the generic key/value dump."""
+    if data is None:
+        return "Requirement not found in the knowledge base."
+    lines = [f"Note: {data['note']}"] if data.get("note") else []
+    if data.get("unknown_framework"):
+        lines.append(
+            f"No framework matches '{data['unknown_framework']}'. Known frameworks: "
+            + ", ".join(data["frameworks"])
+        )
+    elif "requirements" in data:
+        rows = data["requirements"]
+        lines.append(f"{data.get('total', len(rows))} requirement(s) found:")
+        for r in rows:
+            lines.append(_requirement_line(r, limit=None))
+            if r.get("name") and r.get("description"):
+                lines.append(f"  {r['description']}")
+    elif data.get("ambiguous"):
+        lines.append("This reference exists in several frameworks:")
+        lines += [_requirement_line(r) for r in data["ambiguous"]]
+    else:
+        src = data["source"]
+        lines.append("Requirement:" + _requirement_line(src)[1:])
+        target = arguments.get("framework_b")
+        if data["mappings"]:
+            lines.append(
+                f"It maps to these {len(data['mappings'])} requirement(s); "
+                "list every one of them in the answer:"
+            )
+            lines += [_requirement_line(r, True) for r in data["mappings"]]
+        elif data["elsewhere"]:
+            lines.append(
+                f"None of its mappings are in '{target}'. It maps to: "
+                + ", ".join(f"{fw} ({n})" for fw, n in data["elsewhere"].items())
+            )
+        else:
+            lines.append("It has no mappings in the knowledge base.")
+    return "\n".join(lines)
+
+
+def _dispatch_requirement_knowledge(
+    action: str, arguments: dict, user, user_message: str = ""
+) -> tuple[dict, bool]:
+    """Requirement lookup and per-requirement mappings, shared with the REST API (MCP).
+
+    Returns (tool result, whether a requirement was found). When the model's
+    ref_id finds nothing, references written in the question are tried instead:
+    small models drop or garble them, and the chat cannot retry.
+    """
+    from django.core.exceptions import PermissionDenied
+
+    try:
+        data = _requirement_knowledge(action, arguments, user)
+        found = _in_named_frameworks(data, arguments)
+        if not found:
+            for ref in _ref_like(user_message):
+                if ref == arguments.get("ref_id"):
+                    continue
+                retry = _requirement_knowledge(
+                    action, {**arguments, "ref_id": ref, "requirement": None}, user
+                )
+                if _in_named_frameworks(retry, arguments):
+                    data, found = retry, True
+                    break
+    except PermissionDenied:
+        data, found = "You do not have access to framework content.", False
+    text = data if isinstance(data, str) else _compact_knowledge(data, arguments)
+    return {"type": "search_library", "text": text}, found
 
 
 def _detect_framework_names(text: str) -> list[str]:

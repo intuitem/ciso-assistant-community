@@ -2,8 +2,6 @@ import pytest
 from ebios_rm.models import EbiosRMStudy, FearedEvent, RoTo
 from core.models import Terminology
 
-from ebios_rm.tests.fixtures import *
-
 
 @pytest.mark.django_db
 class TestRoTo:

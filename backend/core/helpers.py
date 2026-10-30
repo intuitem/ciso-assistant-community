@@ -3,13 +3,12 @@ from collections import defaultdict
 from collections.abc import MutableMapping
 from datetime import date, datetime, timedelta
 from typing import Optional
-from typing import Dict, List
+from typing import Dict, List, Iterable
 from uuid import UUID
 
 # from icecream import ic
 from django.core.exceptions import NON_FIELD_ERRORS as DJ_NON_FIELD_ERRORS
 from django.core.exceptions import ValidationError as DjValidationError
-from django.conf import settings
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import ValidationError as DRFValidationError
@@ -91,13 +90,7 @@ def applied_control_priority(user: User):
         "4th": list(),
         "undefined": list(),
     }
-    (
-        object_ids_view,
-        object_ids_change,
-        object_ids_delete,
-    ) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, AppliedControl
-    )
+    object_ids_view = RoleAssignment.get_viewable_object_ids(user, AppliedControl)
 
     for mtg in AppliedControl.objects.filter(id__in=object_ids_view):
         clusters[get_quadrant(mtg)].append(mtg)
@@ -106,13 +99,7 @@ def applied_control_priority(user: User):
 
 
 def measures_to_review(user: User):
-    (
-        object_ids_view,
-        object_ids_change,
-        object_ids_delete,
-    ) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, AppliedControl
-    )
+    object_ids_view = RoleAssignment.get_viewable_object_ids(user, AppliedControl)
     measures = (
         AppliedControl.objects.filter(id__in=object_ids_view)
         .filter(expiry_date__lte=date.today() + timedelta(days=30))
@@ -406,7 +393,9 @@ def annotate_tree_with_aggregated_scores(
     contribute their own ceiling; 100% stays achievable.
 
     Leaves are included only when is_scored is True, the node is assessable,
-    and the result is not N/A.
+    and the result is not N/A. When the audit anchors N/A to its target, N/A
+    leaves are included with both layers set to the target projected onto
+    their scale (or their max when no target is set), like get_global_score.
     """
     method = compliance_assessment.score_calculation_method
     show_doc = compliance_assessment.show_documentation_score
@@ -421,14 +410,14 @@ def annotate_tree_with_aggregated_scores(
         else 100
     )
     ca_range = ca_max - ca_min if ca_max > ca_min else 1
+    anchor_na = compliance_assessment.anchor_na_to_target
 
     def _clean(value):
-        """Trim float-precision noise (~1e-9) from denormalized display values
-        without losing precision for upstream rollups, which use the raw
-        _aggregated_ratio."""
+        """A parent's value like the global score (clean_score): unrounded,
+        rendering rounds it."""
         if value is None:
             return None
-        return round(value, 9)
+        return clean_score(value)
 
     def walk(node: dict) -> None:
         children = node.get("children") or {}
@@ -437,11 +426,9 @@ def annotate_tree_with_aggregated_scores(
             walk(child)
 
         if not children:
-            is_assessed = (
-                node.get("is_scored")
-                and node.get("assessable")
-                and node.get("result") != "not_applicable"
-            )
+            is_na = node.get("result") == "not_applicable"
+            anchored = bool(anchor_na and is_na and node.get("assessable"))
+            is_assessed = node.get("is_scored") and node.get("assessable") and not is_na
             score_val = node.get("score")
             # `is_scored` with `score is None` is a data inconsistency; treat
             # it as unscored to avoid producing a negative ratio on offset
@@ -449,18 +436,19 @@ def annotate_tree_with_aggregated_scores(
             if is_assessed and score_val is None:
                 is_assessed = False
             weight = node.get("weight") or 1
+            ra_min = (
+                node.get("min_score") if node.get("min_score") is not None else ca_min
+            )
+            ra_max = (
+                node.get("max_score") if node.get("max_score") is not None else ca_max
+            )
+            ra_range = ra_max - ra_min if ra_max > ra_min else 1
+            doc_val = node.get("documentation_score")
+            if anchored:
+                score_val = compliance_assessment.na_anchor_score(ra_min, ra_max)
+                doc_val = score_val
+                is_assessed = True
             if is_assessed:
-                ra_min = (
-                    node.get("min_score")
-                    if node.get("min_score") is not None
-                    else ca_min
-                )
-                ra_max = (
-                    node.get("max_score")
-                    if node.get("max_score") is not None
-                    else ca_max
-                )
-                ra_range = ra_max - ra_min if ra_max > ra_min else 1
                 ratio = (score_val - ra_min) / ra_range
                 node["aggregated_score"] = score_val
                 node["aggregated_min_score"] = ra_min
@@ -473,13 +461,11 @@ def annotate_tree_with_aggregated_scores(
                 node["_leaf_weighted_max"] = ra_max * weight
                 node["_leaf_weight"] = weight
                 if show_doc:
-                    # documentation_score=None keeps its legacy "no doc -> 0"
-                    # semantic so the tree matches the global score and radar,
-                    # which also map doc None -> 0 in _compute_score_for_field.
-                    # (score=None is excluded above; doc is not.)
-                    doc_val = node.get("documentation_score")
+                    # documentation_score=None counts as the bottom of the
+                    # scale, like _compute_raw_score_for_field, with every
+                    # method. (score=None is excluded above; doc is not.)
                     if doc_val is None:
-                        doc_val = 0
+                        doc_val = ra_min
                     doc_ratio = (doc_val - ra_min) / ra_range
                     node["aggregated_documentation_score"] = doc_val
                     node["_aggregated_doc_ratio"] = doc_ratio
@@ -552,7 +538,7 @@ def annotate_tree_with_aggregated_scores(
                 node["_aggregated_doc_ratio"] = None
         elif method == ComplianceAssessment.CalculationMethod.SUM:
             if leaf_weight > 0:
-                node["aggregated_score"] = leaf_weighted_score
+                node["aggregated_score"] = _clean(leaf_weighted_score)
                 node["aggregated_max_score"] = leaf_weighted_max
                 node["aggregated_min_score"] = 0
                 # Ratio in [0, 1] for any future consumer (e.g. nested SUM).
@@ -562,7 +548,7 @@ def annotate_tree_with_aggregated_scores(
                     else None
                 )
                 if show_doc:
-                    node["aggregated_documentation_score"] = leaf_weighted_doc
+                    node["aggregated_documentation_score"] = _clean(leaf_weighted_doc)
                     node["_aggregated_doc_ratio"] = (
                         leaf_weighted_doc / leaf_weighted_max
                         if leaf_weighted_max
@@ -641,6 +627,48 @@ def filter_graph_by_implementation_groups(
     return filtered_graph
 
 
+def annotate_tree_with_coverage(tree: dict[str, dict], compliance_assessment) -> dict:
+    """Flag each assessed node with whether it is covered by applied controls
+    and by evidence.
+
+    ``has_evidence`` follows RequirementAssessment.has_evidence(): evidence
+    attached directly to the requirement assessment OR reachable through one
+    of its applied controls.
+
+    Keys are only emitted when True, so an uncovered audit — the case the
+    coverage filter exists for — costs nothing in payload size.
+    """
+    ac_through = RequirementAssessment.applied_controls.through.objects.filter(
+        requirementassessment__compliance_assessment=compliance_assessment
+    )
+    with_controls = set(ac_through.values_list("requirementassessment_id", flat=True))
+    with_evidence = set(
+        RequirementAssessment.evidences.through.objects.filter(
+            requirementassessment__compliance_assessment=compliance_assessment
+        ).values_list("requirementassessment_id", flat=True)
+    ) | set(
+        ac_through.filter(appliedcontrol__evidences__isnull=False).values_list(
+            "requirementassessment_id", flat=True
+        )
+    )
+
+    def _annotate(node: dict):
+        ra_id = node.get("ra_id")
+        if ra_id:
+            ra_uuid = UUID(ra_id)
+            if ra_uuid in with_controls:
+                node["has_applied_controls"] = True
+            if ra_uuid in with_evidence:
+                node["has_evidence"] = True
+        for child in node.get("children", {}).values():
+            _annotate(child)
+
+    for node in tree.values():
+        _annotate(node)
+
+    return tree
+
+
 def enrich_tree_for_soa(
     tree: dict,
     ra_lookup: dict,
@@ -699,11 +727,9 @@ def get_parsed_matrices(
     scoped_folder = (
         Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
     )
-    (
-        object_ids_view,
-        _,
-        _,
-    ) = RoleAssignment.get_accessible_object_ids(scoped_folder, user, RiskScenario)
+    object_ids_view = RoleAssignment.get_viewable_object_ids(
+        user, RiskScenario, scoped_folder
+    )
     queryset = RiskScenario.objects.filter(id__in=object_ids_view)
     if risk_assessments is not None:
         queryset = queryset.filter(risk_assessment__in=risk_assessments)
@@ -804,13 +830,7 @@ def risk_per_status(user: User):
         "cancelled": "#9ca3af",
     }
 
-    (
-        object_ids_view,
-        _,
-        _,
-    ) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, RiskScenario
-    )
+    object_ids_view = RoleAssignment.get_viewable_object_ids(user, RiskScenario)
     for st in RiskScenario.TREATMENT_OPTIONS:
         count = (
             RiskScenario.objects.filter(id__in=object_ids_view)
@@ -842,13 +862,7 @@ def applied_control_per_status(user: User):
         AppliedControl.Status.DEGRADED: "#F97316",
         AppliedControl.Status.DEPRECATED: "#E55759",
     }
-    (
-        object_ids_view,
-        _,
-        _,
-    ) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, AppliedControl
-    )
+    object_ids_view = RoleAssignment.get_viewable_object_ids(user, AppliedControl)
     viewable_applied_controls = AppliedControl.objects.filter(id__in=object_ids_view)
     for st in AppliedControl.Status.choices:
         count = viewable_applied_controls.filter(status=st[0]).count()
@@ -871,13 +885,7 @@ def task_template_per_status(user: User):
         "completed": "#46D39A",
         "cancelled": "#E55759",
     }
-    (
-        object_ids_view,
-        _,
-        _,
-    ) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, TaskTemplate
-    )
+    object_ids_view = RoleAssignment.get_viewable_object_ids(user, TaskTemplate)
     viewable_task_templates = TaskTemplate.objects.filter(id__in=object_ids_view)
 
     # Count statuses based on the logic:
@@ -959,23 +967,21 @@ def get_governance_calendar_data(
     activity_counts = defaultdict(int)
 
     # Get accessible objects for each model
-    (task_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        scoped_folder, user, TaskNode
+    task_ids = RoleAssignment.get_viewable_object_ids(user, TaskNode, scoped_folder)
+    control_ids = RoleAssignment.get_viewable_object_ids(
+        user, AppliedControl, scoped_folder
     )
-    (control_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        scoped_folder, user, AppliedControl
+    acceptance_ids = RoleAssignment.get_viewable_object_ids(
+        user, RiskAcceptance, scoped_folder
     )
-    (acceptance_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        scoped_folder, user, RiskAcceptance
+    risk_assessment_ids = RoleAssignment.get_viewable_object_ids(
+        user, RiskAssessment, scoped_folder
     )
-    (risk_assessment_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        scoped_folder, user, RiskAssessment
+    compliance_assessment_ids = RoleAssignment.get_viewable_object_ids(
+        user, ComplianceAssessment, scoped_folder
     )
-    (compliance_assessment_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        scoped_folder, user, ComplianceAssessment
-    )
-    (findings_assessment_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        scoped_folder, user, FindingsAssessment
+    findings_assessment_ids = RoleAssignment.get_viewable_object_ids(
+        user, FindingsAssessment, scoped_folder
     )
 
     # Count TaskNode due dates
@@ -1006,7 +1012,9 @@ def get_governance_calendar_data(
             activity_counts[str(expiry_date)] += 1
 
     # Helper function to count assessment dates
-    def count_assessment_dates(assessment_ids, model):
+    def count_assessment_dates(
+        assessment_ids: Iterable[UUID], model: type[models.Model]
+    ):
         # Count due dates
         due_dates = model.objects.filter(
             id__in=assessment_ids, due_date__gte=start_date, due_date__lte=end_date
@@ -1036,7 +1044,9 @@ def get_governance_calendar_data(
     return result
 
 
-def assessment_per_status(user: User, model: RiskAssessment | ComplianceAssessment):
+def assessment_per_status(
+    user: User, model: type[RiskAssessment] | type[ComplianceAssessment]
+):
     values = list()
     labels = list()
     local_lables = list()
@@ -1048,11 +1058,7 @@ def assessment_per_status(user: User, model: RiskAssessment | ComplianceAssessme
         "done": "#46D39A",
         "deprecated": "#E55759",
     }
-    (
-        object_ids_view,
-        _,
-        _,
-    ) = RoleAssignment.get_accessible_object_ids(Folder.get_root_folder(), user, model)
+    object_ids_view = RoleAssignment.get_viewable_object_ids(user, model)
     viewable_applied_controls = model.objects.filter(id__in=object_ids_view)
     undefined_count = viewable_applied_controls.filter(status__isnull=True).count()
     values.append(
@@ -1101,8 +1107,8 @@ def combined_assessments_per_status(
 
     for series_name, model in assessment_types:
         # Get accessible objects
-        (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
-            scoped_folder, user, model
+        object_ids_view = RoleAssignment.get_viewable_object_ids(
+            user, model, scoped_folder
         )
         viewable_assessments = model.objects.filter(id__in=object_ids_view)
 
@@ -1126,13 +1132,7 @@ def combined_assessments_per_status(
 
 def applied_control_per_cur_risk(user: User):
     output = list()
-    (
-        object_ids_view,
-        _,
-        _,
-    ) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, AppliedControl
-    )
+    object_ids_view = RoleAssignment.get_viewable_object_ids(user, AppliedControl)
     for lvl in get_rating_options(user):
         cnt = (
             AppliedControl.objects.filter(id__in=object_ids_view)
@@ -1148,13 +1148,7 @@ def applied_control_per_cur_risk(user: User):
 def applied_control_per_reference_control(user: User):
     indicators = list()
     values = list()
-    (
-        object_ids_view,
-        _,
-        _,
-    ) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, AppliedControl
-    )
+    object_ids_view = RoleAssignment.get_viewable_object_ids(user, AppliedControl)
 
     tmp = (
         AppliedControl.objects.filter(id__in=object_ids_view)
@@ -1185,11 +1179,9 @@ def aggregate_risks_per_field(
     scoped_folder = (
         Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
     )
-    (
-        object_ids_view,
-        _,
-        _,
-    ) = RoleAssignment.get_accessible_object_ids(scoped_folder, user, RiskScenario)
+    object_ids_view = RoleAssignment.get_viewable_object_ids(
+        user, RiskScenario, scoped_folder
+    )
     parsed_matrices: list = get_parsed_matrices(
         user=user, risk_assessments=risk_assessments, folder_id=folder_id
     )
@@ -1289,11 +1281,7 @@ def risks_count_per_level(
 def p_risks(user: User):
     p_risks_labels = list()
     p_risks_counts = list()
-    (
-        object_ids_view,
-        _,
-        _,
-    ) = RoleAssignment.get_accessible_object_ids(Folder.get_root_folder(), user, Threat)
+    object_ids_view = RoleAssignment.get_viewable_object_ids(user, Threat)
     for p_risk in Threat.objects.filter(id__in=object_ids_view).order_by("name"):
         p_risks_labels.append(p_risk.name)
         p_risks_counts.append(RiskScenario.objects.filter(threat=p_risk).count())
@@ -1308,11 +1296,7 @@ def p_risks(user: User):
 
 def p_risks_2(user: User):
     data = list()
-    (
-        object_ids_view,
-        _,
-        _,
-    ) = RoleAssignment.get_accessible_object_ids(Folder.get_root_folder(), user, Threat)
+    object_ids_view = RoleAssignment.get_viewable_object_ids(user, Threat)
     for p_risk in Threat.objects.filter(id__in=object_ids_view).order_by("name"):
         cnt = RiskScenario.objects.filter(threat=p_risk).count()
         if cnt > 0:
@@ -1327,13 +1311,7 @@ def p_risks_2(user: User):
 
 def risks_per_perimeter_groups(user: User):
     output = list()
-    (
-        object_ids_view,
-        _,
-        _,
-    ) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, RiskScenario
-    )
+    object_ids_view = RoleAssignment.get_viewable_object_ids(user, RiskScenario)
     for folder in Folder.objects.all().order_by("name"):
         ri_level = (
             RiskScenario.objects.filter(id__in=object_ids_view)
@@ -1351,9 +1329,9 @@ def get_counters(user: User, folder_id: Optional[str] = None) -> dict:
     ) or Folder.get_root_folder()
 
     # Get all accessible applied controls
-    applied_controls_ids = RoleAssignment.get_accessible_object_ids(
-        scoped_folder, user, AppliedControl
-    )[0]
+    applied_controls_ids = RoleAssignment.get_viewable_object_ids(
+        user, AppliedControl, scoped_folder
+    )
 
     # Count policies and non-policies separately
     all_applied_controls = AppliedControl.objects.filter(id__in=applied_controls_ids)
@@ -1361,36 +1339,34 @@ def get_counters(user: User, folder_id: Optional[str] = None) -> dict:
     applied_controls_count = all_applied_controls.exclude(category="policy").count()
 
     # Get accessible frameworks
-    frameworks_ids = RoleAssignment.get_accessible_object_ids(
-        scoped_folder, user, Framework
-    )[0]
+    frameworks_ids = RoleAssignment.get_viewable_object_ids(
+        user, Framework, scoped_folder
+    )
 
     # Get accessible risk acceptances
-    risk_acceptances_ids = RoleAssignment.get_accessible_object_ids(
-        scoped_folder, user, RiskAcceptance
-    )[0]
+    risk_acceptances_ids = RoleAssignment.get_viewable_object_ids(
+        user, RiskAcceptance, scoped_folder
+    )
 
     # Get accessible security exceptions
-    security_exceptions_ids = RoleAssignment.get_accessible_object_ids(
-        scoped_folder, user, SecurityException
-    )[0]
+    security_exceptions_ids = RoleAssignment.get_viewable_object_ids(
+        user, SecurityException, scoped_folder
+    )
 
     return {
-        "domains": len(
-            RoleAssignment.get_accessible_object_ids(scoped_folder, user, Folder)[0]
-        ),
-        "frameworks": len(frameworks_ids),
+        "domains": RoleAssignment.get_viewable_object_ids(
+            user, Folder, scoped_folder
+        ).count(),
+        "frameworks": frameworks_ids.count(),
         "applied_controls": applied_controls_count,
         "policies": policies_count,
-        "exceptions": len(security_exceptions_ids),
-        "risk_acceptances": len(risk_acceptances_ids),
+        "exceptions": security_exceptions_ids.count(),
+        "risk_acceptances": risk_acceptances_ids.count(),
     }
 
 
 def build_audits_tree_metrics(user):
-    (object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, Folder
-    )
+    object_ids = RoleAssignment.get_viewable_object_ids(user, Folder)
     viewable_domains = Folder.objects.filter(id__in=object_ids)
 
     tree = list()
@@ -1452,8 +1428,8 @@ def build_audits_stats(user, folder_id=None, object_ids=None):
         scoped_folder = (
             Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
         )
-        (object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            scoped_folder, user, ComplianceAssessment
+        object_ids = RoleAssignment.get_viewable_object_ids(
+            user, ComplianceAssessment, scoped_folder
         )
     top_audits = list(
         ComplianceAssessment.objects.filter(id__in=object_ids)
@@ -1502,8 +1478,8 @@ def csf_functions(user, folder_id=None):
     scoped_folder = (
         Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
     )
-    (object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        scoped_folder, user, AppliedControl
+    object_ids = RoleAssignment.get_viewable_object_ids(
+        user, AppliedControl, scoped_folder
     )
     viewable_controls = AppliedControl.objects.filter(id__in=object_ids)
     cnt = dict()
@@ -1529,9 +1505,7 @@ def get_metrics(user: User, folder_id):
         scoped_folder = (
             Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
         )
-        (object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            scoped_folder, user, model
-        )
+        object_ids = RoleAssignment.get_viewable_object_ids(user, model, scoped_folder)
         return model.objects.filter(id__in=object_ids)
 
     viewable_controls = viewable_items(AppliedControl, folder_id)
@@ -1590,15 +1564,14 @@ def get_metrics(user: User, folder_id):
     return data
 
 
-def _compute_progress_by_assessment(assessment_ids):
+def _compute_progress_by_assessment(assessment_ids: QuerySet[UUID]) -> dict[UUID, int]:
     """
     Bulk-compute progress (% assessed) for a set of ComplianceAssessment ids,
     honoring each assessment's selected_implementation_groups. Mirrors the
     .progress property semantics (assessed = result != NOT_ASSESSED OR score
     is not None) but in two queries instead of N heavy prefetched ones.
     """
-    assessment_ids = list(assessment_ids)
-    if not assessment_ids:
+    if not assessment_ids.exists():
         return {}
 
     ig_by_audit = {
@@ -1637,8 +1610,8 @@ def get_audits_metrics(user: User, folder_id=None):
     scoped_folder = (
         Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
     )
-    (object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-        scoped_folder, user, ComplianceAssessment
+    object_ids = RoleAssignment.get_viewable_object_ids(
+        user, ComplianceAssessment, scoped_folder
     )
     progresses = list(_compute_progress_by_assessment(object_ids).values())
     progress_avg = math.ceil(mean(progresses)) if progresses else 0
@@ -1679,23 +1652,19 @@ def get_compliance_analytics(user: User, folder_id=None):
     }
     """
 
-    def viewable_items(model, folder_id=None):
+    def viewable_items[T: models.Model](model: type[T], folder_id=None) -> QuerySet[T]:
         scoped_folder = (
             Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
         )
-        (object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            scoped_folder, user, model
-        )
+        object_ids = RoleAssignment.get_viewable_object_ids(user, model, scoped_folder)
         return model.objects.filter(id__in=object_ids)
 
-    viewable_assessments = list(
-        viewable_items(ComplianceAssessment, folder_id).select_related(
-            "framework", "folder", "perimeter"
-        )
-    )
+    viewable_assessments = viewable_items(
+        ComplianceAssessment, folder_id
+    ).select_related("framework", "folder", "perimeter")
 
     progress_by_id = _compute_progress_by_assessment(
-        [a.id for a in viewable_assessments]
+        viewable_assessments.values_list("id", flat=True)
     )
 
     framework_data = {}
@@ -1784,9 +1753,6 @@ def get_instance_metrics():
     nb_risk_assessments = RiskAssessment.objects.all().count()
     nb_risk_scenarios = RiskScenario.objects.all().count()
     nb_risk_acceptances = RiskAcceptance.objects.all().count()
-    nb_seats = getattr(settings, "LICENSE_SEATS", 0)
-    nb_editors = len(User.get_editors())
-    expiration = getattr(settings, "LICENSE_EXPIRATION", -1)
 
     created_at = int(Folder.get_root_folder().created_at.timestamp())
     last_login_dt = max(
@@ -1814,9 +1780,6 @@ def get_instance_metrics():
         "nb_risk_assessments": nb_risk_assessments,
         "nb_risk_scenarios": nb_risk_scenarios,
         "nb_risk_acceptances": nb_risk_acceptances,
-        "nb_seats": nb_seats,
-        "nb_editors": nb_editors,
-        "expiration": expiration,
         "created_at": created_at,
         "last_login": last_login,
     }
@@ -1902,13 +1865,7 @@ def risk_status(user: User, risk_assessment_list):
 
 
 def acceptances_to_review(user: User):
-    (
-        object_ids_view,
-        _,
-        _,
-    ) = RoleAssignment.get_accessible_object_ids(
-        Folder.get_root_folder(), user, RiskAcceptance
-    )
+    object_ids_view = RoleAssignment.get_viewable_object_ids(user, RiskAcceptance)
     acceptances = (
         RiskAcceptance.objects.filter(id__in=object_ids_view)
         .filter(expiry_date__lte=date.today() + timedelta(days=30))
@@ -2039,12 +1996,12 @@ def threats_count_per_name(user: User, folder_id=None) -> Dict[str, List]:
     scoped_folder = (
         Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
     )
-    object_ids_view, _, _ = RoleAssignment.get_accessible_object_ids(
-        scoped_folder, user, Threat
+    object_ids_view = RoleAssignment.get_viewable_object_ids(
+        user, Threat, scoped_folder
     )
-    viewable_scenarios = RoleAssignment.get_accessible_object_ids(
-        scoped_folder, user, RiskScenario
-    )[0]
+    viewable_scenarios = RoleAssignment.get_viewable_object_ids(
+        user, RiskScenario, scoped_folder
+    )
 
     # Updated field name from 'riskscenario' to 'risk_scenarios'
     threats_with_counts = (
@@ -2100,9 +2057,9 @@ def qualifications_count_per_name(user: User, folder_id=None) -> Dict[str, List]
     scoped_folder = (
         Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
     )
-    viewable_scenarios = RoleAssignment.get_accessible_object_ids(
-        scoped_folder, user, RiskScenario
-    )[0]
+    viewable_scenarios = RoleAssignment.get_viewable_object_ids(
+        user, RiskScenario, scoped_folder
+    )
 
     # Get all risk scenarios that user can view
     risk_scenarios = RiskScenario.objects.filter(id__in=viewable_scenarios)
@@ -2125,53 +2082,122 @@ def qualifications_count_per_name(user: User, folder_id=None) -> Dict[str, List]
     return {"labels": labels, "values": values}
 
 
+# Curated, not every folder-FK model: there are 151 of those, ~150 queries. Deletion
+# emptiness is checked exhaustively instead (FolderViewSet._folder_emptiness_blocker).
+FOLDER_CONTENT_MODELS = (
+    "core.Perimeter",
+    "core.Asset",
+    "core.AppliedControl",
+    "core.ComplianceAssessment",
+    "core.RiskAssessment",
+    "core.FindingsAssessment",
+    "core.Evidence",
+    "core.Policy",
+    "core.RiskScenario",
+    "tprm.Entity",
+)
+
+
+def folder_direct_content_counts() -> dict:
+    """{folder_id: curated content objects directly in it}. Callers roll subtrees up."""
+    from django.apps import apps
+    from django.db.models import Count
+
+    totals: dict = {}
+    for label in FOLDER_CONTENT_MODELS:
+        try:
+            model = apps.get_model(label)
+        except LookupError:
+            continue
+        for row in model.objects.values("folder").annotate(n=Count("id")):
+            if row["folder"] is not None:
+                totals[row["folder"]] = totals.get(row["folder"], 0) + row["n"]
+    return totals
+
+
+def build_folder_indexes(*, include_perimeters: bool):
+    """Fetch the whole folder tree (and optionally its perimeters) in two queries.
+
+    Left unordered deliberately: `Folder._meta.ordering` is empty, so the per-parent
+    queries this replaces had no defined order either.
+    """
+    folders = list(
+        Folder.objects.values("id", "name", "parent_folder_id", "content_type")
+    )
+    children_by_parent = defaultdict(list)
+    for f in folders:
+        children_by_parent[f["parent_folder_id"]].append(f)
+
+    parent_of = {f["id"]: f["parent_folder_id"] for f in folders}
+
+    perimeters_by_folder = defaultdict(list)
+    if include_perimeters:
+        for p in Perimeter.objects.values("id", "name", "folder_id"):
+            perimeters_by_folder[p["folder_id"]].append(p)
+
+    return children_by_parent, parent_of, perimeters_by_folder
+
+
 def get_folder_content(
-    folder: Folder,
+    folder_id,
+    *,
     include_perimeters,
     include_enclaves,
     viewable_objects,
     needed_folders,
+    children_by_parent,
+    perimeters_by_folder,
     writable_ids: Optional[set[UUID]] = None,
+    content_counts: Optional[dict] = None,
 ):
+    """Nested payload for one folder, from prebuilt indexes. No queries."""
     content = []
-    for f in Folder.objects.filter(parent_folder=folder).distinct():
-        if f.id in viewable_objects or f.id in needed_folders:
-            # Skip enclaves if not included
-            if not include_enclaves and f.content_type == Folder.ContentType.ENCLAVE:
-                continue
-            entry = {
-                "name": f.name,
-                "uuid": f.id,
-                "viewable": viewable_objects and f.id in viewable_objects,
-                "writable": f.id in writable_ids if writable_ids is not None else True,
-                "content_type": f.content_type,
-            }
-            # Add enclave-specific styling
-            if f.content_type == Folder.ContentType.ENCLAVE:
-                entry.update(
-                    {
-                        "symbol": "triangle",
-                        "symbolSize": 12,
-                        "itemStyle": {"color": "#6366f1"},
-                    }
-                )
-            children = get_folder_content(
-                f,
-                include_perimeters=include_perimeters,
-                include_enclaves=include_enclaves,
-                viewable_objects=viewable_objects,
-                needed_folders=needed_folders,
-                writable_ids=writable_ids,
+    for f in children_by_parent.get(folder_id, ()):
+        if f["id"] not in viewable_objects and f["id"] not in needed_folders:
+            continue
+        # Skip enclaves if not included
+        if not include_enclaves and f["content_type"] == Folder.ContentType.ENCLAVE:
+            continue
+        entry = {
+            "name": f["name"],
+            "uuid": f["id"],
+            "viewable": bool(viewable_objects) and f["id"] in viewable_objects,
+            "writable": f["id"] in writable_ids if writable_ids is not None else True,
+            "content_type": f["content_type"],
+        }
+        # Counts only for folders the caller can see: ancestors are here to keep the
+        # tree connected, not to be described.
+        if content_counts is not None and entry["viewable"]:
+            entry["content_count"] = content_counts.get(f["id"], 0)
+        # Add enclave-specific styling
+        if f["content_type"] == Folder.ContentType.ENCLAVE:
+            entry.update(
+                {
+                    "symbol": "triangle",
+                    "symbolSize": 12,
+                    "itemStyle": {"color": "#6366f1"},
+                }
             )
-            if len(children) > 0:
-                entry.update({"children": children})
-            content.append(entry)
+        children = get_folder_content(
+            f["id"],
+            include_perimeters=include_perimeters,
+            include_enclaves=include_enclaves,
+            viewable_objects=viewable_objects,
+            needed_folders=needed_folders,
+            children_by_parent=children_by_parent,
+            perimeters_by_folder=perimeters_by_folder,
+            writable_ids=writable_ids,
+            content_counts=content_counts,
+        )
+        if len(children) > 0:
+            entry.update({"children": children})
+        content.append(entry)
 
-    if include_perimeters and folder.id in viewable_objects:
-        for p in Perimeter.objects.filter(folder=folder).distinct():
+    if include_perimeters and folder_id in viewable_objects:
+        for p in perimeters_by_folder.get(folder_id, ()):
             content.append(
                 {
-                    "name": p.name,
+                    "name": p["name"],
                     "symbol": "circle",
                     "symbolSize": 10,
                     "itemStyle": {"color": "#222436"},
@@ -2233,8 +2259,14 @@ def duplicate_related_objects(
             # If the object exists in the target folder, link it to the duplicate object
             link_existing_object(duplicate_object, existing_obj, field_name)
 
-        elif obj.folder in target_parent_folders and obj.is_published:
-            # If the object's folder is a parent and it's published, link it
+        elif (
+            obj.folder in target_parent_folders
+            and obj.folder.default_role is not None
+            and obj.folder.default_role.permissions.filter(
+                codename=f"view_{model_class._meta.model_name}"
+            ).exists()
+        ):
+            # Link the object if the user can see it thanks to the `obj.folder.default_role`.
             link_existing_object(duplicate_object, obj, field_name)
 
         elif obj.folder in sub_folders:
@@ -2297,3 +2329,43 @@ def duplicate_related_objects(
             field_name,
             model_class,
         )
+
+
+def scoped_requirement_assessments(
+    compliance_assessment, user, *, include_non_assessable=True
+):
+    """Requirement assessments of `compliance_assessment` that `user` may see.
+
+    Two row-level filters that object-level permissions do not cover:
+    a respondent sees only what is assigned to their actors, and requirements
+    hidden by an unsatisfied `visibility_expression` do not apply at all.
+    Returns `(assessments, hidden_urns)`; callers that also build a requirement
+    tree need `hidden_urns` to prune it the same way.
+    """
+    from core.cel_service import build_cel_context
+    from core.models import Actor, RequirementAssignment
+    from core.utils import get_respondent_scoped_folder_ids
+
+    assessments = list(
+        compliance_assessment.get_requirement_assessments(
+            include_non_assessable=include_non_assessable
+        )
+    )
+
+    respondent_folders = get_respondent_scoped_folder_ids(user)
+    if respondent_folders and compliance_assessment.folder_id in respondent_folders:
+        user_actors = Actor.get_all_for_user(user)
+        assigned_ids = set(
+            RequirementAssignment.objects.filter(
+                compliance_assessment=compliance_assessment,
+                actor__in=user_actors,
+            ).values_list("requirement_assessments__id", flat=True)
+        )
+        assessments = [ra for ra in assessments if ra.id in assigned_ids]
+
+    _ctx, hidden_urns = build_cel_context(compliance_assessment)
+    if hidden_urns:
+        assessments = [
+            ra for ra in assessments if ra.requirement.urn not in hidden_urns
+        ]
+    return assessments, hidden_urns

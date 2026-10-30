@@ -1,0 +1,1738 @@
+urn: urn:intuitem:risk:library:china-pi-compliance-audit-2025
+locale: zh
+ref_id: china-pi-compliance-audit-2025
+name: 个人信息保护合规审计管理办法及指引
+description: |-
+  《个人信息保护合规审计管理办法》（国家互联网信息办公室令第18号，2025年2月12日公布，自2025年5月1日起施行）及其附件《个人信息保护合规审计指引》。
+
+  个人信息处理者自行开展或者按照保护部门要求委托专业机构开展个人信息保护合规审计的，应当参照该指引。处理超过1000万人个人信息的个人信息处理者，应当每两年至少开展一次合规审计。
+
+  来源：https://www.cac.gov.cn/2025-02/14/c_1741233507681519.htm
+copyright: 国家互联网信息办公室 / Cyberspace Administration of China
+version: 1
+publication_date: '2026-10-09'
+provider: CAC
+packager: intuitem
+translations:
+  en:
+    name: China PI Protection Compliance Audit Measures and Guideline
+    description: |-
+      Administrative Measures for Personal Information Protection Compliance Audits (CAC Order No. 18, issued February 12, 2025, in force since May 1, 2025) and their annex, the Personal Information Protection Compliance Audit Guideline.
+
+      Personal information processors conducting a compliance audit themselves, or through a professional institution at the request of the authorities, must refer to the Guideline. Processors handling the personal information of more than 10 million people must be audited at least once every two years.
+
+      The Chinese text is the only official one. The English text is an unofficial translation by intuitem.
+
+      Source: https://www.cac.gov.cn/2025-02/14/c_1741233507681519.htm
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:china-pi-compliance-audit-2025
+    ref_id: PI Compliance Audit
+    name: 个人信息保护合规审计管理办法及指引
+    description: |-
+      《个人信息保护合规审计管理办法》（国家互联网信息办公室令第18号，2025年2月12日公布，自2025年5月1日起施行）及其附件《个人信息保护合规审计指引》。
+
+      个人信息处理者自行开展或者按照保护部门要求委托专业机构开展个人信息保护合规审计的，应当参照该指引。处理超过1000万人个人信息的个人信息处理者，应当每两年至少开展一次合规审计。
+
+      来源：https://www.cac.gov.cn/2025-02/14/c_1741233507681519.htm
+    translations:
+      en:
+        name: China PI Protection Compliance Audit Measures and Guideline
+        description: |-
+          Administrative Measures for Personal Information Protection Compliance Audits (CAC Order No. 18, issued February 12, 2025, in force since May 1, 2025) and their annex, the Personal Information Protection Compliance Audit Guideline.
+
+          Personal information processors conducting a compliance audit themselves, or through a professional institution at the request of the authorities, must refer to the Guideline. Processors handling the personal information of more than 10 million people must be audited at least once every two years.
+
+          The Chinese text is the only official one. The English text is an unofficial translation by intuitem.
+
+          Source: https://www.cac.gov.cn/2025-02/14/c_1741233507681519.htm
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:measures
+      assessable: false
+      depth: 1
+      name: 个人信息保护合规审计管理办法
+      translations:
+        en:
+          name: Administrative Measures for Personal Information Protection Compliance Audits
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:art-1
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:measures
+      ref_id: Art. 1
+      description: 为了规范个人信息保护合规审计活动，保护个人信息权益，根据《中华人民共和国个人信息保护法》、《网络数据安全管理条例》等法律、行政法规，制定本办法。
+      translations:
+        en:
+          description: These Measures are formulated in accordance with the Personal Information Protection
+            Law of the People's Republic of China, the Regulations on Network Data Security Management
+            and other laws and administrative regulations, in order to regulate personal information protection
+            compliance audit activities and protect rights and interests in personal information.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:art-2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:measures
+      ref_id: Art. 2
+      description: |-
+        在中华人民共和国境内开展个人信息保护合规审计，适用本办法。
+
+        本办法所称个人信息保护合规审计，是指对个人信息处理者的个人信息处理活动是否遵守法律、行政法规的情况进行审查和评价的监督活动。
+      translations:
+        en:
+          description: |-
+            These Measures apply to personal information protection compliance audits conducted within the territory of the People's Republic of China.
+
+            For the purposes of these Measures, a personal information protection compliance audit means a supervisory activity that reviews and evaluates whether the personal information processing activities of a personal information processor comply with laws and administrative regulations.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:art-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:measures
+      ref_id: Art. 3
+      description: 个人信息处理者自行开展个人信息保护合规审计的，应当由个人信息处理者内部机构或者委托专业机构定期对其处理个人信息遵守法律、行政法规的情况进行合规审计。
+      translations:
+        en:
+          description: Where a personal information processor conducts a personal information protection
+            compliance audit on its own initiative, its internal body, or a professional institution it
+            entrusts, shall regularly audit the compliance of its personal information processing with
+            laws and administrative regulations.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:art-4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:measures
+      ref_id: Art. 4
+      description: 处理超过1000万人个人信息的个人信息处理者，应当每两年至少开展一次个人信息保护合规审计。
+      translations:
+        en:
+          description: A personal information processor that processes the personal information of more
+            than 10 million individuals shall conduct a personal information protection compliance audit
+            at least once every two years.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:art-5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:measures
+      ref_id: Art. 5
+      description: |-
+        个人信息处理者有以下情形之一的，国家网信部门和其他履行个人信息保护职责的部门（以下统称为保护部门），可以要求个人信息处理者委托专业机构对个人信息处理活动进行合规审计：
+
+        （一）发现个人信息处理活动存在严重影响个人权益或者严重缺乏安全措施等较大风险的；
+
+        （二）个人信息处理活动可能侵害众多个人的权益的；
+
+        （三）发生个人信息安全事件，导致100万人以上个人信息或者10万人以上敏感个人信息泄露、篡改、丢失、毁损的。
+
+        对同一个人信息安全事件或者风险，不得重复要求个人信息处理者委托专业机构开展个人信息保护合规审计。
+      translations:
+        en:
+          description: |-
+            Where a personal information processor falls under any of the following circumstances, the national cyberspace administration and other departments performing personal information protection duties (collectively, the "protection departments") may require it to entrust a professional institution to conduct a compliance audit of its personal information processing activities:
+
+            (1) its personal information processing activities are found to carry significant risks, such as seriously affecting individuals' rights and interests or a serious lack of security measures;
+
+            (2) its personal information processing activities may infringe upon the rights and interests of a large number of individuals;
+
+            (3) a personal information security incident has occurred, resulting in the leakage, tampering, loss or damage of the personal information of 1 million or more individuals, or of the sensitive personal information of 100,000 or more individuals.
+
+            A personal information processor shall not be required more than once to entrust a professional institution with a compliance audit for the same personal information security incident or risk.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:art-6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:measures
+      ref_id: Art. 6
+      description: 个人信息处理者自行开展或者按照保护部门要求委托专业机构开展个人信息保护合规审计的，应当参照本办法附件《个人信息保护合规审计指引》。
+      translations:
+        en:
+          description: A personal information processor that conducts a personal information protection
+            compliance audit on its own initiative, or entrusts a professional institution to conduct
+            one at the request of the protection departments, shall refer to the Personal Information
+            Protection Compliance Audit Guideline annexed to these Measures.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:art-7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:measures
+      ref_id: Art. 7
+      description: |-
+        专业机构应当具备开展个人信息保护合规审计的能力，有与服务相适应的审计人员、场所、设施和资金等。
+
+        鼓励相关专业机构通过认证。专业机构的认证按照《中华人民共和国认证认可条例》的有关规定执行。
+      translations:
+        en:
+          description: |-
+            A professional institution shall have the capability to conduct personal information protection compliance audits, with auditors, premises, facilities and funds commensurate with its services.
+
+            Relevant professional institutions are encouraged to obtain certification. Certification of professional institutions is carried out in accordance with the Regulations of the People's Republic of China on Certification and Accreditation.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:art-8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:measures
+      ref_id: Art. 8
+      description: 个人信息处理者按照保护部门要求开展个人信息保护合规审计的，应当为专业机构正常开展个人信息保护合规审计工作提供必要支持，并承担审计费用。
+      translations:
+        en:
+          description: A personal information processor conducting a personal information protection compliance
+            audit at the request of the protection departments shall provide the necessary support for
+            the professional institution to carry out the audit normally, and shall bear the audit costs.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:art-9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:measures
+      ref_id: Art. 9
+      description: 个人信息处理者按照保护部门要求开展个人信息保护合规审计的，应当按照保护部门要求选定专业机构，在限定时间内完成个人信息保护合规审计；情况复杂的，报保护部门批准后，可以适当延长。
+      translations:
+        en:
+          description: A personal information processor conducting a personal information protection compliance
+            audit at the request of the protection departments shall select a professional institution
+            as required by the protection departments and complete the audit within the time limit set;
+            in complex cases, the time limit may be extended appropriately with the approval of the protection
+            departments.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:art-10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:measures
+      ref_id: Art. 10
+      description: |-
+        个人信息处理者按照保护部门要求开展个人信息保护合规审计的，在完成合规审计后，应当将专业机构出具的个人信息保护合规审计报告报送保护部门。
+
+        个人信息保护合规审计报告应当由专业机构主要负责人、合规审计负责人签字并加盖专业机构公章。
+      translations:
+        en:
+          description: |-
+            A personal information processor conducting a personal information protection compliance audit at the request of the protection departments shall, upon completion of the audit, submit the audit report issued by the professional institution to the protection departments.
+
+            The personal information protection compliance audit report shall be signed by the principal person in charge of the professional institution and the person in charge of the audit, and bear the official seal of the professional institution.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:art-11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:measures
+      ref_id: Art. 11
+      description: 个人信息处理者按照保护部门要求开展个人信息保护合规审计的，应当按照保护部门要求对合规审计中发现的问题进行整改。在整改完成后15个工作日内，向保护部门报送整改情况报告。
+      translations:
+        en:
+          description: A personal information processor conducting a personal information protection compliance
+            audit at the request of the protection departments shall remediate the issues found in the
+            audit as required by the protection departments, and submit a remediation report to the protection
+            departments within 15 working days after the remediation is completed.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:art-12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:measures
+      ref_id: Art. 12
+      description: |-
+        处理100万人以上个人信息的个人信息处理者应当指定个人信息保护负责人，负责个人信息处理者的个人信息保护合规审计工作。
+
+        提供重要互联网平台服务、用户数量巨大、业务类型复杂的个人信息处理者，应当成立主要由外部成员组成的独立机构对个人信息保护合规审计情况进行监督。
+      translations:
+        en:
+          description: |-
+            A personal information processor that processes the personal information of 1 million or more individuals shall designate a person in charge of personal information protection, who is responsible for its personal information protection compliance audits.
+
+            A personal information processor that provides important internet platform services, has a very large number of users and complex types of business shall establish an independent body composed mainly of external members to supervise its personal information protection compliance audits.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:art-13
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:measures
+      ref_id: Art. 13
+      description: 专业机构在从事个人信息保护合规审计活动时，应当遵守法律法规，诚信正直，公正客观地作出合规审计职业判断，对在履行个人信息保护合规审计职责中获得的个人信息、商业秘密、保密商务信息等应当依法予以保密，不得泄露或者非法向他人提供，在合规审计工作结束后及时删除相关信息。
+      translations:
+        en:
+          description: When conducting personal information protection compliance audits, a professional
+            institution shall abide by laws and regulations, act with integrity, and make fair and objective
+            professional audit judgments; it shall keep confidential, in accordance with the law, the
+            personal information, trade secrets, confidential business information and the like obtained
+            in performing its audit duties, shall not disclose them or illegally provide them to others,
+            and shall delete the relevant information promptly once the audit work is finished.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:art-14
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:measures
+      ref_id: Art. 14
+      description: 专业机构不得转委托其他机构开展个人信息保护合规审计。
+      translations:
+        en:
+          description: A professional institution shall not subcontract a personal information protection
+            compliance audit to another institution.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:art-15
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:measures
+      ref_id: Art. 15
+      description: 同一专业机构及其关联机构、同一合规审计负责人不得连续三次以上对同一审计对象开展个人信息保护合规审计。
+      translations:
+        en:
+          description: The same professional institution and its affiliates, and the same person in charge
+            of the audit, shall not conduct personal information protection compliance audits of the same
+            audited party more than three consecutive times.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:art-16
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:measures
+      ref_id: Art. 16
+      description: 保护部门对个人信息处理者开展个人信息保护合规审计情况进行监督检查。
+      translations:
+        en:
+          description: The protection departments supervise and inspect the conduct of personal information
+            protection compliance audits by personal information processors.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:art-17
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:measures
+      ref_id: Art. 17
+      description: 任何组织、个人有权对个人信息保护合规审计中的违法活动向保护部门进行投诉、举报。收到投诉、举报的部门应当依法及时处理，并将处理结果告知投诉、举报人。
+      translations:
+        en:
+          description: Any organization or individual has the right to complain to or report to the protection
+            departments about illegal activities in personal information protection compliance audits.
+            The department receiving a complaint or report shall handle it promptly in accordance with
+            the law and inform the complainant or reporter of the outcome.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:art-18
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:measures
+      ref_id: Art. 18
+      description: 个人信息处理者、专业机构违反本办法规定的，依照《中华人民共和国个人信息保护法》、《网络数据安全管理条例》等法律法规的规定处理；构成犯罪的，依法追究刑事责任。
+      translations:
+        en:
+          description: Personal information processors and professional institutions that violate these
+            Measures shall be dealt with in accordance with the Personal Information Protection Law of
+            the People's Republic of China, the Regulations on Network Data Security Management and other
+            laws and regulations; where a crime is constituted, criminal liability shall be pursued in
+            accordance with the law.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:art-19
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:measures
+      ref_id: Art. 19
+      description: 对国家机关和法律、法规授权的具有管理公共事务职能的组织的个人信息保护合规审计，不适用本办法。
+      translations:
+        en:
+          description: These Measures do not apply to personal information protection compliance audits
+            of state organs and of organizations authorized by laws or regulations to perform public affairs
+            management functions.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:art-20
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:measures
+      ref_id: Art. 20
+      description: 本办法自2025年5月1日起施行。
+      translations:
+        en:
+          description: These Measures come into force on May 1, 2025.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:guideline
+      assessable: false
+      depth: 1
+      name: 个人信息保护合规审计指引
+      description: 本指引根据《中华人民共和国个人信息保护法》、《网络数据安全管理条例》等法律、行政法规制定。
+      translations:
+        en:
+          name: Personal Information Protection Compliance Audit Guideline
+          description: This Guideline is formulated in accordance with the Personal Information Protection
+            Law of the People's Republic of China, the Regulations on Network Data Security Management
+            and other laws and administrative regulations.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:2
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:guideline
+      ref_id: '2'
+      description: 对个人信息处理活动的合法性基础进行合规审计的，应当重点审查下列事项：
+      translations:
+        en:
+          description: 'A compliance audit of the legal basis of personal information processing activities
+            shall focus on the following:'
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:2.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:2
+      ref_id: 2(1)
+      description: 基于个人同意处理个人信息的，是否取得个人同意，该同意是否由个人在充分知情的前提下自愿、明确作出；
+      translations:
+        en:
+          description: where personal information is processed on the basis of consent, whether the individual's
+            consent was obtained, and whether it was given voluntarily and explicitly, with full knowledge;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:2.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:2
+      ref_id: 2(2)
+      description: 基于个人同意处理个人信息的，个人信息的处理目的、处理方式、处理的个人信息种类发生变更的，是否重新取得个人同意；
+      translations:
+        en:
+          description: where personal information is processed on the basis of consent and the purpose
+            or method of processing, or the type of personal information processed, changes, whether the
+            individual's consent was obtained again;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:2.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:2
+      ref_id: 2(3)
+      description: 基于个人同意处理个人信息的，是否依照法律、行政法规取得个人单独同意或者书面同意；
+      translations:
+        en:
+          description: where personal information is processed on the basis of consent, whether separate
+            consent or written consent was obtained as required by laws and administrative regulations;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:2.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:2
+      ref_id: 2(4)
+      description: 处理个人信息未取得个人同意的，是否属于法律、行政法规规定不需要取得个人同意的情形。
+      translations:
+        en:
+          description: where personal information is processed without the individual's consent, whether
+            this falls under a circumstance in which laws and administrative regulations do not require
+            consent.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:3
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:guideline
+      ref_id: '3'
+      description: 对个人信息处理规则进行合规审计的，应当重点审查下列事项：
+      translations:
+        en:
+          description: 'A compliance audit of personal information processing rules shall focus on the
+            following:'
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:3.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:3
+      ref_id: 3(1)
+      description: 是否真实、准确、完整地告知个人信息处理者的名称或者姓名和联系方式；
+      translations:
+        en:
+          description: whether the name and contact details of the personal information processor are
+            disclosed truthfully, accurately and completely;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:3.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:3
+      ref_id: 3(2)
+      description: 是否以清单等便于查看的形式列明所收集的个人信息及其处理方式和种类；
+      translations:
+        en:
+          description: whether the personal information collected, and its methods and types of processing,
+            are listed in an easily viewable form such as a list;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:3.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:3
+      ref_id: 3(3)
+      description: 是否与处理目的直接相关，采取对个人权益影响最小的方式；
+      translations:
+        en:
+          description: whether processing is directly related to the purpose of processing and uses the
+            method with the least impact on individuals' rights and interests;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:3.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:3
+      ref_id: 3(4)
+      description: 是否明确个人信息保存期限或者保存期限的确定方法、到期后的处理方式，以及确定保存期限为实现处理目的所必要的最短时间；
+      translations:
+        en:
+          description: whether the retention period of personal information, or the method of determining
+            it, and the handling upon expiry are specified, and whether the retention period is set to
+            the minimum necessary to achieve the purpose of processing;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:3.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:3
+      ref_id: 3(5)
+      description: 是否明确个人查阅、复制、转移、更正、补充、删除、限制处理个人信息以及注销账号、撤回同意的途径和方法。
+      translations:
+        en:
+          description: whether the channels and methods for individuals to access, copy, transfer, correct,
+            supplement, delete or restrict the processing of their personal information, and to cancel
+            their account or withdraw consent, are specified.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:guideline
+      ref_id: '4'
+      description: 对个人信息处理者履行告知个人信息处理规则义务进行合规审计的，应当重点审查下列事项：
+      translations:
+        en:
+          description: 'A compliance audit of the personal information processor''s performance of its
+            obligation to notify the personal information processing rules shall focus on the following:'
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:4.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:4
+      ref_id: 4(1)
+      description: 个人信息处理者在处理个人信息前，是否以显著方式、清晰易懂的语言真实、准确、完整地向个人告知个人信息处理规则；
+      translations:
+        en:
+          description: whether, before processing personal information, the personal information processor
+            notified individuals of the processing rules truthfully, accurately and completely, in a conspicuous
+            manner and in clear and easily understood language;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:4.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:4
+      ref_id: 4(2)
+      description: 告知文本的大小、字体和颜色是否便于个人完整阅读告知事项；
+      translations:
+        en:
+          description: whether the size, font and colour of the notice text make it easy for individuals
+            to read the notified matters in full;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:4.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:4
+      ref_id: 4(3)
+      description: 线下告知是否通过标注、说明等多种方式向个人履行告知义务；
+      translations:
+        en:
+          description: whether offline notification fulfils the obligation to notify individuals through
+            multiple means such as signs and explanations;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:4.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:4
+      ref_id: 4(4)
+      description: 在线告知是否提供文本信息或者通过适当方式向个人履行告知义务；
+      translations:
+        en:
+          description: whether online notification provides text information or fulfils the obligation
+            to notify individuals by other appropriate means;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:4.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:4
+      ref_id: 4(5)
+      description: 个人信息处理规则发生变更的，是否将变更内容及时告知个人；
+      translations:
+        en:
+          description: where the personal information processing rules change, whether individuals are
+            notified of the changes in a timely manner;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:4.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:4
+      ref_id: 4(6)
+      description: 处理个人信息不需要告知的，是否属于法律、行政法规规定应当保密或者不需要告知的情形。
+      translations:
+        en:
+          description: where processing takes place without notification, whether this falls under a circumstance
+            in which laws and administrative regulations require confidentiality or do not require notification.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:guideline
+      ref_id: '5'
+      description: 对个人信息处理者与其他个人信息处理者共同处理个人信息进行合规审计的，应当重点审查下列事项：
+      translations:
+        en:
+          description: 'A compliance audit of personal information processed jointly by the personal information
+            processor and other personal information processors shall focus on the following:'
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:5.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:5
+      ref_id: 5(1)
+      description: 是否约定各自的权利义务；
+      translations:
+        en:
+          description: whether their respective rights and obligations are agreed;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:5.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:5
+      ref_id: 5(2)
+      description: 个人信息权益保护机制；
+      translations:
+        en:
+          description: the mechanism for protecting rights and interests in personal information;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:5.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:5
+      ref_id: 5(3)
+      description: 个人信息安全事件报告机制；
+      translations:
+        en:
+          description: the mechanism for reporting personal information security incidents;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:5.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:5
+      ref_id: 5(4)
+      description: 其他法律、行政法规规定需要约定的权利和义务。
+      translations:
+        en:
+          description: other rights and obligations that laws and administrative regulations require to
+            be agreed.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:guideline
+      ref_id: '6'
+      description: 对个人信息处理者委托处理个人信息进行合规审计的，应当重点审查下列事项：
+      translations:
+        en:
+          description: 'A compliance audit of the personal information processor entrusting the processing
+            of personal information shall focus on the following:'
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:6.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:6
+      ref_id: 6(1)
+      description: 个人信息处理者在委托处理个人信息前，是否开展个人信息保护影响评估；
+      translations:
+        en:
+          description: whether the personal information processor conducted a personal information protection
+            impact assessment before entrusting the processing of personal information;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:6.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:6
+      ref_id: 6(2)
+      description: 个人信息处理者与受托人签订的合同，是否与受托人约定了委托处理的目的、期限、方式、个人信息的种类、保护措施以及双方的权利义务等；
+      translations:
+        en:
+          description: whether the contract signed by the personal information processor with the entrusted
+            party specifies the purpose, period and method of the entrusted processing, the types of personal
+            information, the protection measures, and the rights and obligations of both parties;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:6.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:6
+      ref_id: 6(3)
+      description: 个人信息处理者是否采取定期检查等方式，对受托人的个人信息处理活动进行监督。
+      translations:
+        en:
+          description: whether the personal information processor supervises the entrusted party's personal
+            information processing activities, for example through regular inspections.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:guideline
+      ref_id: '7'
+      description: 个人信息处理者存在因合并、重组、分立、解散、被宣告破产等原因需要转移个人信息情形的，应当重点审查个人信息处理者是否向个人告知接收方的名称或者姓名和联系方式。
+      translations:
+        en:
+          description: Where a personal information processor needs to transfer personal information due
+            to merger, reorganization, division, dissolution, declaration of bankruptcy or other reasons,
+            the audit shall focus on whether the personal information processor notified individuals of
+            the name and contact details of the recipient.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:8
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:guideline
+      ref_id: '8'
+      description: 对个人信息处理者向其他个人信息处理者提供其处理的个人信息进行合规审计的，应当重点审查下列事项：
+      translations:
+        en:
+          description: 'A compliance audit of the personal information processor providing the personal
+            information it processes to other personal information processors shall focus on the following:'
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:8.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:8
+      ref_id: 8(1)
+      description: 基于个人同意处理个人信息的，是否取得个人的单独同意；
+      translations:
+        en:
+          description: where personal information is processed on the basis of consent, whether the individual's
+            separate consent was obtained;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:8.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:8
+      ref_id: 8(2)
+      description: 是否向个人告知接收方的名称或者姓名、联系方式、处理目的、处理方式和个人信息的种类，法律、行政法规规定应当保密或者不需要告知的除外；
+      translations:
+        en:
+          description: whether individuals were notified of the recipient's name, contact details, purpose
+            and method of processing and the types of personal information, except where laws and administrative
+            regulations require confidentiality or do not require notification;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:8.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:8
+      ref_id: 8(3)
+      description: 是否事前进行个人信息保护影响评估。
+      translations:
+        en:
+          description: whether a personal information protection impact assessment was conducted beforehand.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:9
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:guideline
+      ref_id: '9'
+      description: 对个人信息处理者利用自动化决策处理个人信息进行合规审计的，应当重点审查下列事项：
+      translations:
+        en:
+          description: 'A compliance audit of the personal information processor''s use of personal information
+            for automated decision-making shall focus on the following:'
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:9.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:9
+      ref_id: 9(1)
+      description: 自动化决策的透明度，以及自动化决策的结果是否公平、公正；
+      translations:
+        en:
+          description: the transparency of automated decision-making, and whether its results are fair
+            and just;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:9.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:9
+      ref_id: 9(2)
+      description: 是否事前告知个人自动化决策处理个人信息的种类及可能带来的影响；
+      translations:
+        en:
+          description: whether individuals were informed beforehand of the types of personal information
+            processed through automated decision-making and of its possible impact;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:9.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:9
+      ref_id: 9(3)
+      description: 是否事前进行个人信息保护影响评估；
+      translations:
+        en:
+          description: whether a personal information protection impact assessment was conducted beforehand;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:9.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:9
+      ref_id: 9(4)
+      description: 是否向用户提供保障机制，以便个人通过便捷方式拒绝通过自动化决策方式作出对个人权益有重大影响的决定，并要求个人信息处理者就通过自动化决策方式作出对用户个人权益有重大影响的决定予以说明；
+      translations:
+        en:
+          description: whether users are provided with safeguards enabling individuals to refuse, through
+            convenient means, decisions made through automated decision-making that have a significant
+            impact on their rights and interests, and to require the personal information processor to
+            explain such decisions;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:9.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:9
+      ref_id: 9(5)
+      description: 向个人进行信息推送、商业营销的，是否同时提供不针对个人特征的选项，或者提供便捷的拒绝自动化决策服务的方式；
+      translations:
+        en:
+          description: where information push or commercial marketing is directed at individuals, whether
+            options not targeting their personal characteristics, or a convenient way to refuse automated
+            decision-making services, are provided at the same time;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:9.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:9
+      ref_id: 9(6)
+      description: 是否采取了有效措施，防止自动化决策根据消费者的偏好、交易习惯等对个人在交易条件上实行不合理的差别待遇；
+      translations:
+        en:
+          description: whether effective measures are taken to prevent automated decision-making from
+            applying unreasonable differential treatment to individuals in trading conditions based on
+            consumers' preferences, trading habits and the like;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:9.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:9
+      ref_id: 9(7)
+      description: 其他可能影响自动化决策的透明度和结果公平、公正的事项。
+      translations:
+        en:
+          description: other matters that may affect the transparency of automated decision-making and
+            the fairness and justice of its results.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:10
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:guideline
+      ref_id: '10'
+      description: 对个人信息处理者基于个人同意公开个人信息进行合规审计的，应当重点审查下列事项：
+      translations:
+        en:
+          description: 'A compliance audit of the personal information processor publicly disclosing personal
+            information on the basis of consent shall focus on the following:'
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:10.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:10
+      ref_id: 10(1)
+      description: 个人信息处理者公开其处理的个人信息前是否取得个人单独同意，该授权是否真实、有效，是否存在违背个人意愿将个人信息予以公开的情况；
+      translations:
+        en:
+          description: whether the personal information processor obtained the individual's separate consent
+            before publicly disclosing the personal information it processes, whether that authorization
+            is genuine and valid, and whether personal information has been disclosed against the individual's
+            will;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:10.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:10
+      ref_id: 10(2)
+      description: 个人信息处理者公开个人信息前，是否进行个人信息保护影响评估。
+      translations:
+        en:
+          description: whether the personal information processor conducted a personal information protection
+            impact assessment before publicly disclosing personal information.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:11
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:guideline
+      ref_id: '11'
+      description: 个人信息处理者在公共场所安装图像收集、个人身份识别设备的，应当重点对其安装图像收集、个人信息身份识别设备的合法性及所收集个人信息的用途进行审查。审查内容包括但不限于：
+      translations:
+        en:
+          description: 'Where a personal information processor installs image collection or personal identity
+            recognition equipment in public places, the audit shall focus on the lawfulness of installing
+            such equipment and on the use of the personal information collected, including but not limited
+            to:'
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:11.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:11
+      ref_id: 11(1)
+      description: 是否为维护公共安全所必需，是否为商业目的处理所收集的个人信息；
+      translations:
+        en:
+          description: whether it is necessary to maintain public security, and whether the personal information
+            collected is processed for commercial purposes;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:11.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:11
+      ref_id: 11(2)
+      description: 是否设置了显著的提示标识；
+      translations:
+        en:
+          description: whether conspicuous warning signs are displayed;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:11.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:11
+      ref_id: 11(3)
+      description: 个人信息处理者所收集的个人图像、身份识别信息用于维护公共安全以外用途的，是否取得个人单独同意。
+      translations:
+        en:
+          description: where the personal images and identity recognition information collected are used
+            for purposes other than maintaining public security, whether the individual's separate consent
+            was obtained.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:12
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:guideline
+      ref_id: '12'
+      description: 对个人信息处理者处理已公开的个人信息进行合规审计的，应当重点审查个人信息处理者是否存在下列违法违规行为：
+      translations:
+        en:
+          description: 'A compliance audit of the personal information processor''s processing of personal
+            information already made public shall focus on whether the personal information processor
+            engages in the following illegal or non-compliant conduct:'
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:12.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:12
+      ref_id: 12(1)
+      description: 向已公开个人信息中的电子邮箱、手机号等发送与其公开目的无关的商业信息；
+      translations:
+        en:
+          description: sending commercial information unrelated to the purpose of disclosure to e-mail
+            addresses, mobile phone numbers and the like contained in publicly disclosed personal information;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:12.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:12
+      ref_id: 12(2)
+      description: 利用已公开的个人信息从事网络暴力、传播网络谣言和虚假信息等活动；
+      translations:
+        en:
+          description: using publicly disclosed personal information to engage in online violence, or
+            to spread online rumours and false information;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:12.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:12
+      ref_id: 12(3)
+      description: 处理个人明确拒绝处理的已公开个人信息；
+      translations:
+        en:
+          description: processing publicly disclosed personal information that the individual has explicitly
+            refused to have processed;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:12.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:12
+      ref_id: 12(4)
+      description: 对个人权益有重大影响，未取得个人同意；
+      translations:
+        en:
+          description: processing that has a significant impact on individuals' rights and interests without
+            obtaining their consent;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:12.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:12
+      ref_id: 12(5)
+      description: 收集、留存或处理已公开个人信息的规模、时间或使用目的超出合理范围。
+      translations:
+        en:
+          description: collecting, retaining or processing publicly disclosed personal information on
+            a scale, for a duration or for purposes beyond a reasonable range.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:13
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:guideline
+      ref_id: '13'
+      description: 对个人信息处理者处理敏感个人信息进行合规审计的，应当重点审查下列事项：
+      translations:
+        en:
+          description: 'A compliance audit of the personal information processor''s processing of sensitive
+            personal information shall focus on the following:'
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:13.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:13
+      ref_id: 13(1)
+      description: 基于个人同意处理个人信息的，处理生物识别、宗教信仰、特定身份、医疗健康、金融账户、行踪轨迹等敏感个人信息，是否事前取得个人的单独同意；
+      translations:
+        en:
+          description: where personal information is processed on the basis of consent, whether the individual's
+            separate consent was obtained beforehand for processing sensitive personal information such
+            as biometrics, religious beliefs, specific identities, medical health, financial accounts
+            and whereabouts;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:13.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:13
+      ref_id: 13(2)
+      description: 基于个人同意处理个人信息的，处理不满十四周岁未成年人的个人信息，是否事前取得未成年人的父母或者其他监护人的同意；
+      translations:
+        en:
+          description: where personal information is processed on the basis of consent, whether the consent
+            of the parents or other guardians of a minor under the age of fourteen was obtained beforehand
+            for processing the minor's personal information;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:13.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:13
+      ref_id: 13(3)
+      description: 处理敏感个人信息的目的、方式、范围是否合法、正当、必要；
+      translations:
+        en:
+          description: whether the purpose, method and scope of processing sensitive personal information
+            are lawful, justified and necessary;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:13.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:13
+      ref_id: 13(4)
+      description: 是否在事前进行个人信息保护影响评估；
+      translations:
+        en:
+          description: whether a personal information protection impact assessment was conducted beforehand;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:13.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:13
+      ref_id: 13(5)
+      description: 是否向个人告知处理敏感个人信息的必要性以及对个人权益的影响，法律、行政法规规定应当保密或者不需要告知的除外；
+      translations:
+        en:
+          description: whether individuals were informed of the necessity of processing their sensitive
+            personal information and of the impact on their rights and interests, except where laws and
+            administrative regulations require confidentiality or do not require notification;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:13.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:13
+      ref_id: 13(6)
+      description: 法律、行政法规规定应当取得书面同意的，是否取得书面同意；
+      translations:
+        en:
+          description: where laws and administrative regulations require written consent, whether written
+            consent was obtained;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:13.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:13
+      ref_id: 13(7)
+      description: 是否遵守法律、行政法规对处理敏感个人信息的限制性规定。
+      translations:
+        en:
+          description: whether the restrictions imposed by laws and administrative regulations on the
+            processing of sensitive personal information are complied with.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:14
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:guideline
+      ref_id: '14'
+      description: 对个人信息处理者处理不满十四周岁未成年人个人信息进行合规审计的，应当重点审查下列事项：
+      translations:
+        en:
+          description: 'A compliance audit of the personal information processor''s processing of the
+            personal information of minors under the age of fourteen shall focus on the following:'
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:14.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:14
+      ref_id: 14(1)
+      description: 是否制定专门的个人信息处理规则；
+      translations:
+        en:
+          description: whether specific personal information processing rules have been formulated;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:14.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:14
+      ref_id: 14(2)
+      description: 是否向未成年人及其监护人告知未成年人个人信息的处理目的、处理方式、处理必要性，以及处理个人信息的种类、所采取的保护措施等，法律、行政法规规定不需要告知的除外；
+      translations:
+        en:
+          description: whether minors and their guardians were informed of the purpose, method and necessity
+            of processing the minors' personal information, the types of personal information processed
+            and the protection measures taken, except where laws and administrative regulations do not
+            require notification;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:14.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:14
+      ref_id: 14(3)
+      description: 基于个人同意处理个人信息，是否存在强制要求未成年人或者其监护人同意处理非必要个人信息的行为。
+      translations:
+        en:
+          description: where personal information is processed on the basis of consent, whether minors
+            or their guardians are compelled to consent to the processing of non-essential personal information.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:15
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:guideline
+      ref_id: '15'
+      description: 对个人信息处理者向境外提供个人信息进行合规审计的，应当重点审查下列事项：
+      translations:
+        en:
+          description: 'A compliance audit of the personal information processor providing personal information
+            outside the territory of China shall focus on the following:'
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:15.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:15
+      ref_id: 15(1)
+      description: 关键信息基础设施运营者向境外提供个人信息是否经过国家网信部门组织的安全评估，法律、行政法规、国家网信部门另有规定的，从其规定；
+      translations:
+        en:
+          description: whether personal information provided abroad by a critical information infrastructure
+            operator has passed the security assessment organized by the national cyberspace administration,
+            unless laws, administrative regulations or the national cyberspace administration provide
+            otherwise;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:15.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:15
+      ref_id: 15(2)
+      description: 关键信息基础设施运营者以外的数据处理者自当年1月1日起累计向境外提供100万人以上个人信息（不含敏感个人信息）或者1万人以上敏感个人信息是否经过国家网信部门组织的安全评估，法律、行政法规、国家网信部门另有规定的，从其规定；
+      translations:
+        en:
+          description: whether a data processor other than a critical information infrastructure operator
+            that has cumulatively provided abroad, since January 1 of the current year, the personal information
+            (excluding sensitive personal information) of 1 million or more individuals, or the sensitive
+            personal information of 10,000 or more individuals, has passed the security assessment organized
+            by the national cyberspace administration, unless laws, administrative regulations or the
+            national cyberspace administration provide otherwise;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:15.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:15
+      ref_id: 15(3)
+      description: 关键信息基础设施运营者以外的数据处理者自当年1月1日起累计向境外提供10万人以上、不满100万人个人信息（不含敏感个人信息）或者不满1万人敏感个人信息的，是否按照国家网信部门的规定，经个人信息保护认证或者按照国家网信部门制定的标准合同与境外接收方签订合同并向所在地省级网信部门备案，或者符合法律、行政法规、国家网信部门规定的其他条件；
+      translations:
+        en:
+          description: whether a data processor other than a critical information infrastructure operator
+            that has cumulatively provided abroad, since January 1 of the current year, the personal information
+            (excluding sensitive personal information) of 100,000 or more but fewer than 1 million individuals,
+            or the sensitive personal information of fewer than 10,000 individuals, has, in accordance
+            with the provisions of the national cyberspace administration, obtained personal information
+            protection certification, or concluded a contract with the overseas recipient based on the
+            standard contract formulated by the national cyberspace administration and filed it with the
+            provincial cyberspace administration where it is located, or meets other conditions prescribed
+            by laws, administrative regulations or the national cyberspace administration;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:15.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:15
+      ref_id: 15(4)
+      description: 存在向外国司法或者执法机构提供存储于中华人民共和国境内个人信息情形的，是否经过中华人民共和国主管机关批准；
+      translations:
+        en:
+          description: where personal information stored within the People's Republic of China is provided
+            to foreign judicial or law enforcement authorities, whether this was approved by the competent
+            authorities of the People's Republic of China;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:15.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:15
+      ref_id: 15(5)
+      description: 是否向被列入限制或者禁止个人信息提供清单的组织和个人提供个人信息。
+      translations:
+        en:
+          description: whether personal information is provided to organizations or individuals placed
+            on the list restricting or prohibiting the provision of personal information.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:16
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:guideline
+      ref_id: '16'
+      description: 对个人信息删除权保障情况进行合规审计的，应当重点审查下列事项：
+      translations:
+        en:
+          description: 'A compliance audit of the safeguarding of the right to deletion of personal information
+            shall focus on the following:'
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:16.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:16
+      ref_id: 16(1)
+      description: 个人信息处理目的是否已实现、无法实现或者为实现处理目的不再必要；
+      translations:
+        en:
+          description: whether the purpose of processing has been achieved, cannot be achieved, or the
+            personal information is no longer necessary to achieve it;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:16.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:16
+      ref_id: 16(2)
+      description: 个人信息处理者是否停止提供产品或者服务，或者个人是否已注销账号；
+      translations:
+        en:
+          description: whether the personal information processor has ceased to provide the product or
+            service, or the individual has cancelled their account;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:16.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:16
+      ref_id: 16(3)
+      description: 保存期限是否已届满；
+      translations:
+        en:
+          description: whether the retention period has expired;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:16.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:16
+      ref_id: 16(4)
+      description: 个人是否撤回同意；
+      translations:
+        en:
+          description: whether the individual has withdrawn consent;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:16.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:16
+      ref_id: 16(5)
+      description: 个人信息处理者是否违反法律、行政法规或者违反约定处理个人信息；
+      translations:
+        en:
+          description: whether the personal information processor processes personal information in violation
+            of laws, administrative regulations or agreements;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:16.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:16
+      ref_id: 16(6)
+      description: 应当删除个人信息，但法律、行政法规规定的保存期限未届满，或者删除个人信息从技术上难以实现的，个人信息处理者是否停止除存储和采取必要的安全措施之外的处理。
+      translations:
+        en:
+          description: where personal information should be deleted but the retention period prescribed
+            by laws and administrative regulations has not expired, or deletion is technically difficult,
+            whether the personal information processor has stopped all processing other than storage and
+            taking necessary security protection measures.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:17
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:guideline
+      ref_id: '17'
+      description: 对个人信息处理者保障个人在个人信息处理活动中的权利情况进行合规审计的，应当重点审查下列事项：
+      translations:
+        en:
+          description: 'A compliance audit of how the personal information processor safeguards individuals''
+            rights in personal information processing activities shall focus on the following:'
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:17.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:17
+      ref_id: 17(1)
+      description: 是否建立便捷的个人行使权利的申请受理机制和处理机制；
+      translations:
+        en:
+          description: whether a convenient mechanism for accepting and handling individuals' requests
+            to exercise their rights has been established;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:17.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:17
+      ref_id: 17(2)
+      description: 是否及时响应个人行使权利的申请，是否及时、完整、准确告知处理意见或者执行结果；
+      translations:
+        en:
+          description: whether individuals' requests to exercise their rights are responded to in a timely
+            manner, and whether the handling opinion or result is communicated in a timely, complete and
+            accurate manner;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:17.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:17
+      ref_id: 17(3)
+      description: 拒绝个人行使权利请求的，是否向个人说明理由。
+      translations:
+        en:
+          description: where a request by an individual to exercise their rights is refused, whether the
+            reasons are explained to the individual.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:18
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:guideline
+      ref_id: '18'
+      description: 个人信息处理者应当响应个人申请，对其个人信息处理规则进行解释说明，合规审计时应当重点对下列内容进行评价：
+      translations:
+        en:
+          description: 'The personal information processor shall respond to individuals'' requests to
+            explain its personal information processing rules; the compliance audit shall focus on evaluating
+            the following:'
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:18.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:18
+      ref_id: 18(1)
+      description: 个人信息处理者是否提供便捷的方式和途径，接受、处理个人关于个人信息处理规则解释说明的要求；
+      translations:
+        en:
+          description: whether the personal information processor provides convenient means and channels
+            to receive and handle individuals' requests for explanation of the personal information processing
+            rules;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:18.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:18
+      ref_id: 18(2)
+      description: 接到个人的要求后，个人信息处理者是否在合理的时间内，使用通俗易懂的语言对其个人信息处理规则作出解释说明。
+      translations:
+        en:
+          description: whether, upon receiving such a request, the personal information processor explains
+            its personal information processing rules within a reasonable time and in plain, easily understood
+            language.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:19
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:guideline
+      ref_id: '19'
+      description: 个人信息处理者应当依照法律、行政法规的规定制定内部管理制度和操作规程，明确组织架构、岗位职责，建立工作流程、完善内控制度，保障个人信息处理合规与安全。合规审计时，应当重点对个人信息处理者个人信息保护内部管理制度和操作规程进行审查，包括但不限于：
+      translations:
+        en:
+          description: 'The personal information processor shall, in accordance with laws and administrative
+            regulations, formulate internal management systems and operating procedures, define its organizational
+            structure and job responsibilities, establish work processes and improve internal controls,
+            so as to ensure that personal information processing is compliant and secure. The compliance
+            audit shall focus on reviewing the personal information processor''s internal management systems
+            and operating procedures for personal information protection, including but not limited to:'
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:19.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:19
+      ref_id: 19(1)
+      description: 个人信息保护工作的方针、目标、原则是否符合法律、行政法规规定；
+      translations:
+        en:
+          description: whether the policy, objectives and principles of personal information protection
+            work comply with laws and administrative regulations;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:19.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:19
+      ref_id: 19(2)
+      description: 个人信息保护组织架构、人员配备、行为规范、管理责任是否与应当履行的个人信息保护责任相适应；
+      translations:
+        en:
+          description: whether the organizational structure, staffing, codes of conduct and management
+            responsibilities for personal information protection are commensurate with the personal information
+            protection responsibilities to be fulfilled;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:19.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:19
+      ref_id: 19(3)
+      description: 是否根据个人信息的种类、来源、敏感程度、用途等，对个人信息进行分类；
+      translations:
+        en:
+          description: whether personal information is classified according to its type, source, sensitivity,
+            use and the like;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:19.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:19
+      ref_id: 19(4)
+      description: 是否建立个人信息安全事件应急响应机制；
+      translations:
+        en:
+          description: whether an emergency response mechanism for personal information security incidents
+            has been established;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:19.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:19
+      ref_id: 19(5)
+      description: 是否建立个人信息保护影响评估制度、合规审计制度；
+      translations:
+        en:
+          description: whether a personal information protection impact assessment system and a compliance
+            audit system have been established;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:19.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:19
+      ref_id: 19(6)
+      description: 是否建立畅通的个人信息保护投诉举报受理流程；
+      translations:
+        en:
+          description: whether an accessible process for accepting complaints and reports on personal
+            information protection has been established;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:19.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:19
+      ref_id: 19(7)
+      description: 是否合理制定个人信息处理操作权限；
+      translations:
+        en:
+          description: whether operating permissions for personal information processing are reasonably
+            defined;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:19.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:19
+      ref_id: 19(8)
+      description: 是否制定实施个人信息保护安全教育和培训计划；
+      translations:
+        en:
+          description: whether a security education and training plan for personal information protection
+            has been formulated and implemented;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:19.9
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:19
+      ref_id: 19(9)
+      description: 是否建立个人信息保护负责人及相关人员履职评价制度；
+      translations:
+        en:
+          description: whether a performance evaluation system for the person in charge of personal information
+            protection and related staff has been established;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:19.10
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:19
+      ref_id: 19(10)
+      description: 是否建立个人信息违法处理责任制度；
+      translations:
+        en:
+          description: whether an accountability system for unlawful processing of personal information
+            has been established;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:19.11
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:19
+      ref_id: 19(11)
+      description: 法律、行政法规规定的其他事项。
+      translations:
+        en:
+          description: other matters prescribed by laws and administrative regulations.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:20
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:guideline
+      ref_id: '20'
+      description: 个人信息处理者应当采取与所处理个人信息规模、类型相适应的安全技术措施，并对个人信息处理者采取的技术措施的有效性进行评价，评价内容包括但不限于：
+      translations:
+        en:
+          description: 'The personal information processor shall adopt security technical measures commensurate
+            with the scale and type of personal information processed, and the effectiveness of the technical
+            measures adopted shall be evaluated, including but not limited to:'
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:20.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:20
+      ref_id: 20(1)
+      description: 是否采取相应安全技术措施实现个人信息的保密性、完整性、可用性；
+      translations:
+        en:
+          description: whether appropriate security technical measures are adopted to ensure the confidentiality,
+            integrity and availability of personal information;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:20.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:20
+      ref_id: 20(2)
+      description: 是否采取加密、去标识化等安全技术措施，确保在不借助额外信息的情况下，消除或者降低个人信息的可识别性；
+      translations:
+        en:
+          description: whether security technical measures such as encryption and de-identification are
+            adopted to eliminate or reduce the identifiability of personal information without the use
+            of additional information;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:20.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:20
+      ref_id: 20(3)
+      description: 采取的安全技术措施能否合理确定有关人员查阅、复制、传输个人信息等的操作权限，减少个人信息在处理过程中未经授权的访问和滥用风险。
+      translations:
+        en:
+          description: whether the security technical measures adopted can reasonably determine the operating
+            permissions of relevant personnel to access, copy, transmit personal information and the like,
+            reducing the risk of unauthorized access to and misuse of personal information during processing.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:21
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:guideline
+      ref_id: '21'
+      description: 对个人信息处理者教育培训计划的制定和实施情况进行合规审计时，应当重点对下列事项进行评价：
+      translations:
+        en:
+          description: 'A compliance audit of the formulation and implementation of the personal information
+            processor''s education and training plan shall focus on evaluating the following:'
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:21.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:21
+      ref_id: 21(1)
+      description: 是否按计划对管理人员、技术人员、操作人员、全员开展相应的安全教育和培训，是否对相应人员的个人信息保护意识和技能进行考核；
+      translations:
+        en:
+          description: whether security education and training are provided as planned to management,
+            technical and operational staff and all employees, and whether their personal information
+            protection awareness and skills are assessed;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:21.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:21
+      ref_id: 21(2)
+      description: 培训内容、方式、对象、频率等能否满足个人信息保护需要。
+      translations:
+        en:
+          description: whether the content, method, audience and frequency of training meet personal information
+            protection needs.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:22
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:guideline
+      ref_id: '22'
+      description: 对个人信息处理者指定的个人信息保护负责人履职情况进行合规审计的，应当重点审查下列事项：
+      translations:
+        en:
+          description: 'A compliance audit of the performance of duties by the person in charge of personal
+            information protection designated by the personal information processor shall focus on the
+            following:'
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:22.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:22
+      ref_id: 22(1)
+      description: 个人信息保护负责人是否具有相关的工作经历和专业知识，熟悉个人信息保护相关法律、行政法规；
+      translations:
+        en:
+          description: whether the person in charge of personal information protection has relevant work
+            experience and professional knowledge, and is familiar with personal information protection
+            laws and administrative regulations;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:22.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:22
+      ref_id: 22(2)
+      description: 个人信息保护负责人是否具有明确清晰的职责，是否被赋予充分的权限协调个人信息处理者内部相关部门与人员；
+      translations:
+        en:
+          description: whether the person in charge of personal information protection has clearly defined
+            responsibilities and is granted sufficient authority to coordinate relevant internal departments
+            and staff;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:22.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:22
+      ref_id: 22(3)
+      description: 个人信息保护负责人在个人信息处理重大事项决策前是否有权提出相关意见和建议；
+      translations:
+        en:
+          description: whether the person in charge of personal information protection has the right to
+            give opinions and recommendations before decisions on major personal information processing
+            matters are made;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:22.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:22
+      ref_id: 22(4)
+      description: 个人信息保护负责人是否有权对个人信息处理者内部个人信息处理的不合规操作进行制止和采取必要的纠正措施；
+      translations:
+        en:
+          description: whether the person in charge of personal information protection has the right to
+            stop non-compliant internal personal information processing operations and take necessary
+            corrective measures;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:22.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:22
+      ref_id: 22(5)
+      description: 个人信息处理者是否公开个人信息保护负责人的联系方式，并将个人信息保护负责人的姓名、联系方式等报送保护部门。
+      translations:
+        en:
+          description: whether the personal information processor publishes the contact details of the
+            person in charge of personal information protection, and submits their name, contact details
+            and the like to the protection departments.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:23
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:guideline
+      ref_id: '23'
+      description: 对个人信息处理者开展个人信息保护影响评估情况进行合规审计时，应当重点对影响评估开展情况和评估内容进行审查：
+      translations:
+        en:
+          description: 'A compliance audit of the personal information processor''s personal information
+            protection impact assessments shall focus on reviewing how the impact assessments are conducted
+            and what they cover:'
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:23.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:23
+      ref_id: 23(1)
+      description: 是否依照法律、行政法规的规定，在进行对个人权益具有重大影响的个人信息处理活动前进行个人信息保护影响评估；
+      translations:
+        en:
+          description: whether a personal information protection impact assessment is conducted, in accordance
+            with laws and administrative regulations, before personal information processing activities
+            that have a significant impact on individuals' rights and interests;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:23.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:23
+      ref_id: 23(2)
+      description: 是否对个人信息的处理目的、处理方式等进行合法、正当、必要评估；
+      translations:
+        en:
+          description: whether the lawfulness, legitimacy and necessity of the purpose and method of processing
+            personal information are assessed;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:23.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:23
+      ref_id: 23(3)
+      description: 是否对个人权益的影响及安全风险进行评估；
+      translations:
+        en:
+          description: whether the impact on individuals' rights and interests and the security risks
+            are assessed;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:23.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:23
+      ref_id: 23(4)
+      description: 是否对所采取的保护措施的合法性、有效性，以及与风险程度的适应性进行评估。
+      translations:
+        en:
+          description: whether the lawfulness and effectiveness of the protection measures adopted, and
+            their appropriateness to the level of risk, are assessed.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:24
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:guideline
+      ref_id: '24'
+      description: 个人信息处理者应当制定个人信息安全事件应急预案。合规审计时，应当对应急预案的全面性、有效性、可执行性作出评价，包括但不限于下列内容：
+      translations:
+        en:
+          description: 'The personal information processor shall formulate an emergency plan for personal
+            information security incidents. The compliance audit shall evaluate the comprehensiveness,
+            effectiveness and practicability of the emergency plan, including but not limited to:'
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:24.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:24
+      ref_id: 24(1)
+      description: 是否结合业务实际，对面临的个人信息安全风险作出系统评估和预测；
+      translations:
+        en:
+          description: whether the personal information security risks faced are systematically assessed
+            and forecast in light of actual business conditions;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:24.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:24
+      ref_id: 24(2)
+      description: 总体要求、基本策略，组织机构、人员，技术、物资保障，指挥处置程序，应急和支持措施等是否足以应对预测的风险；
+      translations:
+        en:
+          description: whether the overall requirements, basic strategy, organization and personnel, technical
+            and material support, command and handling procedures, emergency and support measures and
+            the like are sufficient to address the forecast risks;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:24.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:24
+      ref_id: 24(3)
+      description: 是否对相关人员进行应急预案培训，定期对应急预案进行演练。
+      translations:
+        en:
+          description: whether relevant personnel are trained on the emergency plan, and whether the emergency
+            plan is exercised regularly.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:25
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:guideline
+      ref_id: '25'
+      description: 对个人信息处理者个人信息安全事件应急响应处置情况进行合规审计的，应当重点审查下列事项：
+      translations:
+        en:
+          description: 'A compliance audit of the personal information processor''s emergency response
+            to and handling of personal information security incidents shall focus on the following:'
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:25.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:25
+      ref_id: 25(1)
+      description: 是否按照应急预案、操作规程及时查明个人信息安全事件的影响、范围和可能造成的危害，分析、确定事件发生的原因，提出防止危害扩大的措施方案；
+      translations:
+        en:
+          description: whether, in accordance with the emergency plan and operating procedures, the impact,
+            scope and possible harm of the personal information security incident are promptly ascertained,
+            its cause analysed and determined, and measures proposed to prevent the harm from spreading;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:25.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:25
+      ref_id: 25(2)
+      description: 是否建立通报渠道，在安全事件发生后按照相关规定及时通知保护部门和个人；
+      translations:
+        en:
+          description: whether a notification channel has been established, and whether the protection
+            departments and individuals are notified promptly in accordance with relevant provisions after
+            a security incident occurs;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:25.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:25
+      ref_id: 25(3)
+      description: 是否采取相应措施将个人信息安全事件可能造成的损失和可能产生的危害风险降低到最小。
+      translations:
+        en:
+          description: whether appropriate measures are taken to minimize the losses and potential harm
+            the personal information security incident may cause.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:26
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:guideline
+      ref_id: '26'
+      description: 对提供重要互联网平台服务、用户数量巨大、业务类型复杂的个人信息处理者制定的平台规则进行合规审计的，应当重点审查下列事项：
+      translations:
+        en:
+          description: 'A compliance audit of the platform rules formulated by a personal information
+            processor that provides important internet platform services, has a very large number of users
+            and complex types of business shall focus on the following:'
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:26.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:26
+      ref_id: 26(1)
+      description: 平台规则是否与法律、行政法规相抵触；
+      translations:
+        en:
+          description: whether the platform rules conflict with laws and administrative regulations;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:26.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:26
+      ref_id: 26(2)
+      description: 平台规则个人信息保护条款的有效性，是否合理界定了平台、平台内产品或者服务提供者的个人信息保护权利和义务；
+      translations:
+        en:
+          description: the effectiveness of the personal information protection clauses of the platform
+            rules, and whether they reasonably define the personal information protection rights and obligations
+            of the platform and of the providers of products or services on the platform;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:26.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:26
+      ref_id: 26(3)
+      description: 平台规则的执行情况，是否通过抽样等方式验证平台规则被有效执行。
+      translations:
+        en:
+          description: the enforcement of the platform rules, and whether their effective enforcement
+            is verified, for example by sampling.
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:27
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:guideline
+      ref_id: '27'
+      description: 对提供重要互联网平台服务、用户数量巨大、业务类型复杂的个人信息处理者发布的个人信息保护社会责任报告进行合规审计的，应当重点审查社会责任报告披露下列内容的情况：
+      translations:
+        en:
+          description: 'A compliance audit of the personal information protection social responsibility
+            report published by a personal information processor that provides important internet platform
+            services, has a very large number of users and complex types of business shall focus on whether
+            the report discloses the following:'
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:27.1
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:27
+      ref_id: 27(1)
+      description: 个人信息保护组织架构和内部管理情况；
+      translations:
+        en:
+          description: the organizational structure and internal management of personal information protection;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:27.2
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:27
+      ref_id: 27(2)
+      description: 个人信息保护能力建设情况；
+      translations:
+        en:
+          description: the building of personal information protection capabilities;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:27.3
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:27
+      ref_id: 27(3)
+      description: 个人信息保护措施和成效；
+      translations:
+        en:
+          description: personal information protection measures and their results;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:27.4
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:27
+      ref_id: 27(4)
+      description: 个人行使权利的申请受理情况；
+      translations:
+        en:
+          description: the acceptance of individuals' requests to exercise their rights;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:27.5
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:27
+      ref_id: 27(5)
+      description: 独立监督机构履职情况；
+      translations:
+        en:
+          description: the performance of duties by the independent supervisory body;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:27.6
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:27
+      ref_id: 27(6)
+      description: 重大个人信息安全事件处理情况；
+      translations:
+        en:
+          description: the handling of major personal information security incidents;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:27.7
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:27
+      ref_id: 27(7)
+      description: 促进个人信息保护社会共治的科普宣传、公益活动情况；
+      translations:
+        en:
+          description: outreach and public-interest activities promoting the joint social governance of
+            personal information protection;
+    - urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:27.8
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:china-pi-compliance-audit-2025:27
+      ref_id: 27(8)
+      description: 法律、行政法规规定的其他事项。
+      translations:
+        en:
+          description: other matters prescribed by laws and administrative regulations.

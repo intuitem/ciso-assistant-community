@@ -2,9 +2,11 @@
 from datetime import datetime
 import sys
 from pathlib import Path
+from urllib.parse import urlsplit
 import tempfile
 import hashlib
 import struct
+from urllib.parse import urljoin
 import click
 import requests
 import os
@@ -47,7 +49,7 @@ else:
     ic.disable()
 
 
-def ids_map(model, folder=None):
+def ids_map(model, folder=None, url_parameters=None):
     if not TOKEN:
         print(
             "No authentication token available. Please set PAT token in .clica.env.",
@@ -56,13 +58,23 @@ def ids_map(model, folder=None):
         sys.exit(1)
 
     my_map = dict()
-    url = f"{API_URL}/{model}/ids/"
+    if model == "frameworks":
+        url = f"{API_URL}/{model}"
+    else:
+        url = f"{API_URL}/{model}/ids/"
+    if isinstance(url_parameters, str):
+        url = urljoin(url, url_parameters)
     headers = {"Authorization": f"Token {TOKEN}"}
     res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
     if res.status_code != 200:
         print("something went wrong. check authentication.")
         sys.exit(1)
     data = res.json()
+    if model == "frameworks" and isinstance(data, dict):
+        next_url = data.get("next")
+        if isinstance(next_url, str) and next_url:
+            next_page = ids_map(model, None, next_url)
+            data.setdefault("results", []).extend(next_page.get("results") or [])
     if folder and isinstance(data, dict):
         my_map = data.get(folder)
     else:
@@ -74,7 +86,9 @@ def get_global_folder_id() -> Optional[str]:
     global GLOBAL_FOLDER_ID
     if GLOBAL_FOLDER_ID:
         return GLOBAL_FOLDER_ID
-    url = f"{API_URL}/folders/"
+    # Filter server-side: the API paginates, so scanning an unfiltered first
+    # page misses the root folder once more than a page of folders exists.
+    url = f"{API_URL}/folders/?content_type=GL"
     headers = {"Authorization": f"Token {TOKEN}"}
 
     res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
@@ -130,6 +144,22 @@ def flatten_mapping(mapping) -> Dict[str, str]:
     return flat
 
 
+def flatten_frameworks_mapping(mapping) -> Dict[str, list[str]]:
+    flat: Dict[str, list[str]] = {}
+    if isinstance(mapping, dict):
+        results = mapping.get("results")
+        if isinstance(results, list):
+            for framework in results:
+                if isinstance(framework, dict):
+                    framework_name = framework.get("name")
+                    framework_id = framework.get("id")
+                    if isinstance(framework_name, str) and isinstance(
+                        framework_id, str
+                    ):
+                        flat.setdefault(framework_name, []).append(framework_id)
+    return flat
+
+
 def resolve_named_id(
     model: str, name: Optional[str], *, folder: Optional[str] = None
 ) -> Optional[str]:
@@ -140,7 +170,18 @@ def resolve_named_id(
     mapping = ids_map(model, folder=folder)
     if not isinstance(mapping, dict):
         return None
-    flat = flatten_mapping(mapping)
+    if model == "frameworks":
+        flat = flatten_frameworks_mapping(mapping)
+        values = flat.get(name, [])
+        if len(values) > 1:
+            click.echo(
+                f"❌ Ambiguous framework name '{name}', found {len(values)}",
+                err=True,
+            )
+            sys.exit(1)
+        return values[0] if values else None
+    else:
+        flat = flatten_mapping(mapping)
     value = flat.get(name)
     if value:
         return value
@@ -305,9 +346,14 @@ DATA_WIZARD_COMMANDS = [
         "command": "import_evidences",
         "model_type": "Evidence",
         "help": (
-            "Import evidences from CSV/Excel.\n"
+            "Import evidence definitions from CSV/Excel.\n"
             "\nRequired columns: name\n\n"
-            "Optional columns: ref_id, description, filtering_labels, domain\n"
+            "Optional columns: description, domain, "
+            "status (draft/missing/in_review/approved/rejected/expired), "
+            "expiry_date, owner (semicolon-separated emails/team names), "
+            "filtering_labels\n"
+            "\nDefinitions only: attachments and links belong to a revision and are "
+            "not imported.\n"
             "\nConflict detection: by name + folder"
         ),
         "requires_folder": True,
@@ -365,7 +411,8 @@ DATA_WIZARD_COMMANDS = [
             "Creates a new assessment and updates matching requirement results.\n"
             "\nRequired columns: ref_id or urn, assessable (must be truthy)\n\n"
             "Optional columns: compliance_result, requirement_progress, observations, "
-            "score, implementation_score, documentation_score, answers\n"
+            "score, implementation_score, documentation_score, answers, "
+            "applied_controls (ref_id or name, created in the audit's domain if missing)\n"
             "\nNote: always creates a new assessment; conflict management is not applicable."
         ),
         "requires_folder": False,
@@ -373,6 +420,23 @@ DATA_WIZARD_COMMANDS = [
         "requires_framework": True,
         "requires_matrix": False,
         "supports_conflict": False,
+    },
+    {
+        "command": "import_cyfun_assessment",
+        "model_type": "CyFunAssessment",
+        "help": (
+            "Import an official CyFun 2025 self-assessment workbook (Excel).\n"
+            "Creates a new assessment on the CyFun 2025 framework (auto-loaded if missing)\n"
+            "with documentation/implementation scores and comments.\n"
+            "\nNote: always creates a new assessment; conflict management is not applicable."
+        ),
+        "requires_folder": False,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+        "supports_conflict": False,
+        "show_folder_option": True,
+        "show_perimeter_option": True,
     },
     {
         "command": "import_findings_assessments",
@@ -462,10 +526,16 @@ DATA_WIZARD_COMMANDS = [
             "Import privacy processings from CSV/Excel.\n"
             "\nRequired columns: name\n\n"
             "Optional columns: ref_id, description, status, "
+            "information_channel, usage_channel, "
             "dpia_required (true/false), dpia_reference, "
             "processing_nature (comma-separated), "
             "assigned_to (comma-separated user emails), "
             "labels (comma-separated), domain\n"
+            "\nMulti-sheet Excel workbooks (as produced by the processing "
+            "XLSX export) are also supported: a 'Processing' sheet plus "
+            "optional 'Purposes', 'Personal data', 'Data subjects', "
+            "'Data recipients', 'Contractors' and 'Transfers' sheets "
+            "recreate the processing with its sub-objects.\n"
             "\nConflict detection: by name + folder"
         ),
         "requires_folder": True,
@@ -530,11 +600,12 @@ DATA_WIZARD_COMMANDS = [
         "model_type": "TPRM",
         "help": (
             "Import TPRM records from a multi-sheet Excel file.\n"
-            "Expected sheets: Entities, Solutions, Contracts (processed in order).\n"
+            "Expected sheets: Entities, Solutions, Contracts, Representatives (processed in order).\n"
             "\nEntities columns: name*, ref_id, description, domain\n"
             "Solutions columns: name*, ref_id, description, provider_entity_ref_id*\n"
             "Contracts columns: name*, ref_id, description, provider_entity_ref_id*, solution_ref_id\n"
-            "\nConflict detection: by name + folder (entities/solutions/contracts)"
+            "Representatives columns: email*, first_name, last_name, description, phone, role, provider_entity_ref_id*\n"
+            "\nConflict detection: by name + folder (entities/solutions/contracts), by email (representatives)"
         ),
         "requires_folder": True,
         "requires_perimeter": False,
@@ -614,6 +685,21 @@ DATA_WIZARD_COMMANDS = [
         "show_perimeter_option": True,
         "show_matrix_option": True,
     },
+    {
+        "command": "import_tasks",
+        "model_type": "TaskTemplate",
+        "help": (
+            "Import task templates and past task node occurrences (multi-sheet Excel "
+            "or CSV) using the Data Wizard backend.\n"
+            "\nNames in the 'evidences' column are matched in the task's domain and "
+            "created there when missing, so expected evidence is linked in one pass."
+        ),
+        "requires_folder": False,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+        "show_folder_option": True,
+    },
 ]
 
 
@@ -646,6 +732,7 @@ def register_data_wizard_command(config: Dict[str, object]) -> None:
     show_matrix_option = config.get("show_matrix_option", requires_matrix)
     supports_name_option = model_type in {
         "ComplianceAssessment",
+        "CyFunAssessment",
         "RiskAssessment",
         "FindingsAssessment",
         "EbiosRMStudyARM",
@@ -878,8 +965,14 @@ def backup_full(dest_dir, batch_size, resume):
         all_metadata.extend(data["results"])
         url = data.get("next")
         if url and not url.startswith("http"):
-            # Convert relative URL to absolute
-            url = f"{API_URL}/serdes/attachment-metadata/{url}"
+            # Convert relative URL to absolute. The API returns
+            # path-relative next links ("/api/...?limit=..."), so join
+            # against the origin, not the endpoint.
+            if url.startswith("/"):
+                split = urlsplit(API_URL)
+                url = f"{split.scheme}://{split.netloc}{url}"
+            else:
+                url = f"{API_URL}/serdes/attachment-metadata/{url}"
 
     rprint(f"[cyan]Found {len(all_metadata)} total attachments[/cyan]")
 
@@ -1220,5 +1313,128 @@ def restore_full(src_dir, verify_hashes):
     rprint("[dim]Note: You will need to regenerate your Personal Access Token[/dim]")
 
 
+@cli.command(name="export-domain")
+@click.option("--folder", required=True, help="Domain name or UUID to export.")
+@click.option(
+    "--output",
+    default=None,
+    type=click.Path(dir_okay=False),
+    help="Output zip path (default: ./<folder>-domain-export.zip).",
+)
+def export_domain(folder, output):
+    """Export a domain (folder) as a zip archive."""
+    if not TOKEN:
+        print(
+            "No authentication token available. Please set PAT token in .clica.env.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    folder_id = resolve_folder_id(folder, required=True)
+    headers = {"Authorization": f"Token {TOKEN}"}
+    url = f"{API_URL}/folders/{folder_id}/export/"
+    out_path = Path(output) if output else Path(f"./{folder}-domain-export.zip")
+
+    with requests.get(
+        url,
+        headers=headers,
+        verify=VERIFY_CERTIFICATE,
+        stream=True,
+        timeout=(10, 3600),
+    ) as res:
+        if res.status_code != 200:
+            rprint(
+                f"[bold red]Error exporting domain: {res.status_code} {res.reason}[/bold red]",
+                file=sys.stderr,
+            )
+            rprint(res.text, file=sys.stderr)
+            sys.exit(1)
+
+        with open(out_path, "wb") as f:
+            for chunk in res.iter_content(chunk_size=1024 * 1024):
+                f.write(chunk)
+    rprint(f"[green]✓ Domain exported to {out_path}[/green]")
+
+
+@cli.command(name="import-domain")
+@click.option("--file", required=True, help="Path to the domain export zip to import.")
+@click.option("--name", default=None, help="Name for the imported domain.")
+@click.option(
+    "--load-missing-libraries",
+    is_flag=True,
+    default=False,
+    help="Load libraries referenced by the dump that are missing on the target.",
+)
+@click.option(
+    "--create-missing-asset-classes",
+    is_flag=True,
+    default=False,
+    help="Create the custom asset classes referenced by the dump. They become visible to every user.",
+)
+def import_domain(file, name, load_missing_libraries, create_missing_asset_classes):
+    """Import a domain (folder) from an export zip."""
+    if not TOKEN:
+        print(
+            "No authentication token available. Please set PAT token in .clica.env.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    file_path = Path(file)
+    if not file_path.exists():
+        rprint(f"[bold red]File not found: {file_path}[/bold red]", file=sys.stderr)
+        sys.exit(1)
+
+    domain_name = name or file_path.stem
+    headers = {
+        "Authorization": f"Token {TOKEN}",
+        "Content-Disposition": f'attachment; filename="{file_path.name}"',
+        "X-CISOAssistantDomainName": domain_name,
+    }
+    url = f"{API_URL}/folders/import/"
+    params = {
+        "load_missing_libraries": str(load_missing_libraries).lower(),
+        "create_missing_asset_classes": str(create_missing_asset_classes).lower(),
+    }
+    with open(file_path, "rb") as f:
+        res = requests.post(
+            url,
+            headers=headers,
+            params=params,
+            data=f,
+            verify=VERIFY_CERTIFICATE,
+            timeout=(10, 3600),
+        )
+
+    if res.status_code != 200:
+        rprint(
+            f"[bold red]Error importing domain: {res.status_code} {res.reason}[/bold red]",
+            file=sys.stderr,
+        )
+        rprint(res.text, file=sys.stderr)
+        sys.exit(1)
+
+    rprint(f"[green]✓ Domain '{domain_name}' imported successfully[/green]")
+
+
 if __name__ == "__main__":
-    cli()
+    try:
+        cli()
+    except requests.exceptions.ConnectionError:
+        print(
+            f"Could not reach the CISO Assistant API at {API_URL!r}. "
+            "Check that API_URL is correct and the server is running.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    except (
+        requests.exceptions.MissingSchema,
+        requests.exceptions.InvalidURL,
+        requests.exceptions.InvalidSchema,
+    ):
+        print(
+            "API_URL is missing or invalid. Copy .clica.env.template to .clica.env "
+            "in the cli/ directory and set API_URL, e.g. API_URL=http://localhost:8000/api",
+            file=sys.stderr,
+        )
+        sys.exit(1)

@@ -1,11 +1,11 @@
 <script lang="ts">
-	import type { urlModel } from '$lib/utils/types';
+	import type { urlModel } from '#lib/utils/types.js';
 	import SuperDebug from 'sveltekit-superforms';
 	import type { ComponentType } from 'svelte';
 	import { getModalStore, type ModalStore } from './stores';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { superForm } from 'sveltekit-superforms';
-	import SuperForm from '$lib/components/Forms/Form.svelte';
+	import SuperForm from '#lib/components/Forms/Form.svelte';
 	import List from '../List/List.svelte';
 	import Checkbox from '../Forms/Checkbox.svelte';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
@@ -13,7 +13,7 @@
 	const modalStore: ModalStore = getModalStore();
 
 	// Base Classes
-	const cBase = 'card bg-surface-50-950 p-4 w-modal shadow-xl space-y-4';
+	const cBase = 'card bg-surface-100-900 border border-surface-500 p-4 w-modal shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 	const cForm = 'p-4 space-y-4 rounded-container';
 

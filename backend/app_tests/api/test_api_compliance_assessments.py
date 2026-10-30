@@ -1,18 +1,21 @@
 import uuid
+from datetime import date
 
 import pytest
+from knox.models import AuthToken
 from rest_framework import status
 from rest_framework.test import APIClient
 from core.models import (
     AppliedControl,
     ComplianceAssessment,
     Framework,
+    HistoricalMetric,
     Perimeter,
     RequirementAssessment,
     RequirementNode,
     StoredLibrary,
 )
-from iam.models import Folder
+from iam.models import Folder, User
 
 from test_utils import EndpointTestsQueries
 
@@ -181,6 +184,9 @@ class TestComplianceAssessmentsAuthenticated:
         perimeter2 = Perimeter.objects.create(
             name="test2", folder=Folder.objects.create(name="test2")
         )
+        # Framework has no Meta ordering, so all()[0]/all()[1] are
+        # nondeterministic on PostgreSQL — pin the import order explicitly.
+        frameworks = list(Framework.objects.order_by("created_at", "pk"))
 
         EndpointTestsQueries.Auth.update_object(
             test.client,
@@ -191,14 +197,14 @@ class TestComplianceAssessmentsAuthenticated:
                 "description": COMPLIANCE_ASSESSMENT_DESCRIPTION,
                 "version": COMPLIANCE_ASSESSMENT_VERSION,
                 "perimeter": perimeter,
-                "framework": Framework.objects.all()[0],
+                "framework": frameworks[0],
             },
             {
                 "name": "new " + COMPLIANCE_ASSESSMENT_NAME,
                 "description": "new " + COMPLIANCE_ASSESSMENT_DESCRIPTION,
                 "version": COMPLIANCE_ASSESSMENT_VERSION + ".1",
                 "perimeter": str(perimeter2.id),
-                "framework": str(Framework.objects.all()[1].id),
+                "framework": str(frameworks[1].id),
             },
             {
                 "perimeter": {
@@ -210,18 +216,18 @@ class TestComplianceAssessmentsAuthenticated:
                     },
                 },
                 "framework": {
-                    "id": str(Framework.objects.all()[0].id),
-                    "urn": Framework.objects.all()[0].urn,
-                    "str": str(Framework.objects.all()[0]),
+                    "id": str(frameworks[0].id),
+                    "urn": frameworks[0].urn,
+                    "str": str(frameworks[0]),
                     "implementation_groups_definition": None,
                     "outcomes_definition": [],
                     "reference_controls": [
                         {"id": str(rc["id"]), "str": rc["str"], "urn": rc["urn"]}
-                        for rc in Framework.objects.all()[0].reference_controls
+                        for rc in frameworks[0].reference_controls
                     ],
-                    "min_score": Framework.objects.all()[0].min_score,
-                    "max_score": Framework.objects.all()[0].max_score,
-                    "ref_id": str(Framework.objects.all()[0].ref_id),
+                    "min_score": frameworks[0].min_score,
+                    "max_score": frameworks[0].max_score,
+                    "ref_id": str(frameworks[0].ref_id),
                     "has_update": False,
                 },
             },
@@ -304,16 +310,30 @@ def _list_progress(client: APIClient, audit_id) -> int:
     raise AssertionError(f"audit {target} not in {len(results)} list results")
 
 
+# Progress modes: the status field's visibility is the mode switch. It is
+# visible by default (DEFAULT_VISIBILITY), so a bare audit is STATUS MODE
+# (only `done` counts). Hiding it switches to CONTENT MODE (questionnaire,
+# else result when visible, else score above the resolved minimum).
+_HIDDEN_PAIR = {"auditor": "hidden", "respondent": "hidden"}
+
+
+def _content_mode(**extra_hidden_fields) -> dict:
+    fv = {"status": dict(_HIDDEN_PAIR)}
+    for field in extra_hidden_fields.get("hide", []):
+        fv[field] = dict(_HIDDEN_PAIR)
+    return fv
+
+
 @pytest.mark.django_db
 class TestComplianceAssessmentListProgress:
     """`/api/compliance-assessments/` list `progress` field is computed by
-    `ComplianceAssessmentViewSet._get_optimized_object_data` (per-page
-    GROUP BY) and read from `optimized_data` by the list serializer.
-    Pin the numeric output across the relevant branches so the path
+    `ComplianceAssessmentViewSet._get_optimized_object_data` (per-page,
+    per-mode GROUP BY) and read from `optimized_data` by the list serializer.
+    Pin the numeric output across the modes and branches so the path
     can't drift silently."""
 
     def test_progress_zero_when_all_not_assessed(self, authenticated_client):
-        """Default RA state is NOT_ASSESSED with no score → 0 / N → 0 %."""
+        """Default RA state → 0 % in both modes (no done, no content)."""
         framework = _make_framework()
         for i in range(4):
             _make_requirement(framework, f"R{i}")
@@ -322,12 +342,32 @@ class TestComplianceAssessmentListProgress:
 
         assert _list_progress(authenticated_client, audit.id) == 0
 
+    def test_status_mode_only_done_counts(self, authenticated_client):
+        """Status field visible (the default) → status mode: results are
+        ignored, only `done` requirements count."""
+        framework = _make_framework()
+        for i in range(4):
+            _make_requirement(framework, f"D{i}")
+        audit = _make_audit(Folder.get_root_folder(), framework)
+        audit.create_requirement_assessments()
+
+        ras = list(audit.requirement_assessments.all())
+        for ra in ras:  # content everywhere, must not count
+            ra.result = RequirementAssessment.Result.COMPLIANT
+            ra.save(update_fields=["result"])
+        ras[0].status = RequirementAssessment.Status.DONE
+        ras[0].save(update_fields=["status"])
+
+        assert _list_progress(authenticated_client, audit.id) == 25
+
     def test_progress_partial_assessed(self, authenticated_client):
-        """1 of 4 RAs marked compliant → 25 %."""
+        """Content mode (status hidden): 1 of 4 RAs marked compliant → 25 %."""
         framework = _make_framework()
         for i in range(4):
             _make_requirement(framework, f"P{i}")
-        audit = _make_audit(Folder.get_root_folder(), framework)
+        audit = _make_audit(
+            Folder.get_root_folder(), framework, field_visibility=_content_mode()
+        )
         audit.create_requirement_assessments()
 
         ras = list(audit.requirement_assessments.all())
@@ -336,20 +376,42 @@ class TestComplianceAssessmentListProgress:
 
         assert _list_progress(authenticated_client, audit.id) == 25
 
-    def test_score_alone_counts_as_assessed(self, authenticated_client):
-        """A score set with `result == NOT_ASSESSED` still counts as
-        assessed — matches the OR-clause shared by the dropped
-        `Count(distinct=True)` annotation and the new GROUP BY:
-        `~Q(result=NA) | Q(score__isnull=False)`."""
+    def test_score_alone_does_not_count_when_result_visible(self, authenticated_client):
+        """Content mode with the result field visible: the result decides,
+        a score alone (e.g. left by the scoring pre-fill) never counts."""
         framework = _make_framework()
         for i in range(2):
             _make_requirement(framework, f"S{i}")
-        audit = _make_audit(Folder.get_root_folder(), framework)
+        audit = _make_audit(
+            Folder.get_root_folder(), framework, field_visibility=_content_mode()
+        )
         audit.create_requirement_assessments()
 
         ras = list(audit.requirement_assessments.all())
         ras[0].score = 3  # leave result = NOT_ASSESSED on purpose
         ras[0].save(update_fields=["score"])
+
+        assert _list_progress(authenticated_client, audit.id) == 0
+
+    def test_score_only_audit_min_does_not_count(self, authenticated_client):
+        """Score-only audit (status and result hidden): a score left at the
+        scale minimum is indistinguishable from the pre-fill and does not
+        count; a score strictly above the minimum does."""
+        framework = _make_framework()  # min_score=0, max_score=4
+        for i in range(2):
+            _make_requirement(framework, f"SO{i}")
+        audit = _make_audit(
+            Folder.get_root_folder(),
+            framework,
+            field_visibility=_content_mode(hide=["result"]),
+        )
+        audit.create_requirement_assessments()
+
+        ras = list(audit.requirement_assessments.all())
+        ras[0].score = 0  # == resolved minimum: pre-fill value
+        ras[0].save(update_fields=["score"])
+        ras[1].score = 3  # deliberate scoring
+        ras[1].save(update_fields=["score"])
 
         assert _list_progress(authenticated_client, audit.id) == 50
 
@@ -357,7 +419,9 @@ class TestComplianceAssessmentListProgress:
         framework = _make_framework()
         for i in range(3):
             _make_requirement(framework, f"A{i}")
-        audit = _make_audit(Folder.get_root_folder(), framework)
+        audit = _make_audit(
+            Folder.get_root_folder(), framework, field_visibility=_content_mode()
+        )
         audit.create_requirement_assessments()
         for ra in audit.requirement_assessments.all():
             ra.result = RequirementAssessment.Result.COMPLIANT
@@ -374,7 +438,9 @@ class TestComplianceAssessmentListProgress:
         _make_requirement(framework, "AS-1")
         _make_requirement(framework, "NA-0", assessable=False)
         _make_requirement(framework, "NA-1", assessable=False)
-        audit = _make_audit(Folder.get_root_folder(), framework)
+        audit = _make_audit(
+            Folder.get_root_folder(), framework, field_visibility=_content_mode()
+        )
         audit.create_requirement_assessments()
 
         for ra in audit.requirement_assessments.all():
@@ -386,9 +452,8 @@ class TestComplianceAssessmentListProgress:
         assert _list_progress(authenticated_client, audit.id) == 50
 
     def test_progress_with_implementation_groups(self, authenticated_client):
-        """`get_progress`'s implementation-groups branch was uncovered
-        before this PR. Verify it still computes the right number when
-        only some RAs match the audit's selected IGs."""
+        """The implementation-groups branch (in-memory scalar loop) must
+        compute the same cascade when only some RAs match the audit's IGs."""
         framework = _make_framework()
         for i in range(2):
             _make_requirement(framework, f"G1-{i}", implementation_groups=["G1"])
@@ -398,6 +463,7 @@ class TestComplianceAssessmentListProgress:
             Folder.get_root_folder(),
             framework,
             selected_implementation_groups=["G1"],
+            field_visibility=_content_mode(),
         )
         audit.create_requirement_assessments()
 
@@ -445,16 +511,6 @@ class TestComplianceAssessmentMapFrom:
     a mapping library; cross-framework cases load a RequirementMappingSet into
     the engine to exercise partial coverage and mapping_inference.
     """
-
-    @pytest.fixture(autouse=True)
-    def _reset_engine_cache(self):
-        # After each test the django_db transaction rolls back; reload the
-        # global engine so any mapping libraries we created don't leak into
-        # other tests via the in-memory cache.
-        yield
-        from core.mappings.engine import engine
-
-        engine.reload_cache()
 
     # --- helpers -----------------------------------------------------------
     def _audit(self, framework, **kwargs):
@@ -504,9 +560,6 @@ class TestComplianceAssessmentMapFrom:
             is_loaded=True,
             content={"requirement_mapping_sets": [rms]},
         )
-        from core.mappings.engine import engine
-
-        engine.reload_cache()
 
     # --- same-framework merge strategy -------------------------------------
     def test_full_copy_into_empty_target(self, authenticated_client):
@@ -743,9 +796,6 @@ class TestComplianceAssessmentMapFrom:
         _make_requirement(src_fw, "A")
         _make_requirement(tgt_fw, "X")
         # no mapping library loaded for this pair
-        from core.mappings.engine import engine
-
-        engine.reload_cache()
 
         source = self._audit(src_fw)
         target = self._audit(tgt_fw)
@@ -755,3 +805,128 @@ class TestComplianceAssessmentMapFrom:
 
         resp = self._map_from(authenticated_client, target, source)
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
+
+
+# ---------------------------------------------------------------------------
+# Object-level authorization on custom detail actions
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.django_db
+class TestComplianceAssessmentDetailActionAuthorization:
+    """The `frameworks` and `progress_ts` detail actions must fetch the audit
+    through `get_object()` so folder scoping applies: a user without a role
+    on the audit's folder gets the same 404 as the standard detail endpoint
+    and cannot tell whether the object exists."""
+
+    @pytest.fixture
+    def audit(self, app_config):
+        framework = _make_framework()
+        _make_requirement(framework, "R0")
+        domain = Folder.objects.create(
+            name="idor-domain", parent_folder=Folder.get_root_folder()
+        )
+        audit = _make_audit(domain, framework)
+        audit.create_requirement_assessments()
+        HistoricalMetric.objects.create(
+            model="ComplianceAssessment",
+            object_id=audit.id,
+            date=date(2026, 1, 1),
+            data={"reqs": {"progress_perc": 42}},
+        )
+        return audit
+
+    @pytest.fixture
+    def outsider_client(self, app_config):
+        """An authenticated user with no role assignment on any folder."""
+        user = User.objects.create_user("outsider@tests.com")
+        client = APIClient()
+        client.credentials(
+            HTTP_AUTHORIZATION=f"Token {AuthToken.objects.create(user=user)[1]}"
+        )
+        return client
+
+    def test_frameworks_requires_folder_access(
+        self, authenticated_client, outsider_client, audit
+    ):
+        url = f"/api/compliance-assessments/{audit.id}/frameworks/"
+        assert outsider_client.get(url).status_code == status.HTTP_404_NOT_FOUND
+        resp = authenticated_client.get(url)
+        assert resp.status_code == status.HTTP_200_OK, resp.content
+        assert isinstance(resp.json(), list)
+
+    def test_progress_ts_requires_folder_access(
+        self, authenticated_client, outsider_client, audit
+    ):
+        url = f"/api/compliance-assessments/{audit.id}/progress_ts/"
+        assert outsider_client.get(url).status_code == status.HTTP_404_NOT_FOUND
+        resp = authenticated_client.get(url)
+        assert resp.status_code == status.HTTP_200_OK, resp.content
+        # Snapshots are date-ordered; creating the audit auto-records one for
+        # today, so only pin the synthetic (oldest) point.
+        assert resp.json()["data"][0] == ["2026-01-01", 42]
+
+    def test_unknown_audit_is_404(self, authenticated_client):
+        """Nonexistent UUIDs must 404: `frameworks` used to raise a bare
+        DoesNotExist (500) and `progress_ts` returned an empty 200."""
+        missing = uuid.uuid4()
+        for action in ("frameworks", "progress_ts"):
+            resp = authenticated_client.get(
+                f"/api/compliance-assessments/{missing}/{action}/"
+            )
+            assert resp.status_code == status.HTTP_404_NOT_FOUND, action
+
+
+@pytest.mark.django_db
+class TestComplianceAssessmentCreationScoring:
+    """Creation seeds the minimum score only where nobody else sets it:
+    question-driven requirements are scored by their answers, as when scoring
+    is turned on (a checklist without scores must never count as a 0)."""
+
+    def test_question_requirements_are_not_seeded(self, authenticated_client):
+        from core.models import Question, QuestionChoice
+        from core.utils import AUDITOR_ONLY
+
+        framework = _make_framework()
+        framework.field_visibility = {"score": AUDITOR_ONLY, "is_scored": AUDITOR_ONLY}
+        framework.save()
+        manual = _make_requirement(framework, "MANUAL")
+        for ref_id, add_scores in (("SCORED", (0, 4)), ("CHECKLIST", (None, None))):
+            node = _make_requirement(framework, ref_id)
+            question = Question.objects.create(
+                requirement_node=node,
+                urn=f"{node.urn}:question:1",
+                type=Question.Type.UNIQUE_CHOICE
+                if ref_id == "SCORED"
+                else Question.Type.MULTIPLE_CHOICE,
+            )
+            for i, add_score in enumerate(add_scores):
+                QuestionChoice.objects.create(
+                    question=question,
+                    urn=f"{question.urn}:choice:{i}",
+                    value=str(i),
+                    add_score=add_score,
+                    order=i,
+                )
+
+        response = authenticated_client.post(
+            "/api/compliance-assessments/",
+            {
+                "name": "seeding",
+                "folder": str(Folder.get_root_folder().id),
+                "framework": str(framework.id),
+            },
+            format="json",
+        )
+        assert response.status_code == status.HTTP_201_CREATED, response.json()
+        ras = {
+            ra.requirement.ref_id: (ra.score, ra.is_scored)
+            for ra in RequirementAssessment.objects.filter(
+                compliance_assessment_id=response.json()["id"]
+            ).select_related("requirement")
+        }
+        assert ras == {
+            manual.ref_id: (0, True),
+            "SCORED": (None, False),
+            "CHECKLIST": (None, False),
+        }

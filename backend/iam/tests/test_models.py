@@ -5,7 +5,7 @@ from rest_framework import serializers
 
 from core.serializers import FolderWriteSerializer
 from core.utils import UserGroupCodename
-from iam.models import Folder, UserGroup, User
+from iam.models import Folder, IdPGroup, User, UserGroup
 
 
 @pytest.mark.django_db
@@ -59,6 +59,22 @@ class TestFolder:
         )
         user = User.objects.create_user(email="member@example.com")
         reader_group.user_set.add(user)
+
+        serializer = FolderWriteSerializer()
+        with pytest.raises(serializers.ValidationError):
+            serializer.update(folder, {"create_iam_groups": False})
+
+    def test_disable_iam_groups_blocked_by_idp_group_mapping(self):
+        root_folder = Folder.objects.get(content_type=Folder.ContentType.ROOT)
+        folder = Folder.objects.create(
+            name="Domain IAM IdP", parent_folder=root_folder, create_iam_groups=True
+        )
+        Folder.create_default_ug_and_ra(folder)
+        reader_group = UserGroup.objects.get(
+            folder=folder, name=str(UserGroupCodename.READER)
+        )
+        idp_group = IdPGroup.objects.create(name="idp_group")
+        reader_group.idp_groups.add(idp_group)
 
         serializer = FolderWriteSerializer()
         with pytest.raises(serializers.ValidationError):

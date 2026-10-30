@@ -1,8 +1,8 @@
 urn: urn:intuitem:risk:library:essential-eight
 locale: en
 ref_id: Essential Eight
-name: Essential Eight Maturity Model (11/2023)
-description: "The Australian Signals Directorate (ASD) has developed prioritised mitigation\
+name: Essential Eight Maturity Model (11/2023) - legacy
+description: "Legacy version, superseded by the Essential Eight Maturity Model (November 2023) library (essential-eight-2023), rebuilt from ASD's official material. Use the transition mapping to carry existing audits over.\n\nThe Australian Signals Directorate (ASD) has developed prioritised mitigation\
   \ strategies, in the form of the Strategies to Mitigate Cyber Security Incidents,\
   \ to help organisations protect themselves against various cyber threats. The most\
   \ effective of these mitigation strategies are the Essential Eight.\n\nThe Essential\
@@ -20,16 +20,16 @@ copyright: "The Commonwealth of Australia owns all the material we produce. All 
   \ and conditions are available at Creative Commons Attribution 3.0 Australia.\n\n\
   You should attribute material you get from this website as Australian Government\
   \ Department of Home Affairs."
-version: 2
-publication_date: 2024-03-17
+version: 3
+publication_date: 2026-09-29
 provider: Australian Government
 packager: intuitem
 objects:
   framework:
     urn: urn:intuitem:risk:framework:essential-eight
     ref_id: Essential Eight
-    name: Essential Eight Maturity Model (11/2023)
-    description: "The Australian Signals Directorate (ASD) has developed prioritised\
+    name: Essential Eight Maturity Model (11/2023) - legacy
+    description: "Legacy version, superseded by the Essential Eight Maturity Model (November 2023) library (essential-eight-2023), rebuilt from ASD's official material. Use the transition mapping to carry existing audits over.\n\nThe Australian Signals Directorate (ASD) has developed prioritised\
       \ mitigation strategies, in the form of the Strategies to Mitigate Cyber Security\
       \ Incidents, to help organisations protect themselves against various cyber\
       \ threats. The most effective of these mitigation strategies are the Essential\

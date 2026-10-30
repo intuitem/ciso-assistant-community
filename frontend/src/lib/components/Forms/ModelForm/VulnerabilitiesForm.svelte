@@ -1,10 +1,11 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import Select from '../Select.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import { m } from '$paraglide/messages';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import { m } from '#paraglide/messages.js';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -41,6 +42,29 @@
 	bind:cachedValue={formDataCache['severity']}
 />
 <AutocompleteSelect
+	{form}
+	multiple
+	optionsEndpoint="actors"
+	lazy
+	optionsLabelField="str"
+	optionsInfoFields={{
+		fields: [{ field: 'type', translate: true }],
+		position: 'prefix'
+	}}
+	field="owner"
+	cacheLock={cacheLocks['owner']}
+	bind:cachedValue={formDataCache['owner']}
+	label={m.owner()}
+/>
+<MarkdownField
+	{form}
+	field="observation"
+	label={m.observation()}
+	helpText={m.observationHelpText()}
+	cacheLock={cacheLocks['observation']}
+	bind:cachedValue={formDataCache['observation']}
+/>
+<AutocompleteSelect
 	multiple
 	lazy
 	{form}
@@ -63,6 +87,10 @@
 	{form}
 	optionsEndpoint="applied-controls"
 	optionsExtraFields={[['folder', 'str']]}
+	optionsInfoFields={{
+		fields: [{ field: 'category', translate: true }],
+		position: 'prefix'
+	}}
 	field="applied_controls"
 	label={m.appliedControls()}
 />
@@ -124,6 +152,15 @@
 	label={m.dueDate()}
 	cacheLock={cacheLocks['due_date']}
 	bind:cachedValue={formDataCache['due_date']}
+/>
+<TextField
+	type="date"
+	{form}
+	field="remediated_at"
+	label={m.remediatedAt()}
+	helpText={m.remediatedAtHelpText()}
+	cacheLock={cacheLocks['remediated_at']}
+	bind:cachedValue={formDataCache['remediated_at']}
 />
 <AutocompleteSelect
 	multiple

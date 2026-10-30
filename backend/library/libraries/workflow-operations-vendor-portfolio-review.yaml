@@ -1,0 +1,80 @@
+urn: urn:intuitem:risk:library:workflow-operations-vendor-portfolio-review
+locale: en
+ref_id: workflow-operations-vendor-portfolio-review
+name: Third-party portfolio review — every active vendor
+description: Walks the whole third-party portfolio page by page and reports what it found. The loop reads
+  its own pages, so this graph is the same four steps whether you have twelve vendors or twelve hundred.
+  To open an assessment for each one, swap the logging step for a create object step on entity_assessment
+  with entity set to {{item.id}} — and run it deliberately, since it creates one per vendor per run.
+copyright: © intuitem
+version: 1
+publication_date: 2026-08-28
+provider: intuitem
+packager: intuitem
+objects:
+  workflows:
+  - urn: urn:intuitem:risk:library:workflow-operations-vendor-portfolio-review:workflow:vendor-portfolio-review
+    schema_version: 1
+    ref_id: vendor-portfolio-review
+    name: Third-party portfolio review — every active vendor
+    description: Walks the whole third-party portfolio page by page and reports what it found. The loop
+      reads its own pages, so this graph is the same four steps whether you have twelve vendors or twelve
+      hundred. To open an assessment for each one, swap the logging step for a create object step on entity_assessment
+      with entity set to {{item.id}} — and run it deliberately, since it creates one per vendor per run.
+    graph:
+      variables:
+      - key: notify_emails
+        type: string
+        default_value: tprm@example.com
+      nodes:
+      - ref: manual
+        type: trigger
+        label: Run the review
+        trigger_config:
+          type: manual
+      - ref: per_vendor
+        type: loop
+        label: Every active vendor
+        loop_config:
+          read:
+            model: entity
+            order_by: name
+            limit: 100
+            filters:
+              operator: and
+              conditions:
+              - field: is_active
+                op: eq
+                value: true
+          collect: '{{item.name}}'
+          on_item_error: continue
+      - ref: note_vendor
+        type: action
+        label: Note the vendor
+        action_config:
+          type: log
+          message: '{{item.name}} · dependency {{item.default_dependency}} · maturity {{item.default_maturity}}'
+      - ref: send_summary
+        type: action
+        label: Email the review
+        action_config:
+          type: send_email
+          recipients: '{{notify_emails}}'
+          subject: 'Third-party portfolio: {{nodes.per_vendor.count}} active vendors'
+          body: 'Reviewed {{nodes.per_vendor.count}} active vendor(s) across {{nodes.per_vendor.pages}}
+            page(s) on {{today}}: {{nodes.per_vendor.results}}'
+      - ref: done
+        type: end
+      edges:
+      - source: manual
+        target: per_vendor
+      - source: per_vendor
+        target: note_vendor
+        source_port: each
+      - source: note_vendor
+        target: per_vendor
+      - source: per_vendor
+        target: send_summary
+        source_port: done
+      - source: send_summary
+        target: done

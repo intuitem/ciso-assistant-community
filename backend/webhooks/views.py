@@ -10,7 +10,7 @@ from global_settings.utils import ff_is_enabled
 from .models import WebhookEndpoint, WebhookEventType
 from .serializers import AuditSinkSerializer, WebhookEndpointSerializer
 from .tasks import replay_audit_to_sink
-from core.views import BaseModelViewSet
+from core.views import BaseModelViewSet, SmartOrderingFilter
 
 
 class WebhookEndpointViewSet(BaseModelViewSet):
@@ -22,7 +22,7 @@ class WebhookEndpointViewSet(BaseModelViewSet):
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
-        filters.OrderingFilter,
+        SmartOrderingFilter,
     ]
 
     model = WebhookEndpoint
@@ -68,7 +68,7 @@ class AuditSinkViewSet(BaseModelViewSet):
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
-        filters.OrderingFilter,
+        SmartOrderingFilter,
     ]
     ordering_fields = ["is_active", "created_at", "name", "url"]
     ordering = ["-is_active", "-created_at"]

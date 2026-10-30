@@ -1,8 +1,8 @@
 from django.db import models
-from iam.models import User, FolderMixin, PublishInRootFolderMixin
+from iam.models import FolderMixin
 from tprm.models import Entity
 from core.models import Actor, AppliedControl, Asset, Evidence, Incident, Perimeter
-from core.models import FilteringLabelMixin, I18nObjectMixin, ReferentialObjectMixin
+from core.models import FilteringLabelMixin, Terminology
 from core.base_models import NameDescriptionMixin, AbstractBaseModel
 from core.constants import COUNTRY_CHOICES
 from django.db.models import Count
@@ -10,7 +10,14 @@ from django.db.models import Count
 from auditlog.registry import auditlog
 
 from django.utils.translation import gettext_lazy as _
+from django.utils import timezone
 import uuid
+
+
+class DpiaRequirementSource(models.TextChoices):
+    ASSESSMENT = "assessment", _("Assessment")
+    OVERRIDE = "override", _("Override")
+    MANUAL = "manual", _("Manual")
 
 
 class NameDescriptionFolderMixin(NameDescriptionMixin, FolderMixin):
@@ -60,43 +67,14 @@ TRANSFER_MECHANISM_CHOICES = (
 )
 
 
-class ProcessingNature(
-    ReferentialObjectMixin, I18nObjectMixin, PublishInRootFolderMixin
-):
-    DEFAULT_PROCESSING_NATURE = [
-        "privacy_collection",
-        "privacy_recording",
-        "privacy_organization",
-        "privacy_structuring",
-        "privacy_storage",
-        "privacy_adaptationOrAlteration",
-        "privacy_retrieval",
-        "privacy_consultation",
-        "privacy_use",
-        "privacy_disclosureByTransmission",
-        "privacy_disseminationOrOtherwiseMakingAvailable",
-        "privacy_alignmentOrCombination",
-        "privacy_restriction",
-        "privacy_erasureOrDestruction",
-    ]
+def create_default_privacy_terminologies():
+    from privacy.terminology_seeds import (
+        DEFAULT_PROCESSING_NATURES,
+        DEFAULT_PERSONAL_DATA_CATEGORIES,
+    )
 
-    name = models.CharField(max_length=100, unique=True)
-
-    def __str__(self):
-        return self.name
-
-    @classmethod
-    def create_default_values(cls):
-        for value in cls.DEFAULT_PROCESSING_NATURE:
-            ProcessingNature.objects.update_or_create(
-                name=value,
-                defaults={"is_published": True},
-            )
-
-    class Meta:
-        ordering = ["name"]
-        verbose_name = "Processing Nature"
-        verbose_name_plural = "Processing Natures"
+    Terminology._seed_defaults(DEFAULT_PROCESSING_NATURES)
+    Terminology._seed_defaults(DEFAULT_PERSONAL_DATA_CATEGORIES)
 
 
 class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
@@ -106,9 +84,34 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
         ("privacy_approved", "Approved"),
         ("privacy_deprecated", "Deprecated"),
     )
+    ROLE_CHOICES = (
+        ("privacy_controller", "Controller"),
+        ("privacy_joint_controller", "Joint Controller"),
+        ("privacy_data_processor", "Data Processor"),
+    )
+    # A DPIA is the controller's (Art. 35): a processor only assists (Art. 28(3)(f)).
+    DPIA_ROLES = ("privacy_controller", "privacy_joint_controller")
 
     ref_id = models.CharField(max_length=100, blank=True)
-    nature = models.ManyToManyField(ProcessingNature, blank=True)
+    # Art. 30(1) register for controller roles, Art. 30(2) for processor roles
+    role = models.CharField(
+        max_length=30, choices=ROLE_CHOICES, default="privacy_controller"
+    )
+    controllers = models.ManyToManyField(
+        Entity,
+        blank=True,
+        related_name="processings_as_controller",
+        help_text="Controllers on whose behalf this processing is carried out",
+    )
+    nature = models.ManyToManyField(
+        Terminology,
+        blank=True,
+        related_name="processing_natures",
+        limit_choices_to={
+            "field_path": Terminology.FieldPath.PROCESSING_NATURE,
+            "is_visible": True,
+        },
+    )
     status = models.CharField(
         max_length=20, choices=STATUS_CHOICES, default="privacy_draft"
     )
@@ -119,6 +122,35 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
     usage_channel = models.CharField(max_length=255, blank=True)
     dpia_required = models.BooleanField(default=False, blank=True)
     dpia_reference = models.CharField(max_length=255, blank=True)
+    dpia_screening = models.ForeignKey(
+        "core.QuickFormResponse",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="screened_processings",
+        verbose_name=_("DPIA screening"),
+    )
+    # The DPIA last validated for this processing, a quick form response.
+    dpia = models.ForeignKey(
+        "core.QuickFormResponse",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="assessed_processings",
+        verbose_name=_("DPIA"),
+    )
+    # Who or what last set `dpia_required`; written through
+    # `privacy.dpia_requirement.set_dpia_required` with its history row.
+    dpia_required_source = models.CharField(
+        max_length=20,
+        choices=DpiaRequirementSource.choices,
+        blank=True,
+        default="",
+        verbose_name=_("DPIA requirement source"),
+    )
+    dpia_required_set_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("DPIA requirement set at")
+    )
     has_sensitive_personal_data = models.BooleanField(default=False)
     associated_controls = models.ManyToManyField(
         AppliedControl, blank=True, related_name="processings"
@@ -142,6 +174,10 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
     )
     fields_to_check = ["ref_id", "name"]
 
+    @property
+    def dpia_applies(self) -> bool:
+        return self.role in self.DPIA_ROLES
+
     def update_sensitive_data_flag(self):
         """Update the has_sensitive_personal_data flag based on associated personal data"""
         has_sensitive = self.personal_data.filter(is_sensitive=True).exists()
@@ -154,7 +190,25 @@ class Processing(NameDescriptionFolderMixin, FilteringLabelMixin):
         return {}
 
 
-class Purpose(NameDescriptionFolderMixin):
+class ProcessingChildMixin:
+    def _touch_processing(self):
+        if self.processing_id:
+            Processing.objects.filter(pk=self.processing_id).update(
+                updated_at=timezone.now()
+            )
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self._touch_processing()
+
+    def delete(self, *args, **kwargs):
+        processing_id = self.processing_id
+        result = super().delete(*args, **kwargs)
+        Processing.objects.filter(pk=processing_id).update(updated_at=timezone.now())
+        return result
+
+
+class Purpose(ProcessingChildMixin, NameDescriptionFolderMixin):
     name = models.CharField(
         max_length=200, verbose_name=_("Name"), null=True, blank=True
     )
@@ -182,7 +236,7 @@ class Purpose(NameDescriptionFolderMixin):
         super().save(*args, **kwargs)
 
 
-class PersonalData(NameDescriptionFolderMixin):
+class PersonalData(ProcessingChildMixin, NameDescriptionFolderMixin):
     DELETION_POLICY_CHOICES = (
         ("privacy_automatic_deletion", "Automatic Deletion"),
         ("privacy_anonymization", "Anonymization"),
@@ -190,74 +244,6 @@ class PersonalData(NameDescriptionFolderMixin):
         ("privacy_user_requested_deletion", "User Requested Deletion"),
         ("privacy_legal_regulatory_hold", "Legal/Regulatory Hold"),
         ("privacy_partial_deletion", "Partial Deletion"),
-    )
-    PERSONAL_DATA_CHOICES = (
-        # Basic Identity Information
-        ("privacy_basic_identity", "Basic Identity Information"),
-        ("privacy_name", "Name"),
-        ("privacy_identification_numbers", "Identification Numbers"),
-        ("privacy_online_identifiers", "Online Identifiers"),
-        ("privacy_location_data", "Location Data"),
-        # Contact Information
-        ("privacy_contact_details", "Contact Details"),
-        ("privacy_address", "Address"),
-        ("privacy_email", "Email Address"),
-        ("privacy_phone_number", "Phone Number"),
-        # Financial Information
-        ("privacy_financial_data", "Financial Data"),
-        ("privacy_bank_account", "Bank Account Information"),
-        ("privacy_payment_card", "Payment Card Information"),
-        ("privacy_transaction_history", "Transaction History"),
-        ("privacy_salary_information", "Salary Information"),
-        # Special Categories of Personal Data (Sensitive)
-        ("privacy_health_data", "Health Data"),
-        ("privacy_genetic_data", "Genetic Data"),
-        ("privacy_biometric_data", "Biometric Data"),
-        ("privacy_racial_ethnic_origin", "Racial or Ethnic Origin"),
-        ("privacy_political_opinions", "Political Opinions"),
-        ("privacy_religious_beliefs", "Religious or Philosophical Beliefs"),
-        ("privacy_trade_union_membership", "Trade Union Membership"),
-        ("privacy_sexual_orientation", "Sexual Orientation"),
-        ("privacy_sex_life_data", "Sex Life Data"),
-        # Digital Behavior and Activities
-        ("privacy_browsing_history", "Browsing History"),
-        ("privacy_search_history", "Search History"),
-        ("privacy_cookies", "Cookies Data"),
-        ("privacy_device_information", "Device Information"),
-        ("privacy_ip_address", "IP Address"),
-        ("privacy_user_behavior", "User Behavior"),
-        # Professional Data
-        ("privacy_employment_details", "Employment Details"),
-        ("privacy_education_history", "Education History"),
-        ("privacy_professional_qualifications", "Professional Qualifications"),
-        ("privacy_work_performance", "Work Performance Data"),
-        # Social Relationships
-        ("privacy_family_details", "Family Details"),
-        ("privacy_social_network", "Social Network"),
-        ("privacy_lifestyle_information", "Lifestyle Information"),
-        # Communication Data
-        ("privacy_correspondence", "Correspondence Content"),
-        ("privacy_messaging_content", "Messaging Content"),
-        ("privacy_communication_metadata", "Communication Metadata"),
-        # Government/Official Data
-        ("privacy_government_identifiers", "Government Identifiers"),
-        ("privacy_tax_information", "Tax Information"),
-        ("privacy_social_security", "Social Security Information"),
-        ("privacy_drivers_license", "Driver's License Information"),
-        ("privacy_passport_information", "Passport Information"),
-        # Legal Data
-        ("privacy_legal_records", "Legal Records"),
-        ("privacy_criminal_records", "Criminal Records"),
-        ("privacy_judicial_data", "Judicial Data"),
-        # Preferences and Opinions
-        ("privacy_preferences", "Preferences"),
-        ("privacy_opinions", "Opinions"),
-        ("privacy_feedback", "Feedback"),
-        # Other Types
-        ("privacy_images_photos", "Images and Photos"),
-        ("privacy_voice_recordings", "Voice Recordings"),
-        ("privacy_video_recordings", "Video Recordings"),
-        ("privacy_other", "Other Personal Data"),
     )
 
     name = models.CharField(
@@ -267,7 +253,15 @@ class PersonalData(NameDescriptionFolderMixin):
     processing = models.ForeignKey(
         Processing, on_delete=models.CASCADE, related_name="personal_data"
     )
-    category = models.CharField(max_length=255, choices=PERSONAL_DATA_CHOICES)
+    category = models.ForeignKey(
+        Terminology,
+        on_delete=models.PROTECT,
+        related_name="personal_data_categories",
+        limit_choices_to={
+            "field_path": Terminology.FieldPath.PERSONAL_DATA_CATEGORY,
+            "is_visible": True,
+        },
+    )
     retention = models.CharField(max_length=255, blank=True)
     deletion_policy = models.CharField(
         max_length=50, choices=DELETION_POLICY_CHOICES, blank=True
@@ -292,11 +286,11 @@ class PersonalData(NameDescriptionFolderMixin):
     fields_to_check = ["name", "category", "processing"]
 
     def __str__(self):
-        return self.name if self.name else self.category
+        return self.name if self.name else str(self.category)
 
     def save(self, *args, **kwargs):
         self.folder = self.processing.folder
-        if self.category in self.SENSITIVE_CATEGORIES:
+        if self.category_id and self.category.name in self.SENSITIVE_CATEGORIES:
             self.is_sensitive = True
         super().save(*args, **kwargs)
 
@@ -309,15 +303,14 @@ class PersonalData(NameDescriptionFolderMixin):
     def get_categories_count(cls, filters: dict = {}):
         categories = (
             cls.objects.filter(**filters)
-            .values("category")
+            .values("category__name")
             .annotate(count=Count("id"))
             .order_by("-count")
         )
 
-        # Convert to list of dictionaries with category codes for frontend translation
         result = []
         for item in categories:
-            category_code = item["category"]
+            category_code = item["category__name"]
             result.append(
                 {"id": category_code, "name": category_code, "value": item["count"]}
             )
@@ -325,7 +318,7 @@ class PersonalData(NameDescriptionFolderMixin):
         return result
 
 
-class DataSubject(NameDescriptionFolderMixin):
+class DataSubject(ProcessingChildMixin, NameDescriptionFolderMixin):
     CATEGORY_CHOICES = (
         # Core Categories
         ("privacy_customer", "Customer/Client"),
@@ -364,7 +357,7 @@ class DataSubject(NameDescriptionFolderMixin):
         super().save(*args, **kwargs)
 
 
-class DataRecipient(NameDescriptionFolderMixin):
+class DataRecipient(ProcessingChildMixin, NameDescriptionFolderMixin):
     CATEGORY_CHOICES = (
         # Internal Recipients
         ("privacy_internal_team", "Internal Team/Department"),
@@ -423,7 +416,7 @@ class DataRecipient(NameDescriptionFolderMixin):
         super().save(*args, **kwargs)
 
 
-class DataContractor(NameDescriptionFolderMixin):
+class DataContractor(ProcessingChildMixin, NameDescriptionFolderMixin):
     RELATIONSHIP_TYPE_CHOICES = (
         ("privacy_data_processor", "Data Processor"),
         ("privacy_sub_processor", "Sub-processor"),
@@ -449,9 +442,11 @@ class DataContractor(NameDescriptionFolderMixin):
         max_length=255, choices=RELATIONSHIP_TYPE_CHOICES
     )
     country = models.CharField(max_length=3, choices=COUNTRY_CHOICES)
-    documentation_link = models.URLField(blank=True)
+    documentation_link = models.URLField(blank=True, max_length=2048)
 
     fields_to_check = ["entity", "relationship_type", "processing"]
+
+    IAM_SCOPE_FIELD = "entity"
 
     def __str__(self):
         return self.name if self.name else self.relationship_type
@@ -461,7 +456,7 @@ class DataContractor(NameDescriptionFolderMixin):
         super().save(*args, **kwargs)
 
 
-class DataTransfer(NameDescriptionFolderMixin):
+class DataTransfer(ProcessingChildMixin, NameDescriptionFolderMixin):
     name = models.CharField(
         max_length=200, verbose_name=_("Name"), null=True, blank=True
     )
@@ -480,9 +475,11 @@ class DataTransfer(NameDescriptionFolderMixin):
         max_length=255, choices=TRANSFER_MECHANISM_CHOICES, blank=True
     )
     guarantees = models.TextField(blank=True)
-    documentation_link = models.URLField(blank=True)
+    documentation_link = models.URLField(blank=True, max_length=2048)
 
     fields_to_check = ["entity", "country", "processing"]
+
+    IAM_SCOPE_FIELD = "entity"
 
     def __str__(self):
         return self.name if self.name else self.country
@@ -636,6 +633,54 @@ class DataBreach(NameDescriptionFolderMixin):
         ordering = ["-discovered_on"]
         verbose_name = "Data Breach"
         verbose_name_plural = "Data Breaches"
+
+
+class DpiaRequirementChange(AbstractBaseModel, FolderMixin):
+    """One change of a processing's `dpia_required`, whatever the path (form,
+    API, batch, accepted screening). Append-only; `created_at` is when it
+    happened."""
+
+    processing = models.ForeignKey(
+        Processing,
+        on_delete=models.CASCADE,
+        related_name="dpia_requirement_changes",
+        verbose_name=_("Processing"),
+    )
+    dpia_required = models.BooleanField(verbose_name=_("DPIA required"))
+    previous_dpia_required = models.BooleanField(
+        null=True, blank=True, verbose_name=_("Previously required")
+    )
+    source = models.CharField(
+        max_length=20,
+        choices=DpiaRequirementSource.choices,
+        verbose_name=_("Source"),
+    )
+    response = models.ForeignKey(
+        "core.QuickFormResponse",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name=_("Screening"),
+    )
+    changed_by = models.ForeignKey(
+        "iam.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="dpia_requirement_changes",
+        verbose_name=_("Changed by"),
+    )
+    note = models.TextField(blank=True, default="", verbose_name=_("Note"))
+
+    class Meta:
+        verbose_name = _("DPIA requirement change")
+        verbose_name_plural = _("DPIA requirement changes")
+        ordering = ["-created_at"]
+
+    def save(self, *args, **kwargs):
+        self.folder = self.processing.folder
+        super().save(*args, **kwargs)
 
 
 common_exclude = ["created_at", "updated_at"]

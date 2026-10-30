@@ -1,9 +1,9 @@
 import { fail, redirect, type Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { setFlash } from 'sveltekit-flash-message/server';
-import { BASE_API_URL } from '$lib/utils/constants';
-import { m } from '$paraglide/messages';
-import { safeTranslate } from '$lib/utils/i18n';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { m } from '#paraglide/messages.js';
+import { safeTranslate } from '#lib/utils/i18n.js';
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
 	const objectEndpoint = `${BASE_API_URL}/users/${params.id}/object/`;

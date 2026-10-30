@@ -1,5 +1,5 @@
 <script lang="ts" module>
-	export type ExportFormat = 'CSV' | 'XLSX' | 'DOCX' | 'PDF' | 'ZIP' | 'HTML';
+	export type ExportFormat = 'CSV' | 'XLSX' | 'DOCX' | 'PDF' | 'ZIP' | 'HTML' | 'MD' | 'JSON';
 
 	export interface ExportOption {
 		titleKey: string;
@@ -17,8 +17,8 @@
 </script>
 
 <script lang="ts">
-	import { safeTranslate } from '$lib/utils/i18n';
-	import { m } from '$paraglide/messages';
+	import { safeTranslate } from '#lib/utils/i18n.js';
+	import { m } from '#paraglide/messages.js';
 	import { getModalStore, type ModalStore } from './stores';
 
 	interface Props {
@@ -37,7 +37,9 @@
 		DOCX: 'fa-file-word',
 		PDF: 'fa-file-pdf',
 		ZIP: 'fa-file-zipper',
-		HTML: 'fa-file-code'
+		HTML: 'fa-file-code',
+		MD: 'fa-file-lines',
+		JSON: 'fa-file-shield'
 	};
 
 	const FORMAT_COLOR: Record<ExportFormat, string> = {
@@ -46,7 +48,9 @@
 		DOCX: 'text-blue-700',
 		PDF: 'text-red-600',
 		ZIP: 'text-amber-600',
-		HTML: 'text-purple-600'
+		HTML: 'text-purple-600',
+		MD: 'text-slate-600',
+		JSON: 'text-cyan-700'
 	};
 
 	function handleClick() {
@@ -79,6 +83,7 @@
 							{#each group.options as option}
 								<a
 									href={option.href}
+									data-sveltekit-reload={option.kind === 'navigate' ? undefined : true}
 									onclick={handleClick}
 									data-testid={option.testId}
 									aria-label={`${safeTranslate(option.titleKey)} — ${option.format}`}

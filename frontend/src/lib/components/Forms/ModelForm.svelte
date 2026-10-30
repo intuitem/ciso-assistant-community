@@ -3,9 +3,9 @@
 
 	import { setContext, onDestroy } from 'svelte';
 
-	import SuperForm from '$lib/components/Forms/Form.svelte';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
+	import SuperForm from '#lib/components/Forms/Form.svelte';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
 	import FolderTreeSelect from './FolderTreeSelect.svelte';
 	import LoadingSpinner from '../utils/LoadingSpinner.svelte';
 
@@ -13,6 +13,8 @@
 	import PerimeterForm from './ModelForm/PerimeterForm.svelte';
 	import ThreatForm from './ModelForm/ThreatForm.svelte';
 	import SecurityAdvisoryForm from './ModelForm/SecurityAdvisoryForm.svelte';
+	import QuickFormResponseForm from './ModelForm/QuickFormResponseForm.svelte';
+	import QuickFormPublicationForm from './ModelForm/QuickFormPublicationForm.svelte';
 	import CWEForm from './ModelForm/CWEForm.svelte';
 	import RiskScenarioForm from './ModelForm/RiskScenarioForm.svelte';
 	import AppliedControlsPoliciesForm from './ModelForm/AppliedControlPolicyForm.svelte';
@@ -29,12 +31,15 @@
 	import SolutionsForm from './ModelForm/SolutionForm.svelte';
 	import ContractsForm from './ModelForm/ContractForm.svelte';
 	import RepresentativesForm from './ModelForm/RepresentativeForm.svelte';
+	import EntityScoreForm from './ModelForm/EntityScoreForm.svelte';
+	import TierForm from './ModelForm/TierForm.svelte';
 	import FrameworksForm from './ModelForm/FrameworkForm.svelte';
 	import UsersForm from './ModelForm/UserForm.svelte';
 	import TeamForm from './ModelForm/TeamForm.svelte';
 	import SsoSettingsForm from './ModelForm/SsoSettingForm.svelte';
 	import FolderForm from './ModelForm/FolderForm.svelte';
 	import IdpGroupForm from './ModelForm/IdpGroupForm.svelte';
+	import ServiceAccountForm from './ModelForm/ServiceAccountForm.svelte';
 	import GeneralSettingsForm from './ModelForm/GeneralSettingForm.svelte';
 	import FeatureFlagsSettingForm from './ModelForm/FeatureFlagsSettingForm.svelte';
 	import VulnerabilitySlaSettingForm from './ModelForm/VulnerabilitySlaSettingForm.svelte';
@@ -56,6 +61,7 @@
 	import SecurityExceptionForm from './ModelForm/SecurityExceptionForm.svelte';
 	import FindingForm from './ModelForm/FindingForm.svelte';
 	import FindingsAssessmentForm from './ModelForm/FindingsAssessmentForm.svelte';
+	import PostureAssessmentForm from './ModelForm/PostureAssessmentForm.svelte';
 	import IncidentForm from './ModelForm/IncidentForm.svelte';
 	import TimelineEntryForm from './ModelForm/TimelineEntryForm.svelte';
 	import TaskTemplateForm from './ModelForm/TaskTemplateForm.svelte';
@@ -65,6 +71,7 @@
 	import EscalationThresholdForm from './ModelForm/EscalationThresholdForm.svelte';
 	import CampaignForm from './ModelForm/CampaignForm.svelte';
 	import ElementaryActionForm from './ModelForm/ElementaryActionForm.svelte';
+	import ThreatModelForm from './ModelForm/ThreatModelForm.svelte';
 	import OperatingModeForm from './ModelForm/OperatingModeForm.svelte';
 	import KillChainForm from './ModelForm/KillChainForm.svelte';
 	import OrganisationIssueForm from './ModelForm/OrganisationIssueForm.svelte';
@@ -73,13 +80,19 @@
 	import QuantitativeRiskScenarioForm from './ModelForm/QuantitativeRiskScenarioForm.svelte';
 	import QuantitativeRiskHypothesisForm from './ModelForm/QuantitativeRiskHypothesisForm.svelte';
 	import TerminologyForm from './ModelForm/TerminologyForm.svelte';
+	import ObjectClassificationForm from './ModelForm/ObjectClassificationForm.svelte';
+	import ClassificationLevelForm from './ModelForm/ClassificationLevelForm.svelte';
+	import AssetClassForm from './ModelForm/AssetClassForm.svelte';
 	import CustomFieldDefinitionForm from './ModelForm/CustomFieldDefinitionForm.svelte';
 	import RoleForm from './ModelForm/RoleForm.svelte';
 	import EvidenceRevisionForm from './ModelForm/EvidenceRevisionForm.svelte';
 	import GenericCollectionForm from './ModelForm/GenericCollectionForm.svelte';
+	import DocumentContainerForm from './ModelForm/DocumentContainerForm.svelte';
+	import DocumentTemplateForm from './ModelForm/DocumentTemplateForm.svelte';
 	import AccreditationForm from './ModelForm/AccreditationForm.svelte';
 	import ProjectForm from './ModelForm/ProjectForm.svelte';
 	import ResponsibilityMatrixForm from './ModelForm/ResponsibilityMatrixForm.svelte';
+	import WorkflowForm from './ModelForm/WorkflowForm.svelte';
 	import ResponsibilityMatrixActivityForm from './ModelForm/ResponsibilityMatrixActivityForm.svelte';
 	import ResponsibilityAssignmentForm from './ModelForm/ResponsibilityAssignmentForm.svelte';
 	import ResponsibilityRoleForm from './ModelForm/ResponsibilityRoleForm.svelte';
@@ -93,21 +106,21 @@
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
-	import { modelSchema } from '$lib/utils/schemas';
-	import type { ModelInfo, urlModel, CacheLock } from '$lib/utils/types';
+	import { modelSchema } from '#lib/utils/schemas.js';
+	import type { ModelInfo, urlModel, CacheLock } from '#lib/utils/types.js';
 	import { superForm, superValidate, type SuperValidated } from 'sveltekit-superforms';
-	import type { FormDataShape } from '$lib/utils/schemas';
-	import { browser } from '$app/environment';
-	import { page } from '$app/stores';
-	import { m } from '$paraglide/messages';
+	import type { FormDataShape } from '#lib/utils/schemas.js';
+	import { browser } from '$app/env';
+	import { page } from '$app/state';
+	import { m } from '#paraglide/messages.js';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
-	import { getSecureRedirect } from '$lib/utils/helpers';
-	import { createModalCache } from '$lib/utils/stores';
+	import { getSecureRedirect } from '#lib/utils/helpers.js';
+	import { createModalCache } from '#lib/utils/stores.js';
 	import FilteringLabelForm from './ModelForm/FilteringLabelForm.svelte';
 	import OperationalScenarioForm from './ModelForm/OperationalScenarioForm.svelte';
 	import StrategicScenarioForm from './ModelForm/StrategicScenarioForm.svelte';
-	import { goto } from '$lib/utils/breadcrumbs';
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { goto } from '#lib/utils/breadcrumbs.js';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 
 	interface Props {
 		form: SuperValidated<FormDataShape>;
@@ -243,8 +256,8 @@
 	let urlModelFromPage = $state();
 
 	run(() => {
-		if ($page) {
-			urlModelFromPage = `${$page.url}`.replace(/^.*:\/\/[^/]+/, '');
+		if (page) {
+			urlModelFromPage = `${page.url}`.replace(/^.*:\/\/[^/]+/, '');
 			createModalCache.setModelName(urlModelFromPage);
 			if (caching) {
 				const currentCache = createModalCache.data[model.urlModel];
@@ -359,6 +372,10 @@
 				optionsEndpoint="reference-controls"
 				optionsExtraFields={[['folder', 'str']]}
 				optionsLabelField="auto"
+				optionsInfoFields={{
+					fields: [{ field: 'category', translate: true }],
+					position: 'prefix'
+				}}
 				optionsSuggestions={suggestions['reference_control']}
 				field="reference_control"
 				cacheLock={cacheLocks['reference_control']}
@@ -441,7 +458,7 @@
 				data-focusindex="1"
 			/>
 		{/if}
-		{#if shape.folder && !customFolder && URLModel !== 'validation-flows'}
+		{#if shape.folder && !customFolder && !['validation-flows', 'findings', 'entity-assessments', 'quick-form-publications'].includes(URLModel)}
 			{#key folderKey}
 				<FolderTreeSelect
 					{form}
@@ -496,6 +513,8 @@
 			/>
 		{:else if URLModel === 'idp-groups'}
 			<IdpGroupForm {form} {model} {cacheLocks} {formDataCache} {shape} {context} />
+		{:else if URLModel === 'service-accounts'}
+			<ServiceAccountForm {form} {model} {cacheLocks} {formDataCache} {shape} {context} {object} />
 		{:else if URLModel === 'risk-assessments'}
 			<RiskAssessmentForm
 				{form}
@@ -509,6 +528,26 @@
 				{updated_fields}
 				{...rest}
 			/>
+		{:else if URLModel === 'document-containers'}
+			<DocumentContainerForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{context}
+			/>
+		{:else if URLModel === 'document-templates'}
+			<DocumentTemplateForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{context}
+			/>
 		{:else if URLModel === 'threats'}
 			<ThreatForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
 		{:else if URLModel === 'security-advisories'}
@@ -516,7 +555,16 @@
 		{:else if URLModel === 'cwes'}
 			<CWEForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
 		{:else if URLModel === 'risk-scenarios'}
-			<RiskScenarioForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
+			<RiskScenarioForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{context}
+				{...rest}
+			/>
 		{:else if URLModel === 'applied-controls' || URLModel === 'policies'}
 			<AppliedControlsPoliciesForm
 				{form}
@@ -528,6 +576,7 @@
 				{origin}
 				{initialData}
 				{context}
+				{object}
 				{...rest}
 			/>
 		{:else if URLModel === 'vulnerabilities'}
@@ -540,7 +589,7 @@
 				{formDataCache}
 				{object}
 				{initialData}
-				{$page}
+				$page={page}
 				{...rest}
 			/>
 		{:else if URLModel === 'validation-flows'}
@@ -583,7 +632,7 @@
 				{model}
 				{cacheLocks}
 				{formDataCache}
-				{initialData}
+				initialData={{ ...initialData, ...additionalInitialData }}
 				{object}
 				{context}
 				{...rest}
@@ -615,9 +664,21 @@
 				{...rest}
 			/>
 		{:else if URLModel === 'solutions'}
-			<SolutionsForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
+			<SolutionsForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} {...rest} />
 		{:else if URLModel === 'contracts'}
 			<ContractsForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
+		{:else if URLModel === 'entity-scores'}
+			<EntityScoreForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{...rest}
+			/>
+		{:else if URLModel === 'tiers'}
+			<TierForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
 		{:else if URLModel === 'representatives'}
 			<RepresentativesForm
 				{form}
@@ -680,7 +741,15 @@
 				{...rest}
 			/>
 		{:else if URLModel === 'processings'}
-			<ProcessingForm {form} {model} {cacheLocks} {formDataCache} {context} {...rest} />
+			<ProcessingForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				initialData={{ ...initialData, ...additionalInitialData }}
+				{context}
+				{...rest}
+			/>
 		{:else if URLModel === 'purposes'}
 			<PurposeForm {form} {model} {cacheLocks} {formDataCache} {context} {initialData} {...rest} />
 		{:else if URLModel === 'personal-data'}
@@ -754,7 +823,7 @@
 				{...rest}
 			/>
 		{:else if URLModel === 'ebios-rm'}
-			<EbiosRmForm {form} {model} {cacheLocks} {formDataCache} {context} {...rest} />
+			<EbiosRmForm {form} {model} {cacheLocks} {formDataCache} {context} {object} {...rest} />
 		{:else if URLModel === 'feared-events'}
 			<FearedEventForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
 		{:else if URLModel === 'ro-to'}
@@ -792,6 +861,27 @@
 				{object}
 				{...rest}
 			/>
+		{:else if URLModel === 'quick-form-publications'}
+			<QuickFormPublicationForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{context}
+				{...rest}
+			/>
+		{:else if URLModel === 'quick-form-responses'}
+			<QuickFormResponseForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{context}
+				{object}
+				{...rest}
+			/>
 		{:else if URLModel === 'security-exceptions'}
 			<SecurityExceptionForm
 				{form}
@@ -814,6 +904,16 @@
 				{context}
 				{...rest}
 			/>
+		{:else if URLModel === 'posture-assessments'}
+			<PostureAssessmentForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{...rest}
+			/>
 		{:else if URLModel === 'incidents'}
 			<IncidentForm {form} {model} {cacheLocks} {formDataCache} {initialData} {context} {...rest} />
 		{:else if URLModel === 'timeline-entries'}
@@ -834,10 +934,21 @@
 				{formDataCache}
 				{initialData}
 				{context}
+				{object}
 				{...rest}
 			/>
 		{:else if URLModel === 'task-nodes'}
 			<TaskNodeForm {form} {model} {cacheLocks} {formDataCache} {context} {...rest} />
+		{:else if URLModel === 'threat-models'}
+			<ThreatModelForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+				{...rest}
+			/>
 		{:else if URLModel === 'elementary-actions'}
 			<ElementaryActionForm
 				{form}
@@ -856,6 +967,7 @@
 				{formDataCache}
 				initialData={model.initialData}
 				{context}
+				{object}
 				{...rest}
 			/>
 		{:else if URLModel === 'kill-chains'}
@@ -908,6 +1020,19 @@
 			<OrganisationObjectiveForm {form} {model} {cacheLocks} {formDataCache} {initialData} />
 		{:else if URLModel === 'terminologies'}
 			<TerminologyForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
+		{:else if URLModel === 'object-classifications'}
+			<ObjectClassificationForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{object}
+			/>
+		{:else if URLModel === 'classification-levels'}
+			<ClassificationLevelForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
+		{:else if URLModel === 'asset-class'}
+			<AssetClassForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
 		{:else if URLModel === 'custom-fields'}
 			<CustomFieldDefinitionForm
 				{form}
@@ -954,6 +1079,8 @@
 				{object}
 				{context}
 			/>
+		{:else if URLModel === 'workflows'}
+			<WorkflowForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} {context} />
 		{:else if URLModel === 'responsibility-matrix-activities'}
 			<ResponsibilityMatrixActivityForm
 				{form}
@@ -984,6 +1111,7 @@
 				{formDataCache}
 				{initialData}
 				{data}
+				{object}
 				{...rest}
 			/>
 		{:else if URLModel === 'metric-instances'}
@@ -994,6 +1122,7 @@
 				{formDataCache}
 				initialData={{ ...initialData, ...additionalInitialData }}
 				{data}
+				{object}
 				{...rest}
 			/>
 		{:else if URLModel === 'custom-metric-samples'}
@@ -1079,8 +1208,13 @@
 
 						isLoading = true;
 					}}
-					>{#if isLoading}{m.loading()} <LoadingSpinner />{:else}{m.save()}{/if}</button
 				>
+					{#if isLoading}
+						{m.loading()} <LoadingSpinner />
+					{:else}
+						{m.save()}
+					{/if}
+				</button>
 			{:else}
 				{#if cancelButton}
 					<button

@@ -1,11 +1,12 @@
 <script lang="ts">
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import Select from '$lib/components/Forms/Select.svelte';
-	import { m } from '$paraglide/messages';
+	import type { ModelInfo, CacheLock } from '#lib/utils/types.js';
+	import Checkbox from '#lib/components/Forms/Checkbox.svelte';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import Select from '#lib/components/Forms/Select.svelte';
+	import { m } from '#paraglide/messages.js';
 	import TextArea from '../TextArea.svelte';
+	import MarkdownField from '#lib/components/Forms/MarkdownField.svelte';
 	import { page } from '$app/state';
 
 	interface Props {
@@ -78,6 +79,17 @@
 		bind:cachedValue={formDataCache['target_objective']}
 		helpText={m.targetObjectiveHelpText()}
 	/>
+	<AutocompleteSelect
+		{form}
+		optionsEndpoint="terminologies?field_path=ro_to.target_objective_category&is_visible=true"
+		optionsLabelField="translated_name"
+		field="target_objective_category"
+		nullable
+		label={m.targetObjectiveCategory()}
+		cacheLock={cacheLocks['target_objective_category']}
+		bind:cachedValue={formDataCache['target_objective_category']}
+		helpText={m.targetObjectiveCategoryHelpText()}
+	/>
 </div>
 <div
 	class="relative p-2 space-y-2 rounded-md {activeActivity === 'two'
@@ -148,7 +160,7 @@
 		label={m.fearedEvents()}
 		helpText={m.roToFearedEventHelpText()}
 	/>
-	<TextArea
+	<MarkdownField
 		{form}
 		field="justification"
 		label={m.justification()}

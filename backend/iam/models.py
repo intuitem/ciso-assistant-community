@@ -4,23 +4,26 @@ Inspired from Azure IAM model"""
 from __future__ import annotations
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Any, Dict, Generator, List, Optional, Tuple
-from typing import TYPE_CHECKING, Set, cast
+from datetime import timedelta
+from typing import Any, Literal, Optional, Final
+from typing import TYPE_CHECKING, cast
+import secrets
 import uuid
 from allauth.account.models import EmailAddress
 from django.utils import timezone
-from django.db import models, transaction
+from django.db import IntegrityError, models, transaction
 from django.db.utils import OperationalError, ProgrammingError
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AnonymousUser, Permission
 from django.utils.translation import gettext_lazy as _, override as translation_override
 from django.urls.base import reverse_lazy
-from django.db.models import Q, F, Prefetch, QuerySet
+from django.db.models import Q, F, Func, QuerySet, Case, When, Value, BooleanField
+from django.db.models.functions import Lower
+from django.db.models.lookups import Exact
+from django.core.exceptions import ValidationError
 from knox.models import AuthToken
 
-if TYPE_CHECKING:
-    from iam.cache_builders import AssignmentLite
 from core.utils import (
     BUILTIN_USERGROUP_CODENAMES,
     get_translated_builtin_role_name,
@@ -30,13 +33,15 @@ from core.base_models import (
     ActorSyncManager,
     ActorSyncMixin,
     NameDescriptionMixin,
+    _IAMNotImplemented,
+    _IAMSpecialCase,
 )
 from core.utils import UserGroupCodename, RoleCodename
 from django.utils.http import urlsafe_base64_encode
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes
 from django.template.loader import render_to_string
-from django.core.mail import get_connection, EmailMessage
+from core import mailer
 from django.core.validators import validate_email
 from django.conf import settings
 
@@ -45,26 +50,9 @@ import structlog
 logger = structlog.get_logger(__name__)
 
 from auditlog.registry import auditlog
-from allauth.mfa.models import Authenticator
+from auditlog.signals import pre_log
+from allauth.idp.oidc.models import Client, Token
 from core.context import focus_folder_id_var
-from django.shortcuts import get_object_or_404
-from iam.cache_builders import (
-    CacheNotReadyError,
-    FolderCacheState,
-    get_folder_state,
-    get_roles_state,
-    get_groups_state,
-    get_assignments_state,
-    get_sub_folders_cached,
-    get_parent_folders_cached,
-    get_folder_path,
-    invalidate_folders_cache,
-    invalidate_roles_cache,
-    invalidate_groups_cache,
-    invalidate_assignments_cache,
-    iter_descendant_ids,
-)
-
 
 ALLOWED_PERMISSION_APPS = (
     "core",
@@ -88,10 +76,56 @@ IGNORED_PERMISSION_MODELS = (
     "historicalmetric",
     "idpgroup",
     "scimtoken",
+    "serviceaccount",
+    # Internal: access is gated through the parent object, never by these permissions
+    "answerattachment",
+    "demomanifest",
+    "flowevent",
+    "producedobjectlink",
+    "quickformapplication",
+    "quickformoutcome",
+    "requirementassignmentevent",
+    "requirementnodeattachment",
+    # Stale content types of removed models
+    "cacheversion",
+    "processingnature",
+    # Never checked; mail settings are gated by *_mailerconfiguration
+    "mailer",
+    "mailerhealth",
 )
 
+# System-written, served read-only: only view (and custom rights) are ever checked
+READ_ONLY_PERMISSION_MODELS = (
+    "actor",
+    "assetcapability",
+    "commitment",
+    "dpiarequirementchange",
+    "entitytierchange",
+    "quickformpage",
+    "responsibilityassignment",
+    "responsibilityrole",
+    "solutiontierchange",
+)
 
-def _get_root_folder() -> Folder | None:
+IGNORED_PERMISSIONS = Q(content_type__model__in=IGNORED_PERMISSION_MODELS) | Q(
+    codename__in=[
+        f"{action}_{model}"
+        for model in READ_ONLY_PERMISSION_MODELS
+        for action in ("add", "change", "delete")
+    ]
+)
+
+type NativePermissionPrefix = Literal["view", "add", "change", "delete"]
+"""Default permission prefixes available for all models (django-native)."""
+
+type UniquePermissionPrefix = Literal["approve", "backup", "restore", "transition"]
+"""Unique permission prefixes (only used by a single specific custom builtin `Permission`)."""
+
+type PermissionPrefix = NativePermissionPrefix | UniquePermissionPrefix
+"""All possible permission prefixes (both the native and special ones)."""
+
+
+def _get_root_folder() -> Optional[Folder]:
     """helper function outside of class to facilitate serialization
     to be used only in Folder class
     Returns None only before the IAM tables/migrations are ready so Django's
@@ -107,48 +141,102 @@ def _get_root_folder() -> Folder | None:
         return None
 
 
+_ENCLAVE_FOLDER_CONTENT_TYPE_STRING: Final[str] = "EN"
+
+# ASCII whitespace, trimmed alike by Folder.clean() and the ref_id unique index.
+_REF_ID_WHITESPACE: Final[str] = " \t\n\r\x0b\x0c"
+
+
+def _trimmed_ref_id(expression=None) -> Func:
+    # TRIM(string, characters) reads the same on SQLite and PostgreSQL.
+    return Func(
+        expression if expression is not None else F("ref_id"),
+        Value(_REF_ID_WHITESPACE),
+        function="TRIM",
+        output_field=models.CharField(),
+    )
+
+
+def _trimmed_ref_id_literal(expression=None) -> Func:
+    # _trimmed_ref_id() with the characters written into the SQL, not bound:
+    # SQLite only matches an indexed expression whose constants are literals.
+    # Queries only: the constraint keeps _trimmed_ref_id(), so its migration stays.
+    return Func(
+        expression if expression is not None else F("ref_id"),
+        function="TRIM",
+        template=f"%(function)s(%(expressions)s, '{_REF_ID_WHITESPACE}')",
+        output_field=models.CharField(),
+    )
+
+
 class Folder(NameDescriptionMixin):
     """A folder is a container for other folders or any object
     Folders are organized in a tree structure, with a single root folder
     Folders are the base perimeter for role assignments
     """
 
-    @staticmethod
-    def get_root_folder() -> "Folder":
-        """class function for general use"""
-        try:
-            state = get_folder_state()
-        except CacheNotReadyError:
-            # During initial migrations the cache cannot hydrate yet; fall back to the
-            # direct lookup which may still be None until the schema is ready.
-            folder = _get_root_folder()
-            return cast("Folder", folder)  # type: ignore[return-value]
+    IAM_NOT_IMPLEMENTED = _IAMNotImplemented()
+    """
+    Sentinel value set to a model `IAM_SCOPE_FIELD` attribute when this model isn't supported by the IAM.
 
-        # Cache is ready, so root folder is already existing
-        # But if the cache is stale, we call the db
-        if state.root_folder_id:
-            cached_root = state.folders.get(state.root_folder_id)
-            if cached_root is not None:
-                return cached_root
-        return Folder.objects.only("id", "content_type").get(
-            content_type=Folder.ContentType.ROOT
+    If an IAM function (e.g. `is_object_readable` is invoked with this model/an object of this model it will raise an `IAMNotImplementedError`.
+    """
+    IAM_SPECIAL_CASE = _IAMSpecialCase()
+    """
+    Sentinel value set to a model `IAM_SCOPE_FIELD` attribute is supported by the IAM even though it doesn't have any clearly defined IAM scope field.
+    """
+
+    class IAMNotImplementedError(NotImplementedError):
+        """Exception raised when the IAM is invoked with a `IAM_NOT_IMPLEMENTED`/undefined `IAM_SCOPE_FIELD` model."""
+
+        pass
+
+    class InconsistencyError(Exception):
+        """Exception raised during `Folder.save` execution if an attempt to save an inconsistent(invalid) folder is made."""
+
+        pass
+
+    @staticmethod
+    def _init_root_folder():
+        """Initialize (create) and cache the root `Folder` if it doesn't exist yet."""
+        Folder.objects.get_or_create(
+            content_type=Folder.ContentType.ROOT,
+            builtin=True,
+            defaults={"name": "Global"},
         )
 
     @staticmethod
+    def get_root_folder() -> Optional[Folder]:
+        """Return the root `Folder`."""
+
+        return _get_root_folder()
+
+    @staticmethod
     def get_root_folder_id() -> uuid.UUID | None:
-        folder = _get_root_folder()
+        folder = Folder.get_root_folder()
         return getattr(folder, "id", None)
+
+    def is_root(self) -> bool:
+        return self.id == self.get_root_folder_id()
+
+    @staticmethod
+    def get_focused_folder_id() -> Optional[uuid.UUID]:
+        return focus_folder_id_var.get()
 
     class ContentType(models.TextChoices):
         """content type for a folder"""
 
         ROOT = "GL", _("GLOBAL")
         DOMAIN = "DO", _("DOMAIN")
-        ENCLAVE = "EN", _("ENCLAVE")
+        ENCLAVE = _ENCLAVE_FOLDER_CONTENT_TYPE_STRING, _("ENCLAVE")
         PERSONAL = "PE", _("PERSONAL")
 
     content_type = models.CharField(
         max_length=2, choices=ContentType.choices, default=ContentType.DOMAIN
+    )
+
+    ref_id = models.CharField(
+        max_length=100, null=True, blank=True, verbose_name=_("reference id")
     )
 
     parent_folder = models.ForeignKey(
@@ -158,10 +246,25 @@ class Folder(NameDescriptionMixin):
         verbose_name=_("parent folder"),
         default=_get_root_folder,
     )
+    descendants = models.ManyToManyField(
+        "self",
+        symmetrical=False,
+        related_name="ancestors",
+    )
     builtin = models.BooleanField(default=False)
     create_iam_groups = models.BooleanField(
         default=False,
         help_text=_("Automatically provision IAM groups for domain folders."),
+    )
+    default_role = models.ForeignKey(
+        "Role",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="default_role_folders",
+        help_text=_(
+            "Role whose permissions are granted, on this folder only, to the members of the standard IAM groups of its sub-folders (enclaves excluded). Only roles containing view permissions exclusively are eligible."
+        ),
     )
 
     filtering_labels = models.ManyToManyField(
@@ -170,6 +273,7 @@ class Folder(NameDescriptionMixin):
         verbose_name=_("Labels"),
         related_name="folders",
     )
+
     fields_to_check = ["name"]
 
     class Meta:
@@ -178,42 +282,345 @@ class Folder(NameDescriptionMixin):
         verbose_name = _("Folder")
         verbose_name_plural = _("Folders")
 
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    ~Q(content_type=_ENCLAVE_FOLDER_CONTENT_TYPE_STRING)
+                    | Q(default_role__isnull=True)
+                ),
+                name="enclave_default_role_must_be_null",
+            ),
+            # Backstop for clean(): blank ref_ids are not identifiers.
+            # TRIM(NULL) is NULL, so this also leaves NULLs out of the index.
+            models.UniqueConstraint(
+                Lower(_trimmed_ref_id()),
+                condition=~Q(Exact(_trimmed_ref_id(), Value(""))),
+                name="folder_ref_id_unique",
+            ),
+        ]
+
     def __str__(self) -> str:
         return self.name.__str__()
 
+    def clean(self) -> None:
+        # Whitespace-only is blank, and blank is stored as NULL.
+        if self.ref_id is not None:
+            self.ref_id = self.ref_id.strip(_REF_ID_WHITESPACE) or None
+        errors = {}
+        if self.ref_id and Folder.ref_id_in_use(self.ref_id, exclude_pk=self.pk):
+            errors["ref_id"] = [self._ref_id_taken_message()]
+        # Report a name clash alongside, so both can be fixed at once.
+        try:
+            super().clean()
+        except ValidationError as e:
+            errors = e.update_error_dict(errors)
+        if errors:
+            raise ValidationError(errors)
+
+    @staticmethod
+    def ref_id_in_use(ref_id: str, exclude_pk=None) -> bool:
+        """Whether another folder holds *ref_id*."""
+        return (
+            Folder.filter_by_ref_id(Folder.objects.all(), ref_id)
+            .exclude(pk=exclude_pk)
+            .exists()
+        )
+
+    @staticmethod
+    def filter_by_ref_id(queryset: QuerySet[Folder], ref_id: str) -> QuerySet[Folder]:
+        """Folders of *queryset* holding *ref_id*, compared as the unique index does."""
+        return queryset.alias(
+            normalized_ref_id=Lower(_trimmed_ref_id_literal())
+        ).filter(
+            # The index's own condition, so the partial index can serve the lookup.
+            ~Q(Exact(_trimmed_ref_id_literal(), Value(""))),
+            normalized_ref_id=Lower(_trimmed_ref_id_literal(Value(ref_id))),
+        )
+
+    def _ref_id_taken_message(self) -> str:
+        # Unique across all folders, so the message must not say where it is used:
+        # the holder may be a folder the user cannot see.
+        return f"{self.ref_id} is already used. Please choose another value."
+
+    @staticmethod
+    def _lock_folder_tree() -> None:
+        """
+        Acquire a SQL `FOR UPDATE` lock to ensure there's no race condition related to folder operations.
+        (e.g. Avoiding checking on a stale `Folder.descendants` snapshot)
+
+        (Perform a `SELECT ... FOR UPDATE` on the root folder).
+
+        This lock is purely for Postgre (the `FOR UPDATE` isn't added to the SQLite SQL query).
+
+        But SQLite don't need this anyway as the SQLite `transation.atomic()` already protect from this race condition.
+        """
+        root_folder_id = Folder.get_root_folder_id()
+        if root_folder_id is None:
+            return
+        try:
+            Folder.objects.select_for_update().get(pk=root_folder_id)
+        except Folder.DoesNotExist:
+            pass
+
+    def _update_descendants_at_creation(self):
+        """Update the `ancestor.descendants` `ManyToManyField` for each `ancestor` of the newly created `self` `Folder` instance."""
+        parent_folder = self.parent_folder
+        if parent_folder is None:
+            return
+
+        ancestors = [parent_folder]
+        ancestors.extend(Folder.objects.filter(descendants=parent_folder))
+
+        for ancestor in ancestors:
+            ancestor.descendants.add(self)
+
+    def _update_descendants_on_parent_folder_change(self, old_instance: Folder):
+        """
+        Update the `descendants` of both the old and new ancestors of this `Folder`.
+
+        The `old_instance` argument MUST be `self` as it's currently stored in the DB (equal to `Folder.objects.get(pk=self.pk)`).
+
+        If `self.parent_folder` didn't change (compared to the current `old_instance` `Folder` stored in the DB), this function does nothing.
+        """
+
+        if old_instance.parent_folder_id == self.parent_folder_id:
+            return
+
+        old_ancestors = list(Folder.objects.filter(descendants=self))
+        old_ancestor_id_set = {ancestor.id for ancestor in old_ancestors}
+
+        new_parent = self.parent_folder
+
+        if new_parent is None:
+            new_ancestors = []
+        else:
+            new_ancestors = list(Folder.objects.filter(descendants=new_parent))
+            new_ancestors.append(new_parent)
+
+        new_ancestor_id_set = {ancestor.id for ancestor in new_ancestors}
+
+        descendant_model = Folder.descendants.through
+        descendant_ids = self.descendants.all().values_list("id", flat=True)
+        descendant_and_self_ids = descendant_ids.union(
+            Folder.objects.filter(id=self.id).values_list("id", flat=True)
+        )
+
+        added_ancestors = [
+            ancestor
+            for ancestor in new_ancestors
+            if ancestor.id not in old_ancestor_id_set
+        ]
+        deleted_ancestors = [
+            ancestor
+            for ancestor in old_ancestors
+            if ancestor.id not in new_ancestor_id_set
+        ]
+
+        for ancestor in added_ancestors:
+            descendant_model.objects.bulk_create(
+                (
+                    descendant_model(
+                        from_folder_id=ancestor.id, to_folder_id=descendant_id
+                    )
+                    for descendant_id in descendant_and_self_ids
+                ),
+                batch_size=1000,
+                ignore_conflicts=True,
+            )
+
+        descendant_model.objects.filter(
+            from_folder_id__in=[ancestor.id for ancestor in deleted_ancestors],
+            to_folder_id__in=descendant_and_self_ids,
+        ).delete()
+
     def save(self, *args, **kwargs):
-        if self._state.adding and not self.is_published:
-            self.is_published = True
-        result = super().save(*args, **kwargs)
-        invalidate_folders_cache()
-        return result
+        try:
+            self._save_in_tree_lock(*args, **kwargs)
+        except IntegrityError as e:
+            # SQLite takes no tree lock, so a concurrent write can slip past clean().
+            if "folder_ref_id_unique" not in str(e):
+                raise
+            raise ValidationError({"ref_id": self._ref_id_taken_message()}) from e
+
+    def _save_in_tree_lock(self, *args, **kwargs):
+        """
+        **WARNING:** This function can raise an `Folder.InconsistencyError` `Exception`.
+
+        This Exception is raised if the `Folder` creation/update would cause some kind of incosistency (a violation of the Folder invariants).
+        """
+
+        is_create = self._state.adding
+        is_root_folder = self.parent_folder is None
+        has_root_content_type = self.content_type == Folder.ContentType.ROOT
+
+        with transaction.atomic():
+            self._lock_folder_tree()
+
+            if is_create:
+                if is_root_folder:
+                    root_folder_already_exists = Folder.objects.filter(
+                        parent_folder=None
+                    ).exists()
+
+                    if root_folder_already_exists:
+                        raise Folder.InconsistencyError(
+                            "There can't be more than one root folder."
+                        )
+
+                if has_root_content_type:
+                    root_content_type_already_exists = Folder.objects.filter(
+                        content_type=Folder.ContentType.ROOT
+                    ).exists()
+
+                    if root_content_type_already_exists:
+                        raise Folder.InconsistencyError(
+                            "There can't be more than one folder with a ROOT content_type."
+                        )
+
+            else:
+                # If it's a `Folder` modification (not a create).
+                current_folder = Folder.objects.get(pk=self.pk)
+
+                old_content_type = current_folder.content_type
+                new_content_type = self.content_type
+
+                if old_content_type != new_content_type:
+                    if new_content_type == Folder.ContentType.ROOT:
+                        raise Folder.InconsistencyError(
+                            "Can't change a non-root ContentType folder to a ROOT ContentType."
+                        )
+
+                    if old_content_type == Folder.ContentType.ROOT:
+                        raise Folder.InconsistencyError(
+                            "Can't change a root ContentType to another ContentType."
+                        )
+
+                old_parent_folder = current_folder.parent_folder
+                new_parent_folder = self.parent_folder
+
+                if old_parent_folder is None:
+                    if not self.builtin:
+                        raise Folder.InconsistencyError(
+                            "The root folder builtin field MUST be True."
+                        )
+
+                if new_parent_folder != old_parent_folder:
+                    if old_parent_folder is None:
+                        raise Folder.InconsistencyError(
+                            "The root folder parent_folder field can't be changed."
+                        )
+
+                    if is_root_folder:
+                        raise Folder.InconsistencyError(
+                            "A folder can't be changed in a root folder (a parentless folder)."
+                        )
+
+                    if new_parent_folder == self:
+                        raise Folder.InconsistencyError(
+                            "A folder can't have itself as a parent."
+                        )
+
+                    if self.descendants.filter(pk=new_parent_folder.pk).exists():
+                        raise Folder.InconsistencyError(
+                            "A folder can't have one of its descendants as a parent (as it would create a cycle in the folder tree)."
+                        )
+
+            if is_create:
+                super().save(*args, **kwargs)
+                self._update_descendants_at_creation()
+            else:
+                assert current_folder is not None, (
+                    "The `current_folder` (snapshot of `self` as it exists in the DB) MUST NOT be `None`."
+                )
+                self._update_descendants_on_parent_folder_change(current_folder)
+                super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
-        result = super().delete(*args, **kwargs)
-        invalidate_folders_cache()
-        return result
+        with transaction.atomic():
+            self._lock_folder_tree()
 
-    def get_sub_folders(self) -> Generator["Folder", None, None]:
+            if self.content_type == Folder.ContentType.ROOT:
+                raise Folder.InconsistencyError("The root folder can't be deleted.")
+
+            super().delete(*args, **kwargs)
+
+    def get_sub_folders(self, include_self: bool = False) -> QuerySet[Folder]:
         """Return the list of subfolders through the cached tree."""
-        yield from get_sub_folders_cached(self.id)
 
-    # Should we update data-model.md now that this method is a generator ?
-    def get_parent_folders(self) -> Generator["Folder", None, None]:
-        """Return the list of parent folders"""
-        yield from get_parent_folders_cached(self.id)
+        subfolders = self.descendants.all()
+        if include_self:
+            subfolders = Folder.objects.filter(Q(id=self.id) | Q(id__in=subfolders))
 
-    def get_folder_full_path(self, *, include_root: bool = False) -> list["Folder"]:
+        return subfolders
+
+    def get_parent_folders(self, include_self: bool = False) -> list[Folder]:
+        """Return the list of parent folders (oredered from nearest parent to the furthest (root folder))."""
+
+        # We use `self.ancestors` instead of (`while (current_parent := current_parent.parent_folder) is not None`) to avoid N+1 queries.
+        # As this would perform one SQL query each time we read the `current_parent.parent_folder` attribute.
+        parent_folders = list(self.ancestors.all())
+        parent_map = {
+            parent_folder.id: parent_folder for parent_folder in parent_folders
+        }
+        ordered_parent_folders = []
+
+        if include_self:
+            ordered_parent_folders.append(self)
+
+        current_parent = self
+
+        while (current_parent_id := current_parent.parent_folder_id) is not None:
+            current_parent = parent_map.get(current_parent_id)
+            assert current_parent is not None, (
+                "The `self.ancestors` relationship is inconsistent with the parent_folder FOREIGN KEY chain."
+            )
+
+            ordered_parent_folders.append(current_parent)
+
+        return ordered_parent_folders
+
+    def get_folder_full_path(self, *, include_root: bool = False) -> list[Folder]:
         """
         Get the full path of the folder including its parents.
         If include_root is True, the root folder is included in the path.
         """
-        return get_folder_path(self.id, include_root=include_root)
+
+        folders = list(self.get_parent_folders())
+        # We use `get_parent_folders` and `folder_map` to be able to get the `self` `Folder` full path with just 1 query.
+        # Otherwise we would execute 1 query for each `last_folder.parent_folder` attribute access.
+        folder_map = {folder.id: folder for folder in folders}
+
+        reversed_folder_path: list[Folder] = [self]
+        while True:
+            last_folder = reversed_folder_path[-1]
+            parent_folder_id = last_folder.parent_folder_id
+
+            if parent_folder_id is None:
+                break
+
+            parent_folder = folder_map.get(parent_folder_id)
+            if parent_folder is None:
+                raise AssertionError(
+                    f"parent_folder(id={parent_folder_id}) not found in folder(id={self.id}) ancestors."
+                )
+
+            reversed_folder_path.append(parent_folder)
+
+        if not include_root:
+            reversed_folder_path.pop()
+
+        folder_path = reversed_folder_path[::-1]
+        return folder_path
 
     def get_folder_full_path_string(self, *, include_root: bool = False) -> str:
         """
         Return a stringified slash-separated folder path.
         This string is unique per-folder.
         """
+        if self.id == self.get_root_folder_id():
+            # The root folder should only return its own name (as it has no ancestors).
+            return self.name
+
         return "/".join(
             f.name for f in self.get_folder_full_path(include_root=include_root)
         )
@@ -256,6 +663,7 @@ class Folder(NameDescriptionMixin):
         # NOTE: There are probably better ways to represent these, but it works.
         # NOTE: This list is not complete.
         paths = [
+            ["matrix", "folder"],
             ["folder"],
             ["parent_folder"],
             ["perimeter", "folder"],
@@ -313,7 +721,8 @@ class Folder(NameDescriptionMixin):
         )
 
         # Combine both querysets into a single one.
-        all_roles_qs = direct_perms_qs.union(group_perms_qs)
+        # order_by() drops the default ordering Django 6.1 applies to unions.
+        all_roles_qs = direct_perms_qs.union(group_perms_qs).order_by()
 
         user_roles = defaultdict(list)
         for item in all_roles_qs:
@@ -339,6 +748,7 @@ class Folder(NameDescriptionMixin):
             (UserGroupCodename.ANALYST, RoleCodename.ANALYST),
             (UserGroupCodename.DOMAIN_MANAGER, RoleCodename.DOMAIN_MANAGER),
             (UserGroupCodename.AUDITEE, RoleCodename.AUDITEE),
+            (UserGroupCodename.TECHNICAL_TESTER, RoleCodename.TECHNICAL_TESTER),
         ]
 
         for ug_codename, role_codename in builtin_pairs:
@@ -387,6 +797,11 @@ class Folder(NameDescriptionMixin):
             role_assignment.is_recursive = True
             role_assignment.save(update_fields=["is_recursive"])
 
+    @staticmethod
+    def _get_empty_id_queryset() -> QuerySet[uuid.UUID]:
+        """Return an empty folder ID queryset. (`Folder.objects.none().values_list("id", flat=True).order_by()`)"""
+        return Folder.objects.none().values_list("id", flat=True).order_by()
+
 
 class FolderMixin(models.Model):
     """
@@ -408,25 +823,6 @@ class FolderMixin(models.Model):
 
     class Meta:
         abstract = True
-
-
-class PublishInRootFolderMixin(models.Model):
-    """
-    Set is_published to True if object is attached to the root folder
-    """
-
-    class Meta:
-        abstract = True
-
-    def save(self, *args, **kwargs):
-        # Root folder children must be published
-        if (
-            getattr(self, "folder") == Folder.get_root_folder()
-            and hasattr(self, "is_published")
-            and not self.is_published
-        ):
-            self.is_published = True
-        super().save(*args, **kwargs)
 
 
 class UserGroup(NameDescriptionMixin, FolderMixin):
@@ -452,20 +848,50 @@ class UserGroup(NameDescriptionMixin, FolderMixin):
         return self.name
 
     def save(self, *args, **kwargs):
-        result = super().save(*args, **kwargs)
-        invalidate_groups_cache()
-        invalidate_assignments_cache()  # because RoleAssignment points to groups
-        return result
+        super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
-        result = super().delete(*args, **kwargs)
-        invalidate_groups_cache()
-        invalidate_assignments_cache()
-        return result
+        super().delete(*args, **kwargs)
 
-    @property
-    def permissions(self):
-        return RoleAssignment.get_permissions(self)
+
+def is_supported_language(code) -> bool:
+    return isinstance(code, str) and code in {c for c, _ in settings.LANGUAGES}
+
+
+def default_language() -> str:
+    """The instance-wide default, used when nothing better is known."""
+    try:
+        from global_settings.models import GlobalSettings
+
+        general = GlobalSettings.objects.filter(name="general").first()
+        if general and isinstance(general.value, dict):
+            candidate = general.value.get("default_language", "en")
+            return candidate if is_supported_language(candidate) else "en"
+    except ImportError, OperationalError, ProgrammingError:
+        # Called during startup and from migrations, before the table exists.
+        pass
+    return "en"
+
+
+def default_date_format() -> str:
+    """The instance-wide default date format, used when the user has no preference."""
+    try:
+        from global_settings.models import GlobalSettings
+
+        general = GlobalSettings.objects.filter(name="general").first()
+        if general and isinstance(general.value, dict):
+            candidate = general.value.get("default_date_format", "auto")
+            if isinstance(candidate, str) and candidate in User.DATE_FORMATS:
+                return candidate
+    except ImportError, OperationalError, ProgrammingError:
+        # Called during startup and from migrations, before the table exists.
+        pass
+    return "auto"
+
+
+def resolve_language(code) -> str:
+    """An explicit, supported language, else the instance default."""
+    return code if is_supported_language(code) else default_language()
 
 
 class UserManager(BaseUserManager):
@@ -501,27 +927,19 @@ class UserManager(BaseUserManager):
                 folder=_get_root_folder(),
                 keep_local_login=extra_fields.get("keep_local_login", False),
                 expiry_date=extra_fields.get("expiry_date"),
-                is_published=True,
+                is_jit_provisioned=extra_fields.get("is_jit_provisioned", False),
             ),
         )
         if password:
             user.password = make_password(password)
         else:
             user.set_unusable_password()
-        # Set default language from general settings
-        try:
-            from global_settings.models import GlobalSettings
-
-            general = GlobalSettings.objects.filter(name="general").first()
-            if general and isinstance(general.value, dict):
-                default_lang = general.value.get("default_language", "en")
-            else:
-                default_lang = "en"
-        except Exception:
-            default_lang = "en"
         if not isinstance(user.preferences, dict):
             user.preferences = {}
-        user.preferences["lang"] = default_lang
+        # An explicit language wins over the instance default: a third-party
+        # representative gets their invitation in their own language.
+        user.preferences["lang"] = resolve_language(extra_fields.get("language"))
+        user.preferences["date_format"] = default_date_format()
 
         user.save(using=self._db)
         user.user_groups.set(extra_fields.get("user_groups", []))
@@ -562,7 +980,7 @@ class UserManager(BaseUserManager):
         return self._create_user(
             email=email,
             password=password,
-            mailing=bool(settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE),
+            mailing=mailer.mailing_enabled(),
             initial_group=None,
             **extra_fields,
         )
@@ -576,9 +994,7 @@ class UserManager(BaseUserManager):
         superuser = self._create_user(
             email=email,
             password=password,
-            mailing=bool(
-                (not password) and (settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE)
-            ),
+            mailing=(not password) and mailer.mailing_enabled(),
             initial_group=UserGroup.objects.get(name="BI-UG-ADM"),
             keep_local_login=True,
             **extra_fields,
@@ -669,6 +1085,15 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
             "scim_external_id, which the provisioning client may omit (RFC 7643)."
         ),
     )
+    is_jit_provisioned = models.BooleanField(
+        default=False,
+        verbose_name=_("JIT provisioned"),
+        help_text=_(
+            "True when this account was auto-provisioned on first SSO login. Like "
+            "SCIM-managed accounts, it stays SSO-only regardless of the global "
+            "'Force SSO' setting, unless 'Keep local login' is set."
+        ),
+    )
     objects = CaseInsensitiveUserManager()
 
     # USERNAME_FIELD is used as the unique identifier for the user
@@ -693,7 +1118,7 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         if self.is_superuser and not self.is_active:
             # avoid deactivation of superuser
             self.is_active = True
-        if not self.is_local:
+        if not self.is_local and not (self.is_scim_managed and self.keep_local_login):
             self.set_unusable_password()
         super().save(*args, **kwargs)
         logger.info("user saved", user=self)
@@ -730,27 +1155,26 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         if not isinstance(prefs, dict):
             prefs = {}
             self.preferences = prefs
-        valid_langs = {code for code, _ in settings.LANGUAGES}
-        if not isinstance(prefs.get("lang"), str) or prefs["lang"] not in valid_langs:
-            try:
-                from global_settings.models import GlobalSettings
-
-                general = GlobalSettings.objects.filter(name="general").first()
-                default_lang = (
-                    general.value.get("default_language", "en")
-                    if general and isinstance(general.value, dict)
-                    else "en"
-                )
-            except Exception:
-                default_lang = "en"
-            prefs["lang"] = default_lang
-        if prefs.get("date_format") not in self.DATE_FORMATS:
-            prefs["date_format"] = "auto"
+        if not is_supported_language(prefs.get("lang")):
+            prefs["lang"] = default_language()
+        stored_format = prefs.get("date_format")
+        if not isinstance(stored_format, str) or stored_format not in self.DATE_FORMATS:
+            prefs["date_format"] = default_date_format()
         ui = prefs.get("ui") if isinstance(prefs.get("ui"), dict) else {}
         if ui.get("theme") not in ("light", "dark", "system"):
             ui["theme"] = "system"
         prefs["ui"] = ui
         return prefs
+
+    def language_code(self) -> str:
+        """Just the language, resolved against the instance default. Unlike
+        get_preferences() this normalizes nothing else, so a read path that
+        only needs the language doesn't pay for — or mutate — the rest of the
+        preferences dict. Matters on list endpoints, which call it per row.
+        """
+        prefs = self.preferences if isinstance(self.preferences, dict) else {}
+        code = prefs.get("lang")
+        return code if is_supported_language(code) else default_language()
 
     # Maps Django HTML template names to YAML template keys
     _TEMPLATE_KEY_MAP = {
@@ -766,6 +1190,21 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         Tries the YAML-based template system first (supports custom overrides),
         falls back to the legacy Django HTML templates.
         """
+        template_key = self._TEMPLATE_KEY_MAP.get(email_template_name)
+        if template_key:
+            from core.email_utils import is_email_template_enabled
+
+            # If call to render_email_template (below) fails because the template is disabled (from settings->templates->email templates),
+            # it will still send an email using fallback to legacy Django HTML templates.
+            # This prevents it
+            if not is_email_template_enabled(template_key):
+                logger.info(
+                    "Email template is disabled in settings, skipping send",
+                    template_key=template_key,
+                    recipient=self.email,
+                )
+                return
+
         user_lang = self.get_preferences().get("lang", "en")
         uid = urlsafe_base64_encode(force_bytes(self.pk))
         token = default_token_generator.make_token(self)
@@ -786,7 +1225,6 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         }
 
         # Try YAML template system (supports custom overrides and Markdown)
-        template_key = self._TEMPLATE_KEY_MAP.get(email_template_name)
         if template_key:
             try:
                 from core.email_utils import render_email_template
@@ -826,76 +1264,18 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         self._send_email(subject, email, email)
 
     def _send_email(self, subject, body, html_body=None):
-        """Send an email with primary/rescue server fallback."""
+        """Send through the configured mailers; core.mailer handles failover."""
         try:
-            ssl_context = getattr(settings, "EMAIL_SSL_CONTEXT", None)
-            with get_connection(ssl_context=ssl_context) as connection:
-                msg = EmailMessage(
-                    subject=subject,
-                    body=body,
-                    from_email=None,
-                    to=[self.email],
-                    connection=connection,
-                )
-                if html_body:
-                    msg.content_subtype = "html"
-                    msg.body = html_body
-                msg.send()
-            logger.info(
-                "Email sent successfully", recipient=self.email, subject=subject
-            )
-        except Exception as primary_exception:
+            mailer.send(subject, body, self.email, html_body=html_body)
+        except Exception as error:
             logger.error(
-                "Primary mail server failure, trying rescue",
+                "Email delivery failed",
                 recipient=self.email,
                 subject=subject,
-                error=str(primary_exception),
-                email_host=settings.EMAIL_HOST,
-                email_port=settings.EMAIL_PORT,
-                email_host_user=settings.EMAIL_HOST_USER,
-                email_use_tls=settings.EMAIL_USE_TLS,
+                error=str(error),
             )
-            if settings.EMAIL_HOST_RESCUE:
-                try:
-                    with get_connection(
-                        host=settings.EMAIL_HOST_RESCUE,
-                        port=settings.EMAIL_PORT_RESCUE,
-                        username=settings.EMAIL_HOST_USER_RESCUE,
-                        password=settings.EMAIL_HOST_PASSWORD_RESCUE,
-                        use_tls=settings.EMAIL_USE_TLS_RESCUE,
-                        use_ssl=settings.EMAIL_USE_SSL_RESCUE,
-                        ssl_context=getattr(settings, "EMAIL_SSL_CONTEXT", None),
-                    ) as new_connection:
-                        msg = EmailMessage(
-                            subject=subject,
-                            body=body,
-                            from_email=None,
-                            to=[self.email],
-                            connection=new_connection,
-                        )
-                        if html_body:
-                            msg.content_subtype = "html"
-                            msg.body = html_body
-                        msg.send()
-                    logger.info(
-                        "Email sent via rescue server",
-                        recipient=self.email,
-                        subject=subject,
-                    )
-                except Exception as rescue_exception:
-                    logger.error(
-                        "Rescue mail server failure",
-                        recipient=self.email,
-                        subject=subject,
-                        error=str(rescue_exception),
-                        email_host=settings.EMAIL_HOST_RESCUE,
-                        email_port=settings.EMAIL_PORT_RESCUE,
-                        email_username=settings.EMAIL_HOST_USER_RESCUE,
-                        email_use_tls=settings.EMAIL_USE_TLS_RESCUE,
-                    )
-                    raise rescue_exception
-            else:
-                raise primary_exception
+            raise
+        logger.info("Email sent successfully", recipient=self.email, subject=subject)
 
     def get_user_groups(self):
         """get the list of user groups containing the user in the form (group_name, builtin)"""
@@ -903,19 +1283,19 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
 
     def get_roles(self):
         """get the list of roles attached to the user — directly via its user
-        groups and, when the idp_groups feature is enabled, via the user groups
+        groups and, when IdP-group role inheritance is enabled, via the user groups
         granted by its IdP groups (groups-of-groups closure). Kept consistent
         with the inheritance-aware ``permissions`` and ``is_admin()`` so the
         current-user payload (and the role-name nav gating it drives) matches
         what the user can actually do."""
-        from global_settings.utils import ff_is_enabled
+        from global_settings.utils import idp_group_role_inheritance_enabled
 
         roles = set(
             self.user_groups.all()
             .values_list("roleassignment__role__name", flat=True)
             .distinct()
         )
-        if ff_is_enabled("idp_groups"):
+        if idp_group_role_inheritance_enabled():
             roles |= set(
                 self.idp_groups.all()
                 .values_list("user_groups__roleassignment__role__name", flat=True)
@@ -931,7 +1311,7 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         """True when the user holds the auditee role on at least one domain."""
         from core.utils import get_respondent_scoped_folder_ids
 
-        return bool(get_respondent_scoped_folder_ids(self))
+        return len(get_respondent_scoped_folder_ids(self)) > 0
 
     @property
     def has_backup_permission(self) -> bool:
@@ -952,58 +1332,26 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
     def username(self):
         return self.email
 
-    @property
-    def permissions(self):
-        return RoleAssignment.get_permissions(self)
-
     @staticmethod
     def get_admin_users() -> QuerySet["User"]:
-        # Admin membership is reached directly or, when the idp_groups feature
-        # is enabled, via an IdP group whose user_groups include BI-UG-ADM
-        # (groups-of-groups closure).
-        from global_settings.utils import ff_is_enabled
+        from global_settings.utils import idp_group_role_inheritance_enabled
 
         q = Q(user_groups__name="BI-UG-ADM")
-        if ff_is_enabled("idp_groups"):
+        if idp_group_role_inheritance_enabled():
             q |= Q(idp_groups__user_groups__name="BI-UG-ADM")
         return User.objects.filter(q).distinct()
 
     def is_admin(self) -> bool:
-        """Whether the user is a *global administrator*.
+        from global_settings.utils import idp_group_role_inheritance_enabled
 
-        "Admin" here always means global admin: membership of the built-in
-        global administrators group (BI-UG-ADM) — either directly, or via an
-        IdP group mapped to it (when the idp_groups feature flag is enabled).
-        This is the canonical check for "is a global administrator?"; the
-        IsGlobalAdmin permission and the current-user `is_admin` field both
-        resolve to it. It is NOT scoped to any domain — domain managers
-        (BI-UG-DMA) are not admins here.
-        """
-        from global_settings.utils import ff_is_enabled
-
-        if self.user_groups.filter(name="BI-UG-ADM").exists():
+        # UserGroup.objects, not self.user_groups: the related manager inherits
+        # the viewset's visibility-filtered prefetch, which would hide exactly
+        # the membership this answer is about.
+        if UserGroup.objects.filter(user=self, name="BI-UG-ADM").exists():
             return True
         return (
-            ff_is_enabled("idp_groups")
+            idp_group_role_inheritance_enabled()
             and self.idp_groups.filter(user_groups__name="BI-UG-ADM").exists()
-        )
-
-    # Permissions that grant write access but do not consume a license seat
-    NON_SEAT_PERMISSIONS = {
-        "change_validationflow",
-        "add_chatsession",
-        "change_chatsession",
-        "delete_chatsession",
-    }
-
-    @property
-    def is_editor(self) -> bool:
-        permissions = RoleAssignment.get_permissions(self)
-        editor_prefixes = {"add_", "change_", "delete_"}
-        return any(
-            any(perm.startswith(prefix) for prefix in editor_prefixes)
-            for perm in permissions
-            if perm not in self.NON_SEAT_PERMISSIONS
         )
 
     @property
@@ -1012,6 +1360,11 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         Indicates whether the user can log in using a local password
         """
         from global_settings.models import GlobalSettings
+
+        if (
+            self.is_scim_managed or self.is_jit_provisioned
+        ) and not self.keep_local_login:
+            return False
 
         try:
             sso_settings = GlobalSettings.objects.get(
@@ -1025,14 +1378,6 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
             or not sso_settings.get("is_enabled", False)
             or not sso_settings.get("force_sso", False)
         )
-
-    @classmethod
-    def get_editors(cls) -> List["User"]:
-        return [
-            user
-            for user in cls.objects.all()
-            if user.is_editor and not user.is_third_party
-        ]
 
     @property
     def is_sso(self) -> bool:
@@ -1048,7 +1393,8 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         Check if the user has Multi-Factor Authentication (MFA) enabled.
         Returns True if the user has any active MFA authenticators (TOTP, WebAuthn, etc.).
         """
-        return Authenticator.objects.filter(user=self).exists()
+        # Through the reverse relation, so a prefetch (UserViewSet) answers it.
+        return self.authenticator_set.exists()
 
 
 class Role(NameDescriptionMixin, FolderMixin):
@@ -1062,14 +1408,10 @@ class Role(NameDescriptionMixin, FolderMixin):
     builtin = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
-        result = super().save(*args, **kwargs)
-        invalidate_roles_cache()
-        return result
+        super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
-        result = super().delete(*args, **kwargs)
-        invalidate_roles_cache()
-        return result
+        super().delete(*args, **kwargs)
 
     def __str__(self) -> str:
         if self.builtin:
@@ -1079,31 +1421,43 @@ class Role(NameDescriptionMixin, FolderMixin):
     fields_to_check = ["name"]
 
 
-def _iter_assignment_lites_for_user(user: AbstractBaseUser | AnonymousUser):
+@dataclass
+class GrantFolderSet:
     """
-    Yield AssignmentLite for a user, including via groups, using caches only.
-    Returns empty iterator for AnonymousUser / unauthenticated.
+    Represent the directly allowed folders ID set (folders on which the user directly has a specific permission).
+
+    Directly allowed means the user directly has the permission on it (not thanks to `RoleAssignment` recursion (`is_recursive=True`)).
     """
-    if isinstance(user, AnonymousUser) or not getattr(user, "is_authenticated", False):
-        return iter(())
-    user_id_opt = cast(Optional[uuid.UUID], getattr(user, "id", None))
-    if user_id_opt is None:
-        return iter(())
 
-    assignments_state = get_assignments_state()
-    groups_state = get_groups_state()
+    non_recursive_grant_folder_ids: list[uuid.UUID]
+    """Represent the list of folder IDs on which the user has the granted permission (non-recursively)."""
+    recursive_grant_folder_ids: list[uuid.UUID]
+    """
+    Represent the list of folder IDs on which the user has the granted permission (recursively).
 
-    user_id = cast(uuid.UUID, user_id_opt)
-    group_ids = groups_state.user_group_ids.get(user_id, frozenset())
+    **WARNING:** This doesn't contain the IDs of the indirectly allowed folders.
+    """
 
-    # user direct
-    direct = assignments_state.by_user.get(user_id, ())
-    # via groups
-    via_groups: list["AssignmentLite"] = []
-    for gid in group_ids:
-        via_groups.extend(assignments_state.by_group.get(gid, ()))
+    def get_allowed_folders(self) -> QuerySet[Folder]:
+        """Return the `QuerySet` of **ALL** the allowed folder of this `GrantFolderSet` (including the indirectly allowed ones)."""
 
-    return iter((*direct, *via_groups))
+        non_recursive_ids = self.non_recursive_grant_folder_ids
+        recursive_ids = self.recursive_grant_folder_ids
+
+        covered_folders = Folder.objects.filter(
+            Q(id__in=non_recursive_ids)
+            | Q(id__in=recursive_ids)
+            | Q(ancestors__in=recursive_ids)
+        )
+        return covered_folders
+
+    @staticmethod
+    def none() -> GrantFolderSet:
+        """Return an empty `GrantFolderSet` (meaning the permission wasn't granted on any folder)."""
+        return GrantFolderSet(
+            non_recursive_grant_folder_ids=[],
+            recursive_grant_folder_ids=[],
+        )
 
 
 class RoleAssignment(NameDescriptionMixin, FolderMixin):
@@ -1123,384 +1477,646 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
     builtin = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
-        result = super().save(*args, **kwargs)
-        invalidate_assignments_cache()
-        return result
+        super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
-        result = super().delete(*args, **kwargs)
-        invalidate_assignments_cache()
-        return result
+        super().delete(*args, **kwargs)
 
     def __str__(self) -> str:
-        # pragma pylint: disable=no-member
-        return (
-            "id="
-            + str(self.id)
-            + ", folders: "
-            + str(list(self.perimeter_folders.values_list("name", flat=True)))
-            + ", role: "
-            + str(self.role.name)
-            + ", user: "
-            + (str(self.user.email) if self.user else "/")
-            + ", user group: "
-            + (str(self.user_group.name) if self.user_group else "/")
-        )
+        folder_names = list(self.perimeter_folders.values_list("name", flat=True))
+        role_name = self.role.name
+
+        principal_type = "user_group" if self.user_group else "user"
+        principal_name = self.user_group.name if self.user_group else self.user
+
+        return f"id={self.id}, folders={folder_names}, is_recursive={self.is_recursive}, role={role_name}, {principal_type}: {principal_name}"
+
+    @staticmethod
+    def get_role_assignments_from_user(
+        user: AbstractBaseUser | AnonymousUser,
+    ) -> QuerySet[RoleAssignment]:
+        if not isinstance(user, User):
+            return RoleAssignment.objects.none()
+
+        if not user.is_active:
+            return RoleAssignment.objects.none()
+
+        from global_settings.utils import idp_group_role_inheritance_enabled
+
+        filter_query = Q(user=user) | Q(user_group__user=user)
+
+        if idp_group_role_inheritance_enabled():
+            filter_query |= Q(user_group__idp_groups__users=user)
+
+        user_role_assignments = RoleAssignment.objects.filter(filter_query).distinct()
+
+        return user_role_assignments
+
+    @staticmethod
+    def _resolve_permission(
+        permission: tuple[PermissionPrefix, type[models.Model]] | Permission,
+    ) -> Permission:
+        """
+        Resolve and return a django `Permission` based on a `(permission_type, model)` tuple, example:
+
+        ```
+        permission = RoleAssignment._resolve_permission(("view", AppliedControl))
+        assert isisntance(permission, Permission)
+        assert permission.codename == "view_appliedcontrol"
+        ```
+
+        If a `Permission` `permission` is passed to this function, the function will return the `permission` itself.
+        """
+        if isinstance(permission, Permission):
+            return permission
+
+        perm_prefix, model = permission
+
+        if model is User and perm_prefix in ("backup", "restore"):
+            codename = perm_prefix
+        else:
+            model_name = model.__name__.lower()
+            codename = f"{perm_prefix}_{model_name}"
+
+        permission = Permission.objects.get(codename=codename)
+        return permission
 
     @staticmethod
     def is_access_allowed(
-        user: AbstractBaseUser | AnonymousUser, perm: Permission, folder: Folder
+        user: AbstractBaseUser | AnonymousUser,
+        perm: Permission,
+        folder: Folder,
+    ) -> bool:
+        """Return `True` if the `user` `User` has the `perm` `Permission` on the `folder` `Folder`, return `False` otherwise."""
+        from core.models import FilteringLabel
+
+        if not isinstance(user, User):
+            return False
+
+        model = perm.content_type.model_class()
+        perm_prefix = perm.codename.split("_")[0]
+
+        if model is Permission:
+            # Everyone can view permissions, no one can add/change/delete them.
+            return perm_prefix == "view"
+
+        if perm_prefix == "add" and model is FilteringLabel:
+            # If the `user` has the `"add_filteringlabel"` permission on any folder.
+            # Then he can add a `FilteringLabel` in ALL the folders (in any folder).
+            stored_assignments, _ = RoleAssignment._get_permission_grant_sources(
+                user, perm
+            )
+            return stored_assignments.exists()
+
+        focused_folder_id = Folder.get_focused_folder_id()
+        if focused_folder_id is not None:
+            is_folder_focused = (
+                folder.id == focused_folder_id
+                or folder.ancestors.filter(id=focused_folder_id).exists()
+            )
+            # We don't want the focus mode to hide the root folder (when the user has access to it).
+            # As it would hide import global objects (see PR #4470).
+            # So we don't return `False` if the `folder` is the root folder.
+            if (not is_folder_focused) and (not folder.is_root()):
+                return False
+
+        grant_folder_set = RoleAssignment._get_grant_folder_set(user, perm)
+        non_recursive_ids = set(grant_folder_set.non_recursive_grant_folder_ids)
+        recursive_ids = set(grant_folder_set.recursive_grant_folder_ids)
+
+        if folder.id in non_recursive_ids or folder.id in recursive_ids:
+            return True
+
+        if not recursive_ids:
+            return False
+
+        return folder.ancestors.filter(id__in=recursive_ids).exists()
+
+    @staticmethod
+    def is_object_accessible(
+        user: AbstractBaseUser | AnonymousUser,
+        perm_prefix: PermissionPrefix,
+        model: type[models.Model],
+        id: uuid.UUID,
     ) -> bool:
         """
-        Determines if a user has specified permission on a specified folder.
-        Cached path:
-        - role permissions: Roles cache
-        - assignments: Assignments cache (+ groups cache)
-        - folder ancestry: Folder cache
+        Return `True` if the `user` has the (`perm_prefix`, `model`) permission on the specific object identified by `id`.
+
+        Return `False` otherwise.
         """
-        if not getattr(user, "is_authenticated", False):
+        from core.models import Actor
+
+        if not isinstance(user, User):
             return False
 
-        perm_codename = perm.codename
-        if not perm_codename:
+        if model is Permission:
+            # Everyone can view permissions, no one can add/change/delete them.
+            return perm_prefix == "view"
+
+        obj = model.objects.filter(id=id).first()
+        if obj is None:
             return False
 
-        state = get_folder_state()
-        focus_folder_id = focus_folder_id_var.get()
-        if focus_folder_id:
-            focus_ids = set(
-                iter_descendant_ids(state, focus_folder_id, include_start=True)
+        if model is Actor:
+            if not isinstance(obj, Actor):
+                raise AssertionError("Unreachable.")
+
+            # The actor accessibility check is based on its `actor.specific` type (`User`/`Team`/`Entity`).
+            obj = obj.specific
+            model = type(obj)
+
+        permission = RoleAssignment._resolve_permission((perm_prefix, model))
+
+        # Not all objects (`obj`) have a `folder` field.
+        # So we need `get_iam_folder_id` to resolve their folder (IAM folder).
+        iam_scope_folder_id = RoleAssignment.get_iam_folder_id(obj)
+
+        if not isinstance(iam_scope_folder_id, uuid.UUID):
+            raise ValueError(
+                f"IAM scope folder not found for object {obj!r} of type {model.__qualname__!r}!"
             )
-            if folder.id not in focus_ids:
-                return False
-        roles_state = get_roles_state()
 
-        for a in _iter_assignment_lites_for_user(user):
-            role_perms = roles_state.role_permissions.get(a.role_id, frozenset())
+        iam_folder = Folder.objects.get(id=iam_scope_folder_id)
 
-            if perm_codename not in role_perms:
-                continue
-
-            # allow any folder if user has add_filteringlabel in role
-            if perm_codename == "add_filteringlabel":
-                return True
-
-            perimeter_ids = set(a.perimeter_folder_ids)
-
-            # walk up folder parents via cached parent_map
-            current_id: Optional[uuid.UUID] = folder.id
-            while current_id is not None:
-                if current_id in perimeter_ids:
-                    return True
-                if not a.is_recursive:
-                    break
-                current_id = state.parent_map.get(current_id)
-
-        return False
+        return RoleAssignment.is_access_allowed(user, permission, iam_folder)
 
     @staticmethod
     def is_object_readable(
-        user: AbstractBaseUser | AnonymousUser, object_type: Any, id: uuid.UUID
+        user: AbstractBaseUser | AnonymousUser, model: type[models.Model], id: uuid.UUID
     ) -> bool:
-        """
-        Determines if a user has read on an object by id
-        """
-        obj = object_type.objects.filter(id=id).first()
-        if not obj:
-            return False
-        (viewable_ids, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_folder(obj), user, object_type
+        return RoleAssignment.is_object_accessible(user, "view", model, id)
+
+    @staticmethod
+    def _get_default_role_folder_ids(
+        principal: AbstractBaseUser | AnonymousUser | UserGroup,
+    ) -> QuerySet[uuid.UUID]:
+        """Return the folder IDs of the folders whose `default_role` is granted to the `principal` principal."""
+
+        if isinstance(principal, User) and principal.is_third_party:
+            # Third-parties shouldn't be granted any `folder.default_role` (Defense-in-depth protection).
+            # (as they should only have rights on `ENCLAVE` folders).
+            return Folder._get_empty_id_queryset()
+
+        if isinstance(principal, UserGroup):
+            role_assignments = RoleAssignment.objects.filter(user_group=principal)
+        else:
+            role_assignments = RoleAssignment.get_role_assignments_from_user(principal)
+
+        # Only role assignments linked to a (obviously non-NULL) `UserGroup(builtin=True)` can grant the `default_role`.
+        # (This prevents default roles from being granted to service accounts (`ServiceAccount`) (as their role assignments can't have a non-NULL `role_assignment.user_group`)).
+        # (This also prevent custom user groups from granting default roles).
+        # These role assignments can grant default roles (`folder.default_role`) in their ancestor folders.
+        default_role_granting_role_assignments = role_assignments.filter(
+            user_group__builtin=True
         )
-        return id in viewable_ids
 
-    @staticmethod
-    def get_accessible_folder_ids(
-        folder: Folder,
-        user: AbstractBaseUser | AnonymousUser,
-        content_type: Folder.ContentType,
-        codename: str = "view_folder",
-    ) -> list[uuid.UUID]:
-        """Return folder IDs in the scoped perimeter that the user can access."""
-        if not getattr(user, "is_authenticated", False):
-            return []
-        state = get_folder_state()
-        roles_state = get_roles_state()
+        # Candidate folder which `default_role` may be granted to the `principal`.
+        unfiltered_default_role_folder_candidates = (
+            default_role_granting_role_assignments.values_list(
+                "perimeter_folders__id", flat=True
+            ).distinct()
+        )
 
-        perimeter_ids = set(iter_descendant_ids(state, folder.id, include_start=True))
-        state = get_folder_state()
-        perimeter_ids = set(iter_descendant_ids(state, folder.id, include_start=True))
-
-        focus_folder_id = focus_folder_id_var.get()
-        if focus_folder_id:
-            focus_ids = set(
-                iter_descendant_ids(state, focus_folder_id, include_start=True)
+        # Enclaved folders are excluded from the `default_role` mechanism (as we don't want third-parties to be granted default roles).
+        default_role_folder_candidates = (
+            Folder.objects.filter(
+                id__in=unfiltered_default_role_folder_candidates,
             )
-            perimeter_ids &= focus_ids
-
-        accessible_ids: Set[uuid.UUID] = set()
-
-        for a in _iter_assignment_lites_for_user(user):
-            role_perms = roles_state.role_permissions.get(a.role_id, frozenset())
-            # Must be able to see folders + have requested permission
-            if "view_folder" not in role_perms or codename not in role_perms:
-                continue
-
-            ra_perimeter_ids = set(a.perimeter_folder_ids)
-            if a.is_recursive:
-                # Expand assignment perimeter downward
-                expanded: Set[uuid.UUID] = set()
-                for pf_id in ra_perimeter_ids:
-                    expanded.update(
-                        iter_descendant_ids(state, pf_id, include_start=True)
-                    )
-                ra_perimeter_ids = expanded
-
-            accessible_ids.update(perimeter_ids & ra_perimeter_ids)
-
-        # Filter by content_type and keep only within perimeter_ids
-        result: list[uuid.UUID] = []
-        for folder_id in accessible_ids:
-            folder_obj = state.folders[folder_id]
-            if content_type and folder_obj.content_type != content_type:
-                continue
-            if folder_id in perimeter_ids:
-                result.append(folder_id)
-
-        return result
-
-    @staticmethod
-    def get_accessible_object_ids(
-        folder: Folder, user: AbstractBaseUser | AnonymousUser, object_type: Any
-    ) -> Tuple["list[Any]", "list[Any]", "list[Any]"]:
-        """Gets all objects of a specified type that a user can reach in a given folder
-        Only accessible folders are considered
-        Returns a triplet: (view_objects_list, change_object_list, delete_object_list)
-        Assumes that object type follows Django conventions for permissions
-        Also retrieve published objects in view
-        """
-        if not getattr(user, "is_authenticated", False):
-            return ([], [], [])
-
-        class_name = object_type.__name__.lower()
-        if class_name == "actor":
-            return RoleAssignment._get_actor_accessible_ids(folder, user)
-        roles_state = get_roles_state()
-        permissions_map = roles_state.permission_ids_by_codename
-
-        view_code = f"view_{class_name}"
-        change_code = f"change_{class_name}"
-        delete_code = f"delete_{class_name}"
-
-        # If a permission doesn't exist for this model, behave safely.
-        if (
-            view_code not in permissions_map
-            or change_code not in permissions_map
-            or delete_code not in permissions_map
-        ):
-            return ([], [], [])
-
-        # Cached state
-        state = get_folder_state()
-
-        perimeter_ids = set(iter_descendant_ids(state, folder.id, include_start=True))
-
-        focus_folder_id = focus_folder_id_var.get()
-        if focus_folder_id:
-            focus_ids = set(
-                iter_descendant_ids(state, focus_folder_id, include_start=True)
+            .exclude(
+                content_type=Folder.ContentType.ENCLAVE,
             )
-            perimeter_ids &= focus_ids
-
-        # folder_id -> set of granted permission codenames ("view_x", "change_x", "delete_x")
-        folder_perm_codes: dict[uuid.UUID, set[str]] = defaultdict(set)
-
-        # Compute folder permissions using caches only
-        for a in _iter_assignment_lites_for_user(user):
-            role_perm_codenames = roles_state.role_permissions.get(
-                a.role_id, frozenset()
+            .exclude(
+                ancestors__content_type=Folder.ContentType.ENCLAVE,
             )
+        )
 
-            # Must be able to see folders at all
-            if "view_folder" not in role_perm_codenames:
-                continue
-
-            ra_perimeter: Set[uuid.UUID] = set(a.perimeter_folder_ids)
-            if a.is_recursive:
-                expanded: Set[uuid.UUID] = set()
-                for pf_id in ra_perimeter:
-                    expanded.update(
-                        iter_descendant_ids(state, pf_id, include_start=True)
-                    )
-                ra_perimeter = expanded
-
-            target_folders = perimeter_ids & ra_perimeter
-            if not target_folders:
-                continue
-
-            can_view = view_code in role_perm_codenames
-            can_change = change_code in role_perm_codenames
-            can_delete = delete_code in role_perm_codenames
-
-            if not (can_view or can_change or can_delete):
-                continue
-
-            for f_id in target_folders:
-                if can_view:
-                    folder_perm_codes[f_id].add(view_code)
-                if can_change:
-                    folder_perm_codes[f_id].add(change_code)
-                if can_delete:
-                    folder_perm_codes[f_id].add(delete_code)
-
-        if object_type is Permission:
-            has_view = any(view_code in perms for perms in folder_perm_codes.values())
-            has_change = any(
-                change_code in perms for perms in folder_perm_codes.values()
-            )
-            has_delete = any(
-                delete_code in perms for perms in folder_perm_codes.values()
-            )
-
-            allowed_ids = list(
-                Permission.objects.filter(
-                    content_type__app_label__in=ALLOWED_PERMISSION_APPS
+        # A user can be granted folder's `default_role` ONLY IF he has an "default role granting `RoleAssignment`" on its folder subtree.
+        default_role_folders = Folder.objects.filter(
+            Q(
+                descendants__in=Folder.objects.filter(
+                    id__in=default_role_folder_candidates
                 )
-                .exclude(content_type__model__in=IGNORED_PERMISSION_MODELS)
-                .values_list("id", flat=True)
             )
+            | Q(id__in=default_role_folder_candidates),
+            default_role__isnull=False,
+        )
 
-            return (
-                allowed_ids if has_view else [],
-                allowed_ids if has_change else [],
-                allowed_ids if has_delete else [],
-            )
-
-        result_view: set[Any] = set()
-        result_change: set[Any] = set()
-        result_delete: set[Any] = set()
-
-        if folder_perm_codes:
-            folder_ids = list(folder_perm_codes.keys())
-            if hasattr(object_type, "folder"):
-                objects_iter = object_type.objects.filter(
-                    folder_id__in=folder_ids
-                ).values_list("id", "folder_id")
-            elif object_type is Folder:
-                objects_iter = [(f_id, f_id) for f_id in folder_ids]
-            elif hasattr(object_type, "risk_assessment"):
-                objects_iter = object_type.objects.filter(
-                    risk_assessment__folder_id__in=folder_ids
-                ).values_list("id", "risk_assessment__folder_id")
-            elif hasattr(object_type, "entity"):
-                objects_iter = object_type.objects.filter(
-                    entity__folder_id__in=folder_ids
-                ).values_list("id", "entity__folder_id")
-            elif hasattr(object_type, "provider_entity"):
-                objects_iter = object_type.objects.filter(
-                    provider_entity__folder_id__in=folder_ids
-                ).values_list("id", "provider_entity__folder_id")
-            elif hasattr(object_type, "journey"):
-                objects_iter = object_type.objects.filter(
-                    journey__folder_id__in=folder_ids
-                ).values_list("id", "journey__folder_id")
-            elif hasattr(object_type, "questionnaire_run"):
-                objects_iter = object_type.objects.filter(
-                    questionnaire_run__folder_id__in=folder_ids
-                ).values_list("id", "questionnaire_run__folder_id")
-            elif hasattr(object_type, "agent_run"):
-                objects_iter = object_type.objects.filter(
-                    agent_run__folder_id__in=folder_ids
-                ).values_list("id", "agent_run__folder_id")
-            else:
-                raise NotImplementedError("type not supported")
-
-            for obj_id, folder_id in objects_iter:
-                perms = folder_perm_codes.get(folder_id, set())
-                if view_code in perms:
-                    result_view.add(obj_id)
-                if change_code in perms:
-                    result_change.add(obj_id)
-                if delete_code in perms:
-                    result_delete.add(obj_id)
-
-        # Published inheritance: published parents for local-view folders
-        # PERF: collect all ancestor folder_ids first, then do ONE query.""
-        if hasattr(object_type, "is_published") and (
-            hasattr(object_type, "folder") or object_type is Folder
-        ):
-            ancestor_ids: set[uuid.UUID] = set()
-
-            for folder_id, perms in folder_perm_codes.items():
-                if view_code not in perms:
-                    continue
-
-                folder_obj = state.folders[folder_id]
-                if folder_obj.content_type == Folder.ContentType.ENCLAVE:
-                    continue
-
-                parent_id = state.parent_map.get(folder_id)
-                while parent_id:
-                    ancestor_ids.add(parent_id)
-                    parent_id = state.parent_map.get(parent_id)
-
-            if ancestor_ids:
-                if object_type is Folder:
-                    result_view.update(
-                        object_type.objects.filter(
-                            id__in=ancestor_ids, is_published=True
-                        ).values_list("id", flat=True)
-                    )
-                else:
-                    result_view.update(
-                        object_type.objects.filter(
-                            folder_id__in=ancestor_ids, is_published=True
-                        ).values_list("id", flat=True)
-                    )
-
-        return (list(result_view), list(result_change), list(result_delete))
+        default_role_folder_ids = (
+            default_role_folders.values_list("id", flat=True).distinct().order_by()
+        )
+        return default_role_folder_ids
 
     @staticmethod
-    def _get_actor_accessible_ids(
-        folder: Folder, user: AbstractBaseUser | AnonymousUser
-    ) -> Tuple[list[str], list[str], list[str]]:
+    def _get_permission_grant_sources(
+        principal: AbstractBaseUser | AnonymousUser | UserGroup,
+        permission: Permission | None,
+    ) -> tuple[QuerySet[RoleAssignment], QuerySet[Folder]]:
+        """
+        Return a tuple containing:
+
+        - `role_assignments`: The `principal`'s role assignments to this `permission`.
+        - `default_role_folders`: The folders which grants this `permission` to the user with their `folder.default_role`.
+        """
+        if isinstance(principal, User):
+            role_assignments = RoleAssignment.get_role_assignments_from_user(principal)
+        elif isinstance(principal, UserGroup):
+            role_assignments = RoleAssignment.objects.filter(user_group=principal)
+        else:
+            role_assignments = RoleAssignment.objects.none()
+
+        default_role_folders = Folder.objects.filter(
+            id__in=RoleAssignment._get_default_role_folder_ids(principal)
+        )
+
+        if permission is not None:
+            role_assignments = role_assignments.filter(role__permissions=permission)
+            default_role_folders = default_role_folders.filter(
+                default_role__permissions=permission
+            )
+
+        return role_assignments, default_role_folders
+
+    @staticmethod
+    def _get_grant_folder_set(
+        user: AbstractBaseUser | AnonymousUser,
+        permission: tuple[PermissionPrefix, type[models.Model]] | Permission,
+    ) -> GrantFolderSet:
+        """Return the set of allowed folders IDs (as a `GrantFolderSet`)."""
+        if not isinstance(user, User):
+            return GrantFolderSet.none()
+
+        permission = RoleAssignment._resolve_permission(permission)
+
+        role_assignments, default_role_folders = (
+            RoleAssignment._get_permission_grant_sources(user, permission)
+        )
+
+        # `.order_by()` disable the model's default ordering (which can cause problems for `.union` (unioned querysets)).
+        role_assignment_pairs = role_assignments.order_by().values_list(
+            "perimeter_folders__id", "is_recursive"
+        )
+        default_role_pairs = (
+            default_role_folders.annotate(
+                grant_is_recursive=Value(False, output_field=BooleanField())
+            )
+            .order_by()
+            .values_list("id", "grant_is_recursive")
+        )
+        directly_accessible_folder_pairs = role_assignment_pairs.union(
+            default_role_pairs
+        ).order_by()
+
+        non_recursive_grant_folder_ids: list[uuid.UUID] = []
+        recursive_grant_folder_ids: list[uuid.UUID] = []
+
+        for folder_id, is_recursive in directly_accessible_folder_pairs:
+            if folder_id is None:
+                # A `RoleAssignment` with no `perimeter_folders` will have a `None` `folder_id`.
+                continue
+            if is_recursive:
+                recursive_grant_folder_ids.append(folder_id)
+            else:
+                non_recursive_grant_folder_ids.append(folder_id)
+
+        return GrantFolderSet(
+            non_recursive_grant_folder_ids=non_recursive_grant_folder_ids,
+            recursive_grant_folder_ids=recursive_grant_folder_ids,
+        )
+
+    @staticmethod
+    def _get_directly_granted_permissions(
+        principal: AbstractBaseUser | AnonymousUser | UserGroup,
+        permission: Permission | None = None,
+    ) -> QuerySet:
+        """
+        Return a `QuerySet` of 4-tuples containing these values:
+
+        - `folder_id`: Folder ID of the permission is assigned to (`folder.id`).
+        - `perm_codename`: Permission codename (`permission.codename`).
+        - `perm_name`: Permission name (`permission.name`).
+        - `is_recursive`: Is the permission granted to the `descendants` of the `folder_id` `Folder`.
+
+        **WARNING:** Rare (but yet theorically possible) edge case to keep in mind.
+
+        - `folder_id` can be `None` (if a `RoleAssignment` has no `perimeter_folders`).
+        - `perm_codename` and `perm_name` can be `None` (if a `Role` has no permissions)
+        """
+        role_assignments, default_role_folders = (
+            RoleAssignment._get_permission_grant_sources(principal, permission)
+        )
+
+        role_assignments_granted_permissions = role_assignments.values_list(
+            "perimeter_folders__id",
+            "role__permissions__codename",
+            "role__permissions__name",
+            "is_recursive",
+        )
+        default_role_granted_permissions = default_role_folders.annotate(
+            # Default role permissions are always non-recursive.
+            is_recursive=Value(False, output_field=BooleanField())
+        ).values_list(
+            "id",
+            "default_role__permissions__codename",
+            "default_role__permissions__name",
+            "is_recursive",
+        )
+
+        # `.order_by()` disable the model's default ordering (which can cause problems for `.union` (unioned querysets)).
+        directly_granted_permissions = (
+            role_assignments_granted_permissions.order_by()
+            .union(default_role_granted_permissions.order_by())
+            .order_by()
+        )
+        return directly_granted_permissions
+
+    @staticmethod
+    def get_allowed_folder_ids(
+        user: AbstractBaseUser | AnonymousUser,
+        permission: tuple[PermissionPrefix, type[models.Model]] | Permission,
+        *,
+        base_folder: Optional[Folder] = None,
+    ) -> QuerySet[uuid.UUID]:
+        """
+        Return the `QuerySet` of allowed folder IDs for a specific permission.
+
+        The `permission` is either a (`perm_prefix`, `model`) pair (e.g. `("view", AppliedControl)`) or a django `Permission`.
+
+        Example:
+        ```
+        def can_add_applied_control(user: User, applied_control: AppliedControl) -> bool:
+            allowed_folder_ids = RoleAssignment.get_allowed_folder_ids(user, ("add", AppliedControl))
+
+            allowed_to_add = Folder.objects.filter(
+                id=applied_control.folder.id,
+                id__in=allowed_folder_ids,
+            ).exists()
+            return allowed_to_add
+        ```
+
+        If `base_folder` is specified, only descendant folder IDs of `base_folder` will be retained.
+
+        If `base_folder` is specified AND the `focus_folder_id_var` context variable is set THEN:
+
+        Both the `base_folder` and the `focused_folder` will compete to be the become the effective base folder (`effective_focused_folder`).
+
+        - If `base_folder` is a descendant of (or equal to) `focused_folder`, `base_folder` becomes the effective base folder (it's the narrower scope).
+        - If `focused_folder` is a descendant of `base_folder`, `focused_folder` becomes the effective base folder (it's the narrower scope).
+        - Otherwise (`base_folder` and `focused_folder` are in disjoint subtrees), NO folder is allowed: an empty `QuerySet` is returned.
+        """
+
+        if not isinstance(user, User):
+            return Folder._get_empty_id_queryset()
+
+        grant_folder_set = RoleAssignment._get_grant_folder_set(user, permission)
+
+        focused_folder_id = Folder.get_focused_folder_id()
+        effective_base_folder_id = base_folder.id if base_folder is not None else None
+
+        if focused_folder_id is not None:
+            if base_folder is None:
+                effective_base_folder_id = focused_folder_id
+
+            elif base_folder.id != focused_folder_id:
+                base_is_descendant_of_focus = base_folder.ancestors.filter(
+                    pk=focused_folder_id
+                ).exists()
+
+                if base_is_descendant_of_focus:
+                    # `base_folder` is the narrower scope.
+                    effective_base_folder_id = base_folder.id
+                elif Folder.objects.filter(
+                    id=focused_folder_id, ancestors=base_folder.id
+                ).exists():
+                    # The focused folder is the narrower scope.
+                    effective_base_folder_id = focused_folder_id
+                else:
+                    # If `base_folder` and the focused folder are in disjoint subtrees.
+                    # Then their subtree intersection is empty (so the user can't access any folder).
+                    return Folder._get_empty_id_queryset()
+
+        allowed_folders = grant_folder_set.get_allowed_folders()
+
+        if effective_base_folder_id is not None:
+            folder_filter = Q(id=effective_base_folder_id) | Q(
+                ancestors=effective_base_folder_id
+            )
+
+            if focused_folder_id is not None:
+                # We don't want the focus mode to hide the root folder (when the user has access to it).
+                # As it would hide import global objects (see PR #4470).
+                root_folder_id = Folder.get_root_folder_id()
+                if root_folder_id is not None:
+                    folder_filter |= Q(id=root_folder_id)
+
+            allowed_folders = allowed_folders.filter(folder_filter)
+
+        allowed_folder_ids = (
+            allowed_folders.values_list("id", flat=True)
+            .distinct()
+            # `.order_by()` disable the model's default ordering (which can cause problems for `.union` (unioned querysets)).
+            .order_by()
+        )
+        return allowed_folder_ids
+
+    @staticmethod
+    def _get_actor_accessible_ids_by_perm(
+        user: AbstractBaseUser | AnonymousUser, perm_prefix: NativePermissionPrefix
+    ) -> QuerySet[uuid.UUID]:
         from core.models import Actor, Team
         from tprm.models import Entity
 
-        view_user_ids, change_user_ids, delete_user_ids = (
-            RoleAssignment.get_accessible_object_ids(folder, user, User)
+        user_folder_ids = RoleAssignment.get_allowed_folder_ids(
+            user, (perm_prefix, User)
         )
-        view_team_ids, change_team_ids, delete_team_ids = (
-            RoleAssignment.get_accessible_object_ids(folder, user, Team)
+        team_folder_ids = RoleAssignment.get_allowed_folder_ids(
+            user, (perm_prefix, Team)
         )
-        view_entity_ids, change_entity_ids, delete_entity_ids = (
-            RoleAssignment.get_accessible_object_ids(folder, user, Entity)
-        )
-
-        def collect_actor_ids(
-            user_ids: list[str], team_ids: list[str], entity_ids: list[str]
-        ) -> list[str]:
-            filters = Q()
-            if user_ids:
-                filters |= Q(user_id__in=user_ids)
-            if team_ids:
-                filters |= Q(team_id__in=team_ids)
-            if entity_ids:
-                filters |= Q(entity_id__in=entity_ids)
-            if not filters:
-                return []
-            return list(Actor.objects.filter(filters).values_list("id", flat=True))
-
-        view_ids = collect_actor_ids(view_user_ids, view_team_ids, view_entity_ids)
-        change_ids = collect_actor_ids(
-            change_user_ids, change_team_ids, change_entity_ids
-        )
-        delete_ids = collect_actor_ids(
-            delete_user_ids, delete_team_ids, delete_entity_ids
+        entity_folder_ids = RoleAssignment.get_allowed_folder_ids(
+            user, (perm_prefix, Entity)
         )
 
-        return (view_ids, change_ids, delete_ids)
+        allowed_actors = Actor.objects.annotate(
+            iam_folder_id=Case(
+                When(user__isnull=False, then=F("user__folder_id")),
+                When(team__isnull=False, then=F("team__folder_id")),
+                default=F("entity__folder_id"),
+            ),
+        ).filter(
+            Q(user__isnull=False, iam_folder_id__in=user_folder_ids)
+            | Q(team__isnull=False, iam_folder_id__in=team_folder_ids)
+            | Q(entity__isnull=False, iam_folder_id__in=entity_folder_ids)
+        )
 
-    def is_user_assigned(self, user) -> bool:
+        allowed_actor_ids = allowed_actors.values_list("id", flat=True)
+        return allowed_actor_ids
+
+    @staticmethod
+    def _get_permission_accessible_ids(
+        perm_prefix: NativePermissionPrefix,
+    ) -> QuerySet[uuid.UUID]:
+        # No user (even admin) SHALL be able to change/delete `Permission` objects.
+        if perm_prefix != "view":
+            return Permission.objects.none().values_list("id", flat=True)
+
+        return (
+            Permission.objects.filter(
+                content_type__app_label__in=ALLOWED_PERMISSION_APPS
+            )
+            .exclude(IGNORED_PERMISSIONS)
+            .values_list("id", flat=True)
+        )
+
+    @staticmethod
+    def get_iam_folder_field(model: type[models.Model]) -> str:
+        """
+        Return the folder ID field with which the IAM perform permission checks on.
+
+        Examples:
+        ```
+        assert get_iam_folder_field(Folder) == "id"
+        assert get_iam_folder_field(AppliedControl) == "folder_id"
+        assert get_iam_folder_field(RiskScenario) == "risk_assessment__folder_id"
+        ```
+        """
+        if model is Folder:
+            return "id"
+
+        field_names = {f.name for f in model._meta.get_fields()}
+
+        if "folder" in field_names:
+            return "folder_id"
+
+        # TRACE: model.IAM_SCOPE_FIELD
+        iam_scope_field_name = getattr(
+            model, "IAM_SCOPE_FIELD", Folder.IAM_NOT_IMPLEMENTED
+        )
+
+        # If `model.IAM_SCOPE_FIELD` can be set to these special values to disable the IAM for the objects of this model.
+        if iam_scope_field_name in [
+            Folder.IAM_NOT_IMPLEMENTED,
+            Folder.IAM_SPECIAL_CASE,
+        ]:
+            raise Folder.IAMNotImplementedError(
+                f"IAM not implemented for model {model.__qualname__}"
+            )
+
+        if iam_scope_field_name in field_names:
+            scope_model = model._meta.get_field(iam_scope_field_name).related_model
+            return f"{iam_scope_field_name}__{RoleAssignment.get_iam_folder_field(scope_model)}"
+
+        raise NotImplementedError(f"Model {model.__qualname__} not supported.")
+
+    @staticmethod
+    def get_iam_folder_id(obj: models.Model) -> uuid.UUID:
+        """
+        Return the folder ID field with which the IAM perform permission checks on.
+
+        (Some object don't have `folder` field we need this function to get the IAM folder of a generic (unknown type) object (`obj`)).
+        """
+
+        model = type(obj)
+        iam_folder_field = RoleAssignment.get_iam_folder_field(model)
+
+        if iam_folder_field == "id":
+            return obj.id
+
+        if iam_folder_field == "folder_id":
+            return obj.folder_id
+
+        scope_field = iam_folder_field.split("__", 1)[0]
+        return RoleAssignment.get_iam_folder_id(getattr(obj, scope_field))
+
+    @staticmethod
+    def _get_accessible_ids(
+        user: AbstractBaseUser | AnonymousUser,
+        perm_prefix: Literal["view", "change", "delete"],
+        model: type[models.Model],
+        # The `folder` argument name should be replaced by `base_folder` (we should do it later as it will cause a lot of line changes throughout the codebase)
+        folder: Optional[Folder],
+    ) -> QuerySet[uuid.UUID]:
+        """
+        Return all the accessible object IDs for the `perm_prefix` permission (prefix) on the `user` have on the `model`.
+
+        E.g. `RoleAssignment._get_accessible_ids(user, "view", AppliedControl, None)` will return all the `AppliedControl` object IDs the `user` has the permission to view.
+
+        The last argument (`folder`) serves as the base folder (only objects IDs from the `folder` subtree will be kept).
+
+        If `folder` is set to `None` the base folder will be the root folder (meaning no objects will be filtered out by it as any object is in the root folder subtree).
+        """
+        from core.models import Actor
+
+        if folder is None:
+            folder = Folder.get_root_folder()
+
+        if perm_prefix not in ("view", "change", "delete"):
+            raise AssertionError(
+                f"The following permission prefix isn't allowed for this function: {perm_prefix!r}"
+            )
+
+        if not isinstance(user, User):
+            return model.objects.none().values_list("id", flat=True)
+
+        if model is Permission:
+            return RoleAssignment._get_permission_accessible_ids(perm_prefix)
+
+        if model is Actor:
+            return RoleAssignment._get_actor_accessible_ids_by_perm(user, perm_prefix)
+
+        allowed_folder_ids = RoleAssignment.get_allowed_folder_ids(
+            user, (perm_prefix, model), base_folder=folder
+        )
+        iam_folder_field = RoleAssignment.get_iam_folder_field(model)
+
+        accessible_object_ids_query = Q(
+            **{f"{iam_folder_field}__in": allowed_folder_ids}
+        )
+
+        accessible_object_ids = model.objects.filter(
+            accessible_object_ids_query
+        ).values_list("id", flat=True)
+
+        return accessible_object_ids
+
+    @staticmethod
+    def get_viewable_object_ids(
+        user: AbstractBaseUser | AnonymousUser,
+        model: type[models.Model],
+        folder: Optional[Folder] = None,
+    ) -> QuerySet[uuid.UUID]:
+        """
+        Return the `QuerySet`(iterable) of `model` objects IDs the `user` is allowed to view.
+
+        The `folder` argument is an optional `Folder` used to only get objects IDs under the `folder` `Folder` subtree.
+        """
+        return RoleAssignment._get_accessible_ids(user, "view", model, folder)
+
+    @staticmethod
+    def get_changeable_object_ids(
+        user: AbstractBaseUser | AnonymousUser,
+        model: type[models.Model],
+        folder: Optional[Folder] = None,
+    ) -> QuerySet[uuid.UUID]:
+        """
+        Return the `QuerySet`(iterable) of `model` objects IDs the `user` is allowed to change(edit).
+
+        The `folder` argument is an optional `Folder` used to only get objects IDs under the `folder` `Folder` subtree.
+        """
+        return RoleAssignment._get_accessible_ids(user, "change", model, folder)
+
+    @staticmethod
+    def get_deletable_object_ids(
+        user: AbstractBaseUser | AnonymousUser,
+        model: type[models.Model],
+        folder: Optional[Folder] = None,
+    ) -> QuerySet[uuid.UUID]:
+        """
+        Return the `QuerySet`(iterable) of `model` objects IDs the `user` is allowed to delete(edit).
+
+        The `folder` argument is an optional `Folder` used to only get objects IDs under the `folder` `Folder` subtree.
+        """
+        return RoleAssignment._get_accessible_ids(user, "delete", model, folder)
+
+    def is_user_assigned(self, user: User) -> bool:
         """Determines if a user is assigned to the role assignment"""
         if user == self.user:
             return True
@@ -1509,99 +2125,147 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
         return self.user_group in user.user_groups.all()
 
     @staticmethod
-    def get_permissions(principal: AbstractBaseUser | AnonymousUser | UserGroup):
-        """Get all permissions attached to a user/group (direct or indirect), using caches.
+    def has_permission_anywhere(
+        principal: AbstractBaseUser | AnonymousUser | UserGroup, codename: str
+    ) -> bool:
+        """
+        Return `True` if the `principal` has the `codename` (e.g. `"view_appliedcontrol"`) django `Permission` on any `Folder`.
+
+        Or return `False` otherwise.
+        """
+        if not isinstance(principal, (User, UserGroup)):
+            return False
+
+        permission = Permission.objects.get(codename=codename)
+        return RoleAssignment._get_directly_granted_permissions(
+            principal, permission
+        ).exists()
+
+    @staticmethod
+    def users_with_permission_anywhere(
+        permissions: QuerySet[Permission],
+    ) -> QuerySet["User"]:
+        """
+        Batch form of `has_permission_anywhere` for users: the users holding any
+        of `permissions` on any `Folder`, in one query instead of one per user.
+
+        Same grant sources as `_get_permission_grant_sources`: the user's own,
+        group and (when inherited) IdP-group role assignments, and the
+        `folder.default_role` a builtin-group assignment grants on its folders
+        and their ancestors, outside enclaves and never to third parties.
+        Inactive users hold nothing.
+        """
+        from global_settings.utils import idp_group_role_inheritance_enabled
+
+        roles = Role.objects.filter(permissions__in=permissions)
+        default_role_folders = Folder.objects.filter(
+            default_role__permissions__in=permissions
+        )
+        # Folders whose builtin-group assignments grant one of those default roles.
+        default_role_grant_folders = (
+            Folder.objects.filter(
+                Q(id__in=default_role_folders) | Q(ancestors__in=default_role_folders)
+            )
+            .exclude(content_type=Folder.ContentType.ENCLAVE)
+            .exclude(ancestors__content_type=Folder.ContentType.ENCLAVE)
+        )
+
+        group_paths = ["user_groups"]
+        if idp_group_role_inheritance_enabled():
+            group_paths.append("idp_groups__user_groups")
+        grants = [Q(roleassignment__role__in=roles)]
+        for path in group_paths:
+            grants.append(Q(**{f"{path}__roleassignment__role__in": roles}))
+            grants.append(
+                Q(
+                    **{
+                        f"{path}__builtin": True,
+                        f"{path}__roleassignment__perimeter_folders__in": (
+                            default_role_grant_folders
+                        ),
+                    },
+                    is_third_party=False,
+                )
+            )
+
+        # One semi-join per grant source: OR-ing them in a single filter would
+        # join every relation at once.
+        holders = Q()
+        for grant in grants:
+            holders |= Q(id__in=User.objects.filter(grant).values("id"))
+        return User.objects.filter(holders, is_active=True)
+
+    @staticmethod
+    def get_permissions(
+        principal: AbstractBaseUser | AnonymousUser | UserGroup,
+    ) -> dict[str, dict[str, str]]:
+        """
+        Get all permissions attached to a user/group (direct or indirect).
 
         Returns: {codename: {"str": Permission.name}}
         """
-        if isinstance(principal, AnonymousUser) or not getattr(
-            principal, "is_authenticated", True
-        ):
+
+        if not isinstance(principal, (User, UserGroup)):
             return {}
 
-        roles_state = get_roles_state()
-        permissions_codes: set[str] = set()
-
-        # --- UserGroup principal: assignments come from "by_group" cache only
-        if isinstance(principal, UserGroup):
-            assignments_state = get_assignments_state()
-            for a in assignments_state.by_group.get(principal.id, ()):
-                permissions_codes.update(
-                    roles_state.role_permissions.get(a.role_id, frozenset())
-                )
-
-        # --- User principal: assignments come from helper (user + via groups)
-        else:
-            for a in _iter_assignment_lites_for_user(principal):
-                permissions_codes.update(
-                    roles_state.role_permissions.get(a.role_id, frozenset())
-                )
-
-        if not permissions_codes:
-            return {}
-
-        # Preserve old output: codename -> {"str": permission name}
-        # (single DB hit, but IAM logic is cached)
-        rows = Permission.objects.filter(codename__in=permissions_codes).values_list(
-            "codename", "name"
-        )
-
-        out: dict[str, dict[str, str]] = {}
-        for codename, name in rows:
-            if codename:
-                out[codename] = {"str": name}
-
-        return out
+        return {
+            codename: {"str": name}
+            for _, codename, name, _ in (
+                RoleAssignment._get_directly_granted_permissions(principal)
+            )
+            # `codename` can be `None` for a `Role` with no permission.
+            if codename is not None
+        }
 
     @classmethod
     def get_permissions_per_folder(
         cls,
         principal: AbstractBaseUser | AnonymousUser | UserGroup,
-        recursive: bool = False,
-    ):
-        """Get permissions grouped by folder id, using caches.
-
-        - Always adds permissions on the explicit perimeter folders in assignments.
-        - If `recursive=True` AND assignment.is_recursive=True, propagates to descendants.
-        Returns: dict[str(folder_id)] -> set[codename]
+        is_recursive: bool = False,
+    ) -> dict[str, set[str]]:
         """
-        if isinstance(principal, AnonymousUser) or not getattr(
-            principal, "is_authenticated", True
-        ):
+        Return a `folder.id => permission.codename` listing all the permissions (identified by their codenames) granted for each `folder`.
+
+        If `is_recursive` is `True`: the indirectly allowed folders are included (meaning `RoleAssignment.is_recursive` isn't ignored).
+        """
+
+        if not isinstance(principal, (User, UserGroup)):
             return {}
 
-        state = get_folder_state()
-        roles_state = get_roles_state()
-        perms_by_folder: dict[str, set[str]] = defaultdict(set)
+        directly_assigned_codenames: dict[uuid.UUID, set[str]] = defaultdict(set)
+        recursively_assigned_codenames: dict[uuid.UUID, set[str]] = defaultdict(set)
 
-        def apply_assignment(a):
-            role_perm_codenames = roles_state.role_permissions.get(
-                a.role_id, frozenset()
-            )
-            if not role_perm_codenames:
-                return
+        for (
+            folder_id,
+            codename,
+            _,
+            is_grant_recursive,
+        ) in RoleAssignment._get_directly_granted_permissions(principal):
+            if folder_id is None or codename is None:
+                continue
 
-            for folder_id in a.perimeter_folder_ids:
-                perms_by_folder[str(folder_id)].update(role_perm_codenames)
+            directly_assigned_codenames[folder_id].add(codename)
+            if is_recursive and is_grant_recursive:
+                recursively_assigned_codenames[folder_id].add(codename)
 
-                if recursive and a.is_recursive:
-                    for descendant_id in iter_descendant_ids(
-                        state, folder_id, include_start=False
-                    ):
-                        perms_by_folder[str(descendant_id)].update(role_perm_codenames)
+        folder_id_to_codenames: dict[str, set[str]] = defaultdict(set)
+        for folder_id, codenames in directly_assigned_codenames.items():
+            folder_id_to_codenames[str(folder_id)] |= codenames
 
-        # --- UserGroup principal
-        if isinstance(principal, UserGroup):
-            assignments_state = get_assignments_state()
-            for a in assignments_state.by_group.get(principal.id, ()):
-                apply_assignment(a)
-            return perms_by_folder
+        if len(recursively_assigned_codenames) > 0:
+            recursive_folder_ids = list(recursively_assigned_codenames.keys())
 
-        # --- User principal (user + via groups)
-        for a in _iter_assignment_lites_for_user(principal):
-            apply_assignment(a)
+            for (
+                folder_id,
+                descendant_folder_id,
+            ) in Folder.descendants.through.objects.filter(
+                from_folder_id__in=recursive_folder_ids
+            ).values_list("from_folder_id", "to_folder_id"):
+                folder_id_to_codenames[str(descendant_folder_id)] |= (
+                    recursively_assigned_codenames[folder_id]
+                )
 
-        return perms_by_folder
+        return folder_id_to_codenames
 
 
 @dataclass(frozen=True, slots=True)
@@ -1627,6 +2291,8 @@ class PersonalAccessToken(models.Model):
 
     name = models.CharField(max_length=255)
     auth_token = models.ForeignKey(AuthToken, on_delete=models.CASCADE)
+
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
 
     @property
     def created(self):
@@ -1654,12 +2320,23 @@ class IdPGroup(AbstractBaseModel, FolderMixin):
     ``user_groups`` (the CISO groups it grants) is admin-managed. Folder-scoped
     (defaults to the root folder) so it participates in RBAC like UserGroup."""
 
+    class Source(models.TextChoices):
+        SCIM = "scim", _("SCIM")
+        SSO = "sso", _("SSO")
+
     name = models.CharField(max_length=512, unique=True, verbose_name=_("Name"))
     user_groups = models.ManyToManyField(
         UserGroup,
         related_name="idp_groups",
         blank=True,
         verbose_name=_("User groups"),
+    )
+    source = models.CharField(
+        max_length=8,
+        choices=Source.choices,
+        null=True,
+        blank=True,
+        verbose_name=_("Source"),
     )
 
     class Meta:
@@ -1680,6 +2357,8 @@ class SCIMToken(models.Model):
         related_name="scim_token",
     )
 
+    IAM_SCOPE_FIELD = Folder.IAM_NOT_IMPLEMENTED
+
     class Meta:
         verbose_name = "SCIM token"
         verbose_name_plural = "SCIM tokens"
@@ -1696,11 +2375,142 @@ class SCIMToken(models.Model):
         return f"{self.name} : {self.auth_token.digest}"
 
 
+class ServiceAccount(AbstractBaseModel):
+    """Machine principal (OIDC Client + dedicated User/Role/RoleAssignment) authenticating via client_credentials."""
+
+    SECRET_PREFIX = "ca_sa."
+    _SECRET_PREVIEW_VISIBLE_CHARS = 3
+    _SECRET_PREVIEW_MASK = "•" * 8
+
+    # Capped at 100 to match allauth's Client.name, which it's copied into verbatim.
+    name = models.CharField(max_length=100, unique=True, verbose_name=_("Name"))
+    description = models.TextField(blank=True, null=True)
+    client = models.OneToOneField(
+        Client,
+        on_delete=models.PROTECT,
+        related_name="service_account",
+    )
+    user = models.OneToOneField(
+        User,
+        on_delete=models.PROTECT,
+        related_name="service_account",
+    )
+    role = models.ForeignKey(
+        Role,
+        on_delete=models.PROTECT,
+        related_name="service_accounts",
+    )
+    created_by = models.ForeignKey(
+        User,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="created_service_accounts",
+    )
+    is_active = models.BooleanField(default=True)
+    expiry_date = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name=_("Expiry date"),
+    )
+    previous_secret_hash = models.CharField(max_length=200, null=True, blank=True)
+    previous_secret_expires_at = models.DateTimeField(null=True, blank=True)
+    secret_preview = models.CharField(max_length=32, blank=True, default="")
+
+    # The IAM let you perform an action on the `ServiceAccount` if you have the appropriate permission in its `user.folder`.
+    IAM_SCOPE_FIELD = "user"
+
+    class Meta:
+        verbose_name = _("Service account")
+        verbose_name_plural = _("Service accounts")
+
+    @property
+    def client_id(self) -> str:
+        return self.client.pk
+
+    @property
+    def role_assignment(self) -> RoleAssignment | None:
+        return RoleAssignment.objects.filter(user=self.user, role=self.role).first()
+
+    @classmethod
+    def generate_secret(cls) -> str:
+        # token_urlsafe rather than allauth's default (Django's SECRET_KEY
+        # charset): the secret travels in form-encoded token requests and
+        # shell command lines, where &, +, %, ! and $ corrupt or split the
+        # value. 32 bytes = 43 chars of [A-Za-z0-9_-], ~256 bits.
+        return cls.SECRET_PREFIX + secrets.token_urlsafe(32)
+
+    @classmethod
+    def secret_preview_for(cls, secret: str) -> str:
+        visible = secret[: len(cls.SECRET_PREFIX) + cls._SECRET_PREVIEW_VISIBLE_CHARS]
+        return visible + cls._SECRET_PREVIEW_MASK
+
+    def deactivate(self):
+        """Block token issuance (no grant types) and revoke outstanding tokens."""
+        self.is_active = False
+        self.save(update_fields=["is_active", "updated_at"])
+        self.client.set_grant_types([])
+        self.client.save(update_fields=["grant_types"])
+        Token.objects.filter(client=self.client).delete()
+        self.user.is_active = False
+        self.user.save(update_fields=["is_active"])
+
+    def activate(self):
+        self.is_active = True
+        self.save(update_fields=["is_active", "updated_at"])
+        self.client.set_grant_types([Client.GrantType.CLIENT_CREDENTIALS])
+        self.client.save(update_fields=["grant_types"])
+        self.user.is_active = True
+        self.user.save(update_fields=["is_active"])
+
+    def rotate_secret(self, grace_period: timedelta | None = None) -> str:
+        plain_secret = self.generate_secret()
+        if grace_period:
+            self.previous_secret_hash = self.client.secret  # already hashed
+            self.previous_secret_expires_at = timezone.now() + grace_period
+        else:
+            self.previous_secret_hash = None
+            self.previous_secret_expires_at = None
+        self.secret_preview = self.secret_preview_for(plain_secret)
+        self.save(
+            update_fields=[
+                "previous_secret_hash",
+                "previous_secret_expires_at",
+                "secret_preview",
+                "updated_at",
+            ]
+        )
+        self.client.set_secret(plain_secret)
+        self.client.save(update_fields=["secret"])
+        Token.objects.filter(client=self.client).delete()
+        return plain_secret
+
+    def delete(self, *args, **kwargs):
+        client, user, role = self.client, self.user, self.role
+        with transaction.atomic():
+            result = super().delete(*args, **kwargs)
+            client.delete()  # cascades outstanding OIDC tokens
+            user.delete()  # cascades the role assignment
+            if not role.builtin:
+                role.delete()
+        return result
+
+    def __str__(self):
+        return self.name
+
+
 common_exclude = ["created_at", "updated_at"]
+# `preferences` is personal UI state (language, theme, date format, hidden
+# modules) with no security meaning, and every toggle would otherwise log the
+# whole blob, burying the User events that matter. `password` stays tracked so
+# the *change* is still auditable, but the hash itself is redacted rather than
+# half-masked as auditlog would do by default.
 auditlog.register(
     User,
     m2m_fields={"user_groups", "idp_groups"},
-    exclude_fields=common_exclude,
+    exclude_fields=common_exclude + ["preferences"],
+    mask_fields=["password"],
+    mask_callable="iam.utils.redact_audited_secret",
 )
 auditlog.register(
     Folder,
@@ -1711,3 +2521,23 @@ auditlog.register(
     m2m_fields={"user_groups"},
     exclude_fields=common_exclude,
 )
+auditlog.register(
+    RoleAssignment,
+    m2m_fields={"perimeter_folders"},
+    exclude_fields=common_exclude,
+)
+auditlog.register(Role, exclude_fields=common_exclude)
+auditlog.register(UserGroup, exclude_fields=common_exclude)
+auditlog.register(PersonalAccessToken)
+auditlog.register(SCIMToken)
+auditlog.register(ServiceAccount, exclude_fields=common_exclude)
+
+
+def _skip_builtin_rbac(sender, instance, **kwargs):
+    if getattr(instance, "builtin", False):
+        return False
+    return True
+
+
+for _rbac_model in (RoleAssignment, Role, UserGroup):
+    pre_log.connect(_skip_builtin_rbac, sender=_rbac_model)

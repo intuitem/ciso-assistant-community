@@ -37,11 +37,21 @@ An audit assesses compliance against the chosen framework. The evaluation of a s
 
 A requirement assessment is not a single value — it captures _several dimensions_ at once, separating **the compliance result** from **how the work got done** and from **the depth of the implementation**. The point is that the same row tracks the auditor's view, the analyst's progress, and the maturity of the underlying implementation without conflating them.
 
+<figure><img src="../.gitbook/assets/audits-list.png" alt=""><figcaption><p>Audits listed with their framework, perimeter and Progress percentage</p></figcaption></figure>
+
 ### Progress column
 
 Every audit in the audit tables (and on dashboards and campaigns) shows a **Progress** percentage. It answers a single question: _how much of the audit has been assessed?_
 
-A requirement assessment counts as **assessed** as soon as it carries _any_ compliance result — **Compliant**, **Partially compliant**, **Non compliant**, or **Not applicable**. Requirements still on the default **Not assessed** state are the only ones that don't count. A requirement that only carries a score (no result) is also treated as assessed, so maturity- or scoring-only audits still show meaningful progress.
+What counts as **assessed** depends on which fields the audit exposes to the auditor. A single rule drives every surface (audit tables, the audit page, journeys, and My assignments), so the number never diverges between views:
+
+- **Status mode** — the default, and active whenever the [workflow status](#analyst-dimension-assignee--workflow-status) field is visible to the auditor. A requirement counts as assessed only once its status is **Done**. Nothing else moves the needle: a requirement can already be _Compliant_ or scored and still not count until it is explicitly marked **Done**. This makes progress the analyst's own "I'm finished with this one" signal.
+- **Content mode** — active when the status field is hidden. A requirement counts as assessed when:
+  - for **questionnaire** requirements, the questionnaire is **fully answered** (every question answered), or it already carries a result or a score;
+  - otherwise, when the **result** is visible, as soon as it leaves the default **Not assessed** state (**Compliant**, **Partially compliant**, **Non compliant**, or **Not applicable**);
+  - otherwise, for **scoring-only** audits, when the score is _strictly above_ the applicable minimum of the scale.
+
+Enabling scoring pre-fills every requirement at the scale minimum, so a bare minimum score is treated as "not touched yet" and does **not** count. Only a score genuinely moved above the minimum counts as assessed, which stops empty maturity- or scoring-only audits from showing 100%.
 
 In other words, **progress is an auditing-activity signal, not a compliance signal**. An audit can be 100% _in progress_ and still be largely non-compliant — the column tells you the team has gone through every requirement and reached a verdict, not that the verdicts are good. The actual compliance picture lives in the donut and score read-outs computed from the [compliance result](#compliance-result) below.
 
@@ -75,9 +85,13 @@ The headline dimension — the actual answer to _"does this requirement hold?"_.
 
 This is the field that feeds the framework's compliance percentages, the report, and the cross-framework roll-ups.
 
-For questionnaire-driven frameworks (whether authored in the [framework builder UI](../configuration/authoring/framework-builder.md#questions-and-choices) or imported from an [Excel source](../configuration/authoring/framework.md#questions-and-choices) — same vocabulary on both paths), the result is computed from the `compute_result` tag carried by each question choice and aggregated _worst-wins_ across the requirement's questions, with `not_applicable` neutral. The full rule lives in the framework builder reference.
+For questionnaire-driven frameworks (whether authored in the [library builder](../configuration/authoring/library-builder.md#add-questions-and-choices) or imported from an [Excel source](../configuration/authoring/excel.md) — same vocabulary on both paths), the result is computed from the `compute_result` tag carried by each question choice and aggregated _worst-wins_ across the requirement's questions, with `not_applicable` neutral.
+
+Text type questions are not taken into account for the result computation: leaving one empty does not hold the requirement at **Not assessed**.
 
 If you maintain a tenant whose audits were produced under the older boolean-collapse logic, see [Special cases — Recompute assessment results](../installation/special-cases.md#recompute-assessment-results-after-the-semantic-compute_result-upgrade) for the realignment procedure.
+
+<figure><img src="../.gitbook/assets/audit-detail.png" alt=""><figcaption><p>The audit page — the compliance donut summarises the results across every assessable requirement</p></figcaption></figure>
 
 ### Analyst dimension (assignee + workflow status)
 
@@ -102,12 +116,19 @@ This is the auditor's grading language, useful when the framework requires disti
 
 ### Scoring layers
 
-Beyond the binary compliance result, each requirement assessment can carry a **score** on the framework's scale. Scoring captures _how mature or deep_ an implementation is, not just whether it exists. There are two ways to score, depending on what the audit needs:
+Beyond the binary compliance result, each requirement assessment can carry a **score** on the audit's scale. Scoring captures _how mature or deep_ an implementation is, not just whether it exists. There are two ways to score, depending on what the audit needs:
 
 - **Maturity score** _(single layer)_ — one score per requirement, typically used for CMMI-style or NIST-CSF-style maturity assessments.
 - **Implementation + Documentation scores** _(two layers)_ — toggle on **documentation score** to split scoring into _is this implemented?_ and _is the implementation documented?_. The platform computes the maturity score as the average of the enabled layers.
 
-Each requirement assessment uses an **effective scoring scale**. At audit runtime the fallback is the audit's own scoring scale (`ComplianceAssessment`), which is usually initialised from the framework when the audit is created. A requirement can override that audit-level scale with its own `min_score`, `max_score`, and level labels. The scoring UI, documentation score, exports, and tree views use that effective scale for the requirement.
+Each requirement assessment uses an **effective scoring scale**, resolved in this order:
+
+1. **Requirement scale** — a requirement can carry its own `min_score`, `max_score`, and level labels, set by the framework author.
+2. **Audit scale** — otherwise, the audit's own scoring scale (`ComplianceAssessment`).
+
+The audit scale is chosen when the audit is created and stored on the audit. The form proposes the baseline audit's scale for a copy, otherwise the framework's scale when the framework declares one, otherwise the **organisation default** set in [general settings](../configuration/settings/general.md#audits) (0–5 out of the box); a preset can be picked instead. Changing the organisation default later leaves existing audits alone. The audit scale can also be changed after creation, with existing scores converted proportionally — unless the framework's questionnaire computes the scores or some requirements carry their own scale, in which case the framework's scale is fixed. See [Choosing the score scale](../guides/customize-audit.md#choosing-the-score-scale).
+
+The scoring UI, documentation score, exports, and tree views use that effective scale for the requirement.
 
 When an audit contains mixed scales, average-based roll-ups normalise each requirement against its effective range before aggregating, then display the result on the audit scale. Sum-based roll-ups stay raw: they add `score x weight`, and their maximum is the sum of each requirement's effective maximum times its weight.
 
@@ -131,9 +152,15 @@ See [Comments](../features/comments.md) for the full feature reference — proce
 
 Evidence justifies the status of a compliance requirement or proves that an applied control has been implemented. It can be a description, a link, or an uploaded file, and it can be attached to any number of applied controls or requirement assessments.
 
+## Raising findings
+
+With the **findings_from_requirements** [feature flag](../configuration/settings/feature-flags.md) on, a requirement assessment gains a **Findings** tab. **Raise a finding** records a non-compliance without leaving the requirement; the picker next to it binds an existing finding, so an issue raised elsewhere (a pentest binder, say) is tied to the requirement it violates. The audit's own findings collect in a [findings binder](findings-assessments.md#raising-a-finding-from-a-requirement) created on first use.
+
+A finding belongs to one requirement assessment at a time. The picker only offers findings not bound to another requirement; to move one, edit the finding itself. Binding and unbinding are refused while the finding's binder is locked, and a locked audit does not take new findings. Raising needs permission to add findings, picking needs permission to change them.
+
 ## Related
 
 - [Applied controls](applied-controls.md)
-- [Findings assessments](findings-assessments.md)
+- [Findings binders](findings-assessments.md)
 - [Perimeters](perimeters.md)
 - [Vocabulary → Audit / Requirement / Evidence](../introduction/vocabulary.md)

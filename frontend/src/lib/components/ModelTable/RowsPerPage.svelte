@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { DataHandler } from '@vincjo/datatables/remote';
 	import { onMount } from 'svelte';
-	import { m } from '$paraglide/messages';
-	import { tableStates } from '$lib/utils/stores';
+	import { m } from '#paraglide/messages.js';
+	import { tableStates } from '#lib/utils/stores.js';
 	import { page } from '$app/state';
 
 	interface Props {

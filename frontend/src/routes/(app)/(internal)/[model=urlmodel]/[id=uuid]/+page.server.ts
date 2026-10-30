@@ -1,8 +1,8 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { getModelInfo, urlParamModelVerboseName } from '$lib/utils/crud';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { getModelInfo, urlParamModelVerboseName } from '#lib/utils/crud.js';
 
-import { safeTranslate } from '$lib/utils/i18n';
-import { m } from '$paraglide/messages';
+import { safeTranslate } from '#lib/utils/i18n.js';
+import { m } from '#paraglide/messages.js';
 
 import { fail, type Actions, type RequestEvent } from '@sveltejs/kit';
 import { message, setError, superValidate } from 'sveltekit-superforms';
@@ -14,10 +14,10 @@ import {
 	nestedDeleteFormAction,
 	nestedWriteFormAction,
 	handleErrorResponse
-} from '$lib/utils/actions';
-import { modelSchema } from '$lib/utils/schemas';
+} from '#lib/utils/actions.js';
+import { modelSchema } from '#lib/utils/schemas.js';
 
-import { loadDetail } from '$lib/utils/load';
+import { loadDetail } from '#lib/utils/load.js';
 import type { PageServerLoad } from './$types';
 
 async function handleRiskAcceptanceTransition(
@@ -55,10 +55,12 @@ async function handleRiskAcceptanceTransition(
 
 	const res = await fetch(endpoint, requestInitOptions);
 	if (!res.ok) {
-		const response = await res.json();
-		if (response.non_field_errors) {
-			setError(form, 'non_field_errors', response.non_field_errors);
-		}
+		const response = (await res.json().catch(() => null)) ?? {};
+		setError(
+			form,
+			'non_field_errors',
+			response.non_field_errors ?? response.error ?? response.detail ?? m.anErrorOccurred()
+		);
 		return fail(400, { form });
 	}
 

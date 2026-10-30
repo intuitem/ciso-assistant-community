@@ -10,8 +10,8 @@ description: "RECYF constitue le r\xE9f\xE9rentiel de cybers\xE9curit\xE9 mentio
   \ (PJL). Il se compose d\u2019objectifs de s\xE9curit\xE9 et, pour chacun d\u2019\
   eux, de moyens acceptables de conformit\xE9."
 copyright: ANSSI
-version: 3
-publication_date: 2026-05-05
+version: 4
+publication_date: 2026-07-09
 provider: ANSSI
 packager: intuitem
 dependencies:
@@ -821,7 +821,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:recyf:7.a
       ref_id: 7.A.4
-      description: "Les sous-syst\xE8mes identifi\xE9s \xE0 la mesure 7.A.4-EE sont\
+      description: "Les sous-syst\xE8mes identifi\xE9s \xE0 la mesure 7.A.3-EE sont\
         \ cloisonn\xE9s entre eux physiquement et/ou logiquement."
       implementation_groups:
       - EE

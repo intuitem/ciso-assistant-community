@@ -1,5 +1,5 @@
-import { getListViewFields, tableSourceMapper } from '$lib/utils/table';
-import type { urlModel } from '$lib/utils/types';
+import { getListViewFields, tableSourceMapper } from '#lib/utils/table.js';
+import type { urlModel } from '#lib/utils/types.js';
 import type { State } from '@vincjo/datatables/remote';
 import type { TableSource } from './types';
 
@@ -9,6 +9,7 @@ export interface LoadTableDataParams {
 	endpoint: string;
 	fields?: { head: string[]; body: string[] };
 	featureFlags?: Record<string, boolean>;
+	onError?: (error: unknown) => void;
 }
 
 export const loadTableData = async ({
@@ -16,16 +17,27 @@ export const loadTableData = async ({
 	URLModel,
 	endpoint,
 	fields,
-	featureFlags = {}
+	featureFlags = {},
+	onError
 }: LoadTableDataParams) => {
 	const url = new URL(endpoint, window.location.origin);
 	const params = new URLSearchParams(url.search);
 	const newParams = getParams(state);
 
 	newParams.forEach((value, key) => params.append(key, value));
+	if (URLModel === 'filtering-labels') params.set('usage_count', 'true');
 	url.search = params.toString();
 
-	const response = await fetch(url.toString()).then((res) => res.json());
+	let response;
+	try {
+		const res = await fetch(url.toString());
+		if (!res.ok) throw new Error(`Failed to load ${URLModel}: ${res.status}`);
+		response = await res.json();
+	} catch (error) {
+		state.setTotalRows(0);
+		onError?.(error);
+		return [];
+	}
 	state.setTotalRows(response.count);
 
 	const baseFields = getListViewFields({ key: URLModel, featureFlags, includeOptional: true });
@@ -67,14 +79,16 @@ export const loadTableData = async ({
 	});
 };
 
-const getParams = ({ offset, rowsPerPage, search, sort, filters }: State) => {
+export const getParams = ({ offset, rowsPerPage, search, sort, filters }: State) => {
 	const params = new URLSearchParams();
 	params.set('offset', offset.toString() ?? '0');
-	params.set('limit', rowsPerPage.toString() ?? '10');
+	// rowsPerPage is 0 when a table opts out of pagination, and the backend rejects
+	// limit=0; leaving it unset falls back to the server default page size.
+	if (rowsPerPage) params.set('limit', rowsPerPage.toString());
 	if (search) {
 		params.set('search', search);
 	}
-	if (sort) {
+	if (sort?.orderBy) {
 		params.set('ordering', `${sort.direction === 'desc' ? '-' : ''}${sort.orderBy}`);
 	}
 	if (filters) {

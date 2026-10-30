@@ -1,17 +1,17 @@
 <script lang="ts">
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import SuperForm from '$lib/components/Forms/Form.svelte';
-	import { goto } from '$lib/utils/breadcrumbs';
-	import { getSecureRedirect } from '$lib/utils/helpers';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
+	import SuperForm from '#lib/components/Forms/Form.svelte';
+	import { goto } from '#lib/utils/breadcrumbs.js';
+	import { getSecureRedirect } from '#lib/utils/helpers.js';
 	import { defaults, superForm, type SuperValidated } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 
-	import * as m from '$paraglide/messages';
-	import TextField from '$lib/components/Forms/TextField.svelte';
-	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
-	import { quickStartSchema } from '$lib/utils/schemas';
-	import { getLocale } from '$paraglide/runtime';
-	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
+	import * as m from '#paraglide/messages.js';
+	import TextField from '#lib/components/Forms/TextField.svelte';
+	import Checkbox from '#lib/components/Forms/Checkbox.svelte';
+	import { quickStartSchema } from '#lib/utils/schemas.js';
+	import { getLocale } from '#paraglide/runtime.js';
+	import { getModalStore, type ModalStore } from '#lib/components/Modals/stores.js';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -39,7 +39,8 @@
 	let closeModal = true;
 
 	// Base Classes
-	const cBase = 'card bg-surface-50-950 p-4 w-fit max-w-4xl shadow-xl space-y-4';
+	const cBase =
+		'card bg-surface-100-900 border border-surface-500 p-4 w-fit max-w-4xl shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 
 	const form = defaults(
@@ -104,7 +105,7 @@
 					field="framework"
 					label={m.framework()}
 					optionsEndpoint="stored-libraries"
-					optionsDetailedUrlParameters={[['object_type', 'framework']]}
+					optionsDetailedUrlParameters={[['object_type', 'frameworks']]}
 					optionsValueField="urn"
 				/>
 				<TextField {form} field="audit_name" label={m.auditName()} />
@@ -120,7 +121,7 @@
 					field="risk_matrix"
 					label={m.riskMatrix()}
 					optionsEndpoint="stored-libraries"
-					optionsDetailedUrlParameters={[['object_type', 'risk_matrix']]}
+					optionsDetailedUrlParameters={[['object_type', 'risk_matrices']]}
 					optionsValueField="urn"
 					disabled={!data.create_risk_assessment}
 				/>

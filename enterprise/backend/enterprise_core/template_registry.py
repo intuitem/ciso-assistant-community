@@ -3,6 +3,91 @@ Registry of overridable templates with their metadata.
 Used by the API to document available templates and validate overrides.
 """
 
+# Payload of `core.generators.audit_context_for_typst`, read as `d` in the template.
+TYPST_AUDIT_VARIABLES = [
+    {
+        "name": "audit",
+        "type": "object",
+        "description": "The compliance assessment (name, description, framework, version, status, ...)",
+    },
+    {
+        "name": "date",
+        "type": "string",
+        "description": "Export date formatted as DD/MM/YYYY",
+    },
+    {
+        "name": "generated_at",
+        "type": "string",
+        "description": "Full generation timestamp",
+    },
+    {
+        "name": "contributors",
+        "type": "string",
+        "description": "Authors and reviewers",
+    },
+    {
+        "name": "requirement_assessments",
+        "type": "list",
+        "description": "Requirement rows: {ref_id, name, description, result, result_key, status, score, max_score, observation, answers, evidences, task_templates, applied_controls}; fields hidden from the reader are absent",
+    },
+    {
+        "name": "hidden_fields",
+        "type": "list",
+        "description": "Requirement fields withheld from this reader; test with `key not in d.hidden_fields`",
+    },
+    {
+        "name": "sections",
+        "type": "list",
+        "description": "Sections this profile includes (summary, charts, scope, requirements, commitments, tasks, signatures, ...)",
+    },
+    {
+        "name": "charts",
+        "type": "list",
+        "description": "Chart image filenames available to `image()` (compliance_donut.png, completion_bar.png, ...)",
+    },
+    {
+        "name": "commitments",
+        "type": "list",
+        "description": "Commitments linked to the requirements, when the profile includes them",
+    },
+    {
+        "name": "tasks",
+        "type": "list",
+        "description": "Tasks linked to the requirements, when the profile includes them",
+    },
+    {
+        "name": "counterparty",
+        "type": "object",
+        "description": "Third-party entity and representatives, or none for an internal audit",
+    },
+    {
+        "name": "req",
+        "type": "object",
+        "description": "Aggregated result counts (as in the Word report), when visibility allows them",
+    },
+    {
+        "name": "category_scores",
+        "type": "object",
+        "description": "Per-category score details, when the profile includes categories",
+    },
+    {
+        "name": "drifts_per_domain",
+        "type": "list",
+        "description": "List of {name, drift_count} per top-level domain",
+    },
+    {
+        "name": "p1_controls",
+        "type": "list",
+        "description": "P1 priority controls: {name, description, status, category, coverage}",
+    },
+    {
+        "name": "full_controls",
+        "type": "list",
+        "description": "All applied controls: {name, description, prio, status, eta, category, coverage}",
+    },
+]
+
+
 WORD_TEMPLATE_REGISTRY = {
     "audit_report": {
         "description": "Compliance assessment Word report",
@@ -94,6 +179,20 @@ WORD_TEMPLATE_REGISTRY = {
                 "description": "Total number of assessable requirement assessments",
             },
         ],
+    },
+    "audit_posture": {
+        "description": "Compliance assessment posture PDF",
+        "format": "typst",
+        "default_template": "audit_report",
+        "default_languages": ["en", "fr"],
+        "variables": TYPST_AUDIT_VARIABLES,
+    },
+    "audit_attestation": {
+        "description": "Compliance assessment attestation PDF",
+        "format": "typst",
+        "default_template": "attestation",
+        "default_languages": ["en", "fr"],
+        "variables": TYPST_AUDIT_VARIABLES,
     },
 }
 
@@ -197,6 +296,19 @@ EMAIL_TEMPLATE_REGISTRY = {
             "ciso_assistant_url",
         ],
     },
+    "compliance_assessment_reviewer_assignment": {
+        "description": "Sent when a user is added as a reviewer of an audit",
+        "category": "notification",
+        "variables": [
+            "assessment_name",
+            "assessment_description",
+            "framework_name",
+            "assessment_status",
+            "assessment_due_date",
+            "folder_name",
+            "ciso_assistant_url",
+        ],
+    },
     "compliance_assessment_due_soon": {
         "description": "Sent when compliance assessments are due soon",
         "category": "notification",
@@ -236,6 +348,99 @@ EMAIL_TEMPLATE_REGISTRY = {
             "ciso_assistant_url",
         ],
     },
+    "incident_assignment": {
+        "description": "Sent when an incident is assigned",
+        "category": "notification",
+        "variables": [
+            "incident_name",
+            "incident_ref_id",
+            "incident_severity",
+            "incident_status",
+            "folder_name",
+            "ciso_assistant_url",
+        ],
+    },
+    "document_review_requested": {
+        "description": "Sent to a document's reviewers when a revision is submitted for review",
+        "category": "notification",
+        "variables": [
+            "document_name",
+            "version_number",
+            "actor_name",
+            "change_summary",
+            "folder_name",
+            "ciso_assistant_url",
+        ],
+    },
+    "document_revision_reviewed": {
+        "description": "Sent to a revision's author when it is validated, sent back for changes, or published",
+        "category": "notification",
+        "variables": [
+            "document_name",
+            "version_number",
+            "decision",
+            "actor_name",
+            "reviewer_comments",
+            "folder_name",
+            "ciso_assistant_url",
+        ],
+    },
+    "evidence_reviewed": {
+        "description": "Sent to evidence owners when an evidence is approved or rejected",
+        "category": "notification",
+        "variables": [
+            "evidence_name",
+            "decision",
+            "actor_name",
+            "folder_name",
+            "ciso_assistant_url",
+        ],
+    },
+    "object_assignment": {
+        "description": "Sent when a user is added as owner, assignee or author of an object without a dedicated assignment template",
+        "category": "notification",
+        "variables": [
+            "object_type",
+            "object_name",
+            "folder_name",
+            "ciso_assistant_url",
+        ],
+    },
+    "object_review_assignment": {
+        "description": "Sent when a user is added as reviewer of an assessment without a dedicated template",
+        "category": "notification",
+        "variables": [
+            "object_type",
+            "object_name",
+            "folder_name",
+            "ciso_assistant_url",
+        ],
+    },
+    "risk_acceptance_submitted": {
+        "description": "Sent to the approver when a risk acceptance is submitted",
+        "category": "notification",
+        "variables": [
+            "acceptance_name",
+            "actor_name",
+            "expiry_date",
+            "risk_scenarios",
+            "folder_name",
+            "ciso_assistant_url",
+        ],
+    },
+    "risk_acceptance_decided": {
+        "description": "Sent to risk scenario owners when a risk acceptance is accepted, rejected or revoked",
+        "category": "notification",
+        "variables": [
+            "acceptance_name",
+            "decision",
+            "actor_name",
+            "justification",
+            "risk_scenarios",
+            "folder_name",
+            "ciso_assistant_url",
+        ],
+    },
     "risk_scenario_assignment": {
         "description": "Sent when a risk scenario is assigned",
         "category": "notification",
@@ -245,6 +450,66 @@ EMAIL_TEMPLATE_REGISTRY = {
             "scenario_ref_id",
             "risk_assessment_name",
             "scenario_treatment",
+            "folder_name",
+            "ciso_assistant_url",
+        ],
+    },
+    "security_exception_expiring_soon": {
+        "description": "Sent when security exceptions are about to expire",
+        "category": "notification",
+        "variables": [
+            "exception_count",
+            "exception_list",
+            "days_remaining",
+            "ciso_assistant_url",
+        ],
+    },
+    "expired_security_exceptions": {
+        "description": "Sent when security exceptions have expired",
+        "category": "notification",
+        "variables": [
+            "exception_count",
+            "exception_list",
+            "expired_since",
+            "ciso_assistant_url",
+        ],
+    },
+    "security_exception_assignment": {
+        "description": "Sent when a security exception is assigned",
+        "category": "notification",
+        "variables": [
+            "exception_name",
+            "exception_description",
+            "exception_ref_id",
+            "exception_severity",
+            "exception_status",
+            "expiration_date",
+            "folder_name",
+            "ciso_assistant_url",
+        ],
+    },
+    "vulnerability_assignment": {
+        "description": "Sent when a vulnerability is assigned",
+        "category": "notification",
+        "variables": [
+            "vulnerability_name",
+            "vulnerability_description",
+            "vulnerability_ref_id",
+            "vulnerability_severity",
+            "vulnerability_status",
+            "due_date",
+            "folder_name",
+            "ciso_assistant_url",
+        ],
+    },
+    "security_exception_status_changed": {
+        "description": "Sent when a security exception status changes",
+        "category": "notification",
+        "variables": [
+            "exception_name",
+            "exception_ref_id",
+            "new_status",
+            "actor_name",
             "folder_name",
             "ciso_assistant_url",
         ],
@@ -320,6 +585,93 @@ EMAIL_TEMPLATE_REGISTRY = {
             "event_notes",
             "validation_url",
             "ciso_assistant_url",
+        ],
+    },
+    "assignment_reopened": {
+        "description": "Sent to a respondent when their audit assignment is reopened for editing",
+        "category": "notification",
+        "variables": [
+            "assessment_name",
+            "reviewer_observation",
+            "ciso_assistant_url",
+        ],
+    },
+    "quick_form_started": {
+        "description": "Sent to a respondent when a quick form is ready for their input",
+        "category": "notification",
+        "variables": [
+            "ciso_assistant_url",
+            "due_date",
+            "quick_form_name",
+            "response_id",
+            "response_name",
+        ],
+    },
+    "quick_form_reopened": {
+        "description": "Sent to a respondent when their quick form response is sent back for changes",
+        "category": "notification",
+        "variables": [
+            "ciso_assistant_url",
+            "observation",
+            "quick_form_name",
+            "response_id",
+            "response_name",
+        ],
+    },
+    "quick_form_submitted": {
+        "description": "Sent to a reviewer when a quick form response is submitted",
+        "category": "notification",
+        "variables": [
+            "ciso_assistant_url",
+            "quick_form_name",
+            "response_id",
+            "response_name",
+        ],
+    },
+}
+
+
+# Registry of overridable HTML render templates (WeasyPrint PDF layouts, ...).
+DOC_HTML_TEMPLATE_REGISTRY = {
+    "document_pdf": {
+        "description": "Managed document PDF layout",
+        "default_languages": ["en", "fr"],
+        "variables": [
+            {
+                "name": "title",
+                "type": "string",
+                "description": "Document title",
+            },
+            {
+                "name": "content",
+                "type": "string",
+                "description": "Rendered HTML body of the document (safe)",
+            },
+            {
+                "name": "version",
+                "type": "string",
+                "description": "Version number of the published revision",
+            },
+            {
+                "name": "document_type",
+                "type": "string",
+                "description": "Human-readable document type label",
+            },
+            {
+                "name": "date",
+                "type": "string",
+                "description": "Publication date formatted as DD/MM/YYYY",
+            },
+            {
+                "name": "logo_base64",
+                "type": "string",
+                "description": "Organisation logo as base64 (empty if unset)",
+            },
+            {
+                "name": "logo_mime_type",
+                "type": "string",
+                "description": "MIME type of the organisation logo",
+            },
         ],
     },
 }

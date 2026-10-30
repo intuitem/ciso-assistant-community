@@ -345,9 +345,7 @@ def app_config():
 @pytest.fixture
 def admin_client(app_config):
     """Return an authenticated API client with admin privileges."""
-    admin = User.objects.create_superuser(
-        "admin@regression-tests.com", is_published=True
-    )
+    admin = User.objects.create_superuser("admin@regression-tests.com")
     admin_group = UserGroup.objects.get(name="BI-UG-ADM")
     admin.folder = admin_group.folder
     admin.save()
@@ -629,6 +627,173 @@ class TestCustomLibraryImportYAML:
         assert loaded.version == 1, (
             f"LoadedLibrary should still be v1 (update not triggered), got v{loaded.version}"
         )
+
+    def test_update_clears_missing_requirement_node_fields(
+        self, admin_client, upload_url
+    ):
+        """Updating a library clears selected requirement fields omitted in v2."""
+        v1_yaml = SAMPLE_FRAMEWORK_YAML.replace(
+            "description: A sample assessable requirement",
+            "description: A sample assessable requirement\n"
+            "      annotation: Test annotation\n"
+            "      typical_evidence: Test evidence\n"
+            "      visibility_expression: 'true'\n"
+            "      target_score: 80\n"
+            "      min_score: 0\n"
+            "      max_score: 1\n"
+            "      scores_definition_ref: binary\n"
+            "      weight: 3\n"
+            "      importance: mandatory\n"
+            "      implementation_groups:\n"
+            "      - base",
+        ).replace(
+            "    description: A sample framework\n",
+            "    description: A sample framework\n"
+            "    scores_definition:\n"
+            "      alternatives:\n"
+            "        binary:\n"
+            "        - score: 0\n"
+            "          name: 'No'\n"
+            "        - score: 1\n"
+            "          name: 'Yes'\n",
+        )
+
+        response1 = _upload_yaml(
+            admin_client,
+            upload_url,
+            "clearable_req_fields_v1.yaml",
+            v1_yaml.encode("utf-8"),
+        )
+        assert response1.status_code == status.HTTP_201_CREATED
+
+        node_urn = "urn:intuitem:test:req_node:sample-fw-reg:cat-1.1"
+        node = RequirementNode.objects.get(urn=node_urn)
+
+        assert node.ref_id == "CAT-1.1"
+        assert node.name == "Requirement 1.1"
+        assert node.description == "A sample assessable requirement"
+        assert node.annotation == "Test annotation"
+        assert node.typical_evidence == "Test evidence"
+        assert node.visibility_expression == "true"
+        assert node.target_score == 80
+        assert node.min_score == 0
+        assert node.max_score == 1
+        assert node.scores_definition_ref == "binary"
+        assert node.weight == 3
+        assert node.importance == RequirementNode.Importance.MANDATORY
+        assert node.implementation_groups == ["base"]
+        assert node.order_id == 1
+
+        v2_yaml = """
+urn: urn:intuitem:test:library:sample-framework-regression
+locale: en
+ref_id: SAMPLE-FW-REG
+name: Sample Framework for Regression Test
+description: A minimal framework library used for regression testing
+copyright: Test
+version: 2
+publication_date: 2025-01-01
+provider: test-provider
+packager: test-packager
+objects:
+  framework:
+    urn: urn:intuitem:test:framework:sample-framework-regression
+    ref_id: SAMPLE-FW-REG
+    name: Sample Framework for Regression Test
+    description: A sample framework
+    requirement_nodes:
+    - urn: urn:intuitem:test:req_node:sample-fw-reg:cat-1
+      assessable: false
+      depth: 1
+      ref_id: CAT-1
+      name: Category 1
+      description: A sample category
+    - urn: urn:intuitem:test:req_node:sample-fw-reg:cat-1.2
+      assessable: true
+      depth: 2
+      ref_id: CAT-1.2
+      parent_urn: urn:intuitem:test:req_node:sample-fw-reg:cat-1
+      name: Requirement 1.2
+      description: Another sample assessable requirement
+    - urn: urn:intuitem:test:req_node:sample-fw-reg:cat-1.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:test:req_node:sample-fw-reg:cat-1
+""".lstrip()
+
+        response2 = _upload_yaml(
+            admin_client,
+            upload_url,
+            "clearable_req_fields_v2.yaml",
+            v2_yaml.encode("utf-8"),
+        )
+        assert response2.status_code == status.HTTP_201_CREATED
+
+        loaded = LoadedLibrary.objects.get(
+            urn="urn:intuitem:test:library:sample-framework-regression"
+        )
+        assert loaded.update() is None
+
+        node.refresh_from_db()
+        assert node.ref_id is None
+        assert node.name is None
+        assert node.description is None
+        assert node.annotation is None
+        assert node.typical_evidence is None
+        assert node.visibility_expression is None
+        assert node.target_score is None
+        # The scale is kept: existing scores were recorded on it.
+        assert node.min_score == 0
+        assert node.max_score == 1
+        assert node.scores_definition_ref is None
+        assert node.weight == 1
+        assert node.importance == RequirementNode.Importance.UNDEFINED
+        assert node.implementation_groups is None
+        assert node.order_id == 2
+
+    def test_null_importance_and_weight_fall_back_to_defaults(
+        self, admin_client, upload_url
+    ):
+        """Explicit nulls load as the defaults, on import and on update."""
+        nulls = (
+            "description: A sample assessable requirement\n"
+            "      importance: null\n"
+            "      weight: null"
+        )
+        v1_yaml = SAMPLE_FRAMEWORK_YAML.replace(
+            "description: A sample assessable requirement", nulls
+        )
+        response1 = _upload_yaml(
+            admin_client, upload_url, "null_defaults_v1.yaml", v1_yaml.encode("utf-8")
+        )
+        assert response1.status_code == status.HTTP_201_CREATED, response1.content
+
+        node_urn = "urn:intuitem:test:req_node:sample-fw-reg:cat-1.1"
+        node = RequirementNode.objects.get(urn=node_urn)
+        assert node.importance == RequirementNode.Importance.UNDEFINED
+        assert node.weight == 1
+
+        node.importance = RequirementNode.Importance.MANDATORY
+        node.weight = 3
+        node.save(update_fields=["importance", "weight"])
+
+        v2_yaml = v1_yaml.replace("version: 1", "version: 2").replace(
+            "Another sample assessable requirement",
+            "Another sample assessable requirement\n      importance: null",
+        )
+        response2 = _upload_yaml(
+            admin_client, upload_url, "null_defaults_v2.yaml", v2_yaml.encode("utf-8")
+        )
+        assert response2.status_code == status.HTTP_201_CREATED, response2.content
+
+        loaded = LoadedLibrary.objects.get(
+            urn="urn:intuitem:test:library:sample-framework-regression"
+        )
+        assert loaded.update() is None
+
+        node.refresh_from_db()
+        assert node.importance == RequirementNode.Importance.UNDEFINED
+        assert node.weight == 1
 
 
 # Excel Import Tests

@@ -1,0 +1,12 @@
+subject: "CISO Assistant: Your assignment on '${assessment_name}' has been reopened for editing"
+body: |
+  Hello,
+
+  Your assignment on the following audit has been set to paused:
+
+  - Audit: ${assessment_name}
+  ${reviewer_observation}
+
+  Please reach out to the relevant team for more information.
+
+  Thank you.

@@ -39,6 +39,23 @@ export const navData = {
 					]
 				},
 				{
+					name: 'notifications',
+					fa_icon: 'fa-solid fa-bell',
+					href: '/notifications',
+					// `exclude` short-circuits `permissions` in canSeeNavItem, so the latter
+					// documents intent rather than gating -- same shape as myAssignments
+					// below. Third-party respondents are email-only in v1, so hide a page
+					// that would always be empty for them.
+					permissions: ['view_notification'],
+					exclude: ['BI-RL-TPR']
+				},
+				{
+					name: 'myRequests',
+					fa_icon: 'fa-solid fa-hand',
+					href: '/my-requests',
+					permissions: ['view_quickformresponse']
+				},
+				{
 					name: 'myAssignments',
 					fa_icon: 'fa-solid fa-list-check',
 					href: '/my-assignments',
@@ -47,8 +64,10 @@ export const navData = {
 						'view_riskscenario',
 						'view_referencecontrol',
 						'view_assessment',
-						'view_riskassessment'
-					]
+						'view_riskassessment',
+						'view_requirementassignment'
+					],
+					exclude: ['BI-RL-TPR']
 				},
 				{
 					name: 'auditDashboard',
@@ -146,15 +165,22 @@ export const navData = {
 					permissions: ['add_role']
 				},
 				{
-					name: 'roleAssignments',
-					fa_icon: 'fa-solid fa-user-tag',
-					href: '/role-assignments'
+					name: 'serviceAccounts',
+					fa_icon: 'fa-solid fa-robot',
+					href: '/service-accounts',
+					adminOnly: true
 				}
 			]
 		},
 		{
 			name: 'catalog',
 			items: [
+				{
+					name: 'libraries',
+					fa_icon: 'fa-solid fa-folder-plus',
+					href: '/libraries',
+					permissions: ['add_threat', 'add_riskmatrix', 'add_referencecontrol', 'add_framework']
+				},
 				{
 					name: 'frameworks',
 					fa_icon: 'fa-solid fa-book',
@@ -164,6 +190,11 @@ export const navData = {
 					name: 'threats',
 					fa_icon: 'fa-solid fa-biohazard',
 					href: '/threats'
+				},
+				{
+					name: 'ttpCatalogs',
+					fa_icon: 'fa-solid fa-table-cells',
+					href: '/ttp-catalogs'
 				},
 				{
 					name: 'securityAdvisories',
@@ -189,6 +220,24 @@ export const navData = {
 					name: 'riskMatrices',
 					fa_icon: 'fa-solid fa-table-cells-large',
 					href: '/risk-matrices'
+				},
+				{
+					name: 'documentTemplates',
+					fa_icon: 'fa-solid fa-file-code',
+					href: '/document-templates',
+					permissions: ['view_documenttemplate']
+				},
+				{
+					name: 'quickForms',
+					fa_icon: 'fa-solid fa-clipboard-question',
+					href: '/quick-forms',
+					permissions: ['view_quickformpublication']
+				},
+				{
+					name: 'lbListLibraryBuilder',
+					fa_icon: 'fas fa-shapes',
+					href: '/experimental/library-builder',
+					permissions: ['add_threat', 'add_riskmatrix', 'add_referencecontrol', 'add_framework']
 				}
 			]
 		},
@@ -216,6 +265,12 @@ export const navData = {
 					href: '/applied-controls'
 				},
 				{
+					name: 'documents',
+					fa_icon: 'fa-solid fa-file-lines',
+					href: '/documents',
+					permissions: ['view_documentcontainer']
+				},
+				{
 					name: 'calendar',
 					fa_icon: 'fa-solid fa-calendar-days',
 					href: '/calendar',
@@ -225,7 +280,8 @@ export const navData = {
 					name: 'xRays',
 					fa_icon: 'fa-solid fa-bolt',
 					href: '/x-rays',
-					permissions: ['view_riskassessment', 'view_assessment']
+					permissions: ['view_riskassessment', 'view_assessment'],
+					exclude: ['BI-RL-TPR']
 				},
 				{
 					name: 'incidents',
@@ -242,18 +298,18 @@ export const navData = {
 					fa_icon: 'fa-solid fa-table-columns',
 					href: '/tasks-review',
 					permissions: ['view_appliedcontrol']
+				},
+				{
+					name: 'workflows',
+					fa_icon: 'fa-solid fa-diagram-project',
+					href: '/workflows',
+					permissions: ['view_workflow']
 				}
 			]
 		},
 		{
 			name: 'governance',
 			items: [
-				{
-					name: 'libraries',
-					fa_icon: 'fa-solid fa-folder-plus',
-					href: '/libraries',
-					permissions: ['add_threat', 'add_riskmatrix', 'add_referencecontrol', 'add_framework']
-				},
 				{
 					name: 'policies',
 					fa_icon: 'fa-solid fa-file-alt',
@@ -278,6 +334,12 @@ export const navData = {
 					href: '/risk-acceptances'
 				},
 				{
+					name: 'requestQueue',
+					fa_icon: 'fa-solid fa-inbox',
+					href: '/requests',
+					permissions: ['view_quickformresponse']
+				},
+				{
 					name: 'validationFlows',
 					fa_icon: 'fa-solid fa-clipboard-check',
 					href: '/validation-flows',
@@ -289,8 +351,19 @@ export const navData = {
 					href: '/security-exceptions'
 				},
 				{
+					name: 'findings',
+					fa_icon: 'fas fa-bug',
+					href: '/findings'
+				},
+				{
+					name: 'commitments',
+					fa_icon: 'fa-solid fa-handshake',
+					href: '/commitments',
+					permissions: ['view_commitment']
+				},
+				{
 					name: 'followUp',
-					fa_icon: 'fa-solid fa-clipboard-list',
+					fa_icon: 'fas fa-th-list',
 					href: '/findings-assessments'
 				}
 			]
@@ -307,6 +380,12 @@ export const navData = {
 					name: 'ebiosRM',
 					fa_icon: 'fa-solid fa-gopuram',
 					href: '/ebios-rm'
+				},
+				{
+					name: 'threatModeling',
+					fa_icon: 'fa-solid fa-diagram-project',
+					href: '/threat-models',
+					permissions: ['view_threatmodel']
 				},
 				{
 					name: 'quantitativeRiskStudies',
@@ -341,7 +420,13 @@ export const navData = {
 					name: 'complianceAssessments',
 					fa_icon: 'fa-solid fa-certificate',
 					href: '/compliance-assessments',
-					exclude: ['BI-RL-ADE']
+					exclude: ['BI-RL-ADE', 'BI-RL-TPR']
+				},
+				{
+					name: 'postureAssessments',
+					fa_icon: 'fa-solid fa-list-check',
+					href: '/posture-assessments',
+					permissions: ['view_postureassessment']
 				},
 				{
 					name: 'evidences',
@@ -350,8 +435,9 @@ export const navData = {
 				},
 				{
 					name: 'campaigns',
+					key: 'campaignsInternal',
 					fa_icon: 'fa-solid fa-scale-balanced',
-					href: '/campaigns'
+					href: '/campaigns?kind=internal'
 				},
 				{
 					name: 'recap',
@@ -405,6 +491,12 @@ export const navData = {
 					href: '/entities'
 				},
 				{
+					name: 'criticality',
+					fa_icon: 'fa-solid fa-layer-group',
+					href: '/entities/tiers',
+					permissions: ['view_tier']
+				},
+				{
 					name: 'representatives',
 					fa_icon: 'fa-solid fa-user-tie',
 					href: '/representatives'
@@ -423,6 +515,12 @@ export const navData = {
 					name: 'entityAssessments',
 					fa_icon: 'fa-solid fa-clipboard-list',
 					href: '/entity-assessments'
+				},
+				{
+					name: 'campaigns',
+					key: 'campaignsThirdParty',
+					fa_icon: 'fa-solid fa-scale-balanced',
+					href: '/campaigns?kind=third_party'
 				}
 			]
 		},
@@ -464,6 +562,12 @@ export const navData = {
 					fa_icon: 'fa-solid fa-triangle-exclamation',
 					href: '/data-breaches',
 					permissions: ['view_databreach']
+				},
+				{
+					name: 'dpias',
+					fa_icon: 'fa-solid fa-scale-balanced',
+					href: '/dpias',
+					permissions: ['view_processing']
 				}
 			]
 		},
@@ -510,6 +614,18 @@ export const navData = {
 					fa_icon: 'fa-solid fa-language',
 					href: '/terminologies',
 					permissions: ['view_terminology']
+				},
+				{
+					name: 'objectClassifications',
+					fa_icon: 'fa-solid fa-shield-halved',
+					href: '/object-classifications',
+					permissions: ['view_objectclassification']
+				},
+				{
+					name: 'assetClasses',
+					fa_icon: 'fa-solid fa-sitemap',
+					href: '/asset-class',
+					permissions: ['view_assetclass']
 				},
 				{
 					name: 'customFields',

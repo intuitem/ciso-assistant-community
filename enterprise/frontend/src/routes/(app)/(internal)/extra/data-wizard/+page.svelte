@@ -1,18 +1,18 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { page } from '$app/state';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import type { PageData } from './$types';
 
-	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
+	import PromptConfirmModal from '#lib/components/Modals/PromptConfirmModal.svelte';
 	import {
 		getModalStore,
 		type ModalComponent,
 		type ModalSettings,
 		type ModalStore
-	} from '$lib/components/Modals/stores';
-	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
-	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	} from '#lib/components/Modals/stores.js';
+	import FolderTreeSelect from '#lib/components/Forms/FolderTreeSelect.svelte';
+	import AutocompleteSelect from '#lib/components/Forms/AutocompleteSelect.svelte';
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
@@ -56,6 +56,7 @@
 	// Composite models: perimeter optional, domain derived from it when set.
 	const ASSESSMENT_MODELS = [
 		'ComplianceAssessment',
+		'CyFunAssessment',
 		'RiskAssessment',
 		'FindingsAssessment',
 		'BusinessImpactAnalysis'
@@ -75,9 +76,15 @@
 		{ id: 'User', label: m.users(), description: '' },
 		{ id: 'AppliedControl', label: m.appliedControls(), description: '' },
 		{ id: 'Policy', label: m.policies(), description: '' },
+		{ id: 'Evidence', label: m.evidences(), description: m.dataWizardEvidenceDescription() },
 		{ id: 'Folder', label: m.domains(), description: '' },
 		{ id: 'Perimeter', label: m.perimeters(), description: '' },
 		{ id: 'ComplianceAssessment', label: m.complianceAssessment(), description: '' },
+		{
+			id: 'CyFunAssessment',
+			label: m.cyFunAssessment(),
+			description: m.dataWizardCyFunDescription()
+		},
 		{
 			id: 'BusinessImpactAnalysis',
 			label: m.businessImpactAnalysis(),
@@ -101,7 +108,11 @@
 		{ id: 'Vulnerability', label: m.vulnerabilities(), description: '' },
 		{ id: 'ReferenceControl', label: m.referenceControls(), description: '' },
 		{ id: 'Threat', label: m.threats(), description: '' },
-		{ id: 'Processing', label: m.processings(), description: '' },
+		{
+			id: 'Processing',
+			label: m.processings(),
+			description: m.dataWizardProcessingDescription()
+		},
 		{ id: 'SecurityException', label: m.securityExceptions(), description: '' },
 		{ id: 'Incident', label: m.incidents(), description: '' },
 		{
@@ -120,17 +131,49 @@
 			description: m.ebiosRMStudyExcelDescription()
 		},
 		{
+			id: 'TaskTemplate',
+			label: m.taskTemplates(),
+			description: m.taskTemplatesDescription()
+		},
+		{
 			id: 'EbiosRMStudyEgerieXML',
 			label: m.ebiosRMStudyEgerieXML(),
 			description: m.ebiosRMStudyEgerieXMLDescription()
 		}
 	];
 
+	// Models with a downloadable xlsx template served by the backend
+	// (data_wizard IMPORT_TEMPLATES). The others depend on a framework or an
+	// external tool export, so only the docs link applies.
+	const TEMPLATE_MODELS = new Set([
+		'Asset',
+		'AppliedControl',
+		'Perimeter',
+		'User',
+		'ElementaryAction',
+		'ReferenceControl',
+		'Threat',
+		'Folder',
+		'SecurityException',
+		'Incident',
+		'Policy',
+		'Vulnerability',
+		'Processing',
+		'TPRM',
+		'Evidence',
+		'FindingsAssessment',
+		'RiskAssessment',
+		'BusinessImpactAnalysis',
+		'TaskTemplate'
+	]);
+
 	// Per-model accepted file extensions. Most importers consume Excel;
 	// Egerie ships an XML export, hence the explicit branch.
 	const XML_MODELS = new Set(['EbiosRMStudyEgerieXML']);
+	const CSV_CAPABLE_MODELS = new Set(['TaskTemplate', 'Processing']);
 	function extensionsFor(modelId: string): string[] {
 		if (XML_MODELS.has(modelId)) return ['.xml'];
+		if (CSV_CAPABLE_MODELS.has(modelId)) return ['.xls', '.xlsx', '.csv'];
 		return ['.xls', '.xlsx'];
 	}
 
@@ -190,6 +233,7 @@
 		'TPRM',
 		'EbiosRMStudyARM',
 		'EbiosRMStudyExcel',
+		'TaskTemplate',
 		'EbiosRMStudyEgerieXML',
 		'Vulnerability'
 	];
@@ -262,7 +306,7 @@
 				</h4>
 				<a
 					class="text-indigo-600 hover:text-indigo-400 dark:text-indigo-300"
-					href="https://intuitem.gitbook.io/ciso-assistant/guide/data-import-wizard"
+					href="https://intuitem.gitbook.io/ciso-assistant/configuration/data-import"
 					>{m.dataWizardTemplatesAndGuidelines()}</a
 				>
 			</div>
@@ -460,6 +504,27 @@
 					>
 						<p class="text-xs text-blue-900 dark:text-blue-300">{selectedModelInfo.description}</p>
 					</div>
+				{/if}
+
+				{#if TEMPLATE_MODELS.has(selectedModel)}
+					<a
+						class="inline-flex items-center gap-1 mt-3 text-sm text-indigo-600 hover:text-indigo-400 dark:text-indigo-300"
+						href={`/extra/data-wizard/template/${selectedModel}`}
+						download
+					>
+						<i class="fa-solid fa-download"></i>
+						{m.dataWizardDownloadTemplate()}
+					</a>
+				{:else if selectedModel === 'ComplianceAssessment' && $scope.framework}
+					<!-- Audit templates are framework-specific: reuse the catalog's generated file -->
+					<a
+						class="inline-flex items-center gap-1 mt-3 text-sm text-indigo-600 hover:text-indigo-400 dark:text-indigo-300"
+						href={`/frameworks/${$scope.framework}/excel-template`}
+						download
+					>
+						<i class="fa-solid fa-download"></i>
+						{m.dataWizardDownloadTemplate()}
+					</a>
 				{/if}
 			</div>
 

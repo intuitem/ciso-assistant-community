@@ -1,7 +1,7 @@
-import { BASE_API_URL } from '$lib/utils/constants';
-import { safeTranslate } from '$lib/utils/i18n';
-import { webhookEndpointSchema } from '$lib/utils/schemas';
-import { m } from '$paraglide/messages';
+import { BASE_API_URL } from '#lib/utils/constants.js';
+import { safeTranslate } from '#lib/utils/i18n.js';
+import { webhookEndpointSchema } from '#lib/utils/schemas.js';
+import { m } from '#paraglide/messages.js';
 import { redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { fail, superValidate } from 'sveltekit-superforms';

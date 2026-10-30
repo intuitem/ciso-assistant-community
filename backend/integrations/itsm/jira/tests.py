@@ -1,6 +1,7 @@
 import pytest
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
+from jira import JIRAError
 from core.models import AppliedControl
 from integrations.models import IntegrationConfiguration
 from .client import JiraClient
@@ -330,6 +331,7 @@ def test_list_remote_objects_filters_by_issue_type(mock_jira, mock_sync, configu
     """Listing linkable issues is scoped to the configured project AND issue type."""
     mock_jira.return_value.search_issues.return_value = []
     mock_sync.objects.filter.return_value.values_list.return_value = []
+    mock_jira.return_value._is_cloud = False
 
     client = JiraClient(configuration)
     client.list_remote_objects()
@@ -465,3 +467,393 @@ def test_priority_choices_fall_back_to_instance_when_createmeta_empty(
 
     assert [c["value"] for c in choices] == ["Highest", "Medium"]
     mock_jira.return_value.priorities.assert_called_once()
+
+
+def _fake_issue(key, issue_id, summary):
+    issue = MagicMock()
+    issue.raw = {"key": key, "id": issue_id, "fields": {"summary": summary}}
+    return issue
+
+
+@patch("integrations.itsm.jira.client.SyncMapping")
+@patch("integrations.itsm.jira.client.JIRA")
+def test_list_remote_objects_passes_limit(mock_jira, mock_sync, configuration):
+    """The picker limit caps the results; pages use a trimmed field set."""
+    mock_jira.return_value.search_issues.return_value = [
+        _fake_issue(f"PROJ-{i}", str(i), f"Issue {i}") for i in range(30)
+    ]
+    mock_sync.objects.filter.return_value.values_list.return_value = []
+    mock_jira.return_value._is_cloud = False
+
+    client = JiraClient(configuration)
+    results = client.list_remote_objects({"limit": 20})
+
+    assert len(results) == 20
+    kwargs = mock_jira.return_value.search_issues.call_args[1]
+    assert kwargs["fields"] == "summary"
+
+
+@patch("integrations.itsm.jira.client.SyncMapping")
+@patch("integrations.itsm.jira.client.JIRA")
+def test_list_remote_objects_searches_summaries(mock_jira, mock_sync, configuration):
+    """A free-text term becomes a summary clause, without any key clause."""
+    mock_jira.return_value.search_issues.return_value = []
+    mock_sync.objects.filter.return_value.values_list.return_value = []
+    mock_jira.return_value._is_cloud = False
+
+    client = JiraClient(configuration)
+    client.list_remote_objects({"search": "physical entry"})
+
+    jql = mock_jira.return_value.search_issues.call_args[0][0]
+    assert 'summary ~ "physical entry*"' in jql
+    assert "key =" not in jql
+    assert jql.endswith("ORDER BY created DESC")
+
+
+@patch("integrations.itsm.jira.client.SyncMapping")
+@patch("integrations.itsm.jira.client.JIRA")
+def test_list_remote_objects_search_matches_issue_key(
+    mock_jira, mock_sync, configuration
+):
+    """A key-shaped term also matches on the issue key."""
+    mock_jira.return_value.search_issues.return_value = []
+    mock_sync.objects.filter.return_value.values_list.return_value = []
+    mock_jira.return_value._is_cloud = False
+
+    client = JiraClient(configuration)
+    client.list_remote_objects({"search": "ciso-40"})
+
+    jql = mock_jira.return_value.search_issues.call_args[0][0]
+    assert 'key = "CISO-40"' in jql
+    # The hyphen is a Lucene special, replaced by a space in the summary clause.
+    assert 'summary ~ "ciso 40*"' in jql
+
+
+@patch("integrations.itsm.jira.client.SyncMapping")
+@patch("integrations.itsm.jira.client.JIRA")
+def test_list_remote_objects_digit_search_targets_project_key(
+    mock_jira, mock_sync, configuration
+):
+    """A digit-only term is completed with the configured project key."""
+    mock_jira.return_value.search_issues.return_value = []
+    mock_sync.objects.filter.return_value.values_list.return_value = []
+    mock_jira.return_value._is_cloud = False
+
+    client = JiraClient(configuration)
+    client.list_remote_objects({"search": "40"})
+
+    jql = mock_jira.return_value.search_issues.call_args[0][0]
+    assert 'key = "PROJ-40"' in jql
+
+
+@patch("integrations.itsm.jira.client.SyncMapping")
+@patch("integrations.itsm.jira.client.JIRA")
+def test_list_remote_objects_key_clause_falls_back_on_jql_error(
+    mock_jira, mock_sync, configuration
+):
+    """Jira 400s on a nonexistent key in JQL; retry without the key clause."""
+    mock_jira.return_value.search_issues.side_effect = [
+        JIRAError(status_code=400, text="An issue with key 'PROJ-9999' does not exist"),
+        [_fake_issue("PROJ-1", "1", "Something 9999")],
+    ]
+    mock_sync.objects.filter.return_value.values_list.return_value = []
+    mock_jira.return_value._is_cloud = False
+
+    client = JiraClient(configuration)
+    results = client.list_remote_objects({"search": "9999"})
+
+    assert [r["key"] for r in results] == ["PROJ-1"]
+    retry_jql = mock_jira.return_value.search_issues.call_args[0][0]
+    assert "key =" not in retry_jql
+    assert 'summary ~ "9999*"' in retry_jql
+
+
+@patch("integrations.itsm.jira.client.SyncMapping")
+@patch("integrations.itsm.jira.client.JIRA")
+def test_list_remote_objects_key_clause_propagates_non_jql_errors(
+    mock_jira, mock_sync, configuration
+):
+    """A 429/timeout during the key search is a real error, not a missing
+    key: it must not silently degrade to the summary-only fallback."""
+    mock_jira.return_value.search_issues.side_effect = JIRAError(
+        status_code=429, text="Rate limited"
+    )
+    mock_sync.objects.filter.return_value.values_list.return_value = []
+    mock_jira.return_value._is_cloud = False
+
+    client = JiraClient(configuration)
+    with pytest.raises(JIRAError):
+        client.list_remote_objects({"search": "9999"})
+
+    mock_jira.return_value.search_issues.assert_called_once()
+
+
+@patch("integrations.itsm.jira.client.SyncMapping")
+@patch("integrations.itsm.jira.client.JIRA")
+def test_list_remote_objects_sanitizes_jql_term(mock_jira, mock_sync, configuration):
+    """Quotes and backslashes in the term cannot break out of the JQL string."""
+    mock_jira.return_value.search_issues.return_value = []
+    mock_sync.objects.filter.return_value.values_list.return_value = []
+    mock_jira.return_value._is_cloud = False
+
+    client = JiraClient(configuration)
+    client.list_remote_objects({"search": 'a"b\\c'})
+
+    jql = mock_jira.return_value.search_issues.call_args[0][0]
+    assert 'summary ~ "a b c*"' in jql
+
+
+@patch("integrations.itsm.jira.client.SyncMapping")
+@patch("integrations.itsm.jira.client.JIRA")
+def test_list_remote_objects_strips_lucene_specials(
+    mock_jira, mock_sync, configuration
+):
+    """Lucene-reserved characters would 400 (and can never match: the text
+    index drops punctuation), so they become spaces."""
+    mock_jira.return_value.search_issues.return_value = []
+    mock_sync.objects.filter.return_value.values_list.return_value = []
+    mock_jira.return_value._is_cloud = False
+
+    client = JiraClient(configuration)
+    client.list_remote_objects({"search": "A.7.1 (review)*?"})
+
+    jql = mock_jira.return_value.search_issues.call_args[0][0]
+    assert 'summary ~ "A.7.1 review*"' in jql
+
+
+@patch("integrations.itsm.jira.client.SyncMapping")
+@patch("integrations.itsm.jira.client.JIRA")
+def test_punctuation_only_search_returns_nothing(mock_jira, mock_sync, configuration):
+    """A term that sanitizes to nothing matches nothing, not everything."""
+    mock_sync.objects.filter.return_value.values_list.return_value = []
+    mock_jira.return_value._is_cloud = False
+
+    client = JiraClient(configuration)
+    results = client.list_remote_objects({"search": "*?("})
+
+    assert results == []
+    mock_jira.return_value.search_issues.assert_not_called()
+
+
+@patch("integrations.itsm.jira.client.SyncMapping")
+@patch("integrations.itsm.jira.client.JIRA")
+def test_list_remote_objects_excludes_mapped_issues(
+    mock_jira, mock_sync, configuration
+):
+    """Issues already linked through a SyncMapping are not offered again."""
+    mock_jira.return_value.search_issues.return_value = [
+        _fake_issue("PROJ-1", "1", "Linked"),
+        _fake_issue("PROJ-2", "2", "Free"),
+    ]
+    mock_sync.objects.filter.return_value.values_list.return_value = ["PROJ-1"]
+    mock_jira.return_value._is_cloud = False
+
+    client = JiraClient(configuration)
+    results = client.list_remote_objects()
+
+    assert [r["key"] for r in results] == ["PROJ-2"]
+
+
+def _fake_hydrated_issue(key, issue_id, summary, project="PROJ", issue_type="Task"):
+    issue = MagicMock()
+    issue.key = key
+    issue.id = issue_id
+    issue.raw = {
+        "key": key,
+        "id": issue_id,
+        "fields": {
+            "summary": summary,
+            "project": {"key": project},
+            "issuetype": {"name": issue_type},
+        },
+    }
+    return issue
+
+
+@patch("integrations.itsm.jira.client.SyncMapping")
+@patch("integrations.itsm.jira.client.JIRA")
+def test_list_remote_objects_hydrates_ids(mock_jira, mock_sync, configuration):
+    """The id param fetches the given issues directly instead of searching."""
+    mock_jira.return_value.issue.return_value = _fake_hydrated_issue(
+        "PROJ-7", "7", "Selected issue"
+    )
+    mock_sync.objects.filter.return_value.values_list.return_value = []
+
+    client = JiraClient(configuration)
+    results = client.list_remote_objects({"id": "PROJ-7"})
+
+    assert results == [{"key": "PROJ-7", "id": "7", "summary": "Selected issue"}]
+    mock_jira.return_value.issue.assert_called_once_with(
+        "PROJ-7", fields="summary,project,issuetype"
+    )
+    mock_jira.return_value.search_issues.assert_not_called()
+
+
+@patch("integrations.itsm.jira.client.SyncMapping")
+@patch("integrations.itsm.jira.client.JIRA")
+def test_hydration_rejects_out_of_scope_issues(mock_jira, mock_sync, configuration):
+    """Hydration must not leak issues outside the configured project/type."""
+    mock_jira.return_value.issue.side_effect = [
+        _fake_hydrated_issue("OTHER-1", "1", "Other project", project="OTHER"),
+        _fake_hydrated_issue("PROJ-2", "2", "Wrong type", issue_type="Epic"),
+        _fake_hydrated_issue("PROJ-3", "3", "In scope"),
+    ]
+    mock_sync.objects.filter.return_value.values_list.return_value = []
+
+    client = JiraClient(configuration)
+    results = client.list_remote_objects({"id": "OTHER-1,PROJ-2,PROJ-3"})
+
+    assert [r["key"] for r in results] == ["PROJ-3"]
+
+
+@patch("integrations.itsm.jira.client.SyncMapping")
+@patch("integrations.itsm.jira.client.JIRA")
+def test_hydration_caps_id_list(mock_jira, mock_sync, configuration):
+    """The client never makes more than MAX_HYDRATION_IDS remote calls."""
+    mock_jira.return_value.issue.return_value = _fake_hydrated_issue("PROJ-1", "1", "x")
+    mock_sync.objects.filter.return_value.values_list.return_value = []
+    mock_jira.return_value._is_cloud = False
+
+    client = JiraClient(configuration)
+    client.list_remote_objects({"id": ",".join(f"PROJ-{i}" for i in range(500))})
+
+    assert mock_jira.return_value.issue.call_count == 20
+
+
+@patch("integrations.itsm.jira.client.SyncMapping")
+@patch("integrations.itsm.jira.client.JIRA")
+def test_hydration_rejects_malformed_ids(mock_jira, mock_sync, configuration):
+    """Ids reach the REST path verbatim, so only key/numeric shapes pass."""
+    mock_sync.objects.filter.return_value.values_list.return_value = []
+
+    client = JiraClient(configuration)
+    results = client.list_remote_objects(
+        {"id": "../serverInfo,PROJ-1?expand=x,%2e%2e,search"}
+    )
+
+    assert results == []
+    mock_jira.return_value.issue.assert_not_called()
+
+
+@patch("integrations.itsm.jira.client.SyncMapping")
+@patch("integrations.itsm.jira.client.JIRA")
+def test_hydration_skips_malformed_payloads(mock_jira, mock_sync, configuration):
+    """A response without the expected fields is skipped, not a 500."""
+    broken = MagicMock()
+    broken.raw = {"key": "PROJ-1", "id": "1", "fields": {}}
+    mock_jira.return_value.issue.side_effect = [
+        broken,
+        _fake_hydrated_issue("PROJ-2", "2", "Fine"),
+    ]
+    mock_sync.objects.filter.return_value.values_list.return_value = []
+
+    client = JiraClient(configuration)
+    results = client.list_remote_objects({"id": "PROJ-1,PROJ-2"})
+
+    assert [r["key"] for r in results] == ["PROJ-2"]
+
+
+class _FakePage(list):
+    """Stand-in for python-jira's ResultList: a list with a nextPageToken."""
+
+    def __init__(self, items, token=None):
+        super().__init__(items)
+        self.nextPageToken = token
+
+
+@patch("integrations.itsm.jira.client.SyncMapping")
+@patch("integrations.itsm.jira.client.JIRA")
+def test_list_paginates_past_mapped_issues(mock_jira, mock_sync, configuration):
+    """A first page full of mapped issues must not shrink the result below
+    the limit while more selectable issues exist: that would flip the
+    picker's lazy/eager probe to eager on a truncated list. (Data Center
+    pages by startAt.)"""
+    mapped = [f"PROJ-{i}" for i in range(100)]
+    mock_jira.return_value.search_issues.side_effect = [
+        [_fake_issue(key, key.split("-")[1], "Mapped") for key in mapped],
+        [_fake_issue(f"PROJ-{i}", str(i), f"Issue {i}") for i in range(100, 160)],
+    ]
+    mock_sync.objects.filter.return_value.values_list.return_value = mapped
+    mock_jira.return_value._is_cloud = False
+
+    client = JiraClient(configuration)
+    results = client.list_remote_objects({"limit": 51})
+
+    assert len(results) == 51
+    assert not set(mapped) & {r["key"] for r in results}
+    second_call = mock_jira.return_value.search_issues.call_args_list[1]
+    assert second_call[1]["startAt"] == 100
+
+
+@patch("integrations.itsm.jira.client.SyncMapping")
+@patch("integrations.itsm.jira.client.JIRA")
+def test_list_paginates_with_cloud_page_tokens(mock_jira, mock_sync, configuration):
+    """Jira Cloud pages via enhanced_search_issues and its nextPageToken;
+    search_issues raises there for any non-zero startAt."""
+    mapped = [f"PROJ-{i}" for i in range(100)]
+    mock_jira.return_value._is_cloud = True
+    mock_jira.return_value.enhanced_search_issues.side_effect = [
+        _FakePage(
+            [_fake_issue(key, key.split("-")[1], "Mapped") for key in mapped],
+            token="page2",
+        ),
+        _FakePage(
+            [_fake_issue(f"PROJ-{i}", str(i), f"Issue {i}") for i in range(100, 160)]
+        ),
+    ]
+    mock_sync.objects.filter.return_value.values_list.return_value = mapped
+
+    client = JiraClient(configuration)
+    results = client.list_remote_objects({"limit": 51})
+
+    assert len(results) == 51
+    assert not set(mapped) & {r["key"] for r in results}
+    second_call = mock_jira.return_value.enhanced_search_issues.call_args_list[1]
+    assert second_call[1]["nextPageToken"] == "page2"
+    mock_jira.return_value.search_issues.assert_not_called()
+
+
+@patch("integrations.itsm.jira.client.SyncMapping")
+@patch("integrations.itsm.jira.client.JIRA")
+def test_list_deduplicates_issues_across_pages(mock_jira, mock_sync, configuration):
+    """Issues created mid-scan shift the created DESC pages, so a key can
+    show up on two consecutive pages; it must be returned once."""
+    mapped = [f"PROJ-{i}" for i in range(99)]
+    boundary = _fake_issue("PROJ-99", "99", "On both pages")
+    mock_jira.return_value.search_issues.side_effect = [
+        [_fake_issue(key, key.split("-")[1], "Mapped") for key in mapped] + [boundary],
+        [boundary]
+        + [_fake_issue(f"PROJ-{i}", str(i), f"Issue {i}") for i in range(100, 160)],
+    ]
+    mock_sync.objects.filter.return_value.values_list.return_value = mapped
+    mock_jira.return_value._is_cloud = False
+
+    client = JiraClient(configuration)
+    results = client.list_remote_objects({"limit": 51})
+
+    keys = [r["key"] for r in results]
+    assert len(keys) == 51
+    assert len(set(keys)) == 51
+    assert keys.count("PROJ-99") == 1
+
+
+@patch("integrations.itsm.jira.client.SyncMapping")
+@patch("integrations.itsm.jira.client.JIRA")
+def test_list_scan_budget_bounds_pagination(mock_jira, mock_sync, configuration):
+    """Paging past mapped issues stops at MAX_LIST_FETCH scanned rows."""
+    mapped = [f"PROJ-{i}" for i in range(1000)]
+    mock_jira.return_value.search_issues.side_effect = [
+        [
+            _fake_issue(key, key.split("-")[1], "Mapped")
+            for key in mapped[i * 100 : (i + 1) * 100]
+        ]
+        for i in range(10)
+    ]
+    mock_sync.objects.filter.return_value.values_list.return_value = mapped
+    mock_jira.return_value._is_cloud = False
+
+    client = JiraClient(configuration)
+    results = client.list_remote_objects({"limit": 51})
+
+    assert results == []
+    assert mock_jira.return_value.search_issues.call_count == 5

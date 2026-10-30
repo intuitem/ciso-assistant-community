@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { safeTranslate } from '#lib/utils/i18n.js';
 	import type { DataHandler } from '@vincjo/datatables/remote';
 	import { ContextMenu } from 'bits-ui';
 	import { onMount } from 'svelte';
-	import { m } from '$paraglide/messages';
+	import { m } from '#paraglide/messages.js';
 	import { getFlash } from 'sveltekit-flash-message';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
 	interface Props {
 		row: any;
@@ -53,7 +53,7 @@
 
 <ContextMenu.Sub>
 	<ContextMenu.SubTrigger
-		class="flex h-10 select-none items-center rounded-button py-3 pl-3 pr-1.5 text-sm font-medium outline-hidden ring-0! ring-transparent! data-highlighted:bg-muted data-[state=open]:bg-surface-50"
+		class="flex h-10 select-none items-center rounded-base py-3 pl-3 pr-1.5 text-sm font-medium outline-hidden ring-0! ring-transparent! data-highlighted:bg-muted data-[state=open]:bg-surface-50"
 	>
 		<div class="flex items-center">{m.changeStatus()}</div>
 	</ContextMenu.SubTrigger>

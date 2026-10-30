@@ -10,8 +10,10 @@ from allauth.socialaccount.adapter import (
 from allauth.socialaccount.models import app_settings
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils.translation import gettext_lazy as _
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.response import Response
 from rest_framework.status import HTTP_401_UNAUTHORIZED
@@ -21,6 +23,8 @@ import structlog
 logger = structlog.get_logger(__name__)
 
 User = get_user_model()
+
+DEFAULT_ATTRIBUTE_MAPPING_GROUPS = ["groups"]
 
 
 class AccountAdapter(DefaultAccountAdapter):
@@ -55,6 +59,16 @@ class AccountAdapter(DefaultAccountAdapter):
             return user
         except Exception:
             return None
+
+    def reauthenticate(self, user, password):
+        from allauth.mfa.utils import is_mfa_enabled
+
+        if is_mfa_enabled(user):
+            raise ValidationError(
+                _("Confirm with your second factor instead of your password."),
+                code="mfa_required",
+            )
+        return super().reauthenticate(user, password)
 
 
 class MFAAdapter(DefaultMFAAdapter):
@@ -109,6 +123,25 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
                         return email
         return None
 
+    @staticmethod
+    def _extract_claim_values(extra, claim_names):
+        if not claim_names:
+            return []
+        sources = [
+            extra,
+            extra.get("userinfo", {}) or {},
+            extra.get("id_token", {}) or {},
+        ]
+        values = []
+        for claim in claim_names:
+            for source in sources:
+                value = source.get(claim)
+                if isinstance(value, str) and value:
+                    values.append(value)
+                elif isinstance(value, list):
+                    values.extend(v for v in value if isinstance(v, str) and v)
+        return values
+
     def pre_social_login(self, request, sociallogin):
         extra = sociallogin.account.extra_data
         logger.debug(
@@ -161,6 +194,21 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
             idp_email_repr=repr(email_address),
             provider=sociallogin.account.provider,
         )
+
+        from global_settings.utils import ff_is_enabled
+        from .sso.models import SSOSettings
+        from .utils import sync_user_idp_groups
+
+        try:
+            sso_settings = SSOSettings.objects.get()
+        except SSOSettings.DoesNotExist:
+            sso_settings = None
+        jit_provisioning_active = (
+            bool(sso_settings)
+            and sso_settings.jit_provisioning_enabled
+            and ff_is_enabled("jit_provisioning")
+        )
+
         try:
             user = User.objects.get(email__iexact=email_address)
             logger.debug(
@@ -178,19 +226,44 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
                 user_id=str(user.id),
             )
         except User.DoesNotExist:
-            logger.error(
-                "pre_social_login: user not found",
+            if not jit_provisioning_active:
+                logger.error(
+                    "pre_social_login: user not found",
+                    provider=sociallogin.account.provider,
+                )
+                logger.debug(
+                    "pre_social_login: user not found - check DB for this email",
+                    idp_email=email_address,
+                    idp_email_repr=repr(email_address),
+                    provider=sociallogin.account.provider,
+                )
+                return Response(
+                    {"message": "User not found."}, status=HTTP_401_UNAUTHORIZED
+                )
+
+            user = User.objects.create_user(
+                email=email_address,
+                password=None,
+                first_name=sociallogin.user.first_name,
+                last_name=sociallogin.user.last_name,
+                user_groups=sso_settings.default_user_groups,
+                is_jit_provisioned=True,
+            )
+            logger.info(
+                "pre_social_login: user auto-provisioned via JIT",
                 provider=sociallogin.account.provider,
+                user_id=str(user.id),
             )
-            logger.debug(
-                "pre_social_login: user not found - check DB for this email",
-                idp_email=email_address,
-                idp_email_repr=repr(email_address),
-                provider=sociallogin.account.provider,
-            )
-            return Response(
-                {"message": "User not found."}, status=HTTP_401_UNAUTHORIZED
-            )
+            sociallogin.user = user
+            sociallogin.connect(request, user)
+
+        if jit_provisioning_active:
+            group_claims = (sso_settings.settings or {}).get(
+                "attribute_mapping", {}
+            ).get("groups") or DEFAULT_ATTRIBUTE_MAPPING_GROUPS
+            if group_claims:
+                group_names = self._extract_claim_values(extra, group_claims)
+                sync_user_idp_groups(user, group_names)
 
     def list_apps(self, request, provider=None, client_id=None):
         """SSOSettings's can be setup in the database, or, via

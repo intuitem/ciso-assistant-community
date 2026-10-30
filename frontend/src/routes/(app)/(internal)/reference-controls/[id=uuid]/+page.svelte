@@ -1,12 +1,16 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import DetailView from '$lib/components/DetailView/DetailView.svelte';
-	import { m } from '$paraglide/messages';
+	import DetailView from '#lib/components/DetailView/DetailView.svelte';
+	import { m } from '#paraglide/messages.js';
 	import { page } from '$app/state';
-	import type { ModalComponent, ModalSettings } from '@skeletonlabs/skeleton-svelte';
-	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
-	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
-	import List from '$lib/components/List/List.svelte';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
+	} from '#lib/components/Modals/stores.js';
+	import ConfirmModal from '#lib/components/Modals/ConfirmModal.svelte';
+	import List from '#lib/components/List/List.svelte';
 
 	interface Props {
 		data: PageData;

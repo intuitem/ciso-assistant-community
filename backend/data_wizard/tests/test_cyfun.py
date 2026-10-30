@@ -1,0 +1,446 @@
+import io
+from pathlib import Path
+
+import openpyxl
+import pytest
+
+from core.cyfun import CYFUN_2025_URN
+from core.models import (
+    ComplianceAssessment,
+    LoadedLibrary,
+    RequirementAssessment,
+    StoredLibrary,
+)
+from core.utils import EVERYONE_EDIT
+from data_wizard.cyfun_helpers import (
+    CYFUN_LIBRARY_URN,
+    FUNCTION_SHEETS,
+    process_cyfun_file,
+)
+
+URL = "/api/data-wizard/load-file/"
+
+HEADERS = [
+    "Category",
+    "Controls linked to the management aspects",
+    "Key Measure",
+    "Subcategory",
+    "Assurance level",
+    "Requirement",
+    "Documentation Score",
+    "Implementation Score",
+    "Subcategory Documentation Maturity Score",
+    "Subcategory Implementation Maturity Score",
+    "Category Documentation Maturity Score",
+    "Category Implementation Maturity Score",
+    "Comments and/or additional information",
+    "Assessor comments",
+]
+
+
+# The BASIC edition has no "Assurance level" column: requirement/scores/comments
+# all sit one column left, and the level marker is above "Documentation Score".
+HEADERS_BASIC = [h for h in HEADERS if h != "Assurance level"]
+
+
+def build_basic_workbook(rows_by_sheet: dict, level: str = "BASIC") -> bytes:
+    wb = openpyxl.Workbook()
+    wb.remove(wb.active)
+    for name in FUNCTION_SHEETS:
+        ws = wb.create_sheet(name)
+        ws.cell(1, 6, level)
+        for col, header in enumerate(HEADERS_BASIC, 1):
+            ws.cell(2, col, header)
+        for row_idx, row in enumerate(rows_by_sheet.get(name, []), 3):
+            for col, value in row.items():
+                ws.cell(row_idx, col, value)
+    buf = io.BytesIO()
+    wb.save(buf)
+    return buf.getvalue()
+
+
+def build_workbook(rows_by_sheet: dict, level: str = "ESSENTIAL") -> bytes:
+    wb = openpyxl.Workbook()
+    wb.remove(wb.active)
+    for name in FUNCTION_SHEETS:
+        ws = wb.create_sheet(name)
+        ws.cell(1, 7, level)
+        for col, header in enumerate(HEADERS, 1):
+            ws.cell(2, col, header)
+        for row_idx, row in enumerate(rows_by_sheet.get(name, []), 3):
+            for col, value in row.items():
+                ws.cell(row_idx, col, value)
+    buf = io.BytesIO()
+    wb.save(buf)
+    return buf.getvalue()
+
+
+class TestProcessCyfunFile:
+    def test_parses_scores_and_comments(self):
+        content = build_workbook(
+            {
+                "GOVERN": [
+                    {
+                        5: "Important",
+                        6: "GV.OC-01.1: The organisation's mission shall be established.",
+                        7: 3,
+                        8: 2,
+                        13: "our comment",
+                        14: "assessor note",
+                    }
+                ],
+                "PROTECT": [
+                    {
+                        5: "Essential",
+                        6: "PR.AA-01.1: Identities are managed.",
+                        7: 4,
+                        8: 4,
+                    }
+                ],
+            }
+        )
+        parsed = process_cyfun_file(content)
+        assert parsed["assurance_level"] == "essential"
+        assert len(parsed["records"]) == 2
+        record = parsed["records"][0]
+        assert record["ref_id"] == "GV.OC-01.1"
+        assert record["documentation_score"] == 3
+        assert record["implementation_score"] == 2
+        assert (
+            record["observations"] == "our comment\n\nAssessor comments: assessor note"
+        )
+
+    def test_na_maps_to_not_applicable(self):
+        content = build_workbook(
+            {"GOVERN": [{6: "GV.OC-02.1: Stakeholders.", 7: "N/A", 8: "N/A"}]}
+        )
+        record = process_cyfun_file(content)["records"][0]
+        assert record["compliance_result"] == "not_applicable"
+        assert "implementation_score" not in record
+        assert "documentation_score" not in record
+
+    def test_skips_non_requirement_rows(self):
+        content = build_workbook(
+            {
+                "GOVERN": [
+                    {6: "NO REQUIREMENT / Guidance to be considered"},
+                    {6: None},
+                    {6: "GV.RM-01.1: Objectives.", 7: 1, 8: 1},
+                ]
+            }
+        )
+        parsed = process_cyfun_file(content)
+        assert [r["ref_id"] for r in parsed["records"]] == ["GV.RM-01.1"]
+
+    def test_level_falls_back_to_rows_when_g1_missing(self):
+        content = build_workbook(
+            {
+                "GOVERN": [
+                    {5: "Basic", 6: "GV.OC-03.1: Legal requirements.", 7: 2, 8: 2},
+                    {5: "Important", 6: "GV.OC-01.1: Mission.", 7: 2, 8: 2},
+                ]
+            },
+            level="",
+        )
+        assert process_cyfun_file(content)["assurance_level"] == "important"
+
+    def test_parses_basic_edition_layout(self):
+        content = build_basic_workbook(
+            {
+                "GOVERN": [
+                    {
+                        5: "GV.OC-03.1: Legal requirements shall be identified.",
+                        6: 2,
+                        7: 3,
+                        12: "tracked in legal register",
+                        13: "verify register completeness",
+                    },
+                    {5: "GV.RM-03.1: Risk strategy.", 6: "N/A", 7: "N/A"},
+                ],
+                "IDENTIFY": [
+                    {
+                        5: "ID.AM-5.1: Unpadded ref as in the real BASIC tool.",
+                        6: 1,
+                        7: 2,
+                    }
+                ],
+            }
+        )
+        parsed = process_cyfun_file(content)
+        assert parsed["assurance_level"] == "basic"
+        assert len(parsed["records"]) == 3
+        assert parsed["records"][2]["ref_id"] == "ID.AM-05.1"
+        record = parsed["records"][0]
+        assert record["ref_id"] == "GV.OC-03.1"
+        assert record["documentation_score"] == 2
+        assert record["implementation_score"] == 3
+        assert (
+            record["observations"]
+            == "tracked in legal register\n\nAssessor comments: verify register completeness"
+        )
+        assert parsed["records"][1]["compliance_result"] == "not_applicable"
+
+    def test_parses_hyphenated_requirement_numbers(self):
+        """The BASIC and IMPORTANT tools write a few ids with a hyphen before the
+        requirement number (DE.CM-03-1); those rows are imported too."""
+        content = build_workbook(
+            {
+                "IDENTIFY": [{6: "ID.AM-03-2: Data flows are mapped.", 7: 2, 8: 3}],
+                "DETECT": [{6: "DE.CM-03-1: Personnel activity.", 7: 1, 8: 2}],
+            }
+        )
+        records = process_cyfun_file(content)["records"]
+        assert [r["ref_id"] for r in records] == ["ID.AM-03.2", "DE.CM-03.1"]
+
+    def test_rejects_workbook_with_unrecognized_sheet_headers(self):
+        content = build_workbook(
+            {"GOVERN": [{6: "GV.RM-01.1: Objectives.", 7: 1, 8: 1}]}
+        )
+        wb = openpyxl.load_workbook(io.BytesIO(content))
+        wb["PROTECT"].cell(2, 6, "Exigence")
+        buf = io.BytesIO()
+        wb.save(buf)
+        with pytest.raises(ValueError, match="UnrecognizedCyfunWorkbook"):
+            process_cyfun_file(buf.getvalue())
+
+    def test_rejects_2023_workbook(self):
+        wb = openpyxl.Workbook()
+        wb.active.title = "BASIC Details"
+        wb.create_sheet("Introduction")
+        buf = io.BytesIO()
+        wb.save(buf)
+        with pytest.raises(ValueError, match="CyFun2023WorkbookNotSupported"):
+            process_cyfun_file(buf.getvalue())
+
+    def test_rejects_unknown_workbook(self):
+        wb = openpyxl.Workbook()
+        wb.active.title = "Sheet1"
+        buf = io.BytesIO()
+        wb.save(buf)
+        with pytest.raises(ValueError, match="UnrecognizedCyfunWorkbook"):
+            process_cyfun_file(buf.getvalue())
+
+
+@pytest.fixture
+def cyfun_stored_library(db):
+    if not StoredLibrary.objects.filter(urn=CYFUN_LIBRARY_URN).exists():
+        path = (
+            Path(__file__).resolve().parents[2]
+            / "library"
+            / "libraries"
+            / "cyfun2025.yaml"
+        )
+        stored, error = StoredLibrary.store_library_content(path.read_bytes())
+        assert error is None
+        assert stored is not None
+
+
+@pytest.mark.django_db
+class TestCyfunEndpoint:
+    def _post(self, client, content: bytes, folder_id, name=None):
+        headers = {
+            "HTTP_X_MODEL_TYPE": "CyFunAssessment",
+            "HTTP_X_FOLDER_ID": str(folder_id),
+            "HTTP_CONTENT_DISPOSITION": "attachment; filename=cyfun.xlsx",
+            "content_type": "application/octet-stream",
+        }
+        if name:
+            headers["HTTP_X_NAME"] = name
+        return client.post(URL, data=content, **headers)
+
+    def test_import_creates_scored_assessment(
+        self, knox_admin_client, domain_folder, cyfun_stored_library
+    ):
+        content = build_workbook(
+            {
+                "GOVERN": [
+                    {
+                        5: "Important",
+                        6: "GV.OC-01.1: The organisation's mission shall be established.",
+                        7: 3,
+                        8: 2,
+                        13: "our comment",
+                    },
+                    {
+                        5: "Essential",
+                        6: "GV.OC-02.1: Stakeholders.",
+                        7: "N/A",
+                        8: "N/A",
+                    },
+                ]
+            }
+        )
+        resp = self._post(
+            knox_admin_client, content, domain_folder.id, name="CyFun test"
+        )
+        assert resp.status_code == 200, resp.json()
+        results = resp.json()["results"]
+        assert results["successful"] == 2
+        assert results["failed"] == 0
+
+        assert LoadedLibrary.objects.filter(urn=CYFUN_LIBRARY_URN).exists()
+        ca = ComplianceAssessment.objects.get(name="CyFun test")
+        assert ca.framework.urn == CYFUN_2025_URN
+        assert ca.selected_implementation_groups == ["E"]
+        assert ca.scoring_enabled
+        assert ca.show_documentation_score
+        # Visibility follows the library: respondents score too.
+        for field in ("score", "is_scored", "documentation_score"):
+            assert ca.field_visibility[field] == EVERYONE_EDIT
+        assert ca.min_score == 1 and ca.max_score == 5
+        assert ca.score_calculation_method == "average_of_averages"
+
+        scored = RequirementAssessment.objects.get(
+            compliance_assessment=ca, requirement__ref_id="GV.OC-01.1"
+        )
+        assert scored.documentation_score == 3
+        assert scored.score == 2
+        assert scored.is_scored
+        assert scored.observation == "our comment"
+
+        na = RequirementAssessment.objects.get(
+            compliance_assessment=ca, requirement__ref_id="GV.OC-02.1"
+        )
+        assert na.result == "not_applicable"
+
+    def test_outdated_loaded_library_is_reported(
+        self, knox_admin_client, domain_folder, cyfun_stored_library
+    ):
+        """An older loaded version lacks the scoring settings the import uses."""
+        assert StoredLibrary.objects.get(urn=CYFUN_LIBRARY_URN).load() is None
+        LoadedLibrary.objects.filter(urn=CYFUN_LIBRARY_URN).update(version=1)
+        content = build_workbook(
+            {"GOVERN": [{5: "Essential", 6: "GV.OC-01.1: Mission.", 7: 3, 8: 2}]}
+        )
+        resp = self._post(knox_admin_client, content, domain_folder.id)
+        assert resp.status_code == 200
+        results = resp.json()["results"]
+        assert results["errors"][0]["error"] == "CyfunLibraryOutdated"
+        assert not ComplianceAssessment.objects.filter(
+            framework__urn=CYFUN_2025_URN
+        ).exists()
+
+    def test_unknown_workbook_reports_error(self, knox_admin_client, domain_folder):
+        wb = openpyxl.Workbook()
+        buf = io.BytesIO()
+        wb.save(buf)
+        resp = self._post(knox_admin_client, buf.getvalue(), domain_folder.id)
+        assert resp.status_code == 200
+        results = resp.json()["results"]
+        assert results["failed"] == 1
+        assert results["errors"][0]["error"] == "UnrecognizedCyfunWorkbook"
+
+
+THREE_ROWS = {
+    "GOVERN": [
+        {5: "Essential", 6: "GV.OC-01.1: Mission.", 7: 3, 8: 2},
+        {5: "Essential", 6: "GV.OC-02.1: Stakeholders.", 7: 4, 8: 4},
+        {5: "Essential", 6: "GV.OC-03.1: Requirements.", 7: 2, 8: 3},
+    ]
+}
+
+
+@pytest.mark.django_db(transaction=True)
+class TestCyfunImportTransaction:
+    """With real commits: the import runs in one transaction, so the outcome
+    rules are evaluated once, and a failing row rolls back alone."""
+
+    _post = TestCyfunEndpoint._post
+
+    def test_outcomes_are_evaluated_once(
+        self, knox_admin_client, domain_folder, cyfun_stored_library, monkeypatch
+    ):
+        from core import cel_service
+
+        evaluated = []
+        evaluate = cel_service.evaluate_outcomes
+        monkeypatch.setattr(
+            cel_service,
+            "evaluate_outcomes",
+            lambda ca: evaluated.append(ca.pk) or evaluate(ca),
+        )
+        resp = self._post(
+            knox_admin_client, build_workbook(THREE_ROWS), domain_folder.id
+        )
+        assert resp.json()["results"]["successful"] == 3
+        assert len(evaluated) == 1
+
+    def test_a_failing_row_does_not_undo_the_others(
+        self, knox_admin_client, domain_folder, cyfun_stored_library, monkeypatch
+    ):
+        from core.serializers import RequirementAssessmentWriteSerializer
+
+        save = RequirementAssessmentWriteSerializer.save
+
+        def failing_save(serializer, **kwargs):
+            if serializer.instance.requirement.ref_id == "GV.OC-02.1":
+                # A real database error (NOT NULL), which aborts a PostgreSQL
+                # transaction unless the row has its own savepoint.
+                RequirementAssessment.objects.filter(pk=serializer.instance.pk).update(
+                    result=None
+                )
+            return save(serializer, **kwargs)
+
+        monkeypatch.setattr(RequirementAssessmentWriteSerializer, "save", failing_save)
+        resp = self._post(
+            knox_admin_client, build_workbook(THREE_ROWS), domain_folder.id, name="Rows"
+        )
+        results = resp.json()["results"]
+        assert (results["successful"], results["failed"]) == (2, 1)
+        ca = ComplianceAssessment.objects.get(name="Rows")
+        scores = dict(
+            RequirementAssessment.objects.filter(
+                compliance_assessment=ca,
+                requirement__ref_id__in=["GV.OC-01.1", "GV.OC-02.1", "GV.OC-03.1"],
+            ).values_list("requirement__ref_id", "score")
+        )
+        assert scores == {"GV.OC-01.1": 2, "GV.OC-02.1": None, "GV.OC-03.1": 3}
+
+
+@pytest.mark.django_db
+def test_controls_of_a_rolled_back_row_are_not_counted(
+    app_ready, domain_folder, cyfun_stored_library, monkeypatch
+):
+    """A row that fails rolls back the applied controls it created: they must
+    not be reported as created."""
+    from rest_framework.test import APIRequestFactory
+
+    from core.models import AppliedControl, Framework
+    from core.serializers import RequirementAssessmentWriteSerializer
+    from data_wizard.views import LoadFileView
+    from iam.models import User, UserGroup
+
+    admin = User.objects.create_superuser("rows@datawizard.test")
+    UserGroup.objects.get(name="BI-UG-ADM").user_set.add(admin)
+    assert StoredLibrary.objects.get(urn=CYFUN_LIBRARY_URN).load() is None
+    framework = Framework.objects.get(urn=CYFUN_2025_URN)
+    audit = ComplianceAssessment.objects.create(
+        name="Controls", framework=framework, folder=domain_folder
+    )
+    audit.create_requirement_assessments()
+
+    save = RequirementAssessmentWriteSerializer.save
+
+    def failing_save(serializer, **kwargs):
+        if serializer.instance.requirement.ref_id == "GV.OC-02.1":
+            raise RuntimeError("row failure")
+        return save(serializer, **kwargs)
+
+    monkeypatch.setattr(RequirementAssessmentWriteSerializer, "save", failing_save)
+    request = APIRequestFactory().post("/")
+    request.user = admin
+    results = {"successful": 0, "failed": 0, "errors": []}
+    LoadFileView()._reconcile_compliance_requirements(
+        request,
+        [
+            {"ref_id": "GV.OC-01.1", "assessable": True, "applied_controls": "Kept"},
+            {"ref_id": "GV.OC-02.1", "assessable": True, "applied_controls": "Dropped"},
+        ],
+        audit,
+        framework.id,
+        results,
+    )
+    assert (results["successful"], results["failed"]) == (1, 1)
+    assert results["details"]["applied_controls_created"] == 1
+    assert AppliedControl.objects.filter(name="Kept").exists()
+    assert not AppliedControl.objects.filter(name="Dropped").exists()
