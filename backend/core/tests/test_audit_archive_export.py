@@ -213,6 +213,12 @@ def _control_blocks(index: str) -> dict[str, str]:
     return {chunk.split('"')[1]: chunk for chunk in chunks}
 
 
+def _toc(index: str) -> str:
+    """Return the table of contents, from its opening tag to its closing one."""
+    start = index.index('<nav class="toc"')
+    return index[start : index.index("</nav>", start)]
+
+
 def _first_requirement(audit: ComplianceAssessment) -> RequirementAssessment:
     return RequirementAssessment.objects.filter(
         compliance_assessment=audit, requirement__assessable=True
@@ -290,24 +296,59 @@ class TestAuditArchiveReportReadability:
 
         assert block.index("Alpha") < block.index("Bravo") < block.index("Charlie")
 
-    def test_observation_and_control_description_are_rendered_as_markdown(
+    def test_observation_is_rendered_as_markdown(
         self, admin_client: APIClient, audit: ComplianceAssessment
     ) -> None:
         ra = _first_requirement(audit)
         ra.observation = "## Finding\n\nPolicy is **formalised**:\n\n- GPO enforced"
         ra.save()
-        control = AppliedControl.objects.create(
-            name="Policy", folder=audit.folder, description="Reviewed *yearly*"
-        )
-        ra.applied_controls.add(control)
 
         index = _index(admin_client, audit)
 
         assert "<h2>Finding</h2>" in index
         assert "<strong>formalised</strong>" in index
         assert "<li>GPO enforced</li>" in index
-        assert "<em>yearly</em>" in index
         assert "**formalised**" not in index
+
+    def test_applied_control_description_is_left_out(
+        self, admin_client: APIClient, audit: ComplianceAssessment
+    ) -> None:
+        control = AppliedControl.objects.create(
+            name="Policy", folder=audit.folder, description="Reviewed yearly by HR"
+        )
+        _first_requirement(audit).applied_controls.add(control)
+
+        index = _index(admin_client, audit)
+
+        assert "Policy" in index
+        assert "Reviewed yearly by HR" not in index
+
+    def test_table_of_contents_links_to_every_requirement(
+        self, admin_client: APIClient, audit: ComplianceAssessment
+    ) -> None:
+        index = _index(admin_client, audit)
+        toc = _toc(index)
+
+        assert "CAT-1" in toc
+        for ra in RequirementAssessment.objects.filter(
+            compliance_assessment=audit, requirement__assessable=True
+        ):
+            anchor = f"req-{ra.requirement.id}"
+            assert f'href="#{anchor}"' in toc
+            assert f'id="{anchor}"' in index
+
+    def test_table_of_contents_shows_the_result_and_status_of_each_requirement(
+        self, admin_client: APIClient, audit: ComplianceAssessment
+    ) -> None:
+        ra = _first_requirement(audit)
+        ra.result = RequirementAssessment.Result.NON_COMPLIANT
+        ra.status = RequirementAssessment.Status.IN_REVIEW
+        ra.save()
+
+        toc = _toc(_index(admin_client, audit))
+
+        assert "Non-compliant" in toc
+        assert "In review" in toc
 
     def test_requirement_description_is_rendered_as_markdown(
         self, admin_client: APIClient, audit: ComplianceAssessment

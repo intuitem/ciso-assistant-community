@@ -2,36 +2,27 @@
 
 <div class="node">
   {% if not node.requirement_node.assessable %}
-    <div class="font-semibold">{{ node.requirement_node.display_long }}</div>
+    <h2 class="section-title" id="req-{{ node.requirement_node.id }}">{{ node.requirement_node.display_long }}</h2>
     {% if node.bar_graph %}
       {% bar_graph assessments ancestors node.requirement_node %}
     {% endif %}
   {% else %}
-    <div
-      class="flex flex-col shadow-md border rounded-lg px-4 py-2 m-2 ml-0 items-center border-t-2 border-t-{{ node.result_color_class }} border-{{ node.result_color_class }}"
+    <article
+      class="requirement result-accent--{{ node.assessments.result }}"
+      id="req-{{ node.requirement_node.id }}"
     >
-      <div class="flex flex-row justify-between w-full">
-        <div class="font-semibold">{{ node.assessments.requirement }}</div>
-        <div class="flex flex-row space-x-2">
-          <div
-            class="text-center rounded-lg whitespace-nowrap px-2 py-1 text-{{ node.status_color_class }}"
-          >
-            {{ node.status }}
-          </div>
-          <div
-            class="text-white text-center rounded-lg whitespace-nowrap px-2 py-1 bg-{{ node.result_color_class }}"
-          >
-            {{ node.result }}
-          </div>
+      <header class="requirement-header">
+        <div class="requirement-title">{{ node.assessments.requirement }}</div>
+        <div class="badges">
+          <span class="badge status--{{ node.assessments.status }}">{{ node.status }}</span>
+          <span class="badge result--{{ node.assessments.result }}">{{ node.result }}</span>
           {% if node.assessments.is_scored %}
-          <div class="text-center whitespace-nowrap px-2 py-1">
-            {{ node.assessments.score }}
-          </div>
+            <span class="badge badge--score">{{ node.assessments.score }}</span>
           {% endif %}
         </div>
-      </div>
+      </header>
       {% if node.assessments.requirement.description %}
-        <div class="markdown text-left w-full">
+        <div class="markdown">
           {{ node.assessments.requirement.get_description_translated|render_markdown }}
         </div>
       {% endif %}
@@ -41,17 +32,17 @@
       answers_dict, whose order comes from an unordered Answer queryset.
       {% endcomment %}
       {% if node.questions_dict %}
-        <div class="text-left w-full">
+        <div class="answers">
           {% for key, question in node.questions_dict.items %}
                 {% with value=node.answers_dict|get_item:key %}
-                  <p class="font-semibold">{{ question.text }}</p>
+                  <p class="label">{{ question.text }}</p>
                   {% with answer=question|get_answers:value %}
                     {% if answer|is_string %}
-                      <span style="color: indigo">{{ answer }}</span>
+                      <span class="answer">{{ answer }}</span>
                     {% elif answer|is_list %}
-                      <span style="color: indigo">{{ answer|join:", " }}</span>
+                      <span class="answer">{{ answer|join:", " }}</span>
                     {% else %}
-                      <span style="color: gray"> {% trans "No answer" %}</span>
+                      <span class="muted">{% trans "No answer" %}</span>
                     {% endif %}
                   {% endwith %}
                 {% endwith %}
@@ -59,45 +50,48 @@
         </div>
       {% endif %}
       {% if node.assessments.observation %}
-          <div class="text-left w-full">
-            <p class="font-semibold">{% trans "Observation:" %}</p>
+          <div class="observation">
+            <p class="label">{% trans "Observation:" %}</p>
             <div class="markdown">{{ node.assessments.observation|render_markdown }}</div>
           </div>
       {% endif %}
-    </div>
+      {% if node.applied_controls %}
+        <table class="controls-table">
+          <thead>
+            <tr>
+              <th>{% trans "Applied controls" %}</th>
+              <th>{% trans "Status" %}</th>
+              <th>{% trans "Evidences" %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for control in node.applied_controls %}
+              <tr data-applied-control="{{ control.measure.name }}">
+                <td class="control-name">{{ control.measure.name }}</td>
+                <td>
+                  <span class="badge control--{{ control.measure.status }}">{{ control.measure.get_status_display }}</span>
+                </td>
+                <td>
+                  {% if control.evidences %}
+                    {% include "snippets/evidence_list.html" with evidences=control.evidences %}
+                  {% else %}
+                    <span class="muted">{% trans "No evidence" %}</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% endif %}
+      {% if node.direct_evidences %}
+        <div class="direct-evidences">
+          <p class="label">{% trans "Associated evidence:" %}</p>
+          {% include "snippets/evidence_list.html" with evidences=node.direct_evidences %}
+        </div>
+      {% endif %}
+    </article>
     {% if node.bar_graph %}
       {% bar_graph assessments ancestors node.requirement_node %}
-    {% endif %}
-    {% if node.direct_evidences %}
-      <div class="evidence-panel">
-        <div class="font-semibold">{% trans "Associated evidence:" %}</div>
-        {% include "snippets/evidence_list.html" with evidences=node.direct_evidences %}
-      </div>
-    {% endif %}
-    {% if node.applied_controls %}
-      <div class="evidence-panel">
-        <div class="font-semibold">{% trans "Applied controls:" %}</div>
-        {% for control in node.applied_controls %}
-          <div class="control" data-applied-control="{{ control.measure.name }}">
-            <div class="control-header">
-              <span class="control-name">{{ control.measure.name }}</span>
-              <span class="control-status control-status--{{ control.measure.status }}">
-                {{ control.measure.get_status_display }}
-              </span>
-            </div>
-            {% if control.measure.description %}
-              <div class="markdown control-description">
-                {{ control.measure.description|render_markdown }}
-              </div>
-            {% endif %}
-            {% if control.evidences %}
-              {% include "snippets/evidence_list.html" with evidences=control.evidences %}
-            {% else %}
-              <p class="no-evidence">{% trans "No evidence" %}</p>
-            {% endif %}
-          </div>
-        {% endfor %}
-      </div>
     {% endif %}
   {% endif %}
   <div id="children-of-{{ node.requirement_node.urn }}">

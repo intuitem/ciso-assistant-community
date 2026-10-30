@@ -1654,9 +1654,9 @@ msgstr "Observation"
 msgid "Associated evidence:"
 msgstr "Preuves associées :"
 
-#: core/templates/snippets/req_node.html:79
-msgid "Applied controls:"
-msgstr "Mesures appliquées :"
+#: core/templates/core/audit_report.html:168
+msgid "Table of contents"
+msgstr "Sommaire"
 
 #: core/templates/snippets/req_node.html:96
 msgid "No evidence"

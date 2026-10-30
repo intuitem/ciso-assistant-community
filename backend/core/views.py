@@ -17028,8 +17028,12 @@ def generate_html(
         """
         return sorted(objects, key=lambda obj: obj.name.casefold())
 
-    def generate_data_rec(requirement_node: RequirementNode):
+    toc = []
+
+    def generate_data_rec(requirement_node: RequirementNode, depth: int = 0):
         selected_evidences = []
+        toc_entry = {"node": requirement_node, "depth": depth, "assessment": None}
+        toc.append(toc_entry)
         children_nodes = [
             req for req in requirement_nodes if req.parent_urn == requirement_node.urn
         ]
@@ -17043,7 +17047,6 @@ def generate_html(
             "applied_controls": [],
             "result": "",
             "status": "",
-            "color_class": "",
         }
 
         node_data["bar_graph"] = True if children_nodes else False
@@ -17052,6 +17055,7 @@ def generate_html(
             assessment = assessment_by_urn.get(requirement_node.urn)
 
             if assessment:
+                toc_entry["assessment"] = assessment
                 node_data["assessments"] = assessment
                 node_data["answers_dict"] = answers_dict_by_urn.get(
                     requirement_node.urn, {}
@@ -17061,8 +17065,6 @@ def generate_html(
                 )
                 node_data["result"] = assessment.get_result_display()
                 node_data["status"] = assessment.get_status_display()
-                node_data["result_color_class"] = color_css_class(assessment.result)
-                node_data["status_color_class"] = color_css_class(assessment.status)
                 direct_evidences = sorted_by_name(assessment.evidences.all())
                 if direct_evidences:
                     selected_evidences += direct_evidences
@@ -17083,7 +17085,7 @@ def generate_html(
                     node_data["applied_controls"] = applied_controls
 
         for child_node in children_nodes:
-            child_data, child_evidences = generate_data_rec(child_node)
+            child_data, child_evidences = generate_data_rec(child_node, depth + 1)
             node_data["children"].append(child_data)
             selected_evidences += child_evidences
 
@@ -17103,6 +17105,7 @@ def generate_html(
     data = {
         "compliance_assessment": compliance_assessment,
         "top_level_nodes": top_level_nodes_data,
+        "toc": toc,
         "assessments": assessments,
         "ancestors": ancestors,
         "archive_names": archive_names,
