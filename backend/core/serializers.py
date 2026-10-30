@@ -399,6 +399,8 @@ class CollectionMembershipMixin(serializers.Serializer):
         )
         viewable = set(self._viewable_ids(GenericCollection))
         final = set(collections) | {c for c in current if c.pk not in viewable}
+        if final == current:
+            return list(final)
         changeable = set(
             RoleAssignment.get_changeable_object_ids(request.user, GenericCollection)
         )

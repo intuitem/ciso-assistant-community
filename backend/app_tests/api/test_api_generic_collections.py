@@ -5,6 +5,8 @@ from core.models import AppliedControl, Evidence, Policy
 from core.utils import RoleCodename
 from iam.models import Folder, Role, RoleAssignment, User
 from auditlog.models import LogEntry
+from django.contrib.auth.models import Permission
+from doc_management.serializers import ManagedDocumentWriteSerializer
 from django.contrib.contenttypes.models import ContentType
 
 from pmbok.models import CollectionItem, GenericCollection
@@ -171,6 +173,37 @@ class TestGenericCollectionItems:
         )
         assert res.status_code == 403
         assert not setup["collection"].items.exists()
+
+    def test_published_documents_are_visible_to_published_only_readers(self, setup):
+        domain, collection = setup["domain"], setup["collection"]
+        serializer = ManagedDocumentWriteSerializer(
+            data={"folder": str(domain.id), "locale": "en", "name": "Charter"},
+            context={},
+        )
+        serializer.is_valid(raise_exception=True)
+        document = serializer.save()
+        document.revisions.first().publish()
+        collection.set_items("document_containers", [document.container])
+
+        reader = User.objects.create_user("collections-reader@tests.com")
+        role = Role.objects.create(name="published-reader", folder=domain)
+        role.permissions.set(
+            Permission.objects.filter(
+                codename__in=[
+                    "view_folder",
+                    "view_genericcollection",
+                    "view_published_documentcontainer",
+                ]
+            )
+        )
+        RoleAssignment.objects.create(
+            user=reader, role=role, folder=domain, is_recursive=True
+        ).perimeter_folders.add(domain)
+        client = APIClient()
+        client.force_authenticate(reader)
+
+        data = client.get(f"{URL}{collection.id}/").json()
+        assert ids(data["document_containers"]) == {str(document.container.id)}
 
 
 @pytest.mark.django_db

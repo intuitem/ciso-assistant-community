@@ -6,6 +6,8 @@ from core.models import Terminology
 from core.serializers import BaseModelSerializer
 from core.serializer_fields import FieldsRelatedField, PathField
 from custom_fields.serializers import CustomFieldsSerializerMixin
+from doc_management.access import readable_ids
+from doc_management.models import DocumentContainer
 from pmbok.models import (
     GenericCollection,
     Accreditation,
@@ -18,7 +20,20 @@ from pmbok.models import (
 )
 
 
-class GenericCollectionReadSerializer(BaseModelSerializer):
+class CollectionItemsVisibilityMixin:
+    def _viewable_ids(self, model):
+        request = self.context.get("request")
+        if model is not DocumentContainer or request is None:
+            return super()._viewable_ids(model)
+        cache = self.context.setdefault("readable_ids", {})
+        if model not in cache:
+            cache[model] = readable_ids(request.user, model)
+        return cache[model]
+
+
+class GenericCollectionReadSerializer(
+    CollectionItemsVisibilityMixin, BaseModelSerializer
+):
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
     dependencies = FieldsRelatedField(many=True)
@@ -43,7 +58,9 @@ class GenericCollectionReadSerializer(BaseModelSerializer):
         return data
 
 
-class GenericCollectionWriteSerializer(BaseModelSerializer):
+class GenericCollectionWriteSerializer(
+    CollectionItemsVisibilityMixin, BaseModelSerializer
+):
     class Meta:
         model = GenericCollection
         fields = "__all__"
