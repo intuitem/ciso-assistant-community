@@ -186,7 +186,7 @@ For `OH.2.2`, the two questions go on separate lines **in the same cell**. If yo
 
 The `questions` column contains only the question text. CISO Assistant also needs to know the expected answer type (single choice, multiple choices, or free text) and, where applicable, the possible answers users can select. An [Answers](library-objects/answers.md) object defines both.
 
-Create two sheets named `answ_meta` and `answ_content`. We chose `answ` as their shared prefix, just as we chose `fwk` for the Framework sheets. These prefixes are names you choose, not fixed names required by CISO Assistant. 
+Create two sheets named `answ_meta` and `answ_content`. We chose `answ` as their shared prefix, just as we chose `fwk` for the Framework sheets. These prefixes are names you choose, not fixed names required by CISO Assistant.
 
 Fill `answ_meta` with one property per row:
 
@@ -398,11 +398,11 @@ The script creates a `.yaml` file in the current directory with the same base na
 
 Your workbook is now ready to import. If you generated a YAML version with the previous step, you can upload that instead.
 
-1. In CISO Assistant, open **Governance > Libraries**.
+1. In CISO Assistant, open **Catalog > Libraries**.
 2. Click on the <img src="../../.gitbook/assets/import_library_button.png" alt="Purple button with a white file in it and a &#x22;+&#x22; sign" data-size="line"> button.
 3. Select your Excel (`.xlsx`) workbook or `.yaml` library and upload it. Your library will be automatically loaded into your instance.
 
-![Libraries page with Governance > Libraries selected and the upload button highlighted in the upper right](../../.gitbook/assets/import_library.png)
+![Libraries page with Catalog > Libraries selected and the upload button highlighted in the upper right](../../.gitbook/assets/import_library.png)
 
 If the file is valid, CISO Assistant confirms the import. The OHSS Framework becomes available under **Catalog > Frameworks**. If the import reports an error, correct the source file and try again. See [Import a library](import-library.md) for more details.
 

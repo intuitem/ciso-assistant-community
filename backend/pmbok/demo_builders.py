@@ -817,13 +817,13 @@ class PmbokBuilder(DemoBuilder):
             collections[ref_id] = collection
             if not created:
                 continue
-            collection.compliance_assessments.set(self.audits(ctx, audit_refs))
+            collection.set_items("compliance_assessments", self.audits(ctx, audit_refs))
             if policy_count is None:
-                collection.policies.set(policies)
+                collection.set_items("policies", policies)
             elif policy_count:
-                collection.policies.set(policies[:policy_count])
+                collection.set_items("policies", policies[:policy_count])
             if with_risk and risk_assessment:
-                collection.risk_assessments.set([risk_assessment])
+                collection.set_items("risk_assessments", [risk_assessment])
             if dependencies:
                 collection.dependencies.set([collections[d] for d in dependencies])
         return collections
@@ -892,7 +892,9 @@ class PmbokBuilder(DemoBuilder):
         ):
             collection = projects[ref_id].linked_collection
             if collection is not None:
-                collection.compliance_assessments.set(self.audits(ctx, audit_refs))
+                collection.set_items(
+                    "compliance_assessments", self.audits(ctx, audit_refs)
+                )
         return projects
 
     def build_accreditations(self, ctx, collections):

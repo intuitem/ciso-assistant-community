@@ -44,6 +44,7 @@ from django.db.models import (
     Prefetch,
 )
 from django.db.models.functions import Coalesce, Concat
+from django.contrib.contenttypes.models import ContentType
 
 from collections import defaultdict, deque
 import pytz
@@ -135,6 +136,7 @@ from django.utils.functional import Promise
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from iam.models import Folder, IdPGroup, Permission, RoleAssignment, User, UserGroup
+from pmbok.models import CollectionItem, GenericCollection
 from core.domain_quality_checks import (
     BLOCKS as DOMAIN_QUALITY_BLOCKS,
     domain_quality_checks,
@@ -797,6 +799,7 @@ class GenericFilterSet(df.FilterSet):
         pass
 
     id = UUIDInFilter(field_name="id", lookup_expr="in")
+    genericcollection = UUIDInFilter(method="filter_genericcollection")
 
     # Range lookups every date column gets, so listing a date in filterset_fields is
     # enough to make it filterable from the table UI. On a DateTimeField the `date`
@@ -836,6 +839,29 @@ class GenericFilterSet(df.FilterSet):
                 continue
             fields[name] = list(dict.fromkeys([*fields.get(name, []), *extra]))
         return fields
+
+    def filter_genericcollection(self, queryset, name, value):
+        allowed = next(
+            (
+                item_queryset
+                for item_queryset in GenericCollection.ITEM_TYPES.values()
+                if item_queryset.model is queryset.model
+            ),
+            None,
+        )
+        if allowed is None:
+            return queryset.none()
+        items = CollectionItem.objects.filter(
+            collection_id__in=value,
+            content_type=ContentType.objects.get_for_model(queryset.model),
+        ).filter(
+            collection_id__in=RoleAssignment.get_viewable_object_ids(
+                self.request.user, GenericCollection
+            )
+        )
+        return queryset.filter(pk__in=items.values("object_id")).filter(
+            pk__in=allowed.values("pk")
+        )
 
     @classmethod
     def filter_for_lookup(cls, field, lookup_type):
@@ -4531,7 +4557,6 @@ class RiskAssessmentFilterSet(GenericFilterSet):
             "ref_id": ["exact"],
             "authors": ["exact"],
             "reviewers": ["exact"],
-            "genericcollection": ["exact"],
             "due_date": ["exact", "year", "month"],
             "eta": ["exact"],
             "filtering_labels": ["exact"],
@@ -5852,6 +5877,9 @@ class AppliedControlFilterSet(GenericFilterSet):
     )
     # Nullable choice filters that support filtering for unset values using "--"
     category = NullableChoiceFilter(choices=AppliedControl.CATEGORY)
+    exclude_category = df.MultipleChoiceFilter(
+        field_name="category", choices=AppliedControl.CATEGORY, exclude=True
+    )
     csf_function = NullableChoiceFilter(choices=AppliedControl.CSF_FUNCTION)
     priority = NullableChoiceFilter(choices=AppliedControl.PRIORITY)
     effort = NullableChoiceFilter(choices=AppliedControl.EFFORT)
@@ -5992,7 +6020,6 @@ class AppliedControlFilterSet(GenericFilterSet):
             "expiry_date": ["exact"],
             "ref_id": ["exact"],
             "processings": ["exact"],
-            "genericcollection": ["exact"],
         }
 
 
@@ -7899,7 +7926,6 @@ class PolicyViewSet(AppliedControlViewSet):
         "risk_scenarios",
         "requirement_assessments",
         "evidences",
-        "genericcollection",
     ]
     search_fields = ["name", "description", "ref_id"]
 
@@ -10866,6 +10892,13 @@ class FrameworkViewSet(BaseModelViewSet):
             has_compliance_assessments_flag=Exists(
                 ComplianceAssessment.objects.filter(framework=OuterRef("pk"))
             ),
+            has_required_evidence=Exists(
+                RequirementNode.objects.filter(
+                    framework=OuterRef("pk"),
+                    assessable=True,
+                    evidence_required=True,
+                )
+            ),
             scale_bound_flag=ExpressionWrapper(
                 Framework.scale_bound_q(OuterRef("pk")),
                 output_field=models.BooleanField(),
@@ -11617,7 +11650,6 @@ class EvidenceFilterSet(GenericFilterSet):
             "findings",
             "findings_assessments",
             "task_templates",
-            "genericcollection",
             "expiry_date",
             "contracts",
             "status",
@@ -12970,7 +13002,6 @@ class ComplianceAssessmentFilterSet(GenericFilterSet):
             "evidences",
             "authors",
             "reviewers",
-            "genericcollection",
             "filtering_labels",
             "due_date",
             "eta",
@@ -14373,14 +14404,22 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
                 result=RequirementAssessment.Result.NOT_APPLICABLE,
             )
             if instance.scoring_enabled:
-                assessable_ras.update(is_scored=True)
+                # Question RAs are scored only where the recompute committed a
+                # score (a baseline copy), as when scoring is turned on.
+                manual_ras = assessable_ras.exclude(
+                    requirement__questions__isnull=False
+                )
+                question_ras = assessable_ras.filter(
+                    requirement__questions__isnull=False
+                )
+                manual_ras.update(is_scored=True)
+                question_ras.filter(score__isnull=False).update(is_scored=True)
+                question_ras.filter(score__isnull=True).update(is_scored=False)
                 # Seed missing scores at the RA's resolved min (Node override
                 # if present, CA min otherwise) so overridden ranges like
                 # 2..5 don't start below their valid floor.
                 ras_to_init = list(
-                    assessable_ras.filter(score__isnull=True).select_related(
-                        "requirement"
-                    )
+                    manual_ras.filter(score__isnull=True).select_related("requirement")
                 )
                 ca_min = instance.min_score if instance.min_score is not None else 0
                 for ra in ras_to_init:
@@ -17492,7 +17531,6 @@ class SecurityExceptionViewSet(ExportMixin, BaseModelViewSet):
         "folder": ["exact"],
         "severity": ["exact"],
         "status": ["exact"],
-        "genericcollection": ["exact"],
         "expiration_date": ["exact"],
         "created_at": ["gte", "lt"],
         "updated_at": ["gte", "lt"],
@@ -17658,7 +17696,6 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
         "evidences",
         "compliance_assessment",
         "filtering_labels",
-        "genericcollection",
         "reported_at",
     ]
     search_fields = ["name", "description", "ref_id"]
@@ -20392,6 +20429,15 @@ class ClassificationLevelViewSet(BaseModelViewSet):
     ordering = ["object_classification", "rank"]
 
 
+def _ra_ids_with_usable_evidence(ra_ids) -> set[str]:
+    return {
+        str(ra_id)
+        for ra_id in EvidenceRevision.current_with_content()
+        .filter(evidence__requirement_assessments__in=ra_ids)
+        .values_list("evidence__requirement_assessments", flat=True)
+    }
+
+
 class RequirementAssignmentViewSet(BaseModelViewSet):
     """
     API endpoint that allows requirement assignments to be viewed or edited.
@@ -20488,17 +20534,20 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
     # Valid transitions: (from_status, to_status) → config
     # reviewer_only: respondents are forbidden
     # actor_only: only assigned actors can perform this transition
-    # check_completion: all assessable requirements must be assessed
+    # check_evidence: every visible requirement flagged `evidence_required` must
+    #                 carry an evidence holding a file or a link
     # observation: "clear" removes it, "optional" keeps if provided, "required" must be provided
     TRANSITIONS = {
         ("draft", "in_progress"): {"reviewer_only": True},
         ("in_progress", "submitted"): {
             "actor_only": True,
             "observation": "clear",
+            "check_evidence": True,
         },
         ("changes_requested", "submitted"): {
             "actor_only": True,
             "observation": "clear",
+            "check_evidence": True,
         },
         ("submitted", "closed"): {
             "reviewer_only": True,
@@ -20576,6 +20625,17 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
                     status=status.HTTP_403_FORBIDDEN,
                 )
 
+        if config.get("check_evidence"):
+            missing_evidence = self._requirements_missing_evidence(assignment)
+            if missing_evidence:
+                return Response(
+                    {
+                        "error": "evidenceRequired",
+                        "missing_evidence": missing_evidence,
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
         # Handle reviewer_observation (stored as event_notes)
         obs_rule = config.get("observation")
         observation = request.data.get("reviewer_observation")
@@ -20612,6 +20672,32 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
 
         return Response({"status": target})
 
+    @staticmethod
+    def _requirements_missing_evidence(assignment):
+        """Visible assigned requirements that ask for an evidence and hold none.
+
+        An evidence with no file and no link is an empty shell, so it does not
+        satisfy the obligation.
+        """
+        flagged = [
+            ra
+            for ra in assignment.get_visible_requirement_assessments(lightweight=True)
+            if ra.requirement.assessable and ra.requirement.evidence_required
+        ]
+        if not flagged:
+            return []
+        with_evidence = _ra_ids_with_usable_evidence([ra.id for ra in flagged])
+        return [
+            {
+                "id": str(ra.id),
+                "urn": ra.requirement.urn,
+                "ref_id": ra.requirement.ref_id,
+                "name": ra.requirement.safe_display_str,
+            }
+            for ra in flagged
+            if str(ra.id) not in with_evidence
+        ]
+
     @action(detail=True, methods=["get"])
     def requirements_list(self, request, pk=None):
         """Returns the scoped requirements list for this assignment.
@@ -20629,29 +20715,12 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
         ).exists()
         viewer_role = "respondent" if is_assigned_actor else "auditor"
 
-        assigned_ra_ids = set(
-            assignment.requirement_assessments.values_list("id", flat=True)
-        )
-
-        requirement_assessments_objects = list(
-            compliance_assessment.get_requirement_assessments(
-                include_non_assessable=True
-            )
-        )
-        requirement_assessments_objects = [
-            ra for ra in requirement_assessments_objects if ra.id in assigned_ra_ids
-        ]
-
-        # CEL visibility filtering: exclude requirements hidden by visibility_expression
         from core.cel_service import build_cel_context
 
         _ctx, hidden_urns = build_cel_context(compliance_assessment)
-        if hidden_urns:
-            requirement_assessments_objects = [
-                ra
-                for ra in requirement_assessments_objects
-                if ra.requirement.urn not in hidden_urns
-            ]
+        requirement_assessments_objects = (
+            assignment.get_visible_requirement_assessments(hidden_urns=hidden_urns)
+        )
 
         requirements_objects = list(
             RequirementNode.objects.filter(framework=compliance_assessment.framework)
@@ -20702,6 +20771,12 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
             total_visible_questions += visible
             total_answered_questions += answered
 
+        # Same verdict the submission check applies, so the respondent cannot be
+        # shown a satisfied requirement that submission then refuses.
+        ra_ids_with_usable_evidence = _ra_ids_with_usable_evidence(
+            [ra.id for ra in requirement_assessments_objects]
+        )
+
         for ra_data in requirement_assessments:
             ra_id = str(ra_data["id"])
             if ra_id in question_counts:
@@ -20711,6 +20786,7 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
                 ra_data["answered_questions"] = question_counts[ra_id][
                     "answered_questions"
                 ]
+            ra_data["has_usable_evidence"] = ra_id in ra_ids_with_usable_evidence
 
         return Response(
             {
