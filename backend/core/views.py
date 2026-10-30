@@ -136,7 +136,15 @@ from django.template.loader import render_to_string
 from django.utils.functional import Promise
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from iam.models import Folder, IdPGroup, Permission, RoleAssignment, User, UserGroup
+from iam.models import (
+    Folder,
+    IdPGroup,
+    Permission,
+    RoleAssignment,
+    User,
+    UserGroup,
+    row_view_codenames,
+)
 from pmbok.models import CollectionItem, GenericCollection
 from core.domain_quality_checks import (
     BLOCKS as DOMAIN_QUALITY_BLOCKS,
@@ -200,7 +208,7 @@ from core.pagination import CustomLimitOffsetPagination
 from core.serializers import (
     USER_ACCOUNT_FIELDS,
     ComplianceAssessmentReadSerializer,
-    user_admin_folder_ids,
+    user_account_folder_ids,
 )
 from core.utils import (
     build_answers_dict,
@@ -1624,7 +1632,7 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
 
         view_all_role_assignments = role_assignments.filter(
             perimeter_folders=root_folder,
-            role__permissions__codename=perm_codename,
+            role__permissions__codename__in=row_view_codenames(perm_codename),
             is_recursive=True,
         )
         can_user_view_all = view_all_role_assignments.exists()
@@ -1910,12 +1918,15 @@ class BaseModelViewSet(SparseFieldsMixin, AutocompleteMixin, viewsets.ModelViewS
         folder = Folder.get_folder(obj)
         if folder is None:
             return False
-        try:
-            perm = Permission.objects.get(codename=f"view_{obj._meta.model_name}")
-        except Permission.DoesNotExist:
+        perms = list(
+            Permission.objects.filter(
+                codename__in=row_view_codenames(f"view_{obj._meta.model_name}")
+            )
+        )
+        if not perms:
             return False
         return RoleAssignment.is_access_allowed(
-            user=self.request.user, perm=perm, folder=folder
+            user=self.request.user, perm=perms, folder=folder
         )
 
     def destroy(self, request: Request, *args, **kwargs) -> Response:
@@ -8622,7 +8633,7 @@ class UserFilter(GenericFilterSet):
     exclude_user_groups = df.UUIDFilter(method="filter_exclude_user_groups")
 
     def filter_queryset(self, queryset):
-        # Account fields are only serialized to the user's administrators (see
+        # Account fields are only serialized to who may see them (see
         # USER_ACCOUNT_FIELDS); matching on them for anyone else would give the
         # values away, so while any of their lookups is set, other rows never match.
         if any(
@@ -8631,7 +8642,7 @@ class UserFilter(GenericFilterSet):
             if f.field_name in USER_ACCOUNT_FIELDS
         ):
             queryset = queryset.filter(
-                Q(folder_id__in=user_admin_folder_ids(self.request))
+                Q(folder_id__in=user_account_folder_ids(self.request))
                 | Q(pk=self.request.user.pk)
             )
         return super().filter_queryset(queryset)
@@ -9003,7 +9014,7 @@ class UserViewSet(BaseModelViewSet):
     autocomplete_fields = ["first_name", "last_name", "email", "is_active"]
 
     # Sorting on an account field (or listing superusers first) gives its values
-    # away, so it is only offered to whoever administers every listed user.
+    # away, so it is only offered to whoever may see every listed user's account.
     DIRECTORY_ORDERING_FIELDS = [
         "id",
         "created_at",
@@ -9021,28 +9032,30 @@ class UserViewSet(BaseModelViewSet):
         # Checked against the rows about to be listed. Single-object actions don't
         # sort, so they skip the query and get the directory ordering.
         if not self.detail:
-            self._all_users_administered = (
-                not queryset.exclude(folder_id__in=user_admin_folder_ids(self.request))
+            self._all_accounts_visible = (
+                not queryset.exclude(
+                    folder_id__in=user_account_folder_ids(self.request)
+                )
                 .exclude(pk=self.request.user.pk)
                 .exists()
             )
         return super().filter_queryset(queryset)
 
-    def _administers_all_users(self) -> bool:
+    def _sees_every_account(self) -> bool:
         if getattr(self, "request", None) is None:
             # Schema generation introspects the ordering without a request.
             return True
-        return getattr(self, "_all_users_administered", False)
+        return getattr(self, "_all_accounts_visible", False)
 
     @property
     def ordering(self):
-        if self._administers_all_users():
+        if self._sees_every_account():
             return ["-is_active", "-is_superuser", "email", "id"]
         return ["-is_active", "email", "id"]
 
     @property
     def ordering_fields(self):
-        if self._administers_all_users():
+        if self._sees_every_account():
             return "__all__"
         return self.DIRECTORY_ORDERING_FIELDS
 

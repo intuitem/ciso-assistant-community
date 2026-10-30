@@ -2545,9 +2545,10 @@ class TeamReadSerializer(BaseModelSerializer):
         ]
 
 
-# Account and security state of a user. `view_user` is ambient through the root
-# folder's default role, so every domain member can list users; these fields are
-# for the user themself and for whoever holds `change_user` on the user's folder.
+# Account and security state of a user. Every domain member lists users through
+# `view_user_restricted`, ambient on the root folder; these fields are for the user
+# themself and for whoever holds `view_user` or `change_user` on the user's folder
+# (see the restricted-view-permissions ADR).
 USER_ACCOUNT_FIELDS = (
     "is_superuser",
     "has_mfa_enabled",
@@ -2559,19 +2560,23 @@ USER_ACCOUNT_FIELDS = (
 )
 
 
-def user_admin_folder_ids(request) -> set:
-    """Folders where the requester holds `change_user`, looked up once per request."""
-    folder_ids = getattr(request, "_user_admin_folder_ids", None)
+def user_account_folder_ids(request) -> set:
+    """Folders where the requester may see users' account fields, looked up once
+    per request. `view_user` is passed as a permission, not as a `("view", User)`
+    pair, so that its restricted counterpart doesn't count."""
+    folder_ids = getattr(request, "_user_account_folder_ids", None)
     if folder_ids is None:
         folder_ids = set(
-            RoleAssignment.get_allowed_folder_ids(request.user, ("change", User))
-        )
-        request._user_admin_folder_ids = folder_ids
+            RoleAssignment.get_allowed_folder_ids(
+                request.user, Permission.objects.get(codename="view_user")
+            )
+        ) | set(RoleAssignment.get_allowed_folder_ids(request.user, ("change", User)))
+        request._user_account_folder_ids = folder_ids
     return folder_ids
 
 
 def can_see_user_account(request, user: User) -> bool:
-    return user.pk == request.user.pk or user.folder_id in user_admin_folder_ids(
+    return user.pk == request.user.pk or user.folder_id in user_account_folder_ids(
         request
     )
 
