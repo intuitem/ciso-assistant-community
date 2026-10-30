@@ -63,6 +63,7 @@ class AccreditationViewSet(BaseModelViewSet):
         "checklist",
         "filtering_labels",
         "expiry_date",
+        "asset",
     ]
     search_fields = ["name", "description", "ref_id", "authority", "authority_name"]
     ordering = ["created_at"]

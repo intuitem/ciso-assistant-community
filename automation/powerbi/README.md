@@ -163,6 +163,13 @@ it is correct against any ceiling. A report built on an older connector picks
 up the fix as soon as the connector file is replaced; nothing in the report
 itself has to change.
 
+**Upgrade to 1.2.0 when your instance returns the framework of a requirement
+node as an object.** The requirement-node API now returns `framework` as
+`{id, str}`, like every other relation. Versions up to 1.1.0 read it as a plain
+id, so against such an instance `RequirementNodes.framework_id` comes back as
+errors. 1.2.0 reads `framework.id` into the same `framework_id` column and adds
+`framework_name`; reports keep working once the connector file is replaced.
+
 ## Modeling tips
 
 - Relate facts to dimensions on the `*_id` columns

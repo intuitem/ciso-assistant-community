@@ -70,10 +70,14 @@
 		const items = data?.results ?? data;
 
 		if (Array.isArray(items)) {
-			return items.map((item: any) => ({
-				label: item.label || item.str || item.name || String(item.value ?? item.id),
-				value: String(item.value ?? item.id)
-			}));
+			return items.map((item: any) => {
+				const label = item.label || item.str || item.name || String(item.value ?? item.id);
+				return {
+					// Tree items (asset classes) share names across branches: show the parent.
+					label: item.parent?.str ? `${item.parent.str} / ${label}` : label,
+					value: String(item.value ?? item.id)
+				};
+			});
 		}
 		// Handle dict responses (e.g. { "open": "Open", "closed": "Closed" })
 		return Object.entries(items).map(([key, val]) => ({

@@ -72,6 +72,16 @@
 	nullable={true}
 	label={m.linkedCollection()}
 />
+<AutocompleteSelect
+	{form}
+	optionsEndpoint="assets"
+	optionsExtraFields={[['folder', 'str']]}
+	field="asset"
+	cacheLock={cacheLocks['asset']}
+	bind:cachedValue={formDataCache['asset']}
+	nullable={true}
+	label={m.asset()}
+/>
 
 <AutocompleteSelect
 	{form}

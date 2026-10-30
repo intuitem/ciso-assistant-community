@@ -168,6 +168,16 @@ class Accreditation(NameDescriptionFolderMixin, FilteringLabelMixin):
         help_text="Evidence documents for the accreditation decision (e.g. minutes/PV)",
     )
     observation = models.TextField(verbose_name="Observation", blank=True, null=True)
+    # A homologation covers one system; a wide scope is a parent asset.
+    asset = models.ForeignKey(
+        "core.Asset",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="accreditations",
+        verbose_name=_("Asset"),
+        help_text="The system this accreditation covers",
+    )
 
 
 class Project(NameDescriptionFolderMixin, FilteringLabelMixin, CustomFieldsMixin):

@@ -254,6 +254,7 @@ from global_settings.utils import (
 
 from core import commitment
 from core import mailer
+from core import risk_bridge
 
 import structlog
 
@@ -3019,6 +3020,14 @@ class AssetViewSet(IntegrationLinkViewSetMixin, ExportMixin, BaseModelViewSet):
             )
             if content.get("value") is not None and content.get("value") > 0
         ]
+
+    @action(detail=True, methods=["get"], url_path="assessment-journey")
+    def assessment_journey(self, request, pk):
+        """Framing response, risk assessment, audit and homologation cycle written
+        for this asset by form-driven assessment."""
+        from core.quick_form_risk_targets import journey_of
+
+        return Response(journey_of(self.get_object(), request.user))
 
     @action(detail=False, name="Lightweight autocomplete search")
     def autocomplete(self, request):
@@ -8332,6 +8341,175 @@ class RiskScenarioViewSet(ExportMixin, BaseModelViewSet):
             {"changes": AppliedControlReadSerializer(changes, many=True).data}
         )
 
+    def _related_requirement_assessments(self, scenario):
+        visible = RoleAssignment.get_viewable_object_ids(
+            self.request.user, RequirementAssessment
+        )
+        return risk_bridge.related_requirement_assessments(scenario).filter(
+            id__in=visible
+        )
+
+    def _visible_suggested_controls(self, scenario):
+        visible = set(
+            RoleAssignment.get_viewable_object_ids(self.request.user, AppliedControl)
+        )
+        return [
+            s
+            for s in risk_bridge.suggested_controls(
+                scenario, self._related_requirement_assessments(scenario)
+            )
+            if s["control"].id in visible
+        ]
+
+    @action(detail=True, methods=["get"], url_path="related-requirements")
+    def related_requirements(self, request, pk):
+        scenario = self.get_object()
+        scenario_threats = set(scenario.threats.values_list("id", flat=True))
+        requirement_assessments = (
+            self._related_requirement_assessments(scenario)
+            .select_related("requirement", "compliance_assessment")
+            .prefetch_related("requirement__threats", "applied_controls")
+            .order_by("compliance_assessment__name", "requirement__order_id")
+        )
+        return Response(
+            {
+                "results": [
+                    {
+                        "id": ra.id,
+                        "requirement": ra.requirement.display_short,
+                        "description": ra.requirement.get_description_translated,
+                        "result": ra.result,
+                        "status": ra.status,
+                        "compliance_assessment": {
+                            "id": ra.compliance_assessment.id,
+                            "str": str(ra.compliance_assessment),
+                        },
+                        "threats": [
+                            {"id": t.id, "str": t.display_short}
+                            for t in ra.requirement.threats.all()
+                            if t.id in scenario_threats
+                        ],
+                        "applied_controls": [
+                            {"id": c.id, "str": str(c)}
+                            for c in ra.applied_controls.all()
+                        ],
+                    }
+                    for ra in requirement_assessments
+                ]
+            }
+        )
+
+    @action(detail=True, methods=["get", "post"], url_path="suggested-likelihood")
+    def suggested_likelihood(self, request, pk):
+        """Likelihoods the related audits compute for this scenario's threats;
+        POST {"audit": id} applies that audit's as the current probability."""
+        scenario = self.get_object()
+        suggestions = risk_bridge.likelihood_suggestions(
+            scenario, self._related_requirement_assessments(scenario)
+        )
+        if request.method == "POST":
+            if not RoleAssignment.is_access_allowed(
+                user=request.user,
+                perm=Permission.objects.get(codename="change_riskscenario"),
+                folder=Folder.get_folder(scenario),
+            ):
+                return Response(status=status.HTTP_403_FORBIDDEN)
+            chosen = next(
+                (
+                    s
+                    for s in suggestions
+                    if str(s["audit"].pk) == str(request.data.get("audit"))
+                ),
+                None,
+            )
+            if chosen is None:
+                return Response(
+                    {"error": "likelihoodNotSuggested"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            scenario.current_proba = chosen["probability"]
+            scenario.save()
+        return Response(
+            {
+                "current": scenario.current_proba,
+                "results": [
+                    {
+                        "audit": {"id": s["audit"].pk, "str": str(s["audit"])},
+                        "threat": {"id": s["threat"].pk, "str": str(s["threat"])},
+                        "probability": s["probability"],
+                        "name": s["name"],
+                    }
+                    for s in suggestions
+                ],
+            }
+        )
+
+    @action(detail=True, methods=["get", "post"], url_path="suggested-controls")
+    def suggested_controls(self, request, pk):
+        scenario = self.get_object()
+        if request.method == "POST":
+            if not RoleAssignment.is_access_allowed(
+                user=request.user,
+                perm=Permission.objects.get(codename="change_riskscenario"),
+                folder=Folder.get_folder(scenario),
+            ):
+                return Response(status=status.HTTP_403_FORBIDDEN)
+            # Only controls currently suggested may be confirmed, each where it was
+            # suggested to land unless the request moves it.
+            suggested = {
+                str(s["control"].id): s
+                for s in self._visible_suggested_controls(scenario)
+            }
+            confirmed = request.data.get("controls")
+            if not isinstance(confirmed, list):
+                return Response(
+                    {"error": "controlsMustBeAList"}, status=status.HTTP_400_BAD_REQUEST
+                )
+            for item in confirmed:
+                if not isinstance(item, dict) or str(item.get("id")) not in suggested:
+                    return Response(
+                        {"error": "controlNotSuggested"},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                target = item.get("target", suggested[str(item["id"])]["target"])
+                if target not in ("existing", "planned"):
+                    return Response(
+                        {"error": "invalidTarget"}, status=status.HTTP_400_BAD_REQUEST
+                    )
+            for item in confirmed:
+                control = suggested[str(item["id"])]["control"]
+                target = item.get("target", suggested[str(item["id"])]["target"])
+                if target == "existing":
+                    scenario.existing_applied_controls.add(control)
+                else:
+                    scenario.applied_controls.add(control)
+        return Response(
+            {
+                "results": [
+                    {
+                        "control": {
+                            "id": s["control"].id,
+                            "str": str(s["control"]),
+                            "status": s["control"].status,
+                        },
+                        "target": s["target"],
+                        "via": [
+                            {
+                                "id": ra.id,
+                                "requirement": ra.requirement.display_short,
+                                "compliance_assessment": {
+                                    "id": ra.compliance_assessment_id,
+                                    "str": str(ra.compliance_assessment),
+                                },
+                            }
+                            for ra in s["via"]
+                        ],
+                    }
+                    for s in self._visible_suggested_controls(scenario)
+                ]
+            }
+        )
+
 
 class RiskAcceptanceFilterSet(GenericFilterSet):
     folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
@@ -11396,7 +11574,7 @@ class RequirementViewSet(BaseModelViewSet):
     """
 
     model = RequirementNode
-    filterset_fields = ["framework", "urn"]
+    filterset_fields = ["framework", "urn", "threats"]
     search_fields = ["name"]
 
     def list(self, request, *args, **kwargs):
@@ -15912,6 +16090,36 @@ class ComplianceAssessmentViewSet(XRaysMixin, BaseModelViewSet):
         ]
 
         return Response({"data": formatted_data})
+
+    @action(detail=True, methods=["get"], url_path="related-scenarios")
+    def related_scenarios(self, request, pk=None):
+        """Risk scenarios each requirement assessment bears on (shared threat,
+        same asset), keyed by requirement assessment id."""
+        compliance_assessment = self.get_object()
+        visible = RiskScenario.objects.filter(
+            id__in=RoleAssignment.get_viewable_object_ids(request.user, RiskScenario)
+        )
+        by_ra = risk_bridge.related_scenarios_by_requirement_assessment(
+            compliance_assessment, scenarios=visible
+        )
+        return Response(
+            {
+                str(ra_id): [
+                    {
+                        "id": s.id,
+                        "ref_id": s.ref_id,
+                        "name": s.name,
+                        "risk_assessment": {
+                            "id": s.risk_assessment_id,
+                            "str": str(s.risk_assessment),
+                        },
+                        "current_level": s.get_current_risk(),
+                    }
+                    for s in scenarios
+                ]
+                for ra_id, scenarios in by_ra.items()
+            }
+        )
 
     @action(detail=True, methods=["get"])
     def threats_metrics(self, request, pk=None):

@@ -54,9 +54,17 @@
 			ratings.flatMap((r) => [r.ref_id, ...r.points.map((p: any) => `${r.ref_id}_${p.stage}`)])
 		)
 	);
+	// `internal` number rules are steps towards other rules, not results to show.
+	const internalValueNames = $derived(
+		new Set(
+			((content.quick_form?.outcomes_definition ?? []) as any[])
+				.filter((r) => r.internal)
+				.map((r) => r.ref_id)
+		)
+	);
 	const numberValues = $derived(
 		Object.entries((content.computed_values ?? {}) as Record<string, number>).filter(
-			([name]) => !ratingValueNames.has(name)
+			([name]) => !ratingValueNames.has(name) && !internalValueNames.has(name)
 		)
 	);
 

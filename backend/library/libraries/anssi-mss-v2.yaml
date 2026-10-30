@@ -3,7 +3,7 @@ locale: fr
 ref_id: ANSSI-MSS-V2
 name: 'ANSSI - MonServiceSécurisé : référentiel de mesures V2'
 description: |-
-  Référentiel de mesures V2 de MonServiceSécurisé, le service de l'ANSSI pour sécuriser et homologuer les services numériques publics : 135 mesures (129 ANSSI, 6 CNIL) réparties en 6 thématiques. Les groupes d'implémentation reprennent les besoins de sécurité de MonServiceSécurisé (Basique, Modéré, Avancé), chacun séparé en mesures indispensables et recommandées. MonServiceSécurisé ajuste en plus la liste selon les caractéristiques du service (données, disponibilité, ouverture, type de service, hébergement) : ces ajustements figurent dans l'annotation de chaque mesure. Les identifiants sont ceux renvoyés par l'API publique de MonServiceSécurisé.
+  Référentiel de mesures V2 de MonServiceSécurisé, le service de l'ANSSI pour sécuriser et homologuer les services numériques publics : 135 mesures (129 ANSSI, 6 CNIL) réparties en 6 thématiques. Les groupes d'implémentation reprennent les besoins de sécurité de MonServiceSécurisé (Basique, Modéré, Avancé), chacun séparé en mesures indispensables et recommandées. MonServiceSécurisé ajuste en plus la liste selon les caractéristiques du service (données, disponibilité, ouverture, type de service, hébergement) : ces ajustements figurent dans l'annotation de chaque mesure. Les identifiants sont ceux renvoyés par l'API publique de MonServiceSécurisé. Les 14 risques V2 (un par vecteur d'attaque) sont fournis comme menaces : chaque mesure porte les menaces dont MonServiceSécurisé lit le statut pour en calculer la vraisemblance.
 
   Sources :
   - https://monservicesecurise.cyber.gouv.fr
@@ -19,19 +19,136 @@ copyright: |-
 
   Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and limitations under the License.
-version: 1
-publication_date: 2026-10-27
+version: 2
+publication_date: 2026-10-30
 provider: ANSSI
 packager: intuitem
 dependencies:
 - urn:intuitem:risk:library:doc-pol
 objects:
+  threats:
+  - urn: urn:intuitem:risk:threat:anssi-mss-v2:v1
+    ref_id: MSS-V1
+    name: Compromission d'un poste de travail utilisateur
+    description: "Pour atteindre son objectif visé, un attaquant externe va compromettre le poste de travail\
+      \ d'un utilisateur du service.\n\nPar exemple, pour atteindre son objectif un attaquant externe\
+      \ peut compromettre un poste de travail via : \n- l'exploitation d'une vulnérabilité liée à l'OS\
+      \ ou un applicatif sur le poste de travail utilisateur,\n- l'installation d'un malware sur le poste\
+      \ de travail utilisateur,\n- le vol du poste de travail de l'utilisateur."
+  - urn: urn:intuitem:risk:threat:anssi-mss-v2:v2
+    ref_id: MSS-V2
+    name: Compromission de ressources d'administration internes
+    description: "Pour atteindre son objectif visé, un attaquant externe va compromettre une ressource\
+      \ utilisée pour l'administration technique interne.\n\nPar exemple, pour atteindre son objectif\
+      \ un attaquant externe peut compromettre : \n- un poste de travail d'administrateur technique,\n\
+      - le réseau d'administration technique."
+  - urn: urn:intuitem:risk:threat:anssi-mss-v2:v3
+    ref_id: MSS-V3
+    name: Compromission de ressources d'administration externes
+    description: "Pour atteindre son objectif visé, un attaquant externe va compromettre une ressource\
+      \ utilisée pour l'administration technique externe (ex. infogérant)\n\nPar exemple, pour atteindre\
+      \ son objectif un attaquant externe peut compromettre : \n- un poste de travail d'administrateur\
+      \ technique,\n- le réseau d'administration technique."
+  - urn: urn:intuitem:risk:threat:anssi-mss-v2:v4
+    ref_id: MSS-V4
+    name: Compromission d'un service ou d'un serveur exposé
+    description: |-
+      Pour atteindre son objectif visé, un attaquant externe va compromettre un service ou serveur exposé.
+
+      Par exemple, pour atteindre son objectif un attaquant externe peut exploiter une vulnérabilité applicative ou technique sur un serveur web exposé ou une API.
+  - urn: urn:intuitem:risk:threat:anssi-mss-v2:v5
+    ref_id: MSS-V5
+    name: Compromission d'un compte utilisateur
+    description: "Pour atteindre son objectif visé, un attaquant externe va compromettre un compte utilisateur\
+      \ par ingénierie sociale ou en exploitant une faiblesse dans l'authentification.\n\nPar exemple,\
+      \ pour atteindre son objectif un attaquant externe peut compromettre un compte via : \n- de l'ingénierie\
+      \ sociale (ex. hameçonnage), \n- une attaque par force brute sur le mécanisme d'authentification\
+      \ (ex. attaque par force brute ou par saisie d’authentifiants volés)."
+  - urn: urn:intuitem:risk:threat:anssi-mss-v2:v6
+    ref_id: MSS-V6
+    name: Compromission d'un compte d'un acteur technique interne
+    description: "Pour atteindre son objectif visé, un attaquant externe va compromettre un compte d'un\
+      \ acteur technique interne (ex. administrateur, hébergeur, développeur) par ingénierie sociale ou\
+      \ en exploitant une faiblesse dans l'authentification.\n\nPar exemple, pour atteindre son objectif\
+      \ un attaquant externe peut compromettre un compte via : \n- de l'ingénierie sociale (ex. hameçonnage),\
+      \ \n- une attaque par force brute sur le mécanisme d'authentification (ex. attaque par force brute\
+      \ ou par saisie d’authentifiants volés)."
+  - urn: urn:intuitem:risk:threat:anssi-mss-v2:v7
+    ref_id: MSS-V7
+    name: Compromission d'un compte d'un acteur technique externe
+    description: "Pour atteindre son objectif visé, un attaquant externe va compromettre un compte d'un\
+      \ acteur technique externe (ex. administrateur, hébergeur, développeur) par ingénierie sociale ou\
+      \ en exploitant une faiblesse dans l'authentification.\n\nPar exemple, pour atteindre son objectif\
+      \ un attaquant externe peut compromettre un compte via : \n- de l'ingénierie sociale (ex. hameçonnage),\
+      \ \n- une attaque par force brute sur le mécanisme d'authentification (ex. attaque par force brute\
+      \ ou par saisie d’authentifiants volés)."
+  - urn: urn:intuitem:risk:threat:anssi-mss-v2:v8
+    ref_id: MSS-V8
+    name: Compromission du SI du fournisseur PaaS
+    description: |-
+      Pour atteindre son objectif visé, un attaquant externe va compromettre l'environnement fourni par le prestataire de PaaS.
+
+      Par exemple, pour atteindre son objectif un attaquant externe peut compromettre l'environnement fourni par le prestataire de PaaS via :
+      - l'exploitation d'une vulnérabilité de la plateforme PaaS,
+      - l'exploitation d'un défaut de cloisonnement entre les environnements hébergés.
+  - urn: urn:intuitem:risk:threat:anssi-mss-v2:v9
+    ref_id: MSS-V9
+    name: Compromission du SI du fournisseur SaaS
+    description: |-
+      Pour atteindre son objectif visé, un attaquant externe va compromettre l'environnement fourni par le prestataire de SaaS.
+
+      Par exemple, pour atteindre son objectif un attaquant externe peut compromettre l'environnement fourni par le prestataire de SaaS via :
+      - l'exploitation d'une vulnérabilité de la solution SaaS,
+      - l'exploitation d'un défaut de cloisonnement entre les données des clients hébergés.
+  - urn: urn:intuitem:risk:threat:anssi-mss-v2:v10
+    ref_id: MSS-V10
+    name: Intrusion physique dans un local interne
+    description: |-
+      Pour atteindre son objectif visé, un attaquant externe va s'introduire physiquement dans les locaux techniques internes.
+
+      Par exemple, pour atteindre son objectif un attaquant externe peut, une fois introduit dans les locaux techniques :
+      - accéder physiquement aux serveurs hébergés,
+      - dérober ou détériorer un équipement contenant des données.
+  - urn: urn:intuitem:risk:threat:anssi-mss-v2:v11
+    ref_id: MSS-V11
+    name: Intrusion physique dans un local externe
+    description: |-
+      Pour atteindre son objectif visé, un attaquant externe va s'introduire physiquement dans les locaux techniques externes.
+
+      Par exemple, pour atteindre son objectif un attaquant externe peut, une fois introduit dans les locaux techniques :
+      - accéder physiquement aux serveurs hébergés,
+      - dérober ou détériorer un équipement contenant des données.
+  - urn: urn:intuitem:risk:threat:anssi-mss-v2:v12
+    ref_id: MSS-V12
+    name: Attaque DDoS sur un service exposé
+    description: |-
+      Pour atteindre son objectif visé, un attaquant externe va réaliser une attaque par déni de service distribué (DDoS).
+
+      Par exemple, pour atteindre son objectif un attaquant externe peut saturer les services exposés (serveur web, API) via l'envoi d'un volume massif de requêtes depuis un réseau de machines compromises.
+  - urn: urn:intuitem:risk:threat:anssi-mss-v2:v13
+    ref_id: MSS-V13
+    name: Compromission de ressources de développement internes
+    description: |-
+      Pour atteindre son objectif visé, un attaquant externe va compromettre une ressource interne (ex. CI/CD) utilisée pour le développement.
+
+      Par exemple, pour atteindre son objectif un attaquant externe peut compromettre :
+      - la chaîne d'intégration et de déploiement (CI/CD),
+      - un dépôt de code source.
+  - urn: urn:intuitem:risk:threat:anssi-mss-v2:v14
+    ref_id: MSS-V14
+    name: Compromission de ressources de développement externes
+    description: |-
+      Pour atteindre son objectif visé, un attaquant externe va compromettre une ressource externe (ex. CI/CD) utilisée pour le développement.
+
+      Par exemple, pour atteindre son objectif un attaquant externe peut compromettre :
+      - la chaîne d'intégration et de déploiement (CI/CD),
+      - un dépôt de code source.
   framework:
     urn: urn:intuitem:risk:framework:anssi-mss-v2
     ref_id: ANSSI-MSS-V2
     name: 'ANSSI - MonServiceSécurisé : référentiel de mesures V2'
     description: |-
-      Référentiel de mesures V2 de MonServiceSécurisé, le service de l'ANSSI pour sécuriser et homologuer les services numériques publics : 135 mesures (129 ANSSI, 6 CNIL) réparties en 6 thématiques. Les groupes d'implémentation reprennent les besoins de sécurité de MonServiceSécurisé (Basique, Modéré, Avancé), chacun séparé en mesures indispensables et recommandées. MonServiceSécurisé ajuste en plus la liste selon les caractéristiques du service (données, disponibilité, ouverture, type de service, hébergement) : ces ajustements figurent dans l'annotation de chaque mesure. Les identifiants sont ceux renvoyés par l'API publique de MonServiceSécurisé.
+      Référentiel de mesures V2 de MonServiceSécurisé, le service de l'ANSSI pour sécuriser et homologuer les services numériques publics : 135 mesures (129 ANSSI, 6 CNIL) réparties en 6 thématiques. Les groupes d'implémentation reprennent les besoins de sécurité de MonServiceSécurisé (Basique, Modéré, Avancé), chacun séparé en mesures indispensables et recommandées. MonServiceSécurisé ajuste en plus la liste selon les caractéristiques du service (données, disponibilité, ouverture, type de service, hébergement) : ces ajustements figurent dans l'annotation de chaque mesure. Les identifiants sont ceux renvoyés par l'API publique de MonServiceSécurisé. Les 14 risques V2 (un par vecteur d'attaque) sont fournis comme menaces : chaque mesure porte les menaces dont MonServiceSécurisé lit le statut pour en calculer la vraisemblance.
 
       Sources :
       - https://monservicesecurise.cyber.gouv.fr
@@ -59,6 +176,977 @@ objects:
     - ref_id: A-R
       name: 'Avancé : mesures recommandées'
       description: Mesures recommandées pour un service au besoin de sécurité avancé.
+    outcomes_definition:
+    - ref_id: vraisemblance_brute_v1
+      kind: number
+      label: Vraisemblance MSS-V1 avant bornage
+      internal: true
+      expression: '("A-I" in assessment.selected_implementation_groups || "A-R" in assessment.selected_implementation_groups)
+        ? ((4.0 - 2.0 * (requirements["distance.3"].result in ["compliant", "not_applicable"] && requirements["auth.8"].result
+        in ["compliant", "not_applicable"] && requirements["auth.4"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) - 1.0 * (requirements["rh.2"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0))
+        > ((4.0 - 1.0 * (requirements["rh.2"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) -
+        1.0 * (requirements["mail.1"].result in ["compliant", "not_applicable"] && requirements["mail.2"].result
+        in ["compliant", "not_applicable"] && requirements["malware.3"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) - 2.0 * (requirements["malware.4"].result in ["compliant", "not_applicable"] ? 1.0
+        : 0.0) + 1.0 * (requirements["supervision.4"].result in ["compliant", "not_applicable"] && requirements["supervision.5"].result
+        in ["compliant", "not_applicable"] && requirements["supervision.7"].result in ["compliant", "not_applicable"]
+        ? 0.0 : 1.0)) > (4.0 - 2.0 * (requirements["mco_mcs.1"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.17"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.3"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.4"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.5"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.6"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.7"].result in ["compliant", "not_applicable"]
+        && requirements["config.1"].result in ["compliant", "not_applicable"] && requirements["config.2"].result
+        in ["compliant", "not_applicable"] && requirements["config.6"].result in ["compliant", "not_applicable"]
+        && requirements["auth.1"].result in ["compliant", "not_applicable"] && requirements["compadmin.7"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["filtre.6"].result in ["compliant",
+        "not_applicable"] ? 1.0 : 0.0) + 1.0 * ((requirements["config.3"].result in ["compliant", "not_applicable"])
+        ? 0.0 : 1.0) + 1.0 * (requirements["supervision.4"].result in ["compliant", "not_applicable"]
+        && requirements["supervision.5"].result in ["compliant", "not_applicable"] && requirements["supervision.7"].result
+        in ["compliant", "not_applicable"] ? 0.0 : 1.0)) ? (4.0 - 1.0 * (requirements["rh.2"].result in
+        ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["mail.1"].result in ["compliant",
+        "not_applicable"] && requirements["mail.2"].result in ["compliant", "not_applicable"] && requirements["malware.3"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 2.0 * (requirements["malware.4"].result in ["compliant",
+        "not_applicable"] ? 1.0 : 0.0) + 1.0 * (requirements["supervision.4"].result in ["compliant",
+        "not_applicable"] && requirements["supervision.5"].result in ["compliant", "not_applicable"] &&
+        requirements["supervision.7"].result in ["compliant", "not_applicable"] ? 0.0 : 1.0)) : (4.0 -
+        2.0 * (requirements["mco_mcs.1"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.17"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.3"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.4"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.5"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.6"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.7"].result in ["compliant", "not_applicable"] && requirements["config.1"].result
+        in ["compliant", "not_applicable"] && requirements["config.2"].result in ["compliant", "not_applicable"]
+        && requirements["config.6"].result in ["compliant", "not_applicable"] && requirements["auth.1"].result
+        in ["compliant", "not_applicable"] && requirements["compadmin.7"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) - 1.0 * (requirements["filtre.6"].result in ["compliant", "not_applicable"] ? 1.0
+        : 0.0) + 1.0 * ((requirements["config.3"].result in ["compliant", "not_applicable"]) ? 0.0 : 1.0)
+        + 1.0 * (requirements["supervision.4"].result in ["compliant", "not_applicable"] && requirements["supervision.5"].result
+        in ["compliant", "not_applicable"] && requirements["supervision.7"].result in ["compliant", "not_applicable"]
+        ? 0.0 : 1.0))) ? (4.0 - 2.0 * (requirements["distance.3"].result in ["compliant", "not_applicable"]
+        && requirements["auth.8"].result in ["compliant", "not_applicable"] && requirements["auth.4"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["rh.2"].result in ["compliant",
+        "not_applicable"] ? 1.0 : 0.0)) : ((4.0 - 1.0 * (requirements["rh.2"].result in ["compliant",
+        "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["mail.1"].result in ["compliant", "not_applicable"]
+        && requirements["mail.2"].result in ["compliant", "not_applicable"] && requirements["malware.3"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 2.0 * (requirements["malware.4"].result in ["compliant",
+        "not_applicable"] ? 1.0 : 0.0) + 1.0 * (requirements["supervision.4"].result in ["compliant",
+        "not_applicable"] && requirements["supervision.5"].result in ["compliant", "not_applicable"] &&
+        requirements["supervision.7"].result in ["compliant", "not_applicable"] ? 0.0 : 1.0)) > (4.0 -
+        2.0 * (requirements["mco_mcs.1"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.17"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.3"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.4"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.5"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.6"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.7"].result in ["compliant", "not_applicable"] && requirements["config.1"].result
+        in ["compliant", "not_applicable"] && requirements["config.2"].result in ["compliant", "not_applicable"]
+        && requirements["config.6"].result in ["compliant", "not_applicable"] && requirements["auth.1"].result
+        in ["compliant", "not_applicable"] && requirements["compadmin.7"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) - 1.0 * (requirements["filtre.6"].result in ["compliant", "not_applicable"] ? 1.0
+        : 0.0) + 1.0 * ((requirements["config.3"].result in ["compliant", "not_applicable"]) ? 0.0 : 1.0)
+        + 1.0 * (requirements["supervision.4"].result in ["compliant", "not_applicable"] && requirements["supervision.5"].result
+        in ["compliant", "not_applicable"] && requirements["supervision.7"].result in ["compliant", "not_applicable"]
+        ? 0.0 : 1.0)) ? (4.0 - 1.0 * (requirements["rh.2"].result in ["compliant", "not_applicable"] ?
+        1.0 : 0.0) - 1.0 * (requirements["mail.1"].result in ["compliant", "not_applicable"] && requirements["mail.2"].result
+        in ["compliant", "not_applicable"] && requirements["malware.3"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) - 2.0 * (requirements["malware.4"].result in ["compliant", "not_applicable"] ? 1.0
+        : 0.0) + 1.0 * (requirements["supervision.4"].result in ["compliant", "not_applicable"] && requirements["supervision.5"].result
+        in ["compliant", "not_applicable"] && requirements["supervision.7"].result in ["compliant", "not_applicable"]
+        ? 0.0 : 1.0)) : (4.0 - 2.0 * (requirements["mco_mcs.1"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.17"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.3"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.4"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.5"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.6"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.7"].result in ["compliant", "not_applicable"]
+        && requirements["config.1"].result in ["compliant", "not_applicable"] && requirements["config.2"].result
+        in ["compliant", "not_applicable"] && requirements["config.6"].result in ["compliant", "not_applicable"]
+        && requirements["auth.1"].result in ["compliant", "not_applicable"] && requirements["compadmin.7"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["filtre.6"].result in ["compliant",
+        "not_applicable"] ? 1.0 : 0.0) + 1.0 * ((requirements["config.3"].result in ["compliant", "not_applicable"])
+        ? 0.0 : 1.0) + 1.0 * (requirements["supervision.4"].result in ["compliant", "not_applicable"]
+        && requirements["supervision.5"].result in ["compliant", "not_applicable"] && requirements["supervision.7"].result
+        in ["compliant", "not_applicable"] ? 0.0 : 1.0)))) : (("M-I" in assessment.selected_implementation_groups
+        || "M-R" in assessment.selected_implementation_groups) ? ((4.0 - 1.0 * (requirements["rh.2"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["mail.1"].result in ["compliant",
+        "not_applicable"] && requirements["malware.3"].result in ["compliant", "not_applicable"] ? 1.0
+        : 0.0) - 2.0 * (requirements["malware.4"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0))
+        > (4.0 - 2.0 * (requirements["mco_mcs.3"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.4"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.5"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.6"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.7"].result
+        in ["compliant", "not_applicable"] && requirements["config.1"].result in ["compliant", "not_applicable"]
+        && requirements["config.6"].result in ["compliant", "not_applicable"] && requirements["auth.1"].result
+        in ["compliant", "not_applicable"] && requirements["compadmin.7"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) - 1.0 * (requirements["filtre.6"].result in ["compliant", "not_applicable"] ? 1.0
+        : 0.0)) ? (4.0 - 1.0 * (requirements["rh.2"].result in ["compliant", "not_applicable"] ? 1.0 :
+        0.0) - 1.0 * (requirements["mail.1"].result in ["compliant", "not_applicable"] && requirements["malware.3"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 2.0 * (requirements["malware.4"].result in ["compliant",
+        "not_applicable"] ? 1.0 : 0.0)) : (4.0 - 2.0 * (requirements["mco_mcs.3"].result in ["compliant",
+        "not_applicable"] && requirements["mco_mcs.4"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.5"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.6"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.7"].result in ["compliant", "not_applicable"] && requirements["config.1"].result
+        in ["compliant", "not_applicable"] && requirements["config.6"].result in ["compliant", "not_applicable"]
+        && requirements["auth.1"].result in ["compliant", "not_applicable"] && requirements["compadmin.7"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["filtre.6"].result in ["compliant",
+        "not_applicable"] ? 1.0 : 0.0))) : ((4.0 - 1.0 * (requirements["rh.2"].result in ["compliant",
+        "not_applicable"] ? 1.0 : 0.0) - 2.0 * (requirements["malware.6"].result in ["compliant", "not_applicable"]
+        && requirements["malware.5"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0)) > (4.0 -
+        2.0 * (requirements["mco_mcs.14"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.5"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.6"].result in ["compliant", "not_applicable"]
+        && requirements["compadmin.7"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0)) ? (4.0
+        - 1.0 * (requirements["rh.2"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 2.0 * (requirements["malware.6"].result
+        in ["compliant", "not_applicable"] && requirements["malware.5"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0)) : (4.0 - 2.0 * (requirements["mco_mcs.14"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.5"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.6"].result
+        in ["compliant", "not_applicable"] && requirements["compadmin.7"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0))))'
+    - ref_id: vraisemblance_v1
+      kind: number
+      label: Vraisemblance MSS-V1 (1 à 4)
+      internal: true
+      likelihood_of: urn:intuitem:risk:threat:anssi-mss-v2:v1
+      expression: 'values.vraisemblance_brute_v1 < 0.0 ? 0.0 : (values.vraisemblance_brute_v1 < 1.0 ?
+        1.0 : (values.vraisemblance_brute_v1 > 4.0 ? 4.0 : values.vraisemblance_brute_v1))'
+    - ref_id: vraisemblance_brute_v2
+      kind: number
+      label: Vraisemblance MSS-V2 avant bornage
+      internal: true
+      expression: '("A-I" in assessment.selected_implementation_groups || "A-R" in assessment.selected_implementation_groups)
+        ? ((4.0 - 1.0 * (requirements["admin.1"].result in ["compliant", "not_applicable"] && requirements["admin.3"].result
+        in ["compliant", "not_applicable"] && requirements["annuaire.5"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) - 1.0 * (requirements["admin.2"].result in ["compliant", "not_applicable"] && requirements["admin.5"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["ecosysteme.2"].result in
+        ["compliant", "not_applicable"] && requirements["admin.6"].result in ["compliant", "not_applicable"]
+        && requirements["admin.7"].result in ["compliant", "not_applicable"] && requirements["distance.1"].result
+        in ["compliant", "not_applicable"] && requirements["distance.2"].result in ["compliant", "not_applicable"]
+        && requirements["annuaire.2"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) + 1.0 * (requirements["supervision.4"].result
+        in ["compliant", "not_applicable"] && requirements["supervision.5"].result in ["compliant", "not_applicable"]
+        && requirements["supervision.6"].result in ["compliant", "not_applicable"] && requirements["supervision.7"].result
+        in ["compliant", "not_applicable"] ? 0.0 : 1.0)) > (4.0 - 1.0 * (requirements["mco_mcs.1"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.17"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.3"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.4"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.5"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.6"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.7"].result
+        in ["compliant", "not_applicable"] && requirements["config.1"].result in ["compliant", "not_applicable"]
+        && requirements["config.2"].result in ["compliant", "not_applicable"] && requirements["config.6"].result
+        in ["compliant", "not_applicable"] && requirements["auth.1"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) - 1.0 * (requirements["admin.4"].result in ["compliant", "not_applicable"] ? 1.0
+        : 0.0) + 2.0 * ((requirements["config.3"].result in ["compliant", "not_applicable"]) ? 0.0 : 1.0)
+        - 1.0 * (requirements["malware.3"].result in ["compliant", "not_applicable"] && requirements["malware.4"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) + 1.0 * (requirements["supervision.4"].result
+        in ["compliant", "not_applicable"] && requirements["supervision.5"].result in ["compliant", "not_applicable"]
+        && requirements["supervision.6"].result in ["compliant", "not_applicable"] && requirements["supervision.7"].result
+        in ["compliant", "not_applicable"] ? 0.0 : 1.0)) ? (4.0 - 1.0 * (requirements["admin.1"].result
+        in ["compliant", "not_applicable"] && requirements["admin.3"].result in ["compliant", "not_applicable"]
+        && requirements["annuaire.5"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["admin.2"].result
+        in ["compliant", "not_applicable"] && requirements["admin.5"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) - 1.0 * (requirements["ecosysteme.2"].result in ["compliant", "not_applicable"] &&
+        requirements["admin.6"].result in ["compliant", "not_applicable"] && requirements["admin.7"].result
+        in ["compliant", "not_applicable"] && requirements["distance.1"].result in ["compliant", "not_applicable"]
+        && requirements["distance.2"].result in ["compliant", "not_applicable"] && requirements["annuaire.2"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) + 1.0 * (requirements["supervision.4"].result
+        in ["compliant", "not_applicable"] && requirements["supervision.5"].result in ["compliant", "not_applicable"]
+        && requirements["supervision.6"].result in ["compliant", "not_applicable"] && requirements["supervision.7"].result
+        in ["compliant", "not_applicable"] ? 0.0 : 1.0)) : (4.0 - 1.0 * (requirements["mco_mcs.1"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.17"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.3"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.4"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.5"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.6"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.7"].result
+        in ["compliant", "not_applicable"] && requirements["config.1"].result in ["compliant", "not_applicable"]
+        && requirements["config.2"].result in ["compliant", "not_applicable"] && requirements["config.6"].result
+        in ["compliant", "not_applicable"] && requirements["auth.1"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) - 1.0 * (requirements["admin.4"].result in ["compliant", "not_applicable"] ? 1.0
+        : 0.0) + 2.0 * ((requirements["config.3"].result in ["compliant", "not_applicable"]) ? 0.0 : 1.0)
+        - 1.0 * (requirements["malware.3"].result in ["compliant", "not_applicable"] && requirements["malware.4"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) + 1.0 * (requirements["supervision.4"].result
+        in ["compliant", "not_applicable"] && requirements["supervision.5"].result in ["compliant", "not_applicable"]
+        && requirements["supervision.6"].result in ["compliant", "not_applicable"] && requirements["supervision.7"].result
+        in ["compliant", "not_applicable"] ? 0.0 : 1.0))) : (("M-I" in assessment.selected_implementation_groups
+        || "M-R" in assessment.selected_implementation_groups) ? -1.0 : -1.0)'
+    - ref_id: vraisemblance_v2
+      kind: number
+      label: Vraisemblance MSS-V2 (1 à 4)
+      internal: true
+      likelihood_of: urn:intuitem:risk:threat:anssi-mss-v2:v2
+      expression: 'values.vraisemblance_brute_v2 < 0.0 ? 0.0 : (values.vraisemblance_brute_v2 < 1.0 ?
+        1.0 : (values.vraisemblance_brute_v2 > 4.0 ? 4.0 : values.vraisemblance_brute_v2))'
+    - ref_id: vraisemblance_brute_v3
+      kind: number
+      label: Vraisemblance MSS-V3 avant bornage
+      internal: true
+      expression: '("A-I" in assessment.selected_implementation_groups || "A-R" in assessment.selected_implementation_groups)
+        ? ((4.0 - 1.0 * (requirements["admin.1"].result in ["compliant", "not_applicable"] && requirements["admin.3"].result
+        in ["compliant", "not_applicable"] && requirements["annuaire.5"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) - 1.0 * (requirements["admin.2"].result in ["compliant", "not_applicable"] && requirements["admin.5"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["ecosysteme.2"].result in
+        ["compliant", "not_applicable"] && requirements["admin.6"].result in ["compliant", "not_applicable"]
+        && requirements["admin.7"].result in ["compliant", "not_applicable"] && requirements["distance.1"].result
+        in ["compliant", "not_applicable"] && requirements["distance.2"].result in ["compliant", "not_applicable"]
+        && requirements["annuaire.2"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) + 1.0 * ((requirements["contrat.1"].result
+        in ["compliant", "not_applicable"] || requirements["contrat.2"].result in ["compliant", "not_applicable"]
+        || requirements["ecosysteme.1"].result in ["compliant", "not_applicable"]) ? 0.0 : 1.0) + 1.0
+        * (requirements["supervision.4"].result in ["compliant", "not_applicable"] && requirements["supervision.5"].result
+        in ["compliant", "not_applicable"] && requirements["supervision.6"].result in ["compliant", "not_applicable"]
+        && requirements["supervision.7"].result in ["compliant", "not_applicable"] ? 0.0 : 1.0)) > (4.0
+        - 1.0 * (requirements["mco_mcs.1"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.17"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.3"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.4"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.5"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.6"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.7"].result in ["compliant", "not_applicable"] && requirements["config.1"].result
+        in ["compliant", "not_applicable"] && requirements["config.2"].result in ["compliant", "not_applicable"]
+        && requirements["config.6"].result in ["compliant", "not_applicable"] && requirements["auth.1"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["admin.4"].result in ["compliant",
+        "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["malware.3"].result in ["compliant", "not_applicable"]
+        && requirements["malware.4"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) + 1.0 * ((requirements["contrat.1"].result
+        in ["compliant", "not_applicable"] || requirements["contrat.2"].result in ["compliant", "not_applicable"]
+        || requirements["ecosysteme.1"].result in ["compliant", "not_applicable"]) ? 0.0 : 1.0) + 2.0
+        * ((requirements["config.3"].result in ["compliant", "not_applicable"]) ? 0.0 : 1.0) + 1.0 * (requirements["supervision.4"].result
+        in ["compliant", "not_applicable"] && requirements["supervision.5"].result in ["compliant", "not_applicable"]
+        && requirements["supervision.6"].result in ["compliant", "not_applicable"] && requirements["supervision.7"].result
+        in ["compliant", "not_applicable"] ? 0.0 : 1.0)) ? (4.0 - 1.0 * (requirements["admin.1"].result
+        in ["compliant", "not_applicable"] && requirements["admin.3"].result in ["compliant", "not_applicable"]
+        && requirements["annuaire.5"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["admin.2"].result
+        in ["compliant", "not_applicable"] && requirements["admin.5"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) - 1.0 * (requirements["ecosysteme.2"].result in ["compliant", "not_applicable"] &&
+        requirements["admin.6"].result in ["compliant", "not_applicable"] && requirements["admin.7"].result
+        in ["compliant", "not_applicable"] && requirements["distance.1"].result in ["compliant", "not_applicable"]
+        && requirements["distance.2"].result in ["compliant", "not_applicable"] && requirements["annuaire.2"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) + 1.0 * ((requirements["contrat.1"].result in
+        ["compliant", "not_applicable"] || requirements["contrat.2"].result in ["compliant", "not_applicable"]
+        || requirements["ecosysteme.1"].result in ["compliant", "not_applicable"]) ? 0.0 : 1.0) + 1.0
+        * (requirements["supervision.4"].result in ["compliant", "not_applicable"] && requirements["supervision.5"].result
+        in ["compliant", "not_applicable"] && requirements["supervision.6"].result in ["compliant", "not_applicable"]
+        && requirements["supervision.7"].result in ["compliant", "not_applicable"] ? 0.0 : 1.0)) : (4.0
+        - 1.0 * (requirements["mco_mcs.1"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.17"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.3"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.4"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.5"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.6"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.7"].result in ["compliant", "not_applicable"] && requirements["config.1"].result
+        in ["compliant", "not_applicable"] && requirements["config.2"].result in ["compliant", "not_applicable"]
+        && requirements["config.6"].result in ["compliant", "not_applicable"] && requirements["auth.1"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["admin.4"].result in ["compliant",
+        "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["malware.3"].result in ["compliant", "not_applicable"]
+        && requirements["malware.4"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) + 1.0 * ((requirements["contrat.1"].result
+        in ["compliant", "not_applicable"] || requirements["contrat.2"].result in ["compliant", "not_applicable"]
+        || requirements["ecosysteme.1"].result in ["compliant", "not_applicable"]) ? 0.0 : 1.0) + 2.0
+        * ((requirements["config.3"].result in ["compliant", "not_applicable"]) ? 0.0 : 1.0) + 1.0 * (requirements["supervision.4"].result
+        in ["compliant", "not_applicable"] && requirements["supervision.5"].result in ["compliant", "not_applicable"]
+        && requirements["supervision.6"].result in ["compliant", "not_applicable"] && requirements["supervision.7"].result
+        in ["compliant", "not_applicable"] ? 0.0 : 1.0))) : (("M-I" in assessment.selected_implementation_groups
+        || "M-R" in assessment.selected_implementation_groups) ? (4.0 - 1.0 * (requirements["mco_mcs.3"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.4"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.5"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.6"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.7"].result in ["compliant", "not_applicable"]
+        && requirements["config.1"].result in ["compliant", "not_applicable"] && requirements["config.6"].result
+        in ["compliant", "not_applicable"] && requirements["auth.1"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) - 1.0 * (requirements["malware.3"].result in ["compliant", "not_applicable"] && requirements["malware.4"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["ecosysteme.2"].result in
+        ["compliant", "not_applicable"] && requirements["distance.1"].result in ["compliant", "not_applicable"]
+        && requirements["distance.2"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) + 1.0 * ((requirements["contrat.1"].result
+        in ["compliant", "not_applicable"] || requirements["contrat.2"].result in ["compliant", "not_applicable"]
+        || requirements["ecosysteme.1"].result in ["compliant", "not_applicable"]) ? 0.0 : 1.0)) : (4.0
+        - 1.0 * (requirements["mco_mcs.14"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.5"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.6"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) - 1.0 * (requirements["malware.5"].result in ["compliant", "not_applicable"] && requirements["malware.6"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["distance.1"].result in
+        ["compliant", "not_applicable"] && requirements["distance.2"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) + 1.0 * ((requirements["contrat.1"].result in ["compliant", "not_applicable"]) ?
+        0.0 : 1.0)))'
+    - ref_id: vraisemblance_v3
+      kind: number
+      label: Vraisemblance MSS-V3 (1 à 4)
+      internal: true
+      likelihood_of: urn:intuitem:risk:threat:anssi-mss-v2:v3
+      expression: 'values.vraisemblance_brute_v3 < 0.0 ? 0.0 : (values.vraisemblance_brute_v3 < 1.0 ?
+        1.0 : (values.vraisemblance_brute_v3 > 4.0 ? 4.0 : values.vraisemblance_brute_v3))'
+    - ref_id: vraisemblance_brute_v4
+      kind: number
+      label: Vraisemblance MSS-V4 avant bornage
+      internal: true
+      expression: '("A-I" in assessment.selected_implementation_groups || "A-R" in assessment.selected_implementation_groups)
+        ? (4.0 - 1.0 * (requirements["mco_mcs.1"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.17"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.3"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.4"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.5"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.6"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.7"].result in ["compliant", "not_applicable"] && requirements["filtre.7"].result
+        in ["compliant", "not_applicable"] && requirements["dev.1"].result in ["compliant", "not_applicable"]
+        && requirements["config.1"].result in ["compliant", "not_applicable"] && requirements["config.2"].result
+        in ["compliant", "not_applicable"] && requirements["config.6"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) - 1.0 * (requirements["cloison.1"].result in ["compliant", "not_applicable"] && requirements["cloison.2"].result
+        in ["compliant", "not_applicable"] && requirements["cloison.3"].result in ["compliant", "not_applicable"]
+        && requirements["cloison.4"].result in ["compliant", "not_applicable"] && requirements["cloison.5"].result
+        in ["compliant", "not_applicable"] && requirements["cloison.6"].result in ["compliant", "not_applicable"]
+        && requirements["filtre.1"].result in ["compliant", "not_applicable"] && requirements["filtre.2"].result
+        in ["compliant", "not_applicable"] && requirements["filtre.3"].result in ["compliant", "not_applicable"]
+        && requirements["filtre.5"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) + 1.0 * ((requirements["audit.6"].result
+        in ["compliant", "not_applicable"] || requirements["config.3"].result in ["compliant", "not_applicable"])
+        ? 0.0 : 1.0) + 1.0 * ((requirements["audit.2"].result in ["compliant", "not_applicable"] || requirements["audit.3"].result
+        in ["compliant", "not_applicable"] || requirements["audit.4"].result in ["compliant", "not_applicable"]
+        || requirements["audit.5"].result in ["compliant", "not_applicable"] || requirements["audit.7"].result
+        in ["compliant", "not_applicable"]) ? 0.0 : 1.0) + 1.0 * (requirements["supervision.4"].result
+        in ["compliant", "not_applicable"] && requirements["supervision.5"].result in ["compliant", "not_applicable"]
+        && requirements["supervision.6"].result in ["compliant", "not_applicable"] && requirements["supervision.7"].result
+        in ["compliant", "not_applicable"] ? 0.0 : 1.0)) : (("M-I" in assessment.selected_implementation_groups
+        || "M-R" in assessment.selected_implementation_groups) ? (4.0 - 1.0 * (requirements["mco_mcs.3"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.4"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.5"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.6"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.7"].result in ["compliant", "not_applicable"]
+        && requirements["filtre.7"].result in ["compliant", "not_applicable"] && requirements["dev.1"].result
+        in ["compliant", "not_applicable"] && requirements["config.1"].result in ["compliant", "not_applicable"]
+        && requirements["config.6"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["cloison.1"].result
+        in ["compliant", "not_applicable"] && requirements["cloison.5"].result in ["compliant", "not_applicable"]
+        && requirements["filtre.1"].result in ["compliant", "not_applicable"] && requirements["filtre.3"].result
+        in ["compliant", "not_applicable"] && requirements["filtre.5"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) + 1.0 * ((requirements["audit.6"].result in ["compliant", "not_applicable"]) ? 0.0
+        : 1.0)) : (4.0 - 2.0 * (requirements["mco_mcs.15"].result in ["compliant", "not_applicable"] &&
+        requirements["mco_mcs.5"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.6"].result
+        in ["compliant", "not_applicable"] && requirements["dev.1"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) + 1.0 * ((requirements["audit.6"].result in ["compliant", "not_applicable"]) ? 0.0
+        : 1.0)))'
+    - ref_id: vraisemblance_v4
+      kind: number
+      label: Vraisemblance MSS-V4 (1 à 4)
+      internal: true
+      likelihood_of: urn:intuitem:risk:threat:anssi-mss-v2:v4
+      expression: 'values.vraisemblance_brute_v4 < 0.0 ? 0.0 : (values.vraisemblance_brute_v4 < 1.0 ?
+        1.0 : (values.vraisemblance_brute_v4 > 4.0 ? 4.0 : values.vraisemblance_brute_v4))'
+    - ref_id: vraisemblance_brute_v5
+      kind: number
+      label: Vraisemblance MSS-V5 avant bornage
+      internal: true
+      expression: '("A-I" in assessment.selected_implementation_groups || "A-R" in assessment.selected_implementation_groups)
+        ? ((4.0 - 1.0 * (requirements["distance.2"].result in ["compliant", "not_applicable"] && requirements["distance.4"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["auth.11"].result in ["compliant",
+        "not_applicable"] && requirements["auth.12"].result in ["compliant", "not_applicable"] && requirements["auth.4"].result
+        in ["compliant", "not_applicable"] && requirements["auth.2"].result in ["compliant", "not_applicable"]
+        && requirements["auth.3"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["auth.9"].result
+        in ["compliant", "not_applicable"] && requirements["auth.8"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) + 1.0 * (requirements["supervision.4"].result in ["compliant", "not_applicable"]
+        && requirements["supervision.5"].result in ["compliant", "not_applicable"] && requirements["supervision.7"].result
+        in ["compliant", "not_applicable"] ? 0.0 : 1.0)) > (4.0 - 1.0 * (requirements["rh.2"].result in
+        ["compliant", "not_applicable"] && requirements["mail.1"].result in ["compliant", "not_applicable"]
+        && requirements["mail.2"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["distance.2"].result
+        in ["compliant", "not_applicable"] && requirements["distance.4"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) - 1.0 * (requirements["rh.4"].result in ["compliant", "not_applicable"] && requirements["auth.10"].result
+        in ["compliant", "not_applicable"] && requirements["id.1"].result in ["compliant", "not_applicable"]
+        && requirements["id.2"].result in ["compliant", "not_applicable"] && requirements["id.4"].result
+        in ["compliant", "not_applicable"] && requirements["droits.1"].result in ["compliant", "not_applicable"]
+        && requirements["droits.3"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) + 1.0 * (requirements["supervision.4"].result
+        in ["compliant", "not_applicable"] && requirements["supervision.5"].result in ["compliant", "not_applicable"]
+        && requirements["supervision.7"].result in ["compliant", "not_applicable"] ? 0.0 : 1.0)) ? (4.0
+        - 1.0 * (requirements["distance.2"].result in ["compliant", "not_applicable"] && requirements["distance.4"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["auth.11"].result in ["compliant",
+        "not_applicable"] && requirements["auth.12"].result in ["compliant", "not_applicable"] && requirements["auth.4"].result
+        in ["compliant", "not_applicable"] && requirements["auth.2"].result in ["compliant", "not_applicable"]
+        && requirements["auth.3"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["auth.9"].result
+        in ["compliant", "not_applicable"] && requirements["auth.8"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) + 1.0 * (requirements["supervision.4"].result in ["compliant", "not_applicable"]
+        && requirements["supervision.5"].result in ["compliant", "not_applicable"] && requirements["supervision.7"].result
+        in ["compliant", "not_applicable"] ? 0.0 : 1.0)) : (4.0 - 1.0 * (requirements["rh.2"].result in
+        ["compliant", "not_applicable"] && requirements["mail.1"].result in ["compliant", "not_applicable"]
+        && requirements["mail.2"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["distance.2"].result
+        in ["compliant", "not_applicable"] && requirements["distance.4"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) - 1.0 * (requirements["rh.4"].result in ["compliant", "not_applicable"] && requirements["auth.10"].result
+        in ["compliant", "not_applicable"] && requirements["id.1"].result in ["compliant", "not_applicable"]
+        && requirements["id.2"].result in ["compliant", "not_applicable"] && requirements["id.4"].result
+        in ["compliant", "not_applicable"] && requirements["droits.1"].result in ["compliant", "not_applicable"]
+        && requirements["droits.3"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) + 1.0 * (requirements["supervision.4"].result
+        in ["compliant", "not_applicable"] && requirements["supervision.5"].result in ["compliant", "not_applicable"]
+        && requirements["supervision.7"].result in ["compliant", "not_applicable"] ? 0.0 : 1.0))) : (("M-I"
+        in assessment.selected_implementation_groups || "M-R" in assessment.selected_implementation_groups)
+        ? ((4.0 - 1.0 * (requirements["distance.2"].result in ["compliant", "not_applicable"] && requirements["distance.4"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["auth.11"].result in ["compliant",
+        "not_applicable"] && requirements["auth.12"].result in ["compliant", "not_applicable"] && requirements["auth.4"].result
+        in ["compliant", "not_applicable"] && requirements["auth.2"].result in ["compliant", "not_applicable"]
+        && requirements["auth.3"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["auth.9"].result
+        in ["compliant", "not_applicable"] && requirements["auth.8"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0)) > (4.0 - 1.0 * (requirements["rh.2"].result in ["compliant", "not_applicable"] &&
+        requirements["mail.1"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["distance.2"].result
+        in ["compliant", "not_applicable"] && requirements["distance.4"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) - 1.0 * (requirements["rh.4"].result in ["compliant", "not_applicable"] && requirements["auth.10"].result
+        in ["compliant", "not_applicable"] && requirements["id.1"].result in ["compliant", "not_applicable"]
+        && requirements["id.2"].result in ["compliant", "not_applicable"] && requirements["id.4"].result
+        in ["compliant", "not_applicable"] && requirements["droits.1"].result in ["compliant", "not_applicable"]
+        && requirements["droits.3"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0)) ? (4.0 - 1.0
+        * (requirements["distance.2"].result in ["compliant", "not_applicable"] && requirements["distance.4"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["auth.11"].result in ["compliant",
+        "not_applicable"] && requirements["auth.12"].result in ["compliant", "not_applicable"] && requirements["auth.4"].result
+        in ["compliant", "not_applicable"] && requirements["auth.2"].result in ["compliant", "not_applicable"]
+        && requirements["auth.3"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["auth.9"].result
+        in ["compliant", "not_applicable"] && requirements["auth.8"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0)) : (4.0 - 1.0 * (requirements["rh.2"].result in ["compliant", "not_applicable"] &&
+        requirements["mail.1"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["distance.2"].result
+        in ["compliant", "not_applicable"] && requirements["distance.4"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) - 1.0 * (requirements["rh.4"].result in ["compliant", "not_applicable"] && requirements["auth.10"].result
+        in ["compliant", "not_applicable"] && requirements["id.1"].result in ["compliant", "not_applicable"]
+        && requirements["id.2"].result in ["compliant", "not_applicable"] && requirements["id.4"].result
+        in ["compliant", "not_applicable"] && requirements["droits.1"].result in ["compliant", "not_applicable"]
+        && requirements["droits.3"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0))) : ((4.0 -
+        1.0 * (requirements["distance.2"].result in ["compliant", "not_applicable"] && requirements["distance.4"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["auth.11"].result in ["compliant",
+        "not_applicable"] && requirements["auth.7"].result in ["compliant", "not_applicable"] ? 1.0 :
+        0.0) - 1.0 * (requirements["auth.9"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0)) >
+        (4.0 - 1.0 * (requirements["rh.2"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0
+        * (requirements["distance.2"].result in ["compliant", "not_applicable"] && requirements["distance.4"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["auth.10"].result in ["compliant",
+        "not_applicable"] && requirements["id.1"].result in ["compliant", "not_applicable"] && requirements["id.2"].result
+        in ["compliant", "not_applicable"] && requirements["id.4"].result in ["compliant", "not_applicable"]
+        && requirements["droits.1"].result in ["compliant", "not_applicable"] && requirements["droits.3"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0)) ? (4.0 - 1.0 * (requirements["distance.2"].result
+        in ["compliant", "not_applicable"] && requirements["distance.4"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) - 1.0 * (requirements["auth.11"].result in ["compliant", "not_applicable"] && requirements["auth.7"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["auth.9"].result in ["compliant",
+        "not_applicable"] ? 1.0 : 0.0)) : (4.0 - 1.0 * (requirements["rh.2"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) - 1.0 * (requirements["distance.2"].result in ["compliant", "not_applicable"] &&
+        requirements["distance.4"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["auth.10"].result
+        in ["compliant", "not_applicable"] && requirements["id.1"].result in ["compliant", "not_applicable"]
+        && requirements["id.2"].result in ["compliant", "not_applicable"] && requirements["id.4"].result
+        in ["compliant", "not_applicable"] && requirements["droits.1"].result in ["compliant", "not_applicable"]
+        && requirements["droits.3"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0))))'
+    - ref_id: vraisemblance_v5
+      kind: number
+      label: Vraisemblance MSS-V5 (1 à 4)
+      internal: true
+      likelihood_of: urn:intuitem:risk:threat:anssi-mss-v2:v5
+      expression: 'values.vraisemblance_brute_v5 < 0.0 ? 0.0 : (values.vraisemblance_brute_v5 < 1.0 ?
+        1.0 : (values.vraisemblance_brute_v5 > 4.0 ? 4.0 : values.vraisemblance_brute_v5))'
+    - ref_id: vraisemblance_brute_v6
+      kind: number
+      label: Vraisemblance MSS-V6 avant bornage
+      internal: true
+      expression: '("A-I" in assessment.selected_implementation_groups || "A-R" in assessment.selected_implementation_groups)
+        ? ((4.0 - 1.0 * (requirements["distance.2"].result in ["compliant", "not_applicable"] && requirements["distance.4"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["auth.2"].result in ["compliant",
+        "not_applicable"] && requirements["auth.3"].result in ["compliant", "not_applicable"] && requirements["auth.4"].result
+        in ["compliant", "not_applicable"] && requirements["auth.11"].result in ["compliant", "not_applicable"]
+        && requirements["auth.12"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["auth.8"].result
+        in ["compliant", "not_applicable"] && requirements["auth.9"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) + 1.0 * (requirements["supervision.4"].result in ["compliant", "not_applicable"]
+        && requirements["supervision.5"].result in ["compliant", "not_applicable"] && requirements["supervision.6"].result
+        in ["compliant", "not_applicable"] && requirements["supervision.7"].result in ["compliant", "not_applicable"]
+        ? 0.0 : 1.0)) > (4.0 - 1.0 * (requirements["rh.2"].result in ["compliant", "not_applicable"] &&
+        requirements["mail.1"].result in ["compliant", "not_applicable"] && requirements["mail.2"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["distance.2"].result in
+        ["compliant", "not_applicable"] && requirements["distance.4"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) - 1.0 * (requirements["rh.4"].result in ["compliant", "not_applicable"] && requirements["droits.1"].result
+        in ["compliant", "not_applicable"] && requirements["droits.3"].result in ["compliant", "not_applicable"]
+        && requirements["compadmin.1"].result in ["compliant", "not_applicable"] && requirements["id.1"].result
+        in ["compliant", "not_applicable"] && requirements["id.2"].result in ["compliant", "not_applicable"]
+        && requirements["id.4"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) + 1.0 * (requirements["compadmin.2"].result
+        in ["compliant", "not_applicable"] && requirements["compadmin.3"].result in ["compliant", "not_applicable"]
+        && requirements["compadmin.4"].result in ["compliant", "not_applicable"] && requirements["compadmin.5"].result
+        in ["compliant", "not_applicable"] && requirements["compadmin.6"].result in ["compliant", "not_applicable"]
+        && requirements["compadmin.9"].result in ["compliant", "not_applicable"] ? 0.0 : 1.0) + 1.0 *
+        (requirements["supervision.4"].result in ["compliant", "not_applicable"] && requirements["supervision.5"].result
+        in ["compliant", "not_applicable"] && requirements["supervision.6"].result in ["compliant", "not_applicable"]
+        && requirements["supervision.7"].result in ["compliant", "not_applicable"] ? 0.0 : 1.0)) ? (4.0
+        - 1.0 * (requirements["distance.2"].result in ["compliant", "not_applicable"] && requirements["distance.4"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["auth.2"].result in ["compliant",
+        "not_applicable"] && requirements["auth.3"].result in ["compliant", "not_applicable"] && requirements["auth.4"].result
+        in ["compliant", "not_applicable"] && requirements["auth.11"].result in ["compliant", "not_applicable"]
+        && requirements["auth.12"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["auth.8"].result
+        in ["compliant", "not_applicable"] && requirements["auth.9"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) + 1.0 * (requirements["supervision.4"].result in ["compliant", "not_applicable"]
+        && requirements["supervision.5"].result in ["compliant", "not_applicable"] && requirements["supervision.6"].result
+        in ["compliant", "not_applicable"] && requirements["supervision.7"].result in ["compliant", "not_applicable"]
+        ? 0.0 : 1.0)) : (4.0 - 1.0 * (requirements["rh.2"].result in ["compliant", "not_applicable"] &&
+        requirements["mail.1"].result in ["compliant", "not_applicable"] && requirements["mail.2"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["distance.2"].result in
+        ["compliant", "not_applicable"] && requirements["distance.4"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) - 1.0 * (requirements["rh.4"].result in ["compliant", "not_applicable"] && requirements["droits.1"].result
+        in ["compliant", "not_applicable"] && requirements["droits.3"].result in ["compliant", "not_applicable"]
+        && requirements["compadmin.1"].result in ["compliant", "not_applicable"] && requirements["id.1"].result
+        in ["compliant", "not_applicable"] && requirements["id.2"].result in ["compliant", "not_applicable"]
+        && requirements["id.4"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) + 1.0 * (requirements["compadmin.2"].result
+        in ["compliant", "not_applicable"] && requirements["compadmin.3"].result in ["compliant", "not_applicable"]
+        && requirements["compadmin.4"].result in ["compliant", "not_applicable"] && requirements["compadmin.5"].result
+        in ["compliant", "not_applicable"] && requirements["compadmin.6"].result in ["compliant", "not_applicable"]
+        && requirements["compadmin.9"].result in ["compliant", "not_applicable"] ? 0.0 : 1.0) + 1.0 *
+        (requirements["supervision.4"].result in ["compliant", "not_applicable"] && requirements["supervision.5"].result
+        in ["compliant", "not_applicable"] && requirements["supervision.6"].result in ["compliant", "not_applicable"]
+        && requirements["supervision.7"].result in ["compliant", "not_applicable"] ? 0.0 : 1.0))) : (("M-I"
+        in assessment.selected_implementation_groups || "M-R" in assessment.selected_implementation_groups)
+        ? ((4.0 - 1.0 * (requirements["distance.2"].result in ["compliant", "not_applicable"] && requirements["distance.4"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["auth.2"].result in ["compliant",
+        "not_applicable"] && requirements["auth.3"].result in ["compliant", "not_applicable"] && requirements["auth.4"].result
+        in ["compliant", "not_applicable"] && requirements["auth.11"].result in ["compliant", "not_applicable"]
+        && requirements["auth.12"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["auth.8"].result
+        in ["compliant", "not_applicable"] && requirements["auth.9"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0)) > (4.0 - 1.0 * (requirements["rh.2"].result in ["compliant", "not_applicable"] &&
+        requirements["mail.1"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["distance.2"].result
+        in ["compliant", "not_applicable"] && requirements["distance.4"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) - 1.0 * (requirements["rh.4"].result in ["compliant", "not_applicable"] && requirements["droits.1"].result
+        in ["compliant", "not_applicable"] && requirements["droits.3"].result in ["compliant", "not_applicable"]
+        && requirements["compadmin.1"].result in ["compliant", "not_applicable"] && requirements["id.1"].result
+        in ["compliant", "not_applicable"] && requirements["id.2"].result in ["compliant", "not_applicable"]
+        && requirements["id.4"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) + 1.0 * (requirements["compadmin.2"].result
+        in ["compliant", "not_applicable"] && requirements["compadmin.6"].result in ["compliant", "not_applicable"]
+        && requirements["compadmin.9"].result in ["compliant", "not_applicable"] ? 0.0 : 1.0)) ? (4.0
+        - 1.0 * (requirements["distance.2"].result in ["compliant", "not_applicable"] && requirements["distance.4"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["auth.2"].result in ["compliant",
+        "not_applicable"] && requirements["auth.3"].result in ["compliant", "not_applicable"] && requirements["auth.4"].result
+        in ["compliant", "not_applicable"] && requirements["auth.11"].result in ["compliant", "not_applicable"]
+        && requirements["auth.12"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["auth.8"].result
+        in ["compliant", "not_applicable"] && requirements["auth.9"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0)) : (4.0 - 1.0 * (requirements["rh.2"].result in ["compliant", "not_applicable"] &&
+        requirements["mail.1"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["distance.2"].result
+        in ["compliant", "not_applicable"] && requirements["distance.4"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) - 1.0 * (requirements["rh.4"].result in ["compliant", "not_applicable"] && requirements["droits.1"].result
+        in ["compliant", "not_applicable"] && requirements["droits.3"].result in ["compliant", "not_applicable"]
+        && requirements["compadmin.1"].result in ["compliant", "not_applicable"] && requirements["id.1"].result
+        in ["compliant", "not_applicable"] && requirements["id.2"].result in ["compliant", "not_applicable"]
+        && requirements["id.4"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) + 1.0 * (requirements["compadmin.2"].result
+        in ["compliant", "not_applicable"] && requirements["compadmin.6"].result in ["compliant", "not_applicable"]
+        && requirements["compadmin.9"].result in ["compliant", "not_applicable"] ? 0.0 : 1.0))) : ((4.0
+        - 1.0 * (requirements["distance.2"].result in ["compliant", "not_applicable"] && requirements["distance.4"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["auth.5"].result in ["compliant",
+        "not_applicable"] && requirements["auth.11"].result in ["compliant", "not_applicable"] ? 1.0 :
+        0.0) - 1.0 * (requirements["auth.9"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0)) >
+        (4.0 - 1.0 * (requirements["rh.2"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0
+        * (requirements["distance.2"].result in ["compliant", "not_applicable"] && requirements["distance.4"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["droits.1"].result in ["compliant",
+        "not_applicable"] && requirements["droits.3"].result in ["compliant", "not_applicable"] && requirements["compadmin.1"].result
+        in ["compliant", "not_applicable"] && requirements["id.1"].result in ["compliant", "not_applicable"]
+        && requirements["id.2"].result in ["compliant", "not_applicable"] && requirements["id.3"].result
+        in ["compliant", "not_applicable"] && requirements["id.4"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) + 1.0 * (requirements["compadmin.2"].result in ["compliant", "not_applicable"] &&
+        requirements["compadmin.6"].result in ["compliant", "not_applicable"] && requirements["compadmin.9"].result
+        in ["compliant", "not_applicable"] ? 0.0 : 1.0)) ? (4.0 - 1.0 * (requirements["distance.2"].result
+        in ["compliant", "not_applicable"] && requirements["distance.4"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) - 1.0 * (requirements["auth.5"].result in ["compliant", "not_applicable"] && requirements["auth.11"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["auth.9"].result in ["compliant",
+        "not_applicable"] ? 1.0 : 0.0)) : (4.0 - 1.0 * (requirements["rh.2"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) - 1.0 * (requirements["distance.2"].result in ["compliant", "not_applicable"] &&
+        requirements["distance.4"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["droits.1"].result
+        in ["compliant", "not_applicable"] && requirements["droits.3"].result in ["compliant", "not_applicable"]
+        && requirements["compadmin.1"].result in ["compliant", "not_applicable"] && requirements["id.1"].result
+        in ["compliant", "not_applicable"] && requirements["id.2"].result in ["compliant", "not_applicable"]
+        && requirements["id.3"].result in ["compliant", "not_applicable"] && requirements["id.4"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) + 1.0 * (requirements["compadmin.2"].result in
+        ["compliant", "not_applicable"] && requirements["compadmin.6"].result in ["compliant", "not_applicable"]
+        && requirements["compadmin.9"].result in ["compliant", "not_applicable"] ? 0.0 : 1.0))))'
+    - ref_id: vraisemblance_v6
+      kind: number
+      label: Vraisemblance MSS-V6 (1 à 4)
+      internal: true
+      likelihood_of: urn:intuitem:risk:threat:anssi-mss-v2:v6
+      expression: 'values.vraisemblance_brute_v6 < 0.0 ? 0.0 : (values.vraisemblance_brute_v6 < 1.0 ?
+        1.0 : (values.vraisemblance_brute_v6 > 4.0 ? 4.0 : values.vraisemblance_brute_v6))'
+    - ref_id: vraisemblance_brute_v7
+      kind: number
+      label: Vraisemblance MSS-V7 avant bornage
+      internal: true
+      expression: '("A-I" in assessment.selected_implementation_groups || "A-R" in assessment.selected_implementation_groups)
+        ? ((4.0 - 1.0 * (requirements["distance.2"].result in ["compliant", "not_applicable"] && requirements["distance.4"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["auth.2"].result in ["compliant",
+        "not_applicable"] && requirements["auth.3"].result in ["compliant", "not_applicable"] && requirements["auth.4"].result
+        in ["compliant", "not_applicable"] && requirements["auth.11"].result in ["compliant", "not_applicable"]
+        && requirements["auth.12"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["auth.8"].result
+        in ["compliant", "not_applicable"] && requirements["auth.9"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) + 1.0 * (requirements["contrat.1"].result in ["compliant", "not_applicable"] && requirements["contrat.2"].result
+        in ["compliant", "not_applicable"] && requirements["ecosysteme.1"].result in ["compliant", "not_applicable"]
+        ? 0.0 : 1.0) + 1.0 * (requirements["supervision.4"].result in ["compliant", "not_applicable"]
+        && requirements["supervision.5"].result in ["compliant", "not_applicable"] && requirements["supervision.6"].result
+        in ["compliant", "not_applicable"] && requirements["supervision.7"].result in ["compliant", "not_applicable"]
+        ? 0.0 : 1.0)) > (4.0 - 1.0 * (requirements["rh.2"].result in ["compliant", "not_applicable"] &&
+        requirements["mail.1"].result in ["compliant", "not_applicable"] && requirements["mail.2"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["distance.2"].result in
+        ["compliant", "not_applicable"] && requirements["distance.4"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) - 1.0 * (requirements["rh.4"].result in ["compliant", "not_applicable"] && requirements["droits.1"].result
+        in ["compliant", "not_applicable"] && requirements["droits.3"].result in ["compliant", "not_applicable"]
+        && requirements["id.1"].result in ["compliant", "not_applicable"] && requirements["id.2"].result
+        in ["compliant", "not_applicable"] && requirements["id.4"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) - 1.0 * (requirements["compadmin.1"].result in ["compliant", "not_applicable"] &&
+        requirements["compadmin.2"].result in ["compliant", "not_applicable"] && requirements["compadmin.3"].result
+        in ["compliant", "not_applicable"] && requirements["compadmin.4"].result in ["compliant", "not_applicable"]
+        && requirements["compadmin.5"].result in ["compliant", "not_applicable"] && requirements["compadmin.6"].result
+        in ["compliant", "not_applicable"] && requirements["compadmin.9"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) + 1.0 * (requirements["contrat.1"].result in ["compliant", "not_applicable"] && requirements["contrat.2"].result
+        in ["compliant", "not_applicable"] && requirements["ecosysteme.1"].result in ["compliant", "not_applicable"]
+        ? 0.0 : 1.0) + 1.0 * (requirements["supervision.4"].result in ["compliant", "not_applicable"]
+        && requirements["supervision.5"].result in ["compliant", "not_applicable"] && requirements["supervision.6"].result
+        in ["compliant", "not_applicable"] && requirements["supervision.7"].result in ["compliant", "not_applicable"]
+        ? 0.0 : 1.0)) ? (4.0 - 1.0 * (requirements["distance.2"].result in ["compliant", "not_applicable"]
+        && requirements["distance.4"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["auth.2"].result
+        in ["compliant", "not_applicable"] && requirements["auth.3"].result in ["compliant", "not_applicable"]
+        && requirements["auth.4"].result in ["compliant", "not_applicable"] && requirements["auth.11"].result
+        in ["compliant", "not_applicable"] && requirements["auth.12"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) - 1.0 * (requirements["auth.8"].result in ["compliant", "not_applicable"] && requirements["auth.9"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) + 1.0 * (requirements["contrat.1"].result in ["compliant",
+        "not_applicable"] && requirements["contrat.2"].result in ["compliant", "not_applicable"] && requirements["ecosysteme.1"].result
+        in ["compliant", "not_applicable"] ? 0.0 : 1.0) + 1.0 * (requirements["supervision.4"].result
+        in ["compliant", "not_applicable"] && requirements["supervision.5"].result in ["compliant", "not_applicable"]
+        && requirements["supervision.6"].result in ["compliant", "not_applicable"] && requirements["supervision.7"].result
+        in ["compliant", "not_applicable"] ? 0.0 : 1.0)) : (4.0 - 1.0 * (requirements["rh.2"].result in
+        ["compliant", "not_applicable"] && requirements["mail.1"].result in ["compliant", "not_applicable"]
+        && requirements["mail.2"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["distance.2"].result
+        in ["compliant", "not_applicable"] && requirements["distance.4"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) - 1.0 * (requirements["rh.4"].result in ["compliant", "not_applicable"] && requirements["droits.1"].result
+        in ["compliant", "not_applicable"] && requirements["droits.3"].result in ["compliant", "not_applicable"]
+        && requirements["id.1"].result in ["compliant", "not_applicable"] && requirements["id.2"].result
+        in ["compliant", "not_applicable"] && requirements["id.4"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) - 1.0 * (requirements["compadmin.1"].result in ["compliant", "not_applicable"] &&
+        requirements["compadmin.2"].result in ["compliant", "not_applicable"] && requirements["compadmin.3"].result
+        in ["compliant", "not_applicable"] && requirements["compadmin.4"].result in ["compliant", "not_applicable"]
+        && requirements["compadmin.5"].result in ["compliant", "not_applicable"] && requirements["compadmin.6"].result
+        in ["compliant", "not_applicable"] && requirements["compadmin.9"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) + 1.0 * (requirements["contrat.1"].result in ["compliant", "not_applicable"] && requirements["contrat.2"].result
+        in ["compliant", "not_applicable"] && requirements["ecosysteme.1"].result in ["compliant", "not_applicable"]
+        ? 0.0 : 1.0) + 1.0 * (requirements["supervision.4"].result in ["compliant", "not_applicable"]
+        && requirements["supervision.5"].result in ["compliant", "not_applicable"] && requirements["supervision.6"].result
+        in ["compliant", "not_applicable"] && requirements["supervision.7"].result in ["compliant", "not_applicable"]
+        ? 0.0 : 1.0))) : (("M-I" in assessment.selected_implementation_groups || "M-R" in assessment.selected_implementation_groups)
+        ? ((4.0 - 1.0 * (requirements["distance.2"].result in ["compliant", "not_applicable"] && requirements["distance.4"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["auth.2"].result in ["compliant",
+        "not_applicable"] && requirements["auth.3"].result in ["compliant", "not_applicable"] && requirements["auth.4"].result
+        in ["compliant", "not_applicable"] && requirements["auth.11"].result in ["compliant", "not_applicable"]
+        && requirements["auth.12"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["auth.8"].result
+        in ["compliant", "not_applicable"] && requirements["auth.9"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) + 1.0 * (requirements["contrat.1"].result in ["compliant", "not_applicable"] && requirements["contrat.2"].result
+        in ["compliant", "not_applicable"] && requirements["ecosysteme.1"].result in ["compliant", "not_applicable"]
+        ? 0.0 : 1.0)) > (4.0 - 1.0 * (requirements["rh.2"].result in ["compliant", "not_applicable"] &&
+        requirements["mail.1"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["distance.2"].result
+        in ["compliant", "not_applicable"] && requirements["distance.4"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) - 1.0 * (requirements["rh.4"].result in ["compliant", "not_applicable"] && requirements["droits.1"].result
+        in ["compliant", "not_applicable"] && requirements["droits.3"].result in ["compliant", "not_applicable"]
+        && requirements["id.1"].result in ["compliant", "not_applicable"] && requirements["id.2"].result
+        in ["compliant", "not_applicable"] && requirements["id.4"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) - 1.0 * (requirements["compadmin.1"].result in ["compliant", "not_applicable"] &&
+        requirements["compadmin.2"].result in ["compliant", "not_applicable"] && requirements["compadmin.6"].result
+        in ["compliant", "not_applicable"] && requirements["compadmin.9"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) + 1.0 * (requirements["contrat.1"].result in ["compliant", "not_applicable"] && requirements["contrat.2"].result
+        in ["compliant", "not_applicable"] && requirements["ecosysteme.1"].result in ["compliant", "not_applicable"]
+        ? 0.0 : 1.0)) ? (4.0 - 1.0 * (requirements["distance.2"].result in ["compliant", "not_applicable"]
+        && requirements["distance.4"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["auth.2"].result
+        in ["compliant", "not_applicable"] && requirements["auth.3"].result in ["compliant", "not_applicable"]
+        && requirements["auth.4"].result in ["compliant", "not_applicable"] && requirements["auth.11"].result
+        in ["compliant", "not_applicable"] && requirements["auth.12"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) - 1.0 * (requirements["auth.8"].result in ["compliant", "not_applicable"] && requirements["auth.9"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) + 1.0 * (requirements["contrat.1"].result in ["compliant",
+        "not_applicable"] && requirements["contrat.2"].result in ["compliant", "not_applicable"] && requirements["ecosysteme.1"].result
+        in ["compliant", "not_applicable"] ? 0.0 : 1.0)) : (4.0 - 1.0 * (requirements["rh.2"].result in
+        ["compliant", "not_applicable"] && requirements["mail.1"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) - 1.0 * (requirements["distance.2"].result in ["compliant", "not_applicable"] &&
+        requirements["distance.4"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["rh.4"].result
+        in ["compliant", "not_applicable"] && requirements["droits.1"].result in ["compliant", "not_applicable"]
+        && requirements["droits.3"].result in ["compliant", "not_applicable"] && requirements["id.1"].result
+        in ["compliant", "not_applicable"] && requirements["id.2"].result in ["compliant", "not_applicable"]
+        && requirements["id.4"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["compadmin.1"].result
+        in ["compliant", "not_applicable"] && requirements["compadmin.2"].result in ["compliant", "not_applicable"]
+        && requirements["compadmin.6"].result in ["compliant", "not_applicable"] && requirements["compadmin.9"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) + 1.0 * (requirements["contrat.1"].result in ["compliant",
+        "not_applicable"] && requirements["contrat.2"].result in ["compliant", "not_applicable"] && requirements["ecosysteme.1"].result
+        in ["compliant", "not_applicable"] ? 0.0 : 1.0))) : ((4.0 - 1.0 * (requirements["distance.2"].result
+        in ["compliant", "not_applicable"] && requirements["distance.4"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) - 1.0 * (requirements["auth.5"].result in ["compliant", "not_applicable"] && requirements["auth.11"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["auth.9"].result in ["compliant",
+        "not_applicable"] ? 1.0 : 0.0) + 1.0 * (requirements["contrat.1"].result in ["compliant", "not_applicable"]
+        ? 0.0 : 1.0)) > (4.0 - 1.0 * (requirements["rh.2"].result in ["compliant", "not_applicable"] ?
+        1.0 : 0.0) - 1.0 * (requirements["distance.2"].result in ["compliant", "not_applicable"] && requirements["distance.4"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["droits.1"].result in ["compliant",
+        "not_applicable"] && requirements["droits.3"].result in ["compliant", "not_applicable"] && requirements["id.1"].result
+        in ["compliant", "not_applicable"] && requirements["id.2"].result in ["compliant", "not_applicable"]
+        && requirements["id.3"].result in ["compliant", "not_applicable"] && requirements["id.4"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["compadmin.1"].result in
+        ["compliant", "not_applicable"] && requirements["compadmin.2"].result in ["compliant", "not_applicable"]
+        && requirements["compadmin.6"].result in ["compliant", "not_applicable"] && requirements["compadmin.9"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) + 1.0 * (requirements["contrat.1"].result in ["compliant",
+        "not_applicable"] ? 0.0 : 1.0)) ? (4.0 - 1.0 * (requirements["distance.2"].result in ["compliant",
+        "not_applicable"] && requirements["distance.4"].result in ["compliant", "not_applicable"] ? 1.0
+        : 0.0) - 1.0 * (requirements["auth.5"].result in ["compliant", "not_applicable"] && requirements["auth.11"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["auth.9"].result in ["compliant",
+        "not_applicable"] ? 1.0 : 0.0) + 1.0 * (requirements["contrat.1"].result in ["compliant", "not_applicable"]
+        ? 0.0 : 1.0)) : (4.0 - 1.0 * (requirements["rh.2"].result in ["compliant", "not_applicable"] ?
+        1.0 : 0.0) - 1.0 * (requirements["distance.2"].result in ["compliant", "not_applicable"] && requirements["distance.4"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["droits.1"].result in ["compliant",
+        "not_applicable"] && requirements["droits.3"].result in ["compliant", "not_applicable"] && requirements["id.1"].result
+        in ["compliant", "not_applicable"] && requirements["id.2"].result in ["compliant", "not_applicable"]
+        && requirements["id.3"].result in ["compliant", "not_applicable"] && requirements["id.4"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["compadmin.1"].result in
+        ["compliant", "not_applicable"] && requirements["compadmin.2"].result in ["compliant", "not_applicable"]
+        && requirements["compadmin.6"].result in ["compliant", "not_applicable"] && requirements["compadmin.9"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) + 1.0 * (requirements["contrat.1"].result in ["compliant",
+        "not_applicable"] ? 0.0 : 1.0))))'
+    - ref_id: vraisemblance_v7
+      kind: number
+      label: Vraisemblance MSS-V7 (1 à 4)
+      internal: true
+      likelihood_of: urn:intuitem:risk:threat:anssi-mss-v2:v7
+      expression: 'values.vraisemblance_brute_v7 < 0.0 ? 0.0 : (values.vraisemblance_brute_v7 < 1.0 ?
+        1.0 : (values.vraisemblance_brute_v7 > 4.0 ? 4.0 : values.vraisemblance_brute_v7))'
+    - ref_id: vraisemblance_brute_v8
+      kind: number
+      label: Vraisemblance MSS-V8 avant bornage
+      internal: true
+      expression: '("A-I" in assessment.selected_implementation_groups || "A-R" in assessment.selected_implementation_groups)
+        ? (4.0 - 1.0 * (requirements["mco_mcs.1"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.17"].result
+        in ["compliant", "not_applicable"] && requirements["malware.4"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.3"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.4"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.5"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.6"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.7"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["config.1"].result in ["compliant",
+        "not_applicable"] && requirements["config.2"].result in ["compliant", "not_applicable"] && requirements["config.4"].result
+        in ["compliant", "not_applicable"] && requirements["config.5"].result in ["compliant", "not_applicable"]
+        && requirements["config.6"].result in ["compliant", "not_applicable"] && requirements["config.8"].result
+        in ["compliant", "not_applicable"] && requirements["dev.1"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) - 1.0 * (requirements["cloison.1"].result in ["compliant", "not_applicable"] && requirements["cloison.2"].result
+        in ["compliant", "not_applicable"] && requirements["cloison.5"].result in ["compliant", "not_applicable"]
+        && requirements["cloison.6"].result in ["compliant", "not_applicable"] && requirements["filtre.1"].result
+        in ["compliant", "not_applicable"] && requirements["filtre.2"].result in ["compliant", "not_applicable"]
+        && requirements["filtre.3"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) + 1.0 * (requirements["contrat.1"].result
+        in ["compliant", "not_applicable"] && requirements["contrat.2"].result in ["compliant", "not_applicable"]
+        && requirements["ecosysteme.1"].result in ["compliant", "not_applicable"] && requirements["ecosysteme.2"].result
+        in ["compliant", "not_applicable"] ? 0.0 : 1.0) + 1.0 * ((requirements["config.3"].result in ["compliant",
+        "not_applicable"]) ? 0.0 : 1.0) - 1.0 * (requirements["distance.1"].result in ["compliant", "not_applicable"]
+        && requirements["distance.2"].result in ["compliant", "not_applicable"] && requirements["distance.3"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) + 1.0 * ((requirements["audit.7"].result in ["compliant",
+        "not_applicable"]) ? 0.0 : 1.0) + 1.0 * (requirements["supervision.4"].result in ["compliant",
+        "not_applicable"] && requirements["supervision.5"].result in ["compliant", "not_applicable"] &&
+        requirements["supervision.6"].result in ["compliant", "not_applicable"] && requirements["supervision.7"].result
+        in ["compliant", "not_applicable"] ? 0.0 : 1.0)) : (("M-I" in assessment.selected_implementation_groups
+        || "M-R" in assessment.selected_implementation_groups) ? (4.0 - 1.0 * (requirements["malware.4"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.3"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.4"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.5"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.6"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.7"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["config.1"].result
+        in ["compliant", "not_applicable"] && requirements["config.4"].result in ["compliant", "not_applicable"]
+        && requirements["config.5"].result in ["compliant", "not_applicable"] && requirements["config.6"].result
+        in ["compliant", "not_applicable"] && requirements["config.8"].result in ["compliant", "not_applicable"]
+        && requirements["dev.1"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["cloison.1"].result
+        in ["compliant", "not_applicable"] && requirements["cloison.5"].result in ["compliant", "not_applicable"]
+        && requirements["filtre.1"].result in ["compliant", "not_applicable"] && requirements["filtre.3"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) + 1.0 * (requirements["contrat.1"].result in ["compliant",
+        "not_applicable"] && requirements["contrat.2"].result in ["compliant", "not_applicable"] && requirements["ecosysteme.1"].result
+        in ["compliant", "not_applicable"] && requirements["ecosysteme.2"].result in ["compliant", "not_applicable"]
+        ? 0.0 : 1.0) - 1.0 * (requirements["distance.1"].result in ["compliant", "not_applicable"] &&
+        requirements["distance.2"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0)) : (4.0 - 2.0
+        * (requirements["malware.5"].result in ["compliant", "not_applicable"] && requirements["malware.6"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.14"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.15"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.3"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.5"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.6"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["mco_mcs.16"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) + 1.0 * ((requirements["contrat.1"].result in
+        ["compliant", "not_applicable"]) ? 0.0 : 1.0)))'
+    - ref_id: vraisemblance_v8
+      kind: number
+      label: Vraisemblance MSS-V8 (1 à 4)
+      internal: true
+      likelihood_of: urn:intuitem:risk:threat:anssi-mss-v2:v8
+      expression: 'values.vraisemblance_brute_v8 < 0.0 ? 0.0 : (values.vraisemblance_brute_v8 < 1.0 ?
+        1.0 : (values.vraisemblance_brute_v8 > 4.0 ? 4.0 : values.vraisemblance_brute_v8))'
+    - ref_id: vraisemblance_brute_v9
+      kind: number
+      label: Vraisemblance MSS-V9 avant bornage
+      internal: true
+      expression: '("A-I" in assessment.selected_implementation_groups || "A-R" in assessment.selected_implementation_groups)
+        ? (4.0 - 1.0 * (requirements["mco_mcs.1"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.17"].result
+        in ["compliant", "not_applicable"] && requirements["malware.4"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.3"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.4"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.5"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.6"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.7"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["config.1"].result in ["compliant",
+        "not_applicable"] && requirements["config.2"].result in ["compliant", "not_applicable"] && requirements["config.4"].result
+        in ["compliant", "not_applicable"] && requirements["config.5"].result in ["compliant", "not_applicable"]
+        && requirements["config.6"].result in ["compliant", "not_applicable"] && requirements["config.8"].result
+        in ["compliant", "not_applicable"] && requirements["dev.1"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) - 1.0 * (requirements["cloison.1"].result in ["compliant", "not_applicable"] && requirements["cloison.2"].result
+        in ["compliant", "not_applicable"] && requirements["cloison.5"].result in ["compliant", "not_applicable"]
+        && requirements["cloison.6"].result in ["compliant", "not_applicable"] && requirements["filtre.1"].result
+        in ["compliant", "not_applicable"] && requirements["filtre.2"].result in ["compliant", "not_applicable"]
+        && requirements["filtre.3"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) + 1.0 * (requirements["contrat.1"].result
+        in ["compliant", "not_applicable"] && requirements["contrat.2"].result in ["compliant", "not_applicable"]
+        && requirements["ecosysteme.1"].result in ["compliant", "not_applicable"] && requirements["ecosysteme.2"].result
+        in ["compliant", "not_applicable"] ? 0.0 : 1.0) + 1.0 * ((requirements["config.3"].result in ["compliant",
+        "not_applicable"]) ? 0.0 : 1.0) - 1.0 * (requirements["distance.1"].result in ["compliant", "not_applicable"]
+        && requirements["distance.2"].result in ["compliant", "not_applicable"] && requirements["distance.3"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) + 1.0 * ((requirements["audit.7"].result in ["compliant",
+        "not_applicable"]) ? 0.0 : 1.0) + 1.0 * (requirements["supervision.4"].result in ["compliant",
+        "not_applicable"] && requirements["supervision.5"].result in ["compliant", "not_applicable"] &&
+        requirements["supervision.6"].result in ["compliant", "not_applicable"] && requirements["supervision.7"].result
+        in ["compliant", "not_applicable"] ? 0.0 : 1.0)) : (("M-I" in assessment.selected_implementation_groups
+        || "M-R" in assessment.selected_implementation_groups) ? (4.0 - 1.0 * (requirements["malware.4"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.3"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.4"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.5"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.6"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.7"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["config.1"].result
+        in ["compliant", "not_applicable"] && requirements["config.4"].result in ["compliant", "not_applicable"]
+        && requirements["config.5"].result in ["compliant", "not_applicable"] && requirements["config.6"].result
+        in ["compliant", "not_applicable"] && requirements["config.8"].result in ["compliant", "not_applicable"]
+        && requirements["dev.1"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["cloison.1"].result
+        in ["compliant", "not_applicable"] && requirements["cloison.5"].result in ["compliant", "not_applicable"]
+        && requirements["filtre.1"].result in ["compliant", "not_applicable"] && requirements["filtre.3"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) + 1.0 * (requirements["contrat.1"].result in ["compliant",
+        "not_applicable"] && requirements["contrat.2"].result in ["compliant", "not_applicable"] && requirements["ecosysteme.1"].result
+        in ["compliant", "not_applicable"] && requirements["ecosysteme.2"].result in ["compliant", "not_applicable"]
+        ? 0.0 : 1.0) - 1.0 * (requirements["distance.1"].result in ["compliant", "not_applicable"] &&
+        requirements["distance.2"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0)) : (4.0 - 1.0
+        * (requirements["malware.5"].result in ["compliant", "not_applicable"] && requirements["malware.6"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.14"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.15"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.3"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.5"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.6"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["mco_mcs.16"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["dev.1"].result in ["compliant",
+        "not_applicable"] ? 1.0 : 0.0) + 1.0 * ((requirements["contrat.1"].result in ["compliant", "not_applicable"])
+        ? 0.0 : 1.0)))'
+    - ref_id: vraisemblance_v9
+      kind: number
+      label: Vraisemblance MSS-V9 (1 à 4)
+      internal: true
+      likelihood_of: urn:intuitem:risk:threat:anssi-mss-v2:v9
+      expression: 'values.vraisemblance_brute_v9 < 0.0 ? 0.0 : (values.vraisemblance_brute_v9 < 1.0 ?
+        1.0 : (values.vraisemblance_brute_v9 > 4.0 ? 4.0 : values.vraisemblance_brute_v9))'
+    - ref_id: vraisemblance_brute_v10
+      kind: number
+      label: Vraisemblance MSS-V10 avant bornage
+      internal: true
+      expression: '("A-I" in assessment.selected_implementation_groups || "A-R" in assessment.selected_implementation_groups)
+        ? (4.0 - 1.0 * (requirements["phys.1"].result in ["compliant", "not_applicable"] && requirements["phys.2"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["config.8"].result in ["compliant",
+        "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["mco_mcs.11"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.12"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0)) : (("M-I"
+        in assessment.selected_implementation_groups || "M-R" in assessment.selected_implementation_groups)
+        ? (4.0 - 1.0 * (requirements["phys.1"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0)
+        - 1.0 * (requirements["config.8"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0
+        * (requirements["mco_mcs.11"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.12"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0)) : -1.0)'
+    - ref_id: vraisemblance_v10
+      kind: number
+      label: Vraisemblance MSS-V10 (1 à 4)
+      internal: true
+      likelihood_of: urn:intuitem:risk:threat:anssi-mss-v2:v10
+      expression: 'values.vraisemblance_brute_v10 < 0.0 ? 0.0 : (values.vraisemblance_brute_v10 < 1.0
+        ? 1.0 : (values.vraisemblance_brute_v10 > 4.0 ? 4.0 : values.vraisemblance_brute_v10))'
+    - ref_id: vraisemblance_brute_v11
+      kind: number
+      label: Vraisemblance MSS-V11 avant bornage
+      internal: true
+      expression: '("A-I" in assessment.selected_implementation_groups || "A-R" in assessment.selected_implementation_groups)
+        ? (4.0 - 1.0 * (requirements["phys.1"].result in ["compliant", "not_applicable"] && requirements["phys.2"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["config.8"].result in ["compliant",
+        "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["mco_mcs.11"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.12"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) + 1.0 * (requirements["contrat.1"].result
+        in ["compliant", "not_applicable"] && requirements["contrat.2"].result in ["compliant", "not_applicable"]
+        && requirements["ecosysteme.1"].result in ["compliant", "not_applicable"] ? 0.0 : 1.0)) : (("M-I"
+        in assessment.selected_implementation_groups || "M-R" in assessment.selected_implementation_groups)
+        ? (4.0 - 1.0 * (requirements["phys.1"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0)
+        - 1.0 * (requirements["config.8"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0
+        * (requirements["mco_mcs.11"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.12"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) + 1.0 * (requirements["contrat.1"].result in ["compliant",
+        "not_applicable"] && requirements["contrat.2"].result in ["compliant", "not_applicable"] && requirements["ecosysteme.1"].result
+        in ["compliant", "not_applicable"] ? 0.0 : 1.0)) : (4.0 - 2.0 * (requirements["contrat.1"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0)))'
+    - ref_id: vraisemblance_v11
+      kind: number
+      label: Vraisemblance MSS-V11 (1 à 4)
+      internal: true
+      likelihood_of: urn:intuitem:risk:threat:anssi-mss-v2:v11
+      expression: 'values.vraisemblance_brute_v11 < 0.0 ? 0.0 : (values.vraisemblance_brute_v11 < 1.0
+        ? 1.0 : (values.vraisemblance_brute_v11 > 4.0 ? 4.0 : values.vraisemblance_brute_v11))'
+    - ref_id: vraisemblance_brute_v12
+      kind: number
+      label: Vraisemblance MSS-V12 avant bornage
+      internal: true
+      expression: '("A-I" in assessment.selected_implementation_groups || "A-R" in assessment.selected_implementation_groups)
+        ? (4.0 - 2.0 * (requirements["filtre.4"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0)
+        - 1.0 * (requirements["cloison.4"].result in ["compliant", "not_applicable"] && requirements["filtre.1"].result
+        in ["compliant", "not_applicable"] && requirements["filtre.2"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) + 1.0 * (requirements["filtre.3"].result in ["compliant", "not_applicable"] ? 0.0
+        : 1.0) + 1.0 * (requirements["supervision.4"].result in ["compliant", "not_applicable"] && requirements["supervision.5"].result
+        in ["compliant", "not_applicable"] && requirements["supervision.7"].result in ["compliant", "not_applicable"]
+        ? 0.0 : 1.0)) : (("M-I" in assessment.selected_implementation_groups || "M-R" in assessment.selected_implementation_groups)
+        ? (4.0 - 2.0 * (requirements["filtre.4"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0)
+        - 1.0 * (requirements["filtre.1"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) + 1.0
+        * (requirements["filtre.3"].result in ["compliant", "not_applicable"] ? 0.0 : 1.0)) : -1.0)'
+    - ref_id: vraisemblance_v12
+      kind: number
+      label: Vraisemblance MSS-V12 (1 à 4)
+      internal: true
+      likelihood_of: urn:intuitem:risk:threat:anssi-mss-v2:v12
+      expression: 'values.vraisemblance_brute_v12 < 0.0 ? 0.0 : (values.vraisemblance_brute_v12 < 1.0
+        ? 1.0 : (values.vraisemblance_brute_v12 > 4.0 ? 4.0 : values.vraisemblance_brute_v12))'
+    - ref_id: vraisemblance_brute_v13
+      kind: number
+      label: Vraisemblance MSS-V13 avant bornage
+      internal: true
+      expression: '("A-I" in assessment.selected_implementation_groups || "A-R" in assessment.selected_implementation_groups)
+        ? (4.0 - 1.0 * (requirements["dev.1"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) -
+        1.0 * (requirements["ecosysteme.2"].result in ["compliant", "not_applicable"] && requirements["cloison.3"].result
+        in ["compliant", "not_applicable"] && requirements["config.1"].result in ["compliant", "not_applicable"]
+        && requirements["config.2"].result in ["compliant", "not_applicable"] && requirements["config.3"].result
+        in ["compliant", "not_applicable"] && requirements["config.6"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.1"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.17"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.3"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.4"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.5"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.6"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.7"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["distance.2"].result
+        in ["compliant", "not_applicable"] && requirements["auth.4"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) + 1.0 * ((requirements["audit.6"].result in ["compliant", "not_applicable"] || requirements["audit.2"].result
+        in ["compliant", "not_applicable"]) ? 0.0 : 1.0) + 1.0 * (requirements["supervision.4"].result
+        in ["compliant", "not_applicable"] && requirements["supervision.5"].result in ["compliant", "not_applicable"]
+        && requirements["supervision.6"].result in ["compliant", "not_applicable"] && requirements["supervision.7"].result
+        in ["compliant", "not_applicable"] ? 0.0 : 1.0)) : (("M-I" in assessment.selected_implementation_groups
+        || "M-R" in assessment.selected_implementation_groups) ? (4.0 - 1.0 * (requirements["dev.1"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["ecosysteme.2"].result in
+        ["compliant", "not_applicable"] && requirements["config.1"].result in ["compliant", "not_applicable"]
+        && requirements["config.6"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.3"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.4"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.5"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.6"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.7"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) - 1.0 * (requirements["distance.2"].result in ["compliant", "not_applicable"] &&
+        requirements["auth.4"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) + 1.0 * 0.0) : (4.0
+        - 1.0 * (requirements["dev.1"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 *
+        (requirements["mco_mcs.15"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.5"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.6"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) + 1.0 * 0.0))'
+    - ref_id: vraisemblance_v13
+      kind: number
+      label: Vraisemblance MSS-V13 (1 à 4)
+      internal: true
+      likelihood_of: urn:intuitem:risk:threat:anssi-mss-v2:v13
+      expression: 'values.vraisemblance_brute_v13 < 0.0 ? 0.0 : (values.vraisemblance_brute_v13 < 1.0
+        ? 1.0 : (values.vraisemblance_brute_v13 > 4.0 ? 4.0 : values.vraisemblance_brute_v13))'
+    - ref_id: vraisemblance_brute_v14
+      kind: number
+      label: Vraisemblance MSS-V14 avant bornage
+      internal: true
+      expression: '("A-I" in assessment.selected_implementation_groups || "A-R" in assessment.selected_implementation_groups)
+        ? (4.0 - 1.0 * (requirements["dev.1"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) -
+        1.0 * (requirements["cloison.3"].result in ["compliant", "not_applicable"] && requirements["config.1"].result
+        in ["compliant", "not_applicable"] && requirements["config.2"].result in ["compliant", "not_applicable"]
+        && requirements["config.3"].result in ["compliant", "not_applicable"] && requirements["config.6"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.1"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.17"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.3"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.4"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.5"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.6"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.7"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) - 1.0 * (requirements["distance.2"].result in ["compliant", "not_applicable"] &&
+        requirements["auth.4"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) + 1.0 * ((requirements["audit.6"].result
+        in ["compliant", "not_applicable"] || requirements["audit.2"].result in ["compliant", "not_applicable"])
+        ? 0.0 : 1.0) + 1.0 * (requirements["contrat.1"].result in ["compliant", "not_applicable"] && requirements["contrat.2"].result
+        in ["compliant", "not_applicable"] && requirements["ecosysteme.1"].result in ["compliant", "not_applicable"]
+        && requirements["ecosysteme.2"].result in ["compliant", "not_applicable"] ? 0.0 : 1.0) + 1.0 *
+        (requirements["supervision.4"].result in ["compliant", "not_applicable"] && requirements["supervision.5"].result
+        in ["compliant", "not_applicable"] && requirements["supervision.6"].result in ["compliant", "not_applicable"]
+        && requirements["supervision.7"].result in ["compliant", "not_applicable"] ? 0.0 : 1.0)) : (("M-I"
+        in assessment.selected_implementation_groups || "M-R" in assessment.selected_implementation_groups)
+        ? (4.0 - 1.0 * (requirements["dev.1"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) -
+        1.0 * (requirements["config.1"].result in ["compliant", "not_applicable"] && requirements["config.6"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.3"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.4"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.5"].result
+        in ["compliant", "not_applicable"] && requirements["mco_mcs.6"].result in ["compliant", "not_applicable"]
+        && requirements["mco_mcs.7"].result in ["compliant", "not_applicable"] ? 1.0 : 0.0) - 1.0 * (requirements["distance.2"].result
+        in ["compliant", "not_applicable"] && requirements["auth.4"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) + 1.0 * 0.0 + 1.0 * (requirements["contrat.1"].result in ["compliant", "not_applicable"]
+        && requirements["contrat.2"].result in ["compliant", "not_applicable"] && requirements["ecosysteme.1"].result
+        in ["compliant", "not_applicable"] && requirements["ecosysteme.2"].result in ["compliant", "not_applicable"]
+        ? 0.0 : 1.0)) : (4.0 - 1.0 * (requirements["dev.1"].result in ["compliant", "not_applicable"]
+        ? 1.0 : 0.0) - 1.0 * (requirements["mco_mcs.15"].result in ["compliant", "not_applicable"] &&
+        requirements["mco_mcs.5"].result in ["compliant", "not_applicable"] && requirements["mco_mcs.6"].result
+        in ["compliant", "not_applicable"] ? 1.0 : 0.0) + 1.0 * 0.0 + 1.0 * (requirements["contrat.1"].result
+        in ["compliant", "not_applicable"] ? 0.0 : 1.0)))'
+    - ref_id: vraisemblance_v14
+      kind: number
+      label: Vraisemblance MSS-V14 (1 à 4)
+      internal: true
+      likelihood_of: urn:intuitem:risk:threat:anssi-mss-v2:v14
+      expression: 'values.vraisemblance_brute_v14 < 0.0 ? 0.0 : (values.vraisemblance_brute_v14 < 1.0
+        ? 1.0 : (values.vraisemblance_brute_v14 > 4.0 ? 4.0 : values.vraisemblance_brute_v14))'
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:t1
       assessable: false
@@ -195,6 +1283,13 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.supplier
       - urn:intuitem:risk:function:doc-pol:doc.sap
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v3
+      - urn:intuitem:risk:threat:anssi-mss-v2:v7
+      - urn:intuitem:risk:threat:anssi-mss-v2:v8
+      - urn:intuitem:risk:threat:anssi-mss-v2:v9
+      - urn:intuitem:risk:threat:anssi-mss-v2:v11
+      - urn:intuitem:risk:threat:anssi-mss-v2:v14
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:contrat.2
       assessable: true
       depth: 2
@@ -212,6 +1307,13 @@ objects:
       - A-I
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.tprm_assessment
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v3
+      - urn:intuitem:risk:threat:anssi-mss-v2:v7
+      - urn:intuitem:risk:threat:anssi-mss-v2:v8
+      - urn:intuitem:risk:threat:anssi-mss-v2:v9
+      - urn:intuitem:risk:threat:anssi-mss-v2:v11
+      - urn:intuitem:risk:threat:anssi-mss-v2:v14
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:t3
       assessable: false
       depth: 1
@@ -236,6 +1338,12 @@ objects:
       - urn:intuitem:risk:function:doc-pol:pol.secdev
       - urn:intuitem:risk:function:doc-pol:proc.sdlc
       - urn:intuitem:risk:function:doc-pol:train.secdev
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v4
+      - urn:intuitem:risk:threat:anssi-mss-v2:v8
+      - urn:intuitem:risk:threat:anssi-mss-v2:v9
+      - urn:intuitem:risk:threat:anssi-mss-v2:v13
+      - urn:intuitem:risk:threat:anssi-mss-v2:v14
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:ecosysteme.1
       assessable: true
       depth: 2
@@ -253,6 +1361,13 @@ objects:
       - A-I
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:doc.supplier_register
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v3
+      - urn:intuitem:risk:threat:anssi-mss-v2:v7
+      - urn:intuitem:risk:threat:anssi-mss-v2:v8
+      - urn:intuitem:risk:threat:anssi-mss-v2:v9
+      - urn:intuitem:risk:threat:anssi-mss-v2:v11
+      - urn:intuitem:risk:threat:anssi-mss-v2:v14
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:ecosysteme.2
       assessable: true
       depth: 2
@@ -270,6 +1385,13 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:doc.flow_matrix
       - urn:intuitem:risk:function:doc-pol:doc.is_map
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v2
+      - urn:intuitem:risk:threat:anssi-mss-v2:v3
+      - urn:intuitem:risk:threat:anssi-mss-v2:v8
+      - urn:intuitem:risk:threat:anssi-mss-v2:v9
+      - urn:intuitem:risk:threat:anssi-mss-v2:v13
+      - urn:intuitem:risk:threat:anssi-mss-v2:v14
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:ecosysteme.3
       assessable: true
       depth: 2
@@ -365,6 +1487,11 @@ objects:
       - urn:intuitem:risk:function:doc-pol:pol.educ
       - urn:intuitem:risk:function:doc-pol:doc.educ_plan
       - urn:intuitem:risk:function:doc-pol:doc.educ_register
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v1
+      - urn:intuitem:risk:threat:anssi-mss-v2:v5
+      - urn:intuitem:risk:threat:anssi-mss-v2:v6
+      - urn:intuitem:risk:threat:anssi-mss-v2:v7
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:t4
       assessable: false
       depth: 1
@@ -390,6 +1517,10 @@ objects:
       - A-I
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.hr_security
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v5
+      - urn:intuitem:risk:threat:anssi-mss-v2:v6
+      - urn:intuitem:risk:threat:anssi-mss-v2:v7
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:t5
       assessable: false
       depth: 1
@@ -467,6 +1598,15 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.maintenance
       - urn:intuitem:risk:function:doc-pol:proc.update
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v1
+      - urn:intuitem:risk:threat:anssi-mss-v2:v2
+      - urn:intuitem:risk:threat:anssi-mss-v2:v3
+      - urn:intuitem:risk:threat:anssi-mss-v2:v4
+      - urn:intuitem:risk:threat:anssi-mss-v2:v8
+      - urn:intuitem:risk:threat:anssi-mss-v2:v9
+      - urn:intuitem:risk:threat:anssi-mss-v2:v13
+      - urn:intuitem:risk:threat:anssi-mss-v2:v14
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:mco_mcs.10
       assessable: true
       depth: 2
@@ -505,6 +1645,9 @@ objects:
       - A-R
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.disposal
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v10
+      - urn:intuitem:risk:threat:anssi-mss-v2:v11
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:mco_mcs.12
       assessable: true
       depth: 2
@@ -527,6 +1670,9 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.disposal
       - urn:intuitem:risk:function:doc-pol:phys.equipment_disposal
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v10
+      - urn:intuitem:risk:threat:anssi-mss-v2:v11
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
       assessable: false
       depth: 1
@@ -551,6 +1697,12 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.update
       - urn:intuitem:risk:function:doc-pol:tech.uem
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v1
+      - urn:intuitem:risk:threat:anssi-mss-v2:v2
+      - urn:intuitem:risk:threat:anssi-mss-v2:v3
+      - urn:intuitem:risk:threat:anssi-mss-v2:v8
+      - urn:intuitem:risk:threat:anssi-mss-v2:v9
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:mco_mcs.15
       assessable: true
       depth: 2
@@ -566,6 +1718,12 @@ objects:
       - B-I
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.update
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v4
+      - urn:intuitem:risk:threat:anssi-mss-v2:v8
+      - urn:intuitem:risk:threat:anssi-mss-v2:v9
+      - urn:intuitem:risk:threat:anssi-mss-v2:v13
+      - urn:intuitem:risk:threat:anssi-mss-v2:v14
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:mco_mcs.16
       assessable: true
       depth: 2
@@ -582,6 +1740,9 @@ objects:
       - B-I
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.network_firewall
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v8
+      - urn:intuitem:risk:threat:anssi-mss-v2:v9
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:mco_mcs.17
       assessable: true
       depth: 2
@@ -600,6 +1761,15 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.vulnerability
       - urn:intuitem:risk:function:doc-pol:proc.update
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v1
+      - urn:intuitem:risk:threat:anssi-mss-v2:v2
+      - urn:intuitem:risk:threat:anssi-mss-v2:v3
+      - urn:intuitem:risk:threat:anssi-mss-v2:v4
+      - urn:intuitem:risk:threat:anssi-mss-v2:v8
+      - urn:intuitem:risk:threat:anssi-mss-v2:v9
+      - urn:intuitem:risk:threat:anssi-mss-v2:v13
+      - urn:intuitem:risk:threat:anssi-mss-v2:v14
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:mco_mcs.3
       assessable: true
       depth: 2
@@ -620,6 +1790,15 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.threat_intel
       - urn:intuitem:risk:function:doc-pol:proc.threat_intel
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v1
+      - urn:intuitem:risk:threat:anssi-mss-v2:v2
+      - urn:intuitem:risk:threat:anssi-mss-v2:v3
+      - urn:intuitem:risk:threat:anssi-mss-v2:v4
+      - urn:intuitem:risk:threat:anssi-mss-v2:v8
+      - urn:intuitem:risk:threat:anssi-mss-v2:v9
+      - urn:intuitem:risk:threat:anssi-mss-v2:v13
+      - urn:intuitem:risk:threat:anssi-mss-v2:v14
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:mco_mcs.4
       assessable: true
       depth: 2
@@ -639,6 +1818,15 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.vulnerability
       - urn:intuitem:risk:function:doc-pol:proc.update
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v1
+      - urn:intuitem:risk:threat:anssi-mss-v2:v2
+      - urn:intuitem:risk:threat:anssi-mss-v2:v3
+      - urn:intuitem:risk:threat:anssi-mss-v2:v4
+      - urn:intuitem:risk:threat:anssi-mss-v2:v8
+      - urn:intuitem:risk:threat:anssi-mss-v2:v9
+      - urn:intuitem:risk:threat:anssi-mss-v2:v13
+      - urn:intuitem:risk:threat:anssi-mss-v2:v14
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:mco_mcs.5
       assessable: true
       depth: 2
@@ -657,6 +1845,15 @@ objects:
       - A-I
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.software_lifecycle
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v1
+      - urn:intuitem:risk:threat:anssi-mss-v2:v2
+      - urn:intuitem:risk:threat:anssi-mss-v2:v3
+      - urn:intuitem:risk:threat:anssi-mss-v2:v4
+      - urn:intuitem:risk:threat:anssi-mss-v2:v8
+      - urn:intuitem:risk:threat:anssi-mss-v2:v9
+      - urn:intuitem:risk:threat:anssi-mss-v2:v13
+      - urn:intuitem:risk:threat:anssi-mss-v2:v14
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:mco_mcs.6
       assessable: true
       depth: 2
@@ -675,6 +1872,15 @@ objects:
       - A-I
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.update
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v1
+      - urn:intuitem:risk:threat:anssi-mss-v2:v2
+      - urn:intuitem:risk:threat:anssi-mss-v2:v3
+      - urn:intuitem:risk:threat:anssi-mss-v2:v4
+      - urn:intuitem:risk:threat:anssi-mss-v2:v8
+      - urn:intuitem:risk:threat:anssi-mss-v2:v9
+      - urn:intuitem:risk:threat:anssi-mss-v2:v13
+      - urn:intuitem:risk:threat:anssi-mss-v2:v14
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:mco_mcs.7
       assessable: true
       depth: 2
@@ -691,6 +1897,15 @@ objects:
       - A-I
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.update
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v1
+      - urn:intuitem:risk:threat:anssi-mss-v2:v2
+      - urn:intuitem:risk:threat:anssi-mss-v2:v3
+      - urn:intuitem:risk:threat:anssi-mss-v2:v4
+      - urn:intuitem:risk:threat:anssi-mss-v2:v8
+      - urn:intuitem:risk:threat:anssi-mss-v2:v9
+      - urn:intuitem:risk:threat:anssi-mss-v2:v13
+      - urn:intuitem:risk:threat:anssi-mss-v2:v14
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:rgpd.1
       assessable: true
       depth: 2
@@ -843,6 +2058,9 @@ objects:
       - urn:intuitem:risk:function:doc-pol:pol.physical
       - urn:intuitem:risk:function:doc-pol:phys.secure_area
       - urn:intuitem:risk:function:doc-pol:phys.visitor_mgmt
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v10
+      - urn:intuitem:risk:threat:anssi-mss-v2:v11
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:phys.2
       assessable: true
       depth: 2
@@ -864,6 +2082,9 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.physical_security
       - urn:intuitem:risk:function:doc-pol:phys.secure_area
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v10
+      - urn:intuitem:risk:threat:anssi-mss-v2:v11
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:cloison.1
       assessable: true
       depth: 2
@@ -882,6 +2103,10 @@ objects:
       - urn:intuitem:risk:function:doc-pol:pol.network
       - urn:intuitem:risk:function:doc-pol:tech.network_firewall
       - urn:intuitem:risk:function:doc-pol:tech.vlan
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v4
+      - urn:intuitem:risk:threat:anssi-mss-v2:v8
+      - urn:intuitem:risk:threat:anssi-mss-v2:v9
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:cloison.2
       assessable: true
       depth: 2
@@ -898,6 +2123,10 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.network
       - urn:intuitem:risk:function:doc-pol:tech.vlan
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v4
+      - urn:intuitem:risk:threat:anssi-mss-v2:v8
+      - urn:intuitem:risk:threat:anssi-mss-v2:v9
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:cloison.3
       assessable: true
       depth: 2
@@ -916,6 +2145,10 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.vlan
       - urn:intuitem:risk:function:doc-pol:tech.microsegmentation
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v4
+      - urn:intuitem:risk:threat:anssi-mss-v2:v13
+      - urn:intuitem:risk:threat:anssi-mss-v2:v14
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:cloison.4
       assessable: true
       depth: 2
@@ -939,6 +2172,9 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.reverse_proxy
       - urn:intuitem:risk:function:doc-pol:tech.web_proxy
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v4
+      - urn:intuitem:risk:threat:anssi-mss-v2:v12
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:cloison.5
       assessable: true
       depth: 2
@@ -957,6 +2193,10 @@ objects:
       - A-I
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:doc.flow_matrix
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v4
+      - urn:intuitem:risk:threat:anssi-mss-v2:v8
+      - urn:intuitem:risk:threat:anssi-mss-v2:v9
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:cloison.6
       assessable: true
       depth: 2
@@ -973,6 +2213,10 @@ objects:
       - A-I
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:doc.flow_matrix
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v4
+      - urn:intuitem:risk:threat:anssi-mss-v2:v8
+      - urn:intuitem:risk:threat:anssi-mss-v2:v9
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:filtre.1
       assessable: true
       depth: 2
@@ -993,6 +2237,11 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:doc.flow_matrix
       - urn:intuitem:risk:function:doc-pol:tech.network_firewall
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v4
+      - urn:intuitem:risk:threat:anssi-mss-v2:v8
+      - urn:intuitem:risk:threat:anssi-mss-v2:v9
+      - urn:intuitem:risk:threat:anssi-mss-v2:v12
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:filtre.2
       assessable: true
       depth: 2
@@ -1011,6 +2260,11 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:doc.flow_matrix
       - urn:intuitem:risk:function:doc-pol:tech.network_firewall
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v4
+      - urn:intuitem:risk:threat:anssi-mss-v2:v8
+      - urn:intuitem:risk:threat:anssi-mss-v2:v9
+      - urn:intuitem:risk:threat:anssi-mss-v2:v12
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:filtre.3
       assessable: true
       depth: 2
@@ -1028,6 +2282,11 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:doc.flow_matrix
       - urn:intuitem:risk:function:doc-pol:pol.network
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v4
+      - urn:intuitem:risk:threat:anssi-mss-v2:v8
+      - urn:intuitem:risk:threat:anssi-mss-v2:v9
+      - urn:intuitem:risk:threat:anssi-mss-v2:v12
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:filtre.4
       assessable: true
       depth: 2
@@ -1047,6 +2306,8 @@ objects:
       - A-I
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.ddos_protection
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v12
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:filtre.5
       assessable: true
       depth: 2
@@ -1065,6 +2326,8 @@ objects:
       - A-I
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.waf
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v4
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:filtre.6
       assessable: true
       depth: 2
@@ -1084,6 +2347,8 @@ objects:
       - A-I
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.endpoint_protection
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v1
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:filtre.7
       assessable: true
       depth: 2
@@ -1104,6 +2369,8 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.app_auth_hardening
       - urn:intuitem:risk:function:doc-pol:pol.web_sec
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v4
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:mail.1
       assessable: true
       depth: 2
@@ -1124,6 +2391,11 @@ objects:
       - A-I
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.mail_gateway
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v1
+      - urn:intuitem:risk:threat:anssi-mss-v2:v5
+      - urn:intuitem:risk:threat:anssi-mss-v2:v6
+      - urn:intuitem:risk:threat:anssi-mss-v2:v7
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:mail.2
       assessable: true
       depth: 2
@@ -1145,6 +2417,11 @@ objects:
       - A-I
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.email_auth
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v1
+      - urn:intuitem:risk:threat:anssi-mss-v2:v5
+      - urn:intuitem:risk:threat:anssi-mss-v2:v6
+      - urn:intuitem:risk:threat:anssi-mss-v2:v7
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:distance.1
       assessable: true
       depth: 2
@@ -1163,6 +2440,11 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.vpn
       - urn:intuitem:risk:function:doc-pol:tech.ztna
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v2
+      - urn:intuitem:risk:threat:anssi-mss-v2:v3
+      - urn:intuitem:risk:threat:anssi-mss-v2:v8
+      - urn:intuitem:risk:threat:anssi-mss-v2:v9
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:distance.2
       assessable: true
       depth: 2
@@ -1183,6 +2465,16 @@ objects:
       - A-I
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.mfa
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v2
+      - urn:intuitem:risk:threat:anssi-mss-v2:v3
+      - urn:intuitem:risk:threat:anssi-mss-v2:v5
+      - urn:intuitem:risk:threat:anssi-mss-v2:v6
+      - urn:intuitem:risk:threat:anssi-mss-v2:v7
+      - urn:intuitem:risk:threat:anssi-mss-v2:v8
+      - urn:intuitem:risk:threat:anssi-mss-v2:v9
+      - urn:intuitem:risk:threat:anssi-mss-v2:v13
+      - urn:intuitem:risk:threat:anssi-mss-v2:v14
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:distance.3
       assessable: true
       depth: 2
@@ -1201,6 +2493,10 @@ objects:
       - A-I
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.disk_encryption
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v1
+      - urn:intuitem:risk:threat:anssi-mss-v2:v8
+      - urn:intuitem:risk:threat:anssi-mss-v2:v9
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:distance.4
       assessable: true
       depth: 2
@@ -1220,6 +2516,10 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.access
       - urn:intuitem:risk:function:doc-pol:tech.vpn
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v5
+      - urn:intuitem:risk:threat:anssi-mss-v2:v6
+      - urn:intuitem:risk:threat:anssi-mss-v2:v7
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:malware.3
       assessable: true
       depth: 2
@@ -1238,6 +2538,10 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.network_antivirus
       - urn:intuitem:risk:function:doc-pol:pol.removable_media
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v1
+      - urn:intuitem:risk:threat:anssi-mss-v2:v2
+      - urn:intuitem:risk:threat:anssi-mss-v2:v3
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:malware.4
       assessable: true
       depth: 2
@@ -1256,6 +2560,12 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.malware
       - urn:intuitem:risk:function:doc-pol:tech.endpoint_protection
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v1
+      - urn:intuitem:risk:threat:anssi-mss-v2:v2
+      - urn:intuitem:risk:threat:anssi-mss-v2:v3
+      - urn:intuitem:risk:threat:anssi-mss-v2:v8
+      - urn:intuitem:risk:threat:anssi-mss-v2:v9
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:malware.5
       assessable: true
       depth: 2
@@ -1275,6 +2585,12 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.edr
       - urn:intuitem:risk:function:doc-pol:tech.endpoint_protection
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v1
+      - urn:intuitem:risk:threat:anssi-mss-v2:v2
+      - urn:intuitem:risk:threat:anssi-mss-v2:v3
+      - urn:intuitem:risk:threat:anssi-mss-v2:v8
+      - urn:intuitem:risk:threat:anssi-mss-v2:v9
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:malware.6
       assessable: true
       depth: 2
@@ -1294,6 +2610,12 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.edr
       - urn:intuitem:risk:function:doc-pol:proc.incident
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v1
+      - urn:intuitem:risk:threat:anssi-mss-v2:v2
+      - urn:intuitem:risk:threat:anssi-mss-v2:v3
+      - urn:intuitem:risk:threat:anssi-mss-v2:v8
+      - urn:intuitem:risk:threat:anssi-mss-v2:v9
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:auth.1
       assessable: true
       depth: 2
@@ -1313,6 +2635,10 @@ objects:
       - A-I
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.hardening
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v1
+      - urn:intuitem:risk:threat:anssi-mss-v2:v2
+      - urn:intuitem:risk:threat:anssi-mss-v2:v3
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:auth.10
       assessable: true
       depth: 2
@@ -1330,6 +2656,8 @@ objects:
       - A-I
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.access
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v5
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:auth.11
       assessable: true
       depth: 2
@@ -1348,6 +2676,10 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.app_auth_hardening
       - urn:intuitem:risk:function:doc-pol:pol.crypto
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v5
+      - urn:intuitem:risk:threat:anssi-mss-v2:v6
+      - urn:intuitem:risk:threat:anssi-mss-v2:v7
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:auth.12
       assessable: true
       depth: 2
@@ -1365,6 +2697,10 @@ objects:
       - A-R
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.password_manager
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v5
+      - urn:intuitem:risk:threat:anssi-mss-v2:v6
+      - urn:intuitem:risk:threat:anssi-mss-v2:v7
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:auth.2
       assessable: true
       depth: 2
@@ -1384,6 +2720,10 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.access
       - urn:intuitem:risk:function:doc-pol:tech.password_manager
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v5
+      - urn:intuitem:risk:threat:anssi-mss-v2:v6
+      - urn:intuitem:risk:threat:anssi-mss-v2:v7
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:auth.3
       assessable: true
       depth: 2
@@ -1401,6 +2741,10 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.access
       - urn:intuitem:risk:function:doc-pol:tech.password_manager
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v5
+      - urn:intuitem:risk:threat:anssi-mss-v2:v6
+      - urn:intuitem:risk:threat:anssi-mss-v2:v7
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:auth.4
       assessable: true
       depth: 2
@@ -1419,6 +2763,13 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.access
       - urn:intuitem:risk:function:doc-pol:tech.mfa
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v1
+      - urn:intuitem:risk:threat:anssi-mss-v2:v5
+      - urn:intuitem:risk:threat:anssi-mss-v2:v6
+      - urn:intuitem:risk:threat:anssi-mss-v2:v7
+      - urn:intuitem:risk:threat:anssi-mss-v2:v13
+      - urn:intuitem:risk:threat:anssi-mss-v2:v14
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:auth.5
       assessable: true
       depth: 2
@@ -1435,6 +2786,9 @@ objects:
       - B-I
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.access
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v6
+      - urn:intuitem:risk:threat:anssi-mss-v2:v7
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:auth.6
       assessable: true
       depth: 2
@@ -1465,6 +2819,8 @@ objects:
       - B-I
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.access
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v5
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:auth.8
       assessable: true
       depth: 2
@@ -1485,6 +2841,11 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.app_auth_hardening
       - urn:intuitem:risk:function:doc-pol:pol.web_sec
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v1
+      - urn:intuitem:risk:threat:anssi-mss-v2:v5
+      - urn:intuitem:risk:threat:anssi-mss-v2:v6
+      - urn:intuitem:risk:threat:anssi-mss-v2:v7
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:auth.9
       assessable: true
       depth: 2
@@ -1507,6 +2868,10 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.app_auth_hardening
       - urn:intuitem:risk:function:doc-pol:pol.access
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v5
+      - urn:intuitem:risk:threat:anssi-mss-v2:v6
+      - urn:intuitem:risk:threat:anssi-mss-v2:v7
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:droits.1
       assessable: true
       depth: 2
@@ -1529,6 +2894,10 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.access
       - urn:intuitem:risk:function:doc-pol:proc.rbac
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v5
+      - urn:intuitem:risk:threat:anssi-mss-v2:v6
+      - urn:intuitem:risk:threat:anssi-mss-v2:v7
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:droits.2
       assessable: true
       depth: 2
@@ -1564,6 +2933,10 @@ objects:
       - A-I
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.recertification
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v5
+      - urn:intuitem:risk:threat:anssi-mss-v2:v6
+      - urn:intuitem:risk:threat:anssi-mss-v2:v7
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:id.1
       assessable: true
       depth: 2
@@ -1587,6 +2960,10 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.access
       - urn:intuitem:risk:function:doc-pol:tech.iam
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v5
+      - urn:intuitem:risk:threat:anssi-mss-v2:v6
+      - urn:intuitem:risk:threat:anssi-mss-v2:v7
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:id.2
       assessable: true
       depth: 2
@@ -1605,6 +2982,10 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.recertification
       - urn:intuitem:risk:function:doc-pol:proc.hr_security
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v5
+      - urn:intuitem:risk:threat:anssi-mss-v2:v6
+      - urn:intuitem:risk:threat:anssi-mss-v2:v7
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:id.3
       assessable: true
       depth: 2
@@ -1621,6 +3002,9 @@ objects:
       - B-I
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.pam
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v6
+      - urn:intuitem:risk:threat:anssi-mss-v2:v7
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:id.4
       assessable: true
       depth: 2
@@ -1640,6 +3024,10 @@ objects:
       - A-I
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.recertification
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v5
+      - urn:intuitem:risk:threat:anssi-mss-v2:v6
+      - urn:intuitem:risk:threat:anssi-mss-v2:v7
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:annuaire.1
       assessable: true
       depth: 2
@@ -1680,6 +3068,9 @@ objects:
       - urn:intuitem:risk:function:doc-pol:tech.admin_network
       - urn:intuitem:risk:function:doc-pol:proc.pam
       - urn:intuitem:risk:function:doc-pol:tech.paw
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v2
+      - urn:intuitem:risk:threat:anssi-mss-v2:v3
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:annuaire.3
       assessable: true
       depth: 2
@@ -1719,6 +3110,9 @@ objects:
       - urn:intuitem:risk:function:doc-pol:tech.admin_network
       - urn:intuitem:risk:function:doc-pol:proc.pam
       - urn:intuitem:risk:function:doc-pol:tech.paw
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v2
+      - urn:intuitem:risk:threat:anssi-mss-v2:v3
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:compadmin.1
       assessable: true
       depth: 2
@@ -1736,6 +3130,9 @@ objects:
       - A-I
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.pam
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v6
+      - urn:intuitem:risk:threat:anssi-mss-v2:v7
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:compadmin.2
       assessable: true
       depth: 2
@@ -1753,6 +3150,9 @@ objects:
       - A-I
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.pam
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v6
+      - urn:intuitem:risk:threat:anssi-mss-v2:v7
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:compadmin.3
       assessable: true
       depth: 2
@@ -1769,6 +3169,9 @@ objects:
       - A-I
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.pam
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v6
+      - urn:intuitem:risk:threat:anssi-mss-v2:v7
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:compadmin.4
       assessable: true
       depth: 2
@@ -1784,6 +3187,9 @@ objects:
       - A-I
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:doc.pam_register
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v6
+      - urn:intuitem:risk:threat:anssi-mss-v2:v7
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:compadmin.5
       assessable: true
       depth: 2
@@ -1801,6 +3207,9 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.pam
       - urn:intuitem:risk:function:doc-pol:proc.recertification
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v6
+      - urn:intuitem:risk:threat:anssi-mss-v2:v7
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:compadmin.6
       assessable: true
       depth: 2
@@ -1819,6 +3228,9 @@ objects:
       - A-I
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.pam
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v6
+      - urn:intuitem:risk:threat:anssi-mss-v2:v7
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:compadmin.7
       assessable: true
       depth: 2
@@ -1841,6 +3253,8 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.uem
       - urn:intuitem:risk:function:doc-pol:pol.work
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v1
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:compadmin.9
       assessable: true
       depth: 2
@@ -1858,6 +3272,9 @@ objects:
       - A-I
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.pam
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v6
+      - urn:intuitem:risk:threat:anssi-mss-v2:v7
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:incident.1
       assessable: true
       depth: 2
@@ -2137,6 +3554,10 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.audit
       - urn:intuitem:risk:function:doc-pol:tech.sast_dast
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v4
+      - urn:intuitem:risk:threat:anssi-mss-v2:v13
+      - urn:intuitem:risk:threat:anssi-mss-v2:v14
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:audit.3
       assessable: true
       depth: 2
@@ -2154,6 +3575,8 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.pentest
       - urn:intuitem:risk:function:doc-pol:proc.pentest
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v4
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:audit.4
       assessable: true
       depth: 2
@@ -2170,6 +3593,8 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.audit
       - urn:intuitem:risk:function:doc-pol:pol.hardening
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v4
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:audit.5
       assessable: true
       depth: 2
@@ -2186,6 +3611,8 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.audit
       - urn:intuitem:risk:function:doc-pol:doc.arc_principles
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v4
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:audit.6
       assessable: true
       depth: 2
@@ -2203,6 +3630,10 @@ objects:
       - A-I
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.sast_dast
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v4
+      - urn:intuitem:risk:threat:anssi-mss-v2:v13
+      - urn:intuitem:risk:threat:anssi-mss-v2:v14
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:audit.7
       assessable: true
       depth: 2
@@ -2224,6 +3655,10 @@ objects:
       - A-I
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.audit
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v4
+      - urn:intuitem:risk:threat:anssi-mss-v2:v8
+      - urn:intuitem:risk:threat:anssi-mss-v2:v9
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:config.1
       assessable: true
       depth: 2
@@ -2242,6 +3677,15 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.hardening
       - urn:intuitem:risk:function:doc-pol:pol.app_control
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v1
+      - urn:intuitem:risk:threat:anssi-mss-v2:v2
+      - urn:intuitem:risk:threat:anssi-mss-v2:v3
+      - urn:intuitem:risk:threat:anssi-mss-v2:v4
+      - urn:intuitem:risk:threat:anssi-mss-v2:v8
+      - urn:intuitem:risk:threat:anssi-mss-v2:v9
+      - urn:intuitem:risk:threat:anssi-mss-v2:v13
+      - urn:intuitem:risk:threat:anssi-mss-v2:v14
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:config.2
       assessable: true
       depth: 2
@@ -2257,6 +3701,15 @@ objects:
       - A-I
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.hardening
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v1
+      - urn:intuitem:risk:threat:anssi-mss-v2:v2
+      - urn:intuitem:risk:threat:anssi-mss-v2:v3
+      - urn:intuitem:risk:threat:anssi-mss-v2:v4
+      - urn:intuitem:risk:threat:anssi-mss-v2:v8
+      - urn:intuitem:risk:threat:anssi-mss-v2:v9
+      - urn:intuitem:risk:threat:anssi-mss-v2:v13
+      - urn:intuitem:risk:threat:anssi-mss-v2:v14
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:config.3
       assessable: true
       depth: 2
@@ -2273,6 +3726,15 @@ objects:
       - A-I
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.hardening
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v1
+      - urn:intuitem:risk:threat:anssi-mss-v2:v2
+      - urn:intuitem:risk:threat:anssi-mss-v2:v3
+      - urn:intuitem:risk:threat:anssi-mss-v2:v4
+      - urn:intuitem:risk:threat:anssi-mss-v2:v8
+      - urn:intuitem:risk:threat:anssi-mss-v2:v9
+      - urn:intuitem:risk:threat:anssi-mss-v2:v13
+      - urn:intuitem:risk:threat:anssi-mss-v2:v14
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:config.4
       assessable: true
       depth: 2
@@ -2293,6 +3755,9 @@ objects:
       - A-I
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.pki
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v8
+      - urn:intuitem:risk:threat:anssi-mss-v2:v9
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:config.5
       assessable: true
       depth: 2
@@ -2310,6 +3775,9 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.crypto
       - urn:intuitem:risk:function:doc-pol:pol.transfer
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v8
+      - urn:intuitem:risk:threat:anssi-mss-v2:v9
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:config.6
       assessable: true
       depth: 2
@@ -2327,6 +3795,15 @@ objects:
       - A-I
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.hardening
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v1
+      - urn:intuitem:risk:threat:anssi-mss-v2:v2
+      - urn:intuitem:risk:threat:anssi-mss-v2:v3
+      - urn:intuitem:risk:threat:anssi-mss-v2:v4
+      - urn:intuitem:risk:threat:anssi-mss-v2:v8
+      - urn:intuitem:risk:threat:anssi-mss-v2:v9
+      - urn:intuitem:risk:threat:anssi-mss-v2:v13
+      - urn:intuitem:risk:threat:anssi-mss-v2:v14
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:config.7
       assessable: true
       depth: 2
@@ -2363,6 +3840,11 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:pol.removable_media
       - urn:intuitem:risk:function:doc-pol:tech.endpoint_protection
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v8
+      - urn:intuitem:risk:threat:anssi-mss-v2:v9
+      - urn:intuitem:risk:threat:anssi-mss-v2:v10
+      - urn:intuitem:risk:threat:anssi-mss-v2:v11
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:admin.1
       assessable: true
       depth: 2
@@ -2380,6 +3862,9 @@ objects:
       - urn:intuitem:risk:function:doc-pol:tech.admin_network
       - urn:intuitem:risk:function:doc-pol:tech.paw
       - urn:intuitem:risk:function:doc-pol:proc.pam
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v2
+      - urn:intuitem:risk:threat:anssi-mss-v2:v3
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:admin.2
       assessable: true
       depth: 2
@@ -2397,6 +3882,9 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.admin_network
       - urn:intuitem:risk:function:doc-pol:proc.pam
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v2
+      - urn:intuitem:risk:threat:anssi-mss-v2:v3
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:admin.3
       assessable: true
       depth: 2
@@ -2413,6 +3901,9 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.admin_network
       - urn:intuitem:risk:function:doc-pol:tech.paw
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v2
+      - urn:intuitem:risk:threat:anssi-mss-v2:v3
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:admin.4
       assessable: true
       depth: 2
@@ -2429,6 +3920,9 @@ objects:
       - A-I
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.paw
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v2
+      - urn:intuitem:risk:threat:anssi-mss-v2:v3
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:admin.5
       assessable: true
       depth: 2
@@ -2448,6 +3942,9 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.admin_network
       - urn:intuitem:risk:function:doc-pol:tech.paw
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v2
+      - urn:intuitem:risk:threat:anssi-mss-v2:v3
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:admin.6
       assessable: true
       depth: 2
@@ -2467,6 +3964,9 @@ objects:
       - urn:intuitem:risk:function:doc-pol:tech.admin_network
       - urn:intuitem:risk:function:doc-pol:pol.network
       - urn:intuitem:risk:function:doc-pol:proc.pam
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v2
+      - urn:intuitem:risk:threat:anssi-mss-v2:v3
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:admin.7
       assessable: true
       depth: 2
@@ -2486,6 +3986,9 @@ objects:
       - urn:intuitem:risk:function:doc-pol:tech.admin_network
       - urn:intuitem:risk:function:doc-pol:pol.crypto
       - urn:intuitem:risk:function:doc-pol:proc.pam
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v2
+      - urn:intuitem:risk:threat:anssi-mss-v2:v3
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:supervision.4
       assessable: true
       depth: 2
@@ -2504,6 +4007,19 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.logging
       - urn:intuitem:risk:function:doc-pol:tech.siem
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v1
+      - urn:intuitem:risk:threat:anssi-mss-v2:v2
+      - urn:intuitem:risk:threat:anssi-mss-v2:v3
+      - urn:intuitem:risk:threat:anssi-mss-v2:v4
+      - urn:intuitem:risk:threat:anssi-mss-v2:v5
+      - urn:intuitem:risk:threat:anssi-mss-v2:v6
+      - urn:intuitem:risk:threat:anssi-mss-v2:v7
+      - urn:intuitem:risk:threat:anssi-mss-v2:v8
+      - urn:intuitem:risk:threat:anssi-mss-v2:v9
+      - urn:intuitem:risk:threat:anssi-mss-v2:v12
+      - urn:intuitem:risk:threat:anssi-mss-v2:v13
+      - urn:intuitem:risk:threat:anssi-mss-v2:v14
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:supervision.5
       assessable: true
       depth: 2
@@ -2521,6 +4037,19 @@ objects:
       - A-I
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:proc.logging
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v1
+      - urn:intuitem:risk:threat:anssi-mss-v2:v2
+      - urn:intuitem:risk:threat:anssi-mss-v2:v3
+      - urn:intuitem:risk:threat:anssi-mss-v2:v4
+      - urn:intuitem:risk:threat:anssi-mss-v2:v5
+      - urn:intuitem:risk:threat:anssi-mss-v2:v6
+      - urn:intuitem:risk:threat:anssi-mss-v2:v7
+      - urn:intuitem:risk:threat:anssi-mss-v2:v8
+      - urn:intuitem:risk:threat:anssi-mss-v2:v9
+      - urn:intuitem:risk:threat:anssi-mss-v2:v12
+      - urn:intuitem:risk:threat:anssi-mss-v2:v13
+      - urn:intuitem:risk:threat:anssi-mss-v2:v14
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:supervision.6
       assessable: true
       depth: 2
@@ -2538,6 +4067,16 @@ objects:
       - A-R
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.access_log
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v2
+      - urn:intuitem:risk:threat:anssi-mss-v2:v3
+      - urn:intuitem:risk:threat:anssi-mss-v2:v4
+      - urn:intuitem:risk:threat:anssi-mss-v2:v6
+      - urn:intuitem:risk:threat:anssi-mss-v2:v7
+      - urn:intuitem:risk:threat:anssi-mss-v2:v8
+      - urn:intuitem:risk:threat:anssi-mss-v2:v9
+      - urn:intuitem:risk:threat:anssi-mss-v2:v13
+      - urn:intuitem:risk:threat:anssi-mss-v2:v14
     - urn: urn:intuitem:risk:req_node:anssi-mss-v2:supervision.7
       assessable: true
       depth: 2
@@ -2556,3 +4095,16 @@ objects:
       - A-R
       reference_controls:
       - urn:intuitem:risk:function:doc-pol:tech.siem
+      threats:
+      - urn:intuitem:risk:threat:anssi-mss-v2:v1
+      - urn:intuitem:risk:threat:anssi-mss-v2:v2
+      - urn:intuitem:risk:threat:anssi-mss-v2:v3
+      - urn:intuitem:risk:threat:anssi-mss-v2:v4
+      - urn:intuitem:risk:threat:anssi-mss-v2:v5
+      - urn:intuitem:risk:threat:anssi-mss-v2:v6
+      - urn:intuitem:risk:threat:anssi-mss-v2:v7
+      - urn:intuitem:risk:threat:anssi-mss-v2:v8
+      - urn:intuitem:risk:threat:anssi-mss-v2:v9
+      - urn:intuitem:risk:threat:anssi-mss-v2:v12
+      - urn:intuitem:risk:threat:anssi-mss-v2:v13
+      - urn:intuitem:risk:threat:anssi-mss-v2:v14

@@ -17,6 +17,7 @@
 	import { hasRelationGraph } from '#lib/components/RelationsGraph/relations.js';
 	import CommentsPanel from '#lib/components/CommentsPanel/CommentsPanel.svelte';
 	import RiskAcceptancesSection from '#lib/components/RiskAcceptances/RiskAcceptancesSection.svelte';
+	import RelatedRequirements from '#lib/components/RiskScenarios/RelatedRequirements.svelte';
 
 	import { goto } from '$app/navigation';
 	import { openRiskAcceptanceModal } from '#lib/utils/riskAcceptance.js';
@@ -481,6 +482,14 @@
 			</div>
 		</div>
 	{/if}
+
+	<RelatedRequirements
+		relatedRequirements={data.relatedRequirements}
+		suggestedControls={data.suggestedControls}
+		suggestedLikelihood={data.suggestedLikelihood.results}
+		currentProba={data.suggestedLikelihood.current}
+		canEdit={canEditObject}
+	/>
 
 	<div class="flex flex-col lg:flex-row gap-4 card px-4 py-2 bg-surface-50-950 shadow-lg">
 		<div class="flex flex-col w-full lg:w-1/2">

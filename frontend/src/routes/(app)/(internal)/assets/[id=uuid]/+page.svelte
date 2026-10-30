@@ -2,6 +2,7 @@
 	import type { PageData } from './$types';
 	import DetailView from '#lib/components/DetailView/DetailView.svelte';
 	import ObjectivesComparisonTable from '#lib/components/Assets/ObjectivesComparisonTable.svelte';
+	import AssessmentJourneyCard from '#lib/components/Assets/AssessmentJourneyCard.svelte';
 	import { m } from '#paraglide/messages.js';
 
 	interface Props {
@@ -14,6 +15,7 @@
 <DetailView {data}>
 	{#snippet widgets()}
 		<div class="h-full flex flex-col space-y-4">
+			<AssessmentJourneyCard assetId={data.data.id} />
 			<div class="card p-4 bg-surface-50-950 shadow-xs grow">
 				<ObjectivesComparisonTable
 					comparisons={data.data.security_objectives_comparison}

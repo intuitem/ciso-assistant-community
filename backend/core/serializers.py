@@ -3501,6 +3501,7 @@ class FrameworkImportExportSerializer(BaseModelSerializer):
 
 
 class RequirementNodeReadSerializer(ReferentialSerializer):
+    framework = FieldsRelatedField()
     reference_controls = FieldsRelatedField(many=True)
     threats = FieldsRelatedField(many=True)
     display_short = serializers.CharField()

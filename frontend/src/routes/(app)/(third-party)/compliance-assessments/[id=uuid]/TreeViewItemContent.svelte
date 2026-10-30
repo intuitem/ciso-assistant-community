@@ -26,6 +26,13 @@
 		ra_id?: string | undefined;
 		threats?: z.infer<typeof ThreatSchema>[] | undefined;
 		reference_controls?: z.infer<typeof ReferenceControlSchema>[] | undefined;
+		relatedScenarios?: {
+			id: string;
+			ref_id: string;
+			name: string;
+			risk_assessment: { id: string; str: string };
+			current_level: { name: string; hexcolor?: string };
+		}[];
 		children?: Record<string, Record<string, unknown>> | undefined;
 		canEditRequirementAssessment: boolean;
 		hasParentNode: boolean;
@@ -53,6 +60,7 @@
 		ra_id = undefined,
 		threats = undefined,
 		reference_controls = undefined,
+		relatedScenarios = [],
 		children = undefined,
 		canEditRequirementAssessment,
 		hasParentNode,
@@ -115,6 +123,7 @@
 		: null;
 
 	let showInfo = $state(false);
+	let showScenarios = $state(false);
 
 	let id = page.params.id;
 	let displayOnlyAssessableNodes = $derived(
@@ -476,6 +485,31 @@
 					{/if}
 				</div>
 			</div>
+			{#if assessable && relatedScenarios.length > 0}
+				<button
+					type="button"
+					class="select-none text-sm text-left hover:text-primary-400"
+					aria-expanded={showScenarios}
+					onclick={() => (showScenarios = !showScenarios)}
+				>
+					<i class="text-xs fa-solid fa-shield-halved"></i>
+					{m.relatedScenariosCount({ count: relatedScenarios.length })}
+				</button>
+				{#if showScenarios}
+					<ul class="card p-2 preset-tonal-secondary text-sm list-disc pl-6">
+						{#each relatedScenarios as scenario (scenario.id)}
+							<li>
+								<a class="anchor" href="/risk-scenarios/{scenario.id}?next={page.url.pathname}">
+									{scenario.ref_id ? `${scenario.ref_id} - ` : ''}{scenario.name}
+								</a>
+								<span class="text-xs text-surface-600-400">
+									· {scenario.risk_assessment.str} · {safeTranslate(scenario.current_level.name)}
+								</span>
+							</li>
+						{/each}
+					</ul>
+				{/if}
+			{/if}
 		</div>
 		{#if (threats && threats.length > 0) || (reference_controls && reference_controls.length > 0)}
 			<div

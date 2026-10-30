@@ -58,6 +58,7 @@ export const load = (async ({ fetch, params, cookies, locals }) => {
 		global_score,
 		threats,
 		frameworksMappings,
+		relatedScenarios,
 		auditCreateForm,
 		auditCloneForm,
 		form,
@@ -69,6 +70,9 @@ export const load = (async ({ fetch, params, cookies, locals }) => {
 		fetch(`${BASE_API_URL}/${URLModel}/${params.id}/global_score/`).then((res) => res.json()),
 		fetch(`${BASE_API_URL}/${URLModel}/${params.id}/threats_metrics/`).then((res) => res.json()),
 		fetch(`${BASE_API_URL}/${URLModel}/${params.id}/frameworks/`).then((res) => res.json()),
+		fetch(`${BASE_API_URL}/${URLModel}/${params.id}/related-scenarios/`)
+			.then((res) => (res.ok ? res.json() : {}))
+			.catch(() => ({})),
 		superValidate({ baseline: compliance_assessment.id }, zod(ComplianceAssessmentSchema), {
 			errors: false
 		}),
@@ -106,6 +110,7 @@ export const load = (async ({ fetch, params, cookies, locals }) => {
 		threats,
 		form,
 		frameworksMappings,
+		relatedScenarios,
 		validationFlowForm,
 		title: compliance_assessment.name
 	};

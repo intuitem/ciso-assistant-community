@@ -57,7 +57,7 @@
 	// Numeric rules never fire; they are listed with their value instead.
 	// Ratings draw as maps below the form, not as yes/no outcomes.
 	const rules = $derived(allRules.filter((r) => r.kind !== 'number' && r.kind !== 'rating'));
-	const valueRules = $derived(allRules.filter((r) => r.kind === 'number'));
+	const valueRules = $derived(allRules.filter((r) => r.kind === 'number' && !r.internal));
 	const fired = $derived((view?.computed_outcome ?? {}) as Record<string, any>);
 	const values = $derived((view?.computed_values ?? {}) as Record<string, number>);
 

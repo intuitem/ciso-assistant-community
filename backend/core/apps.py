@@ -18,6 +18,9 @@ class CoreConfig(AppConfig):
         # Framework-specific exports register themselves on import
         import core.cyfun  # noqa: F401
 
+        # Quick form targets writing an asset's risk assessment and audit
+        import core.quick_form_risk_targets  # noqa: F401
+
         # avoid post_migrate handler if we are in the main, as it interferes with restore
         if not os.environ.get("RUN_MAIN"):
             # No sender filter: startup() waits for the last app's

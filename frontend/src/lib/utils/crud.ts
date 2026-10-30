@@ -414,6 +414,10 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'library', urlModel: 'loaded-libraries' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+		],
+		reverseForeignKeyFields: [
+			{ field: 'threats', urlModel: 'risk-scenarios', disableCreate: true, disableDelete: true },
+			{ field: 'threats', urlModel: 'requirements', disableCreate: true, disableDelete: true }
 		]
 	},
 	'ttp-catalogs': {
@@ -1163,6 +1167,7 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableDelete: true
 			},
 			{ field: 'asset', urlModel: 'findings', disableDelete: true },
+			{ field: 'asset', urlModel: 'accreditations' },
 			{ field: 'asset', urlModel: 'asset-assessments' },
 			{
 				field: 'assets',
@@ -1717,7 +1722,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		localName: 'requirement',
 		localNamePlural: 'requirements',
 		verboseName: 'Requirement',
-		verboseNamePlural: 'Requirements'
+		verboseNamePlural: 'Requirements',
+		endpointUrl: 'requirement-nodes'
 	},
 	'requirement-assessments': {
 		name: 'requirementassessment',
@@ -3921,6 +3927,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		detailViewFields: [
 			{ field: 'id' },
 			{ field: 'folder' },
+			{ field: 'asset', urlModel: 'assets' },
 			{ field: 'linked_collection', urlModel: 'generic-collections' },
 			{ field: 'checklist', urlModel: 'compliance-assessments' },
 			{ field: 'commission_date', type: 'date' },
@@ -3934,7 +3941,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'checklist', urlModel: 'compliance-assessments' },
 			{ field: 'linked_collection', urlModel: 'generic-collections' },
 			{ field: 'authority', urlModel: 'entities' },
-			{ field: 'decision_evidence', urlModel: 'evidences' }
+			{ field: 'decision_evidence', urlModel: 'evidences' },
+			{ field: 'asset', urlModel: 'assets' }
 		],
 		selectFields: [
 			{ field: 'folder' },
@@ -3949,7 +3957,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'author' },
 			{ field: 'linked_collection' },
 			{ field: 'checklist' },
-			{ field: 'filtering_labels' }
+			{ field: 'filtering_labels' },
+			{ field: 'asset' }
 		]
 	},
 	projects: {

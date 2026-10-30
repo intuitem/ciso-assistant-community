@@ -1,4 +1,4 @@
-[Version = "1.1.0"]
+[Version = "1.2.0"]
 section CisoAssistant;
 
 //
@@ -524,7 +524,8 @@ RequirementNodeSpec = {
     { "name", { "name" }, type text },
     { "description", { "description" }, type text },
     { "parent_urn", { "parent_urn" }, type text },
-    { "framework_id", { "framework" }, type text },
+    { "framework_id", { "framework", "id" }, type text },
+    { "framework_name", { "framework", "str" }, type text },
     { "order_id", { "order_id" }, Int64.Type },
     { "assessable", { "assessable" }, type logical },
     { "weight", { "weight" }, Int64.Type },

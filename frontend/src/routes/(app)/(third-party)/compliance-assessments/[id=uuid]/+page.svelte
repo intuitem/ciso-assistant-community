@@ -127,6 +127,7 @@
 		outcomeRules.filter((rule) =>
 			rule.kind === 'number'
 				? showScore &&
+					!rule.internal &&
 					(rule.annotation || rule.label) &&
 					compliance_assessment.computed_values?.[rule.ref_id] != null
 				: showResult
@@ -355,7 +356,8 @@
 					scoringEnabled: data.compliance_assessment.scoring_enabled,
 					scoreCalculationMethod: data.compliance_assessment.score_calculation_method,
 					hidden,
-					selectedStatus
+					selectedStatus,
+					relatedScenarios: data.relatedScenarios?.[node.ra_id] ?? []
 				},
 				children: node.children ? transformToTreeView(Object.entries(node.children), true) : []
 			};
@@ -813,7 +815,7 @@
 		<div class="flex flex-row justify-between">
 			<div class="flex flex-col space-y-2 whitespace-pre-line w-1/5 pr-1">
 				{#each Object.entries(data.compliance_assessment).filter(([key, value]) => {
-					const fieldsToShow = ['ref_id', 'name', 'description', 'observation', 'version', 'folder', 'perimeter', 'framework', 'authors', 'reviewers', 'status', 'selected_implementation_groups', 'campaign'];
+					const fieldsToShow = ['ref_id', 'name', 'description', 'observation', 'version', 'folder', 'perimeter', 'assets', 'framework', 'authors', 'reviewers', 'status', 'selected_implementation_groups', 'campaign'];
 					if (!fieldsToShow.includes(key)) return false;
 					if (value == null || value === '' || (Array.isArray(value) && value.length === 0)) return false;
 					// Hide selected_implementation_groups if framework doesn't support implementation groups

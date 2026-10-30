@@ -385,6 +385,12 @@ export const navData = {
 					href: '/evidences'
 				},
 				{
+					name: 'accreditations',
+					fa_icon: 'fa-solid fa-award',
+					href: '/accreditations',
+					permissions: ['view_accreditation']
+				},
+				{
 					name: 'recap',
 					fa_icon: 'fa-solid fa-clipboard-list',
 					href: '/recap',
@@ -512,12 +518,6 @@ export const navData = {
 					fa_icon: 'fa-solid fa-box-archive',
 					href: '/generic-collections',
 					permissions: ['view_genericcollection']
-				},
-				{
-					name: 'accreditations',
-					fa_icon: 'fa-solid fa-award',
-					href: '/accreditations',
-					permissions: ['view_accreditation']
 				},
 				{
 					name: 'projects',

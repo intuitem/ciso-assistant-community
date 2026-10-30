@@ -1,0 +1,654 @@
+urn: urn:intuitem:risk:library:quick-form-anssi-mss-v2-framing
+locale: fr
+ref_id: quick-form-anssi-mss-v2-framing
+name: 'ANSSI - MonServiceSécurisé : cadrage du service'
+description: |-
+  Description d'un service numérique telle que MonServiceSécurisé la demande (type, hébergement, données, audience, disponibilité, ouverture). Les résultats reprennent les règles de MonServiceSécurisé V2 : besoins de sécurité, avec les groupes d'implémentation du référentiel de mesures qu'ils appliquent, risques retenus parmi les 14 du référentiel et objectifs visés.
+
+  Source : https://github.com/betagouv/mon-service-securise (commit 1362dc43fde880dc2f188383b760cbe38fada8c8)
+copyright: |-
+  Copyright ANSSI - Agence nationale de la sécurité des systèmes d'information (https://cyber.gouv.fr)
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and limitations under the License.
+version: 1
+publication_date: '2026-10-30'
+provider: ANSSI
+packager: intuitem
+dependencies:
+- urn:intuitem:risk:library:anssi-mss-v2
+- urn:intuitem:risk:library:risk-matrix-4x4-ebios-rm
+objects:
+  quick_forms:
+  - urn: urn:intuitem:risk:quick_form:anssi-mss-v2-framing
+    ref_id: anssi-mss-v2-framing
+    name: Cadrage MonServiceSécurisé
+    description: Décrire le service à homologuer. Les besoins de sécurité et les risques retenus se mettent
+      à jour à chaque réponse.
+    ref_id_prefix: MSS
+    subject_question_urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:service:question:service
+    on_accept:
+    - target: asset.risk_assessment
+      config:
+        risk_matrix: urn:intuitem:risk:matrix:risk-matrix-4x4-ebios-rm
+    - target: asset.audit
+      config:
+        framework: urn:intuitem:risk:framework:anssi-mss-v2
+    - target: asset.accreditation
+      config:
+        name: Homologation
+    title_question_urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:service:question:service
+    outcomes_definition:
+    - ref_id: besoins_securite
+      kind: number
+      label: Besoins de sécurité (1 Basiques, 2 Modérés, 3 Avancés)
+      internal: true
+      expression: 'answers["donnees:question:volumetrie"].answered && answers["usages:question:audience"].answered
+        && answers["usages:question:duree"].answered && answers["usages:question:ouverture"].answered
+        ? [[1, 1, 1, 2], [1, 1, 2, 2], [2, 2, 3, 3], [2, 3, 3, 3]][([[1, 1, 2, 2], [1, 1, 2, 3], [1, 2,
+        3, 4], [1, 2, 4, 4]][("donnees:question:volumetrie:choice:tresEleve" in answers["donnees:question:volumetrie"].selected_choices
+        ? 4 : ("donnees:question:volumetrie:choice:eleve" in answers["donnees:question:volumetrie"].selected_choices
+        ? 3 : ("donnees:question:volumetrie:choice:moyen" in answers["donnees:question:volumetrie"].selected_choices
+        ? 2 : 1))) - 1][("donnees:question:categories:choice:donneesSensibles" in answers["donnees:question:categories"].selected_choices
+        ? 4 : ("donnees:question:categories:choice:documentsRHSensibles" in answers["donnees:question:categories"].selected_choices
+        ? 4 : ("donnees:question:categories:choice:secretsDEntreprise" in answers["donnees:question:categories"].selected_choices
+        ? 4 : ("donnees:question:categories:choice:donneesCaracterePersonnelPersonneARisque" in answers["donnees:question:categories"].selected_choices
+        ? 3 : ("donnees:question:categories:choice:donneesSituationFamilialeEconomiqueFinanciere" in answers["donnees:question:categories"].selected_choices
+        ? 3 : ("donnees:question:categories:choice:documentsIdentifiants" in answers["donnees:question:categories"].selected_choices
+        ? 3 : ("donnees:question:categories:choice:donneesTechniques" in answers["donnees:question:categories"].selected_choices
+        ? 3 : ("donnees:question:categories:choice:donneesDIdentite" in answers["donnees:question:categories"].selected_choices
+        ? 2 : ("donnees:question:categories:choice:donneesAdministrativesEtFinancieres" in answers["donnees:question:categories"].selected_choices
+        ? 2 : 1))))))))) - 1] > [[1, 1, 2, 3], [1, 1, 2, 3], [1, 1, 3, 4], [1, 1, 3, 4]][("usages:question:audience:choice:tresLarge"
+        in answers["usages:question:audience"].selected_choices ? 4 : ("usages:question:audience:choice:large"
+        in answers["usages:question:audience"].selected_choices ? 3 : ("usages:question:audience:choice:moyenne"
+        in answers["usages:question:audience"].selected_choices ? 2 : 1))) - 1][("usages:question:duree:choice:moinsDe4h"
+        in answers["usages:question:duree"].selected_choices ? 4 : ("usages:question:duree:choice:moinsDe12h"
+        in answers["usages:question:duree"].selected_choices ? 3 : ("usages:question:duree:choice:moinsDe24h"
+        in answers["usages:question:duree"].selected_choices ? 2 : 1))) - 1] ? [[1, 1, 2, 2], [1, 1, 2,
+        3], [1, 2, 3, 4], [1, 2, 4, 4]][("donnees:question:volumetrie:choice:tresEleve" in answers["donnees:question:volumetrie"].selected_choices
+        ? 4 : ("donnees:question:volumetrie:choice:eleve" in answers["donnees:question:volumetrie"].selected_choices
+        ? 3 : ("donnees:question:volumetrie:choice:moyen" in answers["donnees:question:volumetrie"].selected_choices
+        ? 2 : 1))) - 1][("donnees:question:categories:choice:donneesSensibles" in answers["donnees:question:categories"].selected_choices
+        ? 4 : ("donnees:question:categories:choice:documentsRHSensibles" in answers["donnees:question:categories"].selected_choices
+        ? 4 : ("donnees:question:categories:choice:secretsDEntreprise" in answers["donnees:question:categories"].selected_choices
+        ? 4 : ("donnees:question:categories:choice:donneesCaracterePersonnelPersonneARisque" in answers["donnees:question:categories"].selected_choices
+        ? 3 : ("donnees:question:categories:choice:donneesSituationFamilialeEconomiqueFinanciere" in answers["donnees:question:categories"].selected_choices
+        ? 3 : ("donnees:question:categories:choice:documentsIdentifiants" in answers["donnees:question:categories"].selected_choices
+        ? 3 : ("donnees:question:categories:choice:donneesTechniques" in answers["donnees:question:categories"].selected_choices
+        ? 3 : ("donnees:question:categories:choice:donneesDIdentite" in answers["donnees:question:categories"].selected_choices
+        ? 2 : ("donnees:question:categories:choice:donneesAdministrativesEtFinancieres" in answers["donnees:question:categories"].selected_choices
+        ? 2 : 1))))))))) - 1] : [[1, 1, 2, 3], [1, 1, 2, 3], [1, 1, 3, 4], [1, 1, 3, 4]][("usages:question:audience:choice:tresLarge"
+        in answers["usages:question:audience"].selected_choices ? 4 : ("usages:question:audience:choice:large"
+        in answers["usages:question:audience"].selected_choices ? 3 : ("usages:question:audience:choice:moyenne"
+        in answers["usages:question:audience"].selected_choices ? 2 : 1))) - 1][("usages:question:duree:choice:moinsDe4h"
+        in answers["usages:question:duree"].selected_choices ? 4 : ("usages:question:duree:choice:moinsDe12h"
+        in answers["usages:question:duree"].selected_choices ? 3 : ("usages:question:duree:choice:moinsDe24h"
+        in answers["usages:question:duree"].selected_choices ? 2 : 1))) - 1]) - 1][[[1, 2, 2, 3]][0][("usages:question:ouverture:choice:accessibleSurInternet"
+        in answers["usages:question:ouverture"].selected_choices ? 4 : ("usages:question:ouverture:choice:internePlusTiers"
+        in answers["usages:question:ouverture"].selected_choices ? 3 : ("usages:question:ouverture:choice:interne"
+        in answers["usages:question:ouverture"].selected_choices ? 2 : 1))) - 1] - 1] : 0'
+    - ref_id: besoins_niveau1
+      label: 'Besoins de sécurité : Basiques'
+      description: Les besoins de sécurité sont basiques en l'absence de données ou de fonctionnalités
+        sensibles.
+      group: besoins_securite
+      framework: urn:intuitem:risk:framework:anssi-mss-v2
+      audit_implementation_groups:
+      - B-I
+      - B-R
+      accreditation_category: accreditation_simplified
+      expression: values.besoins_securite == 1.0
+    - ref_id: besoins_niveau2
+      label: 'Besoins de sécurité : Modérés'
+      description: Les besoins de sécurité sont modérés compte tenu de données ou de fonctionnalités plus
+        sensibles traitées par le service.
+      group: besoins_securite
+      framework: urn:intuitem:risk:framework:anssi-mss-v2
+      audit_implementation_groups:
+      - M-I
+      - M-R
+      accreditation_category: accreditation_elaborated
+      expression: values.besoins_securite == 2.0
+    - ref_id: besoins_niveau3
+      label: 'Besoins de sécurité : Avancés'
+      description: Les besoins de sécurité sont avancés compte tenu de la sensibilité des données traitées
+        ou des fonctionnalités proposées.
+      group: besoins_securite
+      framework: urn:intuitem:risk:framework:anssi-mss-v2
+      audit_implementation_groups:
+      - A-I
+      - A-R
+      accreditation_category: accreditation_advanced
+      expression: values.besoins_securite == 3.0
+    - ref_id: gravite_ov1
+      kind: number
+      label: Gravité OV1 (1 à 4)
+      internal: true
+      expression: '(("perimetre:question:type_service:choice:portailInformation" in answers["perimetre:question:type_service"].selected_choices
+        || "perimetre:question:type_service:choice:serviceEnLigne" in answers["perimetre:question:type_service"].selected_choices))
+        && answers["usages:question:audience"].answered ? ("usages:question:audience:choice:tresLarge"
+        in answers["usages:question:audience"].selected_choices ? 4 : ("usages:question:audience:choice:large"
+        in answers["usages:question:audience"].selected_choices ? 3 : ("usages:question:audience:choice:moyenne"
+        in answers["usages:question:audience"].selected_choices ? 2 : 1))) : 0'
+    - ref_id: gravite_ov2
+      kind: number
+      label: Gravité OV2 (1 à 4)
+      internal: true
+      expression: '((true)) && answers["donnees:question:volumetrie"].answered ? ("donnees:question:volumetrie:choice:tresEleve"
+        in answers["donnees:question:volumetrie"].selected_choices ? 4 : ("donnees:question:volumetrie:choice:eleve"
+        in answers["donnees:question:volumetrie"].selected_choices ? 3 : ("donnees:question:volumetrie:choice:moyen"
+        in answers["donnees:question:volumetrie"].selected_choices ? 2 : 1))) : 0'
+    - ref_id: gravite_ov3
+      kind: number
+      label: Gravité OV3 (1 à 4)
+      internal: true
+      expression: '((true)) && answers["usages:question:duree"].answered ? ("usages:question:duree:choice:moinsDe4h"
+        in answers["usages:question:duree"].selected_choices ? 4 : ("usages:question:duree:choice:moinsDe12h"
+        in answers["usages:question:duree"].selected_choices ? 3 : ("usages:question:duree:choice:moinsDe24h"
+        in answers["usages:question:duree"].selected_choices ? 2 : 1))) : 0'
+    - ref_id: gravite_ov4
+      kind: number
+      label: Gravité OV4 (1 à 4)
+      internal: true
+      expression: '(("perimetre:question:specificites:choice:echangeOuReceptionEmails" in answers["perimetre:question:specificites"].selected_choices))
+        && answers["usages:question:audience"].answered ? ("usages:question:audience:choice:tresLarge"
+        in answers["usages:question:audience"].selected_choices ? 4 : ("usages:question:audience:choice:large"
+        in answers["usages:question:audience"].selected_choices ? 3 : ("usages:question:audience:choice:moyenne"
+        in answers["usages:question:audience"].selected_choices ? 2 : 1))) : 0'
+    - ref_id: gravite_r1
+      kind: number
+      label: Gravité R1 (1 à 4)
+      internal: true
+      expression: values.gravite_ov2
+    - ref_id: gravite_r2
+      kind: number
+      label: Gravité R2 (1 à 4)
+      internal: true
+      expression: '(values.gravite_ov4 > (values.gravite_ov3 > (values.gravite_ov2 > values.gravite_ov1
+        ? values.gravite_ov2 : values.gravite_ov1) ? values.gravite_ov3 : (values.gravite_ov2 > values.gravite_ov1
+        ? values.gravite_ov2 : values.gravite_ov1)) ? values.gravite_ov4 : (values.gravite_ov3 > (values.gravite_ov2
+        > values.gravite_ov1 ? values.gravite_ov2 : values.gravite_ov1) ? values.gravite_ov3 : (values.gravite_ov2
+        > values.gravite_ov1 ? values.gravite_ov2 : values.gravite_ov1)))'
+    - ref_id: gravite_r3
+      kind: number
+      label: Gravité R3 (1 à 4)
+      internal: true
+      expression: '(values.gravite_ov4 > (values.gravite_ov3 > (values.gravite_ov2 > values.gravite_ov1
+        ? values.gravite_ov2 : values.gravite_ov1) ? values.gravite_ov3 : (values.gravite_ov2 > values.gravite_ov1
+        ? values.gravite_ov2 : values.gravite_ov1)) ? values.gravite_ov4 : (values.gravite_ov3 > (values.gravite_ov2
+        > values.gravite_ov1 ? values.gravite_ov2 : values.gravite_ov1) ? values.gravite_ov3 : (values.gravite_ov2
+        > values.gravite_ov1 ? values.gravite_ov2 : values.gravite_ov1)))'
+    - ref_id: gravite_r4
+      kind: number
+      label: Gravité R4 (1 à 4)
+      internal: true
+      expression: '(values.gravite_ov4 > (values.gravite_ov3 > (values.gravite_ov2 > values.gravite_ov1
+        ? values.gravite_ov2 : values.gravite_ov1) ? values.gravite_ov3 : (values.gravite_ov2 > values.gravite_ov1
+        ? values.gravite_ov2 : values.gravite_ov1)) ? values.gravite_ov4 : (values.gravite_ov3 > (values.gravite_ov2
+        > values.gravite_ov1 ? values.gravite_ov2 : values.gravite_ov1) ? values.gravite_ov3 : (values.gravite_ov2
+        > values.gravite_ov1 ? values.gravite_ov2 : values.gravite_ov1)))'
+    - ref_id: gravite_r5
+      kind: number
+      label: Gravité R5 (1 à 4)
+      internal: true
+      expression: values.gravite_ov2
+    - ref_id: gravite_r6
+      kind: number
+      label: Gravité R6 (1 à 4)
+      internal: true
+      expression: '(values.gravite_ov4 > (values.gravite_ov3 > (values.gravite_ov2 > values.gravite_ov1
+        ? values.gravite_ov2 : values.gravite_ov1) ? values.gravite_ov3 : (values.gravite_ov2 > values.gravite_ov1
+        ? values.gravite_ov2 : values.gravite_ov1)) ? values.gravite_ov4 : (values.gravite_ov3 > (values.gravite_ov2
+        > values.gravite_ov1 ? values.gravite_ov2 : values.gravite_ov1) ? values.gravite_ov3 : (values.gravite_ov2
+        > values.gravite_ov1 ? values.gravite_ov2 : values.gravite_ov1)))'
+    - ref_id: gravite_r7
+      kind: number
+      label: Gravité R7 (1 à 4)
+      internal: true
+      expression: '(values.gravite_ov4 > (values.gravite_ov3 > (values.gravite_ov2 > values.gravite_ov1
+        ? values.gravite_ov2 : values.gravite_ov1) ? values.gravite_ov3 : (values.gravite_ov2 > values.gravite_ov1
+        ? values.gravite_ov2 : values.gravite_ov1)) ? values.gravite_ov4 : (values.gravite_ov3 > (values.gravite_ov2
+        > values.gravite_ov1 ? values.gravite_ov2 : values.gravite_ov1) ? values.gravite_ov3 : (values.gravite_ov2
+        > values.gravite_ov1 ? values.gravite_ov2 : values.gravite_ov1)))'
+    - ref_id: gravite_r8
+      kind: number
+      label: Gravité R8 (1 à 4)
+      internal: true
+      expression: '(values.gravite_ov4 > (values.gravite_ov3 > (values.gravite_ov2 > values.gravite_ov1
+        ? values.gravite_ov2 : values.gravite_ov1) ? values.gravite_ov3 : (values.gravite_ov2 > values.gravite_ov1
+        ? values.gravite_ov2 : values.gravite_ov1)) ? values.gravite_ov4 : (values.gravite_ov3 > (values.gravite_ov2
+        > values.gravite_ov1 ? values.gravite_ov2 : values.gravite_ov1) ? values.gravite_ov3 : (values.gravite_ov2
+        > values.gravite_ov1 ? values.gravite_ov2 : values.gravite_ov1)))'
+    - ref_id: gravite_r9
+      kind: number
+      label: Gravité R9 (1 à 4)
+      internal: true
+      expression: '(values.gravite_ov4 > (values.gravite_ov3 > (values.gravite_ov2 > values.gravite_ov1
+        ? values.gravite_ov2 : values.gravite_ov1) ? values.gravite_ov3 : (values.gravite_ov2 > values.gravite_ov1
+        ? values.gravite_ov2 : values.gravite_ov1)) ? values.gravite_ov4 : (values.gravite_ov3 > (values.gravite_ov2
+        > values.gravite_ov1 ? values.gravite_ov2 : values.gravite_ov1) ? values.gravite_ov3 : (values.gravite_ov2
+        > values.gravite_ov1 ? values.gravite_ov2 : values.gravite_ov1)))'
+    - ref_id: gravite_r10
+      kind: number
+      label: Gravité R10 (1 à 4)
+      internal: true
+      expression: '(values.gravite_ov3 > values.gravite_ov2 ? values.gravite_ov3 : values.gravite_ov2)'
+    - ref_id: gravite_r11
+      kind: number
+      label: Gravité R11 (1 à 4)
+      internal: true
+      expression: '(values.gravite_ov3 > values.gravite_ov2 ? values.gravite_ov3 : values.gravite_ov2)'
+    - ref_id: gravite_r12
+      kind: number
+      label: Gravité R12 (1 à 4)
+      internal: true
+      expression: values.gravite_ov3
+    - ref_id: gravite_r13
+      kind: number
+      label: Gravité R13 (1 à 4)
+      internal: true
+      expression: '(values.gravite_ov4 > (values.gravite_ov3 > (values.gravite_ov2 > values.gravite_ov1
+        ? values.gravite_ov2 : values.gravite_ov1) ? values.gravite_ov3 : (values.gravite_ov2 > values.gravite_ov1
+        ? values.gravite_ov2 : values.gravite_ov1)) ? values.gravite_ov4 : (values.gravite_ov3 > (values.gravite_ov2
+        > values.gravite_ov1 ? values.gravite_ov2 : values.gravite_ov1) ? values.gravite_ov3 : (values.gravite_ov2
+        > values.gravite_ov1 ? values.gravite_ov2 : values.gravite_ov1)))'
+    - ref_id: gravite_r14
+      kind: number
+      label: Gravité R14 (1 à 4)
+      internal: true
+      expression: '(values.gravite_ov4 > (values.gravite_ov3 > (values.gravite_ov2 > values.gravite_ov1
+        ? values.gravite_ov2 : values.gravite_ov1) ? values.gravite_ov3 : (values.gravite_ov2 > values.gravite_ov1
+        ? values.gravite_ov2 : values.gravite_ov1)) ? values.gravite_ov4 : (values.gravite_ov3 > (values.gravite_ov2
+        > values.gravite_ov1 ? values.gravite_ov2 : values.gravite_ov1) ? values.gravite_ov3 : (values.gravite_ov2
+        > values.gravite_ov1 ? values.gravite_ov2 : values.gravite_ov1)))'
+    - ref_id: risque_r1
+      label: R1 · Compromission d'un poste de travail utilisateur
+      description: Pour atteindre son objectif visé, un attaquant externe va compromettre le poste de
+        travail d'un utilisateur du service.
+      group: risques_retenus
+      scenario:
+        ref_id: R1
+        name: Compromission d'un poste de travail utilisateur
+        threats:
+        - urn:intuitem:risk:threat:anssi-mss-v2:v1
+        impact_value: gravite_r1
+      expression: ("perimetre:question:specificites:choice:postesDeTravail" in answers["perimetre:question:specificites"].selected_choices)
+    - ref_id: risque_r2
+      label: R2 · Compromission de ressources d'administration internes
+      description: Pour atteindre son objectif visé, un attaquant externe va compromettre une ressource
+        utilisée pour l'administration technique interne.
+      group: risques_retenus
+      scenario:
+        ref_id: R2
+        name: Compromission de ressources d'administration internes
+        threats:
+        - urn:intuitem:risk:threat:anssi-mss-v2:v2
+        impact_value: gravite_r2
+      expression: (true) && !(values.besoins_securite == 1.0 || values.besoins_securite == 2.0 || "perimetre:question:activites:choice:administrationTechnique"
+        in answers["perimetre:question:activites"].selected_choices || "perimetre:question:hebergement:choice:saas"
+        in answers["perimetre:question:hebergement"].selected_choices)
+    - ref_id: risque_r3
+      label: R3 · Compromission de ressources d'administration externes
+      description: Pour atteindre son objectif visé, un attaquant externe va compromettre une ressource
+        utilisée pour l'administration technique externe (ex. infogérant)
+      group: risques_retenus
+      scenario:
+        ref_id: R3
+        name: Compromission de ressources d'administration externes
+        threats:
+        - urn:intuitem:risk:threat:anssi-mss-v2:v3
+        impact_value: gravite_r3
+      expression: ("perimetre:question:activites:choice:administrationTechnique" in answers["perimetre:question:activites"].selected_choices
+        || "perimetre:question:hebergement:choice:cloud" in answers["perimetre:question:hebergement"].selected_choices
+        || "perimetre:question:hebergement:choice:saas" in answers["perimetre:question:hebergement"].selected_choices)
+    - ref_id: risque_r4
+      label: R4 · Compromission d'un service ou d'un serveur exposé
+      description: Pour atteindre son objectif visé, un attaquant externe va compromettre un service ou
+        serveur exposé.
+      group: risques_retenus
+      scenario:
+        ref_id: R4
+        name: Compromission d'un service ou d'un serveur exposé
+        threats:
+        - urn:intuitem:risk:threat:anssi-mss-v2:v4
+        impact_value: gravite_r4
+      expression: ("usages:question:ouverture:choice:internePlusTiers" in answers["usages:question:ouverture"].selected_choices
+        || "usages:question:ouverture:choice:accessibleSurInternet" in answers["usages:question:ouverture"].selected_choices)
+    - ref_id: risque_r5
+      label: R5 · Compromission d'un compte utilisateur
+      description: Pour atteindre son objectif visé, un attaquant externe va compromettre un compte utilisateur
+        par ingénierie sociale ou en exploitant une faiblesse dans l'authentification.
+      group: risques_retenus
+      scenario:
+        ref_id: R5
+        name: Compromission d'un compte utilisateur
+        threats:
+        - urn:intuitem:risk:threat:anssi-mss-v2:v5
+        impact_value: gravite_r5
+      expression: (true)
+    - ref_id: risque_r6
+      label: R6 · Compromission d'un compte d'un acteur technique interne
+      description: Pour atteindre son objectif visé, un attaquant externe va compromettre un compte d'un
+        acteur technique interne (ex. administrateur, hébergeur, développeur) par ingénierie sociale ou
+        en exploitant une faiblesse dans l'authentification.
+      group: risques_retenus
+      scenario:
+        ref_id: R6
+        name: Compromission d'un compte d'un acteur technique interne
+        threats:
+        - urn:intuitem:risk:threat:anssi-mss-v2:v6
+        impact_value: gravite_r6
+      expression: (true) && !("perimetre:question:hebergement:choice:saas" in answers["perimetre:question:hebergement"].selected_choices)
+    - ref_id: risque_r7
+      label: R7 · Compromission d'un compte d'un acteur technique externe
+      description: Pour atteindre son objectif visé, un attaquant externe va compromettre un compte d'un
+        acteur technique externe (ex. administrateur, hébergeur, développeur) par ingénierie sociale ou
+        en exploitant une faiblesse dans l'authentification.
+      group: risques_retenus
+      scenario:
+        ref_id: R7
+        name: Compromission d'un compte d'un acteur technique externe
+        threats:
+        - urn:intuitem:risk:threat:anssi-mss-v2:v7
+        impact_value: gravite_r7
+      expression: ("perimetre:question:activites:choice:administrationTechnique" in answers["perimetre:question:activites"].selected_choices
+        || "perimetre:question:activites:choice:developpementLogiciel" in answers["perimetre:question:activites"].selected_choices
+        || "perimetre:question:hebergement:choice:cloud" in answers["perimetre:question:hebergement"].selected_choices
+        || "perimetre:question:hebergement:choice:saas" in answers["perimetre:question:hebergement"].selected_choices)
+    - ref_id: risque_r8
+      label: R8 · Compromission du SI du fournisseur PaaS
+      description: Pour atteindre son objectif visé, un attaquant externe va compromettre l'environnement
+        fourni par le prestataire de PaaS.
+      group: risques_retenus
+      scenario:
+        ref_id: R8
+        name: Compromission du SI du fournisseur PaaS
+        threats:
+        - urn:intuitem:risk:threat:anssi-mss-v2:v8
+        impact_value: gravite_r8
+      expression: ("perimetre:question:hebergement:choice:cloud" in answers["perimetre:question:hebergement"].selected_choices)
+    - ref_id: risque_r9
+      label: R9 · Compromission du SI du fournisseur SaaS
+      description: Pour atteindre son objectif visé, un attaquant externe va compromettre l'environnement
+        fourni par le prestataire de SaaS.
+      group: risques_retenus
+      scenario:
+        ref_id: R9
+        name: Compromission du SI du fournisseur SaaS
+        threats:
+        - urn:intuitem:risk:threat:anssi-mss-v2:v9
+        impact_value: gravite_r9
+      expression: ("perimetre:question:hebergement:choice:saas" in answers["perimetre:question:hebergement"].selected_choices)
+    - ref_id: risque_r10
+      label: R10 · Intrusion physique dans un local interne
+      description: Pour atteindre son objectif visé, un attaquant externe va s'introduire physiquement
+        dans les locaux techniques internes.
+      group: risques_retenus
+      scenario:
+        ref_id: R10
+        name: Intrusion physique dans un local interne
+        threats:
+        - urn:intuitem:risk:threat:anssi-mss-v2:v10
+        impact_value: gravite_r10
+      expression: ("perimetre:question:specificites:choice:accesPhysiqueAuxSallesTechniques" in answers["perimetre:question:specificites"].selected_choices)
+        && !(values.besoins_securite == 1.0 || "perimetre:question:hebergement:choice:cloud" in answers["perimetre:question:hebergement"].selected_choices
+        || "perimetre:question:hebergement:choice:saas" in answers["perimetre:question:hebergement"].selected_choices)
+    - ref_id: risque_r11
+      label: R11 · Intrusion physique dans un local externe
+      description: Pour atteindre son objectif visé, un attaquant externe va s'introduire physiquement
+        dans les locaux techniques externes.
+      group: risques_retenus
+      scenario:
+        ref_id: R11
+        name: Intrusion physique dans un local externe
+        threats:
+        - urn:intuitem:risk:threat:anssi-mss-v2:v11
+        impact_value: gravite_r11
+      expression: ("perimetre:question:hebergement:choice:cloud" in answers["perimetre:question:hebergement"].selected_choices
+        || "perimetre:question:hebergement:choice:saas" in answers["perimetre:question:hebergement"].selected_choices)
+    - ref_id: risque_r12
+      label: R12 · Attaque DDoS sur un service exposé
+      description: Pour atteindre son objectif visé, un attaquant externe va réaliser une attaque par
+        déni de service distribué (DDoS).
+      group: risques_retenus
+      scenario:
+        ref_id: R12
+        name: Attaque DDoS sur un service exposé
+        threats:
+        - urn:intuitem:risk:threat:anssi-mss-v2:v12
+        impact_value: gravite_r12
+      expression: ("usages:question:ouverture:choice:internePlusTiers" in answers["usages:question:ouverture"].selected_choices
+        || "usages:question:ouverture:choice:accessibleSurInternet" in answers["usages:question:ouverture"].selected_choices)
+        && !(values.besoins_securite == 1.0)
+    - ref_id: risque_r13
+      label: R13 · Compromission de ressources de développement internes
+      description: Pour atteindre son objectif visé, un attaquant externe va compromettre une ressource
+        interne (ex. CI/CD) utilisée pour le développement.
+      group: risques_retenus
+      scenario:
+        ref_id: R13
+        name: Compromission de ressources de développement internes
+        threats:
+        - urn:intuitem:risk:threat:anssi-mss-v2:v13
+        impact_value: gravite_r13
+      expression: (true) && !("perimetre:question:activites:choice:developpementLogiciel" in answers["perimetre:question:activites"].selected_choices
+        || "perimetre:question:hebergement:choice:saas" in answers["perimetre:question:hebergement"].selected_choices)
+    - ref_id: risque_r14
+      label: R14 · Compromission de ressources de développement externes
+      description: Pour atteindre son objectif visé, un attaquant externe va compromettre une ressource
+        externe (ex. CI/CD) utilisée pour le développement.
+      group: risques_retenus
+      scenario:
+        ref_id: R14
+        name: Compromission de ressources de développement externes
+        threats:
+        - urn:intuitem:risk:threat:anssi-mss-v2:v14
+        impact_value: gravite_r14
+      expression: ("perimetre:question:activites:choice:developpementLogiciel" in answers["perimetre:question:activites"].selected_choices
+        || "perimetre:question:hebergement:choice:cloud" in answers["perimetre:question:hebergement"].selected_choices
+        || "perimetre:question:hebergement:choice:saas" in answers["perimetre:question:hebergement"].selected_choices)
+    - ref_id: objectif_ov1
+      label: 'Objectif visé OV1 : défigurer le service'
+      group: objectifs_vises
+      expression: ("perimetre:question:type_service:choice:portailInformation" in answers["perimetre:question:type_service"].selected_choices
+        || "perimetre:question:type_service:choice:serviceEnLigne" in answers["perimetre:question:type_service"].selected_choices)
+    - ref_id: objectif_ov2
+      label: 'Objectif visé OV2 : récupérer ou falsifier des informations'
+      group: objectifs_vises
+      expression: (true)
+    - ref_id: objectif_ov3
+      label: 'Objectif visé OV3 : rendre indisponible l''activité du service'
+      group: objectifs_vises
+      expression: (true)
+    - ref_id: objectif_ov4
+      label: 'Objectif visé OV4 : envoyer des mails altérés'
+      group: objectifs_vises
+      expression: ("perimetre:question:specificites:choice:echangeOuReceptionEmails" in answers["perimetre:question:specificites"].selected_choices)
+    pages:
+    - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:service
+      ref_id: service
+      name: Le service
+      questions:
+        urn:intuitem:risk:qf_page:anssi-mss-v2-framing:service:question:service:
+          type: object_reference
+          text: Quel service homologuez-vous ?
+          annotation: L'actif primaire qui représente le service dans CISO Assistant.
+          config:
+            model: asset
+        urn:intuitem:risk:qf_page:anssi-mss-v2-framing:service:question:statut:
+          type: unique_choice
+          text: Quel est le statut de votre service ?
+          choices:
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:service:question:statut:choice:enProjet
+            value: En conception
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:service:question:statut:choice:enCours
+            value: En cours de développement ou de déploiement
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:service:question:statut:choice:enLigne
+            value: En ligne et accessible aux usagers et/ou agents
+        urn:intuitem:risk:qf_page:anssi-mss-v2-framing:service:question:presentation:
+          type: text
+          text: Présentez votre service en quelques lignes
+          required: false
+    - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:perimetre
+      ref_id: perimetre
+      name: Type de service et hébergement
+      questions:
+        urn:intuitem:risk:qf_page:anssi-mss-v2-framing:perimetre:question:type_service:
+          type: multiple_choice
+          text: Quel est le type de service à sécuriser ?
+          choices:
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:perimetre:question:type_service:choice:portailInformation
+            value: Portail d'information
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:perimetre:question:type_service:choice:serviceEnLigne
+            value: Service en ligne
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:perimetre:question:type_service:choice:api
+            value: API
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:perimetre:question:type_service:choice:applicationMobile
+            value: Application mobile
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:perimetre:question:type_service:choice:autreSystemeInformation
+            value: Autre système d'information
+        urn:intuitem:risk:qf_page:anssi-mss-v2-framing:perimetre:question:specificites:
+          type: multiple_choice
+          text: L'une ou plusieurs des spécificités suivantes sont-elles incluses dans le périmètre de
+            l'homologation ?
+          required: false
+          choices:
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:perimetre:question:specificites:choice:postesDeTravail
+            value: Des postes de travail
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:perimetre:question:specificites:choice:accesPhysiqueAuxBureaux
+            value: L'accès physique des bureaux
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:perimetre:question:specificites:choice:accesPhysiqueAuxSallesTechniques
+            value: L'accès physique des salles techniques
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:perimetre:question:specificites:choice:annuaire
+            value: Un annuaire
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:perimetre:question:specificites:choice:dispositifDeSignatureElectronique
+            value: Un dispositif de signature électronique
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:perimetre:question:specificites:choice:echangeOuReceptionEmails
+            value: L'échange et/ou la réception d'emails
+        urn:intuitem:risk:qf_page:anssi-mss-v2-framing:perimetre:question:hebergement:
+          type: unique_choice
+          text: Quel type de cloud/hébergement utilisez-vous ?
+          choices:
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:perimetre:question:hebergement:choice:onPremise
+            value: Hébergement interne (On-premise)
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:perimetre:question:hebergement:choice:cloud
+            value: Le système d’information repose sur une infrastructure ou une plateforme Cloud (IaaS/PaaS)
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:perimetre:question:hebergement:choice:saas
+            value: Le système est entièrement fourni et vous l'utilisez directement via une interface
+              (SaaS)
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:perimetre:question:hebergement:choice:autre
+            value: Autre
+        urn:intuitem:risk:qf_page:anssi-mss-v2-framing:perimetre:question:activites:
+          type: multiple_choice
+          text: Quelles activités du projet sont entièrement externalisées ?
+          required: false
+          choices:
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:perimetre:question:activites:choice:administrationTechnique
+            value: L'administration technique
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:perimetre:question:activites:choice:developpementLogiciel
+            value: Le développement
+    - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:donnees
+      ref_id: donnees
+      name: Données traitées
+      questions:
+        urn:intuitem:risk:qf_page:anssi-mss-v2-framing:donnees:question:categories:
+          type: multiple_choice
+          text: Quelles données sont traitées ?
+          required: false
+          choices:
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:donnees:question:categories:choice:donneesSensibles
+            value: Données sensibles
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:donnees:question:categories:choice:documentsRHSensibles
+            value: Documents RH sensibles
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:donnees:question:categories:choice:secretsDEntreprise
+            value: Données stratégiques de l'entité
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:donnees:question:categories:choice:donneesCaracterePersonnelPersonneARisque
+            value: Données personnelles de personnes à risque
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:donnees:question:categories:choice:donneesSituationFamilialeEconomiqueFinanciere
+            value: Données relatives à la situation familiale, économique et financière
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:donnees:question:categories:choice:documentsIdentifiants
+            value: Documents identifiants
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:donnees:question:categories:choice:donneesTechniques
+            value: Données techniques
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:donnees:question:categories:choice:donneesDIdentite
+            value: Données d'identité
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:donnees:question:categories:choice:donneesAdministrativesEtFinancieres
+            value: Données administratives et financières
+        urn:intuitem:risk:qf_page:anssi-mss-v2-framing:donnees:question:autres_donnees:
+          type: text
+          text: Données traitées supplémentaires
+          required: false
+          annotation: Une catégorie par ligne.
+        urn:intuitem:risk:qf_page:anssi-mss-v2-framing:donnees:question:volumetrie:
+          type: unique_choice
+          text: Quel est le volume des données traitées au sein du système d'information ?
+          choices:
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:donnees:question:volumetrie:choice:faible
+            value: 'Faible : Le système stocke une quantité limitée et stable d''informations, facile
+              à gérer et rapidement consultable.'
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:donnees:question:volumetrie:choice:moyen
+            value: 'Moyen : Le système stocke un volume conséquent et stable d''informations, qui commence
+              à nécessiter une organisation ou des outils spécifiques.'
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:donnees:question:volumetrie:choice:eleve
+            value: 'Elevé : Le système stocke un grand et stable nombre d''informations, avec un impact
+              notable sur la gestion, la sauvegarde ou l''accessibilité.'
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:donnees:question:volumetrie:choice:tresEleve
+            value: 'Très élevé : Le système stocke une très grande quantité d’informations, en croissance
+              constante, nécessitant des capacités de stockage importantes.'
+        urn:intuitem:risk:qf_page:anssi-mss-v2-framing:donnees:question:localisation:
+          type: unique_choice
+          text: Où sont localisées les données traitées ?
+          choices:
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:donnees:question:localisation:choice:UE
+            value: Au sein de l'Union européenne
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:donnees:question:localisation:choice:horsUE
+            value: En partie ou totalement hors de l'Union européenne
+    - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:usages
+      ref_id: usages
+      name: Audience, disponibilité et ouverture
+      questions:
+        urn:intuitem:risk:qf_page:anssi-mss-v2-framing:usages:question:audience:
+          type: unique_choice
+          text: Quelle est l'audience cible du service ?
+          annotation: En cas de socle technique (ex. système d'hébergement d'autres systèmes), l'audience
+            doit être identifiée en prenant en compte l'audience de l'ensemble des systèmes utilisant
+            ce socle.
+          choices:
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:usages:question:audience:choice:limitee
+            value: 'Limitée : Utilisé par un petit nombre de personnes, souvent en interne.'
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:usages:question:audience:choice:moyenne
+            value: 'Moyenne : Utilisé par un périmètre restreint à l’échelle locale ou régionale.'
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:usages:question:audience:choice:large
+            value: 'Large : Utilisé à l’échelle nationale par plusieurs entités d’un même domaine.'
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:usages:question:audience:choice:tresLarge
+            value: 'Très large : Ouvert ou accessible à un public national voire international.'
+        urn:intuitem:risk:qf_page:anssi-mss-v2-framing:usages:question:duree:
+          type: unique_choice
+          text: Quelle serait la durée maximale acceptable de dysfonctionnement du système ?
+          choices:
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:usages:question:duree:choice:moinsDe4h
+            value: Moins de 4h
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:usages:question:duree:choice:moinsDe12h
+            value: Moins de 12h
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:usages:question:duree:choice:moinsDe24h
+            value: Moins de 24h
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:usages:question:duree:choice:plusDe24h
+            value: Plus de 24h
+        urn:intuitem:risk:qf_page:anssi-mss-v2-framing:usages:question:ouverture:
+          type: unique_choice
+          text: Quelle est l'ouverture du système ?
+          choices:
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:usages:question:ouverture:choice:interneRestreint
+            value: Accessible à très peu de personnes en interne de l'organisation
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:usages:question:ouverture:choice:interne
+            value: Interne à l'organisation
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:usages:question:ouverture:choice:internePlusTiers
+            value: Interne et ouvert à certains tiers
+          - urn: urn:intuitem:risk:qf_page:anssi-mss-v2-framing:usages:question:ouverture:choice:accessibleSurInternet
+            value: Accessible depuis internet

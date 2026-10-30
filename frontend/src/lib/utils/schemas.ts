@@ -2007,6 +2007,7 @@ export const AccreditationSchema = z.object({
 	expiry_date: z.union([z.literal('').transform(() => null), z.iso.date()]).nullish(),
 	linked_collection: z.string().uuid().optional().nullable(),
 	checklist: z.string().uuid().optional().nullable(),
+	asset: z.string().uuid().optional().nullable(),
 	decision_evidence: z.array(z.string().uuid().optional()).optional(),
 	observation: z.string().optional().nullable(),
 	filtering_labels: z.array(z.string().uuid().optional()).optional()

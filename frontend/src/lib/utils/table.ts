@@ -3776,10 +3776,31 @@ export const listViewFields = {
 		}
 	},
 	accreditations: {
-		head: ['ref_id', 'name', 'category', 'status', 'authority', 'author', 'expiry_date', 'folder'],
-		body: ['ref_id', 'name', 'category', 'status', 'authority', 'author', 'expiry_date', 'folder'],
+		head: [
+			'ref_id',
+			'name',
+			'asset',
+			'category',
+			'status',
+			'authority',
+			'author',
+			'expiry_date',
+			'folder'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'asset',
+			'category',
+			'status',
+			'authority',
+			'author',
+			'expiry_date',
+			'folder'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
+			asset: ASSET_FILTER,
 			status: ACCREDITATION_STATUS_FILTER,
 			category: ACCREDITATION_CATEGORY_FILTER,
 			authority: ACCREDITATION_AUTHORITY_FILTER,
@@ -4634,6 +4655,13 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			field: 'owner',
 			optionsEndpoint: 'actors',
 			multiSelect: true
+		},
+		{
+			type: 'change_field',
+			label: 'changeAssetClass',
+			icon: 'fa-solid fa-shapes',
+			field: 'asset_class',
+			optionsEndpoint: 'asset-class'
 		},
 		{
 			type: 'change_folder',

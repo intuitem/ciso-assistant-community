@@ -52,6 +52,7 @@ class AccreditationReadSerializer(BaseModelSerializer):
     linked_collection = FieldsRelatedField()
     collection_data = serializers.SerializerMethodField()
     checklist = FieldsRelatedField()
+    asset = FieldsRelatedField()
     decision_evidence = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     status = serializers.SerializerMethodField()

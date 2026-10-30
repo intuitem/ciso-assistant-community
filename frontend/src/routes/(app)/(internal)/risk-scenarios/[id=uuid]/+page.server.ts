@@ -20,6 +20,17 @@ export const load = (async ({ fetch, params, cookies, locals }) => {
 		fetch,
 		`${BASE_API_URL}/risk-acceptances/?risk_scenarios=${params.id}`
 	).catch(() => []);
+	const relatedRequirementsPromise = fetch(`${baseEndpoint}related-requirements/`)
+		.then((res) => (res.ok ? res.json() : { results: [] }))
+		.then((res) => res.results)
+		.catch(() => []);
+	const suggestedControlsPromise = fetch(`${baseEndpoint}suggested-controls/`)
+		.then((res) => (res.ok ? res.json() : { results: [] }))
+		.then((res) => res.results)
+		.catch(() => []);
+	const suggestedLikelihoodPromise = fetch(`${baseEndpoint}suggested-likelihood/`)
+		.then((res) => (res.ok ? res.json() : { current: -1, results: [] }))
+		.catch(() => ({ current: -1, results: [] }));
 
 	const res = await fetch(baseEndpoint);
 	if (!res.ok) {
@@ -70,11 +81,56 @@ export const load = (async ({ fetch, params, cookies, locals }) => {
 		tables,
 		riskMatrix,
 		title: scenario.str,
-		riskAcceptances: await riskAcceptancesPromise
+		riskAcceptances: await riskAcceptancesPromise,
+		relatedRequirements: await relatedRequirementsPromise,
+		suggestedControls: await suggestedControlsPromise,
+		suggestedLikelihood: await suggestedLikelihoodPromise
 	};
 }) satisfies PageServerLoad;
 
 export const actions: Actions = {
+	confirmSuggestedControls: async (event) => {
+		const formData = await event.request.formData();
+		const controls = formData.getAll('id').map((id) => ({ id: String(id) }));
+		if (controls.length === 0) return fail(400, {});
+		const response = await event.fetch(
+			`${BASE_API_URL}/risk-scenarios/${event.params.id}/suggested-controls/`,
+			{
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ controls })
+			}
+		);
+		setFlash(
+			response.ok
+				? { type: 'success', message: m.suggestedControlsConfirmed() }
+				: { type: 'error', message: m.suggestedControlsError() },
+			event
+		);
+		if (!response.ok) return fail(response.status, {});
+		return {};
+	},
+	applySuggestedLikelihood: async (event) => {
+		const formData = await event.request.formData();
+		const audit = formData.get('audit');
+		if (!audit) return fail(400, {});
+		const response = await event.fetch(
+			`${BASE_API_URL}/risk-scenarios/${event.params.id}/suggested-likelihood/`,
+			{
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ audit: String(audit) })
+			}
+		);
+		setFlash(
+			response.ok
+				? { type: 'success', message: m.suggestedLikelihoodApplied() }
+				: { type: 'error', message: m.suggestedLikelihoodError() },
+			event
+		);
+		if (!response.ok) return fail(response.status, {});
+		return {};
+	},
 	syncToActions: async (event) => {
 		const formData = await event.request.formData();
 
