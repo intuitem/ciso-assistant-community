@@ -6,6 +6,8 @@ description: "Every message the publish step can raise, and how to fix it"
 
 A draft can be saved in any state. Publishing requires a sound graph, so the builder runs the checks below and pins each message to the step or wire it concerns. Fix them and publish again.
 
+Quick reference: [cheat sheet](cheat-sheet.md).
+
 ## Structure
 
 | Message | Fix |

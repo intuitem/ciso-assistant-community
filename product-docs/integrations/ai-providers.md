@@ -28,7 +28,7 @@ You also need administrator rights — the settings page requires the permission
 
 In the sidebar, open **Extra** → **Settings**, then expand the **Chat / AI assistant** section.
 
-Set **LLM provider** to `OpenAI-compatible (LM Studio, vLLM, llama.cpp...)`. Despite the name listing local servers, this is the correct choice for any hosted OpenAI-compatible service, including both providers below. Three fields then appear:
+Set **LLM provider** to `OpenAI-compatible (hosted gateway or local server)`. Three fields then appear:
 
 | Field | What to enter |
 | --- | --- |
@@ -41,7 +41,7 @@ Set **LLM provider** to `OpenAI-compatible (LM Studio, vLLM, llama.cpp...)`. Des
 {% endhint %}
 
 {% hint style="warning" %}
-**Model name is required here.** Its help text says you may leave it empty to use the server's default loaded model. That applies to local single-model servers. Hosted providers serve many models at once and will reject a request that does not name one.
+**Model name is required here.** Hosted providers serve many models at once and will reject a request that does not name one. Leaving it empty only works on a local single-model server.
 {% endhint %}
 
 Save the form. Saving stores the settings and drops the cached connection so the next question picks them up — it does not contact the provider, so a wrong key or model name surfaces on the first question rather than here. Use the `curl` commands below to check the values before you paste them.
@@ -123,6 +123,10 @@ curl https://openrouter.ai/api/v1/chat/completions \
 ```
 
 A reply containing `choices[0].message.content` confirms the key and the model identifier for a plain completion. It does not exercise tool calling or streaming, so a model that passes here can still fail once the assistant asks it to choose a query — see [Checking it works](#checking-it-works).
+
+## Other gateways
+
+Any other service that meets the requirements above is configured the same way. For example, [OrcaRouter](https://www.orcarouter.ai) takes `https://api.orcarouter.ai/v1` as **API base URL** and `orcarouter/auto` as **Model name**. We have not exercised it against the assistant, so check tool calling with a question that reads your data, as described in [Checking it works](#checking-it-works).
 
 ## What stays on your own infrastructure
 
