@@ -1038,6 +1038,7 @@ def gen_audit_context(id, tree, lang, assessments=None, charts=True):
             "in_progress": "Devam ediyor",
             "deprecated": "Kullanımdan kaldırıldı",
             "active": "Aktif",
+            "degraded": "Kötüleşti",
             "policy": "Politika",
             "process": "Süreç",
             "technical": "Teknik",
