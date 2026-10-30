@@ -35,25 +35,27 @@ OUTPUT_XLSX = Path(__file__).resolve().parent / "soc-cmm-2.4.2-basic.xlsx"
 LIBRARY_SLUG = "soc-cmm-2.4.2-basic"
 PACKAGER = "Nadia Qoudhadh"
 PROVIDER = "SOC-CMM (Rob van Os)"
-LIBRARY_NAME = "SOC-CMM 2.4.2 - Basic Self-Assessment"
-LIBRARY_NAME_FR = "SOC-CMM 2.4.2 - Auto-évaluation de base"
+LIBRARY_NAME = "SOC-CMM 2.4.2 - Basic Self-Assessment (manual scoring)"
+LIBRARY_NAME_FR = "SOC-CMM 2.4.2 - Auto-évaluation de base (notation manuelle)"
 LIBRARY_DESCRIPTION = (
     "SOC-CMM is a capability maturity model used to perform a self-assessment of a "
-    "Security Operations Center (SOC). It evaluates 5 domains (Business, People, "
-    "Process, Technology, Services) using a continuous 0-5 maturity scale, with no "
-    "prerequisites between levels: every element adds individually to the maturity "
-    "score.\nSource: https://www.soc-cmm.com/ (Rob van Os)"
+    "Security Operations Center (SOC) across 5 domains (Business, People, Process, "
+    "Technology, Services). Each question is scored by the assessor on the 1-5 levels "
+    "of the maturity guidance shown with it. These scores are not the maturity and "
+    "capability results computed by the SOC-CMM tool.\n"
+    "Source: https://www.soc-cmm.com/ (Rob van Os). SOC-CMM® is a registered trademark."
 )
 LIBRARY_DESCRIPTION_FR = (
     "SOC-CMM est un modèle de maturité des capacités utilisé pour réaliser "
-    "l'auto-évaluation d'un centre des opérations de sécurité (SOC). Il évalue 5 "
-    "domaines (Business, People, Process, Technology, Services) sur une échelle de "
-    "maturité continue de 0 à 5, sans prérequis entre les niveaux : chaque élément "
-    "contribue individuellement au score de maturité.\nSource : https://www.soc-cmm.com/ (Rob van Os)"
+    "l'auto-évaluation d'un centre des opérations de sécurité (SOC) sur 5 domaines "
+    "(Business, People, Process, Technology, Services). Chaque question est notée par "
+    "l'évaluateur sur les niveaux 1 à 5 du guide de maturité qui l'accompagne. Ces notes "
+    "ne sont pas les résultats de maturité et de capacité calculés par l'outil SOC-CMM.\n"
+    "Source : https://www.soc-cmm.com/ (Rob van Os). SOC-CMM® est une marque déposée."
 )
 COPYRIGHT = (
-    "Copyright (C) 2025 - SOC-CMM. Licensed under CC BY-SA 4.0 "
-    "(https://creativecommons.org/licenses/by-sa/4.0/)"
+    "SOC-CMM® by Rob van Os (soc-cmm.com), licensed under CC BY-SA 4.0 "
+    "(https://creativecommons.org/licenses/by-sa/4.0/)."
 )
 
 # Prefixes used as row keys in the official "_Guidance" sheet, mapped to the
@@ -67,54 +69,44 @@ GUIDANCE_PREFIX_TO_DOMAIN = {
     "S": "Services",
 }
 
+# The SOC-CMM answers are the 5 levels of each question's own guidance
 MATURITY_SCALE = [
     (
-        0,
-        "Non-existent",
-        "The process is not implemented or not recognized within the SOC.",
-        "Inexistant",
-        "Le processus n'est pas mis en œuvre ou pas reconnu au sein du SOC.",
-    ),
-    (
-        1,
-        "Initial",
-        "The process is performed, but in an ad hoc and inconsistent manner.",
-        "Initial",
-        "Le processus est réalisé, mais de manière ad hoc et non systématique.",
-    ),
-    (
-        2,
-        "Managed",
-        "The process is planned and executed according to a defined approach; "
-        "performance is managed but not yet standardized.",
-        "Géré",
-        "Le processus est planifié et exécuté selon une approche définie ; la "
-        "performance est gérée mais pas encore standardisée.",
-    ),
-    (
-        3,
-        "Defined",
-        "The process is well characterized, documented, and standardized across the SOC.",
-        "Défini",
-        "Le processus est bien caractérisé, documenté et standardisé au sein du SOC.",
-    ),
-    (
-        4,
-        "Quantitatively managed",
-        "The process is measured and controlled using quantitative techniques.",
-        "Géré quantitativement",
-        "Le processus est mesuré et piloté à l'aide de techniques quantitatives.",
-    ),
-    (
-        5,
-        "Optimizing",
-        "The process is continuously improved based on quantitative feedback and "
-        "innovative practices.",
-        "Optimisé",
-        "Le processus est amélioré en continu sur la base de retours quantitatifs "
-        "et de pratiques innovantes.",
-    ),
+        level,
+        f"Level {level}",
+        f"Level {level} of the question's maturity guidance.",
+        f"Niveau {level}",
+        f"Niveau {level} du guide de maturité de la question.",
+    )
+    for level in range(1, 6)
 ]
+
+# Fixes for the source, applied by fix_rows()
+# The guidance of Services 3.12 to 3.15 is shifted by one question in the
+# "_Guidance" sheet; 3.12 takes the identical "best practices" ladder of 2.13
+GUIDANCE_FROM = {
+    "Services.3.12": "Services.2.13",
+    "Services.3.13": "Services.3.12",
+    "Services.3.14": "Services.3.13",
+    "Services.3.15": "Services.3.14",
+}
+# The physical elements listed under Process.2.4.2 are numbered 2.4.1.x; they
+# keep their original URN (node_id) so library updates don't drop their answers
+RENAMED = {f"Process.2.4.1.{i}": f"Process.2.4.2.{i}" for i in range(1, 8)}
+# Sub-aspect titles missing from the scheme (from the workbook)
+MISSING_TITLES = {
+    "Process.4.1": ("Use Case Management", "Gestion des cas d'usage"),
+    "Process.4.2": (
+        "MITRE ATT&CK® / Threat Intelligence",
+        "MITRE ATT&CK® / Renseignement sur la menace",
+    ),
+    "Process.4.3": ("Visibility", "Visibilité"),
+    "Process.5.1": ("Detection Engineering", "Ingénierie de la détection"),
+    "Process.5.2": ("Detection validation", "Validation de la détection"),
+    "Process.6.1": ("Automation Engineering", "Ingénierie de l'automatisation"),
+    "Process.6.2": ("Artificial Intelligence", "Intelligence artificielle"),
+}
+GUIDANCE_SEPARATOR = "\n\nMaturity guidance:\n"
 
 
 def parse_guidance(ws):
@@ -269,6 +261,37 @@ def build_rows(scheme: dict, guidance: dict) -> list[dict]:
     return rows
 
 
+def fix_rows(rows: list[dict]) -> list[dict]:
+    """Apply the source fixes above. A row with sub-items whose title is not a
+    question is a section header (e.g. "Reports", "Documentation"): it is made
+    non-assessable and loses the guidance it picked up from its first question.
+    """
+    by_ref = {row["ref_id"]: row for row in rows}
+    ladders = {
+        ref: row["description"].partition(GUIDANCE_SEPARATOR)[2]
+        for ref, row in by_ref.items()
+    }
+    for ref, source in GUIDANCE_FROM.items():
+        row = by_ref[ref]
+        for field in ("description", "description[fr]"):
+            title = row[field].partition(GUIDANCE_SEPARATOR)[0]
+            row[field] = f"{title}{GUIDANCE_SEPARATOR}{ladders[source]}"
+    for row, following in zip(rows, rows[1:] + [None]):
+        if row["ref_id"] in MISSING_TITLES:
+            row["name"], row["name[fr]"] = MISSING_TITLES[row["ref_id"]]
+        if row["ref_id"] in RENAMED:
+            row["node_id"] = row["ref_id"].lower()
+            row["ref_id"] = RENAMED[row["ref_id"]]
+        title = row["description"].partition(GUIDANCE_SEPARATOR)[0]
+        has_children = following is not None and following["depth"] > row["depth"]
+        if row["assessable"] and has_children and not title.rstrip().endswith("?"):
+            row["assessable"] = ""
+            row["name"] = title
+            row["name[fr]"] = row["description[fr]"].partition(GUIDANCE_SEPARATOR)[0]
+            row["description"] = row["description[fr]"] = ""
+    return rows
+
+
 def main():
     with open(SCHEME_PATH, encoding="utf-8") as f:
         scheme = json.load(f)
@@ -276,9 +299,12 @@ def main():
     src_wb = openpyxl.load_workbook(SOURCE_XLSX, data_only=True)
     guidance = parse_guidance(src_wb["_Guidance"])
 
-    rows = build_rows(scheme, guidance)
+    rows = fix_rows(build_rows(scheme, guidance))
     print(f"Built {len(rows)} requirement rows")
+    write_workbook(rows)
 
+
+def write_workbook(rows: list[dict]):
     wb = openpyxl.Workbook()
     wb.remove(wb.active)
 
@@ -286,7 +312,7 @@ def main():
     for r in [
         ("type", "library"),
         ("urn", f"urn:intuitem:risk:library:{LIBRARY_SLUG}"),
-        ("version", "1"),
+        ("version", "2"),
         ("locale", "en"),
         ("ref_id", LIBRARY_SLUG),
         ("name", LIBRARY_NAME),
@@ -309,7 +335,7 @@ def main():
         ("name", LIBRARY_NAME),
         ("description", LIBRARY_DESCRIPTION),
         ("scores_definition", "soccmm_scores"),
-        ("min_score", "0"),
+        ("min_score", "1"),
         ("max_score", "5"),
         ("name[fr]", LIBRARY_NAME_FR),
         ("description[fr]", LIBRARY_DESCRIPTION_FR),
@@ -317,13 +343,25 @@ def main():
         ws.append(list(r))
 
     ws = wb.create_sheet("fwk_content")
-    ws.append(["assessable", "depth", "ref_id", "name", "description", "name[fr]", "description[fr]"])
+    ws.append(
+        [
+            "assessable",
+            "depth",
+            "ref_id",
+            "node_id",
+            "name",
+            "description",
+            "name[fr]",
+            "description[fr]",
+        ]
+    )
     for row in rows:
         ws.append(
             [
                 row["assessable"],
                 row["depth"],
                 row["ref_id"],
+                row.get("node_id", ""),
                 row["name"],
                 row["description"],
                 row["name[fr]"],

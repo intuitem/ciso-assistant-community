@@ -3,105 +3,91 @@ convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any
 urn: urn:intuitem:risk:library:soc-cmm-2.4.2-basic
 locale: en
 ref_id: soc-cmm-2.4.2-basic
-name: SOC-CMM 2.4.2 - Basic Self-Assessment
-description: 'SOC-CMM is a capability maturity model used to perform a self-assessment
-  of a Security Operations Center (SOC). It evaluates 5 domains (Business, People,
-  Process, Technology, Services) using a continuous 0-5 maturity scale, with no prerequisites
-  between levels: every element adds individually to the maturity score.
-
-  Source: https://www.soc-cmm.com/ (Rob van Os)'
-copyright: Copyright (C) 2025 - SOC-CMM. Licensed under CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/)
-version: 1
-publication_date: 2026-07-24
+name: SOC-CMM 2.4.2 - Basic Self-Assessment (manual scoring)
+description: "SOC-CMM is a capability maturity model used to perform a self-assessment\
+  \ of a Security Operations Center (SOC) across 5 domains (Business, People, Process,\
+  \ Technology, Services). Each question is scored by the assessor on the 1-5 levels\
+  \ of the maturity guidance shown with it. These scores are not the maturity and\
+  \ capability results computed by the SOC-CMM tool.\nSource: https://www.soc-cmm.com/\
+  \ (Rob van Os). SOC-CMM\xAE is a registered trademark."
+copyright: "SOC-CMM\xAE by Rob van Os (soc-cmm.com), licensed under CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/)."
+version: 2
+publication_date: 2026-10-30
 provider: SOC-CMM (Rob van Os)
 packager: Nadia Qoudhadh
 translations:
   fr:
-    name: "SOC-CMM 2.4.2 - Auto-\xE9valuation de base"
+    name: "SOC-CMM 2.4.2 - Auto-\xE9valuation de base (notation manuelle)"
     description: "SOC-CMM est un mod\xE8le de maturit\xE9 des capacit\xE9s utilis\xE9\
       \ pour r\xE9aliser l'auto-\xE9valuation d'un centre des op\xE9rations de s\xE9\
-      curit\xE9 (SOC). Il \xE9value 5 domaines (Business, People, Process, Technology,\
-      \ Services) sur une \xE9chelle de maturit\xE9 continue de 0 \xE0 5, sans pr\xE9\
-      requis entre les niveaux : chaque \xE9l\xE9ment contribue individuellement au\
-      \ score de maturit\xE9.\nSource : https://www.soc-cmm.com/ (Rob van Os)"
-    copyright: Copyright (C) 2025 - SOC-CMM. Licensed under CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/)
+      curit\xE9 (SOC) sur 5 domaines (Business, People, Process, Technology, Services).\
+      \ Chaque question est not\xE9e par l'\xE9valuateur sur les niveaux 1 \xE0 5\
+      \ du guide de maturit\xE9 qui l'accompagne. Ces notes ne sont pas les r\xE9\
+      sultats de maturit\xE9 et de capacit\xE9 calcul\xE9s par l'outil SOC-CMM.\n\
+      Source : https://www.soc-cmm.com/ (Rob van Os). SOC-CMM\xAE est une marque d\xE9\
+      pos\xE9e."
+    copyright: "SOC-CMM\xAE by Rob van Os (soc-cmm.com), licensed under CC BY-SA 4.0\
+      \ (https://creativecommons.org/licenses/by-sa/4.0/)."
 objects:
-  framework:
-    urn: urn:intuitem:risk:framework:soc-cmm-2.4.2-basic
+  frameworks:
+  - urn: urn:intuitem:risk:framework:soc-cmm-2.4.2-basic
     ref_id: soc-cmm-2.4.2-basic
-    name: SOC-CMM 2.4.2 - Basic Self-Assessment
-    description: 'SOC-CMM is a capability maturity model used to perform a self-assessment
-      of a Security Operations Center (SOC). It evaluates 5 domains (Business, People,
-      Process, Technology, Services) using a continuous 0-5 maturity scale, with no
-      prerequisites between levels: every element adds individually to the maturity
-      score.
-
-      Source: https://www.soc-cmm.com/ (Rob van Os)'
+    name: SOC-CMM 2.4.2 - Basic Self-Assessment (manual scoring)
+    description: "SOC-CMM is a capability maturity model used to perform a self-assessment\
+      \ of a Security Operations Center (SOC) across 5 domains (Business, People,\
+      \ Process, Technology, Services). Each question is scored by the assessor on\
+      \ the 1-5 levels of the maturity guidance shown with it. These scores are not\
+      \ the maturity and capability results computed by the SOC-CMM tool.\nSource:\
+      \ https://www.soc-cmm.com/ (Rob van Os). SOC-CMM\xAE is a registered trademark."
     translations:
       fr:
-        name: "SOC-CMM 2.4.2 - Auto-\xE9valuation de base"
+        name: "SOC-CMM 2.4.2 - Auto-\xE9valuation de base (notation manuelle)"
         description: "SOC-CMM est un mod\xE8le de maturit\xE9 des capacit\xE9s utilis\xE9\
           \ pour r\xE9aliser l'auto-\xE9valuation d'un centre des op\xE9rations de\
-          \ s\xE9curit\xE9 (SOC). Il \xE9value 5 domaines (Business, People, Process,\
-          \ Technology, Services) sur une \xE9chelle de maturit\xE9 continue de 0\
-          \ \xE0 5, sans pr\xE9requis entre les niveaux : chaque \xE9l\xE9ment contribue\
-          \ individuellement au score de maturit\xE9.\nSource : https://www.soc-cmm.com/\
-          \ (Rob van Os)"
-    min_score: 0
+          \ s\xE9curit\xE9 (SOC) sur 5 domaines (Business, People, Process, Technology,\
+          \ Services). Chaque question est not\xE9e par l'\xE9valuateur sur les niveaux\
+          \ 1 \xE0 5 du guide de maturit\xE9 qui l'accompagne. Ces notes ne sont pas\
+          \ les r\xE9sultats de maturit\xE9 et de capacit\xE9 calcul\xE9s par l'outil\
+          \ SOC-CMM.\nSource : https://www.soc-cmm.com/ (Rob van Os). SOC-CMM\xAE\
+          \ est une marque d\xE9pos\xE9e."
+    min_score: 1
     max_score: 5
     scores_definition:
-    - score: 0
-      name: Non-existent
-      description: The process is not implemented or not recognized within the SOC.
-      translations:
-        fr:
-          name: Inexistant
-          description: "Le processus n'est pas mis en \u0153uvre ou pas reconnu au\
-            \ sein du SOC."
     - score: 1
-      name: Initial
-      description: The process is performed, but in an ad hoc and inconsistent manner.
+      name: Level 1
+      description: Level 1 of the question's maturity guidance.
       translations:
         fr:
-          name: Initial
-          description: "Le processus est r\xE9alis\xE9, mais de mani\xE8re ad hoc\
-            \ et non syst\xE9matique."
+          name: Niveau 1
+          description: "Niveau 1 du guide de maturit\xE9 de la question."
     - score: 2
-      name: Managed
-      description: The process is planned and executed according to a defined approach;
-        performance is managed but not yet standardized.
+      name: Level 2
+      description: Level 2 of the question's maturity guidance.
       translations:
         fr:
-          name: "G\xE9r\xE9"
-          description: "Le processus est planifi\xE9 et ex\xE9cut\xE9 selon une approche\
-            \ d\xE9finie ; la performance est g\xE9r\xE9e mais pas encore standardis\xE9\
-            e."
+          name: Niveau 2
+          description: "Niveau 2 du guide de maturit\xE9 de la question."
     - score: 3
-      name: Defined
-      description: The process is well characterized, documented, and standardized
-        across the SOC.
+      name: Level 3
+      description: Level 3 of the question's maturity guidance.
       translations:
         fr:
-          name: "D\xE9fini"
-          description: "Le processus est bien caract\xE9ris\xE9, document\xE9 et standardis\xE9\
-            \ au sein du SOC."
+          name: Niveau 3
+          description: "Niveau 3 du guide de maturit\xE9 de la question."
     - score: 4
-      name: Quantitatively managed
-      description: The process is measured and controlled using quantitative techniques.
+      name: Level 4
+      description: Level 4 of the question's maturity guidance.
       translations:
         fr:
-          name: "G\xE9r\xE9 quantitativement"
-          description: "Le processus est mesur\xE9 et pilot\xE9 \xE0 l'aide de techniques\
-            \ quantitatives."
+          name: Niveau 4
+          description: "Niveau 4 du guide de maturit\xE9 de la question."
     - score: 5
-      name: Optimizing
-      description: The process is continuously improved based on quantitative feedback
-        and innovative practices.
+      name: Level 5
+      description: Level 5 of the question's maturity guidance.
       translations:
         fr:
-          name: "Optimis\xE9"
-          description: "Le processus est am\xE9lior\xE9 en continu sur la base de\
-            \ retours quantitatifs et de pratiques innovantes."
+          name: Niveau 5
+          description: "Niveau 5 du guide de maturit\xE9 de la question."
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:business
       assessable: false
@@ -4212,14 +4198,14 @@ objects:
         fr:
           name: "Op\xE9rations & Fonctions"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.2.1
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.2
       ref_id: Process.2.1
-      description: Security operations exercises
+      name: Security operations exercises
       translations:
         fr:
-          description: Security operations exercises
+          name: Security operations exercises
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.2.1.1
       assessable: true
       depth: 4
@@ -4409,14 +4395,14 @@ objects:
             \ and formally approved\n5 - Improvements determined, formally assigned,\
             \ implementation tracked"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.2.2
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.2
       ref_id: Process.2.2
-      description: Service delivery standardization
+      name: Service delivery standardization
       translations:
         fr:
-          description: Service delivery standardization
+          name: Service delivery standardization
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.2.2.1
       assessable: true
       depth: 4
@@ -4585,14 +4571,14 @@ objects:
             \ enforced/maintained\n5 - OPSEC program is formally approved, enforced\
             \ and regularly maintained"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.2.3
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.2
       ref_id: Process.2.3
-      description: Process integration
+      name: Process integration
       translations:
         fr:
-          description: Process integration
+          name: Process integration
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.2.3.1
       assessable: true
       depth: 4
@@ -4718,14 +4704,14 @@ objects:
 
             5 - ITSM processes integration evaluation in place, aligned with stakeholders'
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.2.4
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.2
       ref_id: Process.2.4
-      description: SOC Facilities
+      name: SOC Facilities
       translations:
         fr:
-          description: SOC Facilities
+          name: SOC Facilities
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.2.4.1
       assessable: true
       depth: 4
@@ -4774,7 +4760,7 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.2.4.2
-      ref_id: Process.2.4.1.1
+      ref_id: Process.2.4.2.1
       description: SOC war room
       translations:
         fr:
@@ -4783,7 +4769,7 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.2.4.2
-      ref_id: Process.2.4.1.2
+      ref_id: Process.2.4.2.2
       description: Dedicated SOC network
       translations:
         fr:
@@ -4792,7 +4778,7 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.2.4.2
-      ref_id: Process.2.4.1.3
+      ref_id: Process.2.4.2.3
       description: Physical access control
       translations:
         fr:
@@ -4801,7 +4787,7 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.2.4.2
-      ref_id: Process.2.4.1.4
+      ref_id: Process.2.4.2.4
       description: Secure physical storage
       translations:
         fr:
@@ -4810,7 +4796,7 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.2.4.2
-      ref_id: Process.2.4.1.5
+      ref_id: Process.2.4.2.5
       description: Video wall
       translations:
         fr:
@@ -4819,7 +4805,7 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.2.4.2
-      ref_id: Process.2.4.1.6
+      ref_id: Process.2.4.2.6
       description: Call-center capability
       translations:
         fr:
@@ -4828,7 +4814,7 @@ objects:
       assessable: true
       depth: 5
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.2.4.2
-      ref_id: Process.2.4.1.7
+      ref_id: Process.2.4.2.7
       description: Specialized analyst workstations
       translations:
         fr:
@@ -4844,14 +4830,14 @@ objects:
           description: "Avez-vous optimized secure remote working capabilities for\
             \ les employ\xE9s du SOC?"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.2.5
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.2
       ref_id: Process.2.5
-      description: Operational shifts
+      name: Operational shifts
       translations:
         fr:
-          description: Operational shifts
+          name: Operational shifts
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.2.5.1
       assessable: true
       depth: 4
@@ -4987,14 +4973,14 @@ objects:
           description: Do you have stand-by arrangements with employees withdans le
             SOC?
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.2.6
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.2
       ref_id: Process.2.6
-      description: Knowledge & document management
+      name: Knowledge & document management
       translations:
         fr:
-          description: Knowledge & document management
+          name: Knowledge & document management
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.2.6.1
       assessable: true
       depth: 4
@@ -5075,40 +5061,14 @@ objects:
         fr:
           name: Rapports
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.3.1
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.3
       ref_id: Process.3.1
-      description: 'Reports
-
-
-        Maturity guidance:
-
-        1 - No reports are provided
-
-        2 - Reports are provided in an ad-hoc fashion
-
-        3 - Reports are provided regularly, not standardized
-
-        4 - Reports are provided regularly and standardized using quality criteria
-
-        5 - Reports are provided regularly, standardized and regularly optimized'
+      name: Reports
       translations:
         fr:
-          description: 'Reports
-
-
-            Maturity guidance:
-
-            1 - No reports are provided
-
-            2 - Reports are provided in an ad-hoc fashion
-
-            3 - Reports are provided regularly, not standardized
-
-            4 - Reports are provided regularly and standardized using quality criteria
-
-            5 - Reports are provided regularly, standardized and regularly optimized'
+          name: Reports
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.3.1.1
       assessable: true
       depth: 4
@@ -5256,31 +5216,14 @@ objects:
         fr:
           description: Real-time reporting dashboards
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.3.2
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.3
       ref_id: Process.3.2
-      description: 'Metrics
-
-
-        Maturity guidance:
-
-        1 - Reports not tailored
-
-        2 - Only basic customizations for customers applied
-
-        3 - Customizations applied structurally to customer reports
-
-        4 - Reports fully tailored to recipients, manual customization required
-
-        5 - Reports fully tailored to recipients using automated templates'
+      name: Metrics
       translations:
         fr:
-          description: "M\xE9triques\n\nMaturity guidance:\n1 - Reports not tailored\n\
-            2 - Only basic customizations for customers applied\n3 - Customizations\
-            \ applied structurally to customer reports\n4 - Reports fully tailored\
-            \ to recipients, manual customization required\n5 - Reports fully tailored\
-            \ to recipients using automated templates"
+          name: "M\xE9triques"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.3.2.1
       assessable: true
       depth: 4
@@ -5354,40 +5297,14 @@ objects:
         fr:
           description: Are proactive and reactive metrics used in reports?
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.3.3
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.3
       ref_id: Process.3.3
-      description: 'Advisories
-
-
-        Maturity guidance:
-
-        1 - Reports not approved or reviewed
-
-        2 - Informal report review conducted
-
-        3 - Structural report review conducted
-
-        4 - Reports regularly reviewed, not formally signed off by recipients
-
-        5 - Reports regularly reviewed and formally signed off by recipients'
+      name: Advisories
       translations:
         fr:
-          description: 'Advisories
-
-
-            Maturity guidance:
-
-            1 - Reports not approved or reviewed
-
-            2 - Informal report review conducted
-
-            3 - Structural report review conducted
-
-            4 - Reports regularly reviewed, not formally signed off by recipients
-
-            5 - Reports regularly reviewed and formally signed off by recipients'
+          name: Advisories
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.3.3.1
       assessable: true
       depth: 4
@@ -5418,40 +5335,14 @@ objects:
         fr:
           description: Effectuez-vous follow-up of these advisories?
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.3.4
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.3
       ref_id: Process.3.4
-      description: 'Education and Awareness
-
-
-        Maturity guidance:
-
-        1 - No established reporting lines
-
-        2 - Reports have limited dissemination
-
-        3 - Reports have a standard distribution list
-
-        4 - Reports dissemination through standard reporting lines, not approved
-
-        5 - Reports dissemination through standard and approved reporting lines'
+      name: Education and Awareness
       translations:
         fr:
-          description: 'Education and Awareness
-
-
-            Maturity guidance:
-
-            1 - No established reporting lines
-
-            2 - Reports have limited dissemination
-
-            3 - Reports have a standard distribution list
-
-            4 - Reports dissemination through standard reporting lines, not approved
-
-            5 - Reports dissemination through standard and approved reporting lines'
+          name: Education and Awareness
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.3.4.1
       assessable: true
       depth: 4
@@ -5472,40 +5363,14 @@ objects:
           description: Mesurez-vous the effect of education and security awareness
             efforts?
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.3.5
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.3
       ref_id: Process.3.5
-      description: 'Communication
-
-
-        Maturity guidance:
-
-        1 - Report templates not updated
-
-        2 - Report templates updated in an ad-hoc fashion
-
-        3 - Report templates regularly revised and updated
-
-        4 - Report templates revised and updated using customer feedback
-
-        5 - Reports templates regularly updated and formally approved'
+      name: Communication
       translations:
         fr:
-          description: 'Communication
-
-
-            Maturity guidance:
-
-            1 - Report templates not updated
-
-            2 - Report templates updated in an ad-hoc fashion
-
-            3 - Report templates regularly revised and updated
-
-            4 - Report templates revised and updated using customer feedback
-
-            5 - Reports templates regularly updated and formally approved'
+          name: Communication
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.3.5.1
       assessable: true
       depth: 4
@@ -5557,10 +5422,10 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.4
       ref_id: Process.4.1
-      name: '[Process.4.1]'
+      name: Use Case Management
       translations:
         fr:
-          name: '[Process.4.1]'
+          name: Gestion des cas d'usage
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.4.1.1
       assessable: true
       depth: 4
@@ -5673,10 +5538,10 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.4
       ref_id: Process.4.2
-      name: '[Process.4.2]'
+      name: "MITRE ATT&CK\xAE / Threat Intelligence"
       translations:
         fr:
-          name: '[Process.4.2]'
+          name: "MITRE ATT&CK\xAE / Renseignement sur la menace"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.4.2.1
       assessable: true
       depth: 4
@@ -5825,10 +5690,10 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.4
       ref_id: Process.4.3
-      name: '[Process.4.3]'
+      name: Visibility
       translations:
         fr:
-          name: '[Process.4.3]'
+          name: "Visibilit\xE9"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.4.3.1
       assessable: true
       depth: 4
@@ -5919,10 +5784,10 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.5
       ref_id: Process.5.1
-      name: '[Process.5.1]'
+      name: Detection Engineering
       translations:
         fr:
-          name: '[Process.5.1]'
+          name: "Ing\xE9nierie de la d\xE9tection"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.5.1.1
       assessable: true
       depth: 4
@@ -6239,10 +6104,10 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.5
       ref_id: Process.5.2
-      name: '[Process.5.2]'
+      name: Detection validation
       translations:
         fr:
-          name: '[Process.5.2]'
+          name: "Validation de la d\xE9tection"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.5.2.1
       assessable: true
       depth: 4
@@ -6466,10 +6331,10 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.6
       ref_id: Process.6.1
-      name: '[Process.6.1]'
+      name: Automation Engineering
       translations:
         fr:
-          name: '[Process.6.1]'
+          name: "Ing\xE9nierie de l'automatisation"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.6.1.1
       assessable: true
       depth: 4
@@ -6808,10 +6673,10 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.6
       ref_id: Process.6.2
-      name: '[Process.6.2]'
+      name: Artificial Intelligence
       translations:
         fr:
-          name: '[Process.6.2]'
+          name: Intelligence artificielle
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:process.6.2.1
       assessable: true
       depth: 4
@@ -7333,14 +7198,14 @@ objects:
         fr:
           name: Technologie SIEM
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.1.1
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.1
       ref_id: Technology.1.1
-      description: Accountability
+      name: Accountability
       translations:
         fr:
-          description: Accountability
+          name: Accountability
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.1.1.1
       assessable: true
       depth: 4
@@ -7362,14 +7227,14 @@ objects:
           description: "La responsabilit\xE9 technique de la solution been formellement\
             \ attribu\xE9?"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.1.2
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.1
       ref_id: Technology.1.2
-      description: Documentation
+      name: Documentation
       translations:
         fr:
-          description: Documentation
+          name: Documentation
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.1.2.1
       assessable: true
       depth: 4
@@ -7391,14 +7256,14 @@ objects:
           description: "La solution a-t-elle \xE9t\xE9 document\xE9e fonctionnellement\
             \ documented?"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.1.3
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.1
       ref_id: Technology.1.3
-      description: Personnel & support
+      name: Personnel & support
       translations:
         fr:
-          description: Personnel & support
+          name: Personnel & support
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.1.3.1
       assessable: true
       depth: 4
@@ -7436,14 +7301,14 @@ objects:
         fr:
           description: Y a-t-il un contrat de support contract pour la solution?
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.1.4
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.1
       ref_id: Technology.1.4
-      description: Maintenance & configuration
+      name: Maintenance & configuration
       translations:
         fr:
-          description: Maintenance & configuration
+          name: Maintenance & configuration
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.1.4.1
       assessable: true
       depth: 4
@@ -7494,14 +7359,14 @@ objects:
           description: "La maintenance est-elle performed avec des outils autoris\xE9\
             s et fiables?"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.1.5
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.1
       ref_id: Technology.1.5
-      description: Availability, integrity & continuity
+      name: Availability, integrity & continuity
       translations:
         fr:
-          description: Availability, integrity & continuity
+          name: Availability, integrity & continuity
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.1.5.1
       assessable: true
       depth: 4
@@ -7562,14 +7427,14 @@ objects:
           description: "Y a-t-il un(e) separate environnement de d\xE9veloppement\
             \ / test pour cette solution?"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.1.6
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.1
       ref_id: Technology.1.6
-      description: Access management
+      name: Access management
       translations:
         fr:
-          description: Access management
+          name: Access management
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.1.6.1
       assessable: true
       depth: 4
@@ -7962,14 +7827,14 @@ objects:
         fr:
           name: Outils NDR
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.2.1
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.2
       ref_id: Technology.2.1
-      description: Accountability
+      name: Accountability
       translations:
         fr:
-          description: Accountability
+          name: Accountability
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.2.1.1
       assessable: true
       depth: 4
@@ -7991,14 +7856,14 @@ objects:
           description: "La responsabilit\xE9 technique de la solution been formellement\
             \ attribu\xE9?"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.2.2
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.2
       ref_id: Technology.2.2
-      description: Documentation
+      name: Documentation
       translations:
         fr:
-          description: Documentation
+          name: Documentation
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.2.2.1
       assessable: true
       depth: 4
@@ -8020,14 +7885,14 @@ objects:
           description: "La solution a-t-elle \xE9t\xE9 document\xE9e fonctionnellement\
             \ documented?"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.2.3
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.2
       ref_id: Technology.2.3
-      description: Personnel & support
+      name: Personnel & support
       translations:
         fr:
-          description: Personnel & support
+          name: Personnel & support
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.2.3.1
       assessable: true
       depth: 4
@@ -8065,14 +7930,14 @@ objects:
         fr:
           description: Y a-t-il un contrat de support contract pour la solution?
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.2.4
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.2
       ref_id: Technology.2.4
-      description: Maintenance & configuration
+      name: Maintenance & configuration
       translations:
         fr:
-          description: Maintenance & configuration
+          name: Maintenance & configuration
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.2.4.1
       assessable: true
       depth: 4
@@ -8123,14 +7988,14 @@ objects:
           description: "La maintenance est-elle performed avec des outils autoris\xE9\
             s et fiables?"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.2.5
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.2
       ref_id: Technology.2.5
-      description: Availability, integrity & continuity
+      name: Availability, integrity & continuity
       translations:
         fr:
-          description: Availability, integrity & continuity
+          name: Availability, integrity & continuity
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.2.5.1
       assessable: true
       depth: 4
@@ -8191,14 +8056,14 @@ objects:
           description: "Y a-t-il un(e) separate environnement de d\xE9veloppement\
             \ / test pour cette solution?"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.2.6
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.2
       ref_id: Technology.2.6
-      description: Access Management
+      name: Access Management
       translations:
         fr:
-          description: Access Management
+          name: Access Management
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.2.6.1
       assessable: true
       depth: 4
@@ -8555,14 +8420,14 @@ objects:
         fr:
           name: "Analytique de S\xE9curit\xE9"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.3.1
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.3
       ref_id: Technology.3.1
-      description: Accountability
+      name: Accountability
       translations:
         fr:
-          description: Accountability
+          name: Accountability
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.3.1.1
       assessable: true
       depth: 4
@@ -8584,14 +8449,14 @@ objects:
           description: "La responsabilit\xE9 technique de la solution been formellement\
             \ attribu\xE9?"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.3.2
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.3
       ref_id: Technology.3.2
-      description: Documentation
+      name: Documentation
       translations:
         fr:
-          description: Documentation
+          name: Documentation
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.3.2.1
       assessable: true
       depth: 4
@@ -8613,14 +8478,14 @@ objects:
           description: "La solution a-t-elle \xE9t\xE9 document\xE9e fonctionnellement\
             \ documented?"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.3.3
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.3
       ref_id: Technology.3.3
-      description: Personnel & support
+      name: Personnel & support
       translations:
         fr:
-          description: Personnel & support
+          name: Personnel & support
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.3.3.1
       assessable: true
       depth: 4
@@ -8658,14 +8523,14 @@ objects:
         fr:
           description: Y a-t-il un contrat de support contract pour la solution?
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.3.4
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.3
       ref_id: Technology.3.4
-      description: Maintenance & configuration
+      name: Maintenance & configuration
       translations:
         fr:
-          description: Maintenance & configuration
+          name: Maintenance & configuration
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.3.4.1
       assessable: true
       depth: 4
@@ -8716,14 +8581,14 @@ objects:
           description: "La maintenance est-elle performed avec des outils autoris\xE9\
             s et fiables?"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.3.5
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.3
       ref_id: Technology.3.5
-      description: Availability, integrity & continuity
+      name: Availability, integrity & continuity
       translations:
         fr:
-          description: Availability, integrity & continuity
+          name: Availability, integrity & continuity
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.3.5.1
       assessable: true
       depth: 4
@@ -8784,14 +8649,14 @@ objects:
           description: "Y a-t-il un(e) separate environnement de d\xE9veloppement\
             \ / test pour cette solution?"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.3.6
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.3
       ref_id: Technology.3.6
-      description: Access management
+      name: Access management
       translations:
         fr:
-          description: Access management
+          name: Access management
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.3.6.1
       assessable: true
       depth: 4
@@ -9283,14 +9148,14 @@ objects:
         fr:
           name: "Automatisation & Orchestration de S\xE9curit\xE9"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.4.1
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.4
       ref_id: Technology.4.1
-      description: Accountability
+      name: Accountability
       translations:
         fr:
-          description: Accountability
+          name: Accountability
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.4.1.1
       assessable: true
       depth: 4
@@ -9312,14 +9177,14 @@ objects:
           description: "La responsabilit\xE9 technique de la solution been formellement\
             \ attribu\xE9?"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.4.2
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.4
       ref_id: Technology.4.2
-      description: Documentation
+      name: Documentation
       translations:
         fr:
-          description: Documentation
+          name: Documentation
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.4.2.1
       assessable: true
       depth: 4
@@ -9341,14 +9206,14 @@ objects:
           description: "La solution a-t-elle \xE9t\xE9 document\xE9e fonctionnellement\
             \ documented?"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.4.3
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.4
       ref_id: Technology.4.3
-      description: Personnel & support
+      name: Personnel & support
       translations:
         fr:
-          description: Personnel & support
+          name: Personnel & support
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.4.3.1
       assessable: true
       depth: 4
@@ -9386,14 +9251,14 @@ objects:
         fr:
           description: Y a-t-il un contrat de support contract pour la solution?
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.4.4
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.4
       ref_id: Technology.4.4
-      description: Maintenance & configuration
+      name: Maintenance & configuration
       translations:
         fr:
-          description: Maintenance & configuration
+          name: Maintenance & configuration
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.4.4.1
       assessable: true
       depth: 4
@@ -9444,14 +9309,14 @@ objects:
           description: "La maintenance est-elle performed avec des outils autoris\xE9\
             s et fiables?"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.4.5
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.4
       ref_id: Technology.4.5
-      description: Availability, integrity & continuity
+      name: Availability, integrity & continuity
       translations:
         fr:
-          description: Availability, integrity & continuity
+          name: Availability, integrity & continuity
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.4.5.1
       assessable: true
       depth: 4
@@ -9512,14 +9377,14 @@ objects:
           description: "Y a-t-il un(e) separate environnement de d\xE9veloppement\
             \ / test pour cette solution?"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.4.6
-      assessable: true
+      assessable: false
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.4
       ref_id: Technology.4.6
-      description: Access management
+      name: Access management
       translations:
         fr:
-          description: Access management
+          name: Access management
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:technology.4.6.1
       assessable: true
       depth: 4
@@ -11955,6 +11820,41 @@ objects:
 
         Maturity guidance:
 
+        1 - Best practices not applied
+
+        2 - Best practices identified, but not applied
+
+        3 - Best practices applied, but not structurally
+
+        4 - Best practices applied to service architecture and service delivery
+
+        5 - Best practices applied and adherence checked regularly'
+      translations:
+        fr:
+          description: 'Les meilleures pratiques sont-elles applied to the service?
+
+
+            Maturity guidance:
+
+            1 - Best practices not applied
+
+            2 - Best practices identified, but not applied
+
+            3 - Best practices applied, but not structurally
+
+            4 - Best practices applied to service architecture and service delivery
+
+            5 - Best practices applied and adherence checked regularly'
+    - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.3.13
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.3
+      ref_id: Services.3.13
+      description: 'Is the service supported by predefined workflows or scenarios?
+
+
+        Maturity guidance:
+
         1 - No workflows or scenarios in place
 
         2 - Some ad-hoc information across documents
@@ -11966,7 +11866,7 @@ objects:
         5 - Formal workflows created, approved and published for all incident types'
       translations:
         fr:
-          description: 'Les meilleures pratiques sont-elles applied to the service?
+          description: 'Le service est-il supported by predefined workflows or scenarios?
 
 
             Maturity guidance:
@@ -11981,12 +11881,12 @@ objects:
 
             5 - Formal workflows created, approved and published for all incident
             types'
-    - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.3.13
+    - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.3.14
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.3
-      ref_id: Services.3.13
-      description: 'Is the service supported by predefined workflows or scenarios?
+      ref_id: Services.3.14
+      description: 'Is process data gathered for prediction of service performance?
 
 
         Maturity guidance:
@@ -12002,26 +11902,20 @@ objects:
         5 - Continuous measurement to determine progress & adjust process'
       translations:
         fr:
-          description: 'Le service est-il supported by predefined workflows or scenarios?
-
-
-            Maturity guidance:
-
-            1 - Service performance not measured
-
-            2 - Goals set for service performance, measured ad-hoc
-
-            3 - Goals set for service performance, measured structurally but informally
-
-            4 - Goals set for service performance, measured structurally and formally
-
-            5 - Continuous measurement to determine progress & adjust process'
-    - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.3.14
+          description: "Les donn\xE9es de processus sont-elles data collect\xE9es\
+            \ pour la pr\xE9diction of service performance?\n\nMaturity guidance:\n\
+            1 - Service performance not measured\n2 - Goals set for service performance,\
+            \ measured ad-hoc\n3 - Goals set for service performance, measured structurally\
+            \ but informally\n4 - Goals set for service performance, measured structurally\
+            \ and formally\n5 - Continuous measurement to determine progress & adjust\
+            \ process"
+    - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.3.15
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.3
-      ref_id: Services.3.14
-      description: 'Is process data gathered for prediction of service performance?
+      ref_id: Services.3.15
+      description: 'Is the service continuously being improved based on improvement
+        goals?
 
 
         Maturity guidance:
@@ -12037,23 +11931,12 @@ objects:
         5 - Continuous improvement based on targets and feedback loops'
       translations:
         fr:
-          description: "Les donn\xE9es de processus sont-elles data collect\xE9es\
-            \ pour la pr\xE9diction of service performance?\n\nMaturity guidance:\n\
-            1 - Improvement not done\n2 - Goals defined, but not pursued\n3 - Goals\
-            \ defined and pursued structurally, but not formalized\n4 - Goals formally\
-            \ defined and pursued structurally and periodically\n5 - Continuous improvement\
-            \ based on targets and feedback loops"
-    - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.3.15
-      assessable: true
-      depth: 3
-      parent_urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.3
-      ref_id: Services.3.15
-      description: Is the service continuously being improved based on improvement
-        goals?
-      translations:
-        fr:
           description: "Le service est-il continuellement am\xE9lior\xE9 bas\xE9 sur\
-            \ les objectifs d'am\xE9lioration?"
+            \ les objectifs d'am\xE9lioration?\n\nMaturity guidance:\n1 - Improvement\
+            \ not done\n2 - Goals defined, but not pursued\n3 - Goals defined and\
+            \ pursued structurally, but not formalized\n4 - Goals formally defined\
+            \ and pursued structurally and periodically\n5 - Continuous improvement\
+            \ based on targets and feedback loops"
     - urn: urn:intuitem:risk:req_node:soc-cmm-2.4.2-basic:services.3.16
       assessable: false
       depth: 3
