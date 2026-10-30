@@ -30,19 +30,19 @@ class GenericCollectionViewSet(BaseModelViewSet):
     serializers_module = "pmbok.serializers"
     filterset_fields = [
         "folder",
-        "compliance_assessments",
-        "risk_assessments",
-        "crq_studies",
-        "ebios_studies",
-        "entity_assessments",
-        "findings_assessments",
-        "documents",
-        "security_exceptions",
-        "policies",
         "filtering_labels",
     ]
     search_fields = ["name", "description", "ref_id"]
     ordering = ["created_at"]
+
+    @action(detail=True, name="Get write data")
+    def object(self, request, pk):
+        serializer_class = self.get_serializer_class(action="update")
+        return Response(
+            serializer_class(
+                self.get_object(), context=self.get_serializer_context()
+            ).data
+        )
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get Generic Collection status choices")

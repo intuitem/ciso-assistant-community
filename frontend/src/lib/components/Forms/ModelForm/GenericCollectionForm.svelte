@@ -110,7 +110,7 @@
 		field="documents"
 		cacheLock={cacheLocks['documents']}
 		bind:cachedValue={formDataCache['documents']}
-		label={m.documents()}
+		label={m.evidences()}
 	/>
 {:else if context === 'selectSecurityExceptions'}
 	<AutocompleteSelect
@@ -135,6 +135,42 @@
 		cacheLock={cacheLocks['policies']}
 		bind:cachedValue={formDataCache['policies']}
 		label={m.policies()}
+	/>
+{:else if context === 'selectAppliedControls'}
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="applied-controls?exclude_category=policy"
+		optionsExtraFields={[['folder', 'str']]}
+		optionsLabelField="auto"
+		field="applied_controls"
+		cacheLock={cacheLocks['applied_controls']}
+		bind:cachedValue={formDataCache['applied_controls']}
+		label={m.appliedControls()}
+	/>
+{:else if context === 'selectDocumentContainers'}
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="document-containers"
+		optionsExtraFields={[['folder', 'str']]}
+		optionsLabelField="auto"
+		field="document_containers"
+		cacheLock={cacheLocks['document_containers']}
+		bind:cachedValue={formDataCache['document_containers']}
+		label={m.documentContainers()}
+	/>
+{:else if context === 'selectBusinessImpactAnalyses'}
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="business-impact-analysis"
+		optionsExtraFields={[['folder', 'str']]}
+		optionsLabelField="auto"
+		field="business_impact_analyses"
+		cacheLock={cacheLocks['business_impact_analyses']}
+		bind:cachedValue={formDataCache['business_impact_analyses']}
+		label={m.businessImpactAnalyses()}
 	/>
 	<!-- {:else if context === 'selectDependencies'} -->
 	<!-- 	<AutocompleteSelect -->
@@ -274,6 +310,42 @@
 			cacheLock={cacheLocks['policies']}
 			bind:cachedValue={formDataCache['policies']}
 			label={m.policies()}
+		/>
+
+		<AutocompleteSelect
+			{form}
+			multiple
+			optionsEndpoint="applied-controls?exclude_category=policy"
+			optionsExtraFields={[['folder', 'str']]}
+			optionsLabelField="auto"
+			field="applied_controls"
+			cacheLock={cacheLocks['applied_controls']}
+			bind:cachedValue={formDataCache['applied_controls']}
+			label={m.appliedControls()}
+		/>
+
+		<AutocompleteSelect
+			{form}
+			multiple
+			optionsEndpoint="document-containers"
+			optionsExtraFields={[['folder', 'str']]}
+			optionsLabelField="auto"
+			field="document_containers"
+			cacheLock={cacheLocks['document_containers']}
+			bind:cachedValue={formDataCache['document_containers']}
+			label={m.documentContainers()}
+		/>
+
+		<AutocompleteSelect
+			{form}
+			multiple
+			optionsEndpoint="business-impact-analysis"
+			optionsExtraFields={[['folder', 'str']]}
+			optionsLabelField="auto"
+			field="business_impact_analyses"
+			cacheLock={cacheLocks['business_impact_analyses']}
+			bind:cachedValue={formDataCache['business_impact_analyses']}
+			label={m.businessImpactAnalyses()}
 		/>
 
 		<!-- <AutocompleteSelect -->

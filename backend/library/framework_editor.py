@@ -43,6 +43,7 @@ EDITOR_NODE_KEYS = {
     "visibility_expression",
     "aggregation",
     "typical_evidence",
+    "evidence_required",
     "weight",
     "importance",
     "display_mode",
@@ -181,6 +182,7 @@ def framework_to_editor_doc(framework: dict, *, locale: str = "en") -> dict:
                 "visibility_expression": node.get("visibility_expression"),
                 "aggregation": node.get("aggregation"),
                 "typical_evidence": node.get("typical_evidence"),
+                "evidence_required": bool(node.get("evidence_required")),
                 "weight": node.get("weight", 1),
                 "importance": node.get("importance"),
                 "display_mode": node.get("display_mode", "default"),
@@ -529,6 +531,13 @@ def editor_doc_to_framework_object(
             )
         if aggregation and aggregation != "sum":
             node_dict["aggregation"] = aggregation
+        evidence_required = (
+            node.get("evidence_required")
+            if "evidence_required" in node
+            else (previous or {}).get("evidence_required")
+        )
+        if evidence_required is True:
+            node_dict["evidence_required"] = True
         node_questions = questions_by_node.get(canonical)
         if node_questions:
             node_dict["questions"] = node_questions

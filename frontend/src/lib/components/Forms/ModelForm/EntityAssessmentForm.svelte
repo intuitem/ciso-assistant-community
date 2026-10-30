@@ -10,7 +10,8 @@
 
 	import Dropdown from '#lib/components/Dropdown/Dropdown.svelte';
 	import VisibilityEditor from '#lib/components/ComplianceAssessment/VisibilityEditor.svelte';
-	import type { SuperForm } from 'sveltekit-superforms';
+	import CustomFieldsSection from '../CustomFieldsSection.svelte';
+	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 
 	interface Props {
 		form: SuperForm<any>;
@@ -33,6 +34,7 @@
 	}: Props = $props();
 
 	const { form: formData } = form;
+	const { value: folderId } = formFieldProxy(form, 'folder');
 
 	// Creating almost always means sending a questionnaire, so the audit is on by
 	// default; on edit it stays off. `??` would keep the schema's `false`.
@@ -56,6 +58,30 @@
 			console.error('Could not resolve the entity folder', e);
 		}
 	}
+
+	// Global plus a perimeter is saved in the perimeter's domain; show that domain's fields.
+	async function followPerimeterFolder(perimeterId: string, folder: string) {
+		try {
+			const [perimeter, current] = await Promise.all([
+				fetch(`/perimeters/${perimeterId}`).then((res) => res.json()),
+				fetch(`/folders/${folder}`).then((res) => res.json())
+			]);
+			// Only Global has a null parent; content_type comes back as a display label.
+			if (current?.parent_folder !== null) return;
+			if ($formData.perimeter !== perimeterId || $formData.folder !== folder) return;
+			const target = perimeter?.folder?.id ?? perimeter?.folder;
+			if (target) form.form.update((data) => ({ ...data, folder: target }), { taint: false });
+		} catch (e) {
+			console.error('Could not resolve the perimeter folder', e);
+		}
+	}
+
+	// Derived so the effect reruns on a perimeter change, not on every keystroke in the form.
+	const perimeterId = $derived($formData.perimeter);
+	$effect(() => {
+		const folder = $folderId;
+		if (perimeterId && folder) followPerimeterFolder(perimeterId, folder);
+	});
 	let implementationGroupsChoices = $state<{ label: string; value: string }[]>([]);
 	let frameworkDefaults = $state<Record<string, any> | null>(null);
 
@@ -343,3 +369,4 @@
 		bind:cachedValue={formDataCache['reference_link']}
 	/>
 </Dropdown>
+<CustomFieldsSection {form} model="tprm.entityassessment" folderId={$folderId} />

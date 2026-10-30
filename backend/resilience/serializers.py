@@ -1,4 +1,5 @@
 from core.serializers import (
+    CollectionMembershipMixin,
     AssignmentNotificationMixin,
     BaseModelSerializer,
     AssessmentReadSerializer,
@@ -37,7 +38,7 @@ class BusinessImpactAnalysisReadSerializer(AssessmentReadSerializer):
 
 
 class BusinessImpactAnalysisWriteSerializer(
-    AssignmentNotificationMixin, BaseModelSerializer
+    CollectionMembershipMixin, AssignmentNotificationMixin, BaseModelSerializer
 ):
     assignment_notifications = {
         "authors": "object_assignment",
