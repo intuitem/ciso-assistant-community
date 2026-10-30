@@ -25,6 +25,7 @@ from django.db.models import (
 from django.db.models.functions import Coalesce
 
 from core.models import (
+    Actor,
     AppliedControl,
     Asset,
     ComplianceAssessment,
@@ -41,12 +42,13 @@ from core.models import (
     RiskScenario,
     SecurityException,
     TaskNode,
+    Team,
     ValidationFlow,
     Vulnerability,
 )
 from doc_management.models import DocumentContainer, DocumentRevision, ManagedDocument
 from iam.models import User
-from tprm.models import Entity, EntityAssessment
+from tprm.models import Entity, EntityAssessment, Representative
 
 from .filters import get_model_field
 
@@ -251,16 +253,18 @@ def _requirements_breakdown(assessment):
 
 def _assignment_users(assignment):
     """Users behind the assigned actors: the user, team people, entity representatives."""
-    actors = list(assignment.actor.all())
-    users = User.objects.filter(
-        Q(actor__in=actors)
-        | Q(led_teams__actor__in=actors)
-        | Q(deputy_teams__actor__in=actors)
-        | Q(teams__actor__in=actors)
-        | Q(representative__entity__actor__in=actors),
-        is_active=True,
-    ).distinct()
-    return [{"id": str(user.id), "email": user.email} for user in users]
+    users = {}
+    for actor in assignment.actor.all():
+        people = [actor.user]
+        if actor.team:
+            team = actor.team
+            people += [team.leader, *team.deputies.all(), *team.members.all()]
+        if actor.entity:
+            people += [rep.user for rep in actor.entity.representatives.all()]
+        for user in people:
+            if user is not None and user.is_active:
+                users[user.id] = user
+    return [{"id": str(user.id), "email": user.email} for user in users.values()]
 
 
 READABLE_MODELS: dict[str, ReadEntry] = {
@@ -571,11 +575,25 @@ READABLE_MODELS: dict[str, ReadEntry] = {
                 "ref_id": a.compliance_assessment.framework.ref_id,
                 "name": a.compliance_assessment.framework.name,
             },
+            "audit_folder": lambda a: str(a.compliance_assessment.folder_id),
             "actors": lambda a: [str(actor.id) for actor in a.actor.all()],
-            "users": _assignment_users,
         },
+        optional_computed={"users": _assignment_users},
         select_related=["compliance_assessment__framework", "folder"],
-        prefetch_related=["actor"],
+        prefetch_scoped={
+            "actors": {"actor": Actor},
+            "users": {
+                "actor": Actor,
+                "actor__user": User,
+                "actor__team": Team,
+                "actor__team__leader": User,
+                "actor__team__deputies": User,
+                "actor__team__members": User,
+                "actor__entity": Entity,
+                "actor__entity__representatives": Representative,
+                "actor__entity__representatives__user": User,
+            },
+        },
     ),
     "risk_scenario": ReadEntry(
         model=RiskScenario,

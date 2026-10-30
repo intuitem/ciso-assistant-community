@@ -193,7 +193,7 @@ See [Steps](steps.md).
 - Rows carry `id`, `name`, `created_at`, `updated_at` plus model fields. Filter on stored values (`active`), read back labels (`Active`).
 - `…_count` fields (`evidences_count`, `applied_controls_count`) filter and aggregate like numbers: "controls with no evidence" = `evidences_count` equals `0`.
 - Requirement assessments: only assessable ones. Risk scenario level filters ignore unrated scenarios.
-- Requirement assignments: `framework` (`urn`, `ref_id`, `name`) of the audit and `users` (`id`, `email`) behind the actors: the user, a team's leader, deputies and members, an entity's representatives with an account.
+- Requirement assignments: `framework` (`urn`, `ref_id`, `name`) and `audit_folder` of the audit. **Extra data to include** `users` (`id`, `email`) behind the actors: the user, a team's leader, deputies and members, an entity's representatives with an account. Users the run cannot see are left out. Grant in `audit_folder`, not the assignment's `folder`.
 - `document_revision.content` is truncated under `{{nodes…}}`: map it to a variable to pass the whole text.
 - **Extra data to include**: `quality_check` on audits and requirements (`errors`, `warnings`, `info`, `count`, `flagged`, `messages`, `text`). Branch on `flagged`, not `count`. Expensive: use it on a first-match read or a short page.
 

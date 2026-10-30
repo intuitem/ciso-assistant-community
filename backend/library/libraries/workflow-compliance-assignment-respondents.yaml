@@ -49,12 +49,6 @@ objects:
         trigger_config:
           type: internal_event
           event_key: requirementassignment.updated
-          filters:
-            operator: and
-            conditions:
-            - field: status
-              op: eq
-              value: draft
         input_mapping:
           assignment_id: object_id
       - ref: read_assignment
@@ -64,6 +58,8 @@ objects:
           type: read_objects
           model: requirement_assignment
           mode: first
+          include:
+          - users
           filters:
             operator: and
             conditions:
@@ -73,7 +69,7 @@ objects:
         output_mapping:
           found: found
           framework_urn: object.framework.urn
-          audit_folder: object.folder.id
+          audit_folder: object.audit_folder
           users: object.users
       - ref: check_framework
         type: condition
