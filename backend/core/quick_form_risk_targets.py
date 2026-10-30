@@ -309,9 +309,15 @@ class AssetAccreditationTarget(Target):
         if assessment := _last_written(
             AssetRiskAssessmentTarget.key, subject, RiskAssessment
         ):
-            collection.risk_assessments.add(assessment)
+            collection.set_items(
+                "risk_assessments",
+                [*collection.get_items("risk_assessments"), assessment],
+            )
         if audit := _last_written(AssetAuditTarget.key, subject, ComplianceAssessment):
-            collection.compliance_assessments.add(audit)
+            collection.set_items(
+                "compliance_assessments",
+                [*collection.get_items("compliance_assessments"), audit],
+            )
         value["id"] = str(cycle.pk)
 
 

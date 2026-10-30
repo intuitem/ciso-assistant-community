@@ -137,10 +137,10 @@ def test_accepting_opens_a_homologation_cycle_and_renews_it_once_decided(setup):
     cycle = Accreditation.objects.get(asset=setup["asset"])
     assert cycle.status.name == "draft"
     assert cycle.category.name == "accreditation_elaborated"
-    assert list(cycle.linked_collection.risk_assessments.all()) == [
+    assert list(cycle.linked_collection.get_items("risk_assessments")) == [
         RiskAssessment.objects.get(folder=setup["domain"])
     ]
-    assert list(cycle.linked_collection.compliance_assessments.all()) == [
+    assert list(cycle.linked_collection.get_items("compliance_assessments")) == [
         ComplianceAssessment.objects.get(folder=setup["domain"])
     ]
 

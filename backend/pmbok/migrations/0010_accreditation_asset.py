@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     dependencies = [
         ("core", "0202_custom_word_template_typst"),
-        ("pmbok", "0008_remove_accreditation_is_published_and_more"),
+        ("pmbok", "0009_collection_items"),
     ]
 
     operations = [
