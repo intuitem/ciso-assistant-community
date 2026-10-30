@@ -3318,3 +3318,37 @@ def test_a_new_choice_without_text_is_not_saved():
     rebuilt = fw_editor.editor_doc_to_framework_object(doc, existing=original)
     node = next(n for n in rebuilt["requirement_nodes"] if n["ref_id"] == "A.1")
     assert len(next(iter(node["questions"].values()))["choices"]) == 1
+
+
+def test_framework_editor_doc_round_trip_keeps_evidence_required():
+    from library import framework_editor as fw_editor
+
+    original = copy.deepcopy(
+        builder.normalize_objects(SOURCE_LIBRARY["objects"])["frameworks"][0]
+    )
+    for node in original["requirement_nodes"]:
+        if node["ref_id"] == "A.1":
+            node["evidence_required"] = True
+    doc = fw_editor.framework_to_editor_doc(original, locale="en")
+    rebuilt = fw_editor.editor_doc_to_framework_object(doc, existing=original)
+    nodes = {node["ref_id"]: node for node in rebuilt["requirement_nodes"]}
+    assert nodes["A.1"]["evidence_required"] is True
+    assert "evidence_required" not in nodes["A"]
+
+
+def test_framework_editor_keeps_stored_evidence_required_and_parses_strictly():
+    from library import framework_editor as fw_editor
+
+    original = copy.deepcopy(
+        builder.normalize_objects(SOURCE_LIBRARY["objects"])["frameworks"][0]
+    )
+    for node in original["requirement_nodes"]:
+        node["evidence_required"] = True
+    doc = fw_editor.framework_to_editor_doc(original, locale="en")
+    by_ref = {node["ref_id"]: node for node in doc["nodes"]}
+    del by_ref["A"]["evidence_required"]
+    by_ref["A.1"]["evidence_required"] = "false"
+    rebuilt = fw_editor.editor_doc_to_framework_object(doc, existing=original)
+    nodes = {node["ref_id"]: node for node in rebuilt["requirement_nodes"]}
+    assert nodes["A"]["evidence_required"] is True
+    assert "evidence_required" not in nodes["A.1"]
