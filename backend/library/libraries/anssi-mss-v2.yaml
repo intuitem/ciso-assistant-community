@@ -1,0 +1,2558 @@
+urn: urn:intuitem:risk:library:anssi-mss-v2
+locale: fr
+ref_id: ANSSI-MSS-V2
+name: 'ANSSI - MonServiceSécurisé : référentiel de mesures V2'
+description: |-
+  Référentiel de mesures V2 de MonServiceSécurisé, le service de l'ANSSI pour sécuriser et homologuer les services numériques publics : 135 mesures (129 ANSSI, 6 CNIL) réparties en 6 thématiques. Les groupes d'implémentation reprennent les besoins de sécurité de MonServiceSécurisé (Basique, Modéré, Avancé), chacun séparé en mesures indispensables et recommandées. MonServiceSécurisé ajuste en plus la liste selon les caractéristiques du service (données, disponibilité, ouverture, type de service, hébergement) : ces ajustements figurent dans l'annotation de chaque mesure. Les identifiants sont ceux renvoyés par l'API publique de MonServiceSécurisé.
+
+  Sources :
+  - https://monservicesecurise.cyber.gouv.fr
+  - https://github.com/betagouv/mon-service-securise (commit 1362dc4)
+copyright: |-
+  Copyright ANSSI - Agence nationale de la sécurité des systèmes d'information (https://cyber.gouv.fr)
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and limitations under the License.
+version: 1
+publication_date: 2026-10-27
+provider: ANSSI
+packager: intuitem
+dependencies:
+- urn:intuitem:risk:library:doc-pol
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:anssi-mss-v2
+    ref_id: ANSSI-MSS-V2
+    name: 'ANSSI - MonServiceSécurisé : référentiel de mesures V2'
+    description: |-
+      Référentiel de mesures V2 de MonServiceSécurisé, le service de l'ANSSI pour sécuriser et homologuer les services numériques publics : 135 mesures (129 ANSSI, 6 CNIL) réparties en 6 thématiques. Les groupes d'implémentation reprennent les besoins de sécurité de MonServiceSécurisé (Basique, Modéré, Avancé), chacun séparé en mesures indispensables et recommandées. MonServiceSécurisé ajuste en plus la liste selon les caractéristiques du service (données, disponibilité, ouverture, type de service, hébergement) : ces ajustements figurent dans l'annotation de chaque mesure. Les identifiants sont ceux renvoyés par l'API publique de MonServiceSécurisé.
+
+      Sources :
+      - https://monservicesecurise.cyber.gouv.fr
+      - https://github.com/betagouv/mon-service-securise (commit 1362dc4)
+    field_visibility:
+      extended_result:
+        auditor: hidden
+        respondent: hidden
+    implementation_groups_definition:
+    - ref_id: B-I
+      name: 'Basique : mesures indispensables'
+      description: Mesures indispensables pour un service au besoin de sécurité basique.
+    - ref_id: B-R
+      name: 'Basique : mesures recommandées'
+      description: Mesures recommandées pour un service au besoin de sécurité basique.
+    - ref_id: M-I
+      name: 'Modéré : mesures indispensables'
+      description: Mesures indispensables pour un service au besoin de sécurité modéré.
+    - ref_id: M-R
+      name: 'Modéré : mesures recommandées'
+      description: Mesures recommandées pour un service au besoin de sécurité modéré.
+    - ref_id: A-I
+      name: 'Avancé : mesures indispensables'
+      description: Mesures indispensables pour un service au besoin de sécurité avancé.
+    - ref_id: A-R
+      name: 'Avancé : mesures recommandées'
+      description: Mesures recommandées pour un service au besoin de sécurité avancé.
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:t1
+      assessable: false
+      depth: 1
+      ref_id: T1
+      name: Gouvernance et gestion des risques
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:recensement.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t1
+      ref_id: RECENSEMENT.1
+      name: Etablir la liste de l'ensemble des services et données à protéger
+      description: |-
+        Lister l'ensemble des activités, services et données du système d'information à protéger, et mettre à jour cette liste a minima annuellement ou en cas de changement.
+
+        Cette mesure permet d'identifier les éléments métier à protéger au sein du système d'information.
+      annotation: 'Identifiant MSS : #0001 · Catégorie : Gouvernance · Origine : ANSSI'
+      implementation_groups:
+      - B-I
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.asset_register
+      - urn:intuitem:risk:function:doc-pol:doc.scope
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:recensement.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t1
+      ref_id: RECENSEMENT.2
+      name: Etablir et tenir à jour la liste des équipements et des applicatifs contribuant au fonctionnement
+        du système d'information
+      description: |-
+        Lister les équipements et les applicatifs qui sont utilisés au sein du système d'information, et tenir à jour cette liste.
+
+        Cette mesure permet d'identifier les éléments techniques à protéger au sein du système d'information.
+      annotation: 'Identifiant MSS : #0002 · Catégorie : Gouvernance · Origine : ANSSI'
+      implementation_groups:
+      - B-R
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.asset_register
+      - urn:intuitem:risk:function:doc-pol:tech.cmdb
+      - urn:intuitem:risk:function:doc-pol:tech.sw_inventory
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:recensement.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t1
+      ref_id: RECENSEMENT.3
+      name: Minimiser les données stockées aux seules données nécessaires aux traitements
+      description: |-
+        S'assurer que seules les données nécessaires au système d'information sont stockées.
+
+        Cette mesure permet la conformité à certaines réglementations, peut potentiellement réduire les coûts liés au stockage des données ainsi que l'impact d'une fuite de données.
+      annotation: 'Identifiant MSS : #0003 · Catégorie : Gouvernance · Origine : ANSSI'
+      implementation_groups:
+      - B-I
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.retention
+      - urn:intuitem:risk:function:doc-pol:pol.classif
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:conformite.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t1
+      ref_id: CONFORMITE.1
+      name: Réaliser une analyse de la conformité aux exigences réglementaires et normatives applicables
+      description: |-
+        Réaliser et maintenir à jour une analyse de la conformité du système d'information vis-à-vis des exigences réglementaires et normatives applicables afin d'identifier les écarts avec les mesures mises en œuvre au sein du système d'information.
+
+        Cette mesure permet de s'assurer de la conformité du système d'information aux réglementations et normes devant être appliquées.
+      annotation: 'Identifiant MSS : #0014 · Catégorie : Gouvernance · Origine : ANSSI'
+      implementation_groups:
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.legal
+      - urn:intuitem:risk:function:doc-pol:proc.compliance_monitoring
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:conformite.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t1
+      ref_id: CONFORMITE.3
+      name: Définir et mettre en œuvre en continu un plan d'action de renforcement de la cybersécurité
+      description: |-
+        Formaliser et mettre en œuvre un plan d'action de renforcement de la cybersécurité se basant sur les analyses de la conformité du système d'information vis-à-vis des exigences réglementaires et normatives applicables, les audits et autres analyses réalisés sur le système. Les actions doivent être caractérisés par un porteur et une échéance réalisable.
+
+        Cette mesure permet une amélioration continue de la sécurité du système d'information.
+      annotation: 'Identifiant MSS : #0163 · Catégorie : Gouvernance · Origine : ANSSI'
+      implementation_groups:
+      - M-R
+      - A-R
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.so_register
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:pssi.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t1
+      ref_id: PSSI.5
+      name: Vérifier a minima annuellement les politiques et procédures de sécurité et les mettre à jour
+        si nécessaire
+      description: |-
+        Vérifier tous les ans ou en cas d'évolutions majeures de la menace, du contexte métier, technique ou organisationnel que les politiques et procédures liées au système d'information sont à jour et pertinentes.
+
+        Cette mesure permet de s'assurer que les règles de sécurité stratégiques et opérationnelles sont toujours applicables au système d'information et aux activités liées.
+      annotation: 'Identifiant MSS : #0013 · Catégorie : Gouvernance · Origine : ANSSI'
+      implementation_groups:
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.main
+      - urn:intuitem:risk:function:doc-pol:doc.doc_register
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:t2
+      assessable: false
+      depth: 1
+      ref_id: T2
+      name: Gestion de l'écosystème
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:contrat.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t2
+      ref_id: CONTRAT.1
+      name: Identifier ou fixer les engagements des prestataires en matière de sécurité
+      description: |-
+        En cas de recours à des prestataires, fixer, si possible dès les clauses contractuelles, les exigences de sécurité à respecter. Dans le cas où ces exigences ne peuvent pas être fixées a priori, identifier l'ensemble des exigences de sécurité que s'engagent à respecter les prestataires.
+
+        Cette mesure permet d'éclairer la sélection des prestataires en fonction des garanties de sécurité que ces derniers s'engagent à respecter, et, dans la mesure du possible, de contrôler ces garanties.
+      annotation: 'Identifiant MSS : #0022 · Catégorie : Gouvernance · Origine : ANSSI'
+      implementation_groups:
+      - B-I
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.supplier
+      - urn:intuitem:risk:function:doc-pol:doc.sap
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:contrat.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t2
+      ref_id: CONTRAT.2
+      name: Contrôler la conformité des prestataires aux exigences de sécurité
+      description: |-
+        Auditer périodiquement les prestataires afin de s'assurer du respect des exigences de sécurité identifiées ou fixées au sein des clauses contractuelles, et sanctionner les prestataires de façon adaptée lorsque cela est possible.
+        Ces audits doivent présenter, une synthèse des conformités, les constats et les recommandations en cas de non conformité ainsi que permettre la construction d'un plan d'action.
+
+        Cette mesure permet de s'assurer du niveau de sécurité des prestations réalisées, afin de réduire la vraisemblance d'une attaque par rebond via les prestataires.
+      annotation: 'Identifiant MSS : #0023 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.tprm_assessment
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:t3
+      assessable: false
+      depth: 1
+      ref_id: T3
+      name: Sécurité applicative et protection des données
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:dev.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t3
+      ref_id: DEV.1
+      name: Mettre en œuvre des bonnes pratiques de développement sécurisé
+      description: |-
+        Imposer aux développeurs des bonnes pratiques de développement sécurisé.
+
+        Cette mesure permet de réduire les risques de compromission du code due à la compromission des accès des développeurs ou à une altération du code (intentionnelle ou non).
+      annotation: 'Identifiant MSS : #0024 · Catégorie : Gouvernance · Origine : ANSSI'
+      implementation_groups:
+      - B-R
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.secdev
+      - urn:intuitem:risk:function:doc-pol:proc.sdlc
+      - urn:intuitem:risk:function:doc-pol:train.secdev
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:ecosysteme.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t2
+      ref_id: ECOSYSTEME.1
+      name: Lister les prestataires et fournisseurs avec leurs coordonnées
+      description: |-
+        Lister les prestataires et fournisseurs contribuant à la réalisation des activités du système d'information avec lesquels il existe une relation contractuelle et formaliser leur coordonnées de contact. Mettre cette liste à jour a minima annuellement.
+
+        Cette mesure permet le suivi des prestations permettant les communications en cas d'incident ainsi que, dans la mesure du possible, le suivi opérationnel de la prestation.
+      annotation: 'Identifiant MSS : #0016 · Catégorie : Gouvernance · Origine : ANSSI'
+      implementation_groups:
+      - B-R
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.supplier_register
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:ecosysteme.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t2
+      ref_id: ECOSYSTEME.2
+      name: Lister les interconnexions avec le système d'information et leur point de contact
+      description: |-
+        Lister les interconnexions du système d'information à d'autres systèmes (externes et/ou internes) et renseigner un point de contact pour chacune de ces interconnexions. Mettre cette liste à jour a minima annuellement.
+
+        Cette mesure permet le suivi des communications ouvertes et autorisées entre le système d'information et son écosystème, permettant ainsi la mise en place de mesures de filtrage et de cloisonnement ainsi que la réaction efficace en cas de compromission d'un système interconnecté.
+      annotation: 'Identifiant MSS : #0017 · Catégorie : Gouvernance · Origine : ANSSI'
+      implementation_groups:
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.flow_matrix
+      - urn:intuitem:risk:function:doc-pol:doc.is_map
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:ecosysteme.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t1
+      ref_id: ECOSYSTEME.3
+      name: Héberger le système d'information et les données au sein de l'Union européenne
+      description: |-
+        Privilégier le recours à un hébergeur proposant la localisation au sein de l'Union européenne du service numérique et des données.
+
+        Cette mesure permet de renforcer la protection des données grâce aux garanties offertes par la réglementation européenne et à faciliter les actions de remédiation et d'investigation en cas d'incident de sécurité.
+      annotation: |-
+        Identifiant MSS : #0018 · Catégorie : Gouvernance · Origine : ANSSI
+        Non retenue par défaut : seules les caractéristiques ci-dessous l'ajoutent.
+        Ajoutée si : données hors UE.
+      implementation_groups:
+      - B-R
+      - M-R
+      - A-R
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.data_location
+      - urn:intuitem:risk:function:doc-pol:pol.cloud
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:ecosysteme.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t2
+      ref_id: ECOSYSTEME.4
+      name: Héberger le système d'information et les données auprès d'un prestataire d'informatique en
+        nuage qualifié SecNumCloud
+      description: |-
+        Privilégier le recours à un prestataire de service en nuage (Cloud) qualifié SecNumCloud par l'ANSSI.
+
+        Cette mesure permet d'apporter des garanties élevées en matière de confiance et de sécurité de l'hébergement du service et de ses données.
+      annotation: 'Identifiant MSS : #0019 · Catégorie : Gouvernance · Origine : ANSSI'
+      implementation_groups:
+      - M-R
+      - A-R
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.data_location
+      - urn:intuitem:risk:function:doc-pol:pol.cloud
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:ecosysteme.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t1
+      ref_id: ECOSYSTEME.5
+      name: Privilégier l'achat d'un nom de domaine en .fr, .eu ou un autre nom de domaine de confiance
+      description: |-
+        Lors de l'achat du nom de domaine du service, acheter de préférence un nom de domaine en .fr ou .eu.
+
+        Cette mesure permet de renforcer la confiance des utilisateurs dans le service et la protection du service au titre des règlementations européennes associées à la localisation européenne du nom de domaine.
+      annotation: 'Identifiant MSS : #0020 · Catégorie : Gouvernance · Origine : ANSSI'
+      implementation_groups:
+      - B-R
+      - M-R
+      - A-R
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.domain_mgmt
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:ecosysteme.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t1
+      ref_id: ECOSYSTEME.6
+      name: Acheter un ou plusieurs noms de domaine proches du nom de domaine du site web
+      description: |-
+        Lors du choix du nom de domaine du service numérique, procédez à l'achat d'un ou plusieurs noms de domaines proches du nom de domaine du service numérique, par exemple en changeant des lettres ou en achetant des noms de domaine avec d'autres extensions (ex. .com ou .net).
+
+        Cette mesure permet de limiter le risque de typosquatting (ex. utilisation de noms de domaines proches contenant des modifications typographiques discrètes), permettant de rediriger les utilisateurs vers un site malveillant.
+      annotation: |-
+        Identifiant MSS : #0021 · Catégorie : Gouvernance · Origine : ANSSI
+        Retirée si : ouverture +, ouverture ++, ouverture +++.
+      implementation_groups:
+      - B-R
+      - M-R
+      - A-R
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.domain_mgmt
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:rh.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t1
+      ref_id: RH.2
+      name: Mettre en œuvre un programme de sensibilisation à la sécurité pour l'ensemble des acteurs
+        intervenant sur le système d'information
+      description: |-
+        Sensibiliser à la sécurité numérique les utilisateurs, administrateurs et prestataires ayant accès aux équipements et/ou applicatifs du système d'information.
+
+        Cette mesure permet de réduire la vraisemblance de compromission des utilisateurs, administration et prestataires ou de leurs ressources par un attaquant externe et permet d'accélérer le signalement d'incident.
+      annotation: 'Identifiant MSS : #0026 · Catégorie : Gouvernance · Origine : ANSSI'
+      implementation_groups:
+      - B-I
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.educ
+      - urn:intuitem:risk:function:doc-pol:doc.educ_plan
+      - urn:intuitem:risk:function:doc-pol:doc.educ_register
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:t4
+      assessable: false
+      depth: 1
+      ref_id: T4
+      name: Gestion des identités et des accès
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:rh.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t4
+      ref_id: RH.4
+      name: Formaliser et mettre en œuvre un processus de gestion des arrivées, départs et changements
+        de fonction
+      description: "Définir et mettre en œuvre un processus de gestion des arrivées, des départs et des\
+        \ changements de fonction des personnels et des tiers accédant au système d'information.\nCe processus\
+        \ prévoit : \n- La prise connaissance des règles de sécurité lors de l'arrivée,\n- L'attribution\
+        \ des accès appropriés lors de l'arrivée, \n- La mise à jour des accès lors d'un changement de\
+        \ fonction, \n- La désactivation de l'ensemble des accès logiques et physiques lors du départ.\n\
+        \nCette mesure permet de réduire la vraisemblance d'utilisation d'un compte obsolète par un attaquant\
+        \ externe ou l'utilisation des accès obsolètes par un attaquant interne."
+      annotation: 'Identifiant MSS : #0028 · Catégorie : Gouvernance · Origine : ANSSI'
+      implementation_groups:
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.hr_security
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:t5
+      assessable: false
+      depth: 1
+      ref_id: T5
+      name: Surveillance, maintien et réponse aux incidents
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:carto.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t5
+      ref_id: CARTO.2
+      name: Formaliser et tenir à jour le dossier d'architecture du système d'information
+      description: |-
+        Formaliser et tenir à jour un dossier d'architecture technique du système d'information.
+
+        Cette mesure permet d'assurer le maintien en condition opérationnel et de sécurité du système (ex. être en capacité d'identifier les équipements ou applicatifs vulnérables suite à la publication d'un bulletin d'alerte) ainsi que de pouvoir réagir sans retard injustifié à un incident de sécurité affectant ce système (ex. être capable d'identifier les équipements ou applicatifs affectés par un incident afin d'en limiter les conséquences).
+      annotation: 'Identifiant MSS : #0032 · Catégorie : Gouvernance · Origine : ANSSI'
+      implementation_groups:
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.is_map
+      - urn:intuitem:risk:function:doc-pol:doc.arc_principles
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:donnees.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t3
+      ref_id: DONNEES.1
+      name: Chiffrer les données stockées au repos
+      description: |-
+        Chiffrer les données stockées au repos via des algorithmes à l'état de l'art et s'assurer du cycle de vie sécurisé des clés de chiffrement.
+
+        Cette mesure permet de réduire la vraisemblance de récupération de données non chiffrées par un attaquant.
+      annotation: |-
+        Identifiant MSS : #0049 · Catégorie : Protection · Origine : ANSSI
+        Rendue indispensable si : données très sensibles (+++), données critiques (++++).
+        Rendue recommandée si : données peu sensibles (+), données sensibles (++).
+      implementation_groups:
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.crypto
+      - urn:intuitem:risk:function:doc-pol:tech.disk_encryption
+      - urn:intuitem:risk:function:doc-pol:tech.file_encryption
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:donnees.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t3
+      ref_id: DONNEES.2
+      name: Anonymiser les données collectées concernant l’utilisation du système d'information par les
+        utilisateurs
+      description: |-
+        Configurer le service en vue d'anonymiser autant que possible les données à caractère personnel des utilisateurs conservées pour le bon fonctionnement ou la sécurité du service (ex. log de tentatives d'accès au service) ou à des fins d'analyse (ex. statistiques).
+
+        Cette mesure permet de protéger les utilisateurs contre la traçabilité nominative de leurs actions dans le cadre de l'utilisation du service tout en permettant d'assurer la sécurité de ce dernier au travers du suivi et de l'imputabilité des actions.
+      annotation: 'Identifiant MSS : #0050 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - B-R
+      - M-R
+      - A-R
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.privacy
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:mco_mcs.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t5
+      ref_id: MCO_MCS.1
+      name: Formaliser et mettre en œuvre une procédure de maintien en conditions opérationnelles et de
+        sécurité des équipements et applicatifs
+      description: |-
+        Formaliser et mettre en œuvre une procédure de maintien en condition opérationnelle et de sécurité des ressources matérielles et logicielles du système d'information.
+
+        Cette mesure permet de minimiser les temps d'arrêt des systèmes d'information, de garantir que celui-ci fonctionne à un niveau de performance voulu et adapté, et corriger les vulnérabilités du système d’information avant qu’elles ne soient exploitées.
+      annotation: 'Identifiant MSS : #0033 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.maintenance
+      - urn:intuitem:risk:function:doc-pol:proc.update
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:mco_mcs.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t1
+      ref_id: MCO_MCS.10
+      name: Informer l’utilisateur du canal officiel à utiliser pour le téléchargement de l’application
+        mobile
+      description: |-
+        Informer l’utilisateur du canal officiel à utiliser pour le téléchargement de l’application mobile (par exemple, via le store de l'entreprise configuré via la solution de management de la flotte).
+
+        Cette mesure permet de faciliter les mises à jour de l'application par les utilisateurs et réduit le risque que des acteurs malveillants proposent au téléchargement une version de l'application susceptible de contenir un applicatif malveillant.
+      annotation: |-
+        Identifiant MSS : #0042 · Catégorie : Gouvernance · Origine : ANSSI
+        Non retenue par défaut : seules les caractéristiques ci-dessous l'ajoutent.
+        Ajoutée si : application mobile.
+      implementation_groups:
+      - B-I
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.mdm
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:mco_mcs.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t3
+      ref_id: MCO_MCS.11
+      name: Effacer les données des équipements avant toute réattribution
+      description: |-
+        Avant toute réutilisation d’un équipement (serveur, poste de travail, terminal mobile ou périphérique de stockage), toutes les données qu’il contient doivent être intégralement effacées.
+        Par exemple, cela peut être réalisé via un effacement comprenant plusieurs passes de réécriture, puis via un chiffrement du support avant la réinitialisation aux paramètres d'usine.
+
+        Cette mesure permet de réduire la vraisemblance de fuite des informations suite à la réutilisation d'un équipement.
+      annotation: 'Identifiant MSS : #0043 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - M-R
+      - A-R
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.disposal
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:mco_mcs.12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t3
+      ref_id: MCO_MCS.12
+      name: Effacer les données des équipements avant toute mise au rebut
+      description: "Avant toute mise au rebut d’un équipement informatique (serveur, poste de travail,\
+        \ terminal mobile ou périphérique de stockage), toutes les données qu’il contient doivent être\
+        \ intégralement effacées.\nPar exemple, cela peut être réalisé : \n- Pour un équipement n’ayant\
+        \ pas hébergé d’informations sensibles selon la classification interne : via un effacement sécurisé\
+        \ comprenant plusieurs passes de réécriture puis via le chiffrement du disque,\n- Pour un équipement\
+        \ ayant hébergé des informations sensibles selon la classification interne : via un effacement\
+        \ sécurisé comprenant plusieurs passes de réécriture, un chiffrement du disque puis une destruction\
+        \ physique irréversible.\n\nCette mesure permet réduire la vraisemblance de fuite des informations\
+        \ suite à la mise au rebut d'un équipement."
+      annotation: 'Identifiant MSS : #0174 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - M-R
+      - A-R
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.disposal
+      - urn:intuitem:risk:function:doc-pol:phys.equipment_disposal
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      assessable: false
+      depth: 1
+      ref_id: T6
+      name: Protection des systèmes et réseaux
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:mco_mcs.14
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: MCO_MCS.14
+      name: Mettre à jour systématiquement les postes de travail
+      description: |-
+        S'assurer des mises à jour sans délai injustifié des OS des postes de travail et des applicatifs sur ces postes de travail.
+
+        Cette mesure permet de réduire la vraisemblance de compromission des postes de travail suite à l'exploitation d'une vulnérabilité.
+      annotation: |-
+        Identifiant MSS : #0046 · Catégorie : Protection · Origine : ANSSI
+        Non retenue par défaut : seules les caractéristiques ci-dessous l'ajoutent.
+        Ajoutée si : postes de travail ou téléphones, hébergement SaaS.
+      implementation_groups:
+      - B-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.update
+      - urn:intuitem:risk:function:doc-pol:tech.uem
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:mco_mcs.15
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: MCO_MCS.15
+      name: Mettre à jour systématiquement les serveurs et services
+      description: |-
+        S'assurer de la mise à jour sans délai injustifié des OS et applicatifs installés des serveurs.
+
+        Cette mesure permet de réduire la vraisemblance de compromission des serveurs suite à l'exploitation d'une vulnérabilité.
+      annotation: 'Identifiant MSS : #0047 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - B-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.update
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:mco_mcs.16
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: MCO_MCS.16
+      name: Déployer et tenir à jour un pare-feu permettant de filtrer les communications avec le système
+        d'information
+      description: |-
+        S'assurer de la mise à jour sans délai injustifié des pare-feux utilisés au sein du système d'information.
+
+        Cette mesure permet de s'assurer que les pare-feux restent fiables et continuent d'apporter le niveau de sécurité attendu.
+      annotation: 'Identifiant MSS : #0048 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - B-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.network_firewall
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:mco_mcs.17
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: MCO_MCS.17
+      name: Garantir l'installation sans délai injustifié des correctifs de sécurité sur l'ensemble des
+        équipements et applicatifs
+      description: |-
+        Planifier et installer sans retard injustifié au regarde de la nature de la vulnérabilité les correctifs de sécurité sur l'ensemble des équipements et applicatifs du système d'information.
+        Si des raisons techniques ou opérationnelles ne permettent pas l’installation des correctifs de sécurité, mettre en œuvre des mesures d’atténuation pour réduire les risques liés.
+
+        Cette mesure permet de réduire la vraisemblance d'exploitation d'une vulnérabilité connue sur le système d'information.
+      annotation: 'Identifiant MSS : #0166 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
+      - urn:intuitem:risk:function:doc-pol:proc.update
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:mco_mcs.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: MCO_MCS.3
+      name: Réaliser une veille régulière des vulnérabilités, des campagnes de compromission, des correctifs
+        et des mesures d'atténuation
+      description: |-
+        Mettre en œuvre une veille sur les vulnérabilités, les correctifs de sécurité et les mesures d'atténuation préconisées susceptibles de concerner les applicatifs et équipements du système d'information.
+        Ces alertes peuvent notamment être diffusées par les fournisseurs ou fabricants des applicatifs et équipements, par des prestataires contractualisés pour réaliser cette veille ou par des centres de prévention et d'alerte en matière de cyber sécurité.
+
+        Cette mesure permet d'identifier de potentielles vulnérabilités sur les applicatifs et équipements du système d'information pour les corriger avant exploitation par un attaquant.
+      annotation: 'Identifiant MSS : #0035 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - B-R
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.threat_intel
+      - urn:intuitem:risk:function:doc-pol:proc.threat_intel
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:mco_mcs.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: MCO_MCS.4
+      name: Garantir l'installation sans délai injustifié des correctifs de sécurité sur les ressources
+        exposées, les annuaires et les postes de travail
+      description: |-
+        Mettre en œuvre sans retard injustifié au regarde de la nature de la vulnérabilité les actions visant à l'installation des correctifs de sécurité sur les équipements et applicatifs exposés à des systèmes d'information tiers, les annuaires gérant les utilisateurs ou les ressources et les postes de travail des utilisateurs.
+        Si des raisons techniques ou opérationnelles ne permettent pas l’installation des correctifs de sécurité, mettre en œuvre des mesures d’atténuation pour réduire les risques liés.
+
+        Cette mesure permet de réduire la vraisemblance d’exploitation d’une vulnérabilité en s’assurant que les vulnérabilités connues sont corrigés de façon adaptée et efficace.
+      annotation: 'Identifiant MSS : #0036 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.vulnerability
+      - urn:intuitem:risk:function:doc-pol:proc.update
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:mco_mcs.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: MCO_MCS.5
+      name: Installer uniquement des applicatifs récents et maintenus à jour par les éditeurs
+      description: |-
+        Installer et maintenir à jour les ressources logicielles du système d'information (dont les systèmes embarqués) dans des versions supportées par les fournisseurs ou fabricants et comportant les mises à jour de sécurité.
+        Si des raisons techniques ou opérationnelles ne permettent pas l'installation d'une version supportée par les fournisseurs ou fabricants, mettre en œuvre des mesures pour réduire les risques liés à l'utilisation d'une version obsolète (cloisonnement, gestion des accès, traçabilité).
+
+        Cette mesure permet de s'assurer que les applicatifs installés sont maintenus par les fournisseurs ou fabriquants et qu'ils continuent à bénéficier de correctifs de sécurité.
+      annotation: 'Identifiant MSS : #0037 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - B-I
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.software_lifecycle
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:mco_mcs.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: MCO_MCS.6
+      name: Garantir l'installation régulière des mises à jour fonctionnelles et de sécurité
+      description: |-
+        S'assurer de l'installation régulière des mises à jour fonctionnelles et de sécurité.
+        Si des raisons techniques ou opérationnelles ne permettent pas l'installation des nouvelles versions, mettre en œuvre des mesures pour réduire les risques liés à l'utilisation d'une version obsolète (cloisonnement, gestion des accès, traçabilité).
+
+        Cette mesure permet de s'assurer que les mises à jour fournies par les fournisseurs ou fabricants sont installées afin de réduire la vraisemblance d'exploitation d'une vulnérabilité sur une version obsolète d'un applicatif.
+      annotation: 'Identifiant MSS : #0038 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - B-I
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.update
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:mco_mcs.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: MCO_MCS.7
+      name: Télécharger uniquement les mises à jour officielles mises à disposition par les fournisseurs
+      description: |-
+        S'assurer que toute nouvelle version est téléchargée depuis les ressources officielles mises à disposition par les éditeurs ou les fournisseurs.
+
+        Cette mesure permet de s'assurer de l'installation de versions officielles, et donc de réduire la vraisemblance d'installation d'une version compromise.
+      annotation: 'Identifiant MSS : #0039 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.update
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:rgpd.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t1
+      ref_id: RGPD.1
+      name: Remplir le registre des traitements et le tenir à jour
+      description: |-
+        Rapprochez-vous de votre DPD ou de l’équipe juridique pour compléter le registre avec les 6 informations suivantes :
+        les parties prenantes (responsable de traitement, sous-traitants, catégories de destinataires) qui interviennent dans le traitement des données,
+        les catégories de données traitées et de personnes concernées,
+        le but poursuivi (ce que vous faites des données),
+        qui a accès aux données et à qui elles sont communiquées,
+        combien de temps vous les conservez,
+        comment elles sont sécurisées.
+        Plus d’information [ici](https://www.cnil.fr/fr/RGPD-le-registre-des-activites-de-traitement).
+
+        Cette mesure permet de se rapprocher de la conformité à l'article 30 du RGPD ainsi que d'identifier l'ensemble des traitements de données à caractère personnel afin de les protéger.
+      annotation: |-
+        Identifiant MSS : #0051 · Catégorie : Gouvernance · Origine : CNIL
+        Retirée si : données peu sensibles (+).
+      implementation_groups:
+      - B-I
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.ropa
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:rgpd.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t1
+      ref_id: RGPD.2
+      name: Minimiser la collecte des données à caractère personnel au strict nécessaire
+      description: |-
+        Evaluer le but de chaque collecte de données. Ne collecter que les données strictement nécessaires pour atteindre votre objectif. Il ne faut pas collecter des données inutiles pour votre traitement en se disant qu’elles pourraient servir plus tard.
+        Lorsque trop de données sont collectées, il faut immédiatement supprimer les données non-nécessaires.
+
+        Cette mesure permet de limiter la collecte des données personnelles uniquement aux informations essentielles pour réaliser un objectif spécifique. Cela réduit les risques liés à la gestion des données et renforce la protection de la vie privée des personnes.
+      annotation: |-
+        Identifiant MSS : #0052 · Catégorie : Gouvernance · Origine : CNIL
+        Retirée si : données peu sensibles (+).
+      implementation_groups:
+      - B-I
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.privacy
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:rgpd.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t1
+      ref_id: RGPD.3
+      name: Limiter la durée de traitement et de conservation des données à caractère personnel au strict
+        nécessaire
+      description: |-
+        Ne conserver les données en « base active » (ou environnement de production) que le temps strictement nécessaire à la réalisation de l’objectif poursuivi.
+        Il faut ensuite détruire ou anonymiser les données ou les archiver dans le respect des obligations légales applicables en matière de conservation des archives publiques. Vous pouvez consulter le [guide pratique](https://www.cnil.fr/sites/cnil/files/atoms/files/guide_durees_de_conservation.pdf) prévu à cet effet.
+
+        Cette mesure permet de limiter le temps pendant lequel les données personnelles sont conservées et traitées, réduisant ainsi les risques de mauvaise utilisation, d'accès non autorisé, de fuite de données ou de réutilisation non-anticipée.
+      annotation: |-
+        Identifiant MSS : #0053 · Catégorie : Gouvernance · Origine : CNIL
+        Retirée si : données peu sensibles (+).
+      implementation_groups:
+      - B-I
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.retention
+      - urn:intuitem:risk:function:doc-pol:pol.privacy
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:rgpd.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t1
+      ref_id: RGPD.4
+      name: Fournir des informations aux personnes concernées sur l'utilisation de leurs données à caractère
+        personnel.
+      description: |-
+        Informer clairement les personnes lors de la collecte de leurs données de manière à ce qu’elles puissent :
+        - connaître la raison de la collecte des différentes données les concernant ;
+        - comprendre le traitement qui sera fait de leurs données ;
+        - être assurées de la maîtrise de leurs données, notamment via l’exercice de leurs droits. La liste complète des informations à fournir [est disponible ici](https://www.cnil.fr/fr/reglement-europeen-protection-donnees/chapitre3#Article13).
+
+        Cette mesure permet aux personnes concernées de conserver la maîtrise de leurs données. Cela suppose qu’elles soient clairement informées de l’utilisation qui sera faite de leurs données. Les personnes doivent également être informées de leurs droits et des modalités d’exercice de ces droits. Plus d’information [ici](https://www.cnil.fr/fr/conformite-rgpd-information-des-personnes-et-transparence).
+      annotation: |-
+        Identifiant MSS : #0054 · Catégorie : Gouvernance · Origine : CNIL
+        Retirée si : données peu sensibles (+).
+      implementation_groups:
+      - B-I
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.privacy_notice
+      - urn:intuitem:risk:function:doc-pol:pol.privacy
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:rgpd.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t1
+      ref_id: RGPD.5
+      name: Fournir des informations aux personnes concernées sur les modalités d'exercice des droits.
+      description: |-
+        Permettre aux personnes d’exercer leurs droits d’accès aux données qui les concernent, de rectification ou de suppression, voire d’opposition (sauf si le traitement répond à une obligation légale). Une réponse à une demande de droit d’accès doit contenir une copie des données ainsi que : l’objectif du traitement des données, si possible sa durée, l'identité des destinataires, dans le cas d’un traitement automatisé sa logique et ses conséquences. Ces droits doivent pouvoir s’exercer par voie électronique à partir d’une adresse dédiée. Plus d’informations sont disponibles [ici](https://www.cnil.fr/fr/passer-laction/les-droits-des-personnes-sur-leurs-donnees).
+
+        Cette mesure permet d'informer les personnes concernées sur les modalités d'exercice de leurs droits.
+      annotation: |-
+        Identifiant MSS : #0055 · Catégorie : Gouvernance · Origine : CNIL
+        Retirée si : données peu sensibles (+).
+      implementation_groups:
+      - B-I
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.privacy_notice
+      - urn:intuitem:risk:function:doc-pol:proc.data_subject_rights
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:rgpd.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t1
+      ref_id: RGPD.6
+      name: Vérifier si une analyse sur la protection des données à caractère personnel doit être réalisée.
+      description: |-
+        Consulter la [liste des exemptions](https://www.cnil.fr/sites/cnil/files/atoms/files/liste-traitements-aipd-non-requise.pdf). Si votre traitement n’y figure pas, regarder s’il fait partie des traitements pour lesquels [une AIPD est obligatoire](https://www.cnil.fr/fr/analyse-dimpact-relative-la-protection-des-donnees-publication-dune-liste-des-traitements-pour). Si une AIPD est nécessaire, vous pouvez la réaliser à l’aide du [logiciel PIA](https://www.cnil.fr/fr/outil-pia-telechargez-et-installez-le-logiciel-de-la-cnil).
+
+        Cette mesure permet d'identifier et dans le cas échant de réaliser une AIPD, c'est-à-dire une Analyse d'Impact sur la Protection des Données (AIPD). Cette analyse vise à évaluer et à atténuer les risques liés au traitement des données personnelles, surtout dans le cas de traitements susceptibles de présenter des risques élevés pour les droits et libertés des individus.
+      annotation: |-
+        Identifiant MSS : #0056 · Catégorie : Gouvernance · Origine : CNIL
+        Retirée si : données peu sensibles (+).
+      implementation_groups:
+      - B-I
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.dpia
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:phys.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t4
+      ref_id: PHYS.1
+      name: Restreindre l'accès aux locaux aux seules personnes autorisées.
+      description: |-
+        Restreindre l'accès aux locaux (bureaux, salles serveurs, locaux techniques, etc.) via des mesures de sécurité (ex. tenue d'un registre des visiteurs, badge d'accès) et s'assurer que les personnes externes accédant aux locaux techniques et salles serveurs sont accompagnées ou dûment autorisées.
+
+        Cette mesure permet de réduire la vraisemblance de l'intrusion physique d'un attaquant pouvant porter atteinte au système d'information.
+      annotation: |-
+        Identifiant MSS : #0057 · Catégorie : Protection · Origine : ANSSI
+        Non retenue par défaut : seules les caractéristiques ci-dessous l'ajoutent.
+        Ajoutée si : accès physique aux salles techniques, accès physique aux bureaux, hébergement PaaS / IaaS, hébergement SaaS.
+      implementation_groups:
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.physical
+      - urn:intuitem:risk:function:doc-pol:phys.secure_area
+      - urn:intuitem:risk:function:doc-pol:phys.visitor_mgmt
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:phys.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: PHYS.2
+      name: Mettre en place des mécanismes de protection physique et de contrôle d'accès aux locaux, salles
+        serveur et locaux techniques
+      description: |-
+        S'assurer de la protection physique des locaux, salles serveurs et locaux techniques afin de prévenir, surveiller et réagir aux accès non autorisés (ex. vidéosurveillance, gardiennage, alarmes).
+        Cela doit notamment être mis en place via un contrôle d'accès à ces locaux en s'assurant que les droits d'accès physiques sont attribués au regard du besoin strictement nécessaire à l'exécution des missions des personnes.
+
+        Cette mesure permet de réduire la vraisemblance de l'intrusion physique d'un attaquant pouvant porter atteinte au système d'information.
+      annotation: |-
+        Identifiant MSS : #0058 · Catégorie : Protection · Origine : ANSSI
+        Non retenue par défaut : seules les caractéristiques ci-dessous l'ajoutent.
+        Ajoutée si : accès physique aux salles techniques, accès physique aux bureaux, hébergement PaaS / IaaS, hébergement SaaS.
+      implementation_groups:
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.physical_security
+      - urn:intuitem:risk:function:doc-pol:phys.secure_area
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:cloison.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: CLOISON.1
+      name: Cloisonner le système d'information des systèmes non maîtrisés
+      description: |-
+        Cloisonner physiquement ou logiquement le système d'information des systèmes d'informations non maîtrisés, c'est-à-dire des systèmes d'information tiers ou des systèmes d'information sur lesquels les travaux de sécurisation selon le besoin de sécurité n'ont pas été réalisés. Ce cloisonnement peut par exemple être réalisé par VLAN (réseau), par VM (calcul) ou par volume (stockage).
+
+        Cette mesure permet de réduire la vraisemblance de compromission du système d'information par rebond sur un système d'information non maîtrisé.
+      annotation: 'Identifiant MSS : #0059 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.network
+      - urn:intuitem:risk:function:doc-pol:tech.network_firewall
+      - urn:intuitem:risk:function:doc-pol:tech.vlan
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:cloison.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: CLOISON.2
+      name: Cloisonner le système d'information des autres systèmes
+      description: |-
+        Cloisonner physiquement ou logiquement le système d'information de l'ensemble des autres systèmes d'informations. Ce cloisonnement peut par exemple être réalisé par VLAN (réseau, par VM (calcul) ou par volume (stockage).
+
+        Cette mesure permet de réduire la vraisemblance de compromission du système d'information par rebond sur un autre système d'information.
+      annotation: 'Identifiant MSS : #0060 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.network
+      - urn:intuitem:risk:function:doc-pol:tech.vlan
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:cloison.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: CLOISON.3
+      name: Identifier les éventuels sous-systèmes du système d'information et les cloisonner entre eux
+      description: |-
+        Définir, lorsque cela est pertinent, des sous-systèmes au sein du système d'information et cloisonner physiquement ou logiquement ces sous-systèmes entre eux.
+        Un sous-système regroupe des ressources assurant des fonctionnalités similaires et ayant des niveaux de sensibilité, d'exposition et de sécurité homogènes.
+        Si aucun sous-système n'est identifié, en apporter la justification dans le dossier d'homologation.
+
+        Cette mesure permet de réduire la vraisemblance de compromission des sous-systèmes les plus sensibles par rebond depuis un autre sous-système et de réduire le périmètre impacté en cas de compromission. Par exemple, cette mesure permet de cloisonner les sous-systèmes "Présentation", "Application" et "Données".
+      annotation: 'Identifiant MSS : #0061 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.vlan
+      - urn:intuitem:risk:function:doc-pol:tech.microsegmentation
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:cloison.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: CLOISON.4
+      name: Mettre en œuvre des passerelles entrante et sortante entre le système d'information et les
+        systèmes tiers
+      description: "Mettre en œuvre au moins deux sous-systèmes passerelles :\n- Sortante: permettant\
+        \ aux ressources du système d'information d'accéder aux systèmes tiers tout en authentifiant,\
+        \ filtrant et traçant ces communications (ex. pour permettre la navigation web), \n- Entrante\
+        \ : permettant d'exposer les ressources du système d'information aux systèmes tiers tout en filtrant\
+        \ et traçant ces communications (ex. serveur de réception SMTP, serveur web).\n\nCes passerelles\
+        \ sont constituées d’une ou plusieurs « DMZ » qui doivent être des zones neutres, perdables, protégées\
+        \ par des pare-feux périmétriques et servant, en leur sein et autant que possible, à la rupture\
+        \ protocolaire et à l’analyse du trafic échangé entre un réseau public et le système d'information.\n\
+        \nCette mesure permet de réduire la vraisemblance de compromission du système d'information par\
+        \ rebond sur un système d'information non maîtrisé."
+      annotation: 'Identifiant MSS : #0062 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.reverse_proxy
+      - urn:intuitem:risk:function:doc-pol:tech.web_proxy
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:cloison.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: CLOISON.5
+      name: Ouvrir uniquement les interconnexions nécessaires entre le système d'information et les systèmes
+        non maîtrisés
+      description: |-
+        Définir et mettre en œuvre uniquement les interconnexions nécessaires à la réalisation des activités et services (ou au maintien en condition opérationnelle ou de sécurité) du système d'information avec les systèmes d'informations non maîtrisés, c'est-à-dire des systèmes d'information tiers ou des systèmes d'information sur lesquels les travaux de sécurisation selon le besoin de sécurité n'ont pas été réalisés.
+
+        Cette mesure permet de réduire la surface d'exposition du système d'information et ainsi de réduire sa vraisemblance de compromission par rebond depuis un système d'information non maîtrisé.
+      annotation: 'Identifiant MSS : #0063 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - B-R
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.flow_matrix
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:cloison.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: CLOISON.6
+      name: Ouvrir uniquement les interconnexions nécessaires entre le système d'information et les autres
+        systèmes
+      description: |-
+        Définir et mettre en œuvre uniquement les interconnexions nécessaires à la réalisation des activités et services (ou au maintien en condition opérationnelle ou de sécurité) du système d'information avec l'ensemble des autres systèmes d'information, et mettre en œuvre un filtrage des communications entre ces systèmes.
+
+        Cette mesure permet de réduire la surface d'exposition du système d'information et ainsi de réduire sa vraisemblance de compromission par rebond depuis un autre système d'information.
+      annotation: 'Identifiant MSS : #0064 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.flow_matrix
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:filtre.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: FILTRE.1
+      name: Documenter et autoriser uniquement les communications nécessaires via des règles de filtrage
+        entre le système d'information et les systèmes non maîtrisés
+      description: |-
+        Définir les communications nécessaires à la réalisation des activités et services (ou au maintien en condition opérationnelle de sécurité) du système d'information avec des systèmes d'information non maîtrisés, c'est-à-dire des systèmes d'information tiers ou des systèmes d'information sur lesquels les travaux de sécurisation selon le besoin de sécurité n'ont pas été réalisés.
+        Mettre en œuvre, au niveau de ces interconnexions, des règles de filtrage pour n'autoriser que les communications identifiées avec les systèmes d'information non maîtrisés via un ou des pares-feux dédiés.
+
+        Cette mesure permet de réduire la vraisemblance de compromission du système d'information par rebond sur un système d'information non maîtrisé.
+      annotation: 'Identifiant MSS : #0066 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - B-R
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.flow_matrix
+      - urn:intuitem:risk:function:doc-pol:tech.network_firewall
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:filtre.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: FILTRE.2
+      name: Documenter et autoriser uniquement les communications nécessaires via des règles de filtrage
+        entre le système d'information et les autres systèmes
+      description: |-
+        Définir les communications nécessaires à la réalisation des activités et services (ou au maintien en condition opérationnelle de sécurité) du système d'information avec l'ensemble des autres systèmes d'information.
+        Mettre en œuvre, au niveau de ces interconnexions, des règles de filtrage pour n'autoriser que les communications identifiés avec l'ensemble des systèmes d'information via un ou des pares-feux dédiés.
+
+        Cette mesure permet de réduire la vraisemblance de compromission du système d'information par rebond sur un autre système d'information.
+      annotation: 'Identifiant MSS : #0067 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.flow_matrix
+      - urn:intuitem:risk:function:doc-pol:tech.network_firewall
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:filtre.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: FILTRE.3
+      name: Effectuer a minima annuellement une revue de la mise en œuvre technique des règles de filtrage
+      description: |-
+        Réaliser a minima annuellement une revue de la mise en œuvre technique des règles de filtrage en place pour les communications entrantes et sortantes sur le système d'information.
+
+        Cette mesure permet de s'assurer de l'efficacité des règles de filtrages mises en œuvre et ainsi de réduire la vraisemblance de compromission du système d'information par rebond sur un autre système d'information.
+      annotation: 'Identifiant MSS : #0068 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.flow_matrix
+      - urn:intuitem:risk:function:doc-pol:pol.network
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:filtre.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: FILTRE.4
+      name: Recourir à un service de protection contre les attaques par déni de service
+      description: |-
+        Recourir à un service permettant de protéger le service contre les attaques de type «déni de service» (ex. attaques par déni de service distribué dites « DDoS »).
+
+        Cette mesure permet de réduire le risque d'indisponibilité partielle ou totale du service.
+      annotation: |-
+        Identifiant MSS : #0069 · Catégorie : Protection · Origine : ANSSI
+        Non retenue par défaut : seules les caractéristiques ci-dessous l'ajoutent.
+        Ajoutée si : disponibilité +++, disponibilité ++++.
+      implementation_groups:
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.ddos_protection
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:filtre.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t3
+      ref_id: FILTRE.5
+      name: Installer un parefeu applicatif web (WAF)
+      description: |-
+        S'assurer d'installer un pare-feu applicatif ("WAF") pour filtrer les flux applicatifs entrant du système d'information.
+
+        Cette mesure permet de filtrer les communications entre les utilisateurs et le système afin de protéger le système des attaques courantes (ex. Injection SQL, cross-site scripting).
+      annotation: |-
+        Identifiant MSS : #0070 · Catégorie : Protection · Origine : ANSSI
+        Retirée si : ouverture +.
+      implementation_groups:
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.waf
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:filtre.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: FILTRE.6
+      name: Filtrer les flux sur les postes de travail
+      description: |-
+        Mettre en œuvre un filtrage des flux sur le poste de travail, par exemple via un pare-feu local.
+
+        Cette mesure permet de réduire l'exposition aux sources de risque et de contrôler les communications autorisées afin de réduire la vraisemblance de compromission des postes de travail par un attaquant .
+      annotation: |-
+        Identifiant MSS : #0071 · Catégorie : Protection · Origine : ANSSI
+        Non retenue par défaut : seules les caractéristiques ci-dessous l'ajoutent.
+        Ajoutée si : postes de travail ou téléphones, hébergement SaaS.
+      implementation_groups:
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.endpoint_protection
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:filtre.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t3
+      ref_id: FILTRE.7
+      name: Mettre en place un mécanisme de rate-limit
+      description: |-
+        Mettre en œuvre un mécanisme de rate-limit sur les services exposés.
+
+        Cette mesure permet de réduire la vraisemblance de diverses attaques telles que les déni de service, les attaques par force brute et la sur-utilisation d'API.
+      annotation: |-
+        Identifiant MSS : #0072 · Catégorie : Protection · Origine : ANSSI
+        Rendue indispensable si : ouverture +++, ouverture ++++.
+        Rendue recommandée si : ouverture +, ouverture ++.
+      implementation_groups:
+      - M-R
+      - A-R
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.app_auth_hardening
+      - urn:intuitem:risk:function:doc-pol:pol.web_sec
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:mail.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t3
+      ref_id: MAIL.1
+      name: Mettre en œuvre une solution d'anti-spam et d'anti-hameçonnage
+      description: |-
+        Mettre en œuvre une solution d'anti-spam et d'anti-hameçonnage.
+        Les systèmes de messagerie sont un des principaux vecteurs d’attaques puisque très largement utilisés et exposés sur internet. Qu’il s’agisse de la compromission d’un poste au travers de l’ouverture de pièces jointes contenant un code malveillant, d’un clic malencontreux sur un lien redirigeant vers un site lui-même malveillant (phishing ou hameçonnage) ou de l’exploitation d’une vulnérabilité et d’un défaut de paramétrage du service de messagerie.
+
+        Cette mesure permet donc de réduire le risque qu’un utilisateur se fasse piéger par un message malveillant.
+      annotation: |-
+        Identifiant MSS : #0073 · Catégorie : Protection · Origine : ANSSI
+        Non retenue par défaut : seules les caractéristiques ci-dessous l'ajoutent.
+        Ajoutée si : échange ou réception d'emails.
+      implementation_groups:
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.mail_gateway
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:mail.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t3
+      ref_id: MAIL.2
+      name: Mettre en œuvre des mécanismes permettant de contrôler l'authenticité des messages électroniques
+        envoyés au nom du domaine du système d'information
+      description: |-
+        Mettre en œuvre des mécanismes permettant de contrôler l'authenticité des messages électroniques envoyés au nom du domaine du système d'information, via la mise en œuvre conjointe de politiques d’identification des serveurs d’envoi (SPF), de signature des messages (DKIM) et de validation des résultats d’authentification (DMARC).
+
+        Cette mesure permet de vérifier que les messages envoyés au nom du domaine du système d'information proviennent effectivement de serveurs autorisés et ainsi de réduire les risques d’usurpation d’adresse.
+      annotation: |-
+        Identifiant MSS : #0172 · Catégorie : Protection · Origine : ANSSI
+        Non retenue par défaut : seules les caractéristiques ci-dessous l'ajoutent.
+        Ajoutée si : échange ou réception d'emails.
+      implementation_groups:
+      - B-R
+      - M-R
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.email_auth
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:distance.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t3
+      ref_id: DISTANCE.1
+      name: Mettre en œuvre un mécanisme de chiffrement pour les accès à distance au système d'information
+      description: |-
+        Protéger les accès distants au système d’information à l’aide de protocoles de chiffrement éprouvés (VPN utilisant TLS ou IPSec, ou protocoles applicatifs sécurisés comme TLS/SSL ou SSH), s’appuyant sur les recommandations de l'ANSSI.
+
+        Cette mesure permet de réduire la vraisemblance de perte de confidentialité des échanges entre les utilisateurs et le système d'information lors des accès à distance.
+      annotation: 'Identifiant MSS : #0074 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - B-R
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.vpn
+      - urn:intuitem:risk:function:doc-pol:tech.ztna
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:distance.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t3
+      ref_id: DISTANCE.2
+      name: Mettre en place une authentification multifacteur reposant sur au moins un facteur de connaissance
+        pour les accès à distance
+      description: |-
+        Mettre en œuvre un mécanisme d'authentification mutlifacteur pour les accès à distance.
+        Ce mécanisme doit reposer sur au moins un facteur de connaissance ("ce que je sais", comme par exemple l'authentification via une carte à puce associé un code PIN).
+        Lorsque des raisons techniques ou opérationnelles ne permettent pas la mise en œuvre d'un tel mécanisme, mettre en œuvre des mesures permettant de réduire le risque associé.
+
+        Cette mesure permet de réduire la vraisemblance de compromission des comptes utilisés pour les accès à distance.
+      annotation: 'Identifiant MSS : #0075 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - B-R
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.mfa
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:distance.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: DISTANCE.3
+      name: Chiffrer les disques des équipements autorisés à accéder au système d'information à distance
+      description: |-
+        Chiffrer la mémoire des équipements (postes de travail et équipements mobiles) permettant d'accéder à distance aux systèmes d'information. Par exemple, chiffrer les disques des postes de travail avec un code PIN exigé pour le déchiffrement au démarrage.
+
+        Cette mesure permet de réduire la vraisemblance de fuite d'information suite à la récupération d'un poste de travail ou d'un équipement mobile par un attaquant.
+      annotation: |-
+        Identifiant MSS : #0076 · Catégorie : Protection · Origine : ANSSI
+        Non retenue par défaut : seules les caractéristiques ci-dessous l'ajoutent.
+        Ajoutée si : postes de travail ou téléphones, hébergement SaaS.
+      implementation_groups:
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.disk_encryption
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:distance.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t4
+      ref_id: DISTANCE.4
+      name: Mettre en œuvre une authentification pour les accès à distance au système d'information par
+        l'entité ou ses prestataires.
+      description: |-
+        S'assurer que les accès à distance au système d'information par l'entité ou ses prestataires sont protégés par un mécanisme d'authentification.
+
+        Cette mesure permet de s'assurer de l'identité de l'utilisateur se connectant à distance au système d'information, permettant ainsi de réduire la vraisemblance d'un accès non autorisé aux ressources du système d'information.
+      annotation: 'Identifiant MSS : #0167 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - B-R
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
+      - urn:intuitem:risk:function:doc-pol:tech.vpn
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:malware.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t4
+      ref_id: MALWARE.3
+      name: Analyser l'ensemble des données reçues de sources externes afin d'identifier la présence de
+        codes malveillants
+      description: |-
+        Analyser les données reçues de sources externes afin d'identifier la présence de codes malveillants (ex. passerelle mail analysant les pièces jointes avant distribution ou SAS de décontamination antivirale pour les clefs USB).
+
+        Cette mesure permet de réduire la vraisemblance d'infection des équipements par un malware suite à la réception de code malveillant.
+      annotation: 'Identifiant MSS : #0079 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.network_antivirus
+      - urn:intuitem:risk:function:doc-pol:pol.removable_media
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:malware.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t5
+      ref_id: MALWARE.4
+      name: Déployer, mettre en œuvre et tenir à jour des moyens de protection des équipements contre
+        les codes malveillants
+      description: |-
+        Installer sur les postes de travail, serveurs et équipements mobiles maîtrisés traitant des données provenant de sources externes des mécanismes de protection contre les risques d'exécution de codes malveillants (ex. antivirus ou Endpoint Detection and Response), maintenir à jour les bases de connaissances de ces outils (base antivirale, signatures, etc.), et traiter les alertes issues de ces mécanismes.
+
+        Cette mesure permet de réduire la vraisemblance de compromission par des malware (ex. ransomware) des équipements exposés aux sources de risque externes.
+      annotation: 'Identifiant MSS : #0034 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.malware
+      - urn:intuitem:risk:function:doc-pol:tech.endpoint_protection
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:malware.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t5
+      ref_id: MALWARE.5
+      name: Installer et tenir à jour un antivirus et/ou un EDR sur tous les postes de travail
+      description: |-
+        Installer sur les postes de travail maîtrisés traitant des données provenant de sources externes des mécanismes de protection contre les risques d'exécution de codes malveillants (ex. antivirus ou EDR), maintenir à jour les bases de connaissances de ces outils (base antivirale, signatures, etc.).
+
+        Cette mesure permet de réduire la vraisemblance de compromission par des malware (ex. ransomware) des postes de travail aux sources de risque externes.
+      annotation: |-
+        Identifiant MSS : #0044 · Catégorie : Protection · Origine : ANSSI
+        Non retenue par défaut : seules les caractéristiques ci-dessous l'ajoutent.
+        Ajoutée si : postes de travail ou téléphones, hébergement SaaS.
+      implementation_groups:
+      - B-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.edr
+      - urn:intuitem:risk:function:doc-pol:tech.endpoint_protection
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:malware.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t5
+      ref_id: MALWARE.6
+      name: Traiter les alertes générées par les antivirus et/ou les EDR
+      description: |-
+        S'assurer du traitement et réaction dans le cas échéant des alertes des moyens de protection contre les risques d'exécution de codes malveillants (antivirus ou malware).
+
+        Cette mesure permet de réduire la vraisemblance de compromission par des malware (ex. ransomware) des postes de travail aux sources de risque externes.
+      annotation: |-
+        Identifiant MSS : #0045 · Catégorie : Défense · Origine : ANSSI
+        Non retenue par défaut : seules les caractéristiques ci-dessous l'ajoutent.
+        Ajoutée si : postes de travail ou téléphones, hébergement SaaS.
+      implementation_groups:
+      - B-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.edr
+      - urn:intuitem:risk:function:doc-pol:proc.incident
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:auth.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t4
+      ref_id: AUTH.1
+      name: Modifier les mots de passe ou autres éléments secrets configurés par défaut dans les équipements
+        et applicatifs
+      description: |-
+        Modifier les éléments secrets configurés par défaut, avant la mise en service d'un équipement.
+        Cela demande notamment de s'assurer, avant sélection de l'équipement ou applicatif concerné, qu'il est possible de disposer des moyens et des droits permettant d'effectuer ce changement.
+        Lorsque des raisons techniques ou opérationnelles ne permettent pas de modifier l'élément secret, mettre en œuvre un contrôle d'accès approprié à l'équipement ou au à l'applicatif, la traçabilité de ces accès ainsi que des mesures de réduction du risque lié.
+
+        Cette mesure permet de réduire la vraisemblance d'utilisation malveillante d'utilisation de compte utilisant le secret par défaut.
+      annotation: 'Identifiant MSS : #0083 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:auth.10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t4
+      ref_id: AUTH.10
+      name: S'assurer que tous les accès au système d'information sont authentifiés via a minima un secret
+      description: |-
+        Protéger les accès des utilisateurs et processus automatiques aux équipements et applicatifs des systèmes d'information via un mécanisme d'authentification impliquant au moins un secret (ex. mot de passe ou authentification multifacteur tel qu'une carte à puce avec un code PIN).
+
+        Cette mesure permet de réduire la vraisemblance d'utilisation illégitime des droits suite à une absence d'authentification.
+      annotation: 'Identifiant MSS : #0092 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - B-I
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:auth.11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t4
+      ref_id: AUTH.11
+      name: Protéger les mots de passe stockés
+      description: |-
+        Dans le cadre de la configuration du service au niveau du serveur d'hébergement, veiller à ne pas stocker les mots de passe « en clair ». Seule une « empreinte » des mots de passe doit être stockée.
+
+        Cette mesure permet de limiter la capacité d'un attaquant à accéder aux mots de passe en cas de compromission de la base de données des mots de passe.
+      annotation: 'Identifiant MSS : #0162 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - B-R
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.app_auth_hardening
+      - urn:intuitem:risk:function:doc-pol:pol.crypto
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:auth.12
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t4
+      ref_id: AUTH.12
+      name: Sauvegarder les mots de passe des acteurs internes travaillant sur le système d'information
+        dans un gestionnaire de mots de passe
+      description: |-
+        Fournir aux acteurs internes travaillant sur le système d'information un gestionnaire de mot de passe et les former à son utilisation.
+
+        Cette mesure permet de réduire la vraisemblance de stockage non sécurisé des mots de passe par les acteurs internes (ex. sur un bloc note) et ainsi de réduire la vraisemblance de compromission d'un compte.
+      annotation: 'Identifiant MSS : #0173 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - M-R
+      - A-R
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.password_manager
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:auth.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t4
+      ref_id: AUTH.2
+      name: Renouveler les secrets des comptes partagés au départ ou mobilité interne de chaque utilisateur
+        ayant un accès au compte
+      description: |-
+        En cas de compte partagé, renouveler les secrets de ces comptes à chaque retrait d'un utilisateur de ce compte.
+        Lorsque des raisons techniques ou opérationnelles ne permettent pas de modifier l'élément secret, mettre en œuvre un contrôle d'accès approprié à l'équipement ou à l'applicatif ainsi que des mesures de réduction du risque lié.
+
+        Cette mesure permet de réduire la vraisemblance d'utilisation d'un compte générique par un attaquant externe suite au retrait d'un utilisateur et à la divulgation des secrets liés.
+      annotation: 'Identifiant MSS : #0084 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
+      - urn:intuitem:risk:function:doc-pol:tech.password_manager
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:auth.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t4
+      ref_id: AUTH.3
+      name: Garantir que les secrets des comptes partagés ne sont connus que des utilisateurs autorisés
+      description: |-
+        S'assurer que l'élément secret d'un compte n'est connu que de l'utilisateur autorisé à utiliser le compte (ou des utilisateurs en cas de compte partagé).
+
+        Cette mesure permet de s'assurer que l'authentification permet d'identifier le ou les utilisateurs ayant réalisé les actions.
+      annotation: 'Identifiant MSS : #0085 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
+      - urn:intuitem:risk:function:doc-pol:tech.password_manager
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:auth.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t4
+      ref_id: AUTH.4
+      name: S'assurer que les facteurs d'authentification utilisés sont conformes aux recommandations
+        de l'ANSSI
+      description: |-
+        S'assurer que les facteurs d'authentification (ex. mot de passe) sont conformes aux recommandations de l'ANSSI en matière de complexité, en tenant compte du niveau de complexité maximal permis par la ressource concernée, et en matière de fréquence de renouvellement.
+
+        Cette mesure permet de diminuer la vraisemblance de compromission d'un compte par des acteurs malveillants, par exemple en testant plusieurs mots de passe sur la base de mots du dictionnaire.
+      annotation: 'Identifiant MSS : #0086 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
+      - urn:intuitem:risk:function:doc-pol:tech.mfa
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:auth.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t4
+      ref_id: AUTH.5
+      name: Fixer des contraintes de complexité des mots de passe ou autres secrets aux comptes administrateurs
+        techniques
+      description: |-
+        Fixer des règles de longueur et de complexité des mots de passe lors de la création d'un mot de passe ou de son renouvellement par un administrateurs technique. Lorsque cela est possible, configurer le mécanisme de création de mots de passe pour interdire les mots de passe faibles.
+
+        Cette mesure permet de diminuer la vraisemblance de compromission d'un compte d'administrateur technique par des acteurs malveillants, par exemple en testant plusieurs mots de passe sur la base de mots du dictionnaire.
+      annotation: 'Identifiant MSS : #0087 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - B-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:auth.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t4
+      ref_id: AUTH.6
+      name: Fixer des contraintes de complexité des mots de passe ou autres secrets aux comptes des processus
+      description: |-
+        Fixer des règles de longueur et de complexité des mots de passe lors de la création d'un mot de passe de processus automatisé (compte de service) ou de son renouvellement. Lorsque cela est possible, configurer le système d'information pour interdire les mots de passe faibles.
+
+        Cette mesure permet de diminuer la vraisemblance de compromission d'un compte de processus automatisé par des acteurs malveillants, par exemple en testant plusieurs mots de passe sur la base de mots du dictionnaire.
+      annotation: 'Identifiant MSS : #0088 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - B-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:auth.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t4
+      ref_id: AUTH.7
+      name: Fixer des contraintes de complexité des mots de passe ou autres secrets aux comptes utilisateurs
+      description: |-
+        Fixer des règles de longueur et de complexité des mots de passe lors de la création d'un mot de passe ou de son renouvellement par un utilisateur. Lorsque cela est possible, configurer le système d'information pour interdire les mots de passe faibles.
+
+        Cette mesure permet de diminuer la vraisemblance de compromission d'un compte utilisateur par des acteurs malveillants, par exemple en testant plusieurs mots de passe sur la base de mots du dictionnaire.
+      annotation: 'Identifiant MSS : #0089 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - B-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:auth.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t3
+      ref_id: AUTH.8
+      name: Mettre en place la déconnexion automatique des sessions après une durée déterminée
+      description: |-
+        Configurer le service afin d'activer la déconnexion automatique des sessions des administrateurs et des utilisateurs inactifs après une durée déterminée.
+
+        Cette mesure permet de limiter le risque d'utilisation, par une personne malveillante, du compte d'un utilisateur, qui aurait laissé son équipement non verrouillé sans surveillance et ne se serait pas déconnecté du service.
+      annotation: |-
+        Identifiant MSS : #0090 · Catégorie : Protection · Origine : ANSSI
+        Ajoutée si : annuaire, application mobile, API, service en ligne, autre système d'information, postes de travail ou téléphones.
+        Retirée si : portail d'information.
+      implementation_groups:
+      - M-R
+      - A-R
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.app_auth_hardening
+      - urn:intuitem:risk:function:doc-pol:pol.web_sec
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:auth.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t4
+      ref_id: AUTH.9
+      name: Mettre en œuvre des protections contre les tentatives de connexion répétées
+      description: "Mettre en œuvre des protections contre les tentatives de connexion répétées. \nCes\
+        \ protections doivent être mises en œuvre sur le serveur.\n\nCette mesure permet de réduire la\
+        \ vraisemblance de récupération de compte via une attaque de type brute force."
+      annotation: |-
+        Identifiant MSS : #0091 · Catégorie : Protection · Origine : ANSSI
+        Ajoutée si : annuaire, application mobile, API, service en ligne, autre système d'information, postes de travail ou téléphones.
+        Retirée si : portail d'information.
+        Rendue indispensable si : ouverture ++, ouverture +++, ouverture ++++.
+        Rendue recommandée si : ouverture +.
+      implementation_groups:
+      - B-I
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.app_auth_hardening
+      - urn:intuitem:risk:function:doc-pol:pol.access
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:droits.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t4
+      ref_id: DROITS.1
+      name: Restreindre les droits d'accès de chaque utilisateur authentifié aux seules ressources nécessaires
+      description: |-
+        Pour chaque utilisateur, n'attribuer les droits d'accès qu'aux seuls équipements nécessaires à la réalisation des activités et services du système d'information (ou au maintien en condition opérationnelle ou de sécurité).
+        De plus, n'attribuer des droits d'accès qu'aux utilisateurs authentifiés justifiant d'un besoin au regard de leurs missions.
+
+        Cette mesure permet de limiter le risque d'utilisation par une personne malveillante de droits trop permissifs accordés.
+      annotation: |-
+        Identifiant MSS : #0093 · Catégorie : Protection · Origine : ANSSI
+        Ajoutée si : annuaire, application mobile, API, service en ligne, autre système d'information, postes de travail ou téléphones.
+        Retirée si : portail d'information.
+      implementation_groups:
+      - B-R
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
+      - urn:intuitem:risk:function:doc-pol:proc.rbac
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:droits.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t4
+      ref_id: DROITS.2
+      name: Restreindre les droits d'accès de chaque processus authentifié aux seules ressources nécessaires
+      description: |-
+        Pour chaque processus automatisé, n'attribuer les droits d'accès qu'aux seuls équipements nécessaires à la réalisation des activités et services du système d'information (ou au maintien en condition opérationnelle ou de sécurité).
+        De plus, n'attribuer des droits d'accès qu'aux processus authentifiés justifiant d'un besoin au regard de leurs missions.
+
+        Cette mesure permet de limiter le risque d'utilisation par une personne malveillante de droits trop permissifs accordés.
+      annotation: 'Identifiant MSS : #0094 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
+      - urn:intuitem:risk:function:doc-pol:proc.rbac
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:droits.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t4
+      ref_id: DROITS.3
+      name: Effectuer une revue des droits d'accès a minima annuellement
+      description: |-
+        Effectuer, au moins annuellement, une revue des droits d'accès devant notamment vérifier le respect de l'attribution des droits selon le besoin au regard des missions et permettre de corriger les anomalies.
+
+        Cette mesure permet de s'assurer que les droits d'accès octroyés correspondent strictement aux besoins des utilisateurs et processus automatisés au regard de leurs missions.
+      annotation: 'Identifiant MSS : #0095 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - B-I
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.recertification
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:id.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t4
+      ref_id: ID.1
+      name: Autoriser uniquement la création de comptes d’accès individuels utilisables uniquement par
+        l'utilisateur ou processus automatique associé
+      description: |-
+        Autoriser uniquement la création de comptes d'accès individuels réservés à l'utilisateur ou au processus automatique auquel chaque compte est attribué.
+        Lorsque des raisons techniques ou opérationnelles ne permettent pas de créer de comptes individuels, mettre en place des mesures permettant de réduire le risque lié à l'utilisation de comptes partagés et d'assurer la traçabilité de l'utilisation de ces comptes (ex. carnet de quart dans une salle de supervision, badgeuse à l'entrée de la salle).
+
+        Cette mesure permet de s'assurer de la traçabilité des actions au sein du système d'information.
+      annotation: |-
+        Identifiant MSS : #0080 · Catégorie : Protection · Origine : ANSSI
+        Ajoutée si : annuaire, application mobile, API, service en ligne, autre système d'information, postes de travail ou téléphones.
+        Retirée si : portail d'information.
+      implementation_groups:
+      - B-I
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.access
+      - urn:intuitem:risk:function:doc-pol:tech.iam
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:id.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t4
+      ref_id: ID.2
+      name: Désactiver les comptes non nécessaires dans un délai formalisé
+      description: |-
+        Formaliser et mettre en œuvre une procédure de suppression des comptes inactifs ou non nécessaires, prenant notamment en compte les délais de désactivation des comptes prévus dans la politique de gestion des comptes (ex. sous 7 jours).
+
+        Cette mesure permet de réduire la vraisemblance d'utilisation d'un compte inactif ou non nécessaire par un attaquant.
+      annotation: 'Identifiant MSS : #0081 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - B-R
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.recertification
+      - urn:intuitem:risk:function:doc-pol:proc.hr_security
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:id.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t4
+      ref_id: ID.3
+      name: Supprimer à intervalle régulier les comptes des administrateurs techniques inactifs et non
+        nécessaires
+      description: |-
+        Supprimer à intervalle régulier les comptes des administrateurs techniques, c'est-à-dire les comptes disposant de hauts privilèges sur les infrastructures, inactifs et non nécessaires.
+
+        Cette mesure permet de réduire la vraisemblance d'utilisation d'un compte inactif ou non nécessaire par un attaquant.
+      annotation: 'Identifiant MSS : #0082 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - B-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.pam
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:id.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t4
+      ref_id: ID.4
+      name: Effectuer une revue des comptes a minima annuellement
+      description: "Effectuer une revue des comptes a minima annuellement permettant de vérifier les éléments\
+        \ suivants :\n- Les utilisateurs et processus accédant aux ressources des systèmes d'information\
+        \ de l'entité disposent de comptes individuels,\n- L'emploi d'un compte individuel est réservé\
+        \ à l'utilisateur ou processus auquel ce compte est attribué, \n- Les comptes qui ne sont plus\
+        \ nécessaires sont désactivés.\n\nCette mesure permet de réduire la vraisemblance d'utilisation\
+        \ d'un compte inactif ou non nécessaire par un attaquant."
+      annotation: 'Identifiant MSS : #0169 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - B-I
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.recertification
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:annuaire.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: ANNUAIRE.1
+      name: Identifier et formaliser la liste des ressources du cœur de confiance
+      description: |-
+        Lister et tenir à jour l'ensemble des ressources composant le cœur de confiance du système d'information, c'est-à-dire les annuaires gérant les comptes et ressources, les équipements et applicatifs hébergeant ces annuaires, et les équipements ou comptes permettant de prendre le contrôle de ces annuaires (ex. comptes, hyperviseurs, postes de travail d'administration).
+
+        Cette mesure permet d'identifier le cœur de confiance afin de pouvoir le protéger.
+      annotation: |-
+        Identifiant MSS : #0105 · Catégorie : Gouvernance · Origine : ANSSI
+        Non retenue par défaut : seules les caractéristiques ci-dessous l'ajoutent.
+        Ajoutée si : annuaire.
+      implementation_groups:
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.admin_network
+      - urn:intuitem:risk:function:doc-pol:doc.asset_register
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:annuaire.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: ANNUAIRE.2
+      name: Proscrire les connexions à distance aux ressources d'administration du cœur de confiance via
+        un mécanisme de filtrage sur ces ressources
+      description: |-
+        Interdire via du filtrage les connexions externes à destination des ressources d'administration du cœur de confiance, c'est-à-dire les annuaires gérant les comptes et ressources, les équipements et applicatifs hébergeant ces annuaires, et les équipements ou comptes permettant de prendre le contrôle de ces annuaires (ex. comptes, hyperviseurs, postes de travail d'administration).
+
+        Cette mesure permet de filtrer les connexions au cœur de confiance, réduisant ainsi la vraisemblance de compromission.
+      annotation: |-
+        Identifiant MSS : #0106 · Catégorie : Protection · Origine : ANSSI
+        Non retenue par défaut : seules les caractéristiques ci-dessous l'ajoutent.
+        Ajoutée si : annuaire.
+      implementation_groups:
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.admin_network
+      - urn:intuitem:risk:function:doc-pol:proc.pam
+      - urn:intuitem:risk:function:doc-pol:tech.paw
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:annuaire.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: ANNUAIRE.3
+      name: Effectuer a minima annuellement une revue de la configuration des annuaires
+      description: |-
+        Réaliser a minima annuellement une revue de la configuration des annuaires gérant les utilisateurs ou les ressources du système d'information afin d'identifier tout élément inutile ou anormal. Il est recommandé pour cela de s'appuyer sur un outil automatisé.
+
+        Cette mesure permet de s'assurer de la configuration adéquates des annuaires, et ainsi de s'assurer que ces configurations correspondent aux attentes fonctionnelles et de sécurité.
+      annotation: |-
+        Identifiant MSS : #0107 · Catégorie : Protection · Origine : ANSSI
+        Non retenue par défaut : seules les caractéristiques ci-dessous l'ajoutent.
+        Ajoutée si : annuaire.
+      implementation_groups:
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.gpo
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:annuaire.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: ANNUAIRE.5
+      name: Dédier les ressources et comptes d'administration du cœur de confiance à cet usage
+      description: |-
+        Réaliser les actions d'administration du cœur de confiance via des ressources (équipements et applicatifs) et des comptes d'administrations dédiés à cet usage.
+
+        Cette mesure permet de restreindre les accès avec privilèges au cœur de confiance.
+      annotation: |-
+        Identifiant MSS : #0161 · Catégorie : Protection · Origine : ANSSI
+        Non retenue par défaut : seules les caractéristiques ci-dessous l'ajoutent.
+        Ajoutée si : annuaire.
+      implementation_groups:
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.admin_network
+      - urn:intuitem:risk:function:doc-pol:proc.pam
+      - urn:intuitem:risk:function:doc-pol:tech.paw
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:compadmin.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t4
+      ref_id: COMPADMIN.1
+      name: N'autoriser les actions d'administration qu'avec des comptes d'administration
+      description: |-
+        N'autoriser les actions d'administration qu'avec des comptes d'administration, et limiter ces comptes à ces seules actions.
+
+        Cette mesure permet de réduire la vraisemblance de compromission et d'utilisation d'un compte non dédié à l'administration pour réaliser une action nécessitant de hauts privilèges.
+      annotation: 'Identifiant MSS : #0096 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - B-I
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.pam
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:compadmin.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t4
+      ref_id: COMPADMIN.2
+      name: Restreindre les comptes d'administration aux seules personnes autorisées à administrer
+      description: |-
+        Restreindre l'utilisation des comptes d'administration aux seuls administrateurs ou personnes autorisées à administrer.
+
+        Cette mesure permet de réduire la vraisemblance d'utilisation d'un compte à haut privilège entrainant une erreur critique non-intentionnelle ainsi que la vraisemblance de compromission d'une compte administrateur d'un utilisateur non sensibilisé et formé aux bonnes pratiques liées à cet usage.
+      annotation: 'Identifiant MSS : #0097 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - B-R
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.pam
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:compadmin.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t4
+      ref_id: COMPADMIN.3
+      name: Restreindre le périmètre des comptes d'administration
+      description: |-
+        Créer des comptes d'accès d'administration différents dotés de privilèges distincts selon les périmètres. Par exemple, le compte permettant l'administration des postes utilisateurs n'est pas le même que le compte permettant l'administration des serveurs applicatif.
+        La granularité de cette distinction des privilèges dépend de l'entité et de ses pratiques d'administration.
+
+        Cette mesure permet de limiter la capacité d'action d'acteurs malveillants qui parviendraient à usurper un compte d'administration.
+      annotation: 'Identifiant MSS : #0098 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.pam
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:compadmin.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t4
+      ref_id: COMPADMIN.4
+      name: Formaliser et tenir à jour en continu une liste des comptes d'administration
+      description: |-
+        Etablir et tenir à jour une liste des comptes d'administration du système d'information.
+
+        Cette mesure permet de suivre et donc de limiter le nombre de comptes d'administration pouvant être compromis puis utilisés sur le système d'information.
+      annotation: 'Identifiant MSS : #0099 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:doc.pam_register
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:compadmin.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t4
+      ref_id: COMPADMIN.5
+      name: Garantir une revue des droits d'accès à chaque modification d'un compte d'administration
+      description: |-
+        Lors de toute modification d'un compte d'administration (ajout, suppression, suspension ou modification des droits associés), vérifier que les droits d'accès sont attribués en cohérence avec les besoins d'utilisation du compte.
+        Pour cela, il est recommandé d'octroyer les droits d'administration au travers de groupes dont les comptes d'administration sont membres.
+
+        Cette mesure permet de limiter les droits attribués aux comptes des administrateurs afin de réduire l'impact potentiel d'une compromission d'un tel compte.
+      annotation: 'Identifiant MSS : #0100 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.pam
+      - urn:intuitem:risk:function:doc-pol:proc.recertification
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:compadmin.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t4
+      ref_id: COMPADMIN.6
+      name: Limiter les droits de chaque administrateur du système d'information au strict nécessaire
+      description: "Attribuer les droits individuels à chaque compte d'administration en les restreignant\
+        \ autant que possible au périmètre fonctionnel et technique. \nPour cela, il est recommandé d'octroyer\
+        \ les droits d'administration au travers de groupes dont les comptes d'administration sont membres.\n\
+        \nCette mesure permet de vérifier les droits attribués aux comptes des administrateurs afin de\
+        \ réduire l'impact potentiel d'une compromission d'un tel compte."
+      annotation: 'Identifiant MSS : #0101 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - B-I
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.pam
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:compadmin.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t4
+      ref_id: COMPADMIN.7
+      name: Limiter drastiquement le nombre d'utilisateurs pouvant administrer localement leur poste de
+        travail
+      description: |-
+        S'assurer de ne créer aux utilisateurs que des comptes utilisateurs ne disposant pas de privilège d’administration sur les postes de travail. Seuls les administrateurs chargés de l’administration des postes doivent disposer de ces droits lors de leurs interventions.
+
+        Cette mesure permet de réduire les droits des utilisateurs et ainsi réduire la vraisemblance de l’installation non autorisée de logiciels, la modification de paramètres sensibles du système et la propagation de logiciels malveillants avec des droits élevés.
+      annotation: |-
+        Identifiant MSS : #0102 · Catégorie : Protection · Origine : ANSSI
+        Non retenue par défaut : seules les caractéristiques ci-dessous l'ajoutent.
+        Ajoutée si : postes de travail ou téléphones, hébergement SaaS.
+      implementation_groups:
+      - B-I
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.uem
+      - urn:intuitem:risk:function:doc-pol:pol.work
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:compadmin.9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t4
+      ref_id: COMPADMIN.9
+      name: Limiter au strict nécessaire le nombre de personnes disposant d’un accès administrateur
+      description: |-
+        N'attribuer des droits d'administration qu'aux comptes nécessaires à la réalisation des activités et services ou au maintien en condition opérationnelle ou de sécurité du système d'information.
+
+        Cette mesure permet de réduire le nombre de comptes disposant de droits d'administration et pouvant être compromis.
+      annotation: 'Identifiant MSS : #0104 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - B-I
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.pam
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:incident.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t5
+      ref_id: INCIDENT.1
+      name: Formaliser et mettre en œuvre une procédure de traitement des incidents de sécurité
+      description: |-
+        Formaliser et mettre en œuvre une procédure de traitement des incidents de sécurité affectant les systèmes d'information.
+
+        Cette mesure permet de s'assurer du traitement efficace des incidents de sécurité afin d'en limiter les impacts.
+      annotation: 'Identifiant MSS : #0109 · Catégorie : Défense · Origine : ANSSI'
+      implementation_groups:
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.incident
+      - urn:intuitem:risk:function:doc-pol:proc.incident
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:incident.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t5
+      ref_id: INCIDENT.2
+      name: Mettre en œuvre des outils permettant la collecte de signalements d'évènements de sécurité,
+        notamment par les utilisateurs et les prestataires ou fournisseurs
+      description: |-
+        S'assurer de la mise en œuvre des outils permettant de collecter les signalements d'évènements de sécurité par les utilisateurs, prestataires ou fournisseurs.
+
+        Cette mesure permet de renforcer l'activité de collecte des événements de sécurité
+      annotation: 'Identifiant MSS : #0110 · Catégorie : Défense · Origine : ANSSI'
+      implementation_groups:
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.incident
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:incident.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t5
+      ref_id: INCIDENT.3
+      name: Mettre en œuvre des mécanismes permettant d’analyser et de qualifier les événements de sécurité
+        ainsi que d'identifier d'éventuels incidents
+      description: |-
+        Définir et mettre en œuvre des mécanismes permettant d'analyser et de qualifier les évènements de sécurité remontés et d'identifier les incidents potentiels ou avérés.
+
+        Cette mesure permet de s'assurer de la mise en place des mécanismes permettant l'identification d'incidents de sécurité.
+      annotation: 'Identifiant MSS : #0111 · Catégorie : Défense · Origine : ANSSI'
+      implementation_groups:
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.siem
+      - urn:intuitem:risk:function:doc-pol:proc.logging
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:incident.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t5
+      ref_id: INCIDENT.4
+      name: Garantir que les causes de chaque incident majeur sont analysées et donnent lieu à un plan
+        d'action
+      description: "S'assurer qu'après chaque incident majeur, une analyse des causes de l'incident a\
+        \ été réalisée. \nCette analyse de cause vise à définir et mettre en œuvre les mesures de sécurité\
+        \ permettant de limiter la vraisemblance d'un nouvel incident ou d'en réduire l'impact. Les preuves\
+        \ de l'analyse doivent être conservées.\n\nCette mesure permet de limiter le risque de récurrence\
+        \ du même incident."
+      annotation: 'Identifiant MSS : #0112 · Catégorie : Défense · Origine : ANSSI'
+      implementation_groups:
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.post_incident
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:incident.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t5
+      ref_id: INCIDENT.6
+      name: Rendre publics un point de contact et des modalités de communication de tout problème de sécurité
+      description: |-
+        Publier sur le système d'information un point de contact et les modalités de communication de tout problème de sécurité.
+
+        Cette mesure permet aux utilisateurs de signaler des problèmes de sécurité.
+      annotation: 'Identifiant MSS : #0114 · Catégorie : Défense · Origine : ANSSI'
+      implementation_groups:
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.vuln_disclosure
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:incident.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t5
+      ref_id: INCIDENT.7
+      name: Lister les personnes à contacter en cas d'incident de sécurité informatique
+      description: |-
+        Lister l'ensembles des personnes (directions, prestataires, équipes techniques, autorités, etc.) devant être contactées en cas d'incident de sécurité informatique.
+
+        Cette mesure permet d'améliorer l'efficacité de la réponse aux incidents de sécurité informatique.
+      annotation: 'Identifiant MSS : #0115 · Catégorie : Défense · Origine : ANSSI'
+      implementation_groups:
+      - B-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.incident
+      - urn:intuitem:risk:function:doc-pol:proc.crisis_mgmt
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:incident.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t5
+      ref_id: INCIDENT.8
+      name: Mettre en œuvre des mécanismes permettant de réagir aux incidents et d'en limiter les conséquences
+      description: |-
+        Définir et mettre en œuvre des mécanismes organisationnels et techniques permettant de réagir en cas d'incident et d'en limiter les conséquences sur les services et activités.
+
+        Cette mesure permet d'améliorer la maîtrise des conséquences d'un incident de sécurité sur le système d'information.
+      annotation: 'Identifiant MSS : #0165 · Catégorie : Résilience · Origine : ANSSI'
+      implementation_groups:
+      - M-R
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.incident
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:continu.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t5
+      ref_id: CONTINU.1
+      name: Formaliser et mettre en œuvre des procédures de sauvegarde et de restauration, et les tester
+        a minima annuellement.
+      description: |-
+        Formaliser et mettre en œuvre des procédures de sauvegarde et de restauration du système d'information et de ses données dont les dimensionnements sont adaptés pour répondre au besoin de disponibilité du système.
+        Tester ces procédures afin de vérifier notamment la bonne réalisation des sauvegardes et leur bonne restauration.
+
+        Cette mesure permet de s'assurer que le processus de sauvegarde et de restauration est en place et qu'il correspond aux besoins du système.
+      annotation: 'Identifiant MSS : #0116 · Catégorie : Résilience · Origine : ANSSI'
+      implementation_groups:
+      - B-R
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.backup
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:continu.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t5
+      ref_id: CONTINU.2
+      name: Protéger les sauvegardes d'un évènement les rendant inexploitables
+      description: |-
+        Protéger les sauvegardes d'un incident les rendant inexploitables (ex. stockage hors-ligne pour répondre à un incident de type rançongiciel).
+        Cela peut notamment être réalisé via la mise en œuvre d'une politique de sauvegarde "3-2-1", c'est-à-dire 3 sauvegardes, sur 2 supports différents, dont 1 hors ligne.
+
+        Cette mesure permet de protéger les sauvegardes d'un incident les rendant inexploitables (par exemple pour répondre à un incident de type rançongiciel).
+      annotation: 'Identifiant MSS : #0117 · Catégorie : Résilience · Origine : ANSSI'
+      implementation_groups:
+      - B-I
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.immutable_backup
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:continu.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t5
+      ref_id: CONTINU.3
+      name: Formaliser la durée d'interruption et la perte de données maximales admissibles du système
+        d'information
+      description: |-
+        Formaliser la durée maximale d'interruption admissible (DMIA) et la perte de données maximale admissible (PDMA) pour le système d'information.
+
+        Cette mesure permet d'établir les besoins de résilience du système.
+      annotation: 'Identifiant MSS : #0118 · Catégorie : Résilience · Origine : ANSSI'
+      implementation_groups:
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.bia
+      - urn:intuitem:risk:function:doc-pol:doc.bia
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:continu.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t5
+      ref_id: CONTINU.5
+      name: Formaliser et mettre en œuvre le plan de reprise de l'activité
+      description: |-
+        Définir et mettre en œuvre un plan de reprise d'activité (PRA) cohérent avec la durée maximale d'interruption admissible et la perte de données maximale admissible.
+        La définition de ce plan doit notamment s'appuyer sur la cartographie de l'écosystème, la procédure de gestion des incidents et la procédure de gestion des crises d'origine cyber.
+
+        Cette mesure permet de préparer la reprise des activités du système selon ses besoins de résilience.
+      annotation: 'Identifiant MSS : #0120 · Catégorie : Résilience · Origine : ANSSI'
+      implementation_groups:
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.drp
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:continu.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t5
+      ref_id: CONTINU.6
+      name: Recourir à une ou plusieurs solutions garantissant un haut niveau de disponibilité du système
+        d'information
+      description: |-
+        Recourir à une ou plusieurs solutions garantissant un haut niveau de disponibilité, en particulier dans le cadre de l'hébergement du service (ex. obligation de redondance de la machine virtuelle et des données).
+
+        Cette mesure permet d'éviter une interruption du service dépassant quelques minutes.
+      annotation: |-
+        Identifiant MSS : #0121 · Catégorie : Défense · Origine : ANSSI
+        Non retenue par défaut : seules les caractéristiques ci-dessous l'ajoutent.
+        Ajoutée si : disponibilité +++, disponibilité ++++.
+      implementation_groups:
+      - M-R
+      - A-R
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.dr_site
+      - urn:intuitem:risk:function:doc-pol:proc.capacity_mgmt
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:risque.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t1
+      ref_id: RISQUE.1
+      name: Réaliser une analyse de risque approfondie de la sécurité du système d'information et la mettre
+        à jour au minimum tous les trois ans
+      description: |-
+        Réaliser une analyse de risque approfondie du système d'information et la mettre à jour tous les trois ans et en cas d'incident de sécurité ou d'évolution majeure (métier, technique ou organisationnelle). Cette analyse de risque doit s'appuyer sur les éléments issus du socle normatif et/ou réglementaire applicable (ex. PSSI et réglementation applicable), des spécificités sectorielles, de la maîtrise de l'écosystème, de la maîtrise du système et des audits.
+        Cette analyse doit être validée par l'entité, les risques résiduels acceptés et un plan d'action présentant des échéances raisonnables et les responsables pour chaque action doit être mis en œuvre.
+
+        La méthode EBIOS RM peut être utilisée pour cette analyse de risque.
+
+        Cette mesure permet d'identifier et de maîtrises les risques liés au système d'information.
+      annotation: 'Identifiant MSS : #0131 · Catégorie : Gouvernance · Origine : ANSSI'
+      implementation_groups:
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.risk
+      - urn:intuitem:risk:function:doc-pol:doc.risk_register
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:risque.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t1
+      ref_id: RISQUE.2
+      name: Réaliser une analyse de risque rapide de la sécurité du système d'information
+      description: "Réaliser une analyse de risque rapide du système d'information et la mettre à jour\
+        \ tous les trois ans et en cas d'incident de sécurité ou d'évolution majeure (métier, technique\
+        \ ou organisationnel. \nCette analyse doit être validée par l'entité, les risques résiduels acceptés\
+        \ et un plan d'action présentant des échéances raisonnables et les responsables pour chaque action\
+        \ doit être mis en œuvre.\n\nCette mesure permet d'identifier et de maîtrises les risques liés\
+        \ au système d'information."
+      annotation: 'Identifiant MSS : #0132 · Catégorie : Gouvernance · Origine : ANSSI'
+      implementation_groups:
+      - M-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.risk
+      - urn:intuitem:risk:function:doc-pol:doc.risk_register
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:audit.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t1
+      ref_id: AUDIT.1
+      name: Formaliser et mettre en œuvre un programme d'audit du système d'information
+      description: |-
+        Définir et mettre en œuvre un programme d'audit permettant l'audit du système d'information.
+        Les audits associés à ce programme ainsi que leur profondeur et leur fréquence doivent tenir compte de tout ou partie de l'analyse de risque réalisée, de la criticité du système d'information au regard de l'entité et de l'exposition du système aux risques numériques.
+
+        Un audit doit permettre de vérifier la conformité aux mesures issues du socle normatif et/ou réglementaire (ex. PSSI et réglementations applicables) et d'évaluer le niveau de sécurité du système au regard des menaces et des vulnérabilités connues. Chaque audit doit donner lieu à la formalisation d'un rapport présentant les résultats (synthèse de la conformité, constats et recommandations) et à la mise en œuvre d'un plan d'action visant à corriger les non-conformités et les vulnérabilités identifiées. Ce plan d'action doit présenter des échéances raisonnables et responsables pour chaque action.
+
+        Cette mesure permet de s'assurer de l'efficacité des mesures de sécurité mises en place ainsi que d'identifier et de maîtriser les vulnérabilités liés au système d'information.
+      annotation: 'Identifiant MSS : #0134 · Catégorie : Gouvernance · Origine : ANSSI'
+      implementation_groups:
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.audit
+      - urn:intuitem:risk:function:doc-pol:doc.audit_plan
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:audit.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: AUDIT.2
+      name: Intégrer, si nécessaire, au programme d'audit un audit de code
+      description: |-
+        Réaliser, lorsque cela est pertinent, un audit de code.
+
+        Cette mesure permet d'identifier et de maîtriser les vulnérabilités liées au code du système d'information.
+      annotation: 'Identifiant MSS : #0135 · Catégorie : Gouvernance · Origine : ANSSI'
+      implementation_groups:
+      - A-R
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.audit
+      - urn:intuitem:risk:function:doc-pol:tech.sast_dast
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:audit.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: AUDIT.3
+      name: Intégrer au programme d'audit un test d’intrusion
+      description: "Réaliser une test d'intrusion couvrant a minima les interface exposées à des systèmes\
+        \ non maîtrisés, c'est-à-dire à des systèmes d'information tiers ou des systèmes d'information\
+        \ sur lesquels les travaux de sécurisation selon le besoin de sécurité n'ont pas été réalisés.\
+        \ \n\nCette mesure permet d'identifier et de maîtriser les vulnérabilités liées au système d'information."
+      annotation: 'Identifiant MSS : #0136 · Catégorie : Gouvernance · Origine : ANSSI'
+      implementation_groups:
+      - M-R
+      - A-R
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.pentest
+      - urn:intuitem:risk:function:doc-pol:proc.pentest
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:audit.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: AUDIT.4
+      name: Intégrer au programme d'audit un audit de configuration
+      description: |-
+        Réaliser un audit de configuration.
+
+        Cette mesure permet de s'assurer du durcissement du système d'information.
+      annotation: 'Identifiant MSS : #0137 · Catégorie : Gouvernance · Origine : ANSSI'
+      implementation_groups:
+      - A-R
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.audit
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:audit.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: AUDIT.5
+      name: Intégrer au programme d'audit un audit d'architecture
+      description: |-
+        Réaliser un audit d'architecture.
+
+        Cette mesure permet d'identifier les vulnérabilités issues des choix d'architecture de la solution.
+      annotation: 'Identifiant MSS : #0138 · Catégorie : Gouvernance · Origine : ANSSI'
+      implementation_groups:
+      - A-R
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.audit
+      - urn:intuitem:risk:function:doc-pol:doc.arc_principles
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:audit.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: AUDIT.6
+      name: Mettre en œuvre des mécanismes d'audit automatique du code
+      description: |-
+        Mettre en place des mécanismes d’audit automatique du code (analyse statique, détection de vulnérabilités, vérification de conformité aux standards de développement, etc.), afin de contrôler sa qualité et sa sécurité avant toute intégration en production.
+
+        Cette mesure permet de réduire la vraisemblance d'exploitation d'une vulnérabilité liée au code.
+      annotation: 'Identifiant MSS : #0168 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - B-I
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.sast_dast
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:audit.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: AUDIT.7
+      name: Réaliser un audit de sécurité sur le système d'information
+      description: "Réaliser, sans préjudice d’autres obligations légales et réglementaires, un audit\
+        \ de sécurité sur le système d'information en prenant en compte pour la sélection de l'audit,\
+        \ sa profondeur et sa fréquence tout ou partie de l'analyse de risque réalisée, de la criticité\
+        \ du système d'information au regard de l'entité et de l'exposition du système aux risques numériques.\n\
+        \nL'audit de sécurité doit comprendre a minima une des activités suivants : \n- un test d’intrusion\
+        \ (couvrant au minimum les interfaces exposées à des systèmes sous la responsabilité de l’entité\
+        \ pour lesquels elle a décidé de ne pas appliquer les objectifs de sécurité ainsi qu’à des systèmes\
+        \ d’information tiers), \n- un audit de configuration, \n- un audit d’architecture, \n- un audit\
+        \ organisationnel et physique,\n- un audit de code (si pertinent).\n\nCette mesure permet de réduire\
+        \ la vraisemblance d'exploitation d'une vulnérabilité."
+      annotation: 'Identifiant MSS : #0171 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.audit
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:config.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: CONFIG.1
+      name: Installer et conserver uniquement les applicatifs et fonctionnalités nécessaires
+      description: |-
+        Installer sur les équipements uniquement les applicatifs et fonctionnalités strictement nécessaires à la réalisation des activités et services ou au maintien en condition opérationnelles ou de sécurité du système d'information.
+        Lorsque des raison techniques ou opérationnelles ne permettent pas de désactiver ou de désinstaller les applicatifs et fonctionnalités, mettre en œuvre des mesures permettant de réduire le risque associé (ex. compartimentalisation, gestion des accès, traçabilité).
+
+        Cette mesure permet de réduire la vraisemblance d'exploitation de vulnérabilité sur un applicatif ou un fonctionnalité non nécessaire.
+      annotation: 'Identifiant MSS : #0139 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
+      - urn:intuitem:risk:function:doc-pol:pol.app_control
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:config.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: CONFIG.2
+      name: Configurer les équipements et applicatifs en s'appuyant sur les recommandations disponibles
+      description: |-
+        Configurer les équipements et applicatifs  en s'appuyant sur les recommandations des éditeurs, fabricants ou de l'ANSSI.
+
+        Cette mesure permet de s'assurer du durcissement du système d'information.
+      annotation: 'Identifiant MSS : #0140 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:config.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: CONFIG.3
+      name: Procéder a minima annuellement à une revue de configuration des équipements et applicatifs
+      description: |-
+        Mettre en œuvre des vérifications techniques de la configuration des équipements et des applicatifs.
+        Il est recommandé que cette revue s'appuie sur un ou des outils automatisés (ex. scan de port et de vulnérabilité, revue des configurations des pares-feux par rapport aux matrices de flux).
+
+        Cette mesure permet de s'assurer du durcissement du système d'information.
+      annotation: 'Identifiant MSS : #0141 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:config.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: CONFIG.4
+      name: Installer un certificat de sécurité conforme au référentiel général de sécurité
+      description: |-
+        Dans le cadre de la configuration du système d'information, installer un certificat de sécurité serveur conforme au référentiel général de sécurité (RGS) défini par l'ANSSI, délivré par un prestataire de service de confiance qualifié.
+
+        Cette mesure permet d’authentifier le serveur et de prouver l’identité de l'entité détentrice du certificat, garantissant ainsi la confiance dans les échanges chiffrés.
+      annotation: |-
+        Identifiant MSS : #0142 · Catégorie : Protection · Origine : ANSSI
+        Non retenue par défaut : seules les caractéristiques ci-dessous l'ajoutent.
+        Ajoutée si : ouverture +++, ouverture ++++.
+      implementation_groups:
+      - B-I
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.pki
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:config.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: CONFIG.5
+      name: Désactiver tout flux de données non chiffré
+      description: |-
+        Configurer le service en vue de désactiver tout flux de données qui n'est pas chiffré.
+
+        Cette mesure permet de protéger la confidentialité des données, dans le cas où des flux de données seraient interceptés.
+      annotation: 'Identifiant MSS : #0143 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.crypto
+      - urn:intuitem:risk:function:doc-pol:pol.transfer
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:config.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: CONFIG.6
+      name: Fermer tous les ports non strictement nécessaires
+      description: |-
+        Configurer le service en vue de fermer tous les ports réseau non strictement nécessaires à l'administration et au fonctionnement du service et fermer tous les autres ports.
+
+        Cette mesure permet de réduire le risque d'accès illégitime au service de la part d'acteurs malveillants.
+      annotation: 'Identifiant MSS : #0144 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - B-R
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.hardening
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:config.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: CONFIG.7
+      name: Installer un certificat de signature électronique conforme à la réglementation
+      description: |-
+        Dans le cadre de la configuration du service, installer un certificat de signature électronique qualifié au sens du règlement n° 910/2014 eIDAS, délivré par un prestataire qualifié, ou recourir à un service conforme.
+
+        Cette mesure permet la réalisation d'une signature électronique robuste sur le plan de la sécurité, conforme à la réglementation française et européenne.
+      annotation: |-
+        Identifiant MSS : #0145 · Catégorie : Protection · Origine : ANSSI
+        Non retenue par défaut : seules les caractéristiques ci-dessous l'ajoutent.
+        Ajoutée si : signature électronique.
+      implementation_groups:
+      - M-I
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.pki
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:config.8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: CONFIG.8
+      name: Désactiver, sauf dérogation tracée, les ports usb des serveurs
+      description: |-
+        Configurer les serveurs afin de désactiver les ports usb des serveurs, sauf en cas de dérogation tracée et limitée dans le temps.
+
+        Cette mesure permet de réduire la vraisemblance d'exfiltration ou de contamination par malware des serveurs via les ports usb.
+      annotation: 'Identifiant MSS : #0146 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - M-R
+      - A-R
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:pol.removable_media
+      - urn:intuitem:risk:function:doc-pol:tech.endpoint_protection
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:admin.1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: ADMIN.1
+      name: Réaliser les actions d'administration technique depuis un réseau dédié
+      description: |-
+        Réaliser les actions d'administration au moyen d'un réseau d'administration dédié.
+
+        Cette mesure permet de réduire l'exposition des interfaces d'administration.
+      annotation: 'Identifiant MSS : #0147 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.admin_network
+      - urn:intuitem:risk:function:doc-pol:tech.paw
+      - urn:intuitem:risk:function:doc-pol:proc.pam
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:admin.2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: ADMIN.2
+      name: S'assurer que les ressources des réseaux d'administration technique sont gérés et configurés
+        par les personnes désignées
+      description: |-
+        S'assurer que seules les personnes désignées (interne ou externes) peuvent gérer et configurer les ressources des réseaux d'administration.
+
+        Cette mesure permet de réduire le nombre de personnes pouvant être compromises par un attaquant pour attaquer les réseaux d'administration.
+      annotation: 'Identifiant MSS : #0148 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.admin_network
+      - urn:intuitem:risk:function:doc-pol:proc.pam
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:admin.3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: ADMIN.3
+      name: Dédier les ressources matérielles des réseaux d'administration technique aux actions d'administration
+      description: |-
+        Dédier les ressources matérielles des réseaux d'administration exclusivement aux actions d'administration technique.
+
+        Cette mesure permet de réduire la vraisemblance de compromission d'une ressource des réseaux d'administration.
+      annotation: 'Identifiant MSS : #0149 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.admin_network
+      - urn:intuitem:risk:function:doc-pol:tech.paw
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:admin.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: ADMIN.4
+      name: Utiliser des postes physiques dédiés pour la connexion et actions d'administration
+      description: |-
+        Utiliser pour l'administration des postes de travail physique dédiés uniquement à cet usage.
+        Lorsque des raisons techniques ou opérationnelles ne le permettent pas, mettre en œuvre des mesures de durcissement du système d'exploitation utilisé pour réaliser les actions d'administration, et cloisonner ce système d'exploitation du système d'exploitation utilisé pour les autres actions.
+
+        Cette mesure permet de réduire la vraisemblance d'attaque par rebond sur un poste de travail utilisé pour l'administration.
+      annotation: 'Identifiant MSS : #0150 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.paw
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:admin.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: ADMIN.5
+      name: Administrer les ressources du système d'information au travers d'une liaison réseau et d'une
+        interface physiques dédiées
+      description: |-
+        Utiliser une liaison réseau physique dédiées pour la connexion des réseaux d'administration aux équipements du système d'information.
+        Administrer ces équipements au travers de leur interface d'administration physique.
+        Lorsque des raisons techniques ou opérationnelles ne le permettent pas, mettre en œuvre des mesures de réduction du risque telles que des mesures de sécurité logique.
+
+        Cette mesure permet de cloisonner les accès aux ressources pour les actions d'administration technique.
+      annotation: 'Identifiant MSS : #0151 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.admin_network
+      - urn:intuitem:risk:function:doc-pol:tech.paw
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:admin.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: ADMIN.6
+      name: Cloisonner et filtrer les accès d'administration technique
+      description: "Cloisonner et filtrer le réseau d'administration et les accès d'administration technique\
+        \ afin de respecter les modalités de cloisonnement et de filtrage mises en œuvre au sein des systèmes\
+        \ d'information. \nPar exemple, deux machines ne pouvant pas communiquer au travers des systèmes\
+        \ d'information ne peuvent pas communiquer au travers du réseau d'administration.\n\nCette mesure\
+        \ permet de cloisonner et de filtrer les flux d'administration technique pour réduire les risques\
+        \ d'attaque via ces flux."
+      annotation: 'Identifiant MSS : #0152 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.admin_network
+      - urn:intuitem:risk:function:doc-pol:pol.network
+      - urn:intuitem:risk:function:doc-pol:proc.pam
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:admin.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t6
+      ref_id: ADMIN.7
+      name: Chiffrer et authentifier les communications associées aux actions d'administration technique
+      description: |-
+        Mettre en œuvre des mécanismes de chiffrement et d'authentification à l'état de l'art pour les communications associées à des actions d'administration (ex. protocoles sécurisés garantissant authentification, intégrité et confidentialité).
+        Si ces communications transitent sur des réseaux non dédiés à ces communications, les cloisonner au moyen de mécanismes de chiffrement et d'authentification conformes à l'état de l'art (ex. tunnel VPN).
+        Lorsque des raisons techniques ou opérationnelles ne permettent pas de chiffrer ou d'authentifier ces communications, mettre en œuvre des mesures permettant de protéger la confidentialité et l'intégrité de ces flux et de renforce le contrôle et la traçabilité des actions d'administration.
+
+        Cette mesure permet de protéger les communications associées à des actions d'administration de perte de confidentialité ou d'intégrité.
+      annotation: 'Identifiant MSS : #0153 · Catégorie : Protection · Origine : ANSSI'
+      implementation_groups:
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.admin_network
+      - urn:intuitem:risk:function:doc-pol:pol.crypto
+      - urn:intuitem:risk:function:doc-pol:proc.pam
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:supervision.4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t5
+      ref_id: SUPERVISION.4
+      name: Conserver et centraliser les journaux et évènements de sécurité utiles à la détection des
+        principaux scénarios de menaces
+      description: |-
+        Conserver et centraliser les journaux et évènements de sécurité utiles à la détection des principaux scénarios de menace.
+        Ces journaux et évènement reflètent la variété des activités du système d'information (ex. réseau, système, applicatif, utilisateur).
+
+        Cette mesure permet de s'assurer de la collecte des journaux et évènement nécessaires à la détection et à la réaction des scénarios de menace liés au système d'information.
+      annotation: 'Identifiant MSS : #0157 · Catégorie : Défense · Origine : ANSSI'
+      implementation_groups:
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.logging
+      - urn:intuitem:risk:function:doc-pol:tech.siem
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:supervision.5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t5
+      ref_id: SUPERVISION.5
+      name: Stocker les journaux et évènements de sécurité pour une durée minimum de trois mois
+      description: |-
+        Stocker les journaux et évènements de sécurité pour une durée minimum de trois mois, sans préjudice d'autres obligations légales et réglementaires (ex. RGPD).
+
+        Cette mesure permet de s'assurer que la durée de stockage des journaux et évènements de sécurité est suffisante pour la détection et la réaction des scénarios de menace.
+      annotation: 'Identifiant MSS : #0158 · Catégorie : Défense · Origine : ANSSI'
+      implementation_groups:
+      - B-R
+      - M-R
+      - A-I
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:proc.logging
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:supervision.6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t5
+      ref_id: SUPERVISION.6
+      name: Conserver et centraliser le journal des accès des administrateurs technique
+      description: |-
+        Activer la journalisation et la centralisation des accès des administrateurs techniques concourant au fonctionnement du service.
+
+        Cette mesure permet de faciliter la détection d'actions inhabituelles susceptibles d'être malveillantes et d'investiguer a posteriori les causes d'un incident de sécurité, en vue de faciliter sa remédiation.
+      annotation: 'Identifiant MSS : #0159 · Catégorie : Défense · Origine : ANSSI'
+      implementation_groups:
+      - B-R
+      - M-R
+      - A-R
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.access_log
+    - urn: urn:intuitem:risk:req_node:anssi-mss-v2:supervision.7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:anssi-mss-v2:t5
+      ref_id: SUPERVISION.7
+      name: Conserver et centraliser le journal des évènements de sécurité intervenus sur le système d'information
+      description: |-
+        Activer la journalisation et la centralisation des événements de sécurité.
+        A défaut, créer et maintenir à jour un document recensant l'ensemble des événements de sécurité ayant affecté le service et des mesures mises en œuvre pour y remédier.
+
+        Cette mesure permet de faciliter la détection d'évènements de sécurité connus et la résolution des incidents qui en découleraient.
+      annotation: 'Identifiant MSS : #0160 · Catégorie : Défense · Origine : ANSSI'
+      implementation_groups:
+      - B-R
+      - M-R
+      - A-R
+      reference_controls:
+      - urn:intuitem:risk:function:doc-pol:tech.siem
