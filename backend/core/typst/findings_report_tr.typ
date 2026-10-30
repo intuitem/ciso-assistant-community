@@ -46,6 +46,7 @@
 )
 
 #let status-label = (
+  "--": "Tanımsız",
   undefined: "Tanımsız",
   identified: "Tanımlandı",
   confirmed: "Onaylandı",
